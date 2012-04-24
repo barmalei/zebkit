@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+	<head>
+		<meta http-equiv="content-type" content="text/html;charset=utf-8"></meta>
+		<title></title>
+		
+		<link href="css/shCore.css" rel="stylesheet" type="text/css"></link>
+		<link href="css/shThemeDefault.css" rel="stylesheet" type="text/css"></link>
+		<link href="css/j2js.css" rel="stylesheet" type="text/css"></link>
+
+		<script type="text/javascript" src="js/shCore.js"></script>
+		<script type="text/javascript" src="js/shBrushJScript.js"></script>
+		<script type="text/javascript" src="j2js.js"></script>
+	</head>
+
+	<body>
+		<div class="small_title_text" style="width:720px;padding:8px;">
+			Type or select predefined Java code and convert it into JavaScript code. The generated JavaScript is based on Zebra OOP JS 
+			library. Many Java features are supported, but there is still bunch of Java things that is not supported or ignored: annotation, 
+			template, protected modifier, static private variables and methods, methods and variables declaration in interface, etc.
+		</div>
+		
+		<table border="0" id="container" cellpadding="0" cellspacing="0" style="background:#EEEEEE; border: solid black; border-width:2px;">
+			<tr>
+				<td colspan="2" class="title_text" style="background:black; color:white; padding:3px;" align="center"> 
+					Zebra Java to JavaScript converter 
+				</td>
+			</tr>
+			<tr>
+				<td valign="top" id="javasrc_container">
+					<table border="0" cellpadding="0" cellspacing="0" style="width:360px; margin-right:4px; margin-left:8px; margin-top:4px; margin-bottom:4px;">
+						<tr height="28">
+						  <td class="title_text" align="left" valign="center"> 
+							  Java code
+						  </td>
+			  			  <td align="right" valign="center" class="small_text">
+							 <select id="select"> 
+								<option value="-1" selected="">Load predefined Java code...</option>
+								<option value="hello">Hello World</option>
+								<option value="io">Read file as stream</option>
+								<option value="props">Read properties file</option>
+								<option value="inheritance" selected="">Inheritance</option>
+								<option value="inner">Inner class</option>
+								<option value="abstract">Abstract and final</option>
+							  </select> 
+						  </td>
+						</tr>
+						<tr>
+			  			  <td colspan="2">
+							<textarea wrap="off" id="javasrc" class="src_text" rows="15" cols="20" maxlength="2000" >
+							</textarea>
+						  </td>
+						</tr>
+					</table>
+				</td>
+				<td valign="top" id="jssrc_container">
+					<table border="0" cellpadding="0" cellspacing="0" style="margin-right:8px; margin-top:4px; margin-left:4px; margin-bottom:4px; ">
+						<tr height="28">
+						  <td class="title_text" align="right" valign="center"> 
+							  Result of Java to JavaScript conversion
+						  </td>
+						</tr>
+						<tr>
+			  			  <td>
+							<div id="jscell" class="src_text">
+							</div>
+						  </td>
+						</tr>
+						<tr>
+							<td align="center" valign="center"></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2" valign="center">
+					<table border="0" cellpadding="0" cellspacing="0" width="100%" > 
+						<tr>
+							<td width="33%" align="left" valign="center" >
+								<div class="small_title_text" id="message" style="color:red;margin-bottom:6px; margin-left:8px;">
+								</div>
+							</td>
+							<td width="33%" align="center" valign="center">
+								<button id="convert" style="margin-bottom:6px;"> Convert Java code to JavaScript code </button>
+							</td>
+							<td width="33%"></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+
+		<script type="text/javascript">
+			setup();
+		</script>	
+	</body>
+</html>
+

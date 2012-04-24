@@ -1,0 +1,64 @@
+
+load(arguments[0] + '/lib/gravity/zebra.js');
+load(arguments[0] + '/lib/gravity/zebra/java.lang.js');
+load(arguments[0] + '/lib/gravity/zebra/java.util.js');
+load(arguments[0] + '/lib/gravity/zebra/java.io.js');
+eval(JAVA.Import('lang'));
+
+var test = zebra.NewNamespace('test');
+
+
+// import necessary classes
+var Color = JAVA.awt.Color;
+var Font = JAVA.awt.Font;
+var Cursor = JAVA.awt.Cursor;
+var ColorRender = gravity.ui.view.ColorRender;
+var TextRender = gravity.ui.view.TextRender;
+
+// declare gravity.ui.Link class
+gravity.ui.Link = new zebra.Class(Button,Cursorable,
+    function($, $$) {
+        
+        // reference to class itself
+        var Link = this;
+        
+        // class defined variables
+        $('colors', [Color.blue, ColorRender.darkBlue.getColor(), Color.black, Color.blue, Color.gray]);
+        
+        // constructors
+        $(function (s){
+            this.$super(null);
+            var tr = new TextRender(s);
+            tr.setFont(Toolkit.getObject("ln.fn"));
+            setView(tr);
+            setBackground(null);
+            this.stateUpdated(state, state);
+        });
+
+        
+        // public, protected methods declaration
+        $(function setColor(state,c){
+            if( ! this.colors[state].equals(c)){
+                this.colors[state] = c;
+                this.stateUpdated(state, state);
+            }
+        });
+
+        $(function getColor(state){
+            return this.colors[state];
+        });
+
+        $(function getCursorType(target,x,y){
+            return Cursor.HAND_CURSOR;
+        });
+
+        $(function stateUpdated(o,n){
+            this.$super(this.stateUpdated,o, n);
+            var r = getView();
+            if( ! r.getForeground().equals(this.colors[n])){
+                r.setForeground(this.colors[n]);
+                repaint();
+            }
+        });
+
+});

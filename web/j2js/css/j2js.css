@@ -1,0 +1,78 @@
+
+.round_border {
+	-moz-border-radius: 6px;
+	-webkit-border-radius:6px;
+	border-radius: 6px;
+	border-color:black;
+    display:block-inline;
+}
+
+.jscode {
+    width: 350px;
+    height: 350px;
+    overflow: auto;
+}
+
+.java_text_border {
+    border-left-style:solid;
+    border-top-style:solid;
+    border-bottom-style:solid;
+    border-right-style:dashed;
+
+	border-color:black;
+    border-right-color:red;
+	border-width:1px;
+    display:block-inline;
+}
+
+.js_text_border {
+    border-left-style:none;
+    border-top-style:solid;
+    border-bottom-style:solid;
+    border-right-style:solid;
+	border-color:black;
+	border-width:1px;
+	padding: 2px;
+    display:block-inline;
+}
+
+.title_text {
+	font: 13px Arial;
+	font-weight: bold;
+	text-decoration:none;
+	color: black;
+}
+
+.small_title_text {
+	font: 11px Arial;
+	font-weight: bold;
+	color: black;
+}
+
+.src_text {
+	font-family: "Consolas", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace !important;
+	font-weight: normal;
+	font-size: 12px !important;
+	width : 360px;
+	height: 380px;
+	color: black;
+	background: white;
+	margin-top:4px;
+	border-width:1px; 
+	border-style:solid; 
+	border-color:gray; 
+	padding:2px;
+}
+
+.normal_text {
+	font: 12px Arial;
+	font-weight: normal;
+	color: black;
+}
+
+.small_text {
+	font: 11px Arial;
+	font-weight: normal;
+	color: black;
+}
+

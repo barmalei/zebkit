@@ -1,0 +1,23 @@
+grammar JavaMethod
+    include JavaCommon
+
+    rule constructorDeclaration
+        modifier:(modifier gap+)?  name:identifier gap* "(" gap* (formalParameters gap*)? ")"  (gap* throws)? <JavaMethodDeclaration>  
+    end
+
+    rule methodDeclaration
+        modifier:(modifier gap+)* return_type:(type / VOID) gap+ name:identifier gap* "(" gap* (formalParameters gap*)? ")"  gap* throws? <JavaMethodDeclaration> 
+    end
+
+    rule throws
+        THROWS gap* qualifiedIdentifier (comma qualifiedIdentifier)*   
+    end
+ 
+    rule formalParameters
+        formalParameter (comma formalParameter)* <JavaGroup>
+    end
+
+    rule formalParameter
+        modifier:FINAL? gap* type:type gap+ name:identifier gap* dim*  <JavaMethodParameter>
+    end
+end

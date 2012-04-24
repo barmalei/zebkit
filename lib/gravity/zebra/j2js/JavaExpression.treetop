@@ -1,0 +1,311 @@
+grammar JavaExpression
+  include JavaCommon
+  include JavaLiteral
+  include JavaMethod
+
+  rule code
+    gap* package:package (import gap*)*  gap* body:codeBodyList <JavaSourceCode>
+  end
+  
+  rule codeBodyList
+     codeBody gap* (codeBody gap*)*  <JavaGroup>
+  end
+
+  rule codeBody
+    class / interface
+  end
+
+  rule expression
+    ("(" gap* type gap* ")" gap*)?  
+    (
+      arg1:unaryOperator gap+ INSTANCEOF gap+ arg2:expression <JavaInstanceof>
+      /
+      unaryOperator (gap* exprOperator gap* expression)? 
+    )  
+    (gap* conditionalExpression)?
+  end
+
+  rule exprOperator
+    binomialOperation /  assignmentOperation 
+  end
+
+  rule conditionalExpression
+    "?" gap* expression1:expression gap* ":" gap* expression2:expression <JavaConditionalExpression>
+  end
+
+  rule unaryOperator
+    (prefixOp gap*)* 
+    (
+        NEW gap+ name:qualifiedIdentifier gap* "(" gap* arguments:exprList? gap* ")" gap* body:classBody? '' <JavaClassInstantiation>
+        /
+        memberArrayCreator  '' <JavaExpressionMember>
+        /
+        field  
+    ) 
+    (gap* postFixOp)?  
+  end
+
+  rule field
+    (  
+        groupExpressionMembers 
+        /
+        literal  
+        /
+        thisMethodCall
+        /
+        superConstructorCall
+        /
+        superMethodCall
+        /
+        methodCall
+        /
+        classReference
+        /
+        bodyIdenfifier
+    )
+    (gap* dimExpr)*  
+    accessorField?   <JavaField>
+  end
+
+  rule bodyIdenfifier
+      name:identifier (gap* dimExpr)* ![\(]  <JavaBodyIdentifier>
+  end
+
+  rule classReference
+     identifier  ".class"  
+  end
+
+  rule superMethodCall
+     "super." method:methodCall <JavaSuperMethodCall>
+  end
+
+  rule superConstructorCall
+      "super" gap* "(" gap* arguments:exprList? gap* ")" <JavaSuperConstructorCall>
+  end
+
+  rule thisMethodCall
+     "this" gap* "(" gap* arguments:exprList? gap* ")" <JavaThisMethodCall>
+  end
+
+  rule methodCall
+      name:identifier gap* "(" gap* arguments:exprList? gap* ")" <JavaMethodCall>
+  end
+
+  rule accessorField
+    "." field ''  <JavaFieldAccessor>
+  end
+
+  rule memberArrayCreator
+    NEW gap+ type:qualifiedIdentifier gap* dim (gap* dim)* gap* initializer:arrayInitializer? <JavaArrayInstantiation>
+    /
+    NEW gap+ type:qualifiedIdentifier gap* dimExpr (gap* dimExpr)*  <JavaArrayInstantiation>
+  end
+
+  rule arrayInitializer
+    "{" gap* initializer:initializersGroup? gap* "}" <JavaArrayInitializer>
+  end
+
+  rule initializersGroup
+      variableInitializer (comma variableInitializer)* <JavaGroup>
+  end
+
+  rule groupExpressionMembers
+    "(" gap* expression:expression gap* ")" <JavaExpressionGroup>
+  end
+
+  # =====  Variables
+
+  rule variableInitializer
+    arrayInitializer  / expression        
+  end
+
+  rule localVariables
+    is_final:(FINAL gap*)? type:type gap+ variables:variables gap* ";"  <JavaLocalVariables>
+  end
+
+  rule variables
+    variable (comma variable)* <JavaGroup>
+  end
+
+  rule variable
+    name:identifier (gap* dim)*  gap* "=" gap* initializer:variableInitializer <JavaVariable>
+    /
+    name:identifier (gap* dim)*   <JavaVariable>
+  end
+
+  rule dimExpr
+    "[" gap* expression:expression gap* "]" <JavaDimExpr>
+  end
+
+  # =============== class declaration
+
+  rule class
+     modifier:(modifier gap+)* CLASS gap+ name:identifier (gap+ extends)? (gap+ implements)? gap* body:classBody <JavaClass> 
+  end
+
+  rule extends
+    EXTENDS gap+ parent:qualifiedIdentifier <JavaExtends>
+  end
+
+  rule implements
+    IMPLEMENTS gap+ interfaces:classTypeList <JavaImplements>
+  end
+
+  rule classBody
+    "{" (gap* classBodyDeclaration)* gap* "}"  <JavaClassBody>
+  end
+
+  rule classBodyDeclaration
+    ";"                           /
+    (("static" gap*)? block)      /
+    memberDecl
+  end
+
+  rule classBodyMethod
+    methodDeclaration:methodDeclaration gap* body:(block / ";")  <JavaClassMethod>
+    {
+        def constructor?() false; end
+    }
+  end
+
+  rule classBodyConstructor
+    methodDeclaration:constructorDeclaration gap* body:block  <JavaClassMethod> 
+    {
+        def constructor?() true; end
+    }
+  end
+
+  rule classBodyVariables
+    modifier:(modifier gap+)* type:type gap+ variables:variables gap* ";" <JavaClassLocalVariables>
+  end
+
+  rule memberDecl
+    classBodyConstructor /
+    classBodyMethod / 
+    classBodyVariables /
+    interface /
+    class
+  end
+
+  # ================ interface declaration
+
+  rule interface
+    modifier:(modifier gap+)* INTERFACE gap+ name:identifier (gap+ iimplements)? gap* body:interfaceBody <JavaInterface>
+  end
+
+  rule iimplements
+    EXTENDS gap+ interfaces:classTypeList <JavaImplements>
+  end
+
+  rule interfaceBody
+    "{" gap* (interfaceMemberDecl gap*)*  "}"
+  end
+
+  rule interfaceMemberDecl
+    interfaceVariable            /
+    (methodDeclaration gap* ";") /
+    interface                    /
+    class
+  end
+
+  rule interfaceVariable
+    modifier:(modifier gap+)* type:type gap+ name:identifier gap* "=" gap* initializer:variableInitializer gap* ";" <JavaInterfaceVariable>
+  end
+
+  # ==================== Block statement
+
+  rule block
+    "{" (gap* blockStatement)* gap* "}"  <JavaBlock>
+  end
+
+  rule blockStatement
+    localVariables
+    /
+    class
+    /
+    statement
+  end
+
+  rule statement
+    block  
+    /
+    ASSERT gap* expression (gap* ":" gap* expression)? gap* ";" <JavaAssertion>
+    /
+    IF gap* condition:groupExpressionMembers gap* body:statement gap* ELSE gap* else_body:statement  <JavaIf>
+    /
+    IF gap* condition:groupExpressionMembers gap* body:statement  <JavaIf>  
+    /
+    FOR gap* "(" gap* initializer:forInitializer? gap* condition:condition? gap* ";" gap* updater:exprList? gap* ")" gap* body:statement <JavaFor>
+    /
+    WHILE gap* condition:groupExpressionMembers gap* body:statement  <JavaWhile>
+    /
+    DO gap* body:statement gap* WHILE gap* condition:groupExpressionMembers gap* ";" <JavaDo>
+    /
+    TRY gap* body:block gap* catches:catches? gap* finally:finally? <JavaTry>
+    /
+    SWITCH gap* condition:groupExpressionMembers gap* "{" gap* cases:cases gap* "}" <JavaSwitch>
+    /
+    SYNCHRONIZED gap* condition:groupExpressionMembers gap* body:block <JavaSync>
+    /
+    RETURN gap* expression:expression? gap* ";" <JavaReturn>
+    /
+    THROW gap* expression gap* ";"  <JavaThrow>
+    /
+    BREAK (gap+ identifier)? gap* ";" <JavaBreak>
+    /
+    CONTINUE (gap+ identifier)? gap* ";" <JavaContinue>
+    /
+    (identifier gap* ":") gap* statement
+    /
+    expression gap* ";"  <JavaExpr>
+    /
+    ";" <JavaSemicolumn>
+  end
+
+  rule catches
+    catch (gap* catch)* <JavaGroup>
+  end
+
+  rule catch
+    CATCH gap* "(" gap* type:type gap+ name:identifier gap* ")" gap* body:block <JavaCatch>
+  end
+
+  rule finally
+    FINALLY gap* body:block <JavaFinally>
+  end
+
+  rule cases
+    case (gap* case)*  <JavaGroup> 
+  end
+
+  rule case_break
+      BREAK gap* ";" <JavaBreak>
+  end
+
+  rule case
+    CASE gap* expression:expression gap* ":" gap* body:statement?  break:(gap* case_break)? <JavaCase>
+    /  
+    DEFAULT gap* ":" gap* body:statement <JavaCase> 
+  end
+
+  rule forInitializer
+     type:type gap+ variables:variables gap* ";"  <JavaLocalVariables> 
+     /
+     variables:variables gap* ";"  <JavaLocalVariables> 
+     /
+     ";"
+  end
+
+  rule exprList
+      exprListItem (comma exprListItem)* <JavaGroup>
+  end
+
+  rule exprListItem
+      expression '' <JavaNode>
+  end
+  
+  rule condition
+      expression '' <JavaNode>
+  end 
+end
+

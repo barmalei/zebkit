@@ -21,5 +21,7 @@ PROJECT {
 	        @options = [ "--nomunge"]
 	    }
 	}
+
+	ARTIFACT('lib/gravity/zebra.all.js', CombineJavaScript) 
 }
 

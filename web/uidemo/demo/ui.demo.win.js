@@ -17,7 +17,7 @@ var Tree = zebra.ui.tree.Tree;
 var Constraints = zebra.layout.Constraints;
 
 var CardLayout = new Class(L.Layout, function($) {
-    $(function layout(target){
+    $(function doLayout(target){
         var w = target.width, h = target.height;
         for(var i=0; i<target.count(); i++) {
             var c = target.get(i);

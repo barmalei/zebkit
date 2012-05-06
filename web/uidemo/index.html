@@ -1,4 +1,3 @@
-
 <html>
 
 <header>
@@ -22,42 +21,137 @@
 
     <script type='text/javascript'>
 		var desktop = null;
+		var desktop = null;
 
-        function loaded()  { 
-			var theme_index = -1, themes = [ "black.theme.properties", "gray.theme.properties" ], s = window.location.href;
-			if (s.indexOf("?theme=") > 0) {
-				for(var i=0; i < themes.length; i++) {
-					if (s.indexOf(themes[i]) > 0) {
-						theme_index = i;
-						break;
-					}
-				}
+		function norm_demo(e) {
+			if (!e) e = window.event;
+
+			if (e) {
+				if (e.preventDefault) e.preventDefault();
+				else  e.returnValue = false;
 			}
-			if (theme_index < 0) theme_index = 1; 
-			document.getElementById("color-indicator").style.background = theme_index == 0 ? 'black' : '#CCCCCC';
-			var se = document.getElementById("themes");
-			se.options[theme_index].selected = true;
-			var cf = function() { 
-				var s = window.location.href, i = s.lastIndexOf("?");
-				if (i > 0) s = s.substring(0, i);
-				for(var i=0; i < se.options.length; i++) {
-					if (se.options[i].selected) { 
-						window.location = "index.html?theme=" + themes[i] + "&t=" + (new Date()).getTime();
-						break;
-					}
-				}
-			}
-			
-			if (se.attachEvent) se.attachEvent("onchange", cf);
-			else se.addEventListener("change", cf);
-			
-			zebra.ui.INIT("p3d", themes[theme_index], buildUI); 
+
+		    if (desktop.graph.rs) {
+    			desktop.ri();
+    			var e = document.getElementById("norm_demo_parent");
+    			e.removeChild(document.getElementById("norm_demo"));
+    			desktop.root.repaint();
+    		}
+    		else {
+    		    desktop.graph.clearRect(0,0,desktop.width, desktop.height);
+    			desktop.rotate(0.3);
+    			desktop.scale(1.3, 1.3);
+    			desktop.root.repaint();
+    		}
 		}
+
+        zebra.ready(	
+			function()  { 
+				var theme_index = -1, themes = [ "black.theme.properties", "gray.theme.properties" ], s = window.location.href;
+				if (s.indexOf("?theme=") > 0) {
+					for(var i=0; i < themes.length; i++) {
+						if (s.indexOf(themes[i]) > 0) {
+							theme_index = i;
+							break;
+						}
+					}
+				}
+				if (theme_index < 0) theme_index = 1; 
+				document.getElementById("color-indicator").style.background = theme_index == 0 ? 'black' : '#CCCCCC';
+				var se = document.getElementById("themes");
+				se.options[theme_index].selected = true;
+				var cf = function() { 
+					var s = window.location.href, i = s.lastIndexOf("?");
+					if (i > 0) s = s.substring(0, i);
+					for(var i=0; i < se.options.length; i++) {
+						if (se.options[i].selected) { 
+							window.location = "index.html?theme=" + themes[i] + "&t=" + (new Date()).getTime();
+							break;
+						}
+					}
+				}
+				if (se.attachEvent) se.attachEvent("onchange", cf);
+				else se.addEventListener("change", cf);
+			}, 
+			
+			function() { zebra.ui.load("demo/demo.properties"); },
+			
+			function() {
+				var L = zebra.layout, BorderLayout = L.BorderLayout, Font = JAVA.awt.Font, SimpleBorder = zebra.ui.view.SimpleBorder;
+	    		var Panel = zebra.ui.Panel, Color = JAVA.awt.Color, Text = zebra.data.Text, FlowLayout = L.FlowLayout;
+	    		var Label = zebra.ui.Label, ImagePan = zebra.ui.ImagePan;
+
+	        	desktop = new zebra.ui.zCanvas(document.getElementById("JAVA.awt.fm.canvas")), root = desktop.root;
+	    		root.padding(4);
+				root.setBorder(new SimpleBorder(1));
+				root.setLayout(new BorderLayout());
+
+				var p1 = new Panel(new BorderLayout(16,16));
+				p1.padding(8);
+				var titlePan = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.VERTICAL, 0));
+				var crPan    = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.VERTICAL, 4));
+				var logoPan  = new Panel(new FlowLayout(L.CENTER, L.TOP, L.HORIZONTAL, 12));
+				var g = new ImagePan(zebra.ui.get("logo_head"));
+				g.setBorder(new SimpleBorder(1));
+				logoPan.add(g);
+
+				p1.add(L.TOP, titlePan);
+				p1.add(L.CENTER, logoPan);
+				p1.add(L.BOTTOM, crPan);
+				title = new Label(new zebra.ui.view.ZebraTextRender("Zebra"));
+				title.setFont(new Font("Arial", 'bold', 74));
+				titlePan.add(title);
+				titlePan.add(new Label("(proof of concept pilot version)"));
+				var ll = new Label(new Text((new JAVA.io.TextFileReader("demo/desc.txt")).text));
+				ll.setFont(new Font("Arial", "Bold", 13));
+				logoPan.add(ll);
+				crPan.add(new Label("Copyright (c) Andrei Vishneuski 2012"));
+
+	   			var nt = new zebra.ui.Tabs(), prevSelected = -1;
+				nt._.add(function (src, data) {
+						  if (prevSelected >= 0) src.get(prevSelected).activated && src.get(prevSelected).activated(false);
+						  src.get(data).activated && src.get(data).activated(true);
+						  prevSelected = data;
+					 });
+
+	    		nt.addPage("About", p1);
+	    		nt.addPage("Basic UI", new zebra.ui.demo.BasicUIDemo());
+	   			nt.addPage("Panels", new zebra.ui.demo.PanelsDemo());
+	   			nt.addPage("Tree", new zebra.ui.demo.TreeDemo());
+	   			nt.addPage("Menu", new zebra.ui.demo.PopupDemo());
+	   			nt.addPage("Tooltip & Win", new zebra.ui.demo.WinDemo());
+				nt.addPage("Layouts", new zebra.ui.demo.LayoutDemo());
+				nt.addPage("Grid", new zebra.ui.demo.GridDemo());
+				nt.addPage("Designer", new zebra.ui.demo.DesignerDemo());
+
+				root.add(L.CENTER, nt);
+				desktop.rotate(0.3);
+				desktop.scale(1.3, 1.3);
+				root.repaint();
+			},
+			
+			function() {				
+				var canvas = document.getElementById("JAVA.awt.fm.canvas"), offx = 430, offy = 25, e = canvas;
+	        	do {
+	    			offx += parseInt(e.offsetLeft);
+	    			offy += parseInt(e.offsetTop);
+	    		} while (e = e.offsetParent);
+				var pe = document.getElementById("norm_demo_parent"), ce = document.createElement("a");
+				ce.setAttribute("href", "#");
+				ce.setAttribute("id", "norm_demo");
+				ce.setAttribute("onclick", "norm_demo();");
+				ce.style.position = "absolute";
+				ce.style.top = "" + offy + "px";
+				ce.style.left = "" + offx + "px";
+				ce.innerHTML = "<img border='0' src='demo/rotate.png'\/>";
+				pe.appendChild(ce); 
+			}
+		);
     </script>
     <!--<![endif]-->
 </header>
 
-<body onload="javascript:loaded();">
+<body>
 	<table class="round_border"  border="0" width="950px" cellspacing="0" cellpadding="5">
 		<tr>
 			<td colspan="1" align="left" valign="top">
@@ -295,115 +389,6 @@
 			</td>
 		</tr>
 	</table>
-	
-	<div style="visibility:hidden;line-height: 0;">
-		<span id="JAVA.awt.fm.text"  style="display:inline;">&nbsp;</span>
-		<img  id="JAVA.awt.fm.image" style="display:inline;" src="1x1.png" width="1" height="1"/>
-	</div>
-
-	<div id="container">
-		<div id="imgparent" style="display:inline;">
-			<img id="image" src="1x1.png" width="42" height="1"/>
-		</div>
-	</div>
-
-	<script type="text/javascript">
-		function add_rotate_button() {
-			var canvas = document.getElementById("JAVA.awt.fm.canvas"), offx = 430, offy = 25, e = canvas;
-        	do {
-    			offx += parseInt(e.offsetLeft);
-    			offy += parseInt(e.offsetTop);
-    		} while (e = e.offsetParent);
-			var pe = document.getElementById("norm_demo_parent"), ce = document.createElement("a");
-			ce.setAttribute("href", "#");
-			ce.setAttribute("id", "norm_demo");
-			ce.setAttribute("onclick", "norm_demo();");
-			ce.style.position = "absolute";
-			ce.style.top = "" + offy + "px";
-			ce.style.left = "" + offx + "px";
-			ce.innerHTML = "<img border='0' src='demo/rotate.png'\/>";
-			pe.appendChild(ce); 
-		}
-	
-		function buildUI() {
-    		var L = zebra.layout, BorderLayout = L.BorderLayout, Font = JAVA.awt.Font, SimpleBorder = zebra.ui.view.SimpleBorder;
-    		var Panel = zebra.ui.Panel, Color = JAVA.awt.Color, Text = zebra.data.Text, FlowLayout = L.FlowLayout;
-    		var Label = zebra.ui.Label, ImagePan = zebra.ui.ImagePan;
-
-        	desktop = new zebra.ui.zCanvas(document.getElementById("JAVA.awt.fm.canvas")), root = desktop.root;
-    		root.padding(4);
-			root.setBorder(new SimpleBorder(1));
-			root.setLayout(new BorderLayout());
-     		new zebra.ui.MWheelSupport(desktop);
-    		
-			var p1 = new Panel(new BorderLayout(16,16));
-			p1.padding(8);
-			var titlePan = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.VERTICAL, 0));
-			var crPan    = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.VERTICAL, 4));
-			var logoPan  = new Panel(new FlowLayout(L.CENTER, L.TOP, L.HORIZONTAL, 12));
-			var g = new ImagePan(zebra.ui.get("logo_head"));
-			g.setBorder(new SimpleBorder(1));
-			logoPan.add(g);
-			
-			p1.add(L.TOP, titlePan);
-			p1.add(L.CENTER, logoPan);
-			p1.add(L.BOTTOM, crPan);
-			title = new Label(new zebra.ui.view.ZebraTextRender("Zebra"));
-			title.setFont(new Font("Arial", 'bold', 74));
-			titlePan.add(title);
-			titlePan.add(new Label("(proof of concept pilot version)"));
-			var ll = new Label(new Text((new JAVA.io.TextFileReader("demo/desc.txt")).text));
-			ll.setFont(new Font("Arial", "Bold", 13));
-			logoPan.add(ll);
-			crPan.add(new Label("Copyright (c) Andrei Vishneuski 2012"));
-			
-   			var nt = new zebra.ui.Tabs(), prevSelected = -1;
-			nt._.add(function (src, data) {
-					  if (prevSelected >= 0) src.get(prevSelected).activated && src.get(prevSelected).activated(false);
-					  src.get(data).activated && src.get(data).activated(true);
-					  prevSelected = data;
-				 });
-
-    		nt.addPage("About", p1);
-    		nt.addPage("Basic UI", new zebra.ui.demo.BasicUIDemo());
-   			nt.addPage("Panels", new zebra.ui.demo.PanelsDemo());
-   			nt.addPage("Tree", new zebra.ui.demo.TreeDemo());
-   			nt.addPage("Menu", new zebra.ui.demo.PopupDemo());
-   			nt.addPage("Tooltip & Win", new zebra.ui.demo.WinDemo());
-			nt.addPage("Layouts", new zebra.ui.demo.LayoutDemo());
-			nt.addPage("Grid", new zebra.ui.demo.GridDemo());
-			nt.addPage("Designer", new zebra.ui.demo.DesignerDemo());
-			
-			root.add(L.CENTER, nt);
-			desktop.rotate(0.3);
-			desktop.scale(1.3, 1.3);
-			root.repaint();
-			
-			add_rotate_button();
-		}
-
-		function norm_demo(e) {
-			if (!e) e = window.event;
-			
-			if (e) {
-				if (e.preventDefault) e.preventDefault();
-				else  e.returnValue = false;
-			}
-
-		    if (desktop.graph.rs) {
-    			desktop.ri();
-    			var e = document.getElementById("norm_demo_parent");
-    			e.removeChild(document.getElementById("norm_demo"));
-    			desktop.root.repaint();
-    		}
-    		else {
-    		    desktop.graph.clearRect(0,0,desktop.width, desktop.height);
-    			desktop.rotate(0.3);
-    			desktop.scale(1.3, 1.3);
-    			desktop.root.repaint();
-    		}
-		}
-	</script>
 	
 </body>
 </html>

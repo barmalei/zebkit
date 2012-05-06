@@ -205,24 +205,25 @@ var CompEditorProvider = new Class(DefEditors, [
         
 
 function longGrid() {
+   // var m = new zebra.data.Matrix(10000,20);
     var m = new zebra.data.Matrix(100,10);
-	for(var i=0; i<1000; i++) { m.put(i, "Cell [" + i +"]");  }
+	for(var i=0; i<m.rows*m.cols; i++) { m.put(i, "Cell [" + i +"]");  }
 	
 	var g = new Grid(m);
-	g.setViewProvider(new DefViews(function($) {
-	    $(function() { this.$super(); });
-	    $(function getCellColor(row,col) { 
-	        return (row % 2 == 0) ? ui.get("cell.bg1") : ui.get("cell.bg2") ;
-	    });
-	}));
+    g.setViewProvider(new DefViews([
+        function() { this.$super(); },
+        function getCellColor(row,col) { 
+            return (row % 2 == 0) ? ui.get("cell.bg1") : ui.get("cell.bg2") ;
+        }
+    ]));
 	
 	var gp1 = new GridCaption(g);
 	for(var i=0; i < 10; i++) gp1.putTitle(i, "Title " + i);
-	g.add(Grid.TOP_CAPTION_EL, gp1);
+    g.add(Grid.TOP_CAPTION_EL, gp1);
 	
 	var gp2 = new GridCaption(g);
 	for(var i=0; i < 100; i++) gp2.putTitle(i, " " + i + " ");
-	g.add(Grid.LEFT_CAPTION_EL, gp2);
+    g.add(Grid.LEFT_CAPTION_EL, gp2);
 	
 	var corner = new Panel();
 	corner.setBorder(ui.get("gcap.brv"));

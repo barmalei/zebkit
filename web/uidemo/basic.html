@@ -1,0 +1,122 @@
+<html>
+
+<header>
+    <META http-equiv="X-UA-Compatible" content="IE=9">
+	<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+	<META HTTP-EQUIV="Expires" CONTENT="-1">
+	<link rel="stylesheet" type="text/css" media="screen" href="index.css"/>
+	
+	<script src='../../lib/gravity/zebra.js' 	 type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/java.js'    type='text/javascript'></script>
+
+    <script src='../../lib/gravity/zebra/util.js' type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/data.js' type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/layout.js' type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/ui.view.js' type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/ui.js' type='text/javascript'></script>
+
+    <script src='../../lib/gravity/zebra/ui.list.js' type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/ui.win.js' type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/ui.jsal.js' type='text/javascript'></script>
+
+    <script src='../../lib/gravity/zebra/ui.TextField.js' type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/ui.tree.js' type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/ui.grid.js' type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/ui.editors.js' type='text/javascript'></script>
+
+    <script src='../../lib/gravity/zebra/ui.p3d.js' type='text/javascript'></script>
+
+    <script src='demo/ui.demo.js' type='text/javascript'></script>
+    <script src='demo/ui.demo.layout.js' type='text/javascript'></script>
+    <script src='demo/ui.demo.basicui.js' type='text/javascript'></script>
+    <script src='demo/ui.demo.panels.js' type='text/javascript'></script>
+    <script src='demo/ui.demo.tree.js' type='text/javascript'></script>
+    <script src='demo/ui.demo.popup.js' type='text/javascript'></script>
+    <script src='demo/ui.demo.win.js' type='text/javascript'></script>
+    <script src='demo/ui.demo.grid.js' type='text/javascript'></script>
+    <script src='demo/ui.demo.designer.js' type='text/javascript'></script>
+
+    <script type='text/javascript'>
+        zebra.ready(
+			function() {
+				zebra.ui.load("demo/demo.properties");
+			},
+			
+			function()  { 
+	    		var L = zebra.layout, BorderLayout = L.BorderLayout, Font = JAVA.awt.Font, SimpleBorder = zebra.ui.view.SimpleBorder;
+	    		var Panel = zebra.ui.Panel, Color = zebra.util.Color, Text = zebra.data.Text, FlowLayout = L.FlowLayout;
+	    		var Label = zebra.ui.Label, ImagePan = zebra.ui.ImagePan;
+
+	        	var desktop = new zebra.ui.zCanvas(document.getElementById("JAVA.awt.fm.canvas")), root = desktop.root;
+				root.padding(4);
+				root.setBorder(new SimpleBorder(1));
+				root.setLayout(new BorderLayout());
+    		
+				var p1 = new Panel(new BorderLayout(16,16));
+				p1.padding(8);
+				var titlePan = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.VERTICAL, 0));
+				var crPan    = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.VERTICAL, 4));
+				var logoPan  = new Panel(new FlowLayout(L.CENTER, L.TOP, L.HORIZONTAL, 12));
+				var g = new ImagePan(zebra.ui.get("logo_head"));
+								
+				g.setBorder(new SimpleBorder(1));
+				//logoPan.add(g);
+			
+				p1.add(L.TOP, titlePan);
+				p1.add(L.CENTER, logoPan);
+				p1.add(L.BOTTOM, crPan);
+				title = new Label(new zebra.ui.view.ZebraTextRender("Zebra"));
+				title.setFont(new Font("Arial", 'bold', 74));
+				titlePan.add(title);
+				titlePan.add(new Label("(proof of concept pilot version)"));
+				var ll = new Label(new Text((new JAVA.io.TextFileReader("demo/desc.txt")).text));
+				ll.setFont(new Font("Arial", "Bold", 13));
+				logoPan.add(ll);
+				crPan.add(new Label("Copyright (c) Andrei Vishneuski 2012"));
+			
+	   			var nt = new zebra.ui.Tabs(), prevSelected = -1;
+				nt._.add(function (src, data) {
+						  if (prevSelected >= 0) src.get(prevSelected).activated && src.get(prevSelected).activated(false);
+						  src.get(data).activated && src.get(data).activated(true);
+						  prevSelected = data;
+					 });
+
+	    		nt.addPage("About", p1);
+	    		nt.addPage("Basic UI", new zebra.ui.demo.BasicUIDemo());
+	   			nt.addPage("Panels", new zebra.ui.demo.PanelsDemo());
+	   			nt.addPage("Tree", new zebra.ui.demo.TreeDemo());
+	   			nt.addPage("Menu", new zebra.ui.demo.PopupDemo());
+	   			nt.addPage("Tooltip & Win", new zebra.ui.demo.WinDemo());
+				nt.addPage("Layouts", new zebra.ui.demo.LayoutDemo());
+				nt.addPage("Grid", new zebra.ui.demo.GridDemo());
+//				nt.addPage("Designer", new zebra.ui.demo.DesignerDemo());
+			
+				var p = new Panel(new zebra.layout.GridLayout(1000, 20));
+				for(var i=0; i<2000; i++)  {
+					p.add(new zebra.ui.TextField("Item " + i));
+				}
+				nt.addPage("Scroll", new zebra.ui.ScrollPan(p));
+			
+				root.add(L.CENTER, nt);
+		
+				//desktop.setSize(500, 520);
+				desktop.repaint();
+			}
+		);
+    </script>
+</header>
+
+<body>
+	<!-- <div id="zebra.fm" style="visibility:hidden;line-height: 0; height:1px">
+		<span id="zebra.fm.text" style="display: inline; font-family: Arial; font-size: 18px; font-style: normal; font-variant: normal; font-weight: normal; line-height: normal; ">&nbsp;</span>
+		<img id="zebra.fm.image" style="display:inline;" src="1x1.png" width="1" height="1"/>
+	</div>
+-->	
+	<canvas id="JAVA.awt.fm.canvas" 
+	        tabindex="0" 
+	        class="zebracanvas"
+	        width="1200" height="700"> 
+	</canvas> 
+</body>
+</html>
+

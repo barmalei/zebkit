@@ -48,19 +48,10 @@
 				if (e.preventDefault) e.preventDefault();
 				else  e.returnValue = false;
 			}
-
-		    if (desktop.graph.rs) {
-    			desktop.ri();
-    			var e = document.getElementById("norm_demo_parent");
-    			e.removeChild(document.getElementById("norm_demo"));
-    			desktop.root.repaint();
-    		}
-    		else {
-    		    desktop.graph.clearRect(0,0,desktop.width, desktop.height);
-    			desktop.rotate(0.3);
-    			desktop.scale(1.3, 1.3);
-    			desktop.root.repaint();
-    		}
+   			desktop.graph.restore();
+   			var e = document.getElementById("norm_demo_parent");
+   			e.removeChild(document.getElementById("norm_demo"));
+   			desktop.root.repaint();
 		}
 
         zebra.ready(	
@@ -96,7 +87,7 @@
 			
 			function() {
 				var L = zebra.layout, BorderLayout = L.BorderLayout, Font = JAVA.awt.Font, SimpleBorder = zebra.ui.view.SimpleBorder;
-	    		var Panel = zebra.ui.Panel, Color = JAVA.awt.Color, Text = zebra.data.Text, FlowLayout = L.FlowLayout;
+	    		var Panel = zebra.ui.Panel, Color = zebra.util.Color, Text = zebra.data.Text, FlowLayout = L.FlowLayout;
 	    		var Label = zebra.ui.Label, ImagePan = zebra.ui.ImagePan;
 
 	        	desktop = new zebra.ui.zCanvas(document.getElementById("JAVA.awt.fm.canvas")), root = desktop.root;
@@ -143,8 +134,9 @@
 				nt.addPage("Designer", new zebra.ui.demo.DesignerDemo());
 
 				root.add(L.CENTER, nt);
-				desktop.rotate(0.3);
-				desktop.scale(1.3, 1.3);
+				desktop.graph.save();
+				desktop.graph.rotate(0.3);
+				desktop.graph.scale(1.3, 1.3);
 				root.repaint();
 			},
 			

@@ -2,7 +2,7 @@
 (function(pkg, Class, ui) {
 
 var Panel = zebra.ui.Panel; 
-var Color = JAVA.awt.Color;
+var Color = zebra.util.Color;
 var Label = zebra.ui.Label; 
 var ImagePan = zebra.ui.ImagePan; 
 var BorderLayout = zebra.layout.BorderLayout;

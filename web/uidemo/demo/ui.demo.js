@@ -12,7 +12,7 @@ pkg.createLabel = function (txt, color) {
     var l = new Label(txt.indexOf("\n") >= 0 ? new zebra.data.Text(txt) : txt);
     l.setForeground(color);
     l.setFont(JAVA.awt.Font.defaultBold);
-    l.setBorder(new SimpleBorder(1, JAVA.awt.Color.gray));
+    l.setBorder(new SimpleBorder(1, zebra.util.Color.gray));
     l.padding(4);
     return l;
 }

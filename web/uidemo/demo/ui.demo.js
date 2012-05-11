@@ -11,8 +11,8 @@ pkg.createLabel = function (txt, color) {
     color = color || zebra.ui.get("demo.createLabel.col") || zebra.ui.get("col.gray7");
     var l = new Label(txt.indexOf("\n") >= 0 ? new zebra.data.Text(txt) : txt);
     l.setForeground(color);
-    l.setFont(JAVA.awt.Font.defaultBold);
-    l.setBorder(new SimpleBorder(1, zebra.util.Color.gray));
+    l.setFont(zebra.ui.Font.defaultBold);
+    l.setBorder(new SimpleBorder(1, zebra.util.rgb.gray));
     l.padding(4);
     return l;
 }
@@ -31,7 +31,7 @@ pkg.createLabedComponent = function(title, comp) {
     var content = new Panel(new L.BorderLayout());
     content.setBackground(null);
     var lab = new Label(title);
-    lab.setFont(JAVA.awt.Font.defaultBold);
+    lab.setFont(zebra.ui.Font.defaultBold);
     content.add(L.LEFT, lab)
     content.add(L.RIGHT, comp);
     return content;

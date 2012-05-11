@@ -1,7 +1,7 @@
 (function(pkg, Class) {
 
 var Panel = zebra.ui.Panel; 
-var Color = zebra.util.Color;
+var rgb = zebra.util.rgb;
 var Label = zebra.ui.Label; 
 var TextField = zebra.ui.TextField; 
 var BorderLayout = zebra.layout.BorderLayout;
@@ -18,8 +18,8 @@ var SynHighlighterRender = new Class(zebra.ui.view.TextRender, function($, $$) {
         $(function(path){
             this.words = new JAVA.util.Hashtable();
             this.$super((new JAVA.io.TextFileReader(path)).text);
-            this.setForeground(Color.darkGray);
-            this.setFont(new JAVA.awt.Font("Courier", "bold", 14));
+            this.setForeground(rgb.darkGray);
+            this.setFont(new zebra.ui.Font("Courier", "bold", 14));
         });
 
         $(function paintLine(g,x,y,line,d){
@@ -61,41 +61,41 @@ pkg.ShDemo = new Class(pkg.DemoPan, function($) {
 		this.padding(0);
         
         var sh = new SynHighlighterRender(path);
-        sh.words.put("function", Color.black);
-        sh.words.put("var", Color.black);
-        sh.words.put("for", Color.black);
-        sh.words.put("if", Color.black);
-        sh.words.put("else", Color.black);
-        sh.words.put("return", Color.black);
-        sh.words.put("break", Color.black);
-        sh.words.put("continue", Color.black);
+        sh.words.put("function", rgb.black);
+        sh.words.put("var", rgb.black);
+        sh.words.put("for", rgb.black);
+        sh.words.put("if", rgb.black);
+        sh.words.put("else", rgb.black);
+        sh.words.put("return", rgb.black);
+        sh.words.put("break", rgb.black);
+        sh.words.put("continue", rgb.black);
 
-        sh.words.put("new", Color.blue);
-        sh.words.put("this", Color.blue);
-        sh.words.put("true", Color.blue);
-        sh.words.put("false", Color.blue);
-        sh.words.put("substring", Color.blue);
-        sh.words.put("indexOf", Color.blue);
-        sh.words.put("Math", Color.blue);
-        sh.words.put("null", Color.blue);
+        sh.words.put("new", rgb.blue);
+        sh.words.put("this", rgb.blue);
+        sh.words.put("true", rgb.blue);
+        sh.words.put("false", rgb.blue);
+        sh.words.put("substring", rgb.blue);
+        sh.words.put("indexOf", rgb.blue);
+        sh.words.put("Math", rgb.blue);
+        sh.words.put("null", rgb.blue);
 
-        sh.words.put("Class", Color.red);
-        sh.words.put("Interface", Color.red);
-        sh.words.put("Point", Color.red);
-        sh.words.put("Dimension", Color.red);
-        sh.words.put("Rectangle", Color.red);
-        sh.words.put("Layout", Color.red);
-        sh.words.put("MathBox", Color.red);
-        sh.words.put("$super", Color.red);
-        sh.words.put("$this", Color.red);
+        sh.words.put("Class", rgb.red);
+        sh.words.put("Interface", rgb.red);
+        sh.words.put("Point", rgb.red);
+        sh.words.put("Dimension", rgb.red);
+        sh.words.put("Rectangle", rgb.red);
+        sh.words.put("Layout", rgb.red);
+        sh.words.put("MathBox", rgb.red);
+        sh.words.put("$super", rgb.red);
+        sh.words.put("$this", rgb.red);
 
-        sh.words.put("bits", Color.green);
-        sh.words.put("top", Color.green);
-        sh.words.put("left", Color.green);
-        sh.words.put("bottom", Color.green);
-        sh.words.put("right", Color.green);
-        sh.words.put("width", Color.green);
-        sh.words.put("height", Color.green);
+        sh.words.put("bits", rgb.green);
+        sh.words.put("top", rgb.green);
+        sh.words.put("left", rgb.green);
+        sh.words.put("bottom", rgb.green);
+        sh.words.put("right", rgb.green);
+        sh.words.put("width", rgb.green);
+        sh.words.put("height", rgb.green);
 
         this.tf = new TextField(sh);
         this.add(L.CENTER, new ScrollPan(this.tf));

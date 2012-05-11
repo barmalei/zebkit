@@ -2,7 +2,7 @@
 (function(pkg, Class, ui) {
 
 var Panel = zebra.ui.Panel; 
-var Color = zebra.util.Color;
+var rgb = zebra.util.rgb;
 var Label = zebra.ui.Label; 
 var TextField = zebra.ui.TextField; 
 var BorderLayout = zebra.layout.BorderLayout;
@@ -43,7 +43,7 @@ var FL = Class(zebra.ui.BaseLayer, [
         var rm = zebra.ui.KeyEvent.CTRL + zebra.ui.KeyEvent.SHIFT + zebra.ui.KeyEvent.ALT;
         if ((rm & mask) == rm) {
              if (this.isActive) this.setBackground(null);
-             else  this.setBackground(new zebra.ui.view.Fill(new Color(255,255,255, 0.7)));
+             else  this.setBackground(new zebra.ui.view.Fill(new rgb(255,255,255, 0.7)));
              this.isActive = ! this.isActive;
         }
     },
@@ -67,7 +67,7 @@ function createTooltipDemo() {
     l3.setPSSize(120, 90);
 	ui.tooltip.setTooltip(l1, new zebra.ui.TooltipInfo(function($) {
 		 $(function getTooltip(target, x, y) {
-		    var l = pkg.createLabel(" THIS IS HONDA ", Color.blue);  
+		    var l = pkg.createLabel(" THIS IS HONDA ", rgb.blue);  
 		    l.setBackground(new zebra.ui.view.Fill(ui.get("col.gray7")));
 			return l;
 	 	 });
@@ -110,9 +110,9 @@ function createWindowComp(target) {
     w.getRoot().setLayout(new BorderLayout());
     
     var tf = new zebra.ui.TextField(new zebra.data.Text(""));
-    tf.setFont(new JAVA.awt.Font("Arial","bold", 18));
+    tf.setFont(new zebra.ui.Font("Arial","bold", 18));
     tf.setEditable(false);
-    tf.setText("Drag and drop window\nby its title.\n\nResize window by\ndraggin its right-bottom corner");
+    tf.setText("Drag and drop window\nby its title.\n\nResize window by\ndrag its right-bottom corner");
     w.getRoot().add(L.CENTER, tf);
     w.getRoot().padding(8);
     

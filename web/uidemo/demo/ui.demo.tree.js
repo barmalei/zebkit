@@ -2,7 +2,7 @@
 (function(pkg, Class, ui) {
 
 var Panel = zebra.ui.Panel; 
-var Color = zebra.util.Color;
+var rgb = zebra.util.rgb;
 var Label = zebra.ui.Label; 
 var TextField = zebra.ui.TextField; 
 var FlowLayout = zebra.layout.FlowLayout; 
@@ -62,7 +62,7 @@ pkg.TreeDemo = new Class(pkg.DemoPan, function($) {
 			  function getView(c, i) {
 					var tr = new zebra.ui.view.TextRender(i.value);
 					if (i.value.indexOf("1") > 0) {
-						tr.setForeground(Color.red);
+						tr.setForeground(rgb.red);
 					}
 					if (i.value.indexOf("2") > 0) {
 						tr.setDefBoldFont();
@@ -93,7 +93,7 @@ pkg.TreeDemo = new Class(pkg.DemoPan, function($) {
         //     function (s) { this.$super(s); }, 
         //     
         //     function paint(g, x, y, w, h, d) {
-        //        // g.setColor(Color.red);
+        //        // g.setColor(rgb.red);
         //        // g.fillRect(x, y, d.width, h);
         //        // this.$super(g, x, y, w, h, d);
         //     }

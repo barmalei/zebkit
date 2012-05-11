@@ -2,7 +2,7 @@
 (function(pkg, Class, ui) {
 
 var Panel = zebra.ui.Panel; 
-var Color = zebra.util.Color;
+var rgb = zebra.util.rgb;
 var Label = zebra.ui.Label; 
 var ImagePan = zebra.ui.ImagePan; 
 var BorderLayout = zebra.layout.BorderLayout;
@@ -185,12 +185,12 @@ pkg.PopupDemo = new Class(pkg.DemoPan, function($) {
 
 		
         var p  = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.HORIZONTAL, 8));
-		var l1 = pkg.createLabel("Press right mouse button\nto see context menu Cars", Color.red);
-		var l2 = pkg.createLabel("Press right mouse button\nto see context menu Colors", Color.red);
-		var l3 = pkg.createLabel("Press right mouse button\nto see context menu Brands", Color.red);
-		l1.setBorder(new SimpleBorder(1, Color.red,2));
-		l2.setBorder(new SimpleBorder(1, Color.blue,2));
-		l3.setBorder(new SimpleBorder(1, Color.green,2));
+		var l1 = pkg.createLabel("Press right mouse button\nto see context menu Cars", rgb.red);
+		var l2 = pkg.createLabel("Press right mouse button\nto see context menu Colors", rgb.red);
+		var l3 = pkg.createLabel("Press right mouse button\nto see context menu Brands", rgb.red);
+		l1.setBorder(new SimpleBorder(1, rgb.red,2));
+		l2.setBorder(new SimpleBorder(1, rgb.blue,2));
+		l3.setBorder(new SimpleBorder(1, rgb.green,2));
         p.setPSSize(-1, 60);
 		p.add(l1);
 		p.add(l2);

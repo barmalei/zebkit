@@ -17,7 +17,7 @@ var BorderPan = zebra.ui.BorderPan;
 var RasterLayout = zebra.layout.RasterLayout;
 var TextRender = zebra.ui.view.TextRender;
 var Fill = zebra.ui.view.Fill;
-var Color = zebra.util.Color;
+var rgb = zebra.util.rgb;
 var TreeModelImpl = zebra.data.TreeModelImpl;
 var Tree = zebra.ui.tree.Tree;
 var Item = zebra.data.Item;
@@ -48,9 +48,9 @@ pkg.GridBooleanEditor = new Class([
         function editingCanceled(row,col,data,editor){}
 ]);
 
-var colors = [ [Color.white, Color.lightGray, Color.white],  
-               [Color.orange, Color.black, Color.orange], 
-               [Color.white, Color.lightGray, Color.white] ];
+var colors = [ [rgb.white, rgb.lightGray, rgb.white],  
+               [rgb.orange, rgb.black, rgb.orange], 
+               [rgb.white, rgb.lightGray, rgb.white] ];
 
 var ColumnsAlignmentProvider = new Class(DefViews, [    
     function (){ this.$super(); },
@@ -59,7 +59,7 @@ var ColumnsAlignmentProvider = new Class(DefViews, [
         var tf = new TextRender(data);
         if (row == 1 && col == 1) {
             tf.setDefBoldFont();
-            tf.setForeground(Color.white);
+            tf.setForeground(rgb.white);
         }
         return tf;
     },
@@ -116,7 +116,7 @@ var CustomGridEditor = new Class(DefEditors, [
                         $this.parent.remove($this);
                     });
                     
-                    this.setBorder(new zebra.ui.view.SimpleBorder(1, Color.white, 2));
+                    this.setBorder(new zebra.ui.view.SimpleBorder(1, rgb.white, 2));
                     this.setBackground(new Fill(zebra.ui.get("col.gray6")));
                     
                     

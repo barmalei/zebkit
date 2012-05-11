@@ -2,7 +2,7 @@
 (function(pkg, Class, ui) {
 
 var Panel = zebra.ui.Panel; 
-var Color = JAVA.awt.Color;
+var rgb = zebra.util.rgb;
 var Label = zebra.ui.Label; 
 var TextField = zebra.ui.TextField; 
 var FlowLayout = zebra.layout.FlowLayout; 
@@ -67,7 +67,7 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, function($) {
 		ppp.setBackground(new zebra.ui.view.View([
               function paint(g, x, y, w, h, target) {
                   var s = 8;
-                  g.setColor(JAVA.awt.Color.gray);
+                  g.setColor(rgb.gray);
                   for(var i=0; i < 2*w/s; i++) g.drawLine(x + s*i, y, x, y + s*i);  
               }
         ]));
@@ -105,7 +105,7 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, function($) {
 				prev = c;
 				if (c != null) {
 					prevCol = prev.shaperBr.borderColor;
-					prev.shaperBr.borderColor = JAVA.awt.Color.red;
+					prev.shaperBr.borderColor = rgb.red;
 					prev.repaint();
 				}
 			});
@@ -117,7 +117,7 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, function($) {
 		l.setBackground(new zebra.ui.view.Fill(ui.get("designer.title.bg")));
 
 //		s.setBorder(ui.get("br.plain"));
-//		l.setForeground(Color.white);
+//		l.setForeground(rgb.white);
 		
 		this.add(L.TOP, l);
 		this.add(L.CENTER, s);

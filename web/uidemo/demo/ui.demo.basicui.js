@@ -16,7 +16,7 @@ var Tabs = zebra.ui.Tabs;
 var Checkbox = zebra.ui.Checkbox;
 var ImagePan = zebra.ui.ImagePan;
 var Link = zebra.ui.Link;
-var Color = zebra.util.Color;
+var rgb = zebra.util.rgb;
 var List = zebra.ui.List;
 var CompList = zebra.ui.CompList;
 var Slider = zebra.ui.Slider;
@@ -47,7 +47,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, function($) {
         var p_w = new Panel(new ListLayout(8));
         p_w.add(createComboPan());
         p_w.add(createListPan());
-        
+
         r.add(L.LEFT, p_w);
         r.add(L.CENTER, p_c);
         
@@ -97,7 +97,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, function($) {
         var pr2 = new Progress();
         pr2.setMaxValue(4);
         pr2.setValue(1);
-        pr2.setView(Progress.BUNDLE_VIEW, new Gradient(Color.lightGray, Color.darkGray, L.HORIZONTAL));
+        pr2.setView(Progress.BUNDLE_VIEW, new Gradient(rgb.lightGray, rgb.darkGray, L.HORIZONTAL));
         pr2.setPSSize(130, 12);
         pr2.setBundleWidth(70);
         p.add(pr1);

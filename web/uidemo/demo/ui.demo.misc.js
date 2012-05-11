@@ -2,7 +2,7 @@
 (function(pkg, Class) {
 
 var Panel = zebra.ui.Panel; 
-var Color = zebra.util.Color;
+var rgb = zebra.util.rgb;
 var Label = zebra.ui.Label; 
 var TextField = zebra.ui.TextField; 
 var GridLayout = zebra.layout.GridLayout; 

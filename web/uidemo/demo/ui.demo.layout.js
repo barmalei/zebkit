@@ -19,11 +19,11 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, function($) {
         this.$super();
         this.setLayout(new BorderLayout());
         var n = new Tabs(L.BOTTOM);
-        n.addPage("Border layout", borderLayoutPage());
-        n.addPage("Flow layout", flowLayoutPage());
-        n.addPage("List layout", listLayoutPage());
-        n.addPage("Percent layout", percentLayoutPage());
-        n.addPage("Grid layout", gridLayoutPage());
+        n.add("Border layout", borderLayoutPage());
+        n.add("Flow layout", flowLayoutPage());
+        n.add("List layout", listLayoutPage());
+        n.add("Percent layout", percentLayoutPage());
+        n.add("Grid layout", gridLayoutPage());
         this.add(L.CENTER, n);
     });    
     

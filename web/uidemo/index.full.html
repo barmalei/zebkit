@@ -9,7 +9,7 @@
 	
 	<!--[if (gte IE 9)|(!IE)]><!-->	
 	<script src='../../lib/gravity/zebra.js' 	 type='text/javascript'></script>
-    <script src='../../lib/gravity/zebra/java.js'    type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/io.js'    type='text/javascript'></script>
 
     <script src='../../lib/gravity/zebra/util.js' type='text/javascript'></script>
     <script src='../../lib/gravity/zebra/data.js' type='text/javascript'></script>
@@ -56,15 +56,17 @@
 
         zebra.ready(	
 			function()  { 
-				var theme_index = -1, themes = [ "black.theme.properties", "gray.theme.properties" ], s = window.location.href;
-				if (s.indexOf("?theme=") > 0) {
-					for(var i=0; i < themes.length; i++) {
-						if (s.indexOf(themes[i]) > 0) {
+				var theme_index = -1, palettes = [ "black", "default" ], s = window.location.href;
+				if (s.indexOf("?ui.palette=") > 0) {
+					for(var i=0; i < palettes.length; i++) {
+						if (s.indexOf(palettes[i]) >= 0) {
 							theme_index = i;
 							break;
 						}
 					}
 				}
+				
+				
 				if (theme_index < 0) theme_index = 1; 
 				document.getElementById("color-indicator").style.background = theme_index == 0 ? 'black' : '#CCCCCC';
 				var se = document.getElementById("themes");
@@ -74,7 +76,7 @@
 					if (i > 0) s = s.substring(0, i);
 					for(var i=0; i < se.options.length; i++) {
 						if (se.options[i].selected) { 
-							window.location = "index.html?theme=" + themes[i] + "&t=" + (new Date()).getTime();
+							window.location = "index.html?ui.palette=" + palettes[i] + "&t=" + (new Date()).getTime();
 							break;
 						}
 					}
@@ -111,7 +113,7 @@
 				title.setFont(new Font("Arial", 'bold', 74));
 				titlePan.add(title);
 				titlePan.add(new Label("(proof of concept pilot version)"));
-				var ll = new Label(new Text((new JAVA.io.TextFileReader("demo/desc.txt")).text));
+				var ll = new Label(new Text((new zebra.io.TextFileReader("demo/desc.txt")).text));
 				ll.setFont(new Font("Arial", "Bold", 13));
 				logoPan.add(ll);
 				crPan.add(new Label("Copyright (c) Andrei Vishneuski 2012"));
@@ -123,15 +125,15 @@
 						  prevSelected = data;
 					 });
 
-	    		nt.addPage("About", p1);
-	    		nt.addPage("Basic UI", new zebra.ui.demo.BasicUIDemo());
-	   			nt.addPage("Panels", new zebra.ui.demo.PanelsDemo());
-	   			nt.addPage("Tree", new zebra.ui.demo.TreeDemo());
-	   			nt.addPage("Menu", new zebra.ui.demo.PopupDemo());
-	   			nt.addPage("Tooltip & Win", new zebra.ui.demo.WinDemo());
-				nt.addPage("Layouts", new zebra.ui.demo.LayoutDemo());
-				nt.addPage("Grid", new zebra.ui.demo.GridDemo());
-				nt.addPage("Designer", new zebra.ui.demo.DesignerDemo());
+	    		nt.add("About", p1);
+	    		nt.add("Basic UI", new zebra.ui.demo.BasicUIDemo());
+	   			nt.add("Panels", new zebra.ui.demo.PanelsDemo());
+	   			nt.add("Tree", new zebra.ui.demo.TreeDemo());
+	   			nt.add("Menu", new zebra.ui.demo.PopupDemo());
+	   			nt.add("Tooltip & Win", new zebra.ui.demo.WinDemo());
+				nt.add("Layouts", new zebra.ui.demo.LayoutDemo());
+				nt.add("Grid", new zebra.ui.demo.GridDemo());
+				nt.add("Designer", new zebra.ui.demo.DesignerDemo());
 
 				root.add(L.CENTER, nt);
 				desktop.graph.save();

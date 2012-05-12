@@ -264,9 +264,9 @@ function editableGrid() {
 
     function makeTabs(){
         var book = new Tabs();
-        book.addPage("Page 1", new Panel());
-        book.addPage("Page 2", new Panel());
-//        book.addPage("Page 3", new Panel());
+        book.add("Page 1", new Panel());
+        book.add("Page 2", new Panel());
+//        book.add("Page 3", new Panel());
         var ps = book.getPreferredSize();
         book.setPSSize(ps.width, 130);
         return book;
@@ -362,9 +362,9 @@ pkg.GridDemo = new Class(pkg.DemoPan, function($) {
         this.padding(6);
         
         var n = new Tabs(L.LEFT);
-        n.addPage("1000 cells", longGrid());
-        n.addPage("Grid", customCellAlignmentGrid());
-        n.addPage("Editable grid", editableGrid());
+        n.add("1000 cells", longGrid());
+        n.add("Grid", customCellAlignmentGrid());
+        n.add("Editable grid", editableGrid());
         
 		this.add(L.CENTER, n);
     });    

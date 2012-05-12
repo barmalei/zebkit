@@ -23,9 +23,9 @@ pkg.PanelsDemo = new Class(pkg.DemoPan, function($) {
         this.$super();
         this.setLayout(new BorderLayout());
         var n = new Tabs(L.LEFT);
-		n.addPage("Split Panel", createSplitPan());
-        n.addPage("Border Panel", createTitledPan());
-        n.addPage("Scroll Panel", createScrollPan());
+		n.add("Split Panel", createSplitPan());
+        n.add("Border Panel", createTitledPan());
+        n.add("Scroll Panel", createScrollPan());
         this.add(L.CENTER, n);
     });    
 
@@ -110,7 +110,7 @@ pkg.PanelsDemo = new Class(pkg.DemoPan, function($) {
 		p3.setPSSize(220, 145);
 		p3.setBorder(new Border(3));
 		
-		var r = new JAVA.io.TextFileReader("demo/test.txt");
+		var r = new zebra.io.TextFileReader("demo/test.txt");
 		var p4_1 = new TextField(new zebra.data.Text(r.text));
 		p4 = new ScrollPan(p4_1);
 		p4.setPSSize(220, 145);

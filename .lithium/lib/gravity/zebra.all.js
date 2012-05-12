@@ -1,5 +1,5 @@
 lib/gravity/zebra.js
-lib/gravity/zebra/java.js
+lib/gravity/zebra/io.js
 lib/gravity/zebra/util.js
 lib/gravity/zebra/data.js
 lib/gravity/zebra/layout.js

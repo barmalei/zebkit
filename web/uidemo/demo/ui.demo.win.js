@@ -107,14 +107,14 @@ function createWindowComp(target) {
     });
     
     w.setSize(350, 300);
-    w.getRoot().setLayout(new BorderLayout());
+    w.root.setLayout(new BorderLayout());
     
     var tf = new zebra.ui.TextField(new zebra.data.Text(""));
     tf.setFont(new zebra.ui.Font("Arial","bold", 18));
     tf.setEditable(false);
     tf.setText("Drag and drop window\nby its title.\n\nResize window by\ndrag its right-bottom corner");
-    w.getRoot().add(L.CENTER, tf);
-    w.getRoot().padding(8);
+    w.root.add(L.CENTER, tf);
+    w.root.padding(8);
     
     var p = new Panel(new FlowLayout(L.CENTER, L.CENTER));
     var b = new zebra.ui.Button("Close");
@@ -122,7 +122,7 @@ function createWindowComp(target) {
     p.padding(8);
     p.add(b);
     
-    w.getRoot().add(L.BOTTOM, p);
+    w.root.add(L.BOTTOM, p);
 
 	b._.add(function actionPerformed(src, id, data) { target.hideWin(); });
     

@@ -350,10 +350,10 @@ function customCellAlignmentGrid() {
     for(var i = 0;i < data.rows; i ++ ) grid.setRowHeight(i, 90);
     for(var i = 0;i < data.cols; i ++ ) grid.setColWidth(i, 140);
     grid.toPreferredSize();
+    
     root.add(grid);
     return wrapWithPan(root);
 } 
-
 
 pkg.GridDemo = new Class(pkg.DemoPan, function($) {
     $(function() { 

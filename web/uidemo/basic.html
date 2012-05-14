@@ -66,17 +66,17 @@
 	   			nt.add("Tooltip & Win", new zebra.ui.demo.WinDemo());
 		//		nt.add("Layouts", new zebra.ui.demo.LayoutDemo());
 		//		nt.add("Grid", new zebra.ui.demo.GridDemo());
-//				nt.addPage("Designer", new zebra.ui.demo.DesignerDemo());
+//				nt.add("Designer", new zebra.ui.demo.DesignerDemo());
 			
-				// var p = new Panel(new zebra.layout.GridLayout(1000, 20));
-				// for(var i=0; i<2000; i++)  {
-				// 	p.add(new zebra.ui.TextField("Item " + i));
-				// }
-				// nt.addPage("Scroll", new zebra.ui.ScrollPan(p));
+				var p = new Panel(new zebra.layout.GridLayout(1000, 20));
+				for(var i=0; i<2000; i++)  {
+					p.add(new zebra.ui.TextField("Item " + i));
+				}
+				nt.add("Scroll", new zebra.ui.ScrollPan(p));
 			
 				root.add(L.CENTER, nt);
 		
-				desktop.setSize(700, 520);
+			//	desktop.setSize(700, 520);
 				
 				
 				desktop.repaint();

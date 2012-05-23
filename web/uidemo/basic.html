@@ -6,7 +6,7 @@
 	<META HTTP-EQUIV="Expires" CONTENT="-1">
 	<link rel="stylesheet" type="text/css" media="screen" href="index.css"/>
 	
-	<script src='../../lib/gravity/zebra.js' 	 type='text/javascript'></script>
+	<script src='../../lib/gravity/zebra.js?dsd' 	 type='text/javascript'></script>
     <script src='../../lib/gravity/zebra/io.js'    type='text/javascript'></script>
 
     <script src='../../lib/gravity/zebra/util.js' type='text/javascript'></script>
@@ -38,21 +38,15 @@
 
     <script type='text/javascript'>
         zebra.ready(
-			function() {
-				zebra.ui.load("demo/demo.properties");
-			},
-			
 			function()  { 
-	    		var L = zebra.layout, BorderLayout = L.BorderLayout, SimpleBorder = zebra.ui.view.SimpleBorder;
-	    		var Panel = zebra.ui.Panel, Text = zebra.data.Text, FlowLayout = L.FlowLayout;
-	    		var Label = zebra.ui.Label, ImagePan = zebra.ui.ImagePan;
+				eval(zebra.Import("ui", "layout", "ui.view"));
 
-	        	var desktop = new zebra.ui.zCanvas(document.getElementById("JAVA.awt.fm.canvas")), root = desktop.root;
+	        	var Text = zebra.data.Text, desktop = new zCanvas("myCanvas"), root = desktop.root;
 				root.padding(4);
 				root.setBorder(new SimpleBorder(1));
 				root.setLayout(new BorderLayout());
     		
-	   			var nt = new zebra.ui.Tabs(), prevSelected = -1;
+	   			var nt = new Tabs(), prevSelected = -1;
 				nt._.add(function (src, data) {
 						  if (prevSelected >= 0) src.get(prevSelected).activated && src.get(prevSelected).activated(false);
 						  src.get(data).activated && src.get(data).activated(true);
@@ -68,22 +62,13 @@
 		//		nt.add("Grid", new zebra.ui.demo.GridDemo());
 //				nt.add("Designer", new zebra.ui.demo.DesignerDemo());
 			
-				var p = new Panel(new zebra.layout.GridLayout(1000, 20));
-				for(var i=0; i<2000; i++)  {
-					p.add(new zebra.ui.TextField("Item " + i));
-				}
-				nt.add("Scroll", new zebra.ui.ScrollPan(p));
+				// var p = new Panel(new zebra.layout.GridLayout(1000, 20));
+				// for(var i=0; i<2000; i++)  {
+				// 	p.add(new TextField("Item " + i));
+				// }
+				// nt.add("Scroll", new ScrollPan(p));
 			
-				root.add(L.CENTER, nt);
-		
-		
-				zebra.out.print("Clip : " + window.clipdData);
-				zebra.out.print(window);
-				console.log(window);
-		
-			//	desktop.setSize(700, 520);
-				
-				
+				root.add(CENTER, nt);
 				desktop.repaint();
 			}
 		);
@@ -91,7 +76,7 @@
 </header>
 
 <body>
-	<canvas id="JAVA.awt.fm.canvas" 
+	<canvas id="myCanvas" 
 	        tabindex="0" 
 	        class="zebracanvas"
 	        width="1200" height="700"> 

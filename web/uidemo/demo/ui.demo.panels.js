@@ -110,8 +110,7 @@ pkg.PanelsDemo = new Class(pkg.DemoPan, function($) {
 		p3.setPSSize(220, 145);
 		p3.setBorder(new Border(3));
 		
-		var r = new zebra.io.TextFileReader("demo/test.txt");
-		var p4_1 = new TextField(new zebra.data.Text(r.text));
+		var p4_1 = new TextField(new zebra.data.Text(zebra.io.readTextFile("demo/test.txt")));
 		p4 = new ScrollPan(p4_1);
 		p4.setPSSize(220, 145);
 		p4.setBorder(new Border(3));

@@ -1,0 +1,29 @@
+<html>
+	<header>
+		<script src='http://zebra.gravitysoft.org/alpha/all.min.js' type='text/javascript'></script>
+
+		<script type='text/javascript'>
+		    zebra.ready(function() {
+				// import all classes, functions and cosntans from 
+				// zenra.ui, zebra.layout and zebra.ui.view packages
+				eval(zebra.Import("ui", "layout", "ui.view"));
+				
+				// create canvas
+			    var canvas = new zebra.ui.zCanvas(400, 400), root = canvas.root;
+				root.setBackground(Fill.lightGray);
+				root.setBorder(new SimpleBorder(SimpleBorder.SOLID));
+				root.setLayout(new BorderLayout(8,8));
+				root.padding(8);
+				var tf = new TextField("Hi ...\n", true);
+				root.add(TOP, createImageLabel("Title", zebra.ui.get("icon.excl")));
+				root.add(CENTER, tf);
+				root.add(BOTTOM, new Button("Clear"))._.add(function() {
+					tf.setText("");
+				});
+	 		});
+		</script>
+	</header>
+
+	<body>
+	</body>
+</html>

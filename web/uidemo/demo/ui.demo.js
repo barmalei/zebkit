@@ -46,4 +46,8 @@ pkg.DemoPan = new Class(Panel, function($) {
     $(function activated(b) {});    
 });
 
+zebra.ready(function() {
+    zebra.ui.$objects.load("demo/demo.properties");
+});
+
 })(zebra("ui.demo"), zebra.Class);

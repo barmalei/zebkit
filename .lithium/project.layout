@@ -11,17 +11,14 @@ PROJECT {
     SET("demo/demo/*.js") {
         CLASS(CompressJavaScript) {
 	        @output_dir = "demo"
-	        @options = [ "--nomunge"]
+	        @options = [ "--nomunge" ]
         }
     }
 	
-	COMMAND('minjs', FileSet) {
-	    CLASS(CompressJavaScript) {
-	        @output_dir = "web/uidemo"
-	        @options = [ "--nomunge"]
-	    }
-	}
-
-	ARTIFACT('lib/gravity/zebra.all.js', CombineJavaScript) 
+    ARTIFACT('lib/gravity/zebra/all.min.js', CompressedJavaScript) {
+        @options = [ "--nomunge" ]
+    }
+    
+	ARTIFACT('lib/gravity/zebra/all.js', CombinedJavaScript)
 }
 

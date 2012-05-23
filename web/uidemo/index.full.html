@@ -57,7 +57,7 @@
         zebra.ready(	
 			function()  { 
 				var theme_index = -1, palettes = [ "black", "default" ], s = window.location.href;
-				if (s.indexOf("?ui.palette=") > 0) {
+				if (s.indexOf("?theme.palette=") > 0) {
 					for(var i=0; i < palettes.length; i++) {
 						if (s.indexOf(palettes[i]) >= 0) {
 							theme_index = i;
@@ -65,7 +65,6 @@
 						}
 					}
 				}
-				
 				
 				if (theme_index < 0) theme_index = 1; 
 				document.getElementById("color-indicator").style.background = theme_index == 0 ? 'black' : '#CCCCCC';
@@ -76,7 +75,7 @@
 					if (i > 0) s = s.substring(0, i);
 					for(var i=0; i < se.options.length; i++) {
 						if (se.options[i].selected) { 
-							window.location = "index.html?ui.palette=" + palettes[i] + "&t=" + (new Date()).getTime();
+							window.location = "index.full.html?theme.palette=" + palettes[i] + "&t=" + (new Date()).getTime();
 							break;
 						}
 					}
@@ -84,41 +83,40 @@
 				if (se.attachEvent) se.attachEvent("onchange", cf);
 				else se.addEventListener("change", cf);
 			}, 
-			
-			function() { zebra.ui.load("demo/demo.properties"); },
-			
+						
 			function() {
-				var L = zebra.layout, BorderLayout = L.BorderLayout, Font = zebra.ui.Font, SimpleBorder = zebra.ui.view.SimpleBorder;
-	    		var Panel = zebra.ui.Panel, rgb = zebra.util.rgb, Text = zebra.data.Text, FlowLayout = L.FlowLayout;
-	    		var Label = zebra.ui.Label, ImagePan = zebra.ui.ImagePan;
+				eval(zebra.Import("ui", "layout", "ui.view"));
+				
+	    		var rgb = zebra.util.rgb, Text = zebra.data.Text;
 
-	        	desktop = new zebra.ui.zCanvas(document.getElementById("JAVA.awt.fm.canvas")), root = desktop.root;
+	        	desktop = new zCanvas("zCanvas");
+				var root = desktop.root;
 	    		root.padding(4);
 				root.setBorder(new SimpleBorder(1));
 				root.setLayout(new BorderLayout());
 
 				var p1 = new Panel(new BorderLayout(16,16));
 				p1.padding(8);
-				var titlePan = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.VERTICAL, 0));
-				var crPan    = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.VERTICAL, 4));
-				var logoPan  = new Panel(new FlowLayout(L.CENTER, L.TOP, L.HORIZONTAL, 12));
+				var titlePan = new Panel(new FlowLayout(CENTER, CENTER, VERTICAL, 0));
+				var crPan    = new Panel(new FlowLayout(CENTER, CENTER, VERTICAL, 4));
+				var logoPan  = new Panel(new FlowLayout(CENTER, TOP, HORIZONTAL, 12));
 				var g = new ImagePan(zebra.ui.get("logo_head"));
 				g.setBorder(new SimpleBorder(1));
 				logoPan.add(g);
 
-				p1.add(L.TOP, titlePan);
-				p1.add(L.CENTER, logoPan);
-				p1.add(L.BOTTOM, crPan);
-				title = new Label(new zebra.ui.view.ZebraTextRender("Zebra"));
+				p1.add(TOP, titlePan);
+				p1.add(CENTER, logoPan);
+				p1.add(BOTTOM, crPan);
+				title = new Label("Zebra");
 				title.setFont(new Font("Arial", 'bold', 74));
 				titlePan.add(title);
 				titlePan.add(new Label("(proof of concept pilot version)"));
-				var ll = new Label(new Text((new zebra.io.TextFileReader("demo/desc.txt")).text));
+				var ll = new Label(new Text(zebra.io.readTextFile("demo/desc.txt")));
 				ll.setFont(new Font("Arial", "Bold", 13));
 				logoPan.add(ll);
 				crPan.add(new Label("Copyright (c) Andrei Vishneuski 2012"));
 
-	   			var nt = new zebra.ui.Tabs(), prevSelected = -1;
+	   			var nt = new Tabs(), prevSelected = -1;
 				nt._.add(function (src, data) {
 						  if (prevSelected >= 0) src.get(prevSelected).activated && src.get(prevSelected).activated(false);
 						  src.get(data).activated && src.get(data).activated(true);
@@ -135,7 +133,7 @@
 				nt.add("Grid", new zebra.ui.demo.GridDemo());
 				nt.add("Designer", new zebra.ui.demo.DesignerDemo());
 
-				root.add(L.CENTER, nt);
+				root.add(CENTER, nt);
 				desktop.graph.save();
 				desktop.graph.rotate(0.3);
 				desktop.graph.scale(1.3, 1.3);
@@ -143,7 +141,7 @@
 			},
 			
 			function() {				
-				var canvas = document.getElementById("JAVA.awt.fm.canvas"), offx = 430, offy = 25, e = canvas;
+				var canvas = document.getElementById("zCanvas"), offx = 430, offy = 25, e = canvas;
 	        	do {
 	    			offx += parseInt(e.offsetLeft);
 	    			offy += parseInt(e.offsetTop);
@@ -310,7 +308,7 @@
 					<tr>
 						<td colspan="3" align="center" id="norm_demo_parent">
 							<!--[if (gte IE 9)|(!IE)]><!-->
-							<canvas id="JAVA.awt.fm.canvas" 
+							<canvas id="zCanvas" 
 							        tabindex="0" 
 							        class="zebracanvas"
 							        width="600" height="440"> 

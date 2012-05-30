@@ -18,7 +18,7 @@ var RasterLayout = zebra.layout.RasterLayout;
 var TextRender = zebra.ui.view.TextRender;
 var Fill = zebra.ui.view.Fill;
 var rgb = zebra.util.rgb;
-var TreeModelImpl = zebra.data.TreeModelImpl;
+var TreeModel = zebra.data.TreeModel;
 var Tree = zebra.ui.tree.Tree;
 var Item = zebra.data.Item;
 var Tabs = zebra.ui.Tabs;
@@ -251,7 +251,7 @@ function editableGrid() {
     }
 
     function makeTree(){
-        var root = new Item("root"), data = new TreeModelImpl(root);
+        var root = new Item("root"), data = new TreeModel(root);
         for(var i = 0;i < 2; i ++ ){
             var item = new Item("Item " + i);
             data.add(root, item);

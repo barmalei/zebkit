@@ -123,7 +123,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, function($) {
     function createListPan() {
         var p = new Panel(new ListLayout(8));
         p.setBackground(null);
-        var m = new zebra.data.List();
+        var m = new zebra.data.ListModel();
         m.addElement("Item 1");
         m.addElement("Item 2");
         m.addElement("Item 3");

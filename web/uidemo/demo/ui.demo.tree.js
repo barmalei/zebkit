@@ -17,7 +17,7 @@ var Tree = zebra.ui.tree.Tree;
 var Constraints = zebra.layout.Constraints;
 
 function makeTreeModel() {
-    var tm = new zebra.data.TreeModelImpl(new zebra.data.Item("Root"));
+    var tm = new zebra.data.TreeModel(new zebra.data.Item("Root"));
     tm.add(tm.root, new zebra.data.Item("Item 1"));
     tm.add(tm.root, new zebra.data.Item("Item 2"));
     var ch = new zebra.data.Item("Item 3")
@@ -39,11 +39,10 @@ function makeTreeModel2(items, deepness) {
         return items;
     } 
     
-    var tm = new zebra.data.TreeModelImpl(new zebra.data.Item("Root")), r = tm.root;
+    var tm = new zebra.data.TreeModel(new zebra.data.Item("Root")), r = tm.root;
     while((items = makeBranch(tm, r, items)) > 0);
 	return tm;
 }
-
 
 pkg.TreeDemo = new Class(pkg.DemoPan, function($) {
     $(function() {

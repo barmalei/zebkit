@@ -1,7 +1,13 @@
 ## Zebra alpha/prototype version
 
-This is the first version that demonstrates Zebra development concept: software engineering in WEB with minimal
-DOM/HTML stuff and maximal intuitive code representation. Take a look at "snippet" folder to have more information. 
+Zebra is JavaScript library that implements graceful and easy to use OOP concept together with rich set of UI 
+components. The UI components are developed based on HTML5 Canvas element. This approach differs from 
+traditional WEB UI, where user interface is built around HTML DOM and "colored" with CSS. Zebra UI components 
+are implemented from scratch as a number of widgets rendered on HTML Canvas. Everything, including UI component 
+rendering, in developers hands.
+
+This is the first stable version that demonstrates Zebra development concept: software engineering in WEB with minimal
+DOM/HTML stuff and maximal intuitive code representation. Take a look at "samples" folder to have more information. 
 
 ## Functionality
 
@@ -14,7 +20,7 @@ DOM/HTML stuff and maximal intuitive code representation. Take a look at "snippe
 
 ## Write first Zebra application
 
-**No zebra stuff on you PC has to be downloaded and deployed.** Start from writing simple html with a bunch of Zebra code:
+**No zebra stuff on you PC has to be downloaded and deployed.** Let's start writing simple Zebra html:
 
 		<html>
 			<header>
@@ -36,7 +42,7 @@ DOM/HTML stuff and maximal intuitive code representation. Take a look at "snippe
 			<body></body>
 		</html>
 
-Configuring Zebra UI to use "black" palette:
+To configure Zebra UI to use "black" palette do the following:
 
 		<html>
 			<header>
@@ -49,7 +55,7 @@ Configuring Zebra UI to use "black" palette:
 			<body></body>
 		</html>
 
-More complex example, Grid with 10000 cells:
+Take a look at more complex example, Grid with 10000 cells:
 
 		<html>
 			<header>
@@ -63,13 +69,13 @@ More complex example, Grid with 10000 cells:
 						// create Grid with 1000 rows and 10 columns
 						var grid = new Grid(1000, 10);
 						// make top grid header visible
-						grid.showTopHeader(true);
-						// fill grid cells
+						grid.showTopHeader();
+						// fill grid cells 
 						for(var i=0; i<grid.getGridRows()*grid.getGridCols(); i++) {
-							grid.put(i, " Cell [ " + i + " ] ");
+							grid.model.put(i, " Cell [ " + i + " ] ");
 						}
 						// add scrollable grid into canvas
-						root.add(CENTER, new ScrollPan(g));
+						root.add(CENTER, new ScrollPan(grid));
 						...
 			 		});
 				</script>
@@ -78,18 +84,15 @@ More complex example, Grid with 10000 cells:
 		</html>
 
 
-## Requirements 
+## Requirements and installation
 
-The package has no specific requirements. Java to JavaScript converter is the only part that is required third party 
-Treetop PEG parse. Find it on GITHUB: "https://github.com/nathansobo/treetop"
-
-## Installation 
-
-No particular installation steps are required, except installation of TreeTop PEG parser
+If you need Java to JavaScript converter than Treetop PEG parser has to be installed. 
+Find it on GITHUB: "https://github.com/nathansobo/treetop". Otherwise no any installation 
+activities are necessary.
 
 ## Run demos and samples
 
-   * Zebra HTML5 Canvas based UI:
+   * Zebra HTML5 Canvas UI Demo:
    	  * Open terminal
       * Go to zebra home directory
       * Run small python HTTP server on your PC:
@@ -99,8 +102,8 @@ No particular installation steps are required, except installation of TreeTop PE
       * Open "http://localhost:8080/web/uidemo"
       * Enjoy Zebra UI WEB Demo 
 
-	* Run Java to JavaScript converter sample:
-		* Pay attention TreeTop PEG parser has been installed 
+	* Java to JavaScript converter usage:
+		* Make sure TreeTop PEG parser has been installed 
 		* Open terminal
 		* Go to zebra home directory
 		* Run, for instance, the following command:

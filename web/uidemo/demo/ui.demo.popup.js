@@ -144,7 +144,7 @@ function createToolbar() {
 //    t.setView(c1, zebra.ui.Toolbar.PRESSED, ui.get("page")); 
     
     
-    // var m = new zebra.data.List();
+    // var m = new zebra.data.ListModel();
     // m.addElement("Item 1");
     // m.addElement("Item 2");
     // m.addElement("Item 3");

@@ -110,7 +110,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, function($) {
         p.setBackground(null);
         p.add(new Button("Button"));
 		var bt = new Button(new ImagePan(ui.get("butterfly")));
-		bt.setFocusMarker(null);
+		bt.setFocusMarkerView(null);
         p.add(bt);
         p.add(new Button(zebra.ui.createImageLabel("Image button", ui.get("butterfly"))));
         bt = new Button("Disabled button");
@@ -171,7 +171,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, function($) {
         p.add(cb);
         
         var cb2 = new zebra.ui.Combo();
-        cb2.setContentComponent(new zebra.ui.Combo.EditableContentPan());
+        cb2.setContentPan(new zebra.ui.Combo.EditableContentPan());
         cb2.list.model.addElement("Item 1");
         cb2.list.model.addElement("Item 2");
         cb2.list.model.addElement("Item 3");

@@ -66,6 +66,8 @@ Take a look at more complex example, Grid with 10000 cells:
 						eval(zebra.Import("ui", "layout", "ui.grid"));
 						// create Canvas
 					    var canvas = new zebra.ui.zCanvas(400, 400), root = canvas.root;
+                        // setup layout
+					    root.setLayout(new BorderLayout());
 						// create Grid with 1000 rows and 10 columns
 						var grid = new Grid(1000, 10);
 						// make top grid header visible

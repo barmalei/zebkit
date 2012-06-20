@@ -78,7 +78,6 @@ Take a look at more complex example, Grid with 10000 cells:
 						}
 						// add scrollable grid into canvas
 						root.add(CENTER, new ScrollPan(grid));
-						...
 			 		});
 				</script>
 			</header>

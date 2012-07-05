@@ -16,14 +16,11 @@ end
 $HTML_TEMPLATE = "
 <html>
 <header>
-    <script src='zebra.js' type='text/javascript'></script>
-    <script src='browser.js' type='text/javascript'></script>
-    <script src='java.js' type='text/javascript'></script>
+    <script src='http://zebra.gravitysoft.org/zebra/easyoop.js' type='text/javascript'></script>
     
     <script>
 (function() {
         var test = zebra.namespace('test');
-        eval(JAVA.Import('lang'));
         
         $code
 })();

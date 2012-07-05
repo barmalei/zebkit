@@ -4,10 +4,7 @@ require 'gravity/zebra/j2js/converter'
 $BASE_PATH = File.dirname(__FILE__)
 
 $TEST_CONTEXT="
-load('gravity/zebra.js');
-load('gravity/browser.js');
-load('gravity/zebra/java.js');
-eval(JAVA.Import('lang'));
+load('gravity/zebra/easyoop.js');
 
 var test = zebra.namespace('test');
 "
@@ -15,9 +12,7 @@ var test = zebra.namespace('test');
 $HTML_TEMPLATE = "
 <html>
 <header>
-    <script src='zebra.js' type='text/javascript'></script>
-    <script src='browser.js' type='text/javascript'></script>
-    <script src='java.js' type='text/javascript'></script>
+    <script src='http://repo.gravitysoft.org/zebra/easyoop.js' type='text/javascript'></script>
     
     <script>
 (function() {

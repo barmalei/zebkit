@@ -1,4 +1,4 @@
-lib/gravity/zebra.js
+lib/gravity/zebra/easyoop.js
 lib/gravity/zebra/io.js
 lib/gravity/zebra/util.js
 lib/gravity/zebra/data.js

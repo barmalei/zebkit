@@ -14,11 +14,30 @@ PROJECT {
 	        @options = [ "--nomunge" ]
         }
     }
-	
-    ARTIFACT('lib/gravity/zebra/all.min.js', CompressedJavaScript) {
+
+    ARTIFACT('lib/gravity/zebra/easyoop.min.js', CompressedJavaScript) {
+        @source = "lib/gravity/zebra/easyoop.js"
         @options = [ "--nomunge" ]
     }
-    
-	ARTIFACT('lib/gravity/zebra/all.js', CombinedJavaScript)
+
+    ARTIFACT('lib/gravity/zebra/all.min.js', CompressedJavaScript) {
+        @source = "lib/gravity/zebra/all.js"
+        @options = [ "--nomunge" ]
+        REQUIRE @source
+    }
+
+    ARTIFACT('web/uidemo/demo/demo.all.min.js', CompressedJavaScript) {
+        @source = "web/uidemo/demo/demo.all.js"
+        @options = [ "--nomunge" ]
+        REQUIRE @source
+    }
+
+	SET('lib/gravity/zebra/*.js') {
+	    CLASS(CombinedJavaScript)
+	}
+
+	SET('web/uidemo/demo/*.js') {
+	    CLASS(CombinedJavaScript)
+	}
 }
 

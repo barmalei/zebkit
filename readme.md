@@ -24,7 +24,7 @@ DOM/HTML stuff and maximal intuitive code representation. Take a look at "sample
 
 		<html>
 			<header>
-				<script src='http://zebra.gravitysoft.org/alpha/all.min.js' type='text/javascript'></script>
+				<script src='http://repo.gravitysoft.org/zebra/all.min.js' type='text/javascript'></script>
 				<script type='text/javascript'>
 				    zebra.ready(function() {
 						// import classes and variables from "ui" and "layout" packages in local space
@@ -46,7 +46,7 @@ To configure Zebra UI to use "black" palette do the following:
 
 		<html>
 			<header>
-				<script src='http://zebra.gravitysoft.org/alpha/all.min.js' type='text/javascript'></script>
+				<script src='http://repo.gravitysoft.org/zebra/all.min.js' type='text/javascript'></script>
 				<script type='text/javascript'>
 					zebra()["theme.palette"] = "black";
 					...
@@ -59,11 +59,12 @@ Take a look at more complex example, Grid with 10000 cells:
 
 		<html>
 			<header>
-				<script src='http://zebra.gravitysoft.org/alpha/all.min.js' type='text/javascript'></script>
+				<script src='http://repo.gravitysoft.org/zebra/all.min.js' type='text/javascript'></script>
 				<script type='text/javascript'>
 				    zebra.ready(function() {
 						// import classes and variables from "ui", "ui.grid" and "layout" packages in local space
 						eval(zebra.Import("ui", "layout", "ui.grid"));
+						eval(zebra.Import("ui", "layout", "ui.editors"));
 						// create Canvas
 					    var canvas = new zebra.ui.zCanvas(400, 400), root = canvas.root;
                         // setup layout

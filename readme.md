@@ -99,7 +99,7 @@ activities are necessary.
       * Go to zebra home directory
       * Run small python HTTP server on your PC:
 
-     			$ python startup.py
+    $ python startup.py
 
       * Open "http://localhost:8080/web/uidemo"
       * Enjoy Zebra UI WEB Demo
@@ -110,7 +110,7 @@ activities are necessary.
       * Go to zebra home directory
       * Run, for instance, the following command:
 
-	$ ruby -Ilib samples/j2js/j2js.converter.rb  samples/j2js/ReadFile.java
+    $ ruby -Ilib samples/j2js/j2js.converter.rb  samples/j2js/ReadFile.java
 
       * Find generated "ReadFile.java.js" and "ReadFile.java.html" files in current directory
 

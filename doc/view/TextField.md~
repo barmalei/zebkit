@@ -1,0 +1,8 @@
+# TextField
+
+
+## Methods
+
+### setText(string)
+
+```obj.setText("the new text")```

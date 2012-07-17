@@ -31,7 +31,7 @@ class RequestHandler(DocXMLRPCRequestHandler, SimpleHTTPRequestHandler):
 def START():
     host = "localhost"
     host2 = "192.168.178.14"
-    host = "192.168.16.20"
+    hos2t = "192.168.16.20"
     print("Listen host:" + host)
     server = DocXMLRPCServer((host, 8080), RequestHandler)
     server.serve_forever()

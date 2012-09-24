@@ -85,6 +85,7 @@ zebra.io.JRPC.invoke(url, "method1")(param1, param2, function(res) {
 
 **No zebra stuff on you PC has to be downloaded and deployed.** Let's start writing simple Zebra html:
 
+```html
 		<html>
 			<header>
 				<script src='http://repo.gravitysoft.org/zebra/all.min.js' type='text/javascript'></script>
@@ -104,9 +105,11 @@ zebra.io.JRPC.invoke(url, "method1")(param1, param2, function(res) {
 			</header>
 			<body></body>
 		</html>
+```
 
 To configure Zebra UI to use "black" palette do the following:
 
+```html
 		<html>
 			<header>
 				<script src='http://repo.gravitysoft.org/zebra/all.min.js' type='text/javascript'></script>
@@ -117,9 +120,11 @@ To configure Zebra UI to use "black" palette do the following:
 			</header>
 			<body></body>
 		</html>
+```
 
 Take a look at more complex example, Grid with 10000 cells:
 
+```html
 		<html>
 			<header>
 				<script src='http://repo.gravitysoft.org/zebra/all.min.js' type='text/javascript'></script>
@@ -147,7 +152,7 @@ Take a look at more complex example, Grid with 10000 cells:
 			</header>
 			<body></body>
 		</html>
-
+```
 
 ### Requirements and installation
 

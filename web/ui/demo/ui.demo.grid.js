@@ -48,14 +48,12 @@ pkg.GridBooleanEditor = new Class([
         function editingCanceled(row,col,data,editor){}
 ]);
 
-var colors = [ [rgb.white, rgb.lightGray, rgb.white],  
-               [rgb.orange, rgb.black, rgb.orange], 
+var colors = [ [rgb.white, rgb.lightGray, rgb.white],
+               [rgb.orange, rgb.black, rgb.orange],
                [rgb.white, rgb.lightGray, rgb.white] ];
 
-var ColumnsAlignmentProvider = new Class(DefViews, [    
-    function (){ this.$super(); },
-    
-    function getView(row,col,data){ 
+var ColumnsAlignmentProvider = new Class(DefViews, [
+    function getView(row,col,data){
         var tf = new TextRender(data);
         if (row == 1 && col == 1) {
             tf.setDefBoldFont();
@@ -79,8 +77,8 @@ var ColumnsAlignmentProvider = new Class(DefViews, [
             else if(row == 2) return L.BOTTOM;
         return this.$super(this.getYAlignment,row, col);
     },
-    
-    function getCellColor(row,col) { 
+
+    function getCellColor(row,col) {
         return colors[row][col];
     }
 ]);
@@ -91,7 +89,7 @@ var CustomGridEditor = new Class(DefEditors, [
             var ExtEditor = new Class(Panel, zebra.ui.ExternalEditor, [
                 function() {
                     this.$super(new BorderLayout());
-                    
+
                     var $this = this;
 
                     this.accepted = false;
@@ -100,46 +98,46 @@ var CustomGridEditor = new Class(DefEditors, [
                     this.list.padding(6);
                     this.list.views[0] = null;
                     this.add(L.CENTER, this.list);
-                    
+
                     var controls = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.HORIZONTAL, 8));
                     controls.setBackground(null);
                     var cancelLink = new Link("<cancel>");
                     controls.add(cancelLink);
-                    controls.padding(0, 0, 4, 0);
+                    controls.paddings(0, 0, 4, 0);
                     cancelLink._.add(function() {
                         $this.accepted = false;
                         $this.parent.remove($this);
                     });
-            
+
                     this.list._.add(function() {
                         $this.accepted = true;
                         $this.parent.remove($this);
                     });
-                    
-                    this.setBorder(new zebra.ui.view.SimpleBorder(1, rgb.white, 2));
+
+                    this.setBorder(new zebra.ui.view.Border(1, rgb.white, 2));
                     this.setBackground(new Fill(zebra.ui.get("col.gray6")));
-                    
-                    
+
+
                     this.add(L.BOTTOM, controls);
                 },
-                
+
                 function fire(t, prev) {
                     this.$super(t, prev);
                     this.parent.remove(this);
                 },
-                
+
                 function isAccepted() { return this.accepted; }
             ]);
-            
+
             this.extWin = new ExtEditor();
             for(var i = 0; i < IMAGES.length; i++) {
                 var im = new ImagePan(zebra.ui.get(IMAGES[i]));
                 im.padding(2);
-                this.extWin.list.add(im); 
+                this.extWin.list.add(im);
             }
             this.extWin.toPreferredSize();
         },
-    
+
         function getEditor(t, row,col,o){
             if(col == 0){
                 var cbox = new Checkbox(null);
@@ -153,14 +151,14 @@ var CustomGridEditor = new Class(DefEditors, [
                     list.model.addElement("Item 2");
                     list.model.addElement("Item 3");
                     for(var i = 0;i < list.model.elementsCount(); i ++ ){
-                        if (list.model.elementAt(i) == o) { 
+                        if (list.model.elementAt(i) == o) {
                             list.select(i);
                             break;
                         }
                     }
                     return combo;
                 }
-                else { 
+                else {
                     if (col == 3) return this.extWin;
                 }
                 return this.$super(t, row, col, o);
@@ -170,14 +168,13 @@ var CustomGridEditor = new Class(DefEditors, [
             if(col == 0) return editor.getState() ? "on" : "off";
             else
                 if(col == 1) return editor.list.model.elementAt(editor.list.selectedIndex);
-                else 
+                else
                     if (col == 3) return editor.list.selectedIndex;
             return this.$super(this.fetchEditedValue,row, col, data, editor);
         }
 ]);
 
 var CompViewProvider = new Class(DefViews,[
-    function (){ this.$super(); },
     function getView(row,col,o){
         return row == 2 ? new CompRender(o) : this.$super(row, col, o);
     }
@@ -202,37 +199,36 @@ var CompEditorProvider = new Class(DefEditors, [
         return action == START_EDITING;
     }
 ]);
-        
+
 
 function longGrid() {
    // var m = new zebra.data.Matrix(10000,20);
     var m = new zebra.data.Matrix(100,10);
 	for(var i=0; i<m.rows*m.cols; i++) { m.put(i, "Cell [" + i +"]");  }
-	
+
 	var g = new Grid(m);
     g.setViewProvider(new DefViews([
-        function() { this.$super(); },
-        function getCellColor(row,col) { 
+        function getCellColor(row,col) {
             return (row % 2 == 0) ? ui.get("cell.bg1") : ui.get("cell.bg2") ;
         }
     ]));
-	
+
 	var gp1 = new GridCaption(g);
 	for(var i=0; i < 10; i++) gp1.putTitle(i, "Title " + i);
     g.add(Grid.TOP_CAPTION_EL, gp1);
-	
+
 	var gp2 = new GridCaption(g);
 	for(var i=0; i < 100; i++) gp2.putTitle(i, " " + i + " ");
     g.add(Grid.LEFT_CAPTION_EL, gp2);
-	
+
 	var corner = new Panel();
 	corner.setBorder(ui.get("gcap.brv"));
 	corner.setBackground(ui.get("gcap.bg"));
 	g.add(Grid.STUB_EL, corner);
-	var p = new zebra.ui.ScrollPan(g); 
+	var p = new zebra.ui.ScrollPan(g);
 	p.padding(4);
 	return p;
-} 
+}
 
 function editableGrid() {
     function makeSubgrid(){
@@ -268,10 +264,10 @@ function editableGrid() {
         book.add("Page 2", new Panel());
 //        book.add("Page 3", new Panel());
         var ps = book.getPreferredSize();
-        book.setPSSize(ps.width, 130);
+        book.setPreferredSize(ps.width, 130);
         return book;
     }
-    
+
     function compGrid(){
         var data = new Matrix(1, 3);
         for(var i = 0;i < 3; i++){
@@ -292,48 +288,47 @@ function editableGrid() {
         grid.usePsMetric(true);
         return grid;
     }
-    
+
     var onView = zebra.ui.get("on"), offView = zebra.ui.get("off"),  m = new Matrix(4,4);
-    var d = [ "on", "Item 1", "text 1", "0", 
-              "off", "Item 1", "text 2", "0", 
+    var d = [ "on", "Item 1", "text 1", "0",
+              "off", "Item 1", "text 2", "0",
               "off", "Item 2", "text 3", "1",
               "on", "Item 3", "text 4", "2",
               "on", "Item 1", "text 5",  "1" ];
     var t = ["Checkbox\nas editor", "Drop down\nas editor", "Text field\nas editor", "External Window\nas editor"];
-    
+
 	for(var i=0; i < (m.rows * m.cols); i++) { m.put(i, d[i]);  }
-	
+
 	var g = new Grid(m);
-    g.setViewProvider(new DefViews(function($) {
-        $(function() { this.$super(); });
-        $(function getView(row, col, data) { 
+    g.setViewProvider(new DefViews([
+        function getView(row, col, data) {
             if (col == 0) return (data == "on") ? onView : offView;
             else {
                 if (col == 3) return zebra.ui.get("s" + IMAGES[data]);
             }
             return this.$super(row, col, data);
-        });
-    }));
-    
+        }
+    ]));
+
 	g.setEditorProvider(new CustomGridEditor());
-	
+
 	var gp1 = new GridCaption(g);
 	gp1.isResizable = false;
 	for(var i=0; i < m.cols; i++) gp1.putTitle(i, t[i]);
 	g.add(Grid.TOP_CAPTION_EL, gp1);
-	
+
     // for(var i = 0;i < m.rows; i ++ ) g.setRowHeight(i, 40);
     for(var i = 0;i < m.cols; i ++ ) g.setColWidth(i, 110);
-	
+
 	return wrapWithPan(g, compGrid());
-} 
+}
 
 function customCellAlignmentGrid() {
     var d = [ "Top-Left\nAlignment", "Top-Center\nAlignment", "Top-Right\nAlignment",
-              "Center-Left\nAlignment", "Center-Center\nAlignment", "Center-Right\nAlignment", 
+              "Center-Left\nAlignment", "Center-Center\nAlignment", "Center-Right\nAlignment",
               "Bottom-Left\nAlignment", "Bottom-Center\nAlignment", "Bottom-Right\nAlignment"];
     var titles = [ "Left Aligned", new CompRender(zebra.ui.createImageLabel("Center", zebra.ui.get("ringtone"))), "Right Aligned"];
-    
+
     var root = new Panel(new RasterLayout(L.USE_PS_SIZE)), data = new Matrix(3, 3);
     for(var i = 0;i < data.rows*data.cols; i ++ ){
         data.put(i, d[i]);
@@ -343,31 +338,31 @@ function customCellAlignmentGrid() {
     caption.setTitleProps(0, L.LEFT, L.CENTER, null);
     caption.setTitleProps(2, L.RIGHT, L.CENTER, null);
     caption.isResizable = false;
-    
+
     grid.add(Grid.TOP_CAPTION_EL, caption);
     grid.setViewProvider(new ColumnsAlignmentProvider());
     grid.setLocation(20, 20);
     for(var i = 0;i < data.rows; i ++ ) grid.setRowHeight(i, 90);
     for(var i = 0;i < data.cols; i ++ ) grid.setColWidth(i, 140);
     grid.toPreferredSize();
-    
+
     root.add(grid);
     return wrapWithPan(root);
-} 
+}
 
 pkg.GridDemo = new Class(pkg.DemoPan, function($) {
-    $(function() { 
-        this.$super(); 
+    $(function() {
+        this.$super();
         this.setLayout(new L.BorderLayout());
         this.padding(6);
-        
+
         var n = new Tabs(L.LEFT);
         n.add("1000 cells", longGrid());
         n.add("Grid", customCellAlignmentGrid());
         n.add("Editable grid", editableGrid());
-        
+
 		this.add(L.CENTER, n);
-    });    
+    });
 });
 
 })(zebra.ui.demo, zebra.Class, zebra.ui);

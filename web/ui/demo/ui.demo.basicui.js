@@ -8,7 +8,6 @@ var Button = zebra.ui.Button;
 var FlowLayout = zebra.layout.FlowLayout; 
 var GridLayout = zebra.layout.GridLayout; 
 var ListLayout = zebra.layout.ListLayout; 
-var SimpleBorder = zebra.ui.view.SimpleBorder; 
 var Gradient = zebra.ui.view.Gradient; 
 var L = zebra.layout; 
 var PercentLayout = zebra.layout.PercentLayout; 
@@ -58,13 +57,13 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, function($) {
         var p = new Panel(new ListLayout(6));
         p.setBackground(null);
         var tf = new TextField();
-        tf.setPSSize(100, -1);
+        tf.setPreferredSize(100, -1);
         p.add(pkg.createLabedComponent("Text field:", tf));
         tf = new TextField(new zebra.data.SingleLineTxt("dsd", 5));
-        tf.setPSSize(100, -1);
+        tf.setPreferredSize(100, -1);
         p.add(pkg.createLabedComponent("Fixed size(5):", tf));
         tf = new TextField(new zebra.ui.view.PasswordText());
-        tf.setPSSize(100, -1);
+        tf.setPreferredSize(100, -1);
         p.add(pkg.createLabedComponent("Password field:", tf));
         return pkg.createBorderPan("Text fields", p);
     }
@@ -73,7 +72,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, function($) {
         var p = new Panel(new L.BorderLayout());
         p.setBackground(null);
         var tf = new TextField(new zebra.data.Text("Multiline\ntext field\ncomponents"));
-        tf.setPSSize(150, 70);
+        tf.setPreferredSize(150, 70);
         p.add(L.CENTER, tf);
         return pkg.createBorderPan("Multilines text field", p);
     }
@@ -82,7 +81,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, function($) {
         var p = new Panel(new L.BorderLayout());
         p.setBackground(null);
         var sl = new Slider();
-        sl.setPSSize(90, -1);
+        sl.setPreferredSize(90, -1);
         p.add(L.CENTER, sl);
         return pkg.createBorderPan("Slider", p);
     }
@@ -91,14 +90,14 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, function($) {
         var p = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.VERTICAL, 16));
         p.setBackground(null);
         var pr1 = new Progress();
-        pr1.setPSSize(130, -1);
+        pr1.setPreferredSize(130, -1);
         pr1.setMaxValue(10);
         pr1.setValue(3);
         var pr2 = new Progress();
         pr2.setMaxValue(4);
         pr2.setValue(1);
         pr2.setView(Progress.BUNDLE_VIEW, new Gradient(rgb.lightGray, rgb.darkGray, L.HORIZONTAL));
-        pr2.setPSSize(130, 12);
+        pr2.setPreferredSize(130, 12);
         pr2.setBundleWidth(70);
         p.add(pr1);
         p.add(pr2);
@@ -176,7 +175,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, function($) {
         cb2.list.model.addElement("Item 2");
         cb2.list.model.addElement("Item 3");
         var ps= cb2.getPreferredSize();
-        cb2.setPSSize(ps.width, -1);
+        cb2.setPreferredSize(ps.width, -1);
         p.add(cb2);
 
         var l = new CompList(true);

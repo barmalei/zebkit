@@ -1,9 +1,10 @@
 
+
 (function(pkg, Class) {
 
 var Panel = zebra.ui.Panel; 
 var Label = zebra.ui.Label; 
-var SimpleBorder = zebra.ui.view.SimpleBorder; 
+var Border = zebra.ui.view.Border; 
 var BorderPan = zebra.ui.BorderPan; 
 var L = zebra.layout; 
 
@@ -12,7 +13,7 @@ pkg.createLabel = function (txt, color) {
     var l = new Label(txt.indexOf("\n") >= 0 ? new zebra.data.Text(txt) : txt);
     l.setForeground(color);
     l.setFont(zebra.ui.Font.defaultBold);
-    l.setBorder(new SimpleBorder(1, zebra.util.rgb.gray));
+    l.setBorder(new Border(1, zebra.util.rgb.gray));
     l.padding(4);
     return l;
 }
@@ -23,7 +24,7 @@ pkg.createBorderPan = function (txt, content, w, h) {
     content.padding(4);
     w = w || -1; 
     h = h || -1; 
-    bp.setPSSize(w, h);
+    bp.setPreferredSize(w, h);
     return bp;
 }
 

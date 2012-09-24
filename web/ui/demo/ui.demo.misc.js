@@ -9,7 +9,7 @@ var GridLayout = zebra.layout.GridLayout;
 var BorderPan = zebra.ui.BorderPan; 
 var Fill = zebra.ui.view.Fill; 
 var ScrollPan = zebra.ui.ScrollPan; 
-var SimpleBorder = zebra.ui.view.SimpleBorder; 
+var Border = zebra.ui.view.Border; 
 var Border = zebra.ui.view.Border; 
 var Tree = zebra.ui.tree.Tree;
 var Constraints = zebra.layout.Constraints;
@@ -26,16 +26,16 @@ pkg.MiscDemo = new Class(pkg.DemoPan, function($) {
     
         var extPan = new Panel(new zebra.layout.ListLayout());
         var ext1Content = new Panel();
-        ext1Content.setPSSize(-1, 80);
+        ext1Content.setPreferredSize(-1, 80);
         ext1Content.setBackground(Fill.darkGray);
-        ext1Content.setBorder(new SimpleBorder(1));
+        ext1Content.setBorder(new Border(1));
         var ext2Content = new Panel();
-        ext2Content.setPSSize(-1, 80);
-        ext2Content.setBorder(new SimpleBorder(1));
+        ext2Content.setPreferredSize(-1, 80);
+        ext2Content.setBorder(new Border(1));
         ext2Content.setBackground(Fill.gray);
         var ext3Content = new Panel();
-        ext3Content.setPSSize(-1, 80);
-        ext3Content.setBorder(new SimpleBorder(1));
+        ext3Content.setPreferredSize(-1, 80);
+        ext3Content.setBorder(new Border(1));
         ext3Content.setBackground(Fill.lightGray);
         
         var ext1 = new zebra.ui.Extender(ext1Content, "Panel 1");

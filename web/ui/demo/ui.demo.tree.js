@@ -10,7 +10,6 @@ var GridLayout = zebra.layout.GridLayout;
 var BorderPan = zebra.ui.BorderPan; 
 var BorderLayout = zebra.layout.BorderLayout; 
 var ScrollPan = zebra.ui.ScrollPan; 
-var SimpleBorder = zebra.ui.view.SimpleBorder; 
 var Border = zebra.ui.view.Border; 
 var L = zebra.layout; 
 var Tree = zebra.ui.tree.Tree;
@@ -53,7 +52,7 @@ pkg.TreeDemo = new Class(pkg.DemoPan, function($) {
 
         var t1 = new Tree(makeTreeModel()), p1 = new BorderPan("Standard tree", t1);
 		p1.setGaps(6,6);
-		p1.setPSSize(180, 140);
+		p1.setPreferredSize(180, 140);
 		t1.select(t1.model.root);
       	
       	var t2 = new Tree(makeTreeModel()), p2 = new BorderPan("Custom view tree", t2);
@@ -74,18 +73,18 @@ pkg.TreeDemo = new Class(pkg.DemoPan, function($) {
 		]));
 		t2.select(t2.model.root);
 		p2.setGaps(6,6);
-		p2.setPSSize(180, 140);
+		p2.setPreferredSize(180, 140);
 
       	var t3 = new Tree(makeTreeModel()), p3 = new BorderPan("Editable tree(use enter)", new ScrollPan(t3));
         t3.select(t3.model.root);
 		t3.setEditorProvider(new zebra.ui.tree.DefEditors());
 		p3.setGaps(6,6);
-		p3.setPSSize(180, 140);
+		p3.setPreferredSize(180, 140);
 
 
       	var t4 = new Tree(makeTreeModel2(1000, 30)), p4 = new BorderPan("Long tree", new ScrollPan(t4));
         t4.select(t4.model.root);
-        p4.setPSSize(-1, 210);
+        p4.setPreferredSize(-1, 210);
 	    this.add(L.BOTTOM, p4);
         
         // var t4v = new Class(zebra.ui.view.TextRender, [

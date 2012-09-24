@@ -9,7 +9,6 @@ var FlowLayout = zebra.layout.FlowLayout;
 var GridLayout = zebra.layout.GridLayout; 
 var BorderPan = zebra.ui.BorderPan; 
 var ScrollPan = zebra.ui.ScrollPan; 
-var SimpleBorder = zebra.ui.view.SimpleBorder; 
 var Border = zebra.ui.view.Border; 
 var L = zebra.layout; 
 var Constraints = zebra.layout.Constraints;

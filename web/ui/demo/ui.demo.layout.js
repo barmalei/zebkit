@@ -8,7 +8,6 @@ var BorderLayout = zebra.layout.BorderLayout;
 var FlowLayout = zebra.layout.FlowLayout; 
 var GridLayout = zebra.layout.GridLayout; 
 var ListLayout = zebra.layout.ListLayout; 
-var SimpleBorder = zebra.ui.view.SimpleBorder; 
 var L = zebra.layout; 
 var PercentLayout = zebra.layout.PercentLayout; 
 var Tabs = zebra.ui.Tabs;
@@ -67,8 +66,8 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, function($) {
 
         var p2 = new Panel(new PercentLayout());
         var ps = fl_5.getPreferredSize();
-        fl_4.setPSSize(-1, ps.height + 40);
-        fl_5.setPSSize(-1, ps.height + 40);
+        fl_4.setPreferredSize(-1, ps.height + 40);
+        fl_5.setPreferredSize(-1, ps.height + 40);
         
         p2.add(50, pkg.createBorderPan("Centered aligned, vertical", fl_4));
         p2.add(50, pkg.createBorderPan("Right-bottom aligned, vertical", fl_5));
@@ -106,7 +105,7 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, function($) {
         pl_1.add(50, pkg.createLabel("Takes 50%"));
         pl_1.add(20, pkg.createLabel("Takes 20%"));
         var pl_2 = new Panel(new PercentLayout(L.VERTICAL, 4));
-        pl_2.setPSSize(-1, 220);
+        pl_2.setPreferredSize(-1, 220);
         pl_2.add(30, pkg.createLabel("Takes 30%"));
         pl_2.add(50, pkg.createLabel("Takes 50%"));
         pl_2.add(20, pkg.createLabel("Takes 20%"));
@@ -119,14 +118,14 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, function($) {
         function createLabel(lab, sx, sy) {
             var l = pkg.createLabel(lab);
             var p = l.getPreferredSize();
-            l.setPSSize(p.width + Math.floor((p.width*sx)/100), 
+            l.setPreferredSize(p.width + Math.floor((p.width*sx)/100), 
                         p.height + Math.floor((p.height*sy)/100));
             return l;
         }
 
         var p = new Panel(new FlowLayout(L.CENTER, L.CENTER));
         p.padding(4);
-        p.setPSSize(200,200);
+        p.setPreferredSize(200,200);
 
         var p1 = new Panel(new GridLayout(2, 2));
         

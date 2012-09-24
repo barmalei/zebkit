@@ -26,15 +26,15 @@ DOM/HTML stuff and maximal intuitive code representation. Take a look at "sample
 
 #### POST and GET requests:
         
-        ```js
-        // get, post data
-        var gdata = zebra.io.GET(url);
-        var pdata = zebra.io.POST(url, "request");
+```js
+// get, post data
+var gdata = zebra.io.GET(url);
+var pdata = zebra.io.POST(url, "request");
 
-        // async GET/POST
-        zebra.io.GET(url, function(data, requests) {
-            ...
-        })
+// async GET/POST
+zebra.io.GET(url, function(data, requests) {
+    ...
+})
 
 ####  Interact to remote XML-RPC server:
 

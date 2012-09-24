@@ -22,7 +22,6 @@ DOM/HTML stuff and maximal intuitive code representation. Take a look at "sample
 
 ### NEW IO API: HTTP POST/GET, JSON-RPC or XML-RPC
 
-----
 
 #### POST and GET requests:
         
@@ -35,49 +34,51 @@ var pdata = zebra.io.POST(url, "request");
 zebra.io.GET(url, function(data, requests) {
     ...
 })
+```
 
 ####  Interact to remote XML-RPC server:
 
-        ```js
-        // XML-RPC server
-        var s = new zebra.io.XRPC(url, [ "method1", "method2", "method3" ]);
+```js
+// XML-RPC server
+var s = new zebra.io.XRPC(url, [ "method1", "method2", "method3" ]);
 
-        // call remote methods
-        s.method1(p1, p2);
-        var res = s.method2(p2);
+// call remote methods
+s.method1(p1, p2);
+var res = s.method2(p2);
 
-        // async remote method call
-        s.method1(p1, p2, function(res) {
-            ...
-        });
+// async remote method call
+s.method1(p1, p2, function(res) {
+    ...
+});
+```
 
 ####  Interact to remote JSON-RPC server
        
-        ```js
-        // JSON-RPC server
-        var s = new zebra.io.JRPC(url, [ "method1", "method2", "method3" ]);
+```js
+// JSON-RPC server
+var s = new zebra.io.JRPC(url, [ "method1", "method2", "method3" ]);
 
-        // call remote methods
-        s.method1(p1, p2);
-        var res = s.method2(p2);
+// call remote methods
+s.method1(p1, p2);
+var res = s.method2(p2);
 
-        // async remote method call
-        s.method1(p1, p2, function(res) {
-            ...
-        });
+// async remote method call
+s.method1(p1, p2, function(res) {
+    ...
+});
+```
 
 #### Shortcuts to call remote services:
 
-       ```js
-        // JSON-RPC remote method execution
-        var res = zebra.io.JRPC.invoke(url, "method1")(param1, param2);
+```js
+// JSON-RPC remote method execution
+var res = zebra.io.JRPC.invoke(url, "method1")(param1, param2);
 
-        // Async JSON-RPC remote method execution
-        zebra.io.JRPC.invoke(url, "method1")(param1, param2, function(res) {
-          ....
-        });
-
----
+// Async JSON-RPC remote method execution
+zebra.io.JRPC.invoke(url, "method1")(param1, param2, function(res) {
+  ....
+});
+```
 
 
 ### Write first Zebra application

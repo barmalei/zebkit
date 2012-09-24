@@ -1,4 +1,6 @@
-## Zebra alpha/prototype version
+
+## Three steps from prototype to ALPHA! 
+## Step I
 
 Zebra is JavaScript library that implements graceful and easy to use OOP concept together with rich set of UI
 components. The UI components are developed based on HTML5 Canvas element. This approach differs from
@@ -9,16 +11,76 @@ rendering, in developers hands.
 This is the first stable version that demonstrates Zebra development concept: software engineering in WEB with minimal
 DOM/HTML stuff and maximal intuitive code representation. Take a look at "samples" folder to have more information.
 
-## Functionality
+### Functionality
 
    * [+] Zebra Java to JavaScript converter Ruby code
    * [+] Zebra easy OOP concept JavaScript implementation
    * [+] Zebra HTML5 Canvas based UI
-   * [-] Zebra JS XML
-   * [-] Zebra XML-RPC DataBus XML
+   * [+] Zebra IO  GET/POST XML-RPC JSON-RPC Service, binary data
    * [-] Zebra XML UI Form builder
 
-## Write first Zebra application
+
+### NEW IO API: HTTP POST/GET, JSON-RPC or XML-RPC
+
+----
+
+#### POST and GET requests:
+        
+        ```js
+        // get, post data
+        var gdata = zebra.io.GET(url);
+        var pdata = zebra.io.POST(url, "request");
+
+        // async GET/POST
+        zebra.io.GET(url, function(data, requests) {
+            ...
+        })
+
+####  Interact to remote XML-RPC server:
+
+        ```js
+        // XML-RPC server
+        var s = new zebra.io.XRPC(url, [ "method1", "method2", "method3" ]);
+
+        // call remote methods
+        s.method1(p1, p2);
+        var res = s.method2(p2);
+
+        // async remote method call
+        s.method1(p1, p2, function(res) {
+            ...
+        });
+
+####  Interact to remote JSON-RPC server
+       
+        ```js
+        // JSON-RPC server
+        var s = new zebra.io.JRPC(url, [ "method1", "method2", "method3" ]);
+
+        // call remote methods
+        s.method1(p1, p2);
+        var res = s.method2(p2);
+
+        // async remote method call
+        s.method1(p1, p2, function(res) {
+            ...
+        });
+
+#### Shortcuts to call remote services:
+
+       ```js
+        // JSON-RPC remote method execution
+        var res = zebra.io.JRPC.invoke(url, "method1")(param1, param2);
+
+        // Async JSON-RPC remote method execution
+        zebra.io.JRPC.invoke(url, "method1")(param1, param2, function(res) {
+          ....
+        });
+
+---
+
+
+### Write first Zebra application
 
 **No zebra stuff on you PC has to be downloaded and deployed.** Let's start writing simple Zebra html:
 
@@ -86,13 +148,13 @@ Take a look at more complex example, Grid with 10000 cells:
 		</html>
 
 
-## Requirements and installation
+### Requirements and installation
 
 If you need Java to JavaScript converter than Treetop PEG parser has to be installed.
 Find it on GITHUB: "https://github.com/nathansobo/treetop". Otherwise no any installation
 activities are necessary.
 
-## Run demos and samples
+### Run demos and samples
 
    * Zebra HTML5 Canvas UI Demo:
    	  * Open terminal
@@ -101,7 +163,7 @@ activities are necessary.
 ```
     python startup.py
 ```
-      * Open "http://localhost:8080/web/uidemo"
+      * Open "http://localhost:8080/web/ui"
       * Enjoy Zebra UI WEB Demo
 
    * Java to JavaScript converter usage:
@@ -115,11 +177,11 @@ activities are necessary.
       * Find generated "ReadFile.java.js" and "ReadFile.java.html" files in current directory
 
 
-## License
+### License
 
 General Public License (GPL) and MIT for academic projects
 
-## Contact
+### Contact
 
    * WEB: http://zebra.gravitysoft.org, http://www.gravitysoft.org
    * e-mail: vish@gravitysoft.org

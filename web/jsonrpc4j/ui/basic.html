@@ -1,0 +1,182 @@
+<html>
+
+<header>
+    <META http-equiv="X-UA-Compatible" content="IE=9">
+	<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+	<META HTTP-EQUIV="Expires" CONTENT="-1">
+	<link rel="stylesheet" type="text/css" media="screen" href="index.css"/>
+
+	<script src='../../lib/gravity/zebra/easyoop.js' 	 type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/io.js'    type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/bean.js' type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/util.js' type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/data.js' type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/layout.js' type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/ui.view.js' type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/uiengine.js' type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/ui.js' type='text/javascript'></script>
+
+
+    <script src='../../lib/gravity/zebra/ui.list.js' type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/ui.win.js' type='text/javascript'></script>
+
+    <script src='../../lib/gravity/zebra/ui.TextField.js' type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/ui.tree.js' type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/ui.grid.js' type='text/javascript'></script>
+    <script src='../../lib/gravity/zebra/ui.editors.js' type='text/javascript'></script>
+
+    <script src='../../lib/gravity/zebra/ui.p3d.js' type='text/javascript'></script>
+
+<!--
+    <script src='../../lib/gravity/zebra/test.js' type='text/javascript'></script>
+ -->
+      <script src='demo/ui.demo.js' type='text/javascript'></script>
+      <script src='demo/ui.demo.layout.js' type='text/javascript'></script>
+    <script src='demo/ui.demo.panels.js' type='text/javascript'></script>
+    <script src='demo/ui.demo.basicui.js' type='text/javascript'></script>
+    <script src='demo/ui.demo.popup.js' type='text/javascript'></script>
+     <script src='demo/ui.demo.win.js' type='text/javascript'></script>
+
+  <!--
+     <script src='demo/ui.demo.tree.js' type='text/javascript'></script>
+     <script src='demo/ui.demo.tree.js' type='text/javascript'></script>
+     <script src='demo/ui.demo.popup.js' type='text/javascript'></script>
+     <script src='demo/ui.demo.win.js' type='text/javascript'></script>
+     <script src='demo/ui.demo.grid.js' type='text/javascript'></script>
+     <script src='demo/ui.demo.designer.js' type='text/javascript'></script>
+ -->
+
+
+    <script type='text/javascript'>
+        zebra.ready(
+			function()  {
+ 				eval(zebra.Import("ui", "layout", "ui.view"));
+
+
+                var desktop = new zCanvas("myCanvas"), root = desktop.root;
+                root.setLayout(new BorderLayout());
+                // var pan = new BorderPan("dsd", new Panel());
+                // pan.size(200, 200);
+                // pan.location(20, 20);
+                // root.add(pan);
+
+                // var tabs = new Tabs();
+                // tabs.add("Page 1", new Panel());
+                // tabs.location(300, 100);
+                // tabs.size(300, 300);
+                // root.add(tabs);
+                // // tabs.properties({
+                // //     size: [100, 200],
+                // //     location: [10, 20]
+                // // });
+
+                // var list = new List();
+                // list.model.addElement("Item1");
+                // list.model.addElement("Item2");
+                // list.model.addElement("Item3");
+                // list.location(650, 100);
+                // list.size(100, 300);
+                // root.add(list);
+
+                // var sspan = new Panel();
+                // sspan.setPreferredSize(400, 1000);
+                // var span = new ScrollPan(sspan);
+                // span.size(200, 200);
+                // span.location(20, 300);
+                // root.add(span);
+
+                // // var vbar = new Scroll(VERTICAL);
+                // // vbar.invalidate();
+                // // zebra.print("PS: " + vbar.getPreferredSize() );
+
+                // var ch = new Checkbox("Label");
+                // ch.location(500, 20);
+                // ch.size(100, 30);
+                // ch.setBackground("#CCCCCC");
+                // root.add(ch);
+
+                // var tf = new TextField("sdjsjdksjdkajdka");
+                // tf.size(100, 40);
+                // tf.location(400,400);
+                // root.add(tf);
+
+                // var b = new Button("Test");
+                // b.size(100, 40);
+                // b.location(400,600);
+                // root.add(b);
+
+                // var img = new ImagePan("http://localhost:8080/web/ui/demo/ss.jpeg");
+                // img.setBorder(new Border(1));
+                // img.size(200, 200);
+                // img.location(400, 200);
+                // root.add(img);
+
+                // var sp = new SplitPan();
+                // sp.shape(700, 100, 200, 200);
+                // root.add(sp);
+
+                // var sp = new Slider();
+                // sp.shape(700, 600, 150, 50);
+                // root.add(sp);
+
+                // var lab = new Label("dsdskdjksjdksjdkjskdj");
+                // lab.size(100, 40);
+                // lab.location(500,600);
+                // root.add(lab);
+
+                // var p = new Panel(new ListLayout());
+                // var l = new Label("v1dddd"); 
+                // l.validate();
+                // zebra.print("!!!!!!!!!!!!!!!!!!!!! " + l.isValid + "," + l.getView().getPreferredSize());
+                // p.add(l);
+                // p.add(new Label("v2sdsdsd"));
+                // p.size(100, 40);
+                // p.location(700,600);
+                // root.add(p);
+
+// 	        	var Text = zebra.data.Text, desktop = new zCanvas("myCanvas"), root = desktop.root;
+// 				root.padding(4);
+// 				root.setBorder(new Border(1));
+// 				root.setLayout(new BorderLayout());
+
+                //return;
+
+ 	   			var nt = new Tabs(), prevSelected = -1;
+				nt._.add(function (src, data) {
+						  if (prevSelected >= 0) src.get(prevSelected).activated && src.get(prevSelected).activated(false);
+						  src.get(data).activated && src.get(data).activated(true);
+						  prevSelected = data;
+					 });
+
+ 	    		nt.add("Basic UI", new zebra.ui.demo.BasicUIDemo());
+ 	   			nt.add("Panels", new zebra.ui.demo.PanelsDemo());
+ 	   	//		nt.add("Tree", new zebra.ui.demo.TreeDemo());
+ 	   			//nt.add("Menu", new zebra.ui.demo.PopupDemo());
+ 	   			nt.add("Tooltip & Win", new zebra.ui.demo.WinDemo());
+ 				nt.add("Layouts", new zebra.ui.demo.LayoutDemo());
+// 				nt.add("Grid", new zebra.ui.demo.GridDemo());
+// //				nt.add("Designer", new zebra.ui.demo.DesignerDemo());
+
+// 				// var p = new Panel(new zebra.layout.GridLayout(1000, 20));
+// 				// for(var i=0; i<2000; i++)  {
+// 				// 	p.add(new TextField("Item " + i));
+// 				// }
+// 				// nt.add("Scroll", new ScrollPan(p));
+
+				
+                root.add(CENTER, nt);
+// 				desktop.repaint();
+			}
+		);
+    </script>
+</header>
+
+<body>
+	<canvas id="myCanvas"
+	        tabindex="0"
+	        class="zebracanvas"
+	        width="1200" height="700">
+	</canvas>
+</body>
+</html>
+

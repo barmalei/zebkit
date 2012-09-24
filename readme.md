@@ -22,6 +22,7 @@ DOM/HTML stuff and maximal intuitive code representation. Take a look at "sample
 
 ### NEW IO API: HTTP POST/GET, JSON-RPC or XML-RPC
 
+The most significant work has been done around Zebra IO package. It was completely re-implemented to provide handy manner to interact with remote services.
 
 #### POST and GET requests:
         
@@ -88,7 +89,8 @@ zebra.io.JRPC.invoke(url, "method1")(param1, param2, function(res) {
 ```html
 		<html>
 			<header>
-				<script src='http://repo.gravitysoft.org/zebra/all.min.js' type='text/javascript'></script>
+				<script src='http://repo.gravitysoft.org/zebra/all.min.js' 
+                        type='text/javascript'></script>
 				<script type='text/javascript'>
 				    zebra.ready(function() {
 						// import classes and variables from "ui" and "layout" packages in local space
@@ -112,7 +114,8 @@ To configure Zebra UI to use "black" palette do the following:
 ```html
 		<html>
 			<header>
-				<script src='http://repo.gravitysoft.org/zebra/all.min.js' type='text/javascript'></script>
+				<script src='http://repo.gravitysoft.org/zebra/all.min.js' 
+                        type='text/javascript'></script>
 				<script type='text/javascript'>
 					zebra()["theme.palette"] = "black";
 					...
@@ -127,7 +130,8 @@ Take a look at more complex example, Grid with 10000 cells:
 ```html
 		<html>
 			<header>
-				<script src='http://repo.gravitysoft.org/zebra/all.min.js' type='text/javascript'></script>
+				<script src='http://repo.gravitysoft.org/zebra/all.min.js' 
+                        type='text/javascript'></script>
 				<script type='text/javascript'>
 				    zebra.ready(function() {
 						// import classes and variables from "ui", "ui.grid" and "layout" packages in local space

@@ -599,7 +599,7 @@ if (typeof(zebra) === "undefined") {
             var A = new Class([
                 function $clazz() {
                     this.a  = function() {  return 1;  };
-                    this.aa = function(p1, p2, p3) { return p1 + p2 + p3; } 
+                    this.aa = function(p1, p2, p3) { return p1 + p2 + p3; };
                 }
             ]);
 
@@ -610,7 +610,7 @@ if (typeof(zebra) === "undefined") {
             }
             t1();
 
-            var B = new Class(A, [ 
+            var B = new Class(A, [
                 function $clazz(){
                     this.a  = function(p1, p2) { return p1 * p2; };
                     this.aa = function(p1, p2, p3) { return p1 * p2 * p3; };
@@ -623,6 +623,7 @@ if (typeof(zebra) === "undefined") {
                 assert(B.aa(2, 2, 2), 8, "test_static_methods_6");
             }
             t2();
+
 
             var C = new Class([ 
                 function $clazz() {
@@ -646,6 +647,7 @@ if (typeof(zebra) === "undefined") {
                     this.c = 300;
                 }
             ]);
+
 
             function t1() {
                 assert(A.a, 100, "test_static_fields 1");
@@ -680,6 +682,7 @@ if (typeof(zebra) === "undefined") {
             assert(C.a, undefined, "test_static_fields 1");
             assert(C.b, undefined, "test_static_fields 2");
             assert(C.c, undefined, "test_static_fields 3");
+
             assertException(function() { C.b(); }, TypeError);
             assertException(function() { C.a(); }, TypeError);
             assertException(function() { C.c(); }, TypeError);
@@ -842,7 +845,7 @@ if (typeof(zebra) === "undefined") {
                 function a() { return 22; },
                 function a(p) { return p; },
                 function a(p1, p2) { return p1 + p2; },
-                function $clazz () {
+                function $clazz() {
                    this.a = function() { return 1; };
                 }
             ]);
@@ -871,9 +874,12 @@ if (typeof(zebra) === "undefined") {
 
             var a = new A(), b = new B(), c = new C();
 
+
             assert(a.a(), 22);
             assert(a.a(12), 12);
             assert(a.a(12, 12), 24);
+
+
 
             assert(b.a(), 111);
 
@@ -881,11 +887,15 @@ if (typeof(zebra) === "undefined") {
             assert(b.a(2, 1), 3);
             assert(b.b(), 22);
 
+
             assert(c.c(6, 6), 13);
             assert(c.a(), 222);
             assert(c.a(18), 18);
+            
+
             assert(c.b(), 22);
             assert(c.a(3,3), 16);
+
             assert(A.a(), 1);
 
             // check the subsequent class definition and instantiation has no influence to parent class
@@ -1404,6 +1414,21 @@ if (typeof(zebra) === "undefined") {
             assert(typeof c.f === "function" , true);
             assert(c.f(), 333);
             assert(c.f(1), 555);
+
+            var D = Class(A, [
+                function f() {
+                    return 1 + this.$super();
+                },
+
+                function f(a) {
+                   return a + this.$super();  
+                }
+            ]);
+
+            var d = new D();
+            assert(d.f(), 334);
+            assert(d.f(2), 335);
+
         },
 
         function test_caller() {

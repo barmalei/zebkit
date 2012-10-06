@@ -32,6 +32,7 @@ pkg.PanelsDemo = new Class(pkg.DemoPan, function($) {
         var r = new Panel(new FlowLayout(L.CENTER, L.CENTER));
 		var p = new Panel(new GridLayout(4, 3));
 		var p1 = new BorderPan("Default title", new Label(""));
+		p1.setBackground(zebra.ui.view.Fill.yellow);
 		p1.setPreferredSize(130, 100);
 
 		var ll = new Label("");

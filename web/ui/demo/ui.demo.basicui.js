@@ -1,16 +1,16 @@
 
 (function(pkg, Class, ui) {
 
-var Panel = zebra.ui.Panel; 
-var BorderPan = zebra.ui.BorderPan; 
-var Label = zebra.ui.Label; 
-var Button = zebra.ui.Button; 
-var FlowLayout = zebra.layout.FlowLayout; 
-var GridLayout = zebra.layout.GridLayout; 
-var ListLayout = zebra.layout.ListLayout; 
-var Gradient = zebra.ui.view.Gradient; 
-var L = zebra.layout; 
-var PercentLayout = zebra.layout.PercentLayout; 
+var Panel = zebra.ui.Panel;
+var BorderPan = zebra.ui.BorderPan;
+var Label = zebra.ui.Label;
+var Button = zebra.ui.Button;
+var FlowLayout = zebra.layout.FlowLayout;
+var GridLayout = zebra.layout.GridLayout;
+var ListLayout = zebra.layout.ListLayout;
+var Gradient = zebra.ui.view.Gradient;
+var L = zebra.layout;
+var PercentLayout = zebra.layout.PercentLayout;
 var Tabs = zebra.ui.Tabs;
 var Checkbox = zebra.ui.Checkbox;
 var ImagePan = zebra.ui.ImagePan;
@@ -28,8 +28,8 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, function($) {
         this.$super();
         this.setLayout(new FlowLayout(L.CENTER, L.CENTER));
         var r = new Panel(new L.BorderLayout(8,4));
-        
-        var p = new Panel(new GridLayout(3, 2)), ctr = new Constraints(); 
+
+        var p = new Panel(new GridLayout(3, 2)), ctr = new Constraints();
         ctr.padding(6);
         ctr.fill   = L.HORIZONTAL | L.VERTICAL;
         p.add(ctr, createCheckboxPan(3, true));
@@ -38,21 +38,21 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, function($) {
         p.add(ctr, createMTextFieldPan());
         p.add(ctr, createProgressPan());
         p.add(ctr, createSliderPan());
-        
+
         var p_c = new Panel(new L.BorderLayout(4, 4));
         p_c.add(L.CENTER, p);
         p_c.add(L.BOTTOM, createButtonPan());
-        
+
         var p_w = new Panel(new ListLayout(8));
         p_w.add(createComboPan());
         p_w.add(createListPan());
 
         r.add(L.LEFT, p_w);
         r.add(L.CENTER, p_c);
-        
+
         this.add(r);
-    });    
-    
+    });
+
     function createTextFieldPan() {
         var p = new Panel(new ListLayout(6));
         p.setBackground(null);
@@ -67,7 +67,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, function($) {
         p.add(pkg.createLabedComponent("Password field:", tf));
         return pkg.createBorderPan("Text fields", p);
     }
-    
+
     function createMTextFieldPan() {
         var p = new Panel(new L.BorderLayout());
         p.setBackground(null);
@@ -108,12 +108,12 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, function($) {
         var p = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.HORIZONTAL, 8));
         p.setBackground(null);
         p.add(new Button("Button"));
-		var bt = new Button(new ImagePan(ui.get("butterfly")));
-		bt.setFocusMarkerView(null);
+        var bt = new Button(new ImagePan(ui.get("butterfly")));
+        bt.setFocusMarkerView(null);
         p.add(bt);
         p.add(new Button(zebra.ui.createImageLabel("Image button", ui.get("butterfly"))));
         bt = new Button("Disabled button");
-        bt.setEnabled(false); 
+        bt.setEnabled(false);
         p.add(bt);
         p.add(new Link("Link"));
         return pkg.createBorderPan("Buttons", p);
@@ -140,25 +140,25 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, function($) {
         lbp.setGaps(6,6);
         p.add(lbp);
         l.select(0);
-        
+
         var bp = pkg.createBorderPan("List", p)
         bp.setGaps(4,4);
         return bp;
     }
-    
+
     function createCheckboxPan(n, t) {
         var p = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.VERTICAL, 4));
-	    var s = t ? "Radio button " : "Checkbox button ", g = t ? new zebra.ui.Group() : null;
-	    p.setBackground(null);
-	    
-	    for(var i=0; i < n;  i++) {
-	        var ch = new Checkbox(s + (i+1), t?Checkbox.RADIO:Checkbox.CHECK); 
+        var s = t ? "Radio button " : "Checkbox button ", g = t ? new zebra.ui.Group() : null;
+        p.setBackground(null);
+
+        for(var i=0; i < n;  i++) {
+            var ch = new Checkbox(s + (i+1), t?Checkbox.RADIO:Checkbox.CHECK);
             p.add(ch);
-	        if (g !=null) ch.setSwitchManager(g);
-	    }
+            if (g != null) ch.setSwitchManager(g);
+        }
         return pkg.createBorderPan(s, p);
     }
-    
+
     function createComboPan() {
         var p = new Panel(new ListLayout(8));
         p.setBackground(null);
@@ -168,7 +168,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, function($) {
         cb.list.model.addElement("Item 3");
         cb.list.select(0);
         p.add(cb);
-        
+
         var cb2 = new zebra.ui.Combo();
         cb2.setContentPan(new zebra.ui.Combo.EditableContentPan());
         cb2.list.model.addElement("Item 1");

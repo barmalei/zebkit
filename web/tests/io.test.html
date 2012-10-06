@@ -506,13 +506,13 @@
                          assert(zebra.io.QS.append(url5, {a:10, b:18}), url5 + "?a=10&b=18", "10");
                     },
 
-                    function testJSON_RPC() {
+                    function _testJSON_RPC() {
                         // var url = "http://repo.gravitysoft.org/test/testjsonserver.php"
                         //testRPC("http://10.26.214.170:8081/jrpc", zebra.io.JRPC);
                         testRPC("http://localhost:8081/jrpc", zebra.io.JRPC);
                     },
 
-                    function testXML_RPC() {
+                    function _testXML_RPC() {
                         //testRPC("http://10.26.214.170:8080/xrpc", zebra.io.XRPC);
                         testRPC("http://localhost:8080/xrpc", zebra.io.XRPC);
                     }

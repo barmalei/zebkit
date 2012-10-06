@@ -80,8 +80,9 @@
 						}
 					}
 				}
+
 				if (se.attachEvent) se.attachEvent("onchange", cf);
-				else se.addEventListener("change", cf);
+				else se.addEventListener("change", cf, false);
 			},
 
 			function() {
@@ -162,7 +163,7 @@
 </header>
 
 <body>
-	<table class="round_border"  border="0" width="950px" cellspacing="0" cellpadding="5">
+	<table class="round_border"  border="0" width="950px" cellspacing="0" cellpadding="5" style="padding:15px;">
 		<tr>
 			<td colspan="1" align="left" valign="top">
 				<table border="0" cellspacing="0" cellpadding="0">
@@ -212,6 +213,7 @@
 					</tr>
 				</table>
 			</td>
+
 			<td valign="top" align="center">
 				<table border="0" cellspacing="0" cellpadding="0">
 					<tr>

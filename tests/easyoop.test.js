@@ -1238,9 +1238,15 @@ if (typeof(zebra) === "undefined") {
         },
 
         function test_packaging() {
+
+
             function isPackage(v) {
                return v && zebra.FN(v.constructor) === "Package";
             }
+
+            var np = zebra("newpackage");
+            assert(isPackage(np), true);
+
             var NS = zebra.namespace('NS');
 
             NS('ui').var1 = 1;

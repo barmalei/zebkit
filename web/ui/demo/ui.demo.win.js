@@ -16,8 +16,8 @@ var L = zebra.layout;
 var Tree = zebra.ui.tree.Tree;
 var Constraints = zebra.layout.Constraints;
 
-var CardLayout = new Class(L.Layout, function($) {
-    $(function doLayout(target){
+var CardLayout = new Class(L.Layout, [
+    function doLayout(target){
         var w = target.width, h = target.height;
         for(var i=0; i<target.count(); i++) {
             var c = target.get(i);
@@ -26,10 +26,10 @@ var CardLayout = new Class(L.Layout, function($) {
                 c.setLocation(Math.floor((w - c.width)/2), Math.floor((h - c.height)/2));
             }
         }
-    });
+    },
 
-    $(function calcPreferredSize(target){ return zebra.layout.getMaxPreferredSize(target); });
-});
+    function calcPreferredSize(target){ return zebra.layout.getMaxPreferredSize(target); }
+]);
 
 
 var FL = Class(zebra.ui.BaseLayer, [
@@ -65,32 +65,32 @@ function createTooltipDemo() {
     l1.setPreferredSize(120, 90);
     l2.setPreferredSize(120, 90);
     l3.setPreferredSize(120, 90);
-	ui.tooltip.setTooltip(l1, new zebra.ui.TooltipInfo(function($) {
-		 $(function getTooltip(target, x, y) {
-		    var l = pkg.createLabel(" THIS IS HONDA ", rgb.blue);
-		    l.setBackground(new zebra.ui.view.Fill(ui.get("col.gray7")));
-			return l;
-	 	 });
-	}));
+    ui.tooltip.setTooltip(l1, new zebra.ui.TooltipInfo([
+         function getTooltip(target, x, y) {
+            var l = pkg.createLabel(" THIS IS HONDA ", rgb.blue);
+            l.setBackground(new zebra.ui.view.Fill(ui.get("col.gray7")));
+            return l;
+         }
+    ]));
 
-	ui.tooltip.setTooltip(l2, new zebra.ui.TooltipInfo(function($) {
-		 $(function getTooltip(target, x, y) {
-		    var b = new zebra.ui.ImagePan(ui.get("bmw"));
-		    b.setBorder(new Border(1));
-			return b;
-	 	 });
-	}));
+    ui.tooltip.setTooltip(l2, new zebra.ui.TooltipInfo([
+         function getTooltip(target, x, y) {
+            var b = new zebra.ui.ImagePan(ui.get("bmw"));
+            b.setBorder(new Border(1));
+            return b;
+         }
+    ]));
 
 
-	ui.tooltip.setTooltip(l3, new zebra.ui.TooltipInfo(function($) {
-		 $(function getTooltip(target, x, y) {
- 		    var l = zebra.ui.createImageLabel("Peugeot", ui.get("peugeot"));
- 		    l.setBackground(zebra.ui.view.Fill.white, true);
+    ui.tooltip.setTooltip(l3, new zebra.ui.TooltipInfo([
+         function getTooltip(target, x, y) {
+            var l = new zebra.ui.ImageLabel("Peugeot", ui.get("peugeot"));
+            l.setBackground(zebra.ui.view.Fill.white, true);
             l.padding(4);
             l.setBorder(new Border(1));
-			return l
-	 	 });
-	}));
+            return l;
+         }
+    ]));
 
     return p;
 }
@@ -117,18 +117,18 @@ function createWindowComp(target) {
 
     w.root.add(L.BOTTOM, p);
 
-	b._.add(function actionPerformed(src, id, data) { target.hideWin(); });
+    b._.add(function actionPerformed(src, id, data) { target.hideWin(); });
 
     return w;
 }
 
-pkg.WinDemo = new Class(pkg.DemoPan, function($) {
-    $(function() {
+pkg.WinDemo = new Class(pkg.DemoPan,  [
+    function() {
         this.$super();
         this.shown = false;
         this.setLayout(new BorderLayout(8,8));
-		this.padding(8);
-		this.add(L.LEFT, pkg.createBorderPan("Tooltips", createTooltipDemo()));
+        this.padding(8);
+        this.add(L.LEFT, pkg.createBorderPan("Tooltips", createTooltipDemo()));
 
         var cp = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.VERTICAL, 8));
         this.wp = new Panel(new CardLayout());
@@ -141,15 +141,15 @@ pkg.WinDemo = new Class(pkg.DemoPan, function($) {
         this.wp.add(this.w);
         this.wp.add(this.ab);
         cp.add(this.wp);
-		this.add(L.CENTER, new BorderPan("Window", cp));
+        this.add(L.CENTER, new BorderPan("Window", cp));
 
 
 
-		var $t = this;
-		this.ab._.add(function actionPerformed(src, id, data) { $t.showWin(); });
-    });
+        var $t = this;
+        this.ab._.add(function actionPerformed(src, id, data) { $t.showWin(); });
+    },
 
-    $(function showWin() {
+    function showWin() {
 //        !!!
       //  var v = zebra.ui.getDesktop(this);
         //v.add(new FL());
@@ -162,20 +162,20 @@ pkg.WinDemo = new Class(pkg.DemoPan, function($) {
         this.w.setEnabled(true);
         zebra.ui.getDesktop(this).getLayer("win").add(this.w);
         zebra.ui.getDesktop(this).getLayer("win").activate(this.w);
-    });
+    },
 
-    $(function hideWin() {
+    function hideWin() {
         if (!this.shown) return;
         this.shown = false;
         zebra.ui.getDesktop(this).getLayer("win").removeAll();
         this.wp.add(this.w);
         this.wp.add(this.ab);
         this.w.setEnabled(false);
-    });
+    },
 
-    $(function activated(b) {
+    function activated(b) {
         if (b == false) this.hideWin();
-    });
-});
+    }
+]);
 
 })(zebra.ui.demo, zebra.Class, zebra.ui);

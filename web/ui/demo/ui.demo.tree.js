@@ -43,8 +43,8 @@ function makeTreeModel2(items, deepness) {
     return tm;
 }
 
-pkg.TreeDemo = new Class(pkg.DemoPan, function($) {
-    $(function() {
+pkg.TreeDemo = new Class(pkg.DemoPan, [
+    function() {
         this.$super();
 
         var p = new Panel(new FlowLayout(L.CENTER, L.TOP, L.HORIZONTAL, 8));
@@ -70,7 +70,7 @@ pkg.TreeDemo = new Class(pkg.DemoPan, function($) {
                     }
 
                     if (i.value.indexOf("Root") === 0) {
-                        return new zebra.ui.view.CompRender(zebra.ui.createImageLabel("Root", ui.get("butterfly")));
+                        return new zebra.ui.view.CompRender(new zebra.ui.ImageLabel("Root", ui.get("butterfly")));
                     }
                     return tr;
               }
@@ -113,7 +113,7 @@ pkg.TreeDemo = new Class(pkg.DemoPan, function($) {
         p.add(ctr, p2);
         p.add(ctr, p3);
         this.add(L.CENTER, p);
-    });
-});
+    }
+]);
 
 })(zebra.ui.demo, zebra.Class, zebra.ui);

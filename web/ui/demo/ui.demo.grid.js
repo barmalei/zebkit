@@ -204,7 +204,7 @@ var CompEditorProvider = new Class(DefEditors, [
 function longGrid() {
    // var m = new zebra.data.Matrix(10000,20);
     var m = new zebra.data.Matrix(100,10);
-	for(var i=0; i<m.rows*m.cols; i++) { m.put(i, "Cell [" + i +"]");  }
+	for(var i=0; i<m.rows*m.cols; i++) { m.puti(i, "Cell [" + i +"]");  }
 
 	var g = new Grid(m);
     g.setViewProvider(new DefViews([
@@ -215,16 +215,16 @@ function longGrid() {
 
 	var gp1 = new GridCaption(g);
 	for(var i=0; i < 10; i++) gp1.putTitle(i, "Title " + i);
-    g.add(Grid.TOP_CAPTION_EL, gp1);
+    g.add(L.TOP, gp1);
 
 	var gp2 = new GridCaption(g);
 	for(var i=0; i < 100; i++) gp2.putTitle(i, " " + i + " ");
-    g.add(Grid.LEFT_CAPTION_EL, gp2);
+    g.add(L.LEFT, gp2);
 
 	var corner = new Panel();
 	corner.setBorder(ui.get("gcap.brv"));
 	corner.setBackground(ui.get("gcap.bg"));
-	g.add(Grid.STUB_EL, corner);
+	g.add(L.NONE, corner);
 	var p = new zebra.ui.ScrollPan(g);
 	p.padding(4);
 	return p;
@@ -242,7 +242,7 @@ function editableGrid() {
         cap.putTitle(0, "Title 1");
         cap.putTitle(1, "Title 2");
         cap.isResizable = false;
-        grid.add(Grid.TOP_CAPTION_EL, cap);
+        grid.add(L.TOP, cap);
         return grid;
     }
 
@@ -281,7 +281,7 @@ function editableGrid() {
         cap.putTitle(0, "Grid Inside");
         cap.putTitle(1, "Tree Inside");
         cap.putTitle(2, "Tabs Inside");
-        grid.add(Grid.TOP_CAPTION_EL, cap);
+        grid.add(L.TOP, cap);
         grid.setEditorProvider(new CompEditorProvider());
         grid.setViewProvider(new CompViewProvider());
         grid.setPosition(null);
@@ -297,7 +297,7 @@ function editableGrid() {
               "on", "Item 1", "text 5",  "1" ];
     var t = ["Checkbox\nas editor", "Drop down\nas editor", "Text field\nas editor", "External Window\nas editor"];
 
-	for(var i=0; i < (m.rows * m.cols); i++) { m.put(i, d[i]);  }
+	for(var i=0; i < (m.rows * m.cols); i++) { m.puti(i, d[i]);  }
 
 	var g = new Grid(m);
     g.setViewProvider(new DefViews([
@@ -315,7 +315,7 @@ function editableGrid() {
 	var gp1 = new GridCaption(g);
 	gp1.isResizable = false;
 	for(var i=0; i < m.cols; i++) gp1.putTitle(i, t[i]);
-	g.add(Grid.TOP_CAPTION_EL, gp1);
+	g.add(L.TOP, gp1);
 
     // for(var i = 0;i < m.rows; i ++ ) g.setRowHeight(i, 40);
     for(var i = 0;i < m.cols; i ++ ) g.setColWidth(i, 110);
@@ -327,11 +327,11 @@ function customCellAlignmentGrid() {
     var d = [ "Top-Left\nAlignment", "Top-Center\nAlignment", "Top-Right\nAlignment",
               "Center-Left\nAlignment", "Center-Center\nAlignment", "Center-Right\nAlignment",
               "Bottom-Left\nAlignment", "Bottom-Center\nAlignment", "Bottom-Right\nAlignment"];
-    var titles = [ "Left Aligned", new CompRender(zebra.ui.createImageLabel("Center", zebra.ui.get("ringtone"))), "Right Aligned"];
+    var titles = [ "Left Aligned", new CompRender(new zebra.ui.ImageLabel("Center", zebra.ui.get("ringtone"))), "Right Aligned"];
 
     var root = new Panel(new RasterLayout(L.USE_PS_SIZE)), data = new Matrix(3, 3);
     for(var i = 0;i < data.rows*data.cols; i ++ ){
-        data.put(i, d[i]);
+        data.puti(i, d[i]);
     }
     var grid = new Grid(data), caption = new GridCaption(grid);
     for(var i = 0;i < data.cols; i ++ ) caption.putTitle(i, titles[i]);
@@ -339,7 +339,7 @@ function customCellAlignmentGrid() {
     caption.setTitleProps(2, L.RIGHT, L.CENTER, null);
     caption.isResizable = false;
 
-    grid.add(Grid.TOP_CAPTION_EL, caption);
+    grid.add(L.TOP, caption);
     grid.setViewProvider(new ColumnsAlignmentProvider());
     grid.setLocation(20, 20);
     for(var i = 0;i < data.rows; i ++ ) grid.setRowHeight(i, 90);
@@ -350,8 +350,8 @@ function customCellAlignmentGrid() {
     return wrapWithPan(root);
 }
 
-pkg.GridDemo = new Class(pkg.DemoPan, function($) {
-    $(function() {
+pkg.GridDemo = new Class(pkg.DemoPan, [
+    function() {
         this.$super();
         this.setLayout(new L.BorderLayout());
         this.padding(6);
@@ -362,7 +362,7 @@ pkg.GridDemo = new Class(pkg.DemoPan, function($) {
         n.add("Editable grid", editableGrid());
 
 		this.add(L.CENTER, n);
-    });
-});
+    }
+]);
 
 })(zebra.ui.demo, zebra.Class, zebra.ui);

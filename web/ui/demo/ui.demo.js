@@ -1,12 +1,10 @@
-
-
 (function(pkg, Class) {
 
-var Panel = zebra.ui.Panel; 
-var Label = zebra.ui.Label; 
-var Border = zebra.ui.view.Border; 
-var BorderPan = zebra.ui.BorderPan; 
-var L = zebra.layout; 
+var Panel = zebra.ui.Panel;
+var Label = zebra.ui.Label;
+var Border = zebra.ui.view.Border;
+var BorderPan = zebra.ui.BorderPan;
+var L = zebra.layout;
 
 pkg.createLabel = function (txt, color) {
     color = color || zebra.ui.get("demo.createLabel.col") || zebra.ui.get("col.gray7");
@@ -16,17 +14,17 @@ pkg.createLabel = function (txt, color) {
     l.setBorder(new Border(1, zebra.util.rgb.gray));
     l.padding(4);
     return l;
-}
+};
 
 pkg.createBorderPan = function (txt, content, w, h) {
     content = content || new Panel();
     var bp = new BorderPan(txt, content);
     content.padding(4);
-    w = w || -1; 
-    h = h || -1; 
+    w = w || -1;
+    h = h || -1;
     bp.setPreferredSize(w, h);
     return bp;
-}
+};
 
 pkg.createLabedComponent = function(title, comp) {
     var content = new Panel(new L.BorderLayout());
@@ -36,16 +34,16 @@ pkg.createLabedComponent = function(title, comp) {
     content.add(L.LEFT, lab)
     content.add(L.RIGHT, comp);
     return content;
-}
+};
 
-pkg.DemoPan = new Class(Panel, function($) {
-    $(function() { 
-        this.$super(); 
+pkg.DemoPan = Class(Panel, [
+    function() {
+        this.$super();
         this.padding(6);
-    });    
-    
-    $(function activated(b) {});    
-});
+    },
+
+    function activated(b) {}
+]);
 
 zebra.ready(function() {
     zebra.ui.$objects.load("demo/demo.properties");

@@ -1,31 +1,31 @@
 
 (function(pkg, Class) {
 
-var Panel = zebra.ui.Panel; 
-var Label = zebra.ui.Label; 
-var Button = zebra.ui.Button; 
+var Panel = zebra.ui.Panel;
+var Label = zebra.ui.Label;
+var Button = zebra.ui.Button;
 var BorderLayout = zebra.layout.BorderLayout;
-var FlowLayout = zebra.layout.FlowLayout; 
-var GridLayout = zebra.layout.GridLayout; 
-var ListLayout = zebra.layout.ListLayout; 
-var L = zebra.layout; 
-var PercentLayout = zebra.layout.PercentLayout; 
+var FlowLayout = zebra.layout.FlowLayout;
+var GridLayout = zebra.layout.GridLayout;
+var ListLayout = zebra.layout.ListLayout;
+var L = zebra.layout;
+var PercentLayout = zebra.layout.PercentLayout;
 var Tabs = zebra.ui.Tabs;
 var Constraints = zebra.layout.Constraints;
 
-pkg.LayoutDemo = new Class(pkg.DemoPan, function($) {
-    $(function() {
+pkg.LayoutDemo = new Class(pkg.DemoPan, [
+    function() {
         this.$super();
         this.setLayout(new BorderLayout());
         var n = new Tabs(L.BOTTOM);
-        n.add("Border layout", borderLayoutPage());
-        n.add("Flow layout", flowLayoutPage());
-        n.add("List layout", listLayoutPage());
-        n.add("Percent layout", percentLayoutPage());
-        n.add("Grid layout", gridLayoutPage());
+        n.add("Border layout", this.borderLayoutPage());
+        n.add("Flow layout", this.flowLayoutPage());
+        n.add("List layout", this.listLayoutPage());
+        n.add("Percent layout", this.percentLayoutPage());
+        n.add("Grid layout", this.gridLayoutPage());
         this.add(L.CENTER, n);
-    });    
-    
+    },
+
     function borderLayoutPage() {
         var bl_p = new Panel(new BorderLayout(2,2));
         bl_p.padding(4);
@@ -35,16 +35,16 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, function($) {
         bl_p.add(L.LEFT, new Button("LEFT"));
         bl_p.add(L.CENTER, new Button("CENTER"));
         return bl_p;
-    }
-    
+    },
+
     function flowLayoutPage() {
         var fl = new Panel(new ListLayout(4));
         fl.padding(4);
-        var fl_1 = new Panel(new FlowLayout(L.LEFT, L.CENTER, L.HORIZONTAL, 4)); 
-        var fl_2 = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.HORIZONTAL, 4)); 
-        var fl_3 = new Panel(new FlowLayout(L.RIGHT, L.CENTER, L.HORIZONTAL, 4)); 
-        var fl_4 = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.VERTICAL, 4)); 
-        var fl_5 = new Panel(new FlowLayout(L.RIGHT, L.BOTTOM, L.VERTICAL, 4)); 
+        var fl_1 = new Panel(new FlowLayout(L.LEFT, L.CENTER, L.HORIZONTAL, 4));
+        var fl_2 = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.HORIZONTAL, 4));
+        var fl_3 = new Panel(new FlowLayout(L.RIGHT, L.CENTER, L.HORIZONTAL, 4));
+        var fl_4 = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.VERTICAL, 4));
+        var fl_5 = new Panel(new FlowLayout(L.RIGHT, L.BOTTOM, L.VERTICAL, 4));
         fl.add(pkg.createBorderPan("Left aligned, horizontal", fl_1));
         fl.add(pkg.createBorderPan("Centered aligned, horizontal", fl_2));
         fl.add(pkg.createBorderPan("Right aligned, horizontal", fl_3));
@@ -68,14 +68,14 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, function($) {
         var ps = fl_5.getPreferredSize();
         fl_4.setPreferredSize(-1, ps.height + 40);
         fl_5.setPreferredSize(-1, ps.height + 40);
-        
+
         p2.add(50, pkg.createBorderPan("Centered aligned, vertical", fl_4));
         p2.add(50, pkg.createBorderPan("Right-bottom aligned, vertical", fl_5));
 
         fl.add(p2);
         return fl;
-    }
-    
+    },
+
     function listLayoutPage() {
         var ll = new Panel(new ListLayout(4));
         ll.padding(4);
@@ -95,8 +95,8 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, function($) {
         ll.add(pkg.createBorderPan("Centered list items", ll_2));
         ll.add(pkg.createBorderPan("Right aligned list items", ll_3));
         return ll;
-    }
-    
+    },
+
     function percentLayoutPage() {
         var pl = new Panel(new ListLayout(4));
         pl.padding(4);
@@ -112,13 +112,13 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, function($) {
         pl.add(pkg.createBorderPan("Horizontal percentage", pl_1));
         pl.add(pkg.createBorderPan("Vertical percentage", pl_2));
         return pl;
-    }
-    
+    },
+
     function gridLayoutPage() {
         function createLabel(lab, sx, sy) {
             var l = pkg.createLabel(lab);
             var p = l.getPreferredSize();
-            l.setPreferredSize(p.width + Math.floor((p.width*sx)/100), 
+            l.setPreferredSize(p.width + Math.floor((p.width*sx)/100),
                         p.height + Math.floor((p.height*sy)/100));
             return l;
         }
@@ -128,7 +128,7 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, function($) {
         p.setPreferredSize(200,200);
 
         var p1 = new Panel(new GridLayout(2, 2));
-        
+
         var c = new Constraints();
         c.padding(4);
         c.fill = 0;
@@ -152,10 +152,10 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, function($) {
         c.ax = L.CENTER;
         c.ay = L.CENTER;
         p1.add(c, createLabel("Centered", 120, 50));
-        
+
         p.add(pkg.createBorderPan("2x2 grid layout", p1));
         return p;
     }
-});
+]);
 
 })(zebra.ui.demo, zebra.Class);

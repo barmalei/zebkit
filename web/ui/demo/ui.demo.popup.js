@@ -34,7 +34,7 @@ function createItem(s) {
         return l;
     }
 
-    var l = (j > 0) ? zebra.ui.createImageLabel(s.substring(j+1), ui.get(s.substring(0, j))) : new Label(s);
+    var l = (j > 0) ? new zebra.ui.ImageLabel(s.substring(j+1), ui.get(s.substring(0, j))) : new Label(s);
     l.paddings(2,4,2,4);
     if (zebra.instanceOf(l, Label)) l.setFont(ui.get("def.bfn"));
     else l.get(1).setFont(ui.get("def.bfn"));
@@ -152,8 +152,8 @@ function createToolbar() {
     return t;
 }
 
-pkg.PopupDemo = new Class(pkg.DemoPan, function($) {
-    $(function() {
+pkg.PopupDemo = new Class(pkg.DemoPan, [
+    function() {
         this.$super();
         this.setLayout(new BorderLayout(8,8));
         this.padding(8);
@@ -212,7 +212,7 @@ pkg.PopupDemo = new Class(pkg.DemoPan, function($) {
         zebra.ui.popup.setPopup(l3, new zebra.ui.PopupInfo([
             function getPopup(c, x, y) { return m3; }
         ]));
-    });
-});
+    }
+]);
 
 })(zebra.ui.demo, zebra.Class, zebra.ui);

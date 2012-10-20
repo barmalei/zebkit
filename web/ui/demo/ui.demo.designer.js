@@ -14,8 +14,8 @@ var L = zebra.layout;
 var Tree = zebra.ui.tree.Tree;
 var Constraints = zebra.layout.Constraints;
 
-pkg.DesignerDemo = new Class(pkg.DemoPan, function($) {
-    $(function() {
+pkg.DesignerDemo = new Class(pkg.DemoPan, [
+    function() {
         this.$super();
         this.setLayout(new L.BorderLayout(4,4));
         this.padding(4);
@@ -93,7 +93,7 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, function($) {
         }
 
         var prev = null, prevCol = null;
-        t._.add(function actionPerformed(src, id, data) {
+        t._.add(function toggled(src, data) {
                 var c = lookup(pp, data.getComponent());
                 if (prev != null) {
                     prev.shaperBr.borderColor = prevCol;
@@ -119,7 +119,7 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, function($) {
 
         this.add(L.TOP, l);
         this.add(L.CENTER, s);
-    });
-});
+    }
+]);
 
 })(zebra.ui.demo, zebra.Class, zebra.ui);

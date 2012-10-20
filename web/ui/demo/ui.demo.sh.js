@@ -1,27 +1,27 @@
 (function(pkg, Class) {
 
-var Panel = zebra.ui.Panel; 
+var Panel = zebra.ui.Panel;
 var rgb = zebra.util.rgb;
-var Label = zebra.ui.Label; 
-var TextField = zebra.ui.TextField; 
+var Label = zebra.ui.Label;
+var TextField = zebra.ui.TextField;
 var BorderLayout = zebra.layout.BorderLayout;
-var FlowLayout = zebra.layout.FlowLayout; 
-var GridLayout = zebra.layout.GridLayout; 
-var BorderPan = zebra.ui.BorderPan; 
-var ScrollPan = zebra.ui.ScrollPan; 
-var Border = zebra.ui.view.Border; 
-var L = zebra.layout; 
+var FlowLayout = zebra.layout.FlowLayout;
+var GridLayout = zebra.layout.GridLayout;
+var BorderPan = zebra.ui.BorderPan;
+var ScrollPan = zebra.ui.ScrollPan;
+var Border = zebra.ui.view.Border;
+var L = zebra.layout;
 var Constraints = zebra.layout.Constraints;
 
-var SynHighlighterRender = new Class(zebra.ui.view.TextRender, function($, $$) {
-        $(function(path){
-            this.words = new JAVA.util.Hashtable();
-            this.$super((new JAVA.io.TextFileReader(path)).text);
+var SynHighlighterRender = new Class(zebra.ui.view.TextRender, [
+        function(path){
+            this.words = {};
+            this.$super(zebra.io.GET(path));
             this.setForeground(rgb.darkGray);
             this.setFont(new zebra.ui.Font("Courier", "bold", 14));
-        });
+        },
 
-        $(function paintLine(g,x,y,line,d){
+        function paintLine(g,x,y,line,d){
             var s = this.getLine(line), v = this.parse(s), xx = x;
             for(var i = 0;i < v.length; i++){
                 var str = v[i], color = this.words.get(str);
@@ -30,17 +30,17 @@ var SynHighlighterRender = new Class(zebra.ui.view.TextRender, function($, $$) {
                 g.drawString(str, xx, y + this.font.getAscent());
                 xx += this.font.stringWidth(str);
             }
-        });
+        },
 
-        $(function parse(s){
+        function parse(s){
             var v = [], c =  -2, isLetter = false;
             for(var i = 0;i < s.length; i ++ ){
-                var b = JAVA.lang.Character.isLetter(s[i]);
+                var b = zebra.util.isLetter(s[i]);
                 if(c ==  -2){
                     isLetter = b;
                     c = 0;
                 }
-                
+
                 if(isLetter != b && c >= 0){
                     v.push(s.substring(c, i));
                     c = i;
@@ -49,16 +49,16 @@ var SynHighlighterRender = new Class(zebra.ui.view.TextRender, function($, $$) {
             }
             if(c >= 0) v.push(s.substring(c, s.length));
             return v;
-        });
-});
+        }
+]);
 
 
-pkg.ShDemo = new Class(pkg.DemoPan, function($) {
-    $(function(path) {
+pkg.ShDemo = new Class(pkg.DemoPan, [
+    function(path) {
         this.$super();
         this.setLayout(new BorderLayout());
 		this.padding(0);
-        
+
         var sh = new SynHighlighterRender(path);
         sh.words.put("function", rgb.black);
         sh.words.put("var", rgb.black);
@@ -98,7 +98,7 @@ pkg.ShDemo = new Class(pkg.DemoPan, function($) {
 
         this.tf = new TextField(sh);
         this.add(L.CENTER, new ScrollPan(this.tf));
-    });    
-});
+    }
+]);
 
 })(zebra.ui.demo, zebra.Class);

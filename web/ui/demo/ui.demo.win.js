@@ -11,7 +11,6 @@ var GridLayout = zebra.layout.GridLayout;
 var BorderPan = zebra.ui.BorderPan;
 var ScrollPan = zebra.ui.ScrollPan;
 var Border = zebra.ui.view.Border;
-var Border = zebra.ui.view.Border;
 var L = zebra.layout;
 var Tree = zebra.ui.tree.Tree;
 var Constraints = zebra.layout.Constraints;
@@ -43,7 +42,7 @@ var FL = Class(zebra.ui.BaseLayer, [
         var rm = zebra.ui.KeyEvent.CTRL + zebra.ui.KeyEvent.SHIFT + zebra.ui.KeyEvent.ALT;
         if ((rm & mask) == rm) {
              if (this.isActive) this.setBackground(null);
-             else  this.setBackground(new zebra.ui.view.Fill(new rgb(255,255,255, 0.7)));
+             else  this.setBackground(new rgb(255,255,255, 0.7));
              this.isActive = ! this.isActive;
         }
     },
@@ -68,7 +67,7 @@ function createTooltipDemo() {
     ui.tooltip.setTooltip(l1, new zebra.ui.TooltipInfo([
          function getTooltip(target, x, y) {
             var l = pkg.createLabel(" THIS IS HONDA ", rgb.blue);
-            l.setBackground(new zebra.ui.view.Fill(ui.get("col.gray7")));
+            l.setBackground(ui.get("col.gray7"));
             return l;
          }
     ]));
@@ -85,7 +84,7 @@ function createTooltipDemo() {
     ui.tooltip.setTooltip(l3, new zebra.ui.TooltipInfo([
          function getTooltip(target, x, y) {
             var l = new zebra.ui.ImageLabel("Peugeot", ui.get("peugeot"));
-            l.setBackground(zebra.ui.view.Fill.white, true);
+            l.setBackground(rgb.white);
             l.padding(4);
             l.setBorder(new Border(1));
             return l;

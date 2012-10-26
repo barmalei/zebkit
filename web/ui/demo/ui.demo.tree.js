@@ -70,7 +70,7 @@ pkg.TreeDemo = new Class(pkg.DemoPan, [
                     }
 
                     if (i.value.indexOf("Root") === 0) {
-                        return new zebra.ui.view.CompRender(new zebra.ui.ImageLabel("Root", ui.get("butterfly")));
+                        return new zebra.ui.CompRender(new zebra.ui.ImageLabel("Root", ui.get("butterfly")));
                     }
                     return tr;
               }

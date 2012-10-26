@@ -4,10 +4,10 @@ lib/gravity/zebra/util.js
 lib/gravity/zebra/data.js
 lib/gravity/zebra/layout.js
 lib/gravity/zebra/ui.view.js
+lib/gravity/zebra/canvas.js
 lib/gravity/zebra/ui.js
 lib/gravity/zebra/ui.list.js
-lib/gravity/zebra/ui.win.js
-lib/gravity/zebra/ui.jsal.js
+lib/gravity/zebra/ui.window.js
 lib/gravity/zebra/ui.TextField.js
 lib/gravity/zebra/ui.tree.js
 lib/gravity/zebra/ui.grid.js

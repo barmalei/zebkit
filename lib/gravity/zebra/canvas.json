@@ -1,0 +1,60 @@
+{
+    "version" : "2.preAlpha",
+
+    "$aliases": {
+        "Picture":"zebra.ui.view.Picture",
+        "Border":"zebra.ui.view.Border",
+        "ViewSet":"zebra.ui.view.ViewSet",
+        "Gradient":"zebra.ui.view.Gradient",
+        "rgb":"zebra.util.rgb",
+        "font":"zebra.ui.Font"
+    },
+
+    "events"       : { "$zebra.ui.EventManager"  :[]  },
+    "paintManager" : { "$zebra.ui.PaintManImpl"  :[]  },
+    "focusManager" : { "$zebra.ui.FocusManager"  :[]  },
+    "cursorManager": { "$zebra.ui.CursorManager" :[]  },
+    "clipboard"    : { "$zebra.ui.ClipboardMan"  :[]  },
+
+    "layers" : [
+        { "$ *zebra.ui.BaseLayer" :  "root"  }
+     ],
+
+    "palette": {
+        "white" : "#FFFFFF",
+        "black" : "#000000"
+    },
+
+    "borders" : {
+        "raised" : { "$zebra.ui.view.Raised":[] },
+        "sunken" : { "$zebra.ui.p3d.ListBorder":[] },
+        "etched" : { "$Border" : [ 1, "#778888", 1, 3 ] },
+        "plain"  : { "$Border" : 1 },
+        "dot"    : { "$Border" : 1  }
+    },
+
+    "view": {
+        "font"       : { "$font" : ["Arial", 0, 12] },
+        "boldFont"   : { "$font" : ["Arial", 1, 12] },
+        "smallFont"  : { "$font" : ["Arial", 0, 10] },
+        "fontColor"  : "#808080",
+        "borderColor": "@palette.black",
+        "disableColor1": "#7B7B7B",
+        "disableColor2": "@palette.white"
+    },
+
+    "BaseLayer": {
+         "properties": {
+             "layout"     : { "$zebra.layout.RasterLayout":[] },
+             "background" : null,
+             "border"     : "@borders.raised"
+         }
+    },
+
+    "zCanvas": {
+        "addons": [],
+        "properties": {
+            "background":  { "$Gradient": [ "@palette.white", "#E6E6E6"] }
+        }
+    }
+}

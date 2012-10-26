@@ -1,7 +1,6 @@
 
 (function(pkg, Class, ui) {
 
-
 var Matrix = zebra.data.Matrix;
 var Panel = zebra.ui.Panel;
 var Label = zebra.ui.Label;
@@ -16,13 +15,13 @@ var GridCaption = zebra.ui.grid.GridCaption;
 var BorderPan = zebra.ui.BorderPan;
 var RasterLayout = zebra.layout.RasterLayout;
 var TextRender = zebra.ui.view.TextRender;
-var Fill = zebra.ui.view.Fill;
+var Picture = zebra.ui.view.Picture;
 var rgb = zebra.util.rgb;
 var TreeModel = zebra.data.TreeModel;
 var Tree = zebra.ui.tree.Tree;
 var Item = zebra.data.Item;
 var Tabs = zebra.ui.Tabs;
-var CompRender = zebra.ui.view.CompRender;
+var CompRender = zebra.ui.CompRender;
 var CompList = zebra.ui.CompList;
 var ImagePan = zebra.ui.ImagePan;
 var GridLayout = zebra.layout.GridLayout;
@@ -52,7 +51,7 @@ var colors = [ [rgb.white, rgb.lightGray, rgb.white],
                [rgb.orange, rgb.black, rgb.orange],
                [rgb.white, rgb.lightGray, rgb.white] ];
 
-var ColumnsAlignmentProvider = new Class(DefViews, [
+var ColumnsAlignmentProvider = Class(DefViews, [
     function getView(row,col,data){
         var tf = new TextRender(data);
         if (row == 1 && col == 1) {
@@ -114,8 +113,8 @@ var CustomGridEditor = new Class(DefEditors, [
                         $this.parent.remove($this);
                     });
 
-                    this.setBorder(new zebra.ui.view.Border(1, rgb.white, 2));
-                    this.setBackground(new Fill(zebra.ui.get("col.gray6")));
+                    this.setBorder(new zebra.ui.view.Border(1, rgb.gray, 2, 6));
+                    this.setBackground(zebra.ui.palette.gray6);
 
 
                     this.add(L.BOTTOM, controls);
@@ -200,7 +199,6 @@ var CompEditorProvider = new Class(DefEditors, [
     }
 ]);
 
-
 function longGrid() {
    // var m = new zebra.data.Matrix(10000,20);
     var m = new zebra.data.Matrix(100,10);
@@ -209,7 +207,7 @@ function longGrid() {
 	var g = new Grid(m);
     g.setViewProvider(new DefViews([
         function getCellColor(row,col) {
-            return (row % 2 == 0) ? ui.get("cell.bg1") : ui.get("cell.bg2") ;
+            return (row % 2 == 0) ? ui.get("cellbg1") : ui.get("cellbg2") ;
         }
     ]));
 
@@ -222,8 +220,8 @@ function longGrid() {
     g.add(L.LEFT, gp2);
 
 	var corner = new Panel();
-	corner.setBorder(ui.get("gcap.brv"));
-	corner.setBackground(ui.get("gcap.bg"));
+	corner.setBorder(ui.borders.plain);
+	corner.setBackground(ui.grid.GridCaption.properties.background);
 	g.add(L.NONE, corner);
 	var p = new zebra.ui.ScrollPan(g);
 	p.padding(4);
@@ -289,7 +287,7 @@ function editableGrid() {
         return grid;
     }
 
-    var onView = zebra.ui.get("on"), offView = zebra.ui.get("off"),  m = new Matrix(4,4);
+    var onView = new Picture(zebra.ui.get("on")), offView = new Picture(zebra.ui.get("off")),  m = new Matrix(4,4);
     var d = [ "on", "Item 1", "text 1", "0",
               "off", "Item 1", "text 2", "0",
               "off", "Item 2", "text 3", "1",
@@ -304,7 +302,7 @@ function editableGrid() {
         function getView(row, col, data) {
             if (col == 0) return (data == "on") ? onView : offView;
             else {
-                if (col == 3) return zebra.ui.get("s" + IMAGES[data]);
+                if (col == 3) return new Picture(zebra.ui.get("s" + IMAGES[data]));
             }
             return this.$super(row, col, data);
         }

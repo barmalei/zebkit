@@ -26,6 +26,18 @@ PROJECT {
         REQUIRE @source
     }
 
+    ARTIFACT('lib/gravity/zebra/all.io.min.js', CompressedJavaScript) {
+        @source = "lib/gravity/zebra/all.io.js"
+        @options = [ "--nomunge" ]
+        REQUIRE @source
+    }
+
+    ARTIFACT('lib/gravity/zebra/all.canvas.min.js', CompressedJavaScript) {
+        @source = "lib/gravity/zebra/all.canvas.js"
+        @options = [ "--nomunge" ]
+        REQUIRE @source
+    }
+
     ARTIFACT('web/ui/demo/demo.all.min.js', CompressedJavaScript) {
         @source = "web/ui/demo/demo.all.js"
         @options = [ "--nomunge" ]

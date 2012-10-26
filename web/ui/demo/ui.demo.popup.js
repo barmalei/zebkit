@@ -10,7 +10,6 @@ var FlowLayout = zebra.layout.FlowLayout;
 var GridLayout = zebra.layout.GridLayout;
 var BorderPan = zebra.ui.BorderPan;
 var Line = zebra.ui.Line;
-var Fill = zebra.ui.view.Fill;
 var Border = zebra.ui.view.Border;
 var Border = zebra.ui.view.Border;
 var L = zebra.layout;
@@ -26,7 +25,7 @@ function createItem(s) {
         return p;
     }
 
-    if (s == '--') return new Line("br.plain");
+    if (s == '--') return new Line();
     var j = s.indexOf("|"), i = s.indexOf("+"), k = s.indexOf("-");
     if (i >= 0 || k >=0) {
         var l = new Checkbox(s.substring(i >= 0 ? i+1 : k+1));
@@ -36,19 +35,19 @@ function createItem(s) {
 
     var l = (j > 0) ? new zebra.ui.ImageLabel(s.substring(j+1), ui.get(s.substring(0, j))) : new Label(s);
     l.paddings(2,4,2,4);
-    if (zebra.instanceOf(l, Label)) l.setFont(ui.get("def.bfn"));
-    else l.get(1).setFont(ui.get("def.bfn"));
+    if (zebra.instanceOf(l, Label)) l.setFont(ui.view.boldFont);
+    else l.get(1).setFont(ui.view.boldFont);
     return l;
 }
 
 function createMenubar(items) {
     var MBarBorder =  new Class(zebra.ui.view.View, [
         function paint(g,x,y,w,h,d){
-            g.setColor(zebra.ui.get("col.white"));
+            g.setColor(zebra.ui.palette.white);
             g.fillRect(x + 2, y, w - 3, h - 1);
-            g.setColor(zebra.ui.get("col.gray3"));
+            g.setColor(zebra.ui.palette.gray3);
             g.fillRect(x + 2, y + 2, w - 3, Math.floor((h - 6) / 2));
-            g.setColor(zebra.ui.get("col.gray5"));
+            g.setColor(zebra.ui.palette.gray5);
             g.drawLine(x, y+h-1, x+w, y+h-1);
         }
     ]);
@@ -93,14 +92,14 @@ function createColorPicker() {
     var m = new Menu(true), i = 0, c = new Constraints();
     c.paddings(2,0,2,0);
     m.setLayout(new GridLayout(4, 4));
-    for(var k in Fill) {
-        if (!zebra.instanceOf(Fill[k], Fill)) continue;
+    for(var k in rgb) {
+        if (!(rgb[k] instanceof rgb)) continue;
         if (i > 15) break;
         var p = new Panel();
         p.setPreferredSize(16, 16);
-        p.setBorder(ui.get("br.plain"));
+        p.setBorder(ui.borders.plain);
         m.add(c, p);
-        p.setBackground(Fill[k]);
+        p.setBackground(rgb[k]);
         i++;
     }
     return m;
@@ -124,7 +123,7 @@ function formMenuArray() {
 function createToolbar() {
     var t = new zebra.ui.Toolbar();
     t.padding(6);
-    t.setBackground(Fill.lighGray);
+    t.setBackground(rgb.lighGray);
 
    // t.setBorder(null);
     var img = ui.get("home");
@@ -134,7 +133,7 @@ function createToolbar() {
 
     t.addLine();
     var s = t.addSwitcher("ON/OFF");
-    t.setView(s, zebra.ui.Toolbar.PRESSED, ui.get("combo.br"));
+   // t.setView(s, zebra.ui.Toolbar.PRESSED, ui.borders.plain);
     t.addLine();
 
     var g = new zebra.ui.Group();
@@ -162,7 +161,7 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
 
         var c = new Panel(new BorderLayout()), ctr = new Constraints();
         ctr.padding(8);
-        c.setBorder(ui.get("br.sunken"));
+        c.setBorder(ui.borders.sunken);
         c.setPreferredSize(240, 145);
         c.add(L.TOP, createMenubar(formMenuArray()));
         c = new BorderPan("Top menu bar", c);
@@ -170,7 +169,7 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
         mbar.add(ctr, c);
 
         var c = new Panel(new BorderLayout());
-        c.setBorder(ui.get("br.sunken"));
+        c.setBorder(ui.borders.sunken);
         c.setPreferredSize(240, 145);
         c.add(L.BOTTOM, createMenubar(formMenuArray()));
         c = new BorderPan("Bottom menu bar", c);
@@ -204,7 +203,10 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
         var m3 = createMenu(formMenuArray()[5]);
         this.add(L.BOTTOM, new BorderPan("Context menu", p));
         zebra.ui.popup.setPopup(l1, new zebra.ui.PopupInfo([
-            function getPopup(c, x, y) { return m1; }
+            function getPopup(c, x, y) { 
+
+                zebra.print("!!!!!!!!!!!!! " + m1 + "," + m1.getPreferredSize().width + "," + m1.getPreferredSize().height + m1.getClazz().$name);
+                return m1; }
         ]));
         zebra.ui.popup.setPopup(l2, new zebra.ui.PopupInfo([
             function getPopup(c, x, y) { return m2; }

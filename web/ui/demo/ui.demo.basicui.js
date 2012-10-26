@@ -13,6 +13,7 @@ var L = zebra.layout;
 var PercentLayout = zebra.layout.PercentLayout;
 var Tabs = zebra.ui.Tabs;
 var Checkbox = zebra.ui.Checkbox;
+var Radiobox = zebra.ui.Radiobox;
 var ImagePan = zebra.ui.ImagePan;
 var Link = zebra.ui.Link;
 var rgb = zebra.util.rgb;
@@ -99,7 +100,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         pr2.setValue(1);
         pr2.setBundleView(new Gradient(rgb.lightGray, rgb.darkGray, L.HORIZONTAL));
         pr2.setPreferredSize(130, 12);
-        pr2.setBundleWidth(70);
+        pr2.setBundleSize(70, pr2.bundleHeight);
         p.add(pr1);
         p.add(pr2);
         return pkg.createBorderPan("Progress", p);
@@ -153,7 +154,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         p.setBackground(null);
 
         for(var i=0; i < n;  i++) {
-            var ch = new Checkbox(s + (i+1), t?Checkbox.RADIO:Checkbox.CHECK);
+            var ch = t ? new Radiobox(s + (i+1)) : new Checkbox(s + (i+1));
             p.add(ch);
             if (g != null) ch.setSwitchManager(g);
         }

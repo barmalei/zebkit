@@ -47,7 +47,7 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
 
         var c = new zebra.ui.Panel(new zebra.layout.ListLayout(4));
         var g = new zebra.ui.Group();
-        for (var i=0; i<3; i++) c.add(new zebra.ui.Checkbox("Radio " + i, zebra.ui.Checkbox.RADIO));
+        for (var i=0; i<3; i++) c.add(new zebra.ui.Checkbox("Radio " + i, g));
         var b = new zebra.ui.BorderPan("Border Pan", c);
         b.toPreferredSize();
         b.setLocation(140, 230);
@@ -93,7 +93,7 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
         }
 
         var prev = null, prevCol = null;
-        t._.add(function toggled(src, data) {
+        t._.add(function selected(src, data) {
                 var c = lookup(pp, data.getComponent());
                 if (prev != null) {
                     prev.shaperBr.borderColor = prevCol;
@@ -110,9 +110,9 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
 
         var l = new Label(new zebra.data.Text("This page represents number of Zebra components to control UI components size and location"));
         l.padding(6);
-        l.setFont(ui.get("def.bfn"));
-        l.setForeground(ui.get("designer.title.fg"));
-        l.setBackground(new zebra.ui.view.Fill(ui.get("designer.title.bg")));
+        l.setFont(ui.view.boldFont);
+        // l.setForeground(ui.get("designer.title.fg"));
+        // l.setBackground(ui.get("designer.title.bg"));
 
 //      s.setBorder(ui.get("br.plain"));
 //      l.setForeground(rgb.white);

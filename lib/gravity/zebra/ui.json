@@ -1,6 +1,7 @@
 {
-    "tooltip" : { "$zebra.ui.TooltipManager":[]  },
-    "popup"   : { "$zebra.ui.PopupManager":[]  },
+    "clipboard" : { "$zebra.ui.ClipboardMan"  :[]  },
+    "tooltip"   : { "$zebra.ui.TooltipManager":[]  },
+    "popup"     : { "$zebra.ui.PopupManager":[]  },
 
     "layers" : [
         { "$ *zebra.ui.WinLayer":[]   },
@@ -20,19 +21,14 @@
     },
 
     "pictures" : {
-        "button"   : { ".loadImage":"%root%/theme/p3d/button.gif" },
-        "checkbox" : { ".loadImage":"%root%/theme/p3d/checkbox.gif" },
-        "combo"    : { ".loadImage":"%root%/theme/p3d/combo.gif" },
-        "win"      : { ".loadImage":"%root%/theme/p3d/win.gif" },
-        "slider"   : { ".loadImage":"%root%/theme/p3d/slider.gif" },
-        "misc"     : { ".loadImage":"%root%/theme/p3d/misc.gif" },
-        "tree"     : { ".loadImage":"%root%/theme/p3d/tree.gif" },
-        "ext"      : { ".loadImage":"%root%/theme/p3d/ext.gif" }
-    },
-
-    "view": {
-        "dc1":"#808080",
-        "dc2":"@palette.white"
+        "button"   : { ".loadImage":"%root%/theme/button.gif" },
+        "checkbox" : { ".loadImage":"%root%/theme/checkbox.gif" },
+        "combo"    : { ".loadImage":"%root%/theme/combo.gif" },
+        "win"      : { ".loadImage":"%root%/theme/win.gif" },
+        "slider"   : { ".loadImage":"%root%/theme/slider.gif" },
+        "misc"     : { ".loadImage":"%root%/theme/misc.gif" },
+        "tree"     : { ".loadImage":"%root%/theme/tree.gif" },
+        "ext"      : { ".loadImage":"%root%/theme/ext.gif" }
     },
 
     "PopupLayer": {
@@ -55,9 +51,9 @@
         "properties": {
             "layout": { "$zebra.layout.FlowLayout": [16,16,32,2] },
             "border": {
-                        "pressed": { "$zebra.ui.p3d.ButtonBorder" : true  },
-                        "out"    : { "$zebra.ui.p3d.ButtonBorder" : false },
-                        "over"   : { "$zebra.ui.p3d.ButtonBorder" : [false, [ "#EBEBEB",
+                        "pressed": { "$zebra.ui.ButtonBorder" : true  },
+                        "out"    : { "$zebra.ui.ButtonBorder" : false },
+                        "over"   : { "$zebra.ui.ButtonBorder" : [false, [ "#EBEBEB",
                                                                               "rgb(120,140,140)",
                                                                               "@palette.gray5",
                                                                               "@palette.gray7"]] },
@@ -74,12 +70,12 @@
                 "view": {
                           "$ *zebra.ui.view.ViewSet":
                            {
-                                "on":{ "$Picture": ["@pictures.checkbox",0,12,12,12 ] },
-                                "off":{ "$Picture": ["@pictures.checkbox",12,12,12,12] },
-                                "onover":{ "$Picture": ["@pictures.checkbox",48,12,12,12] },
+                                "on"     :{ "$Picture": ["@pictures.checkbox",0,12,12,12 ] },
+                                "off"    :{ "$Picture": ["@pictures.checkbox",12,12,12,12] },
+                                "onover" :{ "$Picture": ["@pictures.checkbox",48,12,12,12] },
                                 "offover":{ "$Picture": ["@pictures.checkbox",60,12,12,12] },
-                                "doff":{ "$Picture": ["@pictures.checkbox",24,12,12,12] },
-                                "don":{ "$Picture": ["@pictures.checkbox",36,12,12,12] }
+                                "doff"   :{ "$Picture": ["@pictures.checkbox",24,12,12,12] },
+                                "don"    :{ "$Picture": ["@pictures.checkbox",36,12,12,12] }
                             }
                         }
             }
@@ -134,7 +130,7 @@
         },
 
         "properties": {
-            "border": { "$zebra.ui.view.TitledBorder": [ "@borders.etched", 16 ] }
+            "border": { "$zebra.ui.TitledBorder": [ "@borders.etched", 16 ] }
         }
     },
 
@@ -203,13 +199,13 @@
 
         "VBundle": {
             "properties": {
-                "border": { "$zebra.ui.p3d.SBundleBorder":64  }
+                "border": { "$zebra.ui.SBundleBorder":64  }
             }
         },
 
         "HBundle": {
             "properties": {
-                "border": { "$zebra.ui.p3d.SBundleBorder":32  }
+                "border": { "$zebra.ui.SBundleBorder":32  }
             }
         },
 
@@ -220,7 +216,7 @@
 
     "Progress": {
     "properties": {
-            "border": { "$Border" : "@palette.gray2" },
+            "border": { "$Border" : [1, "@palette.gray2"] },
             "bundleView": "@palette.gray4",
             "padding":2
         }
@@ -228,11 +224,11 @@
 
     "Tabs": {
         "properties" : {
-            "border": { "$zebra.ui.view.TitledBorder": "@borders.plain" },
+            "border": { "$zebra.ui.TitledBorder": "@borders.plain" },
             "views": {
-                        "tab":     { "$zebra.ui.p3d.TabBorder": 1 },
-                        "tabover": { "$zebra.ui.p3d.TabBorder": 2 },
-                        "tabon":   { "$zebra.ui.p3d.TabBorder": 0 },
+                        "tab":     { "$zebra.ui.TabBorder": 1 },
+                        "tabover": { "$zebra.ui.TabBorder": 2 },
+                        "tabon":   { "$zebra.ui.TabBorder": 0 },
                         "marker":  "@borders.plain"
                     },
             "tabSpaces" : [ 3, 5, 0, 0, 0 ]
@@ -245,7 +241,7 @@
                         "select":{ "$rgb": [ 228,244,252 ] },
                         "marker": { "$Border": [ 1, "#787878" ] }
                       },
-            "border": { "$zebra.ui.p3d.ListBorder":[] }
+            "border": { "$zebra.ui.ListBorder":[] }
         }
     },
 
@@ -302,7 +298,7 @@
         },
 
         "properties": {
-            "border": { "$zebra.ui.p3d.ListBorder":[] },
+            "border": { "$zebra.ui.ListBorder":[] },
             "layout": { "$zebra.layout.BorderLayout": [0, 0] },
             "selectionView": { "$rgb" : [ 228, 244, 252 ] }
         }
@@ -312,7 +308,7 @@
         "properties": {
             "border": "@borders.dot",
             "views" : {  "marker": "@borders.dot",
-                         "gauge" :  { "$Border": "@palette.gray3"  },
+                         "gauge" :  { "$Border": [1,"@palette.gray3"]  },
                          "hbundle": { "$Picture": [ "@pictures.slider", 0,0,11,18 ] },
                          "vbundle": { "$Picture": [ "@pictures.slider", 11,0,18,11 ] }
                     },
@@ -323,7 +319,7 @@
 
     "TextField": {
         "properties": {
-            "border": { "$zebra.ui.p3d.TFieldBorder":[] },
+            "border": { "$zebra.ui.TFieldBorder":[] },
             "background": "#EEFBFE",
             "selectionColor":"#d3edad",
             "curW":1,
@@ -337,7 +333,7 @@
             "background": "@palette.gray6",
             "font": "@view.smallFont",
             "foreground": "@palette.black",
-            "border": { "$Border": "@palette.gray1" }
+            "border": { "$Border": [1, "@palette.gray1"] }
         }
     },
 
@@ -410,7 +406,7 @@
         },
 
         "properties": {
-            "border" : { "$zebra.ui.p3d.P3DBorder":[] },
+            "border" : { "$zebra.ui.P3DBorder":[] },
             "views":  { "over":"@MenuBar.properties.views.off", "out":null, "pressed":"@MenuBar.properties.views.on" }
         }
     },
@@ -471,7 +467,7 @@
         "GridCaption" :{
             "properties": {
                 "background": "@palette.gray4",
-                "borderView": "@borders.sunken"
+                "borderView":  { "$zebra.ui.SoftBorder":[] }
             },
 
             "font": "@view.boldFont",
@@ -496,7 +492,7 @@
                 "background": "@palette.gray6",
                 "foreground": "@palette.black",
                 "font": "@view.smallFont",
-                "border": { "$Border":"@palette.gray1" }
+                "border": { "$Border": [1, "@palette.gray1"] }
             }
         }
     },

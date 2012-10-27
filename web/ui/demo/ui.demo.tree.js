@@ -57,7 +57,7 @@ pkg.TreeDemo = new Class(pkg.DemoPan, [
 
         var t2 = new Tree(makeTreeModel()), p2 = new BorderPan("Custom view tree", t2);
         var fn = new zebra.ui.Font("Arial", 1, 14);
-        t2.setViewProvider(new zebra.ui.view.ViewProvider([
+        t2.setViewProvider(new zebra.Dummy([
               function getView(c, i) {
                     var tr = new zebra.ui.view.TextRender(i.value);
                     if (i.value.indexOf("1") > 0) {
@@ -101,7 +101,7 @@ pkg.TreeDemo = new Class(pkg.DemoPan, [
         //     }
         // ]);
 
-        // t4.setViewProvider(new zebra.ui.view.ViewProvider([
+        // t4.setViewProvider(new zebra.Dummy([
         //    function getView(c, i) {
         //          return new t4v(i.value);
         //    }

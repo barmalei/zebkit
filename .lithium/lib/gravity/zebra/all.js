@@ -1,5 +1,6 @@
 lib/gravity/zebra/easyoop.js
 lib/gravity/zebra/io.js
+lib/gravity/zebra/util.io.js
 lib/gravity/zebra/util.js
 lib/gravity/zebra/data.js
 lib/gravity/zebra/layout.js
@@ -12,4 +13,4 @@ lib/gravity/zebra/ui.TextField.js
 lib/gravity/zebra/ui.tree.js
 lib/gravity/zebra/ui.grid.js
 lib/gravity/zebra/ui.editors.js
-lib/gravity/zebra/ui.p3d.js
+lib/gravity/zebra/ui.theme.js

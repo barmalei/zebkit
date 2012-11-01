@@ -10,7 +10,7 @@ pkg.createLabel = function (txt, color) {
     color = color || zebra.ui.palette.gray1;
     var l = new Label(txt.indexOf("\n") >= 0 ? new zebra.data.Text(txt) : txt);
     l.setForeground(color);
-    l.setFont(zebra.ui.view.boldFont);
+    l.setFont(zebra.ui.boldFont);
     l.setBorder(new Border(1, zebra.util.rgb.gray));
     l.padding(4);
     return l;
@@ -30,7 +30,7 @@ pkg.createLabedComponent = function(title, comp) {
     var content = new Panel(new L.BorderLayout());
     content.setBackground(null);
     var lab = new Label(title);
-    lab.setFont(zebra.ui.view.boldFont);
+    lab.setFont(zebra.ui.boldFont);
     content.add(L.LEFT, lab)
     content.add(L.RIGHT, comp);
     return content;

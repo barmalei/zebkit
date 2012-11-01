@@ -110,7 +110,7 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
 
         var l = new Label(new zebra.data.Text("This page represents number of Zebra components to control UI components size and location"));
         l.padding(6);
-        l.setFont(ui.view.boldFont);
+        l.setFont(ui.boldFont);
         // l.setForeground(ui.get("designer.title.fg"));
         // l.setBackground(ui.get("designer.title.bg"));
 

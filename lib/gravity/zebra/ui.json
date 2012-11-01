@@ -124,7 +124,7 @@
     "BorderPan": {
         "Label": {
             "properties": {
-                "font": "@view.boldFont",
+                "font": "@boldFont",
                 "foreground": "@palette.gray1"
             }
         },
@@ -241,7 +241,8 @@
                         "select":{ "$rgb": [ 228,244,252 ] },
                         "marker": { "$Border": [ 1, "#787878" ] }
                       },
-            "border": { "$zebra.ui.ListBorder":[] }
+            "border": { "$zebra.ui.ListBorder":[] },
+            "padding": 1
         }
     },
 
@@ -331,14 +332,14 @@
     "TooltipLabel": {
         "properties": {
             "background": "@palette.gray6",
-            "font": "@view.smallFont",
+            "font": "@smallFont",
             "foreground": "@palette.black",
             "border": { "$Border": [1, "@palette.gray1"] }
         }
     },
 
     "Link": {
-        "font": "@view.boldFont",
+        "font": "@boldFont",
         "properties": {}
     },
 
@@ -346,7 +347,7 @@
         "Label": {
             "properties": {
                 "foreground":"#5A5A5A",
-                "font":"@view.font"
+                "font":"@font"
             }
         },
 
@@ -381,7 +382,7 @@
 
     "MenuBar": {
         "Label":{
-            "font"       : "@view.boldFont",
+            "font"       : "@boldFont",
             "foreground" : "@palette.black",
             "paddings"   : [1,5,1,5]
         },
@@ -414,7 +415,7 @@
     "Extender": {
         "Label":{
             "properties": {
-                "font"       : "@view.boldFont",
+                "font"       : "@boldFont",
                 "foreground" : "@palette.white"
             }
         },
@@ -440,11 +441,11 @@
         "Tree": {
             "properties": {
                 "views": {
-                    "on"      : { "$Picture": [ "@pictures.tree", 16 ,0 ,15,14 ] },
-                    "off"     : { "$Picture": [ "@pictures.tree", 0  ,14,16,14 ] },
+                    "close"      : { "$Picture": [ "@pictures.tree", 16 ,0 ,15,14 ] },
+                    "open"     : { "$Picture": [ "@pictures.tree", 0  ,14,16,14 ] },
                     "least"   : { "$Picture": [ "@pictures.tree", 0  ,0 ,16,14 ] },
-                    "open"    : { "$Picture": [ "@pictures.tree", 32 ,0 ,11,11 ] },
-                    "close"   : { "$Picture": [ "@pictures.tree", 32 ,11,11,11 ] },
+                    "off"    : { "$Picture": [ "@pictures.tree", 32 ,0 ,11,11 ] },
+                    "on"   : { "$Picture": [ "@pictures.tree", 32 ,11,11,11 ] },
                     "aselect" : { "$zebra.ui.view.CompositeView":
                                     [
                                         { "$rgb": [ 228, 244, 252 ] },
@@ -455,7 +456,7 @@
                 }
             },
             "fontColor" : "@palette.gray1",
-            "font"      : "@view.boldFont"
+            "font"      : "@boldFont"
         }
     },
 
@@ -470,7 +471,7 @@
                 "borderView":  { "$zebra.ui.SoftBorder":[] }
             },
 
-            "font": "@view.boldFont",
+            "font": "@boldFont",
             "foreground": "@palette.black"
         },
 
@@ -491,7 +492,7 @@
                 "paddings":[2,6,2,6],
                 "background": "@palette.gray6",
                 "foreground": "@palette.black",
-                "font": "@view.smallFont",
+                "font": "@smallFont",
                 "border": { "$Border": [1, "@palette.gray1"] }
             }
         }
@@ -516,7 +517,7 @@
 
         "TitleLab": {
             "properties": {
-                "font": "@view.boldFont",
+                "font": "@boldFont",
                 "foreground":"@palette.white"
             }
         },

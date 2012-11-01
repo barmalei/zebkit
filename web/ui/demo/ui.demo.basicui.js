@@ -64,7 +64,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         tf = new TextField(new zebra.data.SingleLineTxt("dsd", 5));
         tf.setPreferredSize(100, -1);
         p.add(pkg.createLabedComponent("Fixed size(5):", tf));
-        tf = new TextField(new zebra.ui.view.PasswordText());
+        tf = new TextField(new zebra.ui.PasswordText());
         tf.setPreferredSize(100, -1);
         p.add(pkg.createLabedComponent("Password field:", tf));
         return pkg.createBorderPan("Text fields", p);

@@ -59,7 +59,7 @@ pkg.TreeDemo = new Class(pkg.DemoPan, [
         var fn = new zebra.ui.Font("Arial", 1, 14);
         t2.setViewProvider(new zebra.Dummy([
               function getView(c, i) {
-                    var tr = new zebra.ui.view.TextRender(i.value);
+                    var tr = new zebra.ui.TextRender(i.value);
                     if (i.value.indexOf("1") > 0) {
                         tr.setForeground(rgb.red);
                     }
@@ -91,7 +91,7 @@ pkg.TreeDemo = new Class(pkg.DemoPan, [
         p4.setPreferredSize(-1, 210);
         this.add(L.BOTTOM, p4);
 
-        // var t4v = new Class(zebra.ui.view.TextRender, [
+        // var t4v = new Class(zebra.ui.TextRender, [
         //     function (s) { this.$super(s); },
         //
         //     function paint(g, x, y, w, h, d) {

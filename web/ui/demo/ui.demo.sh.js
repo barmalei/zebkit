@@ -13,7 +13,7 @@ var Border = zebra.ui.view.Border;
 var L = zebra.layout;
 var Constraints = zebra.layout.Constraints;
 
-var SynHighlighterRender = new Class(zebra.ui.view.TextRender, [
+var SynHighlighterRender = new Class(zebra.ui.TextRender, [
         function(path){
             this.words = {};
             this.$super(zebra.io.GET(path));

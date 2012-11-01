@@ -19,14 +19,19 @@
         { "$ *zebra.ui.BaseLayer" :  "root"  }
      ],
 
+     "font"       : { "$font" : ["Arial", 0, 12] },
+     "boldFont"   : { "$font" : ["Arial", 1, 12] },
+     "smallFont"  : { "$font" : ["Arial", 0, 10] },
+     "fontColor"  : "#808080",
+     "disabledColor1": "#7B7B7B",
+     "disabledColor2": "@palette.white",
+
     "palette": {
         "white" : "#FFFFFF",
         "black" : "#000000"
     },
 
     "view": {
-        "dc1":"#808080",
-        "dc2":"@palette.white",
         "borderColor": "#AAAAAA"
     },
 
@@ -35,17 +40,7 @@
         "sunken" : { "$zebra.ui.view.Sunken":[] },
         "etched" : { "$Border" :   [ 1, "#778888", 1, 3 ] },
         "plain"  : { "$Border" : 1 },
-        "dot"    : { "$Border" : 1  }
-    },
-
-    "view": {
-        "font"       : { "$font" : ["Arial", 0, 12] },
-        "boldFont"   : { "$font" : ["Arial", 1, 12] },
-        "smallFont"  : { "$font" : ["Arial", 0, 10] },
-        "fontColor"  : "#808080",
-        "borderColor": "@palette.black",
-        "disableColor1": "#7B7B7B",
-        "disableColor2": "@palette.white"
+        "dot"    : { "$Border" : 2  }
     },
 
     "BaseLayer": {

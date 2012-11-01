@@ -35,8 +35,8 @@ function createItem(s) {
 
     var l = (j > 0) ? new zebra.ui.ImageLabel(s.substring(j+1), ui.get(s.substring(0, j))) : new Label(s);
     l.paddings(2,4,2,4);
-    if (zebra.instanceOf(l, Label)) l.setFont(ui.view.boldFont);
-    else l.get(1).setFont(ui.view.boldFont);
+    if (zebra.instanceOf(l, Label)) l.setFont(ui.boldFont);
+    else l.get(1).setFont(ui.boldFont);
     return l;
 }
 

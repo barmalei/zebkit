@@ -9,7 +9,7 @@ var FlowLayout = zebra.layout.FlowLayout;
 var GridLayout = zebra.layout.GridLayout;
 var BorderPan = zebra.ui.BorderPan;
 var ScrollPan = zebra.ui.ScrollPan;
-var Border = zebra.ui.view.Border;
+var Border = zebra.Border;
 var L = zebra.layout;
 var Tree = zebra.ui.tree.Tree;
 var Constraints = zebra.layout.Constraints;
@@ -18,12 +18,12 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
     function() {
         this.$super();
         this.setLayout(new L.BorderLayout(4,4));
-        this.padding(4);
+        this.setPadding(4);
 
         var pp = new Panel(new zebra.layout.RasterLayout()), lab = new Label("Label");
         lab.setSize(100, 20);
         lab.setLocation(50, 50);
-        lab.setBorder(ui.get("br.etched"));
+        lab.setBorder(ui.borders.etched);
         pp.add(lab);
         new zebra.ui.editors.ShaperPan(lab);
 
@@ -62,7 +62,7 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
         var ppp = new Panel();
         ppp.setLocation(220,220);
         ppp.setSize(150,150);
-        ppp.setBackground(new zebra.ui.view.View([
+        ppp.setBackground(new zebra.ui.View([
               function paint(g, x, y, w, h, target) {
                   var s = 8;
                   g.setColor(rgb.gray);
@@ -94,7 +94,7 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
 
         var prev = null, prevCol = null;
         t._.add(function selected(src, data) {
-                var c = lookup(pp, data.getComponent());
+                var c = lookup(pp, data.comp);
                 if (prev != null) {
                     prev.shaperBr.borderColor = prevCol;
                     prev.repaint();
@@ -109,7 +109,7 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
             });
 
         var l = new Label(new zebra.data.Text("This page represents number of Zebra components to control UI components size and location"));
-        l.padding(6);
+        l.setPadding(6);
         l.setFont(ui.boldFont);
         // l.setForeground(ui.get("designer.title.fg"));
         // l.setBackground(ui.get("designer.title.bg"));

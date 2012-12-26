@@ -18,6 +18,9 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, [
         this.$super();
         this.setLayout(new BorderLayout());
         var n = new Tabs(L.BOTTOM);
+        //vg,hg,sideSpace,upperSpace,brSpace
+        n.setTabSpaces(4,4,4,4,4);
+
         n.add("Border layout", this.borderLayoutPage());
         n.add("Flow layout", this.flowLayoutPage());
         n.add("List layout", this.listLayoutPage());
@@ -28,7 +31,7 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, [
 
     function borderLayoutPage() {
         var bl_p = new Panel(new BorderLayout(2,2));
-        bl_p.padding(4);
+        bl_p.setPadding(4);
         bl_p.add(L.TOP, new Button("TOP"));
         bl_p.add(L.BOTTOM, new Button("BOTTOM"));
         bl_p.add(L.RIGHT, new Button("RIGHT"));
@@ -39,7 +42,7 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, [
 
     function flowLayoutPage() {
         var fl = new Panel(new ListLayout(4));
-        fl.padding(4);
+        fl.setPadding(4);
         var fl_1 = new Panel(new FlowLayout(L.LEFT, L.CENTER, L.HORIZONTAL, 4));
         var fl_2 = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.HORIZONTAL, 4));
         var fl_3 = new Panel(new FlowLayout(L.RIGHT, L.CENTER, L.HORIZONTAL, 4));
@@ -78,7 +81,7 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, [
 
     function listLayoutPage() {
         var ll = new Panel(new ListLayout(4));
-        ll.padding(4);
+        ll.setPadding(4);
         var ll_1 = new Panel(new ListLayout(4));
         ll_1.add(pkg.createLabel("Item 1"));
         ll_1.add(pkg.createLabel("Item 2"));
@@ -99,7 +102,7 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, [
 
     function percentLayoutPage() {
         var pl = new Panel(new ListLayout(4));
-        pl.padding(4);
+        pl.setPadding(4);
         var pl_1 = new Panel(new PercentLayout(L.HORIZONTAL, 4));
         pl_1.add(30, pkg.createLabel("Takes 30%"));
         pl_1.add(50, pkg.createLabel("Takes 50%"));
@@ -124,30 +127,30 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, [
         }
 
         var p = new Panel(new FlowLayout(L.CENTER, L.CENTER));
-        p.padding(4);
+        p.setPadding(4);
         p.setPreferredSize(200,200);
 
         var p1 = new Panel(new GridLayout(2, 2));
 
         var c = new Constraints();
-        c.padding(4);
+        c.setPadding(4);
         c.fill = 0;
         c.ax = L.LEFT;
         c.ay = L.TOP;
         p1.add(c, createLabel("Left-top aligned", 0, 200));
 
         c = new Constraints();
-        c.padding(4);
+        c.setPadding(4);
         c.fill = L.HORIZONTAL;
         c.ay = L.BOTTOM;
         p1.add(c, createLabel("Aligned bottom,\nstretched horizontally", 0, 40));
 
         c = new Constraints();
-        c.padding(4);
+        c.setPadding(4);
         p1.add(c, createLabel("Stretched both\nvertical and\nhorizontal\ndirections", 30, 180));
 
         c = new Constraints();
-        c.padding(4);
+        c.setPadding(4);
         c.fill = 0;
         c.ax = L.CENTER;
         c.ay = L.CENTER;

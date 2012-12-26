@@ -8,8 +8,7 @@ var TextField = zebra.ui.TextField;
 var GridLayout = zebra.layout.GridLayout;
 var BorderPan = zebra.ui.BorderPan;
 var ScrollPan = zebra.ui.ScrollPan;
-var Border = zebra.ui.view.Border;
-var Border = zebra.ui.view.Border;
+var Border = zebra.ui.Border;
 var Tree = zebra.ui.tree.Tree;
 var Constraints = zebra.layout.Constraints;
 
@@ -17,7 +16,7 @@ pkg.MiscDemo = new Class(pkg.DemoPan,[
     function() {
         this.$super();
         this.setLayout(new GridLayout(1, 3));
-		this.padding(8);
+		this.setPadding(8);
     },
 
     function createExtenderpan() {

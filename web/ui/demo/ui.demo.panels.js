@@ -1,7 +1,7 @@
 
 (function(pkg, Class, ui) {
 
-eval(zebra.Import("ui", "layout", "ui.view"));
+eval(zebra.Import("ui", "layout"));
 
 pkg.PanelsDemo = new Class(pkg.DemoPan, [
     function() {
@@ -60,7 +60,7 @@ pkg.PanelsDemo = new Class(pkg.DemoPan, [
         var p = new Panel(new BorderLayout());
         var s1_1 = new SplitPan(new ImagePan(ui.get("cosmo1")), new ImagePan(ui.get("cosmo2")));
         var s1 = new SplitPan(new ImagePan(ui.get("cosmo3")), s1_1, HORIZONTAL);
-        p.padding(4);
+        p.setPadding(4);
         s1.setGripperLoc(150);
         s1_1.setGripperLoc(150);
         p.add(CENTER, s1);
@@ -95,7 +95,7 @@ pkg.PanelsDemo = new Class(pkg.DemoPan, [
         p4.setBorder(new Etched());
 
         var ctr = new Constraints();
-        ctr.padding(6);
+        ctr.setPadding(6);
         p.add(ctr, p1);
         p.add(ctr, p2);
         p.add(ctr, p3);

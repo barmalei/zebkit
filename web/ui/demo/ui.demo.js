@@ -2,7 +2,7 @@
 
 var Panel = zebra.ui.Panel;
 var Label = zebra.ui.Label;
-var Border = zebra.ui.view.Border;
+var Border = zebra.ui.Border;
 var BorderPan = zebra.ui.BorderPan;
 var L = zebra.layout;
 
@@ -12,14 +12,14 @@ pkg.createLabel = function (txt, color) {
     l.setForeground(color);
     l.setFont(zebra.ui.boldFont);
     l.setBorder(new Border(1, zebra.util.rgb.gray));
-    l.padding(4);
+    l.setPadding(4);
     return l;
 };
 
 pkg.createBorderPan = function (txt, content, w, h) {
     content = content || new Panel();
     var bp = new BorderPan(txt, content);
-    content.padding(4);
+    content.setPadding(4);
     w = w || -1;
     h = h || -1;
     bp.setPreferredSize(w, h);
@@ -39,7 +39,7 @@ pkg.createLabedComponent = function(title, comp) {
 pkg.DemoPan = Class(Panel, [
     function() {
         this.$super();
-        this.padding(6);
+        this.setPadding(6);
     },
 
     function activated(b) {}

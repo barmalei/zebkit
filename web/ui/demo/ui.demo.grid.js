@@ -15,7 +15,8 @@ var GridCaption = zebra.ui.grid.GridCaption;
 var BorderPan = zebra.ui.BorderPan;
 var RasterLayout = zebra.layout.RasterLayout;
 var TextRender = zebra.ui.TextRender;
-var Picture = zebra.ui.view.Picture;
+var BoldTextRender = zebra.ui.BoldTextRender;
+var Picture = zebra.ui.Picture;
 var rgb = zebra.util.rgb;
 var TreeModel = zebra.data.TreeModel;
 var Tree = zebra.ui.tree.Tree;
@@ -30,7 +31,7 @@ var Link = zebra.ui.Link;
 
 function wrapWithPan() {
     var p = new Panel(new FlowLayout(L.CENTER, L.TOP, L.VERTICAL, 16));
-    p.padding(8);
+    p.setPadding(8);
     for(var i=0; i< arguments.length; i++) p.add(arguments[i]);
     return p;
 }
@@ -53,9 +54,8 @@ var colors = [ [rgb.white, rgb.lightGray, rgb.white],
 
 var ColumnsAlignmentProvider = Class(DefViews, [
     function getView(row,col,data){
-        var tf = new TextRender(data);
+        var tf = new BoldTextRender(data);
         if (row == 1 && col == 1) {
-            tf.setDefBoldFont();
             tf.setForeground(rgb.white);
         }
         return tf;
@@ -63,17 +63,19 @@ var ColumnsAlignmentProvider = Class(DefViews, [
 
     function getXAlignment(row,col){
         if(col == 0) return L.LEFT;
-        else
-            if(col == 1) return L.CENTER;
+        else {
+            if (col == 1) return L.CENTER;
             else if(col == 2) return L.RIGHT;
+        }
         return this.$super(this.getXAlignment,row, col);
     },
 
     function getYAlignment(row,col){
         if(row == 0) return L.TOP;
-        else
+        else {
             if(row == 1) return L.CENTER;
             else if(row == 2) return L.BOTTOM;
+        }
         return this.$super(this.getYAlignment,row, col);
     },
 
@@ -94,7 +96,7 @@ var CustomGridEditor = new Class(DefEditors, [
                     this.accepted = false;
                     this.list = new CompList(true);
                     this.list.setLayout(new GridLayout(2, 2));
-                    this.list.padding(6);
+                    this.list.setPadding(6);
                     this.list.views[0] = null;
                     this.add(L.CENTER, this.list);
 
@@ -102,7 +104,7 @@ var CustomGridEditor = new Class(DefEditors, [
                     controls.setBackground(null);
                     var cancelLink = new Link("<cancel>");
                     controls.add(cancelLink);
-                    controls.paddings(0, 0, 4, 0);
+                    controls.setPaddings(0, 0, 4, 0);
                     cancelLink._.add(function() {
                         $this.accepted = false;
                         $this.parent.remove($this);
@@ -113,7 +115,7 @@ var CustomGridEditor = new Class(DefEditors, [
                         $this.parent.remove($this);
                     });
 
-                    this.setBorder(new zebra.ui.view.Border(1, rgb.gray, 2, 6));
+                    this.setBorder(new zebra.ui.Border(1, rgb.gray, 2, 6));
                     this.setBackground(zebra.ui.palette.gray6);
 
 
@@ -131,7 +133,7 @@ var CustomGridEditor = new Class(DefEditors, [
             this.extWin = new ExtEditor();
             for(var i = 0; i < IMAGES.length; i++) {
                 var im = new ImagePan(zebra.ui.get(IMAGES[i]));
-                im.padding(2);
+                im.setPadding(2);
                 this.extWin.list.add(im);
             }
             this.extWin.toPreferredSize();
@@ -146,11 +148,11 @@ var CustomGridEditor = new Class(DefEditors, [
             else
                 if(col == 1){
                     var combo = new Combo(), list = combo.list;
-                    list.model.addElement("Item 1");
-                    list.model.addElement("Item 2");
-                    list.model.addElement("Item 3");
-                    for(var i = 0;i < list.model.elementsCount(); i ++ ){
-                        if (list.model.elementAt(i) == o) {
+                    list.model.add("Item 1");
+                    list.model.add("Item 2");
+                    list.model.add("Item 3");
+                    for(var i = 0;i < list.model.count(); i ++ ){
+                        if (list.model.get(i) == o) {
                             list.select(i);
                             break;
                         }
@@ -166,7 +168,7 @@ var CustomGridEditor = new Class(DefEditors, [
         function fetchEditedValue(row,col,data,editor){
             if(col == 0) return editor.getState() ? "on" : "off";
             else
-                if(col == 1) return editor.list.model.elementAt(editor.list.selectedIndex);
+                if(col == 1) return editor.list.model.get(editor.list.selectedIndex);
                 else
                     if (col == 3) return editor.list.selectedIndex;
             return this.$super(this.fetchEditedValue,row, col, data, editor);
@@ -185,7 +187,7 @@ var CompEditorProvider = new Class(DefEditors, [
         else {
             var ce = this.$super(t, r, c, o);
             ce.setBorder(null);
-            ce.padding(0);
+            ce.setPadding(0);
             return ce;
         }
     },
@@ -224,7 +226,7 @@ function longGrid() {
 	corner.setBackground(ui.grid.GridCaption.properties.background);
 	g.add(L.NONE, corner);
 	var p = new zebra.ui.ScrollPan(g);
-	p.padding(4);
+	p.setPadding(4);
 	return p;
 }
 
@@ -352,7 +354,7 @@ pkg.GridDemo = new Class(pkg.DemoPan, [
     function() {
         this.$super();
         this.setLayout(new L.BorderLayout());
-        this.padding(6);
+        this.setPadding(6);
 
         var n = new Tabs(L.LEFT);
         n.add("1000 cells", longGrid());

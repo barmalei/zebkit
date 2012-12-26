@@ -10,18 +10,17 @@ var FlowLayout = zebra.layout.FlowLayout;
 var GridLayout = zebra.layout.GridLayout;
 var BorderPan = zebra.ui.BorderPan;
 var Line = zebra.ui.Line;
-var Border = zebra.ui.view.Border;
-var Border = zebra.ui.view.Border;
+var Border = zebra.ui.Border;
 var L = zebra.layout;
 var Checkbox = zebra.ui.Checkbox;
-var MenuBar = zebra.ui.MenuBar;
+var Menubar = zebra.ui.Menubar;
 var Menu = zebra.ui.Menu;
 var Constraints = zebra.layout.Constraints;
 
 function createItem(s) {
     if (s[0]=='&') {
         var p = new ImagePan(ui.get(s.substring(1)));
-        p.padding(4);
+        p.setPadding(4);
         return p;
     }
 
@@ -34,14 +33,14 @@ function createItem(s) {
     }
 
     var l = (j > 0) ? new zebra.ui.ImageLabel(s.substring(j+1), ui.get(s.substring(0, j))) : new Label(s);
-    l.paddings(2,4,2,4);
+    l.setPaddings(2,4,2,4);
     if (zebra.instanceOf(l, Label)) l.setFont(ui.boldFont);
     else l.get(1).setFont(ui.boldFont);
     return l;
 }
 
 function createMenubar(items) {
-    var MBarBorder =  new Class(zebra.ui.view.View, [
+    var MBarBorder =  new Class(zebra.ui.View, [
         function paint(g,x,y,w,h,d){
             g.setColor(zebra.ui.palette.white);
             g.fillRect(x + 2, y, w - 3, h - 1);
@@ -52,14 +51,14 @@ function createMenubar(items) {
         }
     ]);
 
-    var mb = new MenuBar();
+    var mb = new Menubar();
     mb.setBorder(new MBarBorder());
 
     for(var i=0; i < items.length; i++) {
-        if (zebra.instanceOf(items[i], Menu)) mb.setMenu(mb.count() - 1, items[i]);
+        if (zebra.instanceOf(items[i], Menu)) mb.setMenuAt(mb.count() - 1, items[i]);
         else {
             if (items[i].constructor == Array) {
-                mb.setMenu(mb.count() - 1, createMenu(items[i]));
+                mb.setMenuAt(mb.count() - 1, createMenu(items[i]));
             }
             else mb.add(createItem(items[i]));
         }
@@ -69,7 +68,7 @@ function createMenubar(items) {
 
 function createMenu(items, m) {
     if (typeof(m) === "undefined") {
-        m = new Menu(1);
+        m = new Menu();
         var r = createMenu(items, m);
         return r;
     }
@@ -77,7 +76,7 @@ function createMenu(items, m) {
     for(var i=0; i < items.length; i++) {
         var item = items[i];
         if (item.constructor == Array) {
-            m.setSubMenu(m.count() - 1, createMenu(item));
+            m.setSubmenuAt(m.count() - 1, createMenu(item));
         }
         else {
             var it = createItem(item);
@@ -89,8 +88,8 @@ function createMenu(items, m) {
 }
 
 function createColorPicker() {
-    var m = new Menu(true), i = 0, c = new Constraints();
-    c.paddings(2,0,2,0);
+    var m = new Menu(), i = 0, c = new Constraints();
+    c.setPaddings(2,0,2,0);
     m.setLayout(new GridLayout(4, 4));
     for(var k in rgb) {
         if (!(rgb[k] instanceof rgb)) continue;
@@ -122,7 +121,7 @@ function formMenuArray() {
 
 function createToolbar() {
     var t = new zebra.ui.Toolbar();
-    t.padding(6);
+    t.setPadding(6);
     t.setBackground(rgb.lighGray);
 
    // t.setBorder(null);
@@ -155,33 +154,39 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
     function() {
         this.$super();
         this.setLayout(new BorderLayout(8,8));
-        this.padding(8);
+        this.setPadding(8);
 
         var mbar = new Panel(new FlowLayout(L.CENTER, L.TOP, L.HORIZONTAL, 8));
+        var c    = new Panel(new BorderLayout());
+        var ctr  = new Constraints();
 
-        var c = new Panel(new BorderLayout()), ctr = new Constraints();
-        ctr.padding(8);
+        ctr.setPadding(8);
         c.setBorder(ui.borders.sunken);
         c.setPreferredSize(240, 145);
-        c.add(L.TOP, createMenubar(formMenuArray()));
-        c = new BorderPan("Top menu bar", c);
-        c.setGaps(8,8);
-        mbar.add(ctr, c);
+        var mb = createMenubar(formMenuArray());
+        c.add(L.TOP, mb);
+
+        var bp = new BorderPan("Top menu bar", c);
+        bp.setGaps(8,8);
+        mbar.add(ctr, bp);
+
 
         var c = new Panel(new BorderLayout());
         c.setBorder(ui.borders.sunken);
         c.setPreferredSize(240, 145);
+
         c.add(L.BOTTOM, createMenubar(formMenuArray()));
+
         c = new BorderPan("Bottom menu bar", c);
         c.setGaps(8,8);
         mbar.add(ctr, c);
         this.add(L.CENTER, mbar);
 
+
         var t = createToolbar();
-        t = new BorderPan("Horizontal toobar", t);
+        t = new BorderPan("Horizontal toolbar", t);
         t.setGaps(8,8);
         this.add(L.TOP, t);
-
 
         var p  = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.HORIZONTAL, 8));
         var l1 = pkg.createLabel("Press right mouse button\nto see context menu Cars", rgb.red);
@@ -203,10 +208,9 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
         var m3 = createMenu(formMenuArray()[5]);
         this.add(L.BOTTOM, new BorderPan("Context menu", p));
         zebra.ui.popup.setPopup(l1, new zebra.ui.PopupInfo([
-            function getPopup(c, x, y) { 
-
-                zebra.print("!!!!!!!!!!!!! " + m1 + "," + m1.getPreferredSize().width + "," + m1.getPreferredSize().height + m1.getClazz().$name);
-                return m1; }
+            function getPopup(c, x, y) {
+                return m1;
+            }
         ]));
         zebra.ui.popup.setPopup(l2, new zebra.ui.PopupInfo([
             function getPopup(c, x, y) { return m2; }

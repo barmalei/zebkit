@@ -10,7 +10,7 @@ var GridLayout = zebra.layout.GridLayout;
 var BorderPan = zebra.ui.BorderPan;
 var BorderLayout = zebra.layout.BorderLayout;
 var ScrollPan = zebra.ui.ScrollPan;
-var Border = zebra.ui.view.Border;
+var Border = zebra.ui.Border;
 var L = zebra.layout;
 var Tree = zebra.ui.tree.Tree;
 var Constraints = zebra.layout.Constraints;
@@ -65,8 +65,7 @@ pkg.TreeDemo = new Class(pkg.DemoPan, [
                     }
 
                     if (i.value.indexOf("2") > 0) {
-                        tr.setDefBoldFont();
-                       // tr.setFont(zebra.ui.Font.);
+                        return new zebra.ui.BoldTextRender(i.value);
                     }
 
                     if (i.value.indexOf("Root") === 0) {
@@ -108,7 +107,7 @@ pkg.TreeDemo = new Class(pkg.DemoPan, [
         // ]));
 
         var ctr = new Constraints();
-        this.padding(8);
+        this.setPadding(8);
         p.add(ctr, p1);
         p.add(ctr, p2);
         p.add(ctr, p3);

@@ -9,7 +9,7 @@ var FlowLayout = zebra.layout.FlowLayout;
 var GridLayout = zebra.layout.GridLayout;
 var BorderPan = zebra.ui.BorderPan;
 var ScrollPan = zebra.ui.ScrollPan;
-var Border = zebra.ui.view.Border;
+var Border = zebra.ui.Border;
 var L = zebra.layout;
 var Constraints = zebra.layout.Constraints;
 
@@ -57,7 +57,7 @@ pkg.ShDemo = new Class(pkg.DemoPan, [
     function(path) {
         this.$super();
         this.setLayout(new BorderLayout());
-		this.padding(0);
+		this.setPadding(0);
 
         var sh = new SynHighlighterRender(path);
         sh.words.put("function", rgb.black);

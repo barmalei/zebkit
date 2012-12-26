@@ -10,7 +10,7 @@ var FlowLayout = zebra.layout.FlowLayout;
 var GridLayout = zebra.layout.GridLayout;
 var BorderPan = zebra.ui.BorderPan;
 var ScrollPan = zebra.ui.ScrollPan;
-var Border = zebra.ui.view.Border;
+var Border = zebra.ui.Border;
 var L = zebra.layout;
 var Tree = zebra.ui.tree.Tree;
 var Constraints = zebra.layout.Constraints;
@@ -54,7 +54,7 @@ var FL = Class(zebra.ui.BaseLayer, [
 
 function createTooltipDemo() {
     var  p = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.VERTICAL, 16));
-    var ccc = zebra.ui.get("tooltiparea.fg");
+    var ccc = rgb.black;
     var l1 = pkg.createLabel("HONDA\nShow textual\ntooltip", ccc);
     var l2 = pkg.createLabel("BMW\nShow image\ntooltip", ccc);
     var l3 = pkg.createLabel("PEUGEOT\nShow combined\ntooltip", ccc);
@@ -67,7 +67,7 @@ function createTooltipDemo() {
     ui.tooltip.setTooltip(l1, new zebra.ui.TooltipInfo([
          function getTooltip(target, x, y) {
             var l = pkg.createLabel(" THIS IS HONDA ", rgb.blue);
-            l.setBackground(ui.get("col.gray7"));
+            l.setBackground(ui.palette.gray7);
             return l;
          }
     ]));
@@ -85,7 +85,7 @@ function createTooltipDemo() {
          function getTooltip(target, x, y) {
             var l = new zebra.ui.ImageLabel("Peugeot", ui.get("peugeot"));
             l.setBackground(rgb.white);
-            l.padding(4);
+            l.setPadding(4);
             l.setBorder(new Border(1));
             return l;
          }
@@ -106,12 +106,12 @@ function createWindowComp(target) {
     tf.setEditable(false);
     tf.setText("Drag and drop window\nby its title.\n\nResize window by\ndrag its right-bottom corner");
     w.root.add(L.CENTER, tf);
-    w.root.padding(8);
+    w.root.setPadding(8);
 
     var p = new Panel(new FlowLayout(L.CENTER, L.CENTER));
     var b = new zebra.ui.Button("Close");
-    b.paddings(4,16,4,16);
-    p.padding(8);
+    b.setPaddings(4,16,4,16);
+    p.setPadding(8);
     p.add(b);
 
     w.root.add(L.BOTTOM, p);
@@ -126,7 +126,7 @@ pkg.WinDemo = new Class(pkg.DemoPan,  [
         this.$super();
         this.shown = false;
         this.setLayout(new BorderLayout(8,8));
-        this.padding(8);
+        this.setPadding(8);
         this.add(L.LEFT, pkg.createBorderPan("Tooltips", createTooltipDemo()));
 
         var cp = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.VERTICAL, 8));

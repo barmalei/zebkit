@@ -21,12 +21,12 @@ phases. The author appreciates any possible feedback, criticism, help, suggestio
 
    *  Zebra easy OOP concept JavaScript
   
-   *  (NEW) Zebra UI Engine that can be used as powerful basis for: 
+   *  (**NEW**) Zebra UI Engine that can be used as powerful basis for: 
       * Rendered from scratch WEB UI components creation
       * Events (keyboard, mouse, etc) manipulation, advanced event technique to develop composite UI components
       * UI components layouting using number of predefined layout managers
       * Full control of UI components rendering, paint manager does many things behind the scene   
-      * (NEW) Flash-free, pure web native clipboard paste and copy support 
+      * (**NEW**) Flash-free, pure web native clipboard paste and copy support 
       * Layered UI nature
       * and many other ...
 
@@ -37,11 +37,11 @@ phases. The author appreciates any possible feedback, criticism, help, suggestio
       * (NEW) Simple data model description 
       * and many other ...
 
-   *  (NEW) JSON as Zebra UI descriptive language
+   *  (**NEW**) JSON as Zebra UI descriptive language
 
-   *  (NEW) JSON as Zebra UI look and feel configuration 
+   *  (**NEW**) JSON as Zebra UI look and feel configuration 
 
-   *  (NEW) Zebra IO   
+   *  (**NEW**) Zebra IO   
       *  GET/POST/etc  Ajax requests  
       *  XML-RPC, JSON-RPC Service communication
       *  binary data handling
@@ -49,61 +49,62 @@ phases. The author appreciates any possible feedback, criticism, help, suggestio
 
 ### Write first UI Zebra application
 
-**No zebra stuff on you PC has to be downloaded and deployed.** Let's start writing simple Zebra html:
-
-```html
-		<!DOCTYPE html>
-		<html>
-			<header>
-				<script src='http://repo.zebkit.org/pa3/zebra.min.js'
-                        type='text/javascript'></script>
-				<script type='text/javascript'>
-				    zebra.ready(function() {
-						// import classes and variables from "ui" and "layout" packages in local space
-						eval(zebra.Import("ui", "layout"));
-						// create Canvas
-					    var canvas = new zCanvas(400, 400), root = canvas.root;
-						// define layout
-						root.setLayout(new BorderLayout());
-						// add button to center
-						root.add(CENTER, new Button("Ok"));
-						...
-			 		});
-				</script>
-			</header>
-			<body></body>
-		</html>
-```
-
-**We can do the application code even more graceful using JSON-like style:
+To write first application **no zebra stuff on you PC has to be downloaded and deployed.** Let's start writing simple Zebra html
+following traditional style:
 
 ```html
 <!DOCTYPE html>
-		<html>
-			<header>
-				<script src='http://repo.zebkit.org/pa3/zebra.min.js'
-		                type='text/javascript'></script>
-				<script type='text/javascript'>
-				    zebra.ready(function() {
-						// import classes and variables from "ui" and "layout" packages in local space
-						eval(zebra.Import("ui", "layout"));
+<html>
+	<header>
+		<script src='http://repo.zebkit.org/pa3/zebra.min.js'
+                type='text/javascript'></script>
+		<script type='text/javascript'>
+		    zebra.ready(function() {
+				// import classes and variables from "ui" and "layout" packages in local space
+				eval(zebra.Import("ui", "layout"));
+				// create Canvas
+			    var canvas = new zCanvas(400, 400), root = canvas.root;
+				// define layout
+				root.setLayout(new BorderLayout());
+				// add button to center
+				root.add(CENTER, new Button("Ok"));
+				...
+	 		});
+		</script>
+	</header>
+	<body></body>
+</html>
+```
 
-						// create Canvas using JSON like style
-					    (new zCanvas()).root.properties({
-					    	layout: new BorderLayout(),
-					    	kids  : {
-					    		CENTER: new TextField("", true),
-					    		TOP   : (new BoldLabel("Sample application")).properties({
-					    			padding : 8
-					    		}),
-					    		BOTTOM: new Button("Ok")
-					    	}
-					    });
-					}); 
-				</script>
-			</header>
-			<body></body>
-		</html>
+We can write the application in more graceful manner using JSON-like style:
+
+```html
+<!DOCTYPE html>
+<html>
+	<header>
+		<script src='http://repo.zebkit.org/pa3/zebra.min.js'
+                type='text/javascript'></script>
+		<script type='text/javascript'>
+		    zebra.ready(function() {
+				// import classes and variables from "ui" and "layout" packages in local space
+				eval(zebra.Import("ui", "layout"));
+
+				// create Canvas using JSON like style
+			    (new zCanvas()).root.properties({
+			    	layout: new BorderLayout(),
+			    	kids  : {
+			    		CENTER: new TextField("", true),
+			    		TOP   : (new BoldLabel("Sample application")).properties({
+			    			padding : 8
+			    		}),
+			    		BOTTOM: new Button("Ok")
+			    	}
+			    });
+			}); 
+		</script>
+	</header>
+	<body></body>
+</html>
 ```
 
 ### JSON UI definition 
@@ -128,27 +129,27 @@ Create UI definition and store it in the same place where html is going to be ho
 It is expected that JSON UI description file name is "myform.json". 
 Than load the JSON UI description as follow:
 ```html
-		<!DOCTYPE html>
-		<html>
-			<header>
-				<script src='http://repo.zebkit.org/pa3/zebra.min.js'
-                        type='text/javascript'></script>
-				<script type='text/javascript'>
-				    zebra.ready(function() {
-						// load UI form from JSON file
-					    var root = (new zebra.ui.zCanvas()).root;
-					    (new zebra.util.Bag(root)).load(zebra.io.GET("myform.json"));
+<!DOCTYPE html>
+<html>
+	<header>
+		<script src='http://repo.zebkit.org/pa3/zebra.min.js'
+                type='text/javascript'></script>
+		<script type='text/javascript'>
+		    zebra.ready(function() {
+				// load UI form from JSON file
+			    var root = (new zebra.ui.zCanvas()).root;
+			    (new zebra.util.Bag(root)).load(zebra.io.GET("myform.json"));
 
-					    // find by class Button component and register button
-					    // event handler to clear text field content
-					    root.find("//Button")._.add(function() {
-						    root.find("//TextField").setText("");
-						});	    
-					});
-				</script>
-			</header>
-			<body></body>
-		</html>
+			    // find by class Button component and register button
+			    // event handler to clear text field content
+			    root.find("//Button")._.add(function() {
+				    root.find("//TextField").setText("");
+				});	    
+			});
+		</script>
+	</header>
+	<body></body>
+</html>
 ```
 
 
@@ -158,54 +159,54 @@ By implementing special "zebra.ui.CopyCutPaste" interface the component can star
 clipboard data exchange. Zebra doesn't use invisible Flash application to work with clipboard: 
 
 ```html
-	<!DOCTYPE html>
-	<html>
-		<header>		
-			<script src='http://repo.zebkit.org/pa3/zebra.min.js'
-	                type='text/javascript'></script>
-			<script type='text/javascript'>
-				zebra.ready(function() {
-					eval(zebra.Import("ui", "layout"));
+<!DOCTYPE html>
+<html>
+	<header>		
+		<script src='http://repo.zebkit.org/pa3/zebra.min.js'
+                type='text/javascript'></script>
+		<script type='text/javascript'>
+			zebra.ready(function() {
+				eval(zebra.Import("ui", "layout"));
 
-					// define our own UI component class that wants to handle clipboard events
-					var MyComponent = zebra.Class(MLabel, CopyCutPaste, [
-					    // override "canHaveFocus" method to make your component focusable
-					    function canHaveFocus() { return true; },
+				// define our own UI component class that wants to handle clipboard events
+				var MyComponent = zebra.Class(MLabel, CopyCutPaste, [
+				    // override "canHaveFocus" method to make your component focusable
+				    function canHaveFocus() { return true; },
 
-					    // returns what you want to put in clipboard
-					    function copy() {
-					    	this.setForeground("#FF3311");
-					    	return this.getText();
-					    },
+				    // returns what you want to put in clipboard
+				    function copy() {
+				    	this.setForeground("#FF3311");
+				    	return this.getText();
+				    },
 
-					    // this method is called when paste event has happened for this 
-					    // component 
-					    function paste(s) { 
-					    	this.setForeground("#000000");
-					    	this.setText(s); 
-					    }
-					]); 
+				    // this method is called when paste event has happened for this 
+				    // component 
+				    function paste(s) { 
+				    	this.setForeground("#000000");
+				    	this.setText(s); 
+				    }
+				]); 
 
-					// create UI application with our clipboard handler component
-					(new zCanvas()).root.properties({
-						layout: new BorderLayout(8,8), padding:8,
-						kids  : {
-							TOP   : new BoldLabel("Copy/Paste in box below"),
-							// create inner class that is customized to indicate 
-							// when the component gets or looses focus 
-							CENTER: (new MyComponent(FocusListener, [
-								function focusGained(e) { this.setBorder(borders.sunken); },
-								function focusLost(e)   { this.setBorder(borders.plain); }
-							])).properties( { border:borders.plain, 
-											  text:"Copy me in clipboard", 
-											  padding:6 })
-						}
-					});
+				// create UI application with our clipboard handler component
+				(new zCanvas()).root.properties({
+					layout: new BorderLayout(8,8), padding:8,
+					kids  : {
+						TOP   : new BoldLabel("Copy/Paste in box below"),
+						// create inner class that is customized to indicate 
+						// when the component gets or looses focus 
+						CENTER: (new MyComponent(FocusListener, [
+							function focusGained(e) { this.setBorder(borders.sunken); },
+							function focusLost(e)   { this.setBorder(borders.plain); }
+						])).properties( { border:borders.plain, 
+										  text:"Copy me in clipboard", 
+										  padding:6 })
+					}
 				});
-			</script>
-		</header>
-		<body></body>
-	</html>
+			});
+		</script>
+	</header>
+	<body></body>
+</html>
 ```
 
 ### Customize zebra UI components look and feel

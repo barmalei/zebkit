@@ -153,9 +153,9 @@ Than load the JSON UI description as follow:
 ```
 
 
-### Use native clipboard in an Zebra UI component
+### Use native clipboard in Zebra UI components
 
-By implementing special "zebra.ui.CopyCutPaste" interface the component can start participating in 
+By implementing special __"zebra.ui.CopyCutPaste"__ interface the component can start participating in 
 clipboard data exchange. Zebra doesn't use invisible Flash application to work with clipboard: 
 
 ```html

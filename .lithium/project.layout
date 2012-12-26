@@ -2,49 +2,31 @@
 
 PROJECT {
 	@desc = 'Zebra'
-	@ver  = '1.2.0'
+	@ver  = '1.0.0.preAlpha2'
 	
 	ARTIFACT(RUBY) {
 	    @libs = [ 'lib', "#{$lithium_home}/tools/tt/lib", "#{$lithium_home}/tools/polyglot/lib" ]
 	}	
 
-    SET("demo/demo/*.js") {
-        CLASS(CompressJavaScript) {
-	        @output_dir = "demo"
-	        @options = [ "--nomunge" ]
-        }
-    }
-
-    ARTIFACT('lib/gravity/zebra/easyoop.min.js', CompressedJavaScript) {
-        @source = "lib/gravity/zebra/easyoop.js"
-        @options = [ "--nomunge" ]
-    }
-
-    ARTIFACT('lib/gravity/zebra/all.min.js', CompressedJavaScript) {
-        @source = "lib/gravity/zebra/all.js"
+    ARTIFACT('lib/zebra/zebra.min.js', CompressedJavaScript) {
+        @source = "lib/zebra/zebra.js"
         @options = [ "--nomunge" ]
         REQUIRE @source
     }
 
-    ARTIFACT('lib/gravity/zebra/all.io.min.js', CompressedJavaScript) {
-        @source = "lib/gravity/zebra/all.io.js"
+    ARTIFACT('lib/zebra/zebra.io.min.js', CompressedJavaScript) {
+        @source = "lib/zebra/zebra.io.js"
         @options = [ "--nomunge" ]
         REQUIRE @source
     }
 
-    ARTIFACT('lib/gravity/zebra/all.canvas.min.js', CompressedJavaScript) {
-        @source = "lib/gravity/zebra/all.canvas.js"
+    ARTIFACT('lib/zebra/zebra.canvas.min.js', CompressedJavaScript) {
+        @source = "lib/zebra/zebra.canvas.js"
         @options = [ "--nomunge" ]
         REQUIRE @source
     }
 
-    ARTIFACT('web/ui/demo/demo.all.min.js', CompressedJavaScript) {
-        @source = "web/ui/demo/demo.all.js"
-        @options = [ "--nomunge" ]
-        REQUIRE @source
-    }
-
-	SET('lib/gravity/zebra/*.js') {
+  	SET('lib/zebra/*.js') {
 	    CLASS(CombinedJavaScript)
 	}
 

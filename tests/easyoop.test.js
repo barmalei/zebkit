@@ -2,8 +2,8 @@
 if (typeof(zebra) === "undefined") {
     if (typeof arguments[0] === "undefined") p = "";
     else p = arguments[0] + "/";
-    load(p + 'lib/gravity/zebra/easyoop.js');
-    load(p + 'lib/gravity/zebra/assert.js');
+    load(p + 'lib/zebra/easyoop.js');
+    load(p + 'lib/zebra/assert.js');
 }
 
 (function () {
@@ -238,6 +238,16 @@ if (typeof(zebra) === "undefined") {
 
             assert(typeof i.toString == 'function' && typeof i.toString.$clone$ == 'undefined', true, 'toString in interface instance');
             assert(typeof i.equals == 'function'  && typeof i.equals.$clone$ == 'undefined', true, 'equals in interface instance');
+
+            var a = new A(1), b = new B();
+            assert(A, a.constructor, "test_class 38");
+            assert(B, b.constructor, "test_class 38");
+            assert(a.getClazz(), A, "test_class 38");
+            assert(a.getClazz(), a.constructor, "test_class 38");
+            assert(b.getClazz(), B, "test_class 38");
+            assert(b.getClazz(), b.constructor, "test_class 38");
+            assert(A != B, true, "test_class 38");
+
         },
 
         function test_array_classdef() {
@@ -1239,7 +1249,6 @@ if (typeof(zebra) === "undefined") {
 
         function test_packaging() {
 
-
             function isPackage(v) {
                return v && zebra.FN(v.constructor) === "Package";
             }
@@ -1454,6 +1463,3 @@ if (typeof(zebra) === "undefined") {
         }
     );
 })();
-
-
-

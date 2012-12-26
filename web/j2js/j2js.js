@@ -26,7 +26,7 @@ function getFileById(id, callback) {
         "inner" :"InnerClass.java",
         "abstract":"AbstractAndFinal.java"
     };
-    
+
 	if (id in cached) {
 		callback(id, cached[id]);
 		return;
@@ -34,14 +34,14 @@ function getFileById(id, callback) {
 	if (!(id in MAP)) {
 	    throw new Error("File '" + id + "' not found ");
 	}
-	
-	
+
+
 	start_wait("javasrc_container");
 	var r = getXmlHttp();
 	r.open("GET", "/java/" + MAP[id], true);
-	
+
 	r.onreadystatechange = function() {
-	 	if (r.readyState == 4) 
+	 	if (r.readyState == 4)
 		{
 			stop_wait();
 	     	if(r.status == 200) {
@@ -65,29 +65,29 @@ function getFileById(id, callback) {
 function start_wait(target_id) {
 	stop_wait(target_id);
 	if (!target_id) target_id = "container";
-	
+
 	var container = document.getElementById("container");
 	var pos       = findPos(container);
-	var shimDiv   = document.createElement('div');  
-	shimDiv.id = 'wait';  
-	shimDiv.style.position = 'absolute';  
-	shimDiv.style.top = "" + pos[1] + "px";  
-	shimDiv.style.left = "" + pos[0] + "px";  
-	shimDiv.style.width = "" + container.offsetWidth + "px";  
-	shimDiv.style.height = "" + container.offsetHeight + "px";   
-	shimDiv.style.backgroundColor = '#000000'; 
+	var shimDiv   = document.createElement('div');
+	shimDiv.id = 'wait';
+	shimDiv.style.position = 'absolute';
+	shimDiv.style.top = "" + pos[1] + "px";
+	shimDiv.style.left = "" + pos[0] + "px";
+	shimDiv.style.width = "" + container.offsetWidth + "px";
+	shimDiv.style.height = "" + container.offsetHeight + "px";
+	shimDiv.style.backgroundColor = '#000000';
 	shimDiv.style.zIndex = 3;
 	shimDiv.style.opacity = '0.0';
 	shimDiv.style.filter = 'progid:DXImageTransform.Microsoft.Alpha(opacity=0)';
 
 	var rel    = document.getElementById(target_id);
-	var img    = document.createElement('img');  
+	var img    = document.createElement('img');
 	var relPos = findPos(rel);
 
 	img.id = "wait_img";
-	img.style.backgroundColor = '#000000'; 
+	img.style.backgroundColor = '#000000';
 	img.style.zIndex = 3;
-	img.style.position = 'absolute';  
+	img.style.position = 'absolute';
 	img.style.left = "" + (relPos[0] + (rel.offsetWidth  - 75)/2 ) + "px";
 	img.style.top  = "" + (relPos[1] + (rel.offsetHeight - 75)/2 ) + "px";
 	img.setAttribute("src", "wait.gif");
@@ -104,9 +104,9 @@ function stop_wait() {
 function getXmlHttp(){
   	try {
     	return new ActiveXObject("Msxml2.XMLHTTP");
-  	} 
+  	}
 	catch (e) {
-    	try {  return new ActiveXObject("Microsoft.XMLHTTP"); } 
+    	try {  return new ActiveXObject("Microsoft.XMLHTTP"); }
 		catch (ee) {}
   	}
   	return new XMLHttpRequest();
@@ -120,12 +120,12 @@ function setMessage(txt) {
 function setup() {
 	if(typeof String.prototype.trim !== 'function') {
 	  	String.prototype.trim = function() {
-	    	return this.replace(/^\s+|\s+$/g, ''); 
+	    	return this.replace(/^\s+|\s+$/g, '');
 	  	}
 	}
 
 	cached = {};
-	
+
 	var bt = document.getElementById("convert");
 	if (bt.addEventListener) {
 		bt.addEventListener('click', convert, true);
@@ -133,7 +133,7 @@ function setup() {
 	else  {
 	   	bt.attachEvent("onclick", convert);
 	}
-	
+
 	var sl = document.getElementById('select');
 	if(sl.addEventListener){
 	    sl.addEventListener('change', select, false);
@@ -141,16 +141,16 @@ function setup() {
 	else {
 	    sl.attachEvent('onchange', select, false);
 	}
-	
+
 	var src = document.getElementById('javasrc');
-    if(/^[0-9]+$/.test(src.getAttribute("maxlength"))) { 
+    if(/^[0-9]+$/.test(src.getAttribute("maxlength"))) {
       	var func = function() {
-        	var len = parseInt(src.getAttribute("maxlength")); 
+        	var len = parseInt(src.getAttribute("maxlength"));
         	if (src.value.length >= len) {
 				setMessage("Java code length is limited to " + len + " characters");
-          		src.value = src.value.substr(0, len); 
-          		return false; 
-        	} 
+          		src.value = src.value.substr(0, len);
+          		return false;
+        	}
 			else {
 				setMessage("");
 			}
@@ -164,8 +164,8 @@ function setup() {
 		   src.attachEvent('onkeyup', func);
 		   src.attachEvent('onblur', func);
 		}
-    } 
-	
+    }
+
 	sl.selectedIndex = 0;
 	setJavaText("");
 	setJSText("");
@@ -183,16 +183,16 @@ function setJSText(t) {
 	var gen = document.getElementById("jscell");
 	if (gen.hasChildNodes()) {
 	    while (gen.childNodes.length >= 1) {
-	        gen.removeChild(gen.firstChild);       
-	    } 
+	        gen.removeChild(gen.firstChild);
+	    }
 	}
 
 	if (t) {
 		document.getElementById("jscell").innerHTML =  "<pre id='11'>" + t + "</pre>";
-		SyntaxHighlighter.highlight({ "quick-code": false, 
-									  "brush"     : "js", 
-									  "toolbar"   : false, 
-									  "gutter"    : false  }, document.getElementById("11"));	
+		SyntaxHighlighter.highlight({ "quick-code": false,
+									  "brush"     : "js",
+									  "toolbar"   : false,
+									  "gutter"    : false  }, document.getElementById("11"));
 	}
 }
 
@@ -201,7 +201,7 @@ function select() {
 		setJavaText(arguments[1]);
 		setJSText(null);
 	}
-	
+
 	try {
 		var sl = document.getElementById('select');
 		getFileById(sl.value, gotfile);
@@ -216,7 +216,7 @@ function convert() {
 	try {
 		start_wait("jssrc_container");
 		setJSText("");
-		
+
 		var src = document.getElementById("javasrc").value;
 		if (src.trim().length == 0) {
 			throw new Error("Java source code has not been found");
@@ -225,12 +225,12 @@ function convert() {
 		if (/package\s+[a-zA-Z.\*_0-9]+;/.exec(src) == null) {
 			throw new Error("Java package has to be declared");
 		}
-		
-		var r = getXmlHttp(); 
+
+		var r = getXmlHttp();
 		r.open("POST", "/cgi-bin/j2js.rb", true);
-	
+
 		r.onreadystatechange = function() {
-		 	if (r.readyState == 4) 
+		 	if (r.readyState == 4)
 			{
 				stop_wait();
 				var t = decodeURIComponent(r.responseText);
@@ -240,7 +240,7 @@ function convert() {
 					}
 					else {
 						setJSText(t);
-					}	
+					}
 		        }
 				else {
 					//error(r.statusText + " (" +r.status +")");

@@ -1,8 +1,8 @@
 
 if (typeof(zebra) === "undefined") {
-    load(arguments[0] + '/lib/gravity/zebra/easyoop.js');
-    load(arguments[0] + '/lib/gravity/zebra/assert.js');
-    load(arguments[0] + '/lib/gravity/zebra/util.js');
+    load(arguments[0] + '/lib/zebra/easyoop.js');
+    load(arguments[0] + '/lib/zebra/assert.js');
+    load(arguments[0] + '/lib/zebra/util.js');
 }
 
 var assert = zebra.assert, Class = zebra.Class, Bag = zebra.util.Bag, assertException = zebra.assertException;
@@ -11,7 +11,8 @@ zebra.runTests("Zebra util objects bag",
     function test_emptybag() {
         var b = new Bag();
         b.load("{}");
-        assert(b.get("ds") === undefined, true);
+
+        assertException(function() { b.get("ds"); });
         assertException(function() { b.load(""); });
         assertException(function() { b.get(null); });
         assertException(function() { b.get(undefined); });
@@ -24,7 +25,7 @@ zebra.runTests("Zebra util objects bag",
         assert(b.get("d") === null, true);
         zebra.assertObjEqual(b.get("b"), {b1:"abc"});
         zebra.assertObjEqual(b.get("c"), [1,2,3]);
-        assert(typeof b.get("cc") === "undefined", true);
+        assertException(function() { b.get("cc"); });
         zebra.assert(b.get("b.b1") === "abc", true);
     },
 
@@ -35,7 +36,7 @@ zebra.runTests("Zebra util objects bag",
         assert(b.get("d") === null, true, "2");
         zebra.assertObjEqual(b.get("b"), {b1:"abc", b2:100}, "3");
         zebra.assertObjEqual(b.get("c"), [-2, -1, 0, 1, 2, 3], "4");
-        assert(typeof b.get("cc") === "undefined", true, "5");
+        assertException(function() { b.get("cc"); });
         zebra.assert(b.get("b.b1"), "abc", "6");
         zebra.assert(b.get("b.b2") , 100, "7");
         zebra.assert(b.get("x"), null, "8");
@@ -64,6 +65,8 @@ zebra.runTests("Zebra util objects bag",
         var b = bag.get("b");
         var c = bag.get("c");
         var d = bag.get("d");
+
+
         assert(zebra.instanceOf(a, A), true, "a is ok");
         assert(zebra.instanceOf(b, A), true, "b is ok");
         assert(zebra.instanceOf(c, A), true, "c is ok");
@@ -109,12 +112,16 @@ zebra.runTests("Zebra util objects bag",
     },
 
     function test_refs() {
-        var o = {p1: { "p222":333  }}, bag = new Bag(o), l = '{ "p1": { "p11": { "p111": 100, "p12":"@p1.p11.p111" } }, "p2": { "p11": { "p22":"@p1.p11.p111" } }  }';
+        var o = {p1: { "p222":333  }}, bag = new Bag(o);
+        bag.ignoreNonExistentKeys = true;
+
+        var l = '{ "p1": { "p11": { "p111": 100, "p12":"@p1.p11.p111", "p13": { "p133":"@p1.p11.p111" } }, "p33":"@p1.p11.p111" }, "p2": { "p11": { "p22":"@p1.p11.p111" } }  }';
         bag.load(l);
 
         assert(bag.get("p1.p11.p111"), 100, "1");
-        assert(bag.get("p1.p11.p12"), 100, "2");
-
+        assert(bag.get("p1.p11.p13.p133"), 100, "2");
+        assert(bag.get("p1.p33"), 100, "2");
+        assert(bag.get("p1.p11.p12"), 100, "3");
     },
 
     function test_load_merge() {
@@ -152,6 +159,16 @@ zebra.runTests("Zebra util objects bag",
         assert(r.b.b1.p2, 300);
         assert(r.b.b1.p1, 100);
         zebra.assertObjEqual(r.b.b1.d, [1,2, { s: { } } ]);
+    },
+
+    function test_class_field_initialization() {
+        zebra.A = zebra.Class([]);
+
+        var o = {}, bag = new Bag(o), l = '{ "a": { "$zebra.A":[], "id":100 }  }';
+        bag.load(l);
+
+        assert(o.a.id, 100);
+
     }
 );
 

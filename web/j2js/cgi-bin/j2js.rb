@@ -5,7 +5,7 @@ $LOAD_PATH << "lib"
 require 'cgi'
 
 begin
-    require 'gravity/zebra/j2js/converter'
+    require 'zebra/j2js/converter'
 rescue
     cgi = CGI.new()
     puts cgi.header
@@ -17,11 +17,11 @@ $HTML_TEMPLATE = "
 <html>
 <header>
     <script src='http://zebra.gravitysoft.org/zebra/easyoop.js' type='text/javascript'></script>
-    
+
     <script>
 (function() {
         var test = zebra.namespace('test');
-        
+
         $code
 })();
     </script>

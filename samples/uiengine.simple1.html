@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+	<header>
+
+        <script src='http://repo.zebkit.com/pa3/zebra.canvas.min.js' type='text/javascript'></script>
+
+
+		<script type='text/javascript'>
+		    zebra.ready(function() {
+				// import classes, functions and constants from 
+				// zebra.ui, zebra.layout packages
+				eval(zebra.Import("ui", "layout"));
+
+				// create canvas, add three panels that are arranged with 
+				// border layout
+			    var root = (new zCanvas(400, 400)).root; 
+			    root.setLayout(new BorderLayout(4, 4));
+			    root.setPadding(4);
+
+			    var p = new Panel();
+			    p.setBackground("#0000FF");
+			    p.setPreferredSize(-1, 30);
+			    root.add(TOP, p);
+
+			    p = new Panel();
+			    p.setBackground("#00FF00");
+			    p.setPreferredSize(-1, 30);
+			    root.add(BOTTOM, p);
+
+			    p = new Panel();
+			    p.setBackground("#FF0000");
+			    root.add(CENTER, p);
+	 		});
+		</script>
+	</header>
+
+	<body bgcolor="#EEEEEE" align="center" style="padding:15px;">
+	    <h2>Simple Zebra application</h2>
+	</body>
+</html>

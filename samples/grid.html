@@ -1,26 +1,28 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html>
 	<header>
-		<script src='http://repo.gravitysoft.org/zebra/all.min.js' type='text/javascript'></script>
+		<script src='http://repo.zebkit.com/pa3/zebra.min.js' type='text/javascript'></script>
+
 
 		<script type='text/javascript'>
 		    zebra.ready(function() {
-				// import all classes, functions and cosntans from 
-				// zenra.ui, zebra.layout and zebra.ui.view packages
-				eval(zebra.Import("ui", "layout", "ui.grid", "ui.view"));
-				
+				// import all classes, functions and cosntans from
+				// zenra.ui, zebra.layout packages
+				eval(zebra.Import("ui", "layout", "ui.grid"));
+
 				// create canvas
-			    var root = (new zebra.ui.zCanvas(400, 400)).root;
-			//	root.setBackground(Fill.lightGray);
-			//	root.setBorder(new Border(Border.SOLID));
+			    var root = (new zebra.ui.zCanvas(600, 500)).root;
 				root.setLayout(new BorderLayout(8,8));
+
+				var g = new Grid(1000, 10), h = g.setHeader(TOP, null);
 				
-				var g = new Grid(1000, 10);
-				g.showTopHeader();
-				
-				// fill grid cells 
+				for(var i=0; i<g.getGridCols(); i++) {
+					h.putTitle(i, "Title " + i);
+				}
+
+				// fill grid cells
 				for(var i=0; i<g.getGridRows()*g.getGridCols(); i++) {
-					g.model.put(i, " Cell [ " + i + " ] ");
+					g.model.puti(i, " Cell [ " + i + " ] ");
 				}
 				// add scrollable grid into canvas
 				root.add(CENTER, new ScrollPan(g));

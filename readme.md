@@ -340,4 +340,4 @@ Zebra is Still free. General Public License (GPL) and MIT for academic projects
 
    * WEB     : http://www.zebkit.org
    * e-mail  : ask@zebkit.org 
-   * linkedin: nl.linkedin.com/pub/andrei-vishneuski/14/525/34b/
+   * linkedin: http://nl.linkedin.com/pub/andrei-vishneuski/14/525/34b/

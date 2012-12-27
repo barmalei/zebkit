@@ -328,8 +328,8 @@ To see snippets and demo it is preferable to start embedded Python HTTP web serv
 ```
 
 Than yo can:
-  * Run Demo application by opening "http://localhost:8080/web/ui" URL
-  * Run desired snippet by opening "http://localhost:8080/samples" URL
+  * Run demo application by opening http://localhost:8080/web/ui URL
+  * Run a snippet by  opening http://localhost:8080/samples URL and selecting a desired snipper HTML file
 
 
 ### License

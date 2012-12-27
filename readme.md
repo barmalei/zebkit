@@ -21,33 +21,27 @@ phases. The author appreciates any possible feedback, criticism, help, suggestio
 
    *  Zebra easy OOP concept JavaScript: classes and interfaces, overriding, overloading, 
    	  constructors, packaging, inner class, access to super class methods, etc
-  
-   *  **Zebra UI Engine that can be used as powerful basis for: **
+   *  **Zebra UI Engine that can be used as powerful basis for:**
       * Pixel by pixel UI components rendering controlling 
       * Simple and flexible events (keyboard, mouse, etc) manipulation, advanced event technique to develop composite UI components
       * Layouting UI components using number of predefined layout managers
       * Easy developing of own layout managers 
       * Full control of UI components rendering, paint manager does many things behind the scene   
-      * **Flash-free, pure web native clipboard paste and copy supporting **
+      * **Flash-free, pure web native clipboard paste and copy supporting**
       * Layered UI architecture
       * and many other ...
-
    *  Zebra rich UI Components set developed basing on Zebra UI Engine:
       * More than 30 various UI components
       * Complex UI components: Grid, Tree, Tabs, Combo, Designer, Scroll, Menu, etc
       * Thanks to easy OOP concept and proper design: expendable and fully customizable UI components
       * ** Simple data model description **
       * and many other ...
-
    *  **JSON as Zebra UI form descriptive language**
-
-   *  ** JSON as Zebra UI look and feel configuration **
-
+   *  **JSON as Zebra UI look and feel configuration**
    *  **Zebra IO**   
       *  GET/POST/etc  Ajax requests  
       *  XML-RPC, JSON-RPC Service communication
       *  binary data handling
-
    * ...
   
 
@@ -329,8 +323,8 @@ To see snippets and demo it is preferable to start embedded Python HTTP web serv
    	  * Open terminal
       * Go to zebra home directory
       * Run small python HTTP server on your PC:
-```
-    python startup.py
+```bash
+   $ python startup.py
 ```
 
 Than yo can:

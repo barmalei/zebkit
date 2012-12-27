@@ -34,7 +34,7 @@ phases. The author appreciates any possible feedback, criticism, help, suggestio
       * More than 30 various UI components
       * Complex UI components: Grid, Tree, Tabs, Combo, Designer, Scroll, Menu, etc
       * Thanks to easy OOP concept and proper design: expendable and fully customizable UI components
-      * ** Simple data model description **
+      * **Simple data model description**
       * and many other ...
    *  **JSON as Zebra UI form descriptive language**
    *  **JSON as Zebra UI look and feel configuration**
@@ -105,24 +105,24 @@ We can write the application following more graceful manner using JSON-like styl
 </html>
 ```
 
-### JSON UI definition 
+### Defining UI with JSON
 
 JSON can be interpreted as Zebra UI form definition language. For instance, use UI definition shown below and store 
 it in the same place where HTML is going to be hosted:
 ```json
-	{
-		"padding": 8, 
-		"layout" : { "$zebra.layout.BorderLayout":[ 4, 4 ] },
-		"kids"   : {
-			"CENTER": { "$zebra.ui.TextField": ["", true]  },
-			"BOTTOM": { "$zebra.ui.Panel": [],
-				"layout": { "$zebra.layout.FlowLayout": [] },
-				"kids"  : [
-					{ "$zebra.ui.Button": "Clear" } 
-				]  
-			}
+{
+	"padding": 8, 
+	"layout" : { "$zebra.layout.BorderLayout":[ 4, 4 ] },
+	"kids"   : {
+		"CENTER": { "$zebra.ui.TextField": ["", true]  },
+		"BOTTOM": { "$zebra.ui.Panel": [],
+			"layout": { "$zebra.layout.FlowLayout": [] },
+			"kids"  : [
+				{ "$zebra.ui.Button": "Clear" } 
+			]  
 		}
 	}
+}
 ```
 
 Pay attention the code demonstrated below expects JSON UI form definition is stored in "myform.json" file. 
@@ -328,14 +328,13 @@ To see snippets and demo it is preferable to start embedded Python HTTP web serv
 ```
 
 Than yo can:
-      * Run Demo application by opening "http://localhost:8080/web/ui" URL
-      * Run desired snippet by opening "http://localhost:8080/samples" URL
+  * Run Demo application by opening "http://localhost:8080/web/ui" URL
+  * Run desired snippet by opening "http://localhost:8080/samples" URL
 
 
 ### License
 
-Zebra is Still free. 
-General Public License (GPL) and MIT for academic projects
+Zebra is Still free. General Public License (GPL) and MIT for academic projects
 
 ### Contact
 

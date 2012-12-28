@@ -150,7 +150,7 @@ pkg.WinDemo = new Class(pkg.DemoPan,  [
 
     function showWin() {
 //        !!!
-      //  var v = zebra.ui.getDesktop(this);
+      //  var v = zebra.ui.findCanvas(this);
         //v.add(new FL());
 
         if (this.shown) return;
@@ -159,14 +159,14 @@ pkg.WinDemo = new Class(pkg.DemoPan,  [
         this.wp.remove(this.ab);
         this.w.setLocation(50, 50);
         this.w.setEnabled(true);
-        zebra.ui.getDesktop(this).getLayer("win").add(this.w);
-        zebra.ui.getDesktop(this).getLayer("win").activate(this.w);
+        zebra.ui.findCanvas(this).getLayer("win").add(this.w);
+        zebra.ui.findCanvas(this).getLayer("win").activate(this.w);
     },
 
     function hideWin() {
         if (!this.shown) return;
         this.shown = false;
-        zebra.ui.getDesktop(this).getLayer("win").removeAll();
+        zebra.ui.findCanvas(this).getLayer("win").removeAll();
         this.wp.add(this.w);
         this.wp.add(this.ab);
         this.w.setEnabled(false);

@@ -4,6 +4,7 @@
 var Panel = zebra.ui.Panel;
 var BorderPan = zebra.ui.BorderPan;
 var Label = zebra.ui.Label;
+var BoldLabel = zebra.ui.BoldLabel;
 var Button = zebra.ui.Button;
 var FlowLayout = zebra.layout.FlowLayout;
 var GridLayout = zebra.layout.GridLayout;
@@ -56,17 +57,26 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
     },
 
     function createTextFieldPan() {
-        var p = new Panel(new ListLayout(6));
-        p.setBackground(null);
+        var p = new Panel(new GridLayout(3, 2));
         var tf = new TextField();
+        var ctr = new L.Constraints();
+        ctr.ay = L.CENTER
+        ctr.setPadding(2);
+
         tf.setPreferredSize(100, -1);
-        p.add(pkg.createLabedComponent("Text field:", tf));
+        p.add(ctr, new BoldLabel("Text field:"));
+        p.add(ctr, tf);
+
         tf = new TextField(new zebra.data.SingleLineTxt("dsd", 5));
         tf.setPreferredSize(100, -1);
-        p.add(pkg.createLabedComponent("Fixed size(5):", tf));
+        p.add(ctr, new BoldLabel("Fixed size(5):"));
+        p.add(ctr, tf);
+
         tf = new TextField(new zebra.ui.PasswordText());
         tf.setPreferredSize(100, -1);
-        p.add(pkg.createLabedComponent("Password field:", tf));
+        p.add(ctr, new BoldLabel("Password field:"));
+        p.add(ctr, tf);
+
         return pkg.createBorderPan("Text fields", p);
     },
 

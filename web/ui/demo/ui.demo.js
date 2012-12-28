@@ -26,16 +26,6 @@ pkg.createBorderPan = function (txt, content, w, h) {
     return bp;
 };
 
-pkg.createLabedComponent = function(title, comp) {
-    var content = new Panel(new L.BorderLayout());
-    content.setBackground(null);
-    var lab = new Label(title);
-    lab.setFont(zebra.ui.boldFont);
-    content.add(L.LEFT, lab)
-    content.add(L.RIGHT, comp);
-    return content;
-};
-
 pkg.DemoPan = Class(Panel, [
     function() {
         this.$super();

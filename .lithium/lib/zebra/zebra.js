@@ -10,4 +10,4 @@ lib/zebra/ui.window.js
 lib/zebra/ui.TextField.js
 lib/zebra/ui.tree.js
 lib/zebra/ui.grid.js
-lib/zebra/ui.editors.js
+lib/zebra/ui.designer.js

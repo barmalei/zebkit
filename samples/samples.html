@@ -47,6 +47,14 @@
 							preferredSize : [ 70, 50 ],
 							border: new zebra.samples.BorderOutline.Oval("#FF0000")
 						}),
+						RIGHT: (new zebra.samples.BorderOutline()).properties({
+							preferredSize : [ 50, 50 ],
+							border: new Border(Border.SOLID, "#FF0000", 4)
+						}),
+						BOTTOM: (new zebra.samples.BorderOutline()).properties({
+							preferredSize : [ 50, 50 ],
+							border: new Border(Border.SOLID, "#FF0000", 4, 8)
+						}),
 						TOP: (new zebra.samples.BorderOutline()).properties({
 							preferredSize : [ 50, 80 ],
 							border: new zebra.samples.BorderOutline.Pentahedron("#FF0000")
@@ -61,6 +69,39 @@
 						CENTER: new zebra.samples.Components()
 					}
 				});
+
+
+			    root = (new zebra.ui.zCanvas(300,300)).root;
+				root.properties({
+					layout: new zebra.layout.BorderLayout(4,4),
+					kids: {
+						CENTER: new  zebra.samples.CirclePan(50)
+					}
+				});
+
+
+			    root = (new zebra.ui.zCanvas(300,300)).root;
+				root.properties({
+					layout: new zebra.layout.GridLayout(2, 2, HORIZONTAL | VERTICAL),
+					kids: [
+						new zebra.ui.Panel(Cursorable, [ function getCursorType(t, x, y) { return Cursor.HAND; } ]).properties({
+							background:"red",
+							preferredSize:[100,100]
+						}),
+						new zebra.ui.Panel().properties({
+							background:"blue",
+							preferredSize:[100,100]
+						}),
+						new zebra.ui.Panel().properties({
+							background:"gray"
+
+						}),
+						new zebra.ui.Panel().properties({
+							background:"white"
+						})
+					]
+				});
+				
 				
 	 		});
 		</script>

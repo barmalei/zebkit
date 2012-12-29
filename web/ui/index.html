@@ -71,8 +71,8 @@
 
 	   			var nt = new zebra.ui.Tabs(), prevSelected = -1;
 				nt._.add(function (src, data) {
-					if (prevSelected >= 0) src.get(prevSelected).activated && src.get(prevSelected).activated(false);
-					src.get(data).activated && src.get(data).activated(true);
+					if (prevSelected >= 0) src.kids[prevSelected].activated && src.kids[prevSelected].activated(false);
+					src.kids[data].activated && src.kids[data].activated(true);
 					prevSelected = data;
 				});
 

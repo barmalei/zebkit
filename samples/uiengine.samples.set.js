@@ -117,7 +117,6 @@ pkg.BorderOutline = Class(pkg.SamplePan, KeyListener, FocusListener, [
 	}
 ]);
 
-
 pkg.MouseEventHandler = Class(pkg.SamplePan, MouseMotionListener, MouseListener, [
 	function() {
 		this.$super();
@@ -125,6 +124,13 @@ pkg.MouseEventHandler = Class(pkg.SamplePan, MouseMotionListener, MouseListener,
 		this.font = new Font("Helvetica", 1, 12);
 		this.color1 = '#C7D3FC';
 		this.color2 = '#316F92';
+	},
+
+	function mouseDragged(e) {
+		this.tox = e.x;
+		this.toy = e.y;
+		zebra.print("!!");
+		this.repaint();
 	},
 
 	function mouseMoved(e) {
@@ -155,9 +161,21 @@ pkg.MouseEventHandler = Class(pkg.SamplePan, MouseMotionListener, MouseListener,
 		g.fillStyle = rg;
     	g.fillRect(0, 0, this.width, this.height);
 
+    	if (zebra.ui.$mouseDraggOwner == this) {
+    		var xx = this.width/2 -this.tox,
+    			yy = this.height/2 -this.toy,
+    			d  = Math.sqrt(xx*xx + yy*yy);
+    		g.beginPath();
+    		g.setColor("red");
+    		g.lineWidth = 4;
+    		g.ovalPath(this.width/2 - d, this.height/2 - d, 2 * d, 2 * d);
+    		g.stroke();
+    	}
+
     	g.setColor(zebra.util.rgb.white);
     	g.setFont(this.font);
     	g.fillText("(" + this.gx + "," + this.gy + ")", this.gx + 10, this.gy + this.font.ascent);
+	
 	}
 ]);
 
@@ -205,7 +223,7 @@ pkg.Components = Class(pkg.SamplePan, MouseListener, ChildrenListener, [
 
 	function childInputEvent(e){
 		if (e.ID == MouseEvent.ENTERED) {
-			this.counter = 0;
+			this.counter = 0;							
 			this.target = e.source;
 			timer.start(this, 50, 90);
 		}
@@ -224,5 +242,59 @@ pkg.Components = Class(pkg.SamplePan, MouseListener, ChildrenListener, [
 	}
 ]);
 
+pkg.CirclePan = Class(pkg.SamplePan, MouseListener, Cursorable, [
+	function(r) {
+		this.$super();
+		this.setPreferredSize(2*r, 2*r);
+		this.setBorder(new pkg.BorderOutline.Oval("red"));
+	},
+
+	function contains(x, y) {
+		var rx = this.width/2, ry = this.height/2;
+		return (ry - y) * (ry - y) + (rx - x) * (rx - x) < rx * rx;
+	},
+
+	function mouseEntered(e) {
+		this.setBackground("blue");
+	},
+
+	function mouseExited(e) {
+		this.setBackground(null);
+	},
+
+	function getCursorType(t, x, y) {
+		return Cursor.HAND;
+	}
+]);
+
+pkg.CursorPan = Class(pkg.SamplePan, Cursorable, [
+	function(c) {
+		this.$super();
+		this.cursor = c;
+	},
+
+	function getCursorType(t, x, y) {
+		return this.cursor;
+	}
+]);
+
+
+pkg.SpriteView = Class(zebra.ui.View, [	
+	function paint(g, x, y, w, h, d) {
+		for (var i = 0; i < w; i++) {
+			for (var j = 0; j < h; j++) {
+				var xx = x + i, yy = y + j,
+					m1 = Math.abs(yy - 10)*10,
+					m2 = (-xx + w)/w;
+				g.setColor(new rgb((255.0-m1)*m2,(100-m1)*m2,0));
+				
+				g.beginPath();
+				g.moveTo(xx, yy);
+				g.lineTo(xx+1, yy+1);
+				g.stroke();
+			}			
+		}
+	}
+]);
 
 })(zebra("samples"), zebra.Class);

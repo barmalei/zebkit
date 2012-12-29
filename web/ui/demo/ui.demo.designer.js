@@ -13,6 +13,7 @@ var Border = zebra.Border;
 var L = zebra.layout;
 var Tree = zebra.ui.tree.Tree;
 var Constraints = zebra.layout.Constraints;
+var ShaperPan = zebra.ui.designer.ShaperPan
 
 pkg.DesignerDemo = new Class(pkg.DemoPan, [
     function() {
@@ -25,25 +26,25 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
         lab.setLocation(50, 50);
         lab.setBorder(ui.borders.etched);
         pp.add(lab);
-        new zebra.ui.editors.ShaperPan(lab);
+        new ShaperPan(lab);
 
         var b = new zebra.ui.Button("Button");
         b.toPreferredSize();
         b.setLocation(200, 120);
         pp.add(b);
-        new zebra.ui.editors.ShaperPan(b);
+        new ShaperPan(b);
 
         var b = new zebra.ui.Checkbox("Checkbox");
         b.toPreferredSize();
         b.setLocation(180, 170);
         pp.add(b);
-        new zebra.ui.editors.ShaperPan(b);
+        new ShaperPan(b);
 
         var b = new zebra.ui.ImagePan(ui.get("bmw"));
         b.toPreferredSize();
         b.setLocation(20, 120);
         pp.add(b);
-        new zebra.ui.editors.ShaperPan(b);
+        new ShaperPan(b);
 
         var c = new zebra.ui.Panel(new zebra.layout.ListLayout(4));
         var g = new zebra.ui.Group();
@@ -52,10 +53,10 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
         b.toPreferredSize();
         b.setLocation(140, 230);
         pp.add(b);
-        new zebra.ui.editors.ShaperPan(b);
+        new ShaperPan(b);
 
-        var t = new zebra.ui.tree.Tree(new zebra.ui.editors.FormTreeModel(pp, [
-            function exclude(c) { return zebra.instanceOf(c, zebra.ui.editors.ShaperPan); }
+        var t = new zebra.ui.tree.Tree(new zebra.ui.designer.FormTreeModel(pp, [
+            function exclude(c) { return zebra.instanceOf(c, ShaperPan); }
         ]));
 
         //!!!!
@@ -79,13 +80,13 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
             var i = p.indexOf(c);
             if (i >= 0) {
                 while (p != null && typeof(p) != "undefined") {
-                    if (zebra.instanceOf(p, zebra.ui.editors.ShaperPan)) return p;
+                    if (zebra.instanceOf(p, ShaperPan)) return p;
                     p = p.parent;
                 }
             }
             else {
-                for(var i=0; i< p.count(); i++) {
-                    var r = lookup(p.get(i), c);
+                for(var i=0; i< p.kids.length; i++) {
+                    var r = lookup(p.kids[i], c);
                     if (r) return r;
                 }
             }

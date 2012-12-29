@@ -35,7 +35,7 @@ function createItem(s) {
     var l = (j > 0) ? new zebra.ui.ImageLabel(s.substring(j+1), ui.get(s.substring(0, j))) : new Label(s);
     l.setPaddings(2,4,2,4);
     if (zebra.instanceOf(l, Label)) l.setFont(ui.boldFont);
-    else l.get(1).setFont(ui.boldFont);
+    else l.kids[1].setFont(ui.boldFont);
     return l;
 }
 
@@ -55,10 +55,10 @@ function createMenubar(items) {
     mb.setBorder(new MBarBorder());
 
     for(var i=0; i < items.length; i++) {
-        if (zebra.instanceOf(items[i], Menu)) mb.setMenuAt(mb.count() - 1, items[i]);
+        if (zebra.instanceOf(items[i], Menu)) mb.setMenuAt(mb.kids.length - 1, items[i]);
         else {
             if (items[i].constructor == Array) {
-                mb.setMenuAt(mb.count() - 1, createMenu(items[i]));
+                mb.setMenuAt(mb.kids.length - 1, createMenu(items[i]));
             }
             else mb.add(createItem(items[i]));
         }
@@ -76,7 +76,7 @@ function createMenu(items, m) {
     for(var i=0; i < items.length; i++) {
         var item = items[i];
         if (item.constructor == Array) {
-            m.setSubmenuAt(m.count() - 1, createMenu(item));
+            m.setSubmenuAt(m.kids.length - 1, createMenu(item));
         }
         else {
             var it = createItem(item);

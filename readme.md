@@ -28,6 +28,7 @@ phases. The author appreciates any possible feedback, criticism, help, suggestio
       * Easy developing of own layout managers 
       * Full control of UI components rendering, paint manager does many things behind the scene   
       * **Flash-free, pure web native clipboard paste and copy supporting**
+      * **Font metrics calculation** 
       * Layered UI architecture
       * and many other ...
    *  Zebra rich UI Components set developed basing on Zebra UI Engine:
@@ -39,7 +40,7 @@ phases. The author appreciates any possible feedback, criticism, help, suggestio
    *  **JSON as Zebra UI form descriptive language**
    *  **JSON as Zebra UI look and feel configuration**
    *  **Zebra IO**   
-      *  GET/POST/etc  Ajax requests  
+      *  GET/POST/etc Ajax requests  
       *  XML-RPC, JSON-RPC Service communication
       *  binary data handling
    * ...

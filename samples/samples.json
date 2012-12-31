@@ -1,0 +1,19 @@
+{
+	"pictures" : {
+	    "wood"   : { ".loadImage":"%root%/rs/wood.png" }
+	},
+
+
+	"test": 10,
+
+	"zCanvas": {
+	    "properties": {
+	        "background2": "test"
+	    }
+	},	
+
+	"samples": {
+		"borderColor": "#FFFFFF",
+		"borderSize" : 6
+	}
+}

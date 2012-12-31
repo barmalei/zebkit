@@ -1,7 +1,8 @@
 {
-    "version" : "2.preAlpha",
+    "version" : "3.preAlpha",
 
     "useWebClipboard": true,
+    "doubleClickDelta":180,
 
     "$aliases": {
         "Picture"  : "zebra.ui.Picture",

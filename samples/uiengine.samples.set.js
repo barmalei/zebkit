@@ -3,6 +3,9 @@
 
 eval(zebra.Import("ui", "layout", "util"));
 
+zebra()["canvas.json"] = pkg.$url + "samples.json";
+
+
 pkg.SamplePan = Class(Panel, [
 ]); 
 
@@ -15,9 +18,16 @@ pkg.Layout = Class(pkg.SamplePan, KeyListener, [
 pkg.BorderOutline = Class(pkg.SamplePan, KeyListener, FocusListener, [
 	function $clazz() {
 		this.Shape = Class(View, [
+			function(){
+				this.$this(pkg.borderColor);
+			},
+
 			function(c){
 				this.color = c;
-				this.lineWidth = 4;
+
+				zebra.print("pkg.borderSize = " + pkg.borderSize);
+
+				this.lineWidth = pkg.borderSize;
 			},
 
 			function paint(g,x,y,w,h,d){
@@ -72,10 +82,10 @@ pkg.BorderOutline = Class(pkg.SamplePan, KeyListener, FocusListener, [
 	},
 
 	function () {
-		this.$super();
 		this.showCursor = false;
 		this.ch = '';
-		this.font = new Font("Arial", 1, 38);
+		this.font = new Font("Arial", 1, 32);
+		this.$super();
 	},
 
 	function paint(g) {
@@ -86,7 +96,7 @@ pkg.BorderOutline = Class(pkg.SamplePan, KeyListener, FocusListener, [
 		}
 
 		g.setFont(this.font);
-		g.setColor(rgb.lightGray);
+		g.setColor(rgb.white);
 		g.fillText(this.ch, this.width/2 - l/2, (this.height-this.font.height)/2 + this.font.ascent);
 	},
 
@@ -96,13 +106,13 @@ pkg.BorderOutline = Class(pkg.SamplePan, KeyListener, FocusListener, [
 	},
 
 	function focusGained(e) {
-		this.border.color = "green";
+		this.border.color = "red";
 		timer.start(this, 50, 500);
 		this.repaint();
 	},
 
 	function focusLost(e) {
-		this.border.color = "red";
+		this.border.color = "white";
 		timer.stop(this);
 		this.repaint();
 	},
@@ -119,11 +129,11 @@ pkg.BorderOutline = Class(pkg.SamplePan, KeyListener, FocusListener, [
 
 pkg.MouseEventHandler = Class(pkg.SamplePan, MouseMotionListener, MouseListener, [
 	function() {
-		this.$super();
 		this.gx = this.gy = 0;
 		this.font = new Font("Helvetica", 1, 12);
 		this.color1 = '#C7D3FC';
 		this.color2 = '#316F92';
+		this.$super();
 	},
 
 	function mouseDragged(e) {
@@ -175,48 +185,78 @@ pkg.MouseEventHandler = Class(pkg.SamplePan, MouseMotionListener, MouseListener,
     	g.setColor(zebra.util.rgb.white);
     	g.setFont(this.font);
     	g.fillText("(" + this.gx + "," + this.gy + ")", this.gx + 10, this.gy + this.font.ascent);
-	
 	}
 ]);
 
 	
 pkg.Components = Class(pkg.SamplePan, MouseListener, ChildrenListener, [
 	function () {
-		function makePanel(brColor, txt) {
+		function makePanel(brColor, txtCol, txt, constr) {
+			if (zebra.isString(txtCol)) {
+				constr = txt;
+				txt = txtCol;
+				txtCol = brColor;
+			}
+
 			return (new Panel([ 
 						function paint(g) {
-							var font = new Font("Arial", 1, 15);
-							g.setColor(rgb.black);
+							var font = new Font("Arial", 1, 16);
+							
+							g.setColor(txtCol);
 							g.setFont(font);
+
 							var x = (this.width - font.stringWidth(txt))/2,
 								y = (this.height - font.height)/2  + font.ascent;
+
 							g.fillText(txt, x, y);							
 						}
 				    ])).properties({
-							border : new Border(Border.SOLID, brColor, 2, 6),
-							preferredSize: [35, 35]
+							border       : new Border(Border.SOLID, brColor, 4, 6),
+							preferredSize: [35, 35],
+							constraints  : constr
 						});
 		}
 
 		this.$super();
+
+		var constr = new Constraints(), col = "#DDEEEE", constr2 = new Constraints();
+		constr.setPadding(4);
+		constr2.setPadding(4);
+		constr2.ax = LEFT ;
+		constr2.ay = TOP;
+
 		this.properties({
 			layout: new BorderLayout(6,6),
 			kids  : {
-				TOP   : makePanel(rgb.red, "TOP"),
-				CENTER: makePanel(rgb.red, "").properties({
-					layout : new ListLayout(STRETCH, 2),
-					padding: 4,
-					kids   : [
-						makePanel(rgb.orange, "Item 1"),
-						makePanel(rgb.orange, "Item 2"),
-						makePanel(rgb.orange, "Item 3"),
-						makePanel(rgb.orange, "Item 4"),
-						makePanel(rgb.orange, "Item 5")
-					] 
+				TOP   : makePanel(rgb.gray, rgb.white, "TOP"),
+				CENTER: makePanel(rgb.gray, rgb.white, "").properties({
+					layout : new FlowLayout(CENTER, CENTER),
+					kids: [ new Panel().properties({
+						layout : new ListLayout(STRETCH, 2),
+						padding: 4,
+						kids   : [
+							makePanel(rgb.black, rgb.black, "Item 1"),
+							makePanel(rgb.black, rgb.black, "Item 2"),
+							makePanel(rgb.black, rgb.black, "").properties({
+								layout: new GridLayout(2, 3),
+								preferredSize:[-1,-1],
+								padding:4,
+								kids  : [
+									makePanel(col, "1", constr2),
+									makePanel(col, "2", constr).properties({ preferredSize: [100, 40] }),
+									makePanel(col, "3", constr).properties({ preferredSize: [20, 100] }),
+									makePanel(col, "4", constr2),
+									makePanel(col, "5", constr),
+									makePanel(col, "6", constr2)
+								]
+							}),
+							makePanel(rgb.black, rgb.black, "Item 4")
+						] 
+					})]
 				}),
-				LEFT  :  makePanel(rgb.red, "L"),
-				RIGHT :  makePanel(rgb.red, "R"),
-				BOTTOM:  makePanel(rgb.red, "BOTTOM")
+				LEFT  :  makePanel(rgb.gray, rgb.white, "L"),
+				RIGHT :  makePanel(rgb.gray, rgb.white, "R"),
+				BOTTOM:  makePanel(rgb.gray, rgb.white, "BOTTOM")
 			}
 		}); 
 	},
@@ -238,7 +278,7 @@ pkg.Components = Class(pkg.SamplePan, MouseListener, ChildrenListener, [
 	function run() {
 		this.counter++;
 		if (this.counter > 3) timer.stop(this);
-		this.target.setBackground(new rgb(250, 170, 77, 0.3*this.counter));
+		this.target.setBackground(new rgb(200, 20, 80, 0.3*this.counter));
 	}
 ]);
 
@@ -297,4 +337,4 @@ pkg.SpriteView = Class(zebra.ui.View, [
 	}
 ]);
 
-})(zebra("samples"), zebra.Class);
+})(zebra("ui.samples"), zebra.Class);

@@ -14,6 +14,7 @@
 		    <script src='../lib/zebra/canvas.js' type='text/javascript'></script>
 
 
+		 
 
 <!-- 
 		<script src='../lib/zebra/zebra.canvas.min.js' type='text/javascript'></script>
@@ -23,50 +24,78 @@
 
 
 		<script type='text/javascript'>
-		    zebra.ready(function() {
-		    	eval(zebra.Import("ui", "layout"));
+			var bg = null, bg2 = null, bg3 = null;
+
+		    zebra.ready(
+
+		    function() {
+		    	bg = zebra.ui.loadImage("rs/wood.png", function(p,s) {
+		    		zebra.print(p + "," + s);
+		    	});
+			    bg2 = zebra.ui.loadImage("rs/bg2.png", function(p,s) {
+			    	zebra.print(p + "," + s);
+			    });
+				bg3 = zebra.ui.loadImage("rs/bg3.png", function(p,s) {
+					zebra.print(p + "," + s);
+				});
+				bg4 = zebra.ui.loadImage("rs/bg4.png", function(p,s) {
+					zebra.print(p + "," + s);
+				});
+
+				bg5 = zebra.ui.loadImage("rs/bg5.png", function(p,s) {
+					zebra.print(p + "," + s);
+				});
+
+
+		    },
+
+		    function() {
+		    	eval(zebra.Import("ui", "layout", "ui.samples"));
 
 				// create canvas
 			    var root = (new zebra.ui.zCanvas(300,300)).root;
 				root.properties({
 					layout: new zebra.layout.BorderLayout(),
 					kids: {
-						CENTER: new zebra.samples.MouseEventHandler() 
+						CENTER: new MouseEventHandler() 
 					}
 				});
 
 			    root = (new zebra.ui.zCanvas(300,300)).root;
 				root.properties({
-					layout: new zebra.layout.BorderLayout(4,4),
+					layout    : new zebra.layout.BorderLayout(6,6),
+					background: "black",
+					padding   : 4,
 					kids: {
-						CENTER: (new zebra.samples.BorderOutline()).properties({
-							border: new zebra.samples.BorderOutline.Triangle("#FF0000"),
-							background: "#FF7733"
+						CENTER: (new BorderOutline()).properties({
+							border: new BorderOutline.Triangle()
 						}),
-						LEFT: (new zebra.samples.BorderOutline()).properties({
+						LEFT: (new BorderOutline()).properties({
 							preferredSize : [ 70, 50 ],
-							border: new zebra.samples.BorderOutline.Oval("#FF0000")
+							border: new BorderOutline.Oval()
 						}),
-						RIGHT: (new zebra.samples.BorderOutline()).properties({
+						RIGHT: (new BorderOutline()).properties({
 							preferredSize : [ 50, 50 ],
-							border: new Border(Border.SOLID, "#FF0000", 4)
+							border: new Border(Border.SOLID, "white", 4)
 						}),
-						BOTTOM: (new zebra.samples.BorderOutline()).properties({
+						BOTTOM: (new BorderOutline()).properties({
 							preferredSize : [ 50, 50 ],
-							border: new Border(Border.SOLID, "#FF0000", 4, 8)
+							border: new Border(Border.SOLID, "white", 4, 8)
 						}),
-						TOP: (new zebra.samples.BorderOutline()).properties({
+						TOP: (new BorderOutline()).properties({
 							preferredSize : [ 50, 80 ],
-							border: new zebra.samples.BorderOutline.Pentahedron("#FF0000")
+							border: new BorderOutline.Pentahedron()
 						}) 
 					}
 				});
 
-			    root = (new zebra.ui.zCanvas(300,300)).root;
+			    root = (new zebra.ui.zCanvas(370,450)).root;
 				root.properties({
 					layout: new zebra.layout.BorderLayout(4,4),
+					background: new Pattern(bg5),
+					padding:8,
 					kids: {
-						CENTER: new zebra.samples.Components()
+						CENTER: new Components()
 					}
 				});
 
@@ -74,8 +103,9 @@
 			    root = (new zebra.ui.zCanvas(300,300)).root;
 				root.properties({
 					layout: new zebra.layout.BorderLayout(4,4),
+					background: new Pattern(bg2),
 					kids: {
-						CENTER: new  zebra.samples.CirclePan(50)
+						CENTER: new  CirclePan(50)
 					}
 				});
 
@@ -108,5 +138,6 @@
 	</header>
 
 	<body>
+
 	</body>
 </html>

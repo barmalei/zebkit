@@ -177,14 +177,14 @@ it is pure WEB based solution:
 
 				    // returns what you want to put in clipboard
 				    function copy() {
-				    	this.setForeground("#FF3311");
+				    	this.setColor("#FF3311");
 				    	return this.getText();
 				    },
 
 				    // this method is called when paste event has happened for this 
 				    // component 
 				    function paste(s) { 
-				    	this.setForeground("#000000");
+				    	this.setColor("#000000");
 				    	this.setText(s); 
 				    }
 				]); 

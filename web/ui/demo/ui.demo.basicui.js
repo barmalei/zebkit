@@ -64,6 +64,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         ctr.setPadding(2);
 
         tf.setPreferredSize(100, -1);
+        tf.setHint("<enter text>");
         p.add(ctr, new BoldLabel("Text field:"));
         p.add(ctr, tf);
 

@@ -131,6 +131,14 @@
 						})
 					]
 				});
+
+			    root = (new zebra.ui.zCanvas(300,300)).root;
+				root.properties({
+					layout: new zebra.layout.BorderLayout(),
+					kids: {
+						CENTER: new SimpleChart(function(x) { return x*Math.sin(1/(x==0?1:x)); }, -0.3, 0.3, 0.01)
+					}
+				});
 				
 				
 	 		});

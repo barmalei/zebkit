@@ -319,6 +319,55 @@ pkg.CursorPan = Class(pkg.SamplePan, Cursorable, [
 ]);
 
 
+pkg.SimpleChart = Class(pkg.SamplePan, [
+	function(f, x1, x2, dx) {
+		this.$super();
+		this.f = f;
+		this.x1 = x1;
+		this.x2 = x2;
+		this.dx = dx;
+		this.setBackground("black");
+		this.setPadding(8);
+	},
+
+	function recalc() {
+
+		zebra.print("recalc");
+
+		var maxy = -1000000, miny = 1000000, y = []; 
+		for(var x = this.x1, i = 0; x < this.x2; x += this.dx, i++) {
+			y[i] = this.f(x);
+			if (y[i] > maxy) maxy = y[i]; 
+			if (y[i] < miny) miny = y[i]; 
+		}
+		y.push(miny);
+		y.push(maxy);
+		this.fy = y;
+
+		zebra.print(this.fy.length);
+	},
+
+	function paint(g) {
+		var ww = this.width - this.getLeft() - this.getRight(), 
+			hh = this.height - this.getTop() - this.getBottom(),
+			min = this.fy[this.fy.length-2], max = this.fy[this.fy.length-1], deltay = max - min,
+			deltax = this.x2 - this.x1,
+			sx  = this.getLeft() + (ww/deltax) * (this.x1 - this.x1), 
+			sy = this.getTop() + (hh/deltay) * (this.fy[0] - min);
+				
+		g.beginPath();
+		g.setColor("red");
+		g.lineWidth = 3;
+		g.moveTo(sx, sy);
+		for(var x = this.x1 + this.dx, i = 1; i < this.fy.length-2; x += this.dx, i++) {
+			g.lineTo(this.getLeft() + (ww/deltax) * (x - this.x1) , this.getTop() + (hh/deltay) * (this.fy[i] - min));
+			
+		}
+		g.stroke();
+	}
+]);
+
+
 pkg.SpriteView = Class(zebra.ui.View, [	
 	function paint(g, x, y, w, h, d) {
 		for (var i = 0; i < w; i++) {

@@ -121,7 +121,7 @@
         "Label": {
             "properties": {
                 "font"      : "@boldFont",
-                "foreground": "@palette.gray1"
+                "color": "@palette.gray1"
             }
         },
 
@@ -314,6 +314,8 @@
     },
 
     "TextField": {
+        "hintFont"  : { "$font": ["Arial", 3, 12] },
+        "hintColor" : "#CCAADD",
         "properties": {
             "border"        : { "$zebra.ui.TFieldBorder":[] },
             "background"    : "#EEFBFE",
@@ -328,7 +330,7 @@
         "properties": {
             "background": "@palette.gray6",
             "font"      : "@smallFont",
-            "foreground": "@palette.black",
+            "color": "@palette.black",
             "border"    : { "$Border": [1, "@palette.gray1"] }
         }
     },
@@ -341,7 +343,7 @@
     "Menu": {
         "Label": {
             "properties": {
-                "foreground": "#5A5A5A",
+                "color": "#5A5A5A",
                 "font"      : "@font"
             }
         },
@@ -392,7 +394,7 @@
         "Label":{
             "properties": {
                 "font"       : "@boldFont",
-                "foreground" : "@palette.black",
+                "color" : "@palette.black",
                 "paddings"   : [1,5,1,5]
             }
         },
@@ -429,7 +431,7 @@
         "Label":{
             "properties": {
                 "font"       : "@boldFont",
-                "foreground" : "@palette.white"
+                "color" : "@palette.white"
             }
         },
 
@@ -484,7 +486,7 @@
             },
 
             "font": "@boldFont",
-            "foreground": "@palette.black"
+            "fontColor": "@palette.black"
         },
 
         "Grid": {
@@ -503,7 +505,7 @@
             "properties" : {
                 "paddings"  : [2,6,2,6],
                 "background": "@palette.gray6",
-                "foreground": "@palette.black",
+                "color": "@palette.black",
                 "font"      : "@smallFont",
                 "border"    : { "$Border": [1, "@palette.gray1"] }
             }
@@ -530,7 +532,7 @@
         "TitleLab": {
             "properties": {
                 "font"      : "@boldFont",
-                "foreground": "@palette.white"
+                "color": "@palette.white"
             }
         },
 

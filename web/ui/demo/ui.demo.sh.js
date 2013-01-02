@@ -17,7 +17,7 @@ var SynHighlighterRender = new Class(zebra.ui.TextRender, [
         function(path){
             this.words = {};
             this.$super(zebra.io.GET(path));
-            this.setForeground(rgb.darkGray);
+            this.setColor(rgb.darkGray);
             this.setFont(new zebra.ui.Font("Courier", "bold", 14));
         },
 
@@ -26,7 +26,7 @@ var SynHighlighterRender = new Class(zebra.ui.TextRender, [
             for(var i = 0;i < v.length; i++){
                 var str = v[i], color = this.words.get(str);
                 if(color != null) g.setColor(color);
-                else g.setColor(this.foreground);
+                else g.setColor(this.color);
                 g.drawString(str, xx, y + this.font.getAscent());
                 xx += this.font.stringWidth(str);
             }

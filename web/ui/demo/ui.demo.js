@@ -9,7 +9,7 @@ var L = zebra.layout;
 pkg.createLabel = function (txt, color) {
     color = color || zebra.ui.palette.gray1;
     var l = new Label(txt.indexOf("\n") >= 0 ? new zebra.data.Text(txt) : txt);
-    l.setForeground(color);
+    l.setColor(color);
     l.setFont(zebra.ui.boldFont);
     l.setBorder(new Border(1, zebra.util.rgb.gray));
     l.setPadding(4);

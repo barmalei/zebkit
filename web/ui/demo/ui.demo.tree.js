@@ -61,7 +61,7 @@ pkg.TreeDemo = new Class(pkg.DemoPan, [
               function getView(c, i) {
                     var tr = new zebra.ui.TextRender(i.value);
                     if (i.value.indexOf("1") > 0) {
-                        tr.setForeground(rgb.red);
+                        tr.setColor(rgb.red);
                     }
 
                     if (i.value.indexOf("2") > 0) {

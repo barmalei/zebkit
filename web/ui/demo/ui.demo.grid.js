@@ -56,7 +56,7 @@ var ColumnsAlignmentProvider = Class(DefViews, [
     function getView(row,col,data){
         var tf = new BoldTextRender(data);
         if (row == 1 && col == 1) {
-            tf.setForeground(rgb.white);
+            tf.setColor(rgb.white);
         }
         return tf;
     },

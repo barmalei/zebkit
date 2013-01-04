@@ -26,14 +26,14 @@ pkg.MiscDemo = new Class(pkg.DemoPan,[
         var ext1Content = new Panel();
         ext1Content.setPreferredSize(-1, 80);
         ext1Content.setBackground(rgb.darkGray);
-        ext1Content.setBorder(new Border(1));
+        ext1Content.setBorder(new Border());
         var ext2Content = new Panel();
         ext2Content.setPreferredSize(-1, 80);
-        ext2Content.setBorder(new Border(1));
+        ext2Content.setBorder(new Border());
         ext2Content.setBackground(rgb.gray);
         var ext3Content = new Panel();
         ext3Content.setPreferredSize(-1, 80);
-        ext3Content.setBorder(new Border(1));
+        ext3Content.setBorder(new Border());
         ext3Content.setBackground(rgb.lightGray);
 
         var ext1 = new zebra.ui.Extender(ext1Content, "Panel 1");

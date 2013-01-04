@@ -192,9 +192,9 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
         var l1 = pkg.createLabel("Press right mouse button\nto see context menu Cars", rgb.red);
         var l2 = pkg.createLabel("Press right mouse button\nto see context menu Colors", rgb.red);
         var l3 = pkg.createLabel("Press right mouse button\nto see context menu Brands", rgb.red);
-        l1.setBorder(new Border(1, rgb.red,2));
-        l2.setBorder(new Border(1, rgb.blue,2));
-        l3.setBorder(new Border(1, rgb.green,2));
+        l1.setBorder(new Border("red",2));
+        l2.setBorder(new Border("blue",2));
+        l3.setBorder(new Border("green",2));
         p.setPreferredSize(-1, 60);
         p.add(l1);
         p.add(l2);

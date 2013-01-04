@@ -15,14 +15,14 @@ pkg.PanelsDemo = new Class(pkg.DemoPan, [
     },
 
     function createTitledPan() {
-        var r = new Panel(new FlowLayout(CENTER, CENTER));
-        var p = new Panel(new GridLayout(4, 3));
-        var p1 = new BorderPan("Default title", new Label(""));
+        var r = new Panel(new FlowLayout(CENTER, CENTER)),
+            p = new Panel(new GridLayout(4, 3)),
+            p1 = new BorderPan("Default title", new Label(""));
         p1.setBackground(zebra.util.rgb.yellow);
         p1.setPreferredSize(130, 100);
 
-        var ll = new Label("");
-        var p2 = new BorderPan("Center aligned title", ll, CENTER | TOP);
+        var ll = new Label(""),
+            p2 = new BorderPan("Center aligned title", ll, CENTER | TOP);
         p2.setPreferredSize(150, 100);
 
         var p3 = new BorderPan("Right aligned title", new Label(""), TOP | RIGHT);
@@ -68,14 +68,14 @@ pkg.PanelsDemo = new Class(pkg.DemoPan, [
     },
 
     function createScrollPan() {
-        var rt = new Panel(new FlowLayout(CENTER, CENTER));
-        var p = new Panel(new GridLayout(2,2));
-        var img = new ImagePan(ui.get("cosmo1"));
-        var p1 = new ScrollPan(img);
-        p1.setPreferredSize(220, 180);
+        var rt = new Panel(new FlowLayout(CENTER, CENTER)),
+            p = new Panel(new GridLayout(2,2)),
+            img = new ImagePan(ui.get("cosmo1")),
+            p1 = new ScrollPan(img);
+        p1.setPreferredSize(240, 200);
         p1.setBorder(new Etched());
         var p2 = new ScrollPan(new ImagePan(ui.get("cosmo1")), VERTICAL);
-        p2.setPreferredSize(220, 180);
+        p2.setPreferredSize(240, 200);
         p2.setBorder(new Etched());
 
         var p3_1 = new Panel(new zebra.layout.ListLayout(2));
@@ -86,12 +86,12 @@ pkg.PanelsDemo = new Class(pkg.DemoPan, [
             p3_1.add(ch);
         }
         p3 = new ScrollPan(p3_1);
-        p3.setPreferredSize(220, 145);
+        p3.setPreferredSize(240, 170);
         p3.setBorder(new Etched());
 
         var p4_1 = new TextField(new zebra.data.Text(zebra.io.GET("demo/test.txt")));
         p4 = new ScrollPan(p4_1);
-        p4.setPreferredSize(220, 145);
+        p4.setPreferredSize(240, 170);
         p4.setBorder(new Etched());
 
         var ctr = new Constraints();

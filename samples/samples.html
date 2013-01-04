@@ -46,7 +46,46 @@
 					zebra.print(p + "," + s);
 				});
 
+				bg6 = zebra.ui.loadImage("rs/bg6.png", function(p,s) {
+					zebra.print(p + "," + s);
+				});
 
+
+				bg7 = zebra.ui.loadImage("rs/bg7.png", function(p,s) {
+					zebra.print(p + "," + s);
+				});
+
+				bg8 = zebra.ui.loadImage("rs/18original.gif", function(p,s) {
+					zebra.print(p + "," + s);
+				});
+
+				bg9 = zebra.ui.loadImage("rs/19original.jpg", function(p,s) {
+					zebra.print(p + "," + s);
+				});
+
+				bg10 = zebra.ui.loadImage("rs/22.jpg", function(p,s) {
+					zebra.print(p + "," + s);
+				});
+
+				bg11 = zebra.ui.loadImage("rs/25original.gif", function(p,s) {
+					zebra.print(p + "," + s);
+				});
+
+				bg12 = zebra.ui.loadImage("rs/40original.gif", function(p,s) {
+					zebra.print(p + "," + s);
+				});
+
+				bg13 = zebra.ui.loadImage("rs/43original.gif", function(p,s) {
+					zebra.print(p + "," + s);
+				});
+
+				bg14 = zebra.ui.loadImage("rs/44original.gif", function(p,s) {
+					zebra.print(p + "," + s);
+				});
+
+				cursors = zebra.ui.loadImage("rs/cursors.png", function(p,s) {
+					zebra.print(p + "," + s);
+				});
 		    },
 
 		    function() {
@@ -76,11 +115,11 @@
 						}),
 						RIGHT: (new BorderOutline()).properties({
 							preferredSize : [ 50, 50 ],
-							border: new Border(Border.SOLID, "white", 4)
+							border: new Border("white", 4)
 						}),
 						BOTTOM: (new BorderOutline()).properties({
 							preferredSize : [ 50, 50 ],
-							border: new Border(Border.SOLID, "white", 4, 8)
+							border: new Border("white", 4, 8)
 						}),
 						TOP: (new BorderOutline()).properties({
 							preferredSize : [ 50, 80 ],
@@ -89,55 +128,123 @@
 					}
 				});
 
-			    root = (new zebra.ui.zCanvas(370,450)).root;
+			    root = (new zebra.ui.zCanvas(370,400)).root;
 				root.properties({
 					layout: new zebra.layout.BorderLayout(4,4),
-					background: new Pattern(bg5),
-					padding:8,
+					background : new Pattern(bg9),
+					background2: "#AACACA",
+					padding    : 8,
 					kids: {
 						CENTER: new Components()
 					}
 				});
 
-
 			    root = (new zebra.ui.zCanvas(300,300)).root;
 				root.properties({
-					layout: new zebra.layout.BorderLayout(4,4),
-					background: new Pattern(bg2),
+					layout: new StackLayout(),
+					background: new Pattern(bg11),
 					kids: {
-						CENTER: new  CirclePan(50)
+						null: 		 new CirclePan(50),
+						USE_PS_SIZE: new TrianglePan()
 					}
 				});
 
 
 			    root = (new zebra.ui.zCanvas(300,300)).root;
 				root.properties({
-					layout: new zebra.layout.GridLayout(2, 2, HORIZONTAL | VERTICAL),
+					layout: new StackLayout(),
 					kids: [
-						new zebra.ui.Panel(Cursorable, [ function getCursorType(t, x, y) { return Cursor.HAND; } ]).properties({
-							background:"red",
-							preferredSize:[100,100]
+						new Panel().properties({
+							layout: new zebra.layout.GridLayout(2, 2, HORIZONTAL | VERTICAL),
+							kids: [
+								new CursorPan(Cursor.HAND, "red", new Picture(cursors, 180, 110, 60, 60)),
+								new CursorPan(Cursor.WAIT, "blue", new Picture(cursors, 180, 50, 60, 60)),
+								new CursorPan(Cursor.MOVE, "gray", new Picture(cursors, 120, 110, 60, 60)),
+								new CursorPan(Cursor.HELP, "orange", new Picture(cursors, 0, 110, 60, 60))
+							]
 						}),
-						new zebra.ui.Panel().properties({
-							background:"blue",
-							preferredSize:[100,100]
-						}),
-						new zebra.ui.Panel().properties({
-							background:"gray"
 
-						}),
-						new zebra.ui.Panel().properties({
-							background:"white"
+						(new CursorPan("crosshair", "rgba(222,222,222, 0.6)", 
+									   new Picture(cursors, 180, 0, 60, 55))).properties({
+							constraints: USE_PS_SIZE,
+							preferredSize: [100, 100]
 						})
 					]
 				});
 
-			    root = (new zebra.ui.zCanvas(300,300)).root;
+			    root = (new zebra.ui.zCanvas(400,250)).root;
 				root.properties({
-					layout: new zebra.layout.BorderLayout(),
-					kids: {
-						CENTER: new SimpleChart(function(x) { return x*Math.sin(1/(x==0?1:x)); }, -0.3, 0.3, 0.01)
-					}
+					layout: new zebra.layout.StackLayout(),
+					background:new Pattern(bg6),
+					kids:[
+						new SimpleChart(function(x) { return -x*Math.sin(x); }, -0.4, 0.4, 0.01, "#33ddCC"),
+						new SimpleChart(function(x) { return Math.sin(x); }, -3, 3, 0.01, "#11FF99"),
+						new SimpleChart(function(x) { return Math.cos(x)*Math.sin(x) - 2 * Math.sin(x*x); }, -2, 3, 0.01, "#CCFF77"),
+
+						new Panel(MouseMotionListener, MouseListener, [
+							function mouseMoved(e) {
+								for(var i=0; i<this.parent.kids.length-1; i++) {
+									var kid = this.parent.kids[i];
+										j   = kid.isInside(e.x, e.y);
+									
+									if (j >= 0) {
+										kid.setHighlight(true);
+										this.selected = kid;
+										this.index = j;
+										break;
+									}
+									else {
+										this.selected = null;
+										if (kid.highlight) kid.setHighlight(false);		
+									}
+								}
+								
+							},
+
+							function startDragged(e) {
+								this.dx = e.x;
+								this.dy = e.y;
+							},
+
+							function mouseDragged(e) {
+								if (this.selected) {
+									for (var i=0; i < this.selected.gx.length; i++) {
+										this.selected.gx[i] += (e.x - this.dx); 
+										this.selected.gy[i] += (e.y - this.dy); 
+									}
+									this.selected.repaint();
+								}
+								this.dx = e.x;
+								this.dy = e.y;
+							}
+
+						])
+					]
+				});
+
+				var zc = new zebra.ui.zCanvas(300,300), root = zc.root;
+				zc.add(new CustomLayer()); 
+				root.properties({
+					layout: new FlowLayout(CENTER, CENTER, VERTICAL, 8),
+					padding: 8,
+					background: new Pattern(bg6),
+					kids: [
+						new BorderOutline().properties({ 
+							preferredSize: [ 120, 50 ],
+							border: new Border("blue", 4, 8)
+						}),
+
+						new BorderOutline().properties({ 
+							preferredSize: [ 180, 60 ],
+							background:"black",
+							border: borders.etched //new Border("orange", 4, 8)
+						}),
+
+						new BorderOutline().properties({ 
+							preferredSize: [ 220, 70 ],
+							border: new Border("green", 4, 8)
+						})
+					]
 				});
 				
 				

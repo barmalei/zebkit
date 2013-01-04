@@ -72,7 +72,7 @@
                         "over"     : { "$zebra.ui.ButtonBorder" : false },
                         "disabled": "@borders.buttonOver"
                     },
-            "focusMarkerView" : { "$Border": [ 1, "@palette.gray4" ] },
+            "focusMarkerView" : { "$Border": "@palette.gray4" },
             "padding":6
         }
     },
@@ -82,12 +82,12 @@
             "properties": {
                 "view": {
                   "$ *ViewSet": {
-                        "on"     :{ "$Picture": ["@pictures.checkbox",0,12,12,12 ] },
-                        "off"    :{ "$Picture": ["@pictures.checkbox",12,12,12,12] },
-                        "onover" :{ "$Picture": ["@pictures.checkbox",48,12,12,12] },
-                        "offover":{ "$Picture": ["@pictures.checkbox",60,12,12,12] },
-                        "doff"   :{ "$Picture": ["@pictures.checkbox",24,12,12,12] },
-                        "don"    :{ "$Picture": ["@pictures.checkbox",36,12,12,12] }
+                        "on"     :{ "$Picture": ["@pictures.checkbox",0,12,12,12, true ] },
+                        "off"    :{ "$Picture": ["@pictures.checkbox",12,12,12,12, true] },
+                        "onover" :{ "$Picture": ["@pictures.checkbox",48,12,12,12, true] },
+                        "offover":{ "$Picture": ["@pictures.checkbox",60,12,12,12, true] },
+                        "doff"   :{ "$Picture": ["@pictures.checkbox",24,12,12,12, true] },
+                        "don"    :{ "$Picture": ["@pictures.checkbox",36,12,12,12, true] }
                     }
                 }
             }
@@ -95,7 +95,7 @@
 
         "properties": {
             "layout" : { "$zebra.layout.FlowLayout": [ 16,16,32,2 ] },
-            "focusMarkerView" : { "$Border": [ 1, "@palette.gray4" ] },
+            "focusMarkerView" : { "$Border": "@palette.gray4" },
             "padding": 2
         }
     },
@@ -105,12 +105,12 @@
             "properties": {
                 "view": {
                   "$ *ViewSet": {
-                        "on"     : { "$Picture": ["@pictures.checkbox", 0,0,12,12 ]  },
-                        "off"    : { "$Picture": ["@pictures.checkbox", 12,0,12,12] },
-                        "offover": { "$Picture": ["@pictures.checkbox" ,60,0,12,12] },
-                        "onover" : { "$Picture": ["@pictures.checkbox" ,48,0,12,12] },
-                        "doff"   : { "$Picture": ["@pictures.checkbox" ,24,0,12,12] },
-                        "don"    : { "$Picture": ["@pictures.checkbox" ,36,0,12,12] }
+                        "on"     : { "$Picture": ["@pictures.checkbox", 0,0,12,12 , true]  },
+                        "off"    : { "$Picture": ["@pictures.checkbox", 12,0,12,12, true] },
+                        "offover": { "$Picture": ["@pictures.checkbox" ,60,0,12,12, true] },
+                        "onover" : { "$Picture": ["@pictures.checkbox" ,48,0,12,12, true] },
+                        "doff"   : { "$Picture": ["@pictures.checkbox" ,24,0,12,12, true] },
+                        "don"    : { "$Picture": ["@pictures.checkbox" ,36,0,12,12, true] }
                    }
                 }
             }
@@ -120,13 +120,13 @@
     "BorderPan": {
         "Label": {
             "properties": {
-                "font"      : "@boldFont",
+                "font" : "@boldFont",
                 "color": "@palette.gray1"
             }
         },
 
         "properties": {
-            "border": { "$zebra.ui.TitledBorder": [ "@borders.etched", 16 ] }
+            "border": { "$zebra.ui.TitledBorder": [ { "$Border": ["#777777", 1, 6]}, 16 ] }
         }
     },
 
@@ -212,7 +212,7 @@
 
     "Progress": {
     "properties": {
-            "border"    : { "$Border" : [1, "@palette.gray2"] },
+            "border"    : { "$Border" : "@palette.gray2" },
             "bundleView": "@palette.gray4",
             "padding"   : 2
         }
@@ -235,7 +235,7 @@
         "properties": {
             "views" :  {
                 "select": { "$rgb"   : [ 228,244,252 ]  },
-                "marker": { "$Border": [ 1, "#787878" ] }
+                "marker": { "$Border": "#787878" }
             },
             "border" : { "$zebra.ui.ListBorder":[] },
             "padding": 1
@@ -258,7 +258,7 @@
     "Combo": {
         "ComboPadPan": {
             "properties" : {
-                "border"    : { "$Border":[ 1, "#969696", 1, 3] },
+                "border"    : { "$Border":[ "#969696", 1, 3] },
                 "background": "@palette.white"
             }
         },
@@ -304,7 +304,7 @@
         "properties": {
             "border": "@borders.dot",
             "views" : {  "marker" : "@borders.dot",
-                         "gauge"  : { "$Border" : [ 1, "@palette.gray3" ]  },
+                         "gauge"  : { "$Border" : "@palette.gray3" },
                          "hbundle": { "$Picture": [ "@pictures.slider", 0,0,11,18 ] },
                          "vbundle": { "$Picture": [ "@pictures.slider", 11,0,18,11 ] }
                     },
@@ -331,7 +331,7 @@
             "background": "@palette.gray6",
             "font"      : "@smallFont",
             "color": "@palette.black",
-            "border"    : { "$Border": [1, "@palette.gray1"] }
+            "border"    : { "$Border": "@palette.gray1" }
         }
     },
 
@@ -380,7 +380,7 @@
         },
 
         "properties": {
-            "border"     : { "$Border": 1  },
+            "border"     : { "$Border": []  },
             "background" : "#DEDEDE",
             "padding"    : 3,
             "views"      :  { "select" : { "$Gradient": [ "rgb(228,244,252)", "rgb(167,217,245)"  ] },
@@ -414,7 +414,7 @@
         "Combo": {
             "properties": {
                 "background": "@palette.white",
-                "border"    : { "$Border": [ 1, "rgb(200,180,200)"  ] },
+                "border"    : { "$Border": "rgb(200,180,200)" },
                 "paddings"  : [1, 4, 1, 1]
             }
         },
@@ -456,17 +456,17 @@
         "Tree": {
             "properties": {
                 "views": {
-                    "close"   : { "$Picture": [ "@pictures.tree", 16 ,0 ,15,14 ] },
-                    "open"    : { "$Picture": [ "@pictures.tree", 0  ,14,16,14 ] },
-                    "least"   : { "$Picture": [ "@pictures.tree", 0  ,0 ,16,14 ] },
-                    "off"     : { "$Picture": [ "@pictures.tree", 32 ,0 ,11,11 ] },
-                    "on"      : { "$Picture": [ "@pictures.tree", 32 ,11,11,11 ] },
+                    "close"   : { "$Picture": [ "@pictures.tree", 16 ,0 ,15,14, true ] },
+                    "open"    : { "$Picture": [ "@pictures.tree", 0  ,14,16,14, true ] },
+                    "least"   : { "$Picture": [ "@pictures.tree", 0  ,0 ,16,14, true ] },
+                    "off"     : { "$Picture": [ "@pictures.tree", 32 ,0 ,11,11, true ] },
+                    "on"      : { "$Picture": [ "@pictures.tree", 32 ,11,11,11, true ] },
                     "aselect" : { "$zebra.ui.CompositeView": [
                                         { "$rgb": [ 228, 244, 252 ] },
-                                        { "$Border": [ 1, "rgb(200,180,200)" ] }
+                                        { "$Border": "rgb(200,180,200)" }
                                     ]
                     },
-                    "iselect" : { "$Border": [ 1, "rgb(200,180,200)", 1] }
+                    "iselect" : { "$Border": "rgb(200,180,200)" }
                 }
             },
             "fontColor" : "@palette.gray1",
@@ -494,7 +494,7 @@
                 "views" : {
                     "onselection" :{ "$Gradient": [ "#DCDCDC", "#F0F0F0" ] },
                     "offselection":{ "$Gradient": ["#AAAAAA", "#D2D2D2" ] },
-                    "marker"      :{ "$Border"  : [ 1, "rgb(170,190,170)"  ] }
+                    "marker"      :{ "$Border"  : "rgb(170,190,170)" }
                 }
             }
         }
@@ -507,7 +507,7 @@
                 "background": "@palette.gray6",
                 "color": "@palette.black",
                 "font"      : "@smallFont",
-                "border"    : { "$Border": [1, "@palette.gray1"] }
+                "border"    : { "$Border": "@palette.gray1" }
             }
         }
     },
@@ -518,7 +518,7 @@
                 "layout"    : { "$zebra.layout.BorderLayout":[] },
                 "inactiveBg": "@palette.gray6",
                 "activeBg"  : "@palette.gray2",
-                "border"    : {"$Border":[1,"@palette.gray2", 0, 6]},
+                "border"    : {"$Border": ["@palette.gray2", 0, 6]},
                 "paddings"  : [ 2,4,2,4 ]
             }
         },
@@ -559,7 +559,7 @@
         },
 
         "properties": {
-            "border"    : {"$Border":[1,"@palette.gray2", 2, 6]},
+            "border"    : {"$Border":["@palette.gray2", 2, 6]},
             "background": "@palette.gray5",
             "paddings"  : [1,2,1,2],
             "buttons"   : {

@@ -45,7 +45,7 @@
 	        	desktop = new zebra.ui.zCanvas("zCanvas");
 				var root = desktop.root;
 	    		root.setPadding(4);
-				root.setBorder(new Border(1));
+				root.setBorder(new Border());
 				root.setLayout(new BorderLayout());
 
 				var p1 = new Panel(new BorderLayout(16,16));
@@ -54,7 +54,7 @@
 				var crPan    = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.VERTICAL, 4));
 				var logoPan  = new Panel(new FlowLayout(L.CENTER, L.TOP, L.HORIZONTAL, 12));
 				var g = new ImagePan(zebra.ui.get("logo_head"));
-				g.setBorder(new Border(1));
+				g.setBorder(new Border());
 				logoPan.add(g);
 
 				p1.add(L.TOP, titlePan);

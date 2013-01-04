@@ -115,7 +115,7 @@ var CustomGridEditor = new Class(DefEditors, [
                         $this.parent.remove($this);
                     });
 
-                    this.setBorder(new zebra.ui.Border(1, rgb.gray, 2, 6));
+                    this.setBorder(new zebra.ui.Border("gray", 2, 6));
                     this.setBackground(zebra.ui.palette.gray6);
 
 

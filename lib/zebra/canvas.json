@@ -7,6 +7,7 @@
     "$aliases": {
         "Picture"  : "zebra.ui.Picture",
         "Border"   : "zebra.ui.Border",
+        "Dotted"   : "zebra.ui.Dotted",
         "ViewSet"  : "zebra.ui.ViewSet",
         "Gradient" : "zebra.ui.Gradient",
         "rgb"      : "zebra.util.rgb",
@@ -39,9 +40,9 @@
     "borders" : {
         "raised" : { "$zebra.ui.Raised":[] },
         "sunken" : { "$zebra.ui.Sunken":[] },
-        "etched" : { "$Border" :   [ 1, "#778888", 1, 3 ] },
-        "plain"  : { "$Border" : 1 },
-        "dot"    : { "$Border" : 2  }
+        "etched" : { "$zebra.ui.Etched":[] },
+        "plain"  : { "$Border" : []  },
+        "dot"    : { "$Dotted" : []  }
     },
 
     "BaseLayer": {

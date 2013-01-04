@@ -46,10 +46,10 @@ pkg.BorderOutline = Class(pkg.SamplePan, KeyListener, FocusListener, [
 			    w -= 2*this.lineWidth;
 			    h -= 2*this.lineWidth;
 
-			    g.moveTo(x + w/2, y);
+			    g.moveTo(x + w/2 - 1, y);
 			    g.lineTo(x + w - 1, y + h - 1);
 			    g.lineTo(x, y + h - 1);
-			    g.lineTo(x + w/2, y);
+			    g.lineTo(x + w/2 + 1, y);
 			    return true;
 			}
 		]); 
@@ -188,6 +188,25 @@ pkg.MouseEventHandler = Class(pkg.SamplePan, MouseMotionListener, MouseListener,
 	}
 ]);
 
+pkg.CursorPan = Class(pkg.SamplePan, Cursorable, [
+	function(cursor, bg, picture) {
+		this.$super();
+		this.setPreferredSize(50,50);
+		this.cursor = cursor;
+		this.setBackground(bg);
+		this.picture = picture;
+	},
+
+	function getCursorType(t, x, y) { 
+		return this.cursor; 
+	},
+
+	function paint(g) {
+		var ps = this.picture.getPreferredSize();
+		this.picture.paint(g, (this.width - ps.width)/2, (this.height - ps.height)/2, ps.width, ps.height, this);
+	}
+]);
+
 	
 pkg.Components = Class(pkg.SamplePan, MouseListener, ChildrenListener, [
 	function () {
@@ -211,7 +230,7 @@ pkg.Components = Class(pkg.SamplePan, MouseListener, ChildrenListener, [
 							g.fillText(txt, x, y);							
 						}
 				    ])).properties({
-							border       : new Border(Border.SOLID, brColor, 4, 6),
+							border       : new Border(brColor, 4, 6),
 							preferredSize: [35, 35],
 							constraints  : constr
 						});
@@ -249,8 +268,7 @@ pkg.Components = Class(pkg.SamplePan, MouseListener, ChildrenListener, [
 									makePanel(col, "5", constr),
 									makePanel(col, "6", constr2)
 								]
-							}),
-							makePanel(rgb.black, rgb.black, "Item 4")
+							})
 						] 
 					})]
 				}),
@@ -282,7 +300,7 @@ pkg.Components = Class(pkg.SamplePan, MouseListener, ChildrenListener, [
 	}
 ]);
 
-pkg.CirclePan = Class(pkg.SamplePan, MouseListener, Cursorable, [
+pkg.CirclePan = Class(pkg.SamplePan, MouseListener, [
 	function(r) {
 		this.$super();
 		this.setPreferredSize(2*r, 2*r);
@@ -295,94 +313,153 @@ pkg.CirclePan = Class(pkg.SamplePan, MouseListener, Cursorable, [
 	},
 
 	function mouseEntered(e) {
-		this.setBackground("blue");
+		this.setBackground("rgba(100,222,80,0.4)");
 	},
 
 	function mouseExited(e) {
 		this.setBackground(null);
-	},
-
-	function getCursorType(t, x, y) {
-		return Cursor.HAND;
 	}
 ]);
 
-pkg.CursorPan = Class(pkg.SamplePan, Cursorable, [
-	function(c) {
+pkg.TrianglePan = Class(pkg.SamplePan, MouseListener, [
+	function() {
 		this.$super();
-		this.cursor = c;
+		this.setBorder(new pkg.BorderOutline.Triangle("orange"));
+		this.setPreferredSize(200, 200);
 	},
 
-	function getCursorType(t, x, y) {
-		return this.cursor;
+	function contains(x, y) {
+		var ax = this.width/2, ay = 0, 
+			bx = this.width - 1, by = this.height - 1,
+			cx = 0, cy = this.height - 1,
+			ab = (ax - x)*(by- y)-(bx-x)*(ay-y);
+			bc = (bx-x)*(cy-y)-(cx - x)*(by-y);
+			ca = (cx-x)*(ay-y)-(ax - x)*(cy-y);
+		return ab > 0 && bc > 0 && ca > 0
+	},
+
+	function mouseEntered(e) {
+		this.setBackground("rgba(220,80,80, 0.4)");
+	},
+
+	function mouseExited(e) {
+		this.setBackground(null);
 	}
 ]);
-
 
 pkg.SimpleChart = Class(pkg.SamplePan, [
-	function(f, x1, x2, dx) {
-		this.$super();
+	function(f, x1, x2, dx, col) {
 		this.f = f;
 		this.x1 = x1;
 		this.x2 = x2;
 		this.dx = dx;
-		this.setBackground("black");
+		this.color = col;
+		this.lineWidth = 4; 
+		this.$super();
 		this.setPadding(8);
 	},
 
 	function recalc() {
-
-		zebra.print("recalc");
-
-		var maxy = -1000000, miny = 1000000, y = []; 
+		var maxy = -1000000, miny = 1000000, fy = []; 
 		for(var x = this.x1, i = 0; x < this.x2; x += this.dx, i++) {
-			y[i] = this.f(x);
-			if (y[i] > maxy) maxy = y[i]; 
-			if (y[i] < miny) miny = y[i]; 
+			fy[i] = this.f(x);
+			if (fy[i] > maxy) maxy = fy[i]; 
+			if (fy[i] < miny) miny = fy[i]; 
 		}
-		y.push(miny);
-		y.push(maxy);
-		this.fy = y;
 
-		zebra.print(this.fy.length);
+		var left = this.getLeft() + this.lineWidth, top = this.getTop() + this.lineWidth,
+			ww = this.width  - left - this.getRight()  - this.lineWidth*2, 
+			hh = this.height - top  - this.getBottom() - this.lineWidth*2,
+			cx  = ww/(this.x2 - this.x1), cy = hh/ (maxy - miny);
+
+		var t = function (xy, ct) { 
+			return ct * xy; 
+		};
+
+		this.gx = [ left ];
+		this.gy = [ top + t(fy[0] - miny, cy) ];
+		for(var x = this.x1 + this.dx, i = 1; i < fy.length; x += this.dx, i++) {
+			this.gx[i] = left + t(x - this.x1, cx);
+			this.gy[i] = top  + t(fy[i] - miny, cy);
+		}
+	},
+
+	function isInside(x, y) {
+		for(var i = 0; i < this.gx.length; i++) { 
+			var rx = this.gx[i], ry = this.gy[i];
+			if ((ry - y) * (ry - y) + (rx - x) * (rx - x) < 4 * this.lineWidth * this.lineWidth) {
+				return i;
+			}
+		}
+		return -1;
+	},
+
+	function setHighlight(b) {
+		this.highlight = b;
+		this.repaint();
 	},
 
 	function paint(g) {
-		var ww = this.width - this.getLeft() - this.getRight(), 
-			hh = this.height - this.getTop() - this.getBottom(),
-			min = this.fy[this.fy.length-2], max = this.fy[this.fy.length-1], deltay = max - min,
-			deltax = this.x2 - this.x1,
-			sx  = this.getLeft() + (ww/deltax) * (this.x1 - this.x1), 
-			sy = this.getTop() + (hh/deltay) * (this.fy[0] - min);
-				
 		g.beginPath();
-		g.setColor("red");
-		g.lineWidth = 3;
-		g.moveTo(sx, sy);
-		for(var x = this.x1 + this.dx, i = 1; i < this.fy.length-2; x += this.dx, i++) {
-			g.lineTo(this.getLeft() + (ww/deltax) * (x - this.x1) , this.getTop() + (hh/deltay) * (this.fy[i] - min));
-			
+		g.setColor(this.color);
+		g.lineWidth = this.lineWidth;
+		g.moveTo(this.gx[0], this.gy[0]);
+		for(var i = 1; i < this.gx.length; i++) { 
+			g.lineTo(this.gx[i], this.gy[i]);
 		}
 		g.stroke();
+
+		if (this.highlight) {
+			g.lineWidth = this.lineWidth*3;
+			g.setColor("rgba(255,10,10, 0.3)");
+			g.moveTo(this.gx[0], this.gy[0]);
+			for(var i = 1; i < this.gx.length; i++) { 
+				g.lineTo(this.gx[i], this.gy[i]);
+			}
+			g.stroke();
+		}
 	}
 ]);
 
+pkg.CustomLayer = Class(BaseLayer, [
+	function() {
+		this.$super("CUSTOM");
+		this.setLayout(new StackLayout());
+		this.setPadding(8);
+		this.add(new Panel(FocusListener, [
+			function canHaveFocus() {
+				return true;
+			},
 
-pkg.SpriteView = Class(zebra.ui.View, [	
-	function paint(g, x, y, w, h, d) {
-		for (var i = 0; i < w; i++) {
-			for (var j = 0; j < h; j++) {
-				var xx = x + i, yy = y + j,
-					m1 = Math.abs(yy - 10)*10,
-					m2 = (-xx + w)/w;
-				g.setColor(new rgb((255.0-m1)*m2,(100-m1)*m2,0));
-				
-				g.beginPath();
-				g.moveTo(xx, yy);
-				g.lineTo(xx+1, yy+1);
-				g.stroke();
-			}			
-		}
+			function focusGained(e) {
+				this.setBorder(new Border("red", 4, 6));
+			},
+
+			function focusLost(e) {
+				this.setBorder(null);
+			},
+
+			function paint(g) {
+				//g.fillText();
+			}
+		]));
+	},
+
+	function isLayerActive() {
+		return this.bg != null;
+	},
+
+	function isLayerActiveAt(x,y){ 
+		return this.bg != null;
+	},
+
+	function layerKeyPressed(code, m){
+		if (code == 68 && (m & KeyEvent.ALT) > 0) {
+			if (this.bg == null ) this.setBackground("rgba(200, 200, 200, 0.7)");
+			else				  this.setBackground(null);
+			this.activate(this.bg != null);
+			this.kids[0].requestFocus();
+		}		
 	}
 ]);
 

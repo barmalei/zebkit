@@ -75,7 +75,7 @@ function createTooltipDemo() {
     ui.tooltip.setTooltip(l2, new zebra.ui.TooltipInfo([
          function getTooltip(target, x, y) {
             var b = new zebra.ui.ImagePan(ui.get("bmw"));
-            b.setBorder(new Border(1));
+            b.setBorder(new Border());
             return b;
          }
     ]));
@@ -86,7 +86,7 @@ function createTooltipDemo() {
             var l = new zebra.ui.ImageLabel("Peugeot", ui.get("peugeot"));
             l.setBackground(rgb.white);
             l.setPadding(4);
-            l.setBorder(new Border(1));
+            l.setBorder(new Border());
             return l;
          }
     ]));

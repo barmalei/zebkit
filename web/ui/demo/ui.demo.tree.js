@@ -52,7 +52,7 @@ pkg.TreeDemo = new Class(pkg.DemoPan, [
 
         var t1 = new Tree(makeTreeModel()), p1 = new BorderPan("Standard tree", t1);
         p1.setGaps(6,6);
-        p1.setPreferredSize(180, 140);
+        p1.setPreferredSize(190, 180);
         t1.select(t1.model.root);
 
         var t2 = new Tree(makeTreeModel()), p2 = new BorderPan("Custom view tree", t2);
@@ -76,17 +76,17 @@ pkg.TreeDemo = new Class(pkg.DemoPan, [
         ]));
         t2.select(t2.model.root);
         p2.setGaps(6,6);
-        p2.setPreferredSize(180, 140);
+        p2.setPreferredSize(190, 180);
 
         var t3 = new Tree(makeTreeModel()), p3 = new BorderPan("Editable tree(use enter)", new ScrollPan(t3));
         t3.select(t3.model.root);
         t3.setEditorProvider(new zebra.ui.tree.DefEditors());
         p3.setGaps(6,6);
-        p3.setPreferredSize(180, 140);
-
+        p3.setPreferredSize(190, 180);
 
         var t4 = new Tree(makeTreeModel2(1000, 30)), p4 = new BorderPan("Long tree", new ScrollPan(t4));
         t4.select(t4.model.root);
+        t4.setPadding(4);
         p4.setPreferredSize(-1, 210);
         this.add(L.BOTTOM, p4);
 

@@ -35,7 +35,7 @@ pkg.DemoPan = Class(Panel, [
     function activated(b) {}
 ]);
 
-zebra.ui.configurator(function(conf) {
+zebra.ui.configure(function(conf) {
     conf.loadByUrl("demo.json", pkg);
 });
 

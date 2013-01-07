@@ -1,9 +1,0 @@
-{
-	"layout" : { "$zebra.layout.BorderLayout":[4, 4] },
-	"padding": 4,
-	"kids": {
-		"TOP"    : { "$zebra.ui.Panel":[], "background": "#FF0000", "preferredSize": [-1, 30]  },
-		"BOTTOM" : { "$zebra.ui.Panel":[], "background": "#00FF00", "preferredSize": [-1, 30]  },
-		"CENTER" : { "$zebra.ui.Panel":[], "background": "#0000FF" }
-	}
-}

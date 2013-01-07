@@ -1250,7 +1250,7 @@ if (typeof(zebra) === "undefined") {
         function test_packaging() {
 
             function isPackage(v) {
-               return v && zebra.FN(v.constructor) === "Package";
+               return v && zebra.$FN(v.constructor) === "Package";
             }
 
             var np = zebra("newpackage");
@@ -1460,6 +1460,110 @@ if (typeof(zebra) === "undefined") {
                 }
             ]);
             new A();
+        },
+
+        function test_mixing() {
+            var A = Class([
+                function a() {
+                    return 10;
+                },
+
+                function a(p1) {
+                    return p1;
+                }
+            ]), I = Interface();
+
+
+            var a = new A(), clz = a.getClazz();
+            assert(a.a(), 10);
+            assert(a.a(111), 111);
+            assert(zebra.instanceOf(a, zebra.$Extended), false);
+
+            a.extend([
+                function() {
+                    this.ff = 333;
+                },
+
+                function a() {
+                    return 200;
+                },
+
+                function a(p1) {
+                    return this.$super(this.a, p1 + 10);
+                }
+            ]);
+
+            var mclz = a.getClazz();
+            assert(a.a(), 200);
+            assert(a.a(123), 133);
+            assert(a.ff, 333);
+            assert(mclz != clz, true);
+            assert(zebra.instanceOf(a, zebra.$Extended), true);
+
+            // one more extension on the same instance
+            a.extend([
+                function() {
+                    this.fff = 333;
+                },
+
+                function a() {
+                    return this.a(111, 200);
+                },
+
+                function a(p1) {
+                    return this.$super(this.a, p1 + 20);
+                },
+
+                function a(p1, p2) {
+                    return p1 + p2;
+                }
+            ]);
+            assert(a.a(), 311);
+            assert(a.a(123), 143);
+            assert(a.ff, 333);
+            assert(a.fff, 333);
+            assert(a.a(100,11), 111);
+            assert(mclz == a.getClazz(), true);
+            assert(zebra.instanceOf(a, zebra.$Extended), true)
+
+            // no side effect to parent class
+            var a = new A(), clz = a.getClazz();
+            assert(a.a(), 10);
+            assert(a.a(111), 111);
+            assert(zebra.instanceOf(a, zebra.$Extended), false);
+
+            // more deep super calling
+            var B = Class(A, [
+                function b() {
+                    return this.$super(this.a);
+                }
+            ]), b = new B();
+
+            assert(b.a(), 10);
+            assert(b.b(), 10);
+            assert(b.a(111), 111);
+            assert(zebra.instanceOf(b, zebra.$Extended), false);
+            assert(zebra.instanceOf(b, I), false);
+
+            b.extend(I, [
+                function b() {
+                    return this.$super(this.a, 121);                   
+                }
+            ])
+
+            assert(b.a(), 10);
+            assert(b.b(), 121);
+            assert(b.a(112), 112);
+            assert(zebra.instanceOf(b, zebra.$Extended), true);
+            assert(zebra.instanceOf(b, I), true);
+
+            // no side effect to parent class
+            var b = new B(), clz = a.getClazz();
+            assert(b.a(), 10);
+            assert(b.b(), 10);
+            assert(b.a(111), 111);
+            assert(zebra.instanceOf(b, zebra.$Extended), false);
+            assert(zebra.instanceOf(b, I), false);
         }
     );
 })();

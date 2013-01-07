@@ -20,7 +20,7 @@
     "cursorManager": { "$zebra.ui.CursorManager" :[]  },
 
     "layers" : [
-        { "$ *zebra.ui.BaseLayer" :  "root"  }
+        { "$ *zebra.ui.RootLayer" :  "root"  }
      ],
 
     "font"          : { "$font" : ["Arial", 0, 14] },
@@ -48,15 +48,18 @@
     "BaseLayer": {
          "properties": {
              "layout"     : { "$zebra.layout.RasterLayout":[] },
-             "background" : null,
-             "border"     : "@borders.raised"
+             "background" : null
+         }
+    },
+
+    "RootLayer": {
+         "properties": {
+            "layout"     : { "$zebra.layout.RasterLayout":[] },
+            "background" : { "$Gradient": [ "@palette.white", "#E6E6E6", 32] }
          }
     },
 
     "zCanvas": {
-        "addons": [],
-        "properties": {
-            "background":  { "$Gradient": [ "@palette.white", "#E6E6E6"] }
-        }
+        "addons": []
     }
 }

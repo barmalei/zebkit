@@ -1,29 +1,29 @@
 
 (function(pkg, Class, ui) {
 
-var Panel = zebra.ui.Panel;
-var BorderPan = zebra.ui.BorderPan;
-var Label = zebra.ui.Label;
-var BoldLabel = zebra.ui.BoldLabel;
-var Button = zebra.ui.Button;
-var FlowLayout = zebra.layout.FlowLayout;
-var GridLayout = zebra.layout.GridLayout;
-var ListLayout = zebra.layout.ListLayout;
-var Gradient = zebra.ui.Gradient;
-var L = zebra.layout;
-var PercentLayout = zebra.layout.PercentLayout;
-var Tabs = zebra.ui.Tabs;
-var Checkbox = zebra.ui.Checkbox;
-var Radiobox = zebra.ui.Radiobox;
-var ImagePan = zebra.ui.ImagePan;
-var Link = zebra.ui.Link;
-var rgb = zebra.util.rgb;
-var List = zebra.ui.List;
-var CompList = zebra.ui.CompList;
-var Slider = zebra.ui.Slider;
-var Progress = zebra.ui.Progress;
-var TextField = zebra.ui.TextField;
-var Constraints = zebra.layout.Constraints;
+var Panel = zebra.ui.Panel,
+    BorderPan = zebra.ui.BorderPan,
+    Label = zebra.ui.Label,
+    BoldLabel = zebra.ui.BoldLabel,
+    Button = zebra.ui.Button,
+    FlowLayout = zebra.layout.FlowLayout,
+    GridLayout = zebra.layout.GridLayout,
+    ListLayout = zebra.layout.ListLayout,
+    Gradient = zebra.ui.Gradient,
+    L = zebra.layout,
+    PercentLayout = zebra.layout.PercentLayout,
+    Tabs = zebra.ui.Tabs,
+    Checkbox = zebra.ui.Checkbox,
+    Radiobox = zebra.ui.Radiobox,
+    ImagePan = zebra.ui.ImagePan,
+    Link = zebra.ui.Link,
+    rgb = zebra.util.rgb,
+    List = zebra.ui.List,
+    CompList = zebra.ui.CompList,
+    Slider = zebra.ui.Slider,
+    Progress = zebra.ui.Progress,
+    TextField = zebra.ui.TextField,
+    Constraints = zebra.layout.Constraints;
 
 pkg.BasicUIDemo = new Class(pkg.DemoPan, [
     function() {
@@ -65,6 +65,9 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
 
         tf.setPreferredSize(100, -1);
         tf.setHint("<enter text>");
+        
+        tf.extend(zebra.ui.History);
+
         p.add(ctr, new BoldLabel("Text field:"));
         p.add(ctr, tf);
 

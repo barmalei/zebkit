@@ -434,7 +434,7 @@ pkg.CustomLayer = Class(BaseLayer, [
 	},
 
 	function layerKeyPressed(code, m){
-		if (code == 68 && (m & KeyEvent.ALT) > 0) {
+		if (code == 68 && (m & KeyEvent.M_ALT) > 0) {
 			if (this.bg == null ) this.setBackground("rgba(255, 255, 255, 0.5)");
 			else				  this.setBackground(null);
 			this.activate(this.bg != null);

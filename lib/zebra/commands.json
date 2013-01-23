@@ -1,0 +1,33 @@
+[
+	{
+		"command"   : "undo_command",
+		"key"       : "Ctrl+z",
+		"instanceOf": [ "zebra.ui.TextField"]  
+	},
+	{
+		"command" : "redo_command",
+		"key"     : "Ctrl+Shift+z"
+	},
+	{
+		"command" : "selectAll_command",
+		"key"     : "Ctrl+A"
+	},
+	{
+		"command" : "nextWord_command",
+		"key"     : "Ctrl+Right"
+	},
+	{
+		"command" : "prevWord_command",
+		"key"     : "Ctrl+Left"
+	},
+
+	{
+		"command" : "pageUp_command",
+		"key"     : "PageUp"
+	},
+
+	{
+		"command" : "pageDown_command",
+		"key"     : "PageDown"
+	}
+]

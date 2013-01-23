@@ -39,7 +39,7 @@ var FL = Class(zebra.ui.BaseLayer, [
     },
 
     function layerKeyPressed(code, mask) {
-        var rm = zebra.ui.KeyEvent.CTRL + zebra.ui.KeyEvent.SHIFT + zebra.ui.KeyEvent.ALT;
+        var rm = zebra.ui.KeyEvent.M_CTRL + zebra.ui.KeyEvent.M_SHIFT + zebra.ui.KeyEvent.M_ALT;
         if ((rm & mask) == rm) {
              if (this.isActive) this.setBackground(null);
              else  this.setBackground(new rgb(255,255,255, 0.7));

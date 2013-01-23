@@ -961,13 +961,15 @@ if (typeof(zebra) === "undefined") {
             assert(a.a(1, 2), 3);
             assert(a.m, 33);
 
-            a.Field(function a() {
-                return 200;
-            });
+            a.extend([ 
+                function a() {
+                    return 200;
+                },
 
-            a.Field(function a(p) {
-                return 10;
-            });
+                function a(p) {
+                    return 10;
+                }
+            ]);
 
             assert(a.a(), 200);
             assert(a.a(1), 10);
@@ -987,6 +989,22 @@ if (typeof(zebra) === "undefined") {
             // should not be in global space
             assert(this['a'], undefined);
             assert(zebra.$global['a'], undefined);
+
+            var A = new Class([
+                function $prototype() {
+                    this.a = function () { return 100; };
+                }
+            ]);
+
+            var a = new A();
+            assert(a.a(), 100);
+
+            a.extend([ 
+                function a() {
+                    return this.$super() + 100;
+                }
+            ]);
+            assert(a.a(), 200);
         },
 
         function test_inner() {
@@ -1489,7 +1507,7 @@ if (typeof(zebra) === "undefined") {
                 },
 
                 function a(p1) {
-                    return this.$super(this.a, p1 + 10);
+                    return this.$super(p1 + 10);
                 }
             ]);
 
@@ -1511,7 +1529,7 @@ if (typeof(zebra) === "undefined") {
                 },
 
                 function a(p1) {
-                    return this.$super(this.a, p1 + 20);
+                    return this.$super(p1 + 20);
                 },
 
                 function a(p1, p2) {
@@ -1564,6 +1582,23 @@ if (typeof(zebra) === "undefined") {
             assert(b.a(111), 111);
             assert(zebra.instanceOf(b, zebra.$Extended), false);
             assert(zebra.instanceOf(b, I), false);
+
+            var A = Class([
+                function $prototype() {
+                    this.a = function() {
+                        return 101;
+                    };
+                }
+            ]), a = new A();
+            assert(a.a(), 101);
+            
+            a.extend([
+                function a() {
+                    return this.$super() + 100;                   
+                }
+            ]);
+            assert(a.a(), 201);
+
         }
     );
 })();

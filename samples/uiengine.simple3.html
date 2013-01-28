@@ -6,8 +6,7 @@
 		<script type='text/javascript'>
 		    zebra.ready(function() {
 		    	// create canvas and load its content from JSON
-				var root = (new zebra.ui.zCanvas(400, 400)).root;
-				(new zebra.util.Bag(root)).load(zebra.io.GET("uiengine.simple3.json"));
+				var root = (new zebra.ui.zCanvas(400, 400)).load("uiengine.simple3.json");
 	 		});
 		</script>
 	</header>

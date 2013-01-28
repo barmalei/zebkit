@@ -7,7 +7,7 @@
 		<script type='text/javascript'>
 		    zebra.ready(function() {
 				// import all classes, functions and cosntans from 
-				// zenra.ui, zebra.layout packages
+				// zebra.ui, zebra.layout packages
 				eval(zebra.Import("ui", "layout"));
 
 				// create canvas
@@ -23,7 +23,7 @@
 			    });
 				
 			    root.find("//Button")._.add(function() {
-					root.find("//TextField").setText("");
+					root.find("//TextField").setText("" + findCanvas(root).offy);
 				});
 	 		});
 		</script>

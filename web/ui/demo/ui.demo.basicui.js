@@ -66,8 +66,6 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         tf.setPreferredSize(100, -1);
         tf.setHint("<enter text>");
         
-        tf.extend(zebra.ui.History);
-
         p.add(ctr, new BoldLabel("Text field:"));
         p.add(ctr, tf);
 
@@ -149,9 +147,9 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         lbp.setGaps(6,6);
         p.add(lbp);
         var l = new zebra.ui.CompList();
-        l.add(new Label("Label Item"));
+        l.add("Label Item");
         l.add(new Checkbox("Checkbox Item"));
-        l.add(new zebra.ui.ImageLabel("Image Label Item", ui.get("butterfly")));
+        l.add(new zebra.ui.CompList.ImageLabel("Image Label Item", ui.get("butterfly")));
         var lbp = new BorderPan("Components list", l);
         lbp.setGaps(6,6);
         p.add(lbp);
@@ -194,9 +192,9 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         p.add(cb2);
 
         var l = new CompList(true);
-        l.add(new zebra.ui.ImageLabel("Item 1", ui.get("ind1")));
-        l.add(new zebra.ui.ImageLabel("Item 2", ui.get("ind1")));
-        l.add(new zebra.ui.ImageLabel("Item 3", ui.get("ind2")));
+        l.add(new zebra.ui.CompList.ImageLabel("Item 1", ui.get("ind1")));
+        l.add(new zebra.ui.CompList.ImageLabel("Item 2", ui.get("ind1")));
+        l.add(new zebra.ui.CompList.ImageLabel("Item 3", ui.get("ind2")));
         var cb3 = new zebra.ui.Combo(l);
         cb3.list.select(0);
         p.add(cb3);

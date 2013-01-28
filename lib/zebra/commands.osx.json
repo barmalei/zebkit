@@ -1,8 +1,7 @@
 [
 	{
 		"command"   : "undo_command",
-		"key"       : "Cmd+z",
-		"instanceOf": [ "zebra.ui.TextField"]  
+		"key"       : "Cmd+z"
 	},
 	{
 		"command" : "redo_command",
@@ -14,21 +13,46 @@
 	},
 	{
 		"command" : "nextWord_command",
+		"args"    : [ false, 1 ],
 		"key"     : "Cmd+Right"
 	},
 	{
-		"command" : "prevWord_command",
+		"command" : "nextWord_command",
+		"args"    : [ false, -1 ],
 		"key"     : "Cmd+Left"
 	},
 
 	{
-		"command" : "pageUp_command",
-		"key"     : "PageUp"
+		"command" : "nextWord_command",
+		"args"    : [ true, 1],
+		"key"     : "Cmd+Shift+Right"
+	},
+	{
+		"command" : "nextWord_command",
+		"args"    : [ true, -1],
+		"key"     : "Cmd+Shift+Left"
 	},
 
 	{
-		"command" : "pageDown_command",
-		"key"     : "PageDown"
-	}
+		"command" : "nextPage_command",
+		"args"    : [ false, -1], 
+		"key"     : "Ctrl+Up"
+	},
 
+	{
+		"command" : "nextPage_command",
+		"args"    : [ false, 1], 
+		"key"     : "Ctrl+Down"
+	},
+
+	{
+		"command" : "nextPage_command",
+		"args"    : [ true, -1], 
+		"key"     : "Ctrl+Up+Shift"
+	},
+	{
+		"command" : "nextPage_command",
+		"args"    : [ true, 1], 
+		"key"     : "Ctrl+Down+Shift"
+	}
 ]

@@ -244,11 +244,20 @@
 
     "List": {
         "properties": {
-            "$inherit": [ "BaseList.properties" ]
+            "$inherit": [ "BaseList.properties" ],
+            "gap":4
         }
     },
 
     "CompList": {
+        "Label": {
+            "properties": { "padding": 4 }
+        },
+
+        "ImageLabel": {
+            "properties": { "padding": 4 }
+        },
+
         "properties": {
             "$inherit": [ "BaseList.properties" ],
             "layout"  : { "$ *zebra.layout.ListLayout":[] }

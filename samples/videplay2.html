@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+	<header>
+
+	<script src='../../lib/zebra/easyoop.js' 	 type='text/javascript'></script>
+    <script src='../../lib/zebra/util.js' type='text/javascript'></script>
+    <script src='../../lib/zebra/io.js'    type='text/javascript'></script>
+    <script src='../../lib/zebra/data.js' type='text/javascript'></script>
+    <script src='../../lib/zebra/layout.js' type='text/javascript'></script>
+    <script src='../../lib/zebra/canvas.js' type='text/javascript'></script>
+    <script src='../../lib/zebra/ui.js' type='text/javascript'></script>
+    <script src='../../lib/zebra/ui.list.js' type='text/javascript'></script>
+    <script src='../../lib/zebra/ui.window.js' type='text/javascript'></script>
+    <script src='../../lib/zebra/ui.TextField.js' type='text/javascript'></script>
+
+
+		<script type='text/javascript'>
+		    zebra.ready(function() {
+				eval(zebra.Import("ui", "layout"));
+
+			    var canvas = new zCanvas(530, 430), root = canvas.root;
+
+			    root.properties({
+			    	layout   : new BorderLayout(8,8),
+			    	padding  : 6,
+			    	border   : new Border(null, 2, 8),
+			    	kids     : {
+			    		TOP   : new Label("Two video in Zebra layout").properties({
+			    			padding:6,
+			    			font    : new Font("Arial", 1, 16),
+			    			background: "#ECEDCD",
+			    			border : new Border(null, 2, 8)
+			    		}),
+			    		CENTER: new ScrollPan((new Panel()).properties({
+			    				    layout: new FlowLayout(CENTER, CENTER, VERTICAL, 8),
+			    				    kids  :	[
+			    				        new BorderPan("Video 2", new VideoPan("http://mirror.cessen.com/blender.org/peach/trailer/trailer_iphone.m4v")),		
+			    		   	   			new BorderPan("Video 1", new VideoPan("http://html5doctor.com/demos/video-canvas-magic/video.webm"))
+			    		   	   		]
+			    		   	    }))
+			    	}	
+			    });
+
+			    root.findAll("//BorderPan", function(t) {
+			    	t.setPreferredSize(485, 290);
+			    });
+
+			    root.findAll("//VideoPan", function(t) {
+			    	t.video.play();
+			    });
+	 		});
+		</script>
+	</header>
+
+	<body bgcolor="#EEEEEE" align="center" style="padding:15px;">
+	    <h2>Simple Zebra Video Panel</h2>
+	</body>
+</html>

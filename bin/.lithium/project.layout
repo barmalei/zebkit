@@ -1,0 +1,131 @@
+
+require 'gravity/lithium/core-artifact/command'
+require 'gravity/lithium/core-artifact/project'
+require 'gravity/lithium/li-artifact/base'
+
+require 'gravity/lithium/java-artifact/compiler'
+require 'gravity/lithium/java-artifact/runner'
+require 'gravity/lithium/java-artifact/jar'
+require 'gravity/lithium/java-artifact/misc'
+require 'gravity/lithium/java-artifact/pmd'
+
+require 'gravity/lithium/file-artifact/acquired'
+require 'gravity/lithium/maven-artifact'
+require 'gravity/lithium/js-artifact'
+require 'gravity/lithium/py-artifact'
+require 'gravity/lithium/jython-artifact'
+require 'gravity/lithium/rb-artifact'
+require 'gravity/lithium/php-artifact'
+require 'gravity/lithium/tt-artifact'
+
+require 'gravity/lithium/draft'
+require 'gravity/lithium/textmate/command'
+
+PROJECT() {
+	@desc = 'Lithium'
+	@ver  = '2.2-beta'
+	
+	#Std.backtrace(-1)
+	
+	puts "#{':'*60}"
+	puts ":: Lithium - project management tool v#{@ver}, Sep 2012  ::"
+	puts ":: http://www.gravitysoft.org                             ::"
+	puts "#{':'*60}"
+	     
+    COMMAND('BUILD', BUILD)
+    
+    COMMAND('runjava', FileSet) { 
+        CLASS  RunJavaCode 
+    }
+    
+    COMMAND('runjar',    RunJAR)
+    COMMAND('runclass', RunJavaClass)
+    COMMAND('runrb', RunRubyScript) 
+    COMMAND('minjs', CompressJavaScript)
+    COMMAND('runjs',    RunJavaScript)
+    COMMAND('runpy',    RunPythonScript)   
+    COMMAND('runjpy',   RunJythonScript)   
+    COMMAND('runphp',   RunPhpScript)
+    COMMAND('openhtml', OpenHTML)
+    COMMAND('runsh',    RunShell)
+
+    ARTIFACT('runpystr', RunPythonString) { 
+		@script = $arguments.length > 0 ? $arguments.join(' ') : $stdin.read.strip
+	}
+
+    ARTIFACT('runrbstr', RunRubyString) { 
+		@script = $arguments.length > 0 ? $arguments.join(' ') : $stdin.read.strip
+	}
+
+    COMMAND('compilejava',  SunJavaCompiler) { @options = "-Xlint:deprecation" }  
+    COMMAND('compilephp', FileSet) { CLASS  ValidatePhpScript }
+    COMMAND('compilepy', FileSet) { CLASS ValidatePythonScript }
+    COMMAND('compilerb', FileSet) { CLASS ValidateRubyScript }
+    COMMAND('compilexml', FileSet) { CLASS ValidateXML }
+    COMMAND('compilett', FileSet) { CLASS CompileTTGrammar }
+
+
+    COMMAND('run', EXT_MAPPER) {
+        { 'java'  => 'runjava', 
+		  'class' => 'runclass', 
+		  'jar'   => 'runjar', 
+		  'rb'    => 'runrb', 
+		  'py'    => 'runpy', 
+		  'jpy'   => 'runjpy', 
+		  'js'    => 'runjs', 
+		  'sh'    => 'runsh',
+		  'html'  => 'openhtml',
+		  'php'   => 'runphp'
+		}    
+    }
+
+    COMMAND('runstr', NAME_MAPPER) {
+        { 'py'  => 'runpystr', 
+		  'rb'  => 'runrbstr'
+		}    
+    }
+    
+    COMMAND('compile', EXT_MAPPER) {
+        { 'java'    => 'compilejava', 
+          'rb'      => 'compilerb', 
+          'py'      => 'compilepy', 
+ 		  'xml'     => 'compilexml', 
+		  'c'       => 'make',
+		  'php'     => 'compilephp',
+		  'tt'      => 'compilett',
+		  'treetop' => 'compilett'  }
+    }
+
+	COMMAND('build', GenericBuild) 
+
+    COMMAND('help', HELP) {
+		@word = $arguments[0] if $arguments.length > 0
+	}
+    
+    COMMAND('mavenjar', MavenJarFile) 
+
+    COMMAND('grep', GREP) {
+        @grep = $arguments[0] if $arguments.length > 0
+    }
+
+    COMMAND('info', INSPECT, '.')
+    COMMAND('tree', TREE, '.')
+    COMMAND('require', REQUIRE, '.')
+    COMMAND('cleanup', CLEANUP)
+    COMMAND('list', LIST_ARTIFACT)
+    
+    ARTIFACT('INSTALL', INSTALL) 
+
+    COMMAND('init', INIT, '.') {
+        @project_desc    = $arguments[0] if $arguments.length > 0
+        @project_version = $arguments[1] if $arguments.length > 1
+    }
+    
+    COMMAND('PMD', FileSet) { CLASS(PMD) }
+
+	SET(".lithium/**/*") {
+		CLASS MetaFileMapper
+	}
+	
+	ARTIFACT(TextMateBundle) { @command = $arguments[0] if $arguments.length > 0 }
+}

@@ -1,0 +1,13 @@
+
+TextMember
+----------
+
+1. TextMember defines "start", "end" expression (string or regexp)
+   to find the given member in a text.
+
+1. TextMember can has one of the following types
+  -- GROUP if the start and end is nil
+  -- SECTION if both start and end has been defined
+  -- SINGLE if only start expression has been defined
+
+3. TextMember

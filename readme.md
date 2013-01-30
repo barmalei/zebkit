@@ -27,6 +27,7 @@ phases. The author appreciates any possible feedback, criticism, help, suggestio
       * Layouting UI components using number of predefined layout managers
       * Easy developing of own layout managers 
       * Full control of UI components rendering, paint manager does many things behind the scene   
+      * **Play video in Zebra UI panel**
       * **Flash-free, pure web native clipboard paste and copy supporting**
       * **Font metrics calculation** 
       * Layered UI architecture
@@ -331,6 +332,38 @@ To see snippets and demo it is preferable to start embedded Python HTTP web serv
 Than yo can:
   * Run demo application by opening http://127.0.0.1:8080/web/ui URL
   * Run a snippet by  opening http://127.0.0.1:8080/samples URL and selecting a desired snipper HTML file
+
+
+### Developing and building
+
+Zebra source code is split into bunch of JS files you can find in "lib/zebra" folder. Also there is number of JSON 
+configuration and resources ("lib/zebra/rs") files that are required in runtime. All "lib/zebra/zebra*.js" files are 
+final artifacts that are supposed to be used to build Zebra applications. They are generated from source code 
+by running special command as follow:
+```bash
+   $ ruby ./bin/lithium build
+```
+The following JS files are generated:    
+```bash
+zebra-home
+  |
+  +-- lib     
+       |
+       +- zebra.min.js # compressed all Zebra JS code (UI engine, IO, Rich UI components set)
+       +- zebra.js     # all Zebra JS code (UI engine, IO, Rich UI components set)
+       |
+       +- zebra.canvas.min.js  # compressed Zebra UI engine (IO also included) JS code
+       +- zebra.canvas.js      # Zebra UI engine (IO also included) JS code 
+       |
+       +- zebra.io.min.js  # compressed Zebra IO JS code
+       +- zebra.io.js      # Zebra IO JS code
+```
+
+Copy the stuff into your WEB server alone with "lib/zebra/rs" folder and "lib/zebra/*.json" fies.
+Depending on your need you can use one of the mentioned above Zebra module:
+   * Zebra UI engine, if you don't need Rich UI components set. Add "zebra.canvas.min.js" into a HTML page.
+   * Small zebra IO if you don't need any UI feature. Add "zebra.io.min.js" into a HTML page.
+   * Zebra UI Rich components set that actually contains all zebra code. Add "zebra.min.js" into a HTML page.
 
 
 ### License

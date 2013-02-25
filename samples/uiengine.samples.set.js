@@ -19,15 +19,18 @@ this.Shape = Class(View, [
 
 	function paint(g,x,y,w,h,d){
 		this.outline(g,x,y,w,h,d);
+		var prev = g.lineWidth;
         g.lineWidth = this.lineWidth;
         g.setColor(this.color);
         g.stroke();
+        g.lineWidth = prev;
 	}
 ]);
 
 this.Triangle =  Class(this.Shape, [
 	function outline(g,x,y,w,h,d) {
 	    g.beginPath();
+	    g.lineWidth = this.lineWidth;
 	    x += this.lineWidth;
 	    y += this.lineWidth;
 	    w -= 2*this.lineWidth;
@@ -41,7 +44,7 @@ this.Triangle =  Class(this.Shape, [
 	}
 ]); 
 
-this.Oval =  Class(this.Shape, [
+this.Oval = Class(this.Shape, [
 	function outline(g,x,y,w,h,d) {
 	    g.beginPath();
 	    g.lineWidth = this.lineWidth;
@@ -53,6 +56,7 @@ this.Oval =  Class(this.Shape, [
 this.Pentahedron =  Class(this.Shape, [
 	function outline(g,x,y,w,h,d) {
 	    g.beginPath();
+	    g.lineWidth = this.lineWidth;
 	    x += this.lineWidth;
 	    y += this.lineWidth;
 	    w -= 2*this.lineWidth;
@@ -181,7 +185,6 @@ pkg.CursorPan = Class(Panel, Cursorable, [
 		this.picture.paint(g, (this.width - ps.width)/2, (this.height - ps.height)/2, ps.width, ps.height, this);
 	}
 ]);
-
 	
 pkg.Components = Class(Panel, MouseListener, ChildrenListener, [
 	function () {
@@ -203,12 +206,14 @@ pkg.Components = Class(Panel, MouseListener, ChildrenListener, [
 								y = (this.height - font.height)/2  + font.ascent;
 
 							g.fillText(txt, x, y);							
-						}
+						},
+
+						function update22() {}
 				    ])).properties({
-							border       : new Border(brColor, 4, 6),
+							border      : new Border(brColor, 4, 6),
 							preferredSize: [35, 35],
 							constraints  : constr
-						});
+					});
 		}
 
 		this.$super();
@@ -256,13 +261,13 @@ pkg.Components = Class(Panel, MouseListener, ChildrenListener, [
 
 	function childInputEvent(e){
 		if (e.ID == MouseEvent.ENTERED) {
-			this.counter = 0;							
+			this.counter = 0;
 			this.target = e.source;
 			timer.start(this, 50, 90);
 		}
 		else {
 			if (e.ID == MouseEvent.EXITED) {
-				if (timer.get(this)) timer.stop(this);
+			if (timer.get(this)) timer.stop(this);
 				e.source.setBackground(null);
 			}
 		}
@@ -332,8 +337,6 @@ pkg.SimpleChart = Class(Panel, [
 		this.lineWidth = 4; 
 		this.$super();
 		this.setPadding(8);
-
-
 	},
 
 	function recalc() {
@@ -377,9 +380,9 @@ pkg.SimpleChart = Class(Panel, [
 	},
 
 	function paint(g) {
-
 		g.beginPath();
 		g.setColor(this.color);
+		var prev = g.lineWidth;
 		g.lineWidth = this.lineWidth;
 		g.moveTo(this.gx[0], this.gy[0]);
 		for(var i = 1; i < this.gx.length; i++) { 
@@ -398,7 +401,7 @@ pkg.SimpleChart = Class(Panel, [
 			g.stroke();
 		}
 
-		g.lineWidth = 1;
+		g.lineWidth = prev;
 	}
 ]);
 
@@ -425,30 +428,28 @@ pkg.CustomLayer = Class(BaseLayer, [
 		this.font = new Font("Arial", 1, 22);
 	},
 
-	function isLayerActive() {
-		return this.bg != null;
-	},
+	function $prototype() {
+		this.isLayerActive = function() {
+			return this.bg != null;
+		};
 
-	function isLayerActiveAt(x,y){ 
-		return this.bg != null;
-	},
+		this.layerKeyPressed = function(code, m){
+			if (code == 68 && (m & KeyEvent.M_ALT) > 0) {
+				if (this.bg == null ) this.setBackground("rgba(255, 255, 255, 0.5)");
+				else				  this.setBackground(null);
+				this.activate(this.bg != null);
+				this.kids[0].setBackground(this.bg ? "rgba(180,180,180, 0.9)" : null);
+			}		
+		};
 
-	function layerKeyPressed(code, m){
-		if (code == 68 && (m & KeyEvent.M_ALT) > 0) {
-			if (this.bg == null ) this.setBackground("rgba(255, 255, 255, 0.5)");
-			else				  this.setBackground(null);
-			this.activate(this.bg != null);
-			this.kids[0].setBackground(this.bg ? "rgba(180,180,180, 0.9)" : null);
-		}		
-	},
-
-	function paint(g) {
-		if (this.bg == null) {
-			var s = "ALT-D to disable", l = this.font.stringWidth(s);
-			g.setColor("white");
-			g.setFont(this.font);
-			g.fillText(s, this.width/2 - l/2, (this.height - this.font.height - 10) + this.font.ascent);
-		}
+		this.paint = function(g) {
+			if (this.bg == null) {
+				var s = "ALT-D to disable", l = this.font.stringWidth(s);
+				g.setColor("white");
+				g.setFont(this.font);
+				g.fillText(s, this.width/2 - l/2, (this.height - this.font.height - 10) + this.font.ascent);
+			}
+		};
 	}
 ]);
 

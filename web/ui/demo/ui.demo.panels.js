@@ -18,29 +18,28 @@ pkg.PanelsDemo = new Class(pkg.DemoPan, [
         var r = new Panel(new FlowLayout(CENTER, CENTER)),
             p = new Panel(new GridLayout(4, 3)),
             p1 = new BorderPan("Default title", new Label(""));
-        p1.setBackground(zebra.util.rgb.yellow);
-        p1.setPreferredSize(130, 100);
+        p1.setPreferredSize(130, 130);
 
         var ll = new Label(""),
             p2 = new BorderPan("Center aligned title", ll, CENTER | TOP);
-        p2.setPreferredSize(150, 100);
+        p2.setPreferredSize(170, 130);
 
         var p3 = new BorderPan("Right aligned title", new Label(""), TOP | RIGHT);
-        p3.setPreferredSize(130, 100);
+        p3.setPreferredSize(170, 130);
         var p4 = new BorderPan("Bottom title", new Label(""), BOTTOM | LEFT);
-        p4.setPreferredSize(130, 100);
+        p4.setPreferredSize(170, 130);
         var p5 = new BorderPan("Bottom centered title", new Label(""), CENTER | BOTTOM);
-        p5.setPreferredSize(150, 100);
+        p5.setPreferredSize(170, 130);
         var p6 = new BorderPan("Bottom right title", new Label(""), RIGHT | BOTTOM);
-        p6.setPreferredSize(130, 100);
+        p6.setPreferredSize(170, 130);
         var p7 = new BorderPan(new ImageLabel("image title", ui.get("butterfly")), new Label(""));
-        p7.setPreferredSize(130, 100);
+        p7.setPreferredSize(170, 130);
         var p8_1 = new BorderPan("Border pan as title", new Label(""));
-        p8_1.setPreferredSize(120, -1);
+        p8_1.setPreferredSize(130, -1);
         var p8 = new BorderPan(p8_1, new Label(""));
-        p8.setPreferredSize(150, 100);
+        p8.setPreferredSize(170, 130);
         var p9 = new BorderPan(new Checkbox("Checkbox title"), new Label(""));
-        p9.setPreferredSize(130, 100);
+        p9.setPreferredSize(170, 130);
         var ctr = new Constraints();
         ctr.left = ctr.right = ctr.top = ctr.bottom = 6;
         p.add(ctr, p1);
@@ -61,8 +60,8 @@ pkg.PanelsDemo = new Class(pkg.DemoPan, [
         var s1_1 = new SplitPan(new ImagePan(ui.get("cosmo1")), new ImagePan(ui.get("cosmo2")));
         var s1 = new SplitPan(new ImagePan(ui.get("cosmo3")), s1_1, HORIZONTAL);
         p.setPadding(4);
-        s1.setGripperLoc(150);
-        s1_1.setGripperLoc(150);
+        s1.setGripperLoc(180);
+        s1_1.setGripperLoc(220);
         p.add(CENTER, s1);
         return p;
     },
@@ -72,27 +71,28 @@ pkg.PanelsDemo = new Class(pkg.DemoPan, [
             p = new Panel(new GridLayout(2,2)),
             img = new ImagePan(ui.get("cosmo1")),
             p1 = new ScrollPan(img);
-        p1.setPreferredSize(240, 200);
-        p1.setBorder(new Etched());
+
+        p1.setPreferredSize(270, 240);
+        p1.setBorder(zebra.ui.borders.plain);
         var p2 = new ScrollPan(new ImagePan(ui.get("cosmo1")), VERTICAL);
-        p2.setPreferredSize(240, 200);
-        p2.setBorder(new Etched());
+        p2.setPreferredSize(270, 240);
+        p2.setBorder(zebra.ui.borders.plain);
 
         var p3_1 = new Panel(new zebra.layout.ListLayout(2));
-        p3_1.setBackground(null);
         for(var i=0; i<20; i++) {
             var ch = new Checkbox("Checkbox " + i);
             ch.setLayout(new FlowLayout(LEFT, CENTER, HORIZONTAL, 4));
             p3_1.add(ch);
         }
         p3 = new ScrollPan(p3_1);
-        p3.setPreferredSize(240, 170);
-        p3.setBorder(new Etched());
+        p3.setPreferredSize(270, 190);
+        p3.setBorder(zebra.ui.borders.plain);
 
         var p4_1 = new TextField(new zebra.data.Text(zebra.io.GET("demo/test.txt")));
+        p4_1.setBorder(null);
         p4 = new ScrollPan(p4_1);
-        p4.setPreferredSize(240, 170);
-        p4.setBorder(new Etched());
+        p4.setPreferredSize(270, 190);
+        p4.setBorder(zebra.ui.borders.plain);
 
         var ctr = new Constraints();
         ctr.setPadding(6);

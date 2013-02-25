@@ -5,9 +5,9 @@ lib/zebra/data.js
 lib/zebra/layout.js
 lib/zebra/canvas.js
 lib/zebra/ui.js
+lib/zebra/ui.TextField.js
 lib/zebra/ui.list.js
 lib/zebra/ui.window.js
-lib/zebra/ui.TextField.js
 lib/zebra/ui.tree.js
 lib/zebra/ui.grid.js
 lib/zebra/ui.designer.js

@@ -144,7 +144,7 @@ Load the JSON UI form definition as it is illustrated below:
 			    // find by class "Button" component and register button
 			    // event handler to clear text field content by button click
 			    root.find("//Button")._.add(function() {
-				    root.find("//TextField").setText("");
+				    root.find("//TextField").setValue("");
 				});	    
 			});
 		</script>
@@ -179,14 +179,14 @@ it is pure WEB based solution:
 				    // returns what you want to put in clipboard
 				    function copy() {
 				    	this.setColor("#FF3311");
-				    	return this.getText();
+				    	return this.getValue();
 				    },
 
 				    // this method is called when paste event has happened for this 
 				    // component 
 				    function paste(s) { 
 				    	this.setColor("#000000");
-				    	this.setText(s); 
+				    	this.setValue(s); 
 				    }
 				]); 
 
@@ -223,7 +223,7 @@ by providing the following JSON configuration file:
 {
 	"Button" : {
        "properties" : {
-          "font"      : { "$font": ["Arial", 1, 18 ] },
+          "font"      : { "$Font": ["Arial", 1, 18 ] },
           "background": "#DDDDEF"
        }
     }

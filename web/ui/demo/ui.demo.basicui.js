@@ -1,40 +1,18 @@
 
 (function(pkg, Class, ui) {
 
-var Panel = zebra.ui.Panel,
-    BorderPan = zebra.ui.BorderPan,
-    Label = zebra.ui.Label,
-    BoldLabel = zebra.ui.BoldLabel,
-    Button = zebra.ui.Button,
-    FlowLayout = zebra.layout.FlowLayout,
-    GridLayout = zebra.layout.GridLayout,
-    ListLayout = zebra.layout.ListLayout,
-    Gradient = zebra.ui.Gradient,
-    L = zebra.layout,
-    PercentLayout = zebra.layout.PercentLayout,
-    Tabs = zebra.ui.Tabs,
-    Checkbox = zebra.ui.Checkbox,
-    Radiobox = zebra.ui.Radiobox,
-    ImagePan = zebra.ui.ImagePan,
-    Link = zebra.ui.Link,
-    rgb = zebra.util.rgb,
-    List = zebra.ui.List,
-    CompList = zebra.ui.CompList,
-    Slider = zebra.ui.Slider,
-    Progress = zebra.ui.Progress,
-    TextField = zebra.ui.TextField,
-    Constraints = zebra.layout.Constraints;
+eval(zebra.Import("ui", "layout"));
 
 pkg.BasicUIDemo = new Class(pkg.DemoPan, [
     function() {
         this.$super();
-        this.setLayout(new FlowLayout(L.CENTER, L.CENTER));
-        var r = new Panel(new L.BorderLayout(8,4));
+        this.setLayout(new FlowLayout(CENTER, CENTER));
+        var r = new Panel(new BorderLayout(8,4));
 
         var p = new Panel(new GridLayout(3, 2)), ctr = new Constraints();
-        ctr.left = ctr.right = ctr.bottom = ctr.top = 6;
-        ctr.ax = L.STRETCH 
-        ctr.ay = L.STRETCH;
+        ctr.left = ctr.right = ctr.bottom = ctr.top = 8;
+        ctr.ax = STRETCH 
+        ctr.ay = STRETCH;
         p.add(ctr, this.createCheckboxPan(3, true));
         p.add(ctr, this.createCheckboxPan(3, false));
         p.add(ctr, this.createTextFieldPan());
@@ -42,16 +20,16 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         p.add(ctr, this.createProgressPan());
         p.add(ctr, this.createSliderPan());
 
-        var p_c = new Panel(new L.BorderLayout(4, 4));
-        p_c.add(L.CENTER, p);
-        p_c.add(L.BOTTOM, this.createButtonPan());
+        var p_c = new Panel(new BorderLayout(4, 4));
+        p_c.add(CENTER, p);
+        p_c.add(BOTTOM, this.createButtonPan());
 
         var p_w = new Panel(new ListLayout(8));
         p_w.add(this.createComboPan());
         p_w.add(this.createListPan());
 
-        r.add(L.LEFT, p_w);
-        r.add(L.CENTER, p_c);
+        r.add(LEFT, p_w);
+        r.add(CENTER, p_c);
 
         this.add(r);
     },
@@ -59,23 +37,23 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
     function createTextFieldPan() {
         var p = new Panel(new GridLayout(3, 2));
         var tf = new TextField();
-        var ctr = new L.Constraints();
-        ctr.ay = L.CENTER
+        var ctr = new Constraints();
+        ctr.ay = CENTER
         ctr.setPadding(2);
 
-        tf.setPreferredSize(100, -1);
+        tf.setPreferredSize(150, -1);
         tf.setHint("<enter text>");
         
         p.add(ctr, new BoldLabel("Text field:"));
         p.add(ctr, tf);
 
         tf = new TextField(new zebra.data.SingleLineTxt("dsd", 5));
-        tf.setPreferredSize(100, -1);
+        tf.setPreferredSize(150, -1);
         p.add(ctr, new BoldLabel("Fixed size(5):"));
         p.add(ctr, tf);
 
-        tf = new TextField(new zebra.ui.PasswordText());
-        tf.setPreferredSize(100, -1);
+        tf = new TextField(new PasswordText());
+        tf.setPreferredSize(150, -1);
         p.add(ctr, new BoldLabel("Password field:"));
         p.add(ctr, tf);
 
@@ -83,26 +61,23 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
     },
 
     function createMTextFieldPan() {
-        var p = new Panel(new L.BorderLayout());
-        p.setBackground(null);
+        var p = new Panel(new BorderLayout());
         var tf = new TextField(new zebra.data.Text("Multiline\ntext field\ncomponents"));
-        tf.setPreferredSize(150, 70);
-        p.add(L.CENTER, tf);
+        tf.setPreferredSize(180, 80);
+        p.add(CENTER, tf);
         return pkg.createBorderPan("Multilines text field", p);
     },
 
     function createSliderPan() {
-        var p = new Panel(new L.BorderLayout());
-        p.setBackground(null);
+        var p = new Panel(new BorderLayout());
         var sl = new Slider();
         sl.setPreferredSize(90, -1);
-        p.add(L.CENTER, sl);
+        p.add(CENTER, sl);
         return pkg.createBorderPan("Slider", p);
     },
 
     function createProgressPan() {
-        var p = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.VERTICAL, 16));
-        p.setBackground(null);
+        var p = new Panel(new FlowLayout(CENTER, CENTER, VERTICAL, 16));
         var pr1 = new Progress();
         pr1.setPreferredSize(130, -1);
         pr1.setMaxValue(10);
@@ -110,7 +85,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         var pr2 = new Progress();
         pr2.setMaxValue(4);
         pr2.setValue(1);
-        pr2.setBundleView(new Gradient(rgb.lightGray, rgb.darkGray, L.HORIZONTAL));
+        pr2.setBundleView(new Gradient("lightGray", "gray", HORIZONTAL));
         pr2.setPreferredSize(130, 12);
         pr2.setBundleSize(70, pr2.bundleHeight);
         p.add(pr1);
@@ -119,37 +94,37 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
     },
 
     function createButtonPan() {
-        var p = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.HORIZONTAL, 8));
-        p.setBackground(null);
+        var p = new Panel(new FlowLayout(CENTER, CENTER, HORIZONTAL, 8));
         p.add(new Button("Button"));
         var bt = new Button(new ImagePan(ui.get("butterfly")));
         bt.setFocusMarkerView(null);
         p.add(bt);
-        p.add(new Button(new zebra.ui.ImageLabel("Image button", ui.get("butterfly"))));
+        p.add(new Button(new ImageLabel("Image button", ui.get("butterfly"))));
         bt = new Button("Disabled button");
         bt.setEnabled(false);
         p.add(bt);
         p.add(new Link("Link"));
-        return pkg.createBorderPan("Buttons", p);
+        var bp = pkg.createBorderPan("Buttons", p); 
+        bp.setPadding(8);
+        return bp;
     },
 
     function createListPan() {
         var p = new Panel(new ListLayout(8));
-        p.setBackground(null);
         var m = new zebra.data.ListModel();
         m.add("Item 1");
         m.add("Item 2");
         m.add("Item 3");
-        var l = new zebra.ui.List();
+        var l = new List();
         l.setModel(m);
         l.select(0);
         var lbp = new BorderPan("Simple list", l);
         lbp.setGaps(6,6);
         p.add(lbp);
-        var l = new zebra.ui.CompList();
+        var l = new CompList();
         l.add("Label Item");
         l.add(new Checkbox("Checkbox Item"));
-        l.add(new zebra.ui.CompList.ImageLabel("Image Label Item", ui.get("butterfly")));
+        l.add(new CompList.ImageLabel("Image Label Item", ui.get("butterfly")));
         var lbp = new BorderPan("Components list", l);
         lbp.setGaps(6,6);
         p.add(lbp);
@@ -161,29 +136,30 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
     },
 
     function createCheckboxPan(n, t) {
-        var p = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.VERTICAL, 4));
-        var s = t ? "Radio button " : "Checkbox button ", g = t ? new zebra.ui.Group() : null;
-        p.setBackground(null);
-
+        var p = new Panel(new FlowLayout(CENTER, CENTER, VERTICAL, 4)),
+            s = t ? "Radio button " : "Checkbox button ", g = t ? new Group() : null;
+       
         for(var i=0; i < n;  i++) {
             var ch = t ? new Radiobox(s + (i+1)) : new Checkbox(s + (i+1));
             p.add(ch);
             if (g != null) ch.setSwitchManager(g);
         }
+   
+        ch.setEnabled(false);
+        ch.setState(true);
         return pkg.createBorderPan(s, p);
     },
 
     function createComboPan() {
         var p = new Panel(new ListLayout(8));
-        p.setBackground(null);
-        var cb = new zebra.ui.Combo();
+        var cb = new Combo();
         cb.list.model.add("Item 1");
         cb.list.model.add("Item 2");
         cb.list.model.add("Item 3");
         cb.list.select(0);
         p.add(cb);
 
-        var cb2 = new zebra.ui.Combo(true);
+        var cb2 = new Combo(true);
         cb2.list.model.add("Item 1");
         cb2.list.model.add("Item 2");
         cb2.list.model.add("Item 3");
@@ -192,10 +168,12 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         p.add(cb2);
 
         var l = new CompList(true);
-        l.add(new zebra.ui.CompList.ImageLabel("Item 1", ui.get("ind1")));
-        l.add(new zebra.ui.CompList.ImageLabel("Item 2", ui.get("ind1")));
-        l.add(new zebra.ui.CompList.ImageLabel("Item 3", ui.get("ind2")));
-        var cb3 = new zebra.ui.Combo(l);
+        l.setBorder(null);
+        l.add(new CompList.ImageLabel("Item 1", ui.get("ind1")));
+        l.add(new CompList.ImageLabel("Item 2", ui.get("ind1")));
+        l.add(new CompList.ImageLabel("Item 3", ui.get("ind2")));
+
+        var cb3 = new Combo(l);
         cb3.list.select(0);
         p.add(cb3);
 

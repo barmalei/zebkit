@@ -3,6 +3,6 @@
 
 ## Methods
 
-### setText(string)
+### setValue(string)
 
-```obj.setText("the new text")```
+```obj.setValue("the new text")```

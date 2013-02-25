@@ -11,6 +11,6 @@ ARG may be a number or boolean. Not sure what it does.
 
 ## Methods
 
-### setText(string)
+### setValue(string)
 
-```obj.setText(NEWTEXT)```
+```obj.setValue(NEWTEXT)```

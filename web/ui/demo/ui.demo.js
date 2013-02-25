@@ -1,16 +1,16 @@
 (function(pkg, Class) {
 
-var Panel = zebra.ui.Panel;
-var Label = zebra.ui.Label;
-var Border = zebra.ui.Border;
-var BorderPan = zebra.ui.BorderPan;
-var L = zebra.layout;
+var Panel = zebra.ui.Panel,
+    Label = zebra.ui.Label,
+    Border = zebra.ui.Border,
+    BorderPan = zebra.ui.BorderPan;
 
-pkg.createLabel = function (txt, color) {
+pkg.createLabel = function (txt, color, font) {
     color = color || zebra.ui.palette.gray1;
     var l = new Label(txt.indexOf("\n") >= 0 ? new zebra.data.Text(txt) : txt);
     l.setColor(color);
-    l.setFont(zebra.ui.boldFont);
+    if (font) l.setFont(font);  
+    else l.setFont(zebra.ui.boldFont);
     l.setBorder(new Border(zebra.util.rgb.gray));
     l.setPadding(4);
     return l;

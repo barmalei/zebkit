@@ -1,21 +1,8 @@
 
 (function(pkg, Class, ui) {
 
-var Panel = zebra.ui.Panel;
+eval(zebra.Import("ui", "layout"));
 var rgb = zebra.util.rgb;
-var Label = zebra.ui.Label;
-var ImagePan = zebra.ui.ImagePan;
-var BorderLayout = zebra.layout.BorderLayout;
-var FlowLayout = zebra.layout.FlowLayout;
-var GridLayout = zebra.layout.GridLayout;
-var BorderPan = zebra.ui.BorderPan;
-var Line = zebra.ui.Line;
-var Border = zebra.ui.Border;
-var L = zebra.layout;
-var Checkbox = zebra.ui.Checkbox;
-var Menubar = zebra.ui.Menubar;
-var Menu = zebra.ui.Menu;
-var Constraints = zebra.layout.Constraints;
 
 function createItem(s) {
     if (s[0]=='&') {
@@ -40,19 +27,7 @@ function createItem(s) {
 }
 
 function createMenubar(items) {
-    var MBarBorder =  new Class(zebra.ui.View, [
-        function paint(g,x,y,w,h,d){
-            g.setColor(zebra.ui.palette.white);
-            g.fillRect(x + 2, y, w - 3, h - 1);
-            g.setColor(zebra.ui.palette.gray3);
-            g.fillRect(x + 2, y + 2, w - 3, Math.floor((h - 6) / 2));
-            g.setColor(zebra.ui.palette.gray5);
-            g.drawLine(x, y+h-1, x+w, y+h-1);
-        }
-    ]);
-
     var mb = new Menubar();
-    mb.setBorder(new MBarBorder());
 
     for(var i=0; i < items.length; i++) {
         if (zebra.instanceOf(items[i], Menu)) mb.setMenuAt(mb.kids.length - 1, items[i]);
@@ -113,7 +88,7 @@ function formMenuArray() {
                 "Car color",
                     createColorPicker(),
                 "Car brand",
-                    ["&bmw", "&honda", "&peugeot" ]
+                    ["&bmw", "&saab", "&alpha" ]
                 ];
     return mbar;
 }
@@ -156,15 +131,15 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
         this.setLayout(new BorderLayout(8,8));
         this.setPadding(8);
 
-        var mbar = new Panel(new FlowLayout(L.CENTER, L.TOP, L.HORIZONTAL, 8));
+        var mbar = new Panel(new FlowLayout(CENTER, TOP, HORIZONTAL, 8));
         var c    = new Panel(new BorderLayout());
         var ctr  = new Constraints();
 
         ctr.setPadding(8);
-        c.setBorder(ui.borders.sunken);
-        c.setPreferredSize(240, 145);
+        c.setPreferredSize(290, 160);
         var mb = createMenubar(formMenuArray());
-        c.add(L.TOP, mb);
+        mb.setBorder(new Border("lightGray"));
+        c.add(TOP, mb);
 
         var bp = new BorderPan("Top menu bar", c);
         bp.setGaps(8,8);
@@ -172,41 +147,46 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
 
 
         var c = new Panel(new BorderLayout());
-        c.setBorder(ui.borders.sunken);
-        c.setPreferredSize(240, 145);
+        c.setPreferredSize(290, 160);
 
-        c.add(L.BOTTOM, createMenubar(formMenuArray()));
+        mb = createMenubar(formMenuArray());
+        mb.setBorder(new Border("lightGray"));
+
+        c.add(BOTTOM, mb);
 
         c = new BorderPan("Bottom menu bar", c);
         c.setGaps(8,8);
         mbar.add(ctr, c);
-        this.add(L.CENTER, mbar);
+        this.add(CENTER, mbar);
 
 
         var t = createToolbar();
         t = new BorderPan("Horizontal toolbar", t);
         t.setGaps(8,8);
-        this.add(L.TOP, t);
+        this.add(TOP, t);
 
-        var p  = new Panel(new FlowLayout(L.CENTER, L.CENTER, L.HORIZONTAL, 8));
-        var l1 = pkg.createLabel("Press right mouse button\nto see context menu Cars", rgb.red);
-        var l2 = pkg.createLabel("Press right mouse button\nto see context menu Colors", rgb.red);
-        var l3 = pkg.createLabel("Press right mouse button\nto see context menu Brands", rgb.red);
-        l1.setBorder(new Border("red",2));
-        l2.setBorder(new Border("blue",2));
-        l3.setBorder(new Border("green",2));
-        p.setPreferredSize(-1, 60);
+        var p  = new Panel(new FlowLayout(CENTER, CENTER, HORIZONTAL, 8));
+        var l1 = pkg.createLabel("Press right mouse\nbutton to see\ncontext menu Cars", rgb.black);
+        var l2 = pkg.createLabel("Press right mouse\nbutton to see\ncontext menu Colors", "003366");
+        var l3 = pkg.createLabel("Press right mouse\nbutton to see\ncontext menu Brands", "99CC99");
+        l1.setFont(new Font("Arial", 1, 16));
+        l2.setFont(new Font("Arial", 1, 16));
+        l3.setFont(new Font("Arial", 1, 16));
+        l1.setPreferredSize(200, 110);
+        l2.setPreferredSize(200, 110);
+        l3.setPreferredSize(200, 110);
+        l1.setBorder(new Border("C3C3E5",2, 3));
+        l2.setBorder(new Border("003366",2, 3));
+        l3.setBorder(new Border("99CC99",2, 3));
+        p.setPreferredSize(-1, 140);
         p.add(l1);
         p.add(l2);
         p.add(l3);
-        l1.setPreferredSize(-1, 40);
-        l2.setPreferredSize(-1, 40);
-        l3.setPreferredSize(-1, 40);
 
         var m1 = createMenu(formMenuArray()[1]);
         var m2 = createColorPicker();
         var m3 = createMenu(formMenuArray()[5]);
-        this.add(L.BOTTOM, new BorderPan("Context menu", p));
+        this.add(BOTTOM, new BorderPan("Context menu", p));
         zebra.ui.popup.setPopup(l1, new zebra.ui.PopupInfo([
             function getPopup(c, x, y) {
                 return m1;

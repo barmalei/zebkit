@@ -6,7 +6,7 @@
    * Zebra UI engine simple samples: http://www.zebkit.org/samples/uiengine.samples.html
 
 
- Claims to: ask@zebkit.org
+ Send claims to: ask@zebkit.org
 
 
 ## What is Zebra ?

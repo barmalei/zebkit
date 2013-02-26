@@ -1,32 +1,30 @@
 
-## Three steps from prototype to ALPHA!
-## Step III 
+## For impatient for: look at few demos   
 
-The new Zebra version (pre-alpha3) has been practically completely re-viewed and re-worked. Many new features, design 
-decisions have been applied. The new version is a bunch of new ideas with more accurate modularization. JSON UI form 
-definition, IO package, JSON look and feel configuration, decoupling powerful Zebra UI engine from Rich UI components 
-set are just a part of work has been done. Also performance and memory consumption has been improved sometimes in few 
-times. 
+   	* Full package, Zebra rich set of UI components: http://www.zebkit.org/samples/index.html
+   	* Zebra UI engine simple samples: http://www.zebkit.org/samples/uiengine.samples.html
+
+ Claims to: ask@zebkit.org
+
+
+## What is Zebra ?
 
 Zebra is JavaScript library that implements graceful and easy to use OOP concept together with rich set of UI
-components. The UI components are developed based on HTML5 Canvas element. This approach differs from
-traditional WEB UI, where user interface is built around HTML DOM and than "colored" with CSS. Zebra UI components
-are implemented from scratch as a number of widgets rendered on HTML Canvas. Everything, including UI components
-rendering, in developers hands. 
-
-The project is still in pre-alpha state, but the new version is much more closer to the next alpha and beta 
-phases. The author appreciates any possible feedback, criticism, help, suggestions and proposals.
+components, decopled UI engine, IO and other packages. The UI components are developed based on HTML5 Canvas 
+element. This approach differs from traditional WEB UI, where user interface is built around HTML DOM and 
+than "colored" with CSS. Zebra UI components are implemented from scratch as a number of widgets rendered 
+on HTML Canvas. 
 
 ### Features
 
-   *  Zebra easy OOP concept JavaScript: classes and interfaces, overriding, overloading, 
-   	  constructors, packaging, inner class, access to super class methods, etc
+   *  Zebra easy OOP concept JavaScript: classes, interfaces, overriding, overloading, 
+   	  constructors, packaging, inner class, access to super class methods, mixing, etc
    *  **Zebra UI Engine that can be used as powerful basis for:**
       * Pixel by pixel UI components rendering controlling 
       * Simple and flexible events (keyboard, mouse, etc) manipulation, advanced event technique to develop composite UI components
       * Layouting UI components using number of predefined layout managers
       * Easy developing of own layout managers 
-      * Full control of UI components rendering, paint manager does many things behind the scene   
+      * Full control of UI components rendering
       * **Play video in Zebra UI panel**
       * **Flash-free, pure web native clipboard paste and copy supporting**
       * **Font metrics calculation** 
@@ -34,6 +32,7 @@ phases. The author appreciates any possible feedback, criticism, help, suggestio
       * and many other ...
    *  Zebra rich UI Components set developed basing on Zebra UI Engine:
       * More than 30 various UI components
+      * Look and feel customization
       * Complex UI components: Grid, Tree, Tabs, Combo, Designer, Scroll, Menu, etc
       * Thanks to easy OOP concept and proper design: expendable and fully customizable UI components
       * **Simple data model description**
@@ -47,9 +46,9 @@ phases. The author appreciates any possible feedback, criticism, help, suggestio
    * ...
   
 
-### Write first UI Zebra application
+### Simple UI Zebra application
 
-To write first application **no zebra stuff on you PC has to be downloaded and deployed (you need only the readme file :).** 
+To write the first application **no zebra stuff on you PC has to be downloaded and deployed (you need only the readme file :).** 
 Let's start writing simple Zebra HTML following traditional style:
 
 ```html
@@ -107,10 +106,10 @@ We can write the application following more graceful manner using JSON-like styl
 </html>
 ```
 
-### Defining UI with JSON
+### Keeping UI forms in JSON
 
 JSON can be interpreted as Zebra UI form definition language. For instance, use UI definition shown below and store 
-it in the same place where HTML is going to be hosted:
+it in "myform.json" file located in the same place where HTML is hosted:
 ```json
 {
 	"padding": 8, 
@@ -127,7 +126,6 @@ it in the same place where HTML is going to be hosted:
 }
 ```
 
-Pay attention the code demonstrated below expects JSON UI form definition is stored in "myform.json" file. 
 Load the JSON UI form definition as it is illustrated below:
 ```html
 <!DOCTYPE html>
@@ -139,7 +137,7 @@ Load the JSON UI form definition as it is illustrated below:
 		    zebra.ready(function() {
 				// load UI form from JSON file
 			    var root = (new zebra.ui.zCanvas()).root;
-			    (new zebra.util.Bag(root)).load(zebra.io.GET("myform.json"));
+			    root.load(zebra.io.GET("myform.json"));
 
 			    // find by class "Button" component and register button
 			    // event handler to clear text field content by button click
@@ -154,11 +152,13 @@ Load the JSON UI form definition as it is illustrated below:
 ```
 
 
-### Use native clipboard in Zebra UI components
+### Native clipboard support
+
+Zebra support browser native clipboard ! The implementation doesn't require any Flash or other plug-in installed.
+It is pure WEB based solution !
 
 By implementing special __"zebra.ui.CopyCutPaste"__ interface a Zebra UI component can start participating in 
-clipboard data exchange. Pay attention Zebra doesn't use invisible Flash application to work with clipboard, 
-it is pure WEB based solution: 
+clipboard data exchange. For instance:
 
 ```html
 <!DOCTYPE html>
@@ -187,22 +187,22 @@ it is pure WEB based solution:
 				    function paste(s) { 
 				    	this.setColor("#000000");
 				    	this.setValue(s); 
+				    },
+
+				    // use border as an indication the component has focus
+				    function focused() {
+				    	this.$super() // call super
+				    	this.setBorder(this.hasFocus() ? new Border("red", 2,3) : borders.plain);
 				    }
 				]); 
 
 				// create UI application with our clipboard handler UI component
 				(new zCanvas()).root.properties({
+					background: "#EEEEEE",
 					layout: new BorderLayout(8,8), padding:8,
 					kids  : {
 						TOP   : new BoldLabel("Copy/Paste in box below"),
-						// create inner class that is customized to indicate 
-						// when the component gets or looses focus 
-						CENTER: (new MyComponent(FocusListener, [
-							function focusGained(e) { this.setBorder(borders.sunken); },
-							function focusLost(e)   { this.setBorder(borders.plain); }
-						])).properties( { border:borders.plain, 
-										  text:"Copy me in clipboard", 
-										  padding:6 })
+						CENTER: new MyComponent("Copy me in clipboard").properties({border:borders.plain, padding:8})
 					}
 				});
 			});
@@ -212,7 +212,7 @@ it is pure WEB based solution:
 </html>
 ```
 
-### Zebra UI components look and feel customization
+### UI look and feel customization
 
 Default values of UI components properties can be controlled by JSON configuration. You can define an
 own JSON configuration to override default Zebra configurations (that is stored in "ui.json" and "canvas.json"). 
@@ -234,7 +234,7 @@ As soon as the file will be added in configuration chain, every new instantiated
 the new font and background properties values. 
 
 
-### NEW IO API: HTTP POST/GET, JSON-RPC or XML-RPC
+### IO API: HTTP POST/GET, JSON-RPC or XML-RPC
 
 The module provides handy manner to interact with remote services.
 
@@ -329,9 +329,10 @@ To see snippets and demo it is preferable to start embedded Python HTTP web serv
    $ python startup.py
 ```
 
-Than yo can:
-  * Run demo application by opening http://127.0.0.1:8080/web/ui URL
-  * Run a snippet by  opening http://127.0.0.1:8080/samples URL and selecting a desired snipper HTML file
+Than you can:
+  * Run demo application following http://127.0.0.1:8080/samples/index.html URL
+  * Run UI engine samples following http://127.0.0.1:8080/samples/uiengine.samples.html URL
+  * Find many other snippets in "samples" folder
 
 
 ### Developing and building
@@ -349,14 +350,15 @@ zebra-home
   |
   +-- lib     
        |
-       +- zebra.min.js # compressed all Zebra JS code (UI engine, IO, Rich UI components set)
-       +- zebra.js     # all Zebra JS code (UI engine, IO, Rich UI components set)
-       |
-       +- zebra.canvas.min.js  # compressed Zebra UI engine (IO also included) JS code
-       +- zebra.canvas.js      # Zebra UI engine (IO also included) JS code 
-       |
-       +- zebra.io.min.js  # compressed Zebra IO JS code
-       +- zebra.io.js      # Zebra IO JS code
+       zebra
+         +- zebra.min.js # compressed all Zebra JS code (UI engine, IO, Rich UI components set)
+         +- zebra.js     # all Zebra JS code (UI engine, IO, Rich UI components set)
+         |
+         +- zebra.canvas.min.js  # compressed Zebra UI engine (IO also included) JS code
+         +- zebra.canvas.js      # Zebra UI engine (IO also included) JS code 
+         |
+         +- zebra.io.min.js  # compressed Zebra IO JS code
+         +- zebra.io.js      # Zebra IO JS code
 ```
 
 Copy the stuff into your WEB server alone with "lib/zebra/rs" folder and "lib/zebra/*.json" fies.

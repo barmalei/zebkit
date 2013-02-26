@@ -1,8 +1,10 @@
 
 ## For impatient for: look at few demos   
 
-   	* Full package, Zebra rich set of UI components: http://www.zebkit.org/samples/index.html
-   	* Zebra UI engine simple samples: http://www.zebkit.org/samples/uiengine.samples.html
+
+   * Full package, Zebra rich set of UI components: http://www.zebkit.org/samples/index.html
+   * Zebra UI engine simple samples: http://www.zebkit.org/samples/uiengine.samples.html
+
 
  Claims to: ask@zebkit.org
 

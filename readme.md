@@ -1,5 +1,5 @@
 
-## For impatient for: look at few demos   
+## For impatient: look at few demos   
 
 
    * Full package demo, Zebra rich set of UI components: http://www.zebkit.org/samples/index.html

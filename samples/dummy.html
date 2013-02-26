@@ -8,7 +8,8 @@
 		    zebra.ready(function() {
 				// create canvas
 			    var root = (new zebra.ui.zCanvas(400, 400)).root;
-				root.setBackground("#CCCCCC");
+				root.setBackground("#EEEEEE");
+				root.add(new zebra.ui.Label("Dummy Sample").properties( { size: [200,100], padding:8, location: [50,50], border: zebra.ui.borders.plain }))
 				// ...
 	 		});
 		</script>

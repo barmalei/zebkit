@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+	<header>		
+		<script src='http://repo.zebkit.org/pa3/zebra.min.js'
+                type='text/javascript'></script>
+		<script type='text/javascript'>
+			zebra.ready(function() {
+				eval(zebra.Import("ui", "layout"));
+
+				// define our own UI component class that wants to handle clipboard events
+				// the components inherits multi lines label component (MLabel)
+				var MyComponent = zebra.Class(MLabel, CopyCutPaste, [
+				    // override "canHaveFocus" method to make your component focusable
+				    function canHaveFocus() { return true; },
+
+				    // returns what you want to put in clipboard
+				    function copy() {
+				    	this.setColor("#FF3311");
+				    	return this.getValue();
+				    },
+
+				    // this method is called when paste event has happened for this 
+				    // component 
+				    function paste(s) { 
+				    	this.setColor("#000000");
+				    	this.setValue(s); 
+				    },
+
+				    // use border as an indication the component has focus
+				    function focused() {
+				    	this.$super() // call super
+				    	this.setBorder(this.hasFocus() ? new Border("red", 2,3) : borders.plain);
+				    }
+				]); 
+
+				// create UI application with our clipboard handler UI component
+				(new zCanvas()).root.properties({
+					background: "#EEEEEE",
+					layout: new BorderLayout(8,8), padding:8,
+					kids  : {
+						TOP   : new BoldLabel("Copy/Paste in box below"),
+						CENTER: new MyComponent("Copy me in clipboard").properties({border:borders.plain, padding:8})
+					}
+				});
+			});
+		</script>
+	</header>
+	<body></body>
+</html>

@@ -306,8 +306,7 @@ Zebra package:
 zebra-home
   |
   +--- lib     # zebra source code
-  +--- samples # various zebra snippets
-  +--- web/ui  # demo application
+  +--- samples # various zebra snippets and general UI set demo
   +--- startup.py # small HTTP Web server 
 ```
 

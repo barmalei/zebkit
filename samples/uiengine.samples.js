@@ -4,7 +4,7 @@
 eval(zebra.Import("ui", "layout", "util"));
 
 zebra.ui.configure(function(conf) {
-	conf.loadByUrl(pkg.$url + "samples.json");
+	conf.loadByUrl(pkg.$url + "uiengine.samples.json");
 });
 
 this.Shape = Class(View, [

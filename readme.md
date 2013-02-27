@@ -142,7 +142,7 @@ Load the JSON UI form definition as it is illustrated below:
 		    zebra.ready(function() {
 				// load UI form from JSON file
 			    var root = (new zebra.ui.zCanvas()).root;
-			    root.load(zebra.io.GET("myform.json"));
+			    root.load("myform.json");
 
 			    // find by class "Button" component and register button
 			    // event handler to clear text field content by button click
@@ -159,7 +159,7 @@ Load the JSON UI form definition as it is illustrated below:
 
 ### Native clipboard support
 
-Zebra support browser native clipboard ! The implementation doesn't require any Flash or other plug-in installed.
+Zebra support browser native clipboard. The implementation doesn't require any Flash or other plug-in installed.
 It is pure WEB based solution !
 
 By implementing special __"zebra.ui.CopyCutPaste"__ interface a Zebra UI component can start participating in 
@@ -322,9 +322,6 @@ by opening appropriate HTML with a browser. Some sample cannot be opened as file
 In this case they have to be opened through a web server. Zebra includes small, simple but buggy Python web server that can be used 
 for demo purposes. 
 
-Except snippets Zebra also provides demo application where the most of zebra UI components can be seen and "touched". The demo 
-is located in "web/ui/*" and "web/ui/demo/*" folders. 
-
 To see snippets and demo it is preferable to start embedded Python HTTP web server. To do it following the instruction below:
    	  * Open terminal
       * Go to zebra home directory
@@ -374,7 +371,7 @@ Depending on your need you can use one of the mentioned above Zebra module:
 
 ### License
 
-Zebra is Still free. General Public License (GPL) and MIT for academic projects
+General Public License (GPL) and MIT for academic projects
 
 ### Contact
 

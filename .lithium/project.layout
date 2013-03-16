@@ -2,7 +2,7 @@
 
 PROJECT {
 	@desc = 'Zebra'
-	@ver  = '1.0.0.preAlpha3'
+	@ver  = '1.0.0.alpha'
 	
     ARTIFACT('lib/zebra/zebra.min.js', CompressedJavaScript) {
         @source = "lib/zebra/zebra.js"

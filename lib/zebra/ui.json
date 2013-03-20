@@ -555,7 +555,7 @@
                     "onselection" :"#D0EAFF",
                     "offselection":"#ADC1D6"
                 },
-                "lineColor"   :  "rgb(65, 131, 215)"
+                "lineColor": "rgb(65, 131, 215)"
             }
         }
     },

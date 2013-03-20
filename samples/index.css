@@ -4,14 +4,14 @@
 	-moz-border-radius: 6px;
 	-webkit-border-radius:6px;
 	border-radius: 6px;
-	border-width: 3px;
+	border-width: 2px;
 	border-color:black;
 	border-style:solid;
 }
 
 .bullets {
     margin-top:5px;
-    font: 12px Arial; 
+    font: 16px Arial; 
     color: #777777; 
     font-style:italic;
 }

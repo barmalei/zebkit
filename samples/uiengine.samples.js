@@ -7,7 +7,7 @@ zebra.ui.configure(function(conf) {
 	conf.loadByUrl(pkg.$url + "uiengine.samples.json");
 });
 
-this.Shape = Class(View, [
+pkg.Shape = Class(View, [
 	function(){
 		this.$this("white");
 	},
@@ -27,7 +27,7 @@ this.Shape = Class(View, [
 	}
 ]);
 
-this.Triangle =  Class(this.Shape, [
+pkg.Triangle =  Class(pkg.Shape, [
 	function outline(g,x,y,w,h,d) {
 	    g.beginPath();
 	    g.lineWidth = this.lineWidth;
@@ -44,7 +44,7 @@ this.Triangle =  Class(this.Shape, [
 	}
 ]); 
 
-this.Oval = Class(this.Shape, [
+pkg.Oval = Class(pkg.Shape, [
 	function outline(g,x,y,w,h,d) {
 	    g.beginPath();
 	    g.lineWidth = this.lineWidth;
@@ -53,7 +53,7 @@ this.Oval = Class(this.Shape, [
 	}
 ]); 
 
-this.Pentahedron =  Class(this.Shape, [
+pkg.Pentahedron =  Class(pkg.Shape, [
 	function outline(g,x,y,w,h,d) {
 	    g.beginPath();
 	    g.lineWidth = this.lineWidth;
@@ -206,9 +206,7 @@ pkg.Components = Class(Panel, MouseListener, ChildrenListener, [
 								y = (this.height - font.height)/2  + font.ascent;
 
 							g.fillText(txt, x, y);							
-						},
-
-						function update22() {}
+						}
 				    ])).properties({
 							border      : new Border(brColor, 4, 6),
 							preferredSize: [35, 35],
@@ -242,8 +240,8 @@ pkg.Components = Class(Panel, MouseListener, ChildrenListener, [
 								padding:4,
 								kids  : [
 									makePanel(col, "1", constr2),
-									makePanel(col, "2", constr).properties({ preferredSize: [100, 40] }),
-									makePanel(col, "3", constr).properties({ preferredSize: [20, 100] }),
+									makePanel(col, "2", constr).properties({ preferredSize: [70, 40] }),
+									makePanel(col, "3", constr).properties({ preferredSize: [20, 70] }),
 									makePanel(col, "4", constr2),
 									makePanel(col, "5", constr),
 									makePanel(col, "6", constr2)
@@ -284,7 +282,7 @@ pkg.CirclePan = Class(Panel, MouseListener, [
 	function(r) {
 		this.$super();
 		this.setPreferredSize(2*r, 2*r);
-		this.setBorder(new Oval("red"));
+		this.setBorder(new pkg.Oval("red"));
 	},
 
 	function contains(x, y) {
@@ -304,7 +302,7 @@ pkg.CirclePan = Class(Panel, MouseListener, [
 pkg.TrianglePan = Class(Panel, MouseListener, [
 	function() {
 		this.$super();
-		this.setBorder(new Triangle("orange"));
+		this.setBorder(new pkg.Triangle("orange"));
 		this.setPreferredSize(200, 200);
 	},
 
@@ -339,7 +337,11 @@ pkg.SimpleChart = Class(Panel, [
 		this.setPadding(8);
 	},
 
-	function recalc() {
+	function validate() {
+		var b = this.isLayoutValid;
+		this.$super();
+		if (b) return;
+
 		var maxy = -1000000, miny = 1000000, fy = []; 
 		for(var x = this.x1, i = 0; x < this.x2; x += this.dx, i++) {
 			fy[i] = this.f(x);
@@ -417,7 +419,7 @@ pkg.CustomLayer = Class(BaseLayer, [
 					var s = "ALT-D to enable", l = font.stringWidth(s);
 					g.setColor("white");
 					g.setFont(font);
-					g.fillText(s, this.width/2 - l/2, (this.height - font.height)/2 + font.ascent);
+					g.fillText(s, this.width / 2 - l / 2, (this.height - font.height)/2 + font.ascent);
 				}
 			}
 		])).properties({

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+	<header>
+		<script src='http://repo.zebkit.com/pa3/zebra.min.js' type='text/javascript'></script>
+
+		<script type='text/javascript'>
+		    zebra.ready(function() {
+				// import all classes, functions and cosntans from
+				// zebra.ui, zebra.layout and zebra.ui.grid packages
+				eval(zebra.Import("ui", "layout", "ui.grid"));
+
+				// create canvas
+			    var root = (new zebra.ui.zCanvas(500, 400)).root;
+				root.setLayout(new BorderLayout(8,8));
+
+				var g = new Grid([ 
+									[ "Column 1.1",  "Column 1.2", "Column 1.3", "Column 1.4", "Column 1.5" ], 
+									[ "Column 2.1",  "Column 2.2", "Column 2.3", "Column 2.4", "Column 2.5" ], 
+									[ "Column 3.1",  "Column 3.2", "Column 3.3", "Column 3.4", "Column 3.5" ], 
+									[ "Column 4.1",  "Column 4.2", "Column 4.3", "Column 4.4", "Column 4.5" ], 
+									[ "Column 5.1",  "Column 5.2", "Column 5.3", "Column 5.4", "Column 5.5" ], 
+									[ "Column 6.1",  "Column 6.2", "Column 6.3", "Column 6.4", "Column 6.5" ], 
+									[ "Column 7.1",  "Column 7.2", "Column 7.3", "Column 7.4", "Column 7.5" ] 
+								 ]), h = g.setHeader(TOP, null);
+				
+				for(var i=0; i<g.getGridCols(); i++) {
+					h.putTitle(i, "Title " + i);
+				}
+
+				// add scrollable grid into canvas
+				//root.add(CENTER, new GridStretchPan(g));
+				root.add(CENTER, g);
+	 		});
+		</script>
+	</header>
+
+	<body>
+	</body>
+</html>

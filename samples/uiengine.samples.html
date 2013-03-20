@@ -9,7 +9,7 @@
 
 	
 		<script src='http://repo.zebkit.com/pa3/zebra.canvas.min.js' type='text/javascript'></script>
-		<script src='uiengine.samples.js' type='text/javascript'></script>
+		<script src='http://repo.zebkit.com/pa3/uiengine.samples.min.js' type='text/javascript'></script>
 
 
 		<script type='text/javascript'>
@@ -30,7 +30,7 @@
 		    	eval(zebra.Import("ui", "layout", "ui.samples"));
 
 				//create canvas
-			    var root = (new zebra.ui.zCanvas(300,300)).root;
+			    var root = (new zebra.ui.zCanvas("mouseEventDemo")).root;
 				root.properties({
 					layout: new zebra.layout.BorderLayout(),
 					kids: {
@@ -38,12 +38,12 @@
 					}
 				});
 
-			    root = (new zebra.ui.zCanvas(300,300)).root;
+			    root = (new zebra.ui.zCanvas("inputDemo")).root;
 				root.properties({
 					layout    : new zebra.layout.BorderLayout(6,6),
 					background: "black",
 					padding   : 4,
-					kids: {
+					kids	  : {
 						LEFT: (new EditablePan()).properties({
 							preferredSize : [ 70, 50 ],
 							border: new Oval("blue")
@@ -66,7 +66,7 @@
 					}
 				});
 
-			    root = (new zebra.ui.zCanvas(370,400)).root;
+			    root = (new zebra.ui.zCanvas("layoutDemo")).root;
 				root.properties({
 					layout: new zebra.layout.BorderLayout(4,4),
 					background : new Pattern(bg9),
@@ -77,7 +77,7 @@
 					}
 				});
 
-			    root = (new zebra.ui.zCanvas(300,300)).root;
+			    root = (new zebra.ui.zCanvas("shapedComponentDemo")).root;
 				root.properties({
 					layout: new StackLayout(),
 					background: new Pattern(bg11),
@@ -87,8 +87,7 @@
 					}
 				});
 
-
-			    root = (new zebra.ui.zCanvas(300,300)).root;
+			    root = (new zebra.ui.zCanvas("mouseCursorDemo")).root;
 				root.properties({
 					layout: new StackLayout(),
 					kids: [
@@ -110,7 +109,7 @@
 					]
 				});
 
-			    root = (new zebra.ui.zCanvas(400,250)).root;
+			    root = (new zebra.ui.zCanvas("chartDemo")).root;
 				root.properties({
 					layout: new zebra.layout.StackLayout(),
 					background: "black", 
@@ -160,7 +159,27 @@
 					]
 				});
 
-				var zc = new zebra.ui.zCanvas(300,300), root = zc.root;
+
+			    root = (new zebra.ui.zCanvas("chartDemo2")).root;
+				root.properties({
+					layout: new zebra.layout.BorderLayout(),
+					background: "black", 
+					kids:{
+						TOP:    new SimpleChart(function(x) { 
+													return -x*Math.sin(x); 
+												}, -1.4, 8.4, 0.01, "#33ddCC").properties({ preferredSize: [ 100, 80 ] }),
+						CENTER: new SimpleChart(function(x) { 
+													return Math.sin(x); 
+												}, -3, 9, 0.01, "#11FF99"),
+						BOTTOM: new SimpleChart(function(x) { 
+													return Math.cos(x)*Math.sin(x) - 2 * Math.sin(x*x); 
+												}, -2, 5, 0.01, "#CCFF77").properties({ preferredSize: [ -1, 70 ]  }),
+					}
+				});
+
+
+
+				var zc = new zebra.ui.zCanvas("layerDemo"), root = zc.root;
 				zc.add(new CustomLayer()); 
 				root.properties({
 					layout: new FlowLayout(CENTER, CENTER, VERTICAL, 8),
@@ -203,7 +222,7 @@
 					function getCursorType(t, x, y) { return Cursor.HAND; }
 				];
 
-				var zc = new zebra.ui.zCanvas(300,300), root = zc.root;
+				var zc = new zebra.ui.zCanvas("dragDemo"), root = zc.root;
 				root.properties({
 					layout: new RasterLayout(),
 					background: new Pattern(bg6),
@@ -233,5 +252,68 @@
 	</header>
 
 	<body>
+
+		<h1>Zebra UI Engine samples</h1>
+
+
+		<table border="0" width="1200">
+			<tr>
+				<td align="center" valign="bottom"> 
+					<canvas width="300" height="300" id="mouseEventDemo"> </canvas>
+				</td>
+				<td align="center" valign="bottom"> 
+					<canvas width="300" height="300" id="inputDemo"> </canvas>
+				</td>
+				<td align="center" valign="bottom"> 
+					<canvas width="320" height="350" id="layoutDemo"> </canvas>
+				</td>
+			</tr>
+
+			<tr>
+				<td align="center">Mouse event handling by changing radial gradient background</td>
+				<td align="center">
+					Focus and key event handling. Navigate between shaped UI component using tab or mouse and
+					type a character in
+				</td>
+				<td align="center">Layout UI component by applying different layout managers (BorderLayout, ListLayout and GridLayout in this sample)</td>
+			</tr>
+			<tr>
+				<td align="center" valign="bottom"> 
+					<canvas width="300" height="300" id="shapedComponentDemo"> </canvas>
+				</td>
+				<td align="center" valign="bottom"> 
+					<canvas width="300" height="300" id="mouseCursorDemo"> </canvas>
+				</td>
+				<td align="center" valign="bottom"> 
+					<canvas width="400" height="250" id="chartDemo"> </canvas>
+				</td>
+			</tr>
+
+			<tr>
+				<td align="center">Shaped (round and triangle) UI components. Mouse event handling.</td>
+				<td align="center">Mouse cursor controlling</td>
+				<td align="center">Dragable charts</td>
+			</tr>
+			<tr>
+				<td align="center" valign="bottom"> 
+					<canvas width="300" height="300" id="layerDemo"> </canvas>
+				</td>
+				<td align="center" valign="bottom"> 
+					<canvas width="300" height="300" id="dragDemo"> </canvas>
+				</td>
+				<td align="center" valign="bottom"> 
+					<canvas width="350" height="270" id="chartDemo2"> </canvas>
+				</td>
+			</tr>
+			<tr>
+				<td align="center">UI Layer to disable and enable input</td>
+				<td align="center">Drag and move UI component on canvas surface</td>
+				<td align="center">Three charts are arranged with border layout manager</td>
+			</tr>
+
+		</table>
+
+
+
 	</body>
 </html>

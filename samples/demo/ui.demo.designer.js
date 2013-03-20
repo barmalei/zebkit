@@ -13,46 +13,39 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
         lab.setSize(100, 20);
         lab.setLocation(50, 50);
         lab.setBorder(ui.borders.etched);
-        pp.add(lab);
-        new ShaperPan(lab);
+        pp.add(new ShaperPan(lab));
 
         var b = new Button("Button");
         b.toPreferredSize();
         b.setLocation(200, 120);
-        pp.add(b);
-        new ShaperPan(b);
+        pp.add(new ShaperPan(b));
 
         var b = new Checkbox("Checkbox");
         b.toPreferredSize();
         b.setLocation(180, 170);
-        pp.add(b);
-        new ShaperPan(b);
+        pp.add(new ShaperPan(b));
 
         var b = new ImagePan(ui.get("bmw"));
         b.toPreferredSize();
         b.setLocation(20, 120);
-        pp.add(b);
-        new ShaperPan(b);
-
+        pp.add(new ShaperPan(b));
+        
         var b = new ImagePan(ui.get("alpha"));
         b.toPreferredSize();
         b.setLocation(310, 80);
-        pp.add(b);
-        new ShaperPan(b);
-
+        pp.add(new ShaperPan(b));
+        
         var b = new ImagePan(ui.get("saab"));
         b.toPreferredSize();
         b.setLocation(290, 270);
         b.setSize(100, 100);
-        pp.add(b);
-        new ShaperPan(b);
+        pp.add(new ShaperPan(b));
 
         var b = new Combo(["Item number 1", "Item number 2", "Item number 3"]);
         b.toPreferredSize();
         b.setLocation(290, 270);
         b.select(0);
-        pp.add(b);
-        new ShaperPan(b);
+        pp.add(new ShaperPan(b));
 
         var c = new Panel(new ListLayout(4));
         var g = new Group();
@@ -60,8 +53,8 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
         var b = new BorderPan("Border Pan", c);
         b.toPreferredSize();
         b.setLocation(140, 230);
-        pp.add(b);
-        new ShaperPan(b);
+        pp.add(new ShaperPan(b));
+        
 
         var t = new zebra.ui.tree.Tree(new FormTreeModel(pp, [
             function exclude(c) { return zebra.instanceOf(c, ShaperPan); }

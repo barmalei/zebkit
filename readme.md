@@ -11,6 +11,10 @@
 
  Send claims to: ask@zebkit.org
 
+## Special thanks for Zebra font effect idea:
+
+ Michael Deal, http://www.html5rocks.com/en/tutorials/canvas/texteffects/
+
 
 ## What is Zebra ?
 
@@ -302,9 +306,7 @@ zebra.io.JRPC.invoke(url, "method1")(param1, param2, function(res) {
 
 ### Requirements and installation
 
-Basically Zebra doesn't require extra installation or configuration steps. You even can keep free 
-your PC from Zebra stuff, since zebra code can be loaded remotely from Zebra repo. Only if 
-you need Java to JavaScript converter, Treetop PEG parser has to be installed from "https://github.com/nathansobo/treetop". 
+Zebra doesn't require extra installation or configuration steps. 
 
 Zebra package:
 ```bash
@@ -318,7 +320,7 @@ zebra-home
 ### Run demos and samples
 
 Zebra include "samples" folder that keeps various Zebra UI snippets. A desired sample can be run 
-by opening appropriate HTML with a browser. Some sample cannot be opened as file (because of security restrictions browsers have), 
+by opening appropriate HTML with a browser. Some sample cannot be opened as file (because of security restrictions browsers can have), 
 In this case they have to be opened through a web server. Zebra includes small, simple but buggy Python web server that can be used 
 for demo purposes. 
 
@@ -371,7 +373,7 @@ Depending on your need you can use one of the mentioned above Zebra module:
 
 ### License
 
-General Public License (GPL) and MIT for academic projects
+Lesser General Public License (LGPL) and MIT for academic projects
 
 ### Contact
 

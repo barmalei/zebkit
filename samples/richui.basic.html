@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
-	<header>
+	<head>
 
-        <script src='http://repo.zebkit.com/pa3/zebra.min.js' type='text/javascript'></script>
+        <script src='../lib/zebra/zebra.min.js' type='text/javascript'></script>
         
 		<script type='text/javascript'>
 		    zebra.ready(function() {
@@ -11,7 +11,7 @@
 				eval(zebra.Import("ui", "layout"));
 
 				// create canvas
-			    var root = (new zCanvas(400, 400)).root;
+			    var root = (new zCanvas(400, 300)).root;
 			    root.properties({
 			    	layout : new ListLayout(),
 			    	border : new Border(),
@@ -45,9 +45,9 @@
 	 		});
 
 		</script>
-	</header>
+	</head>
 
 	<body bgcolor="#EEEEEE" align="center" style="padding:15px;">
-	    <h2>Simple Zebra application</h2>
+	    <h2>Few basic Zebra Rich UI components</h2>
 	</body>
 </html>

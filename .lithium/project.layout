@@ -2,7 +2,7 @@
 
 PROJECT {
 	@desc = 'Zebra'
-	@ver  = '1.0.0.alpha'
+	@ver  = '2013.04'
 	
     ARTIFACT('lib/zebra/zebra.min.js', CompressedJavaScript) {
         @source = "lib/zebra/zebra.js"
@@ -22,7 +22,17 @@ PROJECT {
         REQUIRE @source
     }
 
+    ARTIFACT('samples/demo/demo.all.min.js', CompressedJavaScript) {
+        @source = "samples/demo/demo.all.js"
+        @options = [ "--nomunge" ]
+        REQUIRE @source
+    }
+
     SET("lib/zebra/*.js", MetaGeneratedFileSet) {
+        CLASS CombinedJavaScript
+    }
+
+    SET("samples/demo/*.js", MetaGeneratedFileSet) {
         CLASS CombinedJavaScript
     }
 
@@ -31,5 +41,6 @@ PROJECT {
         REQUIRE "lib/zebra/zebra.min.js"
         REQUIRE "lib/zebra/zebra.canvas.min.js"
         REQUIRE "lib/zebra/zebra.io.min.js"
+        REQUIRE "samples/demo/demo.all.min.js"
     }
 }

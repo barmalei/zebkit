@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
-	<header>
+	<head>
 		
-		<script src='http://repo.zebkit.com/pa3/zebra.min.js' type='text/javascript'></script>
+		<script src='../lib/zebra/zebra.min.js' type='text/javascript'></script>
 
 
 		<script type='text/javascript'>
@@ -12,8 +12,7 @@
 				eval(zebra.Import("ui", "layout", "ui.grid"));
 
 				// create canvas
-			    //  var root = (new zCanvas(600, 500)).root;
-			    var root = (new zCanvas("sample1")).root;
+			    var root = (new zCanvas(600, 500)).root;
 				root.setLayout(new BorderLayout(8,8));
 
 				var g = new Grid(100, 10), h = g.setHeader(TOP, null);
@@ -31,12 +30,10 @@
 				root.add(CENTER, new ScrollPan(g));
 	 		});
 		</script>
-	</header>
+	</head>
 
 
-	<body>
-		<div style="display:table-cell;zoom:1;">
-			<canvas width="400" height="400" id="sample1" style="padding:0px;line-height: 21px;display: inline-block;"></canvas>
-		</div>
+	<body bgcolor="#EEEEEE" align="center" style="padding:15px;">
+		<h1>Rich UI Grid component</h1>
 	</body>
 </html>

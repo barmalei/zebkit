@@ -63,7 +63,7 @@ Let's start writing simple Zebra HTML following traditional style:
 ```html
 <!DOCTYPE html>
 <html>
-	<header>
+	<head>
 		<script src='http://repo.zebkit.org/pa3/zebra.min.js'
                 type='text/javascript'></script>
 		<script type='text/javascript'>
@@ -79,7 +79,7 @@ Let's start writing simple Zebra HTML following traditional style:
 				...
 	 		});
 		</script>
-	</header>
+	</head>
 	<body></body>
 </html>
 ```
@@ -89,7 +89,7 @@ We can write the application following more graceful manner using JSON-like styl
 ```html
 <!DOCTYPE html>
 <html>
-	<header>
+	<head>
 		<script src='http://repo.zebkit.org/pa3/zebra.min.js'
                 type='text/javascript'></script>
 		<script type='text/javascript'>
@@ -110,7 +110,7 @@ We can write the application following more graceful manner using JSON-like styl
 			    });
 			}); 
 		</script>
-	</header>
+	</head>
 	<body></body>
 </html>
 ```
@@ -139,7 +139,7 @@ Load the JSON UI form definition as it is illustrated below:
 ```html
 <!DOCTYPE html>
 <html>
-	<header>
+	<head>
 		<script src='http://repo.zebkit.org/pa3/zebra.min.js'
                 type='text/javascript'></script>
 		<script type='text/javascript'>
@@ -155,7 +155,7 @@ Load the JSON UI form definition as it is illustrated below:
 				});	    
 			});
 		</script>
-	</header>
+	</head>
 	<body></body>
 </html>
 ```
@@ -172,7 +172,7 @@ clipboard data exchange. For instance:
 ```html
 <!DOCTYPE html>
 <html>
-	<header>		
+	<head>		
 		<script src='http://repo.zebkit.org/pa3/zebra.min.js'
                 type='text/javascript'></script>
 		<script type='text/javascript'>
@@ -216,7 +216,7 @@ clipboard data exchange. For instance:
 				});
 			});
 		</script>
-	</header>
+	</head>
 	<body></body>
 </html>
 ```

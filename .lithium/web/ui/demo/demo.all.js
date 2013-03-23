@@ -1,9 +1,0 @@
-web/ui/demo/ui.demo.js
-web/ui/demo/ui.demo.layout.js
-web/ui/demo/ui.demo.basicui.js
-web/ui/demo/ui.demo.panels.js
-web/ui/demo/ui.demo.tree.js
-web/ui/demo/ui.demo.popup.js
-web/ui/demo/ui.demo.win.js
-web/ui/demo/ui.demo.grid.js
-web/ui/demo/ui.demo.designer.js

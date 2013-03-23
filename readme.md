@@ -312,9 +312,10 @@ Zebra package:
 ```bash
 zebra-home
   |
-  +--- lib     # zebra source code
-  +--- samples # various zebra snippets and general UI set demo
-  +--- startup.py # small HTTP Web server 
+  +--- lib        # zebra source code
+  +--- samples    # various zebra snippets and general UI set demo
+  +--- startup.py # small HTTP Web server
+  +--- index.html # index WEB page to see main samples and demos
 ```
 
 ### Run demos and samples
@@ -333,7 +334,8 @@ To see snippets and demo it is preferable to start embedded Python HTTP web serv
 ```
 
 Than you can:
-  * Run demo application following http://127.0.0.1:8080/samples/index.html URL
+  * Run list of links to various samples and demos following http://127.0.0.1:8080/ URL
+  * Run main Rich UI engine demo following http://127.0.0.1:8080/samples/richui.demo.html URL
   * Run UI engine samples following http://127.0.0.1:8080/samples/uiengine.samples.html URL
   * Find many other snippets in "samples" folder
 

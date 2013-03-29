@@ -375,7 +375,7 @@ Depending on your need you can use one of the mentioned above Zebra module:
 
 ### License
 
-Lesser General Public License (LGPL) and MIT for academic projects
+Lesser General Public License (LGPL)  
 
 ### Contact
 

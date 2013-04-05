@@ -12,7 +12,6 @@
         "View"          : "zebra.ui.View",
         "Gradient"      : "zebra.ui.Gradient",
         "CompositeView" : "zebra.ui.CompositeView",
-        "Shadow"        : "zebra.ui.Shadow",
         "rgb"           : "zebra.util.rgb",
         "Font"          : "zebra.ui.Font",
         "FlowLayout"    : "zebra.layout.FlowLayout",

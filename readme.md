@@ -8,6 +8,8 @@
    * Full package demo, Zebra rich set of UI components: http://www.zebkit.org/samples/index.html
    * Zebra UI engine simple samples: http://www.zebkit.org/samples/uiengine.samples.html
 
+Starting from 5.2013 Zebra is on Mobile !
+
 
  Send claims to: ask@zebkit.org
 
@@ -45,6 +47,7 @@ on HTML Canvas.
       * Complex UI components: Grid, Tree, Tabs, Combo, Designer, Scroll, Menu, etc
       * Thanks to easy OOP concept and proper design: expendable and fully customizable UI components
       * **Simple data model description**
+      * **HTML DOM as part of Zebra UI** 
       * and many other ...
    *  **JSON as Zebra UI form descriptive language**
    *  **JSON as Zebra UI look and feel configuration**
@@ -52,8 +55,12 @@ on HTML Canvas.
       *  GET/POST/etc Ajax requests  
       *  XML-RPC, JSON-RPC Service communication
       *  binary data handling
-   * ...
+   * **Mobile devices support** 
+   	  * **Touch screen support**
+   	  * **Inertial scrolling**
+   	  * **Virtual keyboard input**
   
+
 
 ### Simple UI Zebra application
 

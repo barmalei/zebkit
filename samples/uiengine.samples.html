@@ -132,7 +132,7 @@
 						new SimpleChart(function(x) { return Math.sin(x); }, -3, 3, 0.01, "#11FF99"),
 						new SimpleChart(function(x) { return Math.cos(x)*Math.sin(x) - 2 * Math.sin(x*x); }, -2, 3, 0.01, "#CCFF77"),
 
-						new Panel(MouseMotionListener, MouseListener, [
+						new Panel(MouseListener, [
 							function mouseMoved(e) {
 								for(var i=0; i<this.parent.kids.length-1; i++) {
 									var kid = this.parent.kids[i];
@@ -152,7 +152,7 @@
 								
 							},
 
-							function startDragged(e) {
+							function mouseDragStarted(e) {
 								this.dx = e.x;
 								this.dy = e.y;
 							},
@@ -224,7 +224,7 @@
 				]);
 
 				var Draggable = [
-					function startDragged(e) {
+					function mouseDragStarted(e) {
 						this.dx = e.x;
 						this.dy = e.y;
 					},
@@ -245,19 +245,19 @@
 							bounds: [ 20, 20, 80, 150 ],
 							border: new Border("orange", 4, 8),
 							background: new Pattern(bg5)
-						}).extend(Cursorable, MouseMotionListener, Draggable),
+						}).extend(Cursorable, MouseListener, Draggable),
 
 						new Panel().properties({ 
 							bounds: [ 160, 30, 120, 120 ],
 							border: new Border("green", 4, 8),
 							background: new Pattern(bg5)
-						}).extend(Cursorable, MouseMotionListener, Draggable),
+						}).extend(Cursorable, MouseListener, Draggable),
 
 						new Panel().properties({ 
 							bounds: [ 50, 180, 150, 70 ],
 							border: new Border("red", 4, 8),
 							background: new Pattern(bg5)
-						}).extend(Cursorable, MouseMotionListener, Draggable),
+						}).extend(Cursorable, MouseListener, Draggable),
 					]
 				});
 	 		});

@@ -25,7 +25,7 @@ var ColumnsAlignmentProvider = Class(DefViews, [
     },
 
     function getXAlignment(row,col){
-        if(col == 0) return LEFT;
+        if(col === 0) return LEFT;
         else {
             if (col == 1) return CENTER;
             else if(col == 2) return RIGHT;
@@ -34,7 +34,7 @@ var ColumnsAlignmentProvider = Class(DefViews, [
     },
 
     function getYAlignment(row,col){
-        if(row == 0) return TOP;
+        if(row === 0) return TOP;
         else {
             if(row == 1) return CENTER;
             else if(row == 2) return BOTTOM;
@@ -82,7 +82,6 @@ var CustomGridEditor = new Class(DefEditors, [
                 this.setBorder(new zebra.ui.Border("#7297BA", 2, 6));
                 this.setBackground("#E0F4FF");
 
-
                 this.add(BOTTOM, controls);
             },
 
@@ -96,12 +95,12 @@ var CustomGridEditor = new Class(DefEditors, [
 
         this.extWin = new ExtEditor();
         for(var i = 0; i < IMAGES.length; i++) {
-            var im = new ImagePan(zebra.ui.get(IMAGES[i]));
+            var im = new ImagePan(zebra.ui.demo[IMAGES[i]]);
             im.setPadding(2);
             this.extWin.list.add(im);
         }
         this.extWin.toPreferredSize();
-    
+
         this.editors["0"] = new Checkbox(null);
         this.editors["0"].setLayout(new FlowLayout(CENTER, CENTER));
         this.editors["1"] = new Combo();
@@ -114,10 +113,10 @@ var CustomGridEditor = new Class(DefEditors, [
     function getEditor(t, row,col,o){
         if (col == 3) return this.extWin;
 
-        if (col == 0) {
+        if (col === 0) {
             var e = this.$super(t, row, col, o);
             e.setValue(o == "on");
-            return e;            
+            return e;
         }
 
         return this.$super(t, row, col, o);
@@ -163,7 +162,7 @@ function longGrid() {
 	var g = new Grid(m);
     g.setViewProvider(new DefViews([
         function getCellColor(row,col) {
-            return (row % 2 == 0) ? ui.get("cellbg1") : ui.get("cellbg2") ;
+            return (row % 2 === 0) ? ui.cellbg1 : ui.cellbg2 ;
         }
     ]));
 
@@ -193,9 +192,9 @@ function editableGrid() {
         grid.position.setOffset(0);
         var cap = new GridCaption(grid);
         for (var i = 0; i < data.cols; i++) {
-            cap.putTitle(i, "Title " + (i + 1));    
-        };
-        
+            cap.putTitle(i, "Title " + (i + 1));
+        }
+
         cap.isResizable = false;
         grid.add(TOP, cap);
         return grid;
@@ -247,7 +246,7 @@ function editableGrid() {
         return grid;
     }
 
-    var onView = new Picture(zebra.ui.get("on")), offView = new Picture(zebra.ui.get("off"));
+    var onView = new Picture(zebra.ui.demo.on), offView = new Picture(zebra.ui.demo.off);
     var d = [ ["on", "Item 1", "text 1", "0"],
               ["off", "Item 1", "text 2", "0"],
               ["off", "Item 2", "text 3", "1"],
@@ -259,9 +258,9 @@ function editableGrid() {
 	var g = new Grid();
     g.setViewProvider(new DefViews([
         function getView(row, col, data) {
-            if (col == 0) return (data == "on") ? onView : offView;
+            if (col === 0) return (data == "on") ? onView : offView;
             else {
-                if (col == 3) return new Picture(zebra.ui.get("s" + IMAGES[data]));
+                if (col == 3) return new Picture(zebra.ui.demo["s" + IMAGES[data]]);
             }
             return this.$super(row, col, data);
         }
@@ -286,7 +285,7 @@ function customCellAlignmentGrid() {
     var d = [ "Top-Left\nAlignment", "Top-Center\nAlignment", "Top-Right\nAlignment",
               "Center-Left\nAlignment", "Center-Center\nAlignment", "Center-Right\nAlignment",
               "Bottom-Left\nAlignment", "Bottom-Center\nAlignment", "Bottom-Right\nAlignment"];
-    var titles = [ "Left Aligned", new CompRender(new zebra.ui.ImageLabel("Center", zebra.ui.get("ringtone"))), "Right Aligned"];
+    var titles = [ "Left Aligned", new CompRender(new zebra.ui.ImageLabel("Center", zebra.ui.demo.ringtone)), "Right Aligned"];
 
     var root = new Panel(new RasterLayout(USE_PS_SIZE)), data = new Matrix(3, 3);
     for(var i = 0;i < data.rows*data.cols; i ++ ){

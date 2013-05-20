@@ -25,17 +25,17 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
         b.setLocation(180, 170);
         pp.add(new ShaperPan(b));
 
-        var b = new ImagePan(ui.get("bmw"));
+        var b = new ImagePan(ui.demo.bmw);
         b.toPreferredSize();
         b.setLocation(20, 120);
         pp.add(new ShaperPan(b));
         
-        var b = new ImagePan(ui.get("alpha"));
+        var b = new ImagePan(ui.demo.alpha);
         b.toPreferredSize();
         b.setLocation(310, 80);
         pp.add(new ShaperPan(b));
         
-        var b = new ImagePan(ui.get("saab"));
+        var b = new ImagePan(ui.demo.saab);
         b.toPreferredSize();
         b.setLocation(290, 270);
         b.setSize(100, 100);
@@ -54,7 +54,6 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
         b.toPreferredSize();
         b.setLocation(140, 230);
         pp.add(new ShaperPan(b));
-        
 
         var t = new zebra.ui.tree.Tree(new FormTreeModel(pp, [
             function exclude(c) { return zebra.instanceOf(c, ShaperPan); }

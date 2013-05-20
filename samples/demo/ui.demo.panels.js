@@ -32,7 +32,7 @@ pkg.PanelsDemo = new Class(pkg.DemoPan, [
         p5.setPreferredSize(170, 130);
         var p6 = new BorderPan("Bottom right title", new Label(""), RIGHT | BOTTOM);
         p6.setPreferredSize(170, 130);
-        var p7 = new BorderPan(new ImageLabel("image title", ui.get("butterfly")), new Label(""));
+        var p7 = new BorderPan(new ImageLabel("image title", ui.demo.butterfly), new Label(""));
         p7.setPreferredSize(170, 130);
         var p8_1 = new BorderPan("Border pan as title", new Label(""));
         p8_1.setPreferredSize(130, -1);
@@ -57,8 +57,8 @@ pkg.PanelsDemo = new Class(pkg.DemoPan, [
 
     function createSplitPan() {
         var p = new Panel(new BorderLayout());
-        var s1_1 = new SplitPan(new ImagePan(ui.get("cosmo1")), new ImagePan(ui.get("cosmo2")));
-        var s1 = new SplitPan(new ImagePan(ui.get("cosmo3")), s1_1, HORIZONTAL);
+        var s1_1 = new SplitPan(new ImagePan(ui.demo.cosmo1), new ImagePan(ui.demo.cosmo2));
+        var s1 = new SplitPan(new ImagePan(ui.demo.cosmo3), s1_1, HORIZONTAL);
         p.setPadding(4);
         s1.setGripperLoc(180);
         s1_1.setGripperLoc(220);
@@ -69,12 +69,12 @@ pkg.PanelsDemo = new Class(pkg.DemoPan, [
     function createScrollPan() {
         var rt = new Panel(new FlowLayout(CENTER, CENTER)),
             p = new Panel(new GridLayout(2,2)),
-            img = new ImagePan(ui.get("cosmo1")),
+            img = new ImagePan(ui.demo.cosmo1),
             p1 = new ScrollPan(img);
 
         p1.setPreferredSize(270, 240);
         p1.setBorder(zebra.ui.borders.plain);
-        var p2 = new ScrollPan(new ImagePan(ui.get("cosmo1")), VERTICAL);
+        var p2 = new ScrollPan(new ImagePan(ui.demo.cosmo1), VERTICAL);
         p2.setPreferredSize(270, 240);
         p2.setBorder(zebra.ui.borders.plain);
 
@@ -85,6 +85,8 @@ pkg.PanelsDemo = new Class(pkg.DemoPan, [
             p3_1.add(ch);
         }
         p3 = new ScrollPan(p3_1);
+        p3.setAutoHide(true);
+
         p3.setPreferredSize(270, 190);
         p3.setBorder(zebra.ui.borders.plain);
 

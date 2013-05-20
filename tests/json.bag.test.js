@@ -168,14 +168,32 @@ zebra.runTests("Zebra util objects bag",
         bag.load(l);
 
         assert(o.a.id, 100);
+    },
 
+    function test_optional_fields() {
+        zebra.$a = 100;
+
+        var o = {}, bag = new Bag(o), l = '{ "? zebra.$a == 100": { "p1": 100, "p2": 200, "p4":"abc"  }, "? zebra.$a == 200": { "p1": 300, "p2":400, "p3":500 } }';
+        bag.load(l, false);
+        bag.load('{"? zebra.$a > 10" : { "p1":999, "?zebra.$a > 5": {  "p4":"ggg" }, "? zebra.$a > 0": {"p7": 7 }  } }');
+
+        var r = bag.objects;
+        assert(r.p1, 999);
+        assert(r.p2, 200);
+        assert(r.p4, "ggg");
+        assert(r.p7, 7);
+        assert(typeof r.p3, "undefined");
+
+        var bag = new Bag(o), l = '{ "a":100, "? zebra.$a == 100": { "a": 200 } }';
+        bag.load(l);
+        var r = bag.objects;
+        assert(r.a, 200);
+
+        var bag = new Bag(), l = '{ "a":{  "b": { "c": 100, "m":777 }, "k":444 },  "? zebra.$a == 100": { "a": { "b" : { "c": "ABC" } }  } }';
+        bag.load(l);
+        var r = bag.objects;
+        assert(r.a.b.c, "ABC");
+        assert(r.a.k, 444);
+        assert(r.a.b.m, 777);
     }
 );
-
-
-
-
-
-
-
-

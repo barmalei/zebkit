@@ -47,7 +47,7 @@ function createTooltipDemo() {
             b.setBackground("#E0F4FF");
             b.setPadding(6);
             var pp = new Panel(new FlowLayout(CENTER, CENTER, HORIZONTAL, 2));
-            var img = new ImagePan(ui.get("bmw"))
+            var img = new ImagePan(ui.demo.bmw);
             var l = new Label(new zebra.data.Text("BMW is the best.\nAudi looks similar.\nBeware of imitation :)"));
             l.setColor("#3366CC");
             l.setFont(new Font("Helvetica", 0, 14));
@@ -76,7 +76,7 @@ function createTooltipDemo() {
             }
 
             if (col == 1) {
-                return new Picture(ui.get(data));
+                return new Picture(ui.demo[data]);
             }
         }
     ]));

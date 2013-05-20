@@ -11,7 +11,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
 
         var p = new Panel(new GridLayout(3, 2)), ctr = new Constraints();
         ctr.left = ctr.right = ctr.bottom = ctr.top = 8;
-        ctr.ax = STRETCH 
+        ctr.ax = STRETCH;
         ctr.ay = STRETCH;
         p.add(ctr, this.createCheckboxPan(3, true));
         p.add(ctr, this.createCheckboxPan(3, false));
@@ -38,12 +38,12 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         var p = new Panel(new GridLayout(3, 2));
         var tf = new TextField();
         var ctr = new Constraints();
-        ctr.ay = CENTER
+        ctr.ay = CENTER;
         ctr.setPadding(2);
 
         tf.setPreferredSize(150, -1);
         tf.setHint("<enter text>");
-        
+
         p.add(ctr, new BoldLabel("Text field:"));
         p.add(ctr, tf);
 
@@ -96,15 +96,15 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
     function createButtonPan() {
         var p = new Panel(new FlowLayout(CENTER, CENTER, HORIZONTAL, 8));
         p.add(new Button("Button"));
-        var bt = new Button(new ImagePan(ui.get("butterfly")));
+        var bt = new Button(new ImagePan(ui.demo.butterfly));
         bt.setFocusMarkerView(null);
         p.add(bt);
-        p.add(new Button(new ImageLabel("Image button", ui.get("butterfly"))));
+        p.add(new Button(new ImageLabel("Image button", ui.demo.butterfly)));
         bt = new Button("Disabled button");
         bt.setEnabled(false);
         p.add(bt);
         p.add(new Link("Link"));
-        var bp = pkg.createBorderPan("Buttons", p); 
+        var bp = pkg.createBorderPan("Buttons", p);
         bp.setPadding(8);
         return bp;
     },
@@ -124,13 +124,13 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         var l = new CompList();
         l.add("Label Item");
         l.add(new Checkbox("Checkbox Item"));
-        l.add(new CompList.ImageLabel("Image Label Item", ui.get("butterfly")));
+        l.add(new CompList.ImageLabel("Image Label Item", ui.demo.butterfly));
         var lbp = new BorderPan("Components list", l);
         lbp.setGaps(6,6);
         p.add(lbp);
         l.select(0);
 
-        var bp = pkg.createBorderPan("List", p)
+        var bp = pkg.createBorderPan("List", p);
         bp.setGaps(4,4);
         return bp;
     },
@@ -138,13 +138,13 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
     function createCheckboxPan(n, t) {
         var p = new Panel(new FlowLayout(CENTER, CENTER, VERTICAL, 4)),
             s = t ? "Radio button " : "Checkbox button ", g = t ? new Group() : null;
-       
+
         for(var i=0; i < n;  i++) {
             var ch = t ? new Radiobox(s + (i+1)) : new Checkbox(s + (i+1));
             p.add(ch);
             if (g != null) ch.setSwitchManager(g);
         }
-   
+
         ch.setEnabled(false);
         ch.setState(true);
         return pkg.createBorderPan(s, p);
@@ -169,9 +169,9 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
 
         var l = new CompList(true);
         l.setBorder(null);
-        l.add(new CompList.ImageLabel("Item 1", ui.get("ind1")));
-        l.add(new CompList.ImageLabel("Item 2", ui.get("ind1")));
-        l.add(new CompList.ImageLabel("Item 3", ui.get("ind2")));
+        l.add(new CompList.ImageLabel("Item 1", ui.demo.ind1));
+        l.add(new CompList.ImageLabel("Item 2", ui.demo.ind1));
+        l.add(new CompList.ImageLabel("Item 3", ui.demo.ind2));
 
         var cb3 = new Combo(l);
         cb3.list.select(0);

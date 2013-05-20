@@ -57,7 +57,7 @@ pkg.TreeDemo = new Class(pkg.DemoPan, [
                     }
 
                     if (i.value.indexOf("Root") === 0) {
-                        return new CompRender(new ImageLabel("Root", ui.get("butterfly")));
+                        return new CompRender(new ImageLabel("Root", ui.demo.butterfly));
                     }
                     return tr;
               }

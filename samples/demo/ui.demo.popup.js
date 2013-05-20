@@ -6,7 +6,7 @@ var rgb = zebra.util.rgb;
 
 function createItem(s) {
     if (s[0]=='&') {
-        var p = new ImagePan(ui.get(s.substring(1)));
+        var p = new ImagePan(ui.demo[s.substring(1)]);
         p.setPadding(4);
         return p;
     }
@@ -19,7 +19,7 @@ function createItem(s) {
         return l;
     }
 
-    var l = (j > 0) ? new zebra.ui.ImageLabel(s.substring(j+1), ui.get(s.substring(0, j))) : new Label(s);
+    var l = (j > 0) ? new zebra.ui.ImageLabel(s.substring(j+1), ui.demo[s.substring(0, j)]) : new Label(s);
     l.setPaddings(2,4,2,4);
     if (zebra.instanceOf(l, Label)) l.setFont(ui.boldFont);
     else l.kids[1].setFont(ui.boldFont);
@@ -100,10 +100,10 @@ function createToolbar() {
     t.setBackground(rgb.lighGray);
 
    // t.setBorder(null);
-    var img = ui.get("home");
+    var img = ui.demo.home;
     t.addImage(img);
-    t.addImage(ui.get("mail"));
-    t.addImage(ui.get("attachment"));
+    t.addImage(ui.demo.mail);
+    t.addImage(ui.demo.attachment);
 
     t.addLine();
     var s = t.addSwitcher("ON/OFF");
@@ -114,7 +114,7 @@ function createToolbar() {
     var c1 = t.addRadio(g,"Radio 1");
     var c2 = t.addRadio(g,"Radio 2");
     var c3 = t.addRadio(g,"Radio 3");
-//    t.setView(c1, zebra.ui.Toolbar.PRESSED, ui.get("page"));
+//    t.setView(c1, zebra.ui.Toolbar.PRESSED, ui.demo.page);
 
 
     // var m = new zebra.data.ListModel();

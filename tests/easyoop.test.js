@@ -1111,6 +1111,26 @@ if (typeof(zebra) === "undefined") {
                      function(p) { this.m = p; }
                 ]);
             }, Error);
+
+
+            var A = Class([
+                function a() {
+                    return 10;
+                }
+
+            ]);
+            A.$name = "Test";
+
+            var a1 = new A(), a2 = new A([
+                function a() {
+                    return 20;
+                }
+            ]);
+
+            assert(a1.getClazz(),  A);
+            assert(a1.getClazz().$name,  "Test");
+            assert(a2.getClazz() != A,  true);
+            assert(a2.getClazz().$name ,  "Test");
         },
 
         function _test_method_modifiers() {

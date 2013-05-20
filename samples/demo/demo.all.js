@@ -208,7 +208,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
 
         var p = new Panel(new GridLayout(3, 2)), ctr = new Constraints();
         ctr.left = ctr.right = ctr.bottom = ctr.top = 8;
-        ctr.ax = STRETCH 
+        ctr.ax = STRETCH;
         ctr.ay = STRETCH;
         p.add(ctr, this.createCheckboxPan(3, true));
         p.add(ctr, this.createCheckboxPan(3, false));
@@ -235,12 +235,12 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         var p = new Panel(new GridLayout(3, 2));
         var tf = new TextField();
         var ctr = new Constraints();
-        ctr.ay = CENTER
+        ctr.ay = CENTER;
         ctr.setPadding(2);
 
         tf.setPreferredSize(150, -1);
         tf.setHint("<enter text>");
-        
+
         p.add(ctr, new BoldLabel("Text field:"));
         p.add(ctr, tf);
 
@@ -293,15 +293,15 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
     function createButtonPan() {
         var p = new Panel(new FlowLayout(CENTER, CENTER, HORIZONTAL, 8));
         p.add(new Button("Button"));
-        var bt = new Button(new ImagePan(ui.get("butterfly")));
+        var bt = new Button(new ImagePan(ui.demo.butterfly));
         bt.setFocusMarkerView(null);
         p.add(bt);
-        p.add(new Button(new ImageLabel("Image button", ui.get("butterfly"))));
+        p.add(new Button(new ImageLabel("Image button", ui.demo.butterfly)));
         bt = new Button("Disabled button");
         bt.setEnabled(false);
         p.add(bt);
         p.add(new Link("Link"));
-        var bp = pkg.createBorderPan("Buttons", p); 
+        var bp = pkg.createBorderPan("Buttons", p);
         bp.setPadding(8);
         return bp;
     },
@@ -321,13 +321,13 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         var l = new CompList();
         l.add("Label Item");
         l.add(new Checkbox("Checkbox Item"));
-        l.add(new CompList.ImageLabel("Image Label Item", ui.get("butterfly")));
+        l.add(new CompList.ImageLabel("Image Label Item", ui.demo.butterfly));
         var lbp = new BorderPan("Components list", l);
         lbp.setGaps(6,6);
         p.add(lbp);
         l.select(0);
 
-        var bp = pkg.createBorderPan("List", p)
+        var bp = pkg.createBorderPan("List", p);
         bp.setGaps(4,4);
         return bp;
     },
@@ -335,13 +335,13 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
     function createCheckboxPan(n, t) {
         var p = new Panel(new FlowLayout(CENTER, CENTER, VERTICAL, 4)),
             s = t ? "Radio button " : "Checkbox button ", g = t ? new Group() : null;
-       
+
         for(var i=0; i < n;  i++) {
             var ch = t ? new Radiobox(s + (i+1)) : new Checkbox(s + (i+1));
             p.add(ch);
             if (g != null) ch.setSwitchManager(g);
         }
-   
+
         ch.setEnabled(false);
         ch.setState(true);
         return pkg.createBorderPan(s, p);
@@ -366,9 +366,9 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
 
         var l = new CompList(true);
         l.setBorder(null);
-        l.add(new CompList.ImageLabel("Item 1", ui.get("ind1")));
-        l.add(new CompList.ImageLabel("Item 2", ui.get("ind1")));
-        l.add(new CompList.ImageLabel("Item 3", ui.get("ind2")));
+        l.add(new CompList.ImageLabel("Item 1", ui.demo.ind1));
+        l.add(new CompList.ImageLabel("Item 2", ui.demo.ind1));
+        l.add(new CompList.ImageLabel("Item 3", ui.demo.ind2));
 
         var cb3 = new Combo(l);
         cb3.list.select(0);
@@ -416,7 +416,7 @@ pkg.PanelsDemo = new Class(pkg.DemoPan, [
         p5.setPreferredSize(170, 130);
         var p6 = new BorderPan("Bottom right title", new Label(""), RIGHT | BOTTOM);
         p6.setPreferredSize(170, 130);
-        var p7 = new BorderPan(new ImageLabel("image title", ui.get("butterfly")), new Label(""));
+        var p7 = new BorderPan(new ImageLabel("image title", ui.demo.butterfly), new Label(""));
         p7.setPreferredSize(170, 130);
         var p8_1 = new BorderPan("Border pan as title", new Label(""));
         p8_1.setPreferredSize(130, -1);
@@ -441,8 +441,8 @@ pkg.PanelsDemo = new Class(pkg.DemoPan, [
 
     function createSplitPan() {
         var p = new Panel(new BorderLayout());
-        var s1_1 = new SplitPan(new ImagePan(ui.get("cosmo1")), new ImagePan(ui.get("cosmo2")));
-        var s1 = new SplitPan(new ImagePan(ui.get("cosmo3")), s1_1, HORIZONTAL);
+        var s1_1 = new SplitPan(new ImagePan(ui.demo.cosmo1), new ImagePan(ui.demo.cosmo2));
+        var s1 = new SplitPan(new ImagePan(ui.demo.cosmo3), s1_1, HORIZONTAL);
         p.setPadding(4);
         s1.setGripperLoc(180);
         s1_1.setGripperLoc(220);
@@ -453,12 +453,12 @@ pkg.PanelsDemo = new Class(pkg.DemoPan, [
     function createScrollPan() {
         var rt = new Panel(new FlowLayout(CENTER, CENTER)),
             p = new Panel(new GridLayout(2,2)),
-            img = new ImagePan(ui.get("cosmo1")),
+            img = new ImagePan(ui.demo.cosmo1),
             p1 = new ScrollPan(img);
 
         p1.setPreferredSize(270, 240);
         p1.setBorder(zebra.ui.borders.plain);
-        var p2 = new ScrollPan(new ImagePan(ui.get("cosmo1")), VERTICAL);
+        var p2 = new ScrollPan(new ImagePan(ui.demo.cosmo1), VERTICAL);
         p2.setPreferredSize(270, 240);
         p2.setBorder(zebra.ui.borders.plain);
 
@@ -469,6 +469,8 @@ pkg.PanelsDemo = new Class(pkg.DemoPan, [
             p3_1.add(ch);
         }
         p3 = new ScrollPan(p3_1);
+        p3.setAutoHide(true);
+
         p3.setPreferredSize(270, 190);
         p3.setBorder(zebra.ui.borders.plain);
 
@@ -550,7 +552,7 @@ pkg.TreeDemo = new Class(pkg.DemoPan, [
                     }
 
                     if (i.value.indexOf("Root") === 0) {
-                        return new CompRender(new ImageLabel("Root", ui.get("butterfly")));
+                        return new CompRender(new ImageLabel("Root", ui.demo.butterfly));
                     }
                     return tr;
               }
@@ -590,7 +592,7 @@ var rgb = zebra.util.rgb;
 
 function createItem(s) {
     if (s[0]=='&') {
-        var p = new ImagePan(ui.get(s.substring(1)));
+        var p = new ImagePan(ui.demo[s.substring(1)]);
         p.setPadding(4);
         return p;
     }
@@ -603,7 +605,7 @@ function createItem(s) {
         return l;
     }
 
-    var l = (j > 0) ? new zebra.ui.ImageLabel(s.substring(j+1), ui.get(s.substring(0, j))) : new Label(s);
+    var l = (j > 0) ? new zebra.ui.ImageLabel(s.substring(j+1), ui.demo[s.substring(0, j)]) : new Label(s);
     l.setPaddings(2,4,2,4);
     if (zebra.instanceOf(l, Label)) l.setFont(ui.boldFont);
     else l.kids[1].setFont(ui.boldFont);
@@ -684,10 +686,10 @@ function createToolbar() {
     t.setBackground(rgb.lighGray);
 
    // t.setBorder(null);
-    var img = ui.get("home");
+    var img = ui.demo.home;
     t.addImage(img);
-    t.addImage(ui.get("mail"));
-    t.addImage(ui.get("attachment"));
+    t.addImage(ui.demo.mail);
+    t.addImage(ui.demo.attachment);
 
     t.addLine();
     var s = t.addSwitcher("ON/OFF");
@@ -698,7 +700,7 @@ function createToolbar() {
     var c1 = t.addRadio(g,"Radio 1");
     var c2 = t.addRadio(g,"Radio 2");
     var c3 = t.addRadio(g,"Radio 3");
-//    t.setView(c1, zebra.ui.Toolbar.PRESSED, ui.get("page"));
+//    t.setView(c1, zebra.ui.Toolbar.PRESSED, ui.demo.page);
 
 
     // var m = new zebra.data.ListModel();
@@ -836,7 +838,7 @@ function createTooltipDemo() {
             b.setBackground("#E0F4FF");
             b.setPadding(6);
             var pp = new Panel(new FlowLayout(CENTER, CENTER, HORIZONTAL, 2));
-            var img = new ImagePan(ui.get("bmw"))
+            var img = new ImagePan(ui.demo.bmw);
             var l = new Label(new zebra.data.Text("BMW is the best.\nAudi looks similar.\nBeware of imitation :)"));
             l.setColor("#3366CC");
             l.setFont(new Font("Helvetica", 0, 14));
@@ -865,7 +867,7 @@ function createTooltipDemo() {
             }
 
             if (col == 1) {
-                return new Picture(ui.get(data));
+                return new Picture(ui.demo[data]);
             }
         }
     ]));
@@ -986,7 +988,7 @@ var ColumnsAlignmentProvider = Class(DefViews, [
     },
 
     function getXAlignment(row,col){
-        if(col == 0) return LEFT;
+        if(col === 0) return LEFT;
         else {
             if (col == 1) return CENTER;
             else if(col == 2) return RIGHT;
@@ -995,7 +997,7 @@ var ColumnsAlignmentProvider = Class(DefViews, [
     },
 
     function getYAlignment(row,col){
-        if(row == 0) return TOP;
+        if(row === 0) return TOP;
         else {
             if(row == 1) return CENTER;
             else if(row == 2) return BOTTOM;
@@ -1043,7 +1045,6 @@ var CustomGridEditor = new Class(DefEditors, [
                 this.setBorder(new zebra.ui.Border("#7297BA", 2, 6));
                 this.setBackground("#E0F4FF");
 
-
                 this.add(BOTTOM, controls);
             },
 
@@ -1057,12 +1058,12 @@ var CustomGridEditor = new Class(DefEditors, [
 
         this.extWin = new ExtEditor();
         for(var i = 0; i < IMAGES.length; i++) {
-            var im = new ImagePan(zebra.ui.get(IMAGES[i]));
+            var im = new ImagePan(zebra.ui.demo[IMAGES[i]]);
             im.setPadding(2);
             this.extWin.list.add(im);
         }
         this.extWin.toPreferredSize();
-    
+
         this.editors["0"] = new Checkbox(null);
         this.editors["0"].setLayout(new FlowLayout(CENTER, CENTER));
         this.editors["1"] = new Combo();
@@ -1075,10 +1076,10 @@ var CustomGridEditor = new Class(DefEditors, [
     function getEditor(t, row,col,o){
         if (col == 3) return this.extWin;
 
-        if (col == 0) {
+        if (col === 0) {
             var e = this.$super(t, row, col, o);
             e.setValue(o == "on");
-            return e;            
+            return e;
         }
 
         return this.$super(t, row, col, o);
@@ -1124,7 +1125,7 @@ function longGrid() {
 	var g = new Grid(m);
     g.setViewProvider(new DefViews([
         function getCellColor(row,col) {
-            return (row % 2 == 0) ? ui.get("cellbg1") : ui.get("cellbg2") ;
+            return (row % 2 === 0) ? ui.cellbg1 : ui.cellbg2 ;
         }
     ]));
 
@@ -1154,9 +1155,9 @@ function editableGrid() {
         grid.position.setOffset(0);
         var cap = new GridCaption(grid);
         for (var i = 0; i < data.cols; i++) {
-            cap.putTitle(i, "Title " + (i + 1));    
-        };
-        
+            cap.putTitle(i, "Title " + (i + 1));
+        }
+
         cap.isResizable = false;
         grid.add(TOP, cap);
         return grid;
@@ -1208,7 +1209,7 @@ function editableGrid() {
         return grid;
     }
 
-    var onView = new Picture(zebra.ui.get("on")), offView = new Picture(zebra.ui.get("off"));
+    var onView = new Picture(zebra.ui.demo.on), offView = new Picture(zebra.ui.demo.off);
     var d = [ ["on", "Item 1", "text 1", "0"],
               ["off", "Item 1", "text 2", "0"],
               ["off", "Item 2", "text 3", "1"],
@@ -1220,9 +1221,9 @@ function editableGrid() {
 	var g = new Grid();
     g.setViewProvider(new DefViews([
         function getView(row, col, data) {
-            if (col == 0) return (data == "on") ? onView : offView;
+            if (col === 0) return (data == "on") ? onView : offView;
             else {
-                if (col == 3) return new Picture(zebra.ui.get("s" + IMAGES[data]));
+                if (col == 3) return new Picture(zebra.ui.demo["s" + IMAGES[data]]);
             }
             return this.$super(row, col, data);
         }
@@ -1247,7 +1248,7 @@ function customCellAlignmentGrid() {
     var d = [ "Top-Left\nAlignment", "Top-Center\nAlignment", "Top-Right\nAlignment",
               "Center-Left\nAlignment", "Center-Center\nAlignment", "Center-Right\nAlignment",
               "Bottom-Left\nAlignment", "Bottom-Center\nAlignment", "Bottom-Right\nAlignment"];
-    var titles = [ "Left Aligned", new CompRender(new zebra.ui.ImageLabel("Center", zebra.ui.get("ringtone"))), "Right Aligned"];
+    var titles = [ "Left Aligned", new CompRender(new zebra.ui.ImageLabel("Center", zebra.ui.demo.ringtone)), "Right Aligned"];
 
     var root = new Panel(new RasterLayout(USE_PS_SIZE)), data = new Matrix(3, 3);
     for(var i = 0;i < data.rows*data.cols; i ++ ){
@@ -1315,17 +1316,17 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
         b.setLocation(180, 170);
         pp.add(new ShaperPan(b));
 
-        var b = new ImagePan(ui.get("bmw"));
+        var b = new ImagePan(ui.demo.bmw);
         b.toPreferredSize();
         b.setLocation(20, 120);
         pp.add(new ShaperPan(b));
         
-        var b = new ImagePan(ui.get("alpha"));
+        var b = new ImagePan(ui.demo.alpha);
         b.toPreferredSize();
         b.setLocation(310, 80);
         pp.add(new ShaperPan(b));
         
-        var b = new ImagePan(ui.get("saab"));
+        var b = new ImagePan(ui.demo.saab);
         b.toPreferredSize();
         b.setLocation(290, 270);
         b.setSize(100, 100);
@@ -1344,7 +1345,6 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
         b.toPreferredSize();
         b.setLocation(140, 230);
         pp.add(new ShaperPan(b));
-        
 
         var t = new zebra.ui.tree.Tree(new FormTreeModel(pp, [
             function exclude(c) { return zebra.instanceOf(c, ShaperPan); }

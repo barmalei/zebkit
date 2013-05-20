@@ -1,6 +1,16 @@
 {
-    "tooltip"   : { "$zebra.ui.TooltipManager":[]  },
-    "popup"     : { "$zebra.ui.PopupManager"  :[]  },
+    "popup" : { "$zebra.ui.PopupManager": [] },
+
+    "?zebra.isTouchable == false": {
+        "tooltip": { "$zebra.ui.TooltipManager":[]  },
+        "zCanvas": {
+            "addons": [ "zebra.ui.MouseWheelSupport" ]
+        }
+    },
+
+    "?zebra.isTouchable": {
+         "mscroll": { "$zebra.ui.MobileScrollMan"  :[] }
+    },
 
     "layers" : [
         { "$ *zebra.ui.WinLayer"  : [] },
@@ -29,13 +39,9 @@
         "properties": {}
     },
 
-    "zCanvas": {
-        "addons": [ "zebra.ui.MouseWheelSupport" ]
-    },
-
     "StatePan": {
         "properties": {
-            "layout": { "$FlowLayout": [ 16,16,32,2 ] },
+            "layout"     : { "$FlowLayout": [ 16,16,32,2 ] },
             "focusMarker": "@borders.dot"
         }
     },
@@ -163,8 +169,8 @@
                     "over"         : { "$zebra.ui.ArrowView": [ 2, "red" ] },
                     "disabled"     : { "$zebra.ui.ArrowView": [ 2, "white" ] }
                 },
-                "preferredSize":[ 16, 1 ],
-                "canHaveComponent": false
+                "preferredSize":[ 16, 11 ],
+                "canHaveFocus": false
             }
         },
 
@@ -176,7 +182,7 @@
                     "over"    : { "$zebra.ui.ArrowView": [ 1, "red" ] },
                     "disabled": { "$zebra.ui.ArrowView": [ 1, "white" ] }
                 },
-                "preferredSize":[ 16, -1 ],
+                "preferredSize":[ 16, 11 ],
                 "canHaveFocus": false
             }
         },
@@ -190,8 +196,8 @@
                     "disabled": { "$zebra.ui.ArrowView": [8, "white"] }
                 },
 
-                "preferredSize":[ -1, 16 ],
-                "focusComponent": null
+                "preferredSize" :[ 11, 16 ],
+                "canHaveFocus": false
             }
         },
 
@@ -204,14 +210,15 @@
                     "disabled": { "$zebra.ui.ArrowView": [ 4, "white" ] }
                 },
 
-                 "preferredSize":[ -1,16 ],
-                "focusComponent": null
+                "preferredSize":[ 11, 16 ],
+                "canHaveFocus": false
             }
         },
 
         "VBundle": {
             "properties": {
                 "padding":1,
+                "preferredSize" : [6, -1],
                 "background" : { "$zebra.ui.BunldeView": [] }
             }
         },
@@ -219,6 +226,7 @@
         "HBundle": {
             "properties": {
                 "padding":1,
+                "preferredSize" : [-1, 6],
                 "background" : { "$zebra.ui.BunldeView": [ 32 ] }
             }
         },
@@ -632,6 +640,43 @@
                     "pressed": { "$Picture": [ "@pictures.win",32,0,16,16   ]}
                 }
             }
+        }
+    },
+
+    "HtmlElement": {
+        "properties": {
+            "styles": {
+                "border"          : "none",
+                "margin"          : "0px",
+                "backgroundColor" : "transparent",
+                "position"        : "absolute",
+                "zIndex"          : 10,
+                "visibility"      : "hidden",
+                "boxShadow"       : "none",
+                "-moz-box-shadow" : "none",
+                "isIE:overflow"   : "auto"
+            }
+        }
+    },
+
+    "HtmlTextInput": {
+        "properties": {
+            "$inherit": [ "HtmlElement.properties", "TextField.properties" ],
+            "style"   : [ "outline", "none"]
+        }
+    },
+
+    "HtmlTextField": {
+        "properties": {
+            "$inherit": [ "HtmlTextInput.properties" ]
+        }
+    },
+
+    "HtmlTextArea": {
+        "properties": {
+            "$inherit": [ "HtmlTextInput.properties" ],
+            "style"   : [ "resize", "none" ],
+            "padding" : 16
         }
     }
 }

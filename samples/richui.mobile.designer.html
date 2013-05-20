@@ -12,14 +12,7 @@
 		    zebra.ready(function() {
 		    	eval(zebra.Import("ui", "layout", "ui.designer"));
 		    	
-		    	zebra.out = new zebra.RemoteOutput("http://zebkit.org/cgi-bin/rlog.rb");
-		    	var IOSButtonView = zebra.Class(View, [
-		    		function paint(g) {
-		    			
-		    		}
-		    	]);
-
-			    var z  = new zebra.ui.zCanvas("test");
+		        var z  = new zebra.ui.zCanvas("test");
 			    z.fullScreen();
 
 			    var root = z.root.properties({

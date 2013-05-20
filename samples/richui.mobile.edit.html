@@ -7,21 +7,13 @@
 
 
 		<script src='../lib/zebra/zebra.js' type='text/javascript'></script>
-		<script src='../lib/zebra/debug.js' type='text/javascript'></script>
 	
-		<script src='zebra.js' type='text/javascript'></script>
-		<script src='debug.js' type='text/javascript'></script>
-
 		<script type='text/javascript'>
 		    zebra.ready(function() {
 		    	eval(zebra.Import("ui", "layout"));
 
-//		    	zebra.out = new zebra.RemoteOutput("http://zebkit.org/cgi-bin/rlog.rb");
-		    	
-
 		    	var z = new zebra.ui.zCanvas();
 		    	z.fullScreen();
-
 
 		    	z.root.properties({
 		    		layout: new zebra.layout.BorderLayout(8,8),

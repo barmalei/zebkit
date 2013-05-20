@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src='../lib/zebra/zebra.min.js' type='text/javascript'></script>
+
+
+        <script>
+            var myimg = null;
+            zebra.ready(function() {
+                myimg = zebra.ui.loadImage("http://fc03.deviantart.net/fs43/i/2009/116/c/b/Earth_2049___The_End_by_taenaron.jpg");
+            });
+        </script>
+
+
+        <script type='text/javascript'>
+            zebra.ready(function() {
+                eval(zebra.Import("ui", "layout"));
+
+                var root = (new zebra.ui.zCanvas(400, 400)).root.properties({
+                    layout: new BorderLayout(),
+                    padding:6,
+                    border: borders.plain,
+                    kids  : {
+                        CENTER: new Button("Upload")
+                    }
+                });
+
+                root.find("//Button")._.add(function() {
+                    var e = document.getElementById("zebra.files");
+                    e.onclick = function(e) {
+                        zebra.print("???? " + e);
+                        //e.preventDefault();
+                    };
+
+                    findCanvas(root).canvas.blur();
+                    zebra.util.Timer.run() 
+                    e.click();
+                    zebra.print("!!!!!");
+                });
+            });
+        </script>
+
+
+    </head>
+
+    <body>
+        <input type="file" id="zebra.files" multiple  style="display:none" onchange="zebra.handleFiles(this.files)">        
+
+    </body>
+</html>

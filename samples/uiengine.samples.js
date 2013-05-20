@@ -124,7 +124,7 @@ pkg.EditablePan = Class(Panel, KeyListener, FocusListener, [
 	}
 ]);
 
-pkg.MouseEventHandlerPan = Class(Panel, MouseMotionListener, MouseListener, [
+pkg.MouseEventHandlerPan = Class(Panel, MouseListener, [
 	function() {
 		this.gx = this.gy = 0;
 		this.font = new Font("Helvetica", 1, 12);

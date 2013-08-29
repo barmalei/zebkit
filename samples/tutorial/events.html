@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+	<head>
+
+        <script src='../../lib/zebra/zebra.min.js' type='text/javascript'></script>
+        
+		<script type='text/javascript'>
+zebra.ready(function() {
+
+eval(zebra.Import("ui", "layout"));
+
+if (document.getElementById("doc.event.kids")!=null) {
+var MyComponent = zebra.Class(Panel, 
+                              ChildrenListener,
+[
+    function childInputEvent(e) {
+        if (e.ID == MouseEvent.ENTERED) {
+            e.source.setBackground("orange");
+        }   
+        else
+        if (e.ID == MouseEvent.EXITED) {
+            e.source.setBackground(null);
+        }   
+    }
+]);
+
+var canvas = new zCanvas("doc.event.kids");
+canvas.root.setLayout(new BorderLayout());
+canvas.root.setBorder(new Border("gray"));
+var kid1 = new Panel({ border: new Border("red"), preferredSize:[100, 70]});
+var kid2 = new Panel({ border: new Border("blue"), preferredSize:[100, 70]});
+var kid3 = new Panel({ border: new Border("green"), preferredSize:[100, 70]});
+
+var myComp = new MyComponent();
+myComp.setLayout(new FlowLayout(CENTER, CENTER, HORIZONTAL, 8));
+
+canvas.root.add(CENTER, myComp);
+myComp.add(kid1);
+myComp.add(kid2);
+myComp.add(kid3);
+
+}
+
+
+if (document.getElementById("doc.event.mpressed")!=null) {
+var p = new zebra.ui.BoldLabel("Press ME!", zebra.ui.MouseListener,[
+    // implement mouse pressed event handler
+    function mousePressed(e) {
+        this.setBorder(new Sunken());
+    },
+
+    // implement mouse released event handler
+    function mouseReleased(e) { 
+        this.setBorder(new Raised()); 
+    }
+]);
+
+p.setPadding(8);
+p.setBorder(new Raised());
+
+var canvas = new zCanvas("doc.event.mpressed");
+canvas.root.setPadding(8);
+canvas.root.setLayout(new FlowLayout(CENTER, CENTER, VERTICAL, 8));
+canvas.root.setBackground("lightGray");
+
+
+canvas.root.add(CENTER, p);
+
+}
+
+if (document.getElementById("doc.event.composite")!=null) {
+
+var p = new Panel(MouseListener, [
+    function mouseEntered(e) {
+       this.setBackground("orange");
+    },
+
+    function mouseExited(e) {
+       this.setBackground(null);
+    }
+]); 
+
+var composite = new Panel(MouseListener, Composite, [
+    function mouseEntered(e) {
+       this.setBackground("orange");
+    },
+
+    function mouseExited(e) {
+       this.setBackground(null);
+    }
+]); 
+
+var c = new zCanvas("doc.event.composite");
+c.root.setBorder(new Border("black"));
+p.setBounds(20,20, 250, 110);
+p.setBorder(new Border("red", 2));
+var l = new Label(new zebra.data.Text("Usual, not event transparent\nchildren component"));
+l.setPadding(12);
+l.setBorder(new Border("red")); 
+l.setLocation(20,20);
+l.toPreferredSize();
+p.add(l);
+c.root.add(p);
+
+composite.setBounds(280,20, 190, 110);
+composite.setBorder(new Border("orange", 2));
+var l = new Label(new zebra.data.Text("Event transparent\nchildren component"));
+l.setPadding(12);
+l.setBorder(new Border("red")); 
+l.setLocation(20,20);
+l.toPreferredSize();
+composite.add(l);
+c.root.add(composite);
+
+}
+
+if (document.getElementById("doc.event.composite2")!=null) {
+
+var composite = new Panel(MouseListener, Composite, [
+    function mouseEntered(e) { this.setBackground("orange"); },
+    function mouseExited(e)  { this.setBackground(null); },
+
+    function catchInput(c) {
+        return this.indexOf(c) === 0;
+    }
+]); 
+
+var c = new zCanvas("doc.event.composite2");
+c.root.setBorder(new Border("black"));
+c.root.setLayout(new BorderLayout());
+composite.setLayout(new FlowLayout(CENTER, CENTER, VERTICAL, 16));
+c.root.add(CENTER, composite);
+
+var p1 = new Label("Event transparent children component");
+p1.setBorder(new Border("red", 2));
+p1.setPadding(12);
+var p2 = new Label("Normal, not event transparent children component");
+p2.setPadding(12);
+p2.setBorder(new Border("gray", 2));
+
+composite.add(p1);
+composite.add(p2);
+
+
+}
+        
+        });
+		</script>
+	</head>
+
+	<body bgcolor="#EEEEEE" align="center" style="padding:15px;">
+        <canvas width="350" height="200" id="doc.event.kids"></canvas>
+        <canvas width="150" height="250" id="doc.event.mpressed"></canvas>
+        <canvas width="500" height="150" id="doc.event.composite"></canvas>
+	    <canvas width="500" height="150" id="doc.event.composite2"></canvas>
+	</body>
+</html>

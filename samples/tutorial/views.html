@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+	<head>
+
+        <script src='../../lib/zebra/zebra.min.js' type='text/javascript'></script>
+        
+		<script type='text/javascript'>
+			var glebImg = null, patternImg;
+			zebra.ready(function() {
+				glebImg    = zebra.ui.loadImage("../demo/gleb.png");
+				patternImg = zebra.ui.loadImage("../demo/bg4.png");
+			});
+
+		    zebra.ready(function() {
+		    	eval(zebra.Import("ui", "layout"));
+ 
+ 				if (document.getElementById("doc.views.image") != null) {
+		    		var c = new zCanvas("doc.views.image");
+		    		c.root.setBackground(new Picture(glebImg));
+		    	}
+
+		    	if (document.getElementById("doc.views.gradient1") != null) {
+		    		var c = new zCanvas("doc.views.gradient1");
+		    		c.root.setBackground(new Gradient("orange", "yellow"));
+		    	}
+
+		    	if (document.getElementById("doc.views.gradient2") != null) {
+			    	var c = new zCanvas("doc.views.gradient2");
+			    	c.root.setBackground(new Gradient("orange", "yellow", zebra.layout.HORIZONTAL));
+			    }
+
+			    if (document.getElementById("doc.views.radial") != null) {
+			    	var c = new zCanvas("doc.views.radial");
+			    	c.root.setBackground(new Radial("yellow", "red"));
+			    }
+
+			    if (document.getElementById("doc.views.borders1") != null) {
+				    var c = new zCanvas("doc.views.borders1");
+				    c.root.setLayout(new BorderLayout());
+				   	var p = new Panel({
+				   		layout: new BorderLayout(),
+				   		padding: 30,
+				   		border: new Border("orange", 2),
+				   		kids: {
+				   			CENTER: new Panel({
+				   				layout: new BorderLayout(),
+				   				padding: 30,
+				   				border: new Border("red", 4, 8),
+				   			})
+				   		}
+				   	});
+				    c.root.add(CENTER, p);
+				}
+			    
+			    var p = new Panel({
+			    	padding: 15,
+			    	layout : new BorderLayout(),
+			    	border : new Sunken(),
+			    	kids   : {
+			    		CENTER: new Panel({
+			    			padding: 15,
+			    			layout : new BorderLayout(),
+			    			border : new Raised(),
+			    			kids   : {
+			    				CENTER: new Panel({
+			    					padding: 15,
+			    					layout : new BorderLayout(),
+			    					border : new Etched(),
+			    					kids   : {
+			    						CENTER: new Panel({
+			    							padding: 15,
+			    							layout : new BorderLayout(),
+			    							border : new Dotted(),
+			    						})
+			    					}
+			    				})
+			    			}
+			    		})
+			    	}
+			    });
+
+
+			    if (document.getElementById("doc.views.borders2") != null) {
+			    	var c = new zCanvas("doc.views.borders2"); 
+			    	c.root.setLayout(new BorderLayout());
+					c.root.setBackground("lightGray");
+			    	c.root.add(CENTER, p);
+				}
+
+
+			    var p = new Panel({
+			    	padding: 10,
+			    	layout : new BorderLayout(),
+			    	border : new Sunken("orange", "red", "#DD1133"),
+			    	kids   : {
+			    		CENTER: new Panel({
+			    			padding: 20,
+			    			layout : new BorderLayout(),
+			    			border : new Raised("orange", "red"),
+			    			kids   : {
+			    				CENTER: new Panel({
+			    					padding: 20,
+			    					layout : new BorderLayout(),
+			    					border : new Etched("orange", "red"),
+			    					kids   : {
+			    						CENTER: new Panel({
+			    							padding: 20,
+			    							layout : new BorderLayout(),
+			    							border : new Dotted(),
+			    						})
+			    					}
+			    				})
+			    			}
+			    		})
+			    	}
+			    });
+
+			    if (document.getElementById("doc.views.borders3") != null) {
+			    	var c = new zCanvas("doc.views.borders3");
+			    	c.root.setLayout(new BorderLayout());
+			    	c.root.add(CENTER, p);
+				}
+
+			    if (document.getElementById("doc.views.pattern") != null) {
+			    	var c = new zCanvas("doc.views.pattern");
+			    	c.root.setBackground(new Pattern(patternImg));
+				}
+
+			    if (document.getElementById("doc.views.composite") != null) {
+	var Moustache = new zebra.Class(View, [
+		function paint(g,x,y,w,h,c) {
+			g.setColor("rgba(0,0,0,0.3)");
+			g.drawLine(w/2-15,      h - h/4,      w/2 + 25, h - h/4 + 5, 2);
+			g.drawLine(w/2 - 10, h - h/4 + 10, w/2 + 23, h - h/4 + 5, 3);
+			g.drawLine(w/2,      h - h/4 + 20, w/2 + 25, h - h/4 + 5, 2);
+
+    		g.drawLine(w/2 + 33, h - h/4 + 5, w/2 + 65, h - h/4 - 5, 2);
+    		g.drawLine(w/2 + 33, h - h/4 + 5, w/2 + 70, h - h/4 + 5, 2);
+    		g.drawLine(w/2 + 33, h - h/4 + 5, w/2 + 59, h - h/4 + 15, 3);
+		}
+	]);
+
+			    	var c = new zCanvas("doc.views.composite");
+			   		var comp = new CompositeView(new Picture(glebImg), new Moustache());
+			    	c.root.setBackground(comp);
+				}
+
+				if (document.getElementById("doc.views.text") != null) {
+			    	var c = new zCanvas("doc.views.text");
+			    	c.root.setBackground(new BoldTextRender(new zebra.data.Text("Text Render paints\nmulti-lines text.\nIt computes all\nnecessary font\nmetrics automatically.")));
+				}
+			});
+		</script>
+	</head>
+
+	<body bgcolor="#EEEEEE" align="center" style="padding:15px;">
+	    <canvas width="150" height="180" id="doc.views.image"></canvas>
+	    <canvas width="150" height="150" id="doc.views.gradient1"></canvas>
+	    <canvas width="150" height="150" id="doc.views.gradient2"></canvas>
+	    <canvas width="150" height="150" id="doc.views.radial"></canvas>
+	    <canvas width="150" height="150" id="doc.views.borders1"></canvas>
+	    <canvas width="150" height="150" id="doc.views.borders2"></canvas>
+	    <canvas width="150" height="150" id="doc.views.borders3"></canvas>
+	    <canvas width="150" height="150" id="doc.views.pattern"></canvas>
+	    <canvas width="150" height="180" id="doc.views.composite"></canvas>
+	    <canvas width="150" height="150" id="doc.views.text"></canvas>
+	</body>
+</html>

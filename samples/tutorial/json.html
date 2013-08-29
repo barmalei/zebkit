@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+	<head>
+ 
+<script src='../../lib/zebra/zebra.min.js' type='text/javascript'></script>
+
+<script type='text/javascript'>
+zebra.ready(function() {
+if (document.getElementById("doc.json1") != null) {
+
+var r = new zebra.ui.zCanvas("doc.json1").root;
+r.setLayout(new zebra.layout.BorderLayout(4,4));
+r.setPadding(4);
+r.setBorder("plain");
+
+var l = new zebra.ui.BoldLabel("Simple application");
+l.setPadding(4);
+l.setBackground("lightGray");
+r.add(zebra.layout.TOP, l);
+r.add(zebra.layout.CENTER, new zebra.ui.TextArea(""));
+r.add(zebra.layout.BOTTOM, new zebra.ui.Button("Clear"));
+
+}
+
+if (document.getElementById("doc.json2") != null) {
+new zebra.ui.zCanvas("doc.json2").root.properties({
+   layout  : new zebra.layout.BorderLayout(4,4),
+   padding : 4,
+   border  : "plain",
+   kids: {
+      TOP: new zebra.ui.BoldLabel("Simple application").properties({
+          padding: 4,
+          background: "lightGray"
+      }),
+      CENTER: new zebra.ui.TextArea(),
+      BOTTOM: new zebra.ui.Button("Clear")
+   }
+});
+}
+
+if (document.getElementById("doc.json3") != null) {
+new zebra.ui.zCanvas("doc.json3").root.load("2.json");
+}
+
+if (document.getElementById("doc.json4") != null) {
+
+    var r = new zebra.ui.zCanvas("doc.json4").root;
+    r.setLayout(new zebra.layout.GridLayout(2,2));
+    var url = "1.json";  
+    r.load(url);
+    r.load(url);
+    r.load(url);
+    r.load(url);
+}
+   
+});
+
+</script>
+
+	</head>
+
+	<body bgcolor="#EEEEEE" align="center" style="padding:15px;">
+
+        <canvas width="200" height="200" id="doc.json1"></canvas>
+        <canvas width="200" height="200" id="doc.json2"></canvas>
+        <canvas width="200" height="200" id="doc.json3"></canvas>
+        <canvas width="300" height="300" id="doc.json4"></canvas>
+
+   </body>
+</html>

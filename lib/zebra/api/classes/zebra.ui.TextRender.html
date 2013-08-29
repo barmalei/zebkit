@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>zebra.ui.TextRender - Zebra API</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.8.0pr2/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <script src="http://yui.yahooapis.com/combo?3.8.0pr2/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            <h1><a href="../index.html"><img src="../assets/css/logo.png">Zebra API: zebra.ui.TextRender</a></h1>
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 07/2013</em>
+        </div>
+    </div>
+    <div class="yui3-g">
+
+        <div id="sidebar" class="yui3-u">
+            <div id="modules" class="sidebox">
+    <div class="hd">
+        <h2 class="no-toc">Modules</h2>
+    </div>
+    <div class="bd">
+        <ul>
+            
+                <li><a href="../modules/layout.html">layout</a>
+                
+                </li>
+            
+                <li><a href="../modules/test.html">test</a>
+                
+                </li>
+            
+                <li><a href="../modules/ui.html">ui</a>
+                
+                </li>
+            
+        </ul>
+    </div>
+</div>
+
+<div id="classes" class="sidebox">
+    <div class="hd">
+        <h2 class="no-toc">Classes</h2>
+    </div>
+    <div class="bd">
+        <ul>
+            
+                <li><a href="../classes/BaseLayer.html">BaseLayer</a></li>
+            
+                <li><a href="../classes/ImagePan.html">ImagePan</a></li>
+            
+                <li><a href="../classes/Manager.html">Manager</a></li>
+            
+                <li><a href="../classes/PaintManager.html">PaintManager</a></li>
+            
+                <li><a href="../classes/Panel.html">Panel</a></li>
+            
+                <li><a href="../classes/RootLayer.html">RootLayer</a></li>
+            
+                <li><a href="../classes/toString.html">toString</a></li>
+            
+                <li><a href="../classes/ViewSet.html">ViewSet</a></li>
+            
+                <li><a href="../classes/zCanvas.html">zCanvas</a></li>
+            
+                <li><a href="../classes/zebra.layout.BorderLayout.html">zebra.layout.BorderLayout</a></li>
+            
+                <li><a href="../classes/zebra.layout.Layoutable.html">zebra.layout.Layoutable</a></li>
+            
+                <li><a href="../classes/zebra.layout.StackLayout.html">zebra.layout.StackLayout</a></li>
+            
+                <li><a href="../classes/zebra.ui.Border.html">zebra.ui.Border</a></li>
+            
+                <li><a href="../classes/zebra.ui.BorderPan.html">zebra.ui.BorderPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.CompositeView.html">zebra.ui.CompositeView</a></li>
+            
+                <li><a href="../classes/zebra.ui.CompRender.html">zebra.ui.CompRender</a></li>
+            
+                <li><a href="../classes/zebra.ui.Dotted.html">zebra.ui.Dotted</a></li>
+            
+                <li><a href="../classes/zebra.ui.Etched.html">zebra.ui.Etched</a></li>
+            
+                <li><a href="../classes/zebra.ui.Gradient.html">zebra.ui.Gradient</a></li>
+            
+                <li><a href="../classes/zebra.ui.Manager.html">zebra.ui.Manager</a></li>
+            
+                <li><a href="../classes/zebra.ui.MouseWheelSupport.html">zebra.ui.MouseWheelSupport</a></li>
+            
+                <li><a href="../classes/zebra.ui.Pattern.html">zebra.ui.Pattern</a></li>
+            
+                <li><a href="../classes/zebra.ui.Picture.html">zebra.ui.Picture</a></li>
+            
+                <li><a href="../classes/zebra.ui.Radial.html">zebra.ui.Radial</a></li>
+            
+                <li><a href="../classes/zebra.ui.Raised.html">zebra.ui.Raised</a></li>
+            
+                <li><a href="../classes/zebra.ui.Render.html">zebra.ui.Render</a></li>
+            
+                <li><a href="../classes/zebra.ui.RoundBorder.html">zebra.ui.RoundBorder</a></li>
+            
+                <li><a href="../classes/zebra.ui.ScrollPan.html">zebra.ui.ScrollPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.SplitPan.html">zebra.ui.SplitPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.Sunken.html">zebra.ui.Sunken</a></li>
+            
+                <li><a href="../classes/zebra.ui.Tabs.html">zebra.ui.Tabs</a></li>
+            
+                <li><a href="../classes/zebra.ui.TextRender.html">zebra.ui.TextRender</a></li>
+            
+                <li><a href="../classes/zebra.ui.View.html">zebra.ui.View</a></li>
+            
+                <li><a href="../classes/zebra.ui.ViewSet.html">zebra.ui.ViewSet</a></li>
+            
+        </ul>
+    </div>
+</div>
+
+
+<div id="methods-on-page" class="sidebox on-page">
+    <div class="hd">
+        <h2 class="no-toc">Methods On Page</h2>
+    </div>
+    <div class="bd">
+        <ul>
+            
+                <li><a href="#methods_getLine">getLine</a></li>
+            
+                <li><a href="#methods_getLineHeight">getLineHeight</a></li>
+            
+                <li><a href="#methods_getLineIndent">getLineIndent</a></li>
+            
+                <li><a href="#methods_getLines">getLines</a></li>
+            
+                <li><a href="#methods_getPreferredSize">getPreferredSize</a></li>
+            
+                <li><a href="#methods_getValue">getValue</a></li>
+            
+                <li><a href="#methods_lineWidth">lineWidth</a></li>
+            
+                <li><a href="#methods_ownerChanged">ownerChanged</a></li>
+            
+                <li><a href="#methods_paint">paint</a></li>
+            
+                <li><a href="#methods_paintLine">paintLine</a></li>
+            
+                <li><a href="#methods_recalc">recalc</a></li>
+            
+                <li><a href="#methods_setColor">setColor</a></li>
+            
+                <li><a href="#methods_setFont">setFont</a></li>
+            
+                <li><a href="#methods_setTarget">setTarget</a></li>
+            
+                <li><a href="#methods_setValue">setValue</a></li>
+            
+                <li><a href="#methods_textUpdated">textUpdated</a></li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+<div id="fileTree" class="sidebox">
+    <div class="hd">
+        <h2 class="no-toc">Files</h2>
+    </div>
+    <div class="bd">
+        <ul><li>canvas.js/<ul></ul></li><li>layout.js/<ul></ul></li><li>ui.js/<ul></ul></li></ul>
+    </div>
+</div>
+
+
+
+        </div>
+
+        <div id="main" class="yui3-u">
+            <div class="content"><h4>Class zebra.ui.TextRender</h4>
+
+
+
+    Extends: <a href="../classes/zebra.ui.Render.html" class="crosslink">zebra.ui.Render</a><br>
+
+<span class="foundat">Class defined in: <a href="../"><code>ui.js:151</code></a></span>
+<div class="intro"><p>Text render that expects and draws a text model or a string as its target</p></div>
+
+
+
+<div id="classdocs">
+    <ul>
+        
+        <li><a href="#methods">Methods</a></li>
+        
+        
+        
+        <li><a href="#attrs">Attributes</a></li>
+        
+        
+    </ul>
+    <div>
+        
+            <div id="methods">
+            
+                <a name="methods_getLine"></a>
+<div class="method item">
+    String <strong class="name"><code>getLine</code></strong>( <code>r </code> ) 
+    <br>
+    <span class="foundat">
+    
+        
+    
+        <a href="../"><code>ui.js:214</code></a>
+    </span><br>
+    <p>Get text line by the given line number</p>
+    
+    <strong>Parameters:</strong>
+    <ul class="params">
+    
+        <li>
+        
+            <code>r</code> <strong>&lt;Integer&gt;</strong>
+        
+        
+        <p>a line number</p>
+            
+        </li>
+    
+    </ul>
+    
+    
+    
+    <br><div class="returns"><strong>Returns:</strong> &lt;String&gt; a text line</div>
+    
+    
+    
+</div>
+
+            
+                <a name="methods_getLineHeight"></a>
+<div class="method item">
+    Integer <strong class="name"><code>getLineHeight</code></strong>( <code>l </code> ) 
+    <br>
+    <span class="foundat">
+    
+        
+    
+        <a href="../"><code>ui.js:184</code></a>
+    </span><br>
+    <p>Get the given line height in pixels</p>
+    
+    <strong>Parameters:</strong>
+    <ul class="params">
+    
+        <li>
+        
+            <code>l</code> <strong>&lt;Integer&gt;</strong>
+        
+        
+        <p>a line number</p>
+            
+        </li>
+    
+    </ul>
+    
+    
+    
+    <br><div class="returns"><strong>Returns:</strong> &lt;Integer&gt; a line height in pixels</div>
+    
+    
+    
+</div>
+
+            
+                <a name="methods_getLineIndent"></a>
+<div class="method item">
+    Integer <strong class="name"><code>getLineIndent</code></strong>( <code>  </code> ) 
+    <br>
+    <span class="foundat">
+    
+        
+    
+        <a href="../"><code>ui.js:167</code></a>
+    </span><br>
+    <p>Get a line indent</p>
+    
+    
+    
+    <br><div class="returns"><strong>Returns:</strong> &lt;Integer&gt; line indent</div>
+    
+    
+    
+</div>
+
+            
+                <a name="methods_getLines"></a>
+<div class="method item">
+    Integer <strong class="name"><code>getLines</code></strong>( <code>  </code> ) 
+    <br>
+    <span class="foundat">
+    
+        
+    
+        <a href="../"><code>ui.js:175</code></a>
+    </span><br>
+    <p>Get number of lines of target text</p>
+    
+    
+    
+    <br><div class="returns"><strong>Returns:</strong> &lt;Integer&gt; a number of line in the target text</div>
+    
+    
+    
+</div>
+
+            
+                <a name="methods_getPreferredSize"></a>
+<div class="method item">
+    Object <strong class="name"><code>getPreferredSize</code></strong>( <code>  </code> ) 
+    <br>
+    <span class="foundat">
+    
+         Defined in <a href="zebra.ui.View.html#method_getPreferredSize">zebra.ui.View</a>: 
+    
+        <a href="../"><code>canvas.js:58</code></a>
+    </span><br>
+    <p>Return preferred size the view desires to have</p>
+    
+    
+    
+    <br><div class="returns"><strong>Returns:</strong> &lt;Object&gt; </div>
+    
+    
+    
+</div>
+
+            
+                <a name="methods_getValue"></a>
+<div class="method item">
+    String <strong class="name"><code>getValue</code></strong>( <code>  </code> ) 
+    <br>
+    <span class="foundat">
+    
+        
+    
+        <a href="../"><code>ui.js:233</code></a>
+    </span><br>
+    <p>Get the rendered target text as string object</p>
+    
+    
+    
+    <br><div class="returns"><strong>Returns:</strong> &lt;String&gt; rendered text</div>
+    
+    
+    
+</div>
+
+            
+                <a name="methods_lineWidth"></a>
+<div class="method item">
+    Inetger <strong class="name"><code>lineWidth</code></strong>( <code>line </code> ) 
+    <br>
+    <span class="foundat">
+    
+        
+    
+        <a href="../"><code>ui.js:243</code></a>
+    </span><br>
+    <p>Get the given text line width in pixels</p>
+    
+    <strong>Parameters:</strong>
+    <ul class="params">
+    
+        <li>
+        
+            <code>line</code> <strong>&lt;Integer&gt;</strong>
+        
+        
+        <p>a text line number</p>
+            
+        </li>
+    
+    </ul>
+    
+    
+    
+    <br><div class="returns"><strong>Returns:</strong> &lt;Inetger&gt; a text line width in pixels</div>
+    
+    
+    
+</div>
+
+            
+                <a name="methods_ownerChanged"></a>
+<div class="method item">
+     <strong class="name"><code>ownerChanged</code></strong>( <code>v </code> ) 
+    <br>
+    <span class="foundat">
+    
+        
+    
+        <a href="../"><code>ui.js:194</code></a>
+    </span><br>
+    <p>Called whenever an owner UI component has been changed</p>
+    
+    <strong>Parameters:</strong>
+    <ul class="params">
+    
+        <li>
+        
+            <code>v</code> <strong>&lt;zebra.ui.Panel&gt;</strong>
+        
+        
+        <p>a new owner UI component</p>
+            
+        </li>
+    
+    </ul>
+    
+    
+    
+</div>
+
+            
+                <a name="methods_paint"></a>
+<div class="method item">
+     <strong class="name"><code>paint</code></strong>( <code>g, x, y, w, h, c </code> ) 
+    <br>
+    <span class="foundat">
+    
+         Defined in <a href="zebra.ui.View.html#method_paint">zebra.ui.View</a>: 
+    
+        <a href="../"><code>canvas.js:65</code></a>
+    </span><br>
+    <p>The method is called to render the decorative element on the given surface of the 
+specified UI component</p>
+    
+    <strong>Parameters:</strong>
+    <ul class="params">
+    
+        <li>
+        
+            <code>g</code> <strong>&lt;Canvas 2D context&gt;</strong>
+        
+        
+        <p>graphical context</p>
+            
+        </li>
+    
+        <li>
+        
+            <code>x</code> <strong>&lt;Integer&gt;</strong>
+        
+        
+        <p>x coordinate</p>
+            
+        </li>
+    
+        <li>
+        
+            <code>y</code> <strong>&lt;Integer&gt;</strong>
+        
+        
+        <p>y coordinate</p>
+            
+        </li>
+    
+        <li>
+        
+            <code>w</code> <strong>&lt;Integer&gt;</strong>
+        
+        
+        <p>required width</p>
+            
+        </li>
+    
+        <li>
+        
+            <code>h</code> <strong>&lt;Integer&gt;</strong>
+        
+        
+        <p>required height</p>
+            
+        </li>
+    
+        <li>
+        
+            <code>c</code> <strong>&lt;zebra.ui.Panel&gt;</strong>
+        
+        
+        <p>an UI component on which the view element has to be drawn</p>
+            
+        </li>
+    
+    </ul>
+    
+    
+    
+</div>
+
+            
+                <a name="methods_paintLine"></a>
+<div class="method item">
+     <strong class="name"><code>paintLine</code></strong>( <code>g, x, y, line, d </code> ) 
+    <br>
+    <span class="foundat">
+    
+        
+    
+        <a href="../"><code>ui.js:201</code></a>
+    </span><br>
+    <p>Paint the specified text line</p>
+    
+    <strong>Parameters:</strong>
+    <ul class="params">
+    
+        <li>
+        
+            <code>g</code> <strong>&lt;2DContext&gt;</strong>
+        
+        
+        <p>graphical 2D context</p>
+            
+        </li>
+    
+        <li>
+        
+            <code>x</code> <strong>&lt;Integer&gt;</strong>
+        
+        
+        <p>x coordinate</p>
+            
+        </li>
+    
+        <li>
+        
+            <code>y</code> <strong>&lt;Integer&gt;</strong>
+        
+        
+        <p>y coordinate</p>
+            
+        </li>
+    
+        <li>
+        
+            <code>line</code> <strong>&lt;Integer&gt;</strong>
+        
+        
+        <p>a line number</p>
+            
+        </li>
+    
+        <li>
+        
+            <code>d</code> <strong>&lt;zebra.ui.Panel&gt;</strong>
+        
+        
+        <p>an UI component on that the line has to be rendered</p>
+            
+        </li>
+    
+    </ul>
+    
+    
+    
+</div>
+
+            
+                <a name="methods_recalc"></a>
+<div class="method item">
+     <strong class="name"><code>recalc</code></strong>( <code>  </code> ) 
+    <br>
+    <span class="foundat">
+    
+        
+    
+        <a href="../"><code>ui.js:254</code></a>
+    </span><br>
+    <p>Called every time the target text metrics has to be recalculated</p>
+    
+    
+    
+</div>
+
+            
+                <a name="methods_setColor"></a>
+<div class="method item">
+     <strong class="name"><code>setColor</code></strong>( <code>c </code> ) 
+    <br>
+    <span class="foundat">
+    
+        
+    
+        <a href="../"><code>ui.js:428</code></a>
+    </span><br>
+    <p>Set rendered text color</p>
+    
+    <strong>Parameters:</strong>
+    <ul class="params">
+    
+        <li>
+        
+            <code>c</code> <strong>&lt;String&gt;</strong>
+        
+        
+        <p>a text color</p>
+            
+        </li>
+    
+    </ul>
+    
+    
+    
+</div>
+
+            
+                <a name="methods_setFont"></a>
+<div class="method item">
+     <strong class="name"><code>setFont</code></strong>( <code>f </code> ) 
+    <br>
+    <span class="foundat">
+    
+        
+    
+        <a href="../"><code>ui.js:414</code></a>
+    </span><br>
+    <p>Set the rendered text font.</p>
+    
+    <strong>Parameters:</strong>
+    <ul class="params">
+    
+        <li>
+        
+            <code>f</code> <strong>&lt;String | <a href="../classes/zebra.ui.Font.html" class="crosslink">zebra.ui.Font</a>&gt;</strong>
+        
+        
+        <p>a font as CSS string or zebra.ui.Font class instance</p>
+            
+        </li>
+    
+    </ul>
+    
+    
+    
+</div>
+
+            
+                <a name="methods_setTarget"></a>
+<div class="method item">
+     <strong class="name"><code>setTarget</code></strong>( <code>o </code> ) 
+    <br>
+    <span class="foundat">
+    
+         Defined in <a href="zebra.ui.Render.html#method_setTarget">zebra.ui.Render</a>: 
+    
+        <a href="../"><code>canvas.js:100</code></a>
+    </span><br>
+    <p>Set the given target object. The method triggers "targetWasChanged(oldTarget, newTarget)" execution if the method is declared. 
+Declare targetWasChanged method to listen target object updating.</p>
+    
+    <strong>Parameters:</strong>
+    <ul class="params">
+    
+        <li>
+        
+            <code>o</code> <strong>&lt;Object&gt;</strong>
+        
+        
+        <p>a target object to be visualized</p>
+            
+        </li>
+    
+    </ul>
+    
+    
+    
+</div>
+
+            
+                <a name="methods_setValue"></a>
+<div class="method item">
+     <strong class="name"><code>setValue</code></strong>( <code>s </code> ) 
+    <br>
+    <span class="foundat">
+    
+        
+    
+        <a href="../"><code>ui.js:405</code></a>
+    </span><br>
+    <p>Set the text model content</p>
+    
+    <strong>Parameters:</strong>
+    <ul class="params">
+    
+        <li>
+        
+            <code>s</code> <strong>&lt;String&gt;</strong>
+        
+        
+        <p>a text as string object</p>
+            
+        </li>
+    
+    </ul>
+    
+    
+    
+</div>
+
+            
+                <a name="methods_textUpdated"></a>
+<div class="method item">
+     <strong class="name"><code>textUpdated</code></strong>( <code>src, b, off, size, ful, updatedLines </code> ) 
+    <br>
+    <span class="foundat">
+    
+        
+    
+        <a href="../"><code>ui.js:279</code></a>
+    </span><br>
+    <p>Text model update listener handler</p>
+    
+    <strong>Parameters:</strong>
+    <ul class="params">
+    
+        <li>
+        
+            <code>src</code> <strong>&lt;zebra.data.TextModel&gt;</strong>
+        
+        
+        <p>text model object</p>
+            
+        </li>
+    
+        <li>
+        
+            <code>b</code> <strong>&lt;Boolean&gt;</strong>
+        
+        
+         
+            
+        </li>
+    
+        <li>
+        
+            <code>off</code> <strong>&lt;Integer&gt;</strong>
+        
+        
+        <p>an offset starting from that the text has been updated</p>
+            
+        </li>
+    
+        <li>
+        
+            <code>size</code> <strong>&lt;Integer&gt;</strong>
+        
+        
+        <p>a size (in character) of text part that has been updated</p>
+            
+        </li>
+    
+        <li>
+        
+            <code>ful</code> <strong>&lt;Integer&gt;</strong>
+        
+        
+        <p>a first affected by the given update line</p>
+            
+        </li>
+    
+        <li>
+        
+            <code>updatedLines</code> <strong>&lt;Integer&gt;</strong>
+        
+        
+        <p>a number of text lines that have been affected by text updating</p>
+            
+        </li>
+    
+    </ul>
+    
+    
+    
+</div>
+
+            
+            </div>
+        
+        
+        
+            <div id="attrs">
+            
+                <a name="attrs_owner"></a>
+<div class="attrs item">
+    <code>owner</code> <strong>&lt;zebra.ui.Panel&gt;</strong>
+    
+    
+    <br>
+    <span class="foundat"><a href="../"><code>ui.js:158</code></a></span>
+    <p>UI component that holds the text render</p>
+    
+</div>
+
+            
+                <a name="attrs_target"></a>
+<div class="attrs item">
+    <code>target</code> <strong>&lt;Object&gt;</strong>
+    <em><code>&#x2F;* Extended from zebra.ui.Render *&#x2F;</code></em>
+    
+    <br>
+    <span class="foundat"><a href="../"><code>canvas.js:89</code></a></span>
+    <p>Target component to be visualized</p>
+    
+</div>
+
+            
+            </div>
+        
+        
+    </div>
+</div>
+</div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/js/tabs.js"></script>
+</body>
+</html>

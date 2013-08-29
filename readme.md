@@ -29,7 +29,7 @@ on HTML Canvas.
 ### Features
 
    *  Zebra easy OOP concept JavaScript: classes, interfaces, overriding, overloading, 
-   	  constructors, packaging, inner class, access to super class methods, mixing, etc
+   	  constructors, packaging, anonymous class, access to super class methods, mixing, etc
    *  **Zebra UI Engine that can be used as powerful basis for:**
       * Pixel by pixel UI components rendering controlling 
       * Simple and flexible events (keyboard, mouse, etc) manipulation, advanced event technique to develop composite UI components

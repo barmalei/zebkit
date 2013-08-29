@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html>
+	<head>
+
+<script src='../../lib/zebra/zebra.min.js' type='text/javascript'></script>
+        
+<script type='text/javascript'>
+      zebra.ready(function() {
+
+      if (document.getElementById("doc.layout.diag") != null) {
+          var DiagLayout = zebra.Class(zebra.layout.Layout,[
+              function calcPreferredSize(target) {
+                 var psW = 0, psH = 0;
+                 for(var i=0; i < target.kids.length; i++) {
+                     var kid = target.kids[i];
+                     if (kid.isVisible) {
+                         var ps = kid.getPreferredSize();
+                         psW += ps.width;
+                         psH += ps.height;
+                     }
+                 }
+                 return { width:psW, height:psH };
+              },
+
+              function doLayout(target) {
+                 var x = target.getTop(), y = target.getLeft();
+                 for(var i=0; i < target.kids.length; i++) {
+                     var kid = target.kids[i];
+                     if (kid.isVisible) {
+                         var ps = kid.getPreferredSize();
+                         kid.setBounds(x, y, ps.width, ps.height);               
+                         x += ps.width;
+                         y += ps.height;
+                     }
+                 }
+              } 
+          ]);
+
+          var c = new zebra.ui.zCanvas("doc.layout.diag");
+          var r = c.root;
+          r.setLayout(new DiagLayout());
+          r.setBorder(new zebra.ui.Border("black"));
+          r.setPadding(4);
+          r.add(new zebra.ui.Button("One"));
+          r.add(new zebra.ui.Button("Two"));
+          r.add(new zebra.ui.Button("Three"));
+
+          c.setSize(r.getPreferredSize().width, r.getPreferredSize().height); 
+    }
+
+
+    if (document.getElementById("doc.layout.border") != null) {
+
+        var c = new zebra.ui.zCanvas("doc.layout.border");
+        var r = c.root;
+        r.setLayout(new zebra.layout.BorderLayout());
+
+
+        r.add(zebra.layout.CENTER, new zebra.ui.Button("CENTER"));
+        r.add(zebra.layout.LEFT,   new zebra.ui.Button("LEFT"));
+        r.add(zebra.layout.RIGHT,  new zebra.ui.Button("RIGHT"));
+        r.add(zebra.layout.TOP,    new zebra.ui.Button("TOP"));
+        r.add(zebra.layout.BOTTOM, new zebra.ui.Button("BOTTOM"));
+    }
+
+
+    if (document.getElementById("doc.layout.list1") != null) {
+
+        var c = new zebra.ui.zCanvas("doc.layout.list1");
+        var r = c.root;
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.ListLayout());
+
+
+        r.add(new zebra.ui.Button("Item1"));
+        r.add(new zebra.ui.Button("Item2"));
+        r.add(new zebra.ui.Button("Item3"));
+    }
+
+    if (document.getElementById("doc.layout.list2") != null) {
+
+        var c = new zebra.ui.zCanvas("doc.layout.list2");
+        var r = c.root;
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.ListLayout(zebra.layout.CENTER, 2));
+
+
+        r.add(new zebra.ui.Button("Item1"));
+        r.add(new zebra.ui.Button("Item2"));
+        r.add(new zebra.ui.Button("Item3"));
+    }
+
+    if (document.getElementById("doc.layout.list3") != null) {
+
+        var c = new zebra.ui.zCanvas("doc.layout.list3");
+        var r = c.root;
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.ListLayout(zebra.layout.LEFT, 2));
+
+
+        r.add(new zebra.ui.Button("Item1"));
+        r.add(new zebra.ui.Button("Item2"));
+        r.add(new zebra.ui.Button("Item3"));
+    }
+
+    if (document.getElementById("doc.layout.percent1") != null) {
+
+        var c = new zebra.ui.zCanvas("doc.layout.percent1");
+        var r = c.root;
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.PercentLayout());
+
+
+        r.add(20, new zebra.ui.Button("20%"));
+        r.add(30, new zebra.ui.Button("30%"));
+        r.add(50, new zebra.ui.Button("50%"));
+    }
+
+
+    if (document.getElementById("doc.layout.percent2") != null) {
+
+        var c = new zebra.ui.zCanvas("doc.layout.percent2");
+        var r = c.root;
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.PercentLayout(zebra.layout.HORIZONTAL, 2, false));
+
+        r.add(20, new zebra.ui.Button("20%"));
+        r.add(30, new zebra.ui.Button("30%"));
+        r.add(50, new zebra.ui.Button("50%"));
+    }
+
+    if (document.getElementById("doc.layout.percent3") != null) {
+
+        var c = new zebra.ui.zCanvas("doc.layout.percent3");
+        var r = c.root;
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.PercentLayout(zebra.layout.VERTICAL, 2, false));
+
+        r.add(20, new zebra.ui.Button("20%"));
+        r.add(30, new zebra.ui.Button("30%"));
+        r.add(50, new zebra.ui.Button("50%"));
+    }
+
+    if (document.getElementById("doc.layout.percent4") != null) {
+
+        var c = new zebra.ui.zCanvas("doc.layout.percent4");
+        var r = c.root;
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.PercentLayout(zebra.layout.VERTICAL, 2, true));
+
+        r.add(20, new zebra.ui.Button("20%"));
+        r.add(30, new zebra.ui.Button("30%"));
+        r.add(50, new zebra.ui.Button("50%"));
+    }
+
+    if (document.getElementById("doc.layout.flow1") != null) {
+
+        var c = new zebra.ui.zCanvas("doc.layout.flow1");
+        var r = c.root;
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.FlowLayout(zebra.layout.CENTER, zebra.layout.CENTER, zebra.layout.VERTICAL, 2));
+
+        r.add(new zebra.ui.Button("VCentered"));
+        r.add(new zebra.ui.Button("VCentered"));
+        r.add(new zebra.ui.Button("VCentered"));
+    }
+
+    if (document.getElementById("doc.layout.flow2") != null) {
+
+        var c = new zebra.ui.zCanvas("doc.layout.flow2");
+        var r = c.root;
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.FlowLayout(zebra.layout.CENTER, zebra.layout.CENTER, zebra.layout.HORIZONTAL, 2));
+
+
+        r.add(new zebra.ui.Button("HCentered"));
+        r.add(new zebra.ui.Button("HCentered"));
+        r.add(new zebra.ui.Button("HCentered"));
+    }
+
+    if (document.getElementById("doc.layout.flow3") != null) {
+
+        var c = new zebra.ui.zCanvas("doc.layout.flow3");
+        var r = c.root;
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.FlowLayout(zebra.layout.LEFT, zebra.layout.CENTER, zebra.layout.HORIZONTAL, 2));
+
+
+        r.add(new zebra.ui.Button("Left-Center-Hor"));
+        r.add(new zebra.ui.Button("Left-Center-Hor"));
+        r.add(new zebra.ui.Button("Left-Center-Hor"));
+    }
+
+    if (document.getElementById("doc.layout.flow4") != null) {
+
+        var c = new zebra.ui.zCanvas("doc.layout.flow4");
+        var r = c.root;
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.FlowLayout(zebra.layout.RIGHT, zebra.layout.CENTER, zebra.layout.HORIZONTAL, 2));
+
+
+        r.add(new zebra.ui.Button("Right-Center-Hor"));
+        r.add(new zebra.ui.Button("Right-Center-Hor"));
+        r.add(new zebra.ui.Button("Right-Center-Hor"));
+    }
+
+
+   if (document.getElementById("doc.layout.flow5") != null) {
+
+        var c = new zebra.ui.zCanvas("doc.layout.flow5");
+        var r = c.root;
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.FlowLayout(zebra.layout.RIGHT, zebra.layout.TOP, zebra.layout.HORIZONTAL, 2));
+
+
+        r.add(new zebra.ui.Button("Right-Top-Hor"));
+        r.add(new zebra.ui.Button("Right-Top-Hor"));
+        r.add(new zebra.ui.Button("Right-Top-Hor"));
+    }
+
+   if (document.getElementById("doc.layout.flow6") != null) {
+
+        var c = new zebra.ui.zCanvas("doc.layout.flow6");
+        var r = c.root;
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.FlowLayout(zebra.layout.LEFT, zebra.layout.TOP, zebra.layout.HORIZONTAL, 2));
+
+
+        r.add(new zebra.ui.Button("Left-Top-Hor"));
+        r.add(new zebra.ui.Button("Left-Top-Hor"));
+        r.add(new zebra.ui.Button("Left-Top-Hor"));
+    }
+
+    if (document.getElementById("doc.layout.flow7") != null) {
+
+        var c = new zebra.ui.zCanvas("doc.layout.flow7");
+        var r = c.root;
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.FlowLayout(zebra.layout.LEFT, zebra.layout.TOP, zebra.layout.VERTICAL, 2));
+
+
+        r.add(new zebra.ui.Button("Left-Top-Ver"));
+        r.add(new zebra.ui.Button("Left-Top-Ver"));
+        r.add(new zebra.ui.Button("Left-Top-Ver"));
+    }
+
+    if (document.getElementById("doc.layout.flow8") != null) {
+
+        var c = new zebra.ui.zCanvas("doc.layout.flow8");
+        var r = c.root;
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.FlowLayout(zebra.layout.RIGHT, zebra.layout.TOP, zebra.layout.VERTICAL, 2));
+
+
+        r.add(new zebra.ui.Button("Right-Top-Ver"));
+        r.add(new zebra.ui.Button("Right-Top-Ver"));
+        r.add(new zebra.ui.Button("Right-Top-Ver"));
+    }
+
+    if (document.getElementById("doc.layout.flow9") != null) {
+
+        var c = new zebra.ui.zCanvas("doc.layout.flow9");
+        var r = c.root;
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.FlowLayout(zebra.layout.RIGHT, zebra.layout.BOTTOM, zebra.layout.VERTICAL, 2));
+
+
+        r.add(new zebra.ui.Button("Right-Bottom-Ver"));
+        r.add(new zebra.ui.Button("Right-Bottom-Ver"));
+        r.add(new zebra.ui.Button("Right-Bottom-Ver"));
+    }
+
+    if (document.getElementById("doc.layout.stack") != null) {
+
+        var c = new zebra.ui.zCanvas("doc.layout.stack");
+        var r = c.root;
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.StackLayout());
+
+        r.add(new zebra.ui.Button("Under transparent"));
+        var p = new zebra.ui.Panel();
+        p.setBackground("rgba(240,240,240,0.7)");
+        r.add(p);
+    }
+
+
+    if (document.getElementById("doc.layout.raster1") != null) {
+
+        var c = new zebra.ui.zCanvas("doc.layout.raster1");
+        var r = c.root;
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.RasterLayout());
+
+        var b = new zebra.ui.Button("(10,10,140,40)");
+        b.setBounds(10,10,140,40);
+        r.add(b);
+
+        var b = new zebra.ui.Button("(10,120,80,50)");
+        b.setBounds(10,100,120,50);
+        r.add(b);
+    }
+
+    if (document.getElementById("doc.layout.raster2") != null) {
+
+        var c = new zebra.ui.zCanvas("doc.layout.raster2");
+        var r = c.root;
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.RasterLayout(zebra.layout.USE_PS_SIZE));
+
+        var b = new zebra.ui.Button("(10,10) Preferred Sized");
+        b.setLocation(10,10);
+        r.add(b);
+
+        var b = new zebra.ui.Button(new zebra.ui.Label(new zebra.data.Text("(30,100)\nPreferred sized")));
+        b.setLocation(30,100);
+        r.add(b);
+    }
+
+    if (document.getElementById("doc.layout.raster3") != null) {
+
+        var c = new zebra.ui.zCanvas("doc.layout.raster3");
+        var r = c.root;
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.RasterLayout(zebra.layout.USE_PS_SIZE));
+
+        var b = new zebra.ui.Button("(10,10) Preferred Sized ");
+        b.setLocation(10,10);
+        r.add(b);
+
+        var b = new zebra.ui.Button(new zebra.ui.Label(new zebra.data.Text("(Left,Bottom)\nPreferred sized")));
+        r.add(zebra.layout.LEFT | zebra.layout.BOTTOM, b);
+
+        var b = new zebra.ui.Button(new zebra.ui.Label(new zebra.data.Text("(Center)\nPreferred sized")));
+        r.add(zebra.layout.CENTER, b);
+
+        var b = new zebra.ui.Button(new zebra.ui.Label(new zebra.data.Text("(Center)\nPreferred sized")));
+        r.add(zebra.layout.RIGHT, b);
+    }
+
+    if (document.getElementById("doc.layout.grid1") != null) {
+
+        var r = new zebra.ui.zCanvas("doc.layout.grid1").root;
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.GridLayout(2,2));
+        r.add(new zebra.ui.Button("1x1"));
+        r.add(new zebra.ui.Button("1x2"));
+        r.add(new zebra.ui.Button("2x1"));
+        r.add(new zebra.ui.Button("2x2"));
+    }
+
+    if (document.getElementById("doc.layout.grid2") != null) {
+
+        var c = new zebra.ui.zCanvas("doc.layout.grid2");
+        var r = c.root;
+        var ctr = new zebra.layout.Constraints();
+        ctr.setPadding(8);
+
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.GridLayout(2,2));
+        r.add(ctr,new zebra.ui.Button("1x1 Long component"));
+        r.add(ctr,new zebra.ui.Button("1x2"));
+        r.add(ctr,new zebra.ui.Button("2x1"));
+        r.add(ctr,new zebra.ui.Button("2x2"));
+    }
+
+    if (document.getElementById("doc.layout.grid3") != null) {
+
+        var r = new zebra.ui.zCanvas("doc.layout.grid3").root,
+            ctr = new zebra.layout.Constraints();
+        ctr.setPadding(8);
+
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.GridLayout(2,2));
+
+        var ctr2 = new zebra.layout.Constraints(zebra.layout.CENTER, zebra.layout.BOTTOM);
+        ctr2.setPadding(8);
+        r.add(ctr2,new zebra.ui.Button("1x1 bottom component"));
+
+        r.add(ctr,new zebra.ui.Button(new zebra.ui.MLabel("1x2\nnew line\nnew line")));
+        r.add(new zebra.layout.Constraints(zebra.layout.CENTER, zebra.layout.CENTER), new zebra.ui.Button("Centered"));
+        r.add(ctr, new zebra.ui.Button(new zebra.ui.MLabel("2x2\n2x2\n2x2")));
+    }
+
+    if (document.getElementById("doc.layout.grid4") != null) {
+
+        var r = new zebra.ui.zCanvas("doc.layout.grid4").root,
+            ctr = new zebra.layout.Constraints();
+            ctr.ax = ctr.ay = 0;
+        
+        //ctr.setPadding(8);
+
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.GridLayout(2,2, zebra.layout.VERTICAL | zebra.layout.HORIZONTAL));
+
+        r.add(ctr, new zebra.ui.Button("1x1"));
+        r.add(ctr, new zebra.ui.Button("1x2"));
+        r.add(ctr, new zebra.ui.Button("2x1"));
+        r.add(ctr, new zebra.ui.Button("2x2"));
+    }
+
+    if (document.getElementById("doc.layout.grid5") != null) {
+
+        var r = new zebra.ui.zCanvas("doc.layout.grid5").root,
+            ctr = new zebra.layout.Constraints();
+        
+        //ctr.setPadding(8);
+
+        r.setBorder(zebra.ui.borders.plain);
+        r.setLayout(new zebra.layout.GridLayout(2,2, zebra.layout.VERTICAL | zebra.layout.HORIZONTAL));
+
+        r.add(ctr, new zebra.ui.Button("1x1"));
+        r.add(ctr, new zebra.ui.Button("1x2"));
+        r.add(ctr, new zebra.ui.Button("2x1"));
+        r.add(ctr, new zebra.ui.Button("2x2"));
+    }
+
+
+});
+		</script>
+	</head>
+
+	<body bgcolor="#EEEEEE" align="center" style="padding:15px;">
+        <canvas width="150" height="250" id="doc.layout.diag"></canvas>
+        <canvas width="250" height="200" id="doc.layout.border"></canvas>
+        <canvas width="500" height="150" id="doc.layout.flow"></canvas>
+        <canvas width="150" height="150" id="doc.layout.list1"></canvas>
+        <canvas width="150" height="150" id="doc.layout.list2"></canvas>
+        <canvas width="150" height="150" id="doc.layout.list3"></canvas>
+        <canvas width="200" height="100" id="doc.layout.percent1"></canvas>
+        <canvas width="200" height="100" id="doc.layout.percent2"></canvas>
+        <canvas width="150" height="150" id="doc.layout.percent3"></canvas>
+        <canvas width="150" height="150" id="doc.layout.percent4"></canvas>
+        <canvas width="150" height="150" id="doc.layout.flow1"></canvas>
+        <canvas width="350" height="100" id="doc.layout.flow2"></canvas>
+        <canvas width="450" height="100" id="doc.layout.flow3"></canvas>
+        <canvas width="450" height="100" id="doc.layout.flow4"></canvas>
+        <canvas width="450" height="100" id="doc.layout.flow5"></canvas>
+        <canvas width="450" height="100" id="doc.layout.flow6"></canvas>
+        <canvas width="200" height="200" id="doc.layout.flow7"></canvas>
+        <canvas width="200" height="200" id="doc.layout.flow8"></canvas>
+        <canvas width="200" height="200" id="doc.layout.flow9"></canvas>
+        <canvas width="200" height="200" id="doc.layout.stack"></canvas>
+        <canvas width="200" height="200" id="doc.layout.raster1"></canvas>
+        <canvas width="200" height="200" id="doc.layout.raster2"></canvas>
+        <canvas width="200" height="200" id="doc.layout.raster3"></canvas>
+        <canvas width="200" height="200" id="doc.layout.grid1"></canvas>
+        <canvas width="300" height="200" id="doc.layout.grid2"></canvas>
+        <canvas width="300" height="200" id="doc.layout.grid3"></canvas>
+        <canvas width="300" height="200" id="doc.layout.grid4"></canvas>
+	    <canvas width="300" height="200" id="doc.layout.grid5"></canvas>
+	</body>
+</html>

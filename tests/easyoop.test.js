@@ -1007,7 +1007,7 @@ if (typeof(zebra) === "undefined") {
             assert(a.a(), 200);
         },
 
-        function test_inner() {
+        function test_anonymous() {
             var A = new Class([
                 function a() { return 1; },
                 function a(p) { return p; }
@@ -1022,20 +1022,20 @@ if (typeof(zebra) === "undefined") {
                 function a(p1, p2) { return p1 + p2; }
             ]);
 
-            assert(a.a(), 2, "inner overridden method a()");
-            assert(a.a(22), 22, "inner didn't touch method a(1)");
-            assert(a.a(22, 1), 23, "inner declared new method a(2)");
-            assert(zebra.instanceOf(a,A), true, "Inner is instance of initial class");
-            assert(a.getClazz() != (new A()).getClazz(), true, "Inner class doesn't equal initial class");
-            assert(a.getClazz().$parent == A, true, "Inner has proper parent class");
+            assert(a.a(), 2, "anonymous overridden method a()");
+            assert(a.a(22), 22, "anonymous didn't touch method a(1)");
+            assert(a.a(22, 1), 23, "anonymous declared new method a(2)");
+            assert(zebra.instanceOf(a,A), true, "anonymous is instance of initial class");
+            assert(a.getClazz() != (new A()).getClazz(), true, "anonymous class doesn't equal initial class");
+            assert(a.getClazz().$parent == A, true, "anonymous has proper parent class");
 
 
             a = new A();
-            assert(a.a(), 1, "Inner didn't touch method a() of initial class");
-            assert(a.a(12), 12, "Inner didn't touch method a(1) of initial class");
-            assertException(function() { a.a(12, 12); }, ReferenceError, "Inner didn't add method a(2) to initial class");
-            assert(this['a'], undefined, "Inner didn't update current scope");
-            assert(zebra.$global['a'], undefined, "Inner didn't update global scope");
+            assert(a.a(), 1, "anonymous didn't touch method a() of initial class");
+            assert(a.a(12), 12, "anonymous didn't touch method a(1) of initial class");
+            assertException(function() { a.a(12, 12); }, ReferenceError, "anonymous didn't add method a(2) to initial class");
+            assert(this['a'], undefined, "anonymous didn't update current scope");
+            assert(zebra.$global['a'], undefined, "anonymous didn't update global scope");
 
             var A = new Class([
                 function(m) { this.m = m; }
@@ -1047,7 +1047,7 @@ if (typeof(zebra) === "undefined") {
                 }
             ]);
 
-            assert(a.m, 100, "Inner properly called super method");
+            assert(a.m, 100, "anonymous properly called super method");
 
             var I = new zebra.Interface();
             var i = new I([
@@ -1248,7 +1248,7 @@ if (typeof(zebra) === "undefined") {
             assertException(function() { b.d(); } , Error, "test_method_modifiers 4");
             assert(b.b(10), 100);
 
-            // inner class with abstract class
+            // anonymous class with abstract class
             var a = new AA([
                                 function b(p) { this.c(); },
                                 function d() { this.$super('b'); }

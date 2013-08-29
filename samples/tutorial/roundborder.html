@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+	<head>
+
+        <script src='../../lib/zebra/zebra.min.js' type='text/javascript'></script>
+        
+		<script type='text/javascript'>
+		    zebra.ready(function() {
+		    	 var RoundBorder = zebra.Class(zebra.ui.View, [
+		    	    function paint(g, x, y, w, h, c) {  
+		    	        g.setColor("gray");
+		    	        this.outline(g, x, y, w, h, c);
+		    	        g.stroke();
+		    	    },       
+
+		    	    function outline(g, x, y, w, h, c) {
+		    	       g.beginPath();
+		    	       g.arc(x + w/2, y + h/2, w/2-1, 0, 2*Math.PI, false);
+		    	       return true;
+		    	    }
+		    	]);
+
+		    	var canvas = new zebra.ui.zCanvas("doc.roundborder");
+		    	canvas.root.setBorder(new RoundBorder());
+		    	canvas.root.setBackground("orange");
+			});
+		</script>
+	</head>
+
+	<body bgcolor="#EEEEEE" align="center" style="padding:15px;">
+	    <canvas width="200" height="200" id="doc.roundborder"></canvas>
+	</body>
+</html>

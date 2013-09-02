@@ -11,39 +11,39 @@
 
 		<script type='text/javascript'>
 		    zebra.ready(function() {
-		    	eval(zebra.Import("ui", "layout"));
-	
-		    	var z = new zCanvas(), root = z.root;
-		    	if (zebra.isMobile) z.fullScreen();
-		    	root.setLayout(new BorderLayout());
+eval(zebra.Import("ui", "layout"));
 
-		    	root.add(CENTER, new Panel(MouseListener, [
-		    	    function mouseDragStarted(e) {
-		    	    	if (!this.pathes) this.pathes = {};
-		    	    	this.pathes[e.touch ? e.touch.identifier : 1] = [ e.x, e.y ];
-		    	    },
+var z = new zCanvas(), root = z.root;
+if (zebra.isMobile) z.fullScreen();
+root.setLayout(new BorderLayout());
 
-		    	    function mouseDragged(e) {
-		    	    	this.pathes[e.touch ? e.touch.identifier : 1].push(e.x, e.y);
-		    	        this.repaint(); 
-		    	    }, 
+root.add(CENTER, new Panel(MouseListener, [
+    function mouseDragStarted(e) {
+    	if (!this.pathes) this.pathes = {};
+    	this.pathes[e.touch ? e.touch.identifier : 1] = [ e.x, e.y ];
+    },
 
-		    	    function paint(g) {
-		    	    	if (this.pathes) {
-			    	        g.setColor("red");
-			    	       	g.lineWidth = 3;
-			    	        for(var k in this.pathes) {
-			    	        	var path = this.pathes[k];
-				    	        g.beginPath();
-				    	        for(var i=0; i < path.length; i+=2) {
-				    	        	g.moveTo(path[i],   path[i+1]);
-				    	        	g.lineTo(path[i+2],   path[i+3]);
-				    	    	}
-				    	    	g.stroke();
-				    	    }
-			    	    }
-		    	    }
-		    	])); 
+    function mouseDragged(e) {
+    	this.pathes[e.touch ? e.touch.identifier : 1].push(e.x, e.y);
+        this.repaint(); 
+    }, 
+
+    function paint(g) {
+    	if (this.pathes) {
+	        g.setColor("red");
+	       	g.lineWidth = 3;
+	        for(var k in this.pathes) {
+	        	var path = this.pathes[k];
+    	        g.beginPath();
+    	        for(var i=0; i < path.length; i+=2) {
+    	        	g.moveTo(path[i],   path[i+1]);
+    	        	g.lineTo(path[i+2],   path[i+3]);
+    	    	}
+    	    	g.stroke();
+    	    }
+	    }
+    }
+])); 
 	 		});
 		</script>
 

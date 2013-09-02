@@ -7,7 +7,9 @@
 
    * Full package demo, Zebra rich set of UI components: http://www.zebkit.org/samples/index.html
    * Zebra UI engine simple samples: http://www.zebkit.org/samples/uiengine.samples.html
+   * Zebra UI documenation http://www.zebkit.org/documentation
 
+**Starting from 8.2013 Zebra documentation is available !**
 Starting from 5.2013 Zebra is on Mobile !
 
 
@@ -71,7 +73,7 @@ Let's start writing simple Zebra HTML following traditional style:
 <!DOCTYPE html>
 <html>
 	<head>
-		<script src='http://repo.zebkit.org/pa3/zebra.min.js'
+		<script src='http://repo.zebkit.org/latest/zebra.min.js'
                 type='text/javascript'></script>
 		<script type='text/javascript'>
 		    zebra.ready(function() {
@@ -97,7 +99,7 @@ We can write the application following more graceful manner using JSON-like styl
 <!DOCTYPE html>
 <html>
 	<head>
-		<script src='http://repo.zebkit.org/pa3/zebra.min.js'
+		<script src='http://repo.zebkit.org/latest/zebra.min.js'
                 type='text/javascript'></script>
 		<script type='text/javascript'>
 		    zebra.ready(function() {
@@ -147,7 +149,7 @@ Load the JSON UI form definition as it is illustrated below:
 <!DOCTYPE html>
 <html>
 	<head>
-		<script src='http://repo.zebkit.org/pa3/zebra.min.js'
+		<script src='http://repo.zebkit.org/latest/zebra.min.js'
                 type='text/javascript'></script>
 		<script type='text/javascript'>
 		    zebra.ready(function() {
@@ -180,7 +182,7 @@ clipboard data exchange. For instance:
 <!DOCTYPE html>
 <html>
 	<head>		
-		<script src='http://repo.zebkit.org/pa3/zebra.min.js'
+		<script src='http://repo.zebkit.org/latest/zebra.min.js'
                 type='text/javascript'></script>
 		<script type='text/javascript'>
 			zebra.ready(function() {

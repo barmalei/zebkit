@@ -55,7 +55,7 @@
 			function(t, reflection) {
 				this.$super(t);
 				this.setFont(new zebra.ui.Font("100px Futura, Helvetica, sans-serif"));
-				this.image = zebra.ui.demo.zebra_pattern; //new Image();
+				this.image = zebra.ui.demo.zebra_pattern;
 				this.hasReflection = reflection;
 				this.reflectionGap = -40;
 			},
@@ -73,6 +73,8 @@
 				g.fillStyle = gradient;
 				g.fillText(this.getLine(line), x, y + this.font.ascent); 
 
+
+				var prev = g.globalCompositeOperation;
 				if (this.hasReflection) {
 					// draw reflected text
 					g.save();
@@ -91,8 +93,8 @@
 					g.fillRect(x, y + this.font.height + this.reflectionGap + 30, this.lineWidth(line), 2*this.font.height);
 					g.restore();
 				}
-				var prev = g.globalCompositeOperation;
-				g.globalCompositeOperation = "source-atop";
+				
+			//	g.globalCompositeOperation = "source-atop";
 				g.fillStyle = this.pattern;
 				g.fillRect(x, y, this.lineWidth(line), this.getLineHeight());
 				g.globalCompositeOperation = prev;
@@ -146,7 +148,7 @@
 		    												layout: new FlowLayout(CENTER, TOP, HORIZONTAL, 12),
 		    												kids  : [ new Label(new zebra.data.Text(zebra.io.GET("demo/desc.txt"))).properties({ 
 		    													color:"white",
-		    													font : new Font("Verdana", 0, 14)
+		    													font : new Font("Verdana", 14)
 		    												}) ]
 		    											}),
 		    											BOTTOM: new Panel({
@@ -198,8 +200,9 @@
 				});
 
 				desktop.graph.save();
-				desktop.graph.rotate(0.3);
 				desktop.graph.scale(1.3, 1.3);
+				desktop.graph.rotate(0.3);
+				
 				root.repaint();
 			},
 

@@ -539,7 +539,7 @@ pkg.TreeDemo = new Class(pkg.DemoPan, [
         t1.select(t1.model.root);
 
         var t2 = new Tree(makeTreeModel()), p2 = new BorderPan("Custom view tree", t2);
-        var fn = new Font("Arial", 1, 14);
+        var fn = new Font("Arial", "bold", 14);
         t2.setViewProvider(new zebra.Dummy([
               function getView(c, i) {
                     var tr = new TextRender(i.value);
@@ -755,9 +755,9 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
         var l1 = pkg.createLabel("Press right mouse\nbutton to see\ncontext menu Cars", rgb.black);
         var l2 = pkg.createLabel("Press right mouse\nbutton to see\ncontext menu Colors", "003366");
         var l3 = pkg.createLabel("Press right mouse\nbutton to see\ncontext menu Brands", "99CC99");
-        l1.setFont(new Font("Arial", 1, 16));
-        l2.setFont(new Font("Arial", 1, 16));
-        l3.setFont(new Font("Arial", 1, 16));
+        l1.setFont(new Font("Arial", "bold", 16));
+        l2.setFont(new Font("Arial", "bold", 16));
+        l3.setFont(new Font("Arial", "bold", 16));
         l1.setPreferredSize(200, 110);
         l2.setPreferredSize(200, 110);
         l3.setPreferredSize(200, 110);
@@ -812,7 +812,7 @@ var CardLayout = new Class(Layout, [
 function createTooltipDemo() {
     var  p = new Panel(new FlowLayout(CENTER, CENTER, VERTICAL, 16));
     var ccc = "black";
-    var f = new Font("Helvetica", 1, 16);
+    var f = new Font("Helvetica", "bold", 16);
     var l1 = pkg.createLabel("HONDA\nShow textual\ntooltip", ccc, f);
     var l2 = pkg.createLabel("BMW\nShow fancy tooltip", ccc, f);
     var l3 = pkg.createLabel("SAAB\nShow whatever\nyou want as a tooltip", ccc, f);
@@ -841,7 +841,7 @@ function createTooltipDemo() {
             var img = new ImagePan(ui.demo.bmw);
             var l = new Label(new zebra.data.Text("BMW is the best.\nAudi looks similar.\nBeware of imitation :)"));
             l.setColor("#3366CC");
-            l.setFont(new Font("Helvetica", 0, 14));
+            l.setFont(new Font("Helvetica", 14));
             pp.setPaddings(4, 16, 42, 16);
             pp.add(img);
             pp.add(l)
@@ -861,7 +861,7 @@ function createTooltipDemo() {
         function getView(row, col, data) {
             if (col == 0 || col == 2) {
                 var r = new BoldTextRender(new zebra.data.Text(data));
-                r.setFont(new Font("Helvetica", 1, 16));
+                r.setFont(new Font("Helvetica", "bold", 16));
                 if (col==2) r.setColor("red");
                 return r;
             }
@@ -980,7 +980,7 @@ var colors = [ ["white", "lightGray", "white"],
 var ColumnsAlignmentProvider = Class(DefViews, [
     function getView(row,col,data){
         var tf = new BoldTextRender(data);
-        tf.setFont(new Font("Helvetica", 0, 16));
+        tf.setFont(new Font("Helvetica", 16));
         if (row == 1 && col == 1) {
             tf.setColor("white");
         }
@@ -1088,7 +1088,7 @@ var CustomGridEditor = new Class(DefEditors, [
     function fetchEditedValue(row,col,data,editor){
         if (col == 0) return editor.getValue() ? "on" : "off";
         return (col == 3) ? editor.list.selectedIndex 
-                          : this.$super(this.fetchEditedValue,row, col, data, editor);
+                          : this.$super(row, col, data, editor);
     }
 ]);
 
@@ -1110,7 +1110,7 @@ var CompEditorProvider = new Class(DefEditors, [
     },
 
     function fetchEditedValue(row,col,data,c){
-        return (row == 2) ? c : this.$super(this.fetchEditedValue,row, col, data, c);
+        return (row == 2) ? c : this.$super(row, col, data, c);
     },
 
     function shouldDo(t, action,row,col,e){
@@ -1148,6 +1148,7 @@ function longGrid() {
 function editableGrid() {
     function makeSubgrid(){
         var data = new Matrix(7, 3);
+
         for(var i = 0;i < data.rows; i ++ ){
             for(var j = 0;j < data.cols; j ++ ) data.put(i, j, "Cell [" + i + "," + j + "]");
         }
@@ -1258,7 +1259,7 @@ function customCellAlignmentGrid() {
     for(var i = 0;i < data.cols; i ++ ) caption.putTitle(i, titles[i]);
     caption.setTitleProps(0, LEFT, CENTER, null);
     caption.setTitleProps(2, RIGHT, CENTER, null);
-    caption.render.setFont(new Font("Helvetica", 1, 14));
+    caption.render.setFont(new Font("Helvetica", "bold", 14));
     caption.isResizable = false;
 
     grid.add(TOP, caption);

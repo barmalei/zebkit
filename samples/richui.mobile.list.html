@@ -12,13 +12,14 @@
 		    zebra.ready(function() {
 		    	eval(zebra.Import("ui", "layout"));
 
-		    	var data = [];
+		    	var data = [ "images/035.png;Test1", "images/058.png;Test2", "images/058.png;Test3" ];
 		    	for(var i=0; i < 1000; i++) {
-		    		data[i] = " Item  [ " + i + " ]"; 
+		    	 	data[i] = "images/060.png;" + " Item  [ " + i + " ]"; 
 		    	}
 
+
 		    	var list = new List(data);
-		    	//list.gap = 8;
+		    	list.gap = 8;
 
 				// create canvas
 			    var z = new zebra.ui.zCanvas("test");
@@ -27,13 +28,31 @@
 				var sp = new ScrollPan(list, VERTICAL);
 				sp.setAutoHide(true);
 				
+
+				list.setViewProvider(new zebra.Dummy([
+					function $prototype() {
+						this.getView = function(target, value) {
+							var v = value.split(";");
+
+							// if (v.length > 1) {
+							// 	zebra.print(new ImagePan().getPreferredSize()).getPreferredSize());
+
+							// 	zebra.print();
+							// }
+
+
+
+							return (v.length > 1) ? new CompRender(new ImageLabel(v[1], new Picture(loadImage(v[0]))))
+												  : new TextRender(value);
+						};
+					}
+				]));
+
+
 			    var root = z.root.properties({
 			    	layout : new BorderLayout(6,6),
 			    	padding: 8,
 			    	kids   : {
-			    		//TOP   : new Combo(data),
-			    		TOP:   new Button("test"),
-			    		BOTTOM: new Button("test"),
 			    		CENTER: sp
 			    	}
 			    });

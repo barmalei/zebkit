@@ -242,7 +242,7 @@ by providing the following JSON configuration file:
 {
 	"Button" : {
        "properties" : {
-          "font"      : { "$Font": ["Arial", 1, 18 ] },
+          "font"      : { "$Font": ["Arial", "bold", 18 ] },
           "background": "#DDDDEF"
        }
     }

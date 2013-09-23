@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>ui.designer.js - Zebra API</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.8.0pr2/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <script src="http://yui.yahooapis.com/combo?3.8.0pr2/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            <h1>Zebra API: ui.designer.js</a></h1>
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 07/2013</em>
+        </div>
+    </div>
+    <div class="yui3-g">
+
+        <div id="sidebar" class="yui3-u">
+            <div id="modules" class="sidebox">
+    <div class="hd">
+        <h2 class="no-toc">Packages</h2>
+    </div>
+    <div class="bd">
+        <ul>
+            
+                <li><a href="../modules/data.html">data</a>
+                
+                </li>
+            
+                <li><a href="../modules/io.html">io</a>
+                
+                </li>
+            
+                <li><a href="../modules/layout.html">layout</a>
+                
+                </li>
+            
+                <li><a href="../modules/ui.html">ui</a>
+                
+                </li>
+            
+                <li><a href="../modules/ui.designer.html">ui.designer</a>
+                
+                </li>
+            
+                <li><a href="../modules/ui.grid.html">ui.grid</a>
+                
+                </li>
+            
+                <li><a href="../modules/ui.tree.html">ui.tree</a>
+                
+                </li>
+            
+                <li><a href="../modules/util.html">util</a>
+                
+                </li>
+            
+                <li><a href="../modules/zebra.html">zebra</a>
+                
+                </li>
+            
+        </ul>
+    </div>
+</div>
+
+<div id="classes" class="sidebox">
+    <div class="hd">
+        <h2 class="no-toc">Classes and interfaces</h2>
+    </div>
+    <div class="bd">
+        <ul>
+            
+                <li><a href="../classes/zebra.Class().html">zebra.Class()</a></li>
+            
+                <li><a href="../classes/zebra.data.Item.html">zebra.data.Item</a></li>
+            
+                <li><a href="../classes/zebra.data.ListModel.html">zebra.data.ListModel</a></li>
+            
+                <li><a href="../classes/zebra.data.Matrix.html">zebra.data.Matrix</a></li>
+            
+                <li><a href="../classes/zebra.data.SingleLineTxt.html">zebra.data.SingleLineTxt</a></li>
+            
+                <li><a href="../classes/zebra.data.Text.html">zebra.data.Text</a></li>
+            
+                <li><a href="../classes/zebra.data.TextModel.html">zebra.data.TextModel</a></li>
+            
+                <li><a href="../classes/zebra.data.TreeModel.html">zebra.data.TreeModel</a></li>
+            
+                <li><a href="../classes/zebra.Dummy.html">zebra.Dummy</a></li>
+            
+                <li><a href="../classes/zebra.forName().html">zebra.forName()</a></li>
+            
+                <li><a href="../classes/zebra.instanceOf().html">zebra.instanceOf()</a></li>
+            
+                <li><a href="../classes/zebra.Interface().html">zebra.Interface()</a></li>
+            
+                <li><a href="../classes/zebra.io.b64decode().html">zebra.io.b64decode()</a></li>
+            
+                <li><a href="../classes/zebra.io.b64encode().html">zebra.io.b64encode()</a></li>
+            
+                <li><a href="../classes/zebra.io.GET().html">zebra.io.GET()</a></li>
+            
+                <li><a href="../classes/zebra.io.HTTP.html">zebra.io.HTTP</a></li>
+            
+                <li><a href="../classes/zebra.io.ID().html">zebra.io.ID()</a></li>
+            
+                <li><a href="../classes/zebra.io.JRPC.html">zebra.io.JRPC</a></li>
+            
+                <li><a href="../classes/zebra.io.JRPC.invoke().html">zebra.io.JRPC.invoke()</a></li>
+            
+                <li><a href="../classes/zebra.io.POST().html">zebra.io.POST()</a></li>
+            
+                <li><a href="../classes/zebra.io.QS.html">zebra.io.QS</a></li>
+            
+                <li><a href="../classes/zebra.io.Service.html">zebra.io.Service</a></li>
+            
+                <li><a href="../classes/zebra.io.XRPC.html">zebra.io.XRPC</a></li>
+            
+                <li><a href="../classes/zebra.io.XRPC.invoke().html">zebra.io.XRPC.invoke()</a></li>
+            
+                <li><a href="../classes/zebra.layout.BorderLayout.html">zebra.layout.BorderLayout</a></li>
+            
+                <li><a href="../classes/zebra.layout.Constraints.html">zebra.layout.Constraints</a></li>
+            
+                <li><a href="../classes/zebra.layout.FlowLayout.html">zebra.layout.FlowLayout</a></li>
+            
+                <li><a href="../classes/zebra.layout.getAbsLocation().html">zebra.layout.getAbsLocation()</a></li>
+            
+                <li><a href="../classes/zebra.layout.getDirectAt().html">zebra.layout.getDirectAt()</a></li>
+            
+                <li><a href="../classes/zebra.layout.getDirectChild().html">zebra.layout.getDirectChild()</a></li>
+            
+                <li><a href="../classes/zebra.layout.getTopParent().html">zebra.layout.getTopParent()</a></li>
+            
+                <li><a href="../classes/zebra.layout.GridLayout.html">zebra.layout.GridLayout</a></li>
+            
+                <li><a href="../classes/zebra.layout.Layout.html">zebra.layout.Layout</a></li>
+            
+                <li><a href="../classes/zebra.layout.Layoutable.html">zebra.layout.Layoutable</a></li>
+            
+                <li><a href="../classes/zebra.layout.ListLayout.html">zebra.layout.ListLayout</a></li>
+            
+                <li><a href="../classes/zebra.layout.PercentLayout.html">zebra.layout.PercentLayout</a></li>
+            
+                <li><a href="../classes/zebra.layout.RasterLayout.html">zebra.layout.RasterLayout</a></li>
+            
+                <li><a href="../classes/zebra.layout.StackLayout.html">zebra.layout.StackLayout</a></li>
+            
+                <li><a href="../classes/zebra.ready().html">zebra.ready()</a></li>
+            
+                <li><a href="../classes/zebra.ui.BaseLayer.html">zebra.ui.BaseLayer</a></li>
+            
+                <li><a href="../classes/zebra.ui.BaseList.html">zebra.ui.BaseList</a></li>
+            
+                <li><a href="../classes/zebra.ui.BoldLabel.html">zebra.ui.BoldLabel</a></li>
+            
+                <li><a href="../classes/zebra.ui.Border.html">zebra.ui.Border</a></li>
+            
+                <li><a href="../classes/zebra.ui.BorderPan.html">zebra.ui.BorderPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.Button.html">zebra.ui.Button</a></li>
+            
+                <li><a href="../classes/zebra.ui.Checkbox.html">zebra.ui.Checkbox</a></li>
+            
+                <li><a href="../classes/zebra.ui.Checkbox.Box.html">zebra.ui.Checkbox.Box</a></li>
+            
+                <li><a href="../classes/zebra.ui.ChildrenListener.html">zebra.ui.ChildrenListener</a></li>
+            
+                <li><a href="../classes/zebra.ui.Combo.html">zebra.ui.Combo</a></li>
+            
+                <li><a href="../classes/zebra.ui.Combo.ContentPan.html">zebra.ui.Combo.ContentPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.Combo.EditableContentPan.html">zebra.ui.Combo.EditableContentPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.Combo.ReadonlyContentPan.html">zebra.ui.Combo.ReadonlyContentPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.ComboArrowView.html">zebra.ui.ComboArrowView</a></li>
+            
+                <li><a href="../classes/zebra.ui.CommandManager.html">zebra.ui.CommandManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.CompList.html">zebra.ui.CompList</a></li>
+            
+                <li><a href="../classes/zebra.ui.ComponentListener.html">zebra.ui.ComponentListener</a></li>
+            
+                <li><a href="../classes/zebra.ui.Composite.html">zebra.ui.Composite</a></li>
+            
+                <li><a href="../classes/zebra.ui.CompositeView.html">zebra.ui.CompositeView</a></li>
+            
+                <li><a href="../classes/zebra.ui.CompRender.html">zebra.ui.CompRender</a></li>
+            
+                <li><a href="../classes/zebra.ui.CopyCutPaste.html">zebra.ui.CopyCutPaste</a></li>
+            
+                <li><a href="../classes/zebra.ui.Cursorable.html">zebra.ui.Cursorable</a></li>
+            
+                <li><a href="../classes/zebra.ui.CursorManager.html">zebra.ui.CursorManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.designer.ShaperPan.html">zebra.ui.designer.ShaperPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.Dotted.html">zebra.ui.Dotted</a></li>
+            
+                <li><a href="../classes/zebra.ui.Etched.html">zebra.ui.Etched</a></li>
+            
+                <li><a href="../classes/zebra.ui.EventManager.html">zebra.ui.EventManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.findCanvas().html">zebra.ui.findCanvas()</a></li>
+            
+                <li><a href="../classes/zebra.ui.FocusListener.html">zebra.ui.FocusListener</a></li>
+            
+                <li><a href="../classes/zebra.ui.FocusManager.html">zebra.ui.FocusManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.Font.html">zebra.ui.Font</a></li>
+            
+                <li><a href="../classes/zebra.ui.Gradient.html">zebra.ui.Gradient</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.DefEditors.html">zebra.ui.grid.DefEditors</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.Grid.html">zebra.ui.grid.Grid</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.GridCaption.html">zebra.ui.grid.GridCaption</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.GridStretchPan.html">zebra.ui.grid.GridStretchPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.Metrics.html">zebra.ui.grid.Metrics</a></li>
+            
+                <li><a href="../classes/zebra.ui.Group.html">zebra.ui.Group</a></li>
+            
+                <li><a href="../classes/zebra.ui.HtmlElement.html">zebra.ui.HtmlElement</a></li>
+            
+                <li><a href="../classes/zebra.ui.HtmlTextArea.html">zebra.ui.HtmlTextArea</a></li>
+            
+                <li><a href="../classes/zebra.ui.HtmlTextField.html">zebra.ui.HtmlTextField</a></li>
+            
+                <li><a href="../classes/zebra.ui.HtmlTextInput.html">zebra.ui.HtmlTextInput</a></li>
+            
+                <li><a href="../classes/zebra.ui.ImageLabel.html">zebra.ui.ImageLabel</a></li>
+            
+                <li><a href="../classes/zebra.ui.ImagePan.html">zebra.ui.ImagePan</a></li>
+            
+                <li><a href="../classes/zebra.ui.InputEvent.html">zebra.ui.InputEvent</a></li>
+            
+                <li><a href="../classes/zebra.ui.KeyEvent.html">zebra.ui.KeyEvent</a></li>
+            
+                <li><a href="../classes/zebra.ui.KeyListener.html">zebra.ui.KeyListener</a></li>
+            
+                <li><a href="../classes/zebra.ui.Label.html">zebra.ui.Label</a></li>
+            
+                <li><a href="../classes/zebra.ui.List.html">zebra.ui.List</a></li>
+            
+                <li><a href="../classes/zebra.ui.List.ViewProvider.html">zebra.ui.List.ViewProvider</a></li>
+            
+                <li><a href="../classes/zebra.ui.loadImage().html">zebra.ui.loadImage()</a></li>
+            
+                <li><a href="../classes/zebra.ui.Manager.html">zebra.ui.Manager</a></li>
+            
+                <li><a href="../classes/zebra.ui.Menu.html">zebra.ui.Menu</a></li>
+            
+                <li><a href="../classes/zebra.ui.Menunbar.html">zebra.ui.Menunbar</a></li>
+            
+                <li><a href="../classes/zebra.ui.MLabel.html">zebra.ui.MLabel</a></li>
+            
+                <li><a href="../classes/zebra.ui.MouseEvent.html">zebra.ui.MouseEvent</a></li>
+            
+                <li><a href="../classes/zebra.ui.MouseListener.html">zebra.ui.MouseListener</a></li>
+            
+                <li><a href="../classes/zebra.ui.MouseWheelSupport.html">zebra.ui.MouseWheelSupport</a></li>
+            
+                <li><a href="../classes/zebra.ui.PaintManager.html">zebra.ui.PaintManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.PaintManImpl.html">zebra.ui.PaintManImpl</a></li>
+            
+                <li><a href="../classes/zebra.ui.Panel.html">zebra.ui.Panel</a></li>
+            
+                <li><a href="../classes/zebra.ui.PasswordText.html">zebra.ui.PasswordText</a></li>
+            
+                <li><a href="../classes/zebra.ui.Pattern.html">zebra.ui.Pattern</a></li>
+            
+                <li><a href="../classes/zebra.ui.Picture.html">zebra.ui.Picture</a></li>
+            
+                <li><a href="../classes/zebra.ui.PopupInfo.html">zebra.ui.PopupInfo</a></li>
+            
+                <li><a href="../classes/zebra.ui.PopupLayer.html">zebra.ui.PopupLayer</a></li>
+            
+                <li><a href="../classes/zebra.ui.PopupManager.html">zebra.ui.PopupManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.Progress.html">zebra.ui.Progress</a></li>
+            
+                <li><a href="../classes/zebra.ui.Radial.html">zebra.ui.Radial</a></li>
+            
+                <li><a href="../classes/zebra.ui.Radiobox.html">zebra.ui.Radiobox</a></li>
+            
+                <li><a href="../classes/zebra.ui.RadioView.html">zebra.ui.RadioView</a></li>
+            
+                <li><a href="../classes/zebra.ui.Raised.html">zebra.ui.Raised</a></li>
+            
+                <li><a href="../classes/zebra.ui.Render.html">zebra.ui.Render</a></li>
+            
+                <li><a href="../classes/zebra.ui.RootLayer.html">zebra.ui.RootLayer</a></li>
+            
+                <li><a href="../classes/zebra.ui.RoundBorder.html">zebra.ui.RoundBorder</a></li>
+            
+                <li><a href="../classes/zebra.ui.Scroll.html">zebra.ui.Scroll</a></li>
+            
+                <li><a href="../classes/zebra.ui.ScrollManager.html">zebra.ui.ScrollManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.ScrollPan.html">zebra.ui.ScrollPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.Slider.html">zebra.ui.Slider</a></li>
+            
+                <li><a href="../classes/zebra.ui.SplitPan.html">zebra.ui.SplitPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.StatePan.html">zebra.ui.StatePan</a></li>
+            
+                <li><a href="../classes/zebra.ui.Sunken.html">zebra.ui.Sunken</a></li>
+            
+                <li><a href="../classes/zebra.ui.SwitchManager.html">zebra.ui.SwitchManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.Tabs.html">zebra.ui.Tabs</a></li>
+            
+                <li><a href="../classes/zebra.ui.TextArea.html">zebra.ui.TextArea</a></li>
+            
+                <li><a href="../classes/zebra.ui.TextField.html">zebra.ui.TextField</a></li>
+            
+                <li><a href="../classes/zebra.ui.TextRender.html">zebra.ui.TextRender</a></li>
+            
+                <li><a href="../classes/zebra.ui.Toolbar.html">zebra.ui.Toolbar</a></li>
+            
+                <li><a href="../classes/zebra.ui.TooltipInfo.html">zebra.ui.TooltipInfo</a></li>
+            
+                <li><a href="../classes/zebra.ui.TooltipManager.html">zebra.ui.TooltipManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.tree.DefEditors.html">zebra.ui.tree.DefEditors</a></li>
+            
+                <li><a href="../classes/zebra.ui.tree.DefViews.html">zebra.ui.tree.DefViews</a></li>
+            
+                <li><a href="../classes/zebra.ui.tree.Tree.html">zebra.ui.tree.Tree</a></li>
+            
+                <li><a href="../classes/zebra.ui.View.html">zebra.ui.View</a></li>
+            
+                <li><a href="../classes/zebra.ui.ViewPan.html">zebra.ui.ViewPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.ViewSet.html">zebra.ui.ViewSet</a></li>
+            
+                <li><a href="../classes/zebra.ui.Window.html">zebra.ui.Window</a></li>
+            
+                <li><a href="../classes/zebra.ui.WinLayer.html">zebra.ui.WinLayer</a></li>
+            
+                <li><a href="../classes/zebra.ui.WinListener.html">zebra.ui.WinListener</a></li>
+            
+                <li><a href="../classes/zebra.ui.zCanvas.html">zebra.ui.zCanvas</a></li>
+            
+                <li><a href="../classes/zebra.URL.html">zebra.URL</a></li>
+            
+                <li><a href="../classes/zebra.util.Bag.html">zebra.util.Bag</a></li>
+            
+                <li><a href="../classes/zebra.util.findInTree().html">zebra.util.findInTree()</a></li>
+            
+                <li><a href="../classes/zebra.util.Listeners.html">zebra.util.Listeners</a></li>
+            
+                <li><a href="../classes/zebra.util.newInstance().html">zebra.util.newInstance()</a></li>
+            
+                <li><a href="../classes/zebra.util.Position.html">zebra.util.Position</a></li>
+            
+                <li><a href="../classes/zebra.util.Position.Metric.html">zebra.util.Position.Metric</a></li>
+            
+                <li><a href="../classes/zebra.util.rgb.html">zebra.util.rgb</a></li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>
+
+        <div id="main" class="yui3-u">
+            <div class="content"><h4>ui.designer.js</h4>
+
+<pre class="code prettyprint linenums">
+(function(pkg, Class, ui) {
+
+/**
+ * The package contains number of UI components that can be helful to 
+ * make visiual control of an UI component size and location
+ * @module  ui.designer
+ * @namespace zebra.ui.designer
+ * @main 
+ */
+
+var L = zebra.layout, Cursor = ui.Cursor, KeyEvent = ui.KeyEvent, Cursorable = ui.Cursorable, CURSORS = [];
+
+CURSORS[L.LEFT  ] = Cursor.W_RESIZE;
+CURSORS[L.RIGHT ] = Cursor.E_RESIZE;
+CURSORS[L.TOP   ] = Cursor.N_RESIZE;
+CURSORS[L.BOTTOM] = Cursor.S_RESIZE;
+CURSORS[L.TLEFT ] = Cursor.NW_RESIZE;
+CURSORS[L.TRIGHT] = Cursor.NE_RESIZE;
+CURSORS[L.BLEFT ] = Cursor.SW_RESIZE;
+CURSORS[L.BRIGHT] = Cursor.SE_RESIZE;
+CURSORS[L.CENTER] = Cursor.MOVE;
+CURSORS[L.NONE  ] = Cursor.DEFAULT;
+
+pkg.ShaperBorder = Class(ui.View, [
+    function $prototype() {
+        this.color = &quot;blue&quot;;
+        this.gap = 7;
+
+        function contains(x, y, gx, gy, ww, hh) {
+            return gx &lt;= x &amp;&amp; (gx + ww) &gt; x &amp;&amp; gy &lt;= y &amp;&amp; (gy + hh) &gt; y;
+        }
+
+        this.paint = function(g,x,y,w,h,d){
+            var cx = ~~((w - this.gap)/2), cy = ~~((h - this.gap)/2);
+            g.setColor(this.color);
+            g.beginPath();
+            g.rect(x, y, this.gap, this.gap);
+            g.rect(x + cx, y, this.gap, this.gap);
+            g.rect(x, y + cy, this.gap, this.gap);
+            g.rect(x + w - this.gap, y, this.gap, this.gap);
+            g.rect(x, y + h - this.gap, this.gap, this.gap);
+            g.rect(x + cx, y + h - this.gap, this.gap, this.gap);
+            g.rect(x + w - this.gap, y + cy, this.gap, this.gap);
+            g.rect(x + w - this.gap, y + h - this.gap, this.gap, this.gap);
+            g.fill();
+            g.beginPath();
+            g.rect(x + ~~(this.gap / 2), y + ~~(this.gap / 2), w - this.gap, h - this.gap);
+            g.stroke();
+        };
+
+        this.detectAt = function(target,x,y){
+            var gap = this.gap, gap2 = gap*2, w = target.width, h = target.height;
+
+            if (contains(x, y, gap, gap, w - gap2, h - gap2)) return L.CENTER;
+            if (contains(x, y, 0, 0, gap, gap))               return L.TLEFT;
+            if (contains(x, y, 0, h - gap, gap, gap))         return L.BLEFT;
+            if (contains(x, y, w - gap, 0, gap, gap))         return L.TRIGHT;
+            if (contains(x, y, w - gap, h - gap, gap, gap))   return L.BRIGHT;
+
+            var mx = ~~((w-gap)/2);
+            if (contains(x, y, mx, 0, gap, gap))        return L.TOP;
+            if (contains(x, y, mx, h - gap, gap, gap))  return L.BOTTOM;
+
+            var my = ~~((h-gap)/2);
+            if (contains(x, y, 0, my, gap, gap)) return L.LEFT;
+            return contains(x, y, w - gap, my, gap, gap) ? L.RIGHT : L.NONE;
+        };
+    }
+]);
+
+pkg.InsetsArea = Class([
+    function $prototype() {
+        this.top = this.right = this.left = this.bottom = 6;
+
+        this.detectAt = function (c,x,y){
+            var t = 0, b1 = false, b2 = false;
+            if (x &lt; this.left) t += L.LEFT;
+            else {
+                if (x &gt; (c.width - this.right)) t += L.RIGHT;
+                else b1 = true;
+            }
+
+            if (y &lt; this.top) t += L.TOP;
+            else {
+                if (y &gt; (c.height - this.bottom)) t += L.BOTTOM;
+                else b2 = true;
+            }
+            return b1 &amp;&amp; b2 ? L.CENTER : t;
+        };
+    }
+]);
+
+/**
+ * This is UI component class that implements possibility to embeds another
+ * UI components to control the component size and location visually.
+ 
+        // create canvas 
+        var canvas = new zebra.ui.zCanvas(300,300);
+
+        // create two UI components
+        var lab = new zebra.ui.Label(&quot;Label&quot;);
+        var but = new zebra.ui.Button(&quot;Button&quot;);
+
+        // add created before label component as target of the shaper
+        // component and than add the shaper component into root panel 
+        canvas.root.add(new zebra.ui.designer.ShaperPan(lab).properties({
+            bounds: [ 30,30,100,40]
+        }));
+
+        // add created before button component as target of the shaper
+        // component and than add the shaper component into root panel 
+        canvas.root.add(new zebra.ui.designer.ShaperPan(but).properties({
+            bounds: [ 130,130,100,50]
+        }));
+
+ * @class  ShaperPan
+ * @constructor
+ * @extends {zebra.ui.Panel}
+ * @param {zebra.ui.Panel} target a target UI component whose size and location
+ * has to be controlled
+ */
+pkg.ShaperPan = Class(ui.Panel, Cursorable, ui.Composite, ui.KeyListener, ui.MouseListener, [
+    function $prototype() {
+        this.minHeight = this.minWidth = 12;
+        this.isResizeEnabled = this.isMoveEnabled = true;
+        this.state = null;
+
+        this.getCursorType = function (t, x ,y) {
+            return this.kids.length &gt; 0 ? CURSORS[this.shaperBr.detectAt(t, x, y)] : -1;
+        };
+
+        this.canHaveFocus = function() { return true; };
+
+        this.keyPressed = function(e) {
+            if (this.kids.length &gt; 0){
+                var b = (e.mask &amp; KeyEvent.M_SHIFT) &gt; 0, c = e.code,
+                    dx = (c == KeyEvent.LEFT ?  -1 : (c == KeyEvent.RIGHT ? 1 : 0)),
+                    dy = (c == KeyEvent.UP   ?  -1 : (c == KeyEvent.DOWN  ? 1 : 0)),
+                    w = this.width + dx, h = this.height + dy,
+                    x = this.x + dx, y = this.y + dy;
+
+                if (b) {
+                    if (this.isResizeEnabled &amp;&amp; w &gt; this.shaperBr.gap * 2 &amp;&amp; h &gt; this.shaperBr.gap * 2) {
+                        this.setSize(w, h);
+                    }
+                }
+                else {
+                    if (this.isMoveEnabled) {
+                        var ww = this.width, hh = this.height, p = this.parent;
+                        if (x + ww/2 &gt; 0 &amp;&amp; y + hh/2 &gt; 0 &amp;&amp; x &lt; p.width - ww/2 &amp;&amp; y &lt; p.height - hh/2) this.setLocation(x, y);
+                    }
+                }
+            }
+        };
+
+        this.mouseDragStarted = function(e){
+            this.state = null;
+            if (this.isResizeEnabled || this.isMoveEnabled) {
+                var t = this.shaperBr.detectAt(this, e.x, e.y);
+                if ((this.isMoveEnabled   === false &amp;&amp; t == L.CENTER)||
+                    (this.isResizeEnabled === false &amp;&amp; t != L.CENTER)  )
+                {
+                    return;
+                }
+
+                this.state = { top    : ((t &amp; L.TOP   ) &gt; 0 ? 1 : 0),
+                               left   : ((t &amp; L.LEFT  ) &gt; 0 ? 1 : 0),
+                               right  : ((t &amp; L.RIGHT ) &gt; 0 ? 1 : 0),
+                               bottom : ((t &amp; L.BOTTOM) &gt; 0 ? 1 : 0) };
+
+                if (this.state != null) {
+                    this.px = e.absX;
+                    this.py = e.absY;
+                }
+            }
+        };
+
+        this.mouseDragged = function(e){
+            if (this.state != null) {
+                var dy = (e.absY - this.py), dx = (e.absX - this.px), s = this.state,
+                    nw = this.width  - dx * s.left + dx * s.right,
+                    nh = this.height - dy * s.top  + dy * s.bottom;
+
+                if (nw &gt;= this.minWidth &amp;&amp; nh &gt;= this.minHeight) {
+                    this.px = e.absX;
+                    this.py = e.absY;
+                    if ((s.top + s.right + s.bottom + s.left) === 0) {
+                        this.setLocation(this.x + dx, this.y + dy);
+                    }
+                    else {                    
+                        this.setSize(nw, nh);
+                        this.setLocation(this.x + dx * s.left, this.y + dy * s.top);
+                    }
+                }
+            }
+        };
+
+        this.setColor = function (b, color) {
+            this.colors[b?1:0] = color;
+            this.shaperBr.color = this.colors[this.hasFocus()? 1 : 0];
+            this.repaint();
+        };
+    },
+
+    function (t){
+        this.$super(new L.BorderLayout());
+        this.px = this.py = 0;
+        this.shaperBr = new pkg.ShaperBorder();
+        this.colors   = [ &quot;lightGray&quot;, &quot;blue&quot; ];
+        this.shaperBr.color = this.colors[0];
+        this.setBorder(this.shaperBr);
+        if (t != null) this.add(t);
+    },
+
+    function insert(i, constr, d) {
+        if (this.kids.length &gt; 0) {
+            this.removeAll();
+        }
+
+        var top = this.getTop(), left = this.getLeft();
+        if (d.width === 0 || d.height === 0) d.toPreferredSize();
+        this.setLocation(d.x - left, d.y - top);
+        this.setSize(d.width + left + this.getRight(), d.height + top + this.getBottom());
+        this.$super(i, L.CENTER, d);
+    },
+
+    function focused(){
+        this.$super();
+        this.shaperBr.color = this.colors[this.hasFocus()? 1 : 0];
+        this.repaint();
+    }
+]);
+
+pkg.FormTreeModel = Class(zebra.data.TreeModel, [
+    function $prototype() {
+        this.buildModel = function(comp, root){
+            var b = this.exclude &amp;&amp; this.exclude(comp), item = b ? root : this.createItem(comp);
+            for(var i = 0; i &lt; comp.kids.length; i++) {
+                var r = this.buildModel(comp.kids[i], item);
+                if (r) {
+                    r.parent = item;
+                    item.kids.push(r);
+                }
+            }
+            return b ? null : item;
+        };
+
+        this.itemByComponent = function (c, r){
+            if (r == null) r = this.root;
+            if (r.comp == c) return c;
+            for(var i = 0;i &lt; r.kids.length; i++) {
+                var item = this.itemByComponent(c, r.kids[i]);
+                if (item != null) return item;
+            }
+            return null;
+        };
+
+        this.createItem = function(comp){
+            var name = comp.getClazz().$name;
+            if (name == null) name = comp.toString();
+            var index = name.lastIndexOf(&#x27;.&#x27;),
+                item = new zebra.data.Item(index &gt; 0 ? name.substring(index + 1) : name);
+            item.comp = comp;
+            return item;
+        };
+    },
+
+    function (target){
+        this.$super(this.buildModel(target, null));
+    }
+]);
+
+})(zebra(&quot;ui.designer&quot;), zebra.Class, zebra(&quot;ui&quot;));
+</pre>
+
+</div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/js/tabs.js"></script>
+</body>
+</html>

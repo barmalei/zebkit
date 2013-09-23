@@ -169,9 +169,9 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
         var l1 = pkg.createLabel("Press right mouse\nbutton to see\ncontext menu Cars", rgb.black);
         var l2 = pkg.createLabel("Press right mouse\nbutton to see\ncontext menu Colors", "003366");
         var l3 = pkg.createLabel("Press right mouse\nbutton to see\ncontext menu Brands", "99CC99");
-        l1.setFont(new Font("Arial", 1, 16));
-        l2.setFont(new Font("Arial", 1, 16));
-        l3.setFont(new Font("Arial", 1, 16));
+        l1.setFont(new Font("Arial", "bold", 16));
+        l2.setFont(new Font("Arial", "bold", 16));
+        l3.setFont(new Font("Arial", "bold", 16));
         l1.setPreferredSize(200, 110);
         l2.setPreferredSize(200, 110);
         l3.setPreferredSize(200, 110);

@@ -56,7 +56,7 @@
     "Button": {
         "Label": {
             "properties": {
-                "font": { "$Font" : ["Arial", 1, 15] }
+                "font": { "$Font" : ["Arial", "bold", 15] }
             }
         },
 
@@ -240,7 +240,7 @@
     },
 
     "TextField": {
-        "hintFont"  : { "$Font": ["Arial", 3, 12] },
+        "hintFont"  : { "$Font": ["Arial", "bold italic", 12] },
         "hintColor" : "#C1C1C1",
         "properties": {
             "border"        : { "$ *ViewSet": { 
@@ -524,7 +524,7 @@
                 "views": {
                       "close"   : { "$Picture": [ "@pictures.tree", 16 ,0 ,15,14, true ] },
                       "open"    : { "$Picture": [ "@pictures.tree", 0  ,14,16,14, true ] },
-                      "least"   : { "$Picture": [ "@pictures.tree", 0  ,0 ,16,14, true ] },
+                      "leaf"   : { "$Picture": [ "@pictures.tree", 0  ,0 ,16,14, true ] },
                       "off"     : { "$zebra.ui.tree.TreeSignView": [] },
                       "on"      : { "$zebra.ui.tree.TreeSignView": [ false ] },
                       "aselect" : [ [ "rgb(228, 244, 252)", { "$Border": "rgb(200,180,200)" } ] ]
@@ -532,7 +532,7 @@
 
             },
             "fontColor" : "@palette.gray1",
-            "font"      : { "$Font": [ "Helvetica", 0, 14]}
+            "font"      : { "$Font": [ "Helvetica", 14]}
         }
     },
 
@@ -601,7 +601,7 @@
 
         "TitleLab": {
             "properties": {
-                "font" : {"$Font" : ["Verdana", 0, 16] },
+                "font" : {"$Font" : ["Verdana", 16] },
                 "color": "@palette.white"
             }
         },

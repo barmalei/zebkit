@@ -44,7 +44,7 @@ pkg.TreeDemo = new Class(pkg.DemoPan, [
         t1.select(t1.model.root);
 
         var t2 = new Tree(makeTreeModel()), p2 = new BorderPan("Custom view tree", t2);
-        var fn = new Font("Arial", 1, 14);
+        var fn = new Font("Arial", "bold", 14);
         t2.setViewProvider(new zebra.Dummy([
               function getView(c, i) {
                     var tr = new TextRender(i.value);

@@ -1,0 +1,54 @@
+<a name="methods_{{name}}"></a>
+<div class="method item{{#if access}} {{access}}{{/if}}">
+    {{#if final}}<code>final</code> {{/if}}{{#if returnType}}{{#crossLink returnType}}{{/crossLink}} {{/if}}<strong class="name">`{{name}}`</strong>( `{{paramsList}} ` )     
+
+    {{#if access}}
+        <span class="flag {{access}}">{{access}}</span>
+    {{/if}}
+
+    <br>
+    {{{methodDescription}}}
+    {{#if params}}
+    <strong>Parameters:</strong>
+    <ul class="params">
+    {{#params}}
+        <li>
+        {{#if optional}}
+            <strong>`[{{name}}{{#if optdefault}}={{optdefault}}{{/if}}]` <i><font color="green">&lt;{{#crossLink type}}{{/crossLink}}&gt;</font></i></strong>
+            <span class="flag optional" title="This parameter is optional.">optional</span>
+        {{else}}
+            <strong>`{{name}}` <i><font color="green">&lt;{{#crossLink type}}{{/crossLink}}&gt;</font></i></strong>
+        {{/if}}
+        {{#if multiple}}
+            <abbr title="Denotes that this argument can contain (n) number">(*..n)</abbr>
+        {{/if}}
+        {{{description}}}
+            {{#if props}}
+            <ul>
+            {{#props}}
+                <li><strong>`{{name}}` <i><font color="green">&lt;{{#crossLink type}}{{/crossLink}}&gt;</font></i></strong> {{{description}}}
+                {{#if props}}
+                    <ul>
+                        {{#props}}
+                            <li><strong>`{{name}}` <i><font color="green">&lt;{{#crossLink type}}{{/crossLink}}&gt;</font></i></strong> {{{description}}} </li>
+                        {{/props}}
+                    </ul>
+                {{/if}}
+                </li>
+            {{/props}}
+            </ul>
+            {{/if}}
+        </li>
+    {{/params}}
+    </ul>
+    {{/if}}
+    {{#if return}}
+    {{#return}}
+    <br><div class="returns"><strong>Returns:</strong> <font color="green">{{#if type}}&lt;{{#crossLink type}}{{/crossLink}}&gt; </font>{{/if}}{{{description}}}</div>
+    {{/return}}
+    {{/if}}
+    {{#if example}}
+        <h5>Example</h5>
+        {{{example}}}
+    {{/if}}
+</div>

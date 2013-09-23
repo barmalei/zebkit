@@ -1,0 +1,1902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>ui.list.js - Zebra API</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.8.0pr2/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <script src="http://yui.yahooapis.com/combo?3.8.0pr2/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            <h1>Zebra API: ui.list.js</a></h1>
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 07/2013</em>
+        </div>
+    </div>
+    <div class="yui3-g">
+
+        <div id="sidebar" class="yui3-u">
+            <div id="modules" class="sidebox">
+    <div class="hd">
+        <h2 class="no-toc">Packages</h2>
+    </div>
+    <div class="bd">
+        <ul>
+            
+                <li><a href="../modules/data.html">data</a>
+                
+                </li>
+            
+                <li><a href="../modules/io.html">io</a>
+                
+                </li>
+            
+                <li><a href="../modules/layout.html">layout</a>
+                
+                </li>
+            
+                <li><a href="../modules/ui.html">ui</a>
+                
+                </li>
+            
+                <li><a href="../modules/ui.designer.html">ui.designer</a>
+                
+                </li>
+            
+                <li><a href="../modules/ui.grid.html">ui.grid</a>
+                
+                </li>
+            
+                <li><a href="../modules/ui.tree.html">ui.tree</a>
+                
+                </li>
+            
+                <li><a href="../modules/util.html">util</a>
+                
+                </li>
+            
+                <li><a href="../modules/zebra.html">zebra</a>
+                
+                </li>
+            
+        </ul>
+    </div>
+</div>
+
+<div id="classes" class="sidebox">
+    <div class="hd">
+        <h2 class="no-toc">Classes and interfaces</h2>
+    </div>
+    <div class="bd">
+        <ul>
+            
+                <li><a href="../classes/zebra.Class().html">zebra.Class()</a></li>
+            
+                <li><a href="../classes/zebra.data.Item.html">zebra.data.Item</a></li>
+            
+                <li><a href="../classes/zebra.data.ListModel.html">zebra.data.ListModel</a></li>
+            
+                <li><a href="../classes/zebra.data.Matrix.html">zebra.data.Matrix</a></li>
+            
+                <li><a href="../classes/zebra.data.SingleLineTxt.html">zebra.data.SingleLineTxt</a></li>
+            
+                <li><a href="../classes/zebra.data.Text.html">zebra.data.Text</a></li>
+            
+                <li><a href="../classes/zebra.data.TextModel.html">zebra.data.TextModel</a></li>
+            
+                <li><a href="../classes/zebra.data.TreeModel.html">zebra.data.TreeModel</a></li>
+            
+                <li><a href="../classes/zebra.Dummy.html">zebra.Dummy</a></li>
+            
+                <li><a href="../classes/zebra.forName().html">zebra.forName()</a></li>
+            
+                <li><a href="../classes/zebra.instanceOf().html">zebra.instanceOf()</a></li>
+            
+                <li><a href="../classes/zebra.Interface().html">zebra.Interface()</a></li>
+            
+                <li><a href="../classes/zebra.io.b64decode().html">zebra.io.b64decode()</a></li>
+            
+                <li><a href="../classes/zebra.io.b64encode().html">zebra.io.b64encode()</a></li>
+            
+                <li><a href="../classes/zebra.io.GET().html">zebra.io.GET()</a></li>
+            
+                <li><a href="../classes/zebra.io.HTTP.html">zebra.io.HTTP</a></li>
+            
+                <li><a href="../classes/zebra.io.ID().html">zebra.io.ID()</a></li>
+            
+                <li><a href="../classes/zebra.io.JRPC.html">zebra.io.JRPC</a></li>
+            
+                <li><a href="../classes/zebra.io.JRPC.invoke().html">zebra.io.JRPC.invoke()</a></li>
+            
+                <li><a href="../classes/zebra.io.POST().html">zebra.io.POST()</a></li>
+            
+                <li><a href="../classes/zebra.io.QS.html">zebra.io.QS</a></li>
+            
+                <li><a href="../classes/zebra.io.Service.html">zebra.io.Service</a></li>
+            
+                <li><a href="../classes/zebra.io.XRPC.html">zebra.io.XRPC</a></li>
+            
+                <li><a href="../classes/zebra.io.XRPC.invoke().html">zebra.io.XRPC.invoke()</a></li>
+            
+                <li><a href="../classes/zebra.layout.BorderLayout.html">zebra.layout.BorderLayout</a></li>
+            
+                <li><a href="../classes/zebra.layout.Constraints.html">zebra.layout.Constraints</a></li>
+            
+                <li><a href="../classes/zebra.layout.FlowLayout.html">zebra.layout.FlowLayout</a></li>
+            
+                <li><a href="../classes/zebra.layout.getAbsLocation().html">zebra.layout.getAbsLocation()</a></li>
+            
+                <li><a href="../classes/zebra.layout.getDirectAt().html">zebra.layout.getDirectAt()</a></li>
+            
+                <li><a href="../classes/zebra.layout.getDirectChild().html">zebra.layout.getDirectChild()</a></li>
+            
+                <li><a href="../classes/zebra.layout.getTopParent().html">zebra.layout.getTopParent()</a></li>
+            
+                <li><a href="../classes/zebra.layout.GridLayout.html">zebra.layout.GridLayout</a></li>
+            
+                <li><a href="../classes/zebra.layout.Layout.html">zebra.layout.Layout</a></li>
+            
+                <li><a href="../classes/zebra.layout.Layoutable.html">zebra.layout.Layoutable</a></li>
+            
+                <li><a href="../classes/zebra.layout.ListLayout.html">zebra.layout.ListLayout</a></li>
+            
+                <li><a href="../classes/zebra.layout.PercentLayout.html">zebra.layout.PercentLayout</a></li>
+            
+                <li><a href="../classes/zebra.layout.RasterLayout.html">zebra.layout.RasterLayout</a></li>
+            
+                <li><a href="../classes/zebra.layout.StackLayout.html">zebra.layout.StackLayout</a></li>
+            
+                <li><a href="../classes/zebra.ready().html">zebra.ready()</a></li>
+            
+                <li><a href="../classes/zebra.ui.BaseLayer.html">zebra.ui.BaseLayer</a></li>
+            
+                <li><a href="../classes/zebra.ui.BaseList.html">zebra.ui.BaseList</a></li>
+            
+                <li><a href="../classes/zebra.ui.BoldLabel.html">zebra.ui.BoldLabel</a></li>
+            
+                <li><a href="../classes/zebra.ui.Border.html">zebra.ui.Border</a></li>
+            
+                <li><a href="../classes/zebra.ui.BorderPan.html">zebra.ui.BorderPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.Button.html">zebra.ui.Button</a></li>
+            
+                <li><a href="../classes/zebra.ui.Checkbox.html">zebra.ui.Checkbox</a></li>
+            
+                <li><a href="../classes/zebra.ui.Checkbox.Box.html">zebra.ui.Checkbox.Box</a></li>
+            
+                <li><a href="../classes/zebra.ui.ChildrenListener.html">zebra.ui.ChildrenListener</a></li>
+            
+                <li><a href="../classes/zebra.ui.Combo.html">zebra.ui.Combo</a></li>
+            
+                <li><a href="../classes/zebra.ui.Combo.ContentPan.html">zebra.ui.Combo.ContentPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.Combo.EditableContentPan.html">zebra.ui.Combo.EditableContentPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.Combo.ReadonlyContentPan.html">zebra.ui.Combo.ReadonlyContentPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.ComboArrowView.html">zebra.ui.ComboArrowView</a></li>
+            
+                <li><a href="../classes/zebra.ui.CommandManager.html">zebra.ui.CommandManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.CompList.html">zebra.ui.CompList</a></li>
+            
+                <li><a href="../classes/zebra.ui.ComponentListener.html">zebra.ui.ComponentListener</a></li>
+            
+                <li><a href="../classes/zebra.ui.Composite.html">zebra.ui.Composite</a></li>
+            
+                <li><a href="../classes/zebra.ui.CompositeView.html">zebra.ui.CompositeView</a></li>
+            
+                <li><a href="../classes/zebra.ui.CompRender.html">zebra.ui.CompRender</a></li>
+            
+                <li><a href="../classes/zebra.ui.CopyCutPaste.html">zebra.ui.CopyCutPaste</a></li>
+            
+                <li><a href="../classes/zebra.ui.Cursorable.html">zebra.ui.Cursorable</a></li>
+            
+                <li><a href="../classes/zebra.ui.CursorManager.html">zebra.ui.CursorManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.designer.ShaperPan.html">zebra.ui.designer.ShaperPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.Dotted.html">zebra.ui.Dotted</a></li>
+            
+                <li><a href="../classes/zebra.ui.Etched.html">zebra.ui.Etched</a></li>
+            
+                <li><a href="../classes/zebra.ui.EventManager.html">zebra.ui.EventManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.findCanvas().html">zebra.ui.findCanvas()</a></li>
+            
+                <li><a href="../classes/zebra.ui.FocusListener.html">zebra.ui.FocusListener</a></li>
+            
+                <li><a href="../classes/zebra.ui.FocusManager.html">zebra.ui.FocusManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.Font.html">zebra.ui.Font</a></li>
+            
+                <li><a href="../classes/zebra.ui.Gradient.html">zebra.ui.Gradient</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.DefEditors.html">zebra.ui.grid.DefEditors</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.Grid.html">zebra.ui.grid.Grid</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.GridCaption.html">zebra.ui.grid.GridCaption</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.GridStretchPan.html">zebra.ui.grid.GridStretchPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.Metrics.html">zebra.ui.grid.Metrics</a></li>
+            
+                <li><a href="../classes/zebra.ui.Group.html">zebra.ui.Group</a></li>
+            
+                <li><a href="../classes/zebra.ui.HtmlElement.html">zebra.ui.HtmlElement</a></li>
+            
+                <li><a href="../classes/zebra.ui.HtmlTextArea.html">zebra.ui.HtmlTextArea</a></li>
+            
+                <li><a href="../classes/zebra.ui.HtmlTextField.html">zebra.ui.HtmlTextField</a></li>
+            
+                <li><a href="../classes/zebra.ui.HtmlTextInput.html">zebra.ui.HtmlTextInput</a></li>
+            
+                <li><a href="../classes/zebra.ui.ImageLabel.html">zebra.ui.ImageLabel</a></li>
+            
+                <li><a href="../classes/zebra.ui.ImagePan.html">zebra.ui.ImagePan</a></li>
+            
+                <li><a href="../classes/zebra.ui.InputEvent.html">zebra.ui.InputEvent</a></li>
+            
+                <li><a href="../classes/zebra.ui.KeyEvent.html">zebra.ui.KeyEvent</a></li>
+            
+                <li><a href="../classes/zebra.ui.KeyListener.html">zebra.ui.KeyListener</a></li>
+            
+                <li><a href="../classes/zebra.ui.Label.html">zebra.ui.Label</a></li>
+            
+                <li><a href="../classes/zebra.ui.List.html">zebra.ui.List</a></li>
+            
+                <li><a href="../classes/zebra.ui.List.ViewProvider.html">zebra.ui.List.ViewProvider</a></li>
+            
+                <li><a href="../classes/zebra.ui.loadImage().html">zebra.ui.loadImage()</a></li>
+            
+                <li><a href="../classes/zebra.ui.Manager.html">zebra.ui.Manager</a></li>
+            
+                <li><a href="../classes/zebra.ui.Menu.html">zebra.ui.Menu</a></li>
+            
+                <li><a href="../classes/zebra.ui.Menunbar.html">zebra.ui.Menunbar</a></li>
+            
+                <li><a href="../classes/zebra.ui.MLabel.html">zebra.ui.MLabel</a></li>
+            
+                <li><a href="../classes/zebra.ui.MouseEvent.html">zebra.ui.MouseEvent</a></li>
+            
+                <li><a href="../classes/zebra.ui.MouseListener.html">zebra.ui.MouseListener</a></li>
+            
+                <li><a href="../classes/zebra.ui.MouseWheelSupport.html">zebra.ui.MouseWheelSupport</a></li>
+            
+                <li><a href="../classes/zebra.ui.PaintManager.html">zebra.ui.PaintManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.PaintManImpl.html">zebra.ui.PaintManImpl</a></li>
+            
+                <li><a href="../classes/zebra.ui.Panel.html">zebra.ui.Panel</a></li>
+            
+                <li><a href="../classes/zebra.ui.PasswordText.html">zebra.ui.PasswordText</a></li>
+            
+                <li><a href="../classes/zebra.ui.Pattern.html">zebra.ui.Pattern</a></li>
+            
+                <li><a href="../classes/zebra.ui.Picture.html">zebra.ui.Picture</a></li>
+            
+                <li><a href="../classes/zebra.ui.PopupInfo.html">zebra.ui.PopupInfo</a></li>
+            
+                <li><a href="../classes/zebra.ui.PopupLayer.html">zebra.ui.PopupLayer</a></li>
+            
+                <li><a href="../classes/zebra.ui.PopupManager.html">zebra.ui.PopupManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.Progress.html">zebra.ui.Progress</a></li>
+            
+                <li><a href="../classes/zebra.ui.Radial.html">zebra.ui.Radial</a></li>
+            
+                <li><a href="../classes/zebra.ui.Radiobox.html">zebra.ui.Radiobox</a></li>
+            
+                <li><a href="../classes/zebra.ui.RadioView.html">zebra.ui.RadioView</a></li>
+            
+                <li><a href="../classes/zebra.ui.Raised.html">zebra.ui.Raised</a></li>
+            
+                <li><a href="../classes/zebra.ui.Render.html">zebra.ui.Render</a></li>
+            
+                <li><a href="../classes/zebra.ui.RootLayer.html">zebra.ui.RootLayer</a></li>
+            
+                <li><a href="../classes/zebra.ui.RoundBorder.html">zebra.ui.RoundBorder</a></li>
+            
+                <li><a href="../classes/zebra.ui.Scroll.html">zebra.ui.Scroll</a></li>
+            
+                <li><a href="../classes/zebra.ui.ScrollManager.html">zebra.ui.ScrollManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.ScrollPan.html">zebra.ui.ScrollPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.Slider.html">zebra.ui.Slider</a></li>
+            
+                <li><a href="../classes/zebra.ui.SplitPan.html">zebra.ui.SplitPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.StatePan.html">zebra.ui.StatePan</a></li>
+            
+                <li><a href="../classes/zebra.ui.Sunken.html">zebra.ui.Sunken</a></li>
+            
+                <li><a href="../classes/zebra.ui.SwitchManager.html">zebra.ui.SwitchManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.Tabs.html">zebra.ui.Tabs</a></li>
+            
+                <li><a href="../classes/zebra.ui.TextArea.html">zebra.ui.TextArea</a></li>
+            
+                <li><a href="../classes/zebra.ui.TextField.html">zebra.ui.TextField</a></li>
+            
+                <li><a href="../classes/zebra.ui.TextRender.html">zebra.ui.TextRender</a></li>
+            
+                <li><a href="../classes/zebra.ui.Toolbar.html">zebra.ui.Toolbar</a></li>
+            
+                <li><a href="../classes/zebra.ui.TooltipInfo.html">zebra.ui.TooltipInfo</a></li>
+            
+                <li><a href="../classes/zebra.ui.TooltipManager.html">zebra.ui.TooltipManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.tree.DefEditors.html">zebra.ui.tree.DefEditors</a></li>
+            
+                <li><a href="../classes/zebra.ui.tree.DefViews.html">zebra.ui.tree.DefViews</a></li>
+            
+                <li><a href="../classes/zebra.ui.tree.Tree.html">zebra.ui.tree.Tree</a></li>
+            
+                <li><a href="../classes/zebra.ui.View.html">zebra.ui.View</a></li>
+            
+                <li><a href="../classes/zebra.ui.ViewPan.html">zebra.ui.ViewPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.ViewSet.html">zebra.ui.ViewSet</a></li>
+            
+                <li><a href="../classes/zebra.ui.Window.html">zebra.ui.Window</a></li>
+            
+                <li><a href="../classes/zebra.ui.WinLayer.html">zebra.ui.WinLayer</a></li>
+            
+                <li><a href="../classes/zebra.ui.WinListener.html">zebra.ui.WinListener</a></li>
+            
+                <li><a href="../classes/zebra.ui.zCanvas.html">zebra.ui.zCanvas</a></li>
+            
+                <li><a href="../classes/zebra.URL.html">zebra.URL</a></li>
+            
+                <li><a href="../classes/zebra.util.Bag.html">zebra.util.Bag</a></li>
+            
+                <li><a href="../classes/zebra.util.findInTree().html">zebra.util.findInTree()</a></li>
+            
+                <li><a href="../classes/zebra.util.Listeners.html">zebra.util.Listeners</a></li>
+            
+                <li><a href="../classes/zebra.util.newInstance().html">zebra.util.newInstance()</a></li>
+            
+                <li><a href="../classes/zebra.util.Position.html">zebra.util.Position</a></li>
+            
+                <li><a href="../classes/zebra.util.Position.Metric.html">zebra.util.Position.Metric</a></li>
+            
+                <li><a href="../classes/zebra.util.rgb.html">zebra.util.rgb</a></li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>
+
+        <div id="main" class="yui3-u">
+            <div class="content"><h4>ui.list.js</h4>
+
+<pre class="code prettyprint linenums">
+(function(pkg, Class) {
+
+/**
+ * @module ui
+ * @namespace zebra.ui
+*/
+
+var L = zebra.layout, Position = zebra.util.Position, KE = pkg.KeyEvent, Listeners = zebra.util.Listeners;
+
+/**
+ * Base UI list component class that has to be extended with a concrete list component implementation.
+ * The list component visualizes list model.
+ * @class  BaseList
+ * @extends {zebra.ui.Panel}
+ */
+pkg.BaseList = Class(pkg.Panel, pkg.MouseListener, pkg.KeyListener, Position.Metric, [
+    function $prototype() {
+        this.gap = 2;
+
+        /**
+         * Selected list item index
+         * @type {Integer}
+         * @readOnly
+         * @attribute selectedIndex
+         */
+        
+         /**
+          * List model the component visualizes
+          * @attribute model
+          * @type {zebra.data.ListModel}
+          * @readOnly
+          */
+
+        /**
+         * Select the specified list item. 
+         * @param {Object} v a list item to be selected. Use null as 
+         * the parameter value to clean an item selection
+         * @method setValue 
+         */
+        this.setValue = function(v) {
+            if (v == null) {
+                this.select(-1);
+                return;
+            }
+
+            for(var i=0; i&lt;this.model.count(); i++) {
+                if (this.model.get(i) == v) {
+                    this.select(i);
+                    return;
+                }
+            }
+
+            throw new Error(&quot;Invalid value : &quot; + v);
+        };
+
+        /**
+         * Get the list component selected item
+         * @return {Object} a selected item
+         * @method getValue 
+         */
+        this.getValue = function() {
+            return this.getSelected();
+        };
+        
+        /**
+         * Get a value that defines left, right, top and bottom list item gaps.  
+         * @return {Integer} an item gap
+         * @method getItemGap
+         */
+        this.getItemGap = function() {
+            return this.gap;
+        };
+
+        /**
+         * Get selected list item
+         * @return {Object} an item 
+         * @method getSelected
+         */
+        this.getSelected = function(){
+            return this.selectedIndex &lt; 0 ? null
+                                          : this.model.get(this.selectedIndex);
+        };
+
+        this.lookupItem = function(ch){
+            var count = this.model.count();
+            if (zebra.util.isLetter(ch) &amp;&amp; count &gt; 0){
+                var index = this.selectedIndex &lt; 0 ? 0 : this.selectedIndex + 1;
+                ch = ch.toLowerCase();
+                for(var i = 0;i &lt; count - 1; i++){
+                    var idx = (index + i) % count, item = this.model.get(idx).toString();
+                    if (item.length &gt; 0 &amp;&amp; item[0].toLowerCase() == ch) return idx;
+                }
+            }
+            return -1;
+        };
+
+        /**
+         * Test if the given list item is selected
+         * @param  {Integer}  i an item index
+         * @return {Boolean}  true if the item with the given index is selected
+         * @method isSelected
+         */
+        this.isSelected = function(i) { 
+            return i == this.selectedIndex; 
+        };
+
+        this.correctPM = function(x,y){
+            if (this.isComboMode){
+                var index = this.getItemIdxAt(x, y);
+                if (index &gt;= 0 &amp;&amp; index != this.position.offset) {
+                    this.position.setOffset(index);
+                    this.notifyScrollMan(index);
+                }
+            }
+        };
+
+        /**
+         * Return the given list item location. 
+         * @param  {Integer} i a list item index
+         * @return {Object}  a location of the list item. The result is object that 
+         * has the following structure:
+                { x:Integer, y:Integer}
+         * @method getItemLocation
+         */
+        this.getItemLocation = function(i) {
+            this.validate();
+            var gap = this.getItemGap(), y = this.getTop() + this.scrollManager.getSY() + gap;
+            for(var i = 0;i &lt; index; i++) y += (this.getItemSize(i).height + 2 * gap);
+            return { x:this.getLeft(), y:y };
+        };
+
+        /**
+         * Return the given list item size. 
+         * @param  {Integer} i a list item index
+         * @return {Object}  a size of the list item. The result is object that 
+         * has the following structure:
+                { width:Integer, height:Integer}
+         * @method getItemLocation
+         */
+        this.getItemSize = function (i){
+            return this.provider.getView(this, this.model.get(i)).getPreferredSize();
+        };
+
+        this.mouseMoved   = function(e){ this.correctPM(e.x, e.y); };
+
+        this.getLines     = function() { return this.model.count();};
+        this.getLineSize  = function(l){ return 1; };
+        this.getMaxOffset = function (){ return this.getLines() - 1; };
+        this.canHaveFocus = function (){ return true; };
+
+        this.catchScrolled = function(psx,psy){ this.repaint();};
+       
+        /**
+         * Detect an item by the specified location
+         * @param  {Integer} x a x coordinate
+         * @param  {Integer} y a y coordinate
+         * @return {Integer} a list item that is located at the given position. -1 if no any list item can be 
+         * found.
+         * @method getItemIdxAt   
+         */
+        this.getItemIdxAt  = function(x,y){ return -1;};
+
+        /**
+         * Calculate maximal width and maximal height the items in the list have
+         * @protected
+         * @return {Integer} a max items size
+         * @method calcMaxItemSize
+         */
+        this.calcMaxItemSize = function (){
+            var maxH = 0, maxW = 0;
+            this.validate();
+            for(var i = 0;i &lt; this.model.count(); i ++ ){
+                var is = this.getItemSize(i);
+                if(is.height &gt; maxH) maxH = is.height;
+                if(is.width  &gt; maxW) maxW = is.width;
+            }
+            return { width:maxW, height:maxH };
+        };
+
+        /**
+         * Force repainting of the given list items 
+         * @protected
+         * @param  {Integer} p an index of the first list item to be repainted
+         * @param  {Integer} n an index of the second list item to be repainted
+         * @method  repaintByOffsets
+         */
+        this.repaintByOffsets = function(p,n){
+            this.validate();
+            var xx = this.width - this.getRight(),
+                gap = this.getItemGap(),
+                count = this.model.count();
+
+            if (p &gt;= 0 &amp;&amp; p &lt; count){
+                var l = this.getItemLocation(p), x = l.x - gap;
+                this.repaint(x, l.y - gap, xx - x, this.getItemSize(p).height + 2 * gap);
+            }
+
+            if (n &gt;= 0 &amp;&amp; n &lt; count){
+                var l = this.getItemLocation(n), x = l.x - gap;
+                this.repaint(x, l.y - gap, xx - x, this.getItemSize(n).height + 2 * gap);
+            }
+        };
+
+        this.update = function(g) {
+            if (this.selectedIndex &gt;= 0 &amp;&amp; this.views[&quot;select&quot;] != null){
+                var gap = this.getItemGap(),
+                    is = this.getItemSize(this.selectedIndex),
+                    l = this.getItemLocation(this.selectedIndex);
+
+                this.drawSelMarker(g, l.x - gap, l.y - gap,
+                                   is.width + 2 * gap,
+                                   is.height + 2 * gap);
+            }
+        };
+
+        this.paintOnTop = function(g) {
+            if (this.views[&quot;marker&quot;] != null &amp;&amp; (this.isComboMode || this.hasFocus())){
+                var offset = this.position.offset;
+                if(offset &gt;= 0){
+                    var gap = this.getItemGap(), is = this.getItemSize(offset), l = this.getItemLocation(offset);
+                    this.drawPosMarker(g, l.x - gap, l.y - gap, is.width  + 2 * gap, is.height + 2 * gap);
+                }
+            }
+        };
+
+        /**
+         * Select the given list item
+         * @param  {Integer} index an item index to be selected
+         * @method select
+         */
+        this.select = function(index){
+            if(index &gt;= this.model.count()){
+                throw new Error(&quot;index=&quot; + index + &quot;,max=&quot; + this.model.count());
+            }
+
+            if (this.selectedIndex != index){
+                var prev = this.selectedIndex;
+                this.selectedIndex = index;
+                this.notifyScrollMan(index);
+                this.repaintByOffsets(prev, this.selectedIndex);
+                this._.fired(this, prev);
+            }
+            else {
+                this._.fired(this, null);
+            }
+        };
+
+        this.mouseClicked = function(e) {
+            if (e.isActionMask() &amp;&amp; this.model.count() &gt; 0) {
+                this.select(this.position.offset &lt; 0 ? 0 : this.position.offset);
+            }
+        };
+
+        this.mouseReleased = function(e){
+            if (this.model.count() &gt; 0 &amp;&amp; e.isActionMask() &amp;&amp; this.position.offset != this.selectedIndex) {
+                this.position.setOffset(this.selectedIndex);
+            }
+        };
+
+        this.mousePressed = function(e){
+            if (e.isActionMask() &amp;&amp; this.model.count() &gt; 0) { //&amp;&amp; this.isComboMode === false) {
+                var index = this.getItemIdxAt(e.x, e.y);
+                if (index &gt;= 0 &amp;&amp; this.position.offset != index) {
+                    this.position.setOffset(index);
+                }
+            }
+        };
+
+        this.mouseEntered  = function(e){
+            this.correctPM(e.x, e.y);
+        };
+
+        this.keyPressed = function(e){
+            if (this.model.count() &gt; 0){
+                var po = this.position.offset;
+                switch(e.code) {
+                    case KE.END:
+                        if (e.isControlPressed()) this.position.setOffset(this.position.metrics.getMaxOffset());
+                        else this.position.seekLineTo(Position.END);
+                        break;
+                    case KE.HOME:
+                        if (e.isControlPressed()) this.position.setOffset(0);
+                        else this.position.seekLineTo(Position.BEG);
+                        break;
+                    case KE.RIGHT    : this.position.seek(1); break;
+                    case KE.DOWN     : this.position.seekLineTo(Position.DOWN); break;
+                    case KE.LEFT     : this.position.seek(-1);break;
+                    case KE.UP       : this.position.seekLineTo(Position.UP);break;
+                    case KE.PAGEUP   : this.position.seek(this.pageSize(-1));break;
+                    case KE.PAGEDOWN : this.position.seek(this.pageSize(1));break;
+                    case KE.SPACE    :
+                    case KE.ENTER    : this.select(this.position.offset);break;
+                }
+
+                if (po != this.position.offset) {
+                    if (this.isComboMode) {
+                        this.notifyScrollMan(this.position.offset);
+                    }
+                    else {
+                        this.select(this.position.offset);
+                    }
+                }
+            }
+        };
+
+        this.keyTyped = function (e){
+            var i = this.lookupItem(e.ch);
+            if (i &gt;= 0) this.select(i);
+        };
+
+        this.elementInserted = function(target, e,index){
+            this.invalidate();
+            if (this.selectedIndex &gt;= 0 &amp;&amp; this.selectedIndex &gt;= index) this.selectedIndex ++ ;
+            this.position.inserted(index, 1);
+            this.repaint();
+        };
+
+        this.elementRemoved = function(target, e,index){
+            this.invalidate();
+            if (this.selectedIndex == index || this.model.count() === 0) {
+                this.select(-1);
+            }
+            else {
+                if (this.selectedIndex &gt; index) this.selectedIndex--;
+            }
+            this.position.removed(index, 1);
+            this.repaint();
+        };
+
+        this.elementSet = function (target, e, pe,index){
+            this.invalidate();
+            this.repaint();
+        };
+
+        this.posChanged = function (target,prevOffset,prevLine,prevCol){
+            var off = this.position.offset;
+          //  this.notifyScrollMan(off);
+            this.repaintByOffsets(prevOffset, off);
+        };
+
+        this.drawSelMarker = function (g,x,y,w,h) {
+            if (this.views[&quot;select&quot;]) this.views[&quot;select&quot;].paint(g, x, y, w, h, this);
+        };
+
+        this.drawPosMarker = function (g,x,y,w,h) {
+            if (this.views[&quot;marker&quot;]) this.views[&quot;marker&quot;].paint(g, x, y, w, h, this);
+        };
+
+        /**
+         * Set the left, right, top and bottom a list item paddings
+         * @param {Integer} g a left, right, top and bottom a list item paddings
+         * @method setItemGap
+         */
+        this.setItemGap = function(g){
+            if (this.gap != g){
+                this.gap = g;
+                this.vrp();
+            }
+        };
+
+        /**
+         * Set the list model to be rendered with the list component
+         * @param {zebra.data.ListModel} m a list model
+         * @method setModel
+         */
+        this.setModel = function (m){
+            if (m == null) throw new Error(&quot;Null list model&quot;);
+            if (m != this.model){
+                if (Array.isArray(m)) {
+                    m = new zebra.data.ListModel(m);
+                }
+
+                if (this.model != null &amp;&amp; this.model._) this.model._.remove(this);
+                this.model = m;
+                if (this.model._) this.model._.add(this);
+                this.vrp();
+            }
+        };
+
+        /**
+         * Set the given position controller. List component uses position to 
+         * track virtual cursor.
+         * @param {zebra.util.Position} c a position 
+         * @method setPosition
+         */
+        this.setPosition = function(c){
+            if (c != this.position) {
+                if (this.position != null) this.position._.remove(this);
+                this.position = c;
+                this.position._.add(this);
+                this.position.setMetric(this);
+                this.repaint();
+            }
+        };
+
+        /**
+         * Set the list items view provider. Defining a view provider allows developers
+         * to customize list item rendering.  
+         * @param {Object} v a view provider
+         * @method setViewProvider
+         */
+        this.setViewProvider = function (v){
+            if(this.provider != v){
+                this.provider = v;
+                this.vrp();
+            }
+        };
+
+        this.notifyScrollMan = function (index){
+            if (index &gt;= 0 &amp;&amp; this.scrollManager != null) {
+                this.validate();
+                var gap = this.getItemGap(),
+                    dx = this.scrollManager.getSX(), dy = this.scrollManager.getSY(),
+                    is = this.getItemSize(index), l = this.getItemLocation(index);
+
+                this.scrollManager.makeVisible(l.x - dx - gap, l.y - dy - gap,
+                                               is.width + 2 * gap, is.height + 2 * gap);
+            }
+        };
+
+        this.pageSize = function(d){
+            var offset = this.position.offset;
+            if (offset &gt;= 0) {
+                var vp = pkg.$cvp(this, {});
+                if (vp != null) {
+                    var sum = 0, i = offset, gap = 2 * this.getItemGap();
+                    for(;i &gt;= 0 &amp;&amp; i &lt;= this.position.metrics.getMaxOffset() &amp;&amp; sum &lt; vp.height; i += d){
+                        sum += (this.getItemSize(i).height + gap);
+                    }
+                    return i - offset - d;
+                }
+            }
+            return 0;
+        };
+    },
+
+    function (m, b){
+        /**
+         * Currently selected list item index 
+         * @type {Integer}
+         * @attribute selectedIndex
+         * @default -1
+         * @readOnly
+         */
+        this.selectedIndex = -1;
+        
+        this._ = new Listeners();
+        this.isComboMode = b;
+
+        /**
+         * Scroll manager
+         * @attribute scrollManager
+         * @readOnly
+         * @type {zebra.ui.ScrollManager}
+         */
+        this.scrollManager = new pkg.ScrollManager(this);
+        this.$super();
+
+        // position manager should be set before model initialization
+        this.setPosition(new Position(this));
+
+        /**
+         * List model
+         * @readOnly
+         * @attribute model
+         */
+        this.setModel(m);
+    },
+
+    function focused(){
+        this.$super();
+        this.repaint();
+    }
+]);
+pkg.BaseList.prototype.setViews = pkg.$ViewsSetter;
+
+/**
+ * The class is list component implementation that visualizes zebra.data.ListModel. 
+ * It is supposed the model can have any type of items. Visualization of the items 
+ * is customized by defining a view provider. 
+ * @class  List
+ * @extends zebra.ui.BaseList
+ * @constructor
+ * @param {zebra.data.ListModel|Array} [model] a list model that should be passed as an instance
+ * of zebra.data.ListModel or as an array.
+ * @param {Boolean} [isComboMode] true if the list navigation has to be triggered by 
+ * mouse cursor moving
+ */
+pkg.List = Class(pkg.BaseList, [
+    function $clazz() {
+        /**
+         * List view provider class. This implementation renders list item using string 
+         * render. If a list item is an instance of &quot;zebra.ui.View&quot; class than it will 
+         * be rendered as the view.
+         * @class List.ViewProvider
+         * @for zebra.ui.List.ViewProvider
+         */
+        this.ViewProvider = Class([
+            function $prototype() {
+                this[&#x27;&#x27;] = function(f, c) {
+                    /**
+                     * Reference to text render that is used to paint a list items
+                     * @type {zebra.ui.TextRender}
+                     * @attribute text
+                     * @readOnly
+                     * @for zebra.ui.List.ViewProvider
+                     */
+
+                    this.text = new pkg.TextRender(&quot;&quot;);
+                    if (f != null) this.text.setFont(f);
+                    if (c != null) this.text.setColor(c);
+                };
+
+                this.getView = function(target, value) {
+                    if (value &amp;&amp; value.paint) return value;
+                    this.text.target.setValue(value == null ? &quot;&lt;null&gt;&quot; : value.toString());
+                    return this.text;
+                };
+            }
+        ]);
+    },
+
+    function $prototype() {
+        this.paint = function(g){
+            this.vVisibility();
+            if (this.firstVisible &gt;= 0){
+                var sx = this.scrollManager.getSX(), sy = this.scrollManager.getSY();
+                try {
+                    g.translate(sx, sy);
+                    var gap = this.getItemGap(), y = this.firstVisibleY, x = this.getLeft() + gap,
+                        yy = this.vArea.y + this.vArea.height - sy, count = this.model.count(),
+                        provider = this.provider;
+
+                    for(var i = this.firstVisible; i &lt; count; i++){
+                        provider.getView(this, this.model.get(i)).paint(g, x, y, this.widths[i], this.heights[i], this);
+                        y += (this.heights[i] + 2 * gap);
+                        if (y &gt; yy) break;
+                    }
+                }
+                catch(e) { throw e; }
+                finally { g.translate(-sx,  -sy); }
+            }
+        };
+
+        this.recalc = function(){
+            this.psWidth_ = this.psHeight_ = 0;
+            var count = this.model.count();
+            if (this.heights == null || this.heights.length != count) this.heights = Array(count);
+            if (this.widths  == null || this.widths.length  != count) this.widths  = Array(count);
+
+            var provider = this.provider;
+            if (provider != null) {
+                for(var i = 0;i &lt; count; i++){
+                    var ps = provider.getView(this, this.model.get(i)).getPreferredSize();
+                    this.heights[i] = ps.height;
+                    this.widths [i] = ps.width;
+                    if (this.widths[i] &gt; this.psWidth_) this.psWidth_ = this.widths[i];
+                    this.psHeight_ += this.heights[i];
+                }
+            }
+        };
+
+        this.calcPreferredSize = function(l){
+            var gap = 2 * this.getItemGap();
+            return { width:gap + this.psWidth_, height:gap * this.model.count() + this.psHeight_ };
+        };
+
+        this.vVisibility = function(){
+            this.validate();
+            var prev = this.vArea;
+            this.vArea = pkg.$cvp(this, {});
+
+            if (this.vArea == null) {
+                this.firstVisible = -1;
+                return;
+            }
+
+            if (this.visValid === false ||
+                (prev == null || prev.x != this.vArea.x ||
+                 prev.y != this.vArea.y || prev.width != this.vArea.width ||
+                 prev.height != this.vArea.height))
+            {
+                var top = this.getTop(), gap = this.getItemGap();
+                if (this.firstVisible &gt;= 0){
+                    var dy = this.scrollManager.getSY();
+                    while (this.firstVisibleY + dy &gt;= top &amp;&amp; this.firstVisible &gt; 0){
+                        this.firstVisible--;
+                        this.firstVisibleY -= (this.heights[this.firstVisible] + 2 * gap);
+                    }
+                }
+                else {
+                    this.firstVisible = 0;
+                    this.firstVisibleY = top + gap;
+                }
+
+                if (this.firstVisible &gt;= 0){
+                    var count = this.model.count(), hh = this.height - this.getBottom();
+
+                    for(; this.firstVisible &lt; count; this.firstVisible++)
+                    {
+                        var y1 = this.firstVisibleY + this.scrollManager.getSY(),
+                            y2 = y1 + this.heights[this.firstVisible] - 1;
+
+                        if ((y1 &gt;= top &amp;&amp; y1 &lt; hh) || (y2 &gt;= top &amp;&amp; y2 &lt; hh) || (y1 &lt; top &amp;&amp; y2 &gt;= hh)) {
+                            break;
+                        }
+
+                        this.firstVisibleY += (this.heights[this.firstVisible] + 2 * gap);
+                    }
+
+                    if (this.firstVisible &gt;= count) this.firstVisible =  -1;
+                }
+                this.visValid = true;
+            }
+        };
+
+        this.getItemLocation = function(index){
+            this.validate();
+            var gap = this.getItemGap(), y = this.getTop() + this.scrollManager.getSY() + gap;
+            for(var i = 0;i &lt; index; i++) y += (this.heights[i] + 2 * gap);
+            return { x:this.getLeft() + this.getItemGap(), y:y };
+        };
+
+        this.getItemSize = function(i){
+            this.validate();
+            return { width:this.widths[i], height:this.heights[i] };
+        };
+
+        this.getItemIdxAt = function(x,y){
+            this.vVisibility();
+            if (this.vArea != null &amp;&amp; this.firstVisible &gt;= 0) {
+                var yy    = this.firstVisibleY + this.scrollManager.getSY(),
+                    hh    = this.height - this.getBottom(),
+                    count = this.model.count(), gap = this.getItemGap() * 2;
+
+                for(var i = this.firstVisible; i &lt; count; i++) {
+                    if (y &gt;= yy &amp;&amp; y &lt; yy + this.heights[i]) return i;
+                    yy += (this.heights[i] + gap);
+                    if (yy &gt; hh) break;
+                }
+            }
+            return  -1;
+        };
+    },
+
+    function() { this.$this(false); },
+
+    function (m) {
+        if (zebra.isBoolean(m)) this.$this([], m);
+        else this.$this(m, false);
+    },
+
+    function (m, b){
+        /**
+         * Index of the first visible list item
+         * @readOnly
+         * @attribute firstVisible
+         * @type {Integer}
+         * @private
+         */
+        this.firstVisible = -1;
+
+        /**
+         * Y coordinate of the first visible list item
+         * @readOnly
+         * @attribute firstVisibleY
+         * @type {Integer}
+         * @private
+         */
+        this.firstVisibleY = this.psWidth_ = this.psHeight_ = 0;
+        this.heights = this.widths = this.vArea = null;
+        
+        /**
+         * Internal flag to track list items visibility status. It is set 
+         * to false to trigger list items metrics and visibility recalculation 
+         * @attribute visValid 
+         * @type {Boolean}
+         * @private
+         */
+        this.visValid = false;
+        this.setViewProvider(new pkg.List.ViewProvider());
+        this.$super(m, b);
+    },
+
+    function invalidate(){
+        this.visValid = false;
+        this.firstVisible = -1;
+        this.$super();
+    },
+
+    function drawSelMarker(g,x,y,w,h){
+        this.$super(g, x, y, this.width - this.getRight() - x, h);
+    },
+
+    function drawPosMarker(g,x,y,w,h){
+        this.$super(g, x, y, this.width - this.getRight() - x, h);
+    },
+
+    function catchScrolled(psx,psy){
+        this.firstVisible = -1;
+        this.visValid = false;
+        this.$super(psx, psy);
+    }
+]);
+
+/**
+ * List component consider its children UI components as a list model items. Every added to the component 
+ * UI children component becomes a list model element. The implementation allows developers to use 
+ * other UI components as its elements what makes list item view customization very easy and powerful.
+ * @class CompList
+ * @extends zebra.ui.BaseList
+ * @param {zebra.data.ListModel|Array} [model] a list model that should be passed as an instance
+ * of zebra.data.ListModel or as an array.
+ * @param {Boolean} [isComboMode] true if the list navigation has to be triggered by 
+ * mouse cursor moving 
+ */
+pkg.CompList = Class(pkg.BaseList, pkg.Composite, [
+    function $clazz() {
+        this.Label      = Class(pkg.Label, []);
+        this.ImageLabel = Class(pkg.ImageLabel, []);
+        var CompListModelListeners = Listeners.Class(&quot;elementInserted&quot;, &quot;elementRemoved&quot;);
+
+        this.CompListModel = Class([
+            function $prototype() {
+                this.get = function (i) { return this.src.kids[i]; };
+
+                this.set = function(item,i){
+                    this.src.removeAt(i);
+                    this.src.insert(i, null, item);
+                };
+
+                this.add = function(o){ this.src.add(o); };
+                this.removeAt = function (i){ this.src.removeAt(i);};
+                this.insert = function (item,i){ this.src.insert(i, null, item); };
+                this.count = function (){ return this.src.kids.length; };
+                this.removeAll = function () { this.src.removeAll(); };
+            },
+
+            function(src) {
+                this.src = src;
+                this._ = new CompListModelListeners();
+            }
+        ]);
+    },
+
+    function $prototype() {
+        this.catchScrolled = function(px,py) {};
+
+        this.getItemLocation = function(i) {
+            var gap = this.getItemGap();
+            return { x:this.kids[i].x + gap, y:this.kids[i].y + gap };
+        };
+
+        this.getItemSize = function (i) {
+            var gap = this.getItemGap();
+            return { width:this.kids[i].width - 2 * gap, height:this.kids[i].height -  2 * gap };
+        };
+
+        this.recalc = function (){
+            var gap = this.getItemGap();
+            this.max = L.getMaxPreferredSize(this);
+            this.max.width  -= 2 * gap;
+            this.max.height -= 2 * gap;
+        };
+
+        this.calcMaxItemSize = function (){
+            this.validate();
+            return { width:this.max.width, height:this.max.height };
+        };
+
+        this.getItemIdxAt = function(x,y){
+            return L.getDirectAt(x, y, this);
+        };
+
+        this.catchInput = function (child){
+            if (this.isComboMode) {
+                return true;
+            }
+
+            var b = this.input != null &amp;&amp; L.isAncestorOf(this.input, child);
+
+            if (b &amp;&amp; this.input != null &amp;&amp;
+                L.isAncestorOf(this.input, pkg.focusManager.focusOwner) &amp;&amp;
+                this.hasFocus() === false)
+            {
+                this.input = null;
+            }
+            return (this.input == null || b === false);
+        };
+    },
+
+    function () { this.$this([], false); },
+
+    function (b){
+        if (zebra.isBoolean(b)) this.$this([], b);
+        else this.$this(b, false);
+    },
+
+    function (d, b){
+        this.input = this.max = null;
+        this.setViewProvider(new zebra.Dummy([
+            function getView(target,obj) { return new pkg.CompRender(obj); }
+        ]));
+        this.$super(d, b);
+    },
+
+    function setModel(m){
+        var a =[];
+        if (Array.isArray(m)) {
+            a = m;
+            m = new pkg.CompList.CompListModel(this);
+        }
+
+        if (zebra.instanceOf(m, pkg.CompList.CompListModel) === false) {
+            throw new Error(&quot;Invalid model&quot;);
+        }
+
+        this.$super(m);
+        for(var i=0; i &lt; a.length; i++) this.add(a[i]);
+    },
+
+    function setPosition(c){
+        if (c != this.position){
+            if (zebra.instanceOf(this.layout, Position.Metric)) {
+                c.setMetric(this.layout);
+            }
+            this.$super(c);
+        }
+    },
+
+    function setLayout(layout){
+        if (layout != this.layout){
+            this.scrollManager = new pkg.ScrollManager(this, [
+                function $prototype() {
+                    this.calcPreferredSize = function(t) {
+                        return layout.calcPreferredSize(t);
+                    };
+
+                    this.doLayout = function(t){
+                        layout.doLayout(t);
+                        for(var i = 0; i &lt; t.kids.length; i++){
+                            var kid = t.kids[i];
+                            kid.setLocation(kid.x + this.getSX(), kid.y + this.getSY());
+                        }
+                    };
+
+                    this.updated = function(sx,sy,px,py){
+                        this.target.vrp();
+                    };
+                }
+            ]);
+
+            this.$super(this.scrollManager);
+            if (this.position != null) {
+                this.position.setMetric(zebra.instanceOf(layout, Position.Metric) ? layout : this);
+            }
+        }
+    },
+
+    function focused(){
+        var o = this.position.offset;
+        this.input = (o &gt;= 0 &amp;&amp; o == this.selectedIndex) ? this.model.get(this.position.offset) : null;
+        this.$super();
+    },
+
+    function drawSelMarker(g,x,y,w,h){
+        if (this.input == null || L.isAncestorOf(this.input, pkg.focusManager.focusOwner) === false) {
+            this.$super(g, x, y, w, h);
+        }
+    },
+
+    function posChanged(target,prevOffset,prevLine,prevCol){
+        this.$super(target, prevOffset, prevLine, prevCol);
+        if (this.isComboMode === false) {
+            this.input = (this.position.offset &gt;= 0) ? this.model.get(this.position.offset)
+                                                     : null;
+        }
+    },
+
+    function insert(index,constr,e) {
+        var c = zebra.isString(e) ? new pkg.CompList.Label(e) : e,
+            g = this.getItemGap();
+        c.setPaddings(c.top + g, c.left + g, c.bottom + g, c.right + g);
+        return this.$super(index, constr, c);
+    },
+
+    function kidAdded(index,constr,e){
+        this.$super(index,constr,e);
+        this.model._.elementInserted(this, e, index);
+    },
+
+    function kidRemoved(index,e) {
+        var g = this.getItemGap();
+        e.setPaddings(c.top - g, c.left - g, c.bottom - g, c.right - g);
+        this.model._.elementRemoved(this, e, index);
+    }
+]);
+
+var ContentListeners = Listeners.Class(&quot;contentUpdated&quot;);
+
+/**
+ * Combo box UI component class 
+ * @class Combo
+ * @extends {zebra.ui.Panel}
+ */
+
+/**
+ * Fired when a new value in a combo box component has been selected
+  
+     combo._.add(function(combo, value) {
+         ...
+     });
+
+ * @event selected
+ * @param {zebra.ui.Combo} combo a combo box component where a new value
+ * has been selected
+ * @param {Object} value a new value that has been selected
+ */
+pkg.Combo = Class(pkg.Panel, pkg.MouseListener, pkg.KeyListener, pkg.Composite, [
+    function $clazz() {
+        /**
+         * UI panel class that is used to implement combo box content area  
+         * @for  zebra.ui.Combo.ContentPan
+         * @class  Combo.ContentPan
+         * @extends {zebra.ui.Panel}
+         */
+        this.ContentPan = Class(pkg.Panel, [
+            function $prototype() {
+                /**
+                 * Called whenever the given combo box value has been updated with the specified 
+                 * value. Implement the method to synchronize content panel with updated combo 
+                 * box value
+                 * @method updateValue
+                 * @param {zebra.ui.Combo} combo a combo box component that has been updated
+                 * @param {Object} value a value with which the combo box has been updated
+                 */
+                this.updateValue = function(combo, value) {
+
+                };
+                
+                /**
+                 * Indicates if the content panel is editable. Set the property to true 
+                 * to indicate the content panel implementation is editable. Editable
+                 * means the combo box content can be editable by a user
+                 * @attribute isEditable
+                 * @type {Boolean}
+                 * @readOnly
+                 * @default undefined
+                 */
+
+                /**
+                 * Get a combo box the content panel belongs
+                 * @for  zebra.ui.Combo.ContentPan
+                 * @method getCombo
+                 * @return {zebra.ui.Combo} a combo the content panel belongs
+                 */
+                this.getCombo = function() {
+                    var p = this;
+                    while((p = p.parent) &amp;&amp; zebra.instanceOf(p, pkg.Combo) == false);
+                    return p;
+                };
+            }
+        ]);
+        
+        this.ComboPadPan = Class(pkg.ScrollPan, [
+            function $prototype() {
+                this.closeTime = 0;
+            },
+
+            function setParent(l){
+                this.$super(l);
+                if (l == null &amp;&amp; this.owner) {
+                    this.owner.requestFocus();
+                }
+
+                this.closeTime = l == null ? new Date().getTime() : 0;
+            }
+        ]);
+
+        /**
+         * Read-only content area combo box component panel class
+         * @extends zebra.ui.Combo.ContentPan
+         * @for  zebra.ui.Combo.ReadonlyContentPan
+         * @class  Combo.ReadonlyContentPan
+         */
+        this.ReadonlyContentPan = Class(this.ContentPan, [
+            function $prototype() {
+                this.calcPreferredSize = function(l){
+                    var p = this.getCombo();
+                    return p ? p.list.calcMaxItemSize() : { width:0, height:0 };
+                };
+
+                this.paintOnTop = function(g){
+                    var list = this.getCombo().list, selected = list.getSelected(),
+                        v = selected != null ? list.provider.getView(list, selected) : null;
+
+                    if (v != null) {
+                        var ps = v.getPreferredSize();
+                        v.paint(g, this.getLeft(), this.getTop() + ~~((this.height - this.getTop() - this.getBottom() - ps.height) / 2),
+                                   this.width, ps.height, this);
+                    }
+                };
+            }
+        ]);
+
+        /**
+         * Editable content area combo box component panel class
+         * @for  zebra.ui.Combo.EditableContentPan
+         * @class Combo.EditableContentPan
+         * @extends zebra.ui.Combo.ContentPan
+         */
+        
+        /**
+         * Fired when a content value has been updated. 
+         
+        content._.add(function(contentPan, newValue) {
+            ...
+        });
+        
+         * @param {zebra.ui.Combo.ContentPan} contentPan a content panel that 
+         * updated its value
+         * @param {Object} newValue a new value the content panel has been set
+         * with
+         * @event  contentUpdated
+         */
+        this.EditableContentPan = Class(this.ContentPan, [
+            function $clazz() {
+                this.TextField = Class(pkg.TextField, []);
+            },
+
+            function (){
+                this.$super(new L.BorderLayout());
+                this._ = new ContentListeners();
+
+                this.isEditable = true;
+
+                this.dontGenerateUpdateEvent = false;
+
+                /**
+                 * A reference to a text field component the content panel uses as a 
+                 * value editor
+                 * @attribute textField
+                 * @readOnly
+                 * @private
+                 * @type {zebra.ui.TextField}
+                 */
+                this.textField = new pkg.Combo.EditableContentPan.TextField(&quot;&quot;,  -1);
+                this.textField.view.target._.add(this);
+                this.add(L.CENTER, this.textField);
+            },
+
+            function focused(){
+                this.$super();
+                this.textField.requestFocus();
+            },
+
+            function $prototype() {
+                this.textUpdated = function(src,b,off,size,startLine,lines){
+                    if (this.dontGenerateUpdateEvent === false) {
+                        this._.contentUpdated(this, this.textField.getValue());
+                    }
+                };
+
+                this.canHaveFocus = function() { return true; };
+
+                /**
+                 * Called when the combo box content has been updated
+                 * @param {zebra.ui.Combo} combo a combo where the new value has been set
+                 * @param {Object} v a new combo box value 
+                 * @for  zebra.ui.Combo.EditableContentPan
+                 * @method updateValue
+                 */
+                this.updateValue = function(combo, v){
+                    this.dontGenerateUpdateEvent = true;
+                    try {
+                        var txt = (v == null ? &quot;&quot; : v.toString());
+                        this.textField.setValue(txt);
+                        this.textField.select(0, txt.length);
+                    }
+                    finally {
+                        this.dontGenerateUpdateEvent = false;
+                    }
+                };
+            }
+        ]);
+
+        this.Button = Class(pkg.Button, [
+            function() {
+                this.setFireParams(true,  -1);
+                this.setCanHaveFocus(false);
+                this.$super();
+            }
+        ]);
+
+        this.List = Class(pkg.List, []);
+    },
+
+    /**
+     * @class zebra.ui.Combo
+     */
+    function $prototype() {
+        this.paint = function(g){
+            if (this.content != null &amp;&amp;
+                this.selectionView != null &amp;&amp;
+                this.hasFocus())
+            {
+                this.selectionView.paint(g, this.content.x, this.content.y,
+                                            this.content.width, this.content.height,
+                                            this);
+            }
+        };
+
+        this.catchInput = function (child) {
+            return child != this.button &amp;&amp; (this.content == null || !this.content.isEditable);
+        };
+
+        this.canHaveFocus = function() {
+            return this.winpad.parent == null &amp;&amp; (this.content != null || !this.content.isEditable);
+        };
+
+        this.contentUpdated = function(src, text){
+            if (src == this.content){
+                try {
+                    this.lockListSelEvent = true;
+                    if (text == null) this.list.select(-1);
+                    else {
+                        var m = this.list.model;
+                        for(var i = 0;i &lt; m.count(); i++){
+                            var mv = m.get(i);
+                            if (mv != text){
+                                this.list.select(i);
+                                break;
+                            }
+                        }
+                    }
+                }
+                finally { this.lockListSelEvent = false; }
+                this._.fired(this, text);
+            }
+        };
+
+        /**
+         * Select the given value from the list as the combo box value
+         * @param  {Integer} i an index of a list element to be selected 
+         * as the combo box value 
+         * @method select
+         */
+        this.select = function(i) {
+            this.list.select(i);
+        };
+
+        /**
+         * Set combo box value.
+         * @param {Object} v a value 
+         * @method  setValue
+         */
+        this.setValue = function(v) {
+            this.list.setValue(v);
+        };
+
+        /**
+         * Get the current combo box value
+         * @return {Object} a value
+         * @method getValue
+         */
+        this.getValue = function() {
+            return this.list.getValue();
+        };
+
+        this.mousePressed = function (e) {
+            if (e.isActionMask() &amp;&amp; this.content != null             &amp;&amp;
+                (new Date().getTime() - this.winpad.closeTime) &gt; 100 &amp;&amp;
+                e.x &gt; this.content.x &amp;&amp; e.y &gt; this.content.y         &amp;&amp;
+                e.x &lt; this.content.x + this.content.width            &amp;&amp;
+                e.y &lt; this.content.y + this.content.height              )
+            {
+                this.showPad();
+            }
+        };
+
+        /**
+         * Hide combo drop down list
+         * @method hidePad 
+         */
+        this.hidePad = function (){
+            var d = pkg.findCanvas(this);
+            if (d != null &amp;&amp; this.winpad.parent != null){
+                d.getLayer(pkg.PopupLayer.ID).remove(this.winpad);
+                this.requestFocus();
+            }
+        };
+
+        /**
+         * Show combo drop down list
+         * @method showPad 
+         */
+        this.showPad = function(){
+            var canvas = pkg.findCanvas(this);
+            if (canvas != null) {
+                var winlayer = canvas.getLayer(pkg.PopupLayer.ID),
+                    ps       = this.winpad.getPreferredSize(),
+                    p        = L.getAbsLocation(0, 0, this), px = p[0], py = p[1];
+
+                if (this.winpad.hbar &amp;&amp; ps.width &gt; this.width) {
+                    ps.height += this.winpad.hbar.getPreferredSize().height;
+                }
+
+                if (this.maxPadHeight &gt; 0 &amp;&amp; ps.height &gt; this.maxPadHeight) {
+                    ps.height = this.maxPadHeight;
+                }
+
+                if (py + this.height + ps.height &gt; canvas.height) {
+                    if (py - ps.height &gt;= 0) py -= (ps.height + this.height);
+                    else {
+                        var hAbove = canvas.height - py - this.height;
+                        if(py &gt; hAbove) {
+                            ps.height = py;
+                            py -= (ps.height + this.height);
+                        }
+                        else ps.height = hAbove;
+                    }
+                }
+
+                this.winpad.setSize(this.width, ps.height);
+                this.winpad.setLocation(px, py + this.height);
+                this.list.notifyScrollMan(this.list.selectedIndex);
+                winlayer.add(this, this.winpad);
+                this.list.requestFocus();
+            }
+        };
+
+        /**
+         * Bind the given list component to the combo box component. 
+         * @param {zebra.ui.BaseList} l a list component
+         * @method setList
+         */
+        this.setList = function(l){
+            if (this.list != l){
+                this.hidePad();
+
+                if (this.list != null) this.list._.remove(this);
+                this.list = l;
+                if (this.list._) this.list._.add(this);
+                this.winpad = new pkg.Combo.ComboPadPan(this.list);
+                this.winpad.owner = this;
+                if (this.content != null) {
+                    this.content.updateValue(this, this.list.getSelected());
+                }
+                this.vrp();
+            }
+        };
+
+        this.keyPressed = function (e){
+            var index = this.list.selectedIndex;
+            switch(e.code) {
+                case KE.LEFT :
+                case KE.UP   : if (index &gt; 0) this.list.select(index - 1); break;
+                case KE.DOWN :
+                case KE.RIGHT: if (this.list.model.count() - 1 &gt; index) this.list.select(index + 1); break;
+            }
+        };
+
+        this.keyTyped = function(e) { this.list.keyTyped(e); };
+
+        /**
+         * Set the given combo box selection view
+         * @param {zebra.ui.View} c a view
+         * @method setSelectionView
+         */
+        this.setSelectionView = function (c){
+            if (c != this.selectionView){
+                this.selectionView = pkg.$view(c);
+                this.repaint();
+            }
+        };
+
+        /**
+         * Set the maximal height of the combo box pad element. 
+         * @param {Integer} h a maximal combo box pad size
+         * @method setMaxPadHeight
+         */
+        this.setMaxPadHeight = function(h){
+            if(this.maxPadHeight != h){
+                this.hidePad();
+                this.maxPadHeight = h;
+            }
+        };
+    },
+
+    function() {
+        this.$this(new pkg.Combo.List(true));
+    },
+
+    function(list){
+        if (zebra.isBoolean(list)) this.$this(new pkg.Combo.List(true), list);
+        else this.$this(list, false);
+    },
+
+    function(list, editable){
+        /**
+         * Reference to combo box list component
+         * @attribute list
+         * @readOnly
+         * @type {zebra.ui.BaseList}
+         */
+        if (zebra.instanceOf(list, pkg.BaseList) === false) {
+            list = new pkg.Combo.List(list, true);
+        }
+
+        /**
+         * Reference to combo box button component
+         * @attribute button
+         * @readOnly
+         * @type {zebra.ui.Panel}
+         */
+
+        /**
+         * Reference to combo box content component
+         * @attribute content
+         * @readOnly
+         * @type {zebra.ui.Panel}
+         */
+
+        /**
+         * Reference to combo box pad component
+         * @attribute winpad
+         * @readOnly
+         * @type {zebra.ui.Panel}
+         */
+        
+        /**
+         * Reference to selection view
+         * @attribute selectionView
+         * @readOnly
+         * @type {zebra.ui.View}
+         */
+
+        this.button = this.content = this.winpad = null;
+        
+        /**
+         * Maximal size the combo box height can have
+         * @attribute maxPadHeight
+         * @readOnly
+         * @type {Integer}
+         */
+        this.maxPadHeight = 0;
+        
+        this.lockListSelEvent = false;
+        this._ = new Listeners();
+        this.setList(list);
+        this.$super();
+
+        this.add(L.CENTER, editable ? new pkg.Combo.EditableContentPan()
+                                    : new pkg.Combo.ReadonlyContentPan());
+        this.add(L.RIGHT, new pkg.Combo.Button());
+    },
+
+    function focused(){
+        this.$super();
+        this.repaint();
+    },
+
+    function kidAdded(index,s,c){
+        if (zebra.instanceOf(c, pkg.Combo.ContentPan)) {
+            if (this.content != null) throw new Error(&quot;Content panel is set&quot;);
+            if (c._) c._.add(this);
+            this.content = c;
+            if (this.list != null) c.updateValue(this, this.list.getSelected());
+        }
+
+        this.$super(index, s, c);
+        if (this.button == null &amp;&amp; zebra.instanceOf(c, zebra.util.Actionable)){
+            this.button = c;
+            this.button._.add(this);
+        }
+    },
+
+    function kidRemoved(index,l){
+        if (this.content == l){
+            if (l._) l._.remove(this);
+            this.content = null;
+        }
+
+        this.$super(index, l);
+        if(this.button == l){
+            this.button._.remove(this);
+            this.button = null;
+        }
+    },
+
+    /**
+     * Combo box button listener method. The method triggers showing 
+     * combo box pad window when the combo button has been pressed
+     * @param  {zebra.ui.Button} src a button that has been pressed
+     * @method fired
+     */
+    function fired(src) {
+        if ((new Date().getTime() - this.winpad.closeTime) &gt; 100) {
+            this.showPad();
+        }
+    },
+
+    function fired(src, data) {
+        if (this.lockListSelEvent === false){
+            this.hidePad();
+            if (this.content != null) {
+                this.content.updateValue(this, this.list.getSelected());
+                if (this.content.isEditable) {
+                    pkg.focusManager.requestFocus(this.content);
+                }
+                this.repaint();
+            }
+        }
+    }
+]);
+
+/**
+ * Combo box arrow view. The view is used to render combo box arrow element
+ * in pressed  and unpressed state.  
+ * @class ComboArrowView
+ * @constructor
+ * @param {String} [col] a color of arrow element 
+ * @param {Boolean} [state] a state of arrow element. true means pressed state.
+ * @extends zebra.ui.View 
+ */
+pkg.ComboArrowView = Class(pkg.View, [
+    function $prototype() {
+        this[&#x27;&#x27;] = function(col, state) {
+            /**
+             * Arrow color 
+             * @type {String}
+             * @readOnly
+             * @default &quot;black&quot;
+             * @attribute color
+             */
+
+            /**
+             * Arrow state to be rendered 
+             * @type {Boolean}
+             * @readOnly
+             * @default false
+             * @attribute state
+             */
+
+            /**
+             * Top, left, right and bottom gap value 
+             * @type {Integer}
+             * @readOnly
+             * @default 4
+             * @attribute gap
+             */
+
+            this.color = col == null ? &quot;black&quot; : col;
+            this.state = state == null ? false : state;
+            this.gap   = 4;
+        };
+
+        this.paint = function(g, x, y, w, h, d) {
+            if (this.state) {
+                g.setColor(&quot;#CCCCCC&quot;);
+                g.drawLine(x, y, x, y + h);
+                g.setColor(&quot;gray&quot;);
+                g.drawLine(x + 1, y, x + 1, y + h);
+            }
+            else {
+                g.setColor(&quot;#CCCCCC&quot;);
+                g.drawLine(x, y, x, y + h);
+                g.setColor(&quot;#EEEEEE&quot;);
+                g.drawLine(x + 1, y, x + 1, y + h);
+            }
+
+            x += this.gap + 1;
+            y += this.gap + 1;
+            w -= this.gap * 2;
+            h -= this.gap * 2;
+
+            var s = Math.min(w, h);
+            x = x + (w - s)/2 + 1;
+            y = y + (h - s)/2;
+
+            g.setColor(this.color);
+            g.beginPath();
+            g.moveTo(x, y);
+            g.lineTo(x + s, y);
+            g.lineTo(x + s/2, y + s);
+            g.lineTo(x, y);
+            g.fill();
+        };
+
+        this.getPreferredSize = function() {
+            return { width: 2 * this.gap + 6, height:2 * this.gap + 6 };
+        };
+    }
+]);
+
+
+})(zebra(&quot;ui&quot;), zebra.Class);
+</pre>
+
+</div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/js/tabs.js"></script>
+</body>
+</html>

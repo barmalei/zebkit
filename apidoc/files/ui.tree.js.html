@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>ui.tree.js - Zebra API</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.8.0pr2/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <script src="http://yui.yahooapis.com/combo?3.8.0pr2/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            <h1>Zebra API: ui.tree.js</a></h1>
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 07/2013</em>
+        </div>
+    </div>
+    <div class="yui3-g">
+
+        <div id="sidebar" class="yui3-u">
+            <div id="modules" class="sidebox">
+    <div class="hd">
+        <h2 class="no-toc">Packages</h2>
+    </div>
+    <div class="bd">
+        <ul>
+            
+                <li><a href="../modules/data.html">data</a>
+                
+                </li>
+            
+                <li><a href="../modules/io.html">io</a>
+                
+                </li>
+            
+                <li><a href="../modules/layout.html">layout</a>
+                
+                </li>
+            
+                <li><a href="../modules/ui.html">ui</a>
+                
+                </li>
+            
+                <li><a href="../modules/ui.designer.html">ui.designer</a>
+                
+                </li>
+            
+                <li><a href="../modules/ui.grid.html">ui.grid</a>
+                
+                </li>
+            
+                <li><a href="../modules/ui.tree.html">ui.tree</a>
+                
+                </li>
+            
+                <li><a href="../modules/util.html">util</a>
+                
+                </li>
+            
+                <li><a href="../modules/zebra.html">zebra</a>
+                
+                </li>
+            
+        </ul>
+    </div>
+</div>
+
+<div id="classes" class="sidebox">
+    <div class="hd">
+        <h2 class="no-toc">Classes and interfaces</h2>
+    </div>
+    <div class="bd">
+        <ul>
+            
+                <li><a href="../classes/zebra.Class().html">zebra.Class()</a></li>
+            
+                <li><a href="../classes/zebra.data.Item.html">zebra.data.Item</a></li>
+            
+                <li><a href="../classes/zebra.data.ListModel.html">zebra.data.ListModel</a></li>
+            
+                <li><a href="../classes/zebra.data.Matrix.html">zebra.data.Matrix</a></li>
+            
+                <li><a href="../classes/zebra.data.SingleLineTxt.html">zebra.data.SingleLineTxt</a></li>
+            
+                <li><a href="../classes/zebra.data.Text.html">zebra.data.Text</a></li>
+            
+                <li><a href="../classes/zebra.data.TextModel.html">zebra.data.TextModel</a></li>
+            
+                <li><a href="../classes/zebra.data.TreeModel.html">zebra.data.TreeModel</a></li>
+            
+                <li><a href="../classes/zebra.Dummy.html">zebra.Dummy</a></li>
+            
+                <li><a href="../classes/zebra.forName().html">zebra.forName()</a></li>
+            
+                <li><a href="../classes/zebra.instanceOf().html">zebra.instanceOf()</a></li>
+            
+                <li><a href="../classes/zebra.Interface().html">zebra.Interface()</a></li>
+            
+                <li><a href="../classes/zebra.io.b64decode().html">zebra.io.b64decode()</a></li>
+            
+                <li><a href="../classes/zebra.io.b64encode().html">zebra.io.b64encode()</a></li>
+            
+                <li><a href="../classes/zebra.io.GET().html">zebra.io.GET()</a></li>
+            
+                <li><a href="../classes/zebra.io.HTTP.html">zebra.io.HTTP</a></li>
+            
+                <li><a href="../classes/zebra.io.ID().html">zebra.io.ID()</a></li>
+            
+                <li><a href="../classes/zebra.io.JRPC.html">zebra.io.JRPC</a></li>
+            
+                <li><a href="../classes/zebra.io.JRPC.invoke().html">zebra.io.JRPC.invoke()</a></li>
+            
+                <li><a href="../classes/zebra.io.POST().html">zebra.io.POST()</a></li>
+            
+                <li><a href="../classes/zebra.io.QS.html">zebra.io.QS</a></li>
+            
+                <li><a href="../classes/zebra.io.Service.html">zebra.io.Service</a></li>
+            
+                <li><a href="../classes/zebra.io.XRPC.html">zebra.io.XRPC</a></li>
+            
+                <li><a href="../classes/zebra.io.XRPC.invoke().html">zebra.io.XRPC.invoke()</a></li>
+            
+                <li><a href="../classes/zebra.layout.BorderLayout.html">zebra.layout.BorderLayout</a></li>
+            
+                <li><a href="../classes/zebra.layout.Constraints.html">zebra.layout.Constraints</a></li>
+            
+                <li><a href="../classes/zebra.layout.FlowLayout.html">zebra.layout.FlowLayout</a></li>
+            
+                <li><a href="../classes/zebra.layout.getAbsLocation().html">zebra.layout.getAbsLocation()</a></li>
+            
+                <li><a href="../classes/zebra.layout.getDirectAt().html">zebra.layout.getDirectAt()</a></li>
+            
+                <li><a href="../classes/zebra.layout.getDirectChild().html">zebra.layout.getDirectChild()</a></li>
+            
+                <li><a href="../classes/zebra.layout.getTopParent().html">zebra.layout.getTopParent()</a></li>
+            
+                <li><a href="../classes/zebra.layout.GridLayout.html">zebra.layout.GridLayout</a></li>
+            
+                <li><a href="../classes/zebra.layout.Layout.html">zebra.layout.Layout</a></li>
+            
+                <li><a href="../classes/zebra.layout.Layoutable.html">zebra.layout.Layoutable</a></li>
+            
+                <li><a href="../classes/zebra.layout.ListLayout.html">zebra.layout.ListLayout</a></li>
+            
+                <li><a href="../classes/zebra.layout.PercentLayout.html">zebra.layout.PercentLayout</a></li>
+            
+                <li><a href="../classes/zebra.layout.RasterLayout.html">zebra.layout.RasterLayout</a></li>
+            
+                <li><a href="../classes/zebra.layout.StackLayout.html">zebra.layout.StackLayout</a></li>
+            
+                <li><a href="../classes/zebra.ready().html">zebra.ready()</a></li>
+            
+                <li><a href="../classes/zebra.ui.BaseLayer.html">zebra.ui.BaseLayer</a></li>
+            
+                <li><a href="../classes/zebra.ui.BaseList.html">zebra.ui.BaseList</a></li>
+            
+                <li><a href="../classes/zebra.ui.BoldLabel.html">zebra.ui.BoldLabel</a></li>
+            
+                <li><a href="../classes/zebra.ui.Border.html">zebra.ui.Border</a></li>
+            
+                <li><a href="../classes/zebra.ui.BorderPan.html">zebra.ui.BorderPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.Button.html">zebra.ui.Button</a></li>
+            
+                <li><a href="../classes/zebra.ui.Checkbox.html">zebra.ui.Checkbox</a></li>
+            
+                <li><a href="../classes/zebra.ui.Checkbox.Box.html">zebra.ui.Checkbox.Box</a></li>
+            
+                <li><a href="../classes/zebra.ui.ChildrenListener.html">zebra.ui.ChildrenListener</a></li>
+            
+                <li><a href="../classes/zebra.ui.Combo.html">zebra.ui.Combo</a></li>
+            
+                <li><a href="../classes/zebra.ui.Combo.ContentPan.html">zebra.ui.Combo.ContentPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.Combo.EditableContentPan.html">zebra.ui.Combo.EditableContentPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.Combo.ReadonlyContentPan.html">zebra.ui.Combo.ReadonlyContentPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.ComboArrowView.html">zebra.ui.ComboArrowView</a></li>
+            
+                <li><a href="../classes/zebra.ui.CommandManager.html">zebra.ui.CommandManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.CompList.html">zebra.ui.CompList</a></li>
+            
+                <li><a href="../classes/zebra.ui.ComponentListener.html">zebra.ui.ComponentListener</a></li>
+            
+                <li><a href="../classes/zebra.ui.Composite.html">zebra.ui.Composite</a></li>
+            
+                <li><a href="../classes/zebra.ui.CompositeView.html">zebra.ui.CompositeView</a></li>
+            
+                <li><a href="../classes/zebra.ui.CompRender.html">zebra.ui.CompRender</a></li>
+            
+                <li><a href="../classes/zebra.ui.CopyCutPaste.html">zebra.ui.CopyCutPaste</a></li>
+            
+                <li><a href="../classes/zebra.ui.Cursorable.html">zebra.ui.Cursorable</a></li>
+            
+                <li><a href="../classes/zebra.ui.CursorManager.html">zebra.ui.CursorManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.designer.ShaperPan.html">zebra.ui.designer.ShaperPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.Dotted.html">zebra.ui.Dotted</a></li>
+            
+                <li><a href="../classes/zebra.ui.Etched.html">zebra.ui.Etched</a></li>
+            
+                <li><a href="../classes/zebra.ui.EventManager.html">zebra.ui.EventManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.findCanvas().html">zebra.ui.findCanvas()</a></li>
+            
+                <li><a href="../classes/zebra.ui.FocusListener.html">zebra.ui.FocusListener</a></li>
+            
+                <li><a href="../classes/zebra.ui.FocusManager.html">zebra.ui.FocusManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.Font.html">zebra.ui.Font</a></li>
+            
+                <li><a href="../classes/zebra.ui.Gradient.html">zebra.ui.Gradient</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.DefEditors.html">zebra.ui.grid.DefEditors</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.Grid.html">zebra.ui.grid.Grid</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.GridCaption.html">zebra.ui.grid.GridCaption</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.GridStretchPan.html">zebra.ui.grid.GridStretchPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.Metrics.html">zebra.ui.grid.Metrics</a></li>
+            
+                <li><a href="../classes/zebra.ui.Group.html">zebra.ui.Group</a></li>
+            
+                <li><a href="../classes/zebra.ui.HtmlElement.html">zebra.ui.HtmlElement</a></li>
+            
+                <li><a href="../classes/zebra.ui.HtmlTextArea.html">zebra.ui.HtmlTextArea</a></li>
+            
+                <li><a href="../classes/zebra.ui.HtmlTextField.html">zebra.ui.HtmlTextField</a></li>
+            
+                <li><a href="../classes/zebra.ui.HtmlTextInput.html">zebra.ui.HtmlTextInput</a></li>
+            
+                <li><a href="../classes/zebra.ui.ImageLabel.html">zebra.ui.ImageLabel</a></li>
+            
+                <li><a href="../classes/zebra.ui.ImagePan.html">zebra.ui.ImagePan</a></li>
+            
+                <li><a href="../classes/zebra.ui.InputEvent.html">zebra.ui.InputEvent</a></li>
+            
+                <li><a href="../classes/zebra.ui.KeyEvent.html">zebra.ui.KeyEvent</a></li>
+            
+                <li><a href="../classes/zebra.ui.KeyListener.html">zebra.ui.KeyListener</a></li>
+            
+                <li><a href="../classes/zebra.ui.Label.html">zebra.ui.Label</a></li>
+            
+                <li><a href="../classes/zebra.ui.List.html">zebra.ui.List</a></li>
+            
+                <li><a href="../classes/zebra.ui.List.ViewProvider.html">zebra.ui.List.ViewProvider</a></li>
+            
+                <li><a href="../classes/zebra.ui.loadImage().html">zebra.ui.loadImage()</a></li>
+            
+                <li><a href="../classes/zebra.ui.Manager.html">zebra.ui.Manager</a></li>
+            
+                <li><a href="../classes/zebra.ui.Menu.html">zebra.ui.Menu</a></li>
+            
+                <li><a href="../classes/zebra.ui.Menunbar.html">zebra.ui.Menunbar</a></li>
+            
+                <li><a href="../classes/zebra.ui.MLabel.html">zebra.ui.MLabel</a></li>
+            
+                <li><a href="../classes/zebra.ui.MouseEvent.html">zebra.ui.MouseEvent</a></li>
+            
+                <li><a href="../classes/zebra.ui.MouseListener.html">zebra.ui.MouseListener</a></li>
+            
+                <li><a href="../classes/zebra.ui.MouseWheelSupport.html">zebra.ui.MouseWheelSupport</a></li>
+            
+                <li><a href="../classes/zebra.ui.PaintManager.html">zebra.ui.PaintManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.PaintManImpl.html">zebra.ui.PaintManImpl</a></li>
+            
+                <li><a href="../classes/zebra.ui.Panel.html">zebra.ui.Panel</a></li>
+            
+                <li><a href="../classes/zebra.ui.PasswordText.html">zebra.ui.PasswordText</a></li>
+            
+                <li><a href="../classes/zebra.ui.Pattern.html">zebra.ui.Pattern</a></li>
+            
+                <li><a href="../classes/zebra.ui.Picture.html">zebra.ui.Picture</a></li>
+            
+                <li><a href="../classes/zebra.ui.PopupInfo.html">zebra.ui.PopupInfo</a></li>
+            
+                <li><a href="../classes/zebra.ui.PopupLayer.html">zebra.ui.PopupLayer</a></li>
+            
+                <li><a href="../classes/zebra.ui.PopupManager.html">zebra.ui.PopupManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.Progress.html">zebra.ui.Progress</a></li>
+            
+                <li><a href="../classes/zebra.ui.Radial.html">zebra.ui.Radial</a></li>
+            
+                <li><a href="../classes/zebra.ui.Radiobox.html">zebra.ui.Radiobox</a></li>
+            
+                <li><a href="../classes/zebra.ui.RadioView.html">zebra.ui.RadioView</a></li>
+            
+                <li><a href="../classes/zebra.ui.Raised.html">zebra.ui.Raised</a></li>
+            
+                <li><a href="../classes/zebra.ui.Render.html">zebra.ui.Render</a></li>
+            
+                <li><a href="../classes/zebra.ui.RootLayer.html">zebra.ui.RootLayer</a></li>
+            
+                <li><a href="../classes/zebra.ui.RoundBorder.html">zebra.ui.RoundBorder</a></li>
+            
+                <li><a href="../classes/zebra.ui.Scroll.html">zebra.ui.Scroll</a></li>
+            
+                <li><a href="../classes/zebra.ui.ScrollManager.html">zebra.ui.ScrollManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.ScrollPan.html">zebra.ui.ScrollPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.Slider.html">zebra.ui.Slider</a></li>
+            
+                <li><a href="../classes/zebra.ui.SplitPan.html">zebra.ui.SplitPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.StatePan.html">zebra.ui.StatePan</a></li>
+            
+                <li><a href="../classes/zebra.ui.Sunken.html">zebra.ui.Sunken</a></li>
+            
+                <li><a href="../classes/zebra.ui.SwitchManager.html">zebra.ui.SwitchManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.Tabs.html">zebra.ui.Tabs</a></li>
+            
+                <li><a href="../classes/zebra.ui.TextArea.html">zebra.ui.TextArea</a></li>
+            
+                <li><a href="../classes/zebra.ui.TextField.html">zebra.ui.TextField</a></li>
+            
+                <li><a href="../classes/zebra.ui.TextRender.html">zebra.ui.TextRender</a></li>
+            
+                <li><a href="../classes/zebra.ui.Toolbar.html">zebra.ui.Toolbar</a></li>
+            
+                <li><a href="../classes/zebra.ui.TooltipInfo.html">zebra.ui.TooltipInfo</a></li>
+            
+                <li><a href="../classes/zebra.ui.TooltipManager.html">zebra.ui.TooltipManager</a></li>
+            
+                <li><a href="../classes/zebra.ui.tree.DefEditors.html">zebra.ui.tree.DefEditors</a></li>
+            
+                <li><a href="../classes/zebra.ui.tree.DefViews.html">zebra.ui.tree.DefViews</a></li>
+            
+                <li><a href="../classes/zebra.ui.tree.Tree.html">zebra.ui.tree.Tree</a></li>
+            
+                <li><a href="../classes/zebra.ui.View.html">zebra.ui.View</a></li>
+            
+                <li><a href="../classes/zebra.ui.ViewPan.html">zebra.ui.ViewPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.ViewSet.html">zebra.ui.ViewSet</a></li>
+            
+                <li><a href="../classes/zebra.ui.Window.html">zebra.ui.Window</a></li>
+            
+                <li><a href="../classes/zebra.ui.WinLayer.html">zebra.ui.WinLayer</a></li>
+            
+                <li><a href="../classes/zebra.ui.WinListener.html">zebra.ui.WinListener</a></li>
+            
+                <li><a href="../classes/zebra.ui.zCanvas.html">zebra.ui.zCanvas</a></li>
+            
+                <li><a href="../classes/zebra.URL.html">zebra.URL</a></li>
+            
+                <li><a href="../classes/zebra.util.Bag.html">zebra.util.Bag</a></li>
+            
+                <li><a href="../classes/zebra.util.findInTree().html">zebra.util.findInTree()</a></li>
+            
+                <li><a href="../classes/zebra.util.Listeners.html">zebra.util.Listeners</a></li>
+            
+                <li><a href="../classes/zebra.util.newInstance().html">zebra.util.newInstance()</a></li>
+            
+                <li><a href="../classes/zebra.util.Position.html">zebra.util.Position</a></li>
+            
+                <li><a href="../classes/zebra.util.Position.Metric.html">zebra.util.Position.Metric</a></li>
+            
+                <li><a href="../classes/zebra.util.rgb.html">zebra.util.rgb</a></li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>
+
+        <div id="main" class="yui3-u">
+            <div class="content"><h4>ui.tree.js</h4>
+
+<pre class="code prettyprint linenums">
+(function(pkg, Class, ui)  {
+
+/**
+ * Tree UI component and all related to the component classes and interfaces. 
+ * The component is graphical representation of a tree model that allows a user 
+ * to navigate over the model item, customize the items rendering and 
+ * organize customizable editing of the items.
+ 
+        // create tree component instance to visualize the given tree model
+        var tree = new zebra.ui.tree.Tree({ 
+            value: &quot;Root&quot;
+            kids : [
+                &quot;Item 1&quot;,
+                &quot;Item 2&quot;,
+                &quot;Item 3&quot;
+            ]
+        });
+
+        // make all tree items editable with text field component 
+        tree.setEditorProvider(new zebra.ui.tree.DefEditors());
+
+ * @module ui.tree
+ * @namespace zebra.ui.tree
+ * @main
+ */
+
+var KE = ui.KeyEvent,
+    IM = function(b) {
+        this.width = this.height = this.x = this.y = this.viewHeight = 0;
+        this.viewWidth = -1;
+        this.isOpen = b;
+    },
+    TreeListeners = zebra.util.Listeners.Class(&quot;toggled&quot;, &quot;selected&quot;);
+
+/**
+ * Default tree editor provider
+ * @class DefEditors
+ */
+pkg.DefEditors = Class([
+    function (){
+        /**
+         * Internal component that are designed as default editor component
+         * @private
+         * @readOnly
+         * @attribute tf
+         * @type {zebra.ui.TextField}
+         */
+        this.tf = new ui.TextField(new zebra.data.SingleLineTxt(&quot;&quot;));
+        this.tf.setBackground(&quot;white&quot;);
+        this.tf.setBorder(null);
+        this.tf.setPadding(0);
+    },
+
+    function $prototype() {
+        /**
+         * Get an UI component to edit the given tree model element 
+         * @param  {zebra.ui.tree.Tree} src a tree component
+         * @param  {zebra.data.Item} item an data model item
+         * @return {zebra.ui.Panel} an editor UI component
+         * @method getEditor
+         */
+        this.getEditor = function(src,item){
+            var o = item.value;
+            this.tf.setValue((o == null) ? &quot;&quot; : o.toString());
+            return this.tf;
+        };
+
+        /**
+         * Fetch a model item from the given UI editor component
+         * @param  {zebra.ui.tree.Tree} src a tree UI component
+         * @param  {zebra.ui.Panel} editor an editor that has been used to edit the tree model element
+         * @return {Object} an new tree model element value fetched from the given UI editor component
+         * @method fetchEditedValue
+         */
+        this.fetchEditedValue = function(src,editor){ 
+            return editor.view.target.getValue();
+        };
+
+        /**
+         * The method is called to ask if the given input event should trigger an tree component item
+         * @param  {zebra.ui.tree.Tree} src a tree UI component
+         * @param  {zebra.ui.MouseEvent|zebra/ui.KeyEvent} e   an input event: mouse or key event
+         * @return {Boolean} true if the event should trigger edition of a tree component item 
+         * @method @shouldStartEdit
+         */
+        this.shouldStartEdit = function(src,e){
+            return (e.ID == ui.MouseEvent.CLICKED &amp;&amp; e.clicks &gt; 1) ||
+                   (e.ID == KE.PRESSED &amp;&amp; e.code == KE.ENTER);
+        };
+    }
+]);
+
+/**
+ * Default tree editor view provider
+ * @class DefViews
+ * @constructor
+ * @param {String} [color] the tree item text color
+ * @param {String} [font] the tree item text font
+ */
+pkg.DefViews = Class([
+    function $prototype() {
+        /**
+         * Get a view for the given model item of the UI tree component   
+         * @param  {zebra.ui.tree.Tree} d  a tree component
+         * @param  {zebra.data.Item} obj a tree model element
+         * @return {zebra.ui.View}  a view to visualize the given tree data model element 
+         * @method  getView
+         */
+        this.getView = function (d, obj){
+            if (obj.value &amp;&amp; obj.value.paint) return obj.value;
+            this.defaultRender.target.setValue(obj.value == null ? &quot;&lt;null&gt;&quot; : obj.value);
+            return this.defaultRender;
+        };
+
+        this[&#x27;&#x27;] = function(color, font) {
+            if (color == null) color = pkg.Tree.fontColor;
+            if (font  == null) font  = pkg.Tree.font;
+            this.defaultRender = new ui.TextRender(&quot;&quot;);
+            this.defaultRender.setFont(font);
+            this.defaultRender.setColor(color);
+        };
+    }
+]);
+
+/**
+ * Tree UI component that visualizes a tree data model. The model itself can be passed as JavaScript 
+ * structure or as a instance of zebra.data.TreeModel. Internally tree component keeps the model always
+ * as zebra.data.TreeModel class instance:
+ 
+     var tree = new zebra.ui.tree.Tree({
+          value: &quot;Root&quot;,
+          kids : [  &quot;Item 1&quot;, &quot;Item 2&quot;]
+     });
+
+ * or
+  
+     var model = new zebra.data.TreeModel(&quot;Root&quot;);
+     model.add(model.root, &quot;Item 1&quot;);
+     model.add(model.root, &quot;Item 2&quot;);
+   
+     var tree = new zebra.ui.tree.Tree(model);
+
+
+ * @class  Tree
+ * @constructor
+ * @extends {zebra.ui.Panel}
+ * @param {Object|zebra.data.TreeModel} [model] a tree data model passed as JavaScript 
+ * structure or as an instance
+ * @param {Boolean} [b] the tree component items toggle state. true to have all items 
+ * in opened state.
+ * of zebra.data.TreeModel class
+ */
+
+/**
+ * Fired when a tree item has been toggled
+ 
+       tree._.add(function toggled(src, item) {
+          ...    
+       });
+
+ * @event toggled
+ * @param  {zebra.ui.tree.Tree} src an tree component that triggers the event
+ * @param  {zebra.data.Item} item an tree item that has been toggled
+ */
+
+/**
+ * Fired when a tree item has been selected
+
+     tree._.add(function selected(src, item) {
+        ...
+     });
+
+ * @event selected
+ * @param  {zebra.ui.tree.Tree} src an tree component that triggers the event
+ * @param  {zebra.data.Item} item an tree item that has been toggled
+ */
+pkg.Tree = Class(ui.Panel, ui.MouseListener, ui.KeyListener, ui.ChildrenListener, [
+    function $prototype() {
+        this.itemGapY = this.gapx = this.gapy = 2;
+        this.itemGapX = 4;
+
+        /**
+         * Selected tree item
+         * @attribute selected
+         * @readOnly
+         * @type {zebra.data.Item}
+         */
+
+         /**
+          * Tree data model the UI component visualizes  
+          * @attribute model
+          * @readOnly
+          * @type {zebra.data.TreeModel}
+          */
+
+        this.canHaveFocus = function() { return true; };
+
+        this.childInputEvent = function(e){
+            if(e.ID == KE.PRESSED){
+                var kc = e.code;
+                if(kc == KE.ESCAPE) this.stopEditing(false);
+                else {
+                    if(kc == KE.ENTER){
+                        if(!(zebra.instanceOf(e.source, ui.TextField)) ||
+                            (zebra.instanceOf(e.source.view.target, zebra.data.SingleLineTxt))){
+                            this.stopEditing(true);
+                        }
+                    }
+                }
+            }
+        };
+
+        this.isInvalidatedByChild = function (c){ return false; };
+
+        this.catchScrolled = function (psx,psy){
+            this.stopEditing(true);
+            if(this.firstVisible == null) this.firstVisible = this.model.root;
+            this.firstVisible = (this.y &lt; psy) ? this.nextVisible(this.firstVisible)
+                                               : this.prevVisible(this.firstVisible);
+            this.repaint();
+        };
+
+
+        /**
+         * Test if the given tree component item is opened
+         * @param  {zebra.data.Item}  i a tree model item
+         * @return {Boolean} true if the given tree component item is opened
+         * @method isOpen
+         */
+        this.isOpen = function(i){
+            this.validate();
+            return this.isOpen_(i);
+        };
+
+        this.getItemMetrics = function(i){
+            this.validate();
+            return this.getIM(i);
+        };
+
+        this.laidout = function() { this.vVisibility(); };
+
+        this.vVisibility = function (){
+            if (this.model == null) this.firstVisible = null;
+            else {
+                var nva = ui.$cvp(this, {});
+                if (nva == null) this.firstVisible = null;
+                else
+                {
+                    if (this._isVal === false ||
+                        (this.visibleArea == null || this.visibleArea.x != nva.x ||
+                         this.visibleArea.y != nva.y || this.visibleArea.width != nva.width ||
+                         this.visibleArea.height != nva.height))
+                    {
+                        this.visibleArea = nva;
+                        if(this.firstVisible != null){
+                            this.firstVisible = this.findOpened(this.firstVisible);
+                            this.firstVisible = this.isAbove(this.firstVisible) ? this.nextVisible(this.firstVisible)
+                                                                                : this.prevVisible(this.firstVisible);
+                        }
+                        else
+                            this.firstVisible = (-this.scrollManager.getSY() &gt; ~~(this.maxh / 2)) ? this.prevVisible(this.findLast(this.model.root))
+                                                                                         : this.nextVisible(this.model.root);
+                    }
+                }
+            }
+            this._isVal = true;
+        };
+
+        this.recalc = function (){
+            this.maxh = this.maxw = 0;
+            if(this.model != null &amp;&amp; this.model.root != null){
+                this.recalc_(this.getLeft(), this.getTop(), null, this.model.root, true);
+                this.maxw -= this.getLeft();
+                this.maxh -= this.gapy;
+            }
+        };
+
+        this.getViewBounds = function(root){
+            var metrics = this.getIM(root), toggle = this.getToggleBounds(root), image = this.getImageBounds(root);
+            toggle.x = image.x + image.width + (image.width &gt; 0 || toggle.width &gt; 0 ? this.gapx : 0);
+            toggle.y = metrics.y + ~~((metrics.height - metrics.viewHeight) / 2);
+            toggle.width = metrics.viewWidth;
+            toggle.height = metrics.viewHeight;
+            return toggle;
+        };
+
+        this.getToggleBounds = function(root){
+            var node = this.getIM(root), d = this.getToggleSize(root);
+            return { x:node.x, y:node.y + ~~((node.height - d.height) / 2), width:d.width, height:d.height };
+        };
+
+        /**
+         * Get current toggle element view. The view depends on the state of tree item.
+         * @param  {zebra.data.Item} i a tree model item
+         * @protected
+         * @return {zebra.ui.View}  a toggle element view
+         * @method getToogleView
+         */
+        this.getToggleView = function(i){
+            return i.kids.length &gt; 0 ? (this.getIM(i).isOpen ? this.views[&quot;on&quot;]
+                                                             : this.views[&quot;off&quot;]) : null;
+        };
+
+        /**
+         * Get a tree item that is located at the given location.
+         * @param  {Integer} x a x coordinate
+         * @param  {Integer} y a y coordinate
+         * @return {zebra.data.Item} a tree model item 
+         * @method getItemAt
+         */
+        this.getItemAt = function(x,y){
+            this.validate();
+            return this.firstVisible == null ? null : this.getItemAt_(this.firstVisible, x, y);
+        };
+
+        this.recalc_ = function (x,y,parent,root,isVis){
+            var node = this.getIM(root);
+            if(isVis === true){
+                if(node.viewWidth &lt; 0){
+                    var viewSize = this.provider.getView(this, root).getPreferredSize();
+                    node.viewWidth = viewSize.width === 0 ? 5 : viewSize.width + this.itemGapX * 2;
+                    node.viewHeight = viewSize.height + this.itemGapY * 2;
+                }
+                var imageSize = this.getImageSize(root), toggleSize = this.getToggleSize(root);
+                if(parent != null){
+                    var pImg = this.getImageBounds(parent);
+                    x = pImg.x + ~~((pImg.width - toggleSize.width) / 2);
+                }
+
+                node.x = x;
+                node.y = y;
+                node.width = toggleSize.width + imageSize.width +
+                             node.viewWidth + (toggleSize.width &gt; 0 ? this.gapx : 0) + (imageSize.width &gt; 0 ? this.gapx : 0);
+                node.height = Math.max(Math.max(toggleSize.height, imageSize.height), node.viewHeight);
+                if(node.x + node.width &gt; this.maxw) this.maxw = node.x + node.width;
+                this.maxh += (node.height + this.gapy);
+                x = node.x + toggleSize.width + (toggleSize.width &gt; 0 ? this.gapx : 0);
+                y += (node.height + this.gapy);
+            }
+            var b = node.isOpen &amp;&amp; isVis;
+            if(b){
+                var count = root.kids.length;
+                for(var i = 0;i &lt; count; i++) y = this.recalc_(x, y, root, root.kids[i], b);
+            }
+            return y;
+        };
+
+        this.isOpen_ = function (i){
+            return i == null || (i.kids.length &gt; 0 &amp;&amp; this.getIM(i).isOpen &amp;&amp; this.isOpen_(i.parent));
+        };
+
+        this.getIM = function (i){
+            var node = this.nodes[i];
+            if(typeof node === &#x27;undefined&#x27;){
+                node = new IM(this.isOpenVal);
+                this.nodes[i] = node;
+            }
+            return node;
+        };
+
+        this.getItemAt = function(root,x,y){
+            if(y &gt;= this.visibleArea.y &amp;&amp; y &lt; this.visibleArea.y + this.visibleArea.height){
+                var dx = this.scrollManager.getSX(), dy = this.scrollManager.getSY(),
+                    found = this.getItemAtInBranch(root, x - dx, y - dy);
+
+                if (found != null) return found;
+
+                var parent = root.parent;
+                while(parent != null){
+                    var count = parent.kids.length;
+                    for(var i = parent.kids.indexOf(root) + 1;i &lt; count; i ++ ){
+                        found = this.getItemAtInBranch(parent.kids[i], x - dx, y - dy);
+                        if (found != null) return found;
+                    }
+                    root = parent;
+                    parent = root.parent;
+                }
+            }
+            return null;
+        };
+
+        this.getItemAtInBranch = function(root,x,y){
+            if(root != null){
+                var node = this.getIM(root);
+                if (x &gt;= node.x &amp;&amp; y &gt;= node.y &amp;&amp; x &lt; node.x + node.width &amp;&amp; y &lt; node.y + node.height + this.gapy) return root;
+                if (this.isOpen_(root)){
+                    for(var i = 0;i &lt; root.kids.length; i++) {
+                        var res = this.getItemAtInBranch(root.kids[i], x, y);
+                        if(res != null) return res;
+                    }
+                }
+            }
+            return null;
+        };
+
+        this.getImageView = function (i){
+            return i.kids.length &gt; 0 ? (this.getIM(i).isOpen ? this.views[&quot;open&quot;]
+                                                             : this.views[&quot;close&quot;])
+                                     : this.views[&quot;leaf&quot;];
+        };
+
+        this.getImageSize = function (i) {
+            var v =  i.kids.length &gt; 0 ? (this.getIM(i).isOpen ? this.viewSizes[&quot;open&quot;]
+                                                               : this.viewSizes[&quot;close&quot;])
+                                       : this.viewSizes[&quot;leaf&quot;];
+            return v ? v : { width:0, height:0 }; 
+        };
+
+        this.getImageBounds = function (root){
+            var node = this.getIM(root), id = this.getImageSize(root), td = this.getToggleSize(root);
+            return { x:node.x + td.width + (td.width &gt; 0 ? this.gapx : 0),
+                     y:node.y + ~~((node.height - id.height) / 2), width:id.width, height:id.height };
+        };
+
+        this.getImageY = function (root){
+            var node = this.getIM(root);
+            return node.y + ~~((node.height - this.getImageSize(root).height) / 2);
+        };
+
+        this.getToggleY = function (root){
+            var node = this.getIM(root);
+            return node.y + ~~((node.height - this.getToggleSize(root).height) / 2);
+        };
+
+        this.getToggleSize = function (i){
+            return this.isOpen_(i) ? this.viewSizes[&quot;on&quot;] : this.viewSizes[&quot;off&quot;];
+        };
+
+        this.isAbove = function (i){
+            var node = this.getIM(i);
+            return node.y + node.height + this.scrollManager.getSY() &lt; this.visibleArea.y;
+        };
+
+        this.findOpened = function (item){
+            var parent = item.parent;
+            return (parent == null || this.isOpen_(parent)) ? item : this.findOpened(parent);
+        };
+
+        this.findNext = function (item){
+            if(item != null){
+                if(item.kids.length &gt; 0 &amp;&amp; this.isOpen_(item)){
+                    return item.kids[0];
+                }
+                var parent = null;
+                while ((parent = item.parent) != null){
+                    var index = parent.kids.indexOf(item);
+                    if (index + 1 &lt; parent.kids.length) return parent.kids[index + 1];
+                    item = parent;
+                }
+            }
+            return null;
+        };
+
+        this.findPrev = function (item){
+            if (item != null) {
+                var parent = item.parent;
+                if (parent != null) {
+                    var index = parent.kids.indexOf(item);
+                    return (index - 1 &gt;= 0) ? this.findLast(parent.kids[index - 1]) : parent;
+                }
+            }
+            return null;
+        };
+
+        this.findLast = function (item){
+            return this.isOpen_(item) &amp;&amp; item.kids.length &gt; 0 ? this.findLast(item.kids[item.kids.length - 1])
+                                                              : item;
+        };
+
+        this.prevVisible = function (item){
+            if(item == null || this.isAbove(item)) return this.nextVisible(item);
+            var parent = null;
+            while((parent = item.parent) != null){
+                for(var i = parent.kids.indexOf(item) - 1;i &gt;= 0; i-- ){
+                    var child = parent.kids[i];
+                    if (this.isAbove(child)) return this.nextVisible(child);
+                }
+                item = parent;
+            }
+            return item;
+        };
+
+        this.isVerVisible = function (item){
+            if(this.visibleArea == null) return false;
+            var node = this.getIM(item), yy1 = node.y + this.scrollManager.getSY(), yy2 = yy1 + node.height - 1,
+                by = this.visibleArea.y + this.visibleArea.height;
+
+            return ((this.visibleArea.y &lt;= yy1 &amp;&amp; yy1 &lt; by) ||
+                    (this.visibleArea.y &lt;= yy2 &amp;&amp; yy2 &lt; by) ||
+                    (this.visibleArea.y &gt; yy1 &amp;&amp; yy2 &gt;= by)    );
+        };
+
+        this.nextVisible = function(item){
+            if (item == null || this.isVerVisible(item)) return item;
+            var res = this.nextVisibleInBranch(item), parent = null;
+            if (res != null) return res;
+            while((parent = item.parent) != null){
+                var count = parent.kids.length;
+                for(var i = parent.kids.indexOf(item) + 1;i &lt; count; i++){
+                    res = this.nextVisibleInBranch(parent.kids[i]);
+                    if (res != null) return res;
+                }
+                item = parent;
+            }
+            return null;
+        };
+
+        this.nextVisibleInBranch = function (item){
+            if (this.isVerVisible(item)) return item;
+            if (this.isOpen_(item)){
+                for(var i = 0;i &lt; item.kids.length; i++){
+                    var res = this.nextVisibleInBranch(item.kids[i]);
+                    if (res != null) return res;
+                }
+            }
+            return null;
+        };
+
+        this.paintTree = function (g,item){
+            this.paintBranch(g, item);
+            var parent = null;
+            while((parent = item.parent) != null){
+                this.paintChild(g, parent, parent.kids.indexOf(item) + 1);
+                item = parent;
+            }
+        };
+
+        this.paintBranch = function (g, root){
+            if(root == null) return false;
+            var node = this.getIM(root), dx = this.scrollManager.getSX(), dy = this.scrollManager.getSY(), va = this.visibleArea;
+            if (zebra.util.isIntersect(node.x + dx, node.y + dy, node.width, node.height,
+                                       va.x, va.y, va.width, va.height))
+            {
+                var toggle = this.getToggleBounds(root), toggleView = this.getToggleView(root);
+                if(toggleView != null) {
+                    toggleView.paint(g, toggle.x, toggle.y, toggle.width, toggle.height, this);
+                }
+
+                var image = this.getImageBounds(root);
+                if(image.width &gt; 0) this.getImageView(root).paint(g, image.x, image.y, image.width, image.height, this);
+
+                var vx = image.x + image.width + (image.width &gt; 0 || toggle.width &gt; 0 ? this.gapx : 0),
+                    vy = node.y + ~~((node.height - node.viewHeight) / 2);
+
+                if(this.selected == root &amp;&amp; root != this.editedItem){
+                    var selectView = this.views[this.hasFocus()?&quot;aselect&quot;:&quot;iselect&quot;];
+                    if(selectView != null) selectView.paint(g, vx, vy, node.viewWidth, node.viewHeight, this);
+                }
+
+                if(root != this.editedItem){
+                    var vvv = this.provider.getView(this, root), vvvps = vvv.getPreferredSize();
+                    vvv.paint(g, vx + this.itemGapX, vy + this.itemGapY, vvvps.width, vvvps.height, this);
+                }
+
+                if(this.lnColor != null){
+                    g.setColor(this.lnColor);
+                    var x1 = toggle.x + (toggleView == null ? ~~(toggle.width / 2) + 1 : toggle.width),
+                        yy = toggle.y + ~~(toggle.height / 2) + 0.5;
+
+                    g.beginPath();
+                    g.moveTo(x1-1, yy);
+                    g.lineTo(image.x, yy);
+                    g.stroke();
+                }
+            }
+            else{
+                if(node.y + dy &gt; this.visibleArea.y + this.visibleArea.height ||
+                   node.x + dx &gt; this.visibleArea.x + this.visibleArea.width)
+                {
+                    return false;
+                }
+            }
+            return this.paintChild(g, root, 0);
+        };
+
+        this.y_ = function (item,isStart){
+            var ty = this.getToggleY(item), th = this.getToggleSize(item).height, dy = this.scrollManager.getSY(),
+                y = (item.kids.length &gt; 0) ? (isStart ? ty + th : ty - 1) : ty + ~~(th / 2);
+            if (y + dy &lt; 0) y = -dy - 1;
+            else {
+                if (y + dy &gt; this.height) y = this.height - dy;
+            }
+            return y;
+        };
+
+        this.paintChild = function (g,root,index){
+            var b = this.isOpen_(root), vs = this.viewSizes;
+            if (root == this.firstVisible &amp;&amp; this.lnColor != null){
+                g.setColor(this.lnColor);
+                var y1 = this.getTop(), y2 = this.y_(root, false),
+                    xx = this.getIM(root).x + ~~((b ? vs[&quot;on&quot;].width
+                                                    : vs[&quot;off&quot;].width) / 2);
+                g.beginPath();
+                g.moveTo(xx + 0.5, y1);
+                g.lineTo(xx + 0.5, y2);
+                g.stroke();
+            }
+            if (b &amp;&amp; root.kids.length &gt; 0){
+                var firstChild = root.kids[0];
+                if (firstChild == null) return true;
+                var x = this.getIM(firstChild).x + ~~((this.isOpen_(firstChild) ? vs[&quot;on&quot;].width
+                                                                                : vs[&quot;off&quot;].width) / 2);
+                var count = root.kids.length;
+                if(index &lt; count){
+                    var y = (index &gt; 0) ? this.y_(root.kids[index - 1], true)
+                                        : this.getImageY(root) + this.getImageSize(root).height;
+                    for(var i = index;i &lt; count; i ++ ){
+                        var child = root.kids[i];
+                        if (this.lnColor != null){
+                            g.setColor(this.lnColor);
+                            g.beginPath();
+                            g.moveTo(x + 0.5, y);
+                            g.lineTo(x + 0.5, this.y_(child, false));
+                            g.stroke();
+                            y = this.y_(child, true);
+                        }
+                        if (this.paintBranch(g, child) === false){
+                            if (this.lnColor != null &amp;&amp; i + 1 != count){
+                                g.setColor(this.lnColor);
+                                g.beginPath();
+                                g.moveTo(x + 0.5, y);
+                                g.lineTo(x + 0.5, this.height - this.scrollManager.getSY());
+                                g.stroke();
+                            }
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        };
+
+        this.nextPage = function (item,dir){
+            var sum = 0, prev = item;
+            while(item != null &amp;&amp; sum &lt; this.visibleArea.height){
+                sum += (this.getIM(item).height + this.gapy);
+                prev = item;
+                item = dir &lt; 0 ? this.findPrev(item) : this.findNext(item);
+            }
+            return prev;
+        };
+
+        this.se = function (item,e){
+            if (item != null){
+                this.stopEditing(true);
+                if(this.editors != null &amp;&amp; this.editors.shouldStartEdit(item, e)){
+                    this.startEditing(item);
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        this.paint = function(g){
+            if (this.model != null){
+                this.vVisibility();
+                if (this.firstVisible != null){
+                    var sx = this.scrollManager.getSX(), sy = this.scrollManager.getSY();
+                    try{
+                        g.translate(sx, sy);
+                        this.paintTree(g, this.firstVisible);
+                    }
+                    finally{
+                        g.translate(-sx,  -sy);
+                    }
+                }
+            }
+        };
+
+        /**
+         * Select the given item. 
+         * @param  {zebra.data.Item} an item to be selected. Use null value to clear any selection  
+         * @method  select
+         */
+        this.select = function(item){
+            if (this.isSelectable &amp;&amp; item != this.selected){
+                var old = this.selected, m = null;
+                this.selected = item;
+                if(this.selected != null) this.makeVisible(this.selected);
+                this._.selected(this, this.selected);
+
+                if(old != null &amp;&amp; this.isVerVisible(old)){
+                    m = this.getItemMetrics(old);
+                    this.repaint(m.x + this.scrollManager.getSX(), m.y + this.scrollManager.getSY(), m.width, m.height);
+                }
+                if(this.selected != null &amp;&amp; this.isVerVisible(this.selected)){
+                    m = this.getItemMetrics(this.selected);
+                    this.repaint(m.x + this.scrollManager.getSX(), m.y + this.scrollManager.getSY(), m.width, m.height);
+                }
+            }
+        };
+
+        /**
+         * Make the given tree item visible. Tree component rendered content can takes more space than 
+         * the UI component size is. In this case the content can be scrolled to make visible required 
+         * tree item.
+         * @param  {zebra.data.Item} item an item to be visible
+         * @method makeVisible
+         */
+        this.makeVisible = function(item){
+            this.validate();
+            var r = this.getViewBounds(item);
+            this.scrollManager.makeVisible(r.x, r.y, r.width, r.height);
+        };
+
+        this.mouseClicked = function(e){
+            if (this.se(this.pressedItem, e)) this.pressedItem = null;
+            else {
+                if(this.selected != null &amp;&amp; e.clicks &gt; 1 &amp;&amp; e.isActionMask() &amp;&amp;
+                   this.getItemAt(this.firstVisible, e.x, e.y) == this.selected)
+                {
+                    this.toggle(this.selected);
+                }
+            }
+        };
+
+        this.mouseReleased = function(e){ if (this.se(this.pressedItem, e)) this.pressedItem = null; };
+
+        this.keyTyped = function(e){
+            if (this.selected != null){
+                switch(e.ch) {
+                    case &#x27;+&#x27;: if (this.isOpen(this.selected) === false) this.toggle(this.selected);break;
+                    case &#x27;-&#x27;: if (this.isOpen(this.selected)) this.toggle(this.selected);break;
+                }
+            }
+        };
+
+        this.keyPressed = function(e){
+            var newSelection = null;
+            switch(e.code) {
+                case KE.DOWN    :
+                case KE.RIGHT   : newSelection = this.findNext(this.selected);break;
+                case KE.UP      :
+                case KE.LEFT    : newSelection = this.findPrev(this.selected);break;
+                case KE.HOME    : if (e.isControlPressed()) this.select(this.model.root);break;
+                case KE.END     : if (e.isControlPressed()) this.select(this.findLast(this.model.root));break;
+                case KE.PAGEDOWN: if (this.selected != null) this.select(this.nextPage(this.selected, 1));break;
+                case KE.PAGEUP  : if (this.selected != null) this.select(this.nextPage(this.selected,  - 1));break;
+                //!!!!case KE.ENTER: if(this.selected != null) this.toggle(this.selected);break;
+            }
+            if (newSelection != null) this.select(newSelection);
+            this.se(this.selected, e);
+        };
+
+        this.mousePressed = function(e){            
+            this.pressedItem = null;
+            this.stopEditing(true);
+        
+            if (this.firstVisible != null &amp;&amp; e.isActionMask()){
+                var x = e.x, y = e.y, root = this.getItemAt(this.firstVisible, x, y);
+                if (root != null){
+                    x -= this.scrollManager.getSX();
+                    y -= this.scrollManager.getSY();
+                    var r = this.getToggleBounds(root);
+
+                    if (x &gt;= r.x &amp;&amp; x &lt; r.x + r.width &amp;&amp; y &gt;= r.y &amp;&amp; y &lt; r.y + r.height){
+                        if (root.kids.length &gt; 0) this.toggle(root);
+                    }
+                    else {
+                        if (x &gt; r.x + r.width) this.select(root);
+                        if (this.se(root, e) === false) this.pressedItem = root;
+                    }
+                }
+            }
+        };
+
+        /**
+         * Toggle off or on recursively all items of the given item  
+         * @param  {zebra.data.Item} root a starting item to toggle
+         * @param  {Boolean} b  true if all items have to be in opened 
+         * state and false otherwise
+         * @method toggleAll
+         */
+        this.toggleAll = function (root,b){
+            var model = this.model;
+            if (root.kids.length &gt; 0){
+                if(this.getItemMetrics(root).isOpen != b) this.toggle(root);
+                for(var i = 0;i &lt; root.kids.length; i++ ){
+                    this.toggleAll(root.kids[i], b);
+                }
+            }
+        };
+
+        /**
+         * Toggle the given tree item
+         * @param  {zebra.data.Item} item an item to be toggled
+         * @method toggle
+         */
+        this.toggle = function(item){
+            if (item.kids.length &gt; 0){
+                this.stopEditing(true);
+                this.validate();
+                var node = this.getIM(item);
+                node.isOpen = (node.isOpen ? false : true);
+                this.invalidate();
+                this._.toggled(this, item);
+                if( !node.isOpen &amp;&amp; this.selected != null){
+                    var parent = this.selected;
+                    do {
+                        parent = parent.parent;
+                    }
+                    while(parent != item &amp;&amp; parent != null);
+                    if(parent == item) this.select(item);
+                }
+                this.repaint();
+            }
+        };
+
+        this.itemInserted = function (target,item){
+            this.stopEditing(false);
+            this.vrp();
+        };
+
+        this.itemRemoved = function (target,item){
+            if (item == this.firstVisible) this.firstVisible = null;
+            this.stopEditing(false);
+            if (item == this.selected) this.select(null);
+            delete this.nodes[item];
+            this.vrp();
+        };
+
+        this.itemModified = function (target,item){
+            var node = this.getIM(item);
+            if (node != null) node.viewWidth = -1;
+            this.vrp();
+        };
+
+        /**
+         * Start editing the given if an editor for the item has been defined. 
+         * @param  {zebra.data.Item} item an item whose content has to be edited
+         * @method startEditing
+         * @protected
+         */
+        this.startEditing = function (item){
+            this.stopEditing(true);
+            if(this.editors != null){
+                var editor = this.editors.getEditor(this, item);
+                if(editor != null){
+                    this.editedItem = item;
+                    var b = this.getViewBounds(this.editedItem), ps = editor.getPreferredSize();
+                    editor.setLocation(b.x + this.scrollManager.getSX(),
+                                       b.y - ~~((ps.height - b.height) / 2)+ this.scrollManager.getSY());
+                    editor.setSize(ps.width, ps.height);
+                    this.add(editor);
+                    ui.focusManager.requestFocus(editor);
+                }
+            }
+        };
+
+        /**
+         * Stop editing currently edited tree item and apply or discard the result of the
+         * editing to tree data model.
+         * @param  {Boolean} true if the editing result has to be applied to tree data model
+         * @method stopEditing
+         * @protected
+         */
+        this.stopEditing = function(applyData){
+            if (this.editors != null &amp;&amp; this.editedItem != null){
+                try{
+                    if(applyData)  {
+                        this.model.setValue(this.editedItem, this.editors.fetchEditedValue(this.editedItem, this.kids[0]));
+                    }
+                }
+                finally{
+                    this.editedItem = null;
+                    this.removeAt(0);
+                    this.requestFocus();
+                }
+            }
+        };
+
+        this.calcPreferredSize = function (target){
+            return this.model == null ? { width:0, height:0 }
+                                      : { width:this.maxw, height:this.maxh };
+        };
+    },
+
+    function () { this.$this(null); },
+    function (d){ this.$this(d, true);},
+
+    function (d,b){
+        this.provider = this.selected = this.firstVisible = this.editedItem = this.pressedItem = null;
+        this.maxw = this.maxh = 0;
+        
+        /**
+         * A tree model items view provider
+         * @readOnly
+         * @attribute provider
+         * @type {zebra.ui.tree.DefsViews}
+         */
+
+        /**
+         * A tree model editor provider
+         * @readOnly
+         * @attribute editors
+         * @type {zebra.ui.tree.DefEditors}
+         */
+
+         /**
+          * Tree component line color
+          * @attribute lnColor
+          * @type {String}
+          * @readOnly
+          */
+
+        this.visibleArea = this.lnColor = this.editors = null;
+
+        this.views     = {};
+        this.viewSizes = {};
+
+        this._isVal = false;
+        this.nodes = {};
+        this._ = new TreeListeners(); 
+        this.setLineColor(&quot;gray&quot;);
+
+        this.isOpenVal = b;
+        this.setModel(d);
+
+        this.setViewProvider(new pkg.DefViews());
+
+        this.setSelectable(true);
+        this.$super();
+        this.scrollManager = new ui.ScrollManager(this);
+    },
+
+    function focused(){ 
+        this.$super();
+        if (this.selected != null) {
+            var m = this.getItemMetrics(this.selected);
+            this.repaint(m.x + this.scrollManager.getSX(), m.y + this.scrollManager.getSY(), m.width, m.height);
+        }
+    },
+
+    /**
+     * Set the given editor provider. The editor provider is a class that is used to decide which UI
+     * component has to be used as an item editor, how the editing should be triggered and how the 
+     * edited value has to be fetched from an UI editor.
+     * @param {zebra.ui.tree.DefEditors} p an editor provider
+     * @method setEditorProvider 
+     */
+    function setEditorProvider(p){
+        if(p != this.editors){
+            this.stopEditing(false);
+            this.editors = p;
+        }
+    },
+
+    /**
+     * Say if items of the tree component should be selectable
+     * @param {Boolean} b true is tree component items can be selected 
+     * @method setSelectable
+     */
+    function setSelectable(b){
+        if (this.isSelectable != b){
+            if (b === false &amp;&amp; this.selected != null) this.select(null);
+            this.isSelectable = b;
+            this.repaint();
+        }
+    },
+
+    /**
+     * Set tree component connector lines color
+     * @param {String} c a color
+     * @method setLineColor
+     */
+    function setLineColor(c){
+        this.lnColor = c;
+        this.repaint();
+    },
+
+    function setGaps(gx,gy){
+        if (gx != this.gapx || gy != this.gapy){
+            this.gapx = gx;
+            this.gapy = gy;
+            this.vrp();
+        }
+    },
+
+    /**
+     * Set tree component items view provider. Provider says how tree model items 
+     * have to be visualized. 
+     * @param {zebra.ui.tree.DefViews} p a view provider
+     * @method setViewProvider
+     */
+    function setViewProvider(p){
+        if(p == null) p = this;
+        if(this.provider != p){
+            this.stopEditing(false);
+            this.provider = p;
+            delete this.nodes;
+            this.nodes = {};
+            this.vrp();
+        }
+    },
+
+    /**
+     * Set the number of views to customize rendering of different visual elements of the tree 
+     * UI component. The following decorative elements can be customized:
+ 
+    - **&quot;close&quot; ** - closed tree item icon view 
+    - **&quot;open&quot; **  - opened tree item icon view
+    - **&quot;leaf&quot; **  - leaf tree item icon view
+    - **&quot;on&quot; **    - toggle on view 
+    - **&quot;off&quot; **   - toggle off view
+    - **&quot;iselect&quot; **   - a view to express an item selection when tree component doesn&#x27;t hold focus
+    - **&quot;aselect&quot; **   - a view to express an item selection when tree component holds focus
+
+     * For instance:
+     
+        // build tree UI component
+        var tree = new zebra.ui.tree.Tree({
+            value: &quot;Root&quot;,
+            kids: [
+                &quot;Item 1&quot;,
+                &quot;Item 2&quot;
+            ]
+        });
+
+        // set &quot; [x] &quot; text render for toggle on and 
+        // &quot; [o] &quot; text render for toggle off tree elements
+        tree.setViews({
+            &quot;on&quot;: new zebra.ui.TextRender(&quot; [x] &quot;),
+            &quot;off&quot;: new zebra.ui.TextRender(&quot; [o] &quot;)
+        });
+    
+     * @param {Object} v dictionary of tree component decorative elements views 
+     * @method setViews
+     */
+    function setViews(v){
+        for(var k in v) {
+            if (v.hasOwnProperty(k)) {
+                var vv = ui.$view(v[k]);
+                this.views[k] = vv;
+                if (k != &quot;aselect&quot; &amp;&amp; k != &quot;iselect&quot;){
+                    this.stopEditing(false);
+                    this.viewSizes[k] = vv ? vv.getPreferredSize() : null;
+                    this.vrp();
+                }
+            }
+        }
+    },
+
+    /**
+     * Set the given tree model to be visualized with the UI component.
+     * @param {zebra.data.TreeModel|Object} d a tree model
+     * @method setModel
+     */
+    function setModel(d){
+        if (this.model != d) {
+            if (zebra.instanceOf(d, zebra.data.TreeModel) === false) {
+                d = new zebra.data.TreeModel(d);
+            }
+
+            this.stopEditing(false);
+            this.select(null);
+            if(this.model != null &amp;&amp; this.model._) this.model._.remove(this);
+            this.model = d;
+            if(this.model != null &amp;&amp; this.model._) this.model._.add(this);
+            this.firstVisible = null;
+            delete this.nodes;
+            this.nodes = {};
+            this.vrp();
+        }
+    },
+
+    function invalidate(){
+        if (this.isValid){
+            this._isVal = false;
+            this.$super();
+        }
+    }
+]);
+
+pkg.TreeSignView = Class(ui.View, [
+    function () {
+        this.$this(true);
+    },
+
+    function (plus) {
+        this.$this(&quot;white&quot;, &quot;lightGray&quot;, plus);
+    },
+
+    function (color, bg, plus) {
+        this.color = color;
+        this.bg = bg;
+        this.plus = plus;
+        this.br = new ui.Border(&quot;rgb(65, 131, 215)&quot;, 1, 3);
+    },
+
+    function $prototype() {
+        this.paint = function(g, x, y, w, h, d) {
+            this.br.outline(g, x, y, w, h, d);
+
+            g.setColor(this.bg);
+            g.fill();
+            this.br.paint(g, x, y, w, h, d);
+
+            g.setColor(this.color);
+            g.lineWidth = 2;
+            x+=2;
+            w-=4;
+            h-=4;
+            y+=2;
+            g.beginPath();
+            g.moveTo(x, y + h/2);
+            g.lineTo(x + w, y + h/2);
+            if (this.plus) {
+                g.moveTo(x + w/2, y);
+                g.lineTo(x + w/2, y + h);
+            }
+
+            g.stroke();
+            g.lineWidth = 1;
+        };
+
+        this.getPreferredSize = function() {
+            return { width:12, height:12};
+        };
+    }
+]);
+
+})(zebra(&quot;ui.tree&quot;), zebra.Class, zebra.ui);
+</pre>
+
+</div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/js/tabs.js"></script>
+</body>
+</html>

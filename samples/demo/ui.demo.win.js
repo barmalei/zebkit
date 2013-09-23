@@ -21,7 +21,7 @@ var CardLayout = new Class(Layout, [
 function createTooltipDemo() {
     var  p = new Panel(new FlowLayout(CENTER, CENTER, VERTICAL, 16));
     var ccc = "black";
-    var f = new Font("Helvetica", 1, 16);
+    var f = new Font("Helvetica", "bold", 16);
     var l1 = pkg.createLabel("HONDA\nShow textual\ntooltip", ccc, f);
     var l2 = pkg.createLabel("BMW\nShow fancy tooltip", ccc, f);
     var l3 = pkg.createLabel("SAAB\nShow whatever\nyou want as a tooltip", ccc, f);
@@ -50,7 +50,7 @@ function createTooltipDemo() {
             var img = new ImagePan(ui.demo.bmw);
             var l = new Label(new zebra.data.Text("BMW is the best.\nAudi looks similar.\nBeware of imitation :)"));
             l.setColor("#3366CC");
-            l.setFont(new Font("Helvetica", 0, 14));
+            l.setFont(new Font("Helvetica", 14));
             pp.setPaddings(4, 16, 42, 16);
             pp.add(img);
             pp.add(l)
@@ -70,7 +70,7 @@ function createTooltipDemo() {
         function getView(row, col, data) {
             if (col == 0 || col == 2) {
                 var r = new BoldTextRender(new zebra.data.Text(data));
-                r.setFont(new Font("Helvetica", 1, 16));
+                r.setFont(new Font("Helvetica", "bold", 16));
                 if (col==2) r.setColor("red");
                 return r;
             }

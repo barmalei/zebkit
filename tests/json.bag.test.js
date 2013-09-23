@@ -31,6 +31,8 @@ zebra.runTests("Zebra util objects bag",
 
     function test_obj_merge() {
         var o = {a:2, b: {b2:100}, c:[-2,-1, 0], x:{ ll:100 }, k: { k: 100 }, dd:null, ddd:[1,2,3], pp: { pp: { } } }, b = new Bag(o);
+        b.concatArrays = true;
+
         b.load('{ "a":1, "b":{ "b1":"abc" }, "c": [1,2,3], "d":null, "x":null, "k": { "k": { "k":100 }, "kk":99 }, "dd":[1,2,3] , "ddd":null, "pp": { "pp": { "pp": [1,2]} } }');
         assert(b.get("a") === 1, true, "1");
         assert(b.get("d") === null, true, "2");
@@ -111,6 +113,32 @@ zebra.runTests("Zebra util objects bag",
         assert(r.b.c, "abc");
     },
 
+    function test_classprops() {
+        A = Class([
+            function setName(n) {
+                this.nameProp = n;
+            },
+
+            function $prototype() {
+                this.setName2 = function(n) {
+                    this.nameProp2 = n;
+                };
+            }
+        ]);
+
+        var t = {}, b = new Bag(t);
+        b.load('{ "a": { "$A":[], "name":100, "name2":101, "b": { "$A":[], "name":200, "name2":201, "k":1 }, "c":400  } }');
+
+        assert(t.a.nameProp, 100);
+        assert(t.a.nameProp2, 101);
+        assert(t.a.c, 400);
+        assert(t.a.name, undefined);
+        assert(t.a.b.name, undefined);
+        assert(t.a.b.nameProp, 200);
+        assert(t.a.b.nameProp2, 201);
+        assert(t.a.b.k, 1);
+    },
+
     function test_refs() {
         var o = {p1: { "p222":333  }}, bag = new Bag(o);
         bag.ignoreNonExistentKeys = true;
@@ -129,6 +157,7 @@ zebra.runTests("Zebra util objects bag",
             bag = new Bag(o),
             l1 = '{ "p1": { "p1": { "p1": 100, "p2":true  } }, "p2": [4,5,6], "p33":["a", "b"],  "p3": { "p3":["a", "b"], "p4": { "p4": 1} } }';
             l2 = '{ "p1": { "p1": { "p1": 200, "p3":false } }, "p2": [7,8,9], "p33":["a", "b"],  "p3": { "p3":["c", "d"], "p4": { "p4": 12, "p5":122 } } }';
+        bag.concatArrays = true;
         bag.load(l1, false).load(l2);
         var r = bag.objects;
 

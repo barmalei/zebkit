@@ -54,9 +54,9 @@
         { "$ *zebra.ui.RootLayer" :  "root"  }
      ],
 
-    "font"          : { "$Font" : ["Arial", 0, 14] },
-    "boldFont"      : { "$Font" : ["Arial", 1, 12] },
-    "smallFont"     : { "$Font" : ["Arial", 0, 10] },
+    "font"          : { "$Font" : ["Arial", 14] },
+    "boldFont"      : { "$Font" : ["Arial", "bold", 12] },
+    "smallFont"     : { "$Font" : ["Arial", 10] },
 
     "palette": {
         "white" : "#FFFFFF",

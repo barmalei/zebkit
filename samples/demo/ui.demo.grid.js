@@ -17,7 +17,7 @@ var colors = [ ["white", "lightGray", "white"],
 var ColumnsAlignmentProvider = Class(DefViews, [
     function getView(row,col,data){
         var tf = new BoldTextRender(data);
-        tf.setFont(new Font("Helvetica", 0, 16));
+        tf.setFont(new Font("Helvetica", 16));
         if (row == 1 && col == 1) {
             tf.setColor("white");
         }
@@ -125,7 +125,7 @@ var CustomGridEditor = new Class(DefEditors, [
     function fetchEditedValue(row,col,data,editor){
         if (col == 0) return editor.getValue() ? "on" : "off";
         return (col == 3) ? editor.list.selectedIndex 
-                          : this.$super(this.fetchEditedValue,row, col, data, editor);
+                          : this.$super(row, col, data, editor);
     }
 ]);
 
@@ -147,7 +147,7 @@ var CompEditorProvider = new Class(DefEditors, [
     },
 
     function fetchEditedValue(row,col,data,c){
-        return (row == 2) ? c : this.$super(this.fetchEditedValue,row, col, data, c);
+        return (row == 2) ? c : this.$super(row, col, data, c);
     },
 
     function shouldDo(t, action,row,col,e){
@@ -185,6 +185,7 @@ function longGrid() {
 function editableGrid() {
     function makeSubgrid(){
         var data = new Matrix(7, 3);
+
         for(var i = 0;i < data.rows; i ++ ){
             for(var j = 0;j < data.cols; j ++ ) data.put(i, j, "Cell [" + i + "," + j + "]");
         }
@@ -295,7 +296,7 @@ function customCellAlignmentGrid() {
     for(var i = 0;i < data.cols; i ++ ) caption.putTitle(i, titles[i]);
     caption.setTitleProps(0, LEFT, CENTER, null);
     caption.setTitleProps(2, RIGHT, CENTER, null);
-    caption.render.setFont(new Font("Helvetica", 1, 14));
+    caption.render.setFont(new Font("Helvetica", "bold", 14));
     caption.isResizable = false;
 
     grid.add(TOP, caption);

@@ -9,7 +9,7 @@ var assert = zebra.assert, Class = zebra.Class, assertException = zebra.assertEx
     assertNoException = zebra.assertNoException, Listeners = zebra.util.Listeners;
 
 zebra.runTests("Zebra util",
-    function test_single() {
+    function test_single_listener() {
         var clazz = Listeners.Class(), aaa = 10, bbb = null;
         assert(clazz.prototype.fired != null, true);
 
@@ -127,7 +127,7 @@ zebra.runTests("Zebra util",
         assert(aaa2, 100);
     },
 
-    function test_multiple() {
+    function test_multiple_listener() {
         var clazz = Listeners.Class("test1", "test2"), aaa = 100, bbb = 111, ccc = 1, l = new clazz();
 
         assert(clazz.prototype.test1 != null, true);

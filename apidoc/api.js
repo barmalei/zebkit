@@ -168,12 +168,13 @@ YUI.add("yuidoc-meta", function(Y) {
         },
         {
             "displayName": "io",
-            "name": "io"
+            "name": "io",
+            "description": "The module provides number of classes to help to communicate \nwith remote services and servers by HTTP, JSON-RPC, XML-RPC\nprotocols"
         },
         {
             "displayName": "layout",
             "name": "layout",
-            "description": "Layout package provides number of classes, interfaces, methods and variables that allows developer easily \nimplement rules based layouting of hierarchy of rectangular elements. The package has no relation \nto any concrete UI, but it can be applied to a required UI framework\n\nThe package declares the following constrains constants:\n    \n   - **NONE** no constraints \n   - **LEFT** left alignment constraint\n   - **TOP** top alignment constraint\n   - **RIGHT** right alignment constraint\n   - **BOTTOM** bottom alignment constraint\n   - **CENTER** center alignment constraint\n   - **HORIZONTAL** horizontal elements alignment constraint\n   - **VERTICAL** vertical elements alignment constraint\n   - **TLEFT** top left alignment constraint\n   - **TRIGHT** top right alignment constraint\n   - **BLEFT** bottom left alignment constraint\n   - **BRIGHT** bottom right alignment constraint\n   - **STRETCH** stretch element\n   - **USE_PS_SIZE** use preferred size for an element"
+            "description": "Layout package provides number of classes, interfaces, methods and \nvariables that allows developer easily implement rules based layouting \nof hierarchy of rectangular elements. The package has no relation \nto any concrete UI, but it can be applied to a required UI framework\n\nThe package declares the following constrains constants:\n    \n   - **NONE** no constraints \n   - **LEFT** left alignment constraint\n   - **TOP** top alignment constraint\n   - **RIGHT** right alignment constraint\n   - **BOTTOM** bottom alignment constraint\n   - **CENTER** center alignment constraint\n   - **HORIZONTAL** horizontal elements alignment constraint\n   - **VERTICAL** vertical elements alignment constraint\n   - **TLEFT** top left alignment constraint\n   - **TRIGHT** top right alignment constraint\n   - **BLEFT** bottom left alignment constraint\n   - **BRIGHT** bottom right alignment constraint\n   - **STRETCH** stretch element\n   - **USE_PS_SIZE** use preferred size for an element"
         },
         {
             "displayName": "ui",
@@ -187,7 +188,8 @@ YUI.add("yuidoc-meta", function(Y) {
         },
         {
             "displayName": "ui.grid",
-            "name": "ui.grid"
+            "name": "ui.grid",
+            "description": "The package contains number of classes and interfaces to implement\nUI Grid component. The grid allows developers to visualize matrix \nmodel, customize the model data editing and rendering."
         },
         {
             "displayName": "ui.tree",

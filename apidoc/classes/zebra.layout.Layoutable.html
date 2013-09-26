@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>zebra.layout.Layoutable - Zebra API</title>
+    <title>zebra.layout.Layoutable</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.8.0pr2/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -13,10 +13,10 @@
 <div id="doc">
     <div id="hd" class="yui3-g header">
         <div class="yui3-u-3-4">
-            <h1>Zebra API: zebra.layout.Layoutable</a></h1>
+            <h1>undefined: zebra.layout.Layoutable</a></h1>
         </div>
         <div class="yui3-u-1-4 version">
-            <em>API Docs for: 07/2013</em>
+            <em>API Docs for: </em>
         </div>
     </div>
     <div class="yui3-g">
@@ -409,11 +409,15 @@
             
                 <li><a href="#methods_invalidate">invalidate</a></li>
             
+                <li><a href="#methods_invalidateLayout">invalidateLayout</a></li>
+            
                 <li><a href="#methods_kidAdded">kidAdded</a></li>
             
                 <li><a href="#methods_kidRemoved">kidRemoved</a></li>
             
                 <li><a href="#methods_laidout">laidout</a></li>
+            
+                <li><a href="#methods_recalc">recalc</a></li>
             
                 <li><a href="#methods_relocated">relocated</a></li>
             
@@ -438,6 +442,8 @@
                 <li><a href="#methods_setSize">setSize</a></li>
             
                 <li><a href="#methods_validate">validate</a></li>
+            
+                <li><a href="#methods_validateMetric">validateMetric</a></li>
             
         </ul>
     </div>
@@ -472,8 +478,13 @@
 
 
 
-<div class="intro"><p>Layoutable class defines rectangular component that has elementary metrical properties like width, height and location and can be a participant 
-of layout management process. Layoutable component is container that can contains other layoutable component as its children. The children<br>components are ordered by applying a layout manager of its parent component.</p>
+<div class="intro"><p>Layoutable class defines rectangular component that 
+has elementary metrical properties like width, height 
+and location and can be a participant of layout management 
+process. Layoutable component is container that can 
+contains other layoutable component as its children. 
+The children components are ordered by applying a layout 
+manager of its parent component.</p>
 </div>
 
 
@@ -566,8 +577,10 @@ of layout management process. Layoutable component is container that can contain
     
 
     <br>
-    <p>By default layoutbable component itself implements layout manager to order its children components.
-This method implementation does nothing, so children component will placed according locations and sizes they 
+    <p>By default layoutbable component itself implements 
+layout manager to order its children components.
+This method implementation does nothing, so children 
+component will placed according locations and sizes they 
 have set.</p>
 
     
@@ -594,7 +607,8 @@ have set.</p>
             <strong><code>path</code> <i><font color="green">&lt;String&gt;</font></i></strong>
         
         
-        <p><p>path expression. Path expression is simplified form of XPath-like expression:</p></p>
+        <p>path expression. Path expression is simplified form 
+of XPath-like expression:</p>
 <pre><code>   &quot;/Panel&quot;  - find first children that is an instance of zebra.ui.Panel
    &quot;/Panel[@id=&#39;top&#39;]&quot; - find first children that is an instance of zebra.ui.Panel with &quot;id&quot; attribute that equals &quot;top&quot;
    &quot;//Panel&quot;  - find first children that is an instance of zebra.ui.Panel recursively</code></pre>
@@ -606,7 +620,8 @@ have set.</p>
     
     
     
-    <br><div class="returns"><strong>Returns:</strong> <font color="green">&lt;<a href="../classes/zebra.layout.Layoutable.html" class="crosslink">zebra.layout.Layoutable</a>&gt; </font><p>found children component or null if no children component can be found</p>
+    <br><div class="returns"><strong>Returns:</strong> <font color="green">&lt;<a href="../classes/zebra.layout.Layoutable.html" class="crosslink">zebra.layout.Layoutable</a>&gt; </font><p>found children component or null if 
+no children component can be found</p>
 </div>
     
     
@@ -632,7 +647,8 @@ have set.</p>
             <strong><code>path</code> <i><font color="green">&lt;String&gt;</font></i></strong>
         
         
-        <p><p>path expression. Path expression is simplified form of XPath-like expression:</p></p>
+        <p>path expression. Path expression is 
+simplified form of XPath-like expression:</p>
 <pre><code>    &quot;/Panel&quot;  - find first children that is an instance of zebra.ui.Panel
     &quot;/Panel[@id=&#39;top&#39;]&quot; - find first children that is an instance of zebra.ui.Panel with &quot;id&quot; attribute that equals &quot;top&quot;
     &quot;//Panel&quot;  - find first children that is an instance of zebra.ui.Panel recursively</code></pre>
@@ -646,7 +662,8 @@ have set.</p>
             <span class="flag optional" title="This parameter is optional.">optional</span>
         
         
-        <p>function that is called every time a new children component has been found.</p>
+        <p>function that is called every time a 
+new children component has been found.</p>
 
             
         </li>
@@ -655,7 +672,8 @@ have set.</p>
     
     
     
-    <br><div class="returns"><strong>Returns:</strong> <font color="green">&lt;Array&gt; </font><p>return array of found children components if passed function has not been passed</p>
+    <br><div class="returns"><strong>Returns:</strong> <font color="green">&lt;Array&gt; </font><p>return array of found children components if 
+passed function has not been passed</p>
 </div>
     
     
@@ -745,13 +763,15 @@ have set.</p>
     
 
     <br>
-    <p>Get preferred size. The preferred size includes  top, left, bottom and right paddings and 
+    <p>Get preferred size. The preferred size includes  top, left, 
+bottom and right paddings and 
 the size the component wants to have</p>
 
     
     
     
-    <br><div class="returns"><strong>Returns:</strong> <font color="green">&lt;Object&gt; </font><p><p>return size object the component wants to have as the following structure:</p></p>
+    <br><div class="returns"><strong>Returns:</strong> <font color="green">&lt;Object&gt; </font><p>return size object the component wants to 
+have as the following structure:</p>
 <pre><code>    {width:{Integer}, height:{Integer}} object</code></pre>
 </div>
     
@@ -815,7 +835,7 @@ the size the component wants to have</p>
     
         <li>
         
-            <strong><code>c</code> <i><font color="green">&lt;Layoutbale&gt;</font></i></strong>
+            <strong><code>c</code> <i><font color="green">&lt;zebra.ui.Layoutbale&gt;</font></i></strong>
         
         
         <p>a children component</p>
@@ -883,7 +903,7 @@ set &quot;constraints&quot; property of in inserted component.</p>
     
     
     
-    <br><div class="returns"><strong>Returns:</strong> <font color="green">&lt;<a href="../classes/zebra.layout.Layoutable.html" class="crosslink">zebra.layout.Layoutable</a>&gt; </font><p>just added children layoutable component</p>
+    <br><div class="returns"><strong>Returns:</strong> <font color="green">&lt;<a href="../classes/zebra.layout.Layoutable.html" class="crosslink">zebra.layout.Layoutable</a>&gt; </font><p>an inserted children layoutable component</p>
 </div>
     
     
@@ -898,7 +918,27 @@ set &quot;constraints&quot; property of in inserted component.</p>
     
 
     <br>
-    <p>Invalidate component layout and metrics</p>
+    <p>Invalidate component layout and metrics.</p>
+
+    
+    
+    
+</div>
+
+            
+                <a name="methods_invalidateLayout"></a>
+<div class="method item protected">
+     <strong class="name"><code>invalidateLayout</code></strong>( <code>  </code> )     
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    <br>
+    <p>Invalidate the component layout. Layout invalidation means the 
+component children components have to be placed with the component
+layout manager. Layout invalidation causes a parent component 
+layout is also invalidated.</p>
 
     
     
@@ -1006,8 +1046,31 @@ has been removed</p>
     
 
     <br>
-    <p>The method can be implemented to be informed every time the component
-lay outs its children components</p>
+    <p>The method can be implemented to be informed every time 
+the component lay outs its children components</p>
+
+    
+    
+    
+</div>
+
+            
+                <a name="methods_recalc"></a>
+<div class="method item protected">
+     <strong class="name"><code>recalc</code></strong>( <code>  </code> )     
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    <br>
+    <p>By default there is no any implementation of &quot;recalc&quot; method
+in the layoutable component. In other words the method doesn&#39;t
+exist. Developer should implement the method if the need a proper
+and efficient place  to calculate component properties that 
+have influence to the component preferred size. The &quot;recalc&quot;
+method is called only when it is really necessary to compute
+the component metrics.</p>
 
     
     
@@ -1174,7 +1237,8 @@ has been resized</p>
     
 
     <br>
-    <p>Replace a children component with the specified constraints with the given new children component</p>
+    <p>Replace a children component with the specified constraints 
+with the given new children component</p>
 
     
     <strong>Parameters:</strong>
@@ -1185,7 +1249,8 @@ has been resized</p>
             <strong><code>constr</code> <i><font color="green">&lt;Object&gt;</font></i></strong>
         
         
-        <p>a constraints of a children component to be replaced with a new one</p>
+        <p>a constraints of a children 
+component to be replaced with a new one</p>
 
             
         </li>
@@ -1195,7 +1260,8 @@ has been resized</p>
             <strong><code>d</code> <i><font color="green">&lt;<a href="../classes/zebra.layout.Layoutable.html" class="crosslink">zebra.layout.Layoutable</a>&gt;</font></i></strong>
         
         
-        <p>a new children component to be set</p>
+        <p>a new children 
+component to be set</p>
 
             
         </li>
@@ -1274,9 +1340,11 @@ has been resized</p>
     
 
     <br>
-    <p>Set the given layout manager that is used to place children component. Layout manager is simple
-class that defines number of rules concerning the way children components have to be ordered on 
-its parent surface.</p>
+    <p>Set the given layout manager that is used to place 
+children component. Layout manager is simple class 
+that defines number of rules concerning the way 
+children components have to be ordered on its parent 
+surface.</p>
 
     
     <strong>Parameters:</strong>
@@ -1284,7 +1352,7 @@ its parent surface.</p>
     
         <li>
         
-            <strong><code>m</code> <i><font color="green">&lt;Layout&gt;</font></i></strong>
+            <strong><code>m</code> <i><font color="green">&lt;zebra.ui.Layout&gt;</font></i></strong>
         
         
         <p>a layout manager</p>
@@ -1379,10 +1447,13 @@ a parent component</p>
     
 
     <br>
-    <p>Set the specified preferred size the component has to have. Component preferred size is important thing that 
-is widely used to layout the component. If it is necessary to fix the preferred size it can be done by calling
-the method. 
-wants to have and use it as</p>
+    <p>Set the specified preferred size the component has to have. 
+Component preferred size is important thing that is widely 
+used to layout the component. Usually the preferred 
+size is calculated by a concrete component basing on 
+its metrics. For instance, label component calculates its
+preferred size basing on text size. But if it is required<br>the component preferred size can be fixed with the desired 
+value.</p>
 
     
     <strong>Parameters:</strong>
@@ -1393,7 +1464,8 @@ wants to have and use it as</p>
             <strong><code>w</code> <i><font color="green">&lt;Integer&gt;</font></i></strong>
         
         
-        <p>a preferred width. Pass &quot;-1&quot; as the argument value to not set preferred width</p>
+        <p>a preferred width. Pass &quot;-1&quot; as the 
+argument value to not set preferred width</p>
 
             
         </li>
@@ -1403,7 +1475,8 @@ wants to have and use it as</p>
             <strong><code>h</code> <i><font color="green">&lt;Integer&gt;</font></i></strong>
         
         
-        <p>a preferred height. Pass &quot;-1&quot; as the argument value to not set preferred height</p>
+        <p>a preferred height. Pass &quot;-1&quot; as the 
+argument value to not set preferred height</p>
 
             
         </li>
@@ -1470,11 +1543,66 @@ wants to have and use it as</p>
 </div>
 
             
+                <a name="methods_validateMetric"></a>
+<div class="method item protected">
+     <strong class="name"><code>validateMetric</code></strong>( <code>  </code> )     
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    <br>
+    <p>Validate the component metrics. The method is called as 
+a one step of the component validation procedure. The 
+method causes &quot;recalc&quot; method execution if the method
+has been implemented and the component is in invalid
+state. It is supposed the &quot;recalc&quot; method has to be
+implemented by a component as safe place where the 
+component metrics can be calculated. Component 
+metrics is individual for the given component 
+properties that has influence to the component 
+preferred size value. In many cases the properties
+calculation has to be minimized what can be done
+by moving the calculation in &quot;recalc&quot; method</p>
+
+    
+    
+    
+</div>
+
+            
             </div>
         
         
         
             <div id="attrs">
+            
+                <a name="attrs_constraints"></a>
+<div class="attrs item">
+    <strong><code>constraints</code></strong> <strong><i><font color="green">&lt;Object&gt;</font></i></strong>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    <p>The component layout constraints. The constraints is specific to 
+the parent component layout manager value that customizes the 
+children component layouting on the parent component.</p>
+
+    
+</div>
+
             
                 <a name="attrs_height"></a>
 <div class="attrs item">
@@ -1497,7 +1625,7 @@ wants to have and use it as</p>
 
     
     
-    <p>height of rectangular area</p>
+    <p>Height of rectangular area</p>
 
     
 </div>
@@ -1524,7 +1652,7 @@ wants to have and use it as</p>
 
     
     
-    <p>indicates a layoutable component validity</p>
+    <p>Indicate a layoutable component validity</p>
 
     
 </div>
@@ -1551,7 +1679,7 @@ wants to have and use it as</p>
 
     
     
-    <p>indicates a layoutable component visibility</p>
+    <p>Indicate a layoutable component visibility</p>
 
     
 </div>
@@ -1578,7 +1706,7 @@ wants to have and use it as</p>
 
     
     
-    <p>layout manager that is used to order children layoutable components</p>
+    <p>Layout manager that is used to order children layoutable components</p>
 
     
 </div>
@@ -1605,7 +1733,7 @@ wants to have and use it as</p>
 
     
     
-    <p>parent of the layoutable component</p>
+    <p>Reference to a parent layoutable component</p>
 
     
 </div>
@@ -1632,7 +1760,7 @@ wants to have and use it as</p>
 
     
     
-    <p>width of rectangular area</p>
+    <p>Width of rectangular area</p>
 
     
 </div>
@@ -1795,6 +1923,13 @@ wants to have and use it as</p>
                                 
                             </li>
                         
+                            <li class="index-item method protected">
+                                <a href="../classes/zebra.layout.Layoutable.html#method_invalidateLayout">invalidateLayout</a>
+
+                                
+                                
+                            </li>
+                        
                             <li class="index-item method">
                                 <a href="../classes/zebra.layout.Layoutable.html#method_kidAdded">kidAdded</a>
 
@@ -1811,6 +1946,13 @@ wants to have and use it as</p>
                         
                             <li class="index-item method">
                                 <a href="../classes/zebra.layout.Layoutable.html#method_laidout">laidout</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method protected">
+                                <a href="../classes/zebra.layout.Layoutable.html#method_recalc">recalc</a>
 
                                 
                                 
@@ -1900,6 +2042,13 @@ wants to have and use it as</p>
                                 
                             </li>
                         
+                            <li class="index-item method protected">
+                                <a href="../classes/zebra.layout.Layoutable.html#method_validateMetric">validateMetric</a>
+
+                                
+                                
+                            </li>
+                        
                     </ul>
                 </div>
             
@@ -1911,6 +2060,10 @@ wants to have and use it as</p>
                     <h3>Attributes</h3>
 
                     <ul class="index-list attrs extends">
+                        
+                            <li class="index-item attr">
+                                <a href="#attr_constraints">constraints</a>
+                            </li>
                         
                             <li class="index-item attr">
                                 <a href="#attr_height">height</a>

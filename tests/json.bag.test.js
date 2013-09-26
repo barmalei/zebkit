@@ -139,7 +139,7 @@ zebra.runTests("Zebra util objects bag",
         assert(t.a.b.k, 1);
     },
 
-    function test_refs() {
+    function _test_refs() {
         var o = {p1: { "p222":333  }}, bag = new Bag(o);
         bag.ignoreNonExistentKeys = true;
 

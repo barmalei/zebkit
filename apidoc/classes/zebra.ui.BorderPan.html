@@ -208,6 +208,8 @@
             
                 <li><a href="../classes/zebra.ui.EventManager.html">zebra.ui.EventManager</a></li>
             
+                <li><a href="../classes/zebra.ui.Extender.html">zebra.ui.Extender</a></li>
+            
                 <li><a href="../classes/zebra.ui.findCanvas().html">zebra.ui.findCanvas()</a></li>
             
                 <li><a href="../classes/zebra.ui.FocusListener.html">zebra.ui.FocusListener</a></li>
@@ -249,6 +251,10 @@
                 <li><a href="../classes/zebra.ui.KeyListener.html">zebra.ui.KeyListener</a></li>
             
                 <li><a href="../classes/zebra.ui.Label.html">zebra.ui.Label</a></li>
+            
+                <li><a href="../classes/zebra.ui.Line.html">zebra.ui.Line</a></li>
+            
+                <li><a href="../classes/zebra.ui.Link.html">zebra.ui.Link</a></li>
             
                 <li><a href="../classes/zebra.ui.List.html">zebra.ui.List</a></li>
             
@@ -309,6 +315,8 @@
                 <li><a href="../classes/zebra.ui.ScrollManager.html">zebra.ui.ScrollManager</a></li>
             
                 <li><a href="../classes/zebra.ui.ScrollPan.html">zebra.ui.ScrollPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.showWindow().html">zebra.ui.showWindow()</a></li>
             
                 <li><a href="../classes/zebra.ui.Slider.html">zebra.ui.Slider</a></li>
             
@@ -376,6 +384,19 @@
 
 
 
+<div id="methods-on-page" class="sidebox on-page">
+    <div class="hd">
+        <h2 class="no-toc">Methods On Page</h2>
+    </div>
+    <div class="bd">
+        <ul>
+            
+                <li><a href="#methods_setGaps">setGaps</a></li>
+            
+        </ul>
+    </div>
+</div>
+
 
 
 
@@ -405,8 +426,10 @@
 
 
 
-<div class="intro"><p>Border panel UI component. The component render titled border around the given children content UI component.
-Border title can be placed on top or bottom border line and aligned horizontally (left, center, right). Any 
+<div class="intro"><p>Border panel UI component. The component render titled 
+border around the given children content UI component.
+Border title can be placed on top or bottom border line 
+and aligned horizontally (left, center, right). Any 
 zebra UI component can be used as a border title element.</p>
 </div>
 
@@ -431,7 +454,8 @@ zebra UI component can be used as a border title element.</p>
             <span class="flag optional" title="This parameter is optional.">optional</span>
         
         
-        <p>a border panel title. Can be a string or any other UI component can be 
+        <p>a border panel 
+title. Can be a string or any other UI component can be 
 used as the border panel title</p>
 
             
@@ -443,7 +467,8 @@ used as the border panel title</p>
             <span class="flag optional" title="This parameter is optional.">optional</span>
         
         
-        <p>a content UI component of the border panel</p>
+        <p>a content UI component 
+of the border panel</p>
 
             
         </li>
@@ -454,10 +479,13 @@ used as the border panel title</p>
             <span class="flag optional" title="This parameter is optional.">optional</span>
         
         
-        <p>a title constraints. The constraints gives a possibility to place border panel
-title in different places. Generally the title can be placed on the top or bottom part of the border panel.
+        <p>a title constraints. 
+The constraints gives a possibility to place border 
+panel title in different places. Generally the title can 
+be placed on the top or bottom part of the border panel.
 Also the title can be aligned horizontally. </p>
-<pre><code>   // create border panel with a title located at the top and aligned at the canter   
+<pre><code>   // create border panel with a title located at the 
+   // top and aligned at the canter   
    var bp = new zebra.ui.BorderPan(&quot;Title&quot;, 
                                    new zebra.ui.Panel(),
                                    zebra.layout.TOP | zebra.layout.CENTER);</code></pre>
@@ -477,7 +505,11 @@ Also the title can be aligned horizontally. </p>
 <div id="classdocs">
     <ul>
         
+        <li><a href="#methods">Methods</a></li>
         
+        
+        
+        <li><a href="#attrs">Attributes</a></li>
         
         
 
@@ -485,16 +517,153 @@ Also the title can be aligned horizontally. </p>
     </ul>
     <div>
         
+            <div id="methods">
+            
+                <a name="methods_setGaps"></a>
+<div class="method item">
+     <strong class="name"><code>setGaps</code></strong>( <code>vg, hg </code> )     
+
+    
+
+    <br>
+    <p>Set vertical and horizontal paddings between the
+border panel border and the content of the border 
+panel</p>
+
+    
+    <strong>Parameters:</strong>
+    <ul class="params">
+    
+        <li>
         
+            <strong><code>vg</code> <i><font color="green">&lt;Integer&gt;</font></i></strong>
+        
+        
+        <p>a top and bottom paddings</p>
+
+            
+        </li>
+    
+        <li>
+        
+            <strong><code>hg</code> <i><font color="green">&lt;Integer&gt;</font></i></strong>
+        
+        
+        <p>a left and right paddings</p>
+
+            
+        </li>
+    
+    </ul>
+    
+    
+    
+</div>
+
+            
+            </div>
+        
+        
+        
+            <div id="attrs">
+            
+                <a name="attrs_hGap"></a>
+<div class="attrs item">
+    <strong><code>hGap</code></strong> <strong><i><font color="green">&lt;Ineteger&gt;</font></i></strong>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <span class="flag readonly">readonly</span>
+    
+
+    
+    
+    <p>Horizontal gap. Define left and right paddings between
+border panel border and the border panel content</p>
+
+    
+</div>
+
+            
+                <a name="attrs_vGap"></a>
+<div class="attrs item">
+    <strong><code>vGap</code></strong> <strong><i><font color="green">&lt;Ineteger&gt;</font></i></strong>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <span class="flag readonly">readonly</span>
+    
+
+    
+    
+    <p>Vertical gap. Define top and bottom paddings between
+border panel border and the border panel content</p>
+
+    
+</div>
+
+            
+            </div>
         
         
     
         <div id="index">
 
             
+                <div class="index-section methods">
+                    <h3>Methods</h3>
+
+                    <ul class="index-list methods extends">
+                        
+                            <li class="index-item method">
+                                <a href="../classes/zebra.ui.BorderPan.html#method_setGaps">setGaps</a>
+
+                                
+                                
+                            </li>
+                        
+                    </ul>
+                </div>
+            
 
             
 
+            
+                <div class="index-section attrs">
+                    <h3>Attributes</h3>
+
+                    <ul class="index-list attrs extends">
+                        
+                            <li class="index-item attr">
+                                <a href="#attr_hGap">hGap</a>
+                            </li>
+                        
+                            <li class="index-item attr">
+                                <a href="#attr_vGap">vGap</a>
+                            </li>
+                        
+                    </ul>
+                </div>
             
 
             

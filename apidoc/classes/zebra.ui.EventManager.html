@@ -208,6 +208,8 @@
             
                 <li><a href="../classes/zebra.ui.EventManager.html">zebra.ui.EventManager</a></li>
             
+                <li><a href="../classes/zebra.ui.Extender.html">zebra.ui.Extender</a></li>
+            
                 <li><a href="../classes/zebra.ui.findCanvas().html">zebra.ui.findCanvas()</a></li>
             
                 <li><a href="../classes/zebra.ui.FocusListener.html">zebra.ui.FocusListener</a></li>
@@ -249,6 +251,10 @@
                 <li><a href="../classes/zebra.ui.KeyListener.html">zebra.ui.KeyListener</a></li>
             
                 <li><a href="../classes/zebra.ui.Label.html">zebra.ui.Label</a></li>
+            
+                <li><a href="../classes/zebra.ui.Line.html">zebra.ui.Line</a></li>
+            
+                <li><a href="../classes/zebra.ui.Link.html">zebra.ui.Link</a></li>
             
                 <li><a href="../classes/zebra.ui.List.html">zebra.ui.List</a></li>
             
@@ -309,6 +315,8 @@
                 <li><a href="../classes/zebra.ui.ScrollManager.html">zebra.ui.ScrollManager</a></li>
             
                 <li><a href="../classes/zebra.ui.ScrollPan.html">zebra.ui.ScrollPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.showWindow().html">zebra.ui.showWindow()</a></li>
             
                 <li><a href="../classes/zebra.ui.Slider.html">zebra.ui.Slider</a></li>
             
@@ -572,9 +580,12 @@ methods to register global events listeners.</p>
     
 
     <br>
-    <p>Register global event listener. The listener will get events according to event listeners 
-interfaces it implements. For instance to listen key and mouse events the passed listener
-has to be an instance of &quot;zebra.ui.KeyListener&quot; and &quot;zebra.ui.MouseListener&quot; interfaces:</p>
+    <p>Register global event listener. The listener will 
+get events according to event listeners interfaces 
+it implements. For instance to listen key and 
+mouse events the passed listener has to be an 
+instance of &quot;zebra.ui.KeyListener&quot; and 
+&quot;zebra.ui.MouseListener&quot; interfaces:</p>
 <pre class="code prettyprint"><code>   // implement and register global key and mouse listener
    zebra.ui.events.addListener(new zebra.Dummy(zebra.ui.MouseListener, 
                                                zebra.ui.KeyListener, [

@@ -208,6 +208,8 @@
             
                 <li><a href="../classes/zebra.ui.EventManager.html">zebra.ui.EventManager</a></li>
             
+                <li><a href="../classes/zebra.ui.Extender.html">zebra.ui.Extender</a></li>
+            
                 <li><a href="../classes/zebra.ui.findCanvas().html">zebra.ui.findCanvas()</a></li>
             
                 <li><a href="../classes/zebra.ui.FocusListener.html">zebra.ui.FocusListener</a></li>
@@ -249,6 +251,10 @@
                 <li><a href="../classes/zebra.ui.KeyListener.html">zebra.ui.KeyListener</a></li>
             
                 <li><a href="../classes/zebra.ui.Label.html">zebra.ui.Label</a></li>
+            
+                <li><a href="../classes/zebra.ui.Line.html">zebra.ui.Line</a></li>
+            
+                <li><a href="../classes/zebra.ui.Link.html">zebra.ui.Link</a></li>
             
                 <li><a href="../classes/zebra.ui.List.html">zebra.ui.List</a></li>
             
@@ -309,6 +315,8 @@
                 <li><a href="../classes/zebra.ui.ScrollManager.html">zebra.ui.ScrollManager</a></li>
             
                 <li><a href="../classes/zebra.ui.ScrollPan.html">zebra.ui.ScrollPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.showWindow().html">zebra.ui.showWindow()</a></li>
             
                 <li><a href="../classes/zebra.ui.Slider.html">zebra.ui.Slider</a></li>
             
@@ -412,6 +420,8 @@
                 <li><a href="#methods_paint">paint</a></li>
             
                 <li><a href="#methods_paintLine">paintLine</a></li>
+            
+                <li><a href="#methods_paintSelection">paintSelection</a></li>
             
                 <li><a href="#methods_recalc">recalc</a></li>
             
@@ -1004,6 +1014,101 @@ element has to be drawn</p>
 </div>
 
             
+                <a name="methods_paintSelection"></a>
+<div class="method item protected">
+     <strong class="name"><code>paintSelection</code></strong>( <code>g, x, y, w, h, line, d </code> )     
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    <br>
+    <p>Paint the specified text selection of the given line. The area 
+where selection has to be rendered is denoted with the given
+rectangular area.</p>
+
+    
+    <strong>Parameters:</strong>
+    <ul class="params">
+    
+        <li>
+        
+            <strong><code>g</code> <i><font color="green">&lt;2DContext&gt;</font></i></strong>
+        
+        
+        <p>a canvas graphical context</p>
+
+            
+        </li>
+    
+        <li>
+        
+            <strong><code>x</code> <i><font color="green">&lt;Integer&gt;</font></i></strong>
+        
+        
+        <p>a x coordinate of selection rectangular area</p>
+
+            
+        </li>
+    
+        <li>
+        
+            <strong><code>y</code> <i><font color="green">&lt;Integer&gt;</font></i></strong>
+        
+        
+        <p>a y coordinate of selection rectangular area</p>
+
+            
+        </li>
+    
+        <li>
+        
+            <strong><code>w</code> <i><font color="green">&lt;Integer&gt;</font></i></strong>
+        
+        
+        <p>a width of of selection rectangular area</p>
+
+            
+        </li>
+    
+        <li>
+        
+            <strong><code>h</code> <i><font color="green">&lt;Integer&gt;</font></i></strong>
+        
+        
+        <p>a height of of selection rectangular area</p>
+
+            
+        </li>
+    
+        <li>
+        
+            <strong><code>line</code> <i><font color="green">&lt;Integer&gt;</font></i></strong>
+        
+        
+        <p>[description]</p>
+
+            
+        </li>
+    
+        <li>
+        
+            <strong><code>d</code> <i><font color="green">&lt;<a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a>&gt;</font></i></strong>
+        
+        
+        <p>a target UI component where the text 
+is rendered</p>
+
+            
+        </li>
+    
+    </ul>
+    
+    
+    
+</div>
+
+            
                 <a name="methods_recalc"></a>
 <div class="method item">
      <strong class="name"><code>recalc</code></strong>( <code>  </code> )     
@@ -1179,7 +1284,8 @@ to track a target object updating.</p>
             <strong><code>off</code> <i><font color="green">&lt;Integer&gt;</font></i></strong>
         
         
-        <p>an offset starting from that the text has been updated</p>
+        <p>an offset starting from that 
+the text has been updated</p>
 
             
         </li>
@@ -1189,7 +1295,8 @@ to track a target object updating.</p>
             <strong><code>size</code> <i><font color="green">&lt;Integer&gt;</font></i></strong>
         
         
-        <p>a size (in character) of text part that has been updated</p>
+        <p>a size (in character) of text part that 
+has been updated</p>
 
             
         </li>
@@ -1209,7 +1316,8 @@ to track a target object updating.</p>
             <strong><code>updatedLines</code> <i><font color="green">&lt;Integer&gt;</font></i></strong>
         
         
-        <p>a number of text lines that have been affected by text updating</p>
+        <p>a number of text lines that have 
+been affected by text updating</p>
 
             
         </li>
@@ -1227,11 +1335,67 @@ to track a target object updating.</p>
         
             <div id="attrs">
             
+                <a name="attrs_color"></a>
+<div class="attrs item">
+    <strong><code>color</code></strong> <strong><i><font color="green">&lt;String&gt;</font></i></strong>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <span class="flag readonly">readonly</span>
+    
+
+    
+    
+    <p>Text color</p>
+
+    
+</div>
+
+            
+                <a name="attrs_font"></a>
+<div class="attrs item">
+    <strong><code>font</code></strong> <strong><i><font color="green">&lt;String | <a href="../classes/zebra.ui.Font.html" class="crosslink">zebra.ui.Font</a>&gt;</font></i></strong>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <span class="flag readonly">readonly</span>
+    
+
+    
+    
+    <p>Text font</p>
+
+    
+</div>
+
+            
                 <a name="attrs_owner"></a>
 <div class="attrs item">
     <strong><code>owner</code></strong> <strong><i><font color="green">&lt;<a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a>&gt;</font></i></strong>
     
 
+    
+        <span class="flag protected">protected</span>
     
 
     
@@ -1398,6 +1562,13 @@ to track a target object updating.</p>
                                 
                             </li>
                         
+                            <li class="index-item method protected">
+                                <a href="../classes/zebra.ui.TextRender.html#method_paintSelection">paintSelection</a>
+
+                                
+                                
+                            </li>
+                        
                             <li class="index-item method">
                                 <a href="../classes/zebra.ui.TextRender.html#method_recalc">recalc</a>
 
@@ -1453,6 +1624,14 @@ to track a target object updating.</p>
                     <ul class="index-list attrs extends">
                         
                             <li class="index-item attr">
+                                <a href="#attr_color">color</a>
+                            </li>
+                        
+                            <li class="index-item attr">
+                                <a href="#attr_font">font</a>
+                            </li>
+                        
+                            <li class="index-item attr protected">
                                 <a href="#attr_owner">owner</a>
                             </li>
                         

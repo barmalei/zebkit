@@ -208,6 +208,8 @@
             
                 <li><a href="../classes/zebra.ui.EventManager.html">zebra.ui.EventManager</a></li>
             
+                <li><a href="../classes/zebra.ui.Extender.html">zebra.ui.Extender</a></li>
+            
                 <li><a href="../classes/zebra.ui.findCanvas().html">zebra.ui.findCanvas()</a></li>
             
                 <li><a href="../classes/zebra.ui.FocusListener.html">zebra.ui.FocusListener</a></li>
@@ -249,6 +251,10 @@
                 <li><a href="../classes/zebra.ui.KeyListener.html">zebra.ui.KeyListener</a></li>
             
                 <li><a href="../classes/zebra.ui.Label.html">zebra.ui.Label</a></li>
+            
+                <li><a href="../classes/zebra.ui.Line.html">zebra.ui.Line</a></li>
+            
+                <li><a href="../classes/zebra.ui.Link.html">zebra.ui.Link</a></li>
             
                 <li><a href="../classes/zebra.ui.List.html">zebra.ui.List</a></li>
             
@@ -309,6 +315,8 @@
                 <li><a href="../classes/zebra.ui.ScrollManager.html">zebra.ui.ScrollManager</a></li>
             
                 <li><a href="../classes/zebra.ui.ScrollPan.html">zebra.ui.ScrollPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.showWindow().html">zebra.ui.showWindow()</a></li>
             
                 <li><a href="../classes/zebra.ui.Slider.html">zebra.ui.Slider</a></li>
             
@@ -436,15 +444,17 @@
 
 
 
-<div class="intro"><p>Check-box UI component. The component is a container that consists from two other UI components: </p>
+<div class="intro"><p>Check-box UI component. The component is a container that 
+consists from two other UI components: </p>
 <ul>
 <li>Box component to keep checker indicator</li>
 <li>Label component to paint label </li>
 </ul>
-<p>Developers are free to customize the component as they want. There is no limitation regarding 
-how the box and label component s have to be laid out, which UI components have to be used as 
-the box or label components, etc. The check box extends state panel component and re-map states 
-to own views IDs:</p>
+<p>Developers are free to customize the component as they want. 
+There is no limitation regarding how the box and label components 
+have to be laid out, which UI components have to be used as 
+the box or label components, etc. The check box extends state 
+panel component and re-map states  to own views IDs:</p>
 <ul>
 <li>&quot;on.out&quot; - checked and mouse cursor is out </li>
 <li>&quot;off.out&quot; - un-checked and mouse cursor is out </li>
@@ -472,6 +482,16 @@ to own views IDs:</p>
    }));
    // sync current state with new look and feel
    ch.sync();</code></pre>
+<p>Listening checked event should be done by registering a 
+listener in the check box switch manager as follow:</p>
+<pre class="code prettyprint"><code>   // create checkbox component 
+   var ch = new zebra.ui.Checkbox(&quot;Checkbox&quot;);
+
+   // register a checkbox listener
+   ch.manager._.add(function(sm) {
+       var s = sm.getState();
+       ...
+   });</code></pre>
 </div>
 
 

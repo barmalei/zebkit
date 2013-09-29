@@ -208,6 +208,8 @@
             
                 <li><a href="../classes/zebra.ui.EventManager.html">zebra.ui.EventManager</a></li>
             
+                <li><a href="../classes/zebra.ui.Extender.html">zebra.ui.Extender</a></li>
+            
                 <li><a href="../classes/zebra.ui.findCanvas().html">zebra.ui.findCanvas()</a></li>
             
                 <li><a href="../classes/zebra.ui.FocusListener.html">zebra.ui.FocusListener</a></li>
@@ -249,6 +251,10 @@
                 <li><a href="../classes/zebra.ui.KeyListener.html">zebra.ui.KeyListener</a></li>
             
                 <li><a href="../classes/zebra.ui.Label.html">zebra.ui.Label</a></li>
+            
+                <li><a href="../classes/zebra.ui.Line.html">zebra.ui.Line</a></li>
+            
+                <li><a href="../classes/zebra.ui.Link.html">zebra.ui.Link</a></li>
             
                 <li><a href="../classes/zebra.ui.List.html">zebra.ui.List</a></li>
             
@@ -309,6 +315,8 @@
                 <li><a href="../classes/zebra.ui.ScrollManager.html">zebra.ui.ScrollManager</a></li>
             
                 <li><a href="../classes/zebra.ui.ScrollPan.html">zebra.ui.ScrollPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.showWindow().html">zebra.ui.showWindow()</a></li>
             
                 <li><a href="../classes/zebra.ui.Slider.html">zebra.ui.Slider</a></li>
             
@@ -437,7 +445,7 @@
             
                 <a name="methods_getAbsLocation"></a>
 <div class="method item">
-    <a href="../classes/zebra.layout.Layoutable.html" class="crosslink">zebra.layout.Layoutable</a> <strong class="name"><code>getAbsLocation</code></strong>( <code>c </code> )     
+    Array <strong class="name"><code>getAbsLocation</code></strong>( <code>[x], [y], c </code> )     
 
     
 
@@ -449,6 +457,28 @@ to the top parent component of the specified component.</p>
     
     <strong>Parameters:</strong>
     <ul class="params">
+    
+        <li>
+        
+            <strong><code>[x]</code> <i><font color="green">&lt;Inetger&gt;</font></i></strong>
+            <span class="flag optional" title="This parameter is optional.">optional</span>
+        
+        
+        <p>a x coordinate relatively  to the given component</p>
+
+            
+        </li>
+    
+        <li>
+        
+            <strong><code>[y]</code> <i><font color="green">&lt;Inetger&gt;</font></i></strong>
+            <span class="flag optional" title="This parameter is optional.">optional</span>
+        
+        
+        <p>a y coordinate relatively  to the given component</p>
+
+            
+        </li>
     
         <li>
         
@@ -464,7 +494,9 @@ to the top parent component of the specified component.</p>
     
     
     
-    <br><div class="returns"><strong>Returns:</strong> <font color="green">&lt;<a href="../classes/zebra.layout.Layoutable.html" class="crosslink">zebra.layout.Layoutable</a>&gt; </font><p>a top parent component</p>
+    <br><div class="returns"><strong>Returns:</strong> <font color="green">&lt;Array&gt; </font><p>an absolute location of the given location of the specified 
+UI component. First element of the result array is a x coordinate and 
+second is a y coordinate.</p>
 </div>
     
     

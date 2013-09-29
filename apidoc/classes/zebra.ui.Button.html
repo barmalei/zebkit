@@ -208,6 +208,8 @@
             
                 <li><a href="../classes/zebra.ui.EventManager.html">zebra.ui.EventManager</a></li>
             
+                <li><a href="../classes/zebra.ui.Extender.html">zebra.ui.Extender</a></li>
+            
                 <li><a href="../classes/zebra.ui.findCanvas().html">zebra.ui.findCanvas()</a></li>
             
                 <li><a href="../classes/zebra.ui.FocusListener.html">zebra.ui.FocusListener</a></li>
@@ -249,6 +251,10 @@
                 <li><a href="../classes/zebra.ui.KeyListener.html">zebra.ui.KeyListener</a></li>
             
                 <li><a href="../classes/zebra.ui.Label.html">zebra.ui.Label</a></li>
+            
+                <li><a href="../classes/zebra.ui.Line.html">zebra.ui.Line</a></li>
+            
+                <li><a href="../classes/zebra.ui.Link.html">zebra.ui.Link</a></li>
             
                 <li><a href="../classes/zebra.ui.List.html">zebra.ui.List</a></li>
             
@@ -309,6 +315,8 @@
                 <li><a href="../classes/zebra.ui.ScrollManager.html">zebra.ui.ScrollManager</a></li>
             
                 <li><a href="../classes/zebra.ui.ScrollPan.html">zebra.ui.ScrollPan</a></li>
+            
+                <li><a href="../classes/zebra.ui.showWindow().html">zebra.ui.showWindow()</a></li>
             
                 <li><a href="../classes/zebra.ui.Slider.html">zebra.ui.Slider</a></li>
             
@@ -452,7 +460,8 @@
             <span class="flag optional" title="This parameter is optional.">optional</span>
         
         
-        <p>a button label. The label can be a simple text or an UI component.</p>
+        <p>a button label. 
+The label can be a simple text or an UI component.</p>
 
             
         </li>
@@ -557,8 +566,10 @@ own view IDs set.</p>
     
 
     <br>
-    <p>Set the mode the button has to fire events. Button can fire event after it has been unpressed 
-or immediately when it has been pressed. Also button can start firing events periodically when it has been 
+    <p>Set the mode the button has to fire events. 
+Button can fire event after it has been unpressed 
+or immediately when it has been pressed. Also button 
+can start firing events periodically when it has been 
 pressed and holden in the pressed state.</p>
 
     
@@ -570,7 +581,8 @@ pressed and holden in the pressed state.</p>
             <strong><code>b</code> <i><font color="green">&lt;Boolean&gt;</font></i></strong>
         
         
-        <p>true if the button has to fire event by pressed event</p>
+        <p>true if the button has to fire 
+event by pressed event</p>
 
             
         </li>
@@ -580,8 +592,10 @@ pressed and holden in the pressed state.</p>
             <strong><code>time</code> <i><font color="green">&lt;Integer&gt;</font></i></strong>
         
         
-        <p>the period of time the button has to repeat firing events if it has been 
-pressed and holden in pressed state. -1 means event doesn&#39;t have repeated</p>
+        <p>the period of time the button 
+has to repeat firing events if it has been pressed and 
+holden in pressed state. -1 means event doesn&#39;t have 
+repeated</p>
 
             
         </li>
@@ -701,6 +715,34 @@ code or view or an implementation of zebra.ui.View &quot;paint(g,x,y,w,h,t)&quot
         
             <div id="attrs">
             
+                <a name="attrs_firePeriod"></a>
+<div class="attrs item">
+    <strong><code>firePeriod</code></strong> <strong><i><font color="green">&lt;Integer&gt;</font></i></strong>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <span class="flag readonly">readonly</span>
+    
+
+    
+    
+    <p>Fire button event repeating period. -1 means
+the button event repeating is disabled.</p>
+
+    
+</div>
+
+            
                 <a name="attrs_focusMarkerView"></a>
 <div class="attrs item">
     <strong><code>focusMarkerView</code></strong> <strong><i><font color="green">&lt;<a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a>&gt;</font></i></strong>
@@ -750,6 +792,34 @@ code or view or an implementation of zebra.ui.View &quot;paint(g,x,y,w,h,t)&quot
     <em><code>&#x2F;* Extended from zebra.ui.StatePan *&#x2F;</code></em>
     
     <p>Indicates if the component can have focus</p>
+
+    
+</div>
+
+            
+                <a name="attrs_isFireByPress"></a>
+<div class="attrs item">
+    <strong><code>isFireByPress</code></strong> <strong><i><font color="green">&lt;Boolean&gt;</font></i></strong>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <span class="flag readonly">readonly</span>
+    
+
+    
+    
+    <p>Indicate if the button should
+fire event by pressed event</p>
 
     
 </div>
@@ -848,12 +918,20 @@ code or view or an implementation of zebra.ui.View &quot;paint(g,x,y,w,h,t)&quot
 
                     <ul class="index-list attrs extends">
                         
+                            <li class="index-item attr">
+                                <a href="#attr_firePeriod">firePeriod</a>
+                            </li>
+                        
                             <li class="index-item attr inherited">
                                 <a href="#attr_focusMarkerView">focusMarkerView</a>
                             </li>
                         
                             <li class="index-item attr inherited">
                                 <a href="#attr_isCanHaveFocus">isCanHaveFocus</a>
+                            </li>
+                        
+                            <li class="index-item attr">
+                                <a href="#attr_isFireByPress">isFireByPress</a>
                             </li>
                         
                             <li class="index-item attr inherited">

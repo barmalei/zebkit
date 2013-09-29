@@ -1005,6 +1005,26 @@ if (typeof(zebra) === "undefined") {
                 }
             ]);
             assert(a.a(), 200);
+
+
+
+            A.extend([
+
+                function a() { return 502; },
+                function m1() { return 500; },
+                function m2() { return 501; }
+
+            ]);
+
+            a = new A();
+            assert(A.getMethod("m1") != null, true);
+            assert(a.m1 != null, true);
+            assert(a.m1(), 500);
+            assert(A.getMethod("m2") != null, true);
+            assert(a.m2 != null, true);
+            assert(a.m2(), 501);
+            assert(a.a(), 502);
+
         },
 
         function test_anonymous() {

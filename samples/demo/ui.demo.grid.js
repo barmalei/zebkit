@@ -15,7 +15,7 @@ var colors = [ ["white", "lightGray", "white"],
                ["white", "lightGray", "white"] ];
 
 var ColumnsAlignmentProvider = Class(DefViews, [
-    function getView(row,col,data){
+    function getView(target,row,col,data){
         var tf = new BoldTextRender(data);
         tf.setFont(new Font("Helvetica", 16));
         if (row == 1 && col == 1) {
@@ -24,25 +24,25 @@ var ColumnsAlignmentProvider = Class(DefViews, [
         return tf;
     },
 
-    function getXAlignment(row,col){
+    function getXAlignment(target, row,col){
         if(col === 0) return LEFT;
         else {
             if (col == 1) return CENTER;
             else if(col == 2) return RIGHT;
         }
-        return this.$super(this.getXAlignment,row, col);
+        return this.$super(target, this.getXAlignment,row, col);
     },
 
-    function getYAlignment(row,col){
+    function getYAlignment(target, row,col){
         if(row === 0) return TOP;
         else {
             if(row == 1) return CENTER;
             else if(row == 2) return BOTTOM;
         }
-        return this.$super(this.getYAlignment,row, col);
+        return this.$super(target, this.getYAlignment,row, col);
     },
 
-    function getCellColor(row,col) {
+    function getCellColor(target,row,col) {
         return colors[row][col];
     }
 ]);
@@ -130,8 +130,8 @@ var CustomGridEditor = new Class(DefEditors, [
 ]);
 
 var CompViewProvider = new Class(DefViews,[
-    function getView(row,col,o){
-        return row == 2 ? new CompRender(o) : this.$super(row, col, o);
+    function getView(target, row,col,o){
+        return row == 2 ? new CompRender(o) : this.$super(target, row, col, o);
     }
 ]);
 
@@ -161,7 +161,7 @@ function longGrid() {
 
 	var g = new Grid(m);
     g.setViewProvider(new DefViews([
-        function getCellColor(row,col) {
+        function getCellColor(target, row,col) {
             return (row % 2 === 0) ? ui.cellbg1 : ui.cellbg2 ;
         }
     ]));
@@ -258,12 +258,12 @@ function editableGrid() {
 
 	var g = new Grid();
     g.setViewProvider(new DefViews([
-        function getView(row, col, data) {
+        function getView(target, row, col, data) {
             if (col === 0) return (data == "on") ? onView : offView;
             else {
                 if (col == 3) return new Picture(zebra.ui.demo["s" + IMAGES[data]]);
             }
-            return this.$super(row, col, data);
+            return this.$super(target, row, col, data);
         }
     ]));
 	g.setEditorProvider(new CustomGridEditor());

@@ -136,6 +136,8 @@
             
                 <li><a href="../classes/zebra.layout.getDirectChild().html">zebra.layout.getDirectChild()</a></li>
             
+                <li><a href="../classes/zebra.layout.getMaxPreferredSize().html">zebra.layout.getMaxPreferredSize()</a></li>
+            
                 <li><a href="../classes/zebra.layout.getTopParent().html">zebra.layout.getTopParent()</a></li>
             
                 <li><a href="../classes/zebra.layout.GridLayout.html">zebra.layout.GridLayout</a></li>
@@ -210,8 +212,6 @@
             
                 <li><a href="../classes/zebra.ui.Extender.html">zebra.ui.Extender</a></li>
             
-                <li><a href="../classes/zebra.ui.findCanvas().html">zebra.ui.findCanvas()</a></li>
-            
                 <li><a href="../classes/zebra.ui.FocusListener.html">zebra.ui.FocusListener</a></li>
             
                 <li><a href="../classes/zebra.ui.FocusManager.html">zebra.ui.FocusManager</a></li>
@@ -220,7 +220,15 @@
             
                 <li><a href="../classes/zebra.ui.Gradient.html">zebra.ui.Gradient</a></li>
             
+                <li><a href="../classes/zebra.ui.grid.BaseCaption.html">zebra.ui.grid.BaseCaption</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.CompGridCaption.html">zebra.ui.grid.CompGridCaption</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.CompGridCaption.TitlePan.html">zebra.ui.grid.CompGridCaption.TitlePan</a></li>
+            
                 <li><a href="../classes/zebra.ui.grid.DefEditors.html">zebra.ui.grid.DefEditors</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.DefViews.html">zebra.ui.grid.DefViews</a></li>
             
                 <li><a href="../classes/zebra.ui.grid.Grid.html">zebra.ui.grid.Grid</a></li>
             
@@ -266,7 +274,7 @@
             
                 <li><a href="../classes/zebra.ui.Menu.html">zebra.ui.Menu</a></li>
             
-                <li><a href="../classes/zebra.ui.Menunbar.html">zebra.ui.Menunbar</a></li>
+                <li><a href="../classes/zebra.ui.Menubar.html">zebra.ui.Menubar</a></li>
             
                 <li><a href="../classes/zebra.ui.MLabel.html">zebra.ui.MLabel</a></li>
             
@@ -364,6 +372,8 @@
             
                 <li><a href="../classes/zebra.URL.html">zebra.URL</a></li>
             
+                <li><a href="../classes/zebra.util.Actionable.html">zebra.util.Actionable</a></li>
+            
                 <li><a href="../classes/zebra.util.Bag.html">zebra.util.Bag</a></li>
             
                 <li><a href="../classes/zebra.util.findInTree().html">zebra.util.findInTree()</a></li>
@@ -398,6 +408,19 @@
 </div>
 
 
+
+<div id="events-on-page" class="sidebox on-page">
+    <div class="hd">
+        <h2 class="no-toc">Events On Page</h2>
+    </div>
+    <div class="bd">
+        <ul>
+            
+                <li><a href="#events_fired">fired</a></li>
+            
+        </ul>
+    </div>
+</div>
 
 
 
@@ -456,7 +479,7 @@
     
         <li>
         
-            <strong><code>l</code> <i><font color="green">&lt;<a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a> | STring&gt;</font></i></strong>
+            <strong><code>l</code> <i><font color="green">&lt;<a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a> | String&gt;</font></i></strong>
         
         
         <p>a title label text or 
@@ -483,6 +506,8 @@ component</p>
         
         <li><a href="#attrs">Attributes</a></li>
         
+        
+        <li><a href="#events">Events</a></li>
         
 
         <li><a href="#index">Index</a></li>
@@ -512,6 +537,33 @@ component</p>
         
             <div id="attrs">
             
+                <a name="attrs_contentPan"></a>
+<div class="attrs item">
+    <strong><code>contentPan</code></strong> <strong><i><font color="green">&lt;<a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a>&gt;</font></i></strong>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <span class="flag readonly">readonly</span>
+    
+
+    
+    
+    <p>Content panel</p>
+
+    
+</div>
+
+            
                 <a name="attrs_isCollapsed"></a>
 <div class="attrs item">
     <strong><code>isCollapsed</code></strong> <strong><i><font color="green">&lt;Boolean&gt;</font></i></strong>
@@ -539,8 +591,80 @@ component</p>
 </div>
 
             
+                <a name="attrs_label"></a>
+<div class="attrs item">
+    <strong><code>label</code></strong> <strong><i><font color="green">&lt;<a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a>&gt;</font></i></strong>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <span class="flag readonly">readonly</span>
+    
+
+    
+    
+    <p>Label component</p>
+
+    
+</div>
+
+            
             </div>
         
+        
+            <div id="events">
+            
+                <a name="events_fired"></a>
+<div class="events item">
+    <code>fired</code> 
+    
+    
+    <p>Fired when extender is collapsed or extended </p>
+<pre class="code prettyprint"><code>    var ex = new zebra.ui.Extender(pan, &quot;Title&quot;);
+    ex._.add(function (src, isCollapsed) {
+        ...
+    });</code></pre>
+
+    
+    <strong>Event parameters:</strong>
+    <ul>
+    
+        <li>
+        
+            <strong><code>src</code> <font color="green"><i>&lt;<a href="../classes/zebra.ui.Extender.html" class="crosslink">zebra.ui.Extender</a>&gt;</strong></i></font>
+        
+        
+        <p>an extender UI component that generates the event</p>
+
+            
+        </li>
+    
+        <li>
+        
+            <strong><code>isCollapsed</code> <font color="green"><i>&lt;Boolean&gt;</strong></i></font>
+        
+        
+        <p>a state of the extender UI component</p>
+
+            
+        </li>
+    
+    </ul>
+    
+</div>
+
+
+            
+            </div>
         
     
         <div id="index">
@@ -571,13 +695,36 @@ component</p>
                     <ul class="index-list attrs extends">
                         
                             <li class="index-item attr">
+                                <a href="#attr_contentPan">contentPan</a>
+                            </li>
+                        
+                            <li class="index-item attr">
                                 <a href="#attr_isCollapsed">isCollapsed</a>
+                            </li>
+                        
+                            <li class="index-item attr">
+                                <a href="#attr_label">label</a>
                             </li>
                         
                     </ul>
                 </div>
             
 
+            
+                <div class="index-section events">
+                    <h3>Events</h3>
+
+                    <ul class="index-list events extends">
+                        
+                            <li class="index-item event">
+                                <a href="#event_fired">fired</a>
+
+                                
+                                
+                            </li>
+                        
+                    </ul>
+                </div>
             
         </div>
     </div>

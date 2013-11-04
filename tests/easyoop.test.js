@@ -125,18 +125,18 @@ if (typeof(zebra) === "undefined") {
                 function toString(a) { return a; }
             ]);
             // assert(typeof A.getMethod("toString", 1).modifier !== "undefined", true, "Proxy method correct wrap existent method");
-            assert(typeof A.getMethod("toString", 1).methodName !== "undefined", true, "Proxy method correct wrap existent method");
-            assert(typeof A.getMethod("toString", 1).boundTo !== "undefined", true, "Proxy method correct wrap existent method");
+            assert(typeof A.getMethod("toString", 1).methodName !== "undefined", true, "Proxy method correct wrap existent method 1");
+            assert(typeof A.getMethod("toString", 1).boundTo !== "undefined", true, "Proxy method correct wrap existent method 2");
             // assert(A.getMethod("toString", 1).modifier === 0, true, "Proxy method correct wrap existent method");
-            assert(A.getMethod("toString", 1).methodName === "toString", true, "Proxy method correct wrap existent method");
-            assert(A.getMethod("toString", 1).boundTo == A, true, "Proxy method correct wrap existent method");
+            assert(A.getMethod("toString", 1).methodName === "toString", true, "Proxy method correct wrap existent method 3");
+            assert(A.getMethod("toString", 1).boundTo == A, true, "Proxy method correct wrap existent method 4");
 
             // assert(typeof A.getMethod("toString", 0).modifier !== "undefined", true, "Proxy method correct wrap existent method");
-            assert(typeof A.getMethod("toString", 0).methodName !== "undefined", true, "Proxy method correct wrap existent method");
-            assert(typeof A.getMethod("toString", 0).boundTo !== "undefined", true, "Proxy method correct wrap existent method");
+            assert(typeof A.getMethod("toString", 0).methodName !== "undefined", true, "Proxy method correct wrap existent method 5");
+            assert(typeof A.getMethod("toString", 0).boundTo !== "undefined", true, "Proxy method correct wrap existent method 6");
             // assert(A.getMethod("toString", 0).modifier === 0, true, "Proxy method correct wrap existent method");
-            assert(A.getMethod("toString", 0).methodName == "toString", true, "Proxy method correct wrap existent method");
-            assert(A.getMethod("toString", 0).boundTo == A, true, "Proxy method correct wrap existent method");
+            assert(A.getMethod("toString", 0).methodName == "toString", true, "Proxy method correct wrap existent method 7");
+            assert(A.getMethod("toString", 0).boundTo == A, true, "Proxy method correct wrap existent method 8");
 
             var a = new A();
             assert(a.toString("11") == "11", true);
@@ -249,6 +249,8 @@ if (typeof(zebra) === "undefined") {
             assert(A != B, true, "test_class 38");
 
         },
+
+
 
         function test_array_classdef() {
             var A = new Class([
@@ -499,6 +501,123 @@ if (typeof(zebra) === "undefined") {
             assert(d1.a, 100);
             assert(d1.b, 2000);
             assert(d1.aa, 999);
+
+
+            var A = Class([
+                function $prototype() {
+
+                    this[''] = function(test) {
+                        this.a = 100;
+                        this.test = test;
+                    };  
+
+                }
+            ]);
+
+            var a1 = new A(), a2 = new A(100);
+
+            assert(a1.a, 100);
+            assert(a1.test, undefined);
+            assert(a2.test, 100);
+            assert(a2.a, 100);
+            
+
+            var B =  Class(A, [
+                function() {
+                    this.$super(200);
+                }
+            ]), b = new B();
+
+            assert(b.a, 100);
+            assert(b.test, 200);
+
+
+            var C =  Class(A, []), D = Class(C, [
+                function() {
+                    this.$super(300);
+                },
+
+                function(a) {
+                    this.$super(a);
+                }
+            ]), c = new C(), d = new D(), dd = new D(11);
+
+            assert(c.a, 100);
+            assert(c.test, undefined);
+            assert(d.a, 100);
+            assert(d.test, 300);
+            assert(dd.test, 11);
+            assert(dd.a, 100);
+
+
+            // var B = Class(A, [
+            //     function $prototype() {
+            //         this[''] = function() {
+            //             this.$super(this[''], 100);
+            //         };
+            //     }
+            // ]), b  = new B();
+
+        },
+
+        function test_proto_methods() {
+            var A = Class([function $prototype() {
+                this.a = 10;
+
+                this.b = function() {
+                    return 10;
+                };
+            }]);
+            var a = new A();
+
+            assert(A.getMethod("b") != null, true);
+            assert(a.a, 10);
+            assert(a.b(), 10);
+
+            var B = Class(A, [function $prototype() {
+                this.b = function() {
+                    return 100;
+                };
+            }]);
+            var b = new B();
+
+            assert(B.getMethod("b") != null, true);
+            assert(b.a, 10);
+            assert(b.b(), 100);
+
+            var C = Class(A, [
+                function b() {
+                    return 100 + this.$super();
+                },
+
+                function b(p1) {
+                    return this.b() + p1 + this.$super();
+                }
+            ]);
+            var c = new C();
+
+
+            assert(C.getMethod("b") != null, true);
+            assert(c.a, 10);
+            assert(c.b(), 110);
+            assert(c.b(1), 121);
+
+            var B = Class(A, []);
+            var C = Class(B, [
+                function b() {
+                    return 100 + this.$super();
+                },
+
+                function b(p1) {
+                    return this.b() + p1 + this.$super();
+                }
+            ]);
+            var c = new C();
+
+            assert(C.getMethod("b") != null, true);
+            assert(c.a, 10);
+            assert(c.b(), 110);
+            assert(c.b(1), 121);
         },
 
         function test_public_methods() {

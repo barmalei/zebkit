@@ -51,7 +51,7 @@ function createMenu(items, m) {
     for(var i=0; i < items.length; i++) {
         var item = items[i];
         if (item.constructor == Array) {
-            m.setSubmenuAt(m.kids.length - 1, createMenu(item));
+            m.setMenuAt(m.kids.length - 1, createMenu(item));
         }
         else {
             var it = createItem(item);

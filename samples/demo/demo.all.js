@@ -38,7 +38,7 @@ pkg.DemoPan = Class(Panel, [
 ]);
 
 zebra.ui.configure(function(conf) {
-    conf.loadByUrl("demo.json", pkg);
+    conf.loadByUrl(pkg.$url + "demo.json");
 });
 
 })(zebra("ui.demo"), zebra.Class);
@@ -637,7 +637,7 @@ function createMenu(items, m) {
     for(var i=0; i < items.length; i++) {
         var item = items[i];
         if (item.constructor == Array) {
-            m.setSubmenuAt(m.kids.length - 1, createMenu(item));
+            m.setMenuAt(m.kids.length - 1, createMenu(item));
         }
         else {
             var it = createItem(item);
@@ -856,9 +856,9 @@ function createTooltipDemo() {
     ]);
     grid.setBackground("rgba(224, 244, 255, 0.7)");
     grid.setUsePsMetric(true);
-    grid.setHeader(TOP, ["Product", "Picture", "Max speed"]);
+    grid.add(TOP, new GridCaption(["Product", "Picture", "Max speed"]));
     grid.setViewProvider(new DefViews([
-        function getView(row, col, data) {
+        function getView(target, row, col, data) {
             if (col == 0 || col == 2) {
                 var r = new BoldTextRender(new zebra.data.Text(data));
                 r.setFont(new Font("Helvetica", "bold", 16));
@@ -905,6 +905,9 @@ function createWindowComp(target) {
 
     b._.add(function(src, id, data) { target.hideWin(); });
 
+
+    w.root.add(TOP, new Combo(["Combo item 1", "Combo item 2", "Combo item 3"]));
+
     return w;
 }
 
@@ -940,14 +943,14 @@ pkg.WinDemo = new Class(pkg.DemoPan,  [
         this.wp.remove(this.ab);
         this.w.setLocation(50, 50);
         this.w.setEnabled(true);
-        findCanvas(this).getLayer("win").add(this.w);
-        findCanvas(this).getLayer("win").activate(this.w);
+        this.getCanvas().getLayer("win").add(this.w);
+        this.getCanvas().getLayer("win").activate(this.w);
     },
 
     function hideWin() {
         if (this.shown)  {
             this.shown = false;
-            findCanvas(this).getLayer("win").removeAll();
+            this.getCanvas().getLayer("win").removeAll();
             this.wp.add(this.w);
             this.wp.add(this.ab);
             this.w.setEnabled(false);
@@ -978,7 +981,7 @@ var colors = [ ["white", "lightGray", "white"],
                ["white", "lightGray", "white"] ];
 
 var ColumnsAlignmentProvider = Class(DefViews, [
-    function getView(row,col,data){
+    function getView(target,row,col,data){
         var tf = new BoldTextRender(data);
         tf.setFont(new Font("Helvetica", 16));
         if (row == 1 && col == 1) {
@@ -987,25 +990,25 @@ var ColumnsAlignmentProvider = Class(DefViews, [
         return tf;
     },
 
-    function getXAlignment(row,col){
+    function getXAlignment(target, row,col){
         if(col === 0) return LEFT;
         else {
             if (col == 1) return CENTER;
             else if(col == 2) return RIGHT;
         }
-        return this.$super(this.getXAlignment,row, col);
+        return this.$super(target, this.getXAlignment,row, col);
     },
 
-    function getYAlignment(row,col){
+    function getYAlignment(target, row,col){
         if(row === 0) return TOP;
         else {
             if(row == 1) return CENTER;
             else if(row == 2) return BOTTOM;
         }
-        return this.$super(this.getYAlignment,row, col);
+        return this.$super(target, this.getYAlignment,row, col);
     },
 
-    function getCellColor(row,col) {
+    function getCellColor(target,row,col) {
         return colors[row][col];
     }
 ]);
@@ -1093,8 +1096,8 @@ var CustomGridEditor = new Class(DefEditors, [
 ]);
 
 var CompViewProvider = new Class(DefViews,[
-    function getView(row,col,o){
-        return row == 2 ? new CompRender(o) : this.$super(row, col, o);
+    function getView(target, row,col,o){
+        return row == 2 ? new CompRender(o) : this.$super(target, row, col, o);
     }
 ]);
 
@@ -1124,7 +1127,7 @@ function longGrid() {
 
 	var g = new Grid(m);
     g.setViewProvider(new DefViews([
-        function getCellColor(row,col) {
+        function getCellColor(target, row,col) {
             return (row % 2 === 0) ? ui.cellbg1 : ui.cellbg2 ;
         }
     ]));
@@ -1221,12 +1224,12 @@ function editableGrid() {
 
 	var g = new Grid();
     g.setViewProvider(new DefViews([
-        function getView(row, col, data) {
+        function getView(target, row, col, data) {
             if (col === 0) return (data == "on") ? onView : offView;
             else {
                 if (col == 3) return new Picture(zebra.ui.demo["s" + IMAGES[data]]);
             }
-            return this.$super(row, col, data);
+            return this.$super(target, row, col, data);
         }
     ]));
 	g.setEditorProvider(new CustomGridEditor());

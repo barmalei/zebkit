@@ -2,7 +2,7 @@
 <html>
 	<head>
 		
-		<script src='../lib/zebra/zebra.min.js' type='text/javascript'></script>
+		<script src='../lib/zebra/zebra.js' type='text/javascript'></script>
 
 
 		<script type='text/javascript'>
@@ -12,10 +12,10 @@
 				eval(zebra.Import("ui", "layout", "ui.grid"));
 
 				// create canvas
-			    var root = (new zCanvas(600, 500)).root;
+			    var root = (new zCanvas(1400, 800)).root;
 				root.setLayout(new BorderLayout(8,8));
 
-				var g = new Grid(100, 10), h = g.setHeader(TOP, null);
+				var g = new Grid(1000, 20), h = g.add(TOP, new GridCaption());
 				
 				for(var i=0; i<g.getGridCols(); i++) {
 					h.putTitle(i, "Title " + i);

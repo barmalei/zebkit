@@ -136,6 +136,8 @@
             
                 <li><a href="../classes/zebra.layout.getDirectChild().html">zebra.layout.getDirectChild()</a></li>
             
+                <li><a href="../classes/zebra.layout.getMaxPreferredSize().html">zebra.layout.getMaxPreferredSize()</a></li>
+            
                 <li><a href="../classes/zebra.layout.getTopParent().html">zebra.layout.getTopParent()</a></li>
             
                 <li><a href="../classes/zebra.layout.GridLayout.html">zebra.layout.GridLayout</a></li>
@@ -210,8 +212,6 @@
             
                 <li><a href="../classes/zebra.ui.Extender.html">zebra.ui.Extender</a></li>
             
-                <li><a href="../classes/zebra.ui.findCanvas().html">zebra.ui.findCanvas()</a></li>
-            
                 <li><a href="../classes/zebra.ui.FocusListener.html">zebra.ui.FocusListener</a></li>
             
                 <li><a href="../classes/zebra.ui.FocusManager.html">zebra.ui.FocusManager</a></li>
@@ -220,7 +220,15 @@
             
                 <li><a href="../classes/zebra.ui.Gradient.html">zebra.ui.Gradient</a></li>
             
+                <li><a href="../classes/zebra.ui.grid.BaseCaption.html">zebra.ui.grid.BaseCaption</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.CompGridCaption.html">zebra.ui.grid.CompGridCaption</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.CompGridCaption.TitlePan.html">zebra.ui.grid.CompGridCaption.TitlePan</a></li>
+            
                 <li><a href="../classes/zebra.ui.grid.DefEditors.html">zebra.ui.grid.DefEditors</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.DefViews.html">zebra.ui.grid.DefViews</a></li>
             
                 <li><a href="../classes/zebra.ui.grid.Grid.html">zebra.ui.grid.Grid</a></li>
             
@@ -266,7 +274,7 @@
             
                 <li><a href="../classes/zebra.ui.Menu.html">zebra.ui.Menu</a></li>
             
-                <li><a href="../classes/zebra.ui.Menunbar.html">zebra.ui.Menunbar</a></li>
+                <li><a href="../classes/zebra.ui.Menubar.html">zebra.ui.Menubar</a></li>
             
                 <li><a href="../classes/zebra.ui.MLabel.html">zebra.ui.MLabel</a></li>
             
@@ -364,6 +372,8 @@
             
                 <li><a href="../classes/zebra.URL.html">zebra.URL</a></li>
             
+                <li><a href="../classes/zebra.util.Actionable.html">zebra.util.Actionable</a></li>
+            
                 <li><a href="../classes/zebra.util.Bag.html">zebra.util.Bag</a></li>
             
                 <li><a href="../classes/zebra.util.findInTree().html">zebra.util.findInTree()</a></li>
@@ -424,6 +434,19 @@
 </div>
 
 
+
+<div id="events-on-page" class="sidebox on-page">
+    <div class="hd">
+        <h2 class="no-toc">Events On Page</h2>
+    </div>
+    <div class="bd">
+        <ul>
+            
+                <li><a href="#events_selected">selected</a></li>
+            
+        </ul>
+    </div>
+</div>
 
 
 
@@ -514,6 +537,8 @@ mouse cursor moving</p>
         
         <li><a href="#attrs">Attributes</a></li>
         
+        
+        <li><a href="#events">Events</a></li>
         
 
         <li><a href="#index">Index</a></li>
@@ -1123,6 +1148,50 @@ to false to trigger list items metrics and visibility recalculation</p>
             </div>
         
         
+            <div id="events">
+            
+                <a name="events_selected"></a>
+<div class="events item">
+    <code>selected</code> 
+    <em><code>&#x2F;* Extended from zebra.ui.BaseList *&#x2F;&lt;&#x2F;em&gt;</code>
+    
+    <p><p>Fire when a list item has been selected:</p></p>
+<pre class="code prettyprint"><code>   list._.add(function(src, prev) {
+       ...
+   });</code></pre>
+
+    
+    <strong>Event parameters:</strong>
+    <ul>
+    
+        <li>
+        
+            <strong><code>src</code> <font color="green"><i>&lt;<a href="../classes/zebra.ui.BaseList.html" class="crosslink">zebra.ui.BaseList</a>&gt;</strong></i></font>
+        
+        
+        <p>a list that triggers the event</p>
+
+            
+        </li>
+    
+        <li>
+        
+            <strong><code>prev</code> <font color="green"><i>&lt;Ineteger&gt;</strong></i></font>
+        
+        
+        <p>a previous selected index</p>
+
+            
+        </li>
+    
+    </ul>
+    
+</div>
+
+
+            
+            </div>
+        
     
         <div id="index">
 
@@ -1270,6 +1339,21 @@ to false to trigger list items metrics and visibility recalculation</p>
                 </div>
             
 
+            
+                <div class="index-section events">
+                    <h3>Events</h3>
+
+                    <ul class="index-list events extends">
+                        
+                            <li class="index-item event inherited">
+                                <a href="#event_selected">selected</a>
+
+                                
+                                
+                            </li>
+                        
+                    </ul>
+                </div>
             
         </div>
     </div>

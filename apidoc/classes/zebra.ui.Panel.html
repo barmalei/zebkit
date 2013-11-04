@@ -136,6 +136,8 @@
             
                 <li><a href="../classes/zebra.layout.getDirectChild().html">zebra.layout.getDirectChild()</a></li>
             
+                <li><a href="../classes/zebra.layout.getMaxPreferredSize().html">zebra.layout.getMaxPreferredSize()</a></li>
+            
                 <li><a href="../classes/zebra.layout.getTopParent().html">zebra.layout.getTopParent()</a></li>
             
                 <li><a href="../classes/zebra.layout.GridLayout.html">zebra.layout.GridLayout</a></li>
@@ -210,8 +212,6 @@
             
                 <li><a href="../classes/zebra.ui.Extender.html">zebra.ui.Extender</a></li>
             
-                <li><a href="../classes/zebra.ui.findCanvas().html">zebra.ui.findCanvas()</a></li>
-            
                 <li><a href="../classes/zebra.ui.FocusListener.html">zebra.ui.FocusListener</a></li>
             
                 <li><a href="../classes/zebra.ui.FocusManager.html">zebra.ui.FocusManager</a></li>
@@ -220,7 +220,15 @@
             
                 <li><a href="../classes/zebra.ui.Gradient.html">zebra.ui.Gradient</a></li>
             
+                <li><a href="../classes/zebra.ui.grid.BaseCaption.html">zebra.ui.grid.BaseCaption</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.CompGridCaption.html">zebra.ui.grid.CompGridCaption</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.CompGridCaption.TitlePan.html">zebra.ui.grid.CompGridCaption.TitlePan</a></li>
+            
                 <li><a href="../classes/zebra.ui.grid.DefEditors.html">zebra.ui.grid.DefEditors</a></li>
+            
+                <li><a href="../classes/zebra.ui.grid.DefViews.html">zebra.ui.grid.DefViews</a></li>
             
                 <li><a href="../classes/zebra.ui.grid.Grid.html">zebra.ui.grid.Grid</a></li>
             
@@ -266,7 +274,7 @@
             
                 <li><a href="../classes/zebra.ui.Menu.html">zebra.ui.Menu</a></li>
             
-                <li><a href="../classes/zebra.ui.Menunbar.html">zebra.ui.Menunbar</a></li>
+                <li><a href="../classes/zebra.ui.Menubar.html">zebra.ui.Menubar</a></li>
             
                 <li><a href="../classes/zebra.ui.MLabel.html">zebra.ui.MLabel</a></li>
             
@@ -364,6 +372,8 @@
             
                 <li><a href="../classes/zebra.URL.html">zebra.URL</a></li>
             
+                <li><a href="../classes/zebra.util.Actionable.html">zebra.util.Actionable</a></li>
+            
                 <li><a href="../classes/zebra.util.Bag.html">zebra.util.Bag</a></li>
             
                 <li><a href="../classes/zebra.util.findInTree().html">zebra.util.findInTree()</a></li>
@@ -393,6 +403,8 @@
             
                 <li><a href="#methods_add">add</a></li>
             
+                <li><a href="#methods_calcPreferredSize">calcPreferredSize</a></li>
+            
                 <li><a href="#methods_canHaveFocus">canHaveFocus</a></li>
             
                 <li><a href="#methods_doLayout">doLayout</a></li>
@@ -406,6 +418,8 @@
                 <li><a href="#methods_getBottom">getBottom</a></li>
             
                 <li><a href="#methods_getByConstraints">getByConstraints</a></li>
+            
+                <li><a href="#methods_getCanvas">getCanvas</a></li>
             
                 <li><a href="#methods_getComponentAt">getComponentAt</a></li>
             
@@ -644,6 +658,47 @@ the panel class.</p>
 </div>
 
             
+                <a name="methods_calcPreferredSize"></a>
+<div class="method item private">
+    Object <strong class="name"><code>calcPreferredSize</code></strong>( <code>target </code> )     
+
+    
+        <span class="flag private">private</span>
+    
+
+    <br>
+    <p>Internal implementation of the component 
+preferred size calculation.</p>
+
+    
+    <strong>Parameters:</strong>
+    <ul class="params">
+    
+        <li>
+        
+            <strong><code>target</code> <i><font color="green">&lt;<a href="../classes/zebra.layout.Layoutable.html" class="crosslink">zebra.layout.Layoutable</a>&gt;</font></i></strong>
+        
+        
+        <p>a component 
+for that the metric has to be calculated</p>
+
+            
+        </li>
+    
+    </ul>
+    
+    
+    
+    <br><div class="returns"><strong>Returns:</strong> <font color="green">&lt;Object&gt; </font><p>a preferred size. The method always 
+returns { width:10, height:10 } as the component preferred 
+size</p>
+</div>
+    
+    
+    
+</div>
+
+            
                 <a name="methods_canHaveFocus"></a>
 <div class="method item">
     Boolean <strong class="name"><code>canHaveFocus</code></strong>( <code>  </code> )     
@@ -840,6 +895,26 @@ passed function has not been passed</p>
     
     
     <br><div class="returns"><strong>Returns:</strong> <font color="green">&lt;<a href="../classes/zebra.layout.Layoutable.html" class="crosslink">zebra.layout.Layoutable</a>&gt; </font><p>a children component</p>
+</div>
+    
+    
+    
+</div>
+
+            
+                <a name="methods_getCanvas"></a>
+<div class="method item">
+    <a href="../classes/zebra.ui.zCanvas.html" class="crosslink">zebra.ui.zCanvas</a> <strong class="name"><code>getCanvas</code></strong>( <code>  </code> )     
+
+    
+
+    <br>
+    <p>Find a zebra.ui.zCanvas where the given UI component is hosted</p>
+
+    
+    
+    
+    <br><div class="returns"><strong>Returns:</strong> <font color="green">&lt;<a href="../classes/zebra.ui.zCanvas.html" class="crosslink">zebra.ui.zCanvas</a>&gt; </font><p>a zebra canvas</p>
 </div>
     
     
@@ -1782,8 +1857,8 @@ instance, or a function(g,x,y,w,h,c) that paints the background:</p>
     
 
     <br>
-    <p>Set the UI component enabled state. Using this property an UI component 
-can be excluded from getting input events</p>
+    <p>Set the UI component enabled state. Using this property 
+an UI component can be excluded from getting input events</p>
 
     
     <strong>Parameters:</strong>
@@ -2622,6 +2697,13 @@ children component layouting on the parent component.</p>
                                 
                             </li>
                         
+                            <li class="index-item method private inherited">
+                                <a href="../classes/zebra.layout.Layoutable.html#method_calcPreferredSize">calcPreferredSize</a>
+
+                                
+                                
+                            </li>
+                        
                             <li class="index-item method">
                                 <a href="../classes/zebra.ui.Panel.html#method_canHaveFocus">canHaveFocus</a>
 
@@ -2666,6 +2748,13 @@ children component layouting on the parent component.</p>
                         
                             <li class="index-item method inherited">
                                 <a href="../classes/zebra.layout.Layoutable.html#method_getByConstraints">getByConstraints</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
+                                <a href="../classes/zebra.ui.Panel.html#method_getCanvas">getCanvas</a>
 
                                 
                                 

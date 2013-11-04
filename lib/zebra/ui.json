@@ -8,10 +8,6 @@
         }
     },
 
-    "?zebra.isTouchable": {
-         "mscroll": { "$zebra.ui.MobileScrollMan"  :[] }
-    },
-
     "layers" : [
         { "$ *zebra.ui.RootLayer" : "root" },
         { "$ *zebra.ui.WinLayer"  : [] },
@@ -32,8 +28,7 @@
         "win"      : { ".loadImage":"%root%/rs/win.gif" },
         "slider"   : { ".loadImage":"%root%/rs/slider.gif" },
         "misc"     : { ".loadImage":"%root%/rs/misc.gif" },
-        "tree"     : { ".loadImage":"%root%/rs/tree.gif" },
-        "ext"      : { ".loadImage":"%root%/rs/ext.gif" }
+        "tree"     : { ".loadImage":"%root%/rs/tree.gif" }
     },
 
     "PopupLayer": {
@@ -239,6 +234,16 @@
         }
     },
 
+    "?zebra.isTouchable": {
+        "mscroll": { "$zebra.ui.MobileScrollMan"  :[] },
+
+        "ScrollPan": {
+            "properties": {
+                "autoHide": true
+            }
+        }
+    },
+
     "TextField": {
         "hintFont"  : { "$Font": ["Arial", "bold italic", 12] },
         "hintColor" : "#C1C1C1",
@@ -400,6 +405,7 @@
     "Link": {
         "font": "@boldFont",
         "properties": {
+            "colors"      : [ "blue", "darkBlue", "black", "blue", "gray" ], 
             "canHaveFocus": false
         }
     },
@@ -500,20 +506,25 @@
             }
         },
 
-        "TitlePanel":{
+        "TitlePan":{
             "properties": {
-                "background" : { "$Gradient": [ "rgb(220,220,220)", "rgb(160,160,160)" ] }
+                "padding"    : 4,
+                "background" : { "$Gradient": [ "rgb(220,220,220)", "rgb(160,160,160)" ] },
+                "layout"     : { "$FlowLayout": 4  }
             }
         },
 
-        "TogglePanel":{
+        "TogglePan":{
             "properties": {
-                "view" : { "$ViewSet": {
-                             "on" : { "$Picture": [ "@pictures.ext", 13,0,13,13 ] },
-                             "off": { "$Picture": [ "@pictures.ext", 0,0,13,13 ] }
-                            }
+                "views" : { 
+                    "off" : { "$zebra.ui.tree.TreeSignView": [ true,  "white", "orange" ], "width":14, "height":14  },
+                    "on"  : { "$zebra.ui.tree.TreeSignView": [ false, "white", "orange" ], "width":14, "height":14  }
                          }
             }
+        },
+
+        "properties" :{
+            "layout": { "$BorderLayout":[] }
         }
     },
 
@@ -526,7 +537,7 @@
                       "open"    : { "$Picture": [ "@pictures.tree", 0  ,14,16,14, true ] },
                       "leaf"   : { "$Picture": [ "@pictures.tree", 0  ,0 ,16,14, true ] },
                       "off"     : { "$zebra.ui.tree.TreeSignView": [] },
-                      "on"      : { "$zebra.ui.tree.TreeSignView": [ false ] },
+                      "on"      : { "$zebra.ui.tree.TreeSignView": false },
                       "aselect" : [ [ "rgb(228, 244, 252)", { "$Border": "rgb(200,180,200)" } ] ]
                 }
 
@@ -539,6 +550,31 @@
     "grid" : {
         "DefViews": {
             "cellBackground": null
+        },
+
+        "CompGridCaption" :{
+            "StatePan": {
+                "properties": {
+                    "view" : {
+                        "*"       : { "$zebra.ui.ArrowView" : [ "left", "white" ], "width":10, "height":10  },
+                        "ascent"  : { "$zebra.ui.ArrowView" : [ "top", "white"  ]   },
+                        "descent" : { "$zebra.ui.ArrowView" : [ "bottom", "white" ] }
+                    }
+                }
+            },
+
+            "Link": {
+                "font": "14px Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif",
+                "properties" : {
+                    "colors": [ "orange", "red", "white", "blue", "gray" ]
+                }
+            },
+
+            "properties": {
+                "background": "@palette.gray4",
+                "border": null,
+                "padding": 4
+            }            
         },
 
         "GridCaption" :{

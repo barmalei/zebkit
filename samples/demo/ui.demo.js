@@ -36,7 +36,7 @@ pkg.DemoPan = Class(Panel, [
 ]);
 
 zebra.ui.configure(function(conf) {
-    conf.loadByUrl("demo.json", pkg);
+    conf.loadByUrl(pkg.$url + "demo.json");
 });
 
 })(zebra("ui.demo"), zebra.Class);

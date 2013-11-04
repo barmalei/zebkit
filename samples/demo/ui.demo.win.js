@@ -65,9 +65,9 @@ function createTooltipDemo() {
     ]);
     grid.setBackground("rgba(224, 244, 255, 0.7)");
     grid.setUsePsMetric(true);
-    grid.setHeader(TOP, ["Product", "Picture", "Max speed"]);
+    grid.add(TOP, new GridCaption(["Product", "Picture", "Max speed"]));
     grid.setViewProvider(new DefViews([
-        function getView(row, col, data) {
+        function getView(target, row, col, data) {
             if (col == 0 || col == 2) {
                 var r = new BoldTextRender(new zebra.data.Text(data));
                 r.setFont(new Font("Helvetica", "bold", 16));
@@ -114,6 +114,9 @@ function createWindowComp(target) {
 
     b._.add(function(src, id, data) { target.hideWin(); });
 
+
+    w.root.add(TOP, new Combo(["Combo item 1", "Combo item 2", "Combo item 3"]));
+
     return w;
 }
 
@@ -149,14 +152,14 @@ pkg.WinDemo = new Class(pkg.DemoPan,  [
         this.wp.remove(this.ab);
         this.w.setLocation(50, 50);
         this.w.setEnabled(true);
-        findCanvas(this).getLayer("win").add(this.w);
-        findCanvas(this).getLayer("win").activate(this.w);
+        this.getCanvas().getLayer("win").add(this.w);
+        this.getCanvas().getLayer("win").activate(this.w);
     },
 
     function hideWin() {
         if (this.shown)  {
             this.shown = false;
-            findCanvas(this).getLayer("win").removeAll();
+            this.getCanvas().getLayer("win").removeAll();
             this.wp.add(this.w);
             this.wp.add(this.ab);
             this.w.setEnabled(false);

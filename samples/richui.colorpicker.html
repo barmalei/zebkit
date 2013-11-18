@@ -15,12 +15,12 @@
         <script type='text/javascript'>
             zebra.ready(function() {
                 eval(zebra.Import("ui", "layout"));
-                zebra.ui.tooltip.stopByPress = false;
+                zebra.ui.popup.hideTooltipByPress = false;
 
                 (new zebra.ui.zCanvas(400, 400)).root.properties({
                     layout: new BorderLayout(),
                     kids  : {
-                        CENTER: new ImagePan(myimg, TooltipInfo, [
+                        CENTER: new ImagePan(myimg, [
                             function getTooltip(target, x, y) {
                                 var imgData = this.getCanvas().graph.getImageData(x, y, 1, 1).data,
                                     color   = "rgb("+ imgData[0] + "," + imgData[1] + "," + imgData[2] +")",

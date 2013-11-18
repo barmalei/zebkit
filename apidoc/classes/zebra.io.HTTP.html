@@ -154,6 +154,8 @@
             
                 <li><a href="../classes/zebra.layout.StackLayout.html">zebra.layout.StackLayout</a></li>
             
+                <li><a href="../classes/zebra.PassTextField.html">zebra.PassTextField</a></li>
+            
                 <li><a href="../classes/zebra.ready().html">zebra.ready()</a></li>
             
                 <li><a href="../classes/zebra.ui.BaseLayer.html">zebra.ui.BaseLayer</a></li>
@@ -197,8 +199,6 @@
                 <li><a href="../classes/zebra.ui.CompRender.html">zebra.ui.CompRender</a></li>
             
                 <li><a href="../classes/zebra.ui.CopyCutPaste.html">zebra.ui.CopyCutPaste</a></li>
-            
-                <li><a href="../classes/zebra.ui.Cursorable.html">zebra.ui.Cursorable</a></li>
             
                 <li><a href="../classes/zebra.ui.CursorManager.html">zebra.ui.CursorManager</a></li>
             
@@ -296,8 +296,6 @@
             
                 <li><a href="../classes/zebra.ui.Picture.html">zebra.ui.Picture</a></li>
             
-                <li><a href="../classes/zebra.ui.PopupInfo.html">zebra.ui.PopupInfo</a></li>
-            
                 <li><a href="../classes/zebra.ui.PopupLayer.html">zebra.ui.PopupLayer</a></li>
             
                 <li><a href="../classes/zebra.ui.PopupManager.html">zebra.ui.PopupManager</a></li>
@@ -345,10 +343,6 @@
                 <li><a href="../classes/zebra.ui.TextRender.html">zebra.ui.TextRender</a></li>
             
                 <li><a href="../classes/zebra.ui.Toolbar.html">zebra.ui.Toolbar</a></li>
-            
-                <li><a href="../classes/zebra.ui.TooltipInfo.html">zebra.ui.TooltipInfo</a></li>
-            
-                <li><a href="../classes/zebra.ui.TooltipManager.html">zebra.ui.TooltipManager</a></li>
             
                 <li><a href="../classes/zebra.ui.tree.DefEditors.html">zebra.ui.tree.DefEditors</a></li>
             
@@ -407,8 +401,6 @@
             
                 <li><a href="#methods_GET">GET</a></li>
             
-                <li><a href="#methods_httpError">httpError</a></li>
-            
                 <li><a href="#methods_POST">POST</a></li>
             
                 <li><a href="#methods_POST">POST</a></li>
@@ -447,8 +439,8 @@
 
 
 
-<div class="intro"><p>HTTP request class. This class provides API to generate different (GET, POST, etc) HTTP requests in sync 
-and async modes</p>
+<div class="intro"><p>HTTP request class. This class provides API to generate different 
+(GET, POST, etc) HTTP requests in sync and async modes</p>
 </div>
 
 
@@ -539,10 +531,17 @@ and async modes</p>
         
         
         <p>a callback function that is called when the HTTP GET 
-request is done. The method gets a response string as the first argument 
-and the original request object as the second argument.</p>
-<pre><code>   zebra.io.HTTP(&quot;google.com&quot;).GET(function(result, request) {
+request is done. The method gets a request as the only argument 
+and is called in a context of HTTP class instance.</p>
+<pre><code>   zebra.io.HTTP(&quot;google.com&quot;).GET(function(request) {
        // handle HTTP GET response
+       if (request.status == 200) {
+           request.responseText
+       }
+       else {
+           // handle error
+           ...
+       }
        ...
    });</code></pre>
 
@@ -587,8 +586,8 @@ query parameters.</p>
         
         
         <p>a callback function that is called when the HTTP GET 
-request is done. The method gets a response string as the first argument 
-and the original request object as the second argument.</p>
+request is done. The method gets a request object as its only argument 
+and is called in context of the HTTP class instance.</p>
 <pre><code>   // synchronous HTTP GET request with the number of
    // query parameters
    var result = zebra.io.HTTP(&quot;google.com&quot;).GET({
@@ -596,46 +595,6 @@ and the original request object as the second argument.</p>
        param3: &quot;var2&quot;,
        param3: &quot;var3&quot;
    });</code></pre>
-
-            
-        </li>
-    
-    </ul>
-    
-    
-    
-</div>
-
-            
-                <a name="methods_httpError"></a>
-<div class="method item">
-     <strong class="name"><code>httpError</code></strong>( <code>r, url </code> )     
-
-    
-
-    <br>
-    <p>Called every time an error in a HTTP request has happened</p>
-
-    
-    <strong>Parameters:</strong>
-    <ul class="params">
-    
-        <li>
-        
-            <strong><code>r</code> <i><font color="green">&lt;HttpRequest&gt;</font></i></strong>
-        
-        
-        <p>an original request object</p>
-
-            
-        </li>
-    
-        <li>
-        
-            <strong><code>url</code> <i><font color="green">&lt;String&gt;</font></i></strong>
-        
-        
-        <p>an URL</p>
 
             
         </li>
@@ -687,12 +646,18 @@ with the given parameters list.</p>
         
         
         <p>a callback function that is called when HTTP POST 
-request is done. The method gets a response string as the first argument 
-and the original request object as the second argument:</p>
+request is done. The method gets a request as its only argument 
+and is called in context of HTTP class instance:</p>
 <pre><code>   // asynchronously send POST
-   zebra.io.HTTP(&quot;google.com&quot;).POST(function(result, request) {
+   zebra.io.HTTP(&quot;google.com&quot;).POST(function(request) {
        // handle HTTP GET response
-       ...
+       if (request.status == 200) {
+           request.responseText
+       }
+       else {
+           // handle error
+           ...
+       }
    });</code></pre>
 <p>Or you can pass a number of parameters to be sent synchronously by 
 HTTP POST request: </p>
@@ -744,11 +709,9 @@ data to be sent.</p>
         
         
         <p>a callback function that is called when HTTP POST 
-request is done. The method gets a response string as the first argument 
-and the original request object as the second argument. If the callback
-is null the POST request will be done synchronously. The method gets a 
-response string as the first argument and the original request object 
-as the second argument.</p>
+request is done. The method gets a request as its only  argument 
+and called in context of appropriate HTTP class instance. If the argument
+is null the POST request will be done synchronously.</p>
 
             
         </li>
@@ -854,13 +817,6 @@ if the HTTP request has to be sent asynchronously.</p>
                         
                             <li class="index-item method">
                                 <a href="../classes/zebra.io.HTTP.html#method_GET">GET</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method">
-                                <a href="../classes/zebra.io.HTTP.html#method_httpError">httpError</a>
 
                                 
                                 

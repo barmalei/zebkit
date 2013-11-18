@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>zebra.ui.TooltipManager</title>
+    <title>zebra.PassTextField</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.8.0pr2/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -13,7 +13,7 @@
 <div id="doc">
     <div id="hd" class="yui3-g header">
         <div class="yui3-u-3-4">
-            <h1>undefined: zebra.ui.TooltipManager</a></h1>
+            <h1>undefined: zebra.PassTextField</a></h1>
         </div>
         <div class="yui3-u-1-4 version">
             <em>API Docs for: </em>
@@ -154,6 +154,8 @@
             
                 <li><a href="../classes/zebra.layout.StackLayout.html">zebra.layout.StackLayout</a></li>
             
+                <li><a href="../classes/zebra.PassTextField.html">zebra.PassTextField</a></li>
+            
                 <li><a href="../classes/zebra.ready().html">zebra.ready()</a></li>
             
                 <li><a href="../classes/zebra.ui.BaseLayer.html">zebra.ui.BaseLayer</a></li>
@@ -197,8 +199,6 @@
                 <li><a href="../classes/zebra.ui.CompRender.html">zebra.ui.CompRender</a></li>
             
                 <li><a href="../classes/zebra.ui.CopyCutPaste.html">zebra.ui.CopyCutPaste</a></li>
-            
-                <li><a href="../classes/zebra.ui.Cursorable.html">zebra.ui.Cursorable</a></li>
             
                 <li><a href="../classes/zebra.ui.CursorManager.html">zebra.ui.CursorManager</a></li>
             
@@ -296,8 +296,6 @@
             
                 <li><a href="../classes/zebra.ui.Picture.html">zebra.ui.Picture</a></li>
             
-                <li><a href="../classes/zebra.ui.PopupInfo.html">zebra.ui.PopupInfo</a></li>
-            
                 <li><a href="../classes/zebra.ui.PopupLayer.html">zebra.ui.PopupLayer</a></li>
             
                 <li><a href="../classes/zebra.ui.PopupManager.html">zebra.ui.PopupManager</a></li>
@@ -346,10 +344,6 @@
             
                 <li><a href="../classes/zebra.ui.Toolbar.html">zebra.ui.Toolbar</a></li>
             
-                <li><a href="../classes/zebra.ui.TooltipInfo.html">zebra.ui.TooltipInfo</a></li>
-            
-                <li><a href="../classes/zebra.ui.TooltipManager.html">zebra.ui.TooltipManager</a></li>
-            
                 <li><a href="../classes/zebra.ui.tree.DefEditors.html">zebra.ui.tree.DefEditors</a></li>
             
                 <li><a href="../classes/zebra.ui.tree.DefViews.html">zebra.ui.tree.DefViews</a></li>
@@ -394,21 +388,6 @@
 
 
 
-<div id="methods-on-page" class="sidebox on-page">
-    <div class="hd">
-        <h2 class="no-toc">Methods On Page</h2>
-    </div>
-    <div class="bd">
-        <ul>
-            
-                <li><a href="#methods_hideTooltip">hideTooltip</a></li>
-            
-                <li><a href="#methods_setTooltip">setTooltip</a></li>
-            
-        </ul>
-    </div>
-</div>
-
 
 
 
@@ -424,12 +403,13 @@
             <div class="content"><h4>
 
 
-    Class zebra.ui.TooltipManager
+    Class zebra.PassTextField
 
 
 
     <br>
-    <span style="font-weight:bold;color:rgb(53,109,228);" class="crosslink">extends: </span><a href="../classes/zebra.ui.Manager.html" class="crosslink">zebra.ui.Manager</a>
+    <span style="font-weight:bold;color:rgb(53,109,228);" class="crosslink">extends: </span>zebra.ui.TextField
+visible
 
 
 </h4>
@@ -438,39 +418,16 @@
 
 
 
-<div class="intro"><p>Tooltip manager class implements possibility to define a tooltip 
-for a component. Tooltip is an UI component that has to be shown 
-as information window every time a mouse cursor has entered the
-specified component of the given area of the specified component.</p>
+<div class="intro"><p>Password text filed.</p>
 </div>
 
 
-
-    
-    <a name="methods_zebra.ui.TooltipManager"></a>
-<div class="method item">
-     <strong class="name"><code>zebra.ui.TooltipManager</code></strong>( <code>  </code> )     
-
-    
-
-    <br>
-    
-    
-    
-    
-</div>
-
-    
 
 
 <div id="classdocs">
     <ul>
         
-        <li><a href="#methods">Methods</a></li>
         
-        
-        
-        <li><a href="#attrs">Attributes</a></li>
         
         
 
@@ -478,171 +435,16 @@ specified component of the given area of the specified component.</p>
     </ul>
     <div>
         
-            <div id="methods">
-            
-                <a name="methods_hideTooltip"></a>
-<div class="method item">
-     <strong class="name"><code>hideTooltip</code></strong>( <code>  </code> )     
-
-    
-
-    <br>
-    <p>Hide tooltip if it has been shown</p>
-
-    
-    
-    
-</div>
-
-            
-                <a name="methods_setTooltip"></a>
-<div class="method item">
-     <strong class="name"><code>setTooltip</code></strong>( <code>an, a </code> )     
-
-    
-
-    <br>
-    <p>Bind or unbind the given UI component with the specified tooltip component</p>
-
-    
-    <strong>Parameters:</strong>
-    <ul class="params">
-    
-        <li>
         
-            <strong><code>an</code> <i><font color="green">&lt;<a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a>&gt;</font></i></strong>
-        
-        
-        <p>component for that a tooltip has to be shown</p>
-
-            
-        </li>
-    
-        <li>
-        
-            <strong><code>a</code> <i><font color="green">&lt;<a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a> | String&gt;</font></i></strong>
-        
-        
-        <p>tooltip to be shown. You can pass string 
-or an UI component to be shown as the tooltip. String will be transformed 
-into a tooltip UI label component.  Pass null as the argument to stop
-showing tooltip for the given component.</p>
-
-            
-        </li>
-    
-    </ul>
-    
-    
-    
-</div>
-
-            
-            </div>
-        
-        
-        
-            <div id="attrs">
-            
-                <a name="attrs_showIn"></a>
-<div class="attrs item">
-    <strong><code>showIn</code></strong> <strong><i><font color="green">&lt;Integer&gt;</font></i></strong>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-    <p>Define interval (in milliseconds) between entering a component and showing 
-a tooltip for the entered component</p>
-
-    
-</div>
-
-            
-                <a name="attrs_stopByPress"></a>
-<div class="attrs item">
-    <strong><code>stopByPress</code></strong> <strong><i><font color="green">&lt;Boolean&gt;</font></i></strong>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-    <p>Indicates if a shown tooltip has to disappear by mouse pressed event</p>
-
-    
-</div>
-
-            
-            </div>
         
         
     
         <div id="index">
 
             
-                <div class="index-section methods">
-                    <h3>Methods</h3>
-
-                    <ul class="index-list methods extends">
-                        
-                            <li class="index-item method">
-                                <a href="../classes/zebra.ui.TooltipManager.html#method_hideTooltip">hideTooltip</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method">
-                                <a href="../classes/zebra.ui.TooltipManager.html#method_setTooltip">setTooltip</a>
-
-                                
-                                
-                            </li>
-                        
-                    </ul>
-                </div>
-            
 
             
 
-            
-                <div class="index-section attrs">
-                    <h3>Attributes</h3>
-
-                    <ul class="index-list attrs extends">
-                        
-                            <li class="index-item attr">
-                                <a href="#attr_showIn">showIn</a>
-                            </li>
-                        
-                            <li class="index-item attr">
-                                <a href="#attr_stopByPress">stopByPress</a>
-                            </li>
-                        
-                    </ul>
-                </div>
             
 
             

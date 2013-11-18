@@ -154,6 +154,8 @@
             
                 <li><a href="../classes/zebra.layout.StackLayout.html">zebra.layout.StackLayout</a></li>
             
+                <li><a href="../classes/zebra.PassTextField.html">zebra.PassTextField</a></li>
+            
                 <li><a href="../classes/zebra.ready().html">zebra.ready()</a></li>
             
                 <li><a href="../classes/zebra.ui.BaseLayer.html">zebra.ui.BaseLayer</a></li>
@@ -197,8 +199,6 @@
                 <li><a href="../classes/zebra.ui.CompRender.html">zebra.ui.CompRender</a></li>
             
                 <li><a href="../classes/zebra.ui.CopyCutPaste.html">zebra.ui.CopyCutPaste</a></li>
-            
-                <li><a href="../classes/zebra.ui.Cursorable.html">zebra.ui.Cursorable</a></li>
             
                 <li><a href="../classes/zebra.ui.CursorManager.html">zebra.ui.CursorManager</a></li>
             
@@ -296,8 +296,6 @@
             
                 <li><a href="../classes/zebra.ui.Picture.html">zebra.ui.Picture</a></li>
             
-                <li><a href="../classes/zebra.ui.PopupInfo.html">zebra.ui.PopupInfo</a></li>
-            
                 <li><a href="../classes/zebra.ui.PopupLayer.html">zebra.ui.PopupLayer</a></li>
             
                 <li><a href="../classes/zebra.ui.PopupManager.html">zebra.ui.PopupManager</a></li>
@@ -345,10 +343,6 @@
                 <li><a href="../classes/zebra.ui.TextRender.html">zebra.ui.TextRender</a></li>
             
                 <li><a href="../classes/zebra.ui.Toolbar.html">zebra.ui.Toolbar</a></li>
-            
-                <li><a href="../classes/zebra.ui.TooltipInfo.html">zebra.ui.TooltipInfo</a></li>
-            
-                <li><a href="../classes/zebra.ui.TooltipManager.html">zebra.ui.TooltipManager</a></li>
             
                 <li><a href="../classes/zebra.ui.tree.DefEditors.html">zebra.ui.tree.DefEditors</a></li>
             
@@ -401,9 +395,7 @@
     <div class="bd">
         <ul>
             
-                <li><a href="#methods_getPopup">getPopup</a></li>
-            
-                <li><a href="#methods_setPopup">setPopup</a></li>
+                <li><a href="#methods_hideTooltip">hideTooltip</a></li>
             
         </ul>
     </div>
@@ -438,8 +430,10 @@
 
 
 
-<div class="intro"><p>Popup menu manager class. The manager registering and triggers showing context popup menu. 
-Menu appearing is triggered by right mouse click or double fingers touch event.</p>
+<div class="intro"><p>Popup window manager class. The manager registering and triggers showing context popup menu 
+and tooltips. Menu appearing is triggered by right mouse click or double fingers touch event.
+To bind a popup menu to an UI component you can either set &quot;tooltip&quot; property of the component 
+with a popup menu instance:</p>
 <pre class="code prettyprint"><code>   // create canvas
    var canvas = new zebra.ui.zCanvas();
 
@@ -450,10 +444,9 @@ Menu appearing is triggered by right mouse click or double fingers touch event.<
    m.add(&quot;Menu Item 3&quot;);
 
    // bind the menu to root panel
-   zebra.ui.popup.setPopup(canvas.root, m);</code></pre>
-<p>The popup manager use &quot;zebra.ui.PopupInfo&quot; interface implementation to understand which
-popup menu has to be shown at the given location of the target UI component. Developer 
-can tune a context menu appearing depending on the current mouse cursor or touch location:</p>
+   canvas.root.popup = m;</code></pre>
+<p>Or implement &quot;getPopup(target,x,y)&quot; method that can rule showing popup menu depending on 
+the current cursor location:</p>
 <pre class="code prettyprint"><code>   // create canvas
    var canvas = new zebra.ui.zCanvas();
 
@@ -470,43 +463,46 @@ can tune a context menu appearing depending on the current mouse cursor or touch
    m.add(&quot;Menu Item 2&quot;);
    m.add(&quot;Menu Item 3&quot;);
 
-   // bind the popup info interface implementation to the canvas
-   // root component
-   zebra.ui.popup.setPopup(canvas.root, new zebra.ui.PopupInfo([
-       function getPopup(target, x, y) {
-           // test if mouse cursor position is in red spot area
-           // and return context menu if it is true 
-           if (x &gt; 50 &amp;&amp; y &gt; 50 &amp;&amp; x &lt; 100 &amp;&amp; y &lt;  100)  {
-               return m;
-           }
-           return null;
+   // implement &quot;getPopup&quot; method that shows popup menu only 
+   // if mouse cursor located at red rectangular area of the 
+   // component
+   canvas.getPopup = function(target, x, y) {
+       // test if mouse cursor position is in red spot area
+       // and return context menu if it is true 
+       if (x &gt; 50 &amp;&amp; y &gt; 50 &amp;&amp; x &lt; 100 &amp;&amp; y &lt;  100)  {
+           return m;
        }
-   ]));</code></pre>
-<p> Also developers can define a context menu on the level of component, 
- without necessary to register it in popup manager. For this just implement
- &quot;zebra.ui.PopupInfo&quot; interface with a component that has a context menu:</p>
-<pre class="code prettyprint"><code>   // create canvas and set border layout for root panel
+       return null;
+   }</code></pre>
+<p> Defining a tooltip for an UI component follows the same approach. Other you
+ define set &quot;tooltip&quot; property of your component with a component that has to 
+ be shown as the tooltip:</p>
+<pre class="code prettyprint"><code>    // create canvas
+    var canvas = new zebra.ui.zCanvas();
+
+    // create tooltip 
+    var t = new zebra.ui.Label(&quot;Tooltip&quot;);
+    t.setBorder(&quot;plain&quot;);
+    t.setBackground(&quot;yellow&quot;);
+    t.setPadding(6);
+
+    // bind the tooltip to root panel
+    canvas.root.popup = t;</code></pre>
+<p> Or you can implement &quot;getTooltip(target,x,y)&quot; method if the tooltip showing depends on
+ the mouse cursor location:</p>
+<pre class="code prettyprint"><code>   // create canvas
    var canvas = new zebra.ui.zCanvas();
-   canvas.root.setLayout(new zebra.layout.BorderLayout());
 
-   // instantiate anonymous label class that implements 
-   // popup info interface to bind a context menu to 
-   // the label
-   var lab = new zebra.ui.Label(&quot;I have a context menu defined&quot;, 
-                                zebra.ui.PopupInfo, [
-       function getPopup(target, x, y) { return m; }
-   ]);
-   lab.setBorder(&quot;plain&quot;);
-   lab.setPadding(8);
+   // create tooltip 
+   var t = new zebra.ui.Label(&quot;Tooltip&quot;);
+   t.setBorder(&quot;plain&quot;);
+   t.setBackground(&quot;yellow&quot;);
+   t.setPadding(6);
 
-   // create menu with three items
-   var m = new zebra.ui.Menu();
-   m.add(&quot;Menu Item 1&quot;);
-   m.add(&quot;Menu Item 2&quot;);
-   m.add(&quot;Menu Item 3&quot;);
-
-   // add label to top part of root panel
-   canvas.root.add(zebra.layout.TOP, lab);</code></pre>
+   // bind the tooltip to root panel
+   canvas.root.getPopup = function(target, x, y) {
+       return x &lt; 10 &amp;&amp; y &lt; 10 ? t : null;
+   };</code></pre>
 </div>
 
 
@@ -535,6 +531,8 @@ can tune a context menu appearing depending on the current mouse cursor or touch
         
         
         
+        <li><a href="#attrs">Attributes</a></li>
+        
         
 
         <li><a href="#index">Index</a></li>
@@ -543,79 +541,15 @@ can tune a context menu appearing depending on the current mouse cursor or touch
         
             <div id="methods">
             
-                <a name="methods_getPopup"></a>
+                <a name="methods_hideTooltip"></a>
 <div class="method item">
-    <a href="../classes/zebra.ui.PopupInfo.html" class="crosslink">zebra.ui.PopupInfo</a> <strong class="name"><code>getPopup</code></strong>( <code>c </code> )     
+     <strong class="name"><code>hideTooltip</code></strong>( <code>  </code> )     
 
     
 
     <br>
-    <p>Get popup info interface that is bound to the given component</p>
+    <p>Hide tooltip if it has been shown</p>
 
-    
-    <strong>Parameters:</strong>
-    <ul class="params">
-    
-        <li>
-        
-            <strong><code>c</code> <i><font color="green">&lt;<a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a>&gt;</font></i></strong>
-        
-        
-        <p>an UI component</p>
-
-            
-        </li>
-    
-    </ul>
-    
-    
-    
-    <br><div class="returns"><strong>Returns:</strong> <font color="green">&lt;<a href="../classes/zebra.ui.PopupInfo.html" class="crosslink">zebra.ui.PopupInfo</a>&gt; </font><p>an popup info interface implementation</p>
-</div>
-    
-    
-    
-</div>
-
-            
-                <a name="methods_setPopup"></a>
-<div class="method item">
-     <strong class="name"><code>setPopup</code></strong>( <code>c, p </code> )     
-
-    
-
-    <br>
-    <p>Set the given context menu or an zebra.ui.PopupInfo interface implementation 
-to the specified UI component.</p>
-
-    
-    <strong>Parameters:</strong>
-    <ul class="params">
-    
-        <li>
-        
-            <strong><code>c</code> <i><font color="green">&lt;<a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a>&gt;</font></i></strong>
-        
-        
-        <p>an UI component</p>
-
-            
-        </li>
-    
-        <li>
-        
-            <strong><code>p</code> <i><font color="green">&lt;<a href="../classes/zebra.ui.Menu.html" class="crosslink">zebra.ui.Menu</a> | <a href="../classes/zebra.ui.PopupInfo.html" class="crosslink">zebra.ui.PopupInfo</a>&gt;</font></i></strong>
-        
-        
-        <p>a popup info interface implementation
-that says when and which context menu has to be shown for the given UI component.
-Or UI context menu directly. Passing null as the argument value delete a context
-menu definition from the given UI component.</p>
-
-            
-        </li>
-    
-    </ul>
     
     
     
@@ -625,6 +559,61 @@ menu definition from the given UI component.</p>
             </div>
         
         
+        
+            <div id="attrs">
+            
+                <a name="attrs_hideTooltipByPress"></a>
+<div class="attrs item">
+    <strong><code>hideTooltipByPress</code></strong> <strong><i><font color="green">&lt;Boolean&gt;</font></i></strong>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    <p>Indicates if a shown tooltip has to disappear by mouse pressed event</p>
+
+    
+</div>
+
+            
+                <a name="attrs_showTooltipIn"></a>
+<div class="attrs item">
+    <strong><code>showTooltipIn</code></strong> <strong><i><font color="green">&lt;Integer&gt;</font></i></strong>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    <p>Define interval (in milliseconds) between entering a component and showing 
+a tooltip for the entered component</p>
+
+    
+</div>
+
+            
+            </div>
         
         
     
@@ -637,14 +626,7 @@ menu definition from the given UI component.</p>
                     <ul class="index-list methods extends">
                         
                             <li class="index-item method">
-                                <a href="../classes/zebra.ui.PopupManager.html#method_getPopup">getPopup</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method">
-                                <a href="../classes/zebra.ui.PopupManager.html#method_setPopup">setPopup</a>
+                                <a href="../classes/zebra.ui.PopupManager.html#method_hideTooltip">hideTooltip</a>
 
                                 
                                 
@@ -656,6 +638,22 @@ menu definition from the given UI component.</p>
 
             
 
+            
+                <div class="index-section attrs">
+                    <h3>Attributes</h3>
+
+                    <ul class="index-list attrs extends">
+                        
+                            <li class="index-item attr">
+                                <a href="#attr_hideTooltipByPress">hideTooltipByPress</a>
+                            </li>
+                        
+                            <li class="index-item attr">
+                                <a href="#attr_showTooltipIn">showTooltipIn</a>
+                            </li>
+                        
+                    </ul>
+                </div>
             
 
             

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>/var/folders/zt/mfkpsc7d39qg858tf933jr1h0000gp/T/d20131104-32079-x64eh7/zebra.js</title>
+    <title>/var/folders/zt/mfkpsc7d39qg858tf933jr1h0000gp/T/d20131118-33884-boqa82/zebra.js</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.8.0pr2/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -13,7 +13,7 @@
 <div id="doc">
     <div id="hd" class="yui3-g header">
         <div class="yui3-u-3-4">
-            <h1>undefined: /var/folders/zt/mfkpsc7d39qg858tf933jr1h0000gp/T/d20131104-32079-x64eh7/zebra.js</a></h1>
+            <h1>undefined: /var/folders/zt/mfkpsc7d39qg858tf933jr1h0000gp/T/d20131118-33884-boqa82/zebra.js</a></h1>
         </div>
         <div class="yui3-u-1-4 version">
             <em>API Docs for: </em>
@@ -154,6 +154,8 @@
             
                 <li><a href="../classes/zebra.layout.StackLayout.html">zebra.layout.StackLayout</a></li>
             
+                <li><a href="../classes/zebra.PassTextField.html">zebra.PassTextField</a></li>
+            
                 <li><a href="../classes/zebra.ready().html">zebra.ready()</a></li>
             
                 <li><a href="../classes/zebra.ui.BaseLayer.html">zebra.ui.BaseLayer</a></li>
@@ -197,8 +199,6 @@
                 <li><a href="../classes/zebra.ui.CompRender.html">zebra.ui.CompRender</a></li>
             
                 <li><a href="../classes/zebra.ui.CopyCutPaste.html">zebra.ui.CopyCutPaste</a></li>
-            
-                <li><a href="../classes/zebra.ui.Cursorable.html">zebra.ui.Cursorable</a></li>
             
                 <li><a href="../classes/zebra.ui.CursorManager.html">zebra.ui.CursorManager</a></li>
             
@@ -296,8 +296,6 @@
             
                 <li><a href="../classes/zebra.ui.Picture.html">zebra.ui.Picture</a></li>
             
-                <li><a href="../classes/zebra.ui.PopupInfo.html">zebra.ui.PopupInfo</a></li>
-            
                 <li><a href="../classes/zebra.ui.PopupLayer.html">zebra.ui.PopupLayer</a></li>
             
                 <li><a href="../classes/zebra.ui.PopupManager.html">zebra.ui.PopupManager</a></li>
@@ -345,10 +343,6 @@
                 <li><a href="../classes/zebra.ui.TextRender.html">zebra.ui.TextRender</a></li>
             
                 <li><a href="../classes/zebra.ui.Toolbar.html">zebra.ui.Toolbar</a></li>
-            
-                <li><a href="../classes/zebra.ui.TooltipInfo.html">zebra.ui.TooltipInfo</a></li>
-            
-                <li><a href="../classes/zebra.ui.TooltipManager.html">zebra.ui.TooltipManager</a></li>
             
                 <li><a href="../classes/zebra.ui.tree.DefEditors.html">zebra.ui.tree.DefEditors</a></li>
             
@@ -406,7 +400,7 @@
         </div>
 
         <div id="main" class="yui3-u">
-            <div class="content"><h4>/var/folders/zt/mfkpsc7d39qg858tf933jr1h0000gp/T/d20131104-32079-x64eh7/zebra.js</h4>
+            <div class="content"><h4>/var/folders/zt/mfkpsc7d39qg858tf933jr1h0000gp/T/d20131118-33884-boqa82/zebra.js</h4>
 
 <pre class="code prettyprint linenums">
 (function() {
@@ -1096,8 +1090,8 @@ pkg.Class = make_template(null, function() {
                 throw new Error(&quot;Duplicated method &#x27;&quot; + sw.methodName + &quot;(&quot; + arity +&quot;)&#x27;&quot;);
             }
 
-            f.boundTo    = this;
-            f.methodName = n;
+            f.boundTo         = this;
+            f.methodName      = n;
             sw.methods[arity] = f;
             this.prototype[n] = sw;
         }
@@ -1477,7 +1471,9 @@ pkg.newInstance = function(clazz, args) {
 };
 
 
-function hex(v) { return (v &lt; 16) ? [&quot;0&quot;, v.toString(16)].join(&#x27;&#x27;) :  v.toString(16); }
+function hex(v) {
+    return (v &lt; 16) ? [&quot;0&quot;, v.toString(16)].join(&#x27;&#x27;) :  v.toString(16);
+}
 
 /**
  * Find by xpath-like path an element in a tree-like structure. The method is flexible way to look up 
@@ -3864,123 +3860,179 @@ pkg.QS = Class([
     }
 ]);
 
-//!!! type is intrenal IE specific parameter that indicates XDomainRequest or standard object has to be used
-pkg.getRequest = function(type) {
-    if (zebra.isIE || type === 0 || type === 1) {
-        if ((location.protocol.toLowerCase() === &quot;file:&quot; &amp;&amp; type != 1) || type === 0) {
-            return new (function() {
-                var o = new ActiveXObject(&quot;MSXML2.XMLHTTP&quot;), $this = this;
-                this.responseText = this.statusText = &quot;&quot;;
-                this.onreadystatechange = this.responseXml = null;
-                this.readyState = this.status = 0;
-                this.__type = &quot;aie&quot;;
-                o.onreadystatechange = function() {
-                    $this.readyState = o.readyState;
-                    if (o.readyState == 4) {
-                        $this.responseText = o.responseText;
-                        $this.responseXml  = o.responseXml;
-                        $this.status     = o.status;
-                        $this.statusText = o.statusText;
-                    }
-                    if ($this.onreadystatechange) $this.onreadystatechange();
-                };
+function $Request() {
+    this.responseText = this.statusText = &quot;&quot;;
+    this.onreadystatechange = this.responseXml = null;
+    this.readyState = this.status = 0;
+}
 
-                this.open  = function(method, url, async, user, password) { return o.open(method, url, (async !== false), user, password); };
-                this.send  = function(data) { return o.send(data); };
-                this.abort = function(data) { return o.abort(); };
-                this.setRequestHeader = function(name, value) { o.setRequestHeader(name, value); };
-                this.getResponseHeader = function(name) { return o.getResponseHeader(name); };
-                this.getAllResponseHeaders = function() { return o.getAllResponseHeaders(); };
-            })();
+$Request.prototype.open = function(method, url, async, user, password) {
+    if (location.protocol.toLowerCase() == &quot;file:&quot; ||
+        (new zebra.URL(url)).host.toLowerCase() == location.host.toLowerCase())
+    {
+        this._request = new XMLHttpRequest();
+        this._xdomain = false;
+
+        var $this = this;
+        this._request.onreadystatechange = function() {
+            $this.readyState = $this._request.readyState;
+            if ($this._request.readyState == 4) {
+                $this.responseText = $this._request.responseText;
+                $this.responseXml  = $this._request.responseXml;
+                $this.status     = $this._request.status;
+                $this.statusText = $this._request.statusText;
+            }
+            
+            if ($this.onreadystatechange) {
+                $this.onreadystatechange();
+            }
+        };
+
+        return this._request.open(method, url, (async !== false), user, password);
+    }
+    else {
+        this._xdomain = true;
+        this._async = (async === true);
+        this._request = new XDomainRequest();
+        return this._request.open(method, url);
+    }
+};
+
+$Request.prototype.send = function(data) {
+    if (this._xdomain) {
+        var originalReq = this._request, $this = this;
+
+        //!!!! handler has to be defined after 
+        //!!!! open method has been called and all 
+        //!!!! four handlers have to be defined 
+        originalReq.ontimeout = originalReq.onprogress = function () {};
+
+        originalReq.onerror = function() {
+            $this.readyState = 4;
+            $this.status = 404;
+            if ($this._async &amp;&amp; $this.onreadystatechange) {
+                $this.onreadystatechange();
+            }
+        };
+
+        originalReq.onload  = function() {
+            $this.readyState = 4;
+            $this.status = 200;
+
+            if ($this._async &amp;&amp; $this.onreadystatechange) {
+                $this.onreadystatechange(originalReq.responseText, originalReq);
+            }
+        };
+
+        //!!! set time out zero to prevent data lost 
+        originalReq.timeout = 0;
+
+        if (this._async === false) {
+            originalReq.send(data);
+
+            while (this.status === 0) {
+                pkg.sleep();
+            }
+
+            this.readyState = 4;
+            this.responseText = originalReq.responseText;
+            return;
         }
 
-        var obj = new XDomainRequest();
-        obj._open  = obj.open;
-        obj._send  = obj.send;
-        obj._async = true;
-        obj.__type = &quot;xie&quot;;
-        obj.statusText = &quot;&quot;;
-        obj.status = obj.readyState = 0;
-        obj.open = function(method, url, async, user, password) {
-            this._async = (async === true);
-            return this._open(method, url);
-        };
+        //!!! make short timeout to make sure bloody IE is ready 
+        setTimeout(function () {
+           originalReq.send(data);
+        }, 10);
+    }
+    else  {
+        return this._request.send(data);
+    }
+};
 
+$Request.prototype.abort = function(data) {
+    return this._request.abort();
+};
 
-        obj.setRequestHeader = obj.getResponseHeader = obj.getAllResponseHeaders = function () {
-            throw new Error(&quot;Method is not supported&quot;);
-        };
+$Request.prototype.setRequestHeader = function(name, value) {
+    if (this._xdomain) {
+        if (name == &quot;Content-Type&quot;) {
+            //!!! 
+            // IE8 and IE9 anyway don&#x27;t take in account the assignment
+            // IE8 throws exception every time a value is assigned to
+            // the property
+            // !!!  
+            //this._request.contentType = value;
+            return;
+        }
+        else {
+            throw new Error(&quot;Method &#x27;setRequestHeader&#x27; is not supported for &quot; + name);
+        }
+    }
+    else {
+        this._request.setRequestHeader(name, value);
+    }
+};
 
-        obj.send = function(data) {
-            var req = this;
+$Request.prototype.getResponseHeader = function(name) {
+    if (this._xdomain) {
+        throw new Error(&quot;Method is not supported&quot;);
+    }
+    return this._request.getResponseHeader(name);
+};
 
-            //!!!! handler has to be defined after 
-            //!!!! open method has been called and all 
-            //!!!! four handlers have to be defined 
+$Request.prototype.getAllResponseHeaders = function() {
+    if (this._xdomain) {
+        throw new Error(&quot;Method is not supported&quot;);
+    }
+    return this._request.getAllResponseHeaders();
+};
 
-            this.ontimeout = this.onprogress = function () { };
+pkg.getRequest = function() {
+    if (typeof XMLHttpRequest !== &quot;undefined&quot;) {
+        var r = new XMLHttpRequest();
 
-            this.onerror = function() {
-                req.readyState = 4;
-                req.status = 404;
-                if (req._async &amp;&amp; req.onreadystatechange) {
-                    req.onreadystatechange();
+        if (zebra.isFF) {
+            r.__send = r.send;
+            r.send = function(data) {
+                // !!! FF can throw NS_ERROR_FAILURE exception instead of 
+                // !!! returning 404 File Not Found HTTP error code
+                // !!! No request status, statusText are defined in this case
+                try { return this.__send(data); }
+                catch(e) {
+                    if (!e.message || e.message.toUpperCase().indexOf(&quot;NS_ERROR_FAILURE&quot;) &lt; 0) {
+                        // exception has to be re-instantiate to be Error class instance
+                        var ee = new Error(e.toString());
+                        throw ee;
+                    }
                 }
             };
+        }
 
-            this.onload  = function() {
-                req.readyState = 4;
-                req.status = 200;
-                if (req._async &amp;&amp; req.onreadystatechange) {
-                    req.onreadystatechange();
-                }
-            };
+        // CORS is supported out of box
+        if (&quot;withCredentials&quot; in r) {
+            return r;
+        }
 
-            //!!! set time out zero to prevent data lost 
-            this.timeout = 0;
-
-            if (this._async === false) {
-                var result = this._send(data);
-                while (this.status === 0) {
-                    pkg.sleep();
-                }
-                this.readyState = 4;
-                if (this.onreadystatechange) this.onreadystatechange();
-                return result;
-            }
-
-            //!!! make short timeout to make sure bloody IE is ready 
-            setTimeout(function () {
-               req._send(data);
-            }, 10);
-        };
-        return obj;
+        if (zebra.isIE) {
+            return new $Request();
+        }
     }
 
-    var r = new XMLHttpRequest();
-    if (zebra.isFF) {
-        r.__send = r.send;
-        r.send = function(data) {
-            // !!! FF can throw NS_ERROR_FAILURE exception instead of returning 404 File Not Found HTTP error code
-            // !!! No request status, statusText are defined in this case
-            try { return this.__send(data); }
-            catch(e) {
-                if (!e.message || e.message.toUpperCase().indexOf(&quot;NS_ERROR_FAILURE&quot;) &lt; 0) throw e;
-            }
-        };
-    }
-    return r;
+    throw new Error(&quot;Archaic browser detected&quot;);
 };
 
 /**
- * HTTP request class. This class provides API to generate different (GET, POST, etc) HTTP requests in sync 
- * and async modes
+ * HTTP request class. This class provides API to generate different 
+ * (GET, POST, etc) HTTP requests in sync and async modes
  * @class zebra.io.HTTP
  * @constructor
  * @param {String} url an URL to a HTTP resource
  */
 pkg.HTTP = Class([
-    function(url) { this.url = url; },
+    function(url) {
+        this.url = url;
+        this.header = {};
+    },
 
     /**
      * Perform HTTP GET request .
@@ -3994,11 +4046,18 @@ pkg.HTTP = Class([
     /**
      * Perform HTTP GET request asynchronously.
      * @param {Function} f a callback function that is called when the HTTP GET 
-     * request is done. The method gets a response string as the first argument 
-     * and the original request object as the second argument.
+     * request is done. The method gets a request as the only argument 
+     * and is called in a context of HTTP class instance.
         
-        zebra.io.HTTP(&quot;google.com&quot;).GET(function(result, request) {
+        zebra.io.HTTP(&quot;google.com&quot;).GET(function(request) {
             // handle HTTP GET response
+            if (request.status == 200) {
+                request.responseText
+            }
+            else {
+                // handle error
+                ...
+            }
             ...
         });
 
@@ -4013,8 +4072,8 @@ pkg.HTTP = Class([
      * query parameters.
      * @param {Object} d a dictionary of query parameters 
      * @param {Function} [f] a callback function that is called when the HTTP GET 
-     * request is done. The method gets a response string as the first argument 
-     * and the original request object as the second argument.
+     * request is done. The method gets a request object as its only argument 
+     * and is called in context of the HTTP class instance.
     
         // synchronous HTTP GET request with the number of
         // query parameters
@@ -4044,13 +4103,19 @@ pkg.HTTP = Class([
      * Perform HTTP POST request asynchronously with no parameters or synchronously 
      * with the given parameters list.
      * @param {Function|Object} d a callback function that is called when HTTP POST 
-     * request is done. The method gets a response string as the first argument 
-     * and the original request object as the second argument:
+     * request is done. The method gets a request as its only argument 
+     * and is called in context of HTTP class instance:
         
         // asynchronously send POST
-        zebra.io.HTTP(&quot;google.com&quot;).POST(function(result, request) {
+        zebra.io.HTTP(&quot;google.com&quot;).POST(function(request) {
             // handle HTTP GET response
-            ...
+            if (request.status == 200) {
+                request.responseText
+            }
+            else {
+                // handle error
+                ...
+            }
         });
 
      * Or you can pass a number of parameters to be sent synchronously by 
@@ -4075,11 +4140,9 @@ pkg.HTTP = Class([
      * data to be sent.
      * @param {String} d a data to be sent by HTTP POST request
      * @param {Function} [f] a callback function that is called when HTTP POST 
-     * request is done. The method gets a response string as the first argument 
-     * and the original request object as the second argument. If the callback
-     * is null the POST request will be done synchronously. The method gets a 
-     * response string as the first argument and the original request object 
-     * as the second argument. 
+     * request is done. The method gets a request as its only  argument 
+     * and called in context of appropriate HTTP class instance. If the argument
+     * is null the POST request will be done synchronously.
      * @method POST
      */
     function POST(d, f) {
@@ -4100,35 +4163,47 @@ pkg.HTTP = Class([
     function SEND(method, url, data, callback) {
         //!!! IE9 returns 404 if XDomainRequest is used for the same domain but for different paths.
         //!!! Using standard XMLHttpRequest has to be forced in this case
-        var t = zebra.isIE &amp;&amp; (new zebra.URL(url)).host.toLowerCase() == location.host.toLowerCase() ? 0 : -1,
-            r = pkg.getRequest(t), $this = this;
+        var r = pkg.getRequest(), $this = this;
 
         if (callback !== null) {
             r.onreadystatechange = function() {
                 if (r.readyState == 4) {
-                    $this.httpError(r, url);
-                    callback(r.responseText, r);
+                    callback.call($this, r);
                 }
             };
         }
 
-        r.open(method, url, callback !== null);
-        r.send(data);
-        if (callback === null) {
-            this.httpError(r, url);
-            return r.responseText;
+        r.open(method, url, callback != null);
+        for(var k in this.header) {
+            r.setRequestHeader(k, this.header[k]);
         }
-    },
 
-    /**
-     * Called every time an error in a HTTP request has happened
-     * @param  {HttpRequest} r an original request object 
-     * @param  {String} url an URL
-     * @method httpError
-     */
-    function httpError(r, url) { 
-        if (r.status != 200) {
-            throw new Error(&quot;HTTP error &quot; + r.status + &quot; response = &#x27;&quot; + r.responseText + &quot;&#x27; url = &quot; + url); 
+
+        try {
+            r.send(data);
+        }
+        catch(e) {
+            // exception has to be redefined since the type of exception 
+            // can be browser dependent
+            if (callback == null) {
+                var ee = new Error(e.toString());
+                ee.request = r;
+                throw ee;
+            }
+            else {
+                r.status = 500;
+                r.statusText = e.toString();
+                callback.call(this, r);
+            }
+        }
+
+        if (callback == null) {
+            if (r.status != 200) {
+                var e = new Error(&quot;HTTP error &quot; + r.status + &quot; response = &#x27;&quot; + r.statusText + &quot;&#x27; url = &quot; + url);
+                e.request = r;
+                throw e;
+            }
+            return r.responseText;
         }
     }
 ]);
@@ -4140,8 +4215,14 @@ pkg.HTTP = Class([
         var res = zebra.io.GET(&quot;http://test.com&quot;);
 
         // asynchronous HTTP GET call
-        zebra.io.GET(&quot;http://test.com&quot;, function(res, request) {
+        zebra.io.GET(&quot;http://test.com&quot;, function(request) {
             // handle result
+            if (request.status == 200) {
+                request.responseText
+            }
+            else {
+                // handle error
+            }
             ...
         });
 
@@ -4155,14 +4236,26 @@ pkg.HTTP = Class([
  * @param {String} url an URL
  * @param {Object} [parameters] a dictionary of query parameters 
  * @param {Funcion} [callback] a callback function that is called 
- * when the GET request is completed. Pass it if to perform request
+ * when the GET request is completed. Pass it  to perform request
  * asynchronously 
  * @for  zebra.io.GET()
  * @method GET
  */
 pkg.GET = function(url) {
-    var http = new pkg.HTTP(url);
-    return http.GET.apply(http, Array.prototype.slice.call(arguments, 1));
+    if (zebra.isString(url)) {
+        var http = new pkg.HTTP(url);
+        return http.GET.apply(http, Array.prototype.slice.call(arguments, 1));
+    }
+    else {
+        var http = new pkg.HTTP(url.url);
+        if (url.header) {
+            http.header = url.header;
+        }
+        var args = [];
+        if (url.parameters) args.push(url.parameters);
+        if (url.calback) args.push(url.calback);
+        return http.GET.apply(http, args);
+    }
 };
 
 /**
@@ -4172,8 +4265,15 @@ pkg.GET = function(url) {
         var res = zebra.io.POST(&quot;http://test.com&quot;);
 
         // asynchronous HTTP POST call
-        zebra.io.POST(&quot;http://test.com&quot;, function(res, request) {
+        zebra.io.POST(&quot;http://test.com&quot;, function(request) {
             // handle result
+            if (request.status == 200) {
+            
+            }
+            else {
+                // handle error
+                ...
+            }
             ...
         });
 
@@ -4188,8 +4288,15 @@ pkg.GET = function(url) {
         var res = zebra.io.POST(&quot;http://test.com&quot;, &quot;data&quot;);
 
         // asynchronous HTTP POST call with data
-        zebra.io.POST(&quot;http://test.com&quot;, &quot;request&quot;, function(res, request) {
+        zebra.io.POST(&quot;http://test.com&quot;, &quot;request&quot;, function(request) {
             // handle result
+            if (request.status == 200) {
+    
+            }
+            else {
+                // handle error
+                ...
+            }
         });
 
  * @param {String} url an URL
@@ -4211,7 +4318,11 @@ pkg.InputStream = Class([
         if (isBA &amp;&amp; container instanceof ArrayBuffer) this.data = new Uint8Array(container);
         else {
             if (zebra.isString(container)) {
-                this.Field(function read() { return this.available() &gt; 0 ? this.data.charCodeAt(this.pos++) &amp; 0xFF : -1; });
+                this.extend([
+                    function read() {
+                        return this.available() &gt; 0 ? this.data.charCodeAt(this.pos++) &amp; 0xFF : -1;
+                    }
+                ]);
             }
             else {
                 if (Array.isArray(container) === false) {
@@ -4281,7 +4392,9 @@ pkg.InputStream = Class([
 ]);
 
 pkg.URLInputStream = Class(pkg.InputStream, [
-    function(url) {  this.$this(url, null); },
+    function(url) {
+        this.$this(url, null);
+    },
 
     function(url, f) {
         var r = pkg.getRequest(), $this = this;
@@ -4387,9 +4500,17 @@ pkg.Service = Class([
                     var args = Array.prototype.slice.call(arguments);
                     if (args.length &gt; 0 &amp;&amp; typeof args[args.length - 1] == &quot;function&quot;) {
                         var callback = args.pop();
-                        return this.send(url, this.encode(name, args), function(res) {
+                        return this.send(url, this.encode(name, args), function(request) {
                                                                             var r = null;
-                                                                            try { r = $this.decode(res); }
+                                                                            try {
+                                                                                if (request.status == 200) {
+                                                                                    r = $this.decode(request.responseText);
+                                                                                }
+                                                                                else {
+                                                                                    r = new Error(&quot;Status: &quot; + request.status +
+                                                                                                   &quot;, &#x27;&quot; + request.statusText + &quot;&#x27;&quot;);
+                                                                                }
+                                                                            }
                                                                             catch(e) {  r = e; }
                                                                             callback(r);
                                                                        });
@@ -4430,7 +4551,13 @@ pkg.Service = Class([
       * @return {String}  a result
       * @method  send
       */
-    function send(url, data, callback) { return pkg.POST(url, data, callback); }
+    function send(url, data, callback) {
+        var http = new pkg.HTTP(url);
+        if (this.contentType != null) {
+            http.header[&#x27;Content-Type&#x27;] = this.contentType;
+        }
+        return http.POST(data, callback);
+    }
 ]);
 
 pkg.Service.invoke = function(clazz, url, method) {
@@ -4465,6 +4592,7 @@ pkg.JRPC = Class(pkg.Service, [
     function(url, methods) {
         this.$super(url, methods);
         this.version = &quot;2.0&quot;;
+        this.contentType = &quot;application/json&quot;;
     },
 
     function encode(name, args) {
@@ -4516,7 +4644,10 @@ pkg.Base64.prototype.decode   = function() { return pkg.b64decode(this.encoded);
  * @param {Array} methods a list of methods names the remote service provides  
  */
 pkg.XRPC = Class(pkg.Service, [
-    function(url, methods) { this.$super(url, methods); },
+    function(url, methods) {
+        this.$super(url, methods);
+        this.contentType = &quot;text/xml&quot;;
+    },
 
     function encode(name, args) {
         var p = [&quot;&lt;?xml version=\&quot;1.0\&quot;?&gt;\n&lt;methodCall&gt;&lt;methodName&gt;&quot;, name, &quot;&lt;/methodName&gt;&lt;params&gt;&quot;];
@@ -4530,7 +4661,9 @@ pkg.XRPC = Class(pkg.Service, [
     },
 
     function encodeValue(v, p)  {
-        if (v === null) throw new Error(&quot;Null is not allowed&quot;);
+        if (v === null) { 
+            throw new Error(&quot;Null is not allowed&quot;);
+        }
 
         if (zebra.isString(v)) {
             v = v.replace(&quot;&lt;&quot;, &quot;&amp;lt;&quot;);
@@ -6350,7 +6483,7 @@ var instanceOf = zebra.instanceOf, L = zebra.layout, MB = zebra.util,
     MS = Math.sin, MC = Math.cos, $fmCanvas = null, $fmText = null,
     $fmImage = null, $clipboard = null, $clipboardCanvas, $canvases = [],
     $ratio = typeof window.devicePixelRatio !== &quot;undefined&quot; ? window.devicePixelRatio
-                                                              : (zebra.isIE ? window.screen.deviceXDPI / window.screen.logicalXDPI : 1);
+                                                            : (zebra.isIE ? window.screen.deviceXDPI / window.screen.logicalXDPI : 1);
 
 pkg.clipboardTriggerKey = 0;
 
@@ -7570,24 +7703,6 @@ FocusListener = pkg.FocusListener = Interface(),
 KeyListener = pkg.KeyListener = Interface(),
 
 /**
- * Interface to express intention to control mouse cursor type
- * @class zebra.ui.Cursorable 
- */
-
-/**
- * The method is called by cursor manager to ask which cursor type has to be set for the 
- * at the given location of the given UI component
- * @optional
- * @param {zebra.ui.Panel} c an UI component where a mouse cursor is on
- * @param {Integer} x a x coordinate relevantly the component where a mouse cursor is on
- * @param {integer} y a y coordinate relevantly the component where a mouse cursor is on
- * @return {String} a mouse cursor type
- * @method  getCursorType
- * @interface
- */
-Cursorable = pkg.Cursorable = Interface(),
-
-/**
  * Interface to express intention to control children UI components event handling by 
  * making them events transparent
  * @class zebra.ui.Composite 
@@ -8001,8 +8116,8 @@ var MDRAGGED = ME.DRAGGED, EM = null, MMOVED = ME.MOVED, MEXITED = ME.EXITED,
     KPRESSED = KE.PRESSED, MENTERED = ME.ENTERED,
     context = Object.getPrototypeOf(document.createElement(&#x27;canvas&#x27;).getContext(&#x27;2d&#x27;)),
     $mousePressedEvents = {}, $keyPressedCode = -1, $keyPressedOwner = null,
-    $keyPressedModifiers = 0, KE_STUB = new KE(null,  KPRESSED, 0, &#x27;x&#x27;, 0), 
-    $focusGainedCounter = 0, ME_STUB = new ME(null, ME.PRESSED, 0, 0, 0, 1);
+    $keyPressedModifiers = 0, KE_STUB = new KE(null,  KPRESSED, 0, &#x27;x&#x27;, 0),
+    ME_STUB = new ME(null, ME.PRESSED, 0, 0, 0, 1);
 
 pkg.paintManager = pkg.events = pkg.$mouseMoveOwner = null;
 
@@ -8442,7 +8557,7 @@ pkg.Panel = Class(L.Layoutable, [
          */
         this.kidAdded = function (index,constr,l){
             pkg.events.performComp(CL.ADDED, this, constr, l);
-            if(l.width &gt; 0 &amp;&amp; l.height &gt; 0) l.repaint();
+            if (l.width &gt; 0 &amp;&amp; l.height &gt; 0) l.repaint();
             else this.repaint(l.x, l.y, 1, 1);
         };
 
@@ -8467,6 +8582,27 @@ pkg.Panel = Class(L.Layoutable, [
          */
         this.relocated = function(px,py){ 
             pkg.events.performComp(CL.MOVED, this, px, py); 
+        
+            var p = this.parent, w = this.width, h = this.height;
+            if (p != null &amp;&amp; w &gt; 0 &amp;&amp; h &gt; 0){
+                var x = this.x, y = this.y, nx = x &lt; px ? x : px, ny = y &lt; py ? y : py;
+                
+                //!!! some mobile browser has bug: moving a component leaves 0.5 sized traces 
+                //!!! to fix it 1 pixel extra has to be added to all sides of repainted rect area
+                nx--;
+                ny--;
+
+                if (nx &lt; 0) nx = 0;
+                if (ny &lt; 0) ny = 0;
+
+                var w1 = p.width - nx, 
+                    w2 = w + (x &gt; px ? x - px : px - x),
+                    h1 = p.height - ny,
+                    h2 = h + (y &gt; py ? y - py : py - y);
+
+                pkg.paintManager.repaint(p, nx, ny, (w1 &lt; w2 ? w1 : w2) + 2, //!!! add crappy 2 for mobile
+                                            (h1 &lt; h2 ? h1 : h2) + 2);
+            }
         };
         
         /**
@@ -8478,6 +8614,12 @@ pkg.Panel = Class(L.Layoutable, [
          */
         this.resized = function(pw,ph) { 
             pkg.events.performComp(CL.SIZED, this, pw, ph); 
+
+            if (this.parent != null) {
+                pkg.paintManager.repaint(this.parent, this.x, this.y, 
+                                        (this.width  &gt; pw) ? this.width  : pw, 
+                                        (this.height &gt; ph) ? this.height : ph);
+            }
         };
 
         /**
@@ -8502,13 +8644,13 @@ pkg.Panel = Class(L.Layoutable, [
          * @param {Integer} [timeout] a timeout. The default value is 50
          * @method requestFocusIn
          */
-        this.requestFocusIn = function(timeout){ 
+        this.requestFocusIn = function(timeout) { 
             if (arguments.length === 0) {
                 timeout = 50;
             }
             var $this = this;
             setTimeout(function () {
-                pkg.focusManager.requestFocus($this); 
+                $this.requestFocus(); 
             }, timeout);
         };
 
@@ -8522,6 +8664,13 @@ pkg.Panel = Class(L.Layoutable, [
                 this.isVisible = b;
                 this.invalidate();
                 pkg.events.performComp(CL.SHOWN, this, -1,  -1);
+
+                if (this.parent != null) {
+                    if (b) this.repaint();
+                    else {
+                        this.parent.repaint(this.x, this.y, this.width, this.height);
+                    }
+                }
             }
         };
 
@@ -8540,6 +8689,7 @@ pkg.Panel = Class(L.Layoutable, [
                         this.kids[i].setEnabled(b);
                     }
                 }
+                this.repaint();
             }
         };
 
@@ -8596,7 +8746,7 @@ pkg.Panel = Class(L.Layoutable, [
                 }
 
                 if (v &amp;&amp; v.activate) {
-                    v.activate(this.hasFocus() ?  &quot;function&quot;: &quot;focusoff&quot; );
+                    v.activate(this.hasFocus() ?  &quot;function&quot;: &quot;focusoff&quot;);
                 } 
 
                 this.repaint();
@@ -9018,7 +9168,9 @@ pkg.PaintManager = Class(pkg.Manager, [
             if (w &gt; 0 &amp;&amp; h &gt; 0 &amp;&amp; c.isVisible === true){
                 var r = $cvp(c, temporary);
                 if (r == null) return;
+
                 MB.intersection(r.x, r.y, r.width, r.height, x, y, w, h, r);
+
                 if (r.width &lt;= 0 || r.height &lt;= 0) return;
                 x = r.x;
                 y = r.y;
@@ -9072,6 +9224,14 @@ pkg.PaintManager = Class(pkg.Manager, [
                             var $this = this;
                             $timers[canvas] = setTimeout(function() {
                                 $timers[canvas] = null;
+
+                                // prevent double painting, sometimes 
+                                // width can be -1 what cause clearRect 
+                                // clean incorrectly  
+                                if (canvas.da.width &lt;= 0) {
+                                    return ;
+                                }
+
                                 var context = canvas.graph;
 
                                 try {
@@ -9084,24 +9244,32 @@ pkg.PaintManager = Class(pkg.Manager, [
                                     // dg.strokeStyle = &#x27;red&#x27;;
                                     // dg.beginPath();
                                     // dg.rect(da.x, da.y, da.width, da.height);
-                                    // dg.stroke();
+                                    // dg.stroke();                       
 
-                                    context.clipRect(canvas.da.x, canvas.da.y, canvas.da.width, canvas.da.height);
+                                    context.clipRect(canvas.da.x, canvas.da.y, canvas.da.width, canvas.da.height);                                  
+                                    if (canvas.bg == null) {
+                                        context.clearRect(canvas.da.x, canvas.da.y, canvas.da.width, canvas.da.height);
+                                    }
+
                                     $this.paint(context, canvas);
+
                                     context.restore();
                                     canvas.da.width = -1; //!!!
                                 }
                                 catch(e) { zebra.print(e); }
                             }, 50);
                         }
-                        if (da.width &gt; 0) canvas.repaint(da.x, da.y, da.width, da.height);
+                        
+                        if (da.width &gt; 0) {
+                            canvas.repaint(da.x, da.y, da.width, da.height);
+                        }
                     }
                 }
             }
         };
 
         this.paint = function(g,c){
-            var dw = c.width, dh = c.height, ts = g.stack[g.counter]; // replace getTopStack() to optimize;
+            var dw = c.width, dh = c.height, ts = g.stack[g.counter]; //!!! replace getTopStack() to optimize;
             if (dw !== 0      &amp;&amp; 
                 dh !== 0      &amp;&amp; 
                 ts.width &gt; 0  &amp;&amp; 
@@ -9156,56 +9324,14 @@ pkg.PaintManager = Class(pkg.Manager, [
     component background and face are rendered
 
  * Also the implementation expects an UI component can specify 
- * background and border view. Border view can change the c
+ * background and border view. Using border view can developers change the
  * component shape by defining &quot;ouline(...)&quot;&quot; method  
  * @constructor
  * @class  zebra.ui.PaintManImpl
  * @extends zebra.ui.PaintManager
  */
-pkg.PaintManImpl = Class(pkg.PaintManager, CL, [
+pkg.PaintManImpl = Class(pkg.PaintManager, [
     function $prototype() {
-        this.compEnabled = function(t) { this.repaint(t); };
-
-        this.compShown = function(t){
-            if (t.isVisible) this.repaint(t);
-            else {
-                if (t.parent != null) {
-                    this.repaint(t.parent, t.x, t.y, t.width, t.height);
-                }
-            }
-        };
-
-        this.compSized = function(t, pw, ph){
-            if (t.parent != null) {
-                this.repaint(t.parent, t.x, t.y, 
-                             (t.width  &gt; pw) ? t.width  : pw, 
-                             (t.height &gt; ph) ? t.height : ph);
-            }
-        };
-
-        this.compMoved = function(t, px, py){
-            var p = t.parent, w = t.width, h = t.height;
-            if (p != null &amp;&amp; w &gt; 0 &amp;&amp; h &gt; 0){
-                var x = t.x, y = t.y, nx = x &lt; px ? x : px, ny = y &lt; py ? y : py;
-                
-                //!!! some mobile browser has bug: moving a component leaves 0.5 sized traces 
-                //!!! to fix it 1 pixel extra has to be added to all sides of repainted rect area
-                nx--;
-                ny--;
-
-                if (nx &lt; 0) nx = 0;
-                if (ny &lt; 0) ny = 0;
-
-                var w1 = p.width - nx, 
-                    w2 = w + (x &gt; px ? x - px : px - x),
-                    h1 = p.height - ny,
-                    h2 = h + (y &gt; py ? y - py : py - y);
-
-                this.repaint(p, nx, ny, (w1 &lt; w2 ? w1 : w2) + 2,
-                                        (h1 &lt; h2 ? h1 : h2) + 2);
-            }
-        };
-
         this.paintComponent = function(g,c){
             var b = c.bg != null &amp;&amp; (c.parent == null || c.bg != c.parent.bg);
 
@@ -9241,7 +9367,7 @@ pkg.PaintManImpl = Class(pkg.PaintManager, CL, [
                     id     = -1;
 
                 if (left + right + top + bottom &gt; 0){
-                    var ts = g.getTopStack(), 
+                    var ts = g.stack[g.counter]; // replace g.getTopStack() to optimize
                         cw = ts.width, 
                         ch = ts.height;
                    
@@ -9303,6 +9429,32 @@ pkg.FocusManager = Class(pkg.Manager, MouseListener, CL, KeyListener, [
             freeFocus(this, c); 
         };
 
+        this.canvasFocusLost = function(canvas) {
+            if (this.focusOwner != null &amp;&amp; 
+                this.focusOwner.getCanvas() == canvas) 
+            {
+                this.requestFocus(null);
+            }
+        };
+
+        this.canvasFocusGained = function(canvas) {
+            // !!! 
+            //  previous focus owner for native HTML element should be ignored 
+            // !!!
+          
+            if (this.prevFocusOwner != null &amp;&amp; 
+                zebra.instanceOf(this.prevFocusOwner, pkg.HtmlElement) === false) 
+            {
+                var d = this.prevFocusOwner.getCanvas();
+                if (d == canvas)  { 
+                    this.requestFocus(this.prevFocusOwner);
+                }
+                else {
+                    this.prevFocusOwner = null;
+                }
+            }
+        };
+
         /**
          * Test if the given component is a focus owner
          * @param  {zebra.ui.Panel} c an UI component to be tested 
@@ -9356,7 +9508,9 @@ pkg.FocusManager = Class(pkg.Manager, MouseListener, CL, KeyListener, [
 
         this.ff = function(c,d){
             var top = c;
-            while (top &amp;&amp; top.getFocusRoot == null) top = top.parent;
+            while (top &amp;&amp; top.getFocusRoot == null) {
+                top = top.parent;
+            }
             top = top.getFocusRoot();
             for(var index = (d &gt; 0) ? 0 : c.kids.length - 1;c != top.parent; ){
                 var cc = this.fd(c, index, d);
@@ -9374,7 +9528,21 @@ pkg.FocusManager = Class(pkg.Manager, MouseListener, CL, KeyListener, [
          * @method requestFocus
          */
         this.requestFocus = function (c){
-            if (c != this.focusOwner &amp;&amp; (c == null || this.isFocusable(c))){
+            if (c != this.focusOwner &amp;&amp; (c == null || this.isFocusable(c))) {
+        
+                // if canvas where a potential focus owner component sits 
+                // doesn&#x27;t  hold native focus than store the potential 
+                // focus owner in prevFocusOwner field that will be used 
+                // as soon as the canvas gets focus  
+                if (c != null &amp;&amp; c.getCanvas().$focusGainedCounter === 0) {
+                    this.prevFocusOwner = c;
+                    if (zebra.instanceOf(this.prevFocusOwner, pkg.HtmlElement) == false) {
+                        c.getCanvas().requestFocus();
+                        return;
+                    }
+                }
+
+
                 var oldFocusOwner = this.focusOwner;
                 if (c != null) {
                     var nf = EM.getEventDestination(c);
@@ -9522,39 +9690,25 @@ pkg.CommandManager = Class(pkg.Manager, KeyListener, [
 
 /**
  * Cursor manager class. Allows developers to control mouse cursor type by implementing an own 
- * &quot;zebra.ui.Cursorable&quot; interface. Imagine an UI component needs to change cursor type. It 
+ * getCursorType method or by specifying a cursor by cursorType field. Imagine an UI component 
+ * needs to change cursor type. It 
  *  can be done by one of the following way:
         
-    - **Implement cursorable interface by the component itself** 
+    - **Implement getCursorType method by the component itself** 
 
-          // instantiate panel class that implements cusorable interface
-          var p = new zebra.ui.Panel(zebra.ui.Cursorable, [
-               // implement cursorable interface method to set required 
+          var p = new zebra.ui.Panel([
+               // implement getCursorType method to set required 
                // mouse cursor type 
                function getCursorType(target, x, y) {
                    return zebra.ui.Cursor.WAIT;
                }
           ]);
 
-    - **Implement cursorable interface and register it in cursor manager** 
+    - **Simply set cursorType property of a component** 
 
           var myPanel = new zebra.ui.Panel();
           ...
-          // set cursorable for the given UI component 
-          zebra.ui.cursorManager.setCursorable(myPanel, new zebra.ui.Cursorable([
-               // implement cursorable interface method to set required 
-               // mouse cursor type 
-               function getCursorType(target, x, y) {
-                   return zebra.ui.Cursor.WAIT;
-               }
-          ]));
-
-    - **Simply setting cursor type for the given component by cursor manager** 
-
-          var myPanel = new zebra.ui.Panel();
-          ...
-          // set cursorable for the given UI component 
-          zebra.ui.cursorManager.setCursorable(myPanel, zebra.ui.Cursor.WAIT);
+          myPanel.cursorType = zebra.ui.Cursor.WAIT;
 
  *  @class zebra.ui.CursorManager
  *  @constructor
@@ -9562,69 +9716,54 @@ pkg.CommandManager = Class(pkg.Manager, KeyListener, [
  */
 pkg.CursorManager = Class(pkg.Manager, MouseListener, [
     function $prototype() {
-        /**
-         * Say which cursor has to be used for the given UI component. 
-         * @param  {zebra.ui.Panel} t  an UI component 
-         * @param  {zebra.ui.Cursorable|String} c a zebra.ui.Cursorable 
-         * interface implementation. It has to provide &quot;getCursorType(target,x,y)&quot; 
-         * method implementation that defines a cursor type to be set for the 
-         * given target object and location. Also a cursor type can be passed
-         * directly to the method. In this case the cursorable class instance
-         * will be created automatically.
-         * @method setCursorable
-         */
-        this.setCursorable = function(t,c){
-            if (c == null) {
-                delete this.cursors[t];
+
+        this.mouseMoved = function(e){
+            if (this.isFunc) {
+                this.cursorType = this.target.getCursorType(this.target, e.x, e.y);
+                this.target.getCanvas().canvas.style.cursor = (this.cursorType == null) ? &quot;default&quot;
+                                                                                        : this.cursorType;
+            }
+        };
+        
+        this.mouseEntered = function(e){
+            if (e.source.cursorType != null) {
+                this.target = e.source;
+                this.cursorType = this.target.cursorType;
+                this.target.getCanvas().canvas.style.cursor = (this.cursorType == null) ? &quot;default&quot;
+                                                                                        : this.cursorType;
             }
             else {
-                if (zebra.isString(c)) {
-                    var cursorType = c;
-                    c = new Cursorable([
-                        function $prototype() {
-                            this.getCursorType = function(t,x,y) {
-                                return cursorType;
-                            };
-                        }
-                    ]);
-                }    
-                this.cursors[t] = c;
+                if (e.source.getCursorType != null) {
+                    this.isFunc = true; 
+                    this.target = e.source;
+                    this.cursorType = this.target.getCursorType(this.target, e.x, e.y);
+                    this.target.getCanvas().canvas.style.cursor = (this.cursorType == null) ? &quot;default&quot;
+                                                                                            : this.cursorType;
+                }
             }
         };
-
-        this.mouseMoved   = function(e){ this.setCursorType1(e); };
-        this.mouseEntered = function(e){ this.setCursorType1(e); };
-        this.mouseExited  = function(e){ this.setCursorType2(&quot;default&quot;, e.source); };
-        this.mouseDragged = function(e){ this.setCursorType1(e); };
-
-        this.setCursorType1 = function(e){
-            var t = e.source, c = this.cursors.hasOwnProperty(t) ? this.cursors[t] : null;
-            if(c == null &amp;&amp; instanceOf(t, Cursorable)) c = t;
-            this.setCursorType2(((c != null) ? c.getCursorType(t, e.x, e.y) :  &quot;default&quot;), t);
+        
+        this.mouseExited  = function(e){
+            if (this.target != null) {
+                this.cursorType = &quot;default&quot;;
+                this.target.getCanvas().canvas.style.cursor = this.cursorType;
+                this.target = null;
+                this.isFunc = false;
+            }
         };
-
-        this.setCursorType2 = function(type,t){
-            if (this.cursorType != type) {
-                var d = t.getCanvas();
-                if(d != null){
-                    this.cursorType = type;
-                    d.canvas.style.cursor = (this.cursorType &lt; 0) ? &quot;default&quot; : this.cursorType;
-                }
+        
+        this.mouseDragged = function(e) {
+            if (this.isFunc) {
+                this.cursorType = this.target.getCursorType(this.target, e.x, e.y);
+                this.target.getCanvas().canvas.style.cursor = (this.cursorType == null) ? &quot;default&quot;
+                                                                                        : this.cursorType;
             }
         };
     },
 
     function(){
         this.$super();
-        /**
-         * Keeps cursor info class instances for the number of UI components
-         * @attribute cursors
-         * @private
-         * @readOnly
-         * @type {Object}
-         */
-        this.cursors = {};
-
+   
         /**
          * Current cursor type
          * @attribute cursorType
@@ -9633,6 +9772,9 @@ pkg.CursorManager = Class(pkg.Manager, MouseListener, [
          * @default &quot;default&quot;
          */
         this.cursorType = &quot;default&quot;;
+
+        this.target = null;
+        this.isFunc = false;
     }
 ]);
 
@@ -10115,48 +10257,6 @@ pkg.zCanvas = Class(pkg.Panel, [
             return this.root.load(jsonPath);
         };
 
-        this.focusGained = function(e){
-            if ($focusGainedCounter++ &gt; 0) {
-                e.preventDefault();
-                return;
-            }
-
-            // !!! 
-            // if previous focus owner is a native HTML element it should be ignored 
-            // !!!
-            if (pkg.focusManager.prevFocusOwner != null &amp;&amp; 
-                zebra.instanceOf(pkg.focusManager.prevFocusOwner, pkg.HtmlElement) === false) 
-            {
-                var d = pkg.focusManager.prevFocusOwner.getCanvas();
-                if (d == this)  { 
-                    pkg.focusManager.requestFocus(pkg.focusManager.prevFocusOwner);
-                }
-                else {
-                    pkg.focusManager.prevFocusOwner = null;
-                }
-            }
-        };
- 
-        this.focusLost = function(e){
-            //!!! sometimes focus lost comes incorrectly
-            //    ignore focus lost if canvas still holds focus
-            if (document.activeElement == this.canvas) {
-                e.preventDefault();
-                return;
-            }
-
-            if ($focusGainedCounter !== 0) {
-                $focusGainedCounter = 0;
-
-                //debug(&quot;focusLost&quot;);
-                if (pkg.focusManager.focusOwner != null &amp;&amp; 
-                    pkg.focusManager.focusOwner.getCanvas() == this) 
-                {
-                    pkg.focusManager.requestFocus(null);
-                }
-            }
-        };
-
         this.keyTyped = function(e){
             if (e.charCode == 0) {
                 if ($keyPressedCode != e.keyCode) this.keyPressed(e);
@@ -10515,9 +10615,16 @@ pkg.zCanvas = Class(pkg.Panel, [
 
         this.recalcOffset = function() {
             // calculate offset
-            var ba = this.canvas.getBoundingClientRect();
+            var poffx = this.offx,
+                poffy = this.offy,
+                ba    = this.canvas.getBoundingClientRect();
+
             this.offx = ((ba.left + 0.5) | 0) + measure(this.canvas, &quot;padding-left&quot;) + window.pageXOffset;
             this.offy = ((ba.top  + 0.5) | 0) + measure(this.canvas, &quot;padding-top&quot; ) + window.pageYOffset;
+
+            if (this.offx != poffx || this.offy != poffy) {
+                this.relocated(this, poffx, poffy);
+            }
         };
 
         this.getLayer = function(id) { 
@@ -10533,6 +10640,16 @@ pkg.zCanvas = Class(pkg.Panel, [
         this.setAttribute = function(name, value) {
             this.canvas.setAttribute(name, value);
         };
+
+        // override relocated and resized
+        // to prevent unnecessary repainting 
+        this.relocated = function(px,py) { 
+            pkg.events.performComp(CL.MOVED, this, px, py); 
+        };
+
+        this.resized = function(pw,ph) { 
+            pkg.events.performComp(CL.SIZED, this, pw, ph); 
+        }    
     },
 
     function()       { this.$this(400, 400); },
@@ -10540,8 +10657,13 @@ pkg.zCanvas = Class(pkg.Panel, [
     function(canvas) { this.$this(canvas, -1, -1); },
 
     function(canvas, w, h) {
+        //!!! flag to block wrongly comming double onfocus
+        //!!! events 
+        this.$focusGainedCounter = 0;
+
         var pc = canvas, $this = this;
 
+        //  todo ...
         //!!! touch event listeners have to be taking also 
         //    in account
         this.nativeListeners = {
@@ -10658,14 +10780,51 @@ pkg.zCanvas = Class(pkg.Panel, [
                 $this.mouseExited(1, e);  
             };
             
-            this.canvas.oncontextmenu = function(e) { e.preventDefault(); };
+            this.canvas.oncontextmenu = function(e) {
+                e.preventDefault();
+            };
 
-            this.canvas.onkeydown     = function(e) { $this.keyPressed(e);   };
-            this.canvas.onkeyup       = function(e) { $this.keyReleased(e);  };
-            this.canvas.onkeypress    = function(e) { $this.keyTyped(e);     };
-            this.canvas.onfocus       = function(e) { $this.focusGained(e);  };
-            this.canvas.onblur        = function(e) { $this.focusLost(e);    };
+            this.canvas.onkeydown = function(e) {
+                $this.keyPressed(e);
+            };
+
+            this.canvas.onkeyup = function(e) {
+                $this.keyReleased(e); 
+            };
+            
+            this.canvas.onkeypress = function(e) {
+                $this.keyTyped(e);
+            };
         }
+
+        this.canvas.onfocus = function(e) {
+            if ($this.$focusGainedCounter++ &gt; 0) {
+                e.preventDefault();
+                return;
+            }
+
+            if (pkg.focusManager.canvasFocusGained) {
+                pkg.focusManager.canvasFocusGained($this);
+            }
+        };
+        
+        this.canvas.onblur = function(e) {
+            //!!! sometimes focus lost comes incorrectly
+            //    ignore focus lost if canvas still holds focus
+            if (document.activeElement == $this.canvas) {
+                e.preventDefault();
+                return;
+            }
+
+            if ($this.$focusGainedCounter !== 0) {
+                $this.$focusGainedCounter = 0;
+
+                if (pkg.focusManager.canvasFocusLost) {
+                    pkg.focusManager.canvasFocusLost($this);
+                }
+            }
+        };
+
 
         var addons = pkg.zCanvas.addons;
         if (addons) {
@@ -10690,16 +10849,14 @@ pkg.zCanvas = Class(pkg.Panel, [
     function setLocation(x, y) {
         this.canvas.style.top  = y + &quot;px&quot;;
         this.canvas.style.left = x + &quot;px&quot;;
-        this.canvas.style.position = &quot;fixed&quot;;
-        
-        //!!! bring to stack overflow 
-        //elBoundsUpdated();
-        
+        this.canvas.style.position = &quot;fixed&quot;;  
         this.recalcOffset();
     },
 
     function setSize(w, h) {
         if (this.width != w || h != this.height) {
+            var pw = this.width, ph = this.height;
+
             this.canvas.style.width  = &quot;&quot; + w  + &quot;px&quot;;
             this.canvas.style.height = &quot;&quot; + h + &quot;px&quot;;
   
@@ -10727,16 +10884,26 @@ pkg.zCanvas = Class(pkg.Panel, [
             this.width = w;
             this.height = h;
 
-            // the strange fix for Android native browser
-            // that can render text blurry before you click
-            // it happens because the browser autofit option 
-            var $this = this;
-            setTimeout(function() {
-                $this.invalidate();
-                $this.validate();      
-                $this.repaint();
-            }, 200);  
+            if (this.isTouchable) {
+                // the strange fix for Android native browser
+                // that can render text blurry before you click
+                // it happens because the browser autofit option 
+                var $this = this;
+                setTimeout(function() {
+                    $this.invalidate();
+                    $this.validate();      
+                    $this.repaint();
+                }, 200);  
+            }
+            else {
+                this.invalidate();
+                this.validate();      
+                this.repaint();
+            }
 
+            if (w != pw || h != ph) {
+                this.resized(pw, ph);
+            }
 
             // let know to other zebra canvases that 
             // the size of an element on the page has 
@@ -10769,6 +10936,11 @@ pkg.zCanvas = Class(pkg.Panel, [
 
     function setEnabled(b) {
         if (this.isEnabled != b) {
+
+            // !!!
+            // Since disabled state for Canvas element doesn&#x27;t work
+            // we have to emulate it via canvas listeners removal 
+            // 
             for(var k in this.nativeListeners ) {
                 if (b) {
                     this.canvas[k] = this.nativeListeners[k];  
@@ -10798,6 +10970,10 @@ pkg.zCanvas = Class(pkg.Panel, [
     function kidRemoved(i, c){
         delete this[c.id];
         this.$super(i, c);
+    },
+
+    function requestFocus() {
+        this.canvas.focus();
     }
 ]);
 
@@ -11161,8 +11337,7 @@ pkg.ExternalEditor = Interface();
 var MB = zebra.util,Composite = pkg.Composite, ME = pkg.MouseEvent, MouseListener = pkg.MouseListener,
     Cursor = pkg.Cursor, TextModel = zebra.data.TextModel, View = pkg.View, Listeners = zebra.util.Listeners,
     Actionable = zebra.util.Actionable, KE = pkg.KeyEvent, L = zebra.layout, instanceOf = zebra.instanceOf,
-    timer = zebra.util.timer, KeyListener = pkg.KeyListener, Cursorable = pkg.Cursorable,
-    ChildrenListener = pkg.ChildrenListener,
+    timer = zebra.util.timer, KeyListener = pkg.KeyListener, ChildrenListener = pkg.ChildrenListener,
     $invalidA = &quot;Invalid alignment&quot;,
     $invalidO = &quot;Invalid orientation&quot;,
     $invalidC = &quot;Invalid constraints&quot;;
@@ -11623,7 +11798,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
                         }
                     }
                     else {
-                        for(var i = 0;i &lt; lines; i++){
+                        for(var i = 0;i &lt; lines; i++) {
                             if (pkg.disabledColor1 != null){
                                 g.setColor(pkg.disabledColor1);
                                 this.paintLine(g, x, y, i + startLine, d);
@@ -12255,6 +12430,8 @@ pkg.StatePan = Class(pkg.ViewPan, Composite, MouseListener, KeyListener, [
          */
         this.focusMarkerView = null;
 
+        this.$isIn = false;
+
         /**
          * The method is designed to customize mapping between the component state 
          * and a string view id. It can be handy for classes that extend the component to have 
@@ -12304,27 +12481,29 @@ pkg.StatePan = Class(pkg.ViewPan, Composite, MouseListener, KeyListener, [
                 this.state != PRESSED_OUT  &amp;&amp;
                 (e.code == KE.ENTER || e.code == KE.SPACE))
             {
-                this.updateState(PRESSED_OVER);
+                this.updateState(PRESSED_OVER );
             }
         };
 
         this.keyReleased = function(e){
             if (this.state == PRESSED_OVER || this.state == PRESSED_OUT){
-            var prev = this.state;
+                var prev = this.state;
                 this.updateState(OVER);
-                if (prev == PRESSED_OUT) this.updateState(OUT);
+                if (this.$isIn === false) this.updateState(OUT);
             }
         };
 
         this.mouseEntered = function (e){
             if (this.isEnabled) {
                 this.updateState(this.state == PRESSED_OUT ? PRESSED_OVER : OVER);
+                this.$isIn = true;
             }
         };
 
         this.mouseExited = function(e){
             if (this.isEnabled) {
                 this.updateState(this.state == PRESSED_OVER ? PRESSED_OUT : OUT);
+                this.$isIn = false;
             }
         };
 
@@ -12358,7 +12537,7 @@ pkg.StatePan = Class(pkg.ViewPan, Composite, MouseListener, KeyListener, [
 
         this.paintOnTop = function(g){
             var fc = this.focusComponent;
-            if (this.focusMarkerView != null &amp;&amp;  fc != null &amp;&amp; this.hasFocus()) {
+            if (this.focusMarkerView != null &amp;&amp; fc != null &amp;&amp; this.hasFocus()) {
                 this.focusMarkerView.paint(g, fc.x, fc.y, fc.width, fc.height, this);
             }
         };
@@ -13105,7 +13284,7 @@ pkg.Radiobox = Class(pkg.Checkbox, [
  */
 pkg.SplitPan = Class(pkg.Panel, [
     function $clazz() {
-        this.Bar = Class(pkg.StatePan, MouseListener, Cursorable, [
+        this.Bar = Class(pkg.StatePan, MouseListener, [
             function $prototype() {
                 this.mouseDragged = function(e){
                     var x = this.x + e.x, y = this.y + e.y;
@@ -13664,11 +13843,9 @@ pkg.Progress = Class(pkg.Panel, Actionable, [
  * @constructor
  * @extends {zebra.ui.Button}
  */
-pkg.Link = Class(pkg.Button, Cursorable, [
+pkg.Link = Class(pkg.Button, [
     function $prototype() {
-        this.getCursorType = function(target,x,y){
-            return Cursor.HAND; 
-        };
+        this.cursorType = Cursor.HAND; 
     },
 
     function(s){
@@ -13679,6 +13856,8 @@ pkg.Link = Class(pkg.Button, Cursorable, [
         this.setView(new pkg.TextRender(s));
         this.view.setFont(font);
         this.stateUpdated(this.state, this.state);
+
+
     },
 
     /**
@@ -13749,7 +13928,7 @@ pkg.Extender = Class(pkg.Panel, [
         this.Label = Class(pkg.Label,[]);
         this.TitlePan = Class(pkg.Panel, []);
         
-        this.TogglePan = Class(pkg.ViewPan, MouseListener, Cursorable, [
+        this.TogglePan = Class(pkg.ViewPan, MouseListener, [
             function $prototype() {
                 this.mousePressed = function(e){
                     if (e.isActionMask()) {
@@ -13761,9 +13940,7 @@ pkg.Extender = Class(pkg.Panel, [
                     this.setView(new pkg.ViewSet(v));
                 };
 
-                this.getCursorType = function(t,x,y){
-                    return Cursor.HAND;
-                };
+                this.cursorType = Cursor.HAND;
             }
         ]);
     },
@@ -14719,7 +14896,9 @@ pkg.Tabs = Class(pkg.Panel, MouseListener, KeyListener, [
                                       top + this.vgap);
                     }
                 }
-                else l.setSize(0, 0);
+                else { 
+                    l.setSize(0, 0);
+                }
             }
 
             if (this.selectedIndex &gt;= 0){
@@ -15958,7 +16137,7 @@ var ME = pkg.MouseEvent, KE = pkg.KeyEvent, PO = zebra.util.Position;
  * @extends zebra.ui.Label
  */
 pkg.TextField = Class(pkg.Label, pkg.KeyListener, pkg.MouseListener,
-                      pkg.FocusListener, pkg.Cursorable, pkg.CopyCutPaste, [
+                      pkg.FocusListener, pkg.CopyCutPaste, [
 
     function $clazz() {
         this.TextPosition = Class(PO, [
@@ -15991,6 +16170,8 @@ pkg.TextField = Class(pkg.Label, pkg.KeyListener, pkg.MouseListener,
         this.blinkingPeriod = -1;
         this.blinkMe = true;
         this.blinkMeCounter = 0;
+
+        this.cursorType = pkg.Cursor.TEXT;
 
         /**
          * Cursor view
@@ -16173,7 +16354,7 @@ pkg.TextField = Class(pkg.Label, pkg.KeyListener, pkg.MouseListener,
                 default: return ;
             }
 
-            if (isShiftDown === false &amp;&amp; this.isEditable) {
+            if (isShiftDown === false) {
                 this.clearSelection();
             }
         };
@@ -16248,10 +16429,6 @@ pkg.TextField = Class(pkg.Label, pkg.KeyListener, pkg.MouseListener,
             this.curH = r.getLineHeight() - 1;
         };
 
-        this.getCursorType = function(target,x,y){
-            return pkg.Cursor.TEXT;
-        };
-        
         this.catchScrolled = function(psx,psy){
             this.repaint();
         };
@@ -16746,6 +16923,33 @@ pkg.TextArea = Class(pkg.TextField, [
         this.$super(new zebra.data.Text(txt));
     }
 ]);
+
+/**
+ * Password text filed.
+ * @class zebra.PassTextField
+ * @param {String} txt password text
+ * @param {Integer} [maxSize] maximal size
+ * @param {Boolean} [showLast] indicates if last typed character should 
+ * not be disguised with a star character 
+ * @extends zebra.ui.TextField
+ * visible
+ */
+pkg.PassTextField = Class(pkg.TextField, [
+    function(txt) {
+        this.$this(txt, -1);
+    },
+
+    function(txt, size) {
+        this.$this(txt, size, false);
+    },
+
+    function(txt, size, showLast) {
+        var pt = new pkg.PasswordText(new zebra.data.SingleLineTxt(txt, size));
+        pt.showLast = showLast;
+        this.$super(pt);
+    }
+]);
+
 
 /**
  * @for
@@ -18352,43 +18556,6 @@ pkg.ComboArrowView = Class(pkg.View, [
  */
 
 /**
- * Toltip interface. The interface is supposed to be used to say 
- * which component has to be shown as a tooltip at the given location of 
- * the UI component.
- * @class zebra.ui.TooltipInfo
- * @interface
- */
-pkg.TooltipInfo = Interface();
-/**
- * Get an UI component to be shown as a tooltip for the given UI
- * component at the given location of the target component 
- * @param {zebra.ui.Panel} target a target UI component
- * @param {Integer} x a x coordinate relatively to the target UI component
- * @param {Integer} x a y coordinate relatively to the target UI component
- * @return {zebra.ui.Panel} an UI component to be shown as tooltip
- * @method getTooltip
- */
-
-
-/**
- * Popup interface to indicate which UI component has to be shown at the 
- * given location of the UI component as a popup menu.
- * @class zebra.ui.PopupInfo
- * @interface
- */
-pkg.PopupInfo = Interface();
-/**
- * Get an UI component to be shown as a popup menu for the given UI
- * component at the given location of the target component 
- * @param {zebra.ui.Panel} target a target UI component
- * @param {Integer} x a x coordinate relatively to the target UI component
- * @param {Integer} x a y coordinate relatively to the target UI component
- * @return {zebra.ui.Panel} an UI component to be shown as popup menu UI component
- * @method getPopup
- */
-
-
-/**
  * Window listener interface
  * @class zebra.ui.WinListener
  * @interface
@@ -18552,7 +18719,7 @@ pkg.WinLayer = Class(pkg.BaseLayer, pkg.ChildrenListener, [
 
         this.childInputEvent = function (e) {
             if (e.ID == pkg.InputEvent.FOCUS_GAINED) {
-                this.activate(L.getDirectChild(this, e.source));
+                this.activate(L.getDirectChild(this, e.source));           
             }
         };
 
@@ -18767,9 +18934,8 @@ var $StatePan = Class(pkg.Panel, [
  * @class zebra.ui.Window
  * @extends {zebra.ui.Panel}
  */
-pkg.Window = Class($StatePan, pkg.WinListener,
-                   pkg.MouseListener, pkg.Composite, 
-                   pkg.Cursorable, pkg.ExternalEditor, [
+pkg.Window = Class($StatePan, pkg.WinListener, pkg.MouseListener,
+                   pkg.Composite, pkg.ExternalEditor, [
 
     function $prototype() {
         var MOVE_ACTION = 1, SIZE_ACTION = 2;
@@ -18952,6 +19118,7 @@ pkg.Window = Class($StatePan, pkg.WinListener,
          * @readOnly
          */
         this.title = this.createTitle();
+        this.title.setValue(s);
 
         /**
          * Icons panel. The panel can contain number of icons. 
@@ -18960,18 +19127,17 @@ pkg.Window = Class($StatePan, pkg.WinListener,
          * @readOnly
          */
         this.icons = new pkg.Panel(new L.FlowLayout(L.LEFT, L.CENTER, L.HORIZONTAL, 2));
-        
+        this.icons.add(new pkg.Window.Icon());
+
         /**
          * Window buttons panel. The panel can contain number of window buttons 
          * @type {zebra.ui.Panel}
          * @attribute buttons
          * @readOnly
          */
-        this.buttons = new pkg.Panel(new L.FlowLayout(L.CENTER, L.CENTER)),
+        this.buttons = new pkg.Panel(new L.FlowLayout(L.CENTER, L.CENTER));
 
-        this.icons.add(new pkg.Window.Icon());
-        this.icons.add(this.title);
-
+        this.caption.add(L.CENTER, this.title);
         this.caption.add(L.LEFT, this.icons);
         this.caption.add(L.RIGHT, this.buttons);
 
@@ -19086,158 +19252,6 @@ pkg.Window = Class($StatePan, pkg.WinListener,
                 })(this, this[k]);
             }
         }
-    }
-]);
-
-/**
- * Tooltip manager class implements possibility to define a tooltip 
- * for a component. Tooltip is an UI component that has to be shown 
- * as information window every time a mouse cursor has entered the
- * specified component of the given area of the specified component.
- * @class zebra.ui.TooltipManager
- * @extends zebra.ui.Manager
- * @constructor 
- */
-pkg.TooltipManager = Class(pkg.Manager, pkg.MouseListener, [
-    function $clazz() {
-        this.Label = Class(pkg.Label, []);
-
-        this.createTooltip = function(text){
-            var lab = new pkg.TooltipManager.Label(new zebra.data.Text(text));
-            lab.toPreferredSize();
-            return lab;
-        };
-    },
-
-    function $prototype() {
-        var TI = pkg.TooltipInfo;
-
-        /**
-         * Indicates if a shown tooltip has to disappear by mouse pressed event 
-         * @attribute stopByPress
-         * @type {Boolean}
-         * @default true
-         */
-        this.stopByPress = true;
-
-        this.mouseEntered = function(e){
-            var c = e.source;
-            if (zebra.instanceOf(c, TI) || this.tooltips[c]){
-                this.target = c;
-                this.targetLayer = c.getCanvas().getLayer(pkg.WinLayer.ID);
-                this.x = e.x;
-                this.y = e.y;
-                timer.start(this, this.showIn, this.showIn);
-            }
-        };
-
-        this.mouseExited = function(e){
-            if (this.target != null){
-                timer.stop(this);
-                this.target = null;
-                this.hideTooltip();
-            }
-        };
-
-        this.mouseMoved = function(e){
-            if (this.target != null){
-                timer.clear(this);
-                this.x = e.x;
-                this.y = e.y;
-                this.hideTooltip();
-            }
-        };
-
-        this.run = function(){
-            if (this.tooltip == null){
-                var tp = this.tooltips[this.target];
-                if (!tp) tp = null;
-                if (tp == null &amp;&amp; zebra.instanceOf(this.target, TI)) {
-                    tp = this.target;
-                }
-
-                this.tooltip = zebra.instanceOf(tp, TI) ? tp.getTooltip(this.target, this.x, this.y) : tp;
-                if (this.tooltip != null) {
-                    var p = L.getAbsLocation(this.x, this.y, this.target);
-                    this.tooltip.toPreferredSize();
-                    var tx = p.x,
-                        ty = p.y - this.tooltip.height,
-                        dw = this.targetLayer.width;
-                    
-                    if (tx + this.tooltip.width &gt; dw) {
-                        tx = dw - this.tooltip.width - 1;
-                    }
-                    this.tooltip.setLocation(tx &lt; 0 ? 0 : tx, ty &lt; 0 ? 0 : ty);
-                    this.targetLayer.addWin(&quot;info&quot;, this.tooltip, null);
-                }
-            }
-        };
-
-        /**
-         * Hide tooltip if it has been shown
-         * @method hideTooltip
-         */
-        this.hideTooltip = function(){
-            if (this.tooltip != null) {
-                this.targetLayer.remove(this.tooltip);
-                this.tooltip = null;
-            }
-        };
-
-        /**
-         * Bind or unbind the given UI component with the specified tooltip component 
-         * @param {zebra.ui.Panel} an component for that a tooltip has to be shown
-         * @param {zebra.ui.Panel|String} a tooltip to be shown. You can pass string 
-         * or an UI component to be shown as the tooltip. String will be transformed 
-         * into a tooltip UI label component.  Pass null as the argument to stop
-         * showing tooltip for the given component.
-         * @method setTooltip
-         */
-        this.setTooltip = function (c,data){
-            if (data != null) {
-                this.tooltips[c] = zebra.isString(data) ? pkg.TooltipManager.createTooltip(data)
-                                                        : data;
-            }
-            else {
-                if (this.target == c) {
-                    timer.stop(this);
-                    this.target = null;
-                    this.hideTooltip();
-                }
-                delete this.tooltips[c];
-            }
-        };
-
-        this.mousePressed = function(e){
-            if (this.stopByPress &amp;&amp; this.target != null){
-                timer.stop(this);
-                this.target = null;
-                this.hideTooltip();
-            }
-        };
-
-        this.mouseReleased = function(e){
-            if (this.stopByPress &amp;&amp; this.target != null){
-                this.x = e.x;
-                this.y = e.y;
-                timer.start(this, this.showIn, this.showIn);
-            }
-        };
-    },
-
-    function(){
-        this.$super();
-        this.tooltips = {};
-        this.x = this.y = 0;
-        this.targetLayer = this.tooltip = this.target = null;
-
-        /**
-         * Define interval (in milliseconds) between entering a component and showing 
-         * a tooltip for the entered component 
-         * @attribute showIn
-         * @type {Integer}
-         */
-        this.showIn = 400;
     }
 ]);
 
@@ -19436,8 +19450,8 @@ pkg.Menu = Class(pkg.CompList, pkg.ChildrenListener, [
                     var left    = target.getByConstraints(L.LEFT),
                         right   = target.getByConstraints(L.RIGHT),
                         content = target.getByConstraints(L.CENTER),
-                        t = target.getTop(), 
-                        eh = target.height - t - target.getBottom();
+                        t       = target.getTop(),
+                        eh      = target.height - t - target.getBottom();
 
                     if (left &amp;&amp; left.isVisible) {
                         left.toPreferredSize();
@@ -19504,7 +19518,9 @@ pkg.Menu = Class(pkg.CompList, pkg.ChildrenListener, [
 
     function insert(i, ctr, c) {
         if (zebra.isString(c)) {
-            if (c == &#x27;-&#x27;) return this.$super(i, ctr, new pkg.Menu.Line());
+            if (c == &#x27;-&#x27;) {
+                return this.$super(i, ctr, new pkg.Menu.Line());
+            }
             else {
                 var m = c.match(/(\[\s*\]|\[x\]|\(x\)|\(\s*\))?\s*(.*)/);
                 if (m != null &amp;&amp; m[1] != null) {
@@ -19971,8 +19987,10 @@ pkg.PopupLayer = Class(pkg.BaseLayer, pkg.ChildrenListener, [
 ]);
 
 /**
- * Popup menu manager class. The manager registering and triggers showing context popup menu. 
- * Menu appearing is triggered by right mouse click or double fingers touch event.
+ * Popup window manager class. The manager registering and triggers showing context popup menu 
+ * and tooltips. Menu appearing is triggered by right mouse click or double fingers touch event.
+ * To bind a popup menu to an UI component you can either set &quot;tooltip&quot; property of the component 
+ * with a popup menu instance:
  
         // create canvas
         var canvas = new zebra.ui.zCanvas();
@@ -19984,11 +20002,10 @@ pkg.PopupLayer = Class(pkg.BaseLayer, pkg.ChildrenListener, [
         m.add(&quot;Menu Item 3&quot;);
     
         // bind the menu to root panel
-        zebra.ui.popup.setPopup(canvas.root, m);
+        canvas.root.popup = m;
  
- * The popup manager use &quot;zebra.ui.PopupInfo&quot; interface implementation to understand which
- * popup menu has to be shown at the given location of the target UI component. Developer 
- * can tune a context menu appearing depending on the current mouse cursor or touch location:
+ * Or implement &quot;getPopup(target,x,y)&quot; method that can rule showing popup menu depending on 
+ * the current cursor location:
 
         // create canvas
         var canvas = new zebra.ui.zCanvas();
@@ -20006,119 +20023,191 @@ pkg.PopupLayer = Class(pkg.BaseLayer, pkg.ChildrenListener, [
         m.add(&quot;Menu Item 2&quot;);
         m.add(&quot;Menu Item 3&quot;);
     
-        // bind the popup info interface implementation to the canvas
-        // root component
-        zebra.ui.popup.setPopup(canvas.root, new zebra.ui.PopupInfo([
-            function getPopup(target, x, y) {
-                // test if mouse cursor position is in red spot area
-                // and return context menu if it is true 
-                if (x &gt; 50 &amp;&amp; y &gt; 50 &amp;&amp; x &lt; 100 &amp;&amp; y &lt;  100)  {
-                    return m;
-                }
-                return null;
+        // implement &quot;getPopup&quot; method that shows popup menu only 
+        // if mouse cursor located at red rectangular area of the 
+        // component
+        canvas.getPopup = function(target, x, y) {
+            // test if mouse cursor position is in red spot area
+            // and return context menu if it is true 
+            if (x &gt; 50 &amp;&amp; y &gt; 50 &amp;&amp; x &lt; 100 &amp;&amp; y &lt;  100)  {
+                return m;
             }
-        ]));
- *
- *  Also developers can define a context menu on the level of component, 
- *  without necessary to register it in popup manager. For this just implement
- *  &quot;zebra.ui.PopupInfo&quot; interface with a component that has a context menu:
+            return null;
+        }
  
-        // create canvas and set border layout for root panel
+ *  Defining a tooltip for an UI component follows the same approach. Other you
+ *  define set &quot;tooltip&quot; property of your component with a component that has to 
+ *  be shown as the tooltip:
+ 
+         // create canvas
+         var canvas = new zebra.ui.zCanvas();
+
+         // create tooltip 
+         var t = new zebra.ui.Label(&quot;Tooltip&quot;);
+         t.setBorder(&quot;plain&quot;);
+         t.setBackground(&quot;yellow&quot;);
+         t.setPadding(6);
+         
+         // bind the tooltip to root panel
+         canvas.root.popup = t;
+
+*  Or you can implement &quot;getTooltip(target,x,y)&quot; method if the tooltip showing depends on
+*  the mouse cursor location:
+
+
+        // create canvas
         var canvas = new zebra.ui.zCanvas();
-        canvas.root.setLayout(new zebra.layout.BorderLayout());
 
-        // instantiate anonymous label class that implements 
-        // popup info interface to bind a context menu to 
-        // the label
-        var lab = new zebra.ui.Label(&quot;I have a context menu defined&quot;, 
-                                     zebra.ui.PopupInfo, [
-            function getPopup(target, x, y) { return m; }
-        ]);
-        lab.setBorder(&quot;plain&quot;);
-        lab.setPadding(8);
+        // create tooltip 
+        var t = new zebra.ui.Label(&quot;Tooltip&quot;);
+        t.setBorder(&quot;plain&quot;);
+        t.setBackground(&quot;yellow&quot;);
+        t.setPadding(6);
 
-        // create menu with three items
-        var m = new zebra.ui.Menu();
-        m.add(&quot;Menu Item 1&quot;);
-        m.add(&quot;Menu Item 2&quot;);
-        m.add(&quot;Menu Item 3&quot;);
-
-        // add label to top part of root panel
-        canvas.root.add(zebra.layout.TOP, lab);
+        // bind the tooltip to root panel
+        canvas.root.getPopup = function(target, x, y) {
+            return x &lt; 10 &amp;&amp; y &lt; 10 ? t : null;
+        };
 
  * @class zebra.ui.PopupManager
- * @constructor
- * @extends {zebra.ui.Manager}
+ * @extends zebra.ui.Manager
+ * @constructor 
  */
 pkg.PopupManager = Class(pkg.Manager, pkg.MouseListener, [
+    function $clazz() {
+        this.Label = Class(pkg.Label, []);
+
+        this.createTooltip = function(text){
+            var lab = new pkg.PopupManager.Label(new zebra.data.Text(text));
+            lab.toPreferredSize();
+            return lab;
+        };
+    },
+
     function $prototype() {
-        /**
-         * Get popup info interface that is bound to the given component
-         * @param  {zebra.ui.Panel} c an UI component
-         * @return {zebra.ui.PopupInfo}  an popup info interface implementation
-         * @method  getPopup
-         */
-        this.getPopup = function (c){
-            return this.menus.hasOwnProperty(c) ? this.menus[c] : null;
-        };
-
         this.mouseClicked = function (e){
-            this.initialX = e.absX;
-            this.initialY = e.absY;
-            if((e.mask &amp; MouseEvent.RIGHT_BUTTON) &gt; 0) {
-                this.showPopup(e.source, e.x, e.y); 
+            this.popupMenuX = e.absX;
+            this.popupManuY = e.absY;
+
+            if ((e.mask &amp; MouseEvent.RIGHT_BUTTON) &gt; 0) {
+                var popup = null;
+
+                if (e.source.popup != null) {
+                    popup = e.source.popup;
+                }
+                else {
+                    if (e.source.getPopup != null) {
+                        popup = e.source.getPopup(e.source, e.x, e.y);
+                    }
+                }
+
+                if (popup != null) {
+                    popup.setLocation(this.popupMenuX, this.popupManuY);
+                    e.source.getCanvas().getLayer(pkg.PopupLayer.ID).add(popup);
+                    popup.requestFocus();
+                }
+            }
+        };
+ 
+        /**
+         * Indicates if a shown tooltip has to disappear by mouse pressed event 
+         * @attribute hideTooltipByPress
+         * @type {Boolean}
+         * @default true
+         */
+        this.hideTooltipByPress = true;
+
+        this.mouseEntered = function(e){
+            var c = e.source;
+            if (c.getTooltip != null || c.tooltip != null){
+                this.target = c;
+                this.targetTooltipLayer = c.getCanvas().getLayer(pkg.WinLayer.ID);
+                this.tooltipX = e.x;
+                this.tooltipY = e.y;
+                timer.start(this, this.showTooltipIn, this.showTooltipIn);
             }
         };
 
-        this.fetchMenu = function(target,x,y){
-            var popup = this.getPopup(target);
-            return (popup != null) ? popup.getPopup(target, x, y) 
-                                   : (zebra.instanceOf(target, pkg.PopupInfo) ? target.getPopup(target, x, y) 
-                                                                              : null);
+        this.mouseExited = function(e){
+            if (this.target != null){
+                timer.stop(this);
+                this.target = null;
+                this.hideTooltip();
+            }
         };
 
-        this.showPopup = function(target,x,y){
-            var menu = this.fetchMenu(target, x, y);
-            if (menu != null) {
-                menu.setLocation(this.initialX, this.initialY);
-                target.getCanvas().getLayer(pkg.PopupLayer.ID).add(menu);
-                menu.requestFocus();
+        this.mouseMoved = function(e){
+            if (this.target != null){
+                timer.clear(this);
+                this.tooltipX = e.x;
+                this.tooltipY = e.y;
+                this.hideTooltip();
             }
-            this.time = -1;
+        };
+
+        this.run = function(){
+            if (this.tooltip == null){
+                this.tooltip = this.target.tooltip != null ? this.target.tooltip
+                                                           : this.target.getTooltip(this.target, this.x, this.y);
+
+                if (this.tooltip != null) {
+                    var p = L.getAbsLocation(this.tooltipX, this.tooltipY, this.target);
+                    this.tooltip.toPreferredSize();
+                    var tx = p.x,
+                        ty = p.y - this.tooltip.height,
+                        dw = this.targetTooltipLayer.width;
+                    
+                    if (tx + this.tooltip.width &gt; dw) {
+                        tx = dw - this.tooltip.width - 1;
+                    }
+                    this.tooltip.setLocation(tx &lt; 0 ? 0 : tx, ty &lt; 0 ? 0 : ty);
+                    this.targetTooltipLayer.addWin(&quot;info&quot;, this.tooltip, null);
+                }
+            }
         };
 
         /**
-         * Set the given context menu or an zebra.ui.PopupInfo interface implementation 
-         * to the specified UI component.
-         * @param {zebra.ui.Panel} c an UI component
-         * @param {zebra.ui.Menu|zebra.ui.PopupInfo} p a popup info interface implementation
-         * that says when and which context menu has to be shown for the given UI component.
-         * Or UI context menu directly. Passing null as the argument value delete a context
-         * menu definition from the given UI component. 
-         * @method setPopup   
+         * Hide tooltip if it has been shown
+         * @method hideTooltip
          */
-        this.setPopup = function (c,p){
-            if (p == null) { 
-                delete this.menus[c];
+        this.hideTooltip = function(){
+            if (this.tooltip != null) {
+                this.targetTooltipLayer.remove(this.tooltip);
+                this.tooltip = null;
             }
-            else {
-                if (zebra.instanceOf(p, pkg.PopupInfo) === false) {
-                    var menu = p;
-                    p = new pkg.PopupInfo([
-                        function $prototype() {
-                            this.getPopup = function(target, x, y) { return menu; };
-                        }
-                    ]); 
-                } 
-                this.menus[c] = p;
+        };
+
+        this.mousePressed = function(e){
+            if (this.hideTooltipByPress &amp;&amp; this.target != null){
+                timer.stop(this);
+                this.target = null;
+                this.hideTooltip();
+            }
+        };
+
+        this.mouseReleased = function(e){
+            if (this.hideTooltipByPress &amp;&amp; this.target != null){
+                this.x = e.x;
+                this.y = e.y;
+                timer.start(this, this.showTooltipIn, this.showTooltipIn);
             }
         };
     },
 
     function () {
         this.$super();
-        this.menus = {};
-        this.time = this.initialX = this.initialY = 0;
+        this.popupMenuX = this.popupManuY = 0;
+        this.tooltipX = this.tooltipY = 0;
+
+        this.targetTooltipLayer = this.tooltip = this.target = null;
+
+        /**
+         * Define interval (in milliseconds) between entering a component and showing 
+         * a tooltip for the entered component 
+         * @attribute showTooltipIn
+         * @type {Integer}
+         */
+        this.showTooltipIn = 400;
     }
 ]);
 
@@ -20165,8 +20254,7 @@ pkg.WindowTitleView = Class(pkg.View, [
  * @main 
  */
 
-var L = zebra.layout, Cursor = ui.Cursor, KeyEvent = ui.KeyEvent,
-    Cursorable = ui.Cursorable, CURSORS = [];
+var L = zebra.layout, Cursor = ui.Cursor, KeyEvent = ui.KeyEvent, CURSORS = [];
 
 CURSORS[L.LEFT  ] = Cursor.W_RESIZE;
 CURSORS[L.RIGHT ] = Cursor.E_RESIZE;
@@ -20277,7 +20365,7 @@ pkg.InsetsArea = Class([
  * @param {zebra.ui.Panel} target a target UI component whose size and location
  * has to be controlled
  */
-pkg.ShaperPan = Class(ui.Panel, Cursorable, ui.Composite, ui.KeyListener, ui.MouseListener, [
+pkg.ShaperPan = Class(ui.Panel, ui.Composite, ui.KeyListener, ui.MouseListener, [
     function $prototype() {
         this.minHeight = this.minWidth = 12;
         this.isResizeEnabled = this.isMoveEnabled = true;
@@ -20481,29 +20569,55 @@ pkg.HtmlElement = Class(pkg.Panel, pkg.FocusListener, [
 
         this.adjustLocation = function() {
             if (this.isLocAdjusted === false &amp;&amp; this.canvas != null) {
-                var a = zebra.layout.getAbsLocation(0,0,this);
-                this.element.style.top  = &quot;&quot; + (this.canvas.offy + a.y) + &quot;px&quot;;
-                this.element.style.left = &quot;&quot; + (this.canvas.offx + a.x) + &quot;px&quot;;
+                
+                // hidden DOM component before move 
+                // makes moving more smooth
+                var visibility = this.element.style.visibility;
+                this.element.style.visibility = &quot;hidden&quot;;
+
+                if (zebra.instanceOf( this.parent, pkg.HtmlElement)) {
+                    this.element.style.top  = &quot;&quot; + this.y + &quot;px&quot;;
+                    this.element.style.left = &quot;&quot; + this.x + &quot;px&quot;;
+                }
+                else {
+                    var a = zebra.layout.getAbsLocation(0,0,this);
+                    this.element.style.top  = &quot;&quot; + (this.canvas.offy + a.y) + &quot;px&quot;;
+                    this.element.style.left = &quot;&quot; + (this.canvas.offx + a.x) + &quot;px&quot;;
+                }
                 this.isLocAdjusted = true;
+                this.element.style.visibility = visibility;
             }
         };
 
-        this.calcPreferredSize = function() {
+        this.calcPreferredSize = function(target) {
             return { width: this.ePsW, height: this.ePsH };
         };
 
+        var $store = [
+            &quot;visibility&quot;,
+            &quot;paddingTop&quot;,&quot;paddingLeft&quot;,&quot;paddingBottom&quot;,&quot;paddingRight&quot;,
+            &quot;border&quot;,&quot;borderStyle&quot;,&quot;borderWidth&quot;,
+            &quot;borderTopStyle&quot;,&quot;borderTopWidth&quot;,
+            &quot;borderBottomStyle&quot;,&quot;borderBottomWidth&quot;,
+            &quot;borderLeftStyle&quot;,&quot;borderLeftWidth&quot;,
+            &quot;borderRightStyle&quot;,&quot;borderRightWidth&quot;,
+            &quot;width&quot;, &quot;height&quot;
+        ];
+
         this.recalc = function() {
-            // save elements metrics
-            var e = this.element,
-                t = e.style.paddingTop,
-                l = e.style.paddingLeft,
-                b = e.style.paddingBottom,
-                r = e.style.paddingRight,
-                w = e.style.width,
-                h = e.style.height;
+            // save element metrics
+            var e    = this.element,
+                vars = {};
+            
+            for(var i=0; i&lt;$store.length; i++) {
+                var k = $store[i];
+                vars[k] = e.style[k];
+            }
 
             // force metrics to be calculated automatically 
+            e.style.visibility = &quot;hidden&quot;;
             e.style.padding = &quot;0px&quot;;
+            e.style.border  = &quot;none&quot;;
             e.style.width   = &quot;auto&quot;;
             e.style.height  = &quot;auto&quot;;
 
@@ -20511,21 +20625,11 @@ pkg.HtmlElement = Class(pkg.Panel, pkg.FocusListener, [
             this.ePsW = e.offsetWidth;
             this.ePsH = e.offsetHeight;
 
-            // restore metrics
-            e.style.width         = w;
-            e.style.height        = h;
-            e.style.paddingTop    = t;
-            e.style.paddingLeft   = l;
-            e.style.paddingBottom = b;
-            e.style.paddingRight  = r;
-        };
+            for(var k in vars) {
+                var v = vars[k];
+                if (v != null) e.style[k] = v;
+            }
 
-        this.updateSize = function() {
-            var e = this.element;
-            e.style.paddingTop    = &#x27;&#x27; + this.getTop()    + &quot;px&quot;;
-            e.style.paddingLeft   = &#x27;&#x27; + this.getLeft()   + &quot;px&quot;;
-            e.style.paddingRight  = &#x27;&#x27; + this.getRight()  + &quot;px&quot;;
-            e.style.paddingBottom = &#x27;&#x27; + this.getBottom() + &quot;px&quot;;
             this.setSize(this.width, this.height);
         };
 
@@ -20557,15 +20661,17 @@ pkg.HtmlElement = Class(pkg.Panel, pkg.FocusListener, [
          * @method setStyle
          */
         this.setStyle = function(name, value) {
+            name = name.trim();
             var i = name.indexOf(&#x27;:&#x27;);
             if (i &gt; 0) {
-                if (zebra[name.substring(0, i)]) {
-                    this.element.style[name.substring(i + 1)] = value;
+                if (zebra[name.substring(0, i)] == null) {
+                    return;
                 }
+                name = name.substring(i + 1);
             }
-            else {
-                this.element.style[name] = value;
-            }
+   
+            this.element.style[name] = value;
+            this.vrp();
         };
 
         /**
@@ -20576,6 +20682,29 @@ pkg.HtmlElement = Class(pkg.Panel, pkg.FocusListener, [
          */
         this.setAttribute = function(name, value) {
             this.element.setAttribute(name, value);
+        };
+
+
+        this.isInInvisibleState = function() {
+            if (this.width &lt;= 0 || this.height &lt;= 0 || this.getCanvas() == null) {
+                return true;
+            }
+
+            var p = this.parent;
+            while (p != null &amp;&amp; p.isVisible &amp;&amp; p.width &gt; 0 &amp;&amp; p.height &gt; 0) {
+                p = p.parent;
+            }
+            return p != null; // canvas means the component is not 
+                              // in hierarchy yet, that means it 
+                              // has to be hidden 
+        };
+
+        this.paint = function(g) {
+            // this method is used as an indication that the component 
+            // is visible and no one of his parent is invisible
+            if (this.element.style.visibility == &quot;hidden&quot;) {
+                this.element.style.visibility = &quot;visible&quot;;
+            }
         };
     },
 
@@ -20588,10 +20717,52 @@ pkg.HtmlElement = Class(pkg.Panel, pkg.FocusListener, [
          */
         e = this.element = zebra.isString(e) ? document.createElement(e) : e;
         e.setAttribute(&quot;id&quot;, this.toString());
+        e.style.visibility = &quot;hidden&quot;;  // before the component will be attached 
+                                        // to parent hierarchy of components that is 
+                                        // attached to a canvas the component has to be hidden  
+
         this.$super();
-        document.body.appendChild(e);
 
         var $this = this;
+
+        //!!!
+        // todo:
+        // It is not a very good idea to register global component listener per 
+        // HTML component. Has to be re-designed, but at this moment this is the 
+        // only way to understand when the HTML component parent hierarchy has got 
+        // visibility updates
+        this.globalCompListener = new pkg.ComponentListener([
+            function $prototype() {
+                this.compShown = function(c) {
+                    if (c != $this &amp;&amp; c.isVisible === false &amp;&amp; zebra.layout.isAncestorOf(c, $this)) {
+                        $this.element.style.visibility = &quot;hidden&quot;;
+                    }
+                };
+
+                this.compMoved = function(c, px, py) {
+                    if ($this.canvas == c) {
+                        // force location adjustment when the component 
+                        // parent HTML canvas has been moved 
+                        $this.isLocAdjusted = false;
+                        $this.adjustLocation();
+                    }
+                };
+
+                this.compRemoved = function(p, c) {
+                    // if an ancestor parent has been removed the HTML element 
+                    // has to be hidden
+                    if (c != $this &amp;&amp; zebra.layout.isAncestorOf(c, $this)) {
+                        $this.element.style.visibility = &quot;hidden&quot;;
+                    }
+                };
+
+                this.compSized = function(c, pw, ph) {
+                    if (c != $this &amp;&amp; zebra.layout.isAncestorOf(c, $this) &amp;&amp; $this.isInInvisibleState()) {
+                        $this.element.style.visibility = &quot;hidden&quot;;
+                    }
+                };
+            }
+        ]);
 
         // it is important to avoid mouse event since for some html element 
         // it can cause unexpected event generation. for instance text input 
@@ -20625,13 +20796,14 @@ pkg.HtmlElement = Class(pkg.Panel, pkg.FocusListener, [
                         pageX : ee.pageX,
                         pageY : ee.pageY
                     },
-                    ee.button === 0 ? pkg.MouseEvent.LEFT_BUTTON: (ee.button == 2 ? pkg.MouseEvent.RIGHT_BUTTON : 0));
+
+                    ee.button === 0 ? pkg.MouseEvent.LEFT_BUTTON 
+                                    : (ee.button == 2 ? pkg.MouseEvent.RIGHT_BUTTON : 0));
                 }
             };
         }
 
         e.addEventListener(&quot;focus&quot;, function(ee) {
-
             // mark the element  has focus on the given canvas
             $this.element.canvas = $this.canvas;
 
@@ -20640,7 +20812,8 @@ pkg.HtmlElement = Class(pkg.Panel, pkg.FocusListener, [
         }, false);
 
         e.addEventListener(&quot;blur&quot;, function(ee) {
-            // flush the native element canvas filed to say the component doesn&#x27;t have focus anymore
+            // flush the native element canvas field to say the component doesn&#x27;t 
+            // have focus anymore
             $this.element.canvas = null;
 
             if ($this.canvas != null) {
@@ -20663,11 +20836,11 @@ pkg.HtmlElement = Class(pkg.Panel, pkg.FocusListener, [
 
         e.onkeydown = function(ee) {
             if ($this.canvas != null) {
-                // store current focus owner to analize if the event triggered focus owner changing 
+                // store current focus owner to analyze if the event triggered focus owner changing 
                 var pfo = zebra.ui.focusManager.focusOwner;
 
                 // re-define key event since preventDefault has to be disabled, 
-                // otherwise navigation key will noty work 
+                // otherwise navigation key will not work 
                 $this.canvas.keyPressed({
                     keyCode       : ee.keyCode,
                     target        : ee.target,
@@ -20679,6 +20852,7 @@ pkg.HtmlElement = Class(pkg.Panel, pkg.FocusListener, [
                 });
 
                 var nfo = zebra.ui.focusManager.focusOwner;
+
                 // if focus owner has been updated
                 if (nfo != pfo) {
                     ee.preventDefault();
@@ -20728,16 +20902,55 @@ pkg.HtmlElement = Class(pkg.Panel, pkg.FocusListener, [
         this.$super();
     },
 
+    function setBorder(b) {
+        if (b == null) {
+            this.element.style.border = &quot;none&quot;;
+        }
+        else {
+            var e = this.element;
+
+            //!!!! Bloody FF fix, the border can be made transparent 
+            //!!!! only via &quot;border&quot; style 
+            e.style.border = &quot;0px solid transparent&quot;;
+
+            //!!! FF understands only decoupled border settings
+            e.style.borderTopStyle = &quot;solid&quot;;
+            e.style.borderTopColor = &quot;transparent&quot;;
+            e.style.borderTopWidth = &quot;&quot; + b.getTop() + &quot;px&quot;;
+        
+            e.style.borderLeftStyle = &quot;solid&quot;;
+            e.style.borderLeftColor = &quot;transparent&quot;;
+            e.style.borderLeftWidth = &quot;&quot; + b.getLeft() + &quot;px&quot;;
+
+            e.style.borderBottomStyle = &quot;solid&quot;;
+            e.style.borderBottomColor = &quot;transparent&quot;;
+            e.style.borderBottomWidth = &quot;&quot; + b.getBottom() + &quot;px&quot;;
+
+
+            e.style.borderRightStyle = &quot;solid&quot;;
+            e.style.borderRightColor = &quot;transparent&quot;;
+            e.style.borderRightWidth = &quot;&quot; + b.getRight() + &quot;px&quot;;
+        }
+        this.$super(b);
+    },
+
     function setPaddings(t,l,b,r) {
+        var e = this.element;
+        e.style.paddingTop    = &#x27;&#x27; + t + &quot;px&quot;;
+        e.style.paddingLeft   = &#x27;&#x27; + l + &quot;px&quot;;
+        e.style.paddingRight  = &#x27;&#x27; + r + &quot;px&quot;;
+        e.style.paddingBottom = &#x27;&#x27; + b + &quot;px&quot;;
         this.$super(t,l,b,r);
-        this.updateSize();
     },
 
     function setVisible(b) {
-        if (this.isVisible != b) {
-            this.element.style.visibility = b ? &quot;visible&quot; : &quot;hidden&quot;;
-            this.$super(b);
+        if (this.isInInvisibleState()) {
+            this.element.style.visibility = &quot;hidden&quot;;
         }
+        else {
+            this.element.style.visibility = b ? &quot;visible&quot; : &quot;hidden&quot;;
+        }
+        this.$super(b);
     },
 
     function setEnabled(b) {
@@ -20747,9 +20960,13 @@ pkg.HtmlElement = Class(pkg.Panel, pkg.FocusListener, [
 
     function setSize(w, h) {
         this.$super(w, h);
+        var visibility = this.element.style.visibility;
+        this.element.style.visibility = &quot;hidden&quot;; // could make sizing smooth
+
         // HTML element size is calculated as sum of &quot;width&quot;/&quot;height&quot;, paddings, border
-        // So the passed width and height has to be corrected by reduction of extra HTML 
-        // gaps. For this we firtsly set the width and size
+        // So the passed width and height has to be corrected (before it will be applied to 
+        // an HTML element) by reduction of extra HTML gaps. For this we firstly set the 
+        // width and size
         this.element.style.width  = &quot;&quot; + w + &quot;px&quot;;
         this.element.style.height = &quot;&quot; + h + &quot;px&quot;;
 
@@ -20758,6 +20975,13 @@ pkg.HtmlElement = Class(pkg.Panel, pkg.FocusListener, [
             dy = this.element.offsetHeight - h;
         this.element.style.width   = &quot;&quot; + (w - dx) + &quot;px&quot;;
         this.element.style.height  = &quot;&quot; + (h - dy) + &quot;px&quot;;
+
+        if (this.isInInvisibleState()) {
+            this.element.style.visibility = &quot;hidden&quot;;
+        }
+        else {
+            this.element.style.visibility = visibility;
+        }
     },
 
     function setLocation(x, y) {
@@ -20776,12 +21000,38 @@ pkg.HtmlElement = Class(pkg.Panel, pkg.FocusListener, [
 
         this.$super();
     },
-
+    
     function setParent(p) {
         this.$super(p);
-        this.element.style.visibility = p == null || this.isVisible === false ? &quot;hidden&quot;
-                                                                              : &quot;visible&quot;;
+
+        if (p == null) {
+            if (this.element.parentNode != null) {
+                this.element.parentNode.removeChild(this.element);
+            }
+
+            this.element.style.visibility = &quot;hidden&quot;;
+            pkg.events.removeComponentListener(this.globalCompListener);
+        }
+        else {
+            if (zebra.instanceOf(p, pkg.HtmlElement)) {
+                p.element.appendChild(this.element);
+            }
+            else {
+                document.body.appendChild(this.element);
+            }
+
+            if (this.isInInvisibleState()) {
+                this.element.style.visibility = &quot;hidden&quot;;
+            }
+            else {
+                this.element.style.visibility = this.isVisible ? &quot;visible&quot; : &quot;hidden&quot;;
+            }
+
+            pkg.events.addComponentListener(this.globalCompListener);
+        }
+
         this.isLocAdjusted = false;
+        
         this.canvas = p != null ? this.getCanvas() : null;
     }
 ]);
@@ -20829,6 +21079,21 @@ pkg.HtmlTextInput = Class(pkg.HtmlElement, [
         this.setText(text);
     }
 ]);
+
+
+pkg.HtmlContent = Class(pkg.HtmlElement, [
+    function() {
+        this.$super(&quot;div&quot;);
+        this.setStyle(&quot;overflow&quot;, &quot;hidden&quot;);
+    },
+
+    function loadContent(url) {
+        var c = zebra.io.GET(url);
+        this.setContent(c);
+        this.vrp();
+    }
+]);
+
 
 /**
  * HTML input text element wrapper class. The class wraps standard HTML text field  
@@ -22316,7 +22581,7 @@ pkg.CaptionListeners = new Listeners.Class(&quot;captionResized&quot;);
  * @constructor 
  * @param {Array} [titles] a caption component titles 
  */
-pkg.BaseCaption = Class(ui.Panel, ui.MouseListener, ui.Cursorable, [
+pkg.BaseCaption = Class(ui.Panel, ui.MouseListener, [
     function $prototype() {
         /**
          * Minimal possible grid cell size

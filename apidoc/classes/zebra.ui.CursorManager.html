@@ -154,6 +154,8 @@
             
                 <li><a href="../classes/zebra.layout.StackLayout.html">zebra.layout.StackLayout</a></li>
             
+                <li><a href="../classes/zebra.PassTextField.html">zebra.PassTextField</a></li>
+            
                 <li><a href="../classes/zebra.ready().html">zebra.ready()</a></li>
             
                 <li><a href="../classes/zebra.ui.BaseLayer.html">zebra.ui.BaseLayer</a></li>
@@ -197,8 +199,6 @@
                 <li><a href="../classes/zebra.ui.CompRender.html">zebra.ui.CompRender</a></li>
             
                 <li><a href="../classes/zebra.ui.CopyCutPaste.html">zebra.ui.CopyCutPaste</a></li>
-            
-                <li><a href="../classes/zebra.ui.Cursorable.html">zebra.ui.Cursorable</a></li>
             
                 <li><a href="../classes/zebra.ui.CursorManager.html">zebra.ui.CursorManager</a></li>
             
@@ -296,8 +296,6 @@
             
                 <li><a href="../classes/zebra.ui.Picture.html">zebra.ui.Picture</a></li>
             
-                <li><a href="../classes/zebra.ui.PopupInfo.html">zebra.ui.PopupInfo</a></li>
-            
                 <li><a href="../classes/zebra.ui.PopupLayer.html">zebra.ui.PopupLayer</a></li>
             
                 <li><a href="../classes/zebra.ui.PopupManager.html">zebra.ui.PopupManager</a></li>
@@ -346,10 +344,6 @@
             
                 <li><a href="../classes/zebra.ui.Toolbar.html">zebra.ui.Toolbar</a></li>
             
-                <li><a href="../classes/zebra.ui.TooltipInfo.html">zebra.ui.TooltipInfo</a></li>
-            
-                <li><a href="../classes/zebra.ui.TooltipManager.html">zebra.ui.TooltipManager</a></li>
-            
                 <li><a href="../classes/zebra.ui.tree.DefEditors.html">zebra.ui.tree.DefEditors</a></li>
             
                 <li><a href="../classes/zebra.ui.tree.DefViews.html">zebra.ui.tree.DefViews</a></li>
@@ -394,19 +388,6 @@
 
 
 
-<div id="methods-on-page" class="sidebox on-page">
-    <div class="hd">
-        <h2 class="no-toc">Methods On Page</h2>
-    </div>
-    <div class="bd">
-        <ul>
-            
-                <li><a href="#methods_setCursorable">setCursorable</a></li>
-            
-        </ul>
-    </div>
-</div>
-
 
 
 
@@ -437,36 +418,23 @@
 
 
 <div class="intro"><p>Cursor manager class. Allows developers to control mouse cursor type by implementing an own 
-&quot;zebra.ui.Cursorable&quot; interface. Imagine an UI component needs to change cursor type. It 
+getCursorType method or by specifying a cursor by cursorType field. Imagine an UI component 
+needs to change cursor type. It 
  can be done by one of the following way:</p>
 <ul>
-<li><p><strong>Implement cursorable interface by the component itself</strong> </p>
-<pre class="code prettyprint"><code>// instantiate panel class that implements cusorable interface
-var p = new zebra.ui.Panel(zebra.ui.Cursorable, [
-     // implement cursorable interface method to set required 
+<li><p><strong>Implement getCursorType method by the component itself</strong> </p>
+<pre class="code prettyprint"><code>var p = new zebra.ui.Panel([
+     // implement getCursorType method to set required 
      // mouse cursor type 
      function getCursorType(target, x, y) {
          return zebra.ui.Cursor.WAIT;
      }
 ]);</code></pre>
 </li>
-<li><p><strong>Implement cursorable interface and register it in cursor manager</strong> </p>
+<li><p><strong>Simply set cursorType property of a component</strong> </p>
 <pre class="code prettyprint"><code>var myPanel = new zebra.ui.Panel();
 ...
-// set cursorable for the given UI component 
-zebra.ui.cursorManager.setCursorable(myPanel, new zebra.ui.Cursorable([
-     // implement cursorable interface method to set required 
-     // mouse cursor type 
-     function getCursorType(target, x, y) {
-         return zebra.ui.Cursor.WAIT;
-     }
-]));</code></pre>
-</li>
-<li><p><strong>Simply setting cursor type for the given component by cursor manager</strong> </p>
-<pre class="code prettyprint"><code>var myPanel = new zebra.ui.Panel();
-...
-// set cursorable for the given UI component 
-zebra.ui.cursorManager.setCursorable(myPanel, zebra.ui.Cursor.WAIT);</code></pre>
+myPanel.cursorType = zebra.ui.Cursor.WAIT;</code></pre>
 </li>
 </ul>
 </div>
@@ -493,8 +461,6 @@ zebra.ui.cursorManager.setCursorable(myPanel, zebra.ui.Cursor.WAIT);</code></pre
 <div id="classdocs">
     <ul>
         
-        <li><a href="#methods">Methods</a></li>
-        
         
         
         <li><a href="#attrs">Attributes</a></li>
@@ -505,87 +471,9 @@ zebra.ui.cursorManager.setCursorable(myPanel, zebra.ui.Cursor.WAIT);</code></pre
     </ul>
     <div>
         
-            <div id="methods">
-            
-                <a name="methods_setCursorable"></a>
-<div class="method item">
-     <strong class="name"><code>setCursorable</code></strong>( <code>t, c </code> )     
-
-    
-
-    <br>
-    <p>Say which cursor has to be used for the given UI component.</p>
-
-    
-    <strong>Parameters:</strong>
-    <ul class="params">
-    
-        <li>
-        
-            <strong><code>t</code> <i><font color="green">&lt;<a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a>&gt;</font></i></strong>
-        
-        
-        <p>an UI component</p>
-
-            
-        </li>
-    
-        <li>
-        
-            <strong><code>c</code> <i><font color="green">&lt;<a href="../classes/zebra.ui.Cursorable.html" class="crosslink">zebra.ui.Cursorable</a> | String&gt;</font></i></strong>
-        
-        
-        <p>a zebra.ui.Cursorable 
-interface implementation. It has to provide &quot;getCursorType(target,x,y)&quot; 
-method implementation that defines a cursor type to be set for the 
-given target object and location. Also a cursor type can be passed
-directly to the method. In this case the cursorable class instance
-will be created automatically.</p>
-
-            
-        </li>
-    
-    </ul>
-    
-    
-    
-</div>
-
-            
-            </div>
-        
         
         
             <div id="attrs">
-            
-                <a name="attrs_cursors"></a>
-<div class="attrs item">
-    <strong><code>cursors</code></strong> <strong><i><font color="green">&lt;Object&gt;</font></i></strong>
-    
-
-    
-        <span class="flag private">private</span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <span class="flag readonly">readonly</span>
-    
-
-    
-    
-    <p>Keeps cursor info class instances for the number of UI components</p>
-
-    
-</div>
-
             
                 <a name="attrs_cursorType"></a>
 <div class="attrs item">
@@ -621,21 +509,6 @@ will be created automatically.</p>
         <div id="index">
 
             
-                <div class="index-section methods">
-                    <h3>Methods</h3>
-
-                    <ul class="index-list methods extends">
-                        
-                            <li class="index-item method">
-                                <a href="../classes/zebra.ui.CursorManager.html#method_setCursorable">setCursorable</a>
-
-                                
-                                
-                            </li>
-                        
-                    </ul>
-                </div>
-            
 
             
 
@@ -644,10 +517,6 @@ will be created automatically.</p>
                     <h3>Attributes</h3>
 
                     <ul class="index-list attrs extends">
-                        
-                            <li class="index-item attr private">
-                                <a href="#attr_cursors">cursors</a>
-                            </li>
                         
                             <li class="index-item attr">
                                 <a href="#attr_cursorType">cursorType</a>

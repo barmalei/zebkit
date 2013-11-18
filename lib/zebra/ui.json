@@ -2,7 +2,6 @@
     "popup" : { "$zebra.ui.PopupManager": [] },
 
     "?zebra.isTouchable == false": {
-        "tooltip": { "$zebra.ui.TooltipManager":[]  },
         "zCanvas": {
             "addons": [ "zebra.ui.MouseWheelSupport" ]
         }
@@ -605,7 +604,7 @@
         }
     },
 
-    "TooltipManager": {
+    "PopupManager": {
         "Label": {
             "properties" : {
                 "paddings"  : [2,6,2,6],
@@ -683,29 +682,35 @@
     "HtmlElement": {
         "properties": {
             "styles": {
-                "border"          : "none",
                 "margin"          : "0px",
+                "boxSizing"       : "border-box",
+                "-moz-box-sizing" : "border-box",
+                "display"         : "block",
                 "backgroundColor" : "transparent",
                 "position"        : "absolute",
                 "zIndex"          : 10,
                 "visibility"      : "hidden",
                 "boxShadow"       : "none",
                 "-moz-box-shadow" : "none",
-                "isIE:overflow"   : "auto"
-            }
+                "isIE:overflow"   : "hidden"
+            },
+
+            "border": null
         }
     },
 
     "HtmlTextInput": {
         "properties": {
             "$inherit": [ "HtmlElement.properties", "TextField.properties" ],
-            "style"   : [ "outline", "none"]
+            "style"   : [ "outline", "none"],
+            "paddings" : [4,4,4,4] 
         }
     },
 
     "HtmlTextField": {
         "properties": {
-            "$inherit": [ "HtmlTextInput.properties" ]
+            "$inherit": [ "HtmlTextInput.properties" ],
+            "border": { "$Border" : [ "blue", 9 ] }
         }
     },
 

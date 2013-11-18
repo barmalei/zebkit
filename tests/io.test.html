@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 
-<header>
+<head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
 	<script src='../lib/zebra/easyoop.js' 	 type='text/javascript'></script>
 	<script src='../lib/zebra/assert.js' 	 type='text/javascript'></script>
@@ -13,10 +13,6 @@
 
         function assertByCharCode(v1, ch, str) {
             assert(v1, ch.charCodeAt(0), str);
-        }
-
-        function getRequest(a) {
-            return zebra.io.getRequest(a);
         }
 
         var txt = "Hello World",
@@ -74,7 +70,7 @@
                                 : new zebra.io.URLInputStream(url + "1x1.png");
             var b64e = new zebra.io.Base64(is.data);
             var res  = x.echo(b64e);
-            var is2  = new zebra.io.InputStream(zebra.util.b64decode(res.encoded));
+            var is2  = new zebra.io.InputStream(zebra.io.b64decode(res.encoded));
 
             assert(is.available(), is2.available(), "binary size");
             assert(b64e.encoded, tb64, "base64");
@@ -88,9 +84,9 @@
 
             if (!zebra.isIE) {
                 var is = new zebra.io.URLInputStream(url + "1x1.png", function(d) {
-                    var r = zebra.util.b64encode(d);
+                    var r = zebra.io.b64encode(d);
                     assert(r, tb64, "base64");
-                    var rr = zebra.util.b64decode(r);
+                    var rr = zebra.io.b64decode(r);
                     var is = new zebra.io.InputStream(rr);
                     assert(is.toBase64(), tb64);
                     assert(is.available(), tb.length);
@@ -103,7 +99,7 @@
             }
 
             var d = new Date(), dd = x.echo(d);
-            if (zebra.isString(dd)) dd = zebra.util.ISO8601toDate(dd);
+            if (zebra.isString(dd)) dd = zebra.io.ISO8601toDate(dd);
             assert(d.toString(), dd.toString(), "echo date");
 
             var a = x.echo(["A", [], {m:100}]);
@@ -127,211 +123,77 @@
             zebra.assertObjEqual(clazz.invoke(rurl, "echo")(aa), aa);
         };
 
+
         zebra.ready(
-			function()  {
-                function basicRequestTest(r) {
-                    zebra.assertDefined(r, "status", "HTTP status code is not defined");
-                    zebra.assertDefined(r, "responseText", "Response code is not defined");
-                    zebra.assertDefined(r, "statusText", "Status text is not defined");
-                    zebra.assertDefined(r, "readyState", "Ready state is not defined");
-                    zebra.assertFDefined(r, "open", "Open method is not defined");
-                    zebra.assertFDefined(r, "send", "Send method is not defined");
-                    zebra.assertFDefined(r, "getResponseHeader", "getResponseHeader method is not defined");
-                    zebra.assertFDefined(r, "abort", "Abort method is not defined");
-                    zebra.assertFDefined(r, "getAllResponseHeaders", "getAllResponseHeader method is not defined");
-                    zebra.assert(typeof r.onreadystatechange === "undefined" || r.onreadystatechange == null, true, "onreadystatechange has been already defined")
-                    zebra.assert(r.status, 0, "HTTP status code should be zero");
-                    zebra.assert(r.responseText, "", "Response text should be empty string");
-                    zebra.assert(r.statusText, "", "Status text should be empty string");
-                    zebra.assert(r.readyState, 0, "Ready state should be zero");
-                }
-
-                function runGET(r, url, async, txt, success) {
-                    if (typeof success === "undefined") success = true;
-
-                    r.open("GET", url, async);
-                    if (async == true) {
-                        r.send(null);
-                        r.onreadystatechange = function() {
-                            if (r.readyState == 4) {
-                                if (success) zebra.assert(r.status, 200, "Success GET " + url + " wrong status = '" + r.status + "'");
-                                else         zebra.assert(r.status != 200, true, "Fail GET " + url + " wrong status = '" + r.status + "'");
-                                if (success) zebra.assert(r.responseText, txt);
-                            }
-                        }
-                    }
-                    else {
-                        r.send(null);
-                        if (success) zebra.assert(r.status, 200, "Success GET " + url + " wrong status = '" + r.status + "'");
-                        else         zebra.assert(r.status != 200, true, "Fail GET " + url + " wrong status = '" + r.status + "'");
-                        zebra.assert(r.readyState, 4, "GET " + url + " wrong readyState");
-                        if (success) zebra.assert(r.responseText, txt);
-                    }
-                }
-
-                function runPOST(data, r, url, async, txt, success) {
-                    if (typeof success === "undefined") success = true;
-
-                    r.open("POST", url, async);
-                    if (async == true) {
-                        r.send(data);
-                        r.onreadystatechange = function() {
-                            if (r.readyState == 4) {
-                                if (success) zebra.assert(r.status, 200, " async:Data should be available by " + url);
-                                else         zebra.assert(r.status != 200, true, " async:Data should not be available by " + url);
-                                if (success) zebra.assert(r.responseText.trim(), txt, " async:Response data has to be equal to " + txt);
-                            }
-                        }
-                    }
-                    else {
-                        r.send(data);
-                        if (success) zebra.assert(r.status, 200, " sync:Data should be available by " + url);
-                        else         zebra.assert(r.status != 200, true, " sync:Data should not be available by " + url  + "('" + r.responseText + "')");
-                        zebra.assert(r.readyState, 4, " sync:Ready state should be 4");
-                        if (success)  zebra.assert(r.responseText.trim(), txt, " sync:Response data has to be equal to " + txt);
-                    }
-                }
-
+			function() {
                 zebra.runTests("Zebra IO",
                     function testRequestConsistency() {
-                        if (zebra.isIE) {
-                            var r1 = getRequest(0), r2 = getRequest(1);
-                            zebra.assert(r1.__type, "aie");
-                            zebra.assert(r2.__type, "xie");
-                            basicRequestTest(r1);
-                            basicRequestTest(r2);
-                        }
-                        else {
-                            var r = getRequest();
-                            zebra.assert(typeof r.__type === "undefined", true);
-                            basicRequestTest(r);
-                        }
+                        var r = zebra.io.getRequest();
+                        zebra.assertDefined(r, "status", "HTTP status code is not defined");
+                        zebra.assertDefined(r, "responseText", "Response code is not defined");
+                        zebra.assertDefined(r, "statusText", "Status text is not defined");
+                        zebra.assertDefined(r, "readyState", "Ready state is not defined");
+                        zebra.assertFDefined(r, "open", "Open method is not defined");
+                        zebra.assertFDefined(r, "send", "Send method is not defined");
+                        zebra.assertFDefined(r, "getResponseHeader", "getResponseHeader method is not defined");
+                        zebra.assertFDefined(r, "abort", "Abort method is not defined");
+                        zebra.assertFDefined(r, "getAllResponseHeaders", "getAllResponseHeader method is not defined");
+                        assert(typeof r.onreadystatechange === "undefined" || r.onreadystatechange == null, true, 
+                                     "onreadystatechange has been already defined")
+
+                        assert(r.status, 0, "HTTP status code should be zero");
+                        assert(r.responseText, "", "Response text should be empty string");
+                        assert(r.statusText, "", "Status text should be empty string");
+                        assert(r.readyState, 0, "Ready state should be zero");
                     },
 
                     function testGET() {
-                        if (zebra.isIE) {
-                            if (xhr(furl) == false) {
-                                var r1 = getRequest(0), r2 = getRequest(1);
-                                runGET(r1, furl, false, txt);
-                                runGET(r2, furl, false, txt);
-
-                                var r1 = getRequest(0), r2 = getRequest(1);
-                                runGET(r1, furl, true, txt);
-                                runGET(r2, furl, true, txt);
-                                return;
-                            }
-                        }
-                        runGET(getRequest(), furl, false, txt);
-                        runGET(getRequest(), furl, true, txt);
-                    },
-
-                    function testGET2() {
-                        zebra.assert(zebra.io.GET(furl), txt);
-                        zebra.io.GET(furl, function(t, r) {
-                            zebra.assert(r.status, 200);
-                            zebra.assert(r.readyState, 4);
-                            zebra.assert(t, txt);
-                            zebra.assert(t, r.responseText);
+                        assert(zebra.io.GET(furl), txt, "Test sync get");
+                        zebra.io.GET(furl, function(r) {
+                            assert(this.url, furl);
+                            assert(r.status, 200);
+                            assert(r.readyState, 4);
+                            assert(txt, r.responseText, "Test async 2");
                         });
                     },
 
                     function testGET404() {
-                        var txt = "";
-
-                        if (zebra.isIE) {
-                            if (xhr(wfurl) == false) {
-                                var r1 = getRequest(0), r2 = getRequest(1);
-                                runGET(r1, wfurl, false, txt, false);
-                                runGET(r2, wfurl, false, txt, false);
-                                var r1 = getRequest(0), r2 = getRequest(1);
-                                runGET(r1, wfurl, true, txt, false);
-                                runGET(r2, wfurl, true, txt, false);
-                                return;
-                            }
-                        }
-                        runGET(getRequest(), wfurl, false, txt, false);
-                        runGET(getRequest(), wfurl, true, txt, false);
-                    },
-
-                    function testGET2_404() {
                         zebra.assertException(function() { zebra.io.GET(wfurl) },  Error);
-                    },
 
-                    function testPOST() {
-                        var txt = "Hello World";
-                        if (zebra.isIE) {
-                            if (xhr(furl) == false) {
-                                var r1 = getRequest(0), r2 = getRequest(1);
-                                runPOST(null, r1, furl, false, txt, false);
-                                runPOST(null, r2, furl, false, txt, false);
-                                var r1 = getRequest(0), r2 = getRequest(1);
-                                runPOST(null, r1, furl, true, txt, false);
-                                runPOST(null, r2, furl, true, txt, false);
-                                return;
-                            }
+                        try { zebra.io.GET(wfurl); }
+                        catch(e) {
+                            assert(e.request.status != 200, true);
+                            assert(e.request.readyState, 4);
                         }
-                        runPOST(null, getRequest(), furl, false, txt, true);
-                        runPOST(null, getRequest(), furl, true, txt, true);
-                    },
 
-                    function testPOST2() {
-                        zebra.assert(zebra.io.POST(furl), txt);
-                        zebra.io.POST(furl, function(t, r) {
-                            zebra.assert(r.status, 200);
-                            zebra.assert(r.readyState, 4);
-                            zebra.assert(r.responseText, txt);
-                            zebra.assert(t, txt);
+                        zebra.io.GET(wfurl, function(r) {
+                            assert(r.status != 200, true);   
+                            assert(r.readyState, 4);
                         });
                     },
 
-                    function testPOST404() {
-                        var txt = "";
-
-                        if (zebra.isIE) {
-                            if (xhr(wfurl) == false) {
-                                var r1 = getRequest(0), r2 = getRequest(1);
-                                runPOST(null, r1, wfurl, false, txt, false);
-                                runPOST(null, r2, wfurl, false, txt, false);
-                                var r1 = getRequest(0), r2 = getRequest(1);
-                                runPOST(null, r1, wfurl, true, txt, false);
-                                runPOST(null, r2, wfurl, true, txt, false);
-                                return;
-                            }
-                        }
-                        runPOST(null, getRequest(), wfurl, false, txt, false);
-                        runPOST(null, getRequest(), wfurl, true, txt, false);
+                    function testPOST() {
+                        assert(zebra.io.POST(furl), txt);
+                        zebra.io.POST(furl, function(r) {
+                            assert(r.status, 200);
+                            assert(r.readyState, 4);
+                            assert(r.responseText, txt);
+                            assert(this.url, furl);
+                        });
                     },
 
-                    function testPOST2_404() {
+                    function testPOST_404() {
                         zebra.assertException(function() { zebra.io.POST(wfurl) },  Error);
                     },
 
-                    function testEchoPOST() {
-                        var data = "echo=!!!!!", txt = "!!!!!";
-
-                        if (zebra.isIE) {
-                            if (xhr(eurl) == false) {
-                                var r1 = getRequest(0), r2 = getRequest(1);
-                                runPOST(data, r1, eurl, false, txt);
-                                runPOST(data, r2, eurl, false, txt);
-                                var r1 = getRequest(0), r2 = getRequest(1);
-                                runPOST(data, r1, eurl, true, txt);
-                                runPOST(data, r2, eurl, true, txt);
-                                return;
-                            }
-                        }
-                        runPOST(data, getRequest(), eurl, false, txt);
-                        runPOST(data, getRequest(), eurl, true, txt);
-                    },
-
-                    function testEchoPOST2() {
+                    function _testEchoPOST() {
                         var data = "echo=!!!!!", txt = "!!!!!";
                         zebra.assert(zebra.io.POST(eurl, data).trim(), txt);
-                        zebra.io.POST(eurl, data, function(t, r) {
+                        zebra.io.POST(eurl, data, function(r) {
                             zebra.assert(r.status, 200);
                             zebra.assert(r.readyState, 4);
                             zebra.assert(r.responseText.trim(), txt);
-                            zebra.assert(r.responseText, t);
+                            zebra.assert(this.url, eurl);
                         });
 
                         assert(zebra.io.POST(eurl, {"echo":"test2"}).trim(), "test2");
@@ -357,6 +219,7 @@
                         }
                         else {
 //                            url = "http://10.211.55.2:8080/web/test/";
+
 
                             var is = new zebra.io.URLInputStream(url + "test-utf8.txt");
                             assert(is.available(), 13);
@@ -392,6 +255,7 @@
                             assert(i, 95);
                             is.close();
                             assert(is.available(), -1);
+
 
                             var is = new zebra.io.URLInputStream(url + "1x1.png", function(d, r) {
                                 assert(is.available(), 95);
@@ -508,19 +372,19 @@
 
                     function testJSON_RPC() {
                         // var url = "http://repo.gravitysoft.org/test/testjsonserver.php"
-                        //testRPC("http://10.26.214.170:8081/jrpc", zebra.io.JRPC);
-                        testRPC("http://localhost:8081/jrpc", zebra.io.JRPC);
+                        //testRPC("http://192.168.178.11:8081/jrpc", zebra.io.JRPC);
+                        testRPC("http://192.168.178.11:8091/jrpc", zebra.io.JRPC);
                     },
 
                     function testXML_RPC() {
                         //testRPC("http://10.26.214.170:8080/xrpc", zebra.io.XRPC);
-                        testRPC("http://localhost:8080/xrpc", zebra.io.XRPC);
+                        testRPC("http://192.168.178.11:8090/xrpc", zebra.io.XRPC);
                     }
                 );
 			}
 		);
     </script>
-</header>
+</head>
 
 <body>
 </body>

@@ -167,17 +167,13 @@ pkg.MouseEventHandlerPan = Class(Panel, MouseListener, [
     }
 ]);
 
-pkg.CursorPan = Class(Panel, Cursorable, [
+pkg.CursorPan = Class(Panel, [
     function(cursor, bg, picture) {
         this.$super();
         this.setPreferredSize(50,50);
-        this.cursor = cursor;
         this.setBackground(bg);
         this.picture = picture;
-    },
-
-    function getCursorType(t, x, y) {
-        return this.cursor;
+        this.cursorType = cursor;
     },
 
     function paint(g) {

@@ -187,17 +187,10 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
         var m2 = createColorPicker();
         var m3 = createMenu(formMenuArray()[5]);
         this.add(BOTTOM, new BorderPan("Context menu", p));
-        zebra.ui.popup.setPopup(l1, new zebra.ui.PopupInfo([
-            function getPopup(c, x, y) {
-                return m1;
-            }
-        ]));
-        zebra.ui.popup.setPopup(l2, new zebra.ui.PopupInfo([
-            function getPopup(c, x, y) { return m2; }
-        ]));
-        zebra.ui.popup.setPopup(l3, new zebra.ui.PopupInfo([
-            function getPopup(c, x, y) { return m3; }
-        ]));
+
+        l1.popup = m1;
+        l2.popup = m2;
+        l3.popup = m3;
     }
 ]);
 

@@ -265,7 +265,15 @@ var gdata = zebra.io.GET(url),
 	pdata = zebra.io.POST(url, "request");
 
 // async GET/POST
-zebra.io.GET(url, function(data, requests) {
+zebra.io.GET(url, function(request) {
+    if (request.status == 200) {
+    	// handle result
+    	request.responseText
+		
+	}
+	else {
+		// handle error
+	}
     ...
 })
 ```

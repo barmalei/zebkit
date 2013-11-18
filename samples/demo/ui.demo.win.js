@@ -31,33 +31,27 @@ function createTooltipDemo() {
     l1.setPreferredSize(180, 120);
     l2.setPreferredSize(180, 120);
     l3.setPreferredSize(180, 120);
-    ui.tooltip.setTooltip(l1, new TooltipInfo([
-         function getTooltip(target, x, y) {
-            var l = pkg.createLabel(" THIS IS just HONDA ", "blue");
-            l.setPadding(6);
-            l.setBackground("#E0F4FF");
-            return l;
-         }
-    ]));
 
-    ui.tooltip.setTooltip(l2, new TooltipInfo([
-         function getTooltip(target, x, y) {
-            var b = new Panel({ layout: new FlowLayout(CENTER, TOP) });
-            b.setBorder(new TooltipBorder("#3366CC", 2));
-            b.setBackground("#E0F4FF");
-            b.setPadding(6);
-            var pp = new Panel(new FlowLayout(CENTER, CENTER, HORIZONTAL, 2));
-            var img = new ImagePan(ui.demo.bmw);
-            var l = new Label(new zebra.data.Text("BMW is the best.\nAudi looks similar.\nBeware of imitation :)"));
-            l.setColor("#3366CC");
-            l.setFont(new Font("Helvetica", 14));
-            pp.setPaddings(4, 16, 42, 16);
-            pp.add(img);
-            pp.add(l)
-            b.add(pp);
-            return b;
-         }
-    ]));
+    var t1 = pkg.createLabel(" THIS IS just HONDA ", "blue");
+    t1.setPadding(6);
+    t1.setBackground("#E0F4FF");
+    l1.tooltip = t1;
+
+    var t2 = new Panel({ layout: new FlowLayout(CENTER, TOP) });
+    t2.setBorder(new TooltipBorder("#3366CC", 2));
+    t2.setBackground("#E0F4FF");
+    t2.setPadding(6);
+    var pp = new Panel(new FlowLayout(CENTER, CENTER, HORIZONTAL, 2));
+    var img = new ImagePan(ui.demo.bmw);
+    var ll = new Label(new zebra.data.Text("BMW is the best.\nAudi looks similar.\nBeware of imitation :)"));
+    ll.setColor("#3366CC");
+    ll.setFont(new Font("Helvetica", 14));
+    pp.setPaddings(4, 16, 42, 16);
+    pp.add(img);
+    pp.add(ll);
+    t2.add(pp);
+
+    l2.tooltip = t2;
 
     var grid = new Grid([
         [ "Saab", "saab93", "250 km/h" ],
@@ -81,11 +75,7 @@ function createTooltipDemo() {
         }
     ]));
 
-    ui.tooltip.setTooltip(l3, new TooltipInfo([
-         function getTooltip(target, x, y) {
-            return grid;
-         }
-    ]));
+    l3.tooltip = grid;
 
     return p;
 }
@@ -107,6 +97,10 @@ function createWindowComp(target) {
     var p = new Panel(new FlowLayout(CENTER, CENTER));
     var b = new Button("Close");
     b.setPaddings(4,16,4,16);
+    b.tooltip = new Label("Button");
+    b.tooltip.setBackground("yellow");
+    b.tooltip.setPadding(6);
+    b.tooltip.setBorder("plain");
     p.setPadding(8);
     p.add(b);
 

@@ -5,7 +5,7 @@ if (typeof(zebra) === "undefined") {
     load(arguments[0] + '/lib/zebra/util.js');
 }
 
-var assert = zebra.assert, Class = zebra.Class, assertException = zebra.assertException, 
+var assert = zebra.assert, Class = zebra.Class, assertException = zebra.assertException,
     assertNoException = zebra.assertNoException, Listeners = zebra.util.Listeners;
 
 zebra.runTests("Zebra util",
@@ -13,68 +13,70 @@ zebra.runTests("Zebra util",
         var treeLikeRoot = { value:"test" };
 
         assertException(function() {
-            zebra.util.findInTree(treeLikeRoot, "", function() {}, function() {});    
+            zebra.util.findInTree(treeLikeRoot, "", function() {}, function() {});
         }, Error);
 
         assertException(function() {
-            zebra.util.findInTree(treeLikeRoot, "/", function() {}, function() {});    
+            zebra.util.findInTree(treeLikeRoot, "/", function() {}, function() {});
         }, Error);
 
         assertException(function() {
-            zebra.util.findInTree(treeLikeRoot, "//", function() {}, function() {});    
+            zebra.util.findInTree(treeLikeRoot, "//", function() {}, function() {});
         }, Error);
 
         assertException(function() {
-            zebra.util.findInTree(treeLikeRoot, "/*//", function() {}, function() {});    
+            zebra.util.findInTree(treeLikeRoot, "/*//", function() {}, function() {});
         }, Error);
 
         assertException(function() {
-            zebra.util.findInTree(treeLikeRoot, "/*/", function() {}, function() {});    
+            zebra.util.findInTree(treeLikeRoot, "/*/", function() {}, function() {});
         }, Error);
 
         assertException(function() {
-            zebra.util.findInTree(treeLikeRoot, "/Root/", function() {}, function() {});    
+            zebra.util.findInTree(treeLikeRoot, "/Root/", function() {}, function() {});
         }, Error);
 
         assertException(function() {
-            zebra.util.findInTree(treeLikeRoot, "/*/", function() {}, function() {});    
+            zebra.util.findInTree(treeLikeRoot, "/*/", function() {}, function() {});
         }, Error);
 
         assertException(function() {
-            zebra.util.findInTree(treeLikeRoot, "//Root//", function() {}, function() {});    
+            zebra.util.findInTree(treeLikeRoot, "//Root//", function() {}, function() {});
         }, Error);
 
         assertException(function() {
-            zebra.util.findInTree(treeLikeRoot, "Root//a", function() {}, function() {});    
+            zebra.util.findInTree(treeLikeRoot, "Root//a", function() {}, function() {});
         }, Error);
 
         assertException(function() {
-            zebra.util.findInTree(treeLikeRoot, "//Root/a/", function() {}, function() {});    
+            zebra.util.findInTree(treeLikeRoot, "//Root/a/", function() {}, function() {});
         }, Error);
 
         zebra.util.findInTree(treeLikeRoot, "//Root/a/*", function() {}, function() {});
+
+        zebra.util.findInTree(treeLikeRoot, "//*[@id='dsds/sds']", function() {}, function() {});
     },
 
 
     function test_treelookup() {
 
-        var treeLikeRoot = { 
-            value : "Root", 
+        var treeLikeRoot = {
+            value : "Root",
             kids : [
                 { value: "Item 1", a:12 },
                 { value: "Item 1", a:11 },
-                { 
-                    value: "Item 2", 
+                {
+                    value: "Item 2",
                     kids: [
                         { value: "Item 2.1", a:"aa" },
                         { value: "Item 1", a:11 },
                         { value: "Item 2.1", c:"mm" }
-                    ] 
+                    ]
                 }
             ]
         };
 
-        var res = [], 
+        var res = [],
             cmp = function(item, fragment) {
                 return item.value == fragment;
             },

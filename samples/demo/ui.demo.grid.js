@@ -163,6 +163,10 @@ function longGrid() {
     g.setViewProvider(new DefViews([
         function getCellColor(target, row,col) {
             return (row % 2 === 0) ? ui.cellbg1 : ui.cellbg2 ;
+        },
+
+        function getXAlignment(target, row,col) {
+            return zebra.layout.CENTER;
         }
     ]));
 
@@ -257,6 +261,7 @@ function editableGrid() {
     var t = ["Checkbox\nas editor", "Drop down\nas editor", "Text field\nas editor", "External Window\nas editor"];
 
 	var g = new Grid();
+    g.defXAlignment = CENTER;
     g.setViewProvider(new DefViews([
         function getView(target, row, col, data) {
             if (col === 0) return (data == "on") ? onView : offView;

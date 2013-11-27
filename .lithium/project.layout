@@ -38,8 +38,8 @@ PROJECT {
 
     ARTIFACT("apidoc", GenerateJavaScriptDoc) {
         @input = "lib/zebra/zebra.js"
-        @template = "lib/theme"
-        @config = "lib/zebra/yuidoc.json"
+        @template = "yuidoc/themes/default"
+        @config = "yuidoc/yuidoc.json"
         REQUIRE "lib/zebra/zebra.js"
     }
 

@@ -25,9 +25,9 @@ html {
 }
 
 body {
-    /*font: 13px/1.4 'Lucida Grande', 'Lucida Sans Unicode', 'DejaVu Sans', 'Bitstream Vera Sans', 'Helvetica', 'Arial', sans-serif;*/
+    font: 13px/1.4 'Lucida Grande', 'Lucida Sans Unicode', 'DejaVu Sans', 'Bitstream Vera Sans', 'Helvetica', 'Arial', sans-serif;
     /*font: 13px/1.4 'Helvetica', 'Arial', sans-serif;*/
-    font: 13px/1.4 'Open Sans', sans-serif;
+    /*font: 13px/1.4 'Open Sans', sans-serif;*/
 
 
     margin: 0;
@@ -188,7 +188,7 @@ th {
 /* -- Layout and Content ---------------------------------------------------- */
 #doc {
     margin: auto;
-    min-width: 1024px;
+    min-width2: 1024px;
 }
 
 .content { padding: 0 20px 0 25px; }
@@ -298,7 +298,7 @@ th {
 }
 
 #classdocs .foundat {
-    font-size: 11px;
+    font-size: 12px;
     font-style: normal;
 }
 
@@ -421,7 +421,7 @@ h2, h3, h4, h5, h6 {
     background: #bababa;
     border-radius: 3px;
     color: #fff;
-    font-size: 11px;
+    font-size: 12px;
     margin: 0 0.5em;
     padding: 2px 4px 1px;
 }
@@ -431,7 +431,7 @@ h2, h3, h4, h5, h6 {
     background: #f9f9f9;
     border-color: #efefef;
     color: #555;
-    font-size: 11px;
+    font-size: 12px;
     padding: 3px 6px;
 }
 
@@ -513,7 +513,7 @@ kbd .cmd { font-family: Monaco, Helvetica; }
 .apidocs .index h3 {
     border-bottom: 1px solid #efefef;
     color: #333;
-    font-size: 13px;
+    font-size: 14px;
     margin: 2em 0 0.6em;
     padding-bottom: 2px;
 }
@@ -528,19 +528,19 @@ kbd .cmd { font-family: Monaco, Helvetica; }
     padding: 0;
     -moz-column-count: 4;
     -moz-column-gap: 10px;
-    -moz-column-width: 170px;
+    -moz-column-width2: 170px;
     -ms-column-count: 4;
     -ms-column-gap: 10px;
-    -ms-column-width: 170px;
+    -ms-column-width2: 170px;
     -o-column-count: 4;
     -o-column-gap: 10px;
-    -o-column-width: 170px;
+    -o-column-width2: 170px;
     -webkit-column-count: 4;
     -webkit-column-gap: 10px;
-    -webkit-column-width: 170px;
+    -webkit-column-width2: 170px;
     column-count: 4;
     column-gap: 10px;
-    column-width: 170px;
+    column-width2: 170px;
 }
 
 .apidocs .no-columns .index-list {

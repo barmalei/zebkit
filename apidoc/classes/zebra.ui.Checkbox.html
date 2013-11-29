@@ -11,24 +11,16 @@
 </head>
 <body class="yui3-skin-sam">
 
-<div id="doc">
-    <div id="hd" class="yui3-g header">
-        <div class="yui3-u-3-4">
-<!-- 
-            
-                <h1><img src="../assets/css/logo.png" title=""></h1>
-            
-
- -->        </div>
-        <div class="yui3-u-1-4 version">
+<table id="doc" width="100%" style="background:white;">
+    <tr>
+        <td align="left" colspan="2">
             <h2>Zebra API Doc</h2>
-        </div>
-    </div>
-    <div id="bd" class="yui3-g">
-
-        <div class="yui3-u-1-4">
-            <div id="docs-sidebar" class="sidebar apidocs">
-                <div id="api-list">
+        </td>
+    </tr>
+    <tr style="background:white;">
+        <td style="background:white;" >
+           <div style="width:270px;" id="docs-sidebar" class="sidebar apidocs">
+               <div id="api-list">
     <h2 class="off-left">APIs</h2>
     <div id="api-tabview" class="tabview">
         <ul class="tabs">
@@ -380,32 +372,10 @@
     </div>
 </div>
 
-            </div>
-        </div>
-        <div class="yui3-u-3-4">
-            
-    <div id="api-options">
-        Show:
-        <label for="api-show-inherited">
-            <input type="checkbox" id="api-show-inherited" checked>
-            Inherited
-        </label>
+           </div>
+        </td>
 
-        <label for="api-show-protected">
-            <input type="checkbox" id="api-show-protected" checked>
-            Protected
-        </label>
-
-        <label for="api-show-private">
-            <input type="checkbox" id="api-show-private" checked>
-            Private
-        </label>
-        <label for="api-show-deprecated">
-            <input type="checkbox" id="api-show-deprecated" checked>
-            Deprecated
-        </label>
-    </div>
-
+        <td style="background:white;" id="bd">
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
@@ -482,8 +452,6 @@ listener in the check box switch manager as follow:</p>
         <h2>Constructor</h2>
         <div id="method_zebra.ui.Checkbox" class="method item">
     <h3 class="name"><code>zebra.ui.Checkbox</code></h3>
-
-    
 
     
         <div class="args">
@@ -737,8 +705,6 @@ listener in the check box switch manager as follow:</p>
     <h3 class="name"><code>getState</code></h3>
 
     
-
-    
         <span class="paren">()</span>
     
 
@@ -807,8 +773,6 @@ listener in the check box switch manager as follow:</p>
     <h3 class="name"><code>getValue</code></h3>
 
     
-
-    
         <span class="paren">()</span>
     
 
@@ -871,8 +835,6 @@ listener in the check box switch manager as follow:</p>
                 
                     <div id="method_idByState" class="method item inherited">
     <h3 class="name"><code>idByState</code></h3>
-
-    
 
     
         <div class="args">
@@ -977,8 +939,6 @@ own view IDs set.</p>
     <h3 class="name"><code>setCanHaveFocus</code></h3>
 
     
-
-    
         <div class="args">
             <span class="paren">(</span><ul class="args-list inline commas">
             
@@ -1060,8 +1020,6 @@ own view IDs set.</p>
                 
                     <div id="method_setFocusAnchorComponent" class="method item inherited">
     <h3 class="name"><code>setFocusAnchorComponent</code></h3>
-
-    
 
     
         <div class="args">
@@ -1148,8 +1106,6 @@ Anchor component is a component over that the focus marker view is painted.</p>
     <h3 class="name"><code>setFocusMarkerView</code></h3>
 
     
-
-    
         <div class="args">
             <span class="paren">(</span><ul class="args-list inline commas">
             
@@ -1232,8 +1188,6 @@ code or view or an implementation of zebra.ui.View &quot;paint(g,x,y,w,h,t)&quot
                 
                     <div id="method_setState" class="method item deprecated">
     <h3 class="name"><code>setState</code></h3>
-
-    
 
     
         <div class="args">
@@ -1321,8 +1275,6 @@ code or view or an implementation of zebra.ui.View &quot;paint(g,x,y,w,h,t)&quot
     <h3 class="name"><code>setSwicthManager</code></h3>
 
     
-
-    
         <div class="args">
             <span class="paren">(</span><ul class="args-list inline commas">
             
@@ -1404,8 +1356,6 @@ code or view or an implementation of zebra.ui.View &quot;paint(g,x,y,w,h,t)&quot
     <h3 class="name"><code>setValue</code></h3>
 
     
-
-    
         <div class="args">
             <span class="paren">(</span><ul class="args-list inline commas">
             
@@ -1485,8 +1435,6 @@ code or view or an implementation of zebra.ui.View &quot;paint(g,x,y,w,h,t)&quot
                 
                     <div id="method_stateUpdated" class="method item inherited">
     <h3 class="name"><code>stateUpdated</code></h3>
-
-    
 
     
         <div class="args">
@@ -1801,9 +1749,11 @@ code or view or an implementation of zebra.ui.View &quot;paint(g,x,y,w,h,t)&quot
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
+        </td>
+    </tr>
+</table>
+
+
 <script src="../assets/vendor/prettify/prettify-min.js"></script>
 <script>prettyPrint();</script>
 <script src="../assets/js/yui-prettify.js"></script>

@@ -11,24 +11,16 @@
 </head>
 <body class="yui3-skin-sam">
 
-<div id="doc">
-    <div id="hd" class="yui3-g header">
-        <div class="yui3-u-3-4">
-<!-- 
-            
-                <h1><img src="../assets/css/logo.png" title=""></h1>
-            
-
- -->        </div>
-        <div class="yui3-u-1-4 version">
+<table id="doc" width="100%" style="background:white;">
+    <tr>
+        <td align="left" colspan="2">
             <h2>Zebra API Doc</h2>
-        </div>
-    </div>
-    <div id="bd" class="yui3-g">
-
-        <div class="yui3-u-1-4">
-            <div id="docs-sidebar" class="sidebar apidocs">
-                <div id="api-list">
+        </td>
+    </tr>
+    <tr style="background:white;">
+        <td style="background:white;" >
+           <div style="width:270px;" id="docs-sidebar" class="sidebar apidocs">
+               <div id="api-list">
     <h2 class="off-left">APIs</h2>
     <div id="api-tabview" class="tabview">
         <ul class="tabs">
@@ -380,32 +372,10 @@
     </div>
 </div>
 
-            </div>
-        </div>
-        <div class="yui3-u-3-4">
-            
-    <div id="api-options">
-        Show:
-        <label for="api-show-inherited">
-            <input type="checkbox" id="api-show-inherited" checked>
-            Inherited
-        </label>
+           </div>
+        </td>
 
-        <label for="api-show-protected">
-            <input type="checkbox" id="api-show-protected" checked>
-            Protected
-        </label>
-
-        <label for="api-show-private">
-            <input type="checkbox" id="api-show-private" checked>
-            Private
-        </label>
-        <label for="api-show-deprecated">
-            <input type="checkbox" id="api-show-deprecated" checked>
-            Deprecated
-        </label>
-    </div>
-
+        <td style="background:white;" id="bd">
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
@@ -595,8 +565,6 @@
     <h3 class="name"><code>fired</code></h3>
 
     
-
-    
         <div class="args">
             <span class="paren">(</span><ul class="args-list inline commas">
             
@@ -679,8 +647,6 @@ combo box pad window when the combo button has been pressed</p>
     <h3 class="name"><code>getValue</code></h3>
 
     
-
-    
         <span class="paren">()</span>
     
 
@@ -745,8 +711,6 @@ combo box pad window when the combo button has been pressed</p>
     <h3 class="name"><code>hidePad</code></h3>
 
     
-
-    
         <span class="paren">()</span>
     
 
@@ -792,8 +756,6 @@ combo box pad window when the combo button has been pressed</p>
                 
                     <div id="method_select" class="method item">
     <h3 class="name"><code>select</code></h3>
-
-    
 
     
         <div class="args">
@@ -878,8 +840,6 @@ as the combo box value</p>
     <h3 class="name"><code>setList</code></h3>
 
     
-
-    
         <div class="args">
             <span class="paren">(</span><ul class="args-list inline commas">
             
@@ -959,8 +919,6 @@ as the combo box value</p>
                 
                     <div id="method_setMaxPadHeight" class="method item">
     <h3 class="name"><code>setMaxPadHeight</code></h3>
-
-    
 
     
         <div class="args">
@@ -1044,8 +1002,6 @@ as the combo box value</p>
     <h3 class="name"><code>setSelectionView</code></h3>
 
     
-
-    
         <div class="args">
             <span class="paren">(</span><ul class="args-list inline commas">
             
@@ -1127,8 +1083,6 @@ as the combo box value</p>
     <h3 class="name"><code>setValue</code></h3>
 
     
-
-    
         <div class="args">
             <span class="paren">(</span><ul class="args-list inline commas">
             
@@ -1208,8 +1162,6 @@ as the combo box value</p>
                 
                     <div id="method_showPad" class="method item">
     <h3 class="name"><code>showPad</code></h3>
-
-    
 
     
         <span class="paren">()</span>
@@ -1638,9 +1590,11 @@ has been selected</p>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
+        </td>
+    </tr>
+</table>
+
+
 <script src="../assets/vendor/prettify/prettify-min.js"></script>
 <script>prettyPrint();</script>
 <script src="../assets/js/yui-prettify.js"></script>

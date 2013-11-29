@@ -44,7 +44,7 @@
 				if (e.preventDefault) e.preventDefault();
 				else e.returnValue = false;
 			}
-   			desktop.graph.restore();
+   			desktop.$context.restore();
    			document.getElementById("norm_demo_parent").removeChild(document.getElementById("norm_demo"));
    			desktop.root.repaint();
 		}
@@ -110,6 +110,7 @@
 			function() {
 				eval(zebra.Import("ui", "layout"));
 
+			
 	        	desktop = new zCanvas("zCanvas");
 				var root = desktop.root, nt = new Tabs(), prevSelected = -1;
 	    	
@@ -199,9 +200,9 @@
 					prevSelected = data;
 				});
 
-				desktop.graph.save();
-				desktop.graph.scale(1.3, 1.3);
-				desktop.graph.rotate(0.3);
+				desktop.$context.save();
+				desktop.$context.scale(1.3, 1.3);
+				desktop.$context.rotate(0.3);
 				
 				root.repaint();
 			},
@@ -411,7 +412,6 @@
 						<td valign="top" colspan="1" align="left" style="margin-left:10px;">
 							<ul class="bullets">
 								<li>Lesser General public license</li>
-								<li>MIT License for non-commercial projects</li>
 							</ul>
 						</td>
 

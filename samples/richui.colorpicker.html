@@ -22,7 +22,7 @@
                     kids  : {
                         CENTER: new ImagePan(myimg, [
                             function getTooltip(target, x, y) {
-                                var imgData = this.getCanvas().graph.getImageData(x, y, 1, 1).data,
+                                var imgData = this.getCanvas().$context.getImageData(x, y, 1, 1).data,
                                     color   = "rgb("+ imgData[0] + "," + imgData[1] + "," + imgData[2] +")",
                                     label   = new Panel({
                                         layout    : new FlowLayout(8),
@@ -67,7 +67,7 @@
                         }),
                         CENTER: new ImagePan("demo/image.jpg", MouseListener, [
                             function mousePressed(e) {
-                                var i = this.getCanvas().graph.getImageData(e.absX, e.absY, 1, 1).data,
+                                var i = this.getCanvas().$context.getImageData(e.absX, e.absY, 1, 1).data,
                                     c = "rgb("+ i[0] + "," + i[1] + "," + i[2] +")";
                                 p.kids[counter++%max].setBackground(c);
                             }
@@ -95,7 +95,7 @@
                         BOTTOM: new TextField(),
                         CENTER: new ImagePan("demo/image.jpg", MouseListener, [
                             function mousePressed(e) {
-                                var ctx = this.getCanvas().graph, 
+                                var ctx = this.getCanvas().$context, 
                                     i = ctx.getImageData(e.absX, e.absY, 1, 1).data,
                                     c = "rgb("+ i[0] + "," + i[1] + "," + i[2] +")";
                                 this.parent.find("//TextField").setText(c);

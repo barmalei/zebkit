@@ -1884,13 +1884,15 @@ to customize list item rendering.</p>
                 <li class="param">
                     
                         <code class="param-name">v</code>
-                        <span class="type">Object</span>
+                        <span class="type">Object | Function</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a view provider</p>
+                        <p>a view provider class instance or a function that 
+says which view has to be used for the given list model data. The function 
+has to satisfy the following method signature: &quot;function(list, modelItem, index)&quot;</p>
 
                     </div>
 

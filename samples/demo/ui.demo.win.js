@@ -85,7 +85,7 @@ function createWindowComp(target) {
     //w._.add(function actionPerformed(src, id, data) { target.hideWin(); });
 
     w.setSize(350, 300);
-    w.root.setLayout(new BorderLayout());
+    w.root.setLayout(new BorderLayout(4,4));
 
     var tf = new TextField(new zebra.data.Text(""));
     tf.setFont(new Font("Arial","bold", 18));

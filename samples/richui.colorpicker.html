@@ -7,7 +7,7 @@
         <script>
             var myimg = null;
             zebra.ready(function() {
-                myimg = zebra.ui.loadImage("http://fc03.deviantart.net/fs43/i/2009/116/c/b/Earth_2049___The_End_by_taenaron.jpg");
+                myimg = zebra.ui.loadImage("demo/image.jpg");
             });
         </script>
 
@@ -65,7 +65,7 @@
                             layout : new GridLayout(2, 8, HORIZONTAL),
                             id     : "palette"
                         }),
-                        CENTER: new ImagePan("demo/image.jpg", MouseListener, [
+                        CENTER: new ImagePan(myimg, MouseListener, [
                             function mousePressed(e) {
                                 var i = this.getCanvas().$context.getImageData(e.absX, e.absY, 1, 1).data,
                                     c = "rgb("+ i[0] + "," + i[1] + "," + i[2] +")";
@@ -93,7 +93,7 @@
                     layout : new BorderLayout(6,6),
                     kids   : {
                         BOTTOM: new TextField(),
-                        CENTER: new ImagePan("demo/image.jpg", MouseListener, [
+                        CENTER: new ImagePan(myimg, MouseListener, [
                             function mousePressed(e) {
                                 var ctx = this.getCanvas().$context, 
                                     i = ctx.getImageData(e.absX, e.absY, 1, 1).data,

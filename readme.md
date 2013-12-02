@@ -392,8 +392,8 @@ zebra-home
 
 Copy the stuff into your WEB server alone with "lib/zebra/rs" folder and "lib/zebra/*.json" fies.
 
-Use artifacts packaged in "zebra.runtime.zip" file if you need to keep zebra on your web site. Just 
-unpack it in you web folder and include "zebra.min.js" in your HTML page.
+**Use artifacts packaged in "zebra.runtime.zip" file if you need to keep zebra on your web site. Just 
+unpack it in you web folder and include "zebra.min.js" in your HTML page.**
 
 
 ### License

@@ -1,34 +1,35 @@
 
-require 'gravity/lithium/core-artifact/command'
-require 'gravity/lithium/core-artifact/project'
-require 'gravity/lithium/li-artifact/base'
+require 'lithium/core-artifact/command'
+require 'lithium/core-artifact/project'
+require 'lithium/li-artifact/base'
 
-require 'gravity/lithium/java-artifact/compiler'
-require 'gravity/lithium/java-artifact/runner'
-require 'gravity/lithium/java-artifact/jar'
-require 'gravity/lithium/java-artifact/misc'
-require 'gravity/lithium/java-artifact/pmd'
+require 'lithium/java-artifact/compiler'
+require 'lithium/java-artifact/runner'
+require 'lithium/java-artifact/jar'
+require 'lithium/java-artifact/misc'
+require 'lithium/java-artifact/pmd'
+require 'lithium/java-artifact/checkstyle'
 
-require 'gravity/lithium/file-artifact/acquired'
-require 'gravity/lithium/maven-artifact'
-require 'gravity/lithium/js-artifact'
-require 'gravity/lithium/py-artifact'
-require 'gravity/lithium/jython-artifact'
-require 'gravity/lithium/rb-artifact'
-require 'gravity/lithium/php-artifact'
-require 'gravity/lithium/tt-artifact'
+require 'lithium/file-artifact/acquired'
+require 'lithium/maven-artifact'
+require 'lithium/js-artifact'
+require 'lithium/py-artifact'
+require 'lithium/jython-artifact'
+require 'lithium/rb-artifact'
+require 'lithium/php-artifact'
+require 'lithium/tt-artifact'
 
-require 'gravity/lithium/draft'
-require 'gravity/lithium/textmate/command'
+require 'lithium/draft'
+require 'lithium/textmate/command'
 
 PROJECT() {
 	@desc = 'Lithium'
-	@ver  = '2.2-beta'
+	@ver  = '2.3-beta'
 	
 	#Std.backtrace(-1)
 	
 	puts "#{':'*60}"
-	puts ":: Lithium - project management tool v#{@ver}, Sep 2012  ::"
+	puts ":: Lithium - project management tool v#{@ver}, Aug 2013  ::"
 	puts ":: http://www.gravitysoft.org                             ::"
 	puts "#{':'*60}"
 	     
@@ -38,16 +39,18 @@ PROJECT() {
         CLASS  RunJavaCode 
     }
     
-    COMMAND('runjar',    RunJAR)
+    COMMAND('runjar',   RunJAR)
+    COMMAND('rungroovy',   RunGroovyScript)
     COMMAND('runclass', RunJavaClass)
-    COMMAND('runrb', RunRubyScript) 
-    COMMAND('minjs', CompressJavaScript)
+    COMMAND('runrb',    RunRubyScript) 
+    COMMAND('minjs',    CompressJavaScript)
     COMMAND('runjs',    RunJavaScript)
     COMMAND('runpy',    RunPythonScript)   
     COMMAND('runjpy',   RunJythonScript)   
     COMMAND('runphp',   RunPhpScript)
     COMMAND('openhtml', OpenHTML)
     COMMAND('runsh',    RunShell)
+
 
     ARTIFACT('runpystr', RunPythonString) { 
 		@script = $arguments.length > 0 ? $arguments.join(' ') : $stdin.read.strip
@@ -58,12 +61,13 @@ PROJECT() {
 	}
 
     COMMAND('compilejava',  SunJavaCompiler) { @options = "-Xlint:deprecation" }  
-    COMMAND('compilephp', FileSet) { CLASS  ValidatePhpScript }
-    COMMAND('compilepy', FileSet) { CLASS ValidatePythonScript }
-    COMMAND('compilerb', FileSet) { CLASS ValidateRubyScript }
-    COMMAND('compilexml', FileSet) { CLASS ValidateXML }
-    COMMAND('compilett', FileSet) { CLASS CompileTTGrammar }
+    COMMAND('compilephp', FileSet)           { CLASS  ValidatePhpScript }
+    COMMAND('compilepy', FileSet)            { CLASS ValidatePythonScript }
+    COMMAND('compilerb', FileSet)            { CLASS ValidateRubyScript }
+    COMMAND('compilexml', FileSet)           { CLASS ValidateXML }
+    COMMAND('compilett', FileSet)            { CLASS CompileTTGrammar }
 
+    COMMAND('checkstyle', CheckStyle)         { }
 
     COMMAND('run', EXT_MAPPER) {
         { 'java'  => 'runjava', 
@@ -75,7 +79,8 @@ PROJECT() {
 		  'js'    => 'runjs', 
 		  'sh'    => 'runsh',
 		  'html'  => 'openhtml',
-		  'php'   => 'runphp'
+          'php'   => 'runphp',
+		  'groovy'   => 'rungroovy',
 		}    
     }
 
@@ -108,11 +113,11 @@ PROJECT() {
         @grep = $arguments[0] if $arguments.length > 0
     }
 
-    COMMAND('info', INSPECT, '.')
-    COMMAND('tree', TREE, '.')
+    COMMAND('info',    INSPECT, '.')
+    COMMAND('tree',    TREE,    '.')
     COMMAND('require', REQUIRE, '.')
     COMMAND('cleanup', CLEANUP)
-    COMMAND('list', LIST_ARTIFACT)
+    COMMAND('list',    LIST_ARTIFACT)
     
     ARTIFACT('INSTALL', INSTALL) 
 

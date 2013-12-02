@@ -1,5 +1,3 @@
-
-
 PROJECT {
 	@desc = 'Zebra'
 	@ver  = '2013.09'
@@ -32,6 +30,11 @@ PROJECT {
         CLASS CombinedJavaScript
     }
 
+    ARTIFACT("zebra.latest.zip", ZipFile) {
+        @base = "lib/zebra"
+    }
+
+
     SET("samples/demo/*.js", MetaGeneratedFileSet) {
         CLASS CombinedJavaScript
     }
@@ -47,6 +50,10 @@ PROJECT {
         CLASS RunJavaScriptTest
     }
 
+    COMMAND("cpdist", CopyFile) {
+        @destination = "dist"
+    }
+
     ARTIFACT("build", GROUP) {    
         #REQUIRE "tests/*.js"
         REQUIRE "apidoc"
@@ -55,5 +62,6 @@ PROJECT {
         REQUIRE "lib/zebra/zebra.io.min.js"
         REQUIRE "samples/demo/demo.all.min.js"
         REQUIRE "minjs:samples/uiengine.samples.js"
+        REQUIRE "zebra.latest.zip"
     }
 }

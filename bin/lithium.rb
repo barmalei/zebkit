@@ -20,16 +20,12 @@ $lithium_home = ENV['LITHIUM_HOME'].dup() if ENV['LITHIUM_HOME']
 $lithium_home = __detect_project_home__(File.dirname(File.expand_path($0)))
 raise "Lithium home cannot be identified" if !$lithium_home
 raise "Lithium home '#{$lithium_home}' is invalid." if !File.exists?($lithium_home) || !File.directory?($lithium_home)
-
 $lithium_home["\\"] = '/' if $lithium_home.index("\\")
 $lithium_scripts_home = File.join($lithium_home, 'lib')
 raise "Lithium scripts directory cannot be found #{$lithium_scripts_home}" if !File.directory?($lithium_scripts_home)
 
 # modify ruby modules lookup path
 $: << "#{$lithium_home}/lib"
-
-
-puts "#{$lithium_home}/lib"
 
 # handle options
 $options, f = {}, nil
@@ -48,7 +44,7 @@ $arguments = ARGV.length > 0 ? ARGV[i..ARGV.length-1] : []
 
 
 # initialize stdout/stderr handler
-require 'gravity/lithium/std'
+require 'lithium/std'
 
 
 if $options['std']
@@ -66,7 +62,7 @@ if std_clazz
 end
 
 # Load common utils
-require 'gravity/lithium/util/misc'
+require 'lithium/util/misc'
 
 # For the sake of completeness correct windows letter case
 $lithium_home         = FileUtil.correct_win_path($lithium_home)
@@ -178,7 +174,7 @@ $arguments ||= []
 
 begin
     # load artifact core
-    require 'gravity/lithium/core-artifact/project'
+    require 'lithium/core-artifact/project'
 
     # load project configuration
     load "#{$lithium_home}/.lithium/project.layout"

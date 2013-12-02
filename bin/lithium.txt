@@ -1,5 +1,5 @@
 ::----------------------------------------------------::
-::   Lithium Build Tool v2.2 Aug, 2012                ::
+::   Lithium Build Tool v2.3 Aug, 2013                ::
 ::----------------------------------------------------::
 Usage:
  "lithium [command:]*artifact [arg]*"

@@ -1,9 +1,7 @@
 
 ![ScreenShot](/samples/rs/header.jpg)
 
-
 ## For impatient: look at few demos   
-
 
    * Full package demo, Zebra rich set of UI components: http://www.zebkit.org/samples/index.html
    * Zebra UI engine simple samples: http://www.zebkit.org/samples/uiengine.samples.html
@@ -330,10 +328,11 @@ Zebra package:
 ```bash
 zebra-home
   |
-  +--- lib        # zebra source code
-  +--- samples    # various zebra snippets and general UI set demo
-  +--- startup.py # small HTTP Web server
-  +--- index.html # index WEB page to see main samples and demos
+  +--- [lib]        # zebra source code
+  +--- [apidoc]     # the latest zebra API documentation
+  +--- [samples]    # various zebra snippets and general UI set demo
+  +--- startup.py   # small HTTP Web server
+  +--- index.html   # index WEB page to see main samples and demos
 ```
 
 ### Run demos and samples
@@ -373,9 +372,9 @@ The following JS files are generated:
 ```bash
 zebra-home
   |
-  +-- lib     
+  +-- [lib]     
   |     |
-  |     zebra
+  |     [zebra]
   |       +- zebra.min.js # compressed all Zebra JS code (UI engine, IO, Rich UI components set)
   |       +- zebra.js     # all Zebra JS code (UI engine, IO, Rich UI components set)
   |       |

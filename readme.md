@@ -365,7 +365,7 @@ configuration and resources ("lib/zebra/rs") files that are required in runtime.
 final artifacts that are supposed to be used to build Zebra applications. They are generated from source code 
 by running special command as follow:
 ```bash
-   $ ruby ./bin/lithium build
+   $ ruby ./bin/lithium.rb build
 ```
 
 

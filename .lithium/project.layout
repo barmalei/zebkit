@@ -30,7 +30,7 @@ PROJECT {
         CLASS CombinedJavaScript
     }
 
-    ARTIFACT("dist.zip", ZipFile) {
+    ARTIFACT("zebra.runtime.zip", ZipFile) {
         @base = "lib/zebra"
     }
 
@@ -61,6 +61,6 @@ PROJECT {
         REQUIRE "lib/zebra/zebra.io.min.js"
         REQUIRE "samples/demo/demo.all.min.js"
         REQUIRE "minjs:samples/uiengine.samples.js"
-        REQUIRE "dist.zip"
+        REQUIRE "zebra.runtime.zip"
     }
 }

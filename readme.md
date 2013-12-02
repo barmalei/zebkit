@@ -367,28 +367,33 @@ by running special command as follow:
 ```bash
    $ ruby ./bin/lithium build
 ```
+
+
 The following JS files are generated:    
 ```bash
 zebra-home
   |
   +-- lib     
-       |
-       zebra
-         +- zebra.min.js # compressed all Zebra JS code (UI engine, IO, Rich UI components set)
-         +- zebra.js     # all Zebra JS code (UI engine, IO, Rich UI components set)
-         |
-         +- zebra.canvas.min.js  # compressed Zebra UI engine (IO also included) JS code
-         +- zebra.canvas.js      # Zebra UI engine (IO also included) JS code 
-         |
-         +- zebra.io.min.js  # compressed Zebra IO JS code
-         +- zebra.io.js      # Zebra IO JS code
+  |     |
+  |     zebra
+  |       +- zebra.min.js # compressed all Zebra JS code (UI engine, IO, Rich UI components set)
+  |       +- zebra.js     # all Zebra JS code (UI engine, IO, Rich UI components set)
+  |       |
+  |       +- zebra.canvas.min.js  # compressed Zebra UI engine (IO also included) JS code
+  |       +- zebra.canvas.js      # Zebra UI engine (IO also included) JS code 
+  |       |
+  |       +- zebra.io.min.js  # compressed Zebra IO JS code
+  |       +- zebra.io.js      # Zebra IO JS code
+  |
+  +-- zebra.runtime.zip # scripts, resources and configurations that you need in runtime
+                        # you can unpack it in a web home folder of your web application 
+                        # and than load zebra script from this folder
 ```
 
 Copy the stuff into your WEB server alone with "lib/zebra/rs" folder and "lib/zebra/*.json" fies.
-Depending on your need you can use one of the mentioned above Zebra module:
-   * Zebra UI engine, if you don't need Rich UI components set. Add "zebra.canvas.min.js" into a HTML page.
-   * Small zebra IO if you don't need any UI feature. Add "zebra.io.min.js" into a HTML page.
-   * Zebra UI Rich components set that actually contains all zebra code. Add "zebra.min.js" into a HTML page.
+
+Use artifacts packaged in "zebra.runtime.zip" file if you need to keep zebra on your web site. Just 
+unpack it in you web folder and include "zebra.min.js" in your HTML page.
 
 
 ### License

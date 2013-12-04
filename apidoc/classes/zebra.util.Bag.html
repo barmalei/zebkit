@@ -97,6 +97,8 @@
             
                 <li><a href="../classes/zebra.layout.getMaxPreferredSize().html">zebra.layout.getMaxPreferredSize()</a></li>
             
+                <li><a href="../classes/zebra.layout.getRelLocation().html">zebra.layout.getRelLocation()</a></li>
+            
                 <li><a href="../classes/zebra.layout.getTopParent().html">zebra.layout.getTopParent()</a></li>
             
                 <li><a href="../classes/zebra.layout.GridLayout.html">zebra.layout.GridLayout</a></li>
@@ -170,6 +172,8 @@
                 <li><a href="../classes/zebra.ui.EventManager.html">zebra.ui.EventManager</a></li>
             
                 <li><a href="../classes/zebra.ui.Extender.html">zebra.ui.Extender</a></li>
+            
+                <li><a href="../classes/zebra.ui.ExternalEditor.html">zebra.ui.ExternalEditor</a></li>
             
                 <li><a href="../classes/zebra.ui.FocusListener.html">zebra.ui.FocusListener</a></li>
             
@@ -571,6 +575,13 @@ the given JSON configuration</p>
                             </li>
                         
                             <li class="index-item method">
+                                <a href="#method_get">get</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
                                 <a href="#method_load">load</a>
 
                                 
@@ -579,6 +590,13 @@ the given JSON configuration</p>
                         
                             <li class="index-item method">
                                 <a href="#method_loadByUrl">loadByUrl</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method protected">
+                                <a href="#method_mergeContent">mergeContent</a>
 
                                 
                                 
@@ -749,6 +767,110 @@ content</p>
 
     
 
+    
+
+    
+</div>
+
+                
+                    <div id="method_get" class="method item">
+    <h3 class="name"><code>get</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>key</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type">Object</span>
+        </span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Get a property value. The property name can point to embedded fields:</p>
+<pre class="code prettyprint"><code> var bag = new Bag().loadByUrl(&quot;my.json&quot;);
+ bag.get(&quot;a.b.c&quot;);</code></pre>
+<p>Also the special property type is considered - factory. Access to such property
+causes a new instance of a class object will be created. Property is considered
+as a factory property if it declares a &quot;$new&quot; field. The filed should point to 
+a method that will be called to instantiate the property value.</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">key</code>
+                        <span class="type">String</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a property key.</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type">Object</span>
+                    
+                    <p>a property value</p>
+
+                
+            </div>
+        </div>
     
 
     
@@ -988,6 +1110,129 @@ parsing the JSONs are merged and than the final result is parsed.</p>
                         <b>Return: </b><span class="type"><a href="../classes/zebra.util.Bag.html" class="crosslink">zebra.util.Bag</a></span>
                     
                     <p>a reference to the bag class instance</p>
+
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_mergeContent" class="method item protected">
+    <h3 class="name"><code>mergeContent</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>o</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>v</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type">Object</span>
+        </span>
+    
+
+    
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Merge content of the specified object with the specified value and return 
+a merge result.</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">o</code>
+                        <span class="type">Object</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>an object with that the value is merged</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">v</code>
+                        <span class="type">Object</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a value to be merged</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type">Object</span>
+                    
+                    <p>a merge result</p>
 
                 
             </div>

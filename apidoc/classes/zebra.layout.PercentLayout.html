@@ -97,6 +97,8 @@
             
                 <li><a href="../classes/zebra.layout.getMaxPreferredSize().html">zebra.layout.getMaxPreferredSize()</a></li>
             
+                <li><a href="../classes/zebra.layout.getRelLocation().html">zebra.layout.getRelLocation()</a></li>
+            
                 <li><a href="../classes/zebra.layout.getTopParent().html">zebra.layout.getTopParent()</a></li>
             
                 <li><a href="../classes/zebra.layout.GridLayout.html">zebra.layout.GridLayout</a></li>
@@ -170,6 +172,8 @@
                 <li><a href="../classes/zebra.ui.EventManager.html">zebra.ui.EventManager</a></li>
             
                 <li><a href="../classes/zebra.ui.Extender.html">zebra.ui.Extender</a></li>
+            
+                <li><a href="../classes/zebra.ui.ExternalEditor.html">zebra.ui.ExternalEditor</a></li>
             
                 <li><a href="../classes/zebra.ui.FocusListener.html">zebra.ui.FocusListener</a></li>
             
@@ -577,11 +581,15 @@ vertically or horizontally</p>
                     <ul class="index-list attrs extends">
                         
                             <li class="index-item attr">
-                                <a href="#attr_dir">dir</a>
+                                <a href="#attr_direction">direction</a>
                             </li>
                         
                             <li class="index-item attr">
                                 <a href="#attr_gap">gap</a>
+                            </li>
+                        
+                            <li class="index-item attr">
+                                <a href="#attr_stretch">stretch</a>
                             </li>
                         
                     </ul>
@@ -600,10 +608,10 @@ vertically or horizontally</p>
                 <h2 class="off-left">Attributes</h2>
 
                 
-                    <div id="attr_dir" class="attr item">
-    <a name="config_dir"></a> 
-    <h3 class="name"><code>dir</code></h3>
-    <span class="type">Ineteger</span>
+                    <div id="attr_direction" class="attr item">
+    <a name="config_direction"></a> 
+    <h3 class="name"><code>direction</code></h3>
+    <span class="type">Integer</span>
 
     
 
@@ -639,6 +647,8 @@ vertically or horizontally</p>
     </div>
 
     
+        <p><strong>Default:</strong> zebra.layout.HORIZONTAL</p>
+    
 
     
 
@@ -649,7 +659,7 @@ vertically or horizontally</p>
                     <div id="attr_gap" class="attr item">
     <a name="config_gap"></a> 
     <h3 class="name"><code>gap</code></h3>
-    <span class="type">Ineteger</span>
+    <span class="type">Integer</span>
 
     
 
@@ -684,6 +694,58 @@ vertically or horizontally</p>
 
     </div>
 
+    
+        <p><strong>Default:</strong> 2</p>
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="attr_stretch" class="attr item">
+    <a name="config_stretch"></a> 
+    <h3 class="name"><code>stretch</code></h3>
+    <span class="type">Integer</span>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <span class="flag readonly">readonly</span>
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Boolean flag that say if the laid out components have 
+to be stretched vertically (if direction is set to zebra.layout.VERTICAL) 
+or horizontally (if direction is set to zebra.layout.HORIZONTAL)</p>
+
+    </div>
+
+    
+        <p><strong>Default:</strong> true</p>
     
 
     

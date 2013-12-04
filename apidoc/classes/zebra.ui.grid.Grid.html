@@ -97,6 +97,8 @@
             
                 <li><a href="../classes/zebra.layout.getMaxPreferredSize().html">zebra.layout.getMaxPreferredSize()</a></li>
             
+                <li><a href="../classes/zebra.layout.getRelLocation().html">zebra.layout.getRelLocation()</a></li>
+            
                 <li><a href="../classes/zebra.layout.getTopParent().html">zebra.layout.getTopParent()</a></li>
             
                 <li><a href="../classes/zebra.layout.GridLayout.html">zebra.layout.GridLayout</a></li>
@@ -170,6 +172,8 @@
                 <li><a href="../classes/zebra.ui.EventManager.html">zebra.ui.EventManager</a></li>
             
                 <li><a href="../classes/zebra.ui.Extender.html">zebra.ui.Extender</a></li>
+            
+                <li><a href="../classes/zebra.ui.ExternalEditor.html">zebra.ui.ExternalEditor</a></li>
             
                 <li><a href="../classes/zebra.ui.FocusListener.html">zebra.ui.FocusListener</a></li>
             
@@ -629,6 +633,13 @@ embedded arrays. Every embedded array is a grid row.</p>
                                 
                             </li>
                         
+                            <li class="index-item method protected">
+                                <a href="#method_getDataToEdit">getDataToEdit</a>
+
+                                
+                                
+                            </li>
+                        
                             <li class="index-item method">
                                 <a href="#method_getEditingCell">getEditingCell</a>
 
@@ -776,6 +787,13 @@ embedded arrays. Every embedded array is a grid row.</p>
                                 
                             </li>
                         
+                            <li class="index-item method protected">
+                                <a href="#method_setEditedData">setEditedData</a>
+
+                                
+                                
+                            </li>
+                        
                             <li class="index-item method">
                                 <a href="#method_setEditorProvider">setEditorProvider</a>
 
@@ -813,6 +831,13 @@ embedded arrays. Every embedded array is a grid row.</p>
                         
                             <li class="index-item method">
                                 <a href="#method_setViewProvider">setViewProvider</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
+                                <a href="#method_setViews">setViews</a>
 
                                 
                                 
@@ -1368,6 +1393,104 @@ columns and rows visibility</p>
             
                 <li class="arg">
                     
+                        <code>col</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type">Integer</span>
+        </span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Get the given column top-left corner x coordinate</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">col</code>
+                        <span class="type">Integer</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a column</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type">Integer</span>
+                    
+                    <p>a top-left corner x coordinate of the given column</p>
+
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_getColX" class="method item">
+    <h3 class="name"><code>getColX</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
                         <code>row</code>
                     
                 </li>
@@ -1458,12 +1581,18 @@ of the given column</p>
 </div>
 
                 
-                    <div id="method_getColX" class="method item">
-    <h3 class="name"><code>getColX</code></h3>
+                    <div id="method_getDataToEdit" class="method item protected">
+    <h3 class="name"><code>getDataToEdit</code></h3>
 
     
         <div class="args">
             <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>row</code>
+                    
+                </li>
             
                 <li class="arg">
                     
@@ -1477,12 +1606,14 @@ of the given column</p>
 
     
         <span class="returns-inline">
-            <span class="type">Integer</span>
+            <span class="type">Object</span>
         </span>
     
 
     
 
+    
+        <span class="flag protected">protected</span>
     
 
     
@@ -1507,7 +1638,7 @@ of the given column</p>
     </div>
 
     <div class="description">
-        <p>Get the given column top-left corner x coordinate</p>
+        <p>Fetch a data from matrix model that has to be edited</p>
 
     </div>
 
@@ -1516,6 +1647,22 @@ of the given column</p>
             <h4>Parameters:</h4>
 
             <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">row</code>
+                        <span class="type">Integer</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a row</p>
+
+                    </div>
+
+                    
+                </li>
             
                 <li class="param">
                     
@@ -1543,9 +1690,9 @@ of the given column</p>
             <div class="returns-description">
                 
                     
-                        <b>Return: </b><span class="type">Integer</span>
+                        <b>Return: </b><span class="type">Object</span>
                     
-                    <p>a top-left corner x coordinate of the given column</p>
+                    <p>a matrix model data to be edited</p>
 
                 
             </div>
@@ -3394,6 +3541,133 @@ if the grid component is forced to use preferred size metric.</p>
 </div>
 
                 
+                    <div id="method_setEditedData" class="method item protected">
+    <h3 class="name"><code>setEditedData</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>row</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>col</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>an</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+
+    
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Apply the given edited data to grid matrix model</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">row</code>
+                        <span class="type">Integer</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a row</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">col</code>
+                        <span class="type">Integer</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a column</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">an</code>
+                        <span class="type">Object</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>edited matrix model data to be applied</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+
+    
+</div>
+
+                
                     <div id="method_setEditorProvider" class="method item">
     <h3 class="name"><code>setEditorProvider</code></h3>
 
@@ -3896,6 +4170,93 @@ aligned, colored</p>
 
                     <div class="param-description">
                         <p>a view provider</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="method_setViews" class="method item">
+    <h3 class="name"><code>setViews</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>a</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Set number of views to render different grid component elements</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">a</code>
+                        <span class="type">Object</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>set of views as dictionary where key is a view 
+name and the value is a view instance, string (for color, border), 
+or render function. The following view elements can be passed:</p>
+<pre><code>{
+   &quot;onselection&quot; : &lt;view to render selected row for the grid that holds focus&gt;,   
+   &quot;offselection&quot;: &lt;view to render selected row for the grid that doean&#39;t hold focus&gt;
+}</code></pre>
 
                     </div>
 

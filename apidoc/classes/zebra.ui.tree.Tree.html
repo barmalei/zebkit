@@ -97,6 +97,8 @@
             
                 <li><a href="../classes/zebra.layout.getMaxPreferredSize().html">zebra.layout.getMaxPreferredSize()</a></li>
             
+                <li><a href="../classes/zebra.layout.getRelLocation().html">zebra.layout.getRelLocation()</a></li>
+            
                 <li><a href="../classes/zebra.layout.getTopParent().html">zebra.layout.getTopParent()</a></li>
             
                 <li><a href="../classes/zebra.layout.GridLayout.html">zebra.layout.GridLayout</a></li>
@@ -170,6 +172,8 @@
                 <li><a href="../classes/zebra.ui.EventManager.html">zebra.ui.EventManager</a></li>
             
                 <li><a href="../classes/zebra.ui.Extender.html">zebra.ui.Extender</a></li>
+            
+                <li><a href="../classes/zebra.ui.ExternalEditor.html">zebra.ui.ExternalEditor</a></li>
             
                 <li><a href="../classes/zebra.ui.FocusListener.html">zebra.ui.FocusListener</a></li>
             
@@ -580,6 +584,20 @@ of zebra.data.TreeModel class</p>
                         
                             <li class="index-item method">
                                 <a href="#method_makeVisible">makeVisible</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method protected">
+                                <a href="#method_paintChild">paintChild</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method private">
+                                <a href="#method_se">se</a>
 
                                 
                                 
@@ -1145,6 +1163,271 @@ tree item.</p>
         </div>
     
 
+    
+
+    
+</div>
+
+                
+                    <div id="method_paintChild" class="method item protected">
+    <h3 class="name"><code>paintChild</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>g</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>root</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>index</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type">Boolean</span>
+        </span>
+    
+
+    
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Paint children items of the given root tree item.</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">g</code>
+                        <span class="type">2DContext</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a graphical context</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">root</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a root tree item</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">index</code>
+                        <span class="type">Integer</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>an index</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b> <span class="type">Boolean</span>
+                    
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_se" class="method item private">
+    <h3 class="name"><code>se</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>item</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>e</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type">Boolean</span>
+        </span>
+    
+
+    
+
+    
+        <span class="flag private">private</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Initiate the given item editing if the specified event matches condition</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">item</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>an item to be edited</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">e</code>
+                        <span class="type"><a href="../classes/zebra.ui.InputEvent.html" class="crosslink">zebra.ui.InputEvent</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>an even that may trigger the item editing</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type">Boolean</span>
+                    
+                    <p>return true if an item editing process has been started, 
+false otherwise</p>
+
+                
+            </div>
+        </div>
     
 
     

@@ -97,6 +97,8 @@
             
                 <li><a href="../classes/zebra.layout.getMaxPreferredSize().html">zebra.layout.getMaxPreferredSize()</a></li>
             
+                <li><a href="../classes/zebra.layout.getRelLocation().html">zebra.layout.getRelLocation()</a></li>
+            
                 <li><a href="../classes/zebra.layout.getTopParent().html">zebra.layout.getTopParent()</a></li>
             
                 <li><a href="../classes/zebra.layout.GridLayout.html">zebra.layout.GridLayout</a></li>
@@ -170,6 +172,8 @@
                 <li><a href="../classes/zebra.ui.EventManager.html">zebra.ui.EventManager</a></li>
             
                 <li><a href="../classes/zebra.ui.Extender.html">zebra.ui.Extender</a></li>
+            
+                <li><a href="../classes/zebra.ui.ExternalEditor.html">zebra.ui.ExternalEditor</a></li>
             
                 <li><a href="../classes/zebra.ui.FocusListener.html">zebra.ui.FocusListener</a></li>
             
@@ -729,7 +733,7 @@ a border view how much space left side of the border occupies</p>
 </div>
 
                 
-                    <div id="method_getPreferredSize" class="method item inherited">
+                    <div id="method_getPreferredSize" class="method item">
     <h3 class="name"><code>getPreferredSize</code></h3>
 
     
@@ -756,9 +760,10 @@ a border view how much space left side of the border occupies</p>
 
     <div class="meta">
         
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.View.html#method_getPreferredSize">zebra.ui.View</a>:
+            <p>Inherited from
+            <a href="../classes/zebra.ui.View.html#method_getPreferredSize">
+                zebra.ui.View
+            </a>
             
         
         </p>
@@ -770,7 +775,9 @@ a border view how much space left side of the border occupies</p>
     </div>
 
     <div class="description">
-        <p>Return preferred size the view desires to have</p>
+        <p>Get preferred size of the render. The method doesn&#39;t calculates 
+preferred size it simply calls the target component &quot;getPreferredSize&quot;
+method.</p>
 
     </div>
 
@@ -782,8 +789,11 @@ a border view how much space left side of the border occupies</p>
             <div class="returns-description">
                 
                     
-                        <b>Return: </b> <span class="type">Object</span>
+                        <b>Return: </b><span class="type">Object</span>
                     
+                    <p>a preferred size</p>
+<pre><code> {width:&lt;Integer&gt;, height: &lt;Integer&gt;}</code></pre>
+
                 
             </div>
         </div>

@@ -97,6 +97,8 @@
             
                 <li><a href="../classes/zebra.layout.getMaxPreferredSize().html">zebra.layout.getMaxPreferredSize()</a></li>
             
+                <li><a href="../classes/zebra.layout.getRelLocation().html">zebra.layout.getRelLocation()</a></li>
+            
                 <li><a href="../classes/zebra.layout.getTopParent().html">zebra.layout.getTopParent()</a></li>
             
                 <li><a href="../classes/zebra.layout.GridLayout.html">zebra.layout.GridLayout</a></li>
@@ -170,6 +172,8 @@
                 <li><a href="../classes/zebra.ui.EventManager.html">zebra.ui.EventManager</a></li>
             
                 <li><a href="../classes/zebra.ui.Extender.html">zebra.ui.Extender</a></li>
+            
+                <li><a href="../classes/zebra.ui.ExternalEditor.html">zebra.ui.ExternalEditor</a></li>
             
                 <li><a href="../classes/zebra.ui.FocusListener.html">zebra.ui.FocusListener</a></li>
             
@@ -545,6 +549,13 @@ between number of pages where every page is an UI component.</p>
                                 
                             </li>
                         
+                            <li class="index-item method protected">
+                                <a href="#method_getTabBounds">getTabBounds</a>
+
+                                
+                                
+                            </li>
+                        
                             <li class="index-item method">
                                 <a href="#method_getTabView">getTabView</a>
 
@@ -567,7 +578,21 @@ between number of pages where every page is an UI component.</p>
                             </li>
                         
                             <li class="index-item method">
+                                <a href="#method_paintTab">paintTab</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
                                 <a href="#method_select">select</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
+                                <a href="#method_setViews">setViews</a>
 
                                 
                                 
@@ -948,6 +973,107 @@ tab can be found</p>
 </div>
 
                 
+                    <div id="method_getTabBounds" class="method item protected">
+    <h3 class="name"><code>getTabBounds</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>i</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type">Object</span>
+        </span>
+    
+
+    
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Get the given tab page title rectangular bounds</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">i</code>
+                        <span class="type">Integer</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a tab page index</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type">Object</span>
+                    
+                    <p>a tab page rectangular bounds</p>
+<p>   {x:<Integer>, y:<Integer>, width:<Integer>, height:<Integer>}</p>
+
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
                     <div id="method_getTabView" class="method item">
     <h3 class="name"><code>getTabView</code></h3>
 
@@ -1265,6 +1391,109 @@ given tab page title</p>
 </div>
 
                 
+                    <div id="method_paintTab" class="method item">
+    <h3 class="name"><code>paintTab</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>g</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>pageIndex</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Paint the given tab page title</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">g</code>
+                        <span class="type">2DContext</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a graphical context</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">pageIndex</code>
+                        <span class="type">Integer</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a tab page index</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+
+    
+</div>
+
+                
                     <div id="method_select" class="method item">
     <h3 class="name"><code>select</code></h3>
 
@@ -1330,6 +1559,95 @@ given tab page title</p>
 
                     <div class="param-description">
                         <p>a tab page index to be navigated</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="method_setViews" class="method item">
+    <h3 class="name"><code>setViews</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>a</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Set number of views to render different Tab component elements</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">a</code>
+                        <span class="type">Object</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>set of views as dictionary where key is a view 
+name and the value is a view instance, string(for color), or render
+function. The following view elements can be passed:</p>
+<pre><code>{
+   &quot;tab&quot;    : &lt;view to render not selected tab page&gt;,   
+   &quot;tabover&quot;: &lt;view to render a tab page when mouse is over&gt;
+   &quot;tabon&quot;  : &lt;a view to render selected tab page&gt;
+   &quot;marker&quot; : &lt;a marker view to be rendered around tab page title&gt;
+}</code></pre>
 
                     </div>
 

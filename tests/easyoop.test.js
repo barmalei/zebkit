@@ -12,6 +12,36 @@ if (typeof(zebra) === "undefined") {
         ABSTRACT = 1, FINAL = 2;
 
     zebra.runTests("Zebra easy OOP",
+
+        function test_function_name_detection() {
+            var f = [
+                function a() {},
+                function   a  () {},
+                function   a() {},
+                function a  () {},
+                function a(p1) {
+
+                },
+                function a (p2) {},
+                function  a(p2) {},
+                function   a (p2) {},
+                function a( p2 ) {},
+                function a  ( p2, p3) {},
+                function   a  
+                ( 
+                    p2, 
+
+                    p3) 
+
+
+                {}
+            ]
+        
+            for(var i=0; i < f.length; i++) {
+                assert(zebra.$FN(f[i]), "a");
+            }
+        },
+
         function test_context() {
             function A() {
                 this.toString = function() {
@@ -83,17 +113,8 @@ if (typeof(zebra) === "undefined") {
         },
 
         function test_zebra() {
-            var isChrome = zebra.isChrome, isInBrowser = zebra.isInBrowser, isIE = zebra.isIE, isSafari = zebra.isSafari, isOpera = zebra.isOpera;
-            assert(!isInBrowser || isOpera || isChrome || isSafari || isIE, true, "Should be in one of tested browser");
-
-            var c = isOpera?1:0 + isSafari?1:0 + isIE?1:0 + isOpera?1:0;
-            assert(!isInBrowser || c == 1, true, "");
             assert(typeof zebra.url === 'undefined', true);
             assert(typeof zebra.out !== 'undefined', true);
-
-         //   assert(!zebra.isInBrowser && !zebra.isOpera && !isChrome && !isSafari && !isIE, true, "");
-            // if (zebra.isInBrowser) assert(zebra.url, null, "Outside browser package URL is null");
-            // else assert(zebra.url != null, true, "zebra URL");
         },
 
         function test_methods() {
@@ -1158,8 +1179,14 @@ if (typeof(zebra) === "undefined") {
 
             a = new A([
                 function a() { return 2; },
-                function a(p1, p2) { return p1 + p2; }
+                function a(p1, p2) { return p1 + p2; },
+                function b () {
+                    return 777;
+                }
             ]);
+
+            assert(a.b() != null, true, "new anonymous  method b()");
+            assert(a.b(), 777, "new anonymous  method b()");
 
             assert(a.a(), 2, "anonymous overridden method a()");
             assert(a.a(22), 22, "anonymous didn't touch method a(1)");

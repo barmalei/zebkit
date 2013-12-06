@@ -127,6 +127,7 @@ YUI.add("yuidoc-meta", function(Y) {
         "zebra.ui.TextField",
         "zebra.ui.TextRender",
         "zebra.ui.Toolbar",
+        "zebra.ui.Tooltip",
         "zebra.ui.View",
         "zebra.ui.ViewPan",
         "zebra.ui.ViewSet",

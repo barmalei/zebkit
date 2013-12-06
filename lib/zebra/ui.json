@@ -392,15 +392,6 @@
         }
     },
 
-    "TooltipLabel": {
-        "properties": {
-            "background": "#E0F4FF",
-            "font"      : "@smallFont",
-            "color"     : "@palette.black",
-            "border"    : { "$zebra.ui.TooltipBorder": [] }
-        }
-    },
-
     "Link": {
         "font": "@boldFont",
         "properties": {
@@ -604,15 +595,21 @@
         }
     },
 
-    "PopupManager": {
+    "Tooltip": {
+        "borderColor":"gray",
+        "borderWidth":1,
+
         "Label": {
-            "properties" : {
-                "paddings"  : [2,6,2,6],
-                "background": "@palette.gray6",
-                "color"     : "@palette.black",
-                "font"      : "@smallFont",
-                "border"    : { "$Border": "@palette.gray1" }
+            "properties": {
+                "font":   "bold 11px Arial",
+                "color":  "gray",
+                "padding":2
             }
+        },
+
+        "properties": {
+            "background" : "yellow",
+            "layout": { "$zebra.layout.FlowLayout": [ "center", "top" ] }
         }
     },
 

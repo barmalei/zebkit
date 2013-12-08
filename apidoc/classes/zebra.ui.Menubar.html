@@ -491,6 +491,10 @@ There is no restriction regarding the placement of the component. </p>
         
         
         
+            <li class="api-class-tab attrs"><a href="#attrs">Attributes</a></li>
+        
+        
+            <li class="api-class-tab events"><a href="#events">Events</a></li>
         
     </ul>
 
@@ -540,7 +544,34 @@ There is no restriction regarding the placement of the component. </p>
             
 
             
+                <div class="index-section attrs">
+                    <h3>Attributes</h3>
 
+                    <ul class="index-list attrs extends">
+                        
+                            <li class="index-item attr">
+                                <a href="#attr_selected">selected</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            
+
+            
+                <div class="index-section events">
+                    <h3>Events</h3>
+
+                    <ul class="index-list events extends">
+                        
+                            <li class="index-item event">
+                                <a href="#event_itemSelected">itemSelected</a>
+
+                                
+                                
+                            </li>
+                        
+                    </ul>
+                </div>
             
         </div>
 
@@ -960,7 +991,163 @@ to unbind the given a menu from the given menu bar item</p>
         
 
         
+            <div id="attrs" class="api-class-tabpanel">
+                <h2 class="off-left">Attributes</h2>
 
+                
+                    <div id="attr_selected" class="attr item">
+    <a name="config_selected"></a> 
+    <h3 class="name"><code>selected</code></h3>
+    <span class="type"><a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a></span>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <span class="flag readonly">readonly</span>
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Selected menu bar item</p>
+
+    </div>
+
+    
+
+    
+
+    
+</div>
+
+                
+            </div>
+        
+
+        
+            <div id="events" class="api-class-tabpanel">
+                <h2 class="off-left">Events</h2>
+
+                
+                    <div id="event_itemSelected" class="events item">
+    <h3 class="name"><code>itemSelected</code></h3>
+    <span class="type"></span>
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Fired when a new Menubar item has been selected</p>
+<pre class="code prettyprint"><code>    var mbar = new zebra.ui.Menubar();
+    ...
+    mbar._.add(function (src, index, prevIndex) {
+        ...
+    });</code></pre>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Event Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">src</code>
+                        <span class="type"><a href="../classes/zebra.ui.Menubar.html" class="crosslink">zebra.ui.Menubar</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a menu bar UI component that triggers the event</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">index</code>
+                        <span class="type">Integer</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>an index of selected menu bar item, -1 when no item 
+is selected</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">prevIndex</code>
+                        <span class="type">Integer</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a previous selected item</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+
+    
+</div>
+
+                
+            </div>
         
     </div>
 </div>

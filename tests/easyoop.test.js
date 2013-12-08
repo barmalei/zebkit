@@ -165,17 +165,17 @@ if (typeof(zebra) === "undefined") {
         },
 
         function test_class() {
-            assert(typeof zebra.Interface.getClazz != 'undefined', true, "test_class 2");
+            assert(typeof zebra.Interface.$clazz != 'undefined', true, "test_class 2");
             assertException(function() {  zebra.instanceOf(Class, null); }, Error, "test_class 1");
 
             assert(zebra.instanceOf(Class, Class), false, "test_class 2");
-            assert(typeof Class.getClazz != 'undefined', true, "test_class 2");
-            assert(Class.getClazz(), null, "test_class 2");
+            assert(typeof Class.$clazz != 'undefined', true, "test_class 2");
+            assert(Class.$clazz, null, "test_class 2");
             assertException(function() { new Class();  }, Error, "test_class 3");
             var A = new Class([]);
 
-            assert(typeof A.getClazz !== 'undefined', true, "test_class 5");
-            assert(A.getClazz(), Class, "test_class 6");
+            assert(typeof A.$clazz !== 'undefined', true, "test_class 5");
+            assert(A.$clazz, Class, "test_class 6");
             assert(A.$parent, null, "test_class 8");
 
             assert(A.getMethod('', 1), null, "test_class 9");
@@ -193,7 +193,20 @@ if (typeof(zebra) === "undefined") {
             assert(B.getMethod('a', 0) !== null, true, "test_class 14");
             assert(B.getMethod('a', 1) !== null, true, "test_class 15");
             assert(B.getMethod('a', 2), null, "test_class 16");
-            assertException(function() { new Class("", []); }, TypeError, "test_class 17");
+
+            assertException(function() { Class("", []); }, ReferenceError, "test_class 17");
+            assertException(function() { Class(null, []); }, ReferenceError, "test_class 17");
+            assertException(function() { Class(1, []); }, ReferenceError, "test_class 17");
+            assertException(function() { Class({}, []); }, ReferenceError, "test_class 17");
+            assertException(function() { Class([], []); }, ReferenceError, "test_class 17");
+            assertException(function() { Class("1", []); }, ReferenceError, "test_class 17");
+            assertException(function() { Class(0, []); }, ReferenceError, "test_class 17");
+            assertException(function() { Class(B.ccccc, []); }, ReferenceError, "test_class 17");
+
+            assertException(function() { Class(B, null, []); }, ReferenceError, "test_class 17");
+            assertException(function() { Class(B, "", []); }, ReferenceError, "test_class 17");
+            assertException(function() { Class(B, 1, []); }, ReferenceError, "test_class 17");
+            assertException(function() { Class(B, B.cccc, []); }, ReferenceError, "test_class 17");
 
             var A = new Class([
                 function(p1, p2) {},
@@ -202,7 +215,7 @@ if (typeof(zebra) === "undefined") {
 
             assert(A.getMethod('', 0), null, "test_class 20");
             assert(A.getMethod('', 3), null, "test_class 21");
-            assert(A.getClazz() == Class, true, "test_class 22");
+            assert(A.$clazz == Class, true, "test_class 22");
             assert(A.getMethod('', 1) !== null, true, "test_class 22");
             assert(A.getMethod('', 2) !== null, true, "test_class 23");
             assert(A.getMethod('', 1).modifier == ABSTRACT, false, "test_class 233");
@@ -218,7 +231,7 @@ if (typeof(zebra) === "undefined") {
             assert(B.getMethod('', 1), null, "test_class 24");
             assert(B.getMethod('', 3), null, "test_class 25");
 
-            assert(B.getClazz() == Class, true, "test_class 26");
+            assert(B.$clazz == Class, true, "test_class 26");
             assert(B.getMethod('', 0) !== null, true, "test_class 26");
             assert(B.getMethod('', 2) !== null, true, "test_class 27");
 
@@ -236,17 +249,17 @@ if (typeof(zebra) === "undefined") {
             }
 
             var a = new A(1), b = new B();
-            assert(a.getClazz() == A, true, "test_class 38");
-            assert(b.getClazz() == B, true, "test_class 38");
-            assert(b.getClazz() != a.getClazz(), true, "test_class 38");
+            assert(a.$clazz == A, true, "test_class 38");
+            assert(b.$clazz == B, true, "test_class 38");
+            assert(b.$clazz != a.$clazz, true, "test_class 38");
 
             var I = new Interface(), I2 = new Interface(I);
-            assert(I.getClazz() == Interface, true, "test_class 38");
-            assert(I2.getClazz() == Interface, true, "test_class 38");
+            assert(I.$clazz == Interface, true, "test_class 38");
+            assert(I2.$clazz == Interface, true, "test_class 38");
             var i = new I(), i2 = new I2();
-            assert(i.getClazz() == I, true, "test_class 38");
-            assert(i2.getClazz() == I2, true, "test_class 38");
-            assert(i2.getClazz() != i.getClazz(), true, "test_class 38");
+            assert(i.$clazz == I, true, "test_class 38");
+            assert(i2.$clazz == I2, true, "test_class 38");
+            assert(i2.$clazz != i.$clazz, true, "test_class 38");
 
             assert(typeof a.toString == 'function' && typeof a.toString.$clone$ == 'undefined', true, 'toString in class instance');
             assert(typeof a.equals == 'function'  && typeof a.equals.$clone$ == 'undefined', true, 'equals in class instance');
@@ -263,10 +276,10 @@ if (typeof(zebra) === "undefined") {
             var a = new A(1), b = new B();
             assert(A, a.constructor, "test_class 38");
             assert(B, b.constructor, "test_class 38");
-            assert(a.getClazz(), A, "test_class 38");
-            assert(a.getClazz(), a.constructor, "test_class 38");
-            assert(b.getClazz(), B, "test_class 38");
-            assert(b.getClazz(), b.constructor, "test_class 38");
+            assert(a.$clazz, A, "test_class 38");
+            assert(a.$clazz, a.constructor, "test_class 38");
+            assert(b.$clazz, B, "test_class 38");
+            assert(b.$clazz, b.constructor, "test_class 38");
             assert(A != B, true, "test_class 38");
 
         },
@@ -346,7 +359,7 @@ if (typeof(zebra) === "undefined") {
             assert(zebra.instanceOf(a,A), true, "Instance of class is instance of the class");
             assert(zebra.instanceOf(a,Object), false, "Class should not be an instance of standard JS Object class");
             assert(zebra.instanceOf(a,String), false, "Class should not be an instance of standard JS String class");
-            assert(a.getClazz(), A, "getClazz has to point to a class an object has been instantiated");
+            assert(a.$clazz, A, "getClazz has to point to a class an object has been instantiated");
         },
 
         function test_constructor() {
@@ -951,8 +964,8 @@ if (typeof(zebra) === "undefined") {
             assert(zebra.instanceOf(a,C), false);
             assert(zebra.instanceOf(a,I1), true);
             assert(zebra.instanceOf(a,I2), false);
-            assert(a.getClazz(), A);
-            assert(a.getClazz().$parent, null);
+            assert(a.$clazz, A);
+            assert(a.$clazz.$parent, null);
 
 
             assert(zebra.instanceOf(b,A), true);
@@ -963,16 +976,16 @@ if (typeof(zebra) === "undefined") {
             assert(zebra.instanceOf(b,C), false);
             assert(zebra.instanceOf(b,I1), true);
             assert(zebra.instanceOf(b,I2), false);
-            assert(b.getClazz(), B);
-            assert(b.getClazz().$parent, A);
+            assert(b.$clazz, B);
+            assert(b.$clazz.$parent, A);
 
             assert(zebra.instanceOf(c,A), true);
             assert(zebra.instanceOf(c,B), true);
             assert(zebra.instanceOf(c,C), true);
             assert(zebra.instanceOf(c,I1), true);
             assert(zebra.instanceOf(c,I2), true);
-            assert(c.getClazz(), C);
-            assert(c.getClazz().$parent, B);
+            assert(c.$clazz, C);
+            assert(c.$clazz.$parent, B);
 
             assert(zebra.instanceOf(d,A), false);
             assert(zebra.instanceOf(d,B), false);
@@ -986,8 +999,8 @@ if (typeof(zebra) === "undefined") {
             assert(zebra.instanceOf(D, String), false);
             assert(zebra.instanceOf(D, Function), false);
 
-            assert(d.getClazz(), D);
-            assert(d.getClazz().$parent,  null);
+            assert(d.$clazz, D);
+            assert(d.$clazz.$parent,  null);
         },
 
         function test_overriding() {
@@ -1192,8 +1205,8 @@ if (typeof(zebra) === "undefined") {
             assert(a.a(22), 22, "anonymous didn't touch method a(1)");
             assert(a.a(22, 1), 23, "anonymous declared new method a(2)");
             assert(zebra.instanceOf(a,A), true, "anonymous is instance of initial class");
-            assert(a.getClazz() != (new A()).getClazz(), true, "anonymous class doesn't equal initial class");
-            assert(a.getClazz().$parent == A, true, "anonymous has proper parent class");
+            assert(a.$clazz != (new A()).$clazz, true, "anonymous class doesn't equal initial class");
+            assert(a.$clazz.$parent == A, true, "anonymous has proper parent class");
 
 
             a = new A();
@@ -1293,10 +1306,10 @@ if (typeof(zebra) === "undefined") {
                 }
             ]);
 
-            assert(a1.getClazz(),  A);
-            assert(a1.getClazz().$name,  "Test");
-            assert(a2.getClazz() != A,  true);
-            assert(a2.getClazz().$name ,  "Test");
+            assert(a1.$clazz,  A);
+            assert(a1.$clazz.$name,  "Test");
+            assert(a2.$clazz != A,  true);
+            assert(a2.$clazz.$name ,  "Test");
         },
 
         function _test_method_modifiers() {
@@ -1678,7 +1691,7 @@ if (typeof(zebra) === "undefined") {
             ]), I = Interface();
 
 
-            var a = new A(), clz = a.getClazz();
+            var a = new A(), clz = a.$clazz;
             assert(a.a(), 10);
             assert(a.a(111), 111);
             assert(zebra.instanceOf(a, zebra.$Extended), false);
@@ -1697,7 +1710,7 @@ if (typeof(zebra) === "undefined") {
                 }
             ]);
 
-            var mclz = a.getClazz();
+            var mclz = a.$clazz;
             assert(a.a(), 200);
             assert(a.a(123), 133);
             assert(a.ff, 333);
@@ -1727,11 +1740,11 @@ if (typeof(zebra) === "undefined") {
             assert(a.ff, 333);
             assert(a.fff, 333);
             assert(a.a(100,11), 111);
-            assert(mclz == a.getClazz(), true);
+            assert(mclz == a.$clazz, true);
             assert(zebra.instanceOf(a, zebra.$Extended), true)
 
             // no side effect to parent class
-            var a = new A(), clz = a.getClazz();
+            var a = new A(), clz = a.$clazz;
             assert(a.a(), 10);
             assert(a.a(111), 111);
             assert(zebra.instanceOf(a, zebra.$Extended), false);
@@ -1762,7 +1775,7 @@ if (typeof(zebra) === "undefined") {
             assert(zebra.instanceOf(b, I), true);
 
             // no side effect to parent class
-            var b = new B(), clz = a.getClazz();
+            var b = new B(), clz = a.$clazz;
             assert(b.a(), 10);
             assert(b.b(), 10);
             assert(b.a(111), 111);

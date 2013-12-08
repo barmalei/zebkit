@@ -427,7 +427,7 @@ pkg.CustomLayer = Class(BaseLayer, [
     },
 
     function $prototype() {
-        this.isLayerActive = function() {
+        this.isLayerActiveAt = function(x, y) {
             return this.bg != null;
         };
 

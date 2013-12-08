@@ -455,7 +455,7 @@
         "Label":{
             "properties": {
                 "font"       : "@boldFont",
-                "color" : "@palette.black",
+                "color"      : "@palette.black",
                 "paddings"   : [2,5,2,5]
             }
         },
@@ -465,7 +465,7 @@
             "padding"   : 4,
             "layout"    : { "$FlowLayout":4 },
             "views"     : {
-                "on"  : { "$Gradient": [ "rgb(228,244,252)", "rgb(167,217,245)"  ] } ,
+                "on"     : { "$Gradient": [ "rgb(228,244,252)", "rgb(167,217,245)"  ] } ,
                 "off" : "#BCF1ED"
             }
         }

@@ -115,6 +115,8 @@
             
                 <li><a href="../classes/zebra.layout.StackLayout.html">zebra.layout.StackLayout</a></li>
             
+                <li><a href="../classes/zebra.namespace().html">zebra.namespace()</a></li>
+            
                 <li><a href="../classes/zebra.PassTextField.html">zebra.PassTextField</a></li>
             
                 <li><a href="../classes/zebra.ready().html">zebra.ready()</a></li>
@@ -309,6 +311,8 @@
             
                 <li><a href="../classes/zebra.ui.TextRender.html">zebra.ui.TextRender</a></li>
             
+                <li><a href="../classes/zebra.ui.TitledBorder.html">zebra.ui.TitledBorder</a></li>
+            
                 <li><a href="../classes/zebra.ui.Toolbar.html">zebra.ui.Toolbar</a></li>
             
                 <li><a href="../classes/zebra.ui.Tooltip.html">zebra.ui.Tooltip</a></li>
@@ -340,6 +344,8 @@
                 <li><a href="../classes/zebra.util.Bag.html">zebra.util.Bag</a></li>
             
                 <li><a href="../classes/zebra.util.findInTree().html">zebra.util.findInTree()</a></li>
+            
+                <li><a href="../classes/zebra.util.intersection();.html">zebra.util.intersection();</a></li>
             
                 <li><a href="../classes/zebra.util.Listeners.html">zebra.util.Listeners</a></li>
             
@@ -498,6 +504,13 @@
                             </li>
                         
                             <li class="index-item method inherited">
+                                <a href="#method_getTextRowColAt">getTextRowColAt</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method inherited">
                                 <a href="#method_getValue">getValue</a>
 
                                 
@@ -534,6 +547,13 @@
                         
                             <li class="index-item method inherited">
                                 <a href="#method_select">select</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method inherited">
+                                <a href="#method_setBlinking">setBlinking</a>
 
                                 
                                 
@@ -1252,6 +1272,129 @@ there is no any selected text</p>
 </div>
 
                 
+                    <div id="method_getTextRowColAt" class="method item inherited">
+    <h3 class="name"><code>getTextRowColAt</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>x</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>y</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type">Array</span>
+        </span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+                <p>Inherited from
+                <a href="../classes/zebra.ui.TextField.html#method_getTextRowColAt">zebra.ui.TextField</a>:
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Compute a text column and row by the given location.</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">x</code>
+                        <span class="type">Integer</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a x coordinate</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">y</code>
+                        <span class="type">Integer</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a y coordinate</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type">Array</span>
+                    
+                    <p>a text row and column as an Array object. Fist element 
+of the array is row and the second one is column.</p>
+
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
                     <div id="method_getValue" class="method item inherited">
     <h3 class="name"><code>getValue</code></h3>
 
@@ -1730,6 +1873,89 @@ have be processed</p>
 
                     <div class="param-description">
                         <p>an end position of a selected text</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="method_setBlinking" class="method item inherited">
+    <h3 class="name"><code>setBlinking</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>period</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+                <p>Inherited from
+                <a href="../classes/zebra.ui.TextField.html#method_setBlinking">zebra.ui.TextField</a>:
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Set the specified blinking period of the text field cursor</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">period</code>
+                        <span class="type">Integer</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a test field cursor blinking period (in milliseconds)</p>
 
                     </div>
 
@@ -2949,6 +3175,8 @@ number of rows and columns.</p>
 
     
 
+    
+        <span class="flag readonly">readonly</span>
     
 
     <div class="meta">

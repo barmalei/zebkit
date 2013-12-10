@@ -115,6 +115,8 @@
             
                 <li><a href="../classes/zebra.layout.StackLayout.html">zebra.layout.StackLayout</a></li>
             
+                <li><a href="../classes/zebra.namespace().html">zebra.namespace()</a></li>
+            
                 <li><a href="../classes/zebra.PassTextField.html">zebra.PassTextField</a></li>
             
                 <li><a href="../classes/zebra.ready().html">zebra.ready()</a></li>
@@ -309,6 +311,8 @@
             
                 <li><a href="../classes/zebra.ui.TextRender.html">zebra.ui.TextRender</a></li>
             
+                <li><a href="../classes/zebra.ui.TitledBorder.html">zebra.ui.TitledBorder</a></li>
+            
                 <li><a href="../classes/zebra.ui.Toolbar.html">zebra.ui.Toolbar</a></li>
             
                 <li><a href="../classes/zebra.ui.Tooltip.html">zebra.ui.Tooltip</a></li>
@@ -340,6 +344,8 @@
                 <li><a href="../classes/zebra.util.Bag.html">zebra.util.Bag</a></li>
             
                 <li><a href="../classes/zebra.util.findInTree().html">zebra.util.findInTree()</a></li>
+            
+                <li><a href="../classes/zebra.util.intersection();.html">zebra.util.intersection();</a></li>
             
                 <li><a href="../classes/zebra.util.Listeners.html">zebra.util.Listeners</a></li>
             
@@ -609,7 +615,7 @@ listener in the check box switch manager as follow:</p>
                                 
                             </li>
                         
-                            <li class="index-item method inherited">
+                            <li class="index-item method protected inherited">
                                 <a href="#method_idByState">idByState</a>
 
                                 
@@ -685,6 +691,10 @@ listener in the check box switch manager as follow:</p>
                     <h3>Attributes</h3>
 
                     <ul class="index-list attrs extends">
+                        
+                            <li class="index-item attr">
+                                <a href="#attr_box">box</a>
+                            </li>
                         
                             <li class="index-item attr inherited">
                                 <a href="#attr_focusMarkerView">focusMarkerView</a>
@@ -846,7 +856,7 @@ listener in the check box switch manager as follow:</p>
 </div>
 
                 
-                    <div id="method_idByState" class="method item inherited">
+                    <div id="method_idByState" class="method item protected">
     <h3 class="name"><code>idByState</code></h3>
 
     
@@ -855,7 +865,7 @@ listener in the check box switch manager as follow:</p>
             
                 <li class="arg">
                     
-                        <code>s</code>
+                        <code>state</code>
                     
                 </li>
             
@@ -872,6 +882,8 @@ listener in the check box switch manager as follow:</p>
     
 
     
+        <span class="flag protected">protected</span>
+    
 
     
 
@@ -883,9 +895,10 @@ listener in the check box switch manager as follow:</p>
 
     <div class="meta">
         
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.StatePan.html#method_idByState">zebra.ui.StatePan</a>:
+            <p>Inherited from
+            <a href="../classes/zebra.ui.StatePan.html#method_idByState">
+                zebra.ui.StatePan
+            </a>
             
         
         </p>
@@ -897,9 +910,7 @@ listener in the check box switch manager as follow:</p>
     </div>
 
     <div class="description">
-        <p>The method is designed to customize mapping between the component state 
-and a string view id. It can be handy for classes that extend the component to have 
-own view IDs set.</p>
+        <p>Map the specified state into its symbolic name.</p>
 
     </div>
 
@@ -911,14 +922,14 @@ own view IDs set.</p>
             
                 <li class="param">
                     
-                        <code class="param-name">s</code>
+                        <code class="param-name">state</code>
                         <span class="type">Integer</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a state code</p>
+                        <p>a state</p>
 
                     </div>
 
@@ -937,7 +948,7 @@ own view IDs set.</p>
                     
                         <b>Return: </b><span class="type">String</span>
                     
-                    <p>a view ID that corresponds to the given state</p>
+                    <p>a symbolic name of the state</p>
 
                 
             </div>
@@ -1641,6 +1652,52 @@ manager has been updated.</p>
         
             <div id="attrs" class="api-class-tabpanel">
                 <h2 class="off-left">Attributes</h2>
+
+                
+                    <div id="attr_box" class="attr item">
+    <a name="config_box"></a> 
+    <h3 class="name"><code>box</code></h3>
+    <span class="type"><a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a></span>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <span class="flag readonly">readonly</span>
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Refernce to box component</p>
+
+    </div>
+
+    
+
+    
+
+    
+</div>
 
                 
                     <div id="attr_focusMarkerView" class="attr item inherited">

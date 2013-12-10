@@ -115,6 +115,8 @@
             
                 <li><a href="../classes/zebra.layout.StackLayout.html">zebra.layout.StackLayout</a></li>
             
+                <li><a href="../classes/zebra.namespace().html">zebra.namespace()</a></li>
+            
                 <li><a href="../classes/zebra.PassTextField.html">zebra.PassTextField</a></li>
             
                 <li><a href="../classes/zebra.ready().html">zebra.ready()</a></li>
@@ -309,6 +311,8 @@
             
                 <li><a href="../classes/zebra.ui.TextRender.html">zebra.ui.TextRender</a></li>
             
+                <li><a href="../classes/zebra.ui.TitledBorder.html">zebra.ui.TitledBorder</a></li>
+            
                 <li><a href="../classes/zebra.ui.Toolbar.html">zebra.ui.Toolbar</a></li>
             
                 <li><a href="../classes/zebra.ui.Tooltip.html">zebra.ui.Tooltip</a></li>
@@ -340,6 +344,8 @@
                 <li><a href="../classes/zebra.util.Bag.html">zebra.util.Bag</a></li>
             
                 <li><a href="../classes/zebra.util.findInTree().html">zebra.util.findInTree()</a></li>
+            
+                <li><a href="../classes/zebra.util.intersection();.html">zebra.util.intersection();</a></li>
             
                 <li><a href="../classes/zebra.util.Listeners.html">zebra.util.Listeners</a></li>
             
@@ -422,7 +428,7 @@
             
                 <li class="arg">
                     
-                        <code class="optional">[inheritedClass]</code>
+                        <code class="optional">[inheritedInterfaces*]</code>
                     
                 </li>
             
@@ -496,7 +502,7 @@
   ]);</code></pre>
 </li>
 <li><p><strong>Class method overloading.</strong> You can declare methods with the same names but 
-different parameter list. The methods are considered as different method</p>
+different parameter list. The methods are considered as different methods</p>
 <pre class="code prettyprint"><code>  // declare class &quot;A&quot; that with one method &quot;a&quot;   
   var A = zebra.Class([
       function a() { ... }
@@ -527,8 +533,8 @@ different parameter list. The methods are considered as different method</p>
   var a = new A();
   a.variable // variable is 100 </code></pre>
 </li>
-<li><p><strong>Static methods and variables declaration.</strong> Static fields and methods can be setup by declaring
-special &quot;$clazz&quot; method whose context is set to declared class</p>
+<li><p><strong>Static methods and variables declaration.</strong> Static fields and methods can be defined 
+  by declaring special &quot;$clazz&quot; method whose context is set to declared class</p>
 <pre class="code prettyprint"><code>  var A = zebra.Class([
       // special method where static stuff has to be declared
       function $clazz() {
@@ -562,7 +568,7 @@ special &quot;$clazz&quot; method whose context is set to declared class</p>
  anonymous classes and interfaces. Anonymous class is an instance of an existing 
  class that can override the original class methods with own implementations, implements
  own list of interfaces. In other words the class instance customizes class definition
- for a particular instance of the class;  </p>
+ for the particular instance of the class;  </p>
 <pre class="code prettyprint"><code>       // declare &quot;A&quot; class
        var A = zebra.Class([
            function a() { return 1; }
@@ -601,17 +607,16 @@ special &quot;$clazz&quot; method whose context is set to declared class</p>
             
                 <li class="param">
                     
-                        <code class="param-name optional">[inheritedClass]</code>
+                        <code class="param-name optional">[inheritedInterfaces*]</code>
                         <span class="type">zebra.Interface</span>
                         <span class="flag optional" title="This parameter is optional.">optional</span>
                     
 
                     
-                        <span class="flag multiple" title="This argument may occur one or more times.">multiple</span>
-                    
 
                     <div class="param-description">
-                        <p>an optional interface to be extended</p>
+                        <p>an optional list of interfaces for 
+the declared class to be extended</p>
 
                     </div>
 
@@ -627,7 +632,7 @@ special &quot;$clazz&quot; method whose context is set to declared class</p>
                     
 
                     <div class="param-description">
-                        <p>list of declared class methods. Can be empty.</p>
+                        <p>list of declared class methods. Can be empty array.</p>
 
                     </div>
 

@@ -43,6 +43,7 @@ YUI.add("yuidoc-meta", function(Y) {
         "zebra.layout.getMaxPreferredSize()",
         "zebra.layout.getRelLocation()",
         "zebra.layout.getTopParent()",
+        "zebra.namespace()",
         "zebra.ready()",
         "zebra.ui.BaseLayer",
         "zebra.ui.BaseList",
@@ -126,6 +127,7 @@ YUI.add("yuidoc-meta", function(Y) {
         "zebra.ui.TextArea",
         "zebra.ui.TextField",
         "zebra.ui.TextRender",
+        "zebra.ui.TitledBorder",
         "zebra.ui.Toolbar",
         "zebra.ui.Tooltip",
         "zebra.ui.View",
@@ -157,6 +159,7 @@ YUI.add("yuidoc-meta", function(Y) {
         "zebra.util.Position",
         "zebra.util.Position.Metric",
         "zebra.util.findInTree()",
+        "zebra.util.intersection();",
         "zebra.util.newInstance()",
         "zebra.util.rgb"
     ],

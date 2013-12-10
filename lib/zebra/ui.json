@@ -36,7 +36,7 @@
 
     "StatePan": {
         "properties": {
-            "layout"     : { "$FlowLayout": [ 16,16,32,2 ] },
+            "layout"     : { "$FlowLayout": [ "center","center", "horizontal",2 ] },
             "focusMarker": "@borders.dot"
         }
     },
@@ -55,7 +55,7 @@
         },
 
         "properties": {
-            "layout": { "$FlowLayout": [16,16,32,2] },
+            "layout": { "$FlowLayout": ["center","center", "horizontal",2] },
 
             "background": { 
                             "pressed.over" : "#FFFFFF",
@@ -96,7 +96,7 @@
         },
 
         "properties": {
-            "layout" : { "$FlowLayout": [ 1,16,32,6 ] },
+            "layout" : { "$FlowLayout": [ "left","center","horizontal",6 ] },
             "border" : {  "$ *ViewSet": { 
                              "focuson" :  { "$Border": [ "#66CCFF", 1, 4 ] },
                              "focusoff":  { "$View" : [ ] }
@@ -135,7 +135,7 @@
         },
 
         "properties": {
-            "border": { "$zebra.ui.TitledBorder": [ { "$Border": ["rgb(197,197,197)", 1, 6] }, 16 ] }
+            "border": { "$zebra.ui.TitledBorder": [ { "$Border": ["rgb(197,197,197)", 1, 6] }, "center" ] }
         }
     },
 
@@ -463,7 +463,7 @@
         "properties": {
             "background": [ [ "#DCF0F7", { "$Gradient":["rgba(255, 255, 255, 0.8)", "rgba(255, 255, 255, 0.0)"] } ] ] ,
             "padding"   : 4,
-            "layout"    : { "$FlowLayout":4 },
+            "layout"    : { "$FlowLayout": 4 },
             "views"     : {
                 "on"     : { "$Gradient": [ "rgb(228,244,252)", "rgb(167,217,245)"  ] } ,
                 "off" : "#BCF1ED"
@@ -640,7 +640,7 @@
 
         "StatusPan": {
             "properties": {
-                "layout": { "$FlowLayout":[2,16] }
+                "layout": { "$FlowLayout":["right","center"] }
             }
         },
 

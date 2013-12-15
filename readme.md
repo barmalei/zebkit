@@ -21,10 +21,8 @@ Starting from 5.2013 Zebra is on Mobile !
 
 ## What is Zebra ?
 
-Zebra is JavaScript library that implements graceful and easy to use OOP concept together with rich set of UI
-components, decoupled UI engine, IO and other packages. The UI components are developed based on HTML5 Canvas 
-element. This approach differs from traditional WEB UI, where user interface is built around HTML DOM and 
-than "colored" with CSS. Zebra UI components are implemented from scratch as a number of widgets rendered 
+Zebra is JavaScript library that implements graceful and easy to use OOP concept together with rich set of UI components, decoupled UI engine, IO and other packages. The UI components are developed based on HTML5 Canvas 
+element. This approach differs from traditional WEB UI, where user interface is built around HTML DOM and than "colored" with CSS. Zebra UI components are implemented from scratch as a number of widgets rendered 
 on HTML Canvas. 
 
 ### Features

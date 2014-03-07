@@ -8,8 +8,7 @@ if (typeof(zebra) === "undefined") {
 
 (function () {
     var assertException = zebra.assertException, assert = zebra.assert, assume = zebra.assume,
-        Class = zebra.Class, Interface = zebra.Interface,
-        ABSTRACT = 1, FINAL = 2;
+        Class = zebra.Class, Interface = zebra.Interface;
 
     zebra.runTests("Zebra easy OOP",
 
@@ -72,6 +71,28 @@ if (typeof(zebra) === "undefined") {
             assume(r[0], 1);
             assume(r[1], 2);
             assume(r[2], 3);
+
+            // test Google error where using empty name can bring to real weird results!
+            function GA() {
+                var f = function() {
+                    this[""].call(this);
+                };
+                f.prototype[""] = function() {};
+                return f;
+            }
+            var GB = GA(), error = 0, success = 0;        
+            
+            for(var i=0; i < 1000; i++) {
+                var l = new GB();
+                if (l.abscdef != null) error++;
+                else success++;
+            }
+            assert(success, 1000, "Google developers were heavily dragged");
+
+            var test = function () {};
+            test.constructor = "TEST";
+
+            assert(test.constructor, "TEST", "Function constructor is assignable");
         },
 
         function test_isString() {
@@ -126,18 +147,6 @@ if (typeof(zebra) === "undefined") {
                 }
             ]);
 
-            // assert(typeof(A.getMethod('a', 0).modifier) !== "undefined", true,  "test_methods 12");
-            // assert(typeof(A.getMethod('', 2).modifier) !== "undefined", true,  "test_methods 11");
-
-            // assert(A.getMethod('', 2).modifier == ABSTRACT, false,  "test_methods 2");
-            // assert(A.getMethod('', 2).modifier == FINAL, false,  "test_methods 3");
-            // assert(A.getMethod('a', 0).modifier == ABSTRACT, false,  "test_methods 5");
-            // assert(A.getMethod('a', 0).modifier == FINAL, false,  "test_methods 6");
-
-            // define method that is "in" standard implementation
-            // assert(typeof(A.getMethod('toString', 0).modifier) !== "undefined", true,  "test_methods 121");
-            // assert(A.getMethod('toString', 0).modifier == ABSTRACT, false,  "test_methods 8");
-            // assert(A.getMethod('toString', 0).modifier == FINAL, false,  "test_methods 9");
             assert((new A(2,2)).toString(), '*',  "Test toString overriding possibility");
 
 
@@ -218,10 +227,6 @@ if (typeof(zebra) === "undefined") {
             assert(A.$clazz == Class, true, "test_class 22");
             assert(A.getMethod('', 1) !== null, true, "test_class 22");
             assert(A.getMethod('', 2) !== null, true, "test_class 23");
-            assert(A.getMethod('', 1).modifier == ABSTRACT, false, "test_class 233");
-            assert(A.getMethod('', 2).modifier == ABSTRACT, false, "test_class 234");
-            assert(A.getMethod('', 1).modifier == FINAL, false, "test_class 235");
-            assert(A.getMethod('', 2).modifier == FINAL, false, "test_class 236");
 
             var B = new Class(A, [
                 function(p1, p2) {},
@@ -262,17 +267,10 @@ if (typeof(zebra) === "undefined") {
             assert(i2.$clazz != i.$clazz, true, "test_class 38");
 
             assert(typeof a.toString == 'function' && typeof a.toString.$clone$ == 'undefined', true, 'toString in class instance');
-            assert(typeof a.equals == 'function'  && typeof a.equals.$clone$ == 'undefined', true, 'equals in class instance');
-            assert(a.equals(a), true, 'class instance equals itself');
-            assert(a.equals(new A(1)), false, 'class instance not equals to other class instance');
-            assert(a.equals(null), false, 'class instance not equals to null');
-            assert(a.equals(undefined), false, 'class instance not equals to undefined');
             assert(typeof a.$this == 'function' && typeof a.$this.$clone$ == 'undefined', true, 'toString in class instance');
             assert(typeof a.$super == 'function'  && typeof a.$super.$clone$ == 'undefined', true, 'equals in class instance');
-
             assert(typeof i.toString == 'function' && typeof i.toString.$clone$ == 'undefined', true, 'toString in interface instance');
-            assert(typeof i.equals == 'function'  && typeof i.equals.$clone$ == 'undefined', true, 'equals in interface instance');
-
+          
             var a = new A(1), b = new B();
             assert(A, a.constructor, "test_class 38");
             assert(B, b.constructor, "test_class 38");
@@ -281,10 +279,7 @@ if (typeof(zebra) === "undefined") {
             assert(b.$clazz, B, "test_class 38");
             assert(b.$clazz, b.constructor, "test_class 38");
             assert(A != B, true, "test_class 38");
-
         },
-
-
 
         function test_array_classdef() {
             var A = new Class([
@@ -468,11 +463,11 @@ if (typeof(zebra) === "undefined") {
 
             var a = new A(), aa = new A(100);
 
-            assert(a.a, 1);
-            assert(aa.a, 100);
+            assert(a.a, 1, "test_constructor 26");
+            assert(aa.a, 100, "test_constructor 27");
             var b = new B(), bb = new B(100);
-            assert(b.a, 1);
-            assert(bb.a, 100);
+            assert(b.a, 1, "test_constructor 271");
+            assert(bb.a, 100, "test_constructor 272");
 
             var AA = Class([ function() { this.aa = 999; } ]); 
 
@@ -496,45 +491,45 @@ if (typeof(zebra) === "undefined") {
             var C = Class(A, [ function() { this.$super(10, 200); } ]);
             var D = Class(B, [ function() { this.$super(100, 2000); } ]);
 
-            assert(AA.getMethods('').length, 1); 
-            assert(A.getMethods('').length, 3); 
-            assert(B.getMethods('').length, 3); 
-            assert(C.getMethods('').length, 1); 
-            assert(D.getMethods('').length, 1); 
+            assert(AA.getMethods('').length, 1, "test_constructor 28"); 
+            assert(A.getMethods('').length, 3, "test_constructor 29"); 
+            assert(B.getMethods('').length, 3, "test_constructor 30"); 
+            assert(C.getMethods('').length, 1, "test_constructor 31"); 
+            assert(D.getMethods('').length, 1, "test_constructor 32"); 
        
             var a1 = new A(), a2 = new A(22), a3 = new A(33, 44); 
             var b1 = new B(), b2 = new B(222), b3 = new B(333, 444);  
             var c1 = new C(), d1 = new D(); 
 
-            assert(a1.a, 1);
-            assert(a1.b, 2);
-            assert(a1.aa, 999);
-            assert(a2.a, 22);
-            assert(a2.b, 2);
-            assert(a2.aa, 999);
-            assert(a3.a, 33);
-            assert(a3.b, 44);
-            assert(a2.aa, 999);
+            assert(a1.a, 1, "test_constructor 33");
+            assert(a1.b, 2, "test_constructor 34");
+            assert(a1.aa, 999, "test_constructor 35");
+            assert(a2.a, 22, "test_constructor 36");
+            assert(a2.b, 2, "test_constructor 37");
+            assert(a2.aa, 999, "test_constructor 38");
+            assert(a3.a, 33, "test_constructor 39");
+            assert(a3.b, 44, "test_constructor 40");
+            assert(a2.aa, 999, "test_constructor 41");
 
-            assert(b1.a, 1);
-            assert(b1.b, 2);
-            assert(b1.aa, 999);
+            assert(b1.a, 1, "test_constructor 42");
+            assert(b1.b, 2, "test_constructor 43");
+            assert(b1.aa, 999, "test_constructor 44");
 
-            assert(b2.a, 222);
-            assert(b2.b, 2);
-            assert(b2.aa, 999);            
+            assert(b2.a, 222, "test_constructor 45");
+            assert(b2.b, 2, "test_constructor 46");
+            assert(b2.aa, 999, "test_constructor 47");            
             
-            assert(b3.a, 333);
-            assert(b3.b, 444);
-            assert(b3.aa, 999);
+            assert(b3.a, 333, "test_constructor 48");
+            assert(b3.b, 444, "test_constructor 49");
+            assert(b3.aa, 999, "test_constructor 50");
 
-            assert(c1.a, 10);
-            assert(c1.b, 200);
-            assert(c1.aa, 999);
+            assert(c1.a, 10, "test_constructor 51");
+            assert(c1.b, 200, "test_constructor 52");
+            assert(c1.aa, 999, "test_constructor 53");
 
-            assert(d1.a, 100);
-            assert(d1.b, 2000);
-            assert(d1.aa, 999);
+            assert(d1.a, 100, "test_constructor 54");
+            assert(d1.b, 2000, "test_constructor 55");
+            assert(d1.aa, 999, "test_constructor 56");
 
 
             var A = Class([
@@ -550,10 +545,10 @@ if (typeof(zebra) === "undefined") {
 
             var a1 = new A(), a2 = new A(100);
 
-            assert(a1.a, 100);
-            assert(a1.test, undefined);
-            assert(a2.test, 100);
-            assert(a2.a, 100);
+            assert(a1.a, 100, "test_constructor 57");
+            assert(a1.test, undefined, "test_constructor 58");
+            assert(a2.test, 100, "test_constructor 59");
+            assert(a2.a, 100, "test_constructor 60");
             
 
             var B =  Class(A, [
@@ -562,8 +557,8 @@ if (typeof(zebra) === "undefined") {
                 }
             ]), b = new B();
 
-            assert(b.a, 100);
-            assert(b.test, 200);
+            assert(b.a, 100, "test_constructor 61");
+            assert(b.test, 200, "test_constructor 62");
 
 
             var C =  Class(A, []), D = Class(C, [
@@ -576,12 +571,12 @@ if (typeof(zebra) === "undefined") {
                 }
             ]), c = new C(), d = new D(), dd = new D(11);
 
-            assert(c.a, 100);
-            assert(c.test, undefined);
-            assert(d.a, 100);
-            assert(d.test, 300);
-            assert(dd.test, 11);
-            assert(dd.a, 100);
+            assert(c.a, 100, "test_constructor 63");
+            assert(c.test, undefined, "test_constructor 64");
+            assert(d.a, 100, "test_constructor 65");
+            assert(d.test, 300, "test_constructor 66");
+            assert(dd.test, 11, "test_constructor 67");
+            assert(dd.a, 100, "test_constructor 68");
 
 
             // var B = Class(A, [
@@ -756,6 +751,22 @@ if (typeof(zebra) === "undefined") {
             assert(zebra.instanceOf(o,I3), true);
             assert(zebra.instanceOf(o,III), false);
             assert(zebra.instanceOf(o,IIII), false);
+
+            var C1 = Class([]), c1 = new C1();
+            var C2 = Class(C1, []), c2 = new C2();
+            var C3 = Class(C2, []), c3 = new C3();
+
+            assert(zebra.instanceOf(c1, C1), true);
+            assert(zebra.instanceOf(c1, C2), false);
+            assert(zebra.instanceOf(c1, C3), false);
+
+            assert(zebra.instanceOf(c2, C1), true);
+            assert(zebra.instanceOf(c2, C2), true);
+            assert(zebra.instanceOf(c2, C3), false);
+
+            assert(zebra.instanceOf(c3, C1), true);
+            assert(zebra.instanceOf(c3, C2), true);
+            assert(zebra.instanceOf(c3, C3), true);
         },
 
         function test_static_methods() {
@@ -1098,8 +1109,7 @@ if (typeof(zebra) === "undefined") {
             assertException(t, Error);
         },
 
-        function test_dynamic()
-        {
+        function test_dynamic() {
             var A = new Class([
                 function a() { return 100; },
                 function a(p) { return p; },
@@ -1160,14 +1170,13 @@ if (typeof(zebra) === "undefined") {
             assert(a.a(), 200);
 
 
-
-            A.extend([
-
+            var M = [
                 function a() { return 502; },
                 function m1() { return 500; },
                 function m2() { return 501; }
+            ];
 
-            ]);
+            A.extend(M);
 
             a = new A();
             assert(A.getMethod("m1") != null, true);
@@ -1178,6 +1187,17 @@ if (typeof(zebra) === "undefined") {
             assert(a.m2(), 501);
             assert(a.a(), 502);
 
+            var B = Class([]); 
+            B.extend(M);
+
+            a = new B();
+            assert(B.getMethod("m1") != null, true);
+            assert(a.m1 != null, true);
+            assert(a.m1(), 500);
+            assert(B.getMethod("m2") != null, true);
+            assert(a.m2 != null, true);
+            assert(a.m2(), 501);
+            assert(a.a(), 502);
         },
 
         function test_anonymous() {
@@ -1310,158 +1330,6 @@ if (typeof(zebra) === "undefined") {
             assert(a1.$clazz.$name,  "Test");
             assert(a2.$clazz != A,  true);
             assert(a2.$clazz.$name ,  "Test");
-        },
-
-        function _test_method_modifiers() {
-            var A = new Class([
-                function a(p) {},
-
-                function $final_a() {}
-            ]);
-
-            assertException(function(){
-                               new A([ function a() {} ]);
-                            }, Error, "test_method_modifiers 4");
-
-            assert(A.getMethod('a').modifier == FINAL, true, "test_method_modifiers 0");
-            assert(A.getMethod('a').modifier == ABSTRACT, false, "test_method_modifiers 02");
-            assert(A.getMethod('a',1).modifier == FINAL, false, "test_method_modifiers 0");
-            assert(A.getMethod('a',1).modifier == ABSTRACT, false, "test_method_modifiers 02");
-            assertException(function() {
-                new Class(A, [
-                    function $final_a() {}
-                ]);
-            }, TypeError, "test_method_modifiers 1");
-
-            assertException(function() {
-                 new Class(A, [ function a() {} ]);
-            }, TypeError, "test_method_modifiers 2");
-
-            var A = new Class([ function a() {} ]);
-            var B = new Class(A, []);
-            var C = new Class(B, [
-                function $final_a() {}
-            ]);
-            var D = new Class(C, []);
-
-            assert(A.getMethod('a').modifier == FINAL, false, "test_method_modifiers 20");
-            assert(B.getMethod('a').modifier == FINAL, false, "test_method_modifiers 201");
-            assert(C.getMethod('a').modifier == FINAL, true, "test_method_modifiers 202");
-            assert(A.getMethod('a').modifier == ABSTRACT, false, "test_method_modifiers 20");
-            assert(B.getMethod('a').modifier == ABSTRACT, false, "test_method_modifiers 201");
-            assert(C.getMethod('a').modifier == ABSTRACT, false, "test_method_modifiers 202");
-
-            assertException(function() {
-                new Class(D, [ function $final_a() {} ]);
-            }, TypeError, "test_method_modifiers 3");
-
-            assertException(function() {
-                new Class(D, [ function a() {} ]);
-            }, TypeError, "test_method_modifiers 4");
-
-            var A = new Class([
-                function a(p) {},
-                function $abstract_a() {}
-            ]);
-
-            assert(A.getMethod('a').modifier == FINAL, false, "test_method_modifiers 20");
-            assert(A.getMethod('a').modifier == ABSTRACT, true, "test_method_modifiers 201");
-            assert(A.getMethod('a', 1).modifier == FINAL, false, "test_method_modifiers 20");
-            assert(A.getMethod('a', 1).modifier == ABSTRACT, false, "test_method_modifiers 201");
-            assert(A.modifier == ABSTRACT, true, "test_method_modifiers 202");
-            assertException(function() { new A(); }, Error, "Abstract class cannot be instantiated");
-
-            assertException(function() {
-                new Class(A, [ function $abstract_a() {} ]);
-            }, TypeError, "test_method_modifiers 3");
-
-            var B = new Class(A, [ function a() {} ]);
-
-            assert(B.getMethod('a').modifier == FINAL, false, "test_method_modifiers 20");
-            assert(B.getMethod('a').modifier == ABSTRACT, false, "test_method_modifiers 201");
-            assert(B.getMethod('a', 1).modifier == FINAL, false, "test_method_modifiers 20");
-            assert(B.getMethod('a', 1).modifier == ABSTRACT, false, "test_method_modifiers 201");
-            assert(B.modifier == ABSTRACT, false, "test_method_modifiers 202");
-
-            var C = new Class(A, []);
-            assert(C.modifier == ABSTRACT, true, "test_method_modifiers 202");
-
-            assertException(function() { new A([ function a(p) {} ]); }, Error, "test_method_modifiers 4");
-
-            var A = new Class([
-                function $final_a() {},
-                function $abstract_b() {},
-                function $abstract_b(p) {},
-                function c() {}
-            ]);
-
-            assertException(function() { new A(); }, Error, "test_method_modifiers 4");
-            assertException(function() { new A([  function a() {}   ] ); }, Error, "test_method_modifiers 4");
-
-            var AA = new Class(A, [
-                                function b() { this.$super(); },
-                                function d() {
-                                    this.$super(this.b);
-                                }
-                          ]);
-
-            var AAA = new Class(AA, [
-                                  function b(p1, p2) { this.c(); },
-                                  function d() {
-                                     this.$super(this.b);
-                                  }
-                                ]);
-
-
-            assertException(function() { new AA(); } , Error, "test_method_modifiers 43");
-            assertException(function() { new AAA(); } , Error, "test_method_modifiers 334");
-
-            var B = new Class(AAA, [
-                                  function b(p) { return 100; },
-                                  function d() {
-                                      this.$super(this.b);
-                                  }
-                            ]);
-            var b = new B();
-
-            assertException(function() { b.d(); } , Error, "test_method_modifiers 4");
-            assert(b.b(10), 100);
-
-            // anonymous class with abstract class
-            var a = new AA([
-                                function b(p) { this.c(); },
-                                function d() { this.$super('b'); }
-                          ]);
-            assertException(function() { a.d(); } , Error, "test_method_modifiers 4");
-
-            // constructor cannot be final
-            assertException(function() { new Class([ function $final_() {} ]); }, Error, "test_method_modifiers 4");
-
-
-
-            // constructor cannot be abstract
-            assertException(function() {  new Class([ function $abstract_() {} ]); }, Error, "test_method_modifiers 4");
-
-
-            var A = new Class([
-                function a() {
-                    return this.a(1);
-                },
-
-                function a(m) {
-                    return m;
-                }
-            ]);
-
-            var B = new Class(A, [
-                function a() {
-                    return 100;
-                }
-            ]);
-
-            assert((new A()).a(), 1);
-            assert((new A()).a(2), 2);
-            assert((new B()).a(), 100);
         },
 
         function test_packaging() {
@@ -1626,6 +1494,25 @@ if (typeof(zebra) === "undefined") {
             assert(b.a, 20);
             assert(typeof b.f === "function" , true);
             assert(b.f(), 444);
+
+
+            var BB = Class(A, [
+                function $prototype() {
+                    this.f = function() { return 12345; };
+                }
+            ]);
+            var bb = new BB(); 
+            assert(bb.a, 20);
+            assert(bb.b[0], 1);
+            assert(bb.b[1], 2);
+            assert(bb.b[2], 3);
+            assert(bb.b, a.b);
+            assert(bb.b.length, 3);
+            assert(bb.a, 20);
+            assert(typeof bb.f === "function" , true);
+            assert(bb.f(), 12345);
+
+
 
             var C = Class(A, [ 
                 function f(a) {

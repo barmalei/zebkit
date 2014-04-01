@@ -1,19 +1,19 @@
 {
-    "version" : "5.2013",
+    "version" : "2.2014",
 
-    "$aliases": {
-        "Picture"       : "zebra.ui.Picture",
-        "Border"        : "zebra.ui.Border",
-        "Dotted"        : "zebra.ui.Dotted",
-        "ViewSet"       : "zebra.ui.ViewSet",
-        "View"          : "zebra.ui.View",
-        "Gradient"      : "zebra.ui.Gradient",
-        "CompositeView" : "zebra.ui.CompositeView",
-        "rgb"           : "zebra.util.rgb",
-        "Font"          : "zebra.ui.Font",
-        "FlowLayout"    : "zebra.layout.FlowLayout",
-        "BorderLayout"  : "zebra.layout.BorderLayout",
-        "ListLayout"    : "zebra.layout.ListLayout"
+    "variables": {
+        "Picture"       : "$zebra.ui.Picture",
+        "Border"        : "$zebra.ui.Border",
+        "Dotted"        : "$zebra.ui.Dotted",
+        "ViewSet"       : "$zebra.ui.ViewSet",
+        "View"          : "$zebra.ui.View",
+        "Gradient"      : "$zebra.ui.Gradient",
+        "CompositeView" : "$zebra.ui.CompositeView",
+        "rgb"           : "$zebra.util.rgb",
+        "Font"          : "$zebra.ui.Font",
+        "FlowLayout"    : "$zebra.layout.FlowLayout",
+        "BorderLayout"  : "$zebra.layout.BorderLayout",
+        "ListLayout"    : "$zebra.layout.ListLayout"
     },
 
     "doubleClickDelta":180,
@@ -26,14 +26,8 @@
         "F7":118, "F8":119, "F9":120, "F10":121, "F11" : 122, "F12" : 123, ",":188, ";" : 186, "'" : 222, 
         "[":219, "]":221, "\\":220,  "/":191,  "ENTER":13, "ESCAPE" : 27, "SPACE" : 32, "DELETE" : 46,
         "BSPACE":8, "TAB":9, "INSERT":45, "DELETE":46, "LEFT":37, "RIGHT":39, "UP":38, "DOWN":40,
-        "HOME":36,"END":35,"PAGEUP":33,"PAGEDOWN":34, "CMD":91, "SHIFT" : 16, "CTRL" : 17, "ALT":18,
-        "CHAR_UNDEFINED":0
-    },
-
-    "?zebra.isFF": {
-        "KeyEvent": {
-            "CMD":224
-        }
+        "HOME":36,"END":35,"PAGEUP":33,"PAGEDOWN":34, "CMD":{ ".expr":"zebra.isFF?224:91" }, "SHIFT": 16, 
+        "CTRL" : 17, "ALT":18, "CHAR_UNDEFINED":0
     },
 
     "events"        : { "$zebra.ui.EventManager":[]  },
@@ -50,10 +44,6 @@
         "commandManager" : { "$zebra.ui.CommandManager" :[] }    
     },
     
-    "layers" : [
-        { "$ *zebra.ui.RootLayer" :  "root"  }
-     ],
-
     "font"          : { "$Font" : ["Arial", 14] },
     "boldFont"      : { "$Font" : ["Arial", "bold", 12] },
     "smallFont"     : { "$Font" : ["Arial", 10] },
@@ -72,8 +62,6 @@
     },
 
     "fontColor"     : "#808080",
-    "disabledColor1": "#7B7B7B",
-    "disabledColor2": "@palette.white",
 
     "borders" : {
         "raised" : { "$zebra.ui.Raised":[] },
@@ -92,8 +80,7 @@
 
     "RootLayer": {
         "properties": {
-            "layout"     : { "$zebra.layout.RasterLayout":[] },
-            "background" : "@palette.background"
+            "$inherit": [ "BaseLayer.properties" ]
         }
     },
 
@@ -101,7 +88,11 @@
         "addons": [],
         "//"    :  "IT IS IMPORTANT TO HAVE CANVAS CSS PADDING = 0 TO FIX IE9 PROBLEM",
         "properties": {
+            "background": "white",
+            "layout": { "$zebra.layout.StackLayout":[] },
+            "kids"  : { "$ *zebra.ui.RootLayer": "root" },
             "styles": {
+                "background-color": "@palette.background",
                 "outline"                    : "none",
                 "padding"                    : "0px",
                 "-webkit-user-select"        : "none",

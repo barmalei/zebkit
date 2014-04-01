@@ -62,7 +62,8 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
 
     function createMTextFieldPan() {
         var p = new Panel(new BorderLayout());
-        var tf = new TextField(new zebra.data.Text("Multiline\ntext field\ncomponents"));
+        var tf = new TextArea("Multiline\ntext field\ncomponents");
+        tf.setBlinking();
         tf.setPreferredSize(180, 80);
         p.add(CENTER, tf);
         return pkg.createBorderPan("Multilines text field", p);
@@ -146,7 +147,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         }
 
         ch.setEnabled(false);
-        ch.setState(true);
+        ch.setValue(true);
         return pkg.createBorderPan(s, p);
     },
 

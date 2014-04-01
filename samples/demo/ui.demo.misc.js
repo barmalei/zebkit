@@ -36,9 +36,9 @@ pkg.MiscDemo = new Class(pkg.DemoPan,[
         ext3Content.setBorder(new Border());
         ext3Content.setBackground(rgb.lightGray);
 
-        var ext1 = new zebra.ui.Extender(ext1Content, "Panel 1");
-        var ext2 = new zebra.ui.Extender(ext2Content, "Panel 2");
-        var ext3 = new zebra.ui.Extender(ext3Content, "Panel 3");
+        var ext1 = new zebra.ui.ExtendablePan(ext1Content, "Panel 1");
+        var ext2 = new zebra.ui.ExtendablePan(ext2Content, "Panel 2");
+        var ext3 = new zebra.ui.ExtendablePan(ext3Content, "Panel 3");
         extPan.add(ext1);
         extPan.add(ext2);
         extPan.add(ext3);

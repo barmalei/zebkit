@@ -3,7 +3,7 @@ if (typeof(zebra) === "undefined") {
     if (typeof arguments[0] === "undefined") p = "";
     else p = arguments[0] + "/";
     load(p + 'lib/zebra/easyoop.js');
-    load(p + 'lib/zebra/assert.js');
+    load(p + 'lib/zebra/tools.js');
 }
 
 (function () {
@@ -11,6 +11,198 @@ if (typeof(zebra) === "undefined") {
         Class = zebra.Class, Interface = zebra.Interface;
 
     zebra.runTests("Zebra easy OOP",
+
+        function test_cache() {
+            zebra.$cacheSize = 3;
+
+            zebra.A = "1";
+            zebra.B = "2";
+            zebra.C = "3";
+            zebra.D = "4";
+            zebra.E = "5";
+
+            assert(zebra.$cachedE.length, 0);
+
+            // add first entry A
+            assert(zebra.$cache("zebra.A"), "1");
+            assert(zebra.$cachedO["zebra.A"].i, 0);
+            assert(zebra.$cachedO["zebra.A"].o, "1");
+            assert(zebra.$cachedE.indexOf("zebra.A"), 0);
+            assert(zebra.$cachedE.length, 1);
+            assert(zebra.$cache("zebra.A"), "1");
+            assert(zebra.$cachedO["zebra.A"].i, 0);
+            assert(zebra.$cachedO["zebra.A"].o, "1");
+            assert(zebra.$cachedE.indexOf("zebra.A"), 0);
+            assert(zebra.$cachedE.length, 1);
+            assert(zebra.$cache("zebra.A"), "1");
+            assert(zebra.$cachedO["zebra.A"].i, 0);
+            assert(zebra.$cachedO["zebra.A"].o, "1");
+            assert(zebra.$cachedE.indexOf("zebra.A"), 0);
+            assert(zebra.$cachedE.length, 1);
+
+            // add second entry [A, B]
+            assert(zebra.$cache("zebra.B"), "2");
+            assert(zebra.$cachedO["zebra.B"].i, 1);
+            assert(zebra.$cachedO["zebra.B"].o, "2");
+            assert(zebra.$cachedO["zebra.A"].i, 0);
+            assert(zebra.$cachedO["zebra.A"].o, "1");
+            assert(zebra.$cachedE.indexOf("zebra.A"), 0);
+            assert(zebra.$cachedE.indexOf("zebra.B"), 1);
+            assert(zebra.$cachedE.length, 2);
+
+            // access second entry (change nothing) [A, B]
+            assert(zebra.$cache("zebra.B"), "2");
+            assert(zebra.$cachedO["zebra.B"].i, 1);
+            assert(zebra.$cachedO["zebra.B"].o, "2");
+            assert(zebra.$cachedO["zebra.A"].i, 0);
+            assert(zebra.$cachedO["zebra.A"].o, "1");
+            assert(zebra.$cachedE.indexOf("zebra.A"), 0);
+            assert(zebra.$cachedE.indexOf("zebra.B"), 1);
+            assert(zebra.$cachedE.length, 2);            
+
+
+            // access first entry (change order) [B, A]
+            assert(zebra.$cache("zebra.A"), "1");
+            assert(zebra.$cachedO["zebra.B"].i, 0);
+            assert(zebra.$cachedO["zebra.B"].o, "2");
+            assert(zebra.$cachedO["zebra.A"].i, 1);
+            assert(zebra.$cachedO["zebra.A"].o, "1");
+            assert(zebra.$cachedE.indexOf("zebra.A"), 1);
+            assert(zebra.$cachedE.indexOf("zebra.B"), 0);
+            assert(zebra.$cachedE.length, 2);
+
+            // access first entry (change nothing) [B, A]
+            assert(zebra.$cache("zebra.A"), "1");
+            assert(zebra.$cachedO["zebra.B"].i, 0);
+            assert(zebra.$cachedO["zebra.B"].o, "2");
+            assert(zebra.$cachedO["zebra.A"].i, 1);
+            assert(zebra.$cachedO["zebra.A"].o, "1");
+            assert(zebra.$cachedE.indexOf("zebra.A"), 1);
+            assert(zebra.$cachedE.indexOf("zebra.B"), 0);
+            assert(zebra.$cachedE.length, 2);
+
+            // access second entry (change order) [A, B]
+            assert(zebra.$cache("zebra.B"), "2");
+            assert(zebra.$cachedO["zebra.B"].i, 1);
+            assert(zebra.$cachedO["zebra.B"].o, "2");
+            assert(zebra.$cachedO["zebra.A"].i, 0);
+            assert(zebra.$cachedO["zebra.A"].o, "1");
+            assert(zebra.$cachedE.indexOf("zebra.A"), 0);
+            assert(zebra.$cachedE.indexOf("zebra.B"), 1);
+            assert(zebra.$cachedE.length, 2);
+
+            // add third entry [A, B, C]
+            assert(zebra.$cache("zebra.C"), "3");
+            assert(zebra.$cachedO["zebra.C"].i, 2);
+            assert(zebra.$cachedO["zebra.C"].o, "3");
+            assert(zebra.$cachedO["zebra.B"].i, 1);
+            assert(zebra.$cachedO["zebra.B"].o, "2");
+            assert(zebra.$cachedO["zebra.A"].i, 0);
+            assert(zebra.$cachedO["zebra.A"].o, "1");
+            assert(zebra.$cachedE.indexOf("zebra.A"), 0);
+            assert(zebra.$cachedE.indexOf("zebra.B"), 1);
+            assert(zebra.$cachedE.indexOf("zebra.C"), 2);
+            assert(zebra.$cachedE.length, 3);
+
+            // access third entry (change nothing) [ A, B, C]
+            assert(zebra.$cache("zebra.C"), "3");
+            assert(zebra.$cachedO["zebra.C"].i, 2);
+            assert(zebra.$cachedO["zebra.C"].o, "3");
+            assert(zebra.$cachedO["zebra.B"].i, 1);
+            assert(zebra.$cachedO["zebra.B"].o, "2");
+            assert(zebra.$cachedO["zebra.A"].i, 0);
+            assert(zebra.$cachedO["zebra.A"].o, "1");
+            assert(zebra.$cachedE.indexOf("zebra.A"), 0);
+            assert(zebra.$cachedE.indexOf("zebra.B"), 1);
+            assert(zebra.$cachedE.indexOf("zebra.C"), 2);
+            assert(zebra.$cachedE.length, 3);
+
+            // access A entry (change order)   [ B, A, C ]
+            assert(zebra.$cache("zebra.A"), "1");
+            assert(zebra.$cachedO["zebra.C"].i, 2);
+            assert(zebra.$cachedO["zebra.C"].o, "3");
+            assert(zebra.$cachedO["zebra.B"].i, 0);
+            assert(zebra.$cachedO["zebra.B"].o, "2");
+            assert(zebra.$cachedO["zebra.A"].i, 1);
+            assert(zebra.$cachedO["zebra.A"].o, "1");
+            assert(zebra.$cachedE.indexOf("zebra.A"), 1);
+            assert(zebra.$cachedE.indexOf("zebra.B"), 0);
+            assert(zebra.$cachedE.indexOf("zebra.C"), 2);            
+            assert(zebra.$cachedE.length, 3);
+
+            // access A entry (change order)  [ B, C, A ]
+            assert(zebra.$cache("zebra.A"), "1");
+            assert(zebra.$cachedO["zebra.C"].i, 1);
+            assert(zebra.$cachedO["zebra.C"].o, "3");
+            assert(zebra.$cachedO["zebra.B"].i, 0);
+            assert(zebra.$cachedO["zebra.B"].o, "2");
+            assert(zebra.$cachedO["zebra.A"].i, 2);
+            assert(zebra.$cachedO["zebra.A"].o, "1");
+            assert(zebra.$cachedE.indexOf("zebra.A"), 2);
+            assert(zebra.$cachedE.indexOf("zebra.B"), 0);
+            assert(zebra.$cachedE.indexOf("zebra.C"), 1);   
+            assert(zebra.$cachedE.length, 3);         
+
+            // access A entry  [ B, C, A ]
+            assert(zebra.$cache("zebra.A"), "1");
+            assert(zebra.$cachedO["zebra.C"].i, 1);
+            assert(zebra.$cachedO["zebra.C"].o, "3");
+            assert(zebra.$cachedO["zebra.B"].i, 0);
+            assert(zebra.$cachedO["zebra.B"].o, "2");
+            assert(zebra.$cachedO["zebra.A"].i, 2);
+            assert(zebra.$cachedO["zebra.A"].o, "1");
+            assert(zebra.$cachedE.indexOf("zebra.A"), 2);
+            assert(zebra.$cachedE.indexOf("zebra.B"), 0);
+            assert(zebra.$cachedE.indexOf("zebra.C"), 1);
+            assert(zebra.$cachedE.length, 3);
+
+            // add D entry  [D, C, A]      
+            assert(zebra.$cache("zebra.D"), "4");
+            assert(zebra.$cachedO["zebra.C"].i, 1);
+            assert(zebra.$cachedO["zebra.C"].o, "3");
+            assert(zebra.$cachedO["zebra.A"].i, 2);
+            assert(zebra.$cachedO["zebra.A"].o, "1");
+            assert(zebra.$cachedO["zebra.D"].i, 0);
+            assert(zebra.$cachedO["zebra.D"].o, "4");
+            assert(zebra.$cachedO["zebra.B"], undefined);
+            assert(zebra.$cachedE.indexOf("zebra.A"), 2);
+            assert(zebra.$cachedE.indexOf("zebra.B"), -1);
+            assert(zebra.$cachedE.indexOf("zebra.C"), 1);
+            assert(zebra.$cachedE.indexOf("zebra.D"), 0);
+            assert(zebra.$cachedE.length, 3);
+
+            // access entry D [C, D, A]      
+            assert(zebra.$cache("zebra.D"), "4");
+            assert(zebra.$cachedO["zebra.C"].i, 0);
+            assert(zebra.$cachedO["zebra.C"].o, "3");
+            assert(zebra.$cachedO["zebra.B"], undefined);
+            assert(zebra.$cachedO["zebra.A"].i, 2);
+            assert(zebra.$cachedO["zebra.A"].o, "1");
+            assert(zebra.$cachedO["zebra.D"].i, 1);
+            assert(zebra.$cachedO["zebra.D"].o, "4");
+            assert(zebra.$cachedE.indexOf("zebra.A"), 2);
+            assert(zebra.$cachedE.indexOf("zebra.C"), 0);
+            assert(zebra.$cachedE.indexOf("zebra.D"), 1);
+            assert(zebra.$cachedE.length, 3);
+
+
+            // add entry E [E, D, A]      
+            assert(zebra.$cache("zebra.E"), "5");
+            assert(zebra.$cachedO["zebra.C"], undefined);
+            assert(zebra.$cachedO["zebra.B"], undefined);
+            assert(zebra.$cachedO["zebra.A"].i, 2);
+            assert(zebra.$cachedO["zebra.A"].o, "1");
+            assert(zebra.$cachedO["zebra.D"].i, 1);
+            assert(zebra.$cachedO["zebra.D"].o, "4");
+            assert(zebra.$cachedO["zebra.E"].i, 0);
+            assert(zebra.$cachedO["zebra.E"].o, "5");
+            assert(zebra.$cachedE.indexOf("zebra.A"), 2);
+            assert(zebra.$cachedE.indexOf("zebra.C"), -1);
+            assert(zebra.$cachedE.indexOf("zebra.B"), -1);
+            assert(zebra.$cachedE.indexOf("zebra.D"), 1);
+            assert(zebra.$cachedE.indexOf("zebra.E"), 0);
+            assert(zebra.$cachedE.length, 3);
+        },
 
         function test_function_name_detection() {
             var f = [
@@ -87,7 +279,7 @@ if (typeof(zebra) === "undefined") {
                 if (l.abscdef != null) error++;
                 else success++;
             }
-            assert(success, 1000, "Google developers were heavily dragged");
+            assume(success, 1000, "Google developers were heavily dragged");
 
             var test = function () {};
             test.constructor = "TEST";
@@ -134,8 +326,8 @@ if (typeof(zebra) === "undefined") {
         },
 
         function test_zebra() {
-            assert(typeof zebra.url === 'undefined', true);
-            assert(typeof zebra.out !== 'undefined', true);
+            assert(typeof zebra.version !== 'undefined', true);
+            assert(typeof zebra.$FN === 'function', true);
         },
 
         function test_methods() {
@@ -1156,6 +1348,10 @@ if (typeof(zebra) === "undefined") {
             var A = new Class([
                 function $prototype() {
                     this.a = function () { return 100; };
+                },
+
+                function m1() {
+
                 }
             ]);
 
@@ -1171,7 +1367,7 @@ if (typeof(zebra) === "undefined") {
 
 
             var M = [
-                function a() { return 502; },
+                function a()  { return 502; },
                 function m1() { return 500; },
                 function m2() { return 501; }
             ];

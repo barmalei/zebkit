@@ -1,23 +1,17 @@
 
-![ScreenShot](/samples/rs/header.jpg)
+![ScreenShot](/samples/images/header.jpg)
 
 ## For impatient: look at few demos   
 
-   * Full package demo, Zebra rich set of UI components: http://www.zebkit.org/samples/index.html
+   * Zebra rich set of UI components: http://www.zebkit.org/samples/index.html
    * Zebra UI engine simple samples: http://www.zebkit.org/samples/uiengine.samples.html
-   * Zebra UI documenation http://www.zebkit.org/documentation
-
-**Starting from 8.2013 Zebra documentation is available !**
-
-Starting from 5.2013 Zebra is on Mobile !
-
+   * Zebra UI documentation http://www.zebkit.org/documentation
 
  Send claims to: ask@zebkit.org
 
 ## Special thanks for Zebra font effect idea:
 
  Michael Deal, http://www.html5rocks.com/en/tutorials/canvas/texteffects/
-
 
 ## What is Zebra ?
 
@@ -27,8 +21,7 @@ on HTML Canvas.
 
 ### Features
 
-   *  Zebra easy OOP concept JavaScript: classes, interfaces, overriding, overloading, 
-   	  constructors, packaging, anonymous class, access to super class methods, mixing, etc
+   *  Zebra easy OOP concept JavaScript: classes, interfaces, overriding, overloading, constructors, packaging, anonymous class, access to super class methods, mixing, etc
    *  **Zebra UI Engine that can be used as powerful basis for:**
       * Pixel by pixel UI components rendering controlling 
       * Simple and flexible events (keyboard, mouse, etc) manipulation, advanced event technique to develop composite UI components
@@ -58,13 +51,11 @@ on HTML Canvas.
    	  * **Touch screen support**
    	  * **Inertial scrolling**
    	  * **Virtual keyboard input**
-  
 
 
 ### Simple UI Zebra application
 
-To write the first application **no zebra stuff on you PC has to be downloaded and deployed (you need only the readme file :).** 
-Let's start writing simple Zebra HTML following traditional style:
+To write the first application **no zebra stuff on you PC has to be downloaded and deployed (you need only this readme file :).** Let's start writing simple Zebra HTML following traditional style:
 
 ```html
 <!DOCTYPE html>
@@ -123,12 +114,11 @@ We can write the application following more graceful manner using JSON-like styl
 
 ### Keeping UI forms in JSON
 
-JSON can be interpreted as Zebra UI form definition language. For instance, use UI definition shown below and store 
-it in "myform.json" file located in the same place where HTML is hosted:
+JSON can be interpreted as Zebra UI form definition language. For instance, use UI definition shown below and store it in "myform.json" file located in the same place where HTML is hosted:
 ```json
 {
 	"padding": 8, 
-	"layout" : { "$zebra.layout.BorderLayout":[ 4, 4 ] },
+	"layout" : { "$zebra.layout.BorderLayout":[ 4] },
 	"kids"   : {
 		"CENTER": { "$zebra.ui.TextField": ["", true]  },
 		"BOTTOM": { "$zebra.ui.Panel": [],
@@ -156,8 +146,8 @@ Load the JSON UI form definition as it is illustrated below:
 
 			    // find by class "Button" component and register button
 			    // event handler to clear text field content by button click
-			    root.find("//Button")._.add(function() {
-				    root.find("//TextField").setValue("");
+			    root.find("//zebra.ui.Button").bind(function() {
+				    root.find("//zebra.ui.TextField").setValue("");
 				});	    
 			});
 		</script>
@@ -169,11 +159,9 @@ Load the JSON UI form definition as it is illustrated below:
 
 ### Native clipboard support
 
-Zebra support browser native clipboard. The implementation doesn't require any Flash or other plug-in installed.
-It is pure WEB based solution !
+Zebra support browser native clipboard. The implementation doesn't require any Flash or other plug-in installed. It is pure WEB based solution !
 
-By implementing special __"zebra.ui.CopyCutPaste"__ interface a Zebra UI component can start participating in 
-clipboard data exchange. For instance:
+By implementing special __"zebra.ui.CopyCutPaste"__ interface a Zebra UI component can start participating in clipboard data exchange. For instance:
 
 ```html
 <!DOCTYPE html>
@@ -229,10 +217,7 @@ clipboard data exchange. For instance:
 
 ### UI look and feel customization
 
-Default values of UI components properties can be controlled by JSON configuration. You can define an
-own JSON configuration to override default Zebra configurations (that is stored in "ui.json" and "canvas.json"). 
-For instance, imagine we need to define new background and font for __"zebra.ui.Button"__ component. It can be done 
-by providing the following JSON configuration file:
+Default values of UI components properties can be controlled by JSON configuration. You can define an own JSON configuration to override default Zebra configurations (that is stored in "zebra.json"). For instance, imagine we need to define new background and font for __"zebra.ui.Button"__ component. It can be done by providing the following JSON configuration file:
 
 ```json
 {
@@ -245,8 +230,7 @@ by providing the following JSON configuration file:
 }
 ```
 
-As soon as the file will be added in configuration chain, every new instantiated Button component will get 
-the new font and background properties values. 
+As soon as the file will be added in configuration chain, every new instantiated Button component will get the new font and background properties values. 
 
 
 ### IO API: HTTP POST/GET, JSON-RPC or XML-RPC
@@ -264,8 +248,7 @@ var gdata = zebra.io.GET(url),
 zebra.io.GET(url, function(request) {
     if (request.status == 200) {
     	// handle result
-    	request.responseText
-		
+    	request.responseText	
 	}
 	else {
 		// handle error
@@ -335,10 +318,8 @@ zebra-home
 
 ### Run demos and samples
 
-Zebra include "samples" folder that keeps various Zebra UI snippets. A desired sample can be run 
-by opening appropriate HTML with a browser. Some sample cannot be opened as file (because of security restrictions browsers can have), 
-In this case they have to be opened through a web server. Zebra includes small, simple but buggy Python web server that can be used 
-for demo purposes. 
+Zebra include "samples" folder that keeps various Zebra UI snippets. A desired sample can be run by opening appropriate HTML with a browser. Some sample cannot be opened as file (because of security restrictions browsers can have), 
+In this case they have to be opened through a web server. Zebra includes small, simple but buggy Python web server that can be used for demo purposes. 
 
 To see snippets and demo it is preferable to start embedded Python HTTP web server. To do it following the instruction below:
    	  * Open terminal
@@ -357,10 +338,7 @@ Than you can:
 
 ### Developing and building
 
-Zebra source code is split into bunch of JS files you can find in "lib/zebra" folder. Also there is number of JSON 
-configuration and resources ("lib/zebra/rs") files that are required in runtime. All "lib/zebra/zebra*.js" files are 
-final artifacts that are supposed to be used to build Zebra applications. They are generated from source code 
-by running special command as follow:
+Zebra source code is split into bunch of JS files you can find in "lib/zebra" folder. Also there is number of JSON configuration and resources files that are required in runtime. To build or update generated Zebra packages, scripts, docs and so on run the following command:
 ```bash
    $ ruby ./bin/lithium.rb build
 ```
@@ -373,24 +351,19 @@ zebra-home
   +-- [lib]     
   |     |
   |     [zebra]
-  |       +- zebra.min.js # compressed all Zebra JS code (UI engine, IO, Rich UI components set)
-  |       +- zebra.js     # all Zebra JS code (UI engine, IO, Rich UI components set)
-  |       |
-  |       +- zebra.canvas.min.js  # compressed Zebra UI engine (IO also included) JS code
-  |       +- zebra.canvas.js      # Zebra UI engine (IO also included) JS code 
-  |       |
-  |       +- zebra.io.min.js  # compressed Zebra IO JS code
-  |       +- zebra.io.js      # Zebra IO JS code
+  |       +- *.js      # zebra JS source files
+  |       +- *.json    # configuration files
+  |       +- *.png|pxm # binary resources 
   |
-  +-- zebra.runtime.zip # scripts, resources and configurations that you need in runtime
-                        # you can unpack it in a web home folder of your web application 
-                        # and than load zebra script from this folder
+  +-- zebra.png         # zebra (Runtime) UI elements icons
+  +-- zebra.json        # zebra (Runtime) JSON configuration 
+  +-- zebra.js          # Zebra (Runtime) JS code 
+  +-- zebra.min.js      # minified (Runtime) Zebra JS code 
+  +-- zebra.runtime.zip # all you need in runtime
 ```
 
-Copy the stuff into your WEB server alone with "lib/zebra/rs" folder and "lib/zebra/*.json" fies.
 
-**Use artifacts packaged in "zebra.runtime.zip" file if you need to keep zebra on your web site. Just 
-unpack it in you web folder and include "zebra.min.js" in your HTML page.**
+**Use artifacts packaged in "zebra.runtime.zip" file if you need to keep zebra on your web site. Unpack it in you web folder and include "zebra.min.js" in your HTML page.**
 
 
 ### License

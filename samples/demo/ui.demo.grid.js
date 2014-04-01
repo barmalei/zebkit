@@ -52,9 +52,11 @@ var CustomGridEditor = new Class(DefEditors, [
     function() {
         this.$super();
 
-        var ExtEditor = new Class(Panel, zebra.ui.ExternalEditor, [
+        var ExtEditor = new Class(Panel, [
             function() {
                 this.$super(new BorderLayout());
+
+                this.isPopupEditor = true;
 
                 var $this = this;
 
@@ -69,12 +71,12 @@ var CustomGridEditor = new Class(DefEditors, [
                 var cancelLink = new Link("<cancel>");
                 controls.add(cancelLink);
                 controls.setPaddings(0, 0, 4, 0);
-                cancelLink._.add(function() {
+                cancelLink.bind(function() {
                     $this.accepted = false;
                     $this.parent.remove($this);
                 });
 
-                this.list._.add(function() {
+                this.list.bind(function() {
                     $this.accepted = true;
                     $this.parent.remove($this);
                 });
@@ -104,6 +106,7 @@ var CustomGridEditor = new Class(DefEditors, [
         this.editors["0"] = new Checkbox(null);
         this.editors["0"].setLayout(new FlowLayout(CENTER, CENTER));
         this.editors["1"] = new Combo();
+        this.editors["1"].setBorder(null);
         var list = this.editors["1"].list;
         list.model.add("Item 1");
         list.model.add("Item 2");
@@ -122,10 +125,10 @@ var CustomGridEditor = new Class(DefEditors, [
         return this.$super(t, row, col, o);
     },
 
-    function fetchEditedValue(row,col,data,editor){
+    function fetchEditedValue(grid, row,col,data,editor){
         if (col == 0) return editor.getValue() ? "on" : "off";
         return (col == 3) ? editor.list.selectedIndex 
-                          : this.$super(row, col, data, editor);
+                          : this.$super(grid, row, col, data, editor);
     }
 ]);
 
@@ -146,12 +149,12 @@ var CompEditorProvider = new Class(DefEditors, [
         }
     },
 
-    function fetchEditedValue(row,col,data,c){
-        return (row == 2) ? c : this.$super(row, col, data, c);
+    function fetchEditedValue(grid, row,col,data,c){
+        return (row == 2) ? c : this.$super(grid, row, col, data, c);
     },
 
-    function shouldDo(t, action,row,col,e){
-        return action == START_EDITING;
+    function shouldStart(grid,row,col,e){
+        return true;
     }
 ]);
 
@@ -276,9 +279,8 @@ function editableGrid() {
 
     g.setModel(m);
 
-	var gp1 = new GridCaption(g);
+	var gp1 = new GridCaption(t, new TextRender(new Text("")));
 	gp1.isResizable = false;
-	for(var i=0; i < m.cols; i++) gp1.putTitle(i, t[i]);
 	g.add(TOP, gp1);
 
     // for(var i = 0;i < m.rows; i ++ ) g.setRowHeight(i, 40);
@@ -286,6 +288,26 @@ function editableGrid() {
 
 	return wrapWithPan(g, compGrid());
 }
+
+function createSortableGrid() {
+    var g = new Grid(1, 3);
+
+    for (var i=0; i < 50; i++) {
+        for (var j=0; j < 3; j++) {
+            g.model.put(i,j, "" + Math.floor(Math.random()* 1000000));
+        }
+    }
+
+    var cap = new CompGridCaption();
+    for (var i=0; i < 3; i++) { 
+        cap.add("Title " + i);
+        cap.setSortable(i, true);
+    }
+
+    g.add(TOP, cap);
+    return new ScrollPan(new GridStretchPan(g));
+}
+
 
 function customCellAlignmentGrid() {
     var d = [ "Top-Left\nAlignment", "Top-Center\nAlignment", "Top-Right\nAlignment",
@@ -325,6 +347,7 @@ pkg.GridDemo = new Class(pkg.DemoPan, [
         n.add("1000 cells", longGrid());
         n.add("Grid", customCellAlignmentGrid());
         n.add("Editable grid", editableGrid());
+        n.add("Sortable", createSortableGrid());
 
 		this.add(CENTER, n);
     }

@@ -193,13 +193,15 @@ pjax.updateTabState = function (src) {
 
     function scrollToNode() {
         if (node.hasClass('protected')) {
-            Y.one('#api-show-protected').set('checked', true);
-            pjax.updateVisibility();
+            // TODO: original code was commented 
+            // Y.one('#api-show-protected').set('checked', true);
+            // pjax.updateVisibility();
         }
 
         if (node.hasClass('private')) {
-            Y.one('#api-show-private').set('checked', true);
-            pjax.updateVisibility();
+            // TODO: original code was commented
+            // Y.one('#api-show-private').set('checked', true);
+            // pjax.updateVisibility();
         }
 
         setTimeout(function () {
@@ -272,6 +274,13 @@ pjax.updateVisibility = function () {
     if (e) {
         container.toggleClass('show-deprecated', e.get('checked'));
     }
+
+
+    // TODO: switch on showing protected and private methods and fields
+    container.toggleClass('show-protected', true);
+    container.toggleClass('show-private', true);
+
+
 
     e = Y.one('#api-show-protected');
     if (e) {

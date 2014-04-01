@@ -76,7 +76,7 @@ function createTooltipDemo() {
 
 function createWindowComp(target) {
     var w = new Window("Demo window"); 
-    //w._.add(function actionPerformed(src, id, data) { target.hideWin(); });
+    //w.bind(function actionPerformed(src, id, data) { target.hideWin(); });
 
     w.setSize(350, 300);
     w.root.setLayout(new BorderLayout(4,4));
@@ -85,8 +85,14 @@ function createWindowComp(target) {
     tf.setFont(new Font("Arial","bold", 18));
     tf.setEditable(false);
     tf.setValue("Drag and drop window\nby its title.\n\nResize window by\ndrag its right-bottom corner");
-    w.root.add(CENTER, tf);
-    w.root.setPadding(8);
+    
+    var center = new Panel(new BorderLayout(4));
+    center.add(CENTER, tf);
+    center.add(TOP, new Combo(["Combo item 1", "Combo item 2", "Combo item 3"]));
+    center.setPadding(8);
+
+    w.root.add(CENTER, center);
+    w.root.setPadding(0);
 
     var p = new Panel(new FlowLayout(CENTER, CENTER));
     var b = new Button("Close");
@@ -104,10 +110,20 @@ function createWindowComp(target) {
 
     w.root.add(BOTTOM, p);
 
-    b._.add(function(src, id, data) { target.hideWin(); });
+    b.bind(function(src, id, data) { target.hideWin(); });
 
 
-    w.root.add(TOP, new Combo(["Combo item 1", "Combo item 2", "Combo item 3"]));
+    w.root.add(TOP, new Menubar({ 
+        "MenuItem 1": [ 
+            "Item 1.1", "-", "[x]Item 1.2", "[]Item 1.3" 
+        ],  
+        "MenuItem 2": { 
+            "Item 2.1":null, 
+            "Item 2.2": [ "Item 2.2.1", "Item 2.2.2" ], 
+            "Item 2.3": null  
+        },
+        "Ok": null 
+    }).properties({ border:null }) );
 
     return w;
 }
@@ -134,7 +150,7 @@ pkg.WinDemo = new Class(pkg.DemoPan,  [
         this.add(CENTER, new BorderPan("Window", cp));
 
         var $t = this;
-        this.ab._.add(function actionPerformed(src, id, data) { $t.showWin(); });
+        this.ab.bind(function actionPerformed(src, id, data) { $t.showWin(); });
     },
 
     function showWin() {

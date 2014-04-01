@@ -259,7 +259,8 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
 
     function createMTextFieldPan() {
         var p = new Panel(new BorderLayout());
-        var tf = new TextField(new zebra.data.Text("Multiline\ntext field\ncomponents"));
+        var tf = new TextArea("Multiline\ntext field\ncomponents");
+        tf.setBlinking();
         tf.setPreferredSize(180, 80);
         p.add(CENTER, tf);
         return pkg.createBorderPan("Multilines text field", p);
@@ -343,7 +344,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         }
 
         ch.setEnabled(false);
-        ch.setState(true);
+        ch.setValue(true);
         return pkg.createBorderPan(s, p);
     },
 
@@ -590,75 +591,17 @@ pkg.TreeDemo = new Class(pkg.DemoPan, [
 eval(zebra.Import("ui", "layout"));
 var rgb = zebra.util.rgb;
 
-function createItem(s) {
-    if (s[0]=='&') {
-        var p = new ImagePan(ui.demo[s.substring(1)]);
-        p.setPadding(4);
-        return p;
-    }
-
-    if (s == '--') return new Line();
-    var j = s.indexOf("|"), i = s.indexOf("+"), k = s.indexOf("-");
-    if (i >= 0 || k >=0) {
-        var l = new Checkbox(s.substring(i >= 0 ? i+1 : k+1));
-        l.setState(i >= 0);
-        return l;
-    }
-
-    var l = (j > 0) ? new zebra.ui.ImageLabel(s.substring(j+1), ui.demo[s.substring(0, j)]) : new Label(s);
-    l.setPaddings(2,4,2,4);
-    if (zebra.instanceOf(l, Label)) l.setFont(ui.boldFont);
-    else l.kids[1].setFont(ui.boldFont);
-    return l;
-}
-
-function createMenubar(items) {
-    var mb = new Menubar();
-
-    for(var i=0; i < items.length; i++) {
-        if (zebra.instanceOf(items[i], Menu)) mb.setMenuAt(mb.kids.length - 1, items[i]);
-        else {
-            if (items[i].constructor == Array) {
-                mb.setMenuAt(mb.kids.length - 1, createMenu(items[i]));
-            }
-            else mb.add(createItem(items[i]));
-        }
-    }
-    return mb;
-}
-
-function createMenu(items, m) {
-    if (typeof(m) === "undefined") {
-        m = new Menu();
-        var r = createMenu(items, m);
-        return r;
-    }
-
-    for(var i=0; i < items.length; i++) {
-        var item = items[i];
-        if (item.constructor == Array) {
-            m.setMenuAt(m.kids.length - 1, createMenu(item));
-        }
-        else {
-            var it = createItem(item);
-            if (zebra.instanceOf(it, Line)) m.addDecorative(it);
-            else m.add(it);
-        }
-    }
-    return m;
-}
-
 function createColorPicker() {
-    var m = new Menu(), i = 0, c = new Constraints();
-    c.setPaddings(2,0,2,0);
+    var m = new Menu(), i = 0;
     m.setLayout(new GridLayout(4, 4));
+
     for(var k in rgb) {
         if (!(rgb[k] instanceof rgb)) continue;
         if (i > 15) break;
         var p = new Panel();
-        p.setPreferredSize(16, 16);
+        p.setPreferredSize(24, 24);
         p.setBorder(ui.borders.plain);
-        m.add(c, p);
+        m.add(new MenuItem(p)).hideSub();
         p.setBackground(rgb[k]);
         i++;
     }
@@ -666,26 +609,34 @@ function createColorPicker() {
 }
 
 function formMenuArray() {
-    var mbar = ["butterfly|Cars",
-                    ["ind1|I prefer bike",
-                     "ind2|Car options",
-                        ["+Climate control", "-Start and stop", "--", "+Winter tyre"],
-                    ],
-                "Car color",
-                    createColorPicker(),
-                "Car brand",
-                    ["&bmw", "&saab", "&alpha" ]
-                ];
+    var mbar = {"@(zebra.ui.demo.butterfly) Cars":
+                    {
+                     "@(zebra.ui.demo.ind1) I prefer bike": null,
+                     "@(zebra.ui.demo.ind2) Car options":
+                        ["[x]Climate control", "[]Start and stop", "-", "[x]Winter tyre"]
+                    },
+                "Car color": createColorPicker(),
+                "Car brand":
+                    [ new ImagePan(zebra.ui.demo.bmw).properties({ padding: 8}), 
+                      new ImagePan(zebra.ui.demo.saab).properties({ padding: 8}), 
+                      new ImagePan(zebra.ui.demo.alpha).properties({ padding: 8}) ]
+                };
     return mbar;
+}
+
+function $get(i, o) {
+    for(var k in o) {
+        if (o.hasOwnProperty(k)) {
+            if (i-- === 0) return o[k];
+        }
+    }
+    return null;
 }
 
 
 function createToolbar() {
     var t = new zebra.ui.Toolbar();
-    t.setPadding(6);
-    t.setBackground(rgb.lighGray);
-
-   // t.setBorder(null);
+ 
     var img = ui.demo.home;
     t.addImage(img);
     t.addImage(ui.demo.mail);
@@ -693,14 +644,12 @@ function createToolbar() {
 
     t.addLine();
     var s = t.addSwitcher("ON/OFF");
-   // t.setView(s, zebra.ui.Toolbar.PRESSED, ui.borders.plain);
     t.addLine();
 
     var g = new zebra.ui.Group();
     var c1 = t.addRadio(g,"Radio 1");
     var c2 = t.addRadio(g,"Radio 2");
     var c3 = t.addRadio(g,"Radio 3");
-//    t.setView(c1, zebra.ui.Toolbar.PRESSED, ui.demo.page);
 
 
     // var m = new zebra.data.ListModel();
@@ -708,6 +657,7 @@ function createToolbar() {
     // m.addElement("Item 2");
     // m.addElement("Item 3");
     // t.addComboElement(new zebra.ui.List(m));
+   
     return t;
 }
 
@@ -723,9 +673,10 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
 
         ctr.setPadding(8);
         c.setPreferredSize(290, 160);
-        var mb = createMenubar(formMenuArray());
+        var mb = new Menubar(formMenuArray());
         mb.setBorder(new Border("lightGray"));
         c.add(TOP, mb);
+
 
         var bp = new BorderPan("Top menu bar", c);
         bp.setGaps(8,8);
@@ -735,7 +686,7 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
         var c = new Panel(new BorderLayout());
         c.setPreferredSize(290, 160);
 
-        mb = createMenubar(formMenuArray());
+        mb = new Menubar(formMenuArray());
         mb.setBorder(new Border("lightGray"));
 
         c.add(BOTTOM, mb);
@@ -769,9 +720,9 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
         p.add(l2);
         p.add(l3);
 
-        var m1 = createMenu(formMenuArray()[1]);
+        var m1 = new Menu($get(0, formMenuArray()));
         var m2 = createColorPicker();
-        var m3 = createMenu(formMenuArray()[5]);
+        var m3 = new Menu($get(2, formMenuArray()));
         this.add(BOTTOM, new BorderPan("Context menu", p));
 
         l1.popup = m1;
@@ -860,7 +811,7 @@ function createTooltipDemo() {
 
 function createWindowComp(target) {
     var w = new Window("Demo window"); 
-    //w._.add(function actionPerformed(src, id, data) { target.hideWin(); });
+    //w.bind(function actionPerformed(src, id, data) { target.hideWin(); });
 
     w.setSize(350, 300);
     w.root.setLayout(new BorderLayout(4,4));
@@ -869,8 +820,14 @@ function createWindowComp(target) {
     tf.setFont(new Font("Arial","bold", 18));
     tf.setEditable(false);
     tf.setValue("Drag and drop window\nby its title.\n\nResize window by\ndrag its right-bottom corner");
-    w.root.add(CENTER, tf);
-    w.root.setPadding(8);
+    
+    var center = new Panel(new BorderLayout(4));
+    center.add(CENTER, tf);
+    center.add(TOP, new Combo(["Combo item 1", "Combo item 2", "Combo item 3"]));
+    center.setPadding(8);
+
+    w.root.add(CENTER, center);
+    w.root.setPadding(0);
 
     var p = new Panel(new FlowLayout(CENTER, CENTER));
     var b = new Button("Close");
@@ -888,10 +845,20 @@ function createWindowComp(target) {
 
     w.root.add(BOTTOM, p);
 
-    b._.add(function(src, id, data) { target.hideWin(); });
+    b.bind(function(src, id, data) { target.hideWin(); });
 
 
-    w.root.add(TOP, new Combo(["Combo item 1", "Combo item 2", "Combo item 3"]));
+    w.root.add(TOP, new Menubar({ 
+        "MenuItem 1": [ 
+            "Item 1.1", "-", "[x]Item 1.2", "[]Item 1.3" 
+        ],  
+        "MenuItem 2": { 
+            "Item 2.1":null, 
+            "Item 2.2": [ "Item 2.2.1", "Item 2.2.2" ], 
+            "Item 2.3": null  
+        },
+        "Ok": null 
+    }).properties({ border:null }) );
 
     return w;
 }
@@ -918,7 +885,7 @@ pkg.WinDemo = new Class(pkg.DemoPan,  [
         this.add(CENTER, new BorderPan("Window", cp));
 
         var $t = this;
-        this.ab._.add(function actionPerformed(src, id, data) { $t.showWin(); });
+        this.ab.bind(function actionPerformed(src, id, data) { $t.showWin(); });
     },
 
     function showWin() {
@@ -1003,9 +970,11 @@ var CustomGridEditor = new Class(DefEditors, [
     function() {
         this.$super();
 
-        var ExtEditor = new Class(Panel, zebra.ui.ExternalEditor, [
+        var ExtEditor = new Class(Panel, [
             function() {
                 this.$super(new BorderLayout());
+
+                this.isPopupEditor = true;
 
                 var $this = this;
 
@@ -1020,12 +989,12 @@ var CustomGridEditor = new Class(DefEditors, [
                 var cancelLink = new Link("<cancel>");
                 controls.add(cancelLink);
                 controls.setPaddings(0, 0, 4, 0);
-                cancelLink._.add(function() {
+                cancelLink.bind(function() {
                     $this.accepted = false;
                     $this.parent.remove($this);
                 });
 
-                this.list._.add(function() {
+                this.list.bind(function() {
                     $this.accepted = true;
                     $this.parent.remove($this);
                 });
@@ -1055,6 +1024,7 @@ var CustomGridEditor = new Class(DefEditors, [
         this.editors["0"] = new Checkbox(null);
         this.editors["0"].setLayout(new FlowLayout(CENTER, CENTER));
         this.editors["1"] = new Combo();
+        this.editors["1"].setBorder(null);
         var list = this.editors["1"].list;
         list.model.add("Item 1");
         list.model.add("Item 2");
@@ -1073,10 +1043,10 @@ var CustomGridEditor = new Class(DefEditors, [
         return this.$super(t, row, col, o);
     },
 
-    function fetchEditedValue(row,col,data,editor){
+    function fetchEditedValue(grid, row,col,data,editor){
         if (col == 0) return editor.getValue() ? "on" : "off";
         return (col == 3) ? editor.list.selectedIndex 
-                          : this.$super(row, col, data, editor);
+                          : this.$super(grid, row, col, data, editor);
     }
 ]);
 
@@ -1097,12 +1067,12 @@ var CompEditorProvider = new Class(DefEditors, [
         }
     },
 
-    function fetchEditedValue(row,col,data,c){
-        return (row == 2) ? c : this.$super(row, col, data, c);
+    function fetchEditedValue(grid, row,col,data,c){
+        return (row == 2) ? c : this.$super(grid, row, col, data, c);
     },
 
-    function shouldDo(t, action,row,col,e){
-        return action == START_EDITING;
+    function shouldStart(grid,row,col,e){
+        return true;
     }
 ]);
 
@@ -1227,9 +1197,8 @@ function editableGrid() {
 
     g.setModel(m);
 
-	var gp1 = new GridCaption(g);
+	var gp1 = new GridCaption(t, new TextRender(new Text("")));
 	gp1.isResizable = false;
-	for(var i=0; i < m.cols; i++) gp1.putTitle(i, t[i]);
 	g.add(TOP, gp1);
 
     // for(var i = 0;i < m.rows; i ++ ) g.setRowHeight(i, 40);
@@ -1237,6 +1206,26 @@ function editableGrid() {
 
 	return wrapWithPan(g, compGrid());
 }
+
+function createSortableGrid() {
+    var g = new Grid(1, 3);
+
+    for (var i=0; i < 50; i++) {
+        for (var j=0; j < 3; j++) {
+            g.model.put(i,j, "" + Math.floor(Math.random()* 1000000));
+        }
+    }
+
+    var cap = new CompGridCaption();
+    for (var i=0; i < 3; i++) { 
+        cap.add("Title " + i);
+        cap.setSortable(i, true);
+    }
+
+    g.add(TOP, cap);
+    return new ScrollPan(new GridStretchPan(g));
+}
+
 
 function customCellAlignmentGrid() {
     var d = [ "Top-Left\nAlignment", "Top-Center\nAlignment", "Top-Right\nAlignment",
@@ -1276,6 +1265,7 @@ pkg.GridDemo = new Class(pkg.DemoPan, [
         n.add("1000 cells", longGrid());
         n.add("Grid", customCellAlignmentGrid());
         n.add("Editable grid", editableGrid());
+        n.add("Sortable", createSortableGrid());
 
 		this.add(CENTER, n);
     }
@@ -1366,7 +1356,7 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
         }
 
         var prev = null, prevCol = null;
-        t._.add(function selected(src, data) {
+        t.bind(function selected(src, data) {
                 var c = lookup(pp, data.comp);
                 if (prev != null) {
                     prev.setBackground(null);

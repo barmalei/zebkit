@@ -1,7 +1,7 @@
 
 if (typeof(zebra) === "undefined") {
     load(arguments[0] + '/lib/zebra/easyoop.js');
-    load(arguments[0] + '/lib/zebra/assert.js');
+    load(arguments[0] + '/lib/zebra/tools.js');
     load(arguments[0] + '/lib/zebra/util.js');
 }
 
@@ -227,6 +227,15 @@ zebra.runTests("Zebra util objects bag",
         assert(r.a.b.c, "ABC");
         assert(r.a.k, 444);
         assert(r.a.b.m, 777);
+    }, 
+
+    function testExpr() {
+        zebra.$c = 100;
+
+        var o = {}, bag = new Bag(o), l = '{ "v": { ".expr": "zebra.$c > 0"  } }';
+        bag.load(l);
+
+        assert(bag.get("v"), true)
     }
 );
 

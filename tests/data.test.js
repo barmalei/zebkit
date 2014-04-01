@@ -1,7 +1,7 @@
 
 if (typeof(zebra) === "undefined") {
     load(arguments[0] + '/lib/zebra/easyoop.js');
-    load(arguments[0] + '/lib/zebra/assert.js');
+    load(arguments[0] + '/lib/zebra/tools.js');
     load(arguments[0] + '/lib/zebra/util.js');
     load(arguments[0] + '/lib/zebra/data.js');
 }
@@ -70,6 +70,31 @@ zebra.runTests("Zebra util objects bag",
         assert(k1.kids.length, 0);
         assert(k2.parent == null, true);
         assert(k2.kids.length, 0);
+
+
+        var t = new TreeModel({
+            value: "Root",
+            kids : [ "Item 1", "Item 1" ]
+        });
+
+
+        assert(t.root.kids[0] != t.root.kids[1], true);
+
+        function indexOf(item) {
+            if (item.parent != null) {
+                for(var i=0; i < item.parent.kids.length; i++) {
+                    if (item.parent.kids[i] == item) {
+                        return i;
+                    }
+                }
+            }
+            return -1;
+        }
+
+        assert(indexOf(t.root.kids[1]), 1);
+        assert(indexOf(t.root.kids[0]), 0);
+        assert(indexOf(t.root), -1);
+
     },
 
 

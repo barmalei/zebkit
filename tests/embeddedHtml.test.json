@@ -1,0 +1,129 @@
+{
+	"layout" : { "$zebra.layout.StackLayout" : [] },
+	"kids" : [
+		{
+			"$zebra.ui.Panel" : [],
+			"id" : "login",
+			"layout" : { "$zebra.layout.FlowLayout" : [ 16, 16, 64, 8 ] },
+			"background" : null,
+			"visible" : true,
+			"kids" : [
+				{
+					"$zebra.ui.Panel" : [],
+					"layout" : { "$zebra.layout.FlowLayout" : [ 16, 16, 64, 8 ] },
+					"background" : "lightgrey",
+					"padding" : 8,
+					"kids" : [
+						{
+							"$zebra.ui.BoldLabel" : "Login"
+						},
+						{
+							"$zebra.ui.Label" : [ "Username" ]
+						},
+						{
+							"$zebra.ui.TextField" : [ "", 20 ],
+							"id" : "Login/Username"
+						},
+						{
+							"$zebra.ui.Label" : [ "Password" ]
+						},
+						{
+							"$zebra.ui.TextField" : [ "", 20 ],
+							"id" : "Login/Password",
+							"view" : {
+								"$zebra.ui.PasswordText" : []
+							}
+						},
+						{
+							"$zebra.ui.Button" : [ "Login" ],
+							"id" : "Login/Login"
+						}
+					]
+				}
+			]
+		},
+		{
+			"$zebra.ui.Panel" : [],
+			"id" : "welcome",
+			"layout" : { "$zebra.layout.FlowLayout" : [ 16, 16, 64, 4 ] },
+			"background" : null,
+			"visible" : false,
+			"kids" : [
+				{
+					"$zebra.ui.BoldLabel" : "Tempest"
+				},
+				{
+					"$zebra.ui.Button" : [ "Introduction" ],
+					"id" : "Welcome/Introduction"
+				},
+				{
+					"$zebra.ui.Button" : [ "Create a Character" ],
+					"id" : "Welcome/CreateCharacter"
+				},
+				{
+					"$zebra.ui.Button" : [ "Journey Onward" ],
+					"id" : "Welcome/JourneyOnward"
+				},
+				{
+					"$zebra.ui.Button" : [ "Acknowledgements" ],
+					"id" : "Welcome/Acknowledgements"
+				}
+			]
+		},
+		{
+			"$zebra.ui.Panel" : [],
+			"id" : "newAccount",
+			"layout" : { "$zebra.layout.FlowLayout" : [ 16, 16, 64, 8 ] },
+			"background" : null,
+			"visible" : false,
+			"kids" : [
+				{
+					"$zebra.ui.Panel" : [],
+					"layout" : { "$zebra.layout.FlowLayout" : [ 16, 16, 64, 8 ] },
+					"background" : "lightgrey",
+					"padding" : 8,
+					"kids" : [
+						{
+							"$zebra.ui.BoldLabel" : "New Account"
+						},
+						{
+							"$zebra.ui.Label" : [ "Email Address" ]
+						},
+
+						{
+							"$zebra.ui.HtmlElement" : [ "div" ],
+							"layout": { "$zebra.layout.FlowLayout":[] },
+							"kids": [
+								{
+									"$zebra.ui.HtmlTextField" : [ "" ],
+									"id" : "NewAccount/EmailAddress"
+								},
+
+								{
+									"$zebra.ui.HtmlTextField" : [ "" ],
+									"id" : "NewAccount/EmailAddress"
+								}
+
+							]
+						},
+						{
+							"$zebra.ui.Label" : [ "Confirm Email" ]
+						},
+						{
+							"$zebra.ui.HtmlTextField" : [ "" ],
+							"id" : "NewAccount/EmailAddressConfirm"
+						},
+						{
+							"$zebra.ui.Label" : [ "" ],
+							"id" : "NewAccount/Output"
+						},
+						{
+							"$zebra.ui.Button" : [ "Confirm" ],
+							"id" : "NewAccount/Confirm"
+						}
+					]
+				}
+			]
+		}		
+	]
+}

@@ -207,7 +207,7 @@ pkg.$global    = (typeof window !== "undefined" && window != null) ? window : th
 pkg.isString   = isString;
 pkg.isNumber   = isNumber;
 pkg.isBoolean  = isBoolean;
-pkg.version = "3.2014";
+pkg.version = "4.2014";
 pkg.$caller = null; // current method which is called
 
 function mnf(name, params) {

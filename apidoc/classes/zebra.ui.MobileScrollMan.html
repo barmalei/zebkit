@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>zebra.ui.CompositeView</title>
+    <title>zebra.ui.MobileScrollMan</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -400,14 +400,14 @@
                 <div id="docs-main">
                     <div class="content">
                         
-    <h1>zebra.ui.CompositeView Class</h1>    
+    <h1>zebra.ui.MobileScrollMan Class</h1>    
 
 
 
 
 
     <div class="extends">
-        <b>Extends</b> <a href="../classes/zebra.ui.View.html" class="crosslink">zebra.ui.View</a>
+        <b>Extends</b> <a href="../classes/zebra.ui.Manager.html" class="crosslink">zebra.ui.Manager</a>
     </div>
 
 
@@ -416,29 +416,18 @@
 
 
 <div class="box intro">
-    <p>Composite view. The view allows developers to combine number of 
-views and renders its together.</p>
+    <p>Mobile scroll manager class. Implements inertial scrolling in zebra mobile application.</p>
 
 </div>
 
 
     <div class="constructor">
         <h2>Constructor</h2>
-        <div id="method_zebra.ui.CompositeView" class="method item">
-    <h3 class="name"><code>zebra.ui.CompositeView</code></h3>
+        <div id="method_zebra.ui.MobileScrollMan" class="method item">
+    <h3 class="name"><code>zebra.ui.MobileScrollMan</code></h3>
 
     
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code class="optional">[views]</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
+        <span class="paren">()</span>
     
 
     
@@ -472,32 +461,6 @@ views and renders its together.</p>
         
     </div>
 
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name optional">[views]</code>
-                        <span class="type">Arrayt | Object</span>
-                        <span class="flag optional" title="This parameter is optional.">optional</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>array of dictionary of views 
-to be composed together</p>
-
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
     
 
     
@@ -523,8 +486,6 @@ to be composed together</p>
         
         
         
-            <li class="api-class-tab attrs"><a href="#attrs">Attributes</a></li>
-        
         
     </ul>
 
@@ -539,43 +500,29 @@ to be composed together</p>
 
                     <ul class="index-list methods extends">
                         
-                            <li class="index-item method inherited">
-                                <a href="#method_getBottom">getBottom</a>
+                            <li class="index-item method">
+                                <a href="#method_mouseDragEnded">mouseDragEnded</a>
 
                                 
                                 
                             </li>
                         
-                            <li class="index-item method inherited">
-                                <a href="#method_getLeft">getLeft</a>
+                            <li class="index-item method">
+                                <a href="#method_mouseDragged">mouseDragged</a>
 
                                 
                                 
                             </li>
                         
-                            <li class="index-item method inherited">
-                                <a href="#method_getPreferredSize">getPreferredSize</a>
+                            <li class="index-item method">
+                                <a href="#method_mouseDragStarted">mouseDragStarted</a>
 
                                 
                                 
                             </li>
                         
-                            <li class="index-item method inherited">
-                                <a href="#method_getRight">getRight</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method inherited">
-                                <a href="#method_getTop">getTop</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method inherited">
-                                <a href="#method_paint">paint</a>
+                            <li class="index-item method">
+                                <a href="#method_mousePressed">mousePressed</a>
 
                                 
                                 
@@ -587,30 +534,6 @@ to be composed together</p>
 
             
 
-            
-                <div class="index-section attrs">
-                    <h3>Attributes</h3>
-
-                    <ul class="index-list attrs extends">
-                        
-                            <li class="index-item attr private">
-                                <a href="#attr_bottom">bottom</a>
-                            </li>
-                        
-                            <li class="index-item attr private">
-                                <a href="#attr_left">left</a>
-                            </li>
-                        
-                            <li class="index-item attr private">
-                                <a href="#attr_right">right</a>
-                            </li>
-                        
-                            <li class="index-item attr private">
-                                <a href="#attr_top">top</a>
-                            </li>
-                        
-                    </ul>
-                </div>
             
 
             
@@ -621,340 +544,8 @@ to be composed together</p>
                 <h2 class="off-left">Methods</h2>
 
                 
-                    <div id="method_getBottom" class="method item inherited">
-    <h3 class="name"><code>getBottom</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-        <span class="returns-inline">
-            <span class="type">Integer</span>
-        </span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.View.html#method_getBottom">zebra.ui.View</a>:
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Get bottom gap. The method informs UI component that uses the view as
-a border view how much space bottom side of the border occupies</p>
-
-    </div>
-
-    
-
-    
-        <br>
-        <div class="returns">
-            <div class="returns-description">
-                
-                    
-                        <b>Return: </b><span class="type">Integer</span>
-                    
-                    <p>a bottom gap</p>
-
-                
-            </div>
-        </div>
-    
-
-    
-</div>
-
-                
-                    <div id="method_getLeft" class="method item inherited">
-    <h3 class="name"><code>getLeft</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-        <span class="returns-inline">
-            <span class="type">Integer</span>
-        </span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.View.html#method_getLeft">zebra.ui.View</a>:
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Get left gap. The method informs UI component that uses the view as
-a border view how much space left side of the border occupies</p>
-
-    </div>
-
-    
-
-    
-        <br>
-        <div class="returns">
-            <div class="returns-description">
-                
-                    
-                        <b>Return: </b><span class="type">Integer</span>
-                    
-                    <p>a left gap</p>
-
-                
-            </div>
-        </div>
-    
-
-    
-</div>
-
-                
-                    <div id="method_getPreferredSize" class="method item inherited">
-    <h3 class="name"><code>getPreferredSize</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-        <span class="returns-inline">
-            <span class="type">Object</span>
-        </span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.View.html#method_getPreferredSize">zebra.ui.View</a>:
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Return preferred size the view desires to have</p>
-
-    </div>
-
-    
-
-    
-        <br>
-        <div class="returns">
-            <div class="returns-description">
-                
-                    
-                        <b>Return: </b> <span class="type">Object</span>
-                    
-                
-            </div>
-        </div>
-    
-
-    
-</div>
-
-                
-                    <div id="method_getRight" class="method item inherited">
-    <h3 class="name"><code>getRight</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-        <span class="returns-inline">
-            <span class="type">Integer</span>
-        </span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.View.html#method_getRight">zebra.ui.View</a>:
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Get right gap. The method informs UI component that uses the view as
-a border view how much space right side of the border occupies</p>
-
-    </div>
-
-    
-
-    
-        <br>
-        <div class="returns">
-            <div class="returns-description">
-                
-                    
-                        <b>Return: </b><span class="type">Integer</span>
-                    
-                    <p>a right gap</p>
-
-                
-            </div>
-        </div>
-    
-
-    
-</div>
-
-                
-                    <div id="method_getTop" class="method item inherited">
-    <h3 class="name"><code>getTop</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-        <span class="returns-inline">
-            <span class="type">Integer</span>
-        </span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.View.html#method_getTop">zebra.ui.View</a>:
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Get top gap. The method informs UI component that uses the view as
-a border view how much space top side of the border occupies</p>
-
-    </div>
-
-    
-
-    
-        <br>
-        <div class="returns">
-            <div class="returns-description">
-                
-                    
-                        <b>Return: </b><span class="type">Integer</span>
-                    
-                    <p>a top gap</p>
-
-                
-            </div>
-        </div>
-    
-
-    
-</div>
-
-                
-                    <div id="method_paint" class="method item inherited">
-    <h3 class="name"><code>paint</code></h3>
+                    <div id="method_mouseDragEnded" class="method item">
+    <h3 class="name"><code>mouseDragEnded</code></h3>
 
     
         <div class="args">
@@ -962,37 +553,7 @@ a border view how much space top side of the border occupies</p>
             
                 <li class="arg">
                     
-                        <code>g</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>x</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>y</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>w</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>h</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>c</code>
+                        <code>e</code>
                     
                 </li>
             
@@ -1017,8 +578,6 @@ a border view how much space top side of the border occupies</p>
     <div class="meta">
         
             
-                <p>Inherited from
-                <a href="../classes/zebra.ui.View.html#method_paint">zebra.ui.View</a>:
             
         
         </p>
@@ -1030,8 +589,7 @@ a border view how much space top side of the border occupies</p>
     </div>
 
     <div class="description">
-        <p>The method is called to render the decorative element on the 
-given surface of the specified UI component</p>
+        <p>Define mouse drag ended events handler.</p>
 
     </div>
 
@@ -1043,95 +601,257 @@ given surface of the specified UI component</p>
             
                 <li class="param">
                     
-                        <code class="param-name">g</code>
-                        <span class="type">Canvas 2D context</span>
+                        <code class="param-name">e</code>
+                        <span class="type"><a href="../classes/zebra.ui.MouseEvent.html" class="crosslink">zebra.ui.MouseEvent</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>graphical context</p>
+                        <p>a mouse event</p>
 
                     </div>
 
                     
                 </li>
             
+            </ul>
+        </div>
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="method_mouseDragged" class="method item">
+    <h3 class="name"><code>mouseDragged</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>e</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Define mouse dragged events handler.</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
                 <li class="param">
                     
-                        <code class="param-name">x</code>
-                        <span class="type">Integer</span>
+                        <code class="param-name">e</code>
+                        <span class="type"><a href="../classes/zebra.ui.MouseEvent.html" class="crosslink">zebra.ui.MouseEvent</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>x coordinate</p>
+                        <p>a mouse event</p>
 
                     </div>
 
                     
                 </li>
             
+            </ul>
+        </div>
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="method_mouseDragStarted" class="method item">
+    <h3 class="name"><code>mouseDragStarted</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>e</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Define mouse drag started events handler.</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
                 <li class="param">
                     
-                        <code class="param-name">y</code>
-                        <span class="type">Integer</span>
+                        <code class="param-name">e</code>
+                        <span class="type"><a href="../classes/zebra.ui.MouseEvent.html" class="crosslink">zebra.ui.MouseEvent</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>y coordinate</p>
+                        <p>a mouse event</p>
 
                     </div>
 
                     
                 </li>
             
-                <li class="param">
+            </ul>
+        </div>
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="method_mousePressed" class="method item">
+    <h3 class="name"><code>mousePressed</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
                     
-                        <code class="param-name">w</code>
-                        <span class="type">Integer</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>required width</p>
-
-                    </div>
-
+                        <code>e</code>
                     
                 </li>
             
-                <li class="param">
-                    
-                        <code class="param-name">h</code>
-                        <span class="type">Integer</span>
-                    
+            </ul><span class="paren">)</span>
+        </div>
+    
 
-                    
+    
 
-                    <div class="param-description">
-                        <p>required height</p>
+    
 
-                    </div>
+    
 
-                    
-                </li>
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Define mouse pressed events handler.</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
             
                 <li class="param">
                     
-                        <code class="param-name">c</code>
-                        <span class="type"><a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a></span>
+                        <code class="param-name">e</code>
+                        <span class="type"><a href="../classes/zebra.ui.MouseEvent.html" class="crosslink">zebra.ui.MouseEvent</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>an UI component on which the view 
-element has to be drawn</p>
+                        <p>a mouse event</p>
 
                     </div>
 
@@ -1153,204 +873,6 @@ element has to be drawn</p>
 
         
 
-        
-            <div id="attrs" class="api-class-tabpanel">
-                <h2 class="off-left">Attributes</h2>
-
-                
-                    <div id="attr_bottom" class="attr item private">
-    <a name="config_bottom"></a> 
-    <h3 class="name"><code>bottom</code></h3>
-    <span class="type">Integer</span>
-
-    
-
-    
-        <span class="flag private">private</span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <span class="flag readonly">readonly</span>
-    
-
-    <div class="meta">
-        
-            
-            
-        
-        </p>
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Bottom padding</p>
-
-    </div>
-
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="attr_left" class="attr item private">
-    <a name="config_left"></a> 
-    <h3 class="name"><code>left</code></h3>
-    <span class="type">Integer</span>
-
-    
-
-    
-        <span class="flag private">private</span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <span class="flag readonly">readonly</span>
-    
-
-    <div class="meta">
-        
-            
-            
-        
-        </p>
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Left padding</p>
-
-    </div>
-
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="attr_right" class="attr item private">
-    <a name="config_right"></a> 
-    <h3 class="name"><code>right</code></h3>
-    <span class="type">Integer</span>
-
-    
-
-    
-        <span class="flag private">private</span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <span class="flag readonly">readonly</span>
-    
-
-    <div class="meta">
-        
-            
-            
-        
-        </p>
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Right padding</p>
-
-    </div>
-
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="attr_top" class="attr item private">
-    <a name="config_top"></a> 
-    <h3 class="name"><code>top</code></h3>
-    <span class="type">Integer</span>
-
-    
-
-    
-        <span class="flag private">private</span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <span class="flag readonly">readonly</span>
-    
-
-    <div class="meta">
-        
-            
-            
-        
-        </p>
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Top padding</p>
-
-    </div>
-
-    
-
-    
-
-    
-</div>
-
-                
-            </div>
         
 
         

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>zebra.ui.CompositeView</title>
+    <title>zebra.ui.MenuItem</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -400,14 +400,14 @@
                 <div id="docs-main">
                     <div class="content">
                         
-    <h1>zebra.ui.CompositeView Class</h1>    
+    <h1>zebra.ui.MenuItem Class</h1>    
 
 
 
 
 
     <div class="extends">
-        <b>Extends</b> <a href="../classes/zebra.ui.View.html" class="crosslink">zebra.ui.View</a>
+        <b>Extends</b> <a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a>
     </div>
 
 
@@ -416,16 +416,19 @@
 
 
 <div class="box intro">
-    <p>Composite view. The view allows developers to combine number of 
-views and renders its together.</p>
+    <p>Menu item panel class. The component holds menu item content like 
+caption, icon, sub-menu sign elements. The area of the component 
+is split into three parts: left, right and center. Central part 
+keeps content, left side keeps checked sign element 
+and the right side keeps sub-menu sign element.</p>
 
 </div>
 
 
     <div class="constructor">
         <h2>Constructor</h2>
-        <div id="method_zebra.ui.CompositeView" class="method item">
-    <h3 class="name"><code>zebra.ui.CompositeView</code></h3>
+        <div id="method_zebra.ui.MenuItem" class="method item">
+    <h3 class="name"><code>zebra.ui.MenuItem</code></h3>
 
     
         <div class="args">
@@ -433,7 +436,7 @@ views and renders its together.</p>
             
                 <li class="arg">
                     
-                        <code class="optional">[views]</code>
+                        <code>caption</code>
                     
                 </li>
             
@@ -480,16 +483,27 @@ views and renders its together.</p>
             
                 <li class="param">
                     
-                        <code class="param-name optional">[views]</code>
-                        <span class="type">Arrayt | Object</span>
-                        <span class="flag optional" title="This parameter is optional.">optional</span>
+                        <code class="param-name">caption</code>
+                        <span class="type">String | <a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>array of dictionary of views 
-to be composed together</p>
+                        <p>a menu item caption string 
+or component. Caption string can encode the item id, item icon and 
+item checked state. For instance:</p>
+<ul>
+<li><strong>&quot;Menu Item [@menu_item_id]&quot;</strong> - triggers creation of menu item component 
+with &quot;Menu Item&quot; caption and &quot;menu_item_id&quot; id property value  </li>
+<li><strong>&quot;[x] Menu Item&quot;</strong> - triggers creation of checked menu item component 
+with checked on state</li>
+<li><p><strong>&quot;@(&#39;mypicture.gif&#39;) Menu Item&quot;</strong> - triggers creation of menu item 
+ component with &quot;Menu Item&quot; caption and loaded mypicture.gif icon  </p>
+<p>  // create menu item with icon and &quot;Item 1&quot; title 
+  var mi = new zebra.ui.MenuItem(&quot;@(&#39;mypicture.gif&#39;) Item 1&quot;);</p>
+</li>
+</ul>
 
                     </div>
 
@@ -539,43 +553,85 @@ to be composed together</p>
 
                     <ul class="index-list methods extends">
                         
-                            <li class="index-item method inherited">
-                                <a href="#method_getBottom">getBottom</a>
+                            <li class="index-item method protected">
+                                <a href="#method_getCheck">getCheck</a>
 
                                 
                                 
                             </li>
                         
-                            <li class="index-item method inherited">
-                                <a href="#method_getLeft">getLeft</a>
+                            <li class="index-item method">
+                                <a href="#method_getCheckState">getCheckState</a>
 
                                 
                                 
                             </li>
                         
-                            <li class="index-item method inherited">
-                                <a href="#method_getPreferredSize">getPreferredSize</a>
+                            <li class="index-item method protected">
+                                <a href="#method_getContent">getContent</a>
 
                                 
                                 
                             </li>
                         
-                            <li class="index-item method inherited">
-                                <a href="#method_getRight">getRight</a>
+                            <li class="index-item method protected">
+                                <a href="#method_getSub">getSub</a>
 
                                 
                                 
                             </li>
                         
-                            <li class="index-item method inherited">
-                                <a href="#method_getTop">getTop</a>
+                            <li class="index-item method">
+                                <a href="#method_hideSub">hideSub</a>
 
                                 
                                 
                             </li>
                         
-                            <li class="index-item method inherited">
-                                <a href="#method_paint">paint</a>
+                            <li class="index-item method">
+                                <a href="#method_itemSelected">itemSelected</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
+                                <a href="#method_setCaption">setCaption</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
+                                <a href="#method_setCheckManager">setCheckManager</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
+                                <a href="#method_setCheckState">setCheckState</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
+                                <a href="#method_setIcon">setIcon</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
+                                <a href="#method_setParent">setParent</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method protected">
+                                <a href="#method_switched">switched</a>
 
                                 
                                 
@@ -593,20 +649,12 @@ to be composed together</p>
 
                     <ul class="index-list attrs extends">
                         
-                            <li class="index-item attr private">
-                                <a href="#attr_bottom">bottom</a>
+                            <li class="index-item attr">
+                                <a href="#attr_gap">gap</a>
                             </li>
                         
-                            <li class="index-item attr private">
-                                <a href="#attr_left">left</a>
-                            </li>
-                        
-                            <li class="index-item attr private">
-                                <a href="#attr_right">right</a>
-                            </li>
-                        
-                            <li class="index-item attr private">
-                                <a href="#attr_top">top</a>
+                            <li class="index-item attr">
+                                <a href="#attr_manager">manager</a>
                             </li>
                         
                     </ul>
@@ -621,8 +669,8 @@ to be composed together</p>
                 <h2 class="off-left">Methods</h2>
 
                 
-                    <div id="method_getBottom" class="method item inherited">
-    <h3 class="name"><code>getBottom</code></h3>
+                    <div id="method_getCheck" class="method item protected">
+    <h3 class="name"><code>getCheck</code></h3>
 
     
         <span class="paren">()</span>
@@ -630,7 +678,73 @@ to be composed together</p>
 
     
         <span class="returns-inline">
-            <span class="type">Integer</span>
+            <span class="type"><a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a></span>
+        </span>
+    
+
+    
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Get check state component</p>
+
+    </div>
+
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type"><a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a></span>
+                    
+                    <p>a check state component</p>
+
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_getCheckState" class="method item">
+    <h3 class="name"><code>getCheckState</code></h3>
+
+    
+        <span class="paren">()</span>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type">Boolean</span>
         </span>
     
 
@@ -649,8 +763,6 @@ to be composed together</p>
     <div class="meta">
         
             
-                <p>Inherited from
-                <a href="../classes/zebra.ui.View.html#method_getBottom">zebra.ui.View</a>:
             
         
         </p>
@@ -662,8 +774,7 @@ to be composed together</p>
     </div>
 
     <div class="description">
-        <p>Get bottom gap. The method informs UI component that uses the view as
-a border view how much space bottom side of the border occupies</p>
+        <p>Get menu item checked state</p>
 
     </div>
 
@@ -675,9 +786,9 @@ a border view how much space bottom side of the border occupies</p>
             <div class="returns-description">
                 
                     
-                        <b>Return: </b><span class="type">Integer</span>
+                        <b>Return: </b><span class="type">Boolean</span>
                     
-                    <p>a bottom gap</p>
+                    <p>a menu item checked state</p>
 
                 
             </div>
@@ -688,8 +799,8 @@ a border view how much space bottom side of the border occupies</p>
 </div>
 
                 
-                    <div id="method_getLeft" class="method item inherited">
-    <h3 class="name"><code>getLeft</code></h3>
+                    <div id="method_getContent" class="method item protected">
+    <h3 class="name"><code>getContent</code></h3>
 
     
         <span class="paren">()</span>
@@ -697,8 +808,136 @@ a border view how much space bottom side of the border occupies</p>
 
     
         <span class="returns-inline">
-            <span class="type">Integer</span>
+            <span class="type"><a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a></span>
         </span>
+    
+
+    
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Get content component</p>
+
+    </div>
+
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type"><a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a></span>
+                    
+                    <p>a content component</p>
+
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_getSub" class="method item protected">
+    <h3 class="name"><code>getSub</code></h3>
+
+    
+        <span class="paren">()</span>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type"><a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a></span>
+        </span>
+    
+
+    
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Get menu item child component to render sub item arrow element</p>
+
+    </div>
+
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type"><a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a></span>
+                    
+                    <p>a sub item arrow component</p>
+
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_hideSub" class="method item">
+    <h3 class="name"><code>hideSub</code></h3>
+
+    
+        <span class="paren">()</span>
+    
+
     
 
     
@@ -716,8 +955,6 @@ a border view how much space bottom side of the border occupies</p>
     <div class="meta">
         
             
-                <p>Inherited from
-                <a href="../classes/zebra.ui.View.html#method_getLeft">zebra.ui.View</a>:
             
         
         </p>
@@ -729,43 +966,25 @@ a border view how much space bottom side of the border occupies</p>
     </div>
 
     <div class="description">
-        <p>Get left gap. The method informs UI component that uses the view as
-a border view how much space left side of the border occupies</p>
+        <p>Hide sub menu arrow component</p>
 
     </div>
 
     
 
     
-        <br>
-        <div class="returns">
-            <div class="returns-description">
-                
-                    
-                        <b>Return: </b><span class="type">Integer</span>
-                    
-                    <p>a left gap</p>
-
-                
-            </div>
-        </div>
-    
 
     
 </div>
 
                 
-                    <div id="method_getPreferredSize" class="method item inherited">
-    <h3 class="name"><code>getPreferredSize</code></h3>
+                    <div id="method_itemSelected" class="method item">
+    <h3 class="name"><code>itemSelected</code></h3>
 
     
         <span class="paren">()</span>
     
 
-    
-        <span class="returns-inline">
-            <span class="type">Object</span>
-        </span>
     
 
     
@@ -783,8 +1002,6 @@ a border view how much space left side of the border occupies</p>
     <div class="meta">
         
             
-                <p>Inherited from
-                <a href="../classes/zebra.ui.View.html#method_getPreferredSize">zebra.ui.View</a>:
             
         
         </p>
@@ -796,165 +1013,21 @@ a border view how much space left side of the border occupies</p>
     </div>
 
     <div class="description">
-        <p>Return preferred size the view desires to have</p>
+        <p>Callback method that is called every time the menu item has 
+been selected.</p>
 
     </div>
 
     
 
-    
-        <br>
-        <div class="returns">
-            <div class="returns-description">
-                
-                    
-                        <b>Return: </b> <span class="type">Object</span>
-                    
-                
-            </div>
-        </div>
     
 
     
 </div>
 
                 
-                    <div id="method_getRight" class="method item inherited">
-    <h3 class="name"><code>getRight</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-        <span class="returns-inline">
-            <span class="type">Integer</span>
-        </span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.View.html#method_getRight">zebra.ui.View</a>:
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Get right gap. The method informs UI component that uses the view as
-a border view how much space right side of the border occupies</p>
-
-    </div>
-
-    
-
-    
-        <br>
-        <div class="returns">
-            <div class="returns-description">
-                
-                    
-                        <b>Return: </b><span class="type">Integer</span>
-                    
-                    <p>a right gap</p>
-
-                
-            </div>
-        </div>
-    
-
-    
-</div>
-
-                
-                    <div id="method_getTop" class="method item inherited">
-    <h3 class="name"><code>getTop</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-        <span class="returns-inline">
-            <span class="type">Integer</span>
-        </span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.View.html#method_getTop">zebra.ui.View</a>:
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Get top gap. The method informs UI component that uses the view as
-a border view how much space top side of the border occupies</p>
-
-    </div>
-
-    
-
-    
-        <br>
-        <div class="returns">
-            <div class="returns-description">
-                
-                    
-                        <b>Return: </b><span class="type">Integer</span>
-                    
-                    <p>a top gap</p>
-
-                
-            </div>
-        </div>
-    
-
-    
-</div>
-
-                
-                    <div id="method_paint" class="method item inherited">
-    <h3 class="name"><code>paint</code></h3>
+                    <div id="method_setCaption" class="method item">
+    <h3 class="name"><code>setCaption</code></h3>
 
     
         <div class="args">
@@ -962,37 +1035,7 @@ a border view how much space top side of the border occupies</p>
             
                 <li class="arg">
                     
-                        <code>g</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>x</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>y</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>w</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>h</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>c</code>
+                        <code>caption</code>
                     
                 </li>
             
@@ -1017,8 +1060,6 @@ a border view how much space top side of the border occupies</p>
     <div class="meta">
         
             
-                <p>Inherited from
-                <a href="../classes/zebra.ui.View.html#method_paint">zebra.ui.View</a>:
             
         
         </p>
@@ -1030,8 +1071,7 @@ a border view how much space top side of the border occupies</p>
     </div>
 
     <div class="description">
-        <p>The method is called to render the decorative element on the 
-given surface of the specified UI component</p>
+        <p>Set the menu item caption.</p>
 
     </div>
 
@@ -1043,95 +1083,423 @@ given surface of the specified UI component</p>
             
                 <li class="param">
                     
-                        <code class="param-name">g</code>
-                        <span class="type">Canvas 2D context</span>
+                        <code class="param-name">caption</code>
+                        <span class="type">String</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>graphical context</p>
+                        <p>a caption</p>
 
                     </div>
 
                     
                 </li>
             
+            </ul>
+        </div>
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="method_setCheckManager" class="method item">
+    <h3 class="name"><code>setCheckManager</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>man</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Set the menu item checked state manager.</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
                 <li class="param">
                     
-                        <code class="param-name">x</code>
-                        <span class="type">Integer</span>
+                        <code class="param-name">man</code>
+                        <span class="type"><a href="../classes/zebra.ui.SwitchManager.html" class="crosslink">zebra.ui.SwitchManager</a> | <a href="../classes/zebra.ui.Group.html" class="crosslink">zebra.ui.Group</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>x coordinate</p>
+                        <p>a switch manager</p>
 
                     </div>
 
                     
                 </li>
             
+            </ul>
+        </div>
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="method_setCheckState" class="method item">
+    <h3 class="name"><code>setCheckState</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>b</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Set the menu item checked state</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
                 <li class="param">
                     
-                        <code class="param-name">y</code>
-                        <span class="type">Integer</span>
+                        <code class="param-name">b</code>
+                        <span class="type">Boolean</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>y coordinate</p>
+                        <p>a checked state</p>
 
                     </div>
 
                     
                 </li>
             
+            </ul>
+        </div>
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="method_setIcon" class="method item">
+    <h3 class="name"><code>setIcon</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>img</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Set the menu item icon.</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
                 <li class="param">
                     
-                        <code class="param-name">w</code>
-                        <span class="type">Integer</span>
+                        <code class="param-name">img</code>
+                        <span class="type">String | Image</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>required width</p>
+                        <p>a path to an image or image object</p>
 
                     </div>
 
                     
                 </li>
             
-                <li class="param">
+            </ul>
+        </div>
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="method_setParent" class="method item">
+    <h3 class="name"><code>setParent</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
                     
-                        <code class="param-name">h</code>
-                        <span class="type">Integer</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>required height</p>
-
-                    </div>
-
+                        <code>p</code>
                     
                 </li>
             
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Override setParent method to catch the moment when the 
+item is inserted to a menu</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
                 <li class="param">
                     
-                        <code class="param-name">c</code>
+                        <code class="param-name">p</code>
                         <span class="type"><a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>an UI component on which the view 
-element has to be drawn</p>
+                        <p>a parent</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="method_switched" class="method item protected">
+    <h3 class="name"><code>switched</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>b</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+
+    
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Callback method that is called every time a checked state 
+of the menu item has been updated</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">b</code>
+                        <span class="type">Boolean</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a new checked state</p>
 
                     </div>
 
@@ -1158,15 +1526,13 @@ element has to be drawn</p>
                 <h2 class="off-left">Attributes</h2>
 
                 
-                    <div id="attr_bottom" class="attr item private">
-    <a name="config_bottom"></a> 
-    <h3 class="name"><code>bottom</code></h3>
+                    <div id="attr_gap" class="attr item">
+    <a name="config_gap"></a> 
+    <h3 class="name"><code>gap</code></h3>
     <span class="type">Integer</span>
 
     
 
-    
-        <span class="flag private">private</span>
     
 
     
@@ -1194,10 +1560,12 @@ element has to be drawn</p>
     </div>
 
     <div class="description">
-        <p>Bottom padding</p>
+        <p>Gap between checked, content and sub menu arrow components</p>
 
     </div>
 
+    
+        <p><strong>Default:</strong> 8</p>
     
 
     
@@ -1206,63 +1574,13 @@ element has to be drawn</p>
 </div>
 
                 
-                    <div id="attr_left" class="attr item private">
-    <a name="config_left"></a> 
-    <h3 class="name"><code>left</code></h3>
-    <span class="type">Integer</span>
+                    <div id="attr_manager" class="attr item">
+    <a name="config_manager"></a> 
+    <h3 class="name"><code>manager</code></h3>
+    <span class="type"><a href="../classes/zebra.ui.SwitchManager.html" class="crosslink">zebra.ui.SwitchManager</a> | <a href="../classes/zebra.ui.Group.html" class="crosslink">zebra.ui.Group</a></span>
 
     
 
-    
-        <span class="flag private">private</span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <span class="flag readonly">readonly</span>
-    
-
-    <div class="meta">
-        
-            
-            
-        
-        </p>
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Left padding</p>
-
-    </div>
-
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="attr_right" class="attr item private">
-    <a name="config_right"></a> 
-    <h3 class="name"><code>right</code></h3>
-    <span class="type">Integer</span>
-
-    
-
-    
-        <span class="flag private">private</span>
     
 
     
@@ -1290,55 +1608,7 @@ element has to be drawn</p>
     </div>
 
     <div class="description">
-        <p>Right padding</p>
-
-    </div>
-
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="attr_top" class="attr item private">
-    <a name="config_top"></a> 
-    <h3 class="name"><code>top</code></h3>
-    <span class="type">Integer</span>
-
-    
-
-    
-        <span class="flag private">private</span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <span class="flag readonly">readonly</span>
-    
-
-    <div class="meta">
-        
-            
-            
-        
-        </p>
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Top padding</p>
+        <p>Switch manager that is set to make the item checkable</p>
 
     </div>
 

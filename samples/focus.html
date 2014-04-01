@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+	<head>
+        <title>Tutorial</title>
+        
+    <script src='../zebra.min.js' type='text/javascript'></script>
+        
+<script type='text/javascript'>
+    zebra.ready(function() {
+        if (document.getElementById("doc.focus1") != null) {
+
+            var r = new zebra.ui.zCanvas("doc.focus1").root;
+            r.setLayout(new zebra.layout.BorderLayout());
+            r.add(zebra.layout.CENTER, new zebra.ui.Button("Center", [
+                function focused() {
+                   this.$super();
+                   if (this.hasFocus()) {
+                        this.focusComponent.setColor("orange");
+                   }
+                   else {
+                        this.focusComponent.setColor("black");
+                   }
+                }
+            ]));
+         
+            r.add(zebra.layout.BOTTOM, new zebra.ui.Button("Bottom"));
+        }
+
+        if (document.getElementById("doc.focus2") != null) {
+
+            var r = new zebra.ui.zCanvas("doc.focus2").root;
+            r.setLayout(new zebra.layout.BorderLayout());
+            r.add(zebra.layout.CENTER, new zebra.ui.Button("Center", [
+                function focusGained(e) {
+                    this.focusComponent.setColor("orange");
+                },
+
+                function focusLost(e) {
+                    this.focusComponent.setColor("black");
+                }
+            ]));
+         
+            r.add(zebra.layout.BOTTOM, new zebra.ui.Button("Bottom"));         
+        }
+
+        if (document.getElementById("doc.focus3") != null) {
+
+            var r = new zebra.ui.zCanvas("doc.focus3").root;
+            r.setLayout(new zebra.layout.BorderLayout());
+            zebra.ui.events.addListener({
+                focusGained : function (e) {
+                    if (e.source.focusComponent) { 
+                        e.source.focusComponent.setColor("orange");
+                    }
+                },
+
+                focusLost: function (e) {
+                    if (e.source.focusComponent) { 
+                        e.source.focusComponent.setColor("black");
+                    }
+                }
+            });
+         
+            r.add(zebra.layout.BOTTOM, new zebra.ui.Button("Bottom"));
+            r.add(zebra.layout.CENTER, new zebra.ui.Button("Center"));
+            r.add(zebra.layout.TOP, new zebra.ui.Button("Top"));
+        }
+
+        if (document.getElementById("doc.focus4") != null) {
+
+            var r = new zebra.ui.zCanvas("doc.focus4").root;
+            r.setLayout(new zebra.layout.BorderLayout(4,4));
+            r.setPadding(8);
+            r.setBorder(zebra.ui.borders.plain);
+            
+
+            var p = new zebra.ui.Panel([
+               function canHaveFocus() {
+                   return true;
+               },
+
+               function focused() {
+                    this.$super();
+                    this.repaint();
+               },
+
+               function paintOnTop(g) {
+                    if (this.hasFocus()) {
+                        g.setColor("red");
+                        g.lineWidth = 2;
+                        g.rect(2,2,this.width-4,this.height-4);
+                        g.stroke();
+                    }
+               }
+            ]);
+            p.setBackground("lightGray");
+            r.add(zebra.layout.CENTER, p);
+            r.add(zebra.layout.TOP, new zebra.ui.Button("TOP"));
+        }
+
+        if (document.getElementById("doc.focus5") != null) {
+
+            var r = new zebra.ui.zCanvas("doc.focus5").root;
+            r.setLayout(new zebra.layout.BorderLayout(4,4));
+            r.setPadding(8);
+            r.setBorder(zebra.ui.borders.plain);
+            
+
+            var p = new zebra.ui.Panel([
+               function canHaveFocus() {
+                   return true;
+               }
+            ]);
+
+            p.setBorder(new zebra.ui.ViewSet({
+                focuson : new zebra.ui.Border("red", 2, 8),
+                focusoff: new zebra.ui.Border("gray", 2, 8)
+            }));
+
+            p.setBackground("lightGray");
+            r.add(zebra.layout.CENTER, p);
+            r.add(zebra.layout.TOP, new zebra.ui.Button("TOP"));
+        }
+
+    });
+   
+		</script>
+	</head>
+
+	<body bgcolor="#EEEEEE" align="center" style="padding:15px;">
+        <h1>Handle focus gained/lost events</h1>
+
+        <table cellpadding="8" align="center">
+            <tr>
+                <td><canvas width="350" height="250" id="doc.focus1"></canvas></td>
+                <td><canvas width="350" height="250" id="doc.focus4"></canvas></td>
+                <td><canvas width="350" height="250" id="doc.focus5"></canvas></td>
+            </tr>
+
+            <tr>
+                <td>Update button caption color by changed focus state</td>
+                <td>Focusable panel with rendered border focus indicator</td>
+                <td>Use component border view to depict its focus state</td>
+            </tr>
+        </table>
+
+   </body>
+</html>

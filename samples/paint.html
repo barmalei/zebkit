@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+	<head>
+    <title>Tutorial</title>
+
+    <script src='../zebra.min.js' type='text/javascript'></script>
+        
+	<script type='text/javascript'>
+		zebra.ready(function() {
+		    eval(zebra.Import("ui", "layout"));
+ 
+        var PaintComponent=zebra.Class(zebra.ui.Panel,[
+            function paint(g) {
+               g.setColor("lightGray");
+               g.fillRect(8,this.height/3,this.width-16,this.height/4);
+               g.fillRect(this.width/3,8,this.width/4,this.height-16);
+            }
+        ]);
+
+        var UpdateComponent=zebra.Class(PaintComponent,[
+            function update(g) {
+               g.setColor("red");
+               g.fillRect(0,0,this.width, this.height);
+            }
+        ]);
+
+        var PaintOnTopComponent=zebra.Class(UpdateComponent,[
+            function paintOnTop(g) {
+
+               g.setColor("white");
+               g.lineWidth = 3;
+               g.rect(3,3,this.width-6, this.height-6);
+           	   g.stroke();
+            }
+        ]);
+
+
+        var FocusMarkerComponent = zebra.Class(zebra.ui.ViewPan,[
+             // say the component can have focus
+             function canHaveFocus() { return true; },
+          
+             // override "focused()" method that is called every time
+             // the component gained or lost focus  
+             function focused() {
+                 this.$super(); // don't forget call super "focused()" method
+                 this.repaint();// trigger the component repaint
+             },
+         
+             // "markerColor" property value setter
+             function setMarkerColor(c) {
+                 this.markerColor = c;
+                 this.repaint();
+             },
+         
+             // implement "paint(...)" method to draw focus marker rectangle
+             // whenever the component captures the focus
+             function paint(g) {
+                 if (this.hasFocus()) {
+                     // set "red" as default color if "markerColor" has not 
+                     // been defined yet
+                     g.setColor(this.markerColor==null?"red":this.markerColor);
+                     g.rect(3,3, this.width-6, this.height-6);
+                     g.stroke();
+                 }
+             }  
+        ]);   
+ 
+
+		if (document.getElementById("doc.paint") != null) {
+    		var c = new zCanvas("doc.paint");
+    		c.root.setLayout(new BorderLayout());
+    		c.root.add(CENTER, new PaintComponent());
+    	}
+
+    	if (document.getElementById("doc.update") != null) {
+    		var c = new zCanvas("doc.update");
+    		c.root.setLayout(new BorderLayout());
+    		c.root.add(CENTER, new UpdateComponent());
+    	}
+
+    	if (document.getElementById("doc.paintOnTop") != null) {
+	    	var c = new zCanvas("doc.paintOnTop");
+	    	c.root.setLayout(new BorderLayout());
+	    	c.root.add(CENTER, new PaintOnTopComponent());
+	    }
+
+    	if (document.getElementById("doc.repaint") != null) {
+			var c = new zebra.ui.zCanvas("doc.repaint");
+			c.root.setLayout(new BorderLayout());
+			var fc = new FocusMarkerComponent();
+			fc.setView(new TextRender("Click on the\ncomponent\nto pass focus\nhere"));
+			c.root.add(zebra.layout.CENTER, fc);
+	    }
+
+
+	});
+		</script>
+	</head>
+
+	<body bgcolor="#EEEEEE" align="center" style="padding:15px;">
+        <h1>UI Component custom paint</h1>
+        <table cellpadding="8" align="center">
+            <tr>
+                <td><canvas width="250" height="250" id="doc.paint"></canvas><div>Implement paint(g)</div></td>
+                <td><canvas width="250" height="250" id="doc.update"></canvas><div>Implement paint(g) and update(g)</div></td>
+                <td><canvas width="250" height="250" id="doc.paintOnTop"></canvas><div>Implement paint(g), update(g) and<br/> paintOnTop(g)</div></td>
+            </tr>
+    	    
+	    </table>
+    </body>
+</html>

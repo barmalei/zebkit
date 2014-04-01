@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style media="screen" type="text/css">
+			.zebcanvas {
+			    margin: 10px; 
+			}
+
+			.description {
+				color: white;
+			}
+		
+			body {
+				background: black;
+				padding:20px;
+			}
+
+			h1 {
+				color:white;
+			}
+		</style>
+
+	
+		<script src='../zebra.min.js' type='text/javascript'></script>
+		<script src='js/uiengine.samples.js' 	type='text/javascript'></script>
+
+
+		<script type='text/javascript'>
+			var bg = null, bg5 = null, bg6 = null, bg9 = null, bg11 = null, cursors=null;
+
+		    zebra.ready(
+
+		    function() {
+		    	bg   	= zebra.ui.loadImage("images/wood.png");
+				bg5  	= zebra.ui.loadImage("images/bg5.png");
+				bg6 	= zebra.ui.loadImage("images/bg6.png");
+				bg9  	= zebra.ui.loadImage("images/19original.jpg");				
+				bg11 	= zebra.ui.loadImage("images/25original.gif");
+				cursors = zebra.ui.loadImage("images/cursors.png");
+		    },
+
+		    function() {
+		    	eval(zebra.Import("ui", "layout", "ui.samples"));
+
+				//create canvas
+			    var root = (new zebra.ui.zCanvas("mouseEventDemo")).root;
+				root.properties({
+					layout: new zebra.layout.BorderLayout(),
+					kids  : {
+						CENTER: new MouseEventHandlerPan().properties({border: new Oval()}) 
+					}
+				});
+
+			    root = (new zebra.ui.zCanvas("inputDemo")).root;
+				root.properties({
+					layout    : new zebra.layout.BorderLayout(6,6),
+					background: "black",
+					padding   : 4,
+					kids	  : {
+						LEFT: (new EditablePan()).properties({
+							preferredSize : [ 70, 50 ],
+							border: new Oval("blue")
+						}),
+						TOP: (new EditablePan()).properties({
+							preferredSize : [ 50, 80 ],
+							border: new Pentahedron("magenta")
+						}), 
+						CENTER: (new EditablePan()).properties({
+							border: new Triangle("green")
+						}),
+						BOTTOM: (new EditablePan()).properties({
+							preferredSize : [ 50, 50 ],
+							border 	      : new Border("white", 4, 8)
+						}),
+						RIGHT: (new EditablePan()).properties({
+							preferredSize : [ 50, 50 ],
+							border: new Border("orange", 4)
+						})
+					}
+				});
+
+			    root = (new zebra.ui.zCanvas("layoutDemo")).root;
+				root.properties({
+					layout     : new zebra.layout.BorderLayout(4,4),
+					background : new Pattern(bg9),
+					background2: "#AACACA",
+					padding    : 8,
+					kids       : {
+						CENTER: new Components()
+					}
+				});
+
+			    root = (new zebra.ui.zCanvas("shapedComponentDemo")).root;
+				root.properties({
+					layout: new StackLayout(),
+					background: new Pattern(bg11),
+					kids: {
+						null: 		 new CirclePan(50),
+						USE_PS_SIZE: new TrianglePan()
+					}
+				});
+
+			    root = (new zebra.ui.zCanvas("mouseCursorDemo")).root;
+				root.properties({
+					layout: new StackLayout(),
+					kids: [
+						new Panel().properties({
+							layout: new zebra.layout.GridLayout(2, 2, HORIZONTAL | VERTICAL),
+							kids: [
+								new CursorPan(Cursor.HAND, "red", new Picture(cursors, 180, 110, 60, 60)),
+								new CursorPan(Cursor.WAIT, "blue", new Picture(cursors, 180, 50, 60, 60)),
+								new CursorPan(Cursor.MOVE, "gray", new Picture(cursors, 120, 110, 60, 60)),
+								new CursorPan(Cursor.HELP, "orange", new Picture(cursors, 0, 110, 60, 60))
+							]
+						}),
+
+						(new CursorPan("crosshair", "rgba(222,222,222, 0.6)", 
+									   new Picture(cursors, 180, 0, 60, 55))).properties({
+							constraints: USE_PS_SIZE,
+							preferredSize: [100, 100]
+						})
+					]
+				});
+
+			    root = (new zebra.ui.zCanvas("chartDemo")).root;
+				root.properties({
+					layout: new zebra.layout.StackLayout(),
+					background: "black", 
+					kids:[
+						new SimpleChart(function(x) { return -x*Math.sin(x); }, -0.4, 0.4, 0.01, "#33ddCC"),
+						new SimpleChart(function(x) { return Math.sin(x); }, -3, 3, 0.01, "#11FF99"),
+						new SimpleChart(function(x) { return Math.cos(x)*Math.sin(x) - 2 * Math.sin(x*x); }, -2, 3, 0.01, "#CCFF77"),
+
+						new Panel([
+							function mouseMoved(e) {
+								for(var i=0; i<this.parent.kids.length-1; i++) {
+									var kid = this.parent.kids[i];
+										j   = kid.isInside(e.x, e.y);
+									
+									if (j >= 0) {
+										kid.setHighlight(true);
+										this.selected = kid;
+										this.index = j;
+										break;
+									}
+									else {
+										this.selected = null;
+										if (kid.highlight) kid.setHighlight(false);		
+									}
+								}
+								
+							},
+
+							function mouseDragStarted(e) {
+								this.dx = e.x;
+								this.dy = e.y;
+							},
+
+							function mouseDragged(e) {
+								if (this.selected) {
+									for (var i=0; i < this.selected.gx.length; i++) {
+										this.selected.gx[i] += (e.x - this.dx); 
+										this.selected.gy[i] += (e.y - this.dy); 
+									}
+									this.selected.repaint();
+								}
+								this.dx = e.x;
+								this.dy = e.y;
+							}
+
+						])
+					]
+				});
+
+
+			    root = (new zebra.ui.zCanvas("chartDemo2")).root;
+				root.properties({
+					layout: new zebra.layout.BorderLayout(),
+					background: "black", 
+					kids:{
+						TOP:    new SimpleChart(function(x) { 
+													return -x*Math.sin(x); 
+												}, -1.4, 8.4, 0.01, "#33ddCC").properties({ preferredSize: [ 100, 80 ] }),
+						CENTER: new SimpleChart(function(x) { 
+													return Math.sin(x); 
+												}, -3, 9, 0.01, "#11FF99"),
+						BOTTOM: new SimpleChart(function(x) { 
+													return Math.cos(x)*Math.sin(x) - 2 * Math.sin(x*x); 
+												}, -2, 5, 0.01, "#CCFF77").properties({ preferredSize: [ -1, 70 ]  }),
+					}
+				});
+
+
+
+				var zc = new zebra.ui.zCanvas("layerDemo"), root = zc.root;
+				zc.add(new CustomLayer()); 
+				root.properties({
+					layout: new FlowLayout(CENTER, CENTER, VERTICAL, 8),
+					background: new Pattern(bg6),
+					border: new Border(null, 4, 8),
+					kids: [
+						new EditablePan("gray").properties({ 
+							preferredSize: [ 120, 50 ],
+							border: new Border("blue", 4, 8)
+						}),
+
+						new EditablePan("gray").properties({ 
+							preferredSize: [ 180, 60 ],
+							border: new Border("orange", 4, 8)
+						}),
+
+						new EditablePan("gray").properties({ 
+							preferredSize: [ 220, 70 ],
+							border: new Border("green", 4, 8)
+						})
+					]
+				});
+
+				root.extend([
+					function mousePressed(e) {
+						this.kids[0].requestFocus();
+					}
+				]);
+
+				var Draggable = [
+					function mouseDragStarted(e) {
+						this.dx = e.x;
+						this.dy = e.y;
+					},
+
+					function mouseDragged(e) {
+						this.setLocation(this.x + e.x - this.dx, this.y + e.y - this.dy);
+					},
+
+					function getCursorType(t, x, y) { return zebra.ui.Cursor.HAND; }
+				];
+
+				var zc = new zebra.ui.zCanvas("dragDemo"), root = zc.root;
+				root.properties({
+					layout: new RasterLayout(),
+					background: new Pattern(bg6),
+					kids: [
+						new Panel().properties({ 
+							bounds: [ 20, 20, 80, 150 ],
+							border: new Border("orange", 4, 8),
+							background: new Pattern(bg5)
+						}).extend(Draggable),
+
+						new Panel().properties({ 
+							bounds: [ 160, 30, 120, 120 ],
+							border: new Border("green", 4, 8),
+							background: new Pattern(bg5)
+						}).extend(Draggable),
+
+						new Panel().properties({ 
+							bounds: [ 50, 180, 150, 70 ],
+							border: new Border("red", 4, 8),
+							background: new Pattern(bg5)
+						}).extend(Draggable),
+					]
+				});
+	 		});
+
+		</script>
+	</head>
+
+	<body>
+
+		<h1>Zebra UI Engine samples</h1>
+
+
+		<table border="0" width="1200">
+			<tr>
+				<td align="center" valign="bottom"> 
+					<canvas width="300" height="300" id="mouseEventDemo"> </canvas>
+				</td>
+				<td align="center" valign="bottom"> 
+					<canvas width="300" height="300" id="inputDemo"> </canvas>
+				</td>
+				<td align="center" valign="bottom"> 
+					<canvas width="320" height="350" id="layoutDemo"> </canvas>
+				</td>
+			</tr>
+
+			<tr>
+				<td class="description" align="center">Mouse event handling by changing radial gradient background</td>
+				<td class="description" align="center">
+					Focus and key event handling. Navigate between shaped UI component using tab or mouse and
+					type a character in
+				</td>
+				<td class="description" align="center">
+					Layout UI component by applying different layout managers (BorderLayout, ListLayout and GridLayout in this sample)
+				</td>
+			</tr>
+			<tr>
+				<td align="center" valign="bottom"> 
+					<canvas width="300" height="300" id="shapedComponentDemo"> </canvas>
+				</td>
+				<td align="center" valign="bottom"> 
+					<canvas width="300" height="300" id="mouseCursorDemo"> </canvas>
+				</td>
+				<td align="center" valign="bottom"> 
+					<canvas width="400" height="250" id="chartDemo"> </canvas>
+				</td>
+			</tr>
+
+			<tr>
+				<td class="description" align="center">Shaped (round and triangle) UI components. Mouse event handling.</td>
+				<td class="description" align="center">Mouse cursor controlling</td>
+				<td class="description" align="center">Dragable charts</td>
+			</tr>
+			<tr>
+				<td align="center" valign="bottom"> 
+					<canvas width="300" height="300" id="layerDemo"> </canvas>
+				</td>
+				<td align="center" valign="bottom"> 
+					<canvas width="300" height="300" id="dragDemo"> </canvas>
+				</td>
+				<td align="center" valign="bottom"> 
+					<canvas width="350" height="270" id="chartDemo2"> </canvas>
+				</td>
+			</tr>
+			<tr>
+				<td class="description" align="center">UI Layer to disable and enable input</td>
+				<td class="description" align="center">Drag and move UI component on canvas surface</td>
+				<td class="description" align="center">Three charts are arranged with border layout manager</td>
+			</tr>
+		</table>
+	</body>
+</html>

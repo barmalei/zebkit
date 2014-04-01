@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	    <script src='../zebra.min.js' type='text/javascript'></script>
+        
+		<script type='text/javascript'>
+		    
+		    zebra.ready(
+		    	function() {
+				    eval(zebra.Import("ui", "layout"));
+
+                    var canvas = new zCanvas("pullout", 400, 400), root = canvas.root;
+
+                    function Constr(alignment, percentage) {
+                        this.alignment = alignment;
+                        this.percentage = percentage;
+                    };
+
+                    root.setLayout(new Layout([
+                        function calcPreferredSize(t) {
+                            return { width: 0, height:0 }; // just a stub                             
+                        },
+
+                        function doLayout(t) {
+                            for (var i = 0; i < t.kids.length; i++) {
+                                var kid = t.kids[i];
+                                if (kid.isVisible === true) {
+                                    var ctr = kid.constraints;
+                                    if (ctr.alignment == LEFT) {
+                                        var ps = kid.getPreferredSize();
+                                        ps.height = ~~((t.height*ctr.percentage)/100);
+                                        kid.setSize(ps.width, ps.height);
+                                        var y = (t.height - ps.height)/2, x = (kid.state == "hiding") ? kid.x : 0;
+                                        kid.setLocation(x,y);
+                                    }
+                                }
+                            }
+                        }
+
+                    ]));
+
+                    var p = new Panel([
+                        function $prototype() {
+                            this.status = "shown";
+                            this.timer = null;
+                        },
+
+                        function mouseClicked(e) {
+                            if (this.timer == null) {
+                                if (this.state == "hiding") {
+                                    this.state = "shown";
+                                    this.vrp();
+                                }
+                                else {
+                                    var $this = this;
+                                    this.state   = "hiding";
+                                    this.dt      = 4;
+                                    this.counter = 0;
+                                    this.timer =  setInterval(function() {
+                                        if (-$this.x  >= $this.width) {
+                                            clearInterval($this.timer);
+                                            $this.timer = null;
+                                            $this.setLocation(-$this.width + 20, $this.y);
+                                        }
+                                        else {
+                                            $this.setLocation($this.x - $this.dt, $this.y);
+                                            $this.counter++;
+                                            if ($this.counter % 5 === 0) $this.dt = $this.dt*2;
+                                        }
+                                    }, 50);
+                                }
+                            }
+                        }
+                    ]); 
+
+                    p.setPreferredSize(130, -1);
+                    p.setBorder("plain");
+                    p.cursorType = Cursor.HAND;
+                    p.setBackground("orange");
+                    p.setPadding(6);
+                    p.setLayout(new FlowLayout(CENTER, CENTER, VERTICAL, 8));
+                    p.add(new Button("Button 1"));
+                    p.add(new Button("Button 2"));
+                    p.add(new Button("Button 3"));
+
+                    root.setBorder("plain");
+                    root.add(new Constr(LEFT, 70), p);
+			 		//canvas.fullScreen();
+		 		});
+		</script>
+	</head>
+
+	<body bgcolor="#EEEEEE" align="center">
+        <h1>Pullout panel custom component</h1>
+        <canvas id="pullout"></canvas>
+        <div>Click on orange panel to hide/show it</div>
+	</body>
+</html>

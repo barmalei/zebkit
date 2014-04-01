@@ -101,30 +101,27 @@ def START(host = "localhost", port = 8080):
     class AsyncJRPCServer(SocketServer.ThreadingMixIn, JRPCServer): pass
 
     server1 = DocXMLRPCServer((host, port), XRPCRequestHandler)
-    # server2 = JRPCServer((host, port + 1))
-    # reg_srv_methods(server1);
-    # reg_srv_methods(server2);
+    server2 = JRPCServer((host, port + 1))
+    reg_srv_methods(server1);
+    reg_srv_methods(server2);
 
-    # class ST(Thread):
-    #     def __init__(self, server, msg):
-    #         Thread.__init__(self);
-    #         self.daemon = True
-    #         self.server = server
-    #         self.msg = msg
-    #         self.start()
+    class ST(Thread):
+        def __init__(self, server, msg):
+            Thread.__init__(self);
+            self.daemon = True
+            self.server = server
+            self.msg = msg
+            self.start()
 
-    #     def run(self):
-    #         self.server.serve_forever()
+        def run(self):
+            self.server.serve_forever()
 
     print("Start Zebra demo HTTP Server %s:%d" % (host, port))
-    server1.serve_forever()
+    #server1.serve_forever()
 
-    # ST(server1, "Start XML-RPC Server %s:%d" % (host, port))
-    # print("Start JSON-RPC Server %s:%d" % (host, port + 1))
-    # server2.serve_forever()
+    ST(server1, "Start XML-RPC Server %s:%d" % (host, port))
+    print("Start JSON-RPC Server %s:%d" % (host, port + 1))
+    server2.serve_forever()
 
 if __name__ == '__main__':
-    START()
-    #START(host="10.26.214.170")
-    #START(host="192.168.1.16")
-    #START("192.168.178.11")
+    START(host="localhost", port=8080)

@@ -1,6 +1,8 @@
 
 ![ScreenShot](/samples/images/header.jpg)
 
+v4.2014 (Luda)
+
 ## For impatient: look at few demos   
 
    * Zebra rich set of UI components: http://www.zebkit.org/samples/index.html

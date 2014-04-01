@@ -1,5 +1,5 @@
 
-** 3.2014 **
+**4.2014 (Luda)**
 
    * Reduce number of zebra artifact required to host zebra on a user side. To host zebra only three artifacts are required:
        - zebra.min.js
@@ -31,7 +31,7 @@
    * Better test cases coverage 
    * +1000 other changes and bug fixes
 
-** 8.2013 Zebra documentation is available !**
+** 8.2013 (Gleb) Zebra documentation is available !**
 
    * Zebra start supporting mobile !
    * Tutorial is written published on WEB site

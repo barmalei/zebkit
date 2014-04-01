@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="require.js" type="text/javascript"></script>
+    </head>
+    <body> 
+        <script type="text/javascript">
+
+            require(["http://repo.zebkit.org/dev/zebra.js"], function() {
+                zebra()["zebra.json"] = "http://repo.zebkit.org/dev/zebra.json";
+                
+                zebra.ready(
+                    function() {
+                        var z = new zebra.ui.zCanvas(400, 400);
+                        z.root.properties({
+                            layout: new zebra.layout.BorderLayout(),
+                            kids: {
+                                CENTER: new zebra.ui.tree.Tree({
+                                    "Root": [ "1", "2", "3"]
+                                })
+                            }
+                        });
+                    }
+                ); 
+
+            });
+        </script>
+    </body>
+</html>

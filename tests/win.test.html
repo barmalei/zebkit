@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+	<head>
+
+		<script src='../lib/zebra/easyoop.js' 	 type='text/javascript'></script>
+	    <script src='../lib/zebra/util.js' type='text/javascript'></script>
+	    <script src='../lib/zebra/io.js'    type='text/javascript'></script>
+	    <script src='../lib/zebra/data.js' type='text/javascript'></script>
+	    <script src='../lib/zebra/ui.webstuff.js' type='text/javascript'></script>
+	    <script src='../lib/zebra/layout.js' type='text/javascript'></script>
+	    <script src='../lib/zebra/canvas.js' type='text/javascript'></script>
+	    <script src='../lib/zebra/ui.js' type='text/javascript'></script>
+
+
+	    <script src='../lib/zebra/ui.TextField.js' type='text/javascript'></script>
+	    <script src='../lib/zebra/ui.list.js' type='text/javascript'></script>
+	    <script src='../lib/zebra/ui.window.js' type='text/javascript'></script>
+
+	    <script src='../lib/zebra/ui.tree.js' type='text/javascript'></script>
+	    <script src='../lib/zebra/ui.grid.js' type='text/javascript'></script>
+	    <script src='../lib/zebra/ui.designer.js' type='text/javascript'></script>
+
+        
+		<script type='text/javascript'>
+		    zebra.ready(function() {
+				// import all classes, functions and cosntans from 
+				// zebra.ui, zebra.layout packages
+				eval(zebra.Import("ui", "layout"));			
+
+				zebra.ui.Panel.extend([
+					function getTooltip(target, x, y) {
+						if (this.tooltip != null) {
+							return this.tooltip;
+						}
+						return null;
+					}
+				]);
+
+				var x = 10, y = 10;
+
+				function makeWin() {
+					var w1 = new Window();
+					w1.root.setLayout(new FlowLayout());
+					var b1 = new Button("mdi");
+					var b2 = new Button("modal");
+					w1.root.add(b1);
+					w1.root.add(b2);
+
+					w1.setSize(200,200);
+					w1.setLocation(x,y);
+					x+=30;
+					y+=30;
+
+					b1.bind(function() {
+						zebra.ui.showWindow(c, "mdi", makeWin());
+					});
+
+					b2.bind(function() {
+						zebra.ui.showWindow(c, "modal", makeWin());
+					});
+
+					return w1;
+				}
+
+				// create canvas
+			    var c = new zCanvas(400, 300);
+			    c.fullScreen();
+
+				zebra.ui.showModalWindow(c, makeWin());
+			    zebra.ui.showModalWindow(c, makeWin());
+
+	 		});
+
+		</script>
+	</head>
+
+	<body bgcolor="#EEEEEE" align="center" style="padding:15px;">
+	    
+	</body>
+</html>

@@ -4,9 +4,9 @@
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
 	<script src='../lib/zebra/easyoop.js' 	 type='text/javascript'></script>
-	<script src='../lib/zebra/assert.js' 	 type='text/javascript'></script>
     <script src='../lib/zebra/util.js' 	 type='text/javascript'></script>
     <script src='../lib/zebra/io.js' 	 type='text/javascript'></script>
+    <script src='../lib/zebra/tools.js'      type='text/javascript'></script>
 
     <script type='text/javascript'>
         var assert = zebra.assert, assertException = zebra.assertException;
@@ -21,6 +21,8 @@
             furl = url + "test.txt", wfurl = url + "test2.txt",
             burl = url + "1x1.png",
             eurl = "http://repo.gravitysoft.org/cgi-bin/echo.rb";
+
+
 
 
         // !!! 1x1.png binary dump
@@ -215,7 +217,7 @@
 
                     function testURLInputStream() {
                         if (zebra.isIE) {
-                            zebra.out.print("Internet explorer doesn't support binary streaming");
+                            zebra.print("Internet explorer doesn't support binary streaming");
                         }
                         else {
 //                            url = "http://10.211.55.2:8080/web/test/";
@@ -372,13 +374,13 @@
 
                     function testJSON_RPC() {
                         // var url = "http://repo.gravitysoft.org/test/testjsonserver.php"
-                        //testRPC("http://192.168.178.11:8081/jrpc", zebra.io.JRPC);
-                        testRPC("http://192.168.178.11:8091/jrpc", zebra.io.JRPC);
+                        testRPC("http://192.168.1.10:8091/jrpc", zebra.io.JRPC);
+                        //testRPC("http://192.168.178.11:8091/jrpc", zebra.io.JRPC);
                     },
 
                     function testXML_RPC() {
                         //testRPC("http://10.26.214.170:8080/xrpc", zebra.io.XRPC);
-                        testRPC("http://192.168.178.11:8090/xrpc", zebra.io.XRPC);
+                        testRPC("http://192.168.1.10:8090/xrpc", zebra.io.XRPC);
                     }
                 );
 			}

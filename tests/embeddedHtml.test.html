@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html style="height:100%">
+	<head>
+
+	    <script src='../zebra.min.js' type='text/javascript'></script>
+        
+
+		<script type='text/javascript'>
+		    zebra.ready(function() {
+			    eval(zebra.Import("ui", "layout"));
+
+		 		var canvas = new zCanvas("test1", 600, 300);
+		 		var tabs = new Tabs(), b = new Button("Test");
+		 		tabs.add("Tab1 ", new Panel({  
+		 			layout: new BorderLayout(8,8),
+		 			padding:4,
+		 			kids  : {
+		 				CENTER: new HtmlTextArea("Test1").properties({padding:10}),
+		 				BOTTOM: b
+		 			}
+		 		}));
+
+		 		var xx = 20, yy = 20;
+		 		b.bind(function() {
+		 			canvas.canvas.style.position="fixed";
+		 			canvas.canvas.style.left=xx + "px";
+		 			canvas.canvas.style.top=yy + "px";
+		 			xx +=20;
+		 			yy += 20;
+		 		});
+			
+				var cont = new HtmlContent();
+				tabs.add("Load", cont);
+				cont.loadContent("embeddedHtml.test.content");
+				cont.setPadding(8);
+
+
+				tabs.add("Tab2 ", new HtmlTextArea([
+					function a() {
+
+					}
+				]));
+
+		 		tabs.add("Tab2 ", new HtmlTextArea([
+		 			function mouseEntered(e) {
+		 				console.log("e.x = " + e.x + "," + e.y);
+		 			}
+
+		 		]));
+		 		canvas.root.setLayout(new BorderLayout());
+		 		canvas.root.add(CENTER, tabs);
+
+
+		 		//return
+
+		 		var canvas = new zCanvas("test2", 600, 400);
+		 		canvas.root.load("embeddedHtml.test.json");
+		 		canvas.root.setBackground(null);
+		 		
+				canvas.root.find("//*[@id='Login/Login']").bind(function() {
+					canvas.root.find("//*[@id='login']").setVisible(false); 
+					canvas.root.find("//*[@id='welcome']").setVisible(true);
+				});
+		 		
+				canvas.root.findAll("//*[@id='welcome']//zebra.ui.Button", function(b) {
+					b.bind(function() {
+						canvas.root.find("//*[@id='welcome']").setVisible(false); 
+						canvas.root.find("//*[@id='newAccount']").setVisible(true);
+					});
+				})
+
+				canvas.root.find("//*[@id='NewAccount/Confirm']").bind(function() {
+					canvas.root.find("//*[@id='newAccount']").setVisible(false); 
+					canvas.root.find("//*[@id='login']").setVisible(true);
+				});
+		 	});
+		</script>
+	</head>
+
+	<body bgcolor="#EEEEEE" align="center" style="height:100%;padding:15px;">
+
+	    <table height="100%" width="100%" border="1">
+	    	<tr height="50%">
+	    		<td>
+	    			<canvas id="test1"> </canvas>			
+	    		</td>
+	    	</tr>
+
+	    	<tr height="50%">
+	    		<td >
+	    			<canvas id="test2"> </canvas>			
+	    		</td>
+	    	</tr>
+	    </table>
+	    
+	</body>
+</html>

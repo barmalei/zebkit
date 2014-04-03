@@ -207,8 +207,8 @@ pkg.$global    = (typeof window !== "undefined" && window != null) ? window : th
 pkg.isString   = isString;
 pkg.isNumber   = isNumber;
 pkg.isBoolean  = isBoolean;
-pkg.version = "4.2014";
-pkg.$caller = null; // current method which is called
+pkg.version    = "4.2014";
+pkg.$caller    = null; // current method which is called
 
 function mnf(name, params) {
     var cln = this.$clazz && this.$clazz.$name ? this.$clazz.$name + "." : "";
@@ -8757,7 +8757,7 @@ window.alert = function() {
     if ($keyPressedCode > 0) {
         KE_STUB.reset($keyPressedOwner, KE.RELEASED, 
                       $keyPressedCode, '', $keyPressedModifiers);
-        EM.performInput(KE_STUB);
+        EM.fireInputEvent(KE_STUB);
         $keyPressedCode = -1;
     }
     $alert.apply(window, arguments);
@@ -9292,9 +9292,10 @@ pkg.loadImage = function(img, ready) {
  * its parent UI component.
  
      var p = new zebra.ui.Panel();
-     p.compRemoved = function(p, c) { ... }; // add event handler
+     p.compRemoved = function(p, i, c) { ... }; // add event handler
 
  * @param {zebra.ui.Panel} p a parent component of the component that has been removed
+ * @param {Integer} i an index of removed component 
  * @param {zebra.ui.Panel} c a component that has been removed 
  * @event compRemoved
  */
@@ -9539,7 +9540,7 @@ var CL = pkg.Panel = Class(L.Layoutable, [
          * @method kidAdded
          */
         this.kidAdded = function (index,constr,l){
-            pkg.events.performComp(CL.ADDED, this, constr, l);
+            pkg.events.fireCompEvent(CL.ADDED, this, constr, l);
             
             if (l.width > 0 && l.height > 0) {
                 l.repaint();
@@ -9557,7 +9558,7 @@ var CL = pkg.Panel = Class(L.Layoutable, [
          * @method kidRemoved
          */
         this.kidRemoved = function(i,l){
-            pkg.events.performComp(CL.REMOVED, this, null, l);
+            pkg.events.fireCompEvent(CL.REMOVED, this, i, l);
             if (l.isVisible === true) {
                 // TODO: some browser requires (IE10-11) one pix wider cleaning 
                 if (l.width > 0 && l.height > 0) {
@@ -9575,7 +9576,7 @@ var CL = pkg.Panel = Class(L.Layoutable, [
          * @method relocated
          */
         this.relocated = function(px,py){ 
-            pkg.events.performComp(CL.MOVED, this, px, py); 
+            pkg.events.fireCompEvent(CL.MOVED, this, px, py); 
         
             var p = this.parent, w = this.width, h = this.height;
             if (p != null && w > 0 && h > 0){
@@ -9609,7 +9610,7 @@ var CL = pkg.Panel = Class(L.Layoutable, [
          * @method resized
          */
         this.resized = function(pw,ph) { 
-            pkg.events.performComp(CL.SIZED, this, pw, ph); 
+            pkg.events.fireCompEvent(CL.SIZED, this, pw, ph); 
 
             if (this.parent != null) {
                 // TODO: IE10-11 leaves traces at the left and bottom 
@@ -9665,7 +9666,7 @@ var CL = pkg.Panel = Class(L.Layoutable, [
             if (this.isVisible != b) {
                 this.isVisible = b;
                 this.invalidate();
-                pkg.events.performComp(CL.SHOWN, this, -1,  -1);
+                pkg.events.fireCompEvent(CL.SHOWN, this, -1,  -1);
 
                 if (this.parent != null) {
                     if (b) this.repaint();
@@ -9687,7 +9688,7 @@ var CL = pkg.Panel = Class(L.Layoutable, [
         this.setEnabled = function (b){
             if (this.isEnabled != b){
                 this.isEnabled = b;
-                pkg.events.performComp(CL.ENABLED, this, -1,  -1);
+                pkg.events.fireCompEvent(CL.ENABLED, this, -1,  -1);
                 if (this.kids.length > 0) {
                     for(var i = 0;i < this.kids.length; i++) {
                         this.kids[i].setEnabled(b);
@@ -10535,7 +10536,7 @@ pkg.FocusManager = Class(pkg.Manager, [
          * @param  {zebra.ui.Panel} c a component
          * @method compRemoved
          */
-        this.compRemoved = function(p,c) { 
+        this.compRemoved = function(p, i, c) { 
             freeFocus(this, c); 
         };
 
@@ -10690,11 +10691,11 @@ pkg.FocusManager = Class(pkg.Manager, [
                 }
 
                 if (oldFocusOwner  != null) {
-                    pkg.events.performInput(new IE(oldFocusOwner, IE.FOCUS_LOST, IE.FOCUS_UID));
+                    pkg.events.fireInputEvent(new IE(oldFocusOwner, IE.FOCUS_LOST, IE.FOCUS_UID));
                 }
 
                 if (this.focusOwner != null) {
-                    pkg.events.performInput(new IE(this.focusOwner, IE.FOCUS_GAINED, IE.FOCUS_UID)); 
+                    pkg.events.fireInputEvent(new IE(this.focusOwner, IE.FOCUS_GAINED, IE.FOCUS_UID)); 
                 }
 
                 return this.focusOwner;
@@ -11014,8 +11015,9 @@ pkg.EventManager = Class(pkg.Manager, [
             return false;
         };
 
-        this.performComp = function(id, src, p1, p2){
+        this.fireCompEvent = function(id, src, p1, p2){
             var n = IEHM[id];
+
 
             if (src[n] != null) {
                 src[n].call(src, src, p1, p2);            
@@ -11058,7 +11060,7 @@ pkg.EventManager = Class(pkg.Manager, [
             return cp;
         }
 
-        this.performInput = function(e){
+        this.fireInputEvent = function(e){
             var t = e.source, id = e.ID, it = null, k = IEHM[id], b = false;
             switch(e.UID) {
                 case MUID:
@@ -11367,7 +11369,7 @@ pkg.zCanvas = Class(pkg.Panel, [
                 var fo = pkg.focusManager.focusOwner;
                 if (fo != null) {
                     KE_STUB.reset(fo, KE.TYPED, e.keyCode, String.fromCharCode(e.charCode), km(e));
-                    if (EM.performInput(KE_STUB)) e.preventDefault();
+                    if (EM.fireInputEvent(KE_STUB)) e.preventDefault();
                 }
             }
 
@@ -11408,11 +11410,11 @@ pkg.zCanvas = Class(pkg.Panel, [
 
             if (focusOwner != null) {
                 KE_STUB.reset(focusOwner, KPRESSED, code, code < 47 ? KE.CHAR_UNDEFINED : '?', m);
-                b = EM.performInput(KE_STUB);
+                b = EM.fireInputEvent(KE_STUB);
 
                 if (code == KE.ENTER) {
                     KE_STUB.reset(focusOwner, KE.TYPED, code, "\n", m);
-                    b = EM.performInput(KE_STUB) || b;
+                    b = EM.fireInputEvent(KE_STUB) || b;
                 }
             }
 
@@ -11428,7 +11430,7 @@ pkg.zCanvas = Class(pkg.Panel, [
             var fo = pkg.focusManager.focusOwner;
             if(fo != null) {
                 KE_STUB.reset(fo, KE.RELEASED, e.keyCode, KE.CHAR_UNDEFINED, km(e));
-                if (EM.performInput(KE_STUB)) e.preventDefault();
+                if (EM.fireInputEvent(KE_STUB)) e.preventDefault();
             }
         };
 
@@ -11462,7 +11464,7 @@ pkg.zCanvas = Class(pkg.Panel, [
                         pkg.$mouseMoveOwner = null;
 
                         ME_STUB.reset(prev, MEXITED, x, y, -1, 0);
-                        EM.performInput(ME_STUB);
+                        EM.fireInputEvent(ME_STUB);
                     }
 
                     // if new mouse owner is not null and enabled 
@@ -11470,7 +11472,7 @@ pkg.zCanvas = Class(pkg.Panel, [
                     if (d != null && d.isEnabled === true){
                         pkg.$mouseMoveOwner = d;
                         ME_STUB.reset(d, MENTERED, x, y, -1, 0);
-                        EM.performInput(ME_STUB);
+                        EM.fireInputEvent(ME_STUB);
                     }
                 }
             }
@@ -11488,7 +11490,7 @@ pkg.zCanvas = Class(pkg.Panel, [
                     pkg.$mouseMoveOwner = null;
 
                     ME_STUB.reset(p, MEXITED, $meX(e, this), $meY(e, this), -1, 0);
-                    EM.performInput(ME_STUB);
+                    EM.fireInputEvent(ME_STUB);
                 }
             }
             else {
@@ -11567,13 +11569,13 @@ pkg.zCanvas = Class(pkg.Panel, [
                             mp.draggedComponent = d;
 
                             ME_STUB.reset(d, ME.DRAGSTARTED, xx, yy, m, 0);
-                            EM.performInput(ME_STUB);
+                            EM.fireInputEvent(ME_STUB);
 
                             // if mouse cursor has been moved mouse dragged 
                             // event has to be generated
                             if (xx != x || yy != y) {
                                 ME_STUB.reset(d, MDRAGGED, x, y, m, 0);
-                                EM.performInput(ME_STUB);
+                                EM.fireInputEvent(ME_STUB);
                             }
                         }
                     }
@@ -11581,7 +11583,7 @@ pkg.zCanvas = Class(pkg.Panel, [
                         // the drag event has already occurred before, just send 
                         // next dragged event to target zebra component 
                         ME_STUB.reset(mp.draggedComponent, MDRAGGED, x, y, m, 0);
-                        EM.performInput(ME_STUB);
+                        EM.fireInputEvent(ME_STUB);
                     }
                 }
             }
@@ -11603,18 +11605,18 @@ pkg.zCanvas = Class(pkg.Panel, [
                         pkg.$mouseMoveOwner = null;
 
                         ME_STUB.reset(old, MEXITED, x, y, -1, 0);
-                        EM.performInput(ME_STUB);
+                        EM.fireInputEvent(ME_STUB);
 
                         if (d != null && d.isEnabled === true) {
                             pkg.$mouseMoveOwner = d;
                             ME_STUB.reset(pkg.$mouseMoveOwner, MENTERED, x, y, -1, 0);
-                            EM.performInput(ME_STUB);
+                            EM.fireInputEvent(ME_STUB);
                         }
                     }
                     else {
                         if (d != null && d.isEnabled === true) {
                             ME_STUB.reset(d, MMOVED, x, y, -1, 0);
-                            EM.performInput(ME_STUB);
+                            EM.fireInputEvent(ME_STUB);
                         }
                     }
                 }
@@ -11622,7 +11624,7 @@ pkg.zCanvas = Class(pkg.Panel, [
                     if (d != null && d.isEnabled === true) {
                         pkg.$mouseMoveOwner = d;
                         ME_STUB.reset(d, MENTERED, x, y, -1, 0);
-                        EM.performInput(ME_STUB);
+                        EM.fireInputEvent(ME_STUB);
                     }
                 }
             }
@@ -11639,7 +11641,7 @@ pkg.zCanvas = Class(pkg.Panel, [
                 // complete dragging
                 if (mp.draggedComponent != null){
                     ME_STUB.reset(mp.draggedComponent, ME.DRAGENDED, x, y, mp.button, 0);
-                    EM.performInput(ME_STUB);
+                    EM.fireInputEvent(ME_STUB);
                 }
 
                 // mouse pressed has not null target zebra component 
@@ -11649,17 +11651,17 @@ pkg.zCanvas = Class(pkg.Panel, [
                     // generate mouse click if no mouse drag event has been generated
                     if (mp.draggedComponent == null && (e.touch == null || e.touch.group == null)) {
                         ME_STUB.reset(po, ME.CLICKED, x, y, mp.button, mp.clicks);
-                        EM.performInput(ME_STUB);
+                        EM.fireInputEvent(ME_STUB);
                     }
                     
                     // send mouse released to zebra target component
                     ME_STUB.reset(po, ME.RELEASED, x, y, mp.button, mp.clicks);
-                    EM.performInput(ME_STUB);
+                    EM.fireInputEvent(ME_STUB);
 
                     //  make sure it is originally a touch event 
                     if (ME_STUB.touch != null) { 
                         ME_STUB.reset(po, ME.EXITED, x, y, mp.button, mp.clicks);
-                        EM.performInput(ME_STUB);
+                        EM.fireInputEvent(ME_STUB);
                     }
                 }
 
@@ -11676,13 +11678,13 @@ pkg.zCanvas = Class(pkg.Panel, [
                             if (mo != null) {
                                 pkg.$mouseMoveOwner = null;
                                 ME_STUB.reset(mo, MEXITED, x, y, -1, 0);
-                                EM.performInput(ME_STUB);
+                                EM.fireInputEvent(ME_STUB);
                             }
 
                             if (nd != null && nd.isEnabled === true){
                                 pkg.$mouseMoveOwner = nd;
                                 ME_STUB.reset(nd, MENTERED, x, y, -1, 0);
-                                EM.performInput(ME_STUB);
+                                EM.fireInputEvent(ME_STUB);
                             }
                         }
                     }
@@ -11735,11 +11737,11 @@ pkg.zCanvas = Class(pkg.Panel, [
                 // make sure it was touch event to emulate mouse entered event
                 if (ME_STUB.touch != null) { 
                     ME_STUB.reset(d, ME.ENTERED, x, y, button, clicks);
-                    EM.performInput(ME_STUB);
+                    EM.fireInputEvent(ME_STUB);
                 }
 
                 ME_STUB.reset(d, ME.PRESSED, x, y, button, clicks);
-                EM.performInput(ME_STUB);
+                EM.fireInputEvent(ME_STUB);
             }
 
             //!!! this prevent DOM elements selection on the page 
@@ -11817,11 +11819,11 @@ pkg.zCanvas = Class(pkg.Panel, [
         // override relocated and resized
         // to prevent unnecessary repainting 
         this.relocated = function(px,py) { 
-            pkg.events.performComp(CL.MOVED, this, px, py); 
+            pkg.events.fireCompEvent(CL.MOVED, this, px, py); 
         };
 
         this.resized = function(pw,ph) { 
-            pkg.events.performComp(CL.SIZED, this, pw, ph); 
+            pkg.events.fireCompEvent(CL.SIZED, this, pw, ph); 
         };
 
         // override parent class repaint() method since the necessity 
@@ -21446,6 +21448,10 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
     - Define a window status bar component
 
  * @class zebra.ui.Window
+ * 
+ * @param {String} [content] a window title
+ * @param {zebra.ui.Panel} [content] a window content  
+ * @constructor
  * @uses zebra.ui.Composite
  * @extends {zebra.ui.Panel}
  */
@@ -21621,10 +21627,15 @@ pkg.Window = Class(pkg.StatePan, pkg.Composite, [
     },
 
     function () {
-        this.$this("");
+        this.$this(null, null);
     },
 
-    function (s){
+    function (s) {
+        if (s != null && zebra.isString(s)) this.$this(s, null);
+        else                                this.$this(null, s);
+    },
+
+    function (s, c) {
         //!!! for some reason state has to be set beforehand
         this.state = "inactive";
 
@@ -21639,7 +21650,7 @@ pkg.Window = Class(pkg.StatePan, pkg.Composite, [
          * @type {zebra.ui.Panel}
          * @readOnly
          */
-        this.root = this.createContentPan();
+        this.root = (c == null ? this.createContentPan() : c);
 
         /**
          * Window caption panel. The panel contains window 
@@ -21657,7 +21668,7 @@ pkg.Window = Class(pkg.StatePan, pkg.Composite, [
          * @readOnly
          */
         this.title = this.createTitle();
-        this.title.setValue(s);
+        this.title.setValue((s == null ? "" : s));
 
         /**
          * Icons panel. The panel can contain number of icons. 
@@ -23715,7 +23726,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
                 }
             },
 
-            compRemoved : function(p, c) {
+            compRemoved : function(p, i, c) {
                 // if an ancestor parent has been removed the HTML element
                 // has to be hidden
                 if (c != $this && zebra.layout.isAncestorOf(c, $this)) {

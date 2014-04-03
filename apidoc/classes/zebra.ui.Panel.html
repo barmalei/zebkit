@@ -7268,7 +7268,7 @@ p.compMoved = function(c, px, py) { ... }; // add event handler</code></pre>
 The event is triggered every time the component has been removed from 
 its parent UI component.</p>
 <pre class="code prettyprint"><code>var p = new zebra.ui.Panel();
-p.compRemoved = function(p, c) { ... }; // add event handler</code></pre>
+p.compRemoved = function(p, i, c) { ... }; // add event handler</code></pre>
 
     </div>
 
@@ -7288,6 +7288,22 @@ p.compRemoved = function(p, c) { ... }; // add event handler</code></pre>
 
                     <div class="param-description">
                         <p>a parent component of the component that has been removed</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">i</code>
+                        <span class="type">Integer</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>an index of removed component</p>
 
                     </div>
 

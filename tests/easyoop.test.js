@@ -839,7 +839,27 @@ if (typeof(zebra) === "undefined") {
             assert(c.a, 10);
             assert(c.b(), 110);
             assert(c.b(1), 121);
+
+
+            // test if a standard method defined in Class.prototype can be overridden 
+            var C = Class([
+                function $prototype() {
+                    this.properties = function() {
+                        return 10;
+                    }
+                }
+            ]), c = new C();
+
+            assert(c.properties(), 10);
+
+
+            var CC = Class(C, [
+            ]), cc = new CC();
+        
+
+            assert(cc.properties(), 10);
         },
+
 
         function test_public_methods() {
             var A = new Class([

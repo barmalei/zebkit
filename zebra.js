@@ -570,7 +570,9 @@ pkg.Class = make_template(null, function() {
         this[CNAME] && this[CNAME].apply(this, arguments);    
     }, args);
 
-    // copy parents prototype
+
+    $template.$propertyInfo = {};
+    // copy parents prototype    
     $template.$parent = $parent;
     if ($parent != null) {
         for (var k in $parent.prototype) {
@@ -587,8 +589,7 @@ pkg.Class = make_template(null, function() {
         }
     }
 
-    $template.$propertyInfo = {};
-
+    // extend method cannot be overridden 
     $template.prototype.extend = function() {
         var c = this.$clazz, l = arguments.length, f = arguments[l-1];
         if (pkg.instanceOf(this, pkg.$Extended) === false) {
@@ -684,23 +685,32 @@ pkg.Class = make_template(null, function() {
         return pkg.$caller.boundTo.prototype[CNAME].apply(this, arguments); 
     };
 
-    $template.prototype.properties = function(p) {
-        return pkg.properties(this, p);
-    };
+    // check if the method has been already defined in parent class
+    if (typeof $template.prototype.properties === 'undefined') {
+        $template.prototype.properties = function(p) {
+            return pkg.properties(this, p);
+        };
+    }
 
-    $template.prototype.bind = function() {
-        if (this._ == null) {
-            throw new Error("Listeners are not supported");
-        }
-        return this._.add.apply(this._, arguments);
-    };
+    // check if the method has been already defined in parent class
+    if (typeof $template.prototype.bind === 'undefined') {
+        $template.prototype.bind = function() {
+            if (this._ == null) {
+                throw new Error("Listeners are not supported");
+            }
+            return this._.add.apply(this._, arguments);
+        };
+    }
 
-    $template.prototype.unbind = function() {
-        if (this._ == null) {
-            throw new Error("Listeners are not supported");
-        }
-        this._.remove.apply(this._, arguments); 
-    };
+    // check if the method has been already defined in parent class
+    if (typeof $template.prototype.unbind === 'undefined') {
+        $template.prototype.unbind = function() {
+            if (this._ == null) {
+                throw new Error("Listeners are not supported");
+            }
+            this._.remove.apply(this._, arguments); 
+        };
+    }
 
     /**
      * Get declared by this class methods.
@@ -879,7 +889,8 @@ pkg.Class = make_template(null, function() {
 
     $template.extend(df);
 
-    // validate constructor
+    // add parent class constructor(s) if the class doesn't declare own 
+    // constructors
     if ($template.$parent != null && 
         $template.$parent.prototype[CNAME] != null &&
         typeof $template.prototype[CNAME] === "undefined")
@@ -12722,6 +12733,7 @@ pkg.StringRender = Class(pkg.Render, [
 
         this.targetWasChanged = function(o, n) {
             this.stringWidth = -1;
+            if (this.owner != null) this.owner.invalidate(); 
         };
     }
 ]);
@@ -20429,7 +20441,7 @@ var ContentListeners = zebra.util.ListenersClass("contentUpdated");
  * @event selected
  * @param {zebra.ui.Combo} combo a combo box component where a new value
  * has been selected
- * @param {Object} value a new value that has been selected
+ * @param {Object} value a previously selected index
  */
 pkg.Combo = Class(pkg.Panel, pkg.Composite, [
     function $clazz() {
@@ -20963,6 +20975,7 @@ pkg.Combo = Class(pkg.Panel, pkg.Composite, [
                 }
                 this.repaint();
             }
+            this._.fired(this, data);
         }
     }
 ]);
@@ -23737,6 +23750,14 @@ pkg.HtmlElement = Class(pkg.Panel, [
             compSized : function(c, pw, ph) {
                 if (c != $this && zebra.layout.isAncestorOf(c, $this) && $this.isInInvisibleState()) {
                     $this.element.style.visibility = "hidden";
+                }
+            }
+        };
+
+        this.globalWinListener = {
+            winActivated : function(layer, win, isActive) {
+                if (zebra.layout.isAncestorOf(win, $this) == false) {
+                    $this.element.style.visibility;   
                 }
             }
         };

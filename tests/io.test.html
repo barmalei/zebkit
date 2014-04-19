@@ -374,13 +374,14 @@
 
                     function testJSON_RPC() {
                         // var url = "http://repo.gravitysoft.org/test/testjsonserver.php"
-                        testRPC("http://192.168.1.10:8091/jrpc", zebra.io.JRPC);
-                        //testRPC("http://192.168.178.11:8091/jrpc", zebra.io.JRPC);
+                        //testRPC("http://192.168.1.10:8091/jrpc", zebra.io.JRPC);
+                        testRPC("http://192.168.178.11:8091/jrpc", zebra.io.JRPC);
                     },
 
                     function testXML_RPC() {
                         //testRPC("http://10.26.214.170:8080/xrpc", zebra.io.XRPC);
-                        testRPC("http://192.168.1.10:8090/xrpc", zebra.io.XRPC);
+                        //testRPC("http://192.168.1.10:8090/xrpc", zebra.io.XRPC);
+                        testRPC("http://192.168.178.11:8090/xrpc", zebra.io.XRPC);
                     }
                 );
 			}

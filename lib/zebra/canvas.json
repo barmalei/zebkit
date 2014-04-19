@@ -72,41 +72,35 @@
     },
 
     "BaseLayer": {
-        "properties": {
-            "layout"     : { "$zebra.layout.RasterLayout":[] },
-            "background" : null
-        }
+        "layout"     : { "$zebra.layout.RasterLayout":[] },
+        "background" : null
     },
 
     "RootLayer": {
-        "properties": {
-            "$inherit": [ "BaseLayer.properties" ]
-        }
+        "$inherit": [ "BaseLayer" ]
     },
 
     "zCanvas": {
         "addons": [],
         "//"    :  "IT IS IMPORTANT TO HAVE CANVAS CSS PADDING = 0 TO FIX IE9 PROBLEM",
-        "properties": {
-            "background": "white",
-            "layout": { "$zebra.layout.StackLayout":[] },
-            "kids"  : { "$ *zebra.ui.RootLayer": "root" },
-            "styles": {
-                "background-color": "@palette.background",
-                "outline"                    : "none",
-                "padding"                    : "0px",
-                "-webkit-user-select"        : "none",
-                "-ms-user-select"            : "none",
-                "-moz-user-select"           : "-moz-none",
-                "user-select"                : "none",
-                "-khtml-user-select"         : "none",
-                "-webkit-tap-highlight-color": "rgba(0,0,0,0)", 
-                "touch-action"               : "none", 
-                "content-zooming"            : "none", 
-                "touch-callout"              : "none", 
-                "user-drag"                  : "none", 
-                "tap-highlight-color"        : "rgba(0,0,0,0)" 
-            }
+        "background": "white",
+        "layout": { "$zebra.layout.StackLayout":[] },
+        "kids"  : { "$ *zebra.ui.RootLayer": "root" },
+        "styles": {
+            "background-color": "@palette.background",
+            "outline"                    : "none",
+            "padding"                    : "0px",
+            "-webkit-user-select"        : "none",
+            "-ms-user-select"            : "none",
+            "-moz-user-select"           : "-moz-none",
+            "user-select"                : "none",
+            "-khtml-user-select"         : "none",
+            "-webkit-tap-highlight-color": "rgba(0,0,0,0)", 
+            "touch-action"               : "none", 
+            "content-zooming"            : "none", 
+            "touch-callout"              : "none", 
+            "user-drag"                  : "none", 
+            "tap-highlight-color"        : "rgba(0,0,0,0)" 
         }
     }
 }

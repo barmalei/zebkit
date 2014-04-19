@@ -223,7 +223,7 @@ function $toString() { return this.$hash$; }
 //  tf - template function
 //  p  - parent interfaces
 function make_template(pt, tf, p) {
-    tf.$hash$ = ["$zebra$", $$$++].join('');
+    tf.$hash$ = ["$ZBr$", $$$++].join('');
     tf.toString = $toString;
     
     if (pt != null) { 
@@ -270,36 +270,16 @@ pkg.getPropertySetter = function(obj, name) {
 
 pkg.properties = function(target, p) {
     for(var k in p) {
-        if (k[0] != '$' && p.hasOwnProperty(k)) {
-            var v = p[k]; 
-            //if (typeof v !== 'function') {
-                var m = zebra.getPropertySetter(target, k);
-                if (v && v.$new != null) v = v.$new();
-                if (m == null) target[k] = v;
-                else {
-                    if (Array.isArray(v)) m.apply(target, v);
-                    else                  m.call(target, v);
-                }
-            //}
+        if (k[0] != '$' && p.hasOwnProperty(k) && typeof p[k] !== 'function') {
+            var v = p[k], m = zebra.getPropertySetter(target, k);
+            if (v && v.$new != null) v = v.$new();
+            if (m == null) target[k] = v;
+            else {
+                if (Array.isArray(v)) m.apply(target, v);
+                else                  m.call(target, v);
+            }
         }
     }
-    return target;
-};
-
-pkg.applyDefProperties = function(target) {
-    var clazz = target.$clazz, p = {}, c = 0;
-    for(var i=1; i<arguments.length;i++) {
-        var name = arguments[i];
-        if (clazz.hasOwnProperty(name)) {
-            p[name] = clazz[name]; 
-            c++;
-        }
-    }
-
-    if (c > 0) {
-        pkg.properties(target, p);
-    }
-
     return target;
 };
 
@@ -357,8 +337,8 @@ function ProxyMethod(name, f) {
     else {
         a = function() {
             var cm = pkg.$caller;
-            pkg.$caller = f;
-            try { return f.apply(this, arguments); }
+            pkg.$caller = a.f;
+            try { return a.f.apply(this, arguments); }
             catch(e) { throw e; }
             finally { pkg.$caller = cm; }
         };
@@ -572,13 +552,14 @@ pkg.Class = make_template(null, function() {
 
 
     $template.$propertyInfo = {};
+    
     // copy parents prototype    
     $template.$parent = $parent;
     if ($parent != null) {
         for (var k in $parent.prototype) {
             if ($parent.prototype.hasOwnProperty(k)) {
                 var f = $parent.prototype[k];
-                if (f != null && f.$clone$) {
+                if (f != null && f.$clone$ != null) {
                     f = f.$clone$();
 
                     // skip constructors
@@ -593,56 +574,32 @@ pkg.Class = make_template(null, function() {
     $template.prototype.extend = function() {
         var c = this.$clazz, l = arguments.length, f = arguments[l-1];
         if (pkg.instanceOf(this, pkg.$Extended) === false) {
-            var cn = c.$name;
             c = Class(c, pkg.$Extended, []);
-            c.$name = cn;
+            c.$name = this.$clazz.$name;
             this.$clazz = c;
         }
 
         if (Array.isArray(f)) {
             for(var i=0; i < f.length; i++) {
-                var ff = f[i], n = FN(ff);
+                var n = FN(f[i]);
                 
                 // map user defined constructor to internal constructor name
                 if (n == CDNAME) n = CNAME;
 
                 if (n === CNAME) {
-                    ff.call(this);
+                    f[i].call(this);   // call constructor as an initializer 
                     continue;
                 }
                 else {
-                    var pv = this[n];
-                    if (pv) {
-                        if (this.hasOwnProperty(n) === false) {
-                            if (pv.$clone$) pv = pv.$clone$();
-                            else {
-                                var pvn = ProxyMethod(n);
-                                pvn.methods[pv.length] = pv;
-                                pv.boundTo = c;
-                                pv.methodName = n;
-                                pv = pvn;
-                            }
-                        }
+                    // clone method and put it in class instance 
+                    // if the method is not directly defined in 
+                    // the class instance
+                    var pv = this[n]; 
+                    if (pv != null && this.hasOwnProperty(n) === false)  {
+                        this[n] = (pv.$clone$ != null ? pv.$clone$() : ProxyMethod(n, pv)); 
                     }
-                    else {
-                        pv = ProxyMethod(n);
-                    }
-
-                    //!!! clone function if it has been already bounded to a class
-                    if (ff.boundTo != null) {
-                        eval("ff=" + ff.toString());
-                    }
-
-                    pv.methods[ff.length] = ff;
-                    ff.boundTo = c;
-                    ff.methodName = n;
-
-                    // !!!
-                    // Since method has been added dynamically class bean info has to be
-                    // up to date. Do it below, but how !?
-                    // ???
-
-                    this[n] = pv;
+                    
+                    this[n] = createMethod(n, f[i], this, c);
                 }
             }
             l--;
@@ -712,58 +669,81 @@ pkg.Class = make_template(null, function() {
         };
     }
 
-    /**
-     * Get declared by this class methods.
-     * @param  {String} [name] a method name. The name can be used as a 
-     * filter to exclude all methods whose name doesn't match the passed name  
-     * @return {Array} an array of declared by the class methods
-     * @method  getMethods
-     */
-    $template.getMethods = function(name)  {
-         var m = [];
+    function createMethod(n, f, obj, clazz) {
+        var arity = f.length, vv = obj[n];
 
-         // map user defined constructor to internal constructor name
-         if (name == CDNAME) name = CNAME;
-         for (var n in this.prototype) {
-             var f = this.prototype[n];
-             if (arguments.length > 0 && name != n) continue;
-             if (typeof f === 'function') {
-                if (f.$clone$ != null) {
-                    for (var mk in f.methods) m.push(f.methods[mk]);
-                }
-                else m.push(f);
-             }
-         }
-         return m;
-    };
-
-    $template.getMethod = function(name, params) {
-        // map user defined constructor to internal constructor name
-        if (name == CDNAME) name = CNAME;
-        var m = this.prototype[name];
-        if (typeof m === 'function') {
-            if (m.$clone$) {
-                if (typeof params === "undefined")  {
-                    if (m.methods[0]) return m.methods[0];
-                    for(var k in m.methods) {
-                        if (m.methods.hasOwnProperty(k)) {
-                            return m.methods[k];
-                        }
-                    }
-                    return null;
-                }
-                m = m.methods[params];
-            }
-            if (m) return m;
+        // if passed method has been already bound to
+        // create wrapper function as a clone function  
+        if (f.boundTo != null) {
+            // clone method if it is bound to a class
+            f = (function(f) {
+                return function() { return f.apply(this, arguments); }; 
+            })(f, arity, n); 
         }
-        return null;
-    };
+
+        f.boundTo    = clazz;
+        f.methodName = n;
+
+        if (typeof vv === 'undefined') {
+            // declare new class method
+            return ProxyMethod(n, f); // no parent or previously declared method exists, 
+                                      // create new proxy method
+        }
+
+        if (typeof vv === 'function') {
+            if (vv.$clone$ != null) {  // a proxy  method has been already defined 
+                
+                if (typeof vv.methods === "undefined") {  // single method proxy detected
+                     
+                    if (vv.f.boundTo != clazz || arity == vv.f.length) {  
+                                    // single method has been defined in a parent class or the single   
+                                    // method arity is the same to the new method arity than override 
+                                    // the single method with a new one
+                        
+                        vv.f = f; // new single proxy method
+                        return vv;
+                    } 
+
+                    // single method has been defined in this class and arity of
+                    // the single method differs from arity of the new method 
+                    // than overload the old method with new one method  
+                             
+                    var sw = ProxyMethod(n);
+                    sw.methods[vv.f.length] = vv.f;
+                    sw.methods[arity] = f;
+                    return sw;
+                }
+                
+                // multiple methods proxy detected 
+                vv.methods[arity] = f;
+                return vv;
+            }
+
+            // old method has been defined directly in class prototype field         
+            if (arity == vv.length) {  // the new method arity is the same to old method
+                                       // arity than override it with single method proxy 
+                
+                return ProxyMethod(n, f);  // new single proxy method 
+            }
+
+            // the new method arity is not the same to new one
+            // than overload it with new one ()
+            var sw = ProxyMethod(n);
+            vv.methodName = n;
+            vv.boundTo    = clazz;
+            sw.methods[vv.length] = vv;
+            sw.methods[arity] = f;
+            return sw;
+        }
+        
+        throw new Error("Method '" + n + "' conflicts to property");
+    }
 
     /**
      * Extend existent class with the given methods and interfaces 
      * Be  careful to use the method, pay attention the following facts: 
      
-    - only the given class and the classes that inherit the class __after the extend method calling__ get the upd 
+    - only the given class and the classes that inherit the class __after the extend method calling__ get the updates
     - if the class gets method that already defined the old method will be overridden 
     - **"$super"** cannot be called from the method the class is extended  
 
@@ -798,21 +778,19 @@ pkg.Class = make_template(null, function() {
      * extended with
      * @method extend
      */
-    $template.extend = function(df) {
+    extend = function(df) {
         if (Array.isArray(df) === false) {
             throw new Error("Wrong class definition '" + df + "', array is expected");
         }
 
-        var af = {}; // keep all methods that are passed to control 
-                    //  if some of them are duplicated 
-        
         for(var i=0; i < df.length; i++) {
-            var f = df[i], n = FN(f);
+            var f = df[i], n = FN(f), arity = f.length;
 
             // map user defined constructor to internal constructor name
             if (n == CDNAME) n = CNAME;
 
             if (n[0] === "$") {
+                // populate prototype fields if a special method has been defined 
                 if (n === "$prototype") {
                     var protoFields = {};
                     f.call(protoFields, $template);
@@ -832,62 +810,94 @@ pkg.Class = make_template(null, function() {
                     continue;
                 }
                 
+                // populate class level fields if a special method has been defined 
                 if (n === "$clazz") {
                     f.call($template);
                     continue;
                 }
             }
 
-            if (f.boundTo != null) {
-                //!!! clone function if it has been already bounded to a class
-                //TODO: not very effective code 
-                eval("f=" + f.toString());
-            }
-
-            var sw = null, arity = f.length, vv = this.prototype[n];
-
-            if (typeof vv === 'undefined') {
-                sw = ProxyMethod(n);
-            }
-            else {
-                if (typeof vv === 'function') {
-                    if (vv.$clone$ != null) {
-                        if (typeof vv.methods === "undefined") {
-                            sw = ProxyMethod(n);
-                            sw.methods[vv.f.length] = vv.f;
-                        }
-                        else sw = vv;
-                    }
-                    else {
-                        sw = ProxyMethod(n);
-                        if (vv.length != arity && vv.boundTo == null) {
-                            vv.methodName = n;
-                            vv.boundTo = this;
-                        }
-                        sw.methods[vv.length] = vv;
-                    }
-                }
-                else {
-                    throw new Error("Method '" + n + "' conflicts to property");
-                }
-            }
-
-            var pv = sw.methods[arity], ak = n + ":" + arity;
-
-            // test if passed definition duplicates method
-            if (typeof pv !== 'undefined' && pv.boundTo == this && af[ak] === true) {
-                throw new Error("Duplicated method definition '" + sw.methodName + "(" + arity +")'");
-            }
-
-            f.boundTo         = this;
-            f.methodName      = n;
-            sw.methods[arity] = f;
-            this.prototype[n] = sw;
-            af[ak] = true;
+            $template.prototype[n] = createMethod(n, f, $template.prototype, $template); 
         }
     };
 
-    $template.extend(df);
+    extend(df);
+
+    // populate static fields 
+    // TODO: exclude the basic static methods and static constant
+    // static inheritance 
+    if ($parent != null) {
+        for (var k in $parent) {
+            if (k[0] != '$' && $parent.hasOwnProperty(k) && $template.hasOwnProperty(k) === false) {
+                $template[k] = $parent[k];
+            }
+        }
+    }
+
+    $template.extend = extend; // add extend later to avoid it duplication as a class static field 
+
+    // !!!
+    // the static method has to be placed later to be excluded from static inheritance  
+
+    /**
+     * Get declared by this class methods.
+     * @param  {String} [name] a method name. The name can be used as a 
+     * filter to exclude all methods whose name doesn't match the passed name  
+     * @return {Array} an array of declared by the class methods
+     * @method  getMethods
+     */
+    $template.getMethods = function(name)  {
+         var m = [];
+
+         // map user defined constructor to internal constructor name
+         if (name == CDNAME) name = CNAME;
+         for (var n in this.prototype) {
+             var f = this.prototype[n];
+             if (arguments.length > 0 && name != n) continue;
+             if (typeof f === 'function') {
+                if (f.$clone$ != null) {
+                    if (f.methods != null) {
+                        for (var mk in f.methods) m.push(f.methods[mk]);    
+                    }
+                    else {
+                        m.push(f.f);
+                    }
+                }
+                else m.push(f);
+             }
+         }
+         return m;
+    };
+
+    $template.getMethod = function(name, params) {
+        // map user defined constructor to internal constructor name
+        if (name == CDNAME) name = CNAME;
+        var m = this.prototype[name];
+        if (typeof m === 'function') {
+            if (m.$clone$ != null) {
+                if (m.methods == null) {
+                    return m.f;
+                }
+
+                if (typeof params === "undefined")  {
+                    
+
+                    if (m.methods[0]) return m.methods[0];
+                    for(var k in m.methods) {
+                        if (m.methods.hasOwnProperty(k)) {
+                            return m.methods[k];
+                        }
+                    }
+                    return null;
+                }
+
+                m = m.methods[params];
+            }
+            if (m) return m;
+        }
+        return null;
+    };
+
 
     // add parent class constructor(s) if the class doesn't declare own 
     // constructors
@@ -1206,6 +1216,7 @@ else {
     complete();
 }
 
+
 /**
  * @for
  */
@@ -1472,9 +1483,6 @@ rgb.cyan        = new rgb(0,255,255);
 rgb.magenta     = new rgb(255,0,255);
 rgb.darkBlue    = new rgb(0, 0, 140);
 rgb.transparent = new rgb(0, 0, 0, 1.0);
-
-pkg.index2point  = function(offset,cols) { return [~~(offset / cols), (offset % cols)]; };
-pkg.indexByPoint = function(row,col,cols){ return (cols <= 0) ?  -1 : (row * cols) + col; };
 
 /**
  * Compute intersection of the two given rectangular areas 
@@ -1947,7 +1955,7 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
          * @method seekLineTo
          */
         this.seekLineTo = function(t,num){
-            if(this.offset < 0){
+            if (this.offset < 0){
                 this.setOffset(0);
                 return;
             }
@@ -2534,8 +2542,8 @@ pkg.Bag = zebra.Class([
                     if (this.usePropertySetters && k[0] != '.') {
                         m  = zebra.getPropertySetter(v, k);
                         if (m != null) {
-                            if (m.length > 1) m.apply(v, nv);
-                            else              m.call(v, nv);
+                            if (Array.isArray(nv)) m.apply(v, nv);
+                            else                   m.call(v, nv);
                             continue;
                         }
                     }
@@ -2572,7 +2580,7 @@ pkg.Bag = zebra.Class([
                 }
 
                 for(var k in op) {
-                    if (op.hasOwnProperty(k) && o.hasOwnProperty(k) === false) {
+                    if (k[0] != '$' && op.hasOwnProperty(k) && o.hasOwnProperty(k) === false) {
                         o[k] = op[k];
                     }
                 }
@@ -3494,8 +3502,7 @@ pkg.Matrix = Class([
          * @param  {Object} obj a new cell value
          */
         this.puti = function(i, obj){
-            var p = zebra.util.index2point(i, this.cols);
-            this.put(p[0], p[1], obj);
+            this.put(~~(i / this.cols), i % this.cols, obj);
         };
 
         /**
@@ -3669,7 +3676,7 @@ pkg.ID = function UUID(size) {
     return id.join('');
 };
 
-pkg.sleep = function() {
+pkg.$sleep = function() {
     var r = new XMLHttpRequest(), t = (new Date()).getTime().toString(), i = window.location.toString().lastIndexOf("?");
     r.open('GET', window.location + (i > 0 ? "&" : "?") + t, false);
     r.send(null);
@@ -3928,7 +3935,7 @@ $Request.prototype.send = function(data) {
             originalReq.send(data);
 
             while (this.status === 0) {
-                pkg.sleep();
+                pkg.$sleep();
             }
 
             this.readyState = 4;
@@ -4030,42 +4037,9 @@ pkg.HTTP = Class([
     },
 
     /**
-     * Perform HTTP GET request .
-     * @return {String} a result of the HTTP GET request
-     * @method GET  
-     */
-    function GET() {
-        return this.GET(null, null);
-    },
-
-    /**
-     * Perform HTTP GET request asynchronously.
-     * @param {Function} f a callback function that is called when the HTTP GET 
-     * request is done. The method gets a request as the only argument 
-     * and is called in a context of HTTP class instance.
-        
-        zebra.io.HTTP("google.com").GET(function(request) {
-            // handle HTTP GET response
-            if (request.status == 200) {
-                request.responseText
-            }
-            else {
-                // handle error
-                ...
-            }
-            ...
-        });
-
-     * @method GET  
-     */
-    function GET(f) {
-        return (typeof f === 'function') ? this.GET(null, f) : this.GET(f, null);
-    },
-    
-    /**
      * Perform HTTP GET request synchronously or asynchronously with the given 
      * query parameters.
-     * @param {Object} d a dictionary of query parameters 
+     * @param {Object} [q] a dictionary of query parameters 
      * @param {Function} [f] a callback function that is called when the HTTP GET 
      * request is done. The method gets a request object as its only argument 
      * and is called in context of the HTTP class instance.
@@ -4078,31 +4052,8 @@ pkg.HTTP = Class([
             param3: "var3"
         });
 
-     * @method GET  
-     */
-    function GET(d, f) {
-        return this.SEND("GET", pkg.QS.append(this.url, d), null, f);
-    },
-
-
-    /**
-     * Perform synchronously HTTP POST request. No any data is sent with the POST request.
-     * @return {String} a result of HTTP POST request
-     * @method POST
-     */
-    function POST(){
-        return this.POST(null, null);
-    },
-    
-    /**
-     * Perform HTTP POST request asynchronously with no parameters or synchronously 
-     * with the given parameters list.
-     * @param {Function|Object} d a callback function that is called when HTTP POST 
-     * request is done. The method gets a request as its only argument 
-     * and is called in context of HTTP class instance:
-        
-        // asynchronously send POST
-        zebra.io.HTTP("google.com").POST(function(request) {
+        // asynchronouse GET requests
+        zebra.io.HTTP("google.com").GET(function(request) {
             // handle HTTP GET response
             if (request.status == 200) {
                 request.responseText
@@ -4111,36 +4062,64 @@ pkg.HTTP = Class([
                 // handle error
                 ...
             }
+            ...
         });
 
-     * Or you can pass a number of parameters to be sent synchronously by 
-     * HTTP POST request: 
 
-        // send parameters synchronously by HTTP POST request
-        zebra.io.HTTP("google.com").POST({
-            param1: "val1",
-            param2: "val3",
-            param3: "val3" 
-        });
-
-     * @method POST
+     * @method GET  
      */
-    function POST(d) {
-        return (typeof d === "function") ? this.POST(null, d)
-                                         : this.POST(pkg.QS.toQS(d, false), null);
+    function GET(q, f) {
+        if (typeof q == 'function') {
+            f = q;
+            q = null;
+        }
+        return this.SEND("GET", pkg.QS.append(this.url, q), null, f);
     },
 
     /**
      * Perform HTTP POST request synchronously or asynchronously with the given 
      * data to be sent.
-     * @param {String} d a data to be sent by HTTP POST request
+     * @param {String|Object} d a data to be sent by HTTP POST request.  It can be 
+     * either a parameters set or a string. 
      * @param {Function} [f] a callback function that is called when HTTP POST 
      * request is done. The method gets a request as its only  argument 
      * and called in context of appropriate HTTP class instance. If the argument
      * is null the POST request will be done synchronously.
+
+       // asynchronously send POST
+       zebra.io.HTTP("google.com").POST(function(request) {
+           // handle HTTP GET response
+           if (request.status == 200) {
+               request.responseText
+           }
+           else {
+               // handle error
+               ...
+           }
+       });
+
+    * Or you can pass a number of parameters to be sent synchronously by 
+    * HTTP POST request: 
+
+       // send parameters synchronously by HTTP POST request
+       zebra.io.HTTP("google.com").POST({
+           param1: "val1",
+           param2: "val3",
+           param3: "val3" 
+       });
+
      * @method POST
      */
     function POST(d, f) {
+        if (typeof d == 'function') {
+            f = d;
+            d = null;
+        }    
+
+        if (d != null && zebra.isString(d) == false) {
+            d = pkg.QS.toQS(d, false);
+        }
+
         return this.SEND("POST", this.url, d, f);
     },
 
@@ -4160,7 +4139,7 @@ pkg.HTTP = Class([
         //!!! Using standard XMLHttpRequest has to be forced in this case
         var r = pkg.getRequest(), $this = this;
 
-        if (callback !== null) {
+        if (callback != null) {
             r.onreadystatechange = function() {
                 if (r.readyState == 4) {
                     callback.call($this, r);
@@ -5176,6 +5155,17 @@ pkg.Layoutable = Class(L, [
         };
 
         /**
+         * Set the given id for the component 
+         * @chainable 
+         * @param {String} id an ID to be set
+         * @method setId
+         */
+        this.setId = function(id) {
+            this.id = id;
+            return this;
+        };
+
+        /**
          * Apply the given set of properties to the given component or a number of children
          * components. 
  
@@ -5372,6 +5362,7 @@ pkg.Layoutable = Class(L, [
          * surface.  
          * @method setLayout
          * @param {zebra.ui.Layout} m a layout manager 
+         * @chainable 
          */
         this.setLayout = function (m){
             if (m == null) throw new Error("Null layout");
@@ -5381,6 +5372,8 @@ pkg.Layoutable = Class(L, [
                 this.layout = m;
                 this.invalidate();
             }
+
+            return this;
         };
 
         /**
@@ -5430,8 +5423,8 @@ pkg.Layoutable = Class(L, [
          * @method insert
          */
         this.insert = function(i,constr,d){
-            if (d.constraints) constr = d.constraints;
-            else               d.constraints = constr;
+            if (d.constraints != null) constr = d.constraints;
+            else                       d.constraints = constr;
 
             if (i == this.kids.length) this.kids.push(d);
             else this.kids.splice(i, 0, d);
@@ -5485,10 +5478,12 @@ pkg.Layoutable = Class(L, [
          * @param  {Integer} w a width of the component
          * @param  {Integer} h a height of the component
          * @method setBounds
+         * @chainable
          */
         this.setBounds = function (x, y, w, h){
             this.setLocation(x, y);
             this.setSize(w, h);
+            return this;
         };
 
         /**
@@ -5505,6 +5500,7 @@ pkg.Layoutable = Class(L, [
                 this.isLayoutValid = false;
                 if (this.resized != null) this.resized(pw, ph);
             }
+            return this;
         };
 
         /**
@@ -5555,6 +5551,17 @@ pkg.Layoutable = Class(L, [
             if (this.kidRemoved != null) this.kidRemoved(i, obj);
             this.invalidate();
             return obj;
+        };
+
+        /**
+         * Remove the component from its parent if it has a parent 
+         * @method removeMe
+         */
+        this.removeMe = function() {
+            var i = -1;
+            if (this.parent != null && (i = this.parent.indexOf(this)) >=0) {
+                this.parent.removeAt(i);
+            }
         };
 
         /**
@@ -6399,9 +6406,6 @@ pkg.Constraints = Class([
          * @param  {Integer} p a padding
          * @method setPadding
          */
-        this.setPadding = function(p) {
-            this.top = this.bottom = this.left = this.right = p;
-        };
 
         /**
          * Set top, left, bottom, right paddings 
@@ -6409,13 +6413,18 @@ pkg.Constraints = Class([
          * @param  {Integer} l a left padding
          * @param  {Integer} b a bottom padding
          * @param  {Integer} r a right padding
-         * @method setPaddings
+         * @method setPadding
          */
-        this.setPaddings = function(t,l,b,r) {
-            this.top    = t;
-            this.bottom = b;
-            this.left   = l;
-            this.right  = r;
+        this.setPadding = function(t,l,b,r) {
+            if (arguments.length == 1) {
+                this.bottom = this.left = this.right = t;
+            }
+            else {
+                this.top    = t;
+                this.bottom = b;
+                this.left   = l;
+                this.right  = r;
+            }
         };
     }
 ]);
@@ -6487,34 +6496,55 @@ pkg.GridLayout = Class(L, [
     },
 
     function $prototype() {
-        this.getSizes = function(c, isRow){
-            var max = isRow ? this.rows : this.cols,
-                res = isRow ? this.rowSizes : this.colSizes;
 
-            res[max] = 0;
-            for(var i = 0;i < max; i++){
-                res[i] = isRow ? this.calcRowSize(i, c) : this.calcColSize(i, c);
-                res[max] += res[i];
+        /**
+         * Calculate columns metrics
+         * @param  {zebra.layout.Layoutable} c the target container
+         * @return {Array} a columns widths
+         * @method calcCols
+         * @protected
+         */
+        this.calcCols = function(c){
+            this.colSizes[this.cols] = 0;
+            for(var i = 0;i < this.cols; i++){
+                this.colSizes[i] = this.calcCol(i, c);
+                this.colSizes[this.cols] += this.colSizes[i];
             }
-            return res;
+            return this.colSizes;
+        };
+
+        /**
+         * Calculate rows metrics
+         * @param  {zebra.layout.Layoutable} c the target container
+         * @return {Array} a rows heights
+         * @method calcRows
+         * @protected
+         */
+        this.calcRows = function(c){
+            this.rowSizes[this.rows] = 0;
+            for(var i = 0;i < this.rows; i++){
+                this.rowSizes[i] = this.calcRow(i, c);
+                this.rowSizes[this.rows] += this.rowSizes[i];
+            }
+            return this.rowSizes;
         };
 
         /**
          * Calculate the given row height
          * @param  {Integer} row a row
-         * @param  {Integer} c the target container
+         * @param  {zebra.layout.Layoutable} c the target container
          * @return {Integer} a size of the row
-         * @method calcRowSize
+         * @method calcRow
          * @protected
          */
-        this.calcRowSize = function(row, c){
-            var max = 0, s = zebra.util.indexByPoint(row, 0, this.cols);
-            for (var i = s; i < c.kids.length && i < s + this.cols; i ++ ){
+        this.calcRow = function(row, c){
+            var max = 0, s = row * this.cols;
+            for (var i = s; i < c.kids.length && i < s + this.cols; i++) {
                 var a = c.kids[i];
-                if (a.isVisible === true){
+                if (a.isVisible === true) {
                     var arg = a.constraints || this.constraints, d = a.getPreferredSize().height;
                     d += (arg.top + arg.bottom);
-                    max = (d > max ? d : max);
+                    if (d > max) max = d;
                 }
             }
             return max;
@@ -6523,35 +6553,39 @@ pkg.GridLayout = Class(L, [
         /**
          * Calculate the given column width
          * @param  {Integer} col a column
-         * @param  {Integer} c the target container
+         * @param  {zebra.layout.Layoutable} c the target container
          * @return {Integer} a size of the column
-         * @method calcColSize
+         * @method calcCol
          * @protected
          */
-        this.calcColSize = function(col, c){
-            var max = 0, r = 0, i = 0;
-            while((i = zebra.util.indexByPoint(r, col, this.cols)) < c.kids.length){
+        this.calcCol = function(col, c){
+            var max = 0;
+
+            for(var r = 0; r < this.rows; r++) {
+                var i = r * this.cols + col;
+                if (i >= c.kids.length) break;
+               
                 var a = c.kids[i];
                 if (a.isVisible === true) {
-                    var arg = a.constraints || this.constraints, d = a.getPreferredSize().width;
-                    d += (arg.left + arg.right);
-                    max = (d > max ? d : max);
-                }
-                r++;
+                    var arg = a.constraints || this.constraints, d = a.getPreferredSize().width + arg.left + arg.right;
+                    if (d > max) max = d;
+                }            
             }
             return max;
         };
 
         this.calcPreferredSize = function(c){
-            return { width : this.getSizes(c, false)[this.cols],
-                     height: this.getSizes(c, true) [this.rows] };
+            return { width : this.calcCols(c)[this.cols],
+                     height: this.calcRows(c)[this.rows] };
         };
 
         this.doLayout = function(c){
-            var rows = this.rows, cols = this.cols,
-                colSizes = this.getSizes(c, false),
-                rowSizes = this.getSizes(c, true),
-                top = c.getTop(), left = c.getLeft();
+            var rows     = this.rows, 
+                cols     = this.cols,
+                colSizes = this.calcCols(c),
+                rowSizes = this.calcRows(c),
+                top      = c.getTop(), 
+                left     = c.getLeft();
 
             if ((this.mask & pkg.HORIZONTAL) > 0) {
                 var dw = c.width - left - c.getRight() - colSizes[cols];
@@ -6573,9 +6607,10 @@ pkg.GridLayout = Class(L, [
                 for(var j = 0;j < cols && cc < c.kids.length; j++, cc++){
                     var l = c.kids[cc];
                     if (l.isVisible === true){
-                        var arg = l.constraints || this.constraints,
-                            d   = l.getPreferredSize(),
-                            cellW = colSizes[j], cellH = rowSizes[i];
+                        var arg   = l.constraints || this.constraints,
+                            d     = l.getPreferredSize(),
+                            cellW = colSizes[j], 
+                            cellH = rowSizes[i];
 
                         cellW -= (arg.left + arg.right);
                         cellH -= (arg.top  + arg.bottom);
@@ -6606,6 +6641,9 @@ pkg.GridLayout = Class(L, [
         pkg.$deviceRatio = typeof window.devicePixelRatio !== "undefined" ? window.devicePixelRatio
                                                                           : (typeof window.screen.deviceXDPI !== "undefined" ? // IE
                                                                              window.screen.deviceXDPI / window.screen.logicalXDPI : 1); 
+
+      
+        pkg.$applyRenderExploit = (parseInt(pkg.$deviceRatio) === pkg.$deviceRatio || zebra.isIE);
 
         // canvases location has to be corrected if document layout is invalid 
         pkg.$elBoundsUpdated = function() {
@@ -6833,7 +6871,8 @@ pkg.GridLayout = Class(L, [
                         dv = Math.floor(dv) % 100
 
                         if (bar.isVisible === true) {
-                            bar.position.setOffset(bar.position.offset + dv /** */);
+                            var v =  bar.position.offset + dv;           
+                            if (v >= 0) bar.position.setOffset(v);
                         }
                     }
 
@@ -8823,47 +8862,25 @@ context.ovalPath = function(x,y,w,h){
     w -= 2 * this.lineWidth;
     h -= 2 * this.lineWidth;
 
-    var kappa = 0.5522848, ox = (w / 2) * kappa, oy = (h / 2) * kappa,
-        xe = x + w, ye = y + h, xm = x + w / 2, ym = y + h / 2;
+    var kappa = 0.5522848, 
+        ox = (w / 2) * kappa, 
+        oy = (h / 2) * kappa,
+        xe = x + w, 
+        ye = y + h, 
+        xm = x + w / 2, 
+        ym = y + h / 2;
     this.moveTo(x, ym);
     this.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
     this.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
     this.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
     this.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
+    this.closePath();
 };
 
 context.polylinePath = function(xPoints, yPoints, nPoints){
     this.beginPath();
     this.moveTo(xPoints[0], yPoints[0]);
     for(var i=1; i < nPoints; i++) this.lineTo(xPoints[i], yPoints[i]);
-};
-
-context.drawOval = function(x,y,w,h) {
-    this.ovalPath(x, y, w, h);
-    this.stroke();
-};
-
-context.drawPolygon = function(xPoints,yPoints,nPoints){
-    this.polylinePath(xPoints, yPoints, nPoints);
-    this.lineTo(xPoints[0], yPoints[0]);
-    this.stroke();
-};
-
-context.drawPolyline = function(xPoints,yPoints,nPoints){
-    this.polylinePath(xPoints, yPoints, nPoints);
-    this.stroke();
-};
-
-context.fillPolygon = function(xPoints,yPoints,nPoints){
-    this.polylinePath(xPoints, yPoints, nPoints);
-    this.lineTo(xPoints[0], yPoints[0]);
-    this.fill();
-};
-
-context.fillOval = function(x,y,width,height){
-    this.beginPath();
-    this.ovalPath(x, y, width, height);
-    this.fill();
 };
 
 context.drawDottedRect = function(x,y,w,h) {
@@ -9573,7 +9590,7 @@ var CL = pkg.Panel = Class(L.Layoutable, [
             if (l.isVisible === true) {
                 // TODO: some browser requires (IE10-11) one pix wider cleaning 
                 if (l.width > 0 && l.height > 0) {
-                    var dt = zebra.isIE === true ? 1 : 0;
+                    var dt = pkg.$applyRenderExploit === true ? 1 : 0;
                     this.repaint(l.x - dt, l.y - dt, l.width + 2*dt, l.height + 2*dt);
                 }
             }
@@ -9627,7 +9644,7 @@ var CL = pkg.Panel = Class(L.Layoutable, [
                 // TODO: IE10-11 leaves traces at the left and bottom 
                 // sides when the component size is decreased, 
                 // so it is necessary to repaint one pixel wider
-                var dt = zebra.isIE === true ? 1 : 0;
+                var dt = pkg.$applyRenderExploit === true ? 1 : 0;
 
                 pkg.paintManager.repaint(this.parent, this.x - dt, this.y - dt, 
                                         ((this.width  > pw) ? this.width  : pw) + 2*dt, 
@@ -9711,17 +9728,29 @@ var CL = pkg.Panel = Class(L.Layoutable, [
         };
 
         /**
+         * Set the UI component top, right, left, bottom paddings to the same given value
+         * @param  {Integer} v the value that will be set as top, right, left, bottom UI 
+         * component paddings
+         * @method setPadding
+         * @chainable
+         */
+
+        /**
          * Set UI component top, left, bottom, right paddings. The paddings are 
          * gaps between component border and painted area. 
          * @param  {Integer} top a top padding
          * @param  {Integer} left a left padding
          * @param  {Integer} bottom a bottom padding
          * @param  {Integer} right a right padding
-         * @method setPaddings
+         * @method setPadding
          * @chainable
          */
-        this.setPaddings = function (top,left,bottom,right){
-            if (this.top != top       || this.left != left  ||
+        this.setPadding = function (top,left,bottom,right){
+            if (arguments.length == 1) {
+                left = bottom = right = top;
+            }
+
+            if (this.top    != top    || this.left != left  ||
                 this.bottom != bottom || this.right != right  )
             {
                 this.top = top;
@@ -9732,18 +9761,6 @@ var CL = pkg.Panel = Class(L.Layoutable, [
             }
             return this;
         },
-
-        /**
-         * Set the UI component top, right, left, bottom paddings to the same given value
-         * @param  {Integer} v the value that will be set as top, right, left, bottom UI 
-         * component paddings
-         * @method setPadding
-         * @chainable
-         */
-        this.setPadding = function(v) {
-            this.setPaddings(v,v,v,v);
-            return this;
-        };
 
         /**
          * Set the border view
@@ -9965,14 +9982,17 @@ var CL = pkg.Panel = Class(L.Layoutable, [
             //this.$super();
             L.Layoutable.prototype[zebra.CNAME].call(this);
 
-            var clazz = this.$clazz;
-            while (clazz) {
-                if (clazz.properties != null) {
-                    this.properties(clazz.properties);
-                    break;
-                }
-                clazz = clazz.$parent;
-            }
+            // apply default properties 
+            this.properties(this.$clazz);
+
+            //var clazz = this.$clazz;
+            // while (clazz != null) {
+            //     if (clazz.properties != null) {
+            //         this.properties(clazz.properties);
+            //         break;
+            //     }
+            //     clazz = clazz.$parent;
+            // } 
 
             if (arguments.length > 0) {
                 if (instanceOf(l, L.Layout)) this.setLayout(l);
@@ -10120,6 +10140,7 @@ pkg.ViewPan = Class(pkg.Panel, [
          * @param  {zebra.ui.View|Function} v a view or a rendering 
          * view "paint(g,x,y,w,h,c)" function
          * @method setView
+         * @chainable
          */
         this.setView = function (v){
             var old = this.view;
@@ -10130,6 +10151,8 @@ pkg.ViewPan = Class(pkg.Panel, [
                 this.notifyRender(old, v);
                 this.vrp();
             }
+
+            return this;
         };
 
         /**
@@ -10166,8 +10189,8 @@ pkg.ImagePan = Class(pkg.ViewPan, [
         this.$super();
     },
 
-    function(w, h){
-        this.setImage(null);
+    function(img, w, h){
+        this.setImage(img != null ? img : null);
         this.$super();
         this.setPreferredSize(w, h);
     },
@@ -10179,6 +10202,7 @@ pkg.ImagePan = Class(pkg.ViewPan, [
      * image or zebra.ui.Picture render. 
      * If the passed parameter is string it considered as path to an image. 
      * In this case the image will be loaded using the passed path
+     * @chainable
      */
     function setImage(img) {
         if (img != null) {
@@ -10208,6 +10232,7 @@ pkg.ImagePan = Class(pkg.ViewPan, [
         else {
             this.setView(null);
         }
+        return this;
     }
 ]);
 
@@ -12082,6 +12107,7 @@ pkg.zCanvas = Class(pkg.Panel, [
         this.canvas.style.left = x + "px";
         this.canvas.style.position = "absolute";  
         this.recalcOffset();
+        return this;
     },
 
     function setSize(w, h) {
@@ -12252,6 +12278,8 @@ pkg.zCanvas = Class(pkg.Panel, [
             // it is required to recalculate offsets
 //            this.recalcOffset(); 
         }
+
+        return this;
     },
 
     /**
@@ -13660,16 +13688,19 @@ pkg.Label = Class(pkg.ViewPan, [
          * Set the label text value
          * @param  {String} s a new label text 
          * @method setValue
+         * @chainable
          */
         this.setValue = function(s){
             this.view.setValue(s);
             this.repaint();
+            return this;
         };
 
         /**
          * Set the label text color
          * @param  {String} c a text color
          * @method setColor
+         * @chainable
          */
         this.setColor = function(c){
             if (this.view.setColor(c)) this.repaint();
@@ -13680,6 +13711,7 @@ pkg.Label = Class(pkg.ViewPan, [
          * Set the label text font
          * @param  {zebra.ui.Font} f a text font
          * @method setFont
+         * @chainable
          */
         this.setFont = function(f){
             if (this.view.setFont(f)){
@@ -13885,6 +13917,7 @@ pkg.StatePan = Class(pkg.ViewPan, [
             this.$super(v);
             this.syncState(this.state, this.state);
         }
+        return this;
     },
 
     function setBorder(v){
@@ -13892,6 +13925,7 @@ pkg.StatePan = Class(pkg.ViewPan, [
             this.$super(v);
             this.syncState(this.state, this.state);
         }
+        return this;
     },
 
     function setBackground(v){
@@ -13899,6 +13933,7 @@ pkg.StatePan = Class(pkg.ViewPan, [
             this.$super(v);
             this.syncState(this.state, this.state);
         }
+        return this;
     }
 ]);
 
@@ -14336,7 +14371,7 @@ pkg.Button = Class(pkg.CompositeEvStatePan, [
 
     function (t){
         this._ = new Listeners();
-        if (zebra.isString(t)) t = new pkg.Button.Label(t);
+        if (zebra.isString(t)) t = new this.$clazz.Label(t);
         this.$super();
         if (t != null) {
             this.add(t);
@@ -14495,6 +14530,7 @@ pkg.BorderPan = Class(pkg.Panel, [
          * @param {Integer} vg a top and bottom paddings 
          * @param {Integer} hg a left and right paddings
          * @method setGaps 
+         * @chainable
          */
         this.setGaps = function(vg,hg){
             if (this.vGap != vg || hg != this.hGap){
@@ -14502,6 +14538,7 @@ pkg.BorderPan = Class(pkg.Panel, [
                 this.hGap = hg;
                 this.vrp();
             }
+            return this;
         };
     },
 
@@ -14518,7 +14555,7 @@ pkg.BorderPan = Class(pkg.Panel, [
     },
 
     function(title, center, ctr){
-        if (zebra.isString(title)) title = new pkg.BorderPan.Label(title);
+        if (zebra.isString(title)) title = new this.$clazz.Label(title);
 
         /**
          * Border panel label component
@@ -14545,7 +14582,7 @@ pkg.BorderPan = Class(pkg.Panel, [
         if (instanceOf(br, pkg.TitledBorder) === false) {
             br = new pkg.TitledBorder(br, L.CENTER);
         }
-        this.$super(br);
+        return this.$super(br);
     },
 
     function kidAdded(index,id,lw){
@@ -14828,9 +14865,8 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
     },
 
     function (c, m) {
-        var clazz = this.$clazz;
         if (zebra.isString(c)) {
-            c = clazz.Label ? new clazz.Label(c) : new pkg.Checkbox.Label(c);
+            c = new this.$clazz.Label(c);
         }
         
         this.$super();
@@ -14841,7 +14877,7 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
          * @type {zebra.ui.Panel}
          * @readOnly
          */
-        this.box = clazz.Box ? new clazz.Box() : new pkg.Checkbox.Box();
+        this.box = new this.$clazz.Box();
         this.add(this.box);
         
         if (c != null) {
@@ -15255,7 +15291,7 @@ pkg.SplitPan = Class(pkg.Panel, [
 
         if (f != null) this.add(L.LEFT, f);
         if (s != null) this.add(L.RIGHT, s);
-        this.add(L.CENTER, new pkg.SplitPan.Bar(this));
+        this.add(L.CENTER, new this.$clazz.Bar(this));
     },
 
     function kidAdded(index,id,c){
@@ -15652,7 +15688,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
         this.$super();
 
         if (zebra.isString(lab)) {
-            lab = new pkg.ExtendablePan.Label(lab);
+            lab = new this.$clazz.Label(lab);
         }
 
         /**
@@ -15669,7 +15705,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
          * @attribute titlePan
          * @readOnly
          */
-        this.titlePan = new pkg.ExtendablePan.TitlePan();
+        this.titlePan = new this.$clazz.TitlePan();
         this.add(L.TOP, this.titlePan);
 
         /**
@@ -15678,7 +15714,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
          * @attribute togglePan
          * @readOnly
          */
-        this.togglePan = new pkg.ExtendablePan.TogglePan();
+        this.togglePan = new this.$clazz.TogglePan();
         this.titlePan.add(this.togglePan);
         this.titlePan.add(this.label);
 
@@ -16433,7 +16469,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
 
     function insert(i,ctr,c){
         if (L.CENTER == ctr && c.scrollManager == null) { 
-            c = new pkg.ScrollPan.ContentPan(c);
+            c = new this.$clazz.ContentPan(c);
         }
         return this.$super(i, ctr, c);
     },
@@ -16548,22 +16584,6 @@ pkg.ScrollPan = Class(pkg.Panel, [
  */
 pkg.Tabs = Class(pkg.Panel, [
     function $clazz() {
-        this.TabPan = Class(pkg.Panel, [
-            function() {
-                this.$super(new L.FlowLayout(4));  // TODO: layout can be singleton
-                this.add(new pkg.ImagePan(null));
-                this.add(new pkg.ViewPan());
-            },
-
-            function getImagePan() {
-                return this.kids[0];
-            },
-
-            function getViewPan() {
-                return this.kids[1];
-            }
-        ]);
-
         /**
          * Tab view class that defines the tab page title and icon  
          * @param {String|Image} [icon]  an path to an image or image object
@@ -16573,6 +16593,24 @@ pkg.Tabs = Class(pkg.Panel, [
          * @constructor
          */
         this.TabView = Class(pkg.CompRender, [
+            function $clazz() {
+                this.TabPan = Class(pkg.Panel, [
+                    function() {
+                        this.$super();  
+                        this.add(new pkg.ImagePan(null));
+                        this.add(new pkg.ViewPan());
+                    },
+
+                    function getImagePan() {
+                        return this.kids[0];
+                    },
+
+                    function getViewPan() {
+                        return this.kids[1];
+                    }
+                ]);
+            },
+
             function() {
                 this.$this("");
             },
@@ -16582,7 +16620,7 @@ pkg.Tabs = Class(pkg.Panel, [
             },
 
             function(icon, caption) {
-                var tp = new pkg.Tabs.TabPan();
+                var tp = new this.$clazz.TabPan();
                 this.$super(tp);
                 this.owner = null; 
 
@@ -16598,13 +16636,13 @@ pkg.Tabs = Class(pkg.Panel, [
                     }
                 };
 
-                var r1 = new pkg.Tabs.TabView.captionRender(caption),
-                    r2 = new pkg.Tabs.TabView.captionRender(caption);
+                var r1 = new this.$clazz.captionRender(caption),
+                    r2 = new this.$clazz.captionRender(caption);
 
-                r2.setColor(pkg.Tabs.TabView.fontColor);
-                r1.setColor(pkg.Tabs.TabView.selectedFontColor);
-                r2.setFont (pkg.Tabs.TabView.font);
-                r1.setFont (pkg.Tabs.TabView.selectedFont);
+                r2.setColor(this.$clazz.fontColor);
+                r1.setColor(this.$clazz.selectedFontColor);
+                r2.setFont (this.$clazz.font);
+                r1.setFont (this.$clazz.selectedFont);
 
                 this.getCaptionPan().setView(
                     new pkg.ViewSet(
@@ -17372,11 +17410,11 @@ pkg.Tabs = Class(pkg.Panel, [
 
     function insert(index,constr,c) {
         var render = null
-        if (instanceOf(constr, pkg.Tabs.TabView)) {
+        if (instanceOf(constr, this.$clazz.TabView)) {
             render = constr;
         } 
         else {
-            render = new pkg.Tabs.TabView((constr == null ? "Page " + index : constr ));
+            render = new this.$clazz.TabView((constr == null ? "Page " + index : constr ));
             render.ownerChanged(this); // TODO: a little bit ugly but settin an owner is required to
                                        // keep tabs comppnent infprmed when an icon has been updated 
         }
@@ -17843,7 +17881,7 @@ pkg.StatusBar = Class(pkg.Panel, [
     function () { this.$this(2); },
 
     function (gap){
-        this.setPaddings(gap, 0, 0, 0);
+        this.setPadding(gap, 0, 0, 0);
         this.$super(new L.PercentLayout(Layout.HORIZONTAL, gap));
     },
 
@@ -17942,7 +17980,7 @@ pkg.Toolbar = Class(pkg.Panel, [
      * @method addRadio
      */
     function addRadio(g,c) {
-        var cbox = new pkg.Radiobox(c, g);
+        var cbox = new this.$clazz.Radiobox(c, g);
         cbox.setCanHaveFocus(false);
         return this.add(cbox);
     },
@@ -17955,7 +17993,7 @@ pkg.Toolbar = Class(pkg.Panel, [
      * @method addSwitcher
      */
     function addSwitcher(c){
-        return this.add(new pkg.Toolbar.Checkbox(c));
+        return this.add(new this.$clazz.Checkbox(c));
     },
 
     /**
@@ -17966,7 +18004,7 @@ pkg.Toolbar = Class(pkg.Panel, [
      */
     function addImage(img) {
         this.validateMetric();
-        return this.add(new pkg.Toolbar.ImagePan(img));
+        return this.add(new this.$clazz.ImagePan(img));
     },
 
     /**
@@ -17977,7 +18015,7 @@ pkg.Toolbar = Class(pkg.Panel, [
      * @method addLine
      */
     function addLine(){
-        var line = new pkg.Toolbar.Line();
+        var line = new this.$clazz.Line();
         line.constraints = L.STRETCH;
         return this.addDecorative(line);
     },
@@ -17994,7 +18032,7 @@ pkg.Toolbar = Class(pkg.Panel, [
     },
 
     function insert(i,id,d){
-        return this.$super(i, id, new pkg.Toolbar.ToolPan(d));
+        return this.$super(i, id, new this.$clazz.ToolPan(d));
     }
 ]);
 
@@ -18980,7 +19018,7 @@ pkg.TextField = Class(pkg.Label, pkg.CopyCutPaste, [
         };
 
         this.createPosition = function (r){
-            return new pkg.TextField.TextPosition(r);
+            return new this.$clazz.TextPosition(r);
         };
 
         this.paste = function(txt){
@@ -19716,6 +19754,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
          * Set the list model to be rendered with the list component
          * @param {zebra.data.ListModel} m a list model
          * @method setModel
+         * @chainable 
          */
         this.setModel = function (m){
             if (m != this.model){
@@ -19728,6 +19767,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
                 if (this.model != null && this.model._ != null) this.model.bind(this);
                 this.vrp();
             }
+            return this;
         };
 
         /**
@@ -19944,9 +19984,10 @@ pkg.List = Class(pkg.BaseList, [
                      */
 
                     this.text = new pkg.StringRender("");
+                    zebra.properties(this, this.$clazz);
                     if (f != null) this.text.setFont(f);
                     if (c != null) this.text.setColor(c);
-                };
+                }; 
 
                 /**
                  * Get a view for the given model data element of the
@@ -20186,7 +20227,7 @@ pkg.List = Class(pkg.BaseList, [
          * @private
          */
         this.visValid = false;
-        this.setViewProvider(new pkg.List.ViewProvider());
+        this.setViewProvider(new this.$clazz.ViewProvider());
         this.$super(m, b);
     },
 
@@ -20325,13 +20366,13 @@ pkg.CompList = Class(pkg.BaseList, pkg.Composite, [
     },
 
     function setModel(m){
-        var a =[];
+        var a = [];
         if (Array.isArray(m)) {
             a = m;
-            m = new pkg.CompList.CompListModel(this);
+            m = new this.$clazz.CompListModel(this);
         }
 
-        if (zebra.instanceOf(m, pkg.CompList.CompListModel) === false) {
+        if (zebra.instanceOf(m, this.$clazz.CompListModel) === false) {
             throw new Error("Invalid model");
         }
 
@@ -20378,10 +20419,12 @@ pkg.CompList = Class(pkg.BaseList, pkg.Composite, [
                 this.position.setMetric(zebra.instanceOf(layout, Position.Metric) ? layout : this);
             }
         }
+
+        return this;
     },
 
     function insert(index,constr,e) {
-        return this.$super(index, constr, zebra.isString(e) ? new pkg.CompList.Label(e) : e);
+        return this.$super(index, constr, zebra.isString(e) ? new this.$clazz.Label(e) : e);
     },
 
     function kidAdded(index,constr,e){
@@ -20505,7 +20548,7 @@ pkg.Combo = Class(pkg.Panel, pkg.Composite, [
 
                 this.childInputEvent = function(e){
                     if (e.ID == KE.PRESSED && e.code == KE.ESCAPE && this.parent != null){
-                        this.parent.remove(this);
+                        this.removeMe();
                     }
                 };
             },
@@ -20586,7 +20629,7 @@ pkg.Combo = Class(pkg.Panel, pkg.Composite, [
                  * @private
                  * @type {zebra.ui.TextField}
                  */
-                this.textField = new pkg.Combo.EditableContentPan.TextField("",  -1);
+                this.textField = new this.$clazz.TextField("",  -1);
                 this.textField.view.target.bind(this);
                 this.add(L.CENTER, this.textField);
             },
@@ -20793,7 +20836,7 @@ pkg.Combo = Class(pkg.Panel, pkg.Composite, [
                 if (this.list != null) this.list.unbind(this);
                 this.list = l;
                 if (this.list._) this.list.bind(this);
-                this.winpad = new pkg.Combo.ComboPadPan(this.list);
+                this.winpad = new this.$clazz.ComboPadPan(this.list);
                 this.winpad.owner = this;
                 if (this.content != null) {
                     this.content.comboValueUpdated(this, this.list.getSelected());
@@ -20853,11 +20896,11 @@ pkg.Combo = Class(pkg.Panel, pkg.Composite, [
     },
 
     function() {
-        this.$this(new pkg.Combo.List(true));
+        this.$this(new this.$clazz.List(true));
     },
 
     function(list){
-        if (zebra.isBoolean(list)) this.$this(new pkg.Combo.List(true), list);
+        if (zebra.isBoolean(list)) this.$this(new this.$clazz.List(true), list);
         else this.$this(list, false);
     },
 
@@ -20869,7 +20912,7 @@ pkg.Combo = Class(pkg.Panel, pkg.Composite, [
          * @type {zebra.ui.BaseList}
          */
         if (zebra.instanceOf(list, pkg.BaseList) === false) {
-            list = new pkg.Combo.List(list, true);
+            list = new this.$clazz.List(list, true);
         }
 
         /**
@@ -20915,9 +20958,9 @@ pkg.Combo = Class(pkg.Panel, pkg.Composite, [
         this.setList(list);
         this.$super();
 
-        this.add(L.CENTER, editable ? new pkg.Combo.EditableContentPan()
-                                    : new pkg.Combo.ReadonlyContentPan());
-        this.add(L.RIGHT, new pkg.Combo.Button());
+        this.add(L.CENTER, editable ? new this.$clazz.EditableContentPan()
+                                    : new this.$clazz.ReadonlyContentPan());
+        this.add(L.RIGHT, new this.$clazz.Button());
     },
 
     function focused(){
@@ -20926,7 +20969,7 @@ pkg.Combo = Class(pkg.Panel, pkg.Composite, [
     },
 
     function kidAdded(index,s,c){
-        if (zebra.instanceOf(c, pkg.Combo.ContentPan)) {
+        if (zebra.instanceOf(c, this.$clazz.ContentPan)) {
             if (this.content != null) throw new Error("Content panel is set");
             if (c._ != null) c.bind(this);
             this.content = c;
@@ -21065,7 +21108,7 @@ pkg.ComboArrowView = Class(pkg.View, [
 
 })(zebra("ui"), zebra.Class);
 
-(function(pkg, Class, Interface) {
+(function(pkg, Class) {
 
 var KE = pkg.KeyEvent, task = zebra.util.task, L = zebra.layout, MouseEvent = pkg.MouseEvent,
     WIN_OPENED = 1, WIN_CLOSED = 2, WIN_ACTIVATED = 3, WIN_DEACTIVATED = 4, VIS_PART_SIZE = 30,
@@ -21121,12 +21164,6 @@ pkg.showWindow = function(context, type, win, listener) {
         type = "info";
     }
     return context.getCanvas().getLayer("win").addWin(type, win, listener);
-};
-
-pkg.hideWindow = function(win) {
-    if (win.parent != null && win.parent.indexOf(win) >=0) {
-        win.parent.remove(win);
-    }
 };
 
 /**
@@ -21599,21 +21636,15 @@ pkg.Window = Class(pkg.StatePan, pkg.Composite, [
         };
 
         this.createCaptionPan = function() {
-            var clazz = this.$clazz;
-            clazz = clazz.CaptionPan ? clazz.CaptionPan : pkg.Window.CaptionPan;
-            return new clazz();
+            return new this.$clazz.CaptionPan();
         };
 
         this.createContentPan = function() {
-            var clazz = this.$clazz;
-            clazz = clazz.ContentPan ? clazz.ContentPan : pkg.Window.ContentPan;
-            return new clazz();
+            return new this.$clazz.ContentPan();
         };
 
         this.createTitle = function() {
-            var clazz = this.$clazz;
-            clazz = clazz.TitleLab ? clazz.TitleLab : pkg.Window.TitleLab;
-            return new clazz();
+            return new this.$clazz.TitleLab();
         };
 
         this.setIcon = function(i, icon) {
@@ -21690,7 +21721,7 @@ pkg.Window = Class(pkg.StatePan, pkg.Composite, [
          * @readOnly
          */
         this.icons = new pkg.Panel(new L.FlowLayout(L.LEFT, L.CENTER, L.HORIZONTAL, 2));
-        this.icons.add(new pkg.Window.Icon());
+        this.icons.add(new this.$clazz.Icon());
 
         /**
          * Window buttons panel. The panel can contain number of window buttons 
@@ -21710,8 +21741,8 @@ pkg.Window = Class(pkg.StatePan, pkg.Composite, [
          * @readOnly
          * @type {zebra.ui.Panel}
          */
-        this.status = new pkg.Window.StatusPan();
-        this.sizer  = new pkg.Window.SizerIcon();
+        this.status = new this.$clazz.StatusPan();
+        this.sizer  = new this.$clazz.SizerIcon();
         this.status.add(this.sizer);
 
         this.setSizeable(true);
@@ -21724,7 +21755,7 @@ pkg.Window = Class(pkg.StatePan, pkg.Composite, [
     },
 
     function fired(src) {
-        this.parent.remove(this);
+        this.removeMe();
     },
 
     function focused(){
@@ -21785,7 +21816,7 @@ pkg.Window = Class(pkg.StatePan, pkg.Composite, [
      * @method close
      */
     function close() {
-        if (this.parent) this.parent.remove(this);
+        this.removeMe();
     },
 
     /**
@@ -21807,7 +21838,7 @@ pkg.Window = Class(pkg.StatePan, pkg.Composite, [
         // add new buttons set
         for(var k in buttons) {
             if (buttons.hasOwnProperty(k)) {
-                var b = new pkg.Window.Button();
+                var b = new this.$clazz.Button();
                 b.setView(buttons[k]);
                 this.buttons.add(b);
                 (function(t, f) {
@@ -21843,6 +21874,12 @@ pkg.Window = Class(pkg.StatePan, pkg.Composite, [
  * @constructor
  */
 pkg.MenuItem = Class(pkg.Panel, [
+    function $clazz() {
+        this.SubImage      = Class(pkg.StatePan, []);
+        this.Label         = Class(pkg.Label,    []);
+        this.CheckStatePan = Class(pkg.ViewPan,  []);
+    },
+
     function $prototype() {
         /**
          * Gap between checked, content and sub menu arrow components
@@ -22053,7 +22090,7 @@ pkg.MenuItem = Class(pkg.Panel, [
 
     function (c) {
         this.$super();
-        this.add(new pkg.Menu.CheckStatePan());
+        this.add(new this.$clazz.CheckStatePan());
 
         if (zebra.isString(c)) {
             var m = c.match(/(\s*\@\(.*\)\s*)?(\s*\[\s*\]|\s*\[\s*x\s*\]|\s*\(\s*x\s*\)|\s*\(\s*\))?\s*(.*)/);
@@ -22095,14 +22132,14 @@ pkg.MenuItem = Class(pkg.Panel, [
                 this.id = c.toLowerCase().replace(/[ ]+/, '_');
             }
 
-            c = new pkg.ImageLabel(new pkg.Menu.Label(c), img);
+            c = new pkg.ImageLabel(new this.$clazz.Label(c), img);
         }
         else {
             this.getCheck().setVisible(false);
         }
 
         this.add(c);
-        this.add(new pkg.Menu.SubImage());
+        this.add(new this.$clazz.SubImage());
 
         this.setEnabled(c.isEnabled);
         this.setVisible(c.isVisible);
@@ -22331,7 +22368,7 @@ pkg.Menu = Class(pkg.CompList, [
             if (this.parent != null) {
                 var ch = this.$childMenu();
                 if (ch != null) ch.$hideMenu(triggeredBy);
-                this.parent.remove(this);
+                this.removeMe();
             }
         };
 
@@ -22374,11 +22411,8 @@ pkg.Menu = Class(pkg.CompList, [
     },
 
     function $clazz() {
-        this.SubImage      = Class(pkg.StatePan, []);
-        this.MenuItem      = Class(pkg.MenuItem, []);
-        this.Label         = Class(pkg.Label,    []);
-        this.CheckStatePan = Class(pkg.ViewPan,  []);
-        this.Line          = Class(pkg.Line,     []);
+        this.MenuItem = Class(pkg.MenuItem, []);
+        this.Line     = Class(pkg.Line,     []);
         this.Line.prototype.$isDecorative = true;
     },
 
@@ -22443,9 +22477,8 @@ pkg.Menu = Class(pkg.CompList, [
 
     function insert(i, ctr, c) {
         if (zebra.isString(c)) {
-            var clazz = this.$clazz.MenuItem != null ? this.$clazz.MenuItem : pkg.MenuItem; 
-            return this.$super(i, ctr, (c == '-') ? new pkg.Menu.Line()
-                                                  : new clazz(c));            
+            return this.$super(i, ctr, (c == '-') ? new this.$clazz.Line()
+                                                  : new this.$clazz.MenuItem(c));            
         }
         return this.$super(i, ctr, c);
     },
@@ -22842,10 +22875,10 @@ pkg.Tooltip = Class(pkg.Panel, [
 
     function(content) {
         this.$super();
-        this.setBorder(new pkg.Tooltip.TooltipBorder(pkg.Tooltip.borderColor, 
+        this.setBorder(new this.$clazz.TooltipBorder(pkg.Tooltip.borderColor, 
                                                      pkg.Tooltip.borderWidth));
         this.add(zebra.instanceOf(content, pkg.Panel) ? content 
-                                                      : new pkg.Tooltip.Label(content));   
+                                                      : new this.$clazz.Label(content));   
         this.toPreferredSize();
     },
 
@@ -23185,7 +23218,7 @@ pkg.WindowTitleView = Class(pkg.View, [
  * @for
  */
 
-})(zebra("ui"), zebra.Class, zebra.Interface);
+})(zebra("ui"), zebra.Class);
 
 (function(pkg, Class, ui) {
 
@@ -23892,8 +23925,9 @@ pkg.HtmlElement = Class(pkg.Panel, [
             // if the component has focus that has came from Zebra component we should
             // set focus to native component that hosted by Zebra component
 
-            var canvas = this.getCanvas();
-            var pfo = canvas.$prevFocusOwner;
+            var canvas = this.getCanvas(),
+                pfo    = canvas.$prevFocusOwner;
+            
             if (pfo == null || zebra.instanceOf(pfo, pkg.HtmlElement) === false) {
                 this.element.focus();
             }
@@ -23903,6 +23937,8 @@ pkg.HtmlElement = Class(pkg.Panel, [
     },
 
     function setBorder(b) {
+        b = pkg.$view(b);
+
         if (b == null) {
             this.element.style.border = "none";
         }
@@ -23934,13 +23970,18 @@ pkg.HtmlElement = Class(pkg.Panel, [
         this.$super(b);
     },
 
-    function setPaddings(t,l,b,r) {
+    function setPadding(t,l,b,r) {
+        if (arguments.length == 1) {
+            l = b = r = t;
+        }
+
         var e = this.element;
         e.style.paddingTop    = '' + t + "px";
         e.style.paddingLeft   = '' + l + "px";
         e.style.paddingRight  = '' + r + "px";
         e.style.paddingBottom = '' + b + "px";
-        this.$super(t,l,b,r);
+        
+        this.$super.apply(this, arguments);
     },
 
     function setVisible(b) {
@@ -24072,6 +24113,7 @@ pkg.HtmlTextInput = Class(pkg.HtmlElement, [
     },
 
     function(text, elementName) {
+        if (text == null) text = "";
         this.$super(elementName);
         this.element.setAttribute("tabindex", 0);
         this.setValue(text);
@@ -24102,10 +24144,6 @@ pkg.HtmlContent = Class(pkg.HtmlElement, [
  * @extends zebra.ui.HtmlTextInput
  */
 pkg.HtmlTextField = Class(pkg.HtmlTextInput, [
-    function() {
-        this.$this("");
-    },
-
     function(text) {
         this.$super(text, "input");
         this.element.setAttribute("type",  "text");
@@ -24121,8 +24159,9 @@ pkg.HtmlTextField = Class(pkg.HtmlTextInput, [
  * @extends zebra.ui.HtmlTextInput
  */
 pkg.HtmlTextArea = Class(pkg.HtmlTextInput, [
-    function() {
-        this.$this("");
+    function setResizeable(b) {
+        if (b === false) this.setStyle("resize", "none");
+        else             this.setStyle("resize", "both");
     },
 
     function(text) {
@@ -24279,7 +24318,7 @@ pkg.DefViews = Class([
              */
             this.render = new ui.StringRender("");
 
-            zebra.applyDefProperties(this, "font", "color");
+            zebra.properties(this, this.$clazz);
             
             if (color != null) this.setColor(color);
             if (font  != null) this.setFont(font);
@@ -25503,7 +25542,7 @@ pkg.DefViews = Class([
              * @protected
              */
             this.render = (render == null ? new ui.StringRender("") : render);
-            zebra.applyDefProperties(this, "font", "color");
+            zebra.properties(this, this.$clazz);
         };
         
         /**
@@ -25591,8 +25630,8 @@ pkg.DefEditors = Class([
     function $prototype() {
         this[''] = function() {
 
-            this.textEditor = new pkg.DefEditors.TextField("", 150);
-            this.boolEditor = new pkg.DefEditors.Checkbox(null);
+            this.textEditor = new this.$clazz.TextField("", 150);
+            this.boolEditor = new this.$clazz.Checkbox(null);
             this.editors    = {};
         };
 
@@ -25635,7 +25674,7 @@ pkg.DefEditors = Class([
             editor.setValue((v == null ? "" : v.toString()));
             editor.setPadding(0);         
             var ah = ~~((grid.getRowHeight(row) - editor.getPreferredSize().height)/2);
-            editor.setPaddings(ah, grid.cellInsetsLeft, ah, grid.cellInsetsRight);
+            editor.setPadding(ah, grid.cellInsetsLeft, ah, grid.cellInsetsRight);
             return editor;
         };
 
@@ -25691,6 +25730,20 @@ pkg.CaptionListeners = new zebra.util.ListenersClass("captionResized");
  * @constructor 
  * @param {Array} [titles] a caption component titles 
  */
+
+/**
+ * Fire when a grid row selection state has been changed
+ 
+        caption.bind(function captionResized(caption, rowcol, phw) {
+            ... 
+        });
+
+ * @event captionResized
+ * @param  {zebra.ui.grid.BaseCaption} caption a caption
+ * @param  {Integer} rowcol a row or column that has been resized
+ * @param  {Integer} pwh a a previous row or column size
+ */
+
 pkg.BaseCaption = Class(ui.Panel, [
     function $prototype() {
         /**
@@ -26422,7 +26475,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, ui.Composite, [
 
     function(titles) {
         this.$super(titles);
-        this.setLayout(new pkg.CompGridCaption.Layout());
+        this.setLayout(new this.$clazz.Layout());
     },
 
     function captionResized(rowcol, ns) {
@@ -26444,7 +26497,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, ui.Composite, [
 
     function insert(i,constr, c) {
         if (zebra.isString(c)) {
-            c = new pkg.CompGridCaption.TitlePan(c);
+            c = new this.$clazz.TitlePan(c);
         }
         this.$super(i,constr, c);
     }
@@ -27768,7 +27821,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
 
             this.$super();
 
-            this.add(L.NONE, new pkg.Grid.CornerPan());
+            this.add(L.NONE, new this.$clazz.CornerPan());
             this.setModel(model);
             this.setViewProvider(new pkg.DefViews());
             this.setPosition(new Position(this));
@@ -28255,6 +28308,9 @@ pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
                 this.widths  = this.calcColWidths(taWidth, taHeight);
                 this.heights = this.calcRowHeights(taWidth, taHeight, this.widths);
                 this.strPs   = this.summarizePS(taWidth, taHeight, this.widths, this.heights);
+            
+
+
             }
         };
 
@@ -28267,7 +28323,9 @@ pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
                 }
                 ps.height += (grid.getTop() + grid.getBottom());
             }
-            else ps.height = grid.getPreferredSize().height;
+            else {
+                ps.height = grid.getPreferredSize().height;
+            }
             return ps;
         };
     },

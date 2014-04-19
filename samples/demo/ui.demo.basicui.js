@@ -153,10 +153,8 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
 
     function createComboPan() {
         var p = new Panel(new ListLayout(8));
-        var cb = new Combo();
-        cb.list.model.add("Item 1");
-        cb.list.model.add("Item 2");
-        cb.list.model.add("Item 3");
+        
+        var cb = new Combo(["Item 1", "Item 2", "Item 3"]);
         cb.list.select(0);
         p.add(cb);
 

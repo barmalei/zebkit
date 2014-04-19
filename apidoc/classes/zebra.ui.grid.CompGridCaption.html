@@ -535,6 +535,8 @@ a zebra.ui.Panel class instance</p>
             <li class="api-class-tab attrs"><a href="#attrs">Attributes</a></li>
         
         
+            <li class="api-class-tab events"><a href="#events">Events</a></li>
+        
     </ul>
 
     <div>
@@ -668,6 +670,21 @@ a zebra.ui.Panel class instance</p>
                 </div>
             
 
+            
+                <div class="index-section events">
+                    <h3>Events</h3>
+
+                    <ul class="index-list events extends">
+                        
+                            <li class="index-item event inherited">
+                                <a href="#event_captionResized">captionResized</a>
+
+                                
+                                
+                            </li>
+                        
+                    </ul>
+                </div>
             
         </div>
 
@@ -2139,6 +2156,109 @@ to the cell preferred size by mouse double click event.</p>
             </div>
         
 
+        
+            <div id="events" class="api-class-tabpanel">
+                <h2 class="off-left">Events</h2>
+
+                
+                    <div id="event_captionResized" class="events item inherited">
+    <h3 class="name"><code>captionResized</code></h3>
+    <span class="type"></span>
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+                <p>Inherited from
+                <a href="../classes/zebra.ui.grid.BaseCaption.html#event_captionResized">zebra.ui.grid.BaseCaption</a>:
+            
+        
+        </p>
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p><p>Fire when a grid row selection state has been changed</p></p>
+<pre class="code prettyprint"><code>   caption.bind(function captionResized(caption, rowcol, phw) {
+       ... 
+   });</code></pre>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Event Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">caption</code>
+                        <span class="type"><a href="../classes/zebra.ui.grid.BaseCaption.html" class="crosslink">zebra.ui.grid.BaseCaption</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a caption</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">rowcol</code>
+                        <span class="type">Integer</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a row or column that has been resized</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">pwh</code>
+                        <span class="type">Integer</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a a previous row or column size</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+
+    
+</div>
+
+                
+            </div>
         
     </div>
 </div>

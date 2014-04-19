@@ -10,8 +10,8 @@
 		    zebra.ready(function() {
 			    eval(zebra.Import("ui", "layout", "ui.grid"));
 
-                BorderPan.Label.properties.color = "black";
-                BorderPan.Label.properties.font = new Font("Arial", "bold", 12);
+                BorderPan.Label.color = "black";
+                BorderPan.Label.font = new Font("Arial", "bold", 12);
 
                 var qGrid = new Grid([
                     [ "Quadrant 1", "0.3332, 0.5454545", "123" ],
@@ -68,7 +68,7 @@
                         if (col == 2) {
                             var d = parseInt(data);
                             var c = new Panel(new BorderLayout(10));
-                            c.setPaddings(0,0,0,10);
+                            c.setPadding(0,0,0,10);
                             
                             c.add(LEFT, new BoldLabel(data));
                             

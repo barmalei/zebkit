@@ -59,7 +59,7 @@
 
 		 			function mouseDragEnded(e) {
 		 				if (this.viewComp != null) {
-		 					this.viewComp.parent.remove(this.viewComp);
+		 					this.viewComp.removeMe();
 		 					this.viewComp = null;
 
 		 					var a = zebra.layout.toParentOrigin(e.x, e.y, this);

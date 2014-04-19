@@ -224,10 +224,8 @@ Default values of UI components properties can be controlled by JSON configurati
 ```json
 {
 	"Button" : {
-       "properties" : {
-          "font"      : { "$Font": ["Arial", "bold", 18 ] },
-          "background": "#DDDDEF"
-       }
+        "font"      : { "$Font": ["Arial", "bold", 18 ] },
+        "background": "#DDDDEF"
     }
 }
 ```

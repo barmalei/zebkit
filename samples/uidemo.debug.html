@@ -110,12 +110,9 @@
 			function() {
 				eval(zebra.Import("ui", "layout"));
 
-			
 	        	desktop = new zCanvas("zCanvas");
 				var root = desktop.root, nt = new Tabs(), prevSelected = -1;
 	    	
-				//desktop.fullScreen();
-
 	    		root.properties({
 	    			padding: 4,
 	    			border : new Border(),
@@ -147,14 +144,19 @@
 		    											}),
 		    											CENTER : new Panel({ 
 		    												layout: new FlowLayout(CENTER, TOP, HORIZONTAL, 12),
-		    												kids  : [ new Label(new zebra.data.Text(zebra.io.GET("demo/desc.txt"))).properties({ 
+		    												kids  : [ new TextField(new zebra.data.Text(zebra.io.GET("demo/desc.txt"))).properties({ 
 		    													color:"white",
+		    													background: null,
+		    													border: null,
+		    													padding: 0,
+		    													editable: false,
+		    													cursorView: "black",
 		    													font : new Font("Verdana", 14)
 		    												}) ]
 		    											}),
 		    											BOTTOM: new Panel({
 		    												layout: new FlowLayout(CENTER, TOP, HORIZONTAL, 12),
-		    												kids  : [ new Label("Copyright (c) Sandtube 2014") ]
+		    												kids  : [ new Label("Copyright (c) Andrei Vishneuski 2014") ]
 		    											})
 		    										}
 		    									})

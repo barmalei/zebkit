@@ -23,8 +23,10 @@
 									[ "Column 5.1",  "Column 5.2", "Column 5.3", "Column 5.4", "Column 5.5" ], 
 									[ "Column 6.1",  "Column 6.2", "Column 6.3", "Column 6.4", "Column 6.5" ], 
 									[ "Column 7.1",  "Column 7.2", "Column 7.3", "Column 7.4", "Column 7.5" ] 
-								 ]), h = g.add(TOP, new GridCaption());
+								 ]), gc = new GridCaption(), h = g.add(TOP,gc);
 				
+				gc.isResizable = false;
+
 				for(var i=0; i<g.getGridCols(); i++) {
 					h.putTitle(i, "Title " + i);
 				}
@@ -35,6 +37,7 @@
 	</head>
 
 	<body bgcolor="#EEEEEE" align="center" style="padding:15px;">
+
 		<h1>Grid: simple data model</h1>
 		<pre>
 [[ "Column 1.1",  "Column 1.2", "Column 1.3", "Column 1.4", "Column 1.5" ], 

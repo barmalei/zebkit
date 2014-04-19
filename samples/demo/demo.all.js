@@ -350,10 +350,8 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
 
     function createComboPan() {
         var p = new Panel(new ListLayout(8));
-        var cb = new Combo();
-        cb.list.model.add("Item 1");
-        cb.list.model.add("Item 2");
-        cb.list.model.add("Item 3");
+        
+        var cb = new Combo(["Item 1", "Item 2", "Item 3"]);
         cb.list.select(0);
         p.add(cb);
 
@@ -831,7 +829,7 @@ function createWindowComp(target) {
 
     var p = new Panel(new FlowLayout(CENTER, CENTER));
     var b = new Button("Close");
-    b.setPaddings(4,16,4,16);
+    b.setPadding(4,16,4,16);
 
     b.tooltip = new zebra.ui.Tooltip("Button");
 
@@ -988,15 +986,15 @@ var CustomGridEditor = new Class(DefEditors, [
                 var controls = new Panel(new FlowLayout(CENTER, CENTER, HORIZONTAL, 8));
                 var cancelLink = new Link("<cancel>");
                 controls.add(cancelLink);
-                controls.setPaddings(0, 0, 4, 0);
+                controls.setPadding(0, 0, 4, 0);
                 cancelLink.bind(function() {
                     $this.accepted = false;
-                    $this.parent.remove($this);
+                    $this.removeMe();
                 });
 
                 this.list.bind(function() {
                     $this.accepted = true;
-                    $this.parent.remove($this);
+                    $this.removeMe();
                 });
 
                 this.setBorder(new zebra.ui.Border("#7297BA", 2, 6));
@@ -1007,7 +1005,7 @@ var CustomGridEditor = new Class(DefEditors, [
 
             function fire(t, prev) {
                 this.$super(t, prev);
-                this.parent.remove(this);
+                this.removeMe();
             },
 
             function isAccepted() { return this.accepted; }
@@ -1101,7 +1099,7 @@ function longGrid() {
 
 	var corner = new Panel();
 	corner.setBorder(ui.borders.plain);
-	corner.setBackground(ui.grid.GridCaption.properties.background);
+	corner.setBackground(ui.grid.GridCaption.background);
 	var p = new ScrollPan(g);
 	p.setPadding(4);
 	return p;

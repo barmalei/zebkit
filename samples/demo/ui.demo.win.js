@@ -96,7 +96,7 @@ function createWindowComp(target) {
 
     var p = new Panel(new FlowLayout(CENTER, CENTER));
     var b = new Button("Close");
-    b.setPaddings(4,16,4,16);
+    b.setPadding(4,16,4,16);
 
     b.tooltip = new zebra.ui.Tooltip("Button");
 

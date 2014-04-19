@@ -70,15 +70,15 @@ var CustomGridEditor = new Class(DefEditors, [
                 var controls = new Panel(new FlowLayout(CENTER, CENTER, HORIZONTAL, 8));
                 var cancelLink = new Link("<cancel>");
                 controls.add(cancelLink);
-                controls.setPaddings(0, 0, 4, 0);
+                controls.setPadding(0, 0, 4, 0);
                 cancelLink.bind(function() {
                     $this.accepted = false;
-                    $this.parent.remove($this);
+                    $this.removeMe();
                 });
 
                 this.list.bind(function() {
                     $this.accepted = true;
-                    $this.parent.remove($this);
+                    $this.removeMe();
                 });
 
                 this.setBorder(new zebra.ui.Border("#7297BA", 2, 6));
@@ -89,7 +89,7 @@ var CustomGridEditor = new Class(DefEditors, [
 
             function fire(t, prev) {
                 this.$super(t, prev);
-                this.parent.remove(this);
+                this.removeMe();
             },
 
             function isAccepted() { return this.accepted; }
@@ -183,7 +183,7 @@ function longGrid() {
 
 	var corner = new Panel();
 	corner.setBorder(ui.borders.plain);
-	corner.setBackground(ui.grid.GridCaption.properties.background);
+	corner.setBackground(ui.grid.GridCaption.background);
 	var p = new ScrollPan(g);
 	p.setPadding(4);
 	return p;

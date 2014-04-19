@@ -583,14 +583,28 @@ layout children components</p>
                     <ul class="index-list methods extends">
                         
                             <li class="index-item method protected">
-                                <a href="#method_calcColSize">calcColSize</a>
+                                <a href="#method_calcCol">calcCol</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method protected">
-                                <a href="#method_calcRowSize">calcRowSize</a>
+                                <a href="#method_calcCols">calcCols</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method protected">
+                                <a href="#method_calcRow">calcRow</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method protected">
+                                <a href="#method_calcRows">calcRows</a>
 
                                 
                                 
@@ -632,8 +646,8 @@ layout children components</p>
                 <h2 class="off-left">Methods</h2>
 
                 
-                    <div id="method_calcColSize" class="method item protected">
-    <h3 class="name"><code>calcColSize</code></h3>
+                    <div id="method_calcCol" class="method item protected">
+    <h3 class="name"><code>calcCol</code></h3>
 
     
         <div class="args">
@@ -718,7 +732,7 @@ layout children components</p>
                 <li class="param">
                     
                         <code class="param-name">c</code>
-                        <span class="type">Integer</span>
+                        <span class="type"><a href="../classes/zebra.layout.Layoutable.html" class="crosslink">zebra.layout.Layoutable</a></span>
                     
 
                     
@@ -754,8 +768,108 @@ layout children components</p>
 </div>
 
                 
-                    <div id="method_calcRowSize" class="method item protected">
-    <h3 class="name"><code>calcRowSize</code></h3>
+                    <div id="method_calcCols" class="method item protected">
+    <h3 class="name"><code>calcCols</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>c</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type">Array</span>
+        </span>
+    
+
+    
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Calculate columns metrics</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">c</code>
+                        <span class="type"><a href="../classes/zebra.layout.Layoutable.html" class="crosslink">zebra.layout.Layoutable</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>the target container</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type">Array</span>
+                    
+                    <p>a columns widths</p>
+
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_calcRow" class="method item protected">
+    <h3 class="name"><code>calcRow</code></h3>
 
     
         <div class="args">
@@ -840,7 +954,7 @@ layout children components</p>
                 <li class="param">
                     
                         <code class="param-name">c</code>
-                        <span class="type">Integer</span>
+                        <span class="type"><a href="../classes/zebra.layout.Layoutable.html" class="crosslink">zebra.layout.Layoutable</a></span>
                     
 
                     
@@ -866,6 +980,106 @@ layout children components</p>
                         <b>Return: </b><span class="type">Integer</span>
                     
                     <p>a size of the row</p>
+
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_calcRows" class="method item protected">
+    <h3 class="name"><code>calcRows</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>c</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type">Array</span>
+        </span>
+    
+
+    
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Calculate rows metrics</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">c</code>
+                        <span class="type"><a href="../classes/zebra.layout.Layoutable.html" class="crosslink">zebra.layout.Layoutable</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>the target container</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type">Array</span>
+                    
+                    <p>a rows heights</p>
 
                 
             </div>

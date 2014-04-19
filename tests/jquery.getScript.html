@@ -10,8 +10,8 @@
 	<body bgcolor="#EEEEEE" align="center" style="padding:15px;">
         <script>
 
-            $.getScript('http://repo.zebkit.org/sandbox/zebra.min.js', function (script, textStatus, jqXHR) {                
-                zebra.ui.$url = new zebra.URL("http://repo.zebkit.org/sandbox/");
+            $.getScript('../zebra.min.js', function (script, textStatus, jqXHR) {                
+                zebra()["zebra.json"] = "http://localhost:8090/zebra.json";
 
                 zebra.ready(function() {
                     var root = new zebra.ui.zCanvas();

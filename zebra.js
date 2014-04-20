@@ -6642,7 +6642,7 @@ pkg.GridLayout = Class(L, [
                                                                           : (typeof window.screen.deviceXDPI !== "undefined" ? // IE
                                                                              window.screen.deviceXDPI / window.screen.logicalXDPI : 1); 
 
-      
+
         pkg.$applyRenderExploit = (parseInt(pkg.$deviceRatio) === pkg.$deviceRatio || zebra.isIE);
 
         // canvases location has to be corrected if document layout is invalid 
@@ -7588,26 +7588,28 @@ pkg.Border = Class(pkg.View, [
             x += dt;
             y += dt;
 
+            // !!! this code can work inproperly in IE 10 in Vista !
+            // g.beginPath();
+            // g.moveTo(x+r, y);
+            // g.arcTo(xx, y, xx, yy, r);
+            // g.arcTo(xx, yy, x, yy, r);
+            // g.arcTo(x, yy, x, y, r);
+            // g.arcTo(x, y, xx, y, r);
+            // g.closePath();
+            // return true;
+
             g.beginPath();
-            g.moveTo(x+r, y);
-            g.arcTo(xx, y, xx, yy, r);
-            g.arcTo(xx, yy, x, yy, r);
-            g.arcTo(x, yy, x, y, r);
-            g.arcTo(x, y, xx, y, r);
+            g.moveTo(x + r, y);
+            g.lineTo(xx - r, y);
+            g.quadraticCurveTo(xx, y, xx, y + r);
+            g.lineTo(xx, yy  - r);
+            g.quadraticCurveTo(xx, yy, xx - r, yy);
+            g.lineTo(x + r, yy);
+            g.quadraticCurveTo(x, yy, x, yy - r);
+            g.lineTo(x, y + r);
+            g.quadraticCurveTo(x, y, x + r, y);
             g.closePath();
             return true;
-
-            // g.beginPath();
-            // g.moveTo(x + r, y);
-            // g.lineTo(xx - r, y);
-            // g.quadraticCurveTo(xx, y, xx, y + r);
-            // g.lineTo(xx, yy  - r);
-            // g.quadraticCurveTo(xx, yy, xx - r, yy);
-            // g.lineTo(x + r, yy);
-            // g.quadraticCurveTo(x, yy, x, yy - r);
-            // g.lineTo(x, y + r);
-            // g.quadraticCurveTo(x, y, x + r, y);
-            // return true;
         };
 
         this[''] = function (c,w,r){
@@ -25802,7 +25804,7 @@ pkg.BaseCaption = Class(ui.Panel, [
          * @method mouseDragged
          */
         this.mouseDragged = function(e){
-            if (this.pxy != null){
+            if (this.pxy != null) {
                 var b  = (this.orient == L.HORIZONTAL),
                     rc = this.selectedColRow,
                     ns = (b ? this.metrics.getColWidth(rc) + e.x
@@ -25844,6 +25846,7 @@ pkg.BaseCaption = Class(ui.Panel, [
             if (this.pxy != null) {
                 this.pxy = null;
             }
+
             if (this.metrics != null) {
                 this.calcRowColAt(e.x, e.y);
             }
@@ -25940,11 +25943,11 @@ pkg.BaseCaption = Class(ui.Panel, [
                 x < this.width       &&
                 y < this.height        )
             {
-                var m = this.metrics,
-                    cv = m.getCellsVisibility(),
+                var m     = this.metrics,
+                    cv    = m.getCellsVisibility(),
                     isHor = (this.orient == L.HORIZONTAL);
 
-                if ((isHor && cv.fc != null) || (isHor === false && cv.fr != null)){
+                if ((isHor && cv.fc != null) || (isHor === false && cv.fr != null)) {
                     var gap  = m.lineSize,
                         xy   = isHor ? x : y,
                         xxyy = isHor ? cv.fc[1] - this.x - gap + m.getXOrigin()
@@ -25970,8 +25973,8 @@ pkg.BaseCaption = Class(ui.Panel, [
                         b       = this.orient == L.HORIZONTAL,
                         startRC = b ? v.fc[0] : v.fr[0],
                         endRC   = b ? v.lc[0] : v.lr[0],
-                        xy       = b ? v.fc[1] - this.x - m.lineSize + m.getXOrigin()
-                                     : v.fr[1] - this.y - m.lineSize + m.getYOrigin();
+                        xy      = b ? v.fc[1] - this.x - m.lineSize + m.getXOrigin()
+                                    : v.fr[1] - this.y - m.lineSize + m.getYOrigin();
 
                     g.setColor(this.lineColor);
                     for(var i = startRC; i <= endRC; i++) {
@@ -26175,8 +26178,7 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
      */
     function putTitle(rowcol,title){
         var old = this.getTitle(rowcol);
-        if (old != title)
-        {
+        if (old != title) {
             if (this.titles == null) {
                 this.titles = arr((rowcol + 1) * 2, null);
             }
@@ -26807,6 +26809,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                          this, top, left,
                                          this.getBottom(), 
                                          this.getRight());
+
                 this.scrollManager.scrollTo(o[0], o[1]);
             };
 
@@ -27020,9 +27023,11 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 if (offx !== 0) {
                     this.iColVisibility(offx > 0 ? 1 :  - 1);
                 }
+
                 if (offy !== 0) {
                     this.iRowVisibility(offy > 0 ? 1 :  - 1);
                 }
+
                 this.stopEditing(false);
                 this.repaint();
             };
@@ -27550,7 +27555,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                     addH = this.cellInsetsTop  + this.cellInsetsBottom;
 
                 for(var i = 0;i < cols; i++ ){
-                    for(var j = 0;j < rows; j ++ ){
+                    for(var j = 0;j < rows; j++ ){
                         var v = this.provider.getView(this, j, i, this.model.get(j, i));
                         if (v != null){
                             var ps = v.getPreferredSize();
@@ -27563,6 +27568,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                             if (pkg.Grid.DEF_COLWIDTH > this.colWidths [i]) {
                                 this.colWidths [i] = pkg.Grid.DEF_COLWIDTH;
                             }
+
                             if (pkg.Grid.DEF_ROWHEIGHT > this.rowHeights[j]) {
                                 this.rowHeights[j] = pkg.Grid.DEF_ROWHEIGHT;
                             }
@@ -28308,9 +28314,6 @@ pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
                 this.widths  = this.calcColWidths(taWidth, taHeight);
                 this.heights = this.calcRowHeights(taWidth, taHeight, this.widths);
                 this.strPs   = this.summarizePS(taWidth, taHeight, this.widths, this.heights);
-            
-
-
             }
         };
 

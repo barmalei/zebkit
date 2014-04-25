@@ -6694,7 +6694,9 @@ pkg.GridLayout = Class(L, [
                 c.style.width  = "" + w + "px";
                 c.style.height = "" + h + "px";
                 
-                var ctx = pkg.$canvas.context(c); 
+                var ctx = pkg.$canvas.context(c), 
+                    $scale = ctx.scale,
+                    $getImageData = ctx.getImageData; 
 
                 // take in account that canvas can be visualized on 
                 // Retina screen where the size of canvas (backstage)
@@ -6704,7 +6706,7 @@ pkg.GridLayout = Class(L, [
                     var ratio = pkg.$deviceRatio / ctx.$ratio;
                     c.width  = ~~(w * ratio);
                     c.height = ~~(h * ratio);
-                    ctx.constructor.prototype.scale.call(ctx, ratio, ratio);
+                    $scale.call(ctx, ratio, ratio);
                 }
                 else {
                     c.width  = w;
@@ -6723,7 +6725,7 @@ pkg.GridLayout = Class(L, [
                     var ratio = pkg.$canvas.ratio(ctx);
                     ctx.$ratio = ratio; 
                     if (pkg.$deviceRatio != ratio) {
-                        var r = pkg.$deviceRatio / ratio, $getImageData = ctx.constructor.prototype.getImageData;
+                        var r = pkg.$deviceRatio / ratio;
                         ctx.getImageData= function(x, y, w, h) {
                             return $getImageData.call(this, x * r, y * r, w, h);
                         };

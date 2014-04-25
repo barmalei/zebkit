@@ -1202,7 +1202,7 @@ if (pkg.isInBrowser) {
         }
 
         return p[0] == '/' ? [ this.protocol, "//", this.host, p ].join('')
-                           : [ this.protocol, "//", this.host, this.path, p ].join('');
+                           : [ this.protocol, "//", this.host, this.path, this.path[this.path.length-1] == '/' ? '' : '/', p ].join('');
     };
 
     var $interval = setInterval(function () {
@@ -12129,7 +12129,12 @@ pkg.zCanvas = Class(pkg.Panel, [
             } 
             else {
                 // customize context with number of new methods
-                var proto = ctx.constructor.prototype;
+                //var proto = ctx.constructor.prototype;
+                var $scale     = ctx.scale, 
+                    $translate = ctx.translate, 
+                    $rotate    = ctx.rotate,
+                    $save      = ctx.save,
+                    $restore   = ctx.restore;
 
                 ctx.reset = function(w, h) {
                     this.counter = 0;
@@ -12173,7 +12178,7 @@ pkg.zCanvas = Class(pkg.Panel, [
                         c.y  -= dy;
                         c.dx += dx;
                         c.dy += dy;
-                        proto.translate.call(this, dx, dy);
+                        $translate.call(this, dx, dy);
                     }
                 };
 
@@ -12182,14 +12187,14 @@ pkg.zCanvas = Class(pkg.Panel, [
                     c.rotateVal += v;
                     c.srot = MS(c.rotateVal);
                     c.crot = MC(c.rotateVal);
-                    proto.rotate.call(this, v);
+                    $rotate.call(this, v);
                 };
 
                 ctx.scale = function(sx, sy) {
                     var c = this.stack[this.counter];
                     c.sx = c.sx * sx;
                     c.sy = c.sy * sy;
-                    proto.scale.call(this, sx, sy);
+                    $scale.call(this, sx, sy);
                 };
 
                 ctx.save = function() {
@@ -12208,7 +12213,7 @@ pkg.zCanvas = Class(pkg.Panel, [
                     c.crot = cc.crot;
                     c.rotateVal = cc.rotateVal;
 
-                    proto.save.call(this);
+                    $save.call(this);
                     return this.counter - 1;
                 };
 
@@ -12218,7 +12223,7 @@ pkg.zCanvas = Class(pkg.Panel, [
                     }
 
                     this.counter--;
-                    proto.restore.call(this);
+                    $restore.call(this);
                     return this.counter;
                 };
 

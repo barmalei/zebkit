@@ -4893,10 +4893,9 @@ pkg.getTopParent = function(c){
 };
 
 /**
- * Translate the given relative to the specified component location 
- * in a parent relative location. 
- * @param  {Integer} [x] a x coordinate relatively  to the given component
- * @param  {Integer} [y] a y coordinate relatively  to the given component
+ * Translate the given relative location into the parent relative location. 
+ * @param  {Integer} [x] a x coordinate relatively to the given component
+ * @param  {Integer} [y] a y coordinate relatively to the given component
  * @param  {zebra.layout.Layoutable} c a component
  * @param  {zebra.layout.Layoutable} [p] a parent component
  * @return {Object} a relative to the given parent UI component location:
@@ -6694,9 +6693,7 @@ pkg.GridLayout = Class(L, [
                 c.style.width  = "" + w + "px";
                 c.style.height = "" + h + "px";
                 
-                var ctx = pkg.$canvas.context(c), 
-                    $scale = ctx.scale,
-                    $getImageData = ctx.getImageData; 
+                var ctx = pkg.$canvas.context(c); 
 
                 // take in account that canvas can be visualized on 
                 // Retina screen where the size of canvas (backstage)
@@ -6706,7 +6703,7 @@ pkg.GridLayout = Class(L, [
                     var ratio = pkg.$deviceRatio / ctx.$ratio;
                     c.width  = ~~(w * ratio);
                     c.height = ~~(h * ratio);
-                    $scale.call(ctx, ratio, ratio);
+                    ctx.$scale(ratio, ratio);
                 }
                 else {
                     c.width  = w;
@@ -6722,12 +6719,15 @@ pkg.GridLayout = Class(L, [
                 // context has already been modified to prevent 
                 // redundancy  
                 if (typeof ctx.$ratio == "undefined") {
-                    var ratio = pkg.$canvas.ratio(ctx);
+                    var ratio = pkg.$canvas.ratio(ctx); 
+
+                    ctx.$getImageData = ctx.getImageData;
+                    ctx.$scale = ctx.scale;
                     ctx.$ratio = ratio; 
                     if (pkg.$deviceRatio != ratio) {
                         var r = pkg.$deviceRatio / ratio;
                         ctx.getImageData= function(x, y, w, h) {
-                            return $getImageData.call(this, x * r, y * r, w, h);
+                            return this.$getImageData(x * r, y * r, w, h);
                         };
                     }
                 }
@@ -12121,6 +12121,10 @@ pkg.zCanvas = Class(pkg.Panel, [
                 ctx = pkg.$canvas.size(this.canvas, w, h);
             
             this.$context = ctx;
+            if (this.$context.textBaseline != "top" ) {
+                this.$context.textBaseline = "top";
+            }
+            
 
             // canvas has one instance of context, the code below
             // test if the context has been already full filled 
@@ -12726,7 +12730,7 @@ pkg.StringRender = Class(pkg.Render, [
                                                                    : pkg.StringRender.disabledColor;
             }
 
-            g.fillText(this.target, x, y + this.font.ascent);
+            g.fillText(this.target, x, y );
         };
 
         this.getPreferredSize = function() {
@@ -12850,7 +12854,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
          * @method paintLine
          */
         this.paintLine = function(g,x,y,line,d) { 
-            g.fillText(this.getLine(line), x, y + this.font.ascent);
+            g.fillText(this.getLine(line), x, y);
         };
         
         /**

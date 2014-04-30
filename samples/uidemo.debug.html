@@ -72,7 +72,7 @@
 				gradient.addColorStop(0.65, '#fff');
 			    gradient.addColorStop(1.0, '#000');
 				g.fillStyle = gradient;
-				g.fillText(this.getLine(line), x, y + this.font.ascent); 
+				g.fillText(this.getLine(line), x, y); 
 
 				var prev = g.globalCompositeOperation;
 				if (this.hasReflection) {
@@ -82,7 +82,7 @@
 					g.scale(1, -1);
 					g.font = this.font.s;
 					g.fillStyle = "#fff";
-					g.fillText(this.getLine(line), x, -y - this.font.height - 2*(this.font.height - this.font.ascent) - this.reflectionGap);
+					g.fillText(this.getLine(line), x, -y - this.font.height - 2*this.font.height - this.reflectionGap);
 					g.scale(1, -1);
 
 					// cut the gradient out of the reflected text 

@@ -93,7 +93,7 @@ pkg.EditablePan = Class(Panel, [
 
         g.setFont(this.font);
         g.setColor(this.color);
-        g.fillText(this.ch, this.width/2 - l/2, (this.height-this.font.height)/2 + this.font.ascent);
+        g.fillText(this.ch, this.width/2 - l/2, (this.height-this.font.height)/2);
     },
 
     function keyTyped(e) {
@@ -166,7 +166,7 @@ pkg.MouseEventHandlerPan = Class(Panel, [
 
         g.setColor("black");
         g.setFont(this.font);
-        g.fillText("(" + this.gx + "," + this.gy + ")", this.gx + 10, this.gy + this.font.ascent);
+        g.fillText("(" + this.gx + "," + this.gy + ")", this.gx + 10, this.gy);
     }
 ]);
 
@@ -202,7 +202,7 @@ pkg.Components = Class(Panel, [
                             g.setFont(font);
 
                             var x = (this.width - font.stringWidth(txt))/2,
-                                y = (this.height - font.height)/2  + font.ascent;
+                                y = (this.height - font.height)/2;
 
                             g.fillText(txt, x, y);
                         }
@@ -421,7 +421,7 @@ pkg.CustomLayer = Class(BaseLayer, [
                     var s = "ALT-D to enable", l = font.stringWidth(s);
                     g.setColor("white");
                     g.setFont(font);
-                    g.fillText(s, this.width / 2 - l / 2, (this.height - font.height)/2 + font.ascent);
+                    g.fillText(s, this.width / 2 - l / 2, (this.height - font.height)/2);
                 }
             }
         ])).properties({
@@ -452,7 +452,7 @@ pkg.CustomLayer = Class(BaseLayer, [
                 var s = "ALT-D to disable", l = this.font.stringWidth(s);
                 g.setColor("white");
                 g.setFont(this.font);
-                g.fillText(s, this.width/2 - l/2, (this.height - this.font.height - 10) + this.font.ascent);
+                g.fillText(s, this.width/2 - l/2, (this.height - this.font.height - 10));
             }
         };
     }

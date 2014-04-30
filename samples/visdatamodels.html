@@ -54,7 +54,7 @@ zebra.ready(
               x += this.icon.width + 4;
               g.setColor("orange");
               g.setFont(this.font);
-              g.fillText(this.text, x, (this.icon.height - this.font.height)/2 + y + this.font.ascent); 
+              g.fillText(this.text, x, (this.icon.height - this.font.height)/2 + y); 
           },
 
           function getPreferredSize() {
@@ -262,7 +262,7 @@ zebra.ready(
                       var str = v[i], color = this.words[str];
                       str += " ";
                       g.setColor(color != null ? color : this.color);
-                      g.fillText(str, xx, y + this.font.ascent);
+                      g.fillText(str, xx, y);
                       xx += this.font.stringWidth(str);
                   }
               }

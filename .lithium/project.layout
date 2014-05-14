@@ -32,7 +32,11 @@ PROJECT {
     SET("lib/zebra/*.js", MetaGeneratedFileSet) {
         CLASS CombinedJavaScript
     }
-    
+   
+    SET("*.js", MetaGeneratedFileSet) {
+        CLASS CombinedJavaScript
+    }
+   
     ARTIFACT("zebra.runtime.zip", ZipFile) {
         @base = "."
     }

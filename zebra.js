@@ -4894,8 +4894,8 @@ pkg.getTopParent = function(c){
 
 /**
  * Translate the given relative location into the parent relative location. 
- * @param  {Integer} [x] a x coordinate relatively to the given component
- * @param  {Integer} [y] a y coordinate relatively to the given component
+ * @param  {Integer} [x] a x coordinate relatively  to the given component
+ * @param  {Integer} [y] a y coordinate relatively  to the given component
  * @param  {zebra.layout.Layoutable} c a component
  * @param  {zebra.layout.Layoutable} [p] a parent component
  * @return {Object} a relative to the given parent UI component location:
@@ -18069,7 +18069,7 @@ pkg.Toolbar = Class(pkg.Panel, [
 pkg.VideoPan = Class(pkg.Panel,  [
     function $prototype() {
         this.paint = function(g) {
-            g.drawImage(this.video, 0, 0);
+            g.drawImage(this.video, 0, 0, this.width, this.height);
         };
 
         /**

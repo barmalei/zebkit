@@ -4,6 +4,28 @@ require 'lithium/file-artifact/command'
 require 'lithium/java-artifact/runner'
 require 'lithium/file-artifact/acquired'
 
+
+class JS < Artifact
+    extend Artifact::Singletone
+
+    attr :compressorClassName
+
+    def initialize(*args)
+        super
+        @compressorClassName ||= "YUICompressor"
+        @compressorOptions = []
+    end    
+
+    def compressor()
+        c = Object.const_get(@compressorClassName)
+        return c.new
+    end
+
+    def build() end
+    def what_it_does() "Initialize JavaScript environment '#{@name}'" end
+end
+
+
 class RunJavaScript < FileCommand
     def build()
         f = fullpath()
@@ -16,10 +38,55 @@ class RunJavaScript < FileCommand
     def what_it_does() "Run '#{@name}' script" end
 end
 
+
+class YUICompressor 
+    @@options = []
+
+    def self.options(opt) 
+        @@options = opt
+    end
+
+    def compress(infile, outfile)
+        raise "Input file '#{infile}' cannot be found" if !File.exists?(infile) || File.directory?(infile)
+        raise "Output file is identical to input file '#{f}'" if outfile == infile
+        opt = ["'#{infile}'", "-o", "'#{outfile}'"]
+        opt << @@options
+        r = RunJAR.new("tools/yuicompressor/yuicompressor.jar", $lithium_home) {
+            @arguments = opt
+        }
+        r.build()
+    end
+end
+
+class UglifyCompressor
+    @@options = []
+    @@lib     = "#{$project_home}/node_modules/uglify-js" 
+
+    def self.lib(lib) 
+        @@lib = lib
+    end
+
+    def self.options(opt) 
+        @@options = opt
+    end
+
+    def compress(infile, outfile)
+        raise "Input file '#{infile}' cannot be found" if !File.exists?(infile) || File.directory?(infile)
+        raise "Output file is identical to input file '#{f}'" if outfile == infile
+        opt = ["#{@@lib}/bin/uglifyjs"]
+        opt << @@options
+        opt << infile
+        opt << ">"
+        opt << outfile
+        raise "" if exec4(opt.join(' ')) != 0
+    end
+end
+
 class CompressJavaScript < FileCommand
+    required JS
+
     def initialize(name)
         super
-        @options ||= []
     end
 
     def build()
@@ -33,28 +100,18 @@ class CompressJavaScript < FileCommand
             o = File.join(File.dirname(f), "#{n}.min#{e}")
         end
 
-        CompressJavaScript.compress(f, o, @options)
+        js.compressor.compress(f, o)
     end
 
-    def self.compress(infile, outfile, options)
-        raise "Input file '#{infile}' cannot be found" if !File.exists?(infile) || File.directory?(infile)
-        raise "Output file is identical to input file '#{f}'" if outfile == infile
-        opt = ["'#{infile}'", "-o", "'#{outfile}'"]
-        opt << options
-        r = RunJAR.new("tools/yuicompressor/yuicompressor.jar", $lithium_home) {
-            @arguments = opt
-        }
-        r.build()
-    end
-
-    def what_it_does() "Compress '#{@name}' JS script" end
+    def what_it_does() "Compress (#{js.compressorClassName}) '#{@name}' JS script" end
 end
 
 class CompressedJavaScript < FileArtifact
+    required JS
+
     def initialize(name)
         super
 
-        @options ||= []
         if !@source
             s = ".min.js"
             i = @name.rindex(s)
@@ -74,10 +131,10 @@ class CompressedJavaScript < FileArtifact
     def build()
         sfp = File.join($project_home, @source)
         raise "Source file cannot be identified" if !File.exists?(sfp)
-        CompressJavaScript.compress(sfp, fullpath(), @options)
+        js.compressor.compress(sfp, fullpath())
     end
 
-    def what_it_does() "Compress '#{@source}' JS script" end
+    def what_it_does() "Compress (#{js.compressorClassName}) '#{@source}' JS script" end
 end
 
 class CombinedJavaScript < MetaGeneratedFile

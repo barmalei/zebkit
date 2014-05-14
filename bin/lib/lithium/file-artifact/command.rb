@@ -10,53 +10,77 @@ class CopyFile < FileCommand
     def initialize(*args)
         super
         @ignore_hidden_files ||= true  
-        @create_destination  ||= true  
+
+        if !@destination
+            self.destination = $arguments[0] if $arguments.length > 0 && $arguments[0]
+        else
+            self.destination = @destination 
+        end
     end
         
     def destination=(v) 
+        raise 'Destination is not defined.' if !v
+
         if Pathname.new(v).absolute?() 
             puts "Destination is absolute path '#{v}'."
         else
-            v = "#{@root}/#{v}" 
+            v = File.join($project_home, v)
         end  
+
+        v = File.join(v, File.basename(fullpath())) if !File.directory?(fullpath()) && File.directory?(v)
+
         @destination = File.expand_path(v)
     end 
    
-    def expired?() 
-        
+    def expired?
+        validate(); 
+        return !File.exists?(@destination) || File.mtime(fullpath()).to_i > File.mtime(@destination).to_i
+    end
+
+    def cleanup()
     end
 
     def build()
-        raise 'Destination has not been defined.' if !@destination  
-        
-        if @create_destination
-            raise "Destination '#{@destination}' already exists." if File.directory?(@destination)   
+        validate()
+        source = fullpath()
+        if File.directory?(source)
+            filter = @ignore_hidden_files ? /^[\.].*/ : nil
+            FileUtil.cpdir(source, @destination, filter)
         else
-            raise "Destination '#{@destination}' doesn't exist."  if !File.directory?(@destination)
-        end 
-        
-        begin
-            Dir.mkdir(@destination) if @create_destination
-            path = fullpath()
-            if File.directory?(path)
-                 filter = @ignore_hidden_files ? /^[\.].*/ : nil
-                 # !!! has to be removed
-                 FileUtil.cpdir(path, @destination, filter)
-                 FileUtils.remove_dir(path) if @clean_source
-            else
-                 FileUtils.cp(path, @destination)
-                 File.delete(path) if @clean_source
-            end
-        rescue
-            FileUtils.remove_dir(@destination) if File.directory?(@destination) && @create_destination
-            raise    
+            FileUtils.cp(source, @destination)
         end
     end
     
+    def validate
+        raise 'Destination is not defined.' if !@destination
+        raise "Source file #{source} cannot be found" if !File.exists?(fullpath())
+    end
+
     def what_it_does() "Copy from: #{fullpath()}\n     to  : #{@destination}" end
     
     attr_reader :destination
 end
+
+class RmFile < FileCommand
+    def initialize(*args)
+        super
+        @recursive ||= false;   
+    end
+
+    def build()
+        path = fullpath()
+        if File.directory?(path)
+             FileUtils.remove_dir(path)
+        else
+             File.delete(path)
+        end
+    end
+
+    def expired?() 
+        !File.exists(fullpath())         
+    end
+end
+
 
 class GREP < FileMask
     def initialize(*args) 

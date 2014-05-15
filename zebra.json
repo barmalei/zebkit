@@ -715,12 +715,19 @@
         "DefEditors" : {
             "TextField": {
                 "$inherit" : [ "TextField" ],
-                "border":null
+                "border": {"$Border":  "blue" },
+                "background": null
             },
 
             "Combo": {
                  "$inherit" : [ "Combo" ],
                 "border":null
+            },
+
+            "Checkbox": {
+                "$inherit" : [ "Checkbox" ],
+                "layout": { "$FlowLayout": [ "center", "center" ]},
+                "border": {"$Border":  "blue" }
             }
         },
 

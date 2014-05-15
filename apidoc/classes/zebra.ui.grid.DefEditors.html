@@ -413,8 +413,40 @@
 
 <div class="box intro">
     <p>Simple grid cells editors provider implementation. By default the editors provider
-uses a text field component as a cell content editor. It is possible to customize 
-a grid column editor by specifying it via &quot;editors[col]&quot; property value</p>
+uses a text field component or check box component as a cell content editor. Check 
+box component is used if a cell data type is boolean, otherwise text filed is applied 
+as the cell editor.    </p>
+<pre class="code prettyprint"><code>   // grid with tree columns and three rows
+   // first and last column will be editable with text field component
+   // second column will be editable with check box component
+   var grid = new zebra.ui.grid.Grid([
+       [&quot;Text Cell&quot;, true, &quot;Text cell&quot;],
+       [&quot;Text Cell&quot;, false, &quot;Text cell&quot;],
+       [&quot;Text Cell&quot;, true, &quot;Text cell&quot;]
+   ]);
+
+   // make grid cell editable
+   grid.setEditorProvider(new zebra.ui.grid.DefEditors());</code></pre>
+<p>It is possible to customize a grid column editor by specifying setting &quot;editors[col]&quot; property 
+value. You can define an UI component that has to be applied as an editor for the given column 
+Also you can disable editing by setting appropriate column editor class to null:</p>
+<pre class="code prettyprint"><code>   // grid with tree columns and three rows
+   // first and last column will be editable with text field component
+   // second column will be editable with check box component
+   var grid = new zebra.ui.grid.Grid([
+       [&quot;Text Cell&quot;, true, &quot;Text cell&quot;],
+       [&quot;Text Cell&quot;, false, &quot;Text cell&quot;],
+       [&quot;Text Cell&quot;, true, &quot;Text cell&quot;]
+   ]);
+
+   // grid cell editors provider
+   var editorsProvider = new zebra.ui.grid.DefEditors();
+
+   // disable the first column editing 
+   editorsProvider.editors[0] = null;
+
+   // make grid cell editable
+   grid.setEditorProvider(editorsProvider);</code></pre>
 
 </div>
 

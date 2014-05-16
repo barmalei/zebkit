@@ -6642,7 +6642,7 @@ pkg.GridLayout = Class(L, [
                                                                              window.screen.deviceXDPI / window.screen.logicalXDPI : 1); 
 
 
-        pkg.$applyRenderExploit = (parseInt(pkg.$deviceRatio) === pkg.$deviceRatio || zebra.isIE);
+        pkg.$applyRenderExploit = (parseInt(pkg.$deviceRatio) !== pkg.$deviceRatio || zebra.isIE);
 
         // canvases location has to be corrected if document layout is invalid 
         pkg.$elBoundsUpdated = function() {

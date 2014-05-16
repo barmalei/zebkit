@@ -859,24 +859,6 @@
         "border": null
     },
 
-    "HtmlElement": {
-        "styles": {
-            "margin"          : "0px",
-            "boxSizing"       : "border-box",
-            "-moz-box-sizing" : "border-box",
-            "display"         : "block",
-            "backgroundColor" : "transparent",
-            "position"        : "absolute",
-            "zIndex"          : 10,
-            "visibility"      : "hidden",
-            "boxShadow"       : "none",
-            "-moz-box-shadow" : "none",
-            "isIE:overflow"   : "hidden"
-        },
-
-        "border": null
-    },
-
     "HtmlTextInput": {
         "$inherit": [ "TextField", "HtmlElement" ],
         "style"   : [ "outline", "none"],

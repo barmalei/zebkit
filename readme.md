@@ -5,8 +5,8 @@ v4.2014 (Luda)
 
 ## For impatient: look at few demos   
 
-   * Zebra rich set of UI components: http://www.zebkit.org/samples/index.html
-   * Zebra UI engine simple samples: http://www.zebkit.org/samples/uiengine.samples.html
+   * Zebra rich set of UI components: http://repo.zebkit.org/latest/samples/uidemo.html
+   * Zebra UI engine simple samples: http://repo.zebkit.org/latest/samples/uiengine.html
    * Zebra UI documentation http://www.zebkit.org/documentation
 
  Send claims to: ask@zebkit.org

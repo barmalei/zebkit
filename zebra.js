@@ -11653,10 +11653,10 @@ pkg.zCanvas = Class(pkg.Panel, [
                         if (d != null && d.isEnabled === true) {
                             mp.draggedComponent = d;
                             var modifiers  = {
-                                altKey      : mp.altKey,
-                                ctrlKey     : mp.ctrlKey,
-                                metaKey     : mp.metaKey,
-                                shiftKey    : mp.shiftKey,
+                                altKey      : mp.modifiers.altKey,
+                                ctrlKey     : mp.modifiers.ctrlKey,
+                                metaKey     : mp.modifiers.metaKey,
+                                shiftKey    : mp.modifiers.shiftKey,
                             };
 
                             ME_STUB.reset(d, ME.DRAGSTARTED, xx, yy, m, 0, modifiers);

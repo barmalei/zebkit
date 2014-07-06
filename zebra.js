@@ -3651,7 +3651,7 @@ pkg.Matrix = Class([
 })(zebra("data"), zebra.Class, zebra.Interface);
 
 /**
- * The module provides number of classes to help to communicate 
+ * The module provides number of classes to help to communicate
  * with remote services and servers by HTTP, JSON-RPC, XML-RPC
  * protocols
  * @module io
@@ -3806,19 +3806,19 @@ pkg.parseXML = function(s) {
 };
 
 /**
- * Query string parser class. The class provides number of 
- * useful static methods to manipulate with a query string 
- * of an URL 
+ * Query string parser class. The class provides number of
+ * useful static methods to manipulate with a query string
+ * of an URL
  * @class zebra.io.QS
  * @static
  */
 pkg.QS = Class([
     function $clazz() {
         /**
-         * Append the given parameters to a query string of the specified URL 
+         * Append the given parameters to a query string of the specified URL
          * @param  {String} url an URL
-         * @param  {Object} obj a dictionary of parameters to be appended to 
-         * the URL query string 
+         * @param  {Object} obj a dictionary of parameters to be appended to
+         * the URL query string
          * @return {String} a new URL
          * @static
          * @method append
@@ -3846,8 +3846,8 @@ pkg.QS = Class([
         /**
          * Convert the given dictionary of parameters to a query string.
          * @param  {Object} obj a dictionary of parameters
-         * @param  {Boolean} encode say if the parameters values have to be 
-         * encoded 
+         * @param  {Boolean} encode say if the parameters values have to be
+         * encoded
          * @return {String} a query string built from parameters list
          * @static
          * @method toQS
@@ -3886,7 +3886,7 @@ $Request.prototype.open = function(method, url, async, user, password) {
                 $this.status     = $this._request.status;
                 $this.statusText = $this._request.statusText;
             }
-            
+
             if ($this.onreadystatechange) {
                 $this.onreadystatechange();
             }
@@ -3906,9 +3906,9 @@ $Request.prototype.send = function(data) {
     if (this._xdomain) {
         var originalReq = this._request, $this = this;
 
-        //!!!! handler has to be defined after 
-        //!!!! open method has been called and all 
-        //!!!! four handlers have to be defined 
+        //!!!! handler has to be defined after
+        //!!!! open method has been called and all
+        //!!!! four handlers have to be defined
         originalReq.ontimeout = originalReq.onprogress = function () {};
 
         originalReq.onerror = function() {
@@ -3928,7 +3928,7 @@ $Request.prototype.send = function(data) {
             }
         };
 
-        //!!! set time out zero to prevent data lost 
+        //!!! set time out zero to prevent data lost
         originalReq.timeout = 0;
 
         if (this._async === false) {
@@ -3943,7 +3943,7 @@ $Request.prototype.send = function(data) {
             return;
         }
 
-        //!!! make short timeout to make sure bloody IE is ready 
+        //!!! make short timeout to make sure bloody IE is ready
         setTimeout(function () {
            originalReq.send(data);
         }, 10);
@@ -3960,11 +3960,11 @@ $Request.prototype.abort = function(data) {
 $Request.prototype.setRequestHeader = function(name, value) {
     if (this._xdomain) {
         if (name == "Content-Type") {
-            //!!! 
+            //!!!
             // IE8 and IE9 anyway don't take in account the assignment
             // IE8 throws exception every time a value is assigned to
             // the property
-            // !!!  
+            // !!!
             //this._request.contentType = value;
             return;
         }
@@ -3998,7 +3998,7 @@ pkg.getRequest = function() {
         if (zebra.isFF) {
             r.__send = r.send;
             r.send = function(data) {
-                // !!! FF can throw NS_ERROR_FAILURE exception instead of 
+                // !!! FF can throw NS_ERROR_FAILURE exception instead of
                 // !!! returning 404 File Not Found HTTP error code
                 // !!! No request status, statusText are defined in this case
                 try { return this.__send(data); }
@@ -4024,7 +4024,7 @@ pkg.getRequest = function() {
 };
 
 /**
- * HTTP request class. This class provides API to generate different 
+ * HTTP request class. This class provides API to generate different
  * (GET, POST, etc) HTTP requests in sync and async modes
  * @class zebra.io.HTTP
  * @constructor
@@ -4037,13 +4037,13 @@ pkg.HTTP = Class([
     },
 
     /**
-     * Perform HTTP GET request synchronously or asynchronously with the given 
+     * Perform HTTP GET request synchronously or asynchronously with the given
      * query parameters.
-     * @param {Object} [q] a dictionary of query parameters 
-     * @param {Function} [f] a callback function that is called when the HTTP GET 
-     * request is done. The method gets a request object as its only argument 
+     * @param {Object} [q] a dictionary of query parameters
+     * @param {Function} [f] a callback function that is called when the HTTP GET
+     * request is done. The method gets a request object as its only argument
      * and is called in context of the HTTP class instance.
-    
+
         // synchronous HTTP GET request with the number of
         // query parameters
         var result = zebra.io.HTTP("google.com").GET({
@@ -4066,7 +4066,7 @@ pkg.HTTP = Class([
         });
 
 
-     * @method GET  
+     * @method GET
      */
     function GET(q, f) {
         if (typeof q == 'function') {
@@ -4077,12 +4077,12 @@ pkg.HTTP = Class([
     },
 
     /**
-     * Perform HTTP POST request synchronously or asynchronously with the given 
+     * Perform HTTP POST request synchronously or asynchronously with the given
      * data to be sent.
-     * @param {String|Object} d a data to be sent by HTTP POST request.  It can be 
-     * either a parameters set or a string. 
-     * @param {Function} [f] a callback function that is called when HTTP POST 
-     * request is done. The method gets a request as its only  argument 
+     * @param {String|Object} d a data to be sent by HTTP POST request.  It can be
+     * either a parameters set or a string.
+     * @param {Function} [f] a callback function that is called when HTTP POST
+     * request is done. The method gets a request as its only  argument
      * and called in context of appropriate HTTP class instance. If the argument
      * is null the POST request will be done synchronously.
 
@@ -4098,14 +4098,14 @@ pkg.HTTP = Class([
            }
        });
 
-    * Or you can pass a number of parameters to be sent synchronously by 
-    * HTTP POST request: 
+    * Or you can pass a number of parameters to be sent synchronously by
+    * HTTP POST request:
 
        // send parameters synchronously by HTTP POST request
        zebra.io.HTTP("google.com").POST({
            param1: "val1",
            param2: "val3",
-           param3: "val3" 
+           param3: "val3"
        });
 
      * @method POST
@@ -4114,9 +4114,14 @@ pkg.HTTP = Class([
         if (typeof d == 'function') {
             f = d;
             d = null;
-        }    
+        }
 
-        if (d != null && zebra.isString(d) == false) {
+        // if the passed data is simple dictionary object encode it as POST
+        // parameters
+        //
+        // TODO: think also about changing content type
+        // "application/x-www-form-urlencoded; charset=UTF-8"
+        if (d != null && zebra.isString(d) == false && d.constructor === Object) {
             d = pkg.QS.toQS(d, false);
         }
 
@@ -4124,14 +4129,14 @@ pkg.HTTP = Class([
     },
 
     /**
-     * Universal HTTP request method that can be used to generate 
-     * a HTTP request with any HTTP method to the given URL with 
+     * Universal HTTP request method that can be used to generate
+     * a HTTP request with any HTTP method to the given URL with
      * the given data to be sent asynchronously or synchronously
      * @param {String}   method   an HTTP method (GET,POST,DELETE,PUT, etc)
      * @param {String}   url      an URL
      * @param {String}   data     a data to be sent to the given URL
-     * @param {Function} [callback] a callback method to be defined 
-     * if the HTTP request has to be sent asynchronously. 
+     * @param {Function} [callback] a callback method to be defined
+     * if the HTTP request has to be sent asynchronously.
      * @method SEND
      */
     function SEND(method, url, data, callback) {
@@ -4156,7 +4161,7 @@ pkg.HTTP = Class([
             r.send(data);
         }
         catch(e) {
-            // exception has to be redefined since the type of exception 
+            // exception has to be redefined since the type of exception
             // can be browser dependent
             if (callback == null) {
                 var ee = new Error(e.toString());
@@ -4173,7 +4178,7 @@ pkg.HTTP = Class([
         if (callback == null) {
             if (r.status != 200) {
 
-                // requesting local files can return 0 as a success result 
+                // requesting local files can return 0 as a success result
                 if (r.status !== 0 || new zebra.URL(this.url).protocol != "file:") {
                     var e = new Error("HTTP error " + r.status + " response = '" + r.statusText + "' url = " + url);
                     e.request = r;
@@ -4187,7 +4192,7 @@ pkg.HTTP = Class([
 
 /**
  * Shortcut method to perform asynchronous or synchronous HTTP GET requests.
- 
+
         // synchronous HTTP GET call
         var res = zebra.io.GET("http://test.com");
 
@@ -4211,10 +4216,10 @@ pkg.HTTP = Class([
         });
 
  * @param {String} url an URL
- * @param {Object} [parameters] a dictionary of query parameters 
- * @param {Funcion} [callback] a callback function that is called 
+ * @param {Object} [parameters] a dictionary of query parameters
+ * @param {Funcion} [callback] a callback function that is called
  * when the GET request is completed. Pass it  to perform request
- * asynchronously 
+ * asynchronously
  * @api  zebra.io.GET()
  * @method GET
  */
@@ -4237,7 +4242,7 @@ pkg.GET = function(url) {
 
 /**
  * Shortcut method to perform asynchronous or synchronous HTTP POST requests.
- 
+
         // synchronous HTTP POST call
         var res = zebra.io.POST("http://test.com");
 
@@ -4245,7 +4250,7 @@ pkg.GET = function(url) {
         zebra.io.POST("http://test.com", function(request) {
             // handle result
             if (request.status == 200) {
-            
+
             }
             else {
                 // handle error
@@ -4268,7 +4273,7 @@ pkg.GET = function(url) {
         zebra.io.POST("http://test.com", "request", function(request) {
             // handle result
             if (request.status == 200) {
-    
+
             }
             else {
                 // handle error
@@ -4277,10 +4282,10 @@ pkg.GET = function(url) {
         });
 
  * @param {String} url an URL
- * @param {Object} [parameters] a dictionary of query parameters 
- * @param {Function} [callback] a callback function that is called 
+ * @param {Object} [parameters] a dictionary of query parameters
+ * @param {Function} [callback] a callback function that is called
  * when the GET request is completed. Pass it if to perform request
- * asynchronously 
+ * asynchronously
  * @method  POST
  * @api  zebra.io.POST()
  */
@@ -4409,10 +4414,10 @@ pkg.URLInputStream = Class(pkg.InputStream, [
 ]);
 
 /**
- * A remote service connector class. It is supposed the class has to be extended with 
- * different protocols like RPC, JSON etc. The typical pattern of connecting to 
+ * A remote service connector class. It is supposed the class has to be extended with
+ * different protocols like RPC, JSON etc. The typical pattern of connecting to
  * a remote service is shown below:
- 
+
         // create service connector that has two methods "a()" and "b(param1)"
         var service = new zebra.io.Service("http://myservice.com", [
             "a", "b"
@@ -4438,16 +4443,16 @@ pkg.URLInputStream = Class(pkg.InputStream, [
  *
  * Ideally any specific remote service extension of "zebra.io.Service"
  * class has to implement two methods:
- 
+
     - **encode** to say how the given remote method with passed parameters have
     to be transformed into a concrete service side protocol (JSON, XML, etc)
-    - **decode** to say how the specific service response has to be converted into 
-    JavaScript object 
+    - **decode** to say how the specific service response has to be converted into
+    JavaScript object
 
- * @class  zebra.io.Service 
+ * @class  zebra.io.Service
  * @constructor
  * @param {String} url an URL of remote service
- * @param {Array} methods a list of methods names the remote service provides  
+ * @param {Array} methods a list of methods names the remote service provides
  */
 pkg.Service = Class([
     function(url, methods) {
@@ -4499,31 +4504,31 @@ pkg.Service = Class([
 
     /**
      * Transforms the given remote method execution with the specified parameters
-     * to service specific protocol. 
+     * to service specific protocol.
      * @param {String} name a remote method name
-     * @param {Array} args an passed to the remote method arguments 
-     * @return {String} a remote service specific encoded string 
+     * @param {Array} args an passed to the remote method arguments
+     * @return {String} a remote service specific encoded string
      * @protected
      * @method encode
      */
 
     /**
-     * Transforms the given remote method response to a JavaScript 
+     * Transforms the given remote method response to a JavaScript
      * object.
      * @param {String} name a remote method name
-     * @return {Object} a result of the remote method calling as a JavaScript 
+     * @return {Object} a result of the remote method calling as a JavaScript
      * object
      * @protected
      * @method decode
      */
 
      /**
-      * Send the given data to the given url and return a response. Callback 
+      * Send the given data to the given url and return a response. Callback
       * function can be passed for asynchronous result handling.
       * @protected
       * @param  {String}   url an URL
       * @param  {String}   data  a data to be send
-      * @param  {Function} [callback] a callback function  
+      * @param  {Function} [callback] a callback function
       * @return {String}  a result
       * @method  send
       */
@@ -4543,17 +4548,17 @@ pkg.Service.invoke = function(clazz, url, method) {
 
 /**
  * The class is implementation of JSON-RPC remote service connector.
- 
-        // create JSON-RPC connector to a remote service that 
+
+        // create JSON-RPC connector to a remote service that
         // has three remote methods
         var service = new zebra.io.JRPC("json-rpc.com", [
             "method1", "method2", "method3"
         ]);
 
-        // synchronously call remote method "method1" 
+        // synchronously call remote method "method1"
         service.method1();
-        
-        // asynchronously call remote method "method1" 
+
+        // asynchronously call remote method "method1"
         service.method1(function(res) {
             ...
         });
@@ -4561,7 +4566,7 @@ pkg.Service.invoke = function(clazz, url, method) {
  * @class zebra.io.JRPC
  * @constructor
  * @param {String} url an URL of remote service
- * @param {Array} methods a list of methods names the remote service provides  
+ * @param {Array} methods a list of methods names the remote service provides
  * @extends {zebra.io.Service}
  */
 pkg.JRPC = Class(pkg.Service, [
@@ -4584,7 +4589,7 @@ pkg.JRPC = Class(pkg.Service, [
         if (typeof(r.error) !== "undefined") {
             throw new Error(r.error.message);
         }
-        
+
         if (typeof r.result === "undefined" || typeof r.id === "undefined") {
             throw new Error("Wrong JSON response format");
         }
@@ -4599,16 +4604,16 @@ pkg.Base64.prototype.decode   = function() { return pkg.b64decode(this.encoded);
 /**
  * The class is implementation of XML-RPC remote service connector.
 
-        // create XML-RPC connector to a remote service that 
+        // create XML-RPC connector to a remote service that
         // has three remote methods
         var service = new zebra.io.XRPC("xmlrpc.com", [
             "method1", "method2", "method3"
         ]);
 
-        // synchronously call remote method "method1" 
+        // synchronously call remote method "method1"
         service.method1();
 
-        // asynchronously call remote method "method1" 
+        // asynchronously call remote method "method1"
         service.method1(function(res) {
             ...
         });
@@ -4617,7 +4622,7 @@ pkg.Base64.prototype.decode   = function() { return pkg.b64decode(this.encoded);
  * @constructor
  * @extends {zebra.io.Service}
  * @param {String} url an URL of remote service
- * @param {Array} methods a list of methods names the remote service provides  
+ * @param {Array} methods a list of methods names the remote service provides
  */
 pkg.XRPC = Class(pkg.Service, [
     function(url, methods) {
@@ -4637,7 +4642,7 @@ pkg.XRPC = Class(pkg.Service, [
     },
 
     function encodeValue(v, p)  {
-        if (v === null) { 
+        if (v === null) {
             throw new Error("Null is not allowed");
         }
 

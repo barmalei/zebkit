@@ -12594,14 +12594,14 @@ zebra.ready(
 
 (function(pkg, Class) {
 
-// redefine configuration 
+// redefine configuration
 zebra()["zebra.json"] = pkg.$url.join("zebra.json");
 
 /**
  * @module  ui
  */
 
-var MB = zebra.util, ME = pkg.MouseEvent, Cursor = pkg.Cursor, View = pkg.View, 
+var MB = zebra.util, ME = pkg.MouseEvent, Cursor = pkg.Cursor, View = pkg.View,
     Listeners = zebra.util.Listeners, KE = pkg.KeyEvent, L = zebra.layout,
     task = zebra.util.task, instanceOf = zebra.instanceOf,
     $invalidA = "Invalid alignment",
@@ -12627,7 +12627,7 @@ pkg.$ViewsSetter = function (v){
 pkg.CompRender = Class(pkg.Render, [
     function $prototype() {
         /**
-         * Get preferred size of the render. The method doesn't calculates 
+         * Get preferred size of the render. The method doesn't calculates
          * preferred size it simply calls the target component "getPreferredSize"
          * method.
          * @method getPreferredSize
@@ -12664,9 +12664,9 @@ pkg.CompRender = Class(pkg.Render, [
 ]);
 
 /**
- * Line UI component class. Draw series of vertical or horizontal lines of using 
- * the given line width and color. Vertical or horizontal line rendering s selected 
- * depending on the line component size: if height is greater than width than vertical 
+ * Line UI component class. Draw series of vertical or horizontal lines of using
+ * the given line width and color. Vertical or horizontal line rendering s selected
+ * depending on the line component size: if height is greater than width than vertical
  * line will be rendered.
  * @constructor
  * @class zebra.ui.Line
@@ -12675,7 +12675,7 @@ pkg.CompRender = Class(pkg.Render, [
 pkg.Line = Class(pkg.Panel, [
     function() {
         /**
-         * Line colors 
+         * Line colors
          * @attribute lineColors
          * @type {Array}
          * @readOnly
@@ -12687,7 +12687,7 @@ pkg.Line = Class(pkg.Panel, [
 
     function $prototype() {
         /**
-         * Line width 
+         * Line width
          * @attribute lineWidth
          * @type {Integer}
          * @default 1
@@ -12696,7 +12696,7 @@ pkg.Line = Class(pkg.Panel, [
 
         /**
          * Set set of colors to be used to paint the line. Number of colors defines the number of
-         * lines to be painted. 
+         * lines to be painted.
          * @param {String} colors* colors
          * @method setLineColors
          */
@@ -12708,13 +12708,13 @@ pkg.Line = Class(pkg.Panel, [
         };
 
         this.paint = function(g) {
-            var isHor  = this.width > this.height, 
+            var isHor  = this.width > this.height,
                 left   = this.getLeft(),
                 right  = this.getRight(),
                 top    = this.getTop(),
                 bottom = this.getBottom(),
-                xy     = isHor ? top : left; 
-            
+                xy     = isHor ? top : left;
+
             for(var i=0; i < this.lineColors.length; i++) {
                 if (this.lineColors[i] != null) {
                     g.setColor(this.lineColors[i]);
@@ -12725,19 +12725,19 @@ pkg.Line = Class(pkg.Panel, [
                         g.drawLine(xy, top, xy, this.height - top - bottom, this.lineWidth);
                     }
                 }
-                xy += this.lineWidth;                
+                xy += this.lineWidth;
             }
         };
 
         this.calcPreferredSize = function(target) {
             var s = this.lineColors.length * this.lineWidth;
-            return { width: s, height:s};  
+            return { width: s, height:s};
         };
     }
 ]);
 
 /**
- * Lightweight implementation of single line string render. The render requires 
+ * Lightweight implementation of single line string render. The render requires
  * a simple string as a target object.
  * @param {String} str a string to be rendered
  * @param {zebra.ui.Font} [font] a text font
@@ -12755,7 +12755,7 @@ pkg.StringRender = Class(pkg.Render, [
             this.setTarget(txt);
 
             /**
-             * Font to be used to render the target string 
+             * Font to be used to render the target string
              * @attribute font
              * @readOnly
              * @type {zebra.ui.Font}
@@ -12763,7 +12763,7 @@ pkg.StringRender = Class(pkg.Render, [
             this.font = font != null ? font : pkg.StringRender.font ;
 
             /**
-             * Color to be used to render the target string 
+             * Color to be used to render the target string
              * @readOnly
              * @attribute color
              * @type {String}
@@ -12776,10 +12776,10 @@ pkg.StringRender = Class(pkg.Render, [
         };
 
         /**
-         * Set the rendered text font.  
-         * @param  {String|zebra.ui.Font} f a font as CSS string or 
-         * zebra.ui.Font class instance 
-         * @return {Boolean} return true if a text font has been updated 
+         * Set the rendered text font.
+         * @param  {String|zebra.ui.Font} f a font as CSS string or
+         * zebra.ui.Font class instance
+         * @return {Boolean} return true if a text font has been updated
          * @method setFont
          */
         this.setFont = function(f){
@@ -12795,13 +12795,13 @@ pkg.StringRender = Class(pkg.Render, [
             }
             return false;
         };
-        
+
         this.paint = function(g,x,y,w,h,d) {
             if (this.font.s != g.font) g.setFont(this.font);
             if (this.color != g.fillStyle) g.fillStyle = this.color;
 
             if (d != null && d.isEnabled === false) {
-                g.fillStyle = d != null && d.disabledColor != null ? d.disabledColor 
+                g.fillStyle = d != null && d.disabledColor != null ? d.disabledColor
                                                                    : pkg.StringRender.disabledColor;
             }
 
@@ -12812,12 +12812,12 @@ pkg.StringRender = Class(pkg.Render, [
             if (this.stringWidth < 0) {
                 this.stringWidth = this.font.stringWidth(this.target);
             }
-            return { width: this.stringWidth, height: this.font.height };                     
+            return { width: this.stringWidth, height: this.font.height };
         };
 
         /**
          * Return a string that is rendered by this class
-         * @return  {String} a string 
+         * @return  {String} a string
          * @method getValue
          */
         this.getValue = function(){
@@ -12825,9 +12825,9 @@ pkg.StringRender = Class(pkg.Render, [
         };
 
         /**
-         * Set rendered text color 
+         * Set rendered text color
          * @param  {String} c a text color
-         * @return {Boolean} return true if a text color has been updated 
+         * @return {Boolean} return true if a text color has been updated
          * @method setColor
          */
         this.setColor = function(c){
@@ -12849,7 +12849,7 @@ pkg.StringRender = Class(pkg.Render, [
 
         this.targetWasChanged = function(o, n) {
             this.stringWidth = -1;
-            if (this.owner != null) this.owner.invalidate(); 
+            if (this.owner != null) this.owner.invalidate();
         };
     }
 ]);
@@ -12857,7 +12857,7 @@ pkg.StringRender = Class(pkg.Render, [
 /**
  * Text render that expects and draws a text model or a string as its target
  * @class zebra.ui.TextRender
- * @constructor 
+ * @constructor
  * @extends zebra.ui.Render
  * @param  {String|zebra.data.TextModel} text a text as string or text model object
  */
@@ -12874,7 +12874,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
         this.owner = null;
 
         /**
-         * Get a line indent 
+         * Get a line indent
          * @default 1
          * @return {Integer} line indent
          * @method getLineIndent
@@ -12909,7 +12909,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
         this.getMaxOffset = function() {
             return this.target.getTextLength();
         };
-        
+
         /**
          * Called whenever an owner UI component has been changed
          * @param  {zebra.ui.Panel} v a new owner UI component
@@ -12918,7 +12918,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
         this.ownerChanged  = function(v) {
             this.owner = v;
         };
-        
+
         /**
          * Paint the specified text line
          * @param  {2DContext} g graphical 2D context
@@ -12928,10 +12928,10 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
          * @param  {zebra.ui.Panel} d an UI component on that the line has to be rendered
          * @method paintLine
          */
-        this.paintLine = function(g,x,y,line,d) { 
+        this.paintLine = function(g,x,y,line,d) {
             g.fillText(this.getLine(line), x, y);
         };
-        
+
         /**
          * Get text line by the given line number
          * @param  {Integer} r a line number
@@ -12999,22 +12999,22 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
         };
 
         /**
-         * Text model update listener handler 
+         * Text model update listener handler
          * @param  {zebra.data.TextModel} src text model object
-         * @param  {Boolean} b 
-         * @param  {Integer} off an offset starting from that 
-         * the text has been updated 
-         * @param  {Integer} size a size (in character) of text part that 
-         * has been updated 
+         * @param  {Boolean} b
+         * @param  {Integer} off an offset starting from that
+         * the text has been updated
+         * @param  {Integer} size a size (in character) of text part that
+         * has been updated
          * @param  {Integer} ful a first affected by the given update line
-         * @param  {Integer} updatedLines a number of text lines that have 
-         * been affected by text updating 
+         * @param  {Integer} updatedLines a number of text lines that have
+         * been affected by text updating
          * @method textUpdated
          */
         this.textUpdated = function(src,b,off,size,ful,updatedLines){
             if (b === false) {
                 if (this.lines > 0) {
-                    var p1 = ful - this.startLine, 
+                    var p1 = ful - this.startLine,
                         p2 = this.startLine + this.lines - ful - updatedLines;
                     this.lines = ((p1 > 0) ? p1 : 0) + ((p2 > 0) ? p2 : 0) + 1;
                     this.startLine = this.startLine < ful ? this.startLine : ful;
@@ -13037,9 +13037,9 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
         };
 
         /**
-         * Invalidate metrics for the specified range of lines. 
+         * Invalidate metrics for the specified range of lines.
          * @param  {Integer} start first line to be invalidated
-         * @param  {Integer} size  number of lines to be invalidated 
+         * @param  {Integer} size  number of lines to be invalidated
          * @method invalidate
          * @private
          */
@@ -13138,16 +13138,16 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
         };
 
         /**
-         * Paint the specified text selection of the given line. The area 
+         * Paint the specified text selection of the given line. The area
          * where selection has to be rendered is denoted with the given
          * rectangular area.
          * @param  {2DContext} g a canvas graphical context
-         * @param  {Integer} x a x coordinate of selection rectangular area  
-         * @param  {Integer} y a y coordinate of selection rectangular area  
-         * @param  {Integer} w a width of of selection rectangular area  
-         * @param  {Integer} h a height of of selection rectangular area  
+         * @param  {Integer} x a x coordinate of selection rectangular area
+         * @param  {Integer} y a y coordinate of selection rectangular area
+         * @param  {Integer} w a width of of selection rectangular area
+         * @param  {Integer} h a height of of selection rectangular area
          * @param  {Integer} line [description]
-         * @param  {zebra.ui.Panel} d a target UI component where the text 
+         * @param  {zebra.ui.Panel} d a target UI component where the text
          * has to be rendered
          * @protected
          * @method paintSelection
@@ -13158,7 +13158,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
         };
 
         /**
-         * Set the text model content 
+         * Set the text model content
          * @param  {String} s a text as string object
          * @method setValue
          */
@@ -13167,10 +13167,10 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
         };
 
         /**
-         * Set the rendered text font.  
-         * @param  {String|zebra.ui.Font} f a font as CSS string or 
-         * zebra.ui.Font class instance 
-         * @return {Boolean} return true if a text font has been updated 
+         * Set the rendered text font.
+         * @param  {String|zebra.ui.Font} f a font as CSS string or
+         * zebra.ui.Font class instance
+         * @return {Boolean} return true if a text font has been updated
          * @method setFont
          */
         this.setFont = function(f){
@@ -13185,9 +13185,9 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
         };
 
         /**
-         * Set rendered text color 
+         * Set rendered text color
          * @param  {String} c a text color
-         * @return {Boolean} return true if a text color has been updated 
+         * @return {Boolean} return true if a text color has been updated
          * @method setColor
          */
         this.setColor = function(c){
@@ -13198,7 +13198,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
             return false;
         };
 
-        // speed up constructor by avoiding super execution since 
+        // speed up constructor by avoiding super execution since
         // text render is one of the most used class
         this[''] = function(text) {
             /**
@@ -13237,7 +13237,7 @@ pkg.BoldTextRender = Class(pkg.TextRender, [
 ]);
 
 /**
- * Password text render class. This class renders a secret text with hiding it with the given character. 
+ * Password text render class. This class renders a secret text with hiding it with the given character.
  * @param {String|zebra.data.TextModel} [text] a text as string or text model instance
  * @class zebra.ui.PasswordText
  * @constructor
@@ -13250,7 +13250,7 @@ pkg.PasswordText = Class(pkg.TextRender, [
 
     function(text){
         /**
-         * Echo character that will replace characters of hidden text 
+         * Echo character that will replace characters of hidden text
          * @attribute echo
          * @type {String}
          * @readOnly
@@ -13259,7 +13259,7 @@ pkg.PasswordText = Class(pkg.TextRender, [
         this.echo = "*";
 
         /**
-         * Indicates if the last entered character doesn't have to be replaced with echo character  
+         * Indicates if the last entered character doesn't have to be replaced with echo character
          * @type {Boolean}
          * @attribute showLast
          * @default true
@@ -13310,17 +13310,17 @@ pkg.TabBorder = Class(View, [
 
     function $prototype() {
         this.paint = function(g,x,y,w,h,d){
-            var xx = x + w - 1, 
-                yy = y + h - 1, 
-                o  = d.parent.orient, 
-                t  = this.type, 
-                s  = this.width, 
+            var xx = x + w - 1,
+                yy = y + h - 1,
+                o  = d.parent.orient,
+                t  = this.type,
+                s  = this.width,
                 dt = s / 2;
 
             g.beginPath();
             g.lineWidth = s;
             switch(o) {
-                case L.LEFT:     
+                case L.LEFT:
                     g.moveTo(xx + 1, y + dt);
                     g.lineTo(x + s*2, y + dt);
                     g.lineTo(x + dt , y + s*2);
@@ -13333,7 +13333,7 @@ pkg.TabBorder = Class(View, [
                         g.fill();
                     }
 
-                    g.setColor((t === 0 || t == 2) ? this.onColor1 : this.offColor);        
+                    g.setColor((t === 0 || t == 2) ? this.onColor1 : this.offColor);
                     g.stroke();
 
                     if (d.isEnabled === true) {
@@ -13341,19 +13341,19 @@ pkg.TabBorder = Class(View, [
                         g.setColor(this.fillColor3);
                         g.fillRect(xx - ww + 1, y + s, ww, h - s - 1);
                     }
-                    
+
                     if (t == 1) {
                         g.setColor(this.onColor2);
                         g.drawLine(x + 2*s + 1, yy - s, xx + 1, yy - s, s);
                     }
                     break;
                 case L.RIGHT:
-                    xx -= dt; // thick line grows left side and right side proportionally 
-                              // correct it 
+                    xx -= dt; // thick line grows left side and right side proportionally
+                              // correct it
 
                     g.moveTo(x, y + dt);
                     g.lineTo(xx - 2*s, y + dt);
-                    
+
                     g.lineTo(xx   , y + 2*s);
                     g.lineTo(xx   , yy - 2*s);
                     g.lineTo(xx - 2*s, yy + dt);
@@ -13364,7 +13364,7 @@ pkg.TabBorder = Class(View, [
                         g.fill();
                     }
 
-                    g.setColor((t === 0 || t == 2) ? this.onColor1 : this.offColor);        
+                    g.setColor((t === 0 || t == 2) ? this.onColor1 : this.offColor);
                     g.stroke();
 
                     if (d.isEnabled === true) {
@@ -13391,14 +13391,14 @@ pkg.TabBorder = Class(View, [
                         g.fill();
                     }
 
-                    g.setColor((t === 0 || t == 2) ? this.onColor1 : this.offColor);        
+                    g.setColor((t === 0 || t == 2) ? this.onColor1 : this.offColor);
                     g.stroke();
 
                     if (d.isEnabled === true){
                         g.setColor(this.fillColor3);
                         var hh = ~~((h - 6) / 2);
                         g.fillRect(x + s, yy - hh + 1 , w - s - 1, hh);
-                    }               
+                    }
 
                     if (t === 0) {
                         g.setColor(this.onColor2);
@@ -13424,14 +13424,14 @@ pkg.TabBorder = Class(View, [
                         g.fill();
                     }
 
-                    g.setColor((t === 0 || t == 2) ? this.onColor1 : this.offColor);        
+                    g.setColor((t === 0 || t == 2) ? this.onColor1 : this.offColor);
                     g.stroke();
 
                     if (d.isEnabled === true){
                         g.setColor(this.fillColor3);
-                        var hh = ~~((h - 6) / 2);   
+                        var hh = ~~((h - 6) / 2);
                         g.fillRect(x + s, y, w - s - 1, hh);
-                    }               
+                    }
 
                     if (t === 0) {
                         g.setColor(this.onColor2);
@@ -13453,56 +13453,56 @@ pkg.TabBorder = Class(View, [
 ]);
 
 /**
- * Render class that allows developers to render a border with a title area. 
+ * Render class that allows developers to render a border with a title area.
  * The title area has to be specified by an UI component that uses the border
- * by defining "getTitleInfo()"" method. The method has to return object that 
+ * by defining "getTitleInfo()"" method. The method has to return object that
  * describes title size, location and alignment:
- *     
  *
- *      { 
- *        x: {Integer}, y: {Integer}, 
+ *
+ *      {
+ *        x: {Integer}, y: {Integer},
  *        width: {Integer}, height: {Integer},
- *        orient: {Integer} 
+ *        orient: {Integer}
  *      }
  *
- * 
+ *
  * @class zebra.ui.TitledBorder
  * @extends zebra.ui.Render
  * @constructor
  * @param {zebra.ui.View} border  a border to be rendered with a title area
- * @param {Integer|String} [lineAlignment] a line alignment. Specifies how  
+ * @param {Integer|String} [lineAlignment] a line alignment. Specifies how
  * a title area has to be aligned relatively border line:
  *
- *      BOTTOM or "bottom"  - title area will be placed on top of border line: 
- *                    ___| Title area |___ 
- *                    
- * 
+ *      BOTTOM or "bottom"  - title area will be placed on top of border line:
+ *                    ___| Title area |___
+ *
+ *
  *      CENTER or "center"  - title area will be centered relatively to border line:
  *                    ---| Title area |-----
- *                    
- * 
- *      TOP or "top"  - title area will be placed underneath of border line: 
+ *
+ *
+ *      TOP or "top"  - title area will be placed underneath of border line:
  *                     ____              ________
- *                         |  Title area | 
- *                    
- * 
+ *                         |  Title area |
+ *
+ *
  */
 pkg.TitledBorder = Class(pkg.Render, [
     function $prototype() {
         this.getTop  = function (){
-            return this.target.getTop(); 
+            return this.target.getTop();
         };
 
         this.getLeft = function (){
             return this.target.getLeft();
         };
-        
+
         this.getRight = function (){
             return this.target.getRight();
         };
-        
-        this.getBottom = function (){ 
-            return this.target.getBottom(); 
+
+        this.getBottom = function (){
+            return this.target.getBottom();
         };
 
         this.outline = function (g,x,y,w,h,d) {
@@ -13572,8 +13572,8 @@ pkg.TitledBorder = Class(pkg.Render, [
                 var r = d.getTitleInfo();
                 if (r != null) {
                     var xx = x + w, yy = y + h, t = g.getTopStack();
-                    switch (r.orient) {     
-                        case L.TOP: 
+                    switch (r.orient) {
+                        case L.TOP:
                             var top = this.target.getTop();
                             // compute border y
                             switch (this.lineAlignment) {
@@ -13583,13 +13583,13 @@ pkg.TitledBorder = Class(pkg.Render, [
                             }
 
 
-                            // skip rendering border if the border is not in clip rectangle 
+                            // skip rendering border if the border is not in clip rectangle
                             // This is workaround because of IE10/IE11 have bug what causes
-                            // handling rectangular clip + none-rectangular clip side effect 
-                            // to "fill()" subsequent in proper working (fill without respect of 
-                            // clipping  area) 
-                            if (this.$isIn(t, x + this.target.getLeft(), y, 
-                                           w - this.target.getRight() - this.target.getLeft(), 
+                            // handling rectangular clip + none-rectangular clip side effect
+                            // to "fill()" subsequent in proper working (fill without respect of
+                            // clipping  area)
+                            if (this.$isIn(t, x + this.target.getLeft(), y,
+                                           w - this.target.getRight() - this.target.getLeft(),
                                            yy - y - this.target.getBottom()))
                             {
                                 return;
@@ -13597,7 +13597,7 @@ pkg.TitledBorder = Class(pkg.Render, [
 
                             g.save();
                             g.beginPath();
-                            
+
                             g.moveTo(x, y);
                             g.lineTo(r.x, y);
                             g.lineTo(r.x, y + top);
@@ -13617,8 +13617,8 @@ pkg.TitledBorder = Class(pkg.Render, [
                                 case L.BOTTOM : yy = r.y ; break;
                             }
 
-                            if (this.$isIn(t, x + this.target.getLeft(), y + this.target.getTop(), 
-                                              w - this.target.getRight() - this.target.getLeft(), 
+                            if (this.$isIn(t, x + this.target.getLeft(), y + this.target.getTop(),
+                                              w - this.target.getRight() - this.target.getLeft(),
                                               yy - y - this.target.getTop()))
                             {
                                 return;
@@ -13637,7 +13637,7 @@ pkg.TitledBorder = Class(pkg.Render, [
                             g.lineTo(x, yy);
                             g.lineTo(x, y);
 
-                            break;   
+                            break;
                         case L.LEFT:
                             var left = this.target.getLeft();
                             switch (this.lineAlignment) {
@@ -13646,8 +13646,8 @@ pkg.TitledBorder = Class(pkg.Render, [
                                 case L.BOTTOM : x = r.x + r.width; break;
                             }
 
-                            if (this.$isIn(t, x, y + this.target.getTop(), 
-                                           xx - x - this.target.getRight(), 
+                            if (this.$isIn(t, x, y + this.target.getTop(),
+                                           xx - x - this.target.getRight(),
                                            h - this.target.getTop() - this.target.getBottom()))
                             {
                                 return;
@@ -13676,8 +13676,8 @@ pkg.TitledBorder = Class(pkg.Render, [
                             }
 
                             if (this.$isIn(t, x + this.target.getLeft(),
-                                              y + this.target.getTop(), 
-                                              xx - x - this.target.getLeft(), 
+                                              y + this.target.getTop(),
+                                              xx - x - this.target.getLeft(),
                                               h - this.target.getTop() - this.target.getBottom()))
                             {
                                 return;
@@ -13708,13 +13708,13 @@ pkg.TitledBorder = Class(pkg.Render, [
                 this.target.paint(g, x, y, w, h, d);
             }
         };
-    
+
         this[''] = function (b, a){
             this.lineAlignment = (a == null ? L.BOTTOM : L.$constraints(a));
 
             if (b == null && this.lineAlignment != L.BOTTOM &&
-                             this.lineAlignment != L.TOP && 
-                             this.lineAlignment != L.CENTER) 
+                             this.lineAlignment != L.TOP &&
+                             this.lineAlignment != L.CENTER)
             {
                 throw new Error($invalidA);
             }
@@ -13724,21 +13724,21 @@ pkg.TitledBorder = Class(pkg.Render, [
 ]);
 
 /**
- * Label UI component class. The label can be used to visualize simple string or multi lines text or 
+ * Label UI component class. The label can be used to visualize simple string or multi lines text or
  * the given text render implementation:
- 
+
         // render simple string
         var l = new zebra.ui.Label("Simple string");
 
         // render multi lines text
         var l = new zebra.ui.Label(new zebra.data.Text("Multiline\ntext"));
 
-        // render password text 
+        // render password text
         var l = new zebra.ui.Label(new zebra.ui.PasswordText("password"));
 
- * @param  {String|zebra.data.TextModel|zebra.ui.TextRender} [r] a text to be shown with the label. 
- * You can pass a simple string or an instance of a text model or an instance of text render as the 
- * text value.   
+ * @param  {String|zebra.data.TextModel|zebra.ui.TextRender} [r] a text to be shown with the label.
+ * You can pass a simple string or an instance of a text model or an instance of text render as the
+ * text value.
  * @class zebra.ui.Label
  * @constructor
  * @extends zebra.ui.ViewPan
@@ -13753,7 +13753,7 @@ pkg.Label = Class(pkg.ViewPan, [
         this.getValue = function() {
             return this.view.getValue();
         };
-        
+
         /**
          * Get the label text color
          * @return {String} a zebra label color
@@ -13771,10 +13771,10 @@ pkg.Label = Class(pkg.ViewPan, [
         this.getFont = function (){
             return this.view.font;
         };
-        
+
         /**
          * Set the label text value
-         * @param  {String} s a new label text 
+         * @param  {String} s a new label text
          * @method setValue
          * @chainable
          */
@@ -13840,8 +13840,8 @@ pkg.MLabel = Class(pkg.Label, [
 
 /**
  * Shortcut class to render bold text in Label
- * @param {String|zebra.ui.TextRender|zebra.data.TextModel} [t] a text string, 
- * text model or text render instance 
+ * @param {String|zebra.ui.TextRender|zebra.data.TextModel} [t] a text string,
+ * text model or text render instance
  * @constructor
  * @class zebra.ui.BoldLabel
  * @extends zebra.ui.Label
@@ -13849,11 +13849,11 @@ pkg.MLabel = Class(pkg.Label, [
 pkg.BoldLabel = Class(pkg.Label, []);
 
 /**
- * Image label UI component. This is UI container that consists from an image 
+ * Image label UI component. This is UI container that consists from an image
  * component and an label component.Image is located at the left size of text.
  * @param {Image|String} img an image or path to the image
- * @param {String|zebra.ui.TextRender|zebra.data.TextModel} txt a text string, 
- * text model or text render instance 
+ * @param {String|zebra.ui.TextRender|zebra.data.TextModel} txt a text string,
+ * text model or text render instance
  * @constructor
  * @class zebra.ui.ImageLabel
  * @extends {zebra.ui.Panel}
@@ -13868,7 +13868,7 @@ pkg.ImageLabel = Class(pkg.Panel, [
     },
 
     /**
-     * Set the specified caption 
+     * Set the specified caption
      * @param {String} c an image label caption text
      * @method setCaption
      */
@@ -13889,36 +13889,36 @@ pkg.ImageLabel = Class(pkg.Panel, [
 ]);
 
 /**
- * State panel class. The class is UI component that allows to customize 
+ * State panel class. The class is UI component that allows to customize
  * the component  face, background and border depending on the component
- * state. Number and names of states the component can have is defined 
+ * state. Number and names of states the component can have is defined
  * by developers. To bind a view to the specified state use zebra.ui.ViewSet
- * class. For instance if a component has to support two states : "state1" and 
- * "state2" you can do it as following: 
- 
+ * class. For instance if a component has to support two states : "state1" and
+ * "state2" you can do it as following:
+
         // create state component
         var p = new zebra.ui.StatePan();
- 
-        // define border view that contains views for "state1" and "state2" 
+
+        // define border view that contains views for "state1" and "state2"
         p.setBorder({
             "state1": new zebra.ui.Border("red", 1),
             "state1": new zebra.ui.Border("blue", 2)
-        
+
         });
-        
-        // define background view that contains views for "state1" and "state2" 
+
+        // define background view that contains views for "state1" and "state2"
         p.setBorder({
             "state1": "yellow",
             "state1": "green"
         });
- 
-        // set component state 
+
+        // set component state
         p.setState("state1");
-  
- * State component children components can listening when the state of the component 
- * has been updated by implementing "parentStateUpdated(o,n,id)" method. It gets old 
- * state, new state and a view id that is mapped to the new state.  The feature is 
- * useful if we are developing a composite components whose children component also 
+
+ * State component children components can listening when the state of the component
+ * has been updated by implementing "parentStateUpdated(o,n,id)" method. It gets old
+ * state, new state and a view id that is mapped to the new state.  The feature is
+ * useful if we are developing a composite components whose children component also
  * should react to a state changing.
  * @class  zebra.ui.StatePan
  * @constructor
@@ -13939,7 +13939,7 @@ pkg.StatePan = Class(pkg.ViewPan, [
          * @param {Object} s a state
          * @method  setState
          */
-        this.setState = function(s) {            
+        this.setState = function(s) {
             if (s !== this.state){
                 var prev = this.state;
                 this.state = s;
@@ -13948,7 +13948,7 @@ pkg.StatePan = Class(pkg.ViewPan, [
         };
 
         /**
-         * Define the method if the state value has to be 
+         * Define the method if the state value has to be
          * somehow converted to a view id. By default the state value
          * itself is used as a view id.
          * @param {Object} s a state to be converted
@@ -13958,8 +13958,8 @@ pkg.StatePan = Class(pkg.ViewPan, [
 
         /**
          * Called every time the component state has been updated
-         * @param  {Integer} o a previous component state 
-         * @param  {Integer} n a new component state 
+         * @param  {Integer} o a previous component state
+         * @param  {Integer} n a new component state
          * @method stateUpdated
          */
         this.stateUpdated = function(o,n){
@@ -13991,7 +13991,7 @@ pkg.StatePan = Class(pkg.ViewPan, [
         };
 
         /**
-         * Refresh state 
+         * Refresh state
          * @protected
          * @method syncState
          */
@@ -14026,11 +14026,11 @@ pkg.StatePan = Class(pkg.ViewPan, [
 ]);
 
 /**
- * Event state panel class. The class implements UI component whose face, border and 
- * background view depends on its input events state. The component is good basis 
+ * Event state panel class. The class implements UI component whose face, border and
+ * background view depends on its input events state. The component is good basis
  * for creation  dynamic view UI components.The state the component can be is:
-       
-    - **over** the mouse cursor is inside the component 
+
+    - **over** the mouse cursor is inside the component
     - **out** the mouse cursor is outside the component
     - **pressed over** the mouse cursor is inside the component and an action mouse
       button or key is pressed
@@ -14038,12 +14038,12 @@ pkg.StatePan = Class(pkg.ViewPan, [
       button or key is pressed
     - **disabled** the component is disabled
 
- * The view border, background or face should be set as "zebra.ui.ViewSet" where an required 
- * for the given component state view is identified by an id. By default corresponding to 
+ * The view border, background or face should be set as "zebra.ui.ViewSet" where an required
+ * for the given component state view is identified by an id. By default corresponding to
  * component states views IDs are the following: "over", "pressed.over", "out", "pressed.out",
- * "disabled".  Imagine for example we have two colors and we need to change between the colors 
+ * "disabled".  Imagine for example we have two colors and we need to change between the colors
  * every time mouse cursor is over/out of the component:
-  
+
      // create state panel
      var statePan = new zebra.ui.EvStatePan();
 
@@ -14054,18 +14054,18 @@ pkg.StatePan = Class(pkg.ViewPan, [
      }));
 
  * Alone with background border view can be done also dynamic
- 
+
      // add dynamically updated border
      statePan.setBorder(new zebra.ui.ViewSet({
         "over": new zebra.ui.Border("green", 4, 8),
         "out": null
      }));
 
- * Additionally the UI component allows developer to specify whether the component can hold 
- * input focus and which UI component has to be considered as the focus marker. The focus marker 
- * component is used as anchor to paint focus marker view. In simple case the view can be just 
+ * Additionally the UI component allows developer to specify whether the component can hold
+ * input focus and which UI component has to be considered as the focus marker. The focus marker
+ * component is used as anchor to paint focus marker view. In simple case the view can be just
  * a border. So border will be rendered around the focus marker component:
- 
+
      // create state panel that contains one label component
      var statePan = new zebra.ui.EvStatePan();
      var lab      = new zebra.ui.Label("Focus marker label");
@@ -14074,7 +14074,7 @@ pkg.StatePan = Class(pkg.ViewPan, [
      statePan.setLayout(new zebra.layout.BorderLayout());
      statePan.add(zebra.layout.CENTER, lab);
 
-     // set label as an anchor for focus border indicator 
+     // set label as an anchor for focus border indicator
      statePan.setFocusAnchorComponent(lab);
      statePan.setFocusMarkerView("plain");
 
@@ -14082,13 +14082,13 @@ pkg.StatePan = Class(pkg.ViewPan, [
  * @constructor
  * @extends zebra.ui.StatePan
  */
-var OVER = 0, PRESSED_OVER = 1, OUT = 2, PRESSED_OUT = 3, DISABLED = 4; 
+var OVER = 0, PRESSED_OVER = 1, OUT = 2, PRESSED_OUT = 3, DISABLED = 4;
 
 
 pkg.EvStatePan = Class(pkg.StatePan,  [
     function $prototype() {
         this.state = OUT;
-        
+
         this.$isIn = false;
 
         var IDS = ["over", "pressed.over", "out", "pressed.out", "disabled"];
@@ -14129,7 +14129,7 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
         this._mouseReleased = function(e) {
             if ((this.state === PRESSED_OVER || this.state === PRESSED_OUT) && e.isActionMask()){
                 if (e.source == this) {
-                    this.setState(e.x >= 0 && e.y >= 0 && e.x < this.width && e.y < this.height ? OVER : OUT);    
+                    this.setState(e.x >= 0 && e.y >= 0 && e.x < this.width && e.y < this.height ? OVER : OUT);
                 }
                 else {
                     var p = L.toParentOrigin(e.x, e.y, e.source, this);
@@ -14150,11 +14150,11 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
                     case ME.ENTERED : this._mouseEntered(e); break;
                     case ME.PRESSED : this._mousePressed(e); break;
                     case ME.RELEASED: this._mouseReleased(e);break;
-                    case ME.EXITED: 
+                    case ME.EXITED:
                         // check if the mouse cursor is in of the source component
-                        // that means another layer has grabbed control 
+                        // that means another layer has grabbed control
                         if (e.x >= 0 && e.y >= 0 && e.x < e.source.width && e.y < e.source.height) {
-                            this.$isIn = false;                                
+                            this.$isIn = false;
                         }
                         else {
                             var p = L.toParentOrigin(e.x, e.y, e.source, this);
@@ -14275,12 +14275,12 @@ pkg.CompositeEvStatePan = Class(pkg.EvStatePan, pkg.Composite, [
          * @type {Boolean}
          */
         this.canHaveFocus = true;
-        
+
 
         this.focusComponent = null;
-        
+
         /**
-         * Reference to an anchor focus marker component 
+         * Reference to an anchor focus marker component
          * @attribute focusMarkerView
          * @readOnly
          * @type {zebra.ui.Panel}
@@ -14296,11 +14296,11 @@ pkg.CompositeEvStatePan = Class(pkg.EvStatePan, pkg.Composite, [
 
         /**
          * Set the view that has to be rendered as focus marker
-         * when the component gains focus. 
-         * @param  {String|zebra.ui.View|Function} c a view. 
-         * The view can be a color or border string code or view 
-         * or an implementation of zebra.ui.View "paint(g,x,y,w,h,t)" 
-         * method.   
+         * when the component gains focus.
+         * @param  {String|zebra.ui.View|Function} c a view.
+         * The view can be a color or border string code or view
+         * or an implementation of zebra.ui.View "paint(g,x,y,w,h,t)"
+         * method.
          * @method setFocusMarkerView
          */
         this.setFocusMarkerView = function (c){
@@ -14318,7 +14318,7 @@ pkg.CompositeEvStatePan = Class(pkg.EvStatePan, pkg.Composite, [
         this.setCanHaveFocus = function(b){
             if (this.canHaveFocus != b){
                 var fm = pkg.focusManager;
-                if (b === false && fm.focusOwner == this) { 
+                if (b === false && fm.focusOwner == this) {
                     fm.requestFocus(null);
                 }
                 this.canHaveFocus = b;
@@ -14326,10 +14326,10 @@ pkg.CompositeEvStatePan = Class(pkg.EvStatePan, pkg.Composite, [
         };
 
         /**
-         * Set the specified children component to be used as 
-         * focus marker view anchor component. Anchor component 
-         * is a component over that the focus marker view is 
-         * painted. 
+         * Set the specified children component to be used as
+         * focus marker view anchor component. Anchor component
+         * is a component over that the focus marker view is
+         * painted.
          * @param  {zebra.ui.Panel} c  an anchor component
          * @method setFocusAnchorComponent
          */
@@ -14356,36 +14356,36 @@ pkg.CompositeEvStatePan = Class(pkg.EvStatePan, pkg.Composite, [
 ]);
 
 /**
- *  Button UI component. Button is composite component whose look and feel can 
+ *  Button UI component. Button is composite component whose look and feel can
  *  be easily customized:
- 
+
         // create image button
         var button = new zebra.ui.Button(new zebra.ui.ImagePan("icon1.gif"));
 
-        // create image + caption button 
+        // create image + caption button
         var button = new zebra.ui.Button(new zebra.ui.ImageLabel("Caption", "icon1.gif"));
 
-        // create multilines caption button  
+        // create multilines caption button
         var button = new zebra.ui.Button(new zebra.ui.MLabel("Line1\nLine2"));
- 
+
 
  *  @class  zebra.ui.Button
  *  @constructor
- *  @param {String|zebra.ui.Panel} [t] a button label. 
+ *  @param {String|zebra.ui.Panel} [t] a button label.
  *  The label can be a simple text or an UI component.
  *  @extends zebra.ui.CompositeEvStatePan
  */
 
 /**
  * Fired when a button has been pressed
-        
+
         var b = new zebra.ui.Button("Test");
         b.bind(function (src) {
             ...
         });
 
- * Button can be adjusted in respect how it generates the pressed event. Event can be 
- * triggered by pressed or clicked even. Also event can be generated periodically if 
+ * Button can be adjusted in respect how it generates the pressed event. Event can be
+ * triggered by pressed or clicked even. Also event can be generated periodically if
  * the button is kept in pressed state.
  * @event buttonPressed
  * @param {zebra.ui.Button} src a button that has been pressed
@@ -14401,17 +14401,17 @@ pkg.Button = Class(pkg.CompositeEvStatePan, [
         /**
          * Indicate if the button should
          * fire event by pressed event
-         * @attribute isFireByPress 
+         * @attribute isFireByPress
          * @type {Boolean}
          * @default false
          * @readOnly
          */
         this.isFireByPress = false;
-        
+
         /**
          * Fire button event repeating period. -1 means
-         * the button event repeating is disabled. 
-         * @attribute firePeriod 
+         * the button event repeating is disabled.
+         * @attribute firePeriod
          * @type {Integer}
          * @default -1
          * @readOnly
@@ -14424,7 +14424,7 @@ pkg.Button = Class(pkg.CompositeEvStatePan, [
         };
 
         /**
-         * The method is executed for a button that is configured 
+         * The method is executed for a button that is configured
          * to repeat fire events.
          * @method run
          * @protected
@@ -14434,17 +14434,17 @@ pkg.Button = Class(pkg.CompositeEvStatePan, [
         };
 
         /**
-         * Set the mode the button has to fire events. 
-         * Button can fire event after it has been unpressed 
-         * or immediately when it has been pressed. Also button 
-         * can start firing events periodically when it has been 
+         * Set the mode the button has to fire events.
+         * Button can fire event after it has been unpressed
+         * or immediately when it has been pressed. Also button
+         * can start firing events periodically when it has been
          * pressed and held in the pressed state.
-         * @param  {Boolean} b   true if the button has to fire 
+         * @param  {Boolean} b   true if the button has to fire
          * event by pressed event
-         * @param  {Integer} time the period of time the button 
-         * has to repeat firing events if it has been pressed and 
-         * held in pressed state. -1 means event doesn't have 
-         * repeated  
+         * @param  {Integer} time the period of time the button
+         * has to repeat firing events if it has been pressed and
+         * held in pressed state. -1 means event doesn't have
+         * repeated
          * @method setFireParams
          */
         this.setFireParams = function (b,time){
@@ -14490,26 +14490,26 @@ pkg.Button = Class(pkg.CompositeEvStatePan, [
 ]);
 
 /**
- *  Border panel UI component class. The component renders titled border around the 
- *  given  content UI component. Border title can be placed on top or 
- *  bottom border line and aligned horizontally (left, center, right). Every 
+ *  Border panel UI component class. The component renders titled border around the
+ *  given  content UI component. Border title can be placed on top or
+ *  bottom border line and aligned horizontally (left, center, right). Every
  *  zebra UI component can be used as a border title element.
- *  @param {zebra.ui.Panel|String} [title] a border panel title. Can be a 
+ *  @param {zebra.ui.Panel|String} [title] a border panel title. Can be a
  *  string or any other UI component can be used as the border panel title
- *  @param {zebra.ui.Panel} [content] a content UI component of the border 
- *  panel 
- *  @param {Integer} [constraints] a title constraints. The constraints gives 
- *  a possibility to place border panel title in different places. Generally 
+ *  @param {zebra.ui.Panel} [content] a content UI component of the border
+ *  panel
+ *  @param {Integer} [constraints] a title constraints. The constraints gives
+ *  a possibility to place border panel title in different places. Generally
  *  the title can be placed on the top or bottom part of the border panel.
- *  Also the title can be aligned horizontally. 
-        
-         // create border panel with a title located at the 
-         // top and aligned at the canter   
-         var bp = new zebra.ui.BorderPan("Title", 
+ *  Also the title can be aligned horizontally.
+
+         // create border panel with a title located at the
+         // top and aligned at the canter
+         var bp = new zebra.ui.BorderPan("Title",
                                          new zebra.ui.Panel(),
                                          zebra.layout.TOP | zebra.layout.CENTER);
 
- 
+
  *  @constructor
  *  @class zebra.ui.BorderPan
  *  @extends {zebra.ui.Panel}
@@ -14522,8 +14522,8 @@ pkg.BorderPan = Class(pkg.Panel, [
     function $prototype() {
         /**
          * Vertical gap. Define top and bottom paddings between
-         * border panel border and the border panel content 
-         * @attribute vGap 
+         * border panel border and the border panel content
+         * @attribute vGap
          * @type {Integer}
          * @readOnly
          * @default 0
@@ -14531,8 +14531,8 @@ pkg.BorderPan = Class(pkg.Panel, [
 
          /**
           * Horizontal gap. Define left and right paddings between
-          * border panel border and the border panel content 
-          * @attribute hGap 
+          * border panel border and the border panel content
+          * @attribute hGap
           * @type {Integer}
           * @readOnly
           * @default 0
@@ -14540,7 +14540,7 @@ pkg.BorderPan = Class(pkg.Panel, [
          this.vGap = this.hGap = 2;
 
          /**
-          * Border panel label indent 
+          * Border panel label indent
           * @type {Integer}
           * @attribute indent
           * @default 4
@@ -14548,24 +14548,24 @@ pkg.BorderPan = Class(pkg.Panel, [
          this.indent = 4;
 
          /**
-          * Get the border panel title info. The information 
-          * describes a rectangular area the title occupies, the 
+          * Get the border panel title info. The information
+          * describes a rectangular area the title occupies, the
           * title location and alignment
           * @return {Object} a title info
           *
-          *  { 
+          *  {
           *      x: {Integer}, y: {Integer},
           *      width: {Integer}, height: {Integer},
           *      orient: {Integer}
           *  }
-          *       
+          *
           * @method getTitleInfo
-          * @protected      
+          * @protected
           */
          this.getTitleInfo = function() {
-            return (this.label != null) ? { x      : this.label.x, 
+            return (this.label != null) ? { x      : this.label.x,
                                             y      : this.label.y,
-                                            width  : this.label.width, 
+                                            width  : this.label.width,
                                             height : this.label.height,
                                             orient : this.label.constraints & (L.TOP | L.BOTTOM) }
                                         : null;
@@ -14585,12 +14585,12 @@ pkg.BorderPan = Class(pkg.Panel, [
         };
 
         this.doLayout = function (target){
-            var h = 0, 
+            var h = 0,
                 right  = this.getRight(),
                 left   = this.getLeft(),
                 xa     = this.label != null ? this.label.constraints & (L.LEFT | L.CENTER | L.RIGHT): 0,
                 ya     = this.label != null ? this.label.constraints & (L.BOTTOM | L.TOP) : 0,
-                top    = ya == L.TOP ? this.top : this.getTop(),  
+                top    = ya == L.TOP ? this.top : this.getTop(),
                 bottom = ya == L.BOTTOM ? this.bottom : this.getBottom();
 
             if (this.label != null && this.label.isVisible === true){
@@ -14604,7 +14604,7 @@ pkg.BorderPan = Class(pkg.Panel, [
             }
 
             if (this.content != null && this.content.isVisible === true){
-                this.content.setLocation(left + this.hGap, 
+                this.content.setLocation(left + this.hGap,
                                          (ya == L.BOTTOM ? top : top + h) + this.vGap);
                 this.content.setSize(this.width - right - left - 2 * this.hGap,
                                      this.height - top - bottom - h - 2 * this.vGap);
@@ -14613,11 +14613,11 @@ pkg.BorderPan = Class(pkg.Panel, [
 
         /**
          * Set vertical and horizontal paddings between the
-         * border panel border and the content of the border 
-         * panel  
-         * @param {Integer} vg a top and bottom paddings 
+         * border panel border and the content of the border
+         * panel
+         * @param {Integer} vg a top and bottom paddings
          * @param {Integer} hg a left and right paddings
-         * @method setGaps 
+         * @method setGaps
          * @chainable
          */
         this.setGaps = function(vg,hg){
@@ -14633,11 +14633,11 @@ pkg.BorderPan = Class(pkg.Panel, [
     function(title) {
         this.$this(title, null);
     },
-    
+
     function() {
         this.$this(null);
     },
-    
+
     function(title, center) {
         this.$this(title, center, L.TOP | L.LEFT);
     },
@@ -14647,14 +14647,14 @@ pkg.BorderPan = Class(pkg.Panel, [
 
         /**
          * Border panel label component
-         * @attribute label 
+         * @attribute label
          * @type {zebra.ui.Panel}
          * @readOnly
          */
 
         /**
          * Border panel label content component
-         * @attribute content 
+         * @attribute content
          * @type {zebra.ui.Panel}
          * @readOnly
          */
@@ -14688,10 +14688,10 @@ pkg.BorderPan = Class(pkg.Panel, [
 
 /**
  * The standard UI checkbox component switch manager implementation. The manager holds
- * boolean state of a checkbox UI component. There are few ways how a checkbox can 
- * switch its state: standard checkbox or radio group. In general we have a deal with 
- * one switchable UI component that can work in different modes. Thus we can re-use 
- * one UI, but customize it with appropriate switch manager. That is the main idea of 
+ * boolean state of a checkbox UI component. There are few ways how a checkbox can
+ * switch its state: standard checkbox or radio group. In general we have a deal with
+ * one switchable UI component that can work in different modes. Thus we can re-use
+ * one UI, but customize it with appropriate switch manager. That is the main idea of
  * having the class.
  * @constructor
  * @class  zebra.ui.SwitchManager
@@ -14699,20 +14699,20 @@ pkg.BorderPan = Class(pkg.Panel, [
 
 /**
  * Fired when a state has been updated
-        
+
         var ch = new zebra.ui.Checkbox("Test");
         ch.manager.bind(function (src, ui) {
             ...
         });
 
  * @event stateUpdated
- * @param {zebra.ui.SwitchManager} src a switch manager that controls and tracks the event 
+ * @param {zebra.ui.SwitchManager} src a switch manager that controls and tracks the event
  * @param {zebra.ui.Checkbox} ui  an UI component that triggers the event
  */
 pkg.SwitchManager = Class([
     function $prototype() {
         /**
-         * Get current state of the given UI component 
+         * Get current state of the given UI component
          * @param  {zebra.ui.Checkbox} o an ui component
          * @return {Boolean}  a boolean state
          * @method getValue
@@ -14735,7 +14735,7 @@ pkg.SwitchManager = Class([
         /**
          * Called every time a state has been updated.
          * @param  {zebra.ui.Checkbox} o an ui component for which the state has been updated
-         * @param  {Boolean} b  a new boolean state of the UI component 
+         * @param  {Boolean} b  a new boolean state of the UI component
          * @method stateUpdated
          */
         this.updated = function(o, b){
@@ -14746,13 +14746,13 @@ pkg.SwitchManager = Class([
         /**
          * Call when the manager has been installed for the given UI component
          * @protected
-         * @param  {zebra.ui.Checkbox} o an UI component the switch manager is designated  
+         * @param  {zebra.ui.Checkbox} o an UI component the switch manager is designated
          * @method install
          */
-        this.install = function(o) { 
-            o.switched(this.getValue(o)); 
+        this.install = function(o) {
+            o.switched(this.getValue(o));
         };
-        
+
         /**
          * Call when the manager has been uninstalled for the given UI component
          * @protected
@@ -14769,15 +14769,15 @@ pkg.SwitchManager = Class([
 ]);
 
 /**
- * Radio group switch manager implementation. This is an extension of "zebra.ui.SwicthManager" to 
+ * Radio group switch manager implementation. This is an extension of "zebra.ui.SwicthManager" to
  * support radio group switching behavior. You can use it event with normal checkbox:
- 
+
        // create group of check boxes that will work as a radio group
        var gr = new zebra.ui.Group();
        var ch1 = new zebra.ui.Checkbox("Test 1", gr);
        var ch2 = new zebra.ui.Checkbox("Test 2", gr);
        var ch3 = new zebra.ui.Checkbox("Test 3", gr);
- 
+
  * @class  zebra.ui.Group
  * @constructor
  * @extends zebra.ui.SwitchManager
@@ -14812,30 +14812,30 @@ pkg.Group = Class(pkg.SwitchManager, [
 ]);
 
 /**
- * Check-box UI component. The component is a container that 
- * consists from two other UI components: 
-    
-    - Box component to keep checker indicator
-    - Label component to paint label 
+ * Check-box UI component. The component is a container that
+ * consists from two other UI components:
 
- * Developers are free to customize the component as they want. 
- * There is no limitation regarding how the box and label components 
- * have to be laid out, which UI components have to be used as 
- * the box or label components, etc. The check box extends state 
+    - Box component to keep checker indicator
+    - Label component to paint label
+
+ * Developers are free to customize the component as they want.
+ * There is no limitation regarding how the box and label components
+ * have to be laid out, which UI components have to be used as
+ * the box or label components, etc. The check box extends state
  * panel component and re-map states  to own views IDs:
-    
-    - "on.out" - checked and mouse cursor is out 
-    - "off.out" - un-checked and mouse cursor is out 
-    - "don" - disabled and checked, 
-    - "doff" - disabled and un-checked , 
-    - "on.over" - checked and mouse cursor is over 
+
+    - "on.out" - checked and mouse cursor is out
+    - "off.out" - un-checked and mouse cursor is out
+    - "don" - disabled and checked,
+    - "doff" - disabled and un-checked ,
+    - "on.over" - checked and mouse cursor is over
     - "off.over" - un-checked and mouse cursor is out
 
  *
  * Customize is quite similar to what explained for zebra.ui.EvStatePan:
  *
- 
-        // create checkbox component 
+
+        // create checkbox component
         var ch = new zebra.ui.Checkbox("Checkbox");
 
         // change border when the component checked to green
@@ -14846,18 +14846,18 @@ pkg.Group = Class(pkg.SwitchManager, [
         }));
 
         // customize checker box children UI component to show
-        // green for checked and red for un-cheked states 
+        // green for checked and red for un-cheked states
         ch.kids[0].setView(new zebra.ui.ViewSet({
             "off.*": "red",
             "on.*": "green"
         }));
         // sync current state with new look and feel
         ch.syncState();
-  
- * Listening checked event should be done by registering a 
+
+ * Listening checked event should be done by registering a
  * listener in the check box switch manager as follow:
- 
-        // create checkbox component 
+
+        // create checkbox component
         var ch = new zebra.ui.Checkbox("Checkbox");
 
         // register a checkbox listener
@@ -14868,14 +14868,14 @@ pkg.Group = Class(pkg.SwitchManager, [
 
  * @class  zebra.ui.Checkbox
  * @extends zebra.ui.CompositeEvStatePan
- * @constructor 
- * @param {String|zebra.ui.Panel} [label] a label 
- * @param {zebra.ui.SwitchManager} [m] a switch manager 
+ * @constructor
+ * @param {String|zebra.ui.Panel} [label] a label
+ * @param {zebra.ui.SwitchManager} [m] a switch manager
  */
 pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
     function $clazz() {
         /**
-         * The box UI component class that is used by default with 
+         * The box UI component class that is used by default with
          * the check box component.
          * @constructor
          * @class zebra.ui.Checkbox.Box
@@ -14886,7 +14886,7 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
                 this.parentStateUpdated = function (o, n, id) {
                     this.setState(id);
                 };
-            }      
+            }
         ]);
 
         /**
@@ -14897,7 +14897,7 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
 
     function $prototype() {
         /**
-         * Set the check box state 
+         * Set the check box state
          * @param  {Boolean} b a state
          * @chainable
          * @method setValue
@@ -14908,18 +14908,18 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
         };
 
         /**
-         * Get the check box state 
+         * Get the check box state
          * @return {Boolean} a check box state
          * @method getValue
          */
         this.getValue = function() {
             return this.manager ? this.manager.getValue(this) : false;
         };
-      
+
         /**
-         * Callback method that is called whenever a state of switch 
-         * manager has been updated. 
-         * @param  {Boolean} b a new state  
+         * Callback method that is called whenever a state of switch
+         * manager has been updated.
+         * @param  {Boolean} b a new state
          * @method switched
          */
         this.switched = function(b){
@@ -14935,7 +14935,7 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
          */
         this.toViewId = function(state){
             if (this.isEnabled === true) {
-                if (this.getValue()) { 
+                if (this.getValue()) {
                     return (this.state == OVER) ? "on.over" : "on.out";
                 }
                 return (this.state == OVER) ? "off.over" : "off.out";
@@ -14956,9 +14956,9 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
         if (zebra.isString(c)) {
             c = new this.$clazz.Label(c);
         }
-        
+
         this.$super();
-        
+
         /**
          * Reference to box component
          * @attribute box
@@ -14967,7 +14967,7 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
          */
         this.box = new this.$clazz.Box();
         this.add(this.box);
-        
+
         if (c != null) {
             this.add(c);
             this.setFocusAnchorComponent(c);
@@ -15005,7 +15005,7 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
     },
 
     /**
-     * Set the specified switch manager 
+     * Set the specified switch manager
      * @param {zebra.ui.SwicthManager} m a switch manager
      * @method setSwicthManager
      */
@@ -15017,7 +15017,7 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
          * @type {zebra.ui.SwitchManager}
          */
 
-        if (m == null) { 
+        if (m == null) {
             throw new Error("Null switch manager");
         }
 
@@ -15044,13 +15044,13 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
 ]);
 
 /**
- * Radio-box UI component class. This class is extension of "zebra.ui.Checkbox" class that sets group 
- * as a default switch manager. The other functionality id identical to checkbox component. Generally 
- * speaking this class is a shortcut for radio box creation.  
+ * Radio-box UI component class. This class is extension of "zebra.ui.Checkbox" class that sets group
+ * as a default switch manager. The other functionality id identical to checkbox component. Generally
+ * speaking this class is a shortcut for radio box creation.
  * @class  zebra.ui.Radiobox
- * @constructor 
- * @param {String|zebra.ui.Panel} [label] a label 
- * @param {zebra.ui.Group} [m] a switch manager 
+ * @constructor
+ * @param {String|zebra.ui.Panel} [label] a label
+ * @param {zebra.ui.Group} [m] a switch manager
  */
 pkg.Radiobox = Class(pkg.Checkbox, [
     function $clazz() {
@@ -15068,14 +15068,14 @@ pkg.Radiobox = Class(pkg.Checkbox, [
 ]);
 
 /**
- * Splitter panel UI component class. The component splits its area horizontally or vertically into two areas. 
- * Every area hosts an UI component. A size of the parts can be controlled by mouse cursor dragging. Gripper 
+ * Splitter panel UI component class. The component splits its area horizontally or vertically into two areas.
+ * Every area hosts an UI component. A size of the parts can be controlled by mouse cursor dragging. Gripper
  * element is children UI component that can be customized. For instance:
- 
+
       // create split panel
-      var sp = new zebra.ui.SplitPan(new zebra.ui.Label("Left panel"), 
-                                    new zebra.ui.Label("Right panel")); 
-      
+      var sp = new zebra.ui.SplitPan(new zebra.ui.Label("Left panel"),
+                                    new zebra.ui.Label("Right panel"));
+
       // customize gripper background color depending on its state
       sp.gripper.setBackground(new zebra.ui.ViewSet({
            "over" : "yellow"
@@ -15084,9 +15084,9 @@ pkg.Radiobox = Class(pkg.Checkbox, [
       }));
 
 
- * @param {zebra.ui.Panel} [first] a first UI component in splitter panel 
+ * @param {zebra.ui.Panel} [first] a first UI component in splitter panel
  * @param {zebra.ui.Panel} [second] a second UI component in splitter panel
- * @param {Integer} [o] an orientation of splitter element: zebra.layout.VERTICAL or zebra.layout.HORIZONTAL 
+ * @param {Integer} [o] an orientation of splitter element: zebra.layout.VERTICAL or zebra.layout.HORIZONTAL
  * @class zebra.ui.SplitPan
  * @constructor
  * @extends {zebra.ui.Panel}
@@ -15132,7 +15132,7 @@ pkg.SplitPan = Class(pkg.Panel, [
                 };
 
                 this.mouseDragEnded = function(e){
-                    var xy = this.target.normalizeBarLoc(this.target.orientation == L.VERTICAL ? this.x + e.x 
+                    var xy = this.target.normalizeBarLoc(this.target.orientation == L.VERTICAL ? this.x + e.x
                                                                                                : this.y + e.y);
                     if (xy > 0) this.target.setGripperLoc(xy);
                 };
@@ -15150,7 +15150,7 @@ pkg.SplitPan = Class(pkg.Panel, [
 
     function $prototype() {
         /**
-         * A minimal size of the left (or top) sizable panel 
+         * A minimal size of the left (or top) sizable panel
          * @attribute leftMinSize
          * @type {Integer}
          * @readOnly
@@ -15174,13 +15174,13 @@ pkg.SplitPan = Class(pkg.Panel, [
          */
 
         /**
-         * A gap between gripper element and first and second UI components 
+         * A gap between gripper element and first and second UI components
          * @attribute gap
          * @type {Integer}
          * @readOnly
          * @default 1
          */
-        
+
         /**
          * A reference to gripper UI component
          * @attribute gripper
@@ -15313,7 +15313,7 @@ pkg.SplitPan = Class(pkg.Panel, [
         };
 
         /**
-         * Set gap between gripper element and sizable panels 
+         * Set gap between gripper element and sizable panels
          * @param  {Integer} g a gap
          * @method setGap
          */
@@ -15350,7 +15350,7 @@ pkg.SplitPan = Class(pkg.Panel, [
 
         /**
          * Set the given gripper movable state
-         * @param  {Boolean} b the gripper movable state. 
+         * @param  {Boolean} b the gripper movable state.
          * @method setGripperMovable
          */
         this.setGripperMovable = function (b){
@@ -15374,7 +15374,7 @@ pkg.SplitPan = Class(pkg.Panel, [
         this.barLocation = 70;
         this.leftComp = this.rightComp = this.gripper = null;
         this.orientation = L.$constraints(o);
-        
+
         this.$super();
 
         if (f != null) this.add(L.LEFT, f);
@@ -15436,8 +15436,8 @@ pkg.SplitPan = Class(pkg.Panel, [
         });
 
  *  @event fired
- *  @param {zebra.ui.Progress} src a progress bar that triggers 
- *  the event 
+ *  @param {zebra.ui.Progress} src a progress bar that triggers
+ *  the event
  *  @param {Integer} oldValue a progress bar previous value
  */
 
@@ -15501,7 +15501,7 @@ pkg.Progress = Class(pkg.Panel, [
                 v1 = (this.maxValue * bundleSize) + (this.maxValue - 1) * this.gap,
                 ps = this.bundleView.getPreferredSize();
 
-            ps = (this.orientation == L.HORIZONTAL) ? { 
+            ps = (this.orientation == L.HORIZONTAL) ? {
                                                         width :v1,
                                                         height:(this.bundleHeight >= 0 ? this.bundleHeight
                                                                                        : ps.height)
@@ -15605,7 +15605,7 @@ pkg.Progress = Class(pkg.Panel, [
     },
 
     /**
-     * Set the given gap between progress bar bundle elements 
+     * Set the given gap between progress bar bundle elements
      * @param {Integer} g a gap
      * @method setGap
      */
@@ -15619,7 +15619,7 @@ pkg.Progress = Class(pkg.Panel, [
     /**
      * Set the progress bar bundle element view
      * @param {zebra.ui.View} v a progress bar bundle view
-     * @method setBundleView   
+     * @method setBundleView
      */
     function setBundleView(v){
         if (this.bundleView != v){
@@ -15644,7 +15644,7 @@ pkg.Progress = Class(pkg.Panel, [
 ]);
 
 /**
- * UI link component class. 
+ * UI link component class.
  * @class zebra.ui.Link
  * @param {String} s a link text
  * @constructor
@@ -15652,7 +15652,7 @@ pkg.Progress = Class(pkg.Panel, [
  */
 pkg.Link = Class(pkg.Button, [
     function $prototype() {
-        this.cursorType = Cursor.HAND; 
+        this.cursorType = Cursor.HAND;
     },
 
     function(s){
@@ -15663,9 +15663,9 @@ pkg.Link = Class(pkg.Button, [
     },
 
     /**
-     * Set link font 
+     * Set link font
      * @param {zebra.ui.Font} f a font
-     * @method setFont 
+     * @method setFont
      */
     function setFont(f) {
         this.view.setFont(f);
@@ -15673,7 +15673,7 @@ pkg.Link = Class(pkg.Button, [
 
     /**
      * Set the link text color for the specified link state
-     * @param {Integer} state a link state 
+     * @param {Integer} state a link state
      * @param {String} c a link text color
      * @method  setColor
      */
@@ -15695,10 +15695,10 @@ pkg.Link = Class(pkg.Button, [
 ]);
 
 /**
- * Extendable  UI panel class. Implement collapsible panel where 
- * a user can hide of show content by pressing special control 
+ * Extendable  UI panel class. Implement collapsible panel where
+ * a user can hide of show content by pressing special control
  * element:
- 
+
         // create extendable panel that contains list as its content
         var ext = zebra.ui.ExtendablePan(new zebra.ui.List([
             "Item 1",
@@ -15711,13 +15711,13 @@ pkg.Link = Class(pkg.Button, [
  * @class zebra.ui.ExtendablePan
  * @extends {zebra.ui.Panel}
  * @param {zebra.ui.Panel} c a content of the extender panel
- * @param {zebra.ui.Panel|String} l a title label text or 
+ * @param {zebra.ui.Panel|String} l a title label text or
  * component
  */
 
  /**
-  * Fired when extender is collapsed or extended 
-         
+  * Fired when extender is collapsed or extended
+
          var ex = new zebra.ui.ExtendablePan(pan, "Title");
          ex.bind(function (src, isCollapsed) {
              ...
@@ -15725,7 +15725,7 @@ pkg.Link = Class(pkg.Button, [
 
   * @event fired
   * @param {zebra.ui.ExtendablePan} src an extender UI component that generates the event
-  * @param {Boolean} isCollapsed a state of the extender UI component 
+  * @param {Boolean} isCollapsed a state of the extender UI component
   */
 
 pkg.ExtendablePan = Class(pkg.Panel, [
@@ -15749,7 +15749,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
     function $clazz() {
         this.Label = Class(pkg.Label,[]);
         this.TitlePan = Class(pkg.Panel, []);
-        
+
         this.TogglePan = Class(pkg.StatePan, [
             function $prototype() {
                 this.mousePressed = function(e){
@@ -15772,7 +15772,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
          * @default false
          */
         this.isCollapsed = true;
-        
+
         this.$super();
 
         if (zebra.isString(lab)) {
@@ -15780,7 +15780,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
         }
 
         /**
-         * Label component 
+         * Label component
          * @attribute label
          * @type {zebra.ui.Panel}
          * @readOnly
@@ -15807,7 +15807,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
         this.titlePan.add(this.label);
 
         /**
-         * Content panel 
+         * Content panel
          * @type {zebra.ui.Panel}
          * @readOnly
          * @attribute contentPan
@@ -15825,7 +15825,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
 var ScrollManagerListeners = zebra.util.ListenersClass("scrolled");
 
 /**
- * Scroll manager class. 
+ * Scroll manager class.
  * @param {zebra.ui.Panel} t a target component to be scrolled
  * @constructor
  * @class zebra.ui.ScrollManager
@@ -15845,7 +15845,7 @@ var ScrollManagerListeners = zebra.util.ListenersClass("scrolled");
 
 
  /**
-  * Fired when a scroll state has been updated 
+  * Fired when a scroll state has been updated
 
         scrollManager.scrollStateUpdated = function(x, y, px, py) {
             ...
@@ -15873,27 +15873,27 @@ pkg.ScrollManager = Class([
          * @method getSY
          */
         this.getSY = function (){ return this.sy; };
-        
+
         /**
-         * Set a target component scroll x location to the 
+         * Set a target component scroll x location to the
          * specified value
-         * @param  {Integer} v a x scroll location 
+         * @param  {Integer} v a x scroll location
          * @method scrollXTo
          */
         this.scrollXTo = function(v){
             this.scrollTo(v, this.getSY());
         };
-        
+
         /**
-         * Set a target component scroll y location to the 
+         * Set a target component scroll y location to the
          * specified value
-         * @param  {Integer} v a y scroll location 
+         * @param  {Integer} v a y scroll location
          * @method scrollYTo
          */
         this.scrollYTo = function(v){
             this.scrollTo(this.getSX(), v);
         };
-        
+
         /**
          * Scroll the target component into the specified location
          * @param  {Integer} x a x location
@@ -15912,11 +15912,11 @@ pkg.ScrollManager = Class([
         };
 
         /**
-         * Make visible the given rectangular area of the 
+         * Make visible the given rectangular area of the
          * scrolled target component
-         * @param  {Integer} x a x coordinate of top left corner 
+         * @param  {Integer} x a x coordinate of top left corner
          * of the rectangular area
-         * @param  {Integer} y a y coordinate of top left corner 
+         * @param  {Integer} y a y coordinate of top left corner
          * of the rectangular area
          * @param  {Integer} w a width of the rectangular area
          * @param  {Integer} h a height of the rectangular area
@@ -15931,7 +15931,7 @@ pkg.ScrollManager = Class([
     function (c){
         this.sx = this.sy = 0;
         this._ = new ScrollManagerListeners();
-        
+
         /**
          * Target UI component for that the scroll manager has been instantiated
          * @attribute target
@@ -15945,7 +15945,7 @@ pkg.ScrollManager = Class([
 /**
  * Scroll bar UI component
  * @param {Integer|String} t type of the scroll bar components:
- 
+
         zebra.layout.VERTICAL or "vertical" - vertical scroll bar
         zebra.layout.HORIZONTAL or "horizontal"- horizontal scroll bar
 
@@ -15976,7 +15976,7 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, pkg.Composite, [
 
     function $prototype() {
         /**
-         * Maximal possible value 
+         * Maximal possible value
          * @attribute max
          * @type {Integer}
          * @readOnly
@@ -15986,7 +15986,7 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, pkg.Composite, [
 
         /**
          * Page increment value
-         * @attribute pageIncrement 
+         * @attribute pageIncrement
          * @type {Integer}
          * @readOnly
          * @default 20
@@ -15995,7 +15995,7 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, pkg.Composite, [
 
         /**
          * Unit increment value
-         * @attribute unitIncrement 
+         * @attribute unitIncrement
          * @type {Integer}
          * @readOnly
          * @default 5
@@ -16003,25 +16003,25 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, pkg.Composite, [
         this.unitIncrement = 5;
 
         /**
-         * Evaluate if the given point is in scroll bar bundle element 
-         * @param  {Integer}  x a x location 
-         * @param  {Integer}  y a y location 
-         * @return {Boolean}   true if the point is located inside the 
+         * Evaluate if the given point is in scroll bar bundle element
+         * @param  {Integer}  x a x location
+         * @param  {Integer}  y a y location
+         * @return {Boolean}   true if the point is located inside the
          * scroll bar bundle element
          * @method isInBundle
          */
         this.isInBundle = function(x,y){
             var bn = this.bundle;
-            return (bn != null && 
-                    bn.isVisible === true && 
-                    bn.x <= x && bn.y <= y && 
-                    bn.x + bn.width > x && 
+            return (bn != null &&
+                    bn.isVisible === true &&
+                    bn.x <= x && bn.y <= y &&
+                    bn.x + bn.width > x &&
                     bn.y + bn.height > y);
         };
 
         this.amount = function(){
             var db = this.decBt, ib = this.incBt;
-            return (this.type == L.VERTICAL) ? ib.y - db.y - db.height 
+            return (this.type == L.VERTICAL) ? ib.y - db.y - db.height
                                              : ib.x - db.x - db.width;
         };
 
@@ -16116,7 +16116,7 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, pkg.Composite, [
         };
 
         this.calcPreferredSize = function (target){
-            var ps1 = pkg.getPreferredSize(this.incBt), 
+            var ps1 = pkg.getPreferredSize(this.incBt),
                 ps2 = pkg.getPreferredSize(this.decBt),
                 ps3 = pkg.getPreferredSize(this.bundle);
 
@@ -16132,13 +16132,13 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, pkg.Composite, [
         };
 
         this.doLayout = function(target){
-            var right  = this.getRight(), 
-                top    = this.getTop(), 
+            var right  = this.getRight(),
+                top    = this.getTop(),
                 bottom = this.getBottom(),
-                left   = this.getLeft(), 
-                ew     = this.width - left - right, 
+                left   = this.getLeft(),
+                ew     = this.width - left - right,
                 eh     = this.height - top - bottom,
-                b      = (this.type == L.HORIZONTAL), 
+                b      = (this.type == L.HORIZONTAL),
                 ps1    = pkg.getPreferredSize(this.decBt),
                 ps2    = pkg.getPreferredSize(this.incBt),
                 minbs  = pkg.Scroll.MIN_BUNDLE_SIZE;
@@ -16147,7 +16147,7 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, pkg.Composite, [
             this.decBt.setLocation(left, top);
 
             this.incBt.setSize(b ? ps2.width : ew, b ? eh : ps2.height);
-            this.incBt.setLocation(b ? this.width - right - ps2.width 
+            this.incBt.setLocation(b ? this.width - right - ps2.width
                                      : left, b ? top : this.height - bottom - ps2.height);
 
             if (this.bundle != null && this.bundle.isVisible === true){
@@ -16162,7 +16162,7 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, pkg.Composite, [
         };
 
         /**
-         * Set the specified maximum value of the scroll bar component 
+         * Set the specified maximum value of the scroll bar component
          * @param {Integer} m a maximum value
          * @method setMaximum
          */
@@ -16201,14 +16201,14 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, pkg.Composite, [
         }
 
         /**
-         * Increment button 
+         * Increment button
          * @attribute incBt
          * @type {zebra.ui.Button}
          * @readOnly
          */
 
         /**
-         * Decrement button 
+         * Decrement button
          * @attribute decBt
          * @type {zebra.ui.Button}
          * @readOnly
@@ -16220,7 +16220,7 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, pkg.Composite, [
          * @type {zebra.ui.Panel}
          * @readOnly
          */
-        
+
         this.incBt = this.decBt = this.bundle = this.position = null;
         this.bundleLoc = this.type = 0;
         this.startDragLoc = Number.MAX_VALUE;
@@ -16271,12 +16271,12 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, pkg.Composite, [
 ]);
 
 /**
- * Scroll UI panel. The component is used to manage scrolling 
- * for a children UI component that occupies more space than 
- * it is available. The usage is very simple, just put an component 
- * you want to scroll horizontally or/and vertically in the scroll 
+ * Scroll UI panel. The component is used to manage scrolling
+ * for a children UI component that occupies more space than
+ * it is available. The usage is very simple, just put an component
+ * you want to scroll horizontally or/and vertically in the scroll
  * panel:
- 
+
         // scroll vertically and horizontally a large picture
         var scrollPan = new zebra.ui.ScrollPan(new zebra.ui.ImagePan("largePicture.jpg"));
 
@@ -16289,12 +16289,12 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, pkg.Composite, [
                                                zebra.layout.HORIZONTAL);
 
 
- 
- * @param {zebra.ui.Panel} [c] an UI component that has to 
- * be placed into scroll panel  
- * @param {Integer} [barMask] a scroll bars mask that allows 
- * developers to control vertical and 
- * horizontal scroll bars visibility.  
+
+ * @param {zebra.ui.Panel} [c] an UI component that has to
+ * be placed into scroll panel
+ * @param {Integer} [barMask] a scroll bars mask that allows
+ * developers to control vertical and
+ * horizontal scroll bars visibility.
  * @constructor
  * @class zebra.ui.ScrollPan
  * @extends {zebra.ui.Panel}
@@ -16318,7 +16318,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
 
     function $prototype() {
         /**
-         * Indicate if the scroll bars should be hidden 
+         * Indicate if the scroll bars should be hidden
          * when they are not active
          * @attribute autoHide
          * @type {Boolean}
@@ -16328,8 +16328,8 @@ pkg.ScrollPan = Class(pkg.Panel, [
         this.$interval = 0;
 
         /**
-         * Set the given auto hide state. 
-         * @param  {Boolean} b an auto hide state.  
+         * Set the given auto hide state.
+         * @param  {Boolean} b an auto hide state.
          * @method setAutoHide
          */
         this.setAutoHide = function(b) {
@@ -16338,12 +16338,12 @@ pkg.ScrollPan = Class(pkg.Panel, [
                 if (this.hBar != null) {
                     if (this.hBar.incBt != null) this.hBar.incBt.setVisible(!b);
                     if (this.hBar.decBt != null) this.hBar.decBt.setVisible(!b);
-                } 
+                }
 
                 if (this.vBar != null) {
                     if (this.vBar.incBt != null) this.vBar.incBt.setVisible(!b);
                     if (this.vBar.decBt != null) this.vBar.decBt.setVisible(!b);
-                } 
+                }
 
                 if (this.$interval != 0) {
                     clearInterval(this.$interval);
@@ -16355,7 +16355,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
         };
 
         /**
-         * Scroll manager listener method that is called every time 
+         * Scroll manager listener method that is called every time
          * a target component has been scrolled
          * @param  {Integer} psx previous scroll x location
          * @param  {Integer} psy previous scroll y location
@@ -16365,32 +16365,32 @@ pkg.ScrollPan = Class(pkg.Panel, [
             try {
                 this.validate();
                 this.isPosChangedLocked = true;
-                
+
                 if (this.hBar != null) {
                     this.hBar.position.setOffset( -this.scrollObj.scrollManager.getSX());
                 }
-                
+
                 if (this.vBar != null) {
                     this.vBar.position.setOffset( -this.scrollObj.scrollManager.getSY());
                 }
-                
+
                 if (this.scrollObj.scrollManager == null) this.invalidate();
             }
             catch(e) { throw e; }
             finally  { this.isPosChangedLocked = false; }
         };
 
-        this.calcPreferredSize = function (target){ 
-            return pkg.getPreferredSize(this.scrollObj); 
+        this.calcPreferredSize = function (target){
+            return pkg.getPreferredSize(this.scrollObj);
         };
 
         this.doLayout = function (target){
             var sman   = (this.scrollObj == null) ? null : this.scrollObj.scrollManager,
-                right  = this.getRight(), 
-                top    = this.getTop(), 
-                bottom = this.getBottom(), 
+                right  = this.getRight(),
+                top    = this.getTop(),
+                bottom = this.getBottom(),
                 left   = this.getLeft(),
-                ww     = this.width  - left - right,  maxH = ww, 
+                ww     = this.width  - left - right,  maxH = ww,
                 hh     = this.height - top  - bottom, maxV = hh,
                 so     = this.scrollObj.getPreferredSize(),
                 vps    = this.vBar == null ? { width:0, height:0 } : this.vBar.getPreferredSize(),
@@ -16405,7 +16405,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
                 maxV -= hps.height;
             }
             maxV = so.height > maxV ? (so.height - maxV) :  -1;
-            
+
             // compensate scrolled horizontal size by reduction of vertical bar width if necessary
             // autoHidded scrollbars don't have an influence to layout
             if (this.vBar != null && this.autoHide === false &&
@@ -16415,7 +16415,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
                 maxH -= vps.width;
             }
             maxH = so.width > maxH ? (so.width - maxH) :  -1;
-           
+
             var sy = sman.getSY(), sx = sman.getSX();
             if (this.vBar != null) {
                 if (maxV < 0) {
@@ -16442,7 +16442,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
 
             if (this.scrollObj.isVisible === true){
                 this.scrollObj.setLocation(left, top);
-                this.scrollObj.setSize(ww - (this.autoHide === false && this.vBar != null && this.vBar.isVisible === true ? vps.width  : 0), 
+                this.scrollObj.setSize(ww - (this.autoHide === false && this.vBar != null && this.vBar.isVisible === true ? vps.width  : 0),
                                        hh - (this.autoHide === false && this.hBar != null && this.hBar.isVisible === true ? hps.height : 0));
             }
 
@@ -16467,18 +16467,18 @@ pkg.ScrollPan = Class(pkg.Panel, [
             if (this.isPosChangedLocked === false){
 
                 //!!! review the code below
-                if (this.autoHide) { 
+                if (this.autoHide) {
                     this.$dontHide = true;
-                    if (this.$interval === 0 && ((this.vBar != null && this.vBar.isVisible === true) || 
-                                                 (this.hBar != null && this.hBar.isVisible === true)    )) 
+                    if (this.$interval === 0 && ((this.vBar != null && this.vBar.isVisible === true) ||
+                                                 (this.hBar != null && this.hBar.isVisible === true)    ))
                     {
                         var $this = this;
                         if (this.vBar) this.vBar.toFront();
                         if (this.hBar) this.hBar.toFront();
                         this.vrp();
-                        this.$interval = setInterval(function() { 
-                            if ($this.$dontHide || ($this.vBar != null && pkg.$mouseMoveOwner == $this.vBar)|| 
-                                                   ($this.hBar != null && pkg.$mouseMoveOwner == $this.hBar)  ) 
+                        this.$interval = setInterval(function() {
+                            if ($this.$dontHide || ($this.vBar != null && pkg.$mouseMoveOwner == $this.vBar)||
+                                                   ($this.hBar != null && pkg.$mouseMoveOwner == $this.hBar)  )
                             {
                                 $this.$dontHide = false;
                             }
@@ -16487,11 +16487,11 @@ pkg.ScrollPan = Class(pkg.Panel, [
                                 $this.$interval = 0;
                                 $this.doLayout();
                             }
-                        }, 500); 
+                        }, 500);
                     }
                 }
 
-                if (this.vBar != null && this.vBar.position == target) { 
+                if (this.vBar != null && this.vBar.position == target) {
                     this.scrollObj.scrollManager.scrollYTo(-this.vBar.position.offset);
                 }
                 else {
@@ -16551,12 +16551,12 @@ pkg.ScrollPan = Class(pkg.Panel, [
         if ((L.VERTICAL & barMask) > 0) {
             this.add(L.RIGHT, new pkg.Scroll(L.VERTICAL));
         }
-        
+
         if (c != null) this.add(L.CENTER, c);
     },
 
     function insert(i,ctr,c){
-        if (L.CENTER == ctr && c.scrollManager == null) { 
+        if (L.CENTER == ctr && c.scrollManager == null) {
             c = new this.$clazz.ContentPan(c);
         }
         return this.$super(i, ctr, c);
@@ -16606,41 +16606,41 @@ pkg.ScrollPan = Class(pkg.Panel, [
 ]);
 
 /**
- * Tabs UI panel. The component is used to organize switching 
+ * Tabs UI panel. The component is used to organize switching
  * between number of pages where every page is an UI component.
  *
- *  Filling tabs component with pages is the same to how you add 
- *  an UI component to a panel. For instance in the example below 
- *  three pages with "Titl1", "Title2", "Title3" are added: 
- 
+ *  Filling tabs component with pages is the same to how you add
+ *  an UI component to a panel. For instance in the example below
+ *  three pages with "Titl1", "Title2", "Title3" are added:
+
       var tabs = zebra.ui.Tabs();
       tabs.add("Title1", new zebra.ui.Label("Label as a page"));
       tabs.add("Title2", new zebra.ui.Button("Button as a page"));
       tabs.add("Title3", new zebra.ui.TextArea("Text area as a page"));
- 
- *  You can access tabs pages UI component the same way like you 
+
+ *  You can access tabs pages UI component the same way like you
  *  access a panel children components
-    
+
      ...
      tabs.kids[0] // access the first page
 
  *  And you can remove it with standard panel inherited API:
-    
+
      ...
      tabs.removeAt(0); // remove first tab page
 
 
- *  To customize tab page caption and icon you should access tab object and 
- *  do it with API it provides: 
-  
-    
-        // update a tab caption 
+ *  To customize tab page caption and icon you should access tab object and
+ *  do it with API it provides:
+
+
+        // update a tab caption
         tabs.getTab(0).setCaption("Test");
 
         // update a tab icon
         tabs.getTab(0).setIcon("my.gif");
 
-        // set a particular font and color for the tab in selected state 
+        // set a particular font and color for the tab in selected state
         tabs.getTab(0).setColor(true, "blue");
         tabs.getTab(0).setFont(true, new zebra.ui.Font("Arial", "bold", 16));
 
@@ -16648,7 +16648,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
         tabs.getTab(0).setCaption(false, "Test");
 
  * @param {Integer|String} [o] the tab panel orientation:
- 
+
       zebra.layout.TOP   or "top"
       zebra.layout.BOTTOM or "bottom"
       zebra.layout.LEFT or "left"
@@ -16660,7 +16660,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
  */
 
 /**
- * Fired when a new tab page has been selected 
+ * Fired when a new tab page has been selected
 
       tabs.bind(function (src, selectedIndex) {
          ...
@@ -16673,9 +16673,9 @@ pkg.ScrollPan = Class(pkg.Panel, [
 pkg.Tabs = Class(pkg.Panel, [
     function $clazz() {
         /**
-         * Tab view class that defines the tab page title and icon  
+         * Tab view class that defines the tab page title and icon
          * @param {String|Image} [icon]  an path to an image or image object
-         * @param {String} [caption] a tab caption 
+         * @param {String} [caption] a tab caption
          * @class zebra.ui.Tabs.TabView
          * @extends {zebra.ui.CompRender}
          * @constructor
@@ -16684,7 +16684,7 @@ pkg.Tabs = Class(pkg.Panel, [
             function $clazz() {
                 this.TabPan = Class(pkg.Panel, [
                     function() {
-                        this.$super();  
+                        this.$super();
                         this.add(new pkg.ImagePan(null));
                         this.add(new pkg.ViewPan());
                     },
@@ -16710,14 +16710,14 @@ pkg.Tabs = Class(pkg.Panel, [
             function(icon, caption) {
                 var tp = new this.$clazz.TabPan();
                 this.$super(tp);
-                this.owner = null; 
+                this.owner = null;
 
                 var $this = this;
                 tp.getImagePan().imageLoaded = function(p, b, i) {
                     $this.vrp();
-                
-                    // if the icon has zero width and height the repaint 
-                    // doesn't trigger validation. So let's do it on 
+
+                    // if the icon has zero width and height the repaint
+                    // doesn't trigger validation. So let's do it on
                     // parent level
                     if ($this.owner != null && $this.owner.parent != null) {
                         $this.owner.repaint();
@@ -16734,11 +16734,11 @@ pkg.Tabs = Class(pkg.Panel, [
 
                 this.getCaptionPan().setView(
                     new pkg.ViewSet(
-                        {   
+                        {
                             "selected": r1,
                             "*"       : r2
-                        }, 
-                        [   
+                        },
+                        [
                             function setFont(id, f) {
                                 var v = this.views[id];
                                 if (v != null) {
@@ -16757,13 +16757,13 @@ pkg.Tabs = Class(pkg.Panel, [
 
                             function getCaption(id) {
                                 var v = this.views[id];
-                                return v == null ? null : v.getValue(); 
-                            } 
+                                return v == null ? null : v.getValue();
+                            }
                         ]
                     )
                 );
             },
-    
+
             function ownerChanged(v) {
                 this.owner = v;
             },
@@ -16773,21 +16773,21 @@ pkg.Tabs = Class(pkg.Panel, [
             },
 
             /**
-             * Set the given tab caption. The caption is set for both 
+             * Set the given tab caption. The caption is set for both
              * tab states: selected and not selected
              * @param {String} s the tab caption
-             * @method setCaption 
+             * @method setCaption
              */
             function setCaption(s) {
                 this.setCaption(true, s);
                 this.setCaption(false, s);
-            }, 
+            },
 
             /**
-             * Set the given tab caption for the specified tab state. 
+             * Set the given tab caption for the specified tab state.
              * @param {Boolean} b the tab state. true means selected state.
              * @param {String} s the tab caption
-             * @method setCaption 
+             * @method setCaption
              */
             function setCaption(b, s) {
                 this.getCaptionPan().view.setCaption(this.$toId(b), s);
@@ -16798,7 +16798,7 @@ pkg.Tabs = Class(pkg.Panel, [
              * Get the tab caption for the specified tab state
              * @param {Boolean} b the tab state. true means selected state.
              * @return {String} the tab caption
-             * @method getCaption 
+             * @method getCaption
              */
             function getCaption(b) {
                 this.getCaptionPan().view.getCaption(this.$toId(b));
@@ -16807,7 +16807,7 @@ pkg.Tabs = Class(pkg.Panel, [
             /**
              * Set the caption text color for both selected and not selected states.
              * @param {String} c the tab caption
-             * @method setColor 
+             * @method setColor
              */
             function setColor(c) {
                 setColor(true, c);
@@ -16815,7 +16815,7 @@ pkg.Tabs = Class(pkg.Panel, [
             },
 
             /**
-             * Set the given tab caption text color for the specified tab state. 
+             * Set the given tab caption text color for the specified tab state.
              * @param {Boolean} b the tab state. true means selected state.
              * @param {String} c the tab caption
              * @method setColor
@@ -16833,7 +16833,7 @@ pkg.Tabs = Class(pkg.Panel, [
              * @param {zebra.ui.Font} f the tab text font
              * @method setFont
              */
-            function setFont(f) {            
+            function setFont(f) {
                 setFont(true, f);
                 setFont(false, f);
             },
@@ -16866,7 +16866,7 @@ pkg.Tabs = Class(pkg.Panel, [
              * The method is invoked every time the tab selection state has been updated
              * @param {zebra.ui.Tabs} tabs the tabs component the tab belongs
              * @param {Integer} i an index of the tab
-             * @param {Boolean} b a new state of the tab 
+             * @param {Boolean} b a new state of the tab
              * @method selected
              */
             function selected(tabs, i, b) {
@@ -16875,7 +16875,7 @@ pkg.Tabs = Class(pkg.Panel, [
 
             function $toId(b) {
                 return b ? "selected" : "*";
-            } 
+            }
         ]);
     },
 
@@ -16890,9 +16890,9 @@ pkg.Tabs = Class(pkg.Panel, [
          * @readOnly
          */
         this.canHaveFocus = true;
-        
+
         /**
-         * Side gaps 
+         * Side gaps
          * @type {Integer}
          * @attribute sideOffset
          * @default 0
@@ -16909,7 +16909,7 @@ pkg.Tabs = Class(pkg.Panel, [
             if (this.overTab != i) {
                 this.overTab = i;
                 if (this.views["tabover"] != null) {
-                    this.repaint(this.repaintX, this.repaintY, 
+                    this.repaint(this.repaintX, this.repaintY,
                                  this.repaintWidth, this.repaintHeight);
                 }
             }
@@ -16949,9 +16949,9 @@ pkg.Tabs = Class(pkg.Panel, [
         /**
          * Navigate to a next tab page following the given direction starting from the given page
          * @param  {Integer} page a starting page index
-         * @param  {Integer} d    a navigation direction. 1 means forward and -1 mens backward 
-         * @return {Integer}      a new tab page index 
-         * @method next 
+         * @param  {Integer} d    a navigation direction. 1 means forward and -1 mens backward
+         * @return {Integer}      a new tab page index
+         * @method next
          */
         this.next =  function (page, d){
             for(; page >= 0 && page < ~~(this.pages.length / 2); page += d) {
@@ -16962,15 +16962,15 @@ pkg.Tabs = Class(pkg.Panel, [
 
         this.getTitleInfo = function(){
             var b   = (this.orient == L.LEFT || this.orient == L.RIGHT),
-                res = b ? { x      : this.tabAreaX, 
-                            y      : 0, 
-                            width  : this.tabAreaWidth, 
-                            height : 0, 
+                res = b ? { x      : this.tabAreaX,
+                            y      : 0,
+                            width  : this.tabAreaWidth,
+                            height : 0,
                             orient : this.orient }
-                        : { x      : 0, 
-                            y      : this.tabAreaY, 
-                            width  : 0, 
-                            height : this.tabAreaHeight, 
+                        : { x      : 0,
+                            y      : this.tabAreaY,
+                            width  : 0,
+                            height : this.tabAreaHeight,
                             orient : this.orient };
 
             if (this.selectedIndex >= 0){
@@ -16991,18 +16991,18 @@ pkg.Tabs = Class(pkg.Panel, [
          * Test if the given tab page is in enabled state
          * @param  {Integer} index a tab page index
          * @return {Boolean} a tab page state
-         * @method isTabEnabled  
+         * @method isTabEnabled
          */
         this.isTabEnabled = function (index){
             return this.kids[index].isEnabled;
-        };  
+        };
 
         this.paintOnTop = function(g){
             var ts = g.stack[g.counter];
             // stop painting if the tab area is outside of clip area
-            if (zebra.util.isIntersect(this.repaintX, this.repaintY, 
+            if (zebra.util.isIntersect(this.repaintX, this.repaintY,
                                        this.repaintWidth, this.repaintHeight,
-                                       ts.x, ts.y, ts.width, ts.height)) 
+                                       ts.x, ts.y, ts.width, ts.height))
             {
                 if (this.selectedIndex > 0){
                     var r = this.getTabBounds(this.selectedIndex);
@@ -17024,9 +17024,9 @@ pkg.Tabs = Class(pkg.Panel, [
         };
 
         /**
-         * Draw currently activate tab page marker. 
-         * @param  {2DContext} g a graphical context 
-         * @param  {Object} r a tab page title rectangular area 
+         * Draw currently activate tab page marker.
+         * @param  {2DContext} g a graphical context
+         * @param  {Object} r a tab page title rectangular area
          * @method drawMarker
          */
         this.drawMarker = function(g,r){
@@ -17047,10 +17047,10 @@ pkg.Tabs = Class(pkg.Panel, [
          * @method paintTab
          */
         this.paintTab = function (g, pageIndex){
-            var b       = this.getTabBounds(pageIndex), 
-                page    = this.kids[pageIndex], 
-                tab     = this.views["tab"], 
-                tabover = this.views["tabover"], 
+            var b       = this.getTabBounds(pageIndex),
+                page    = this.kids[pageIndex],
+                tab     = this.views["tab"],
+                tabover = this.views["tabover"],
                 tabon   = this.views["tabon"];
 
             if (this.selectedIndex == pageIndex && tabon != null) {
@@ -17078,7 +17078,7 @@ pkg.Tabs = Class(pkg.Panel, [
          * @return {Object} a tab page rectangular bounds
          *
          *    {x:{Integer}, y:{Integer}, width:{Integer}, height:{Integer}}
-         * 
+         *
          * @protected
          * @method getTabBounds
          */
@@ -17101,11 +17101,11 @@ pkg.Tabs = Class(pkg.Panel, [
 
         this.doLayout = function(target){
             var right  = this.orient == L.RIGHT  ? this.right  : this.getRight(),
-                top    = this.orient == L.TOP    ? this.top    : this.getTop(), 
-                bottom = this.orient == L.BOTTOM ? this.bottom : this.getBottom(), 
+                top    = this.orient == L.TOP    ? this.top    : this.getTop(),
+                bottom = this.orient == L.BOTTOM ? this.bottom : this.getBottom(),
                 left   = this.orient == L.LEFT   ? this.left   : this.getLeft(),
                 b      = (this.orient == L.TOP || this.orient == L.BOTTOM);
-          
+
             if (b) {
                 this.repaintX = this.tabAreaX = left + this.sideOffset;
                 this.repaintY = this.tabAreaY = (this.orient == L.TOP) ? top : this.height - bottom - this.tabAreaHeight;
@@ -17113,11 +17113,11 @@ pkg.Tabs = Class(pkg.Panel, [
             }
             else {
                 this.repaintX = this.tabAreaX = (this.orient == L.LEFT ? left : this.width - right - this.tabAreaWidth);
-                this.repaintY = this.tabAreaY = top + this.sideOffset;                
+                this.repaintY = this.tabAreaY = top + this.sideOffset;
                 if (this.orient == L.RIGHT) this.repaintX -= this.border.getRight();
             }
 
-            var count = ~~(this.pages.length / 2), 
+            var count = ~~(this.pages.length / 2),
                 sp    = 2 * this.sideSpace,
                 xx    = (this.orient == L.RIGHT  ? this.tabAreaX : this.tabAreaX + this.sideSpace),
                 yy    = (this.orient == L.BOTTOM ? this.tabAreaY : this.tabAreaY + this.sideSpace);
@@ -17130,7 +17130,7 @@ pkg.Tabs = Class(pkg.Panel, [
 
                 if (b) {
                     xx += r.width;
-                    if (i == this.selectedIndex) { 
+                    if (i == this.selectedIndex) {
                         xx -= sp;
                         if (this.orient == L.BOTTOM) r.y -= this.border.getBottom();
                     }
@@ -17139,7 +17139,7 @@ pkg.Tabs = Class(pkg.Panel, [
                     yy += r.height;
                     if (i == this.selectedIndex) {
                         yy -= sp;
-                        if (this.orient == L.RIGHT) r.x -= this.border.getRight();                        
+                        if (this.orient == L.RIGHT) r.x -= this.border.getRight();
                     }
                 }
             }
@@ -17182,14 +17182,14 @@ pkg.Tabs = Class(pkg.Panel, [
                                       top + this.vgap);
                     }
                 }
-                else { 
+                else {
                     l.setSize(0, 0);
                 }
             }
         };
 
         /**
-         * Define recalc method to compute the component metrical characteristics 
+         * Define recalc method to compute the component metrical characteristics
          * @method recalc
          */
         this.recalc = function(){
@@ -17198,7 +17198,7 @@ pkg.Tabs = Class(pkg.Panel, [
                 this.tabAreaHeight = this.tabAreaWidth = 0;
 
                 var bv   = this.views["tab"],
-                    b    = (this.orient == L.LEFT || this.orient == L.RIGHT), 
+                    b    = (this.orient == L.LEFT || this.orient == L.RIGHT),
                     max  = 0,
                     hadd = bv.getLeft() + bv.getRight(),
                     vadd = bv.getTop()  + bv.getBottom();
@@ -17220,7 +17220,7 @@ pkg.Tabs = Class(pkg.Panel, [
                     }
                 }
 
-                // align tabs widths or heights to have the same size 
+                // align tabs widths or heights to have the same size
                 for(var i = 0; i < count; i++ ){
                     var r = this.getTabBounds(i);
                     if (b) r.width  = max;
@@ -17230,13 +17230,13 @@ pkg.Tabs = Class(pkg.Panel, [
                 if (b) {
                     this.tabAreaWidth   = max + this.sideSpace;
                     this.tabAreaHeight += (2 * this.sideSpace);
-                    this.repaintHeight  = this.tabAreaHeight; 
-                    this.repaintWidth   = this.tabAreaWidth + (b  == L.LEFT ? this.border.getLeft() : this.border.getRight()); 
+                    this.repaintHeight  = this.tabAreaHeight;
+                    this.repaintWidth   = this.tabAreaWidth + (b  == L.LEFT ? this.border.getLeft() : this.border.getRight());
                 }
                 else {
                     this.tabAreaWidth += (2 * this.sideSpace);
                     this.tabAreaHeight = this.sideSpace + max;
-                    this.repaintWidth  = this.tabAreaWidth; 
+                    this.repaintWidth  = this.tabAreaWidth;
                     this.repaintHeight = this.tabAreaHeight + (b  == L.TOP ? this.border.getTop() : this.border.getBottom());
                 }
 
@@ -17259,8 +17259,8 @@ pkg.Tabs = Class(pkg.Panel, [
          * Get tab index located at the given location
          * @param  {Integer} x a x coordinate
          * @param  {Integer} y a y coordinate
-         * @return {Integer} an index of the tab that is 
-         * detected at the given location. -1 if no any 
+         * @return {Integer} an index of the tab that is
+         * detected at the given location. -1 if no any
          * tab can be found
          * @method getTabAt
          */
@@ -17325,21 +17325,21 @@ pkg.Tabs = Class(pkg.Panel, [
         };
 
         /**
-         * Switch to the given tab page 
-         * @param  {Integer} index a tab page index to be navigated 
+         * Switch to the given tab page
+         * @param  {Integer} index a tab page index to be navigated
          * @method select
          */
         this.select = function(index){
             if (this.selectedIndex != index){
-                var prev = this.selectedIndex; 
+                var prev = this.selectedIndex;
                 this.selectedIndex = index;
 
                 if (prev >= 0) {
-                    this.pages[prev * 2].selected(this, prev, false);    
+                    this.pages[prev * 2].selected(this, prev, false);
                 }
-                
+
                 if (index >= 0) {
-                    this.pages[index * 2].selected(this, index, true);    
+                    this.pages[index * 2].selected(this, index, true);
                 }
 
                 this._.fired(this, this.selectedIndex);
@@ -17349,7 +17349,7 @@ pkg.Tabs = Class(pkg.Panel, [
 
         /**
          * Get the given tab. Using the tab you can control tab caption,
-         * icon. 
+         * icon.
          * @param {Integer} pageIndex a tab page index
          * @return  {zebra.ui.Tabs.TabView}
          * @method getTab
@@ -17380,8 +17380,8 @@ pkg.Tabs = Class(pkg.Panel, [
 
         /**
          * Set the tab page element alignments
-         * @param {Integer|String} o an alignment. The valid value is one of the following: 
-         * zebra.layout.LEFT, zebra.layout.RIGHT, zebra.layout.TOP, zebra.layout.BOTTOM or 
+         * @param {Integer|String} o an alignment. The valid value is one of the following:
+         * zebra.layout.LEFT, zebra.layout.RIGHT, zebra.layout.TOP, zebra.layout.BOTTOM or
          * "left", "right", "top", bottom
          * @method  setAlignment
          */
@@ -17416,20 +17416,20 @@ pkg.Tabs = Class(pkg.Panel, [
         };
 
         /**
-         *  Set number of views to render different Tab component elements 
-         *  @param {Object} a set of views as dictionary where key is a view 
+         *  Set number of views to render different Tab component elements
+         *  @param {Object} a set of views as dictionary where key is a view
          *  name and the value is a view instance, string(for color), or render
          *  function. The following view elements can be passed:
          *
-         * 
+         *
          *      {
-         *         "tab"    : <view to render not selected tab page>,   
+         *         "tab"    : <view to render not selected tab page>,
          *         "tabover": <view to render a tab page when mouse is over>
          *         "tabon"  : <a view to render selected tab page>
          *         "marker" : <a marker view to be rendered around tab page title>
          *      }
          *
-         * 
+         *
          *  @method  setViews
          */
     },
@@ -17448,14 +17448,14 @@ pkg.Tabs = Class(pkg.Panel, [
 
 
         /**
-         * Tab orientation 
+         * Tab orientation
          * @attribute orient
          * @type {Integer}
          * @readOnly
          */
 
         /**
-         * Sides gap 
+         * Sides gap
          * @attribute sideSpace
          * @type {Integer}
          * @readOnly
@@ -17500,15 +17500,15 @@ pkg.Tabs = Class(pkg.Panel, [
         var render = null
         if (instanceOf(constr, this.$clazz.TabView)) {
             render = constr;
-        } 
+        }
         else {
             render = new this.$clazz.TabView((constr == null ? "Page " + index : constr ));
             render.ownerChanged(this); // TODO: a little bit ugly but settin an owner is required to
-                                       // keep tabs comppnent infprmed when an icon has been updated 
+                                       // keep tabs comppnent infprmed when an icon has been updated
         }
 
-        this.pages.splice(index * 2, 0, render, { x:0, y:0, width:0, height:0 }); 
-        
+        this.pages.splice(index * 2, 0, render, { x:0, y:0, width:0, height:0 });
+
         var r = this.$super(index, constr, c);
         if (this.selectedIndex < 0) this.select(this.next(0, 1));
         return r;
@@ -17548,6 +17548,15 @@ pkg.Slider = Class(pkg.Panel, [
         this.correctDt = this.scaleStep = this.psW = this.psH = 0;
         this.intervals = this.pl = null;
         this.canHaveFocus = true;
+
+        /**
+         * Get a value
+         * @return {Integer} a value
+         * @method getValue
+         */
+        this.getValue = function() {
+            return this.value;
+        };
 
         this.paintNums = function(g,loc){
             if(this.isShowTitle)
@@ -17594,7 +17603,7 @@ pkg.Slider = Class(pkg.Panel, [
                 }
             }
 
-            var left = this.getLeft(), top = this.getTop(), 
+            var left = this.getLeft(), top = this.getTop(),
                 right = this.getRight(), bottom = this.getBottom(),
                 bnv = this.views["bundle"], gauge = this.views["gauge"],
                 bs = bnv.getPreferredSize(), gs = gauge.getPreferredSize(),
@@ -17603,8 +17612,8 @@ pkg.Slider = Class(pkg.Panel, [
             if (this.orient == L.HORIZONTAL){
                 var topY = top + ~~((h - this.psH) / 2) + 1, by = topY;
                 if(this.isEnabled === true) {
-                    gauge.paint(g, left + 1, 
-                                   topY + ~~((bs.height - gs.height) / 2), 
+                    gauge.paint(g, left + 1,
+                                   topY + ~~((bs.height - gs.height) / 2),
                                    w, gs.height, this);
                 }
                 else{
@@ -17635,7 +17644,7 @@ pkg.Slider = Class(pkg.Panel, [
             else {
                 var leftX = left + ~~((w - this.psW) / 2) + 1, bx = leftX;
                 if (this.isEnabled === true) {
-                    gauge.paint(g, leftX + ~~((bs.width - gs.width) / 2), 
+                    gauge.paint(g, leftX + ~~((bs.width - gs.width) / 2),
                                    top + 1, gs.width, h, this);
                 }
                 else {
@@ -17814,7 +17823,7 @@ pkg.Slider = Class(pkg.Panel, [
                     if (v <= this.max) this.setValue(v);
                     break;
                 case KE.HOME: this.setValue(b ? this.getPointValue(0) : this.min);break;
-                case KE.END:  this.setValue(b ? this.getPointValue(this.intervals.length - 1) 
+                case KE.END:  this.setValue(b ? this.getPointValue(this.intervals.length - 1)
                                             : this.max);
                               break;
             }
@@ -17827,8 +17836,8 @@ pkg.Slider = Class(pkg.Panel, [
                     var l = ((this.orient == L.HORIZONTAL) ? x : y), v = this.loc2value(l);
                     if (this.value != v) {
                         this.setValue(this.isJumpOnPress ? v
-                                                         : this.nextValue(this.value, 
-                                                                          this.roughStep, 
+                                                         : this.nextValue(this.value,
+                                                                          this.roughStep,
                                                                           v < this.value ? -1:1));
                     }
                 }
@@ -17838,8 +17847,8 @@ pkg.Slider = Class(pkg.Panel, [
         this.mouseDragStarted = function(e){
             var r = this.getBundleBounds(this.value);
 
-            if (e.x >= r.x && e.y >= r.y && 
-                e.x < r.x + r.width && 
+            if (e.x >= r.x && e.y >= r.y &&
+                e.x < r.x + r.width &&
                 e.y < r.y + r.height)
             {
                 this.dragged = true;
@@ -17875,11 +17884,11 @@ pkg.Slider = Class(pkg.Panel, [
         this.provider = this;
     },
 
-    function focused() { 
+    function focused() {
         this.$super();
-        this.repaint(); 
+        this.repaint();
     },
-    
+
     function setScaleGap(g){
         if (g != this.gap){
             this.gap = g;
@@ -17925,9 +17934,9 @@ pkg.Slider = Class(pkg.Panel, [
     },
 
     function setValues(min,max,intervals,roughStep,exactStep){
-        if(roughStep <= 0 || exactStep < 0 || min >= max || 
-           min + roughStep > max || min + exactStep > max  ) 
-        { 
+        if(roughStep <= 0 || exactStep < 0 || min >= max ||
+           min + roughStep > max || min + exactStep > max  )
+        {
             throw new Error("Invalid values");
         }
 
@@ -17945,7 +17954,7 @@ pkg.Slider = Class(pkg.Panel, [
         for(var i=0; i<intervals.length; i++){
             this.intervals[i] = intervals[i];
         }
-        
+
         if(this.value < min || this.value > max) {
             this.setValue(this.isIntervalMode ? min + intervals[0] : min);
         }
@@ -17962,7 +17971,7 @@ pkg.Slider.prototype.setViews = pkg.$ViewsSetter;
 /**
  * Status bar UI component class
  * @class zebra.ui.StatusBar
- * @param {Integer} [gap] a gap between status bar children elements 
+ * @param {Integer} [gap] a gap between status bar children elements
  * @extends {zebra.ui.Panel}
  */
 pkg.StatusBar = Class(pkg.Panel, [
@@ -17993,14 +18002,14 @@ pkg.StatusBar = Class(pkg.Panel, [
 ]);
 
 /**
- * Toolbar UI component. Handy way to place number of click able elements 
+ * Toolbar UI component. Handy way to place number of click able elements
  * @class zebra.ui.Toolbar
  * @extends {zebra.ui.Panel}
  */
 
 /**
  * Fired when a toolbar element has been pressed
-        
+
         var t = new zebra.ui.Toolbar();
 
         // add three pressable icons
@@ -18008,7 +18017,7 @@ pkg.StatusBar = Class(pkg.Panel, [
         t.addImage("icon2.jpg");
         t.addLine();
         t.addImage("ico3.jpg");
-        
+
         // catch a toolbar icon has been pressed
         t.bind(function (src) {
             ...
@@ -18041,13 +18050,13 @@ pkg.Toolbar = Class(pkg.Panel, [
 
     function $prototype() {
         /**
-         * Test if the given component is a decorative element 
+         * Test if the given component is a decorative element
          * in the toolbar
-         * @param  {zebra.ui.Panel}  c a component 
-         * @return {Boolean} return true if the component is 
+         * @param  {zebra.ui.Panel}  c a component
+         * @return {Boolean} return true if the component is
          * decorative element of the toolbar
          * @method isDecorative
-         * @protected 
+         * @protected
          */
         this.isDecorative = function(c){
             return instanceOf(c, pkg.EvStatePan) === false;
@@ -18060,11 +18069,11 @@ pkg.Toolbar = Class(pkg.Panel, [
     },
 
     /**
-     * Add a radio box as the toolbar element that belongs to the 
+     * Add a radio box as the toolbar element that belongs to the
      * given group and has the specified content component
      * @param {zebra.ui.Group} g a radio group the radio box belongs
      * @param {zebra.ui.Panel} c a content
-     * @return {zebra.ui.Panel} a component that has been added 
+     * @return {zebra.ui.Panel} a component that has been added
      * @method addRadio
      */
     function addRadio(g,c) {
@@ -18077,7 +18086,7 @@ pkg.Toolbar = Class(pkg.Panel, [
      * Add a check box as the toolbar element with the specified content
      * component
      * @param {zebra.ui.Panel} c a content
-     * @return {zebra.ui.Panel} a component that has been added 
+     * @return {zebra.ui.Panel} a component that has been added
      * @method addSwitcher
      */
     function addSwitcher(c){
@@ -18087,7 +18096,7 @@ pkg.Toolbar = Class(pkg.Panel, [
     /**
      * Add an image as the toolbar element
      * @param {String|Image} img an image or a path to the image
-     * @return {zebra.ui.Panel} a component that has been added 
+     * @return {zebra.ui.Panel} a component that has been added
      * @method addImage
      */
     function addImage(img) {
@@ -18097,9 +18106,9 @@ pkg.Toolbar = Class(pkg.Panel, [
 
     /**
      * Add line to the toolbar component. Line is a decorative ]
-     * element that logically splits toolbar elements. Line as any 
-     * other decorative element doesn't fire event  
-     * @return {zebra.ui.Panel} a component that has been added 
+     * element that logically splits toolbar elements. Line as any
+     * other decorative element doesn't fire event
+     * @return {zebra.ui.Panel} a component that has been added
      * @method addLine
      */
     function addLine(){
@@ -18110,9 +18119,9 @@ pkg.Toolbar = Class(pkg.Panel, [
 
     /**
      * Add the given component as decorative element of the toolbar.
-     * Decorative elements don't fire event and cannot be pressed  
-     * @param {zebra.ui.Panel} c a component 
-     * @return {zebra.ui.Panel} a component that has been added 
+     * Decorative elements don't fire event and cannot be pressed
+     * @param {zebra.ui.Panel} c a component
+     * @return {zebra.ui.Panel} a component that has been added
      * @method addDecorative
      */
     function addDecorative(c){
@@ -18127,15 +18136,15 @@ pkg.Toolbar = Class(pkg.Panel, [
 /**
  * Simple video panel that can be used to play a video:
  *
-    
-        // create canvas, add video panel to the center and 
-        // play video 
+
+        // create canvas, add video panel to the center and
+        // play video
         var canvas = zebra.ui.zCanvas(500,500).root.properties({
             layout: new zebra.layout.BorderLayout(),
-            zebra.layout.CENTER: new zebra.ui.VideoPan("trailer.mpg") 
+            zebra.layout.CENTER: new zebra.ui.VideoPan("trailer.mpg")
         });
- 
- * 
+
+ *
  * @param {String} url an URL to a video
  * @class zebra.ui.VideoPan
  * @extends {zebra.ui.Panel}
@@ -18159,17 +18168,17 @@ pkg.VideoPan = Class(pkg.Panel,  [
         };
 
         /**
-         * Start or continue playing video  
+         * Start or continue playing video
          * @method play
          */
         this.play = function() {
             if (this.isPlaying === false) {
                 this.isPlaying = true;
-                this.video.play();  
-            
+                this.video.play();
+
                 var $this = this;
                 window.requestAFrame(function anim() {
-                    if ($this.isReady === true) $this.repaint();    
+                    if ($this.isReady === true) $this.repaint();
                     if ($this.isPlaying === true) window.requestAFrame(anim);
                 })
 
@@ -18189,24 +18198,24 @@ pkg.VideoPan = Class(pkg.Panel,  [
         var $this = this;
 
         /**
-         * Original video DOM element that is created 
-         * to play video 
-         * @type {Video} 
+         * Original video DOM element that is created
+         * to play video
+         * @type {Video}
          * @readOnly
          * @attribute video
          */
         this.video = document.createElement("video");
         this.video.setAttribute("src", src);
-        
+
         this.video.addEventListener("canplaythrough", function() {
             $this.isReady = true;
         }, false);
-        
-        this.video.addEventListener("ended", function() { 
+
+        this.video.addEventListener("ended", function() {
             $this.isPlaying = false;
-            if ($this.finished != null) $this.finished(); 
+            if ($this.finished != null) $this.finished();
         }, false);
-        
+
         this.$super();
     }
 ]);
@@ -18267,10 +18276,10 @@ pkg.ArrowView = Class(View, [
 pkg.CheckboxView = Class(View, [
     function $prototype() {
         this[''] = function(color) {
-            this.color = (color != null ? color : "rgb(65, 131, 255)");    
+            this.color = (color != null ? color : "rgb(65, 131, 255)");
         };
 
-        this.paint = function(g,x,y,w,h,d){        
+        this.paint = function(g,x,y,w,h,d){
             g.beginPath();
             g.strokeStyle = this.color;
             g.lineWidth = 2;
@@ -18296,14 +18305,14 @@ pkg.BunldeView = Class(View, [
         this.paint =  function(g,x,y,w,h,d) {
             g.beginPath();
             if (this.direction == L.VERTICAL) {
-                var r = w/2;    
+                var r = w/2;
                 g.arc(x + r, y + r, r, Math.PI, 0, false);
                 g.lineTo(x + w, y + h - r);
                 g.arc(x + r, y + h - r, r, 0, Math.PI, false);
                 g.lineTo(x, y + r);
             }
             else {
-                var r = h/2;    
+                var r = h/2;
                 g.arc(x + r, y + r, r, 0.5 * Math.PI, 1.5 * Math.PI, false);
                 g.lineTo(x + w - r, y);
                 g.arc(x + w - r, y + h - r, r, 1.5*Math.PI, 0.5*Math.PI, false);
@@ -18319,7 +18328,7 @@ pkg.BunldeView = Class(View, [
  * The radio button ticker view.
  * @class  zebra.ui.RadioView
  * @extends zebra.ui.View
- * @constructor 
+ * @constructor
  * @param {String} [col1] color one to render the outer cycle
  * @param {String} [col2] color tow to render the inner cycle
  */
@@ -18332,10 +18341,10 @@ pkg.RadioView = Class(View, [
         this.color1 = col1;
         this.color2 = col2;
     },
-    
+
     function $prototype() {
         this.paint = function(g,x,y,w,h,d){
-            g.beginPath();            
+            g.beginPath();
 
             g.fillStyle = this.color1;
             g.arc(~~(x + w/2), ~~(y + h/2) , ~~(w/3 - 0.5), 0, 2* Math.PI, 1, false);
@@ -18350,7 +18359,7 @@ pkg.RadioView = Class(View, [
 ]);
 
 /**
- * Mobile scroll manager class. Implements inertial scrolling in zebra mobile application. 
+ * Mobile scroll manager class. Implements inertial scrolling in zebra mobile application.
  * @class zebra.ui.MobileScrollMan
  * @extends zebra.ui.Manager
  * @constructor
@@ -18359,17 +18368,17 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
     function $prototype() {
         this.sx = this.sy = 0;
         this.target = null;
-        this.identifier = -1; 
+        this.identifier = -1;
 
         /**
          * Define mouse drag started events handler.
          * @param  {zebra.ui.MouseEvent} e a mouse event
          * @method mouseDragStarted
-         */                
+         */
         this.mouseDragStarted = function(e) {
             if (e.touchCounter == 1)  {
                 this.identifier = e.touch.identifier;  // finger
-                var owner = e.source; 
+                var owner = e.source;
 
                 while(owner != null && instanceOf(owner, pkg.ScrollPan) === false) {
                     owner = owner.parent;
@@ -18387,11 +18396,11 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
          * Define mouse dragged events handler.
          * @param  {zebra.ui.MouseEvent} e a mouse event
          * @method mouseDragged
-         */                
+         */
         this.mouseDragged = function(e) {
             if (e.touchCounter   == 1 &&
-                this.target      != null && 
-                this.identifier  == e.touch.identifier) 
+                this.target      != null &&
+                this.identifier  == e.touch.identifier)
             {
                 var d = e.touch.direction;
                 if (d == L.BOTTOM || d == L.TOP) {
@@ -18399,7 +18408,7 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
                         var bar = this.target.vBar;
                         bar.position.setOffset(bar.position.offset - e.y + this.sy);
                     }
-                } 
+                }
                 else {
                     if (d == L.LEFT || d == L.RIGHT) {
                         if (this.target.hBar != null && this.target.hBar.isVisible === true) {
@@ -18418,39 +18427,39 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
          * Define mouse drag ended events handler.
          * @param  {zebra.ui.MouseEvent} e a mouse event
          * @method mouseDragEnded
-         */                
+         */
         this.mouseDragEnded = function(e) {
-            if (this.target != null && 
-                this.timer  == null && 
+            if (this.target != null &&
+                this.timer  == null &&
                 this.identifier == e.touch.identifier &&
                 (e.touch.direction == L.BOTTOM || e.touch.direction == L.TOP) &&
-                this.target.vBar != null && 
-                this.target.vBar.isVisible === true && 
-                e.touch.dy != 0) 
+                this.target.vBar != null &&
+                this.target.vBar.isVisible === true &&
+                e.touch.dy != 0)
             {
-                this.$dt = 2*e.touch.dy;                     
+                this.$dt = 2*e.touch.dy;
                 var $this = this, bar = this.target.vBar, k = 0;
 
                 this.timer = setInterval(function() {
                     var o = bar.position.offset;
-                    
+
                     bar.position.setOffset(o - $this.$dt);
-                    if (++k%5 === 0) { 
+                    if (++k%5 === 0) {
                         $this.$dt = ~~($this.$dt/2);
                     }
                     if (o == bar.position.offset || ($this.$dt >= -1  &&  $this.$dt <= 1)) {
                         clearInterval($this.timer);
-                        $this.timer = $this.target = null; 
+                        $this.timer = $this.target = null;
                     }
                 }, 10);
-            }            
+            }
         };
 
         /**
          * Define mouse pressed events handler.
          * @param  {zebra.ui.MouseEvent} e a mouse event
          * @method mousePressed
-         */                
+         */
         this.mousePressed = function(e) {
             if (this.timer != null) {
                 clearInterval(this.timer);

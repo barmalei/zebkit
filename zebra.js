@@ -4573,7 +4573,7 @@ pkg.JRPC = Class(pkg.Service, [
     function(url, methods) {
         this.$super(url, methods);
         this.version = "2.0";
-        this.contentType = "application/json";
+        this.contentType = "application/json; charset=ISO-8859-1;";
     },
 
     function encode(name, args) {
@@ -17789,7 +17789,7 @@ pkg.Slider = Class(pkg.Panel, [
             }
         };
 
-        this.setValue = function(v){
+        this.setValue = function(v) {
             if (v < this.min || v > this.max) {
                 throw new Error("Value is out of bounds: " + v);
             }

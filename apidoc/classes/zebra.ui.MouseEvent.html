@@ -416,8 +416,8 @@
 
 
 <div class="box intro">
-    <p>Mouse and touch screen input event class. The input event is 
-triggered by a mouse or touch screen. It has UID property set 
+    <p>Mouse and touch screen input event class. The input event is
+triggered by a mouse or touch screen. It has UID property set
 to zebra.ui.InputEvent.MOUSE_UID value</p>
 
 </div>
@@ -534,15 +534,15 @@ to zebra.ui.InputEvent.MOUSE_UID value</p>
                     
 
                     <div class="param-description">
-                        <p>an unique ID of the mouse input event: </p>
-<pre><code>   zebra.ui.MouseEvent.CLICKED    
-   zebra.ui.MouseEvent.PRESSED    
-   zebra.ui.MouseEvent.RELEASED   
-   zebra.ui.MouseEvent.ENTERED    
-   zebra.ui.MouseEvent.EXITED     
-   zebra.ui.MouseEvent.DRAGGED    
+                        <p>an unique ID of the mouse input event:</p>
+<pre><code>   zebra.ui.MouseEvent.CLICKED
+   zebra.ui.MouseEvent.PRESSED
+   zebra.ui.MouseEvent.RELEASED
+   zebra.ui.MouseEvent.ENTERED
+   zebra.ui.MouseEvent.EXITED
+   zebra.ui.MouseEvent.DRAGGED
    zebra.ui.MouseEvent.DRAGSTARTED
-   zebra.ui.MouseEvent.DRAGENDED  
+   zebra.ui.MouseEvent.DRAGENDED
    zebra.ui.MouseEvent.MOVED</code></pre>
 
                     </div>
@@ -559,7 +559,7 @@ to zebra.ui.InputEvent.MOUSE_UID value</p>
                     
 
                     <div class="param-description">
-                        <p>an absolute (relatively to a canvas where the source 
+                        <p>an absolute (relatively to a canvas where the source
 UI component is hosted) mouse pointer x coordinate</p>
 
                     </div>
@@ -576,7 +576,7 @@ UI component is hosted) mouse pointer x coordinate</p>
                     
 
                     <div class="param-description">
-                        <p>an absolute (relatively to a canvas where the source 
+                        <p>an absolute (relatively to a canvas where the source
 UI component is hosted) mouse pointer y coordinate</p>
 
                     </div>
@@ -700,6 +700,10 @@ UI component is hosted) mouse pointer y coordinate</p>
                                 <a href="#attr_mask">mask</a>
                             </li>
                         
+                            <li class="index-item attr">
+                                <a href="#attr_modifiers">modifiers</a>
+                            </li>
+                        
                             <li class="index-item attr inherited">
                                 <a href="#attr_source">source</a>
                             </li>
@@ -772,6 +776,12 @@ UI component is hosted) mouse pointer y coordinate</p>
                 <li class="arg">
                     
                         <code>clicks</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>modifiers</code>
                     
                 </li>
             
@@ -860,7 +870,7 @@ UI component is hosted) mouse pointer y coordinate</p>
                     
 
                     <div class="param-description">
-                        <p>an absolute (relatively to a canvas where the target 
+                        <p>an absolute (relatively to a canvas where the target
 component is hosted) x mouse cursor coordinate</p>
 
                     </div>
@@ -877,7 +887,7 @@ component is hosted) x mouse cursor coordinate</p>
                     
 
                     <div class="param-description">
-                        <p>an absolute (relatively to a canvas where the target 
+                        <p>an absolute (relatively to a canvas where the target
 component is hosted) y mouse cursor coordinate</p>
 
                     </div>
@@ -911,6 +921,22 @@ component is hosted) y mouse cursor coordinate</p>
 
                     <div class="param-description">
                         <p>number of a button clicks</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">modifiers</code>
+                        <span class="type">Object</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>modifier keys state</p>
 
                     </div>
 
@@ -1169,6 +1195,52 @@ component is hosted) y mouse cursor coordinate</p>
 </div>
 
                 
+                    <div id="attr_modifiers" class="attr item">
+    <a name="config_modifiers"></a> 
+    <h3 class="name"><code>modifiers</code></h3>
+    <span class="type">Object</span>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <span class="flag readonly">readonly</span>
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>State of modifier keys</p>
+
+    </div>
+
+    
+
+    
+
+    
+</div>
+
+                
                     <div id="attr_source" class="attr item inherited">
     <a name="config_source"></a> 
     <h3 class="name"><code>source</code></h3>
@@ -1299,7 +1371,7 @@ component is hosted) y mouse cursor coordinate</p>
     </div>
 
     <div class="description">
-        <p>Class id of the input event. It helps to differentiates 
+        <p>Class id of the input event. It helps to differentiates
 input events by a device it has been generated</p>
 
     </div>

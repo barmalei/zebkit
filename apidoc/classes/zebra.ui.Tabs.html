@@ -416,31 +416,31 @@
 
 
 <div class="box intro">
-    <p>Tabs UI panel. The component is used to organize switching 
+    <p>Tabs UI panel. The component is used to organize switching
 between number of pages where every page is an UI component.</p>
-<p> Filling tabs component with pages is the same to how you add 
- an UI component to a panel. For instance in the example below 
- three pages with &quot;Titl1&quot;, &quot;Title2&quot;, &quot;Title3&quot; are added: </p>
+<p> Filling tabs component with pages is the same to how you add
+ an UI component to a panel. For instance in the example below
+ three pages with &quot;Titl1&quot;, &quot;Title2&quot;, &quot;Title3&quot; are added:</p>
 <pre class="code prettyprint"><code> var tabs = zebra.ui.Tabs();
  tabs.add(&quot;Title1&quot;, new zebra.ui.Label(&quot;Label as a page&quot;));
  tabs.add(&quot;Title2&quot;, new zebra.ui.Button(&quot;Button as a page&quot;));
  tabs.add(&quot;Title3&quot;, new zebra.ui.TextArea(&quot;Text area as a page&quot;));</code></pre>
-<p> You can access tabs pages UI component the same way like you 
+<p> You can access tabs pages UI component the same way like you
  access a panel children components</p>
 <pre class="code prettyprint"><code>...
 tabs.kids[0] // access the first page</code></pre>
 <p> And you can remove it with standard panel inherited API:</p>
 <pre class="code prettyprint"><code>...
 tabs.removeAt(0); // remove first tab page</code></pre>
-<p> To customize tab page caption and icon you should access tab object and 
- do it with API it provides: </p>
-<pre class="code prettyprint"><code>   // update a tab caption 
+<p> To customize tab page caption and icon you should access tab object and
+ do it with API it provides:</p>
+<pre class="code prettyprint"><code>   // update a tab caption
    tabs.getTab(0).setCaption(&quot;Test&quot;);
 
    // update a tab icon
    tabs.getTab(0).setIcon(&quot;my.gif&quot;);
 
-   // set a particular font and color for the tab in selected state 
+   // set a particular font and color for the tab in selected state
    tabs.getTab(0).setColor(true, &quot;blue&quot;);
    tabs.getTab(0).setFont(true, new zebra.ui.Font(&quot;Arial&quot;, &quot;bold&quot;, 16));
 
@@ -1169,8 +1169,8 @@ icon.</p>
                     
                         <b>Return: </b><span class="type">Integer</span>
                     
-                    <p>an index of the tab that is 
-detected at the given location. -1 if no any 
+                    <p>an index of the tab that is
+detected at the given location. -1 if no any
 tab can be found</p>
 
                 
@@ -2201,8 +2201,8 @@ tab can be found</p>
                     
 
                     <div class="param-description">
-                        <p>an alignment. The valid value is one of the following: 
-zebra.layout.LEFT, zebra.layout.RIGHT, zebra.layout.TOP, zebra.layout.BOTTOM or 
+                        <p>an alignment. The valid value is one of the following:
+zebra.layout.LEFT, zebra.layout.RIGHT, zebra.layout.TOP, zebra.layout.BOTTOM or
 &quot;left&quot;, &quot;right&quot;, &quot;top&quot;, bottom</p>
 
                     </div>
@@ -2365,11 +2365,11 @@ zebra.layout.LEFT, zebra.layout.RIGHT, zebra.layout.TOP, zebra.layout.BOTTOM or
                     
 
                     <div class="param-description">
-                        <p>set of views as dictionary where key is a view 
+                        <p>set of views as dictionary where key is a view
 name and the value is a view instance, string(for color), or render
 function. The following view elements can be passed:</p>
 <pre><code>{
-   &quot;tab&quot;    : &lt;view to render not selected tab page&gt;,   
+   &quot;tab&quot;    : &lt;view to render not selected tab page&gt;,
    &quot;tabover&quot;: &lt;view to render a tab page when mouse is over&gt;
    &quot;tabon&quot;  : &lt;a view to render selected tab page&gt;
    &quot;marker&quot; : &lt;a marker view to be rendered around tab page title&gt;
@@ -2665,7 +2665,7 @@ function. The following view elements can be passed:</p>
     </div>
 
     <div class="description">
-        <p>Fired when a new tab page has been selected </p>
+        <p>Fired when a new tab page has been selected</p>
 <pre class="code prettyprint"><code> tabs.bind(function (src, selectedIndex) {
     ...
  });</code></pre>

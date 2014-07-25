@@ -416,34 +416,34 @@
 
 
 <div class="box intro">
-    <p>State panel class. The class is UI component that allows to customize 
+    <p>State panel class. The class is UI component that allows to customize
 the component  face, background and border depending on the component
-state. Number and names of states the component can have is defined 
+state. Number and names of states the component can have is defined
 by developers. To bind a view to the specified state use zebra.ui.ViewSet
-class. For instance if a component has to support two states : &quot;state1&quot; and 
-&quot;state2&quot; you can do it as following: </p>
+class. For instance if a component has to support two states : &quot;state1&quot; and
+&quot;state2&quot; you can do it as following:</p>
 <pre class="code prettyprint"><code>   // create state component
    var p = new zebra.ui.StatePan();
 
-   // define border view that contains views for &quot;state1&quot; and &quot;state2&quot; 
+   // define border view that contains views for &quot;state1&quot; and &quot;state2&quot;
    p.setBorder({
        &quot;state1&quot;: new zebra.ui.Border(&quot;red&quot;, 1),
        &quot;state1&quot;: new zebra.ui.Border(&quot;blue&quot;, 2)
 
    });
 
-   // define background view that contains views for &quot;state1&quot; and &quot;state2&quot; 
+   // define background view that contains views for &quot;state1&quot; and &quot;state2&quot;
    p.setBorder({
        &quot;state1&quot;: &quot;yellow&quot;,
        &quot;state1&quot;: &quot;green&quot;
    });
 
-   // set component state 
+   // set component state
    p.setState(&quot;state1&quot;);</code></pre>
-<p>State component children components can listening when the state of the component 
-has been updated by implementing &quot;parentStateUpdated(o,n,id)&quot; method. It gets old 
-state, new state and a view id that is mapped to the new state.  The feature is 
-useful if we are developing a composite components whose children component also 
+<p>State component children components can listening when the state of the component
+has been updated by implementing &quot;parentStateUpdated(o,n,id)&quot; method. It gets old
+state, new state and a view id that is mapped to the new state.  The feature is
+useful if we are developing a composite components whose children component also
 should react to a state changing.</p>
 
 </div>
@@ -868,7 +868,7 @@ should react to a state changing.</p>
     </div>
 
     <div class="description">
-        <p>Define the method if the state value has to be 
+        <p>Define the method if the state value has to be
 somehow converted to a view id. By default the state value
 itself is used as a view id.</p>
 

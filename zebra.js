@@ -223,7 +223,7 @@ function $toString() { return this.$hash$; }
 //  tf - template function
 //  p  - parent interfaces
 function make_template(pt, tf, p) {
-    tf.$hash$ = ["$ZBr$", $$$++].join('');
+    tf.$hash$ = "$ZBr$" + ($$$++);
     tf.toString = $toString;
     
     if (pt != null) { 
@@ -239,7 +239,7 @@ function make_template(pt, tf, p) {
         for(var i=0; i < p.length; i++) {
             var l = p[i];
             if (l == null || typeof l !== "function") {
-                throw new ReferenceError("Undefined parent class or interface ["+i+"]");
+                throw new ReferenceError("Invalid parent class or interface:" + i);
             }
 
             tf.$parents[l] = true;
@@ -316,7 +316,7 @@ pkg.$Extended = pkg.Interface();
 
 function ProxyMethod(name, f) {
     if (isString(name) === false) {
-        throw new TypeError('Method name has not been defined');
+        throw new TypeError('Invalid method name');
     }
 
     var a = null;
@@ -489,7 +489,7 @@ pkg.Class = make_template(null, function() {
     }
 
     if (Array.isArray(arguments[arguments.length - 1]) === false) {
-        throw new Error("Invalid class definition was found");
+        throw new Error("Invalid class definition");
     }
 
     if (arguments.length > 1 && typeof arguments[0] !== "function") {
@@ -505,7 +505,7 @@ pkg.Class = make_template(null, function() {
     }
 
     var $template = make_template(pkg.Class, function() {
-        this.$hash$ = ["$zObj_", $$$++].join('');
+        this.$hash$ = "$zObj_" + ($$$++);
 
         if (arguments.length > 0) {
             var a = arguments[arguments.length - 1];
@@ -649,11 +649,13 @@ pkg.Class = make_template(null, function() {
         };
     }
 
+    var lans = "Listeners are not supported";
+
     // check if the method has been already defined in parent class
     if (typeof $template.prototype.bind === 'undefined') {
         $template.prototype.bind = function() {
             if (this._ == null) {
-                throw new Error("Listeners are not supported");
+                throw new Error(lans);
             }
             return this._.add.apply(this._, arguments);
         };
@@ -663,7 +665,7 @@ pkg.Class = make_template(null, function() {
     if (typeof $template.prototype.unbind === 'undefined') {
         $template.prototype.unbind = function() {
             if (this._ == null) {
-                throw new Error("Listeners are not supported");
+                throw new Error(lans);
             }
             this._.remove.apply(this._, arguments); 
         };
@@ -736,7 +738,7 @@ pkg.Class = make_template(null, function() {
             return sw;
         }
         
-        throw new Error("Method '" + n + "' conflicts to property");
+        throw new Error("Method '" + n + "' clash with a property");
     }
 
     /**
@@ -780,7 +782,7 @@ pkg.Class = make_template(null, function() {
      */
     extend = function(df) {
         if (Array.isArray(df) === false) {
-            throw new Error("Wrong class definition '" + df + "', array is expected");
+            throw new Error("Invalid class definition '" + df + "', array is expected");
         }
 
         for(var i=0; i < df.length; i++) {
@@ -976,7 +978,6 @@ pkg.$cache = function(key) {
 
     throw new Error("Class '" + key + "' cannot be found");
 };
-
 
 /**
  * Get class by the given class name
@@ -1216,7 +1217,6 @@ else {
     complete();
 }
 
-
 /**
  * @for
  */
@@ -1278,7 +1278,7 @@ function hex(v) {
                               },
                               function(foundElement) {
                                  ...
-                                 // true means stop lookaup
+                                 // true means stop lookup
                                  return true;   
                               });
 
@@ -1365,7 +1365,7 @@ pkg.findInTree = function(root, path, eq, cb) {
 
 
 /**
- * Rgb color class. This class represents rgb(a) color as JavaScript structure:
+ * RGB color class. This class represents rgb(a) color as JavaScript structure:
  
        // rgb color
        var rgb1 = new zebra.util.rgb(100,200,100);
@@ -3672,7 +3672,7 @@ var HEX = "0123456789ABCDEF";
 pkg.ID = function UUID(size) {
     if (typeof size === 'undefined') size = 16;
     var id = [];
-    for (var i=0; i<36; i++)  id[i] = HEX[~~(Math.random() * 16)];
+    for (var i=0; i < size; i++) id[i] = HEX[~~(Math.random() * 16)];
     return id.join('');
 };
 
@@ -7790,9 +7790,10 @@ pkg.Radial = Class(pkg.View, [
         };
 
         this.paint = function(g,x,y,w,h,d){
-            var cx1 = w/2, cy1 = w/2;
-            this.gradient = g.createRadialGradient(cx1, cy1, 10, cx1, cy1, w < h ? w : h);
-            for(var i=0;i<this.colors.length;i++) {
+            var cx1 = w/2, cy1 = h/2;
+            this.gradient = g.createRadialGradient(cx1, cy1, 10, cx1, cy1, w > h ? w : h);
+
+            for(var i = 0; i < this.colors.length; i++) {
                 this.gradient.addColorStop(i, this.colors[i].toString());
             }
             g.fillStyle = this.gradient;
@@ -12028,7 +12029,9 @@ pkg.zCanvas = Class(pkg.Panel, [
         }
         else {
             this.canvas = element;
-            document.body.appendChild(this.canvas);
+            if (!document.contains(this.canvas)) {
+                document.body.appendChild(this.canvas);
+            }
         }
 
         if (w < 0) w = this.canvas.offsetWidth;
@@ -16801,7 +16804,7 @@ pkg.Tabs = Class(pkg.Panel, [
              * @method getCaption
              */
             function getCaption(b) {
-                this.getCaptionPan().view.getCaption(this.$toId(b));
+                return this.getCaptionPan().view.getCaption(this.$toId(b));
             },
 
             /**

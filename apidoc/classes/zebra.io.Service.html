@@ -412,8 +412,8 @@
 
 
 <div class="box intro">
-    <p>A remote service connector class. It is supposed the class has to be extended with 
-different protocols like RPC, JSON etc. The typical pattern of connecting to 
+    <p>A remote service connector class. It is supposed the class has to be extended with
+different protocols like RPC, JSON etc. The typical pattern of connecting to
 a remote service is shown below:</p>
 <pre class="code prettyprint"><code>   // create service connector that has two methods &quot;a()&quot; and &quot;b(param1)&quot;
    var service = new zebra.io.Service(&quot;http://myservice.com&quot;, [
@@ -440,7 +440,7 @@ class has to implement two methods:</p>
 <ul>
 <li><strong>encode</strong> to say how the given remote method with passed parameters have
 to be transformed into a concrete service side protocol (JSON, XML, etc)</li>
-<li><strong>decode</strong> to say how the specific service response has to be converted into 
+<li><strong>decode</strong> to say how the specific service response has to be converted into
 JavaScript object</li>
 </ul>
 
@@ -688,7 +688,7 @@ JavaScript object</li>
     </div>
 
     <div class="description">
-        <p>Transforms the given remote method response to a JavaScript 
+        <p>Transforms the given remote method response to a JavaScript
 object.</p>
 
     </div>
@@ -727,7 +727,7 @@ object.</p>
                     
                         <b>Return: </b><span class="type">Object</span>
                     
-                    <p>a result of the remote method calling as a JavaScript 
+                    <p>a result of the remote method calling as a JavaScript
 object</p>
 
                 
@@ -925,7 +925,7 @@ to service specific protocol.</p>
     </div>
 
     <div class="description">
-        <p>Send the given data to the given url and return a response. Callback 
+        <p>Send the given data to the given url and return a response. Callback
 function can be passed for asynchronous result handling.</p>
 
     </div>

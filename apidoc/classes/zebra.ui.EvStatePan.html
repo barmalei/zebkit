@@ -416,11 +416,11 @@
 
 
 <div class="box intro">
-    <p>Event state panel class. The class implements UI component whose face, border and 
-background view depends on its input events state. The component is good basis 
+    <p>Event state panel class. The class implements UI component whose face, border and
+background view depends on its input events state. The component is good basis
 for creation  dynamic view UI components.The state the component can be is:</p>
 <ul>
-<li><strong>over</strong> the mouse cursor is inside the component </li>
+<li><strong>over</strong> the mouse cursor is inside the component</li>
 <li><strong>out</strong> the mouse cursor is outside the component</li>
 <li><strong>pressed over</strong> the mouse cursor is inside the component and an action mouse
 button or key is pressed</li>
@@ -428,10 +428,10 @@ button or key is pressed</li>
 button or key is pressed</li>
 <li><strong>disabled</strong> the component is disabled</li>
 </ul>
-<p>The view border, background or face should be set as &quot;zebra.ui.ViewSet&quot; where an required 
-for the given component state view is identified by an id. By default corresponding to 
+<p>The view border, background or face should be set as &quot;zebra.ui.ViewSet&quot; where an required
+for the given component state view is identified by an id. By default corresponding to
 component states views IDs are the following: &quot;over&quot;, &quot;pressed.over&quot;, &quot;out&quot;, &quot;pressed.out&quot;,
-&quot;disabled&quot;.  Imagine for example we have two colors and we need to change between the colors 
+&quot;disabled&quot;.  Imagine for example we have two colors and we need to change between the colors
 every time mouse cursor is over/out of the component:</p>
 <pre class="code prettyprint"><code>// create state panel
 var statePan = new zebra.ui.EvStatePan();
@@ -447,9 +447,9 @@ statePan.setBorder(new zebra.ui.ViewSet({
    &quot;over&quot;: new zebra.ui.Border(&quot;green&quot;, 4, 8),
    &quot;out&quot;: null
 }));</code></pre>
-<p>Additionally the UI component allows developer to specify whether the component can hold 
-input focus and which UI component has to be considered as the focus marker. The focus marker 
-component is used as anchor to paint focus marker view. In simple case the view can be just 
+<p>Additionally the UI component allows developer to specify whether the component can hold
+input focus and which UI component has to be considered as the focus marker. The focus marker
+component is used as anchor to paint focus marker view. In simple case the view can be just
 a border. So border will be rendered around the focus marker component:</p>
 <pre class="code prettyprint"><code>// create state panel that contains one label component
 var statePan = new zebra.ui.EvStatePan();
@@ -459,7 +459,7 @@ statePan.setPadding(6);
 statePan.setLayout(new zebra.layout.BorderLayout());
 statePan.add(zebra.layout.CENTER, lab);
 
-// set label as an anchor for focus border indicator 
+// set label as an anchor for focus border indicator
 statePan.setFocusAnchorComponent(lab);
 statePan.setFocusMarkerView(&quot;plain&quot;);</code></pre>
 
@@ -1597,7 +1597,7 @@ statePan.setFocusMarkerView(&quot;plain&quot;);</code></pre>
     </div>
 
     <div class="description">
-        <p>Define the method if the state value has to be 
+        <p>Define the method if the state value has to be
 somehow converted to a view id. By default the state value
 itself is used as a view id.</p>
 

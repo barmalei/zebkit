@@ -416,21 +416,21 @@
 
 
 <div class="box intro">
-    <p>Cursor manager class. Allows developers to control mouse cursor type by implementing an own 
-getCursorType method or by specifying a cursor by cursorType field. Imagine an UI component 
-needs to change cursor type. It 
+    <p>Cursor manager class. Allows developers to control mouse cursor type by implementing an own
+getCursorType method or by specifying a cursor by cursorType field. Imagine an UI component
+needs to change cursor type. It
  can be done by one of the following way:</p>
 <ul>
-<li><p><strong>Implement getCursorType method by the component itself if the cursor type depends on cursor location</strong> </p>
+<li><p><strong>Implement getCursorType method by the component itself if the cursor type depends on cursor location</strong></p>
 <pre class="code prettyprint"><code>var p = new zebra.ui.Panel([
-     // implement getCursorType method to set required 
-     // mouse cursor type 
+     // implement getCursorType method to set required
+     // mouse cursor type
      function getCursorType(target, x, y) {
          return zebra.ui.Cursor.WAIT;
      }
 ]);</code></pre>
 </li>
-<li><p><strong>Define &quot;cursorType&quot; property in component if the cursor type doesn&#39;t depend on cursor location </strong> </p>
+<li><p><strong>Define &quot;cursorType&quot; property in component if the cursor type doesn&#39;t depend on cursor location </strong></p>
 <pre class="code prettyprint"><code>var myPanel = new zebra.ui.Panel();
 ...
 myPanel.cursorType = zebra.ui.Cursor.WAIT;</code></pre>

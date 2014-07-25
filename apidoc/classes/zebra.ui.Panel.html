@@ -416,15 +416,15 @@
 
 
 <div class="box intro">
-    <p>This the core UI component class. All other UI components has to be 
-successor of panel class. </p>
+    <p>This the core UI component class. All other UI components has to be
+successor of panel class.</p>
 <pre class="code prettyprint"><code>// instantiate panel with no arguments
 var p = new zebra.ui.Panel();
 
 // instantiate panel with border layout set as its layout manager
 var p = new zebra.ui.Panel(new zebra.layout.BorderLayout());
 
-// instantiate panel with the given properties (border 
+// instantiate panel with the given properties (border
 // layout manager, blue background and plain border)
 var p = new zebra.ui.Panel({
    layout: new zebra.ui.BorderLayout(),
@@ -432,45 +432,45 @@ var p = new zebra.ui.Panel({
    border     : &quot;plain&quot;
 });</code></pre>
 <p> <strong>Container. </strong>
- Panel can contains number of other UI components as its children where 
- the children components are placed with a defined by the panel layout 
+ Panel can contains number of other UI components as its children where
+ the children components are placed with a defined by the panel layout
  manager:</p>
 <pre class="code prettyprint"><code>// add few children component to panel top, center and bottom parts
 // with help of border layout manager
 var p = new zebra.ui.Panel();
-p.setLayout(new zebra.layout.BorderLayout(4)); // set layout manager to 
+p.setLayout(new zebra.layout.BorderLayout(4)); // set layout manager to
                                                // order children components
 
-p.add(zebra.layout.TOP, new zebra.ui.Label(&quot;Top label&quot;)); 
-p.add(zebra.layout.CENTER, new zebra.ui.TextArea(&quot;Text area&quot;)); 
-p.add(zebra.layout.BOTTOM, new zebra.ui.Button(&quot;Button&quot;)); </code></pre>
+p.add(zebra.layout.TOP, new zebra.ui.Label(&quot;Top label&quot;));
+p.add(zebra.layout.CENTER, new zebra.ui.TextArea(&quot;Text area&quot;));
+p.add(zebra.layout.BOTTOM, new zebra.ui.Button(&quot;Button&quot;));</code></pre>
 <p> <strong>Events. </strong>
- The class provides possibility to catch various component and input 
- events by declaring an appropriate event method handler. The most 
- simple case you just define a method: </p>
+ The class provides possibility to catch various component and input
+ events by declaring an appropriate event method handler. The most
+ simple case you just define a method:</p>
 <pre class="code prettyprint"><code>var p = new zebra.ui.Panel();
 p.mousePressed = function(e) {
-    // handle event here 
+    // handle event here
 };</code></pre>
 <p> If you prefer to create an anonymous class instance you can do it as
- follow:  </p>
+ follow:</p>
 <pre class="code prettyprint"><code>var p = new zebra.ui.Panel([
     function mousePressed(e) {
-        // handle event here 
+        // handle event here
     }
 ]);</code></pre>
-<p> One more way to add the event handler is dynamic extending of an instance 
- class demonstrated below: </p>
+<p> One more way to add the event handler is dynamic extending of an instance
+ class demonstrated below:</p>
 <pre class="code prettyprint"><code>var p = new zebra.ui.Panel(&quot;Test&quot;);
 p.extend([
     function mousePressed(e) {
-        // handle event here 
+        // handle event here
     }
 ]);</code></pre>
-<p> Pay attention Zebra UI components often declare own event handlers and 
+<p> Pay attention Zebra UI components often declare own event handlers and
  in this case you can overwrite the default event handler with a new one.
- Preventing the basic event handler execution can cause the component will 
- work improperly. You should care about the base event handler execution 
+ Preventing the basic event handler execution can cause the component will
+ work improperly. You should care about the base event handler execution
  as follow:</p>
 <pre class="code prettyprint"><code>// button component declares own mouse pressed event handler
 // we have to call the original handler to keep the button component
@@ -478,8 +478,8 @@ p.extend([
 var p = new zebra.ui.Button(&quot;Test&quot;);
 p.extend([
     function mousePressed(e) {
-        this.$super(e); // call parent class event handler implementation 
-        // handle event here 
+        this.$super(e); // call parent class event handler implementation
+        // handle event here
     }
 ]);</code></pre>
 
@@ -552,8 +552,8 @@ p.extend([
                     
 
                     <div class="param-description">
-                        <p>pass a layout manager or 
-number of properties that have to be applied to the instance of 
+                        <p>pass a layout manager or
+number of properties that have to be applied to the instance of
 the panel class.</p>
 
                     </div>
@@ -1419,12 +1419,12 @@ be added</p>
     </div>
 
     <div class="description">
-        <p>Shortcut method to register the specific to the concrete component 
-events listener. For instance &quot;zebra.ui.Button&quot; component fires event 
+        <p>Shortcut method to register the specific to the concrete component
+events listener. For instance &quot;zebra.ui.Button&quot; component fires event
 when it is pressed:</p>
 <pre class="code prettyprint"><code>   var b = new zebra.ui.Button(&quot;Test&quot;);
    b.bind(function() {
-       // button has been pressed 
+       // button has been pressed
    });</code></pre>
 
     </div>
@@ -1444,7 +1444,7 @@ when it is pressed:</p>
                     
 
                     <div class="param-description">
-                        <p>listener function or an object that 
+                        <p>listener function or an object that
 declares events handler methods</p>
 
                     </div>
@@ -3032,7 +3032,7 @@ insertion.</p>
                     
 
                     <div class="param-description">
-                        <p>an index at that a new children component 
+                        <p>an index at that a new children component
 has been added</p>
 
                     </div>
@@ -3305,7 +3305,7 @@ the component has completed to layout its children components</p>
                     
 
                     <div class="param-description">
-                        <p>an URL to a JSON file that describes UI 
+                        <p>an URL to a JSON file that describes UI
 to be loaded into the panel</p>
 
                     </div>
@@ -3571,7 +3571,7 @@ the component metrics.</p>
     </div>
 
     <div class="description">
-        <p>The method is implemented to be aware the 
+        <p>The method is implemented to be aware the
 component location updating</p>
 
     </div>
@@ -4254,7 +4254,7 @@ component location updating</p>
     </div>
 
     <div class="description">
-        <p>The method is implemented to be aware the 
+        <p>The method is implemented to be aware the
 component size updating</p>
 
     </div>
@@ -4478,7 +4478,7 @@ been re-set with the new one</p>
     </div>
 
     <div class="description">
-        <p>Set the background. Background can be a color string or a zebra.ui.View class 
+        <p>Set the background. Background can be a color string or a zebra.ui.View class
 instance, or a function(g,x,y,w,h,c) that paints the background:</p>
 <pre class="code prettyprint"><code>       // set background color
        comp.setBackground(&quot;red&quot;);
@@ -4512,7 +4512,7 @@ instance, or a function(g,x,y,w,h,c) that paints the background:</p>
                     
 
                     <div class="param-description">
-                        <p>a background view, color or 
+                        <p>a background view, color or
 background &quot;paint(g,x,y,w,h,c)&quot; rendering function.</p>
 
                     </div>
@@ -4596,7 +4596,7 @@ background &quot;paint(g,x,y,w,h,c)&quot; rendering function.</p>
                     
 
                     <div class="param-description">
-                        <p>a border view or border &quot;paint(g,x,y,w,h,c)&quot; 
+                        <p>a border view or border &quot;paint(g,x,y,w,h,c)&quot;
 rendering function or border type: &quot;plain&quot;, &quot;sunken&quot;, &quot;raised&quot;, &quot;etched&quot;</p>
 
                     </div>
@@ -4812,7 +4812,7 @@ rendering function or border type: &quot;plain&quot;, &quot;sunken&quot;, &quot;
     </div>
 
     <div class="description">
-        <p>Set the UI component enabled state. Using this property 
+        <p>Set the UI component enabled state. Using this property
 an UI component can be excluded from getting input events</p>
 
     </div>
@@ -5000,12 +5000,12 @@ an UI component can be excluded from getting input events</p>
                     
 
                     <div class="param-description">
-                        <p>children component of number of 
+                        <p>children component of number of
 components to be added. The parameter can be:</p>
 <ul>
 <li>Component</li>
 <li>Array of components</li>
-<li>Dictionary object where every element is a component to be added and the key of 
+<li>Dictionary object where every element is a component to be added and the key of
 the component is stored in the dictionary is considered as the component constraints</li>
 </ul>
 
@@ -5285,7 +5285,7 @@ a parent component</p>
                     
 
                     <div class="param-description">
-                        <p>the value that will be set as top, right, left, bottom UI 
+                        <p>the value that will be set as top, right, left, bottom UI
 component paddings</p>
 
                     </div>
@@ -5368,7 +5368,7 @@ component paddings</p>
     </div>
 
     <div class="description">
-        <p>Set UI component top, left, bottom, right paddings. The paddings are 
+        <p>Set UI component top, left, bottom, right paddings. The paddings are
 gaps between component border and painted area.</p>
 
     </div>
@@ -5986,7 +5986,7 @@ argument value to not set preferred height</p>
                     
                         <b>Return: </b><span class="type">Object</span>
                     
-                    <p>a preferred size applied to the component. 
+                    <p>a preferred size applied to the component.
 The structure of the returned object is the following:</p>
 <pre><code>       { width:{Integer}, height:{Integer} }</code></pre>
 
@@ -6226,7 +6226,7 @@ by moving the calculation in &quot;recalc&quot; method</p>
     </div>
 
     <div class="description">
-        <p>Shortcut method to invalidating the component 
+        <p>Shortcut method to invalidating the component
 and initiating the component repainting</p>
 
     </div>
@@ -6972,7 +6972,7 @@ children component layouting on the parent component.</p>
     </div>
 
     <div class="description">
-        <p>Implement the event handler method to catch children components component events </p>
+        <p>Implement the event handler method to catch children components component events</p>
 <pre class="code prettyprint"><code>var p = new zebra.ui.Panel();
 p.childCompEvent = function(id, src, p1, p2) { ... }; // add event handler</code></pre>
 
@@ -6996,9 +6996,9 @@ p.childCompEvent = function(id, src, p1, p2) { ... }; // add event handler</code
                         <p>a component event ID. The id can have one of the following value:</p>
 <pre><code>   zebra.ui.Panel.ENABLED
    zebra.ui.Panel.SHOWN
-   zebra.ui.Panel.MOVED  
-   zebra.ui.Panel.SIZED  
-   zebra.ui.Panel.ADDED  
+   zebra.ui.Panel.MOVED
+   zebra.ui.Panel.SIZED
+   zebra.ui.Panel.ADDED
    zebra.ui.Panel.REMOVED</code></pre>
 
                     </div>
@@ -7031,11 +7031,11 @@ p.childCompEvent = function(id, src, p1, p2) { ... }; // add event handler</code
                     
 
                     <div class="param-description">
-                        <p>an event first parameter that depends 
+                        <p>an event first parameter that depends
 on an component event that has happened</p>
 <pre><code>   if id is zebra.ui.Panel.SIZED the parameter is previous component width
-   if id is zebra.ui.Panel.MOVED the parameter is previous component x location 
-   if id is zebra.ui.Panel.ADDED the parameter is constraints a new component has been added  
+   if id is zebra.ui.Panel.MOVED the parameter is previous component x location
+   if id is zebra.ui.Panel.ADDED the parameter is constraints a new component has been added
    if id is zebra.ui.Panel.REMOVED the parameter is null</code></pre>
 
                     </div>
@@ -7052,11 +7052,11 @@ on an component event that has happened</p>
                     
 
                     <div class="param-description">
-                        <p>an event second parameter depends 
+                        <p>an event second parameter depends
 on an component event that has happened</p>
 <pre><code>   if id is zebra.ui.Panel.SIZED the parameter is previous component height
-   if id is zebra.ui.Panel.MOVED the parameter is previous component y location 
-   if id is zebra.ui.Panel.ADDED the parameter is reference to the added children component  
+   if id is zebra.ui.Panel.MOVED the parameter is previous component y location
+   if id is zebra.ui.Panel.ADDED the parameter is reference to the added children component
    if id is zebra.ui.Panel.REMOVED the parameter is reference to the removed children component</code></pre>
 
                     </div>
@@ -7098,7 +7098,7 @@ on an component event that has happened</p>
     </div>
 
     <div class="description">
-        <p>Implement the event handler method to catch children components input events </p>
+        <p>Implement the event handler method to catch children components input events</p>
 <pre class="code prettyprint"><code>var p = new zebra.ui.Panel();
 p.childInputEvent = function(e) { ... }; // add event handler</code></pre>
 
@@ -7161,8 +7161,8 @@ p.childInputEvent = function(e) { ... }; // add event handler</code></pre>
 
     <div class="description">
         <p>Implement the event handler method to catch component added event
-The event is triggered every time the component has been inserted into 
-another one. </p>
+The event is triggered every time the component has been inserted into
+another one.</p>
 <pre class="code prettyprint"><code>var p = new zebra.ui.Panel();
 p.compAdded = function(p, constr, c) { ... }; // add event handler</code></pre>
 
@@ -7257,7 +7257,7 @@ p.compAdded = function(p, constr, c) { ... }; // add event handler</code></pre>
 
     <div class="description">
         <p>Implement the event handler method to catch component enabled event
-The event is triggered every time a component enabled state has been 
+The event is triggered every time a component enabled state has been
 updated.</p>
 <pre class="code prettyprint"><code>var p = new zebra.ui.Panel();
 p.compEnabled = function(c) { ... }; // add event handler</code></pre>
@@ -7321,7 +7321,7 @@ p.compEnabled = function(c) { ... }; // add event handler</code></pre>
 
     <div class="description">
         <p>Implement the event handler method to catch component moved event
-The event is triggered every time the component location has been 
+The event is triggered every time the component location has been
 updated.</p>
 <pre class="code prettyprint"><code>var p = new zebra.ui.Panel();
 p.compMoved = function(c, px, py) { ... }; // add event handler</code></pre>
@@ -7417,7 +7417,7 @@ p.compMoved = function(c, px, py) { ... }; // add event handler</code></pre>
 
     <div class="description">
         <p>Implement the event handler method to catch component removed event
-The event is triggered every time the component has been removed from 
+The event is triggered every time the component has been removed from
 its parent UI component.</p>
 <pre class="code prettyprint"><code>var p = new zebra.ui.Panel();
 p.compRemoved = function(p, i, c) { ... }; // add event handler</code></pre>
@@ -7513,7 +7513,7 @@ p.compRemoved = function(p, i, c) { ... }; // add event handler</code></pre>
 
     <div class="description">
         <p>Implement the event handler method to catch component shown event
-The event is triggered every time a component visibility state has 
+The event is triggered every time a component visibility state has
 been updated.</p>
 <pre class="code prettyprint"><code>var p = new zebra.ui.Panel();
 p.compShown = function(c) { ... }; // add event handler</code></pre>
@@ -7735,7 +7735,7 @@ p.focusGained = function(e) { ... }; // add event handler</code></pre>
 
     <div class="description">
         <p>Implement the event handler method to catch component focus lost event
-The event is triggered every time a component has lost focus </p>
+The event is triggered every time a component has lost focus</p>
 <pre class="code prettyprint"><code>var p = new zebra.ui.Panel();
 p.focusLost = function(e) { ... }; // add event handler</code></pre>
 
@@ -8052,7 +8052,7 @@ p.mouseClicked = function(e) { ... }; // add event handler</code></pre>
 
     <div class="description">
         <p>Implement the event handler method to catch mouse drag ended event.
-The event is triggered every time a mouse cursor has been moved last time when a mouse button 
+The event is triggered every time a mouse cursor has been moved last time when a mouse button
 has been pressed. Or when a finger has been moved last time over a touch screen.</p>
 <pre class="code prettyprint"><code>var p = new zebra.ui.Panel();
 p.mouseDragEnded = function(e) { ... }; // add event handler</code></pre>
@@ -8116,7 +8116,7 @@ p.mouseDragEnded = function(e) { ... }; // add event handler</code></pre>
 
     <div class="description">
         <p>Implement the event handler method to catch mouse dragged event.
-The event is triggered every time a mouse cursor has been moved when a mouse button 
+The event is triggered every time a mouse cursor has been moved when a mouse button
 has been pressed. Or when a finger has been moved over a touch screen.</p>
 <pre class="code prettyprint"><code>var p = new zebra.ui.Panel();
 p.mouseDragged = function(e) { ... }; // add event handler</code></pre>
@@ -8180,7 +8180,7 @@ p.mouseDragged = function(e) { ... }; // add event handler</code></pre>
 
     <div class="description">
         <p>Implement the event handler method to catch mouse drag started event.
-The event is triggered every time a mouse cursor has been moved first time when a mouse button 
+The event is triggered every time a mouse cursor has been moved first time when a mouse button
 has been pressed. Or when a finger has been moved first time over a touch screen.</p>
 <pre class="code prettyprint"><code>var p = new zebra.ui.Panel();
 p.mouseDragStarted = function(e) { ... }; // add event handler</code></pre>
@@ -8244,8 +8244,8 @@ p.mouseDragStarted = function(e) { ... }; // add event handler</code></pre>
 
     <div class="description">
         <p>Implement the event handler method to catch mouse entered event.
-The event is triggered every time a mouse cursor entered the 
-given component. </p>
+The event is triggered every time a mouse cursor entered the
+given component.</p>
 <pre class="code prettyprint"><code>var p = new zebra.ui.Panel();
 p.mouseEntered = function(e) { ... }; // add event handler</code></pre>
 
@@ -8308,8 +8308,8 @@ p.mouseEntered = function(e) { ... }; // add event handler</code></pre>
 
     <div class="description">
         <p>Implement the event handler method to catch mouse exited event.
-The event is triggered every time a mouse cursor exited the given 
-component. </p>
+The event is triggered every time a mouse cursor exited the given
+component.</p>
 <pre class="code prettyprint"><code>var p = new zebra.ui.Panel();
 p.mouseExited = function(e) { ... }; // add event handler</code></pre>
 
@@ -8372,7 +8372,7 @@ p.mouseExited = function(e) { ... }; // add event handler</code></pre>
 
     <div class="description">
         <p>Implement the event handler method  to catch mouse moved event.
-The event is triggered every time a mouse cursor has been moved with 
+The event is triggered every time a mouse cursor has been moved with
 no a mouse button pressed.</p>
 <pre class="code prettyprint"><code>var p = new zebra.ui.Panel();
 p.mouseMoved = function(e) { ... }; // add event handler</code></pre>
@@ -8436,7 +8436,7 @@ p.mouseMoved = function(e) { ... }; // add event handler</code></pre>
 
     <div class="description">
         <p>Implement the event handler method to catch mouse pressed event.
-The event is triggered every time a mouse button has been pressed or 
+The event is triggered every time a mouse button has been pressed or
 a finger has touched a touch screen.</p>
 <pre class="code prettyprint"><code>var p = new zebra.ui.Panel();
 p.mousePressed = function(e) { ... }; // add event handler</code></pre>
@@ -8500,8 +8500,8 @@ p.mousePressed = function(e) { ... }; // add event handler</code></pre>
 
     <div class="description">
         <p>Implement the event handler method to catch mouse released event.
-The event is triggered every time a mouse button has been released or 
-a finger has untouched a touch screen. </p>
+The event is triggered every time a mouse button has been released or
+a finger has untouched a touch screen.</p>
 <pre class="code prettyprint"><code>var p = new zebra.ui.Panel();
 p.mouseReleased = function(e) { ... }; // add event handler</code></pre>
 

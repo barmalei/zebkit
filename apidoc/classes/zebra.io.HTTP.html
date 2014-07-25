@@ -412,7 +412,7 @@
 
 
 <div class="box intro">
-    <p>HTTP request class. This class provides API to generate different 
+    <p>HTTP request class. This class provides API to generate different
 (GET, POST, etc) HTTP requests in sync and async modes</p>
 
 </div>
@@ -619,7 +619,7 @@
     </div>
 
     <div class="description">
-        <p>Perform HTTP GET request synchronously or asynchronously with the given 
+        <p>Perform HTTP GET request synchronously or asynchronously with the given
 query parameters.</p>
 
     </div>
@@ -657,8 +657,8 @@ query parameters.</p>
                     
 
                     <div class="param-description">
-                        <p>a callback function that is called when the HTTP GET 
-request is done. The method gets a request object as its only argument 
+                        <p>a callback function that is called when the HTTP GET
+request is done. The method gets a request object as its only argument
 and is called in context of the HTTP class instance.</p>
 <pre><code>   // synchronous HTTP GET request with the number of
    // query parameters
@@ -747,7 +747,7 @@ and is called in context of the HTTP class instance.</p>
     </div>
 
     <div class="description">
-        <p>Perform HTTP POST request synchronously or asynchronously with the given 
+        <p>Perform HTTP POST request synchronously or asynchronously with the given
 data to be sent.</p>
 
     </div>
@@ -767,7 +767,7 @@ data to be sent.</p>
                     
 
                     <div class="param-description">
-                        <p>a data to be sent by HTTP POST request.  It can be 
+                        <p>a data to be sent by HTTP POST request.  It can be
 either a parameters set or a string.</p>
 
                     </div>
@@ -785,8 +785,8 @@ either a parameters set or a string.</p>
                     
 
                     <div class="param-description">
-                        <p>a callback function that is called when HTTP POST 
-request is done. The method gets a request as its only  argument 
+                        <p>a callback function that is called when HTTP POST
+request is done. The method gets a request as its only  argument
 and called in context of appropriate HTTP class instance. If the argument
 is null the POST request will be done synchronously.</p>
 <pre><code>  // asynchronously send POST
@@ -800,13 +800,13 @@ is null the POST request will be done synchronously.</p>
           ...
       }
   });</code></pre>
-<p>Or you can pass a number of parameters to be sent synchronously by 
-HTTP POST request: </p>
+<p>Or you can pass a number of parameters to be sent synchronously by
+HTTP POST request:</p>
 <pre><code>  // send parameters synchronously by HTTP POST request
   zebra.io.HTTP(&quot;google.com&quot;).POST({
       param1: &quot;val1&quot;,
       param2: &quot;val3&quot;,
-      param3: &quot;val3&quot; 
+      param3: &quot;val3&quot;
   });</code></pre>
 
                     </div>
@@ -887,8 +887,8 @@ HTTP POST request: </p>
     </div>
 
     <div class="description">
-        <p>Universal HTTP request method that can be used to generate 
-a HTTP request with any HTTP method to the given URL with 
+        <p>Universal HTTP request method that can be used to generate
+a HTTP request with any HTTP method to the given URL with
 the given data to be sent asynchronously or synchronously</p>
 
     </div>
@@ -957,7 +957,7 @@ the given data to be sent asynchronously or synchronously</p>
                     
 
                     <div class="param-description">
-                        <p>a callback method to be defined 
+                        <p>a callback method to be defined
 if the HTTP request has to be sent asynchronously.</p>
 
                     </div>

@@ -411,36 +411,36 @@
 
 
 <div class="box intro">
-    <p>Zebra UI. The UI is powerful way to create any imaginable 
-user interface for WEB. The idea is based on developing 
-hierarchy of UI components that sits and renders on HTML5 
+    <p>Zebra UI. The UI is powerful way to create any imaginable
+user interface for WEB. The idea is based on developing
+hierarchy of UI components that sits and renders on HTML5
 Canvas element.</p>
-<p>Write zebra UI code in safe place where you can be sure all 
-necessary structure, configurations, etc are ready. The safe 
-place is &quot;zebra.ready(...)&quot; method. Development of zebra UI 
-application begins from creation &quot;zebra.ui.zCanvas&quot; class, 
-that is starting point and root element of your UI components 
-hierarchy. &quot;zCanvas&quot; is actually wrapper around HTML5 Canvas 
-element where zebra UI sits on. The typical zebra UI coding 
-template is shown below: </p>
-<pre class="code prettyprint"><code>// build UI in safe place  
+<p>Write zebra UI code in safe place where you can be sure all
+necessary structure, configurations, etc are ready. The safe
+place is &quot;zebra.ready(...)&quot; method. Development of zebra UI
+application begins from creation &quot;zebra.ui.zCanvas&quot; class,
+that is starting point and root element of your UI components
+hierarchy. &quot;zCanvas&quot; is actually wrapper around HTML5 Canvas
+element where zebra UI sits on. The typical zebra UI coding
+template is shown below:</p>
+<pre class="code prettyprint"><code>// build UI in safe place
 zebra.ready(function() {
-   // create canvas element 
+   // create canvas element
    var c = new zebra.ui.zCanvas(400, 400);
 
    // start placing UI component on c.root panel
    //set layout manager
-   c.root.setLayout(new zebra.layout.BorderLayout());            
+   c.root.setLayout(new zebra.layout.BorderLayout());
    //add label to top
-   c.root.add(zebra.layout.TOP,new zebra.ui.Label(&quot;Top label&quot;)); 
+   c.root.add(zebra.layout.TOP,new zebra.ui.Label(&quot;Top label&quot;));
    //add text area to center
-   c.root.add(zebra.layout.CENTER,new zebra.ui.TextArea(&quot;&quot;));    
+   c.root.add(zebra.layout.CENTER,new zebra.ui.TextArea(&quot;&quot;));
    //add button area to bottom
    c.root.add(zebra.layout.BOTTOM,new zebra.ui.Button(&quot;Button&quot;));
    ...
 });</code></pre>
 <p> The latest version of zebra JavaScript is available in repository:</p>
-<pre class="code prettyprint"><code>   &lt;script src=&#39;http://repo.zebkit.org/latest/zebra.min.js&#39; 
+<pre class="code prettyprint"><code>   &lt;script src=&#39;http://repo.zebkit.org/latest/zebra.min.js&#39;
            type=&#39;text/javascript&#39;&gt;&lt;/script&gt;</code></pre>
 
 </div>

@@ -416,33 +416,34 @@
 
 
 <div class="box intro">
-    <p>zCanvas zebra UI component class. This is one of the key 
-class everybody has to use to start building an UI. The class is a wrapper<br>for HTML Canvas element. Internally it catches all native HTML Canvas 
-events and translates its into Zebra UI events. </p>
-<p>zCanvas instantiation triggers a new HTML Canvas will be created 
+    <p>zCanvas zebra UI component class. This is one of the key
+class everybody has to use to start building an UI. The class is a wrapper
+for HTML Canvas element. Internally it catches all native HTML Canvas
+events and translates its into Zebra UI events.</p>
+<p>zCanvas instantiation triggers a new HTML Canvas will be created
 and added to HTML DOM tree.  It happens if developer doesn&#39;t pass
-an HTML Canvas element reference or an ID of existing HTML Canvas 
-element If developers need to re-use an existent in DOM tree canvas 
-element they have to pass id of the canvas that has to be used as basis 
+an HTML Canvas element reference or an ID of existing HTML Canvas
+element If developers need to re-use an existent in DOM tree canvas
+element they have to pass id of the canvas that has to be used as basis
 for zebra UI creation or reference to a HTML Canvas element:</p>
 <pre class="code prettyprint"><code>  // a new HTML canvas element is created and added into HTML DOM tree
   var canvas = zebra.ui.zCanvas();
 
   // a new HTML canvas element is created into HTML DOM tree
-  var canvas = zebra.ui.zCanvas(400,500);  // pass canvas size 
+  var canvas = zebra.ui.zCanvas(400,500);  // pass canvas size
 
-  // stick to existent HTML canvas element 
-  var canvas = zebra.ui.zCanvas(&quot;ExistentCanvasID&quot;);  </code></pre>
-<p>The zCanvas has layered structure. Every layer is responsible for 
+  // stick to existent HTML canvas element
+  var canvas = zebra.ui.zCanvas(&quot;ExistentCanvasID&quot;);</code></pre>
+<p>The zCanvas has layered structure. Every layer is responsible for
 showing and controlling a dedicated type of UI elements like windows
-pop-up menus, tool tips and so on. Developers have to build an own UI 
-hierarchy on the canvas root layer. The layer is standard UI panel 
-that is accessible as zCanvas component instance &quot;root&quot; field. </p>
+pop-up menus, tool tips and so on. Developers have to build an own UI
+hierarchy on the canvas root layer. The layer is standard UI panel
+that is accessible as zCanvas component instance &quot;root&quot; field.</p>
 <pre class="code prettyprint"><code>  // create canvas
-  var canvas = zebra.ui.zCanvas(400,500); 
+  var canvas = zebra.ui.zCanvas(400,500);
 
-  // save reference to canvas root layer where 
-  // hierarchy of UI components have to be hosted 
+  // save reference to canvas root layer where
+  // hierarchy of UI components have to be hosted
   var root = canvas.root;
 
   // fill root with UI components
@@ -531,7 +532,7 @@ that is accessible as zCanvas component instance &quot;root&quot; field. </p>
                     
 
                     <div class="param-description">
-                        <p>an ID of a HTML canvas element or 
+                        <p>an ID of a HTML canvas element or
 reference to an HTML Canvas element.</p>
 
                     </div>
@@ -910,7 +911,7 @@ reference to an HTML Canvas element.</p>
     </div>
 
     <div class="description">
-        <p>Get the canvas layer by the specified layer ID. Layer is a children component 
+        <p>Get the canvas layer by the specified layer ID. Layer is a children component
 of the canvas UI component. Every layer has an ID assigned to it the method
 actually allows developers to get the canvas children component by its ID</p>
 
@@ -1162,7 +1163,7 @@ actually allows developers to get the canvas children component by its ID</p>
                     <div id="attr_$da" class="attr item private">
     <a name="config_$da"></a> 
     <h3 class="name"><code>$da</code></h3>
-    <span class="type">Object 
+    <span class="type">Object
                 x:Integer, y:Integer, width:Integer, height:Integer</span>
 
     
@@ -1242,7 +1243,7 @@ actually allows developers to get the canvas children component by its ID</p>
     </div>
 
     <div class="description">
-        <p>Reference to HTML Canvas element  where the zebra canvas UI 
+        <p>Reference to HTML Canvas element  where the zebra canvas UI
 components are hosted</p>
 
     </div>
@@ -1289,7 +1290,7 @@ components are hosted</p>
     </div>
 
     <div class="description">
-        <p>Indicate if the canvas has to be stretched to 
+        <p>Indicate if the canvas has to be stretched to
 fill the whole screen area.</p>
 
     </div>
@@ -1336,9 +1337,9 @@ fill the whole screen area.</p>
 
     <div class="description">
         <p>Implement the event handler method  to catch canvas initialized event.
-The event is triggered once the canvas has been initiated and all properties 
-listeners of the canvas are set upped. The event can be used to load 
-saved data.  </p>
+The event is triggered once the canvas has been initiated and all properties
+listeners of the canvas are set upped. The event can be used to load
+saved data.</p>
 <pre class="code prettyprint"><code>var p = new zebra.ui.zCanvas(300, 300, [
      function canvasInitialized() {
          // do something

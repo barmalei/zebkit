@@ -416,14 +416,14 @@
 
 
 <div class="box intro">
-    <p>Command manager supports short cut keys definition and listening. The shortcuts have to be defined in 
+    <p>Command manager supports short cut keys definition and listening. The shortcuts have to be defined in
 zebra JSON configuration files. There are two sections:</p>
 <ul>
 <li><strong>osx</strong> to keep shortcuts for Mac OS X platform</li>
-<li><strong>common</strong> to keep shortcuts for all other platforms </li>
+<li><strong>common</strong> to keep shortcuts for all other platforms</li>
 </ul>
 <p>The JSON configuration entity has simple structure:</p>
-<pre class="code prettyprint"><code>{ 
+<pre class="code prettyprint"><code>{
   &quot;common&quot;: [
        {
           &quot;command&quot;   : &quot;undo_command&quot;,
@@ -444,16 +444,16 @@ zebra JSON configuration files. There are two sections:</p>
        },
        ...
   ]
-} </code></pre>
-<p>The configuration contains list of shortcuts. Every shortcut is bound to a key combination it is triggered. 
+}</code></pre>
+<p>The configuration contains list of shortcuts. Every shortcut is bound to a key combination it is triggered.
 Every shortcut has a name and an optional list of arguments that have to be passed to a shortcut listener method.
 The optional arguments can be used to differentiate two shortcuts that are bound to the same command.</p>
 <p>On the component level shortcut commands can be listened by implementing method whose name equals to shortcut name.
-Pay attention to catch shortcut command your component has to be focusable and holds focus at the given time. 
+Pay attention to catch shortcut command your component has to be focusable and holds focus at the given time.
 For instance, to catch &quot;undo_command&quot;  do the following:</p>
 <pre class="code prettyprint"><code>  var pan = new zebra.ui.Panel([
       function redo_command() {
-          // handle shortcut here 
+          // handle shortcut here
       },
 
       // visualize the component gets focus
@@ -706,7 +706,7 @@ For instance, to catch &quot;undo_command&quot;  do the following:</p>
     </div>
 
     <div class="description">
-        <p>Shortcut event is handled by registering a method handler with shortcut manager. The manager is accessed as 
+        <p>Shortcut event is handled by registering a method handler with shortcut manager. The manager is accessed as
 &quot;zebra.ui.commandManager&quot; static variable:</p>
 <pre class="code prettyprint"><code>   zebra.ui.commandManager.bind(function (e) {
        ...

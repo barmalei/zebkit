@@ -412,27 +412,27 @@
 
 
 <div class="box intro">
-    <p>Interface to express intention to control children UI components event handling by 
-making them events transparent. In the easiest way a component that needs take 
-control on input (mouse, keyboard, etc) events has to implement the 
-composite interface. For instance let&#39;s make a composite panel, what causes 
-any added to the panel zebra.ui.Button component will not react on any input 
+    <p>Interface to express intention to control children UI components event handling by
+making them events transparent. In the easiest way a component that needs take
+control on input (mouse, keyboard, etc) events has to implement the
+composite interface. For instance let&#39;s make a composite panel, what causes
+any added to the panel zebra.ui.Button component will not react on any input
 event:</p>
-<pre class="code prettyprint"><code>   // declare composite panel class that inherits standard zebra 
-   // panel class and implements Composite interface 
+<pre class="code prettyprint"><code>   // declare composite panel class that inherits standard zebra
+   // panel class and implements Composite interface
    var CompositePan = zebra.Class(zebra.ui.Panel, zebra.ui.Composite, []);
 
-   // instantiate an instance  
+   // instantiate an instance
    var cp = new CompositePan(new zebra.layout.FlowLayout());
 
    // add button that will not react since they are events transparent
    cp.add(new zebra.ui.Button(&quot;Button 1&quot;));
    cp.add(new zebra.ui.Button(&quot;Button 2&quot;));</code></pre>
-<p>If some of the children components have to be made not event transparent 
+<p>If some of the children components have to be made not event transparent
 you have to implement &quot;catchInput&quot; method as follow:</p>
-<pre class="code prettyprint"><code>   // declare composite panel class that inherits standard zebra 
-   // panel class, implements Composite interface and implements 
-   // catchInput method to make first kid not event transparent 
+<pre class="code prettyprint"><code>   // declare composite panel class that inherits standard zebra
+   // panel class, implements Composite interface and implements
+   // catchInput method to make first kid not event transparent
    var CompositePan = zebra.Class(zebra.ui.Panel, zebra.ui.Composite, [
        function catchInput(kid) {
            // make first kid not event transparent
@@ -547,7 +547,7 @@ you have to implement &quot;catchInput&quot; method as follow:</p>
     </div>
 
     <div class="description">
-        <p>The method is called to ask if the given children UI component 
+        <p>The method is called to ask if the given children UI component
 has to be input events transparent</p>
 
     </div>
@@ -586,7 +586,7 @@ has to be input events transparent</p>
                     
                         <b>Return: </b><span class="type">Boolean</span>
                     
-                    <p>true if the given children component has 
+                    <p>true if the given children component has
 to be input events transparent</p>
 
                 

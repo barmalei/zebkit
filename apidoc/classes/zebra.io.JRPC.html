@@ -417,16 +417,16 @@
 
 <div class="box intro">
     <p>The class is implementation of JSON-RPC remote service connector.</p>
-<pre class="code prettyprint"><code>   // create JSON-RPC connector to a remote service that 
+<pre class="code prettyprint"><code>   // create JSON-RPC connector to a remote service that
    // has three remote methods
    var service = new zebra.io.JRPC(&quot;json-rpc.com&quot;, [
        &quot;method1&quot;, &quot;method2&quot;, &quot;method3&quot;
    ]);
 
-   // synchronously call remote method &quot;method1&quot; 
+   // synchronously call remote method &quot;method1&quot;
    service.method1();
 
-   // asynchronously call remote method &quot;method1&quot; 
+   // asynchronously call remote method &quot;method1&quot;
    service.method1(function(res) {
        ...
    });</code></pre>

@@ -416,27 +416,27 @@
 
 
 <div class="box intro">
-    <p>Check-box UI component. The component is a container that 
-consists from two other UI components: </p>
+    <p>Check-box UI component. The component is a container that
+consists from two other UI components:</p>
 <ul>
 <li>Box component to keep checker indicator</li>
-<li>Label component to paint label </li>
+<li>Label component to paint label</li>
 </ul>
-<p>Developers are free to customize the component as they want. 
-There is no limitation regarding how the box and label components 
-have to be laid out, which UI components have to be used as 
-the box or label components, etc. The check box extends state 
+<p>Developers are free to customize the component as they want.
+There is no limitation regarding how the box and label components
+have to be laid out, which UI components have to be used as
+the box or label components, etc. The check box extends state
 panel component and re-map states  to own views IDs:</p>
 <ul>
-<li>&quot;on.out&quot; - checked and mouse cursor is out </li>
-<li>&quot;off.out&quot; - un-checked and mouse cursor is out </li>
-<li>&quot;don&quot; - disabled and checked, </li>
-<li>&quot;doff&quot; - disabled and un-checked , </li>
-<li>&quot;on.over&quot; - checked and mouse cursor is over </li>
+<li>&quot;on.out&quot; - checked and mouse cursor is out</li>
+<li>&quot;off.out&quot; - un-checked and mouse cursor is out</li>
+<li>&quot;don&quot; - disabled and checked,</li>
+<li>&quot;doff&quot; - disabled and un-checked ,</li>
+<li>&quot;on.over&quot; - checked and mouse cursor is over</li>
 <li>&quot;off.over&quot; - un-checked and mouse cursor is out</li>
 </ul>
 <p>Customize is quite similar to what explained for zebra.ui.EvStatePan:</p>
-<pre class="code prettyprint"><code>   // create checkbox component 
+<pre class="code prettyprint"><code>   // create checkbox component
    var ch = new zebra.ui.Checkbox(&quot;Checkbox&quot;);
 
    // change border when the component checked to green
@@ -447,16 +447,16 @@ panel component and re-map states  to own views IDs:</p>
    }));
 
    // customize checker box children UI component to show
-   // green for checked and red for un-cheked states 
+   // green for checked and red for un-cheked states
    ch.kids[0].setView(new zebra.ui.ViewSet({
        &quot;off.*&quot;: &quot;red&quot;,
        &quot;on.*&quot;: &quot;green&quot;
    }));
    // sync current state with new look and feel
    ch.syncState();</code></pre>
-<p>Listening checked event should be done by registering a 
+<p>Listening checked event should be done by registering a
 listener in the check box switch manager as follow:</p>
-<pre class="code prettyprint"><code>   // create checkbox component 
+<pre class="code prettyprint"><code>   // create checkbox component
    var ch = new zebra.ui.Checkbox(&quot;Checkbox&quot;);
 
    // register a checkbox listener
@@ -761,7 +761,7 @@ listener in the check box switch manager as follow:</p>
     </div>
 
     <div class="description">
-        <p>The method is called to ask if the given children UI component 
+        <p>The method is called to ask if the given children UI component
 has to be input events transparent</p>
 
     </div>
@@ -800,7 +800,7 @@ has to be input events transparent</p>
                     
                         <b>Return: </b><span class="type">Boolean</span>
                     
-                    <p>true if the given children component has 
+                    <p>true if the given children component has
 to be input events transparent</p>
 
                 
@@ -1006,9 +1006,9 @@ to be input events transparent</p>
     </div>
 
     <div class="description">
-        <p>Set the specified children component to be used as 
-focus marker view anchor component. Anchor component 
-is a component over that the focus marker view is 
+        <p>Set the specified children component to be used as
+focus marker view anchor component. Anchor component
+is a component over that the focus marker view is
 painted.</p>
 
     </div>
@@ -1112,9 +1112,9 @@ when the component gains focus.</p>
                     
 
                     <div class="param-description">
-                        <p>a view. 
-The view can be a color or border string code or view 
-or an implementation of zebra.ui.View &quot;paint(g,x,y,w,h,t)&quot; 
+                        <p>a view.
+The view can be a color or border string code or view
+or an implementation of zebra.ui.View &quot;paint(g,x,y,w,h,t)&quot;
 method.</p>
 
                     </div>
@@ -1341,7 +1341,7 @@ method.</p>
     </div>
 
     <div class="description">
-        <p>Callback method that is called whenever a state of switch 
+        <p>Callback method that is called whenever a state of switch
 manager has been updated.</p>
 
     </div>

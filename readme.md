@@ -163,7 +163,7 @@ Load the JSON UI form definition as it is illustrated below:
 
 Zebra support browser native clipboard. The implementation doesn't require any Flash or other plug-in installed. It is pure WEB based solution !
 
-By implementing special __"zebra.ui.CopyCutPaste"__ interface a Zebra UI component can start participating in clipboard data exchange. For instance:
+By implementing special methods __"clipCopy()"__  and/or __"clipPaste(s)"__ a focusable UI component can start participating in clipboard data exchange. For instance:
 
 ```html
 <!DOCTYPE html>
@@ -175,10 +175,11 @@ By implementing special __"zebra.ui.CopyCutPaste"__ interface a Zebra UI compone
 			zebra.ready(function() {
 				eval(zebra.Import("ui", "layout"));
 
-				// define our own UI component class that wants to handle clipboard events
-				// the components inherits multi lines label component (MLabel)
-				var MyComponent = zebra.Class(MLabel, CopyCutPaste, [
-				    // override "canHaveFocus" method to make your component focusable
+				// define our own UI component class that wants to handle 
+                // clipboard events
+				var MyComponent = zebra.Class(MLabel, [
+				    // override "canHaveFocus" method to make your component
+                    // focusable
 				    function canHaveFocus() { return true; },
 
 				    // returns what you want to put in clipboard
@@ -187,8 +188,8 @@ By implementing special __"zebra.ui.CopyCutPaste"__ interface a Zebra UI compone
 				    	return this.getValue();
 				    },
 
-				    // this method is called when paste event has happened for this 
-				    // component 
+				    // this method is called when paste event has 
+                    // happened for this component 
 				    function paste(s) { 
 				    	this.setColor("#000000");
 				    	this.setValue(s); 
@@ -201,7 +202,8 @@ By implementing special __"zebra.ui.CopyCutPaste"__ interface a Zebra UI compone
 				    }
 				]); 
 
-				// create UI application with our clipboard handler UI component
+				// create UI application with our clipboard handler UI
+                // component
 				(new zCanvas()).root.properties({
 					background: "#EEEEEE",
 					layout: new BorderLayout(8,8), padding:8,

@@ -10,19 +10,19 @@
 
 				// define our own UI component class that wants to handle clipboard events
 				// the components inherits multi lines label component (MLabel)
-				var MyComponent = zebra.Class(MLabel, CopyCutPaste, [
+				var MyComponent = zebra.Class(MLabel, [
 				    // override "canHaveFocus" method to make your component focusable
 				    function canHaveFocus() { return true; },
 
 				    // returns what you want to put in clipboard
-				    function copy() {
+				    function clipCopy() {
 				    	this.setColor("#FF3311");
 				    	return this.getValue();
 				    },
 
 				    // this method is called when paste event has happened for this 
 				    // component 
-				    function paste(s) { 
+				    function clipPaste(s) { 
 				    	this.setColor("#000000");
 				    	this.setValue(s); 
 				    },

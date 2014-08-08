@@ -692,7 +692,7 @@
             "font"  : "12px 'Lucida Grande', 'Lucida Sans', Arial, sans-serif"
         },
 
-        "Tree": {
+        "BaseTree" : {
             "lineColor" : "rgb(65, 131, 215)",
             "views": {
                 "close"   : { "$Picture": [ "@pictures.zebra", 61 ,20 ,16,14, true ] },
@@ -701,6 +701,37 @@
                 "off"     : { "$zebra.ui.tree.TreeSignView": [] },
                 "on"      : { "$zebra.ui.tree.TreeSignView": false },
                 "aselect" : [ [ "rgb(228, 244, 252)", { "$Border": "rgb(200,180,200)" } ] ]
+            }
+        },
+
+        "Tree": {
+            "$inherit" : ["tree.BaseTree"]
+        },
+
+        "CompTree": {
+            "Checkbox" : {
+                "$inherit" : [ "Checkbox" ]
+            },
+
+            "Combo" : {
+                "$inherit" : [ "Combo" ]
+            },
+
+            "Label" : {
+                "$inherit" : [ "Label" ],
+                "padding"  : 4
+            },
+
+            "$inherit" : ["tree.BaseTree"],
+            "views": {
+                "close"   : { "$Picture": [ "@pictures.zebra", 61 ,20 ,16,14, true ] },
+                "open"    : { "$Picture": [ "@pictures.zebra", 49 ,34,16,14, true ] },
+                "leaf"    : { "$Picture": [ "@pictures.zebra", 49 ,20 ,16,14, true ] },
+
+                "off"     : { "$zebra.ui.tree.TreeSignView": [] },
+                "on"      : { "$zebra.ui.tree.TreeSignView": false },
+                "iselect" : "#A0D9EA",
+                "aselect" : "#A0D9EA"
             }
         }
     },

@@ -166,7 +166,7 @@ pkg.MouseEventHandlerPan = Class(Panel, [
 
         g.setColor("black");
         g.setFont(this.font);
-        g.fillText("(" + this.gx + "," + this.gy + ")", this.gx + 10, this.gy);
+        g.fillText("(" + ~~this.gx + "," + ~~this.gy + ")", this.gx + 10, this.gy);
     }
 ]);
 
@@ -288,7 +288,7 @@ pkg.CirclePan = Class(Panel, [
     },
 
     function contains(x, y) {
-        var rx = this.width/2, ry = this.height/2;
+        var rx = ~~(this.width/2), ry = ~~(this.height/2);
         return (ry - y) * (ry - y) + (rx - x) * (rx - x) < rx * rx;
     },
 
@@ -309,7 +309,7 @@ pkg.TrianglePan = Class(Panel, [
     },
 
     function contains(x, y) {
-        var ax = this.width/2, ay = 0,
+        var ax = ~~(this.width/2), ay = 0,
             bx = this.width - 1, by = this.height - 1,
             cx = 0, cy = this.height - 1,
             ab = (ax - x)*(by- y)-(bx-x)*(ay-y);

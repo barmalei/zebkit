@@ -65,7 +65,6 @@ YUI.add("yuidoc-meta", function(Y) {
         "zebra.ui.Composite",
         "zebra.ui.CompositeEvStatePan",
         "zebra.ui.CompositeView",
-        "zebra.ui.CopyCutPaste",
         "zebra.ui.CursorManager",
         "zebra.ui.Dotted",
         "zebra.ui.Etched",
@@ -151,9 +150,13 @@ YUI.add("yuidoc-meta", function(Y) {
         "zebra.ui.loadImage()",
         "zebra.ui.showModalWindow()",
         "zebra.ui.showWindow()",
+        "zebra.ui.tree.$IM",
+        "zebra.ui.tree.BaseTree",
+        "zebra.ui.tree.CompTree",
         "zebra.ui.tree.DefEditors",
         "zebra.ui.tree.DefViews",
         "zebra.ui.tree.Tree",
+        "zebra.ui.tree.TreeSignView",
         "zebra.ui.zCanvas",
         "zebra.util.Bag",
         "zebra.util.Listeners",
@@ -212,7 +215,7 @@ YUI.add("yuidoc-meta", function(Y) {
         {
             "displayName": "ui.tree",
             "name": "ui.tree",
-            "description": "Tree UI component and all related to the component classes and interfaces. \nThe component is graphical representation of a tree model that allows a user \nto navigate over the model item, customize the items rendering and \norganize customizable editing of the items.\n\n       // create tree component instance to visualize the given tree model\n       var tree = new zebra.ui.tree.Tree({ \n           value: \"Root\"\n           kids : [\n               \"Item 1\",\n               \"Item 2\",\n               \"Item 3\"\n           ]\n       });\n\n       // make all tree items editable with text field component \n       tree.setEditorProvider(new zebra.ui.tree.DefEditors());"
+            "description": "Tree UI components and all related to the component classes and interfaces.\nTree components are graphical representation of a tree model that allows a user\nto navigate over the model item, customize the items rendering and\norganize customizable editing of the items.\n\n       // create tree component instance to visualize the given tree model\n       var tree = new zebra.ui.tree.Tree({\n           value: \"Root\",\n           kids : [\n               \"Item 1\",\n               \"Item 2\",\n               \"Item 3\"\n           ]\n       });\n\n       // make all tree items editable with text field component\n       tree.setEditorProvider(new zebra.ui.tree.DefEditors());\n\nOne more tree  component implementation - \"CompTree\" - allows developers\nto create tree whose nodes are  other UI components\n\n       // create tree component instance to visualize the given tree model\n       var tree = new zebra.ui.tree.CompTree({\n           value: new zebra.ui.Label(\"Root label item\"),\n           kids : [\n               new zebra.ui.Checkbox(\"Checkbox Item\"),\n               new zebra.ui.Button(\"Button Item\"),\n               new zebra.ui.TextField(\"Text field item\")\n           ]\n       });"
         },
         {
             "displayName": "util",

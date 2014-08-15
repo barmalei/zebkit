@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>zebra.data.Matrix</title>
+    <title>zebra.ui.tree.BaseTree</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -406,11 +406,15 @@
                 <div id="docs-main">
                     <div class="content">
                         
-    <h1>zebra.data.Matrix Class</h1>    
+    <h1>zebra.ui.tree.BaseTree Class</h1>    
 
 
 
 
+
+    <div class="extends">
+        <b>Extends</b> <a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a>
+    </div>
 
 
 
@@ -418,15 +422,22 @@
 
 
 <div class="box intro">
-    <p>Matrix model class.</p>
+    <p>Abstract tree component that can used as basement for building own tree components.
+The component is responsible for rendering tree, calculating tree nodes metrics,
+computing visible area, organizing basic user interaction. Classes that inherit it
+has to provide the following important things:</p>
+<p><strong>A tree model item metric</strong> Developers have to implement &quot;getItemPreferredSize(item)&quot;
+     method to say which size the given tree item wants to have.
+<strong>Tree node item rendering</strong> If necessary developers have to implement the way
+     a tree item has to be visualized by implementing &quot;this.paintItem(...)&quot; method</p>
 
 </div>
 
 
     <div class="constructor">
         <h2>Constructor</h2>
-        <div id="method_zebra.data.Matrix" class="method item">
-    <h3 class="name"><code>zebra.data.Matrix</code></h3>
+        <div id="method_zebra.ui.tree.BaseTree" class="method item">
+    <h3 class="name"><code>zebra.ui.tree.BaseTree</code></h3>
 
     
         <div class="args">
@@ -434,19 +445,13 @@
             
                 <li class="arg">
                     
-                        <code class="optional">[data]</code>
+                        <code>a</code>
                     
                 </li>
             
                 <li class="arg">
                     
-                        <code class="optional">[rows]</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code class="optional">[cols]</code>
+                        <code class="optional">[nodeState]</code>
                     
                 </li>
             
@@ -493,15 +498,28 @@
             
                 <li class="param">
                     
-                        <code class="param-name optional">[data]</code>
-                        <span class="type">Array of Array</span>
-                        <span class="flag optional" title="This parameter is optional.">optional</span>
+                        <code class="param-name">a</code>
+                        <span class="type"><a href="../classes/zebra.data.TreeModel.html" class="crosslink">zebra.data.TreeModel</a> | Object</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>the given data</p>
+                        <p>tree model. It can be an instance of tree model
+class or an object that described tree model. An example of such object is shown below:</p>
+<pre><code>   {
+       value : &quot;Root&quot;,
+       kids  : [
+           {
+               value: &quot;Child 1&quot;,
+               kids :[
+                   &quot;Sub child 1&quot;
+               ]
+           },
+           &quot;Child 2&quot;,
+           &quot;Child 3&quot;
+       ]
+   }</code></pre>
 
                     </div>
 
@@ -510,32 +528,15 @@
             
                 <li class="param">
                     
-                        <code class="param-name optional">[rows]</code>
-                        <span class="type">Integer</span>
+                        <code class="param-name optional">[nodeState]</code>
+                        <span class="type">Boolean</span>
                         <span class="flag optional" title="This parameter is optional.">optional</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a number of rows</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name optional">[cols]</code>
-                        <span class="type">Integer</span>
-                        <span class="flag optional" title="This parameter is optional.">optional</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>a number of columns</p>
+                        <p>a default tree nodes state (expanded or collapsed)</p>
 
                     </div>
 
@@ -585,73 +586,143 @@
                     
                     <h3>Methods</h3>
 
-                    <ul class="index-list methods">
+                    <ul class="index-list methods extends">
                         
-                            <li class="index-item method">
-                                <a href="#method_get">get</a>
+                            <li class="index-item method protected">
+                                <a href="#method_getIM">getIM</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_put">put</a>
+                                <a href="#method_getItemAt">getItemAt</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method protected">
+                                <a href="#method_getItemBounds">getItemBounds</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_puti">puti</a>
+                                <a href="#method_getItemMetrics">getItemMetrics</a>
 
                                 
                                 
                             </li>
                         
-                            <li class="index-item method private">
-                                <a href="#method_rellocate">rellocate</a>
+                            <li class="index-item method protected">
+                                <a href="#method_getItemPreferredSize">getItemPreferredSize</a>
 
                                 
                                 
                             </li>
                         
-                            <li class="index-item method">
-                                <a href="#method_removeCols">removeCols</a>
+                            <li class="index-item method protected">
+                                <a href="#method_getToggleBounds">getToggleBounds</a>
 
                                 
                                 
                             </li>
                         
-                            <li class="index-item method">
-                                <a href="#method_removeRows">removeRows</a>
+                            <li class="index-item method protected">
+                                <a href="#method_getToggleBounds">getToggleBounds</a>
 
                                 
                                 
                             </li>
                         
-                            <li class="index-item method">
-                                <a href="#method_setCols">setCols</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method">
-                                <a href="#method_setRows">setRows</a>
+                            <li class="index-item method protected">
+                                <a href="#method_getToogleView">getToogleView</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_setRowsCols">setRowsCols</a>
+                                <a href="#method_isOpen">isOpen</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_sortCol">sortCol</a>
+                                <a href="#method_makeVisible">makeVisible</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method protected">
+                                <a href="#method_paintChild">paintChild</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method protected">
+                                <a href="#method_paintItem">paintItem</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
+                                <a href="#method_select">select</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
+                                <a href="#method_setGaps">setGaps</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
+                                <a href="#method_setLineColor">setLineColor</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
+                                <a href="#method_setModel">setModel</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
+                                <a href="#method_setSelectable">setSelectable</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
+                                <a href="#method_setViews">setViews</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
+                                <a href="#method_toggle">toggle</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
+                                <a href="#method_toggleAll">toggleAll</a>
 
                                 
                                 
@@ -667,14 +738,22 @@
                 <div class="index-section attrs">
                     <h3>Attributes</h3>
 
-                    <ul class="index-list attrs">
+                    <ul class="index-list attrs extends">
                         
                             <li class="index-item attr">
-                                <a href="#attr_cols">cols</a>
+                                <a href="#attr_gapx">gapx</a>
                             </li>
                         
                             <li class="index-item attr">
-                                <a href="#attr_rows">rows</a>
+                                <a href="#attr_gapy">gapy</a>
+                            </li>
+                        
+                            <li class="index-item attr">
+                                <a href="#attr_lnColor">lnColor</a>
+                            </li>
+                        
+                            <li class="index-item attr">
+                                <a href="#attr_selected">selected</a>
                             </li>
                         
                     </ul>
@@ -685,24 +764,17 @@
                 <div class="index-section events">
                     <h3>Events</h3>
 
-                    <ul class="index-list events">
+                    <ul class="index-list events extends">
                         
                             <li class="index-item event">
-                                <a href="#event_cellModified">cellModified</a>
+                                <a href="#event_selected">selected</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item event">
-                                <a href="#event_matrixResized">matrixResized</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item event">
-                                <a href="#event_matrixSorted">matrixSorted</a>
+                                <a href="#event_toggled">toggled</a>
 
                                 
                                 
@@ -718,8 +790,8 @@
                 <h2 class="off-left">Methods</h2>
 
                 
-                    <div id="method_get" class="method item">
-    <h3 class="name"><code>get</code></h3>
+                    <div id="method_getIM" class="method item protected">
+    <h3 class="name"><code>getIM</code></h3>
 
     
         <div class="args">
@@ -727,13 +799,357 @@
             
                 <li class="arg">
                     
-                        <code>row</code>
+                        <code>i</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type"><a href="../classes/zebra.ui.tree.$IM.html" class="crosslink">zebra.ui.tree.$IM</a></span>
+        </span>
+    
+
+    
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Get a tree node metrics by the given tree model item.</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">i</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a tree model item</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type"><a href="../classes/zebra.ui.tree.$IM.html" class="crosslink">zebra.ui.tree.$IM</a></span>
+                    
+                    <p>a tree node metrics</p>
+
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_getItemAt" class="method item">
+    <h3 class="name"><code>getItemAt</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code class="optional">[root]</code>
                     
                 </li>
             
                 <li class="arg">
                     
-                        <code>col</code>
+                        <code>x</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>y</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+        </span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Get a tree item that is located at the given location.</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name optional">[root]</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a starting tree node</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">x</code>
+                        <span class="type">Integer</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a x coordinate</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">y</code>
+                        <span class="type">Integer</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a y coordinate</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                    
+                    <p>a tree model item</p>
+
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_getItemBounds" class="method item protected">
+    <h3 class="name"><code>getItemBounds</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>root</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type">Object</span>
+        </span>
+    
+
+    
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Get tree model item  metrical bounds (location and size).</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">root</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>an tree model item</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type">Object</span>
+                    
+                    <p>a structure that keeps an item view location
+and size:</p>
+<pre><code>           {
+               x: {Integer},
+               y: {Integer},
+               width: {Integer},
+               height: {Integer}
+           }</code></pre>
+
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_getItemMetrics" class="method item">
+    <h3 class="name"><code>getItemMetrics</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>i</code>
                     
                 </li>
             
@@ -773,7 +1189,7 @@
     </div>
 
     <div class="description">
-        <p>Get a matrix model cell value at the specified row and column</p>
+        <p>Get calculated for the given tree model item metrics</p>
 
     </div>
 
@@ -785,30 +1201,14 @@
             
                 <li class="param">
                     
-                        <code class="param-name">row</code>
-                        <span class="type">Integer</span>
+                        <code class="param-name">i</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a cell row</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">col</code>
-                        <span class="type">Integer</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>a cell column</p>
+                        <p>a tree item</p>
 
                     </div>
 
@@ -827,7 +1227,7 @@
                     
                         <b>Return: </b><span class="type">Object</span>
                     
-                    <p>matrix model cell value</p>
+                    <p>an tree model item metrics. Th</p>
 
                 
             </div>
@@ -838,8 +1238,8 @@
 </div>
 
                 
-                    <div id="method_put" class="method item">
-    <h3 class="name"><code>put</code></h3>
+                    <div id="method_getItemPreferredSize" class="method item protected">
+    <h3 class="name"><code>getItemPreferredSize</code></h3>
 
     
         <div class="args">
@@ -847,19 +1247,7 @@
             
                 <li class="arg">
                     
-                        <code>row</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>col</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>obj</code>
+                        <code>root</code>
                     
                 </li>
             
@@ -868,9 +1256,15 @@
     
 
     
+        <span class="returns-inline">
+            <span class="type">Object</span>
+        </span>
+    
 
     
 
+    
+        <span class="flag protected">protected</span>
     
 
     
@@ -895,8 +1289,9 @@
     </div>
 
     <div class="description">
-        <p>Set the specified by row and column cell value. If the specified row or column is greater than 
-the matrix model has the model size will be adjusted to new one.</p>
+        <p>An abstract method that a concrete tree component implementations have to
+override. The method has to return a preferred size the given tree model
+item wants to have.</p>
 
     </div>
 
@@ -908,46 +1303,14 @@ the matrix model has the model size will be adjusted to new one.</p>
             
                 <li class="param">
                     
-                        <code class="param-name">row</code>
-                        <span class="type">Integer</span>
+                        <code class="param-name">root</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a cell row</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">col</code>
-                        <span class="type">Integer</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>a cell column</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">obj</code>
-                        <span class="type">Object</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>a new cell value</p>
+                        <p>an tree model item</p>
 
                     </div>
 
@@ -959,13 +1322,30 @@ the matrix model has the model size will be adjusted to new one.</p>
     
 
     
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type">Object</span>
+                    
+                    <p>a structure that keeps an item preferred size:</p>
+<pre><code>           {
+               width: {Integer},
+               height: {Integer}
+           }</code></pre>
+
+                
+            </div>
+        </div>
+    
 
     
 </div>
 
                 
-                    <div id="method_puti" class="method item">
-    <h3 class="name"><code>puti</code></h3>
+                    <div id="method_getToggleBounds" class="method item protected">
+    <h3 class="name"><code>getToggleBounds</code></h3>
 
     
         <div class="args">
@@ -973,13 +1353,7 @@ the matrix model has the model size will be adjusted to new one.</p>
             
                 <li class="arg">
                     
-                        <code>i</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>obj</code>
+                        <code>root</code>
                     
                 </li>
             
@@ -988,9 +1362,15 @@ the matrix model has the model size will be adjusted to new one.</p>
     
 
     
+        <span class="returns-inline">
+            <span class="type">Object</span>
+        </span>
+    
 
     
 
+    
+        <span class="flag protected">protected</span>
     
 
     
@@ -1015,8 +1395,221 @@ the matrix model has the model size will be adjusted to new one.</p>
     </div>
 
     <div class="description">
-        <p>Set the specified by index cell value. The index identifies cell starting from [0,0] cell till [rows,columns]. 
-If the index is greater than size of model the model size will be adjusted to new one.</p>
+        <p>Get toggle element bounds for the given tree model item.</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">root</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>an tree model item</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type">Object</span>
+                    
+                    <p>a structure that keeps an item toggle location
+and size:</p>
+<pre><code>           {
+               x: {Integer},
+               y: {Integer},
+               width: {Integer},
+               height: {Integer}
+           }</code></pre>
+
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_getToggleBounds" class="method item protected">
+    <h3 class="name"><code>getToggleBounds</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>root</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type">Object</span>
+        </span>
+    
+
+    
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Get icon element bounds for the given tree model item.</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">root</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>an tree model item</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type">Object</span>
+                    
+                    <p>a structure that keeps an item icon location
+and size:</p>
+<pre><code>           {
+               x: {Integer},
+               y: {Integer},
+               width: {Integer},
+               height: {Integer}
+           }</code></pre>
+
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_getToogleView" class="method item protected">
+    <h3 class="name"><code>getToogleView</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>i</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type"><a href="../classes/zebra.ui.View.html" class="crosslink">zebra.ui.View</a></span>
+        </span>
+    
+
+    
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Get current toggle element view. The view depends on the state of tree item.</p>
 
     </div>
 
@@ -1029,29 +1622,207 @@ If the index is greater than size of model the model size will be adjusted to ne
                 <li class="param">
                     
                         <code class="param-name">i</code>
-                        <span class="type">Integer</span>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a cell row</p>
+                        <p>a tree model item</p>
 
                     </div>
 
                     
                 </li>
             
+            </ul>
+        </div>
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type"><a href="../classes/zebra.ui.View.html" class="crosslink">zebra.ui.View</a></span>
+                    
+                    <p>a toggle element view</p>
+
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_isOpen" class="method item">
+    <h3 class="name"><code>isOpen</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>i</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type">Boolean</span>
+        </span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Test if the given tree component item is opened</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
                 <li class="param">
                     
-                        <code class="param-name">obj</code>
-                        <span class="type">Object</span>
+                        <code class="param-name">i</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a new cell value</p>
+                        <p>a tree model item</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type">Boolean</span>
+                    
+                    <p>true if the given tree component item is opened</p>
+
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_makeVisible" class="method item">
+    <h3 class="name"><code>makeVisible</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>item</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Make the given tree item visible. Tree component rendered content can takes more space than
+the UI component size is. In this case the content can be scrolled to make visible required
+tree item.</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">item</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>an item to be visible</p>
 
                     </div>
 
@@ -1068,8 +1839,8 @@ If the index is greater than size of model the model size will be adjusted to ne
 </div>
 
                 
-                    <div id="method_rellocate" class="method item private">
-    <h3 class="name"><code>rellocate</code></h3>
+                    <div id="method_paintChild" class="method item protected">
+    <h3 class="name"><code>paintChild</code></h3>
 
     
         <div class="args">
@@ -1077,9 +1848,503 @@ If the index is greater than size of model the model size will be adjusted to ne
             
                 <li class="arg">
                     
-                        <code>r</code>
+                        <code>g</code>
                     
                 </li>
+            
+                <li class="arg">
+                    
+                        <code>root</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>index</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type">Boolean</span>
+        </span>
+    
+
+    
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Paint children items of the given root tree item.</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">g</code>
+                        <span class="type">2DContext</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a graphical context</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">root</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a root tree item</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">index</code>
+                        <span class="type">Integer</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>an index</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b> <span class="type">Boolean</span>
+                    
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_paintItem" class="method item protected">
+    <h3 class="name"><code>paintItem</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>g</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>root</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>node</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>x</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>y</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+
+    
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>An abstract method that a concrete tree component implementations should
+override. The method has to render the given tree node of the specified
+tree model item at the given location</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">g</code>
+                        <span class="type">2DContext</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a graphical context</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">root</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a tree model item to be rendered</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">node</code>
+                        <span class="type"><a href="../classes/zebra.ui.tree.$IM.html" class="crosslink">zebra.ui.tree.$IM</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a tree node metrics</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">x</code>
+                        <span class="type">Ineteger</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a x location where the tree node has to be rendered</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">y</code>
+                        <span class="type">Ineteger</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a y location where the tree node has to be rendered</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="method_select" class="method item">
+    <h3 class="name"><code>select</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>an</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Select the given item.</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">an</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>item to be selected. Use null value to clear any selection</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="method_setGaps" class="method item">
+    <h3 class="name"><code>setGaps</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>gx</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>gy</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Set the given horizontal gaps between tree node graphical elements:
+toggle, icon, item view</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">gx</code>
+                        <span class="type">Integer</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>horizontal gap</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">gy</code>
+                        <span class="type">Integer</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>vertical gap</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="method_setLineColor" class="method item">
+    <h3 class="name"><code>setLineColor</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
             
                 <li class="arg">
                     
@@ -1096,8 +2361,6 @@ If the index is greater than size of model the model size will be adjusted to ne
     
 
     
-        <span class="flag private">private</span>
-    
 
     
 
@@ -1121,7 +2384,7 @@ If the index is greater than size of model the model size will be adjusted to ne
     </div>
 
     <div class="description">
-        <p>Reallocate the matrix model space with the new number of rows and columns</p>
+        <p>Set tree component connector lines color</p>
 
     </div>
 
@@ -1130,33 +2393,17 @@ If the index is greater than size of model the model size will be adjusted to ne
             <h4>Parameters:</h4>
 
             <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">r</code>
-                        <span class="type">Integer</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>a new number of rows</p>
-
-                    </div>
-
-                    
-                </li>
             
                 <li class="param">
                     
                         <code class="param-name">c</code>
-                        <span class="type">Integer</span>
+                        <span class="type">String</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a new number of columns</p>
+                        <p>a color</p>
 
                     </div>
 
@@ -1173,8 +2420,8 @@ If the index is greater than size of model the model size will be adjusted to ne
 </div>
 
                 
-                    <div id="method_removeCols" class="method item">
-    <h3 class="name"><code>removeCols</code></h3>
+                    <div id="method_setModel" class="method item">
+    <h3 class="name"><code>setModel</code></h3>
 
     
         <div class="args">
@@ -1182,13 +2429,7 @@ If the index is greater than size of model the model size will be adjusted to ne
             
                 <li class="arg">
                     
-                        <code>begcol</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>count</code>
+                        <code>d</code>
                     
                 </li>
             
@@ -1224,7 +2465,7 @@ If the index is greater than size of model the model size will be adjusted to ne
     </div>
 
     <div class="description">
-        <p>Remove specified number of columns from the model starting from the given column.</p>
+        <p>Set the given tree model to be visualized with the UI component.</p>
 
     </div>
 
@@ -1236,30 +2477,14 @@ If the index is greater than size of model the model size will be adjusted to ne
             
                 <li class="param">
                     
-                        <code class="param-name">begcol</code>
-                        <span class="type">Integer</span>
+                        <code class="param-name">d</code>
+                        <span class="type"><a href="../classes/zebra.data.TreeModel.html" class="crosslink">zebra.data.TreeModel</a> | Object</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a start column</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">count</code>
-                        <span class="type">Integer</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>a number of columns to be removed</p>
+                        <p>a tree model</p>
 
                     </div>
 
@@ -1276,8 +2501,8 @@ If the index is greater than size of model the model size will be adjusted to ne
 </div>
 
                 
-                    <div id="method_removeRows" class="method item">
-    <h3 class="name"><code>removeRows</code></h3>
+                    <div id="method_setSelectable" class="method item">
+    <h3 class="name"><code>setSelectable</code></h3>
 
     
         <div class="args">
@@ -1285,13 +2510,7 @@ If the index is greater than size of model the model size will be adjusted to ne
             
                 <li class="arg">
                     
-                        <code>begrow</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>count</code>
+                        <code>b</code>
                     
                 </li>
             
@@ -1327,7 +2546,7 @@ If the index is greater than size of model the model size will be adjusted to ne
     </div>
 
     <div class="description">
-        <p>Remove specified number of rows from the model starting from the given row.</p>
+        <p>Say if items of the tree component should be selectable</p>
 
     </div>
 
@@ -1339,30 +2558,14 @@ If the index is greater than size of model the model size will be adjusted to ne
             
                 <li class="param">
                     
-                        <code class="param-name">begrow</code>
-                        <span class="type">Integer</span>
+                        <code class="param-name">b</code>
+                        <span class="type">Boolean</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a start row</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">count</code>
-                        <span class="type">Integer</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>a number of rows to be removed</p>
+                        <p>true is tree component items can be selected</p>
 
                     </div>
 
@@ -1379,8 +2582,8 @@ If the index is greater than size of model the model size will be adjusted to ne
 </div>
 
                 
-                    <div id="method_setCols" class="method item">
-    <h3 class="name"><code>setCols</code></h3>
+                    <div id="method_setViews" class="method item">
+    <h3 class="name"><code>setViews</code></h3>
 
     
         <div class="args">
@@ -1388,7 +2591,7 @@ If the index is greater than size of model the model size will be adjusted to ne
             
                 <li class="arg">
                     
-                        <code>cols</code>
+                        <code>v</code>
                     
                 </li>
             
@@ -1424,7 +2627,33 @@ If the index is greater than size of model the model size will be adjusted to ne
     </div>
 
     <div class="description">
-        <p>Set the given number of columns the model has to have.</p>
+        <p>Set the number of views to customize rendering of different visual elements of the tree
+UI component. The following decorative elements can be customized:</p>
+<ul>
+<li><strong>&quot;close&quot; </strong> - closed tree item icon view</li>
+<li><strong>&quot;open&quot; </strong>  - opened tree item icon view</li>
+<li><strong>&quot;leaf&quot; </strong>  - leaf tree item icon view</li>
+<li><strong>&quot;on&quot; </strong>    - toggle on view</li>
+<li><strong>&quot;off&quot; </strong>   - toggle off view</li>
+<li><strong>&quot;iselect&quot; </strong>   - a view to express an item selection when tree component doesn&#39;t hold focus</li>
+<li><strong>&quot;aselect&quot; </strong>   - a view to express an item selection when tree component holds focus</li>
+</ul>
+<p>For instance:</p>
+<pre class="code prettyprint"><code>   // build tree UI component
+   var tree = new zebra.ui.tree.Tree({
+       value: &quot;Root&quot;,
+       kids: [
+           &quot;Item 1&quot;,
+           &quot;Item 2&quot;
+       ]
+   });
+
+   // set &quot; [x] &quot; text render for toggle on and
+   // &quot; [o] &quot; text render for toggle off tree elements
+   tree.setViews({
+       &quot;on&quot;: new zebra.ui.TextRender(&quot; [x] &quot;),
+       &quot;off&quot;: new zebra.ui.TextRender(&quot; [o] &quot;)
+   });</code></pre>
 
     </div>
 
@@ -1436,14 +2665,14 @@ If the index is greater than size of model the model size will be adjusted to ne
             
                 <li class="param">
                     
-                        <code class="param-name">cols</code>
-                        <span class="type">Integer</span>
+                        <code class="param-name">v</code>
+                        <span class="type">Object</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a new number of columns</p>
+                        <p>dictionary of tree component decorative elements views</p>
 
                     </div>
 
@@ -1460,8 +2689,8 @@ If the index is greater than size of model the model size will be adjusted to ne
 </div>
 
                 
-                    <div id="method_setRows" class="method item">
-    <h3 class="name"><code>setRows</code></h3>
+                    <div id="method_toggle" class="method item">
+    <h3 class="name"><code>toggle</code></h3>
 
     
         <div class="args">
@@ -1469,7 +2698,7 @@ If the index is greater than size of model the model size will be adjusted to ne
             
                 <li class="arg">
                     
-                        <code>rows</code>
+                        <code>item</code>
                     
                 </li>
             
@@ -1505,7 +2734,7 @@ If the index is greater than size of model the model size will be adjusted to ne
     </div>
 
     <div class="description">
-        <p>Set the given number of rows the model has to have.</p>
+        <p>Toggle the given tree item</p>
 
     </div>
 
@@ -1517,14 +2746,14 @@ If the index is greater than size of model the model size will be adjusted to ne
             
                 <li class="param">
                     
-                        <code class="param-name">rows</code>
-                        <span class="type">Integer</span>
+                        <code class="param-name">item</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a new number of rows</p>
+                        <p>an item to be toggled</p>
 
                     </div>
 
@@ -1541,8 +2770,8 @@ If the index is greater than size of model the model size will be adjusted to ne
 </div>
 
                 
-                    <div id="method_setRowsCols" class="method item">
-    <h3 class="name"><code>setRowsCols</code></h3>
+                    <div id="method_toggleAll" class="method item">
+    <h3 class="name"><code>toggleAll</code></h3>
 
     
         <div class="args">
@@ -1550,13 +2779,13 @@ If the index is greater than size of model the model size will be adjusted to ne
             
                 <li class="arg">
                     
-                        <code>rows</code>
+                        <code>root</code>
                     
                 </li>
             
                 <li class="arg">
                     
-                        <code>cols</code>
+                        <code>b</code>
                     
                 </li>
             
@@ -1592,7 +2821,7 @@ If the index is greater than size of model the model size will be adjusted to ne
     </div>
 
     <div class="description">
-        <p>Set the given number of rows and columns the model has to have.</p>
+        <p>Toggle off or on recursively all items of the given item</p>
 
     </div>
 
@@ -1604,14 +2833,14 @@ If the index is greater than size of model the model size will be adjusted to ne
             
                 <li class="param">
                     
-                        <code class="param-name">rows</code>
-                        <span class="type">Integer</span>
+                        <code class="param-name">root</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a new number of rows</p>
+                        <p>a starting item to toggle</p>
 
                     </div>
 
@@ -1620,120 +2849,15 @@ If the index is greater than size of model the model size will be adjusted to ne
             
                 <li class="param">
                     
-                        <code class="param-name">cols</code>
-                        <span class="type">Integer</span>
+                        <code class="param-name">b</code>
+                        <span class="type">Boolean</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a new number of columns</p>
-
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="method_sortCol" class="method item">
-    <h3 class="name"><code>sortCol</code></h3>
-
-    
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code>col</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code class="optional">[f]</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Sort the given column of the matrix model</p>
-
-    </div>
-
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">col</code>
-                        <span class="type">Integer</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>a column to be re-ordered</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name optional">[f]</code>
-                        <span class="type">Function</span>
-                        <span class="flag optional" title="This parameter is optional.">optional</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>an optional sort function. The name of the function 
-is grabbed to indicate type of the sorting the method does. For instance:
-&quot;descent&quot;, &quot;ascent&quot;.</p>
+                        <p>true if all items have to be in opened
+state and false otherwise</p>
 
                     </div>
 
@@ -1760,9 +2884,9 @@ is grabbed to indicate type of the sorting the method does. For instance:
                 <h2 class="off-left">Attributes</h2>
 
                 
-                    <div id="attr_cols" class="attr item">
-    <a name="config_cols"></a> 
-    <h3 class="name"><code>cols</code></h3>
+                    <div id="attr_gapx" class="attr item">
+    <a name="config_gapx"></a> 
+    <h3 class="name"><code>gapx</code></h3>
     <span class="type">Integer</span>
 
     
@@ -1794,7 +2918,103 @@ is grabbed to indicate type of the sorting the method does. For instance:
     </div>
 
     <div class="description">
-        <p>Number of columns in the matrix model</p>
+        <p>Horizontal gap between a node elements: toggle, icons and tree item view</p>
+
+    </div>
+
+    
+        <p><strong>Default:</strong> 2</p>
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="attr_gapy" class="attr item">
+    <a name="config_gapy"></a> 
+    <h3 class="name"><code>gapy</code></h3>
+    <span class="type">Integer</span>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <span class="flag readonly">readonly</span>
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Vertical gap between a node elements: toggle, icons and tree item view</p>
+
+    </div>
+
+    
+        <p><strong>Default:</strong> 2</p>
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="attr_lnColor" class="attr item">
+    <a name="config_lnColor"></a> 
+    <h3 class="name"><code>lnColor</code></h3>
+    <span class="type">String</span>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <span class="flag readonly">readonly</span>
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Tree component line color</p>
 
     </div>
 
@@ -1806,10 +3026,10 @@ is grabbed to indicate type of the sorting the method does. For instance:
 </div>
 
                 
-                    <div id="attr_rows" class="attr item">
-    <a name="config_rows"></a> 
-    <h3 class="name"><code>rows</code></h3>
-    <span class="type">Integer</span>
+                    <div id="attr_selected" class="attr item">
+    <a name="config_selected"></a> 
+    <h3 class="name"><code>selected</code></h3>
+    <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
 
     
 
@@ -1840,10 +3060,12 @@ is grabbed to indicate type of the sorting the method does. For instance:
     </div>
 
     <div class="description">
-        <p>Number of rows in the matrix model</p>
+        <p>Selected tree model item</p>
 
     </div>
 
+    
+        <p><strong>Default:</strong> null</p>
     
 
     
@@ -1860,8 +3082,8 @@ is grabbed to indicate type of the sorting the method does. For instance:
                 <h2 class="off-left">Events</h2>
 
                 
-                    <div id="event_cellModified" class="events item">
-    <h3 class="name"><code>cellModified</code></h3>
+                    <div id="event_selected" class="events item">
+    <h3 class="name"><code>selected</code></h3>
     <span class="type"></span>
 
     
@@ -1885,10 +3107,10 @@ is grabbed to indicate type of the sorting the method does. For instance:
     </div>
 
     <div class="description">
-        <p>Fired when the matrix model cell has been updated. </p>
-<pre class="code prettyprint"><code>     matrix.bind(function cellModified(src, row, col, old) {
-        ...
-     });</code></pre>
+        <p>Fired when a tree item has been selected</p>
+<pre class="code prettyprint"><code> tree.bind(function selected(src, item) {
+    ...
+ });</code></pre>
 
     </div>
 
@@ -1901,13 +3123,13 @@ is grabbed to indicate type of the sorting the method does. For instance:
                 <li class="param">
                     
                         <code class="param-name">src</code>
-                        <span class="type"><a href="../classes/zebra.data.Matrix.html" class="crosslink">zebra.data.Matrix</a></span>
+                        <span class="type"><a href="../classes/zebra.ui.tree.BaseTree.html" class="crosslink">zebra.ui.tree.BaseTree</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a matrix that triggers the event</p>
+                        <p>an tree component that triggers the event</p>
 
                     </div>
 
@@ -1916,46 +3138,14 @@ is grabbed to indicate type of the sorting the method does. For instance:
             
                 <li class="param">
                     
-                        <code class="param-name">row</code>
-                        <span class="type">Integer</span>
+                        <code class="param-name">item</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>an updated row</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">col</code>
-                        <span class="type">Integer</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>an updated column</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">old</code>
-                        <span class="type">Object</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>a previous cell value</p>
+                        <p>an tree item that has been toggled</p>
 
                     </div>
 
@@ -1971,8 +3161,8 @@ is grabbed to indicate type of the sorting the method does. For instance:
 </div>
 
                 
-                    <div id="event_matrixResized" class="events item">
-    <h3 class="name"><code>matrixResized</code></h3>
+                    <div id="event_toggled" class="events item">
+    <h3 class="name"><code>toggled</code></h3>
     <span class="type"></span>
 
     
@@ -1996,10 +3186,10 @@ is grabbed to indicate type of the sorting the method does. For instance:
     </div>
 
     <div class="description">
-        <p>Fired when the matrix model size (number of rows or columns) is changed. </p>
-<pre class="code prettyprint"><code>    matrix.bind(function matrixResized(src, pr, pc) {
-       ...
-    });</code></pre>
+        <p>Fired when a tree item has been toggled</p>
+<pre class="code prettyprint"><code>   tree.bind(function toggled(src, item) {
+      ...
+   });</code></pre>
 
     </div>
 
@@ -2012,13 +3202,13 @@ is grabbed to indicate type of the sorting the method does. For instance:
                 <li class="param">
                     
                         <code class="param-name">src</code>
-                        <span class="type"><a href="../classes/zebra.data.Matrix.html" class="crosslink">zebra.data.Matrix</a></span>
+                        <span class="type"><a href="../classes/zebra.ui.tree.BaseTree.html" class="crosslink">zebra.ui.tree.BaseTree</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a matrix that triggers the event</p>
+                        <p>an tree component that triggers the event</p>
 
                     </div>
 
@@ -2027,115 +3217,14 @@ is grabbed to indicate type of the sorting the method does. For instance:
             
                 <li class="param">
                     
-                        <code class="param-name">pr</code>
-                        <span class="type">Integer</span>
+                        <code class="param-name">item</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a previous number of rows</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">pc</code>
-                        <span class="type">Integer</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>a previous number of columns</p>
-
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-
-    
-</div>
-
-                
-                    <div id="event_matrixSorted" class="events item">
-    <h3 class="name"><code>matrixSorted</code></h3>
-    <span class="type"></span>
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-            
-        
-        </p>
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Fired when the matrix data has been re-ordered. </p>
-<pre class="code prettyprint"><code>      matrix.bind(function matrixSorted(src, sortInfo) {
-         ...
-      });</code></pre>
-
-    </div>
-
-    
-        <div class="params">
-            <h4>Event Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">src</code>
-                        <span class="type"><a href="../classes/zebra.data.Matrix.html" class="crosslink">zebra.data.Matrix</a></span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>a matrix that triggers the event</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">sortInfo</code>
-                        <span class="type">Object</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>a new data order info. The information 
-contains:</p>
-<pre><code> { 
-    func: sortFunction,
-    name: sortFunctionName,
-    col : sortColumn
- }</code></pre>
+                        <p>an tree item that has been toggled</p>
 
                     </div>
 

@@ -161,8 +161,6 @@
             
                 <li><a href="../classes/zebra.ui.CompRender.html">zebra.ui.CompRender</a></li>
             
-                <li><a href="../classes/zebra.ui.CopyCutPaste.html">zebra.ui.CopyCutPaste</a></li>
-            
                 <li><a href="../classes/zebra.ui.CursorManager.html">zebra.ui.CursorManager</a></li>
             
                 <li><a href="../classes/zebra.ui.designer.ShaperPan.html">zebra.ui.designer.ShaperPan</a></li>
@@ -321,11 +319,19 @@
             
                 <li><a href="../classes/zebra.ui.Tooltip.html">zebra.ui.Tooltip</a></li>
             
+                <li><a href="../classes/zebra.ui.tree.$IM.html">zebra.ui.tree.$IM</a></li>
+            
+                <li><a href="../classes/zebra.ui.tree.BaseTree.html">zebra.ui.tree.BaseTree</a></li>
+            
+                <li><a href="../classes/zebra.ui.tree.CompTree.html">zebra.ui.tree.CompTree</a></li>
+            
                 <li><a href="../classes/zebra.ui.tree.DefEditors.html">zebra.ui.tree.DefEditors</a></li>
             
                 <li><a href="../classes/zebra.ui.tree.DefViews.html">zebra.ui.tree.DefViews</a></li>
             
                 <li><a href="../classes/zebra.ui.tree.Tree.html">zebra.ui.tree.Tree</a></li>
+            
+                <li><a href="../classes/zebra.ui.tree.TreeSignView.html">zebra.ui.tree.TreeSignView</a></li>
             
                 <li><a href="../classes/zebra.ui.VideoPan.html">zebra.ui.VideoPan</a></li>
             
@@ -1092,6 +1098,20 @@ the panel class.</p>
                         
                             <li class="index-item event">
                                 <a href="#event_childInputEvent">childInputEvent</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item event">
+                                <a href="#event_clipCopy">clipCopy</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item event">
+                                <a href="#event_clipPaste">clipPaste</a>
 
                                 
                                 
@@ -7120,6 +7140,104 @@ p.childInputEvent = function(e) { ... }; // add event handler</code></pre>
 
                     <div class="param-description">
                         <p>an input event</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+
+    
+</div>
+
+                
+                    <div id="event_clipCopy" class="events item">
+    <h3 class="name"><code>clipCopy</code></h3>
+    <span class="type"></span>
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>The method is called for focusable UI components (components that can hold input focus) to ask
+a string to be saved in native clipboard</p>
+
+    </div>
+
+    
+
+
+    
+</div>
+
+                
+                    <div id="event_clipPaste" class="events item">
+    <h3 class="name"><code>clipPaste</code></h3>
+    <span class="type"></span>
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>The method is called to pass string from clipboard to a focusable (a component that can hold
+input focus) UI component</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Event Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">s</code>
+                        <span class="type">String</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a string from native clipboard</p>
 
                     </div>
 

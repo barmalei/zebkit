@@ -1448,7 +1448,7 @@ rgb.pink        = new rgb(255,192,203);
 rgb.cyan        = new rgb(0,255,255);
 rgb.magenta     = new rgb(255,0,255);
 rgb.darkBlue    = new rgb(0, 0, 140);
-rgb.transparent = new rgb(0, 0, 0, 1.0);
+rgb.transparent = new rgb(0, 0, 0, 0.0);
 
 /**
  * Compute intersection of the two given rectangular areas 
@@ -6583,6 +6583,11 @@ pkg.GridLayout = Class(L, [
                                                   : parseInt(/(^[0-9\.]+)([a-z]+)?/.exec(value)[1], 10);
         };
 
+        pkg.$contains = function(element) {
+            return (document.contains != null && document.contains(element)) ||  
+                   (document.body.contains != null && document.body.contains(element));
+        };
+
         pkg.$canvas = {
             size : function(c, w, h) {
                 c.style.width  = "" + w + "px";
@@ -7075,9 +7080,11 @@ pkg.GridLayout = Class(L, [
  */
 
 var instanceOf = zebra.instanceOf, L = zebra.layout, MB = zebra.util,
-    $configurators = [],rgb = zebra.util.rgb, temporary = { x:0, y:0, width:0, height:0 },
+    $configurators = [], rgb = zebra.util.rgb, temporary = { x:0, y:0, width:0, height:0 },
     MS = Math.sin, MC = Math.cos, $fmCanvas = null, $fmText = null,
-    $fmImage = null, $clipboard = null, $clipboardCanvas, $canvases = pkg.$canvases = [];
+    $fmImage = null, $clipboard = null, $clipboardCanvas;
+
+pkg.$canvases = [];
 
 pkg.clipboardTriggerKey = 0;
 
@@ -7090,9 +7097,7 @@ function $meY(e, d) {
 }
 
 pkg.$view = function(v) {
-    if (v == null) return null;
-
-    if (v.paint != null) return v;
+    if (v == null || v.paint != null) return v;
 
     if (zebra.isString(v)) {
         return rgb.hasOwnProperty(v) ? rgb[v]
@@ -7114,14 +7119,14 @@ pkg.$view = function(v) {
 };
 
 /**
- * Look up 2D canvas in the list of exitent
+ * Look up 2D canvas in the list of existent
  * @param  {2DCanvas} canvas a canvas
  * @return {zebra.ui.zCanvas} a zebra canvas
  */
 pkg.$detectZCanvas = function(canvas) {
     if (zebra.isString(canvas)) canvas = document.getElementById(canvas);
-    for(var i=0; canvas != null && i < $canvases.length; i++) {
-        if ($canvases[i].canvas == canvas) return $canvases[i];
+    for(var i=0; canvas != null && i < pkg.$canvases.length; i++) {
+        if (pkg.$canvases[i].canvas == canvas) return pkg.$canvases[i];
     }
     return null;
 };
@@ -7485,7 +7490,7 @@ pkg.Border = Class(pkg.View, [
             x += dt;
             y += dt;
 
-            // !!! this code can work inproperly in IE 10 in Vista !
+            // !!! this code can work improperly in IE 10 in Vista !
             // g.beginPath();
             // g.moveTo(x+r, y);
             // g.arcTo(xx, y, xx, yy, r);
@@ -7683,7 +7688,7 @@ pkg.Radial = Class(pkg.View, [
             var cx1 = w/2, cy1 = h/2;
             this.gradient = g.createRadialGradient(cx1, cy1, 10, cx1, cy1, w > h ? w : h);
 
-            for(var i = 0; i < this.colors.length; i++) {
+            for(var i=0;i<this.colors.length;i++) {
                 this.gradient.addColorStop(i, this.colors[i].toString());
             }
             g.fillStyle = this.gradient;
@@ -8591,30 +8596,12 @@ ME = pkg.MouseEvent = Class(IE, [
          * component is hosted) y mouse cursor coordinate
          * @param  {Integer} mask   a pressed mouse buttons mask
          * @param  {Integer} clicks number of a button clicks
-         * @param  {Object} modifiers modifier keys state
          * @method  reset
          */
-        this.reset = function(target,id,ax,ay,mask,clicks,modifiers){
+        this.reset = function(target,id,ax,ay,mask,clicks){
             this.ID     = id;
             this.mask   = mask;
             this.clicks = clicks;
-
-            if (modifiers != null) {
-                this.modifiers  = {
-                    altKey      : modifiers.altKey,
-                    ctrlKey     : modifiers.ctrlKey,
-                    metaKey     : modifiers.metaKey,
-                    shiftKey    : modifiers.shiftKey,
-                };
-            }
-            else {
-                this.modifiers  = {
-                    altKey      : false,
-                    ctrlKey     : false,
-                    metaKey     : false,
-                    shiftKey    : false,
-                };
-            }
 
             // this can speed up calculation significantly
             if (this.source == target && this.source.parent == target.parent && target.x == this.$px && target.y == this.$py) {
@@ -8648,9 +8635,17 @@ ME = pkg.MouseEvent = Class(IE, [
         };
     },
 
-    function (target,id,ax,ay,mask,clicks,modifiers){
+    function (target,id,ax,ay,mask,clicks){
         this.$super(target, id, IE.MOUSE_UID);
-        this.reset(target, id, ax, ay, mask, clicks, modifiers);
+
+        this.modifiers  = {
+            altKey      : false,
+            ctrlKey     : false,
+            metaKey     : false,
+            shiftKey    : false
+        };
+
+        this.reset(target, id, ax, ay, mask, clicks);
     }
 ]);
 
@@ -8659,10 +8654,11 @@ var MDRAGGED = ME.DRAGGED, EM = null, MMOVED = ME.MOVED, MEXITED = ME.EXITED,
     context = Object.getPrototypeOf(document.createElement('canvas').getContext('2d')),
     $mousePressedEvents = {}, $keyPressedCode = -1, $keyPressedOwner = null,
     $keyPressedModifiers = 0, KE_STUB = new KE(null,  KPRESSED, 0, 'x', 0),
-    ME_STUB = new ME("", ME.PRESSED, 0, 0, 0, 1, null);
+    ME_STUB = new ME("", ME.PRESSED, 0, 0, 0, 1);
 
 pkg.paintManager = pkg.events = pkg.$mouseMoveOwner = null;
 
+// !!!
 // global mouse move events handler (registered by drag out a canvas surface)
 // has to be removed every time a mouse button released with the given function
 function $cleanDragFix() {
@@ -8730,7 +8726,7 @@ context.setFont = function(f) {
 
 context.setColor = function(c) {
     if (c == null) throw new Error("Null color");
-    c = (c.s ? c.s : c.toString());
+    c = (c.s != null ? c.s : c.toString());
     if (c != this.fillStyle) this.fillStyle = c;
     if (c != this.strokeStyle) this.strokeStyle = c;
 };
@@ -10552,7 +10548,7 @@ pkg.FocusManager = Class(pkg.Manager, [
          * @method keyPressed
          */
         this.keyPressed = function(e){
-            if (KE.TAB == e.code){
+            if (KE.TAB == e.code) {
                 var cc = this.ff(e.source, e.isShiftPressed() ?  -1 : 1);
                 if (cc != null) this.requestFocus(cc);
             }
@@ -10582,7 +10578,7 @@ pkg.FocusManager = Class(pkg.Manager, [
         // looking recursively a focusable component among children components of 
         // the given target  starting from the specified by index kid with the 
         // given direction (forward or backward lookup)
-        this.fd = function(t,index,d){
+        this.fd = function(t,index,d) {
             if (t.kids.length > 0){
                 var isNComposite = (instanceOf(t, Composite) === false);
                 for(var i = index; i >= 0 && i < t.kids.length; i += d) {
@@ -10598,7 +10594,7 @@ pkg.FocusManager = Class(pkg.Manager, [
                         (isNComposite || (t.catchInput && t.catchInput(cc) === false))  &&
                         ( (cc.canHaveFocus === true || (cc.canHaveFocus !=  null  &&
                                                         cc.canHaveFocus !== false &&
-                                                        cc.canHaveFocus())             )||
+                                                        cc.canHaveFocus())            ) ||
                           (cc = this.fd(cc, d > 0 ? 0 : cc.kids.length - 1, d)) != null)  )
                     {
                         return cc;
@@ -10612,7 +10608,7 @@ pkg.FocusManager = Class(pkg.Manager, [
         // find next focusable component 
         // c - component starting from that a next focusable component has to be found
         // d - a direction of next focusable component lookup: 1 (forward) or -1 (backward)
-        this.ff = function(c,d){
+        this.ff = function(c, d){
             var top = c;
             while (top && top.getFocusRoot == null) {
                 top = top.parent;
@@ -10627,12 +10623,12 @@ pkg.FocusManager = Class(pkg.Manager, [
                 return top.traverseFocus(c, d);
             }
 
-            for(var index = (d > 0) ? 0 : c.kids.length - 1;c != top.parent; ){
+            for(var index = (d > 0) ? 0 : c.kids.length - 1; c != top.parent; ){
                 var cc = this.fd(c, index, d);
-                if(cc != null) return cc;
+                if (cc != null) return cc;
                 cc = c;
                 c = c.parent;
-                if(c != null) index = d + c.indexOf(cc);
+                if (c != null) index = d + c.indexOf(cc);
             }
 
             return this.fd(top, d > 0 ? 0 : top.kids.length - 1, d);
@@ -11111,7 +11107,7 @@ pkg.EventManager = Class(pkg.Manager, [
         zebra.ui.events.addListener({
 
             // implement necessary events handlers methods
-             keyPressed: function(e) {
+            keyPressed: function(e) {
                 ...
             }
             ...
@@ -11441,13 +11437,15 @@ pkg.zCanvas = Class(pkg.Panel, [
             // zebra component the mouse pointer entered and send appropriate
             // mouse entered event to it
             if (mp == null || mp.canvas == null) {
-                var x = $meX(e, this), y = $meY(e, this), d = this.getComponentAt(x, y);
-                var modifiers  = {
-                    altKey      : e.altKey,
-                    ctrlKey     : e.ctrlKey,
-                    metaKey     : e.metaKey,
-                    shiftKey    : e.shiftKey,
-                };
+                var x = $meX(e, this), 
+                    y = $meY(e, this), 
+                    d = this.getComponentAt(x, y);
+
+                // setup modifiers 
+                ME_STUB.modifiers.altKey   = e.altKey;
+                ME_STUB.modifiers.ctrlKey  = e.ctrlKey;
+                ME_STUB.modifiers.metaKey  = e.metaKey;
+                ME_STUB.modifiers.shiftKey = e.shiftKey;
 
                 // also correct current component on that mouse pointer is located
                 if (d != pkg.$mouseMoveOwner) {
@@ -11457,7 +11455,7 @@ pkg.zCanvas = Class(pkg.Panel, [
                         var prev = pkg.$mouseMoveOwner;
                         pkg.$mouseMoveOwner = null;
 
-                        ME_STUB.reset(prev, MEXITED, x, y, -1, 0, modifiers);
+                        ME_STUB.reset(prev, MEXITED, x, y, -1, 0);
                         EM.fireInputEvent(ME_STUB);
                     }
 
@@ -11465,7 +11463,7 @@ pkg.zCanvas = Class(pkg.Panel, [
                     // generate mouse entered event ans set new mouse owner
                     if (d != null && d.isEnabled === true){
                         pkg.$mouseMoveOwner = d;
-                        ME_STUB.reset(d, MENTERED, x, y, -1, 0, modifiers);
+                        ME_STUB.reset(d, MENTERED, x, y, -1, 0);
                         EM.fireInputEvent(ME_STUB);
                     }
                 }
@@ -11475,12 +11473,11 @@ pkg.zCanvas = Class(pkg.Panel, [
         this.$mouseExited = function (id, e) {
             var mp = $mousePressedEvents[id];
 
-            var modifiers  = {
-                altKey      : e.altKey,
-                ctrlKey     : e.ctrlKey,
-                metaKey     : e.metaKey,
-                shiftKey    : e.shiftKey,
-            };
+            // setup modifiers 
+            ME_STUB.modifiers.altKey   = e.altKey;
+            ME_STUB.modifiers.ctrlKey  = e.ctrlKey;
+            ME_STUB.modifiers.metaKey  = e.metaKey;
+            ME_STUB.modifiers.shiftKey = e.shiftKey;
 
             // if a mouse button has not been pressed and current mouse owner
             // component is not null, flush current mouse owner and send
@@ -11490,7 +11487,7 @@ pkg.zCanvas = Class(pkg.Panel, [
                     var p = pkg.$mouseMoveOwner;
                     pkg.$mouseMoveOwner = null;
 
-                    ME_STUB.reset(p, MEXITED, $meX(e, this), $meY(e, this), -1, 0, modifiers);
+                    ME_STUB.reset(p, MEXITED, $meX(e, this), $meY(e, this), -1, 0);
                     EM.fireInputEvent(ME_STUB);
                 }
             }
@@ -11507,7 +11504,7 @@ pkg.zCanvas = Class(pkg.Panel, [
                             pageX : ee.pageX,
                             pageY : ee.pageY,
                             target: e.target,
-                            modifiers: modifiers,
+                            modifiers: ME_STUB.modifiers,
                         });
                         ee.preventDefault();
                     };
@@ -11540,19 +11537,18 @@ pkg.zCanvas = Class(pkg.Panel, [
                 // target component exits and mouse cursor moved on the same
                 // canvas where mouse pressed occurred
                 if (mp.component != null && mp.canvas.canvas == e.target) {
-
                     // !!!!
                     // for the sake of performance $meX(e, this) and $meY(e, this)
                     // methods calls are replaced with direct code
                     var x = this.$context.tX(e.pageX - this.offx, e.pageY - this.offy),
                         y = this.$context.tY(e.pageX - this.offx, e.pageY - this.offy),
                         m = mp.button;
-                    var modifiers  = {
-                        altKey      : e.altKey,
-                        ctrlKey     : e.ctrlKey,
-                        metaKey     : e.metaKey,
-                        shiftKey    : e.shiftKey,
-                    };
+
+                        // setup modifiers 
+                        ME_STUB.modifiers.altKey   = e.altKey;
+                        ME_STUB.modifiers.ctrlKey  = e.ctrlKey;
+                        ME_STUB.modifiers.metaKey  = e.metaKey;
+                        ME_STUB.modifiers.shiftKey = e.shiftKey;
 
                     // if drag events has not been initiated yet generate mouse
                     // start dragging event
@@ -11575,20 +11571,20 @@ pkg.zCanvas = Class(pkg.Panel, [
                         // mouse dragged events to the component
                         if (d != null && d.isEnabled === true) {
                             mp.draggedComponent = d;
-                            var modifiers  = {
-                                altKey      : mp.modifiers.altKey,
-                                ctrlKey     : mp.modifiers.ctrlKey,
-                                metaKey     : mp.modifiers.metaKey,
-                                shiftKey    : mp.modifiers.shiftKey,
-                            };
 
-                            ME_STUB.reset(d, ME.DRAGSTARTED, xx, yy, m, 0, modifiers);
+                            // setup modifiers 
+                            ME_STUB.modifiers.altKey   = mp.altKey;
+                            ME_STUB.modifiers.ctrlKey  = mp.ctrlKey;
+                            ME_STUB.modifiers.metaKey  = mp.metaKey;
+                            ME_STUB.modifiers.shiftKey = mp.shiftKey;
+
+                            ME_STUB.reset(d, ME.DRAGSTARTED, xx, yy, m, 0);
                             EM.fireInputEvent(ME_STUB);
 
                             // if mouse cursor has been moved mouse dragged
                             // event has to be generated
                             if (xx != x || yy != y) {
-                                ME_STUB.reset(d, MDRAGGED, x, y, m, 0, modifiers);
+                                ME_STUB.reset(d, MDRAGGED, x, y, m, 0);
                                 EM.fireInputEvent(ME_STUB);
                             }
                         }
@@ -11596,7 +11592,7 @@ pkg.zCanvas = Class(pkg.Panel, [
                     else {
                         // the drag event has already occurred before, just send
                         // next dragged event to target zebra component
-                        ME_STUB.reset(mp.draggedComponent, MDRAGGED, x, y, m, 0, modifiers);
+                        ME_STUB.reset(mp.draggedComponent, MDRAGGED, x, y, m, 0);
                         EM.fireInputEvent(ME_STUB);
                     }
                 }
@@ -11611,31 +11607,31 @@ pkg.zCanvas = Class(pkg.Panel, [
                 var x = this.$context.tX(e.pageX - this.offx, e.pageY - this.offy),
                     y = this.$context.tY(e.pageX - this.offx, e.pageY - this.offy),
                     d = this.getComponentAt(x, y);
-                var modifiers  = {
-                    altKey      : e.altKey,
-                    ctrlKey     : e.ctrlKey,
-                    metaKey     : e.metaKey,
-                    shiftKey    : e.shiftKey,
-                };
-
+              
+                // setup modifiers 
+                ME_STUB.modifiers.altKey   = e.altKey;
+                ME_STUB.modifiers.ctrlKey  = e.ctrlKey;
+                ME_STUB.modifiers.metaKey  = e.metaKey;
+                ME_STUB.modifiers.shiftKey = e.shiftKey;
+                
                 if (pkg.$mouseMoveOwner != null) {
                     if (d != pkg.$mouseMoveOwner) {
                         var old = pkg.$mouseMoveOwner;
 
                         pkg.$mouseMoveOwner = null;
 
-                        ME_STUB.reset(old, MEXITED, x, y, -1, 0, modifiers);
+                        ME_STUB.reset(old, MEXITED, x, y, -1, 0);
                         EM.fireInputEvent(ME_STUB);
 
                         if (d != null && d.isEnabled === true) {
                             pkg.$mouseMoveOwner = d;
-                            ME_STUB.reset(pkg.$mouseMoveOwner, MENTERED, x, y, -1, 0, modifiers);
+                            ME_STUB.reset(pkg.$mouseMoveOwner, MENTERED, x, y, -1, 0);
                             EM.fireInputEvent(ME_STUB);
                         }
                     }
                     else {
                         if (d != null && d.isEnabled === true) {
-                            ME_STUB.reset(d, MMOVED, x, y, -1, 0, modifiers);
+                            ME_STUB.reset(d, MMOVED, x, y, -1, 0);
                             EM.fireInputEvent(ME_STUB);
                         }
                     }
@@ -11643,7 +11639,7 @@ pkg.zCanvas = Class(pkg.Panel, [
                 else {
                     if (d != null && d.isEnabled === true) {
                         pkg.$mouseMoveOwner = d;
-                        ME_STUB.reset(d, MENTERED, x, y, -1, 0, modifiers);
+                        ME_STUB.reset(d, MENTERED, x, y, -1, 0);
                         EM.fireInputEvent(ME_STUB);
                     }
                 }
@@ -11656,17 +11652,17 @@ pkg.zCanvas = Class(pkg.Panel, [
             // handle it only if appropriate mouse pressed has occurred
             if (mp != null && mp.canvas != null) {
                 var x = $meX(e, this), y = $meY(e, this), po = mp.component;
-                var modifiers  = {
-                    altKey      : e.altKey,
-                    ctrlKey     : e.ctrlKey,
-                    metaKey     : e.metaKey,
-                    shiftKey    : e.shiftKey,
-                };
+
+                // setup modifiers 
+                ME_STUB.modifiers.altKey   = e.altKey;
+                ME_STUB.modifiers.ctrlKey  = e.ctrlKey;
+                ME_STUB.modifiers.metaKey  = e.metaKey;
+                ME_STUB.modifiers.shiftKey = e.shiftKey;
 
                 // if a component has been dragged send end dragged event to it to
                 // complete dragging
                 if (mp.draggedComponent != null){
-                    ME_STUB.reset(mp.draggedComponent, ME.DRAGENDED, x, y, mp.button, 0, modifiers);
+                    ME_STUB.reset(mp.draggedComponent, ME.DRAGENDED, x, y, mp.button, 0);
                     EM.fireInputEvent(ME_STUB);
                 }
 
@@ -11676,17 +11672,17 @@ pkg.zCanvas = Class(pkg.Panel, [
                 if (po != null) {
                     // generate mouse click if no mouse drag event has been generated
                     if (mp.draggedComponent == null && (e.touch == null || e.touch.group == null)) {
-                        ME_STUB.reset(po, ME.CLICKED, x, y, mp.button, mp.clicks, modifiers);
+                        ME_STUB.reset(po, ME.CLICKED, x, y, mp.button, mp.clicks);
                         EM.fireInputEvent(ME_STUB);
                     }
 
                     // send mouse released to zebra target component
-                    ME_STUB.reset(po, ME.RELEASED, x, y, mp.button, mp.clicks, modifiers);
+                    ME_STUB.reset(po, ME.RELEASED, x, y, mp.button, mp.clicks);
                     EM.fireInputEvent(ME_STUB);
 
                     //  make sure it is originally a touch event
                     if (ME_STUB.touch != null) {
-                        ME_STUB.reset(po, ME.EXITED, x, y, mp.button, mp.clicks, modifiers);
+                        ME_STUB.reset(po, ME.EXITED, x, y, mp.button, mp.clicks);
                         EM.fireInputEvent(ME_STUB);
                     }
                 }
@@ -11703,13 +11699,13 @@ pkg.zCanvas = Class(pkg.Panel, [
                         if (nd != mo) {
                             if (mo != null) {
                                 pkg.$mouseMoveOwner = null;
-                                ME_STUB.reset(mo, MEXITED, x, y, -1, 0, modifiers);
+                                ME_STUB.reset(mo, MEXITED, x, y, -1, 0);
                                 EM.fireInputEvent(ME_STUB);
                             }
 
                             if (nd != null && nd.isEnabled === true){
                                 pkg.$mouseMoveOwner = nd;
-                                ME_STUB.reset(nd, MENTERED, x, y, -1, 0, modifiers);
+                                ME_STUB.reset(nd, MENTERED, x, y, -1, 0);
                                 EM.fireInputEvent(ME_STUB);
                             }
                         }
@@ -11731,12 +11727,7 @@ pkg.zCanvas = Class(pkg.Panel, [
 
             // store mouse pressed event
             var clicks = mp != null && (new Date().getTime() - mp.time) <= pkg.doubleClickDelta ? 2 : 1 ;
-            var modifiers  = {
-                altKey      : e.altKey,
-                ctrlKey     : e.ctrlKey,
-                metaKey     : e.metaKey,
-                shiftKey    : e.shiftKey,
-            };
+
             mp = $mousePressedEvents[id] = {
                 pageX       : e.pageX,
                 pageY       : e.pageY,
@@ -11748,7 +11739,12 @@ pkg.zCanvas = Class(pkg.Panel, [
                 mouseDragged: null,
                 time        : (new Date()).getTime(),
                 clicks      : clicks,
-                modifiers   : modifiers,
+                modifiers   : {
+                    altKey      : e.altKey,
+                    ctrlKey     : e.ctrlKey,
+                    metaKey     : e.metaKey,
+                    shiftKey    : e.shiftKey
+                }
             };
 
             var x = $meX(e, this), y = $meY(e, this), tl = null;
@@ -11767,13 +11763,19 @@ pkg.zCanvas = Class(pkg.Panel, [
             if (d != null && d.isEnabled === true) {
                 mp.component = d;
 
+                // setup modifiers 
+                ME_STUB.modifiers.altKey   = mp.altKey;
+                ME_STUB.modifiers.ctrlKey  = mp.ctrlKey;
+                ME_STUB.modifiers.metaKey  = mp.metaKey;
+                ME_STUB.modifiers.shiftKey = mp.shiftKey;
+
                 // make sure it was touch event to emulate mouse entered event
                 if (ME_STUB.touch != null) {
-                    ME_STUB.reset(d, ME.ENTERED, x, y, button, clicks, modifiers);
+                    ME_STUB.reset(d, ME.ENTERED, x, y, button, clicks);
                     EM.fireInputEvent(ME_STUB);
                 }
 
-                ME_STUB.reset(d, ME.PRESSED, x, y, button, clicks, modifiers);
+                ME_STUB.reset(d, ME.PRESSED, x, y, button, clicks);
                 EM.fireInputEvent(ME_STUB);
             }
 
@@ -11865,21 +11867,18 @@ pkg.zCanvas = Class(pkg.Panel, [
         this.repaint = function(x,y,w,h) {
             // if the canvas element has no parent nothing
             // should be redrawn
-            if ((document.contains != null &&
-                 document.contains(this.canvas) === false)||
-                 this.canvas.style.visibility == "hidden"   )
+            if (pkg.$contains(this.canvas) &&
+                this.canvas.style.visibility != "hidden")
             {
-                return;
-            }
+                if (arguments.length === 0) {
+                    x = y = 0;
+                    w = this.width;
+                    h =  this.height;
+                }
 
-            if (arguments.length === 0) {
-                x = y = 0;
-                w = this.width;
-                h =  this.height;
-            }
-
-            if (w > 0 && h > 0 && pkg.paintManager != null) {
-                pkg.paintManager.repaint(this, x,y,w,h);
+                if (w > 0 && h > 0 && pkg.paintManager != null) {
+                    pkg.paintManager.repaint(this, x,y,w,h);
+                }
             }
         };
 
@@ -11946,7 +11945,7 @@ pkg.zCanvas = Class(pkg.Panel, [
         }
         else {
             this.canvas = element;
-            if (!document.contains(this.canvas)) {
+            if (!pkg.$contains(this.canvas)) {
                 document.body.appendChild(this.canvas);
             }
         }
@@ -12086,7 +12085,7 @@ pkg.zCanvas = Class(pkg.Panel, [
         // !!!
         // save canvas in list of created Zebra canvases
         // do it before calling setSize(w,h) method
-        $canvases.push(this);
+        pkg.$canvases.push(this);
 
         this.setSize(w, h);
 
@@ -12115,11 +12114,13 @@ pkg.zCanvas = Class(pkg.Panel, [
                 ph  = this.height,
                 ctx = pkg.$canvas.size(this.canvas, w, h);
 
+            //TODO: top works not good in FF and it is better don't use it 
+            // So, ascent has to be taking in account as it was implemented 
+            // before 
             this.$context = ctx;
             if (this.$context.textBaseline != "top" ) {
                 this.$context.textBaseline = "top";
             }
-
 
             // canvas has one instance of context, the code below
             // test if the context has been already full filled
@@ -12346,7 +12347,7 @@ pkg.zCanvas = Class(pkg.Panel, [
 
     function vrp() {
         this.$super();
-        if (document.contains == null || document.contains(this.canvas)) {
+        if (pkg.$contains(this.canvas)) {
             this.repaint();
         }
     },
@@ -12482,7 +12483,7 @@ zebra.ready(
                                                                                : ee.clipboardData.getData('text/plain');
                             pkg.focusManager.focusOwner.clipPaste(txt);
                         }
-                        $clipboard.value="";
+                        $clipboard.value = "";
                     }
                 }
                 document.body.appendChild($clipboard);
@@ -13037,6 +13038,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
                                         this.paintSelection(g, xx, y, lw === 0 ? 1 : lw, lilh, line, d);
 
                                         // restore foreground color after selection has been rendered
+                                        // TODO: think to replace it with settting "fillStyle" directly
                                         g.setColor(this.color);
                                     }
                                 }
@@ -13047,7 +13049,8 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
                         }
                     }
                     else {
-                        var dcol = d != null && d.disabledColor != null ? d.disabledColor : pkg.TextRender.disabledColor;
+                        var dcol = d != null && d.disabledColor != null ? d.disabledColor
+                                                                        : pkg.TextRender.disabledColor;
                         for(var i = 0;i < lines; i++) {
                             g.setColor(dcol);
                             y += lilh;
@@ -16815,14 +16818,6 @@ pkg.Tabs = Class(pkg.Panel, [
         this.canHaveFocus = true;
 
         /**
-         * Side gaps
-         * @type {Integer}
-         * @attribute sideOffset
-         * @default 0
-         */
-        this.sideOffset = 0;
-
-        /**
          * Define mouse moved event handler
          * @param  {zebra.ui.MouseEvent} e a key event
          * @method mouseMoved
@@ -16870,9 +16865,11 @@ pkg.Tabs = Class(pkg.Panel, [
         };
 
         /**
-         * Navigate to a next tab page following the given direction starting from the given page
+         * Navigate to a next tab page following the given direction starting 
+         * from the given page
          * @param  {Integer} page a starting page index
-         * @param  {Integer} d    a navigation direction. 1 means forward and -1 mens backward
+         * @param  {Integer} d a navigation direction. 1 means forward and -1 means backward
+         * navigation. 
          * @return {Integer}      a new tab page index
          * @method next
          */
@@ -16931,7 +16928,9 @@ pkg.Tabs = Class(pkg.Panel, [
                     var r = this.getTabBounds(this.selectedIndex);
                 }
 
-                for(var i = 0;i < this.selectedIndex; i++) this.paintTab(g, i);
+                for(var i = 0;i < this.selectedIndex; i++) {
+                    this.paintTab(g, i);
+                }
 
                 for(var i = this.selectedIndex + 1;i < ~~(this.pages.length / 2); i++) {
                     this.paintTab(g, i);
@@ -17029,13 +17028,13 @@ pkg.Tabs = Class(pkg.Panel, [
                 b      = (this.orient == L.TOP || this.orient == L.BOTTOM);
 
             if (b) {
-                this.repaintX = this.tabAreaX = left + this.sideOffset;
+                this.repaintX = this.tabAreaX = left ;
                 this.repaintY = this.tabAreaY = (this.orient == L.TOP) ? top : this.height - bottom - this.tabAreaHeight;
                 if (this.orient == L.BOTTOM) this.repaintY -= this.border.getBottom();
             }
             else {
                 this.repaintX = this.tabAreaX = (this.orient == L.LEFT ? left : this.width - right - this.tabAreaWidth);
-                this.repaintY = this.tabAreaY = top + this.sideOffset;
+                this.repaintY = this.tabAreaY = top ;
                 if (this.orient == L.RIGHT) this.repaintX -= this.border.getRight();
             }
 
@@ -22497,8 +22496,8 @@ pkg.Menu = Class(pkg.CompList, [
 
     function insert(i, ctr, c) {
         if (zebra.isString(c)) {
-            return this.$super(i, ctr, (c == '-') ? new this.$clazz.Line()
-                                                  : new this.$clazz.MenuItem(c));            
+            return this.$super(i, ctr, (c.match(/\-+/) != null) ? new this.$clazz.Line()
+                                                                : new this.$clazz.MenuItem(c));            
         }
         return this.$super(i, ctr, c);
     },
@@ -23405,11 +23404,14 @@ pkg.ShaperPan = Class(ui.Panel, ui.Composite, [
          */
         this.keyPressed = function(e) {
             if (this.kids.length > 0){
-                var b = (e.mask & KeyEvent.M_SHIFT) > 0, c = e.code,
+                var b  = (e.mask & KeyEvent.M_SHIFT) > 0, 
+                    c  = e.code,
                     dx = (c == KeyEvent.LEFT ?  -1 : (c == KeyEvent.RIGHT ? 1 : 0)),
                     dy = (c == KeyEvent.UP   ?  -1 : (c == KeyEvent.DOWN  ? 1 : 0)),
-                    w = this.width + dx, h = this.height + dy,
-                    x = this.x + dx, y = this.y + dy;
+                    w  = this.width  + dx, 
+                    h  = this.height + dy,
+                    x  = this.x + dx, 
+                    y  = this.y + dy;
 
                 if (b) {
                     if (this.isResizeEnabled && w > this.shaperBr.gap * 2 && h > this.shaperBr.gap * 2) {
@@ -23459,7 +23461,9 @@ pkg.ShaperPan = Class(ui.Panel, ui.Composite, [
          */
         this.mouseDragged = function(e){
             if (this.state != null) {
-                var dy = (e.absY - this.py), dx = (e.absX - this.px), s = this.state,
+                var dy = (e.absY - this.py), 
+                    dx = (e.absX - this.px), 
+                    s  = this.state,
                     nw = this.width  - dx * s.left + dx * s.right,
                     nh = this.height - dy * s.top  + dy * s.bottom;
 
@@ -25669,8 +25673,9 @@ pkg.Tree = Class(pkg.BaseTree, [
 ]);
 
 /**
- * Component tree component that expects other UI components to be a tree model values. The implementation
- * lays out passed via tree model UI components as tree component nods. For instance:
+ * Component tree component that expects other UI components to be a tree model values. 
+ * In general the implementation lays out passed via tree model UI components as tree 
+ * component nodes. For instance:
 
      var tree = new zebra.ui.tree.Tree({
           value: new zebra.ui.Label("Label root item"),
@@ -25681,14 +25686,23 @@ pkg.Tree = Class(pkg.BaseTree, [
          ]
      });
 
- * or
+ * But to prevent unexpected navigation it is better to use number of predefined 
+ * with component tree UI components: 
 
-     var model = new zebra.data.TreeModel(new zebra.ui.Label("Root"));
-     model.add(model.root, new zebra.ui.Checkbox("Checkbox Item"));
-     model.add(model.root, new zebra.ui.Combo( ["Item 1", "Item2", "Item 3"] ));
+   - zebra.ui.tree.CompTree.Label
+   - zebra.ui.tree.CompTree.Checkbox
+   - zebra.ui.tree.CompTree.Combo
 
-     var tree = new zebra.ui.tree.Tree(model);
-     ...
+ * You can describe tree model keeping in mind special notation
+
+     var tree = new zebra.ui.tree.Tree({
+          value: "Label root item",  // zebra.ui.tree.CompTree.Label
+          kids : [
+                "[ ] Checkbox Item 1", // unchecked zebra.ui.tree.CompTree.Checkbox
+                "[x] Checkbox Item 2", // checked zebra.ui.tree.CompTree.Checkbox
+                ["Combo item 1", "Combo item 2"] // zebra.ui.tree.CompTree.Combo
+         ]
+     });
 
  *
  * @class  zebra.ui.tree.CompTree

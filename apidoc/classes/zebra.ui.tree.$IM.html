@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>zebra.Interface()</title>
+    <title>zebra.ui.tree.$IM</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -406,7 +406,7 @@
                 <div id="docs-main">
                     <div class="content">
                         
-    <h1>zebra.Interface()</h1>
+    <h1>zebra.ui.tree.$IM Class</h1>    
 
 
 
@@ -418,30 +418,36 @@
 
 
 <div class="box intro">
-    
+    <p>Simple private structure to keep a tree model item metrical characteristics</p>
+
 </div>
 
 
-
-
-
-
-    
-        <div id="method_Interface" class="method item">
-    <h3 class="name"><code>Interface</code></h3>
+    <div class="constructor">
+        <h2>Constructor</h2>
+        <div id="method_zebra.ui.tree.$IM" class="method item private">
+    <h3 class="name"><code>zebra.ui.tree.$IM</code></h3>
 
     
-        <span class="paren">()</span>
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>b</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
     
 
     
-        <span class="returns-inline">
-            <span class="type">Function</span>
-        </span>
-    
 
     
 
+    
+        <span class="flag private">private</span>
     
 
     
@@ -466,42 +472,354 @@
     </div>
 
     <div class="description">
-        <p>Interface is a special class that is used to &quot;pitch&quot; a class with a some marker.
-It is not supposed an interface directly rules which method the class has to implement.</p>
-<pre class="code prettyprint"><code>   // declare &quot;I&quot; interface
-   var I = zebra.Interface();
+        
+    </div>
 
-   // declare &quot;A&quot; class that implements &quot;I&quot; interface
-   var A = zebra.Class(I, [ function m() {} ]);
+    
+        <div class="params">
+            <h4>Parameters:</h4>
 
-   // instantiate &quot;A&quot; class
-   var a = new A();
-   zebra.instanceOf(a, I);  // true 
-   zebra.instanceOf(a, A);  // true</code></pre>
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">b</code>
+                        <span class="type">Boolean</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a state of an appropriate tree component node of the given
+tree model item. The state is sensible for item that has children items and
+the state indicates if the given tree node is collapsed (false) or expanded
+(true)</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+
+    
+</div>
+
+    </div>
+
+
+
+
+
+<div id="classdocs" class="tabview">
+    <ul class="api-class-tabs">
+
+        <li class="api-class-tab index">
+            <a href="#index">Index</a>
+        </li>
+
+        
+        
+        
+            <li class="api-class-tab attrs"><a href="#attrs">Attributes</a></li>
+        
+        
+    </ul>
+
+    <div>
+        <div id="index" class="api-class-tabpanel index">
+            <h2 class="off-left">Item Index</h2>
+
+            
+
+            
+
+            
+                <div class="index-section attrs">
+                    <h3>Attributes</h3>
+
+                    <ul class="index-list attrs">
+                        
+                            <li class="index-item attr">
+                                <a href="#attr_height">height</a>
+                            </li>
+                        
+                            <li class="index-item attr">
+                                <a href="#attr_isOpen">isOpen</a>
+                            </li>
+                        
+                            <li class="index-item attr">
+                                <a href="#attr_viewHeight">viewHeight</a>
+                            </li>
+                        
+                            <li class="index-item attr">
+                                <a href="#attr_viewWidth">viewWidth</a>
+                            </li>
+                        
+                            <li class="index-item attr">
+                                <a href="#attr_width">width</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            
+
+            
+        </div>
+
+        
+
+        
+
+        
+            <div id="attrs" class="api-class-tabpanel">
+                <h2 class="off-left">Attributes</h2>
+
+                
+                    <div id="attr_height" class="attr item">
+    <a name="config_height"></a> 
+    <h3 class="name"><code>height</code></h3>
+    <span class="type">Integer</span>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <span class="flag readonly">readonly</span>
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>The whole height of tree node that includes a rendered item preferred
+height, all icons and gaps heights</p>
 
     </div>
 
     
 
     
-        <br>
-        <div class="returns">
-            <div class="returns-description">
-                
-                    
-                        <b>Return: </b><span class="type">Function</span>
-                    
-                    <p>an interface</p>
+
+    
+</div>
 
                 
-            </div>
-        </div>
+                    <div id="attr_isOpen" class="attr item">
+    <a name="config_isOpen"></a> 
+    <h3 class="name"><code>isOpen</code></h3>
+    <span class="type">Boolean</span>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <span class="flag readonly">readonly</span>
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Indicates whether a node is in expanded or collapsed state</p>
+
+    </div>
+
+    
+
     
 
     
 </div>
 
+                
+                    <div id="attr_viewHeight" class="attr item">
+    <a name="config_viewHeight"></a> 
+    <h3 class="name"><code>viewHeight</code></h3>
+    <span class="type">Integer</span>
+
     
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <span class="flag readonly">readonly</span>
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Height of an area of rendered tree model item. It excludes icons, toggle
+and gaps heights</p>
+
+    </div>
+
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="attr_viewWidth" class="attr item">
+    <a name="config_viewWidth"></a> 
+    <h3 class="name"><code>viewWidth</code></h3>
+    <span class="type">Integer</span>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <span class="flag readonly">readonly</span>
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Width of an area of rendered tree model item. It excludes icons, toggle
+and gaps widths</p>
+
+    </div>
+
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="attr_width" class="attr item">
+    <a name="config_width"></a> 
+    <h3 class="name"><code>width</code></h3>
+    <span class="type">Integer</span>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <span class="flag readonly">readonly</span>
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>The whole width of tree node that includes a rendered item preferred
+width, all icons and gaps widths</p>
+
+    </div>
+
+    
+
+    
+
+    
+</div>
+
+                
+            </div>
+        
+
+        
+    </div>
+</div>
 
 
                     </div>

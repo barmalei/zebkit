@@ -161,8 +161,6 @@
             
                 <li><a href="../classes/zebra.ui.CompRender.html">zebra.ui.CompRender</a></li>
             
-                <li><a href="../classes/zebra.ui.CopyCutPaste.html">zebra.ui.CopyCutPaste</a></li>
-            
                 <li><a href="../classes/zebra.ui.CursorManager.html">zebra.ui.CursorManager</a></li>
             
                 <li><a href="../classes/zebra.ui.designer.ShaperPan.html">zebra.ui.designer.ShaperPan</a></li>
@@ -321,11 +319,19 @@
             
                 <li><a href="../classes/zebra.ui.Tooltip.html">zebra.ui.Tooltip</a></li>
             
+                <li><a href="../classes/zebra.ui.tree.$IM.html">zebra.ui.tree.$IM</a></li>
+            
+                <li><a href="../classes/zebra.ui.tree.BaseTree.html">zebra.ui.tree.BaseTree</a></li>
+            
+                <li><a href="../classes/zebra.ui.tree.CompTree.html">zebra.ui.tree.CompTree</a></li>
+            
                 <li><a href="../classes/zebra.ui.tree.DefEditors.html">zebra.ui.tree.DefEditors</a></li>
             
                 <li><a href="../classes/zebra.ui.tree.DefViews.html">zebra.ui.tree.DefViews</a></li>
             
                 <li><a href="../classes/zebra.ui.tree.Tree.html">zebra.ui.tree.Tree</a></li>
+            
+                <li><a href="../classes/zebra.ui.tree.TreeSignView.html">zebra.ui.tree.TreeSignView</a></li>
             
                 <li><a href="../classes/zebra.ui.VideoPan.html">zebra.ui.VideoPan</a></li>
             
@@ -411,13 +417,13 @@
 
 
 <div class="box intro">
-    <p>Tree UI component and all related to the component classes and interfaces. 
-The component is graphical representation of a tree model that allows a user 
-to navigate over the model item, customize the items rendering and 
+    <p>Tree UI components and all related to the component classes and interfaces.
+Tree components are graphical representation of a tree model that allows a user
+to navigate over the model item, customize the items rendering and
 organize customizable editing of the items.</p>
 <pre class="code prettyprint"><code>   // create tree component instance to visualize the given tree model
-   var tree = new zebra.ui.tree.Tree({ 
-       value: &quot;Root&quot;
+   var tree = new zebra.ui.tree.Tree({
+       value: &quot;Root&quot;,
        kids : [
            &quot;Item 1&quot;,
            &quot;Item 2&quot;,
@@ -425,8 +431,19 @@ organize customizable editing of the items.</p>
        ]
    });
 
-   // make all tree items editable with text field component 
+   // make all tree items editable with text field component
    tree.setEditorProvider(new zebra.ui.tree.DefEditors());</code></pre>
+<p>One more tree  component implementation - &quot;CompTree&quot; - allows developers
+to create tree whose nodes are  other UI components</p>
+<pre class="code prettyprint"><code>   // create tree component instance to visualize the given tree model
+   var tree = new zebra.ui.tree.CompTree({
+       value: new zebra.ui.Label(&quot;Root label item&quot;),
+       kids : [
+           new zebra.ui.Checkbox(&quot;Checkbox Item&quot;),
+           new zebra.ui.Button(&quot;Button Item&quot;),
+           new zebra.ui.TextField(&quot;Text field item&quot;)
+       ]
+   });</code></pre>
 
 </div>
 
@@ -438,6 +455,24 @@ organize customizable editing of the items.</p>
             <p>This package provides the following classes:</p>
 
             <ul class="module-classes">
+            
+                <li class="module-class">
+                    <a href="../classes/zebra.ui.tree.$IM.html">
+                        zebra.ui.tree.$IM
+                    </a>
+                </li>
+            
+                <li class="module-class">
+                    <a href="../classes/zebra.ui.tree.BaseTree.html">
+                        zebra.ui.tree.BaseTree
+                    </a>
+                </li>
+            
+                <li class="module-class">
+                    <a href="../classes/zebra.ui.tree.CompTree.html">
+                        zebra.ui.tree.CompTree
+                    </a>
+                </li>
             
                 <li class="module-class">
                     <a href="../classes/zebra.ui.tree.DefEditors.html">
@@ -454,6 +489,12 @@ organize customizable editing of the items.</p>
                 <li class="module-class">
                     <a href="../classes/zebra.ui.tree.Tree.html">
                         zebra.ui.tree.Tree
+                    </a>
+                </li>
+            
+                <li class="module-class">
+                    <a href="../classes/zebra.ui.tree.TreeSignView.html">
+                        zebra.ui.tree.TreeSignView
                     </a>
                 </li>
             

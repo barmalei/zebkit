@@ -453,7 +453,6 @@
                     "tabon"  : { "$zebra.ui.TabBorder": 0 },
                     "marker" : { "$Border": [ "#66CCFF", 1, 3 ] }  
                 },
-        "sideOffset" : 6,
         "pageGaps"  : [2 , 2]
     },
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>zebra.ui.PassTextField</title>
+    <title>zebra.ui.tree.CompTree</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -406,14 +406,14 @@
                 <div id="docs-main">
                     <div class="content">
                         
-    <h1>zebra.ui.PassTextField Class</h1>    
+    <h1>zebra.ui.tree.CompTree Class</h1>    
 
 
 
 
 
     <div class="extends">
-        <b>Extends</b> <a href="../classes/zebra.ui.TextField.html" class="crosslink">zebra.ui.TextField</a>
+        <b>Extends</b> <a href="../classes/zebra.ui.tree.BaseTree.html" class="crosslink">zebra.ui.tree.BaseTree</a>
     </div>
 
 
@@ -422,10 +422,145 @@
 
 
 <div class="box intro">
-    <p>Password text field.</p>
+    <p>Component tree component that expects other UI components to be a tree model values. 
+In general the implementation lays out passed via tree model UI components as tree 
+component nodes. For instance:</p>
+<pre class="code prettyprint"><code>var tree = new zebra.ui.tree.Tree({
+     value: new zebra.ui.Label(&quot;Label root item&quot;),
+     kids : [
+           new zebra.ui.Checkbox(&quot;Checkbox Item&quot;),
+           new zebra.ui.Button(&quot;Button item&quot;),
+           new zebra.ui.Combo([&quot;Combo item 1&quot;, &quot;Combo item 2&quot;])
+    ]
+});</code></pre>
+<p>But to prevent unexpected navigation it is better to use number of predefined 
+with component tree UI components: </p>
+<ul>
+<li>zebra.ui.tree.CompTree.Label</li>
+<li>zebra.ui.tree.CompTree.Checkbox</li>
+<li>zebra.ui.tree.CompTree.Combo</li>
+</ul>
+<p>You can describe tree model keeping in mind special notation</p>
+<pre class="code prettyprint"><code>var tree = new zebra.ui.tree.Tree({
+     value: &quot;Label root item&quot;,  // zebra.ui.tree.CompTree.Label
+     kids : [
+           &quot;[ ] Checkbox Item 1&quot;, // unchecked zebra.ui.tree.CompTree.Checkbox
+           &quot;[x] Checkbox Item 2&quot;, // checked zebra.ui.tree.CompTree.Checkbox
+           [&quot;Combo item 1&quot;, &quot;Combo item 2&quot;] // zebra.ui.tree.CompTree.Combo
+    ]
+});</code></pre>
 
 </div>
 
+
+    <div class="constructor">
+        <h2>Constructor</h2>
+        <div id="method_zebra.ui.tree.CompTree" class="method item">
+    <h3 class="name"><code>zebra.ui.tree.CompTree</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code class="optional">[model]</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code class="optional">[b]</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name optional">[model]</code>
+                        <span class="type">Object | <a href="../classes/zebra.data.TreeModel.html" class="crosslink">zebra.data.TreeModel</a></span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a tree data model passed as JavaScript
+structure or as an instance</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name optional">[b]</code>
+                        <span class="type">Boolean</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>the tree component items toggle state. true to have all items
+in opened state.</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+
+    
+</div>
+
+    </div>
 
 
 
@@ -446,6 +581,8 @@
             <li class="api-class-tab attrs"><a href="#attrs">Attributes</a></li>
         
         
+            <li class="api-class-tab events"><a href="#events">Events</a></li>
+        
     </ul>
 
     <div>
@@ -459,99 +596,78 @@
 
                     <ul class="index-list methods extends">
                         
-                            <li class="index-item method inherited">
-                                <a href="#method_calcPreferredSize">calcPreferredSize</a>
+                            <li class="index-item method protected inherited">
+                                <a href="#method_getIM">getIM</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method inherited">
-                                <a href="#method_clearSelection">clearSelection</a>
+                                <a href="#method_getItemAt">getItemAt</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method protected inherited">
-                                <a href="#method_drawCursor">drawCursor</a>
+                                <a href="#method_getItemBounds">getItemBounds</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method inherited">
-                                <a href="#method_getColor">getColor</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method inherited">
-                                <a href="#method_getEndSelection">getEndSelection</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method inherited">
-                                <a href="#method_getFont">getFont</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method inherited">
-                                <a href="#method_getSelectedText">getSelectedText</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method inherited">
-                                <a href="#method_getStartSelection">getStartSelection</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method inherited">
-                                <a href="#method_getTextRowColAt">getTextRowColAt</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method inherited">
-                                <a href="#method_getValue">getValue</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method inherited">
-                                <a href="#method_hasSelection">hasSelection</a>
+                                <a href="#method_getItemMetrics">getItemMetrics</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method protected inherited">
-                                <a href="#method_isFiltered">isFiltered</a>
+                                <a href="#method_getItemPreferredSize">getItemPreferredSize</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method protected inherited inherited">
+                                <a href="#method_getToggleBounds">getToggleBounds</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method protected inherited">
+                                <a href="#method_getToogleView">getToogleView</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method inherited">
-                                <a href="#method_remove">remove</a>
+                                <a href="#method_isOpen">isOpen</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method inherited">
-                                <a href="#method_removeSelected">removeSelected</a>
+                                <a href="#method_makeVisible">makeVisible</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method protected inherited">
+                                <a href="#method_paintChild">paintChild</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method protected inherited">
+                                <a href="#method_paintItem">paintItem</a>
 
                                 
                                 
@@ -565,42 +681,14 @@
                             </li>
                         
                             <li class="index-item method inherited">
-                                <a href="#method_setBlinking">setBlinking</a>
+                                <a href="#method_setGaps">setGaps</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method inherited">
-                                <a href="#method_setColor">setColor</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method inherited">
-                                <a href="#method_setCursorView">setCursorView</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method inherited">
-                                <a href="#method_setEditable">setEditable</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method inherited">
-                                <a href="#method_setFont">setFont</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method inherited">
-                                <a href="#method_setHint">setHint</a>
+                                <a href="#method_setLineColor">setLineColor</a>
 
                                 
                                 
@@ -614,42 +702,28 @@
                             </li>
                         
                             <li class="index-item method inherited">
-                                <a href="#method_setPosition">setPosition</a>
+                                <a href="#method_setSelectable">setSelectable</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method inherited">
-                                <a href="#method_setPSByRowsCols">setPSByRowsCols</a>
+                                <a href="#method_setViews">setViews</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method inherited">
-                                <a href="#method_setSelectionColor">setSelectionColor</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method inherited inherited">
-                                <a href="#method_setValue">setValue</a>
+                                <a href="#method_toggle">toggle</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method inherited">
-                                <a href="#method_setView">setView</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method inherited">
-                                <a href="#method_write">write</a>
+                                <a href="#method_toggleAll">toggleAll</a>
 
                                 
                                 
@@ -668,29 +742,47 @@
                     <ul class="index-list attrs extends">
                         
                             <li class="index-item attr inherited">
-                                <a href="#attr_blinkigPeriod">blinkigPeriod</a>
+                                <a href="#attr_gapx">gapx</a>
                             </li>
                         
                             <li class="index-item attr inherited">
-                                <a href="#attr_curView">curView</a>
+                                <a href="#attr_gapy">gapy</a>
                             </li>
                         
                             <li class="index-item attr inherited">
-                                <a href="#attr_isEditable">isEditable</a>
+                                <a href="#attr_lnColor">lnColor</a>
                             </li>
                         
                             <li class="index-item attr inherited">
-                                <a href="#attr_selectionColor">selectionColor</a>
-                            </li>
-                        
-                            <li class="index-item attr inherited">
-                                <a href="#attr_view">view</a>
+                                <a href="#attr_selected">selected</a>
                             </li>
                         
                     </ul>
                 </div>
             
 
+            
+                <div class="index-section events">
+                    <h3>Events</h3>
+
+                    <ul class="index-list events extends">
+                        
+                            <li class="index-item event inherited">
+                                <a href="#event_selected">selected</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item event inherited">
+                                <a href="#event_toggled">toggled</a>
+
+                                
+                                
+                            </li>
+                        
+                    </ul>
+                </div>
             
         </div>
 
@@ -699,8 +791,8 @@
                 <h2 class="off-left">Methods</h2>
 
                 
-                    <div id="method_calcPreferredSize" class="method item inherited">
-    <h3 class="name"><code>calcPreferredSize</code></h3>
+                    <div id="method_getIM" class="method item protected inherited">
+    <h3 class="name"><code>getIM</code></h3>
 
     
         <div class="args">
@@ -708,7 +800,7 @@
             
                 <li class="arg">
                     
-                        <code>t</code>
+                        <code>i</code>
                     
                 </li>
             
@@ -718,156 +810,8 @@
 
     
         <span class="returns-inline">
-            <span class="type">Object</span>
+            <span class="type"><a href="../classes/zebra.ui.tree.$IM.html" class="crosslink">zebra.ui.tree.$IM</a></span>
         </span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.ViewPan.html#method_calcPreferredSize">zebra.ui.ViewPan</a>:
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Override the parent method to calculate preferred size
-basing on a target view.</p>
-
-    </div>
-
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">t</code>
-                        <span class="type"><a href="../classes/zebra.ui.Panel.html" class="crosslink">zebra.ui.Panel</a></span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>[description]</p>
-
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-    
-        <br>
-        <div class="returns">
-            <div class="returns-description">
-                
-                    
-                        <b>Return: </b><span class="type">Object</span>
-                    
-                    <p>return a target view preferred size if it is defined.
-The returned structure is the following:
-             { width: {Integer}, height:{Integer} }</p>
-
-                
-            </div>
-        </div>
-    
-
-    
-</div>
-
-                
-                    <div id="method_clearSelection" class="method item inherited">
-    <h3 class="name"><code>clearSelection</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#method_clearSelection">zebra.ui.TextField</a>:
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Clear a text selection.</p>
-
-    </div>
-
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="method_drawCursor" class="method item protected inherited">
-    <h3 class="name"><code>drawCursor</code></h3>
-
-    
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code>g</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
-    
-
     
 
     
@@ -888,7 +832,7 @@ The returned structure is the following:
         
             
                 <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#method_drawCursor">zebra.ui.TextField</a>:
+                <a href="../classes/zebra.ui.tree.BaseTree.html#method_getIM">zebra.ui.tree.BaseTree</a>:
             
         
         </p>
@@ -900,7 +844,7 @@ The returned structure is the following:
     </div>
 
     <div class="description">
-        <p>Draw the text field cursor</p>
+        <p>Get a tree node metrics by the given tree model item.</p>
 
     </div>
 
@@ -912,14 +856,14 @@ The returned structure is the following:
             
                 <li class="param">
                     
-                        <code class="param-name">g</code>
-                        <span class="type">2DContext</span>
+                        <code class="param-name">i</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a 2D contextnn</p>
+                        <p>a tree model item</p>
 
                     </div>
 
@@ -931,67 +875,14 @@ The returned structure is the following:
     
 
     
-
-    
-</div>
-
-                
-                    <div id="method_getColor" class="method item inherited">
-    <h3 class="name"><code>getColor</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-        <span class="returns-inline">
-            <span class="type">String</span>
-        </span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.Label.html#method_getColor">zebra.ui.Label</a>:
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Get the label text color</p>
-
-    </div>
-
-    
-
-    
         <br>
         <div class="returns">
             <div class="returns-description">
                 
                     
-                        <b>Return: </b><span class="type">String</span>
+                        <b>Return: </b><span class="type"><a href="../classes/zebra.ui.tree.$IM.html" class="crosslink">zebra.ui.tree.$IM</a></span>
                     
-                    <p>a zebra label color</p>
+                    <p>a tree node metrics</p>
 
                 
             </div>
@@ -1002,280 +893,18 @@ The returned structure is the following:
 </div>
 
                 
-                    <div id="method_getEndSelection" class="method item inherited">
-    <h3 class="name"><code>getEndSelection</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-        <span class="returns-inline">
-            <span class="type">Array</span>
-        </span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#method_getEndSelection">zebra.ui.TextField</a>:
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Get an ending position (row and column) of a selected text</p>
-
-    </div>
-
-    
-
-    
-        <br>
-        <div class="returns">
-            <div class="returns-description">
-                
-                    
-                        <b>Return: </b><span class="type">Array</span>
-                    
-                    <p>a position of a selected text. First element 
-of is a row and second column of selected text. null if 
-there is no any selected text</p>
-
-                
-            </div>
-        </div>
-    
-
-    
-</div>
-
-                
-                    <div id="method_getFont" class="method item inherited">
-    <h3 class="name"><code>getFont</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-        <span class="returns-inline">
-            <span class="type"><a href="../classes/zebra.ui.Font.html" class="crosslink">zebra.ui.Font</a></span>
-        </span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.Label.html#method_getFont">zebra.ui.Label</a>:
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Get the label text font</p>
-
-    </div>
-
-    
-
-    
-        <br>
-        <div class="returns">
-            <div class="returns-description">
-                
-                    
-                        <b>Return: </b><span class="type"><a href="../classes/zebra.ui.Font.html" class="crosslink">zebra.ui.Font</a></span>
-                    
-                    <p>a zebra label font</p>
-
-                
-            </div>
-        </div>
-    
-
-    
-</div>
-
-                
-                    <div id="method_getSelectedText" class="method item inherited">
-    <h3 class="name"><code>getSelectedText</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-        <span class="returns-inline">
-            <span class="type">String</span>
-        </span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#method_getSelectedText">zebra.ui.TextField</a>:
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Get a selected text</p>
-
-    </div>
-
-    
-
-    
-        <br>
-        <div class="returns">
-            <div class="returns-description">
-                
-                    
-                        <b>Return: </b><span class="type">String</span>
-                    
-                    <p>a selected text</p>
-
-                
-            </div>
-        </div>
-    
-
-    
-</div>
-
-                
-                    <div id="method_getStartSelection" class="method item inherited">
-    <h3 class="name"><code>getStartSelection</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-        <span class="returns-inline">
-            <span class="type">Array</span>
-        </span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#method_getStartSelection">zebra.ui.TextField</a>:
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Get a starting position (row and column) of a selected text</p>
-
-    </div>
-
-    
-
-    
-        <br>
-        <div class="returns">
-            <div class="returns-description">
-                
-                    
-                        <b>Return: </b><span class="type">Array</span>
-                    
-                    <p>a position of a selected text. First element 
-of is a row and second column of selected text. null if 
-there is no any selected text</p>
-
-                
-            </div>
-        </div>
-    
-
-    
-</div>
-
-                
-                    <div id="method_getTextRowColAt" class="method item inherited">
-    <h3 class="name"><code>getTextRowColAt</code></h3>
+                    <div id="method_getItemAt" class="method item inherited">
+    <h3 class="name"><code>getItemAt</code></h3>
 
     
         <div class="args">
             <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code class="optional">[root]</code>
+                    
+                </li>
             
                 <li class="arg">
                     
@@ -1295,7 +924,7 @@ there is no any selected text</p>
 
     
         <span class="returns-inline">
-            <span class="type">Array</span>
+            <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
         </span>
     
 
@@ -1315,7 +944,7 @@ there is no any selected text</p>
         
             
                 <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#method_getTextRowColAt">zebra.ui.TextField</a>:
+                <a href="../classes/zebra.ui.tree.BaseTree.html#method_getItemAt">zebra.ui.tree.BaseTree</a>:
             
         
         </p>
@@ -1327,7 +956,7 @@ there is no any selected text</p>
     </div>
 
     <div class="description">
-        <p>Compute a text column and row by the given location.</p>
+        <p>Get a tree item that is located at the given location.</p>
 
     </div>
 
@@ -1336,6 +965,23 @@ there is no any selected text</p>
             <h4>Parameters:</h4>
 
             <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name optional">[root]</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a starting tree node</p>
+
+                    </div>
+
+                    
+                </li>
             
                 <li class="param">
                     
@@ -1379,10 +1025,9 @@ there is no any selected text</p>
             <div class="returns-description">
                 
                     
-                        <b>Return: </b><span class="type">Array</span>
+                        <b>Return: </b><span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
                     
-                    <p>a text row and column as an Array object. Fist element 
-of the array is row and the second one is column.</p>
+                    <p>a tree model item</p>
 
                 
             </div>
@@ -1393,16 +1038,135 @@ of the array is row and the second one is column.</p>
 </div>
 
                 
-                    <div id="method_getValue" class="method item inherited">
-    <h3 class="name"><code>getValue</code></h3>
+                    <div id="method_getItemBounds" class="method item protected inherited">
+    <h3 class="name"><code>getItemBounds</code></h3>
 
     
-        <span class="paren">()</span>
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>root</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
     
 
     
         <span class="returns-inline">
-            <span class="type">String</span>
+            <span class="type">Object</span>
+        </span>
+    
+
+    
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+                <p>Inherited from
+                <a href="../classes/zebra.ui.tree.BaseTree.html#method_getItemBounds">zebra.ui.tree.BaseTree</a>:
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Get tree model item  metrical bounds (location and size).</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">root</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>an tree model item</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type">Object</span>
+                    
+                    <p><p><p>a structure that keeps an item view location
+and size:</p></p></p>
+<pre><code>           {
+               x: {Integer},
+               y: {Integer},
+               width: {Integer},
+               height: {Integer}
+           }</code></pre>
+
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_getItemMetrics" class="method item inherited">
+    <h3 class="name"><code>getItemMetrics</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>i</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type">Object</span>
         </span>
     
 
@@ -1422,7 +1186,7 @@ of the array is row and the second one is column.</p>
         
             
                 <p>Inherited from
-                <a href="../classes/zebra.ui.Label.html#method_getValue">zebra.ui.Label</a>:
+                <a href="../classes/zebra.ui.tree.BaseTree.html#method_getItemMetrics">zebra.ui.tree.BaseTree</a>:
             
         
         </p>
@@ -1434,10 +1198,34 @@ of the array is row and the second one is column.</p>
     </div>
 
     <div class="description">
-        <p>Get the label text</p>
+        <p>Get calculated for the given tree model item metrics</p>
 
     </div>
 
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">i</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a tree item</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
     
 
     
@@ -1446,9 +1234,9 @@ of the array is row and the second one is column.</p>
             <div class="returns-description">
                 
                     
-                        <b>Return: </b><span class="type">String</span>
+                        <b>Return: </b><span class="type">Object</span>
                     
-                    <p>a zebra label text</p>
+                    <p>an tree model item metrics. Th</p>
 
                 
             </div>
@@ -1459,11 +1247,341 @@ of the array is row and the second one is column.</p>
 </div>
 
                 
-                    <div id="method_hasSelection" class="method item inherited">
-    <h3 class="name"><code>hasSelection</code></h3>
+                    <div id="method_getItemPreferredSize" class="method item protected inherited">
+    <h3 class="name"><code>getItemPreferredSize</code></h3>
 
     
-        <span class="paren">()</span>
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>root</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type">Object</span>
+        </span>
+    
+
+    
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+                <p>Inherited from
+                <a href="../classes/zebra.ui.tree.BaseTree.html#method_getItemPreferredSize">zebra.ui.tree.BaseTree</a>:
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>An abstract method that a concrete tree component implementations have to
+override. The method has to return a preferred size the given tree model
+item wants to have.</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">root</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>an tree model item</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type">Object</span>
+                    
+                    <p><p><p>a structure that keeps an item preferred size:</p></p></p>
+<pre><code>           {
+               width: {Integer},
+               height: {Integer}
+           }</code></pre>
+
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_getToggleBounds" class="method item protected inherited">
+    <h3 class="name"><code>getToggleBounds</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>root</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type">Object</span>
+        </span>
+    
+
+    
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            <p>Inherited from
+            <a href="../classes/zebra.ui.tree.BaseTree.html#method_getToggleBounds">
+                zebra.ui.tree.BaseTree
+            </a>
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Get toggle element bounds for the given tree model item.</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">root</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>an tree model item</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type">Object</span>
+                    
+                    <p><p><p>a structure that keeps an item toggle location
+and size:</p></p></p>
+<pre><code>           {
+               x: {Integer},
+               y: {Integer},
+               width: {Integer},
+               height: {Integer}
+           }</code></pre>
+
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_getToogleView" class="method item protected inherited">
+    <h3 class="name"><code>getToogleView</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>i</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type"><a href="../classes/zebra.ui.View.html" class="crosslink">zebra.ui.View</a></span>
+        </span>
+    
+
+    
+
+    
+        <span class="flag protected">protected</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+                <p>Inherited from
+                <a href="../classes/zebra.ui.tree.BaseTree.html#method_getToogleView">zebra.ui.tree.BaseTree</a>:
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Get current toggle element view. The view depends on the state of tree item.</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">i</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a tree model item</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <br>
+        <div class="returns">
+            <div class="returns-description">
+                
+                    
+                        <b>Return: </b><span class="type"><a href="../classes/zebra.ui.View.html" class="crosslink">zebra.ui.View</a></span>
+                    
+                    <p>a toggle element view</p>
+
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_isOpen" class="method item inherited">
+    <h3 class="name"><code>isOpen</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>i</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
     
 
     
@@ -1488,7 +1606,7 @@ of the array is row and the second one is column.</p>
         
             
                 <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#method_hasSelection">zebra.ui.TextField</a>:
+                <a href="../classes/zebra.ui.tree.BaseTree.html#method_isOpen">zebra.ui.tree.BaseTree</a>:
             
         
         </p>
@@ -1500,10 +1618,34 @@ of the array is row and the second one is column.</p>
     </div>
 
     <div class="description">
-        <p>Test if the text field has a selected text</p>
+        <p>Test if the given tree component item is opened</p>
 
     </div>
 
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">i</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a tree model item</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
     
 
     
@@ -1514,7 +1656,7 @@ of the array is row and the second one is column.</p>
                     
                         <b>Return: </b><span class="type">Boolean</span>
                     
-                    <p>true if the text field has a selected text</p>
+                    <p>true if the given tree component item is opened</p>
 
                 
             </div>
@@ -1525,8 +1667,8 @@ of the array is row and the second one is column.</p>
 </div>
 
                 
-                    <div id="method_isFiltered" class="method item protected inherited">
-    <h3 class="name"><code>isFiltered</code></h3>
+                    <div id="method_makeVisible" class="method item inherited">
+    <h3 class="name"><code>makeVisible</code></h3>
 
     
         <div class="args">
@@ -1534,7 +1676,104 @@ of the array is row and the second one is column.</p>
             
                 <li class="arg">
                     
-                        <code>e</code>
+                        <code>item</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+                <p>Inherited from
+                <a href="../classes/zebra.ui.tree.BaseTree.html#method_makeVisible">zebra.ui.tree.BaseTree</a>:
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Make the given tree item visible. Tree component rendered content can takes more space than
+the UI component size is. In this case the content can be scrolled to make visible required
+tree item.</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">item</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>an item to be visible</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="method_paintChild" class="method item protected inherited">
+    <h3 class="name"><code>paintChild</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>g</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>root</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>index</code>
                     
                 </li>
             
@@ -1566,7 +1805,7 @@ of the array is row and the second one is column.</p>
         
             
                 <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#method_isFiltered">zebra.ui.TextField</a>:
+                <a href="../classes/zebra.ui.tree.BaseTree.html#method_paintChild">zebra.ui.tree.BaseTree</a>:
             
         
         </p>
@@ -1578,7 +1817,7 @@ of the array is row and the second one is column.</p>
     </div>
 
     <div class="description">
-        <p>Test if the given key pressed event has to be processed</p>
+        <p>Paint children items of the given root tree item.</p>
 
     </div>
 
@@ -1590,14 +1829,46 @@ of the array is row and the second one is column.</p>
             
                 <li class="param">
                     
-                        <code class="param-name">e</code>
-                        <span class="type"><a href="../classes/zebra.ui.KeyEvent.html" class="crosslink">zebra.ui.KeyEvent</a></span>
+                        <code class="param-name">g</code>
+                        <span class="type">2DContext</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a key event</p>
+                        <p>a graphical context</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">root</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a root tree item</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">index</code>
+                        <span class="type">Integer</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>an index</p>
 
                     </div>
 
@@ -1614,11 +1885,8 @@ of the array is row and the second one is column.</p>
             <div class="returns-description">
                 
                     
-                        <b>Return: </b><span class="type">Boolean</span>
+                        <b>Return: </b> <span class="type">Boolean</span>
                     
-                    <p>true if the given key pressed event doesn&#39;t 
-have be processed</p>
-
                 
             </div>
         </div>
@@ -1628,8 +1896,8 @@ have be processed</p>
 </div>
 
                 
-                    <div id="method_remove" class="method item inherited">
-    <h3 class="name"><code>remove</code></h3>
+                    <div id="method_paintItem" class="method item protected inherited">
+    <h3 class="name"><code>paintItem</code></h3>
 
     
         <div class="args">
@@ -1637,13 +1905,31 @@ have be processed</p>
             
                 <li class="arg">
                     
-                        <code>pos</code>
+                        <code>g</code>
                     
                 </li>
             
                 <li class="arg">
                     
-                        <code>size</code>
+                        <code>root</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>node</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>x</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>y</code>
                     
                 </li>
             
@@ -1656,6 +1942,8 @@ have be processed</p>
     
 
     
+        <span class="flag protected">protected</span>
+    
 
     
 
@@ -1669,7 +1957,7 @@ have be processed</p>
         
             
                 <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#method_remove">zebra.ui.TextField</a>:
+                <a href="../classes/zebra.ui.tree.BaseTree.html#method_paintItem">zebra.ui.tree.BaseTree</a>:
             
         
         </p>
@@ -1681,7 +1969,9 @@ have be processed</p>
     </div>
 
     <div class="description">
-        <p>Remove the specified part of edited text</p>
+        <p>An abstract method that a concrete tree component implementations should
+override. The method has to render the given tree node of the specified
+tree model item at the given location</p>
 
     </div>
 
@@ -1693,14 +1983,14 @@ have be processed</p>
             
                 <li class="param">
                     
-                        <code class="param-name">pos</code>
-                        <span class="type">Integer</span>
+                        <code class="param-name">g</code>
+                        <span class="type">2DContext</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a start position of a removed text</p>
+                        <p>a graphical context</p>
 
                     </div>
 
@@ -1709,14 +1999,62 @@ have be processed</p>
             
                 <li class="param">
                     
-                        <code class="param-name">size</code>
-                        <span class="type">Integer</span>
+                        <code class="param-name">root</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a size of removed text</p>
+                        <p>a tree model item to be rendered</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">node</code>
+                        <span class="type"><a href="../classes/zebra.ui.tree.$IM.html" class="crosslink">zebra.ui.tree.$IM</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a tree node metrics</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">x</code>
+                        <span class="type">Ineteger</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a x location where the tree node has to be rendered</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">y</code>
+                        <span class="type">Ineteger</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a y location where the tree node has to be rendered</p>
 
                     </div>
 
@@ -1725,55 +2063,6 @@ have be processed</p>
             
             </ul>
         </div>
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="method_removeSelected" class="method item inherited">
-    <h3 class="name"><code>removeSelected</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#method_removeSelected">zebra.ui.TextField</a>:
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Remove selected text</p>
-
-    </div>
-
     
 
     
@@ -1791,13 +2080,7 @@ have be processed</p>
             
                 <li class="arg">
                     
-                        <code>startOffset</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>endOffset</code>
+                        <code>an</code>
                     
                 </li>
             
@@ -1823,7 +2106,7 @@ have be processed</p>
         
             
                 <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#method_select">zebra.ui.TextField</a>:
+                <a href="../classes/zebra.ui.tree.BaseTree.html#method_select">zebra.ui.tree.BaseTree</a>:
             
         
         </p>
@@ -1835,7 +2118,7 @@ have be processed</p>
     </div>
 
     <div class="description">
-        <p>Select the specified part of the edited text</p>
+        <p>Select the given item.</p>
 
     </div>
 
@@ -1847,30 +2130,14 @@ have be processed</p>
             
                 <li class="param">
                     
-                        <code class="param-name">startOffset</code>
-                        <span class="type">Integer</span>
+                        <code class="param-name">an</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a start position of a selected text</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">endOffset</code>
-                        <span class="type">Integer</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>an end position of a selected text</p>
+                        <p>item to be selected. Use null value to clear any selection</p>
 
                     </div>
 
@@ -1887,8 +2154,8 @@ have be processed</p>
 </div>
 
                 
-                    <div id="method_setBlinking" class="method item inherited">
-    <h3 class="name"><code>setBlinking</code></h3>
+                    <div id="method_setGaps" class="method item inherited">
+    <h3 class="name"><code>setGaps</code></h3>
 
     
         <div class="args">
@@ -1896,7 +2163,13 @@ have be processed</p>
             
                 <li class="arg">
                     
-                        <code class="optional">[period]</code>
+                        <code>gx</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>gy</code>
                     
                 </li>
             
@@ -1922,7 +2195,7 @@ have be processed</p>
         
             
                 <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#method_setBlinking">zebra.ui.TextField</a>:
+                <a href="../classes/zebra.ui.tree.BaseTree.html#method_setGaps">zebra.ui.tree.BaseTree</a>:
             
         
         </p>
@@ -1934,7 +2207,8 @@ have be processed</p>
     </div>
 
     <div class="description">
-        <p>Set the specified blinking period of the text field cursor</p>
+        <p>Set the given horizontal gaps between tree node graphical elements:
+toggle, icon, item view</p>
 
     </div>
 
@@ -1946,17 +2220,30 @@ have be processed</p>
             
                 <li class="param">
                     
-                        <code class="param-name optional">[period]</code>
+                        <code class="param-name">gx</code>
                         <span class="type">Integer</span>
-                        <span class="flag optional" title="This parameter is optional.">optional</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a text field cursor blinking period (in milliseconds),
-use -1 to disable cursor blinking. If the argument is not passed the default (500ms)
-blinking period will be applied.</p>
+                        <p>horizontal gap</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">gy</code>
+                        <span class="type">Integer</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>vertical gap</p>
 
                     </div>
 
@@ -1973,8 +2260,8 @@ blinking period will be applied.</p>
 </div>
 
                 
-                    <div id="method_setColor" class="method item inherited">
-    <h3 class="name"><code>setColor</code></h3>
+                    <div id="method_setLineColor" class="method item inherited">
+    <h3 class="name"><code>setLineColor</code></h3>
 
     
         <div class="args">
@@ -2001,8 +2288,6 @@ blinking period will be applied.</p>
     
 
     
-        <span class="flag chainable">chainable</span>
-    
 
     
 
@@ -2010,7 +2295,7 @@ blinking period will be applied.</p>
         
             
                 <p>Inherited from
-                <a href="../classes/zebra.ui.Label.html#method_setColor">zebra.ui.Label</a>:
+                <a href="../classes/zebra.ui.tree.BaseTree.html#method_setLineColor">zebra.ui.tree.BaseTree</a>:
             
         
         </p>
@@ -2022,7 +2307,7 @@ blinking period will be applied.</p>
     </div>
 
     <div class="description">
-        <p>Set the label text color</p>
+        <p>Set tree component connector lines color</p>
 
     </div>
 
@@ -2041,7 +2326,7 @@ blinking period will be applied.</p>
                     
 
                     <div class="param-description">
-                        <p>a text color</p>
+                        <p>a color</p>
 
                     </div>
 
@@ -2058,8 +2343,8 @@ blinking period will be applied.</p>
 </div>
 
                 
-                    <div id="method_setCursorView" class="method item inherited">
-    <h3 class="name"><code>setCursorView</code></h3>
+                    <div id="method_setModel" class="method item inherited">
+    <h3 class="name"><code>setModel</code></h3>
 
     
         <div class="args">
@@ -2067,7 +2352,7 @@ blinking period will be applied.</p>
             
                 <li class="arg">
                     
-                        <code>v</code>
+                        <code>d</code>
                     
                 </li>
             
@@ -2093,7 +2378,7 @@ blinking period will be applied.</p>
         
             
                 <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#method_setCursorView">zebra.ui.TextField</a>:
+                <a href="../classes/zebra.ui.tree.BaseTree.html#method_setModel">zebra.ui.tree.BaseTree</a>:
             
         
         </p>
@@ -2105,8 +2390,7 @@ blinking period will be applied.</p>
     </div>
 
     <div class="description">
-        <p>Set the cursor view. The view defines rendering of the text field 
-cursor.</p>
+        <p>Set the given tree model to be visualized with the UI component.</p>
 
     </div>
 
@@ -2118,14 +2402,14 @@ cursor.</p>
             
                 <li class="param">
                     
-                        <code class="param-name">v</code>
-                        <span class="type"><a href="../classes/zebra.ui.View.html" class="crosslink">zebra.ui.View</a></span>
+                        <code class="param-name">d</code>
+                        <span class="type"><a href="../classes/zebra.data.TreeModel.html" class="crosslink">zebra.data.TreeModel</a> | Object</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a cursor view</p>
+                        <p>a tree model</p>
 
                     </div>
 
@@ -2142,8 +2426,8 @@ cursor.</p>
 </div>
 
                 
-                    <div id="method_setEditable" class="method item inherited">
-    <h3 class="name"><code>setEditable</code></h3>
+                    <div id="method_setSelectable" class="method item inherited">
+    <h3 class="name"><code>setSelectable</code></h3>
 
     
         <div class="args">
@@ -2177,7 +2461,7 @@ cursor.</p>
         
             
                 <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#method_setEditable">zebra.ui.TextField</a>:
+                <a href="../classes/zebra.ui.tree.BaseTree.html#method_setSelectable">zebra.ui.tree.BaseTree</a>:
             
         
         </p>
@@ -2189,7 +2473,7 @@ cursor.</p>
     </div>
 
     <div class="description">
-        <p>Control the text field editable state</p>
+        <p>Say if items of the tree component should be selectable</p>
 
     </div>
 
@@ -2208,7 +2492,7 @@ cursor.</p>
                     
 
                     <div class="param-description">
-                        <p>true to make the text field editable</p>
+                        <p>true is tree component items can be selected</p>
 
                     </div>
 
@@ -2225,661 +2509,8 @@ cursor.</p>
 </div>
 
                 
-                    <div id="method_setFont" class="method item inherited">
-    <h3 class="name"><code>setFont</code></h3>
-
-    
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code>f</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <span class="flag chainable">chainable</span>
-    
-
-    
-
-    <div class="meta">
-        
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.Label.html#method_setFont">zebra.ui.Label</a>:
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Set the label text font</p>
-
-    </div>
-
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">f</code>
-                        <span class="type"><a href="../classes/zebra.ui.Font.html" class="crosslink">zebra.ui.Font</a></span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>a text font</p>
-
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="method_setHint" class="method item inherited">
-    <h3 class="name"><code>setHint</code></h3>
-
-    
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code>hint</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>font</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>color</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#method_setHint">zebra.ui.TextField</a>:
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Set the specified hint text to be drawn with the given font and color.
-The hint is not-editable text that is shown in empty text field to help 
-a user to understand which input the text field expects.</p>
-
-    </div>
-
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">hint</code>
-                        <span class="type">String</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>a hint text</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">font</code>
-                        <span class="type">String | <a href="../classes/zebra.ui.Font.html" class="crosslink">zebra.ui.Font</a></span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>a font</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">color</code>
-                        <span class="type">String</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>a hint color</p>
-
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="method_setModel" class="method item inherited">
-    <h3 class="name"><code>setModel</code></h3>
-
-    
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code>m</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#method_setModel">zebra.ui.TextField</a>:
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Set the text field text model</p>
-
-    </div>
-
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">m</code>
-                        <span class="type"><a href="../classes/zebra.data.TextModel.html" class="crosslink">zebra.data.TextModel</a></span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>a text model to be set</p>
-
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="method_setPosition" class="method item inherited">
-    <h3 class="name"><code>setPosition</code></h3>
-
-    
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code>p</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#method_setPosition">zebra.ui.TextField</a>:
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Set the specified cursor position controller</p>
-
-    </div>
-
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">p</code>
-                        <span class="type"><a href="../classes/zebra.util.Position.html" class="crosslink">zebra.util.Position</a></span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>a position controller</p>
-
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="method_setPSByRowsCols" class="method item inherited">
-    <h3 class="name"><code>setPSByRowsCols</code></h3>
-
-    
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code>r</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>c</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#method_setPSByRowsCols">zebra.ui.TextField</a>:
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Adjust the size of the text field component to be enough to place the given
-number of rows and columns.</p>
-
-    </div>
-
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">r</code>
-                        <span class="type">Integer</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>a row of the text the height of the text field has to be adjusted</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">c</code>
-                        <span class="type">Integer</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>a column of the text the width of the text field has to be adjusted</p>
-
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="method_setSelectionColor" class="method item inherited">
-    <h3 class="name"><code>setSelectionColor</code></h3>
-
-    
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code>c</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#method_setSelectionColor">zebra.ui.TextField</a>:
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Set selection color</p>
-
-    </div>
-
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">c</code>
-                        <span class="type">String</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>a selection color</p>
-
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="method_setValue" class="method item inherited">
-    <h3 class="name"><code>setValue</code></h3>
-
-    
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code>s</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            <p>Inherited from
-            <a href="../classes/zebra.ui.Label.html#method_setValue">
-                zebra.ui.Label
-            </a>
-            
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Set the text content of the text field component</p>
-
-    </div>
-
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">s</code>
-                        <span class="type">String</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>a text the text field component has to be filled</p>
-
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="method_setView" class="method item inherited">
-    <h3 class="name"><code>setView</code></h3>
+                    <div id="method_setViews" class="method item inherited">
+    <h3 class="name"><code>setViews</code></h3>
 
     
         <div class="args">
@@ -2906,8 +2537,6 @@ number of rows and columns.</p>
     
 
     
-        <span class="flag chainable">chainable</span>
-    
 
     
 
@@ -2915,7 +2544,7 @@ number of rows and columns.</p>
         
             
                 <p>Inherited from
-                <a href="../classes/zebra.ui.ViewPan.html#method_setView">zebra.ui.ViewPan</a>:
+                <a href="../classes/zebra.ui.tree.BaseTree.html#method_setViews">zebra.ui.tree.BaseTree</a>:
             
         
         </p>
@@ -2927,7 +2556,33 @@ number of rows and columns.</p>
     </div>
 
     <div class="description">
-        <p>Set the target view to be wrapped with the UI component</p>
+        <p><p>Set the number of views to customize rendering of different visual elements of the tree
+UI component. The following decorative elements can be customized:</p></p>
+<p><ul></p>
+<p><li><strong>&quot;close&quot; </strong> - closed tree item icon view</li></p>
+<p><li><strong>&quot;open&quot; </strong>  - opened tree item icon view</li></p>
+<p><li><strong>&quot;leaf&quot; </strong>  - leaf tree item icon view</li></p>
+<p><li><strong>&quot;on&quot; </strong>    - toggle on view</li></p>
+<p><li><strong>&quot;off&quot; </strong>   - toggle off view</li></p>
+<p><li><strong>&quot;iselect&quot; </strong>   - a view to express an item selection when tree component doesn&#39;t hold focus</li></p>
+<p><li><strong>&quot;aselect&quot; </strong>   - a view to express an item selection when tree component holds focus</li>
+</ul></p>
+<p><p>For instance:</p></p>
+<pre class="code prettyprint"><code>   // build tree UI component
+   var tree = new zebra.ui.tree.Tree({
+       value: &quot;Root&quot;,
+       kids: [
+           &quot;Item 1&quot;,
+           &quot;Item 2&quot;
+       ]
+   });
+
+   // set &quot; [x] &quot; text render for toggle on and
+   // &quot; [o] &quot; text render for toggle off tree elements
+   tree.setViews({
+       &quot;on&quot;: new zebra.ui.TextRender(&quot; [x] &quot;),
+       &quot;off&quot;: new zebra.ui.TextRender(&quot; [o] &quot;)
+   });</code></pre>
 
     </div>
 
@@ -2940,14 +2595,13 @@ number of rows and columns.</p>
                 <li class="param">
                     
                         <code class="param-name">v</code>
-                        <span class="type"><a href="../classes/zebra.ui.View.html" class="crosslink">zebra.ui.View</a> | Function</span>
+                        <span class="type">Object</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a view or a rendering
-view &quot;paint(g,x,y,w,h,c)&quot; function</p>
+                        <p>dictionary of tree component decorative elements views</p>
 
                     </div>
 
@@ -2964,8 +2618,8 @@ view &quot;paint(g,x,y,w,h,c)&quot; function</p>
 </div>
 
                 
-                    <div id="method_write" class="method item inherited">
-    <h3 class="name"><code>write</code></h3>
+                    <div id="method_toggle" class="method item inherited">
+    <h3 class="name"><code>toggle</code></h3>
 
     
         <div class="args">
@@ -2973,13 +2627,7 @@ view &quot;paint(g,x,y,w,h,c)&quot; function</p>
             
                 <li class="arg">
                     
-                        <code>pos</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>s</code>
+                        <code>item</code>
                     
                 </li>
             
@@ -3005,7 +2653,7 @@ view &quot;paint(g,x,y,w,h,c)&quot; function</p>
         
             
                 <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#method_write">zebra.ui.TextField</a>:
+                <a href="../classes/zebra.ui.tree.BaseTree.html#method_toggle">zebra.ui.tree.BaseTree</a>:
             
         
         </p>
@@ -3017,7 +2665,7 @@ view &quot;paint(g,x,y,w,h,c)&quot; function</p>
     </div>
 
     <div class="description">
-        <p>Insert the specified text into the edited text at the given position</p>
+        <p>Toggle the given tree item</p>
 
     </div>
 
@@ -3029,14 +2677,103 @@ view &quot;paint(g,x,y,w,h,c)&quot; function</p>
             
                 <li class="param">
                     
-                        <code class="param-name">pos</code>
-                        <span class="type">Integer</span>
+                        <code class="param-name">item</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a start position of a removed text</p>
+                        <p>an item to be toggled</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="method_toggleAll" class="method item inherited">
+    <h3 class="name"><code>toggleAll</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>root</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>b</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+                <p>Inherited from
+                <a href="../classes/zebra.ui.tree.BaseTree.html#method_toggleAll">zebra.ui.tree.BaseTree</a>:
+            
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Toggle off or on recursively all items of the given item</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">root</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>a starting item to toggle</p>
 
                     </div>
 
@@ -3045,14 +2782,15 @@ view &quot;paint(g,x,y,w,h,c)&quot; function</p>
             
                 <li class="param">
                     
-                        <code class="param-name">s</code>
-                        <span class="type">String</span>
+                        <code class="param-name">b</code>
+                        <span class="type">Boolean</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>a text to be inserted</p>
+                        <p>true if all items have to be in opened
+state and false otherwise</p>
 
                     </div>
 
@@ -3079,10 +2817,10 @@ view &quot;paint(g,x,y,w,h,c)&quot; function</p>
                 <h2 class="off-left">Attributes</h2>
 
                 
-                    <div id="attr_blinkigPeriod" class="attr item inherited">
-    <a name="config_blinkigPeriod"></a> 
-    <h3 class="name"><code>blinkigPeriod</code></h3>
-    <span class="type">Number</span>
+                    <div id="attr_gapx" class="attr item inherited">
+    <a name="config_gapx"></a> 
+    <h3 class="name"><code>gapx</code></h3>
+    <span class="type">Integer</span>
 
     
 
@@ -3104,7 +2842,7 @@ view &quot;paint(g,x,y,w,h,c)&quot; function</p>
         
             
                 <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#attr_blinkigPeriod">zebra.ui.TextField</a>:
+                <a href="../classes/zebra.ui.tree.BaseTree.html#attr_gapx">zebra.ui.tree.BaseTree</a>:
             
         
         </p>
@@ -3115,13 +2853,12 @@ view &quot;paint(g,x,y,w,h,c)&quot; function</p>
     </div>
 
     <div class="description">
-        <p>Specify the text field cursor blinking period in milliseconds.
--1 means no blinkable cursor</p>
+        <p>Horizontal gap between a node elements: toggle, icons and tree item view</p>
 
     </div>
 
     
-        <p><strong>Default:</strong> -1</p>
+        <p><strong>Default:</strong> 2</p>
     
 
     
@@ -3130,10 +2867,10 @@ view &quot;paint(g,x,y,w,h,c)&quot; function</p>
 </div>
 
                 
-                    <div id="attr_curView" class="attr item inherited">
-    <a name="config_curView"></a> 
-    <h3 class="name"><code>curView</code></h3>
-    <span class="type"><a href="../classes/zebra.ui.View.html" class="crosslink">zebra.ui.View</a></span>
+                    <div id="attr_gapy" class="attr item inherited">
+    <a name="config_gapy"></a> 
+    <h3 class="name"><code>gapy</code></h3>
+    <span class="type">Integer</span>
 
     
 
@@ -3155,7 +2892,7 @@ view &quot;paint(g,x,y,w,h,c)&quot; function</p>
         
             
                 <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#attr_curView">zebra.ui.TextField</a>:
+                <a href="../classes/zebra.ui.tree.BaseTree.html#attr_gapy">zebra.ui.tree.BaseTree</a>:
             
         
         </p>
@@ -3166,10 +2903,12 @@ view &quot;paint(g,x,y,w,h,c)&quot; function</p>
     </div>
 
     <div class="description">
-        <p>Cursor view</p>
+        <p>Vertical gap between a node elements: toggle, icons and tree item view</p>
 
     </div>
 
+    
+        <p><strong>Default:</strong> 2</p>
     
 
     
@@ -3178,59 +2917,9 @@ view &quot;paint(g,x,y,w,h,c)&quot; function</p>
 </div>
 
                 
-                    <div id="attr_isEditable" class="attr item inherited">
-    <a name="config_isEditable"></a> 
-    <h3 class="name"><code>isEditable</code></h3>
-    <span class="type">Boolean</span>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <span class="flag readonly">readonly</span>
-    
-
-    <div class="meta">
-        
-            
-                <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#attr_isEditable">zebra.ui.TextField</a>:
-            
-        
-        </p>
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Indicate if the text field is editable</p>
-
-    </div>
-
-    
-        <p><strong>Default:</strong> true</p>
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="attr_selectionColor" class="attr item inherited">
-    <a name="config_selectionColor"></a> 
-    <h3 class="name"><code>selectionColor</code></h3>
+                    <div id="attr_lnColor" class="attr item inherited">
+    <a name="config_lnColor"></a> 
+    <h3 class="name"><code>lnColor</code></h3>
     <span class="type">String</span>
 
     
@@ -3253,7 +2942,7 @@ view &quot;paint(g,x,y,w,h,c)&quot; function</p>
         
             
                 <p>Inherited from
-                <a href="../classes/zebra.ui.TextField.html#attr_selectionColor">zebra.ui.TextField</a>:
+                <a href="../classes/zebra.ui.tree.BaseTree.html#attr_lnColor">zebra.ui.tree.BaseTree</a>:
             
         
         </p>
@@ -3264,7 +2953,7 @@ view &quot;paint(g,x,y,w,h,c)&quot; function</p>
     </div>
 
     <div class="description">
-        <p>Selection color</p>
+        <p>Tree component line color</p>
 
     </div>
 
@@ -3276,10 +2965,10 @@ view &quot;paint(g,x,y,w,h,c)&quot; function</p>
 </div>
 
                 
-                    <div id="attr_view" class="attr item inherited">
-    <a name="config_view"></a> 
-    <h3 class="name"><code>view</code></h3>
-    <span class="type"><a href="../classes/zebra.ui.View.html" class="crosslink">zebra.ui.View</a></span>
+                    <div id="attr_selected" class="attr item inherited">
+    <a name="config_selected"></a> 
+    <h3 class="name"><code>selected</code></h3>
+    <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
 
     
 
@@ -3301,7 +2990,7 @@ view &quot;paint(g,x,y,w,h,c)&quot; function</p>
         
             
                 <p>Inherited from
-                <a href="../classes/zebra.ui.ViewPan.html#attr_view">zebra.ui.ViewPan</a>:
+                <a href="../classes/zebra.ui.tree.BaseTree.html#attr_selected">zebra.ui.tree.BaseTree</a>:
             
         
         </p>
@@ -3312,7 +3001,7 @@ view &quot;paint(g,x,y,w,h,c)&quot; function</p>
     </div>
 
     <div class="description">
-        <p>Reference to a view that the component visualize</p>
+        <p>Selected tree model item</p>
 
     </div>
 
@@ -3329,6 +3018,174 @@ view &quot;paint(g,x,y,w,h,c)&quot; function</p>
             </div>
         
 
+        
+            <div id="events" class="api-class-tabpanel">
+                <h2 class="off-left">Events</h2>
+
+                
+                    <div id="event_selected" class="events item inherited">
+    <h3 class="name"><code>selected</code></h3>
+    <span class="type"></span>
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+                <p>Inherited from
+                <a href="../classes/zebra.ui.tree.BaseTree.html#event_selected">zebra.ui.tree.BaseTree</a>:
+            
+        
+        </p>
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p><p>Fired when a tree item has been selected</p></p>
+<pre class="code prettyprint"><code> tree.bind(function selected(src, item) {
+    ...
+ });</code></pre>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Event Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">src</code>
+                        <span class="type"><a href="../classes/zebra.ui.tree.BaseTree.html" class="crosslink">zebra.ui.tree.BaseTree</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>an tree component that triggers the event</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">item</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>an tree item that has been toggled</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+
+    
+</div>
+
+                
+                    <div id="event_toggled" class="events item inherited">
+    <h3 class="name"><code>toggled</code></h3>
+    <span class="type"></span>
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+                <p>Inherited from
+                <a href="../classes/zebra.ui.tree.BaseTree.html#event_toggled">zebra.ui.tree.BaseTree</a>:
+            
+        
+        </p>
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p><p>Fired when a tree item has been toggled</p></p>
+<pre class="code prettyprint"><code>   tree.bind(function toggled(src, item) {
+      ...
+   });</code></pre>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Event Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">src</code>
+                        <span class="type"><a href="../classes/zebra.ui.tree.BaseTree.html" class="crosslink">zebra.ui.tree.BaseTree</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>an tree component that triggers the event</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">item</code>
+                        <span class="type"><a href="../classes/zebra.data.Item.html" class="crosslink">zebra.data.Item</a></span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>an tree item that has been toggled</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+
+    
+</div>
+
+                
+            </div>
         
     </div>
 </div>

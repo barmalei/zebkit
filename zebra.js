@@ -18440,7 +18440,9 @@ pkg.TextField = Class(pkg.Label, [
                 };
             },
 
-            function destroy() { this.metrics.target.unbind(this); }
+            function destroy() { 
+                this.metrics.target.unbind(this); 
+            }
         ]);
     },
 
@@ -18494,6 +18496,7 @@ pkg.TextField = Class(pkg.Label, [
             if (arguments.length === 0) {
                 period = 500;
             }
+
             if (period != this.blinkingPeriod) {
                 this.blinkingPeriod = period;
                 this.repaintCursor();
@@ -18560,6 +18563,10 @@ pkg.TextField = Class(pkg.Label, [
             return (d > 0 ? [line, ln.length ]: [line, 0]);
         };
 
+        // accumulate text model lines into string by the given start and end offsets 
+        // r     - text view
+        // start - start offset
+        // end   - end offset 
         this.getSubString = function(r,start,end){
             var res = [], sr = start[0], er = end[0], sc = start[1], ec = end[1];
             for(var i = sr; i < er + 1; i++){
@@ -18739,11 +18746,13 @@ pkg.TextField = Class(pkg.Label, [
         };
 
         this.recalc = function() {
-            var r = this.view, p = this.position;
-            if (p.offset >= 0){
-                var cl = p.currentLine;
-                this.curX = r.font.charsWidth(r.getLine(cl), 0, p.currentCol) + this.getLeft();
-                this.curY = cl * (r.getLineHeight() + r.getLineIndent()) + this.getTop();
+            var r = this.view;
+            if (this.position.offset >= 0) {
+                this.curX = r.font.charsWidth(r.getLine(this.position.currentLine), 
+                                              0, 
+                                              this.position.currentCol) + this.getLeft();
+                
+                this.curY = this.position.currentLine * (r.getLineHeight() + r.getLineIndent()) + this.getTop();
             }
             this.curH = r.getLineHeight() - 1;
         };
@@ -19158,17 +19167,23 @@ pkg.TextField = Class(pkg.Label, [
         };
 
         this.calcPreferredSize = function (t) {
-            return this.view.getPreferredSize();
+            var ps = this.view.getPreferredSize();
+            ps.width += this.curW;
+            return ps;
         };
 
         //!!! to maximize optimize performance the method duplicates part of ViewPan.paint() code
         this.paint = function(g){
-            var sx = this.scrollManager.getSX(), sy = this.scrollManager.getSY();
+            var sx = this.scrollManager.getSX(), 
+                sy = this.scrollManager.getSY();
+            
             try{
                 g.translate(sx, sy);
 
                 //!!! this code can be found in ViewPan.paint()
-                var l = this.getLeft(), t = this.getTop();
+                var l = this.getLeft(), 
+                    t = this.getTop();
+
                 this.view.paint(g, l, t, this.width  - l - this.getRight(),
                                          this.height - t - this.getBottom(), this);
                 this.drawCursor(g);

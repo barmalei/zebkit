@@ -889,6 +889,10 @@
         "border": null
     },
 
+    "HtmlContent": {
+        "$inherit": [ "TextField", "HtmlElement" ]
+    },
+
     "HtmlTextInput": {
         "$inherit": [ "TextField", "HtmlElement" ],
         "style"   : [ "outline", "none"],

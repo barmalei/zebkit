@@ -13053,6 +13053,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
                                                                         : pkg.TextRender.disabledColor;
                         for(var i = 0;i < lines; i++) {
                             g.setColor(dcol);
+                            this.paintLine(g, x, y, i + startLine, d);
                             y += lilh;
                         }
                     }
@@ -16865,11 +16866,11 @@ pkg.Tabs = Class(pkg.Panel, [
         };
 
         /**
-         * Navigate to a next tab page following the given direction starting 
+         * Navigate to a next tab page following the given direction starting
          * from the given page
          * @param  {Integer} page a starting page index
          * @param  {Integer} d a navigation direction. 1 means forward and -1 means backward
-         * navigation. 
+         * navigation.
          * @return {Integer}      a new tab page index
          * @method next
          */
@@ -18539,7 +18540,6 @@ pkg.TextField = Class(pkg.Label, [
 
         this.findNextWord = function(t,line,col,d){
             if (line < 0 || line >= t.getLines()) return null;
-            
             var ln = t.getLine(line);
             col += d;
             if (col < 0 && line > 0) return [line - 1, t.getLine(line - 1).length];

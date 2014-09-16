@@ -22520,8 +22520,8 @@ pkg.Menu = Class(pkg.CompList, [
 
     function insert(i, ctr, c) {
         if (zebra.isString(c)) {
-            return this.$super(i, ctr, (c.match(/\-+/) != null) ? new this.$clazz.Line()
-                                                                : new this.$clazz.MenuItem(c));            
+            return this.$super(i, ctr, (c.match(/^\-+$/) != null) ? new this.$clazz.Line()
+                                                                  : new this.$clazz.MenuItem(c));            
         }
         return this.$super(i, ctr, c);
     },

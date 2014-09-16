@@ -3510,7 +3510,7 @@ pkg.Matrix = Class([
 
         /**
          * Reallocate the matrix model space with the new number of rows and columns 
-         * @method rellocate
+         * @method re-locate.
          * @private
          * @param  {Integer} r a new number of rows
          * @param  {Integer} c a new number of columns
@@ -3557,7 +3557,8 @@ pkg.Matrix = Class([
         };
 
         /**
-         * Remove specified number of columns from the model starting from the given column.
+         * Remove specified number of columns from the model starting
+         * from the given column.
          * @method removeCols
          * @param  {Integer}  begcol a start column
          * @param  {Integer} count  a number of columns to be removed
@@ -3578,7 +3579,7 @@ pkg.Matrix = Class([
         };
 
         /**
-         * Sort the given column of the matrix model
+         * Sort the given column of the matrix model.
          * @param  {Integer} col a column to be re-ordered
          * @param  {Function} [f] an optional sort function. The name of the function 
          * is grabbed to indicate type of the sorting the method does. For instance:
@@ -11360,8 +11361,15 @@ pkg.zCanvas = Class(pkg.Panel, [
         };
 
         this.$keyPressed = function(e){
-            $keyPressedCode  = e.keyCode;
-            var code = e.keyCode, m = km(e), b = false;
+            var code = $keyPressedCode = (e.which || e.keyCode || 0), m = km(e), b = false;
+
+            // FF sets keyCode to zero for some diacritic characters
+            // to fix the problem we have to try get the code from "key" field
+            // of event that stores a character
+            if (code === 0 && e.key != null && e.key.length() === 1) {
+                code = e.key.charCodeAt(0);
+            }
+
             for(var i = this.kids.length - 1;i >= 0; i--){
                 var l = this.kids[i];
                 if (l.layerKeyPressed != null && l.layerKeyPressed(code, m)){
@@ -11371,7 +11379,7 @@ pkg.zCanvas = Class(pkg.Panel, [
 
             var focusOwner = pkg.focusManager.focusOwner;
             if (pkg.clipboardTriggerKey > 0          &&
-                e.keyCode == pkg.clipboardTriggerKey &&
+                code == pkg.clipboardTriggerKey &&
                 focusOwner != null                   &&
                 (focusOwner.clipCopy  != null        ||
                  focusOwner.clipPaste != null           ))

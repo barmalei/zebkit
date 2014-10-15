@@ -173,9 +173,31 @@ zebra.runTests("Zebra util objects bag",
         zebra.assert(r.p3.p4.p5, 122);
     },
 
+
+    function test_objload_merge() {
+        var o = { p1: { "p1":333, "p2": [1,2,3]  }, p2:[0]},
+            bag = new Bag(o),
+            l1 = { p1: { p1: { p1: 100, p2:true  } }, p2: [4,5,6], p33:["a", "b"],  p3: { p3:["a", "b"], p4: { p4: 1} } };
+            l2 = { p1: { p1: { p1: 200, p3:false } }, p2: [7,8,9], p33:["a", "b"],  p3: { p3:["c", "d"], p4: { p4: 12, p5:122 } } };
+        bag.concatArrays = true;
+        bag.load(l1, false).load(l2);
+        var r = bag.objects;
+
+        assert(r.p1.p1.p1, 200);
+        assert(r.p1.p1.p2, true);
+        assert(r.p1.p1.p3, false);
+        zebra.assertObjEqual(r.p1.p2, [1,2,3]);
+        zebra.assertObjEqual(r.p2, [0,4,5,6,7,8,9]);
+
+        zebra.assertObjEqual(r.p3.p3, ["a", "b", "c", "d"]);
+        zebra.assertObjEqual(r.p33, ["a", "b", "a", "b"]);
+        zebra.assert(r.p3.p4.p4, 12);
+        zebra.assert(r.p3.p4.p5, 122);
+    },
+
     function test_inherit() {
-        var o = {}, 
-            bag = new Bag(o), 
+        var o = {},
+            bag = new Bag(o),
             l = '{ "p": { "p1": 100, "p2": 200  }, "b": { "b1": { "$inherit":["p"], "p2":300 } }  }';
 
         bag.load(l);
@@ -193,10 +215,42 @@ zebra.runTests("Zebra util objects bag",
         zebra.assertObjEqual(r.b.b1.d, [1,2, { s: { } } ]);
     },
 
+    function test_obj_inherit() {
+        var o = {},
+            bag = new Bag(o),
+            l = { p: { p1: 100, p2: 200  }, b: { b1: { $inherit:["p"], p2:300 } }  };
+
+        bag.load(l);
+
+        var r = bag.objects;
+        assert(r.b.b1.p2, 300);
+        assert(r.b.b1.p1, 100);
+
+        var o = { d: { k: "str", d:[1,2, { s: { } } ] } },
+            bag = new Bag(o),
+            l = { p: { p1: 100, p2: 200  }, b: { b1: { $inherit:["p", "d.d"], p2:300 } }  };
+
+        bag.load(l);
+        var r = bag.objects;
+
+        assert(r.b.b1.p2, 300);
+        assert(r.b.b1.p1, 100);
+        zebra.assertObjEqual(r.b.b1.d, [1,2, { s: { } } ]);
+    },
+
     function test_class_field_initialization() {
         zebra.A = zebra.Class([]);
 
         var o = {}, bag = new Bag(o), l = '{ "a": { "$zebra.A":[], "id":100 }  }';
+        bag.load(l);
+
+        assert(o.a.id, 100);
+    },
+
+    function test_obj_class_field_initialization() {
+        zebra.A = zebra.Class([]);
+
+        var o = {}, bag = new Bag(o), l = { a: { "$zebra.A":[], id:100 }  };
         bag.load(l);
 
         assert(o.a.id, 100);
@@ -227,7 +281,7 @@ zebra.runTests("Zebra util objects bag",
         assert(r.a.b.c, "ABC");
         assert(r.a.k, 444);
         assert(r.a.b.m, 777);
-    }, 
+    },
 
     function testExpr() {
         zebra.$c = 100;

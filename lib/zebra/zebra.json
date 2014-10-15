@@ -1,5 +1,5 @@
 {
-    "version" : "3.2014",
+    "version" : "9.2014",
 
     "variables": {
         "Picture"       : "$zebra.ui.Picture",
@@ -869,6 +869,10 @@
                 "pressed": { "$Picture": [ "@pictures.zebra",32,0,16,16   ]}
             }
         }
+    },
+
+    "StatusBar" : {
+        "borderView" : "etched"
     },
 
     "HtmlElement": {

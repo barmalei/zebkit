@@ -9,8 +9,8 @@
 
 	<!--[if (gte IE 9)|(!IE)]><!-->
 	<script src='../zebra.min.js' type='text/javascript'></script>
-    <script src='demo/demo.all.min.js' type='text/javascript'></script>
-    
+    <script src='demo/demo.all.js' type='text/javascript'></script>
+
     <script type='text/javascript'>
 		var desktop = null;
 
@@ -30,23 +30,23 @@
 			function(t, reflection) {
 				this.$super(t);
 				this.setFont(new zebra.ui.Font("100px Futura, Helvetica, sans-serif"));
-				this.image = zebra.ui.demo.zebra_pattern; 
+				this.image = zebra.ui.demo.zebra_pattern;
 				this.hasReflection = reflection;
 				this.reflectionGap = -40;
 			},
 
 			function getLineHeight() {
-				return this.hasReflection ? this.font.height*2 + this.reflectionGap : this.font.height;
+				return this.hasReflection ? this.font.height * 2 + this.reflectionGap : this.font.height;
 			},
 
-			function paintLine(g,x,y,line,d) { 
+			function paintLine(g,x,y,line,d) {
 				var gradient = g.createLinearGradient(x, y, x, y + this.font.height);
 				gradient.addColorStop(0.1, '#000');
 				gradient.addColorStop(0.35, '#fff');
 				gradient.addColorStop(0.65, '#fff');
 			    gradient.addColorStop(1.0, '#000');
 				g.fillStyle = gradient;
-				g.fillText(this.getLine(line), x, y); 
+				g.fillText(this.getLine(line), x, y);
 
 
 				var prev = g.globalCompositeOperation;
@@ -60,7 +60,7 @@
 					g.fillText(this.getLine(line), x, -y - this.reflectionGap - 2*this.font.height);
 					g.scale(1, -1);
 
-					// cut the gradient out of the reflected text 
+					// cut the gradient out of the reflected text
 					var gradient = g.createLinearGradient(x, y + this.font.height + this.reflectionGap, x, y + 2*d.height + this.reflectionGap);
 					gradient.addColorStop(0.0, 'rgba(0,0,0,0.65)');
 					gradient.addColorStop(1.0, '#000');
@@ -68,7 +68,7 @@
 					g.fillRect(x, y + this.font.height + this.reflectionGap + 30, this.lineWidth(line), 2*this.font.height);
 					g.restore();
 				}
-				
+
 			//	g.globalCompositeOperation = "source-atop";
 				g.fillStyle = this.pattern;
 				g.fillRect(x, y, this.lineWidth(line), this.getLineHeight());
@@ -94,7 +94,7 @@
 	    			layout : new BorderLayout(),
 	    			kids   : {
 	    				CENTER: nt.properties({
-	    					kids : { 
+	    					kids : {
 	    						"About": new Panel({
 		    						padding: 8,
 		    						layout : new BorderLayout(),
@@ -117,9 +117,9 @@
 		    													font : new Font("Helvetica", 'bold', 100)
 		    												}) ]
 		    											}),
-		    											CENTER : new Panel({ 
+		    											CENTER : new Panel({
 		    												layout: new FlowLayout(CENTER, TOP, HORIZONTAL, 12),
-		    												kids  : [ new Label(new zebra.data.Text(zebra.io.GET("demo/desc.txt"))).properties({ 
+		    												kids  : [ new Label(new zebra.data.Text(zebra.io.GET("demo/desc.txt"))).properties({
 		    													color:"white",
 		    													font : new Font("Verdana", 14)
 		    												}) ]
@@ -146,7 +146,7 @@
 									layout  : new BorderLayout(8, 8),
 									padding : 8,
 									background: "gray",
-									kids    : { 
+									kids    : {
 										CENTER: new TextField(new ZebraTextRender("Zebra ...")).properties({
 											cursorView    : "red",
 											curW          : 3,
@@ -161,7 +161,7 @@
 									    })
 									}
 								})
-		    				} 
+		    				}
 	    				})
 	    			}
 	    		});
@@ -333,7 +333,7 @@
 					<tr>
 						<td colspan="3" align="center" id="norm_demo_parent">
 							<!--[if (gte IE 9)|(!IE)]><!-->
-							<canvas id="zCanvas"	
+							<canvas id="zCanvas"
 							        tabindex="0"
 							        style="outline:none;"
 							        class="zebracanvas"
@@ -376,7 +376,7 @@
 							</div>
 						</td>
 						<td rowspan="2" align="right" valign = "bottom">
-							<img style="margin-left:15px;" src="demo/html5.png"> 
+							<img style="margin-left:15px;" src="demo/html5.png">
 						</td>
 					</tr>
 					<tr>
@@ -390,19 +390,19 @@
 							<table border="0" cellspacing="0" cellpadding="0">
 								<tr>
 									<td valign="center" align="center">
-										<img style="margin-left:5px;" src="demo/java.logo.png"> 
+										<img style="margin-left:5px;" src="demo/java.logo.png">
 									</td>
 									<td valign="center" align="center">
-										<img style="margin-left:5px;" src="demo/android.logo.png"> 
+										<img style="margin-left:5px;" src="demo/android.logo.png">
 									</td>
 									<td valign="center" align="center">
-										<img style="margin-left:5px;" src="demo/ios.logo.png"> 
+										<img style="margin-left:5px;" src="demo/ios.logo.png">
 									</td>
 									<td valign="center" align="center">
-										<img style="margin-left:5px;" src="demo/dotnet.logo.png"> 
+										<img style="margin-left:5px;" src="demo/dotnet.logo.png">
 									</td>
 									<td valign="center" align="center">
-										<img style="margin-left:5px;" src="demo/eclipse.logo.png"> 
+										<img style="margin-left:5px;" src="demo/eclipse.logo.png">
 									</td>
 								</tr>
 							</table>

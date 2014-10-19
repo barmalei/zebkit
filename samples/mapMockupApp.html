@@ -93,9 +93,10 @@
                     }
                 ]));
 
-                var Map = zebra.Class(Panel, Composite, [
+                var Map = zebra.Class(Panel, [
                     function() {
                         this.$this(0,0);
+                        this.catchInput = true;
                     },
 
                     function(lat, lon) {

@@ -120,7 +120,10 @@ function createWindowComp(target) {
         "MenuItem 2": { 
             "Item 2.1":null, 
             "Item 2.2": [ "Item 2.2.1", "Item 2.2.2" ], 
-            "Item 2.3": null  
+            "Item 2.3": null,  
+            "-": null,
+            "Item 2.4": null,
+            "--": null
         },
         "Ok": null 
     }).properties({ border:null }) );

@@ -58,11 +58,12 @@
 			    	tf        = root.find("//zebra.ui.TextField"); 
 
 				// Highlight screen when mouse is in. It is done by zebra mixing.
-				root.find("//*[@id='mypanel']").extend(Composite, [	
+				root.find("//*[@id='mypanel']").extend([	
   					function mouseExited(e)  { this.setBackground(null); },
   					function mouseEntered(e) { this.setBackground("rgba(255, 255, 255, 0.5)");	 },
   					function catchInput(t) {  return t != slider && t != button && t != tf; }
 				]);
+
 
 				video.extend([ function finished() {  button.kids[0].setValue("Play video"); } ]);
 

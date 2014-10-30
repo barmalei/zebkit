@@ -12,4 +12,5 @@ src/ui.window.js
 src/ui.designer.js
 src/ui.html.js
 src/ui.tree.js
+src/ui.comptree.js
 src/ui.grid.js

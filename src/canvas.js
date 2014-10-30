@@ -2247,37 +2247,40 @@ pkg.loadImage = function(img, ready) {
 
  * @param {Integer} id a component event ID. The id can have one of the following value:
 
-        zebra.ui.Panel.ENABLED
-        zebra.ui.Panel.SHOWN
-        zebra.ui.Panel.MOVED
-        zebra.ui.Panel.SIZED
-        zebra.ui.Panel.ADDED
-        zebra.ui.Panel.REMOVED
+
+   - zebra.ui.Panel.ENABLED
+   - zebra.ui.Panel.SHOWN
+   - zebra.ui.Panel.MOVED
+   - zebra.ui.Panel.SIZED
+   - zebra.ui.Panel.ADDED
+   - zebra.ui.Panel.REMOVED
 
  * @param {zebra.ui.Panel} src a component that triggers the event
  * @param {zebra.ui.Panel|Integer|Object} p1 an event first parameter that depends
- * on an component event that has happened
+ * on an component event that has happened:
 
-        if id is zebra.ui.Panel.SIZED the parameter is previous component width
-        if id is zebra.ui.Panel.MOVED the parameter is previous component x location
-        if id is zebra.ui.Panel.ADDED the parameter is constraints a new component has been added
-        if id is zebra.ui.Panel.REMOVED the parameter is null
+
+   - if id is **zebra.ui.Panel.SIZED** the parameter is previous component width
+   - if id is **zebra.ui.Panel.MOVED** the parameter is previous component x location
+   - if id is **zebra.ui.Panel.ADDED** the parameter is constraints a new component has been added
+   - if id is **zebra.ui.Panel.REMOVED** the parameter is null
 
  * @param {zebra.ui.Panel|Integer|Object} p2 an event second parameter depends
- * on an component event that has happened
+ * on an component event that has happened:
 
-        if id is zebra.ui.Panel.SIZED the parameter is previous component height
-        if id is zebra.ui.Panel.MOVED the parameter is previous component y location
-        if id is zebra.ui.Panel.ADDED the parameter is reference to the added children component
-        if id is zebra.ui.Panel.REMOVED the parameter is reference to the removed children component
+
+    - if id is **zebra.ui.Panel.SIZED** the parameter is previous component height
+    - if id is **zebra.ui.Panel.MOVED** the parameter is previous component y location
+    - if id is **zebra.ui.Panel.ADDED** the parameter is reference to the added children component
+    - if id is **zebra.ui.Panel.REMOVED** the parameter is reference to the removed children component
 
  * @event  childCompEvent
  */
 
-
  /**
   * The method is called for focusable UI components (components that can hold input focus) to ask
   * a string to be saved in native clipboard
+  *
   * @return {String} a string to be copied in native clipboard
   *
   * @event clipCopy
@@ -2946,7 +2949,7 @@ pkg.BaseLayer = Class(pkg.Panel, [
          *  at this location
          *  @method isLayerActiveAt
          */
-        
+
 
         this.getFocusRoot = function(child) {
             return this;
@@ -3554,8 +3557,8 @@ pkg.FocusManager = Class(pkg.Manager, [
                   (typeof c.canHaveFocus == "function" && c.canHaveFocus());
         };
 
-        // looking recursively a focusable component among children components of 
-        // the given target  starting from the specified by index kid with the 
+        // looking recursively a focusable component among children components of
+        // the given target  starting from the specified by index kid with the
         // given direction (forward or backward lookup)
         this.fd = function(t,index,d) {
             if (t.kids.length > 0){
@@ -3563,9 +3566,9 @@ pkg.FocusManager = Class(pkg.Manager, [
                 for(var i = index; i >= 0 && i < t.kids.length; i += d) {
                     var cc = t.kids[i];
 
-                    // check if the current children component satisfies 
-                    // conditions it can grab focus or any deeper in hierarchy 
-                    // component that can grab the focus exist  
+                    // check if the current children component satisfies
+                    // conditions it can grab focus or any deeper in hierarchy
+                    // component that can grab the focus exist
                     if (cc.isEnabled === true                                           &&
                         cc.isVisible === true                                           &&
                         cc.width      >  0                                              &&
@@ -3585,7 +3588,7 @@ pkg.FocusManager = Class(pkg.Manager, [
             return null;
         };
 
-        // find next focusable component 
+        // find next focusable component
         // c - component starting from that a next focusable component has to be found
         // d - a direction of next focusable component lookup: 1 (forward) or -1 (backward)
         this.ff = function(c, d){
@@ -4420,11 +4423,11 @@ pkg.zCanvas = Class(pkg.Panel, [
             // zebra component the mouse pointer entered and send appropriate
             // mouse entered event to it
             if (mp == null || mp.canvas == null) {
-                var x = $meX(e, this), 
-                    y = $meY(e, this), 
+                var x = $meX(e, this),
+                    y = $meY(e, this),
                     d = this.getComponentAt(x, y);
 
-                // setup modifiers 
+                // setup modifiers
                 ME_STUB.modifiers.altKey   = e.altKey;
                 ME_STUB.modifiers.ctrlKey  = e.ctrlKey;
                 ME_STUB.modifiers.metaKey  = e.metaKey;
@@ -4456,7 +4459,7 @@ pkg.zCanvas = Class(pkg.Panel, [
         this.$mouseExited = function (id, e) {
             var mp = $mousePressedEvents[id];
 
-            // setup modifiers 
+            // setup modifiers
             ME_STUB.modifiers.altKey   = e.altKey;
             ME_STUB.modifiers.ctrlKey  = e.ctrlKey;
             ME_STUB.modifiers.metaKey  = e.metaKey;
@@ -4527,7 +4530,7 @@ pkg.zCanvas = Class(pkg.Panel, [
                         y = this.$context.tY(e.pageX - this.offx, e.pageY - this.offy),
                         m = mp.button;
 
-                        // setup modifiers 
+                        // setup modifiers
                         ME_STUB.modifiers.altKey   = e.altKey;
                         ME_STUB.modifiers.ctrlKey  = e.ctrlKey;
                         ME_STUB.modifiers.metaKey  = e.metaKey;
@@ -4555,7 +4558,7 @@ pkg.zCanvas = Class(pkg.Panel, [
                         if (d != null && d.isEnabled === true) {
                             mp.draggedComponent = d;
 
-                            // setup modifiers 
+                            // setup modifiers
                             ME_STUB.modifiers.altKey   = mp.altKey;
                             ME_STUB.modifiers.ctrlKey  = mp.ctrlKey;
                             ME_STUB.modifiers.metaKey  = mp.metaKey;
@@ -4590,13 +4593,13 @@ pkg.zCanvas = Class(pkg.Panel, [
                 var x = this.$context.tX(e.pageX - this.offx, e.pageY - this.offy),
                     y = this.$context.tY(e.pageX - this.offx, e.pageY - this.offy),
                     d = this.getComponentAt(x, y);
-              
-                // setup modifiers 
+
+                // setup modifiers
                 ME_STUB.modifiers.altKey   = e.altKey;
                 ME_STUB.modifiers.ctrlKey  = e.ctrlKey;
                 ME_STUB.modifiers.metaKey  = e.metaKey;
                 ME_STUB.modifiers.shiftKey = e.shiftKey;
-                
+
                 if (pkg.$mouseMoveOwner != null) {
                     if (d != pkg.$mouseMoveOwner) {
                         var old = pkg.$mouseMoveOwner;
@@ -4636,7 +4639,7 @@ pkg.zCanvas = Class(pkg.Panel, [
             if (mp != null && mp.canvas != null) {
                 var x = $meX(e, this), y = $meY(e, this), po = mp.component;
 
-                // setup modifiers 
+                // setup modifiers
                 ME_STUB.modifiers.altKey   = e.altKey;
                 ME_STUB.modifiers.ctrlKey  = e.ctrlKey;
                 ME_STUB.modifiers.metaKey  = e.metaKey;
@@ -4746,7 +4749,7 @@ pkg.zCanvas = Class(pkg.Panel, [
             if (d != null && d.isEnabled === true) {
                 mp.component = d;
 
-                // setup modifiers 
+                // setup modifiers
                 ME_STUB.modifiers.altKey   = mp.altKey;
                 ME_STUB.modifiers.ctrlKey  = mp.ctrlKey;
                 ME_STUB.modifiers.metaKey  = mp.metaKey;
@@ -5122,9 +5125,9 @@ pkg.zCanvas = Class(pkg.Panel, [
                 ph  = this.height,
                 ctx = pkg.$canvas.size(this.canvas, w, h);
 
-            //TODO: top works not good in FF and it is better don't use it 
-            // So, ascent has to be taking in account as it was implemented 
-            // before 
+            //TODO: top works not good in FF and it is better don't use it
+            // So, ascent has to be taking in account as it was implemented
+            // before
             this.$context = ctx;
             if (this.$context.textBaseline != "top" ) {
                 this.$context.textBaseline = "top";

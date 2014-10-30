@@ -1,10 +1,7 @@
 YUI.add("yuidoc-meta", function(Y) {
    Y.YUIDoc = { meta: {
     "classes": [
-        "zebra.$cache",
-        "zebra.Class()",
         "zebra.Dummy",
-        "zebra.Interface()",
         "zebra.URL",
         "zebra.data.Item",
         "zebra.data.ListModel",
@@ -13,20 +10,11 @@ YUI.add("yuidoc-meta", function(Y) {
         "zebra.data.Text",
         "zebra.data.TextModel",
         "zebra.data.TreeModel",
-        "zebra.forName()",
-        "zebra.instanceOf()",
-        "zebra.io.GET()",
         "zebra.io.HTTP",
-        "zebra.io.ID()",
         "zebra.io.JRPC",
-        "zebra.io.JRPC.invoke()",
-        "zebra.io.POST()",
         "zebra.io.QS",
         "zebra.io.Service",
         "zebra.io.XRPC",
-        "zebra.io.XRPC.invoke()",
-        "zebra.io.b64decode()",
-        "zebra.io.b64encode()",
         "zebra.layout.BorderLayout",
         "zebra.layout.Constraints",
         "zebra.layout.FlowLayout",
@@ -37,14 +25,6 @@ YUI.add("yuidoc-meta", function(Y) {
         "zebra.layout.PercentLayout",
         "zebra.layout.RasterLayout",
         "zebra.layout.StackLayout",
-        "zebra.layout.getDirectAt()",
-        "zebra.layout.getDirectChild()",
-        "zebra.layout.getMaxPreferredSize()",
-        "zebra.layout.getTopParent()",
-        "zebra.layout.toChildOrigin()",
-        "zebra.layout.toParentOrigin()",
-        "zebra.namespace()",
-        "zebra.ready()",
         "zebra.ui.BaseLayer",
         "zebra.ui.BaseList",
         "zebra.ui.BoldLabel",
@@ -62,7 +42,6 @@ YUI.add("yuidoc-meta", function(Y) {
         "zebra.ui.CommandManager",
         "zebra.ui.CompList",
         "zebra.ui.CompRender",
-        "zebra.ui.Composite",
         "zebra.ui.CompositeEvStatePan",
         "zebra.ui.CompositeView",
         "zebra.ui.CursorManager",
@@ -147,9 +126,6 @@ YUI.add("yuidoc-meta", function(Y) {
         "zebra.ui.grid.GridCaption",
         "zebra.ui.grid.GridStretchPan",
         "zebra.ui.grid.Metrics",
-        "zebra.ui.loadImage()",
-        "zebra.ui.showModalWindow()",
-        "zebra.ui.showWindow()",
         "zebra.ui.tree.$IM",
         "zebra.ui.tree.BaseTree",
         "zebra.ui.tree.CompTree",
@@ -163,12 +139,7 @@ YUI.add("yuidoc-meta", function(Y) {
         "zebra.util.Position",
         "zebra.util.Position.Metric",
         "zebra.util.TaskCotext",
-        "zebra.util.findInTree()",
-        "zebra.util.intersection();",
-        "zebra.util.newInstance()",
-        "zebra.util.rgb",
-        "zebra.util.shutdownAll",
-        "zebra.util.task"
+        "zebra.util.rgb"
     ],
     "modules": [
         "data",
@@ -195,7 +166,7 @@ YUI.add("yuidoc-meta", function(Y) {
         {
             "displayName": "layout",
             "name": "layout",
-            "description": "Layout package provides number of classes, interfaces, methods and \nvariables that allows developer easily implement rules based layouting \nof hierarchy of rectangular elements. The package has no relation \nto any concrete UI, but it can be applied to a required UI framework\n\nThe package declares the following constraints constants:\n    \n   - **NONE** no constraints \n   - **LEFT** left alignment constraint\n   - **TOP** top alignment constraint\n   - **RIGHT** right alignment constraint\n   - **BOTTOM** bottom alignment constraint\n   - **CENTER** center alignment constraint\n   - **HORIZONTAL** horizontal elements alignment constraint\n   - **VERTICAL** vertical elements alignment constraint\n   - **TLEFT** top left alignment constraint\n   - **TRIGHT** top right alignment constraint\n   - **BLEFT** bottom left alignment constraint\n   - **BRIGHT** bottom right alignment constraint\n   - **STRETCH** stretch element\n   - **USE_PS_SIZE** use preferred size for an element"
+            "description": "Layout package provides number of classes, interfaces, methods and \nvariables that allows developer easily implement rules based layouting \nof hierarchy of rectangular elements. The package has no relation \nto any concrete UI, but it can be applied to a required UI framework\n\nThe package declares the following constraints constants:\n    \n   - **NONE** no constraints \n   - **LEFT** left alignment constraint\n   - **TOP** top alignment constraint\n   - **RIGHT** right alignment constraint\n   - **BOTTOM** bottom alignment constraint\n   - **CENTER** center alignment constraint\n   - **HORIZONTAL** horizontal elements alignment constraint\n   - **VERTICAL** vertical elements alignment constraint\n   - **TopLeft** top left alignment constraint\n   - **TopRight** top right alignment constraint\n   - **BottomLeft** bottom left alignment constraint\n   - **BottomRight** bottom right alignment constraint\n   - **STRETCH** stretch element\n   - **USE_PS_SIZE** use preferred size for an element"
         },
         {
             "displayName": "ui",
@@ -210,7 +181,7 @@ YUI.add("yuidoc-meta", function(Y) {
         {
             "displayName": "ui.grid",
             "name": "ui.grid",
-            "description": "The package contains number of classes and interfaces to implement\nUI Grid component. The grid allows developers to visualize matrix \nmodel, customize the model data editing and rendering."
+            "description": "The package contains number of classes and interfaces to implement\nUI Grid component. The grid allows developers to visualize matrix\nmodel, customize the model data editing and rendering."
         },
         {
             "displayName": "ui.tree",

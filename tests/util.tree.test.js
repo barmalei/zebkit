@@ -1,9 +1,9 @@
 
 if (typeof(zebra) === "undefined") {
-    load(arguments[0] + '/lib/zebra/easyoop.js');
-    load(arguments[0] + '/lib/zebra/tools.js');
-    load(arguments[0] + '/lib/zebra/util.js');
-    load(arguments[0] + '/lib/zebra/layout.js');
+    load(arguments[0] + '/src/easyoop.js');
+    load(arguments[0] + '/src/tools.js');
+    load(arguments[0] + '/src/util.js');
+    load(arguments[0] + '/src/layout.js');
 }
 
 var assert = zebra.assert, Class = zebra.Class, assertException = zebra.assertException,
@@ -151,7 +151,7 @@ zebra.runTests("Zebra util",
         zebra.util.findInTree(treeLikeRoot, "/Root/Item 2/Item 1", cmp, collect);
         assert(res.length, 1);
         assert(res[0].value, "Item 1");
-        
+
         res = [];
         zebra.util.findInTree(treeLikeRoot, "/Root/Item 1[@a=12]", cmp, collect);
         assert(res.length, 1);

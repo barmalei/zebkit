@@ -1704,22 +1704,18 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                         }
 
                         this.paintPosMarker(g);
-                    }
-                    finally {
                         g.restore();
+                    }
+                    catch(e) {
+                        g.restore();
+                        throw e;
                     }
                 }
             };
 
             this.catchScrolled = function (psx, psy){
-                console.log("Grid.catchScrolled() : psy = " + psy + ", offy = " + this.scrollManager.getSY() + ", offx = " + this.scrollManager.getSX());
-
-
                 var offx = this.scrollManager.getSX() - psx,
                     offy = this.scrollManager.getSY() - psy;
-
-
-
 
                 if (offx !== 0) {
                     this.iColVisibility(offx > 0 ? 1 :  - 1);

@@ -777,9 +777,11 @@ pkg.BaseTree = Class(ui.Panel, [
                     try{
                         g.translate(sx, sy);
                         this.paintTree(g, this.firstVisible);
-                    }
-                    finally{
                         g.translate(-sx,  -sy);
+                    }
+                    catch(e) {
+                        g.translate(-sx,  -sy);
+                        throw e;
                     }
                 }
             }
@@ -1338,7 +1340,8 @@ pkg.Tree = Class(pkg.BaseTree, [
                         ps = editor.getPreferredSize();
 
                     editor.setLocation(b.x + this.scrollManager.getSX() + this.itemGapX,
-                                       b.y - ~~((ps.height - b.height + 2 * this.itemGapY) / 2) + this.scrollManager.getSY() + this.itemGapY);
+                                       b.y - ~~((ps.height - b.height + 2 * this.itemGapY) / 2) +
+                                      this.scrollManager.getSY() + this.itemGapY);
 
                     editor.setSize(ps.width, ps.height);
                     this.add(editor);
@@ -1358,7 +1361,8 @@ pkg.Tree = Class(pkg.BaseTree, [
             if (this.editors != null && this.editedItem != null){
                 try {
                     if (applyData)  {
-                        this.model.setValue(this.editedItem, this.editors.fetchEditedValue(this.editedItem, this.kids[0]));
+                        this.model.setValue(this.editedItem,
+                                            this.editors.fetchEditedValue(this.editedItem, this.kids[0]));
                     }
                 }
                 finally{

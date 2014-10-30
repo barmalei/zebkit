@@ -1277,7 +1277,7 @@ function createDynamicGrid() {
     }));
 
     addBt.bind(function() {
-
+        grid.model.insertCols(1, 1);
     });
 
     return new Panel({

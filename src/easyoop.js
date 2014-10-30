@@ -270,7 +270,7 @@ pkg.getPropertySetter = function(obj, name) {
     return (typeof m  === "function") ? m : null;
 };
 
-// target - is object whose propeties have to populated
+// target - is object whose properties have to populated
 // p      - properties
 pkg.properties = function(target, p) {
     for(var k in p) {
@@ -343,43 +343,54 @@ pkg.Interface = make_template(null, function() {
     return $Interface;
 });
 
-pkg.$Extended = pkg.Interface();
+// single method proxy
+function sProxyMethod(name, f) {
+    var a = function() {
+        var cm = pkg.$caller;
+        pkg.$caller = a.f;
+        // don't use finally section it slower than try-catch
+        try {
+            var r = a.f.apply(this, arguments);
+            pkg.$caller = cm;
+            return r;
+        }
+        catch(e) { pkg.$caller = cm; throw e; }
+    };
 
-function ProxyMethod(name, f) {
-    if (isString(name) === false) {
-        throw new TypeError('Invalid method name');
-    }
-
-    var a = null;
-    if (arguments.length == 1) {
-        a = function() {
-            var nm = a.methods[arguments.length];
-            if (nm != null) {
-                var cm = pkg.$caller;
-                pkg.$caller = nm;
-                try { return nm.apply(this, arguments); }
-                catch(e) { throw e; }
-                finally { pkg.$caller = cm; }
-            }
-            mnf.call(this, a.methodName, arguments.length);
-        };
-        a.methods = {};
-    }
-    else {
-        a = function() {
-            var cm = pkg.$caller;
-            pkg.$caller = a.f;
-            try { return a.f.apply(this, arguments); }
-            catch(e) { throw e; }
-            finally { pkg.$caller = cm; }
-        };
-        a.f = f;
-    }
+    a.f = f;
+    a.methodName = name;
 
     a.$clone$ = function() {
-        if (a.methodName === CNAME) return null;
-        if (a.f) return ProxyMethod(a.methodName, a.f);
-        var m = ProxyMethod(a.methodName);
+        return sProxyMethod(a.methodName, a.f);
+    };
+
+    return a;
+};
+
+// multiple methods proxy
+function nProxyMethod(name) {
+    var a = function() {
+        var nm = a.methods[arguments.length];
+        if (nm != null) {
+            var cm = pkg.$caller;
+            pkg.$caller = nm;
+            // don't use finally section it slower than try-catch
+            try {
+                var r = nm.apply(this, arguments);
+                pkg.$caller = cm;
+                return r;
+            }
+            catch(e) { pkg.$caller = cm; throw e; }
+        }
+        mnf.call(this, a.methodName, arguments.length);
+    };
+
+    a.methods = {};
+    a.methodName = name;
+
+    a.$clone$ = function() {
+        // multiple methods, so overloading is possible
+        var m = nProxyMethod(a.methodName);
         for(var k in a.methods) {
             if (a.methods.hasOwnProperty(k)) {
                 m.methods[k] = a.methods[k];
@@ -388,7 +399,6 @@ function ProxyMethod(name, f) {
         return m;
     };
 
-    a.methodName = name;
     return a;
 }
 
@@ -533,7 +543,9 @@ pkg.Class = make_template(null, function() {
                   // Array.prototype.slice.call(arguments, 0, arguments.length-1);
 
     // use instead of slice for performance reason
-    for(var i=0; i < arguments.length-1; i++) args[i] = arguments[i];
+    for(var i=0; i < arguments.length-1; i++) {
+        args[i] = arguments[i];
+    }
 
     if (args.length > 0 && (args[0] == null || args[0].$clazz == pkg.Class)) {
         $parent = args[0];
@@ -562,7 +574,6 @@ pkg.Class = make_template(null, function() {
                 args.push(arguments[arguments.length - 1]);
 
                 var cl = pkg.Class.apply(null, args),  // declare new anonymous class
-
                     // create a function to instantiate an object that will be made the 
                     // anonymous class instance. The intermediate object is required to 
                     // call constructor properly since we have arguments as an array 
@@ -591,31 +602,37 @@ pkg.Class = make_template(null, function() {
         }
     }, args);
 
-
+    // prepare fields that caches the class properties
     $template.$propertyInfo = {};
     
-    // copy parents prototype    
+    // copy parents prototype methods and fields into
+    // new class template
     $template.$parent = $parent;
     if ($parent != null) {
         for (var k in $parent.prototype) {
             if ($parent.prototype.hasOwnProperty(k)) {
                 var f = $parent.prototype[k];
-                if (f != null && f.$clone$ != null) {
-                    f = f.$clone$();
 
-                    // skip constructors
-                    if (f == null) continue;
+                // constructor should not be copied
+                if (k != CNAME) {
+                    $template.prototype[k] = (f != null && f.$clone$ != null) ? f.$clone$() : f;
                 }
-                $template.prototype[k] = f;
             }
         }
     }
 
     // extend method cannot be overridden 
     $template.prototype.extend = function() {
-        var c = this.$clazz, l = arguments.length, f = arguments[l-1];
-        if (pkg.instanceOf(this, pkg.$Extended) === false) {
-            c = Class(c, pkg.$Extended, []);
+        var c = this.$clazz,
+            l = arguments.length,
+            f = arguments[l-1];
+
+        // replace the instance class with a new intermediate class
+        // that inherits the replaced class. it is done to support
+        // $super method calls.
+        if (this.$extended !== true) {
+            c = Class(c,[]);
+            this.$extended = true;               // mark the instance as extended to avoid double extending.
             c.$name = this.$clazz.$name;
             this.$clazz = c;
         }
@@ -637,7 +654,7 @@ pkg.Class = make_template(null, function() {
                     // the class instance
                     var pv = this[n]; 
                     if (pv != null && this.hasOwnProperty(n) === false)  {
-                        this[n] = (pv.$clone$ != null ? pv.$clone$() : ProxyMethod(n, pv)); 
+                        this[n] = (pv.$clone$ != null ? pv.$clone$() : sProxyMethod(n, pv));
                     }
                     
                     this[n] = createMethod(n, f[i], this, c);
@@ -646,7 +663,7 @@ pkg.Class = make_template(null, function() {
             l--;
         }
 
-        // add new interfaces 
+        // add new interfaces if they
         for(var i=0; i < l; i++) {
             if (pkg.instanceOf(arguments[i], pkg.Interface) === false) {
                 throw new Error("Invalid argument: " + arguments[i]);
@@ -658,23 +675,29 @@ pkg.Class = make_template(null, function() {
 
     $template.prototype.$super = function() {
         if (pkg.$caller) {
-            var name = pkg.$caller.methodName, $s = pkg.$caller.boundTo.$parent, args = arguments;
+            var name = pkg.$caller.methodName,
+                $s   = pkg.$caller.boundTo.$parent,
+                args = arguments;
+
             if (arguments.length > 0 && typeof arguments[0] === 'function') {
                 name = arguments[0].methodName;
                 args = [];
-                // slice is slower Array.prototype.slice.call(arguments, 1);
                 for(var i=1; i < arguments.length; i++) args[i-1] = arguments[i];
             }
 
-            var params = args.length;
             while ($s != null) {
                 var m = $s.prototype[name];
-                if (m && (typeof m.methods === "undefined" || m.methods[params])) {
+
+                // if the method found and the method is
+                //     not proxy method       <or>
+                //     single proxy method    <or>
+                //     multiple proxy method that contains a method with the required arity
+                if (m != null && (typeof m.methods === "undefined" || m.methods[args.length] != null)) {
                     return m.apply(this, args);
                 }
                 $s = $s.$parent;
             }
-            mnf.call(this, name, params);
+            mnf.call(this, name, args.length);
         }
         throw new Error("$super is called outside of class context");
     };
@@ -714,6 +737,14 @@ pkg.Class = make_template(null, function() {
         };
     }
 
+    /**
+     * Create method
+     * @param  {String} n     a method name
+     * @param  {Function} f   a method to be added
+     * @param  {Object} obj   an object where all declared method sits
+     * @param  {Class} clazz  a class
+     * @return {Function}     a method
+     */
     function createMethod(n, f, obj, clazz) {
         var arity = f.length, vv = obj[n];
 
@@ -731,8 +762,14 @@ pkg.Class = make_template(null, function() {
 
         if (typeof vv === 'undefined') {
             // declare new class method
-            return ProxyMethod(n, f); // no parent or previously declared method exists, 
-                                      // create new proxy method
+            return sProxyMethod(n, f); // no parent or previously declared method exists,
+                                       // create new proxy single method
+
+            // Pay attention we cannot avoid of proxy creation since we
+            // cannot say in advance if the declared method will call
+            // super. For instance class can declare method "b" and which
+            // doesn't have an implementation on the level of parent class
+            // but it can call super method "a" method !
         }
 
         if (typeof vv === 'function') {
@@ -752,8 +789,7 @@ pkg.Class = make_template(null, function() {
                     // single method has been defined in this class and arity of
                     // the single method differs from arity of the new method 
                     // than overload the old method with new one method  
-                             
-                    var sw = ProxyMethod(n);
+                    var sw = nProxyMethod(n);
                     sw.methods[vv.f.length] = vv.f;
                     sw.methods[arity] = f;
                     return sw;
@@ -768,12 +804,12 @@ pkg.Class = make_template(null, function() {
             if (arity == vv.length) {  // the new method arity is the same to old method
                                        // arity than override it with single method proxy 
                 
-                return ProxyMethod(n, f);  // new single proxy method 
+                return sProxyMethod(n, f);  // new single proxy method
             }
 
             // the new method arity is not the same to new one
             // than overload it with new one ()
-            var sw = ProxyMethod(n);
+            var sw = nProxyMethod(n);
             vv.methodName = n;
             vv.boundTo    = clazz;
             sw.methods[vv.length] = vv;
@@ -823,13 +859,15 @@ pkg.Class = make_template(null, function() {
      * extended with
      * @method extend
      */
-    var extend = function(df) {
+    function extend(df) {
         if (Array.isArray(df) === false) {
             throw new Error("Invalid class definition '" + df + "', array is expected");
         }
 
         for(var i=0; i < df.length; i++) {
-            var f = df[i], n = FN(f), arity = f.length;
+            var f     = df[i],
+                n     = FN(f),
+                arity = f.length;
 
             // map user defined constructor to internal constructor name
             if (n == CDNAME) n = CNAME;
@@ -838,17 +876,21 @@ pkg.Class = make_template(null, function() {
                 // populate prototype fields if a special method has been defined 
                 if (n === "$prototype") {
                     var protoFields = {};
-                    f.call(protoFields, $template);
+                    f.call(protoFields, this);  // call $prototype to populate methods in protoFields
+                                                     // dictionary
+
+                    // add "boundTo" and "methodName" fields to the prototype methods
+                    // and add the new method to class prototype
                     for(var k in protoFields) {
                         if (protoFields.hasOwnProperty(k)) {
                             var protoFieldVal = protoFields[k];
                             // map user defined constructor to internal constructor name
                             if (k == CDNAME) k = CNAME;
 
-                            $template.prototype[k] = protoFieldVal;
+                            this.prototype[k] = protoFieldVal;
                             if (protoFieldVal && typeof protoFieldVal === "function") {
                                 protoFieldVal.methodName = k;
-                                protoFieldVal.boundTo = $template;
+                                protoFieldVal.boundTo = this;
                             }
                         }
                     }
@@ -857,16 +899,16 @@ pkg.Class = make_template(null, function() {
                 
                 // populate class level fields if a special method has been defined 
                 if (n === "$clazz") {
-                    f.call($template);
+                    f.call(this);
                     continue;
                 }
             }
 
-            $template.prototype[n] = createMethod(n, f, $template.prototype, $template); 
+            this.prototype[n] = createMethod(n, f, this.prototype, this);
         }
     };
 
-    extend(df);
+    extend.call($template, df);
 
     // populate static fields 
     // TODO: exclude the basic static methods and static constant
@@ -891,13 +933,13 @@ pkg.Class = make_template(null, function() {
         }
     }
 
-    $template.extend = extend; // add extend later to avoid it duplication as a class static field 
+    $template.extend = extend; // add extend later to avoid the method be inherited as a class static field
 
     // add parent class constructor(s) if the class doesn't declare own 
     // constructors
     if ($template.$parent != null && 
         $template.$parent.prototype[CNAME] != null &&
-        typeof $template.prototype[CNAME] === "undefined")
+        $template.prototype[CNAME] == null)
     {
         $template.prototype[CNAME] = $template.$parent.prototype[CNAME];
     }
@@ -909,9 +951,9 @@ var Class    = pkg.Class,
     $busy    = 1, 
     $cachedO = pkg.$cachedO = {}, 
     $cachedE = pkg.$cachedE = [],
-    $f       = []; // stores method that wait for redness
+    $readyCallbacks = []; // stores method that wait for redness
 
-pkg.$cacheSize = 5000;
+pkg.$cacheSize = 7777;
 
 /**
  * Get an object by the given key from cache (and cached it if necessary)
@@ -1030,15 +1072,15 @@ pkg.ready = function() {
         if ($busy > 0) $busy--;
     }
     else {
-        if (arguments.length == 1 && $busy === 0 && $f.length === 0) {
+        if (arguments.length == 1 && $busy === 0 && $readyCallbacks.length === 0) {
             arguments[0]();
             return;
         }
     }
 
-    for(var i = 0; i < arguments.length; i++) $f.push(arguments[i]);
-    while($busy === 0 && $f.length > 0) {
-        $f.shift()();
+    for(var i = 0; i < arguments.length; i++) $readyCallbacks.push(arguments[i]);
+    while($busy === 0 && $readyCallbacks.length > 0) {
+        $readyCallbacks.shift()();
     }
 };
 

@@ -1,5 +1,5 @@
 {
-    "version" : "2.2014",
+    "version" : "10.2014",
 
     "variables": {
         "Picture"       : "$zebra.ui.Picture",

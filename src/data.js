@@ -146,7 +146,8 @@ pkg.Text = Class(pkg.TextModel, [
         this.write = function (s, offset){
             var slen = s.length,
                 info = this.getLnInfo(this.lines, 0, 0, offset),
-                line = this.lines[info[0]].s, j = 0,
+                line    = this.lines[info[0]].s,
+                j       = 0,
                 lineOff = offset - info[1],
                 tmp = [line.substring(0, lineOff), s, line.substring(lineOff)].join('');
 
@@ -727,7 +728,9 @@ pkg.TreeModel = Class([
     }
 ]);
 
-pkg.MatrixListeners = MB.ListenersClass("matrixResized", "cellModified", "matrixSorted");
+pkg.MatrixListeners = MB.ListenersClass("matrixResized", "cellModified",
+                                        "matrixSorted", "matrixRowInserted",
+                                        "matrixColInserted");
 
 /**
  *  Matrix model class. 
@@ -929,6 +932,28 @@ pkg.Matrix = Class([
 
             this.cols -= count;
             this._.matrixResized(this, this.rows, this.cols + count);
+        };
+
+        this.insertRows = function(row, count) {
+            if (arguments.length === 1) count = 1;
+            for(var i=0; i < count; i++) {
+                this.objs.splice(row, 0, []);
+                this._.matrixRowInserted(this, row + i);
+            }
+            this.rows += count;
+            this._.matrixResized(this, this.rows - count, this.cols);
+        };
+
+        this.insertCols = function(col, count) {
+            if (arguments.length === 1) count = 1;
+            for(var j=0; j < count; j++) {
+                for(var i=0; i < this.rows; i++) {
+                    this.objs[i].splice(col, 0, undefined);
+                }
+                this._.matrixColInserted(this, col + j);
+            }
+            this.cols += count;
+            this._.matrixResized(this, this.rows, this.cols - count);
         };
 
         /**

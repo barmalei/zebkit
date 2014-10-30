@@ -270,7 +270,7 @@ pkg.getPropertySetter = function(obj, name) {
     return (typeof m  === "function") ? m : null;
 };
 
-// target - is object whose propeties have to populated
+// target - is object whose properties have to populated
 // p      - properties
 pkg.properties = function(target, p) {
     for(var k in p) {
@@ -343,43 +343,54 @@ pkg.Interface = make_template(null, function() {
     return $Interface;
 });
 
-pkg.$Extended = pkg.Interface();
+// single method proxy
+function sProxyMethod(name, f) {
+    var a = function() {
+        var cm = pkg.$caller;
+        pkg.$caller = a.f;
+        // don't use finally section it slower than try-catch
+        try {
+            var r = a.f.apply(this, arguments);
+            pkg.$caller = cm;
+            return r;
+        }
+        catch(e) { pkg.$caller = cm; throw e; }
+    };
 
-function ProxyMethod(name, f) {
-    if (isString(name) === false) {
-        throw new TypeError('Invalid method name');
-    }
-
-    var a = null;
-    if (arguments.length == 1) {
-        a = function() {
-            var nm = a.methods[arguments.length];
-            if (nm != null) {
-                var cm = pkg.$caller;
-                pkg.$caller = nm;
-                try { return nm.apply(this, arguments); }
-                catch(e) { throw e; }
-                finally { pkg.$caller = cm; }
-            }
-            mnf.call(this, a.methodName, arguments.length);
-        };
-        a.methods = {};
-    }
-    else {
-        a = function() {
-            var cm = pkg.$caller;
-            pkg.$caller = a.f;
-            try { return a.f.apply(this, arguments); }
-            catch(e) { throw e; }
-            finally { pkg.$caller = cm; }
-        };
-        a.f = f;
-    }
+    a.f = f;
+    a.methodName = name;
 
     a.$clone$ = function() {
-        if (a.methodName === CNAME) return null;
-        if (a.f) return ProxyMethod(a.methodName, a.f);
-        var m = ProxyMethod(a.methodName);
+        return sProxyMethod(a.methodName, a.f);
+    };
+
+    return a;
+};
+
+// multiple methods proxy
+function nProxyMethod(name) {
+    var a = function() {
+        var nm = a.methods[arguments.length];
+        if (nm != null) {
+            var cm = pkg.$caller;
+            pkg.$caller = nm;
+            // don't use finally section it slower than try-catch
+            try {
+                var r = nm.apply(this, arguments);
+                pkg.$caller = cm;
+                return r;
+            }
+            catch(e) { pkg.$caller = cm; throw e; }
+        }
+        mnf.call(this, a.methodName, arguments.length);
+    };
+
+    a.methods = {};
+    a.methodName = name;
+
+    a.$clone$ = function() {
+        // multiple methods, so overloading is possible
+        var m = nProxyMethod(a.methodName);
         for(var k in a.methods) {
             if (a.methods.hasOwnProperty(k)) {
                 m.methods[k] = a.methods[k];
@@ -388,7 +399,6 @@ function ProxyMethod(name, f) {
         return m;
     };
 
-    a.methodName = name;
     return a;
 }
 
@@ -533,7 +543,9 @@ pkg.Class = make_template(null, function() {
                   // Array.prototype.slice.call(arguments, 0, arguments.length-1);
 
     // use instead of slice for performance reason
-    for(var i=0; i < arguments.length-1; i++) args[i] = arguments[i];
+    for(var i=0; i < arguments.length-1; i++) {
+        args[i] = arguments[i];
+    }
 
     if (args.length > 0 && (args[0] == null || args[0].$clazz == pkg.Class)) {
         $parent = args[0];
@@ -562,7 +574,6 @@ pkg.Class = make_template(null, function() {
                 args.push(arguments[arguments.length - 1]);
 
                 var cl = pkg.Class.apply(null, args),  // declare new anonymous class
-
                     // create a function to instantiate an object that will be made the 
                     // anonymous class instance. The intermediate object is required to 
                     // call constructor properly since we have arguments as an array 
@@ -591,31 +602,37 @@ pkg.Class = make_template(null, function() {
         }
     }, args);
 
-
+    // prepare fields that caches the class properties
     $template.$propertyInfo = {};
     
-    // copy parents prototype    
+    // copy parents prototype methods and fields into
+    // new class template
     $template.$parent = $parent;
     if ($parent != null) {
         for (var k in $parent.prototype) {
             if ($parent.prototype.hasOwnProperty(k)) {
                 var f = $parent.prototype[k];
-                if (f != null && f.$clone$ != null) {
-                    f = f.$clone$();
 
-                    // skip constructors
-                    if (f == null) continue;
+                // constructor should not be copied
+                if (k != CNAME) {
+                    $template.prototype[k] = (f != null && f.$clone$ != null) ? f.$clone$() : f;
                 }
-                $template.prototype[k] = f;
             }
         }
     }
 
     // extend method cannot be overridden 
     $template.prototype.extend = function() {
-        var c = this.$clazz, l = arguments.length, f = arguments[l-1];
-        if (pkg.instanceOf(this, pkg.$Extended) === false) {
-            c = Class(c, pkg.$Extended, []);
+        var c = this.$clazz,
+            l = arguments.length,
+            f = arguments[l-1];
+
+        // replace the instance class with a new intermediate class
+        // that inherits the replaced class. it is done to support
+        // $super method calls.
+        if (this.$extended !== true) {
+            c = Class(c,[]);
+            this.$extended = true;               // mark the instance as extended to avoid double extending.
             c.$name = this.$clazz.$name;
             this.$clazz = c;
         }
@@ -637,7 +654,7 @@ pkg.Class = make_template(null, function() {
                     // the class instance
                     var pv = this[n]; 
                     if (pv != null && this.hasOwnProperty(n) === false)  {
-                        this[n] = (pv.$clone$ != null ? pv.$clone$() : ProxyMethod(n, pv)); 
+                        this[n] = (pv.$clone$ != null ? pv.$clone$() : sProxyMethod(n, pv));
                     }
                     
                     this[n] = createMethod(n, f[i], this, c);
@@ -646,7 +663,7 @@ pkg.Class = make_template(null, function() {
             l--;
         }
 
-        // add new interfaces 
+        // add new interfaces if they
         for(var i=0; i < l; i++) {
             if (pkg.instanceOf(arguments[i], pkg.Interface) === false) {
                 throw new Error("Invalid argument: " + arguments[i]);
@@ -658,23 +675,29 @@ pkg.Class = make_template(null, function() {
 
     $template.prototype.$super = function() {
         if (pkg.$caller) {
-            var name = pkg.$caller.methodName, $s = pkg.$caller.boundTo.$parent, args = arguments;
+            var name = pkg.$caller.methodName,
+                $s   = pkg.$caller.boundTo.$parent,
+                args = arguments;
+
             if (arguments.length > 0 && typeof arguments[0] === 'function') {
                 name = arguments[0].methodName;
                 args = [];
-                // slice is slower Array.prototype.slice.call(arguments, 1);
                 for(var i=1; i < arguments.length; i++) args[i-1] = arguments[i];
             }
 
-            var params = args.length;
             while ($s != null) {
                 var m = $s.prototype[name];
-                if (m && (typeof m.methods === "undefined" || m.methods[params])) {
+
+                // if the method found and the method is
+                //     not proxy method       <or>
+                //     single proxy method    <or>
+                //     multiple proxy method that contains a method with the required arity
+                if (m != null && (typeof m.methods === "undefined" || m.methods[args.length] != null)) {
                     return m.apply(this, args);
                 }
                 $s = $s.$parent;
             }
-            mnf.call(this, name, params);
+            mnf.call(this, name, args.length);
         }
         throw new Error("$super is called outside of class context");
     };
@@ -714,6 +737,14 @@ pkg.Class = make_template(null, function() {
         };
     }
 
+    /**
+     * Create method
+     * @param  {String} n     a method name
+     * @param  {Function} f   a method to be added
+     * @param  {Object} obj   an object where all declared method sits
+     * @param  {Class} clazz  a class
+     * @return {Function}     a method
+     */
     function createMethod(n, f, obj, clazz) {
         var arity = f.length, vv = obj[n];
 
@@ -731,8 +762,14 @@ pkg.Class = make_template(null, function() {
 
         if (typeof vv === 'undefined') {
             // declare new class method
-            return ProxyMethod(n, f); // no parent or previously declared method exists, 
-                                      // create new proxy method
+            return sProxyMethod(n, f); // no parent or previously declared method exists,
+                                       // create new proxy single method
+
+            // Pay attention we cannot avoid of proxy creation since we
+            // cannot say in advance if the declared method will call
+            // super. For instance class can declare method "b" and which
+            // doesn't have an implementation on the level of parent class
+            // but it can call super method "a" method !
         }
 
         if (typeof vv === 'function') {
@@ -752,8 +789,7 @@ pkg.Class = make_template(null, function() {
                     // single method has been defined in this class and arity of
                     // the single method differs from arity of the new method 
                     // than overload the old method with new one method  
-                             
-                    var sw = ProxyMethod(n);
+                    var sw = nProxyMethod(n);
                     sw.methods[vv.f.length] = vv.f;
                     sw.methods[arity] = f;
                     return sw;
@@ -768,12 +804,12 @@ pkg.Class = make_template(null, function() {
             if (arity == vv.length) {  // the new method arity is the same to old method
                                        // arity than override it with single method proxy 
                 
-                return ProxyMethod(n, f);  // new single proxy method 
+                return sProxyMethod(n, f);  // new single proxy method
             }
 
             // the new method arity is not the same to new one
             // than overload it with new one ()
-            var sw = ProxyMethod(n);
+            var sw = nProxyMethod(n);
             vv.methodName = n;
             vv.boundTo    = clazz;
             sw.methods[vv.length] = vv;
@@ -823,13 +859,15 @@ pkg.Class = make_template(null, function() {
      * extended with
      * @method extend
      */
-    var extend = function(df) {
+    function extend(df) {
         if (Array.isArray(df) === false) {
             throw new Error("Invalid class definition '" + df + "', array is expected");
         }
 
         for(var i=0; i < df.length; i++) {
-            var f = df[i], n = FN(f), arity = f.length;
+            var f     = df[i],
+                n     = FN(f),
+                arity = f.length;
 
             // map user defined constructor to internal constructor name
             if (n == CDNAME) n = CNAME;
@@ -838,17 +876,21 @@ pkg.Class = make_template(null, function() {
                 // populate prototype fields if a special method has been defined 
                 if (n === "$prototype") {
                     var protoFields = {};
-                    f.call(protoFields, $template);
+                    f.call(protoFields, this);  // call $prototype to populate methods in protoFields
+                                                     // dictionary
+
+                    // add "boundTo" and "methodName" fields to the prototype methods
+                    // and add the new method to class prototype
                     for(var k in protoFields) {
                         if (protoFields.hasOwnProperty(k)) {
                             var protoFieldVal = protoFields[k];
                             // map user defined constructor to internal constructor name
                             if (k == CDNAME) k = CNAME;
 
-                            $template.prototype[k] = protoFieldVal;
+                            this.prototype[k] = protoFieldVal;
                             if (protoFieldVal && typeof protoFieldVal === "function") {
                                 protoFieldVal.methodName = k;
-                                protoFieldVal.boundTo = $template;
+                                protoFieldVal.boundTo = this;
                             }
                         }
                     }
@@ -857,16 +899,16 @@ pkg.Class = make_template(null, function() {
                 
                 // populate class level fields if a special method has been defined 
                 if (n === "$clazz") {
-                    f.call($template);
+                    f.call(this);
                     continue;
                 }
             }
 
-            $template.prototype[n] = createMethod(n, f, $template.prototype, $template); 
+            this.prototype[n] = createMethod(n, f, this.prototype, this);
         }
     };
 
-    extend(df);
+    extend.call($template, df);
 
     // populate static fields 
     // TODO: exclude the basic static methods and static constant
@@ -891,13 +933,13 @@ pkg.Class = make_template(null, function() {
         }
     }
 
-    $template.extend = extend; // add extend later to avoid it duplication as a class static field 
+    $template.extend = extend; // add extend later to avoid the method be inherited as a class static field
 
     // add parent class constructor(s) if the class doesn't declare own 
     // constructors
     if ($template.$parent != null && 
         $template.$parent.prototype[CNAME] != null &&
-        typeof $template.prototype[CNAME] === "undefined")
+        $template.prototype[CNAME] == null)
     {
         $template.prototype[CNAME] = $template.$parent.prototype[CNAME];
     }
@@ -909,9 +951,9 @@ var Class    = pkg.Class,
     $busy    = 1, 
     $cachedO = pkg.$cachedO = {}, 
     $cachedE = pkg.$cachedE = [],
-    $f       = []; // stores method that wait for redness
+    $readyCallbacks = []; // stores method that wait for redness
 
-pkg.$cacheSize = 5000;
+pkg.$cacheSize = 7777;
 
 /**
  * Get an object by the given key from cache (and cached it if necessary)
@@ -1030,15 +1072,15 @@ pkg.ready = function() {
         if ($busy > 0) $busy--;
     }
     else {
-        if (arguments.length == 1 && $busy === 0 && $f.length === 0) {
+        if (arguments.length == 1 && $busy === 0 && $readyCallbacks.length === 0) {
             arguments[0]();
             return;
         }
     }
 
-    for(var i = 0; i < arguments.length; i++) $f.push(arguments[i]);
-    while($busy === 0 && $f.length > 0) {
-        $f.shift()();
+    for(var i = 0; i < arguments.length; i++) $readyCallbacks.push(arguments[i]);
+    while($busy === 0 && $readyCallbacks.length > 0) {
+        $readyCallbacks.shift()();
     }
 };
 
@@ -5775,7 +5817,8 @@ pkg.Text = Class(pkg.TextModel, [
         this.write = function (s, offset){
             var slen = s.length,
                 info = this.getLnInfo(this.lines, 0, 0, offset),
-                line = this.lines[info[0]].s, j = 0,
+                line    = this.lines[info[0]].s,
+                j       = 0,
                 lineOff = offset - info[1],
                 tmp = [line.substring(0, lineOff), s, line.substring(lineOff)].join('');
 
@@ -6356,7 +6399,9 @@ pkg.TreeModel = Class([
     }
 ]);
 
-pkg.MatrixListeners = MB.ListenersClass("matrixResized", "cellModified", "matrixSorted");
+pkg.MatrixListeners = MB.ListenersClass("matrixResized", "cellModified",
+                                        "matrixSorted", "matrixRowInserted",
+                                        "matrixColInserted");
 
 /**
  *  Matrix model class. 
@@ -6560,6 +6605,28 @@ pkg.Matrix = Class([
             this._.matrixResized(this, this.rows, this.cols + count);
         };
 
+        this.insertRows = function(row, count) {
+            if (arguments.length === 1) count = 1;
+            for(var i=0; i < count; i++) {
+                this.objs.splice(row, 0, []);
+                this._.matrixRowInserted(this, row + i);
+            }
+            this.rows += count;
+            this._.matrixResized(this, this.rows - count, this.cols);
+        };
+
+        this.insertCols = function(col, count) {
+            if (arguments.length === 1) count = 1;
+            for(var j=0; j < count; j++) {
+                for(var i=0; i < this.rows; i++) {
+                    this.objs[i].splice(col, 0, undefined);
+                }
+                this._.matrixColInserted(this, col + j);
+            }
+            this.cols += count;
+            this._.matrixResized(this, this.rows, this.cols - count);
+        };
+
         /**
          * Sort the given column of the matrix model.
          * @param  {Integer} col a column to be re-ordered
@@ -6619,6 +6686,509 @@ pkg.Matrix = Class([
  */
 
 })(zebra("data"), zebra.Class, zebra.Interface);
+(function(pkg) {
+    pkg.$canvases = [];
+
+    zebra.ready(function() {
+        pkg.$deviceRatio = typeof window.devicePixelRatio !== "undefined" ? window.devicePixelRatio
+                                                                          : (typeof window.screen.deviceXDPI !== "undefined" ? // IE
+                                                                             window.screen.deviceXDPI / window.screen.logicalXDPI : 1); 
+
+        pkg.$applyRenderExploit = (parseInt(pkg.$deviceRatio) !== pkg.$deviceRatio || zebra.isIE);
+
+        // canvases location has to be corrected if document layout is invalid 
+        pkg.$elBoundsUpdated = function() {
+            for(var i = pkg.$canvases.length - 1; i >= 0; i--) {
+                var c = pkg.$canvases[i];
+                if (c.isFullScreen) {
+                    //c.setLocation(window.pageXOffset, -window.pageYOffset);
+                
+                    var ws = pkg.$windowSize();
+                    // browser (mobile) can reduce size of browser window by 
+                    // the area a virtual keyboard occupies. Usually the 
+                    // content scrolls up to the size the VK occupies, so 
+                    // to leave zebra full screen content in the window 
+                    // with the real size (not reduced) size take in account 
+                    // scrolled metrics
+                    c.setSize(ws.width + window.pageXOffset, ws.height + window.pageYOffset);
+                }
+                c.recalcOffset();
+            }
+        };
+
+        window.requestAFrame = (function(){
+            return  window.requestAnimationFrame       ||
+                    window.webkitRequestAnimationFrame ||
+                    window.mozRequestAnimationFrame    ||
+                    function( callback ){ window.setTimeout(callback, 35); };
+        })();
+
+        pkg.$windowSize = function() {
+            // iOS retina devices can have a problem with performance 
+            // in landscape mode because of a bug (full page size is
+            // just 1 pixels column more than video memory can keep)
+            // So, just make width always one pixel less. 
+            return { width : window.innerWidth - 1,
+                     height: window.innerHeight   };
+        };
+
+        pkg.$measure = function(e, cssprop) {
+            var value = window.getComputedStyle ? window.getComputedStyle(e, null).getPropertyValue(cssprop)
+                                                : (e.style ? e.style[cssprop]
+                                                           : e.currentStyle[cssprop]);
+            return (value == null || value == '') ? 0
+                                                  : parseInt(/(^[0-9\.]+)([a-z]+)?/.exec(value)[1], 10);
+        };
+
+        pkg.$contains = function(element) {
+            return (document.contains != null && document.contains(element)) ||  
+                   (document.body.contains != null && document.body.contains(element));
+        };
+
+        pkg.$canvas = {
+            size : function(c, w, h) {
+                c.style.width  = "" + w + "px";
+                c.style.height = "" + h + "px";
+                
+                var ctx = pkg.$canvas.context(c); 
+
+                // take in account that canvas can be visualized on 
+                // Retina screen where the size of canvas (backstage)
+                // can be less than it is real screen size. Let's 
+                // make it match each other
+                if (ctx.$ratio != pkg.$deviceRatio) {
+                    var ratio = pkg.$deviceRatio / ctx.$ratio;
+                    c.width  = ~~(w * ratio);
+                    c.height = ~~(h * ratio);
+                    ctx.$scale(ratio, ratio);
+                }
+                else {
+                    c.width  = w;
+                    c.height = h;
+                } 
+                return ctx;
+            },
+
+            context: function(c) {
+                var ctx = c.getContext("2d");
+
+                // canvas 2d context is singleton so check if the 
+                // context has already been modified to prevent 
+                // redundancy  
+                if (typeof ctx.$ratio == "undefined") {
+                    var ratio = pkg.$canvas.ratio(ctx); 
+
+                    ctx.$getImageData = ctx.getImageData;
+                    ctx.$scale = ctx.scale;
+                    ctx.$ratio = ratio; 
+                    if (pkg.$deviceRatio != ratio) {
+                        var r = pkg.$deviceRatio / ratio;
+                        ctx.getImageData= function(x, y, w, h) {
+                            return this.$getImageData(x * r, y * r, w, h);
+                        };
+                    }
+                }
+
+                return ctx;
+            },
+
+            create: function(w, h) {
+                var e = document.createElement("canvas");
+                if (arguments.length === 0) {
+                    w = typeof e.width  != "undefined" ? e.width  : 0;
+                    h = typeof e.height != "undefined" ? e.height : 0;
+                }
+                pkg.$canvas.size(e, w, h);
+                return e;
+            },
+
+            ratio : function(ctx) {
+                // backstage buffer can have different size with a real size
+                // what causes the final picture can be zoomed in/out
+                // we need to calculate it to make canvas more crisp
+                // for HDPI screens
+                return (ctx.webkitBackingStorePixelRatio ||   // backing store ratio
+                        ctx.mozBackingStorePixelRatio    ||
+                        ctx.msBackingStorePixelRatio     ||
+                        ctx.backingStorePixelRatio       || 
+                        ctx.backingStorePixelRatio       || 1);
+            }
+        };
+
+        var $wrt = null, winSizeUpdated = false, wpw = -1, wph = -1;            
+        window.addEventListener("resize", function(e) {
+            if (wpw == window.innerWidth && wph == window.innerHeight) {
+                return;
+            }
+
+            wpw = window.innerWidth;
+            wph = window.innerHeight;
+
+            if ($wrt != null) {
+                winSizeUpdated = true;
+                return;
+            }
+
+            $wrt = zebra.util.task(
+                function(t) {
+                    if (winSizeUpdated === false) {  
+                        pkg.$elBoundsUpdated();
+                        t.shutdown();
+                        $wrt = null;
+                    }
+                    winSizeUpdated = false;                    
+                }
+            ).run(200, 150);
+            
+        }, false);
+
+        window.onbeforeunload = function(e) {
+            var msgs = [];
+            for(var i = pkg.$canvases.length - 1; i >= 0; i--) {
+                if (pkg.$canvases[i].saveBeforeLeave != null) {
+                    var m = pkg.$canvases[i].saveBeforeLeave();
+                    if (m != null) {
+                        msgs.push(m);
+                    }
+                }
+            }
+
+            if (msgs.length > 0) {
+                var message = msgs.join("  ");
+                if (typeof e === 'undefined') {
+                    e = window.event;
+                }   
+
+                if (e) e.returnValue = message;
+                return message;
+            }
+        };
+
+        // bunch of handlers to track HTML page metrics update
+        // it is necessary since to correct zebra canvases anchor         
+        document.addEventListener("DOMNodeInserted", function(e) { 
+            pkg.$elBoundsUpdated(); 
+        }, false);
+        
+        document.addEventListener("DOMNodeRemoved", function(e) { 
+            pkg.$elBoundsUpdated();
+
+            // remove canvas from list 
+            for(var i = pkg.$canvases.length - 1; i >= 0; i--) {
+                var canvas = pkg.$canvases[i];
+                if (e.target == canvas.canvas) {
+                    pkg.$canvases.splice(i, 1);
+
+                    if (canvas.saveBeforeLeave != null) {
+                        canvas.saveBeforeLeave();
+                    }
+                    
+                    break;
+                }
+            }            
+        }, false);
+    });
+
+    var PI4 = Math.PI/4, PI4_3 = PI4 * 3, $abs = Math.abs, $atan2 = Math.atan2, L = zebra.layout;
+
+    /**
+     *  Mouse wheel support class. Installs necessary mouse wheel
+     *  listeners and handles mouse wheel events in zebra UI. The 
+     *  mouse wheel support is plugging that is configured by a 
+     *  JSON configuration. 
+     *  @class zebra.ui.MouseWheelSupport
+     *  @param  {zebra.ui.zCanvas} canvas a zebra zCanvas UI component
+     *  @constructor
+     */
+    pkg.MouseWheelSupport = zebra.Class([
+        function $prototype() {
+            this.naturalDirection = true;
+
+            /**
+             * Mouse wheel handler 
+             * @param  {MouseWheelEvent} e DOM mouse event object 
+             * @method wheeled
+             */
+            this.wheeled  = function(e){
+                var owner = pkg.$mouseMoveOwner;
+
+                while (owner != null && zebra.instanceOf(owner, pkg.ScrollPan) === false) {
+                    owner = owner.parent;
+                }
+
+                if (owner != null && (owner.vBar != null || owner.hBar != null)) {
+                    var dv = e[this.wheelInfo.dy] * this.wheelInfo.dir;  
+
+                    if (dv !== 0 && owner.vBar != null) {
+                        var bar = owner.vBar;
+                        if (Math.abs(dv) < 1) {
+                            dv *= bar.pageIncrement;
+                        }
+
+                        dv = Math.floor(dv) % 100;
+
+                        if (bar.isVisible === true) {
+                            var v =  bar.position.offset + dv;           
+                            if (v >= 0) bar.position.setOffset(v);
+                        }
+                    }
+
+                    e.preventDefault();
+                }
+            };
+        },
+
+        function(canvas) {
+            if (canvas == null) {
+                throw new Error("Null canvas");
+            }
+
+            var WHEEL = {
+                wheel: {
+                    dy  : "deltaY",
+                    dir : 1,
+                    test: function() {
+                        return "onwheel" in document.createElement("div");
+                    }
+                },
+                mousewheel: {
+                    dy  : "wheelDelta",
+                    dir : -1,
+                    test: function() {
+                        return document.onmousewheel !== undefined;
+                    }
+                },
+                DOMMouseScroll: {
+                    dy  : "detail",
+                    dir : 1,
+                    test: function() {
+                        return true;
+                    }
+                }
+            };
+
+            for(var k in WHEEL) {
+                var w = WHEEL[k];
+                if (w.test()) {
+                    var $this = this;
+                    canvas.canvas.addEventListener(k, 
+                        this.wheeled.bind == null ? function(e) { 
+                                                        return $this.wheeled(e); 
+                                                    }
+                                                  : this.wheeled.bind(this),
+                    false);
+                    
+                    this.wheelInfo = w; 
+                    break;        
+                }
+            }
+        }
+    ]);
+
+    pkg.TouchHandler = zebra.Class([
+        function $prototype() {
+            this.touchCounter = 0;
+
+            function isIn(t, id) {
+                for(var i = 0; i < t.length; i++) {  
+                    if (t[i].identifier == id) return true;
+                }                    
+                return false;
+            }
+
+            this.$fixEnd = function(e) {
+                var t = e.touches, ct = e.changedTouches; 
+                for (var k in this.touches) { 
+
+                    // find out if: 
+                    // 1) a stored started touch has appeared as new touch
+                    //    it can happen if touch end has not been fired and 
+                    //    the new start touch id matches a stored one  
+                    // 2) if no one touch among current touches matches a stored 
+                    //    touch. If it is true that means the stored touch has not 
+                    //    been released since no appropriate touch end event has 
+                    //    been fired
+                    if (isIn(ct, k) === true || isIn(t, k) === false) {
+                        var tt = this.touches[k]; 
+                        this.touchCounter--;
+                        if (tt.group != null) tt.group.active = false;
+                        this.ended(tt); 
+                        delete this.touches[k];
+                    }
+                }
+            };
+
+            this.start = function(e) {
+                this.$fixEnd(e);
+
+                // fix android bug: parasite event for multi touch 
+                // or stop capturing new touches since it is already fixed
+                if (this.touchCounter > e.touches.length) return;
+
+                // collect new touches in queue, don't send it immediately 
+                var t = e.touches; 
+                for(var i = 0; i < t.length; i++) {  // go through all touches
+                    var tt = t[i];
+
+                    // test if the given touch has not been collected in queue yet
+                    if (this.touches.hasOwnProperty(tt.identifier) === false) {
+                        this.touchCounter++; 
+                        var nt = {
+                            pageX      : tt.pageX,
+                            pageY      : tt.pageY,
+                            identifier : tt.identifier,
+                            target     : tt.target,
+                            direction  : L.NONE,  // detected movement direction (L.HORIZONTAL or L.VERTICAL)
+                            dx         : 0,       // horizontal shift since last touch movement 
+                            dy         : 0,       // vertical shift since last touch movement 
+                            dc         : 0,       // internal counter to collect number of the movement 
+                                                  // happens in the given direction 
+                            group      : null      
+                        };
+                        this.touches[tt.identifier] = nt;
+                        this.queue.push(nt);
+                    }
+                }
+
+                // initiate timer to send collected new touch events 
+                // if any new has appeared. the timer helps to collect 
+                // events in one group  
+                if (this.queue.length > 0 && this.timer == null) {
+                    var $this = this;
+                    this.timer = setTimeout(function() {
+                        $this.Q(); // flush queue 
+                        $this.timer = null;
+                    }, 25);
+                }
+            };
+
+            this.end = function(e) {
+                //  remove timer if it has not been started yet
+                if (this.timer != null) {
+                    clearTimeout(this.timer);
+                    this.timer = null;
+                }
+
+                //clear queue
+                this.Q();
+
+                // update touches
+                var t = e.changedTouches;
+                for (var i = 0; i < t.length; i++) {
+                    var tt = this.touches[t[i].identifier];
+                    if (tt != null) {
+                        this.touchCounter--;
+                        if (tt.group != null) tt.group.active = false;
+                        this.ended(tt);
+                        delete this.touches[t[i].identifier];
+                    }
+                }
+            };
+
+            this.Q = function() {
+                if (this.queue.length > 1) {
+                    // marked all collected touches with one group 
+                    for(var i = 0; i < this.queue.length; i++) {
+                        var t = this.queue[i];
+                        t.group = {
+                           size  : this.queue.length, // group size
+                           index : i,       
+                           active: true  // say it is still touched
+                        };
+                    }
+                }
+
+                if (this.queue.length > 0) {
+                    for(var i = 0; i < this.queue.length; i++) {
+                        this.started(this.queue[i]);
+                    }
+                    this.queue.length = 0;
+                }
+            };
+
+            this[''] = function(element) {
+                this.touches = {};
+                this.queue   = [];
+                this.timer   = null;
+
+                var $this = this;
+                element.addEventListener("touchstart",  function(e) {
+                    $this.start(e);
+                }, false);
+
+                element.addEventListener("touchend", function(e) {
+                    $this.end(e);
+                    e.preventDefault();
+                }, false);
+
+                element.addEventListener("touchmove", function(e) {
+                    var mt = e.changedTouches;
+
+                    // clear dx, dy for not updated touches 
+                    for(var k in $this.touches) {
+                        $this.touches[k].dx = $this.touches[k].dy = 0;
+                    }
+
+                    for(var i=0; i < mt.length; i++) {
+                        var nmt = mt[i], t = $this.touches[nmt.identifier];
+
+                        if (t != null) {
+                            if (t.pageX != nmt.pageX || t.pageY != nmt.pageY) {
+                                var dx  = nmt.pageX - t.pageX, 
+                                    dy  = nmt.pageY - t.pageY, 
+                                    d   = t.direction, gamma = null,
+                                    dxs = (dx < 0 && t.dx < 0) || (dx > 0 && t.dx > 0),  // test if horizontal move direction has been changed
+                                    dys = (dy < 0 && t.dy < 0) || (dy > 0 && t.dy > 0);  // test if vertical move direction has been changed
+
+                                // update stored touch coordinates with a new one 
+                                t.pageX  = nmt.pageX;
+                                t.pageY  = nmt.pageY;
+
+                                // we can recognize direction only if move was not too short
+                                if ($abs(dx) > 2 || $abs(dy) > 2) {
+                                    // compute gamma, this is corner in polar coordinate system
+                                    gamma = $atan2(dy, dx);
+
+                                    // using gamma we can figure out direction
+                                    if (gamma > -PI4) {
+                                        d = (gamma < PI4) ? L.RIGHT : (gamma < PI4_3 ? L.BOTTOM : L.LEFT);
+                                    }
+                                    else {
+                                        d = (gamma > -PI4_3) ? L.TOP : L.LEFT;
+                                    }
+
+                                    // to minimize wrong touch effect let's update 
+                                    // direction only if move event sequence 
+                                    // with identical direction is less than 3
+                                    if (t.direction != d) {
+                                        if (t.dc < 3) t.direction = d;
+                                        t.dc = 0;
+                                    }
+                                    else {
+                                        t.dc++;
+                                    }
+                                    t.gamma = gamma;
+                                }
+
+                                // ignore moved if there still start events that are waiting for to be fired 
+                                if ($this.timer == null) {
+                                    t.dx = dx;
+                                    t.dy = dy;
+                                    $this.moved(t);
+                                }
+                                else {
+                                    $this.dc = 0;
+                                }
+                            }
+                        }
+                    }    
+
+                    e.preventDefault();
+                }, false);
+            };
+        }
+    ]);
+})(zebra("ui"));
 (function(pkg, Class) {
 
 /**
@@ -6668,8 +7238,6 @@ var instanceOf = zebra.instanceOf, L = zebra.layout, MB = zebra.util,
     MS = Math.sin, MC = Math.cos, $fmCanvas = null, $fmText = null,
     $fmImage = null, $clipboard = null, $clipboardCanvas;
 
-pkg.$canvases = [];
-
 pkg.clipboardTriggerKey = 0;
 
 function $meX(e, d) {
@@ -6704,11 +7272,14 @@ pkg.$view = function(v) {
 
 /**
  * Look up 2D canvas in the list of existent
- * @param  {2DCanvas} canvas a canvas
+ * @param  {2DCanvas|String} canvas a canvas
  * @return {zebra.ui.zCanvas} a zebra canvas
  */
 pkg.$detectZCanvas = function(canvas) {
-    if (zebra.isString(canvas)) canvas = document.getElementById(canvas);
+    if (zebra.isString(canvas)) {
+        canvas = document.getElementById(canvas);
+    }
+
     for(var i=0; canvas != null && i < pkg.$canvases.length; i++) {
         if (pkg.$canvases[i].canvas == canvas) return pkg.$canvases[i];
     }
@@ -7153,9 +7724,18 @@ pkg.RoundBorder = Class(pkg.View, [
         this.outline = function(g,x,y,w,h,d) {
             g.beginPath();
             g.lineWidth = this.width;
-            g.arc(~~(x + w/2), ~~(y + h/2), ~~(w/2 - 0.5), 0, 2 * Math.PI, false);
+            g.arc(Math.floor(x + w/2) + (w%2 === 0 ? 0 :0.5),
+                  Math.floor(y + h/2) + (h%2 === 0 ? 0 :0.5),
+                  ~~((w - g.lineWidth)/2), 0, 2 * Math.PI, false);
             g.closePath();
             return true;
+        };
+
+        this.getPreferredSize = function() {
+            var s = this.lineWidth * 8;
+            return  {
+                width :s, height:s
+            };
         };
 
         this[''] = function(col, width) {
@@ -7342,7 +7922,7 @@ pkg.Picture = Class(pkg.Render, [
         };
 
         this.paint = function(g,x,y,w,h,d) {
-            if (this.target != null && w > 0 && h > 0){
+            if (this.target != null && this.target.complete === true && this.target.naturalWidth > 0 && w > 0 && h > 0){
                 if (this.width > 0) {
                     g.drawImage(this.target, this.x, this.y,
                                 this.width, this.height, x, y, w, h);
@@ -7355,7 +7935,8 @@ pkg.Picture = Class(pkg.Render, [
 
         this.getPreferredSize = function(){
             var img = this.target;
-            return img == null ? { width:0, height:0 }
+            return img == null || this.target.naturalWidth <= 0 || img.complete !== true
+                               ? { width:0, height:0 }
                                : (this.width > 0) ? { width:this.width, height:this.height }
                                                   : { width:img.width, height:img.height };
         };
@@ -7666,7 +8247,9 @@ pkg.Bag = Class(zebra.util.Bag, [
 ]);
 
 rgb.prototype.paint = function(g,x,y,w,h,d) {
-    if (this.s != g.fillStyle) g.fillStyle = this.s;
+    if (this.s != g.fillStyle) {
+        g.fillStyle = this.s;
+    }
 
     // fix for IE10/11, calculate intersection of clipped area
     // and the area that has to be filled. IE11/10 have a bug
@@ -8480,7 +9063,7 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * @method  loadImage
  */
 pkg.loadImage = function(img, ready) {
-    if (img instanceof Image && img.complete && img.naturalWidth !== 0) {
+    if (img instanceof Image && img.complete === true && img.naturalWidth !== 0) {
         if (arguments.length > 1)  {
             ready(img.src, true, img);
         }
@@ -9881,9 +10464,11 @@ pkg.PaintManager = Class(pkg.Manager, [
                                     $this.paint(context, canvas);
 
                                     canvas.$da.width = -1; //!!!
-                                }
-                                finally {
                                     context.restore();
+                                }
+                                catch(e) {
+                                    context.restore();
+                                    throw e;
                                 }
                             });
                         }
@@ -9898,7 +10483,9 @@ pkg.PaintManager = Class(pkg.Manager, [
         };
 
         this.paint = function(g,c){
-            var dw = c.width, dh = c.height, ts = g.stack[g.counter];
+            var dw = c.width,
+                dh = c.height,
+                ts = g.stack[g.counter];
 
             if (dw !== 0      &&
                 dh !== 0      &&
@@ -10423,10 +11010,11 @@ pkg.CommandManager = Class(pkg.Manager, [
         this.keyCommands = {};
         this._ = new zebra.util.Listeners("commandFired");
 
-
-        this.setCommands(commands.common);
-        if (zebra.isMacOS && commands.osx != null) {
-            this.setCommands(commands.osx);
+        if (commands != null) {
+            this.setCommands(commands.common);
+            if (zebra.isMacOS && commands.osx != null) {
+                this.setCommands(commands.osx);
+            }
         }
     }
 ]);
@@ -11864,9 +12452,9 @@ pkg.zCanvas = Class(pkg.Panel, [
             this.height = h;
 
            // if (zebra.isTouchable) {
-           //      the strange fix for Android native browser
-           //      that can render text blurry before you click
-           //      it happens because the browser auto-fit option
+           //      // the strange fix for Android native browser
+           //      // that can render text blurry before you click
+           //      // it happens because the browser auto-fit option
            //      var $this = this;
            //      setTimeout(function() {
            //          $this.invalidate();
@@ -12119,507 +12707,6 @@ zebra.ready(
  */
 
 })(zebra("ui"), zebra.Class);
-(function(pkg) {
-    zebra.ready(function() {
-        pkg.$deviceRatio = typeof window.devicePixelRatio !== "undefined" ? window.devicePixelRatio
-                                                                          : (typeof window.screen.deviceXDPI !== "undefined" ? // IE
-                                                                             window.screen.deviceXDPI / window.screen.logicalXDPI : 1); 
-
-        pkg.$applyRenderExploit = (parseInt(pkg.$deviceRatio) !== pkg.$deviceRatio || zebra.isIE);
-
-        // canvases location has to be corrected if document layout is invalid 
-        pkg.$elBoundsUpdated = function() {
-            for(var i = pkg.$canvases.length - 1; i >= 0; i--) {
-                var c = pkg.$canvases[i];
-                if (c.isFullScreen) {
-                    //c.setLocation(window.pageXOffset, -window.pageYOffset);
-                
-                    var ws = pkg.$windowSize();
-                    // browser (mobile) can reduce size of browser window by 
-                    // the area a virtual keyboard occupies. Usually the 
-                    // content scrolls up to the size the VK occupies, so 
-                    // to leave zebra full screen content in the window 
-                    // with the real size (not reduced) size take in account 
-                    // scrolled metrics
-                    c.setSize(ws.width + window.pageXOffset, ws.height + window.pageYOffset);
-                }
-                c.recalcOffset();
-            }
-        };
-
-        window.requestAFrame = (function(){
-            return  window.requestAnimationFrame       ||
-                    window.webkitRequestAnimationFrame ||
-                    window.mozRequestAnimationFrame    ||
-                    function( callback ){ window.setTimeout(callback, 35); };
-        })();
-
-        pkg.$windowSize = function() {
-            // iOS retina devices can have a problem with performance 
-            // in landscape mode because of a bug (full page size is
-            // just 1 pixels column more than video memory can keep)
-            // So, just make width always one pixel less. 
-            return { width : window.innerWidth - 1,
-                     height: window.innerHeight   };
-        };
-
-        pkg.$measure = function(e, cssprop) {
-            var value = window.getComputedStyle ? window.getComputedStyle(e, null).getPropertyValue(cssprop)
-                                                : (e.style ? e.style[cssprop]
-                                                           : e.currentStyle[cssprop]);
-            return (value == null || value == '') ? 0
-                                                  : parseInt(/(^[0-9\.]+)([a-z]+)?/.exec(value)[1], 10);
-        };
-
-        pkg.$contains = function(element) {
-            return (document.contains != null && document.contains(element)) ||  
-                   (document.body.contains != null && document.body.contains(element));
-        };
-
-        pkg.$canvas = {
-            size : function(c, w, h) {
-                c.style.width  = "" + w + "px";
-                c.style.height = "" + h + "px";
-                
-                var ctx = pkg.$canvas.context(c); 
-
-                // take in account that canvas can be visualized on 
-                // Retina screen where the size of canvas (backstage)
-                // can be less than it is real screen size. Let's 
-                // make it match each other
-                if (ctx.$ratio != pkg.$deviceRatio) {
-                    var ratio = pkg.$deviceRatio / ctx.$ratio;
-                    c.width  = ~~(w * ratio);
-                    c.height = ~~(h * ratio);
-                    ctx.$scale(ratio, ratio);
-                }
-                else {
-                    c.width  = w;
-                    c.height = h;
-                } 
-                return ctx;
-            },
-
-            context: function(c) {
-                var ctx = c.getContext("2d");
-
-                // canvas 2d context is singleton so check if the 
-                // context has already been modified to prevent 
-                // redundancy  
-                if (typeof ctx.$ratio == "undefined") {
-                    var ratio = pkg.$canvas.ratio(ctx); 
-
-                    ctx.$getImageData = ctx.getImageData;
-                    ctx.$scale = ctx.scale;
-                    ctx.$ratio = ratio; 
-                    if (pkg.$deviceRatio != ratio) {
-                        var r = pkg.$deviceRatio / ratio;
-                        ctx.getImageData= function(x, y, w, h) {
-                            return this.$getImageData(x * r, y * r, w, h);
-                        };
-                    }
-                }
-
-                return ctx;
-            },
-
-            create: function(w, h) {
-                var e = document.createElement("canvas");
-                if (arguments.length === 0) {
-                    w = typeof e.width  != "undefined" ? e.width  : 0;
-                    h = typeof e.height != "undefined" ? e.height : 0;
-                }
-                pkg.$canvas.size(e, w, h);
-                return e;
-            },
-
-            ratio : function(ctx) {
-                // backstage buffer can have different size with a real size
-                // what causes the final picture can be zoomed in/out
-                // we need to calculate it to make canvas more crisp
-                // for HDPI screens
-                return (ctx.webkitBackingStorePixelRatio ||   // backing store ratio
-                        ctx.mozBackingStorePixelRatio    ||
-                        ctx.msBackingStorePixelRatio     ||
-                        ctx.backingStorePixelRatio       || 
-                        ctx.backingStorePixelRatio       || 1);
-            }
-        };
-
-        var $wrt = null, winSizeUpdated = false, wpw = -1, wph = -1;            
-        window.addEventListener("resize", function(e) {
-            if (wpw == window.innerWidth && wph == window.innerHeight) {
-                return;
-            }
-
-            wpw = window.innerWidth;
-            wph = window.innerHeight;
-
-            if ($wrt != null) {
-                winSizeUpdated = true;
-                return;
-            }
-
-            $wrt = zebra.util.task(
-                function(t) {
-                    if (winSizeUpdated === false) {  
-                        pkg.$elBoundsUpdated();
-                        t.shutdown();
-                        $wrt = null;
-                    }
-                    winSizeUpdated = false;                    
-                }
-            ).run(200, 150);
-            
-        }, false);
-
-        window.onbeforeunload = function(e) {
-            var msgs = [];
-            for(var i = pkg.$canvases.length - 1; i >= 0; i--) {
-                if (pkg.$canvases[i].saveBeforeLeave != null) {
-                    var m = pkg.$canvases[i].saveBeforeLeave();
-                    if (m != null) {
-                        msgs.push(m);
-                    }
-                }
-            }
-
-            if (msgs.length > 0) {
-                var message = msgs.join("  ");
-                if (typeof e === 'undefined') {
-                    e = window.event;
-                }   
-
-                if (e) e.returnValue = message;
-                return message;
-            }
-        };
-
-        // bunch of handlers to track HTML page metrics update
-        // it is necessary since to correct zebra canvases anchor         
-        document.addEventListener("DOMNodeInserted", function(e) { 
-            pkg.$elBoundsUpdated(); 
-        }, false);
-        
-        document.addEventListener("DOMNodeRemoved", function(e) { 
-            pkg.$elBoundsUpdated();
-
-            // remove canvas from list 
-            for(var i = pkg.$canvases.length - 1; i >= 0; i--) {
-                var canvas = pkg.$canvases[i];
-                if (e.target == canvas.canvas) {
-                    pkg.$canvases.splice(i, 1);
-
-                    if (canvas.saveBeforeLeave != null) {
-                        canvas.saveBeforeLeave();
-                    }
-                    
-                    break;
-                }
-            }            
-        }, false);
-    });
-
-    var PI4 = Math.PI/4, PI4_3 = PI4 * 3, $abs = Math.abs, $atan2 = Math.atan2, L = zebra.layout;
-
-    /**
-     *  Mouse wheel support class. Installs necessary mouse wheel
-     *  listeners and handles mouse wheel events in zebra UI. The 
-     *  mouse wheel support is plugging that is configured by a 
-     *  JSON configuration. 
-     *  @class zebra.ui.MouseWheelSupport
-     *  @param  {zebra.ui.zCanvas} canvas a zebra zCanvas UI component
-     *  @constructor
-     */
-    pkg.MouseWheelSupport = zebra.Class([
-        function $prototype() {
-            this.naturalDirection = true;
-
-            /**
-             * Mouse wheel handler 
-             * @param  {MouseWheelEvent} e DOM mouse event object 
-             * @method wheeled
-             */
-            this.wheeled  = function(e){
-                var owner = pkg.$mouseMoveOwner;
-
-                while (owner != null && zebra.instanceOf(owner, pkg.ScrollPan) === false) {
-                    owner = owner.parent;
-                }
-
-                if (owner != null && (owner.vBar != null || owner.hBar != null)) {
-                    var dv = e[this.wheelInfo.dy] * this.wheelInfo.dir;  
-
-                    if (dv !== 0 && owner.vBar != null) {
-                        var bar = owner.vBar;
-                        if (Math.abs(dv) < 1) {
-                            dv *= bar.pageIncrement;
-                        }
-
-                        dv = Math.floor(dv) % 100;
-
-                        if (bar.isVisible === true) {
-                            var v =  bar.position.offset + dv;           
-                            if (v >= 0) bar.position.setOffset(v);
-                        }
-                    }
-
-                    e.preventDefault();
-                }
-            };
-        },
-
-        function(canvas) {
-            if (canvas == null) {
-                throw new Error("Null canvas");
-            }
-
-            var WHEEL = {
-                wheel: {
-                    dy  : "deltaY",
-                    dir : 1,
-                    test: function() {
-                        return "onwheel" in document.createElement("div");
-                    }
-                },
-                mousewheel: {
-                    dy  : "wheelDelta",
-                    dir : -1,
-                    test: function() {
-                        return document.onmousewheel !== undefined;
-                    }
-                },
-                DOMMouseScroll: {
-                    dy  : "detail",
-                    dir : 1,
-                    test: function() {
-                        return true;
-                    }
-                }
-            };
-
-            for(var k in WHEEL) {
-                var w = WHEEL[k];
-                if (w.test()) {
-                    var $this = this;
-                    canvas.canvas.addEventListener(k, 
-                        this.wheeled.bind == null ? function(e) { 
-                                                        return $this.wheeled(e); 
-                                                    }
-                                                  : this.wheeled.bind(this),
-                    false);
-                    
-                    this.wheelInfo = w; 
-                    break;        
-                }
-            }
-        }
-    ]);
-
-    pkg.TouchHandler = zebra.Class([
-        function $prototype() {
-            this.touchCounter = 0;
-
-            function isIn(t, id) {
-                for(var i = 0; i < t.length; i++) {  
-                    if (t[i].identifier == id) return true;
-                }                    
-                return false;
-            }
-
-            this.$fixEnd = function(e) {
-                var t = e.touches, ct = e.changedTouches; 
-                for (var k in this.touches) { 
-
-                    // find out if: 
-                    // 1) a stored started touch has appeared as new touch
-                    //    it can happen if touch end has not been fired and 
-                    //    the new start touch id matches a stored one  
-                    // 2) if no one touch among current touches matches a stored 
-                    //    touch. If it is true that means the stored touch has not 
-                    //    been released since no appropriate touch end event has 
-                    //    been fired
-                    if (isIn(ct, k) === true || isIn(t, k) === false) {
-                        var tt = this.touches[k]; 
-                        this.touchCounter--;
-                        if (tt.group != null) tt.group.active = false;
-                        this.ended(tt); 
-                        delete this.touches[k];
-                    }
-                }
-            };
-
-            this.start = function(e) {
-                this.$fixEnd(e);
-
-                // fix android bug: parasite event for multi touch 
-                // or stop capturing new touches since it is already fixed
-                if (this.touchCounter > e.touches.length) return;
-
-                // collect new touches in queue, don't send it immediately 
-                var t = e.touches; 
-                for(var i = 0; i < t.length; i++) {  // go through all touches
-                    var tt = t[i];
-
-                    // test if the given touch has not been collected in queue yet
-                    if (this.touches.hasOwnProperty(tt.identifier) === false) {
-                        this.touchCounter++; 
-                        var nt = {
-                            pageX      : tt.pageX,
-                            pageY      : tt.pageY,
-                            identifier : tt.identifier,
-                            target     : tt.target,
-                            direction  : L.NONE,  // detected movement direction (L.HORIZONTAL or L.VERTICAL)
-                            dx         : 0,       // horizontal shift since last touch movement 
-                            dy         : 0,       // vertical shift since last touch movement 
-                            dc         : 0,       // internal counter to collect number of the movement 
-                                                  // happens in the given direction 
-                            group      : null      
-                        };
-                        this.touches[tt.identifier] = nt;
-                        this.queue.push(nt);
-                    }
-                }
-
-                // initiate timer to send collected new touch events 
-                // if any new has appeared. the timer helps to collect 
-                // events in one group  
-                if (this.queue.length > 0 && this.timer == null) {
-                    var $this = this;
-                    this.timer = setTimeout(function() {
-                        $this.Q(); // flush queue 
-                        $this.timer = null;
-                    }, 25);
-                }
-            };
-
-            this.end = function(e) {
-                //  remove timer if it has not been started yet
-                if (this.timer != null) {
-                    clearTimeout(this.timer);
-                    this.timer = null;
-                }
-
-                //clear queue
-                this.Q();
-
-                // update touches
-                var t = e.changedTouches;
-                for (var i = 0; i < t.length; i++) {
-                    var tt = this.touches[t[i].identifier];
-                    if (tt != null) {
-                        this.touchCounter--;
-                        if (tt.group != null) tt.group.active = false;
-                        this.ended(tt);
-                        delete this.touches[t[i].identifier];
-                    }
-                }
-            };
-
-            this.Q = function() {
-                if (this.queue.length > 1) {
-                    // marked all collected touches with one group 
-                    for(var i = 0; i < this.queue.length; i++) {
-                        var t = this.queue[i];
-                        t.group = {
-                           size  : this.queue.length, // group size
-                           index : i,       
-                           active: true  // say it is still touched
-                        };
-                    }
-                }
-
-                if (this.queue.length > 0) {
-                    for(var i = 0; i < this.queue.length; i++) {
-                        this.started(this.queue[i]);
-                    }
-                    this.queue.length = 0;
-                }
-            };
-
-            this[''] = function(element) {
-                this.touches = {};
-                this.queue   = [];
-                this.timer   = null;
-
-                var $this = this;
-                element.addEventListener("touchstart",  function(e) {
-                    $this.start(e);
-                }, false);
-
-                element.addEventListener("touchend", function(e) {
-                    $this.end(e);
-                    e.preventDefault();
-                }, false);
-
-                element.addEventListener("touchmove", function(e) {
-                    var mt = e.changedTouches;
-
-                    // clear dx, dy for not updated touches 
-                    for(var k in $this.touches) {
-                        $this.touches[k].dx = $this.touches[k].dy = 0;
-                    }
-
-                    for(var i=0; i < mt.length; i++) {
-                        var nmt = mt[i], t = $this.touches[nmt.identifier];
-
-                        if (t != null) {
-                            if (t.pageX != nmt.pageX || t.pageY != nmt.pageY) {
-                                var dx  = nmt.pageX - t.pageX, 
-                                    dy  = nmt.pageY - t.pageY, 
-                                    d   = t.direction, gamma = null,
-                                    dxs = (dx < 0 && t.dx < 0) || (dx > 0 && t.dx > 0),  // test if horizontal move direction has been changed
-                                    dys = (dy < 0 && t.dy < 0) || (dy > 0 && t.dy > 0);  // test if vertical move direction has been changed
-
-                                // update stored touch coordinates with a new one 
-                                t.pageX  = nmt.pageX;
-                                t.pageY  = nmt.pageY;
-
-                                // we can recognize direction only if move was not too short
-                                if ($abs(dx) > 2 || $abs(dy) > 2) {
-                                    // compute gamma, this is corner in polar coordinate system
-                                    gamma = $atan2(dy, dx);
-
-                                    // using gamma we can figure out direction
-                                    if (gamma > -PI4) {
-                                        d = (gamma < PI4) ? L.RIGHT : (gamma < PI4_3 ? L.BOTTOM : L.LEFT);
-                                    }
-                                    else {
-                                        d = (gamma > -PI4_3) ? L.TOP : L.LEFT;
-                                    }
-
-                                    // to minimize wrong touch effect let's update 
-                                    // direction only if move event sequence 
-                                    // with identical direction is less than 3
-                                    if (t.direction != d) {
-                                        if (t.dc < 3) t.direction = d;
-                                        t.dc = 0;
-                                    }
-                                    else {
-                                        t.dc++;
-                                    }
-                                    t.gamma = gamma;
-                                }
-
-                                // ignore moved if there still start events that are waiting for to be fired 
-                                if ($this.timer == null) {
-                                    t.dx = dx;
-                                    t.dy = dy;
-                                    $this.moved(t);
-                                }
-                                else {
-                                    $this.dc = 0;
-                                }
-                            }
-                        }
-                    }    
-
-                    e.preventDefault();
-                }, false);
-            };
-        }
-    ]);
-})(zebra("ui"));
 (function(pkg, Class) {
 
 // redefine configuration
@@ -19329,9 +19416,9 @@ pkg.TextField = Class(pkg.Label, [
                 this.view.paint(g, l, t, this.width  - l - this.getRight(),
                                          this.height - t - this.getBottom(), this);
                 this.drawCursor(g);
+                g.translate( -sx,  -sy);
             }
-            catch(e) { throw e; }
-            finally { g.translate( -sx,  -sy); }
+            catch(e) { g.translate( -sx,  -sy); throw e; }
         };
     },
 
@@ -20239,12 +20326,12 @@ pkg.List = Class(pkg.BaseList, [
                         y += this.heights[i];
                         if (y > yy) break;
                     }
+
+                    g.translate(-sx,  -sy);
                 }
                 catch(e) {
-                    throw e;
-                }
-                finally {
                     g.translate(-sx,  -sy);
+                    throw e;
                 }
             }
         };
@@ -25124,22 +25211,18 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                         }
 
                         this.paintPosMarker(g);
-                    }
-                    finally {
                         g.restore();
+                    }
+                    catch(e) {
+                        g.restore();
+                        throw e;
                     }
                 }
             };
 
             this.catchScrolled = function (psx, psy){
-                console.log("Grid.catchScrolled() : psy = " + psy + ", offy = " + this.scrollManager.getSY() + ", offx = " + this.scrollManager.getSX());
-
-
                 var offx = this.scrollManager.getSX() - psx,
                     offy = this.scrollManager.getSY() - psy;
-
-
-
 
                 if (offx !== 0) {
                     this.iColVisibility(offx > 0 ? 1 :  - 1);
@@ -27320,9 +27403,11 @@ pkg.BaseTree = Class(ui.Panel, [
                     try{
                         g.translate(sx, sy);
                         this.paintTree(g, this.firstVisible);
-                    }
-                    finally{
                         g.translate(-sx,  -sy);
+                    }
+                    catch(e) {
+                        g.translate(-sx,  -sy);
+                        throw e;
                     }
                 }
             }
@@ -27881,7 +27966,8 @@ pkg.Tree = Class(pkg.BaseTree, [
                         ps = editor.getPreferredSize();
 
                     editor.setLocation(b.x + this.scrollManager.getSX() + this.itemGapX,
-                                       b.y - ~~((ps.height - b.height + 2 * this.itemGapY) / 2) + this.scrollManager.getSY() + this.itemGapY);
+                                       b.y - ~~((ps.height - b.height + 2 * this.itemGapY) / 2) +
+                                      this.scrollManager.getSY() + this.itemGapY);
 
                     editor.setSize(ps.width, ps.height);
                     this.add(editor);
@@ -27901,7 +27987,8 @@ pkg.Tree = Class(pkg.BaseTree, [
             if (this.editors != null && this.editedItem != null){
                 try {
                     if (applyData)  {
-                        this.model.setValue(this.editedItem, this.editors.fetchEditedValue(this.editedItem, this.kids[0]));
+                        this.model.setValue(this.editedItem,
+                                            this.editors.fetchEditedValue(this.editedItem, this.kids[0]));
                     }
                 }
                 finally{

@@ -72,7 +72,7 @@ Open demos in a browser: http://127.0.0.1:8090/
       ```bash
       zebra-home
         |
-        +--- [lib/zebra]  # zebra source code
+        +--- [src]        # zebra source code
         +--- [apidoc]     # the latest zebra API documentation
         +--- [samples]    # various zebra snippets and general UI set demo
         +--- gulpfile.js  # zebra building and deploying tasks

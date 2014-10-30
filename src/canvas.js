@@ -47,8 +47,6 @@ var instanceOf = zebra.instanceOf, L = zebra.layout, MB = zebra.util,
     MS = Math.sin, MC = Math.cos, $fmCanvas = null, $fmText = null,
     $fmImage = null, $clipboard = null, $clipboardCanvas;
 
-pkg.$canvases = [];
-
 pkg.clipboardTriggerKey = 0;
 
 function $meX(e, d) {
@@ -83,11 +81,14 @@ pkg.$view = function(v) {
 
 /**
  * Look up 2D canvas in the list of existent
- * @param  {2DCanvas} canvas a canvas
+ * @param  {2DCanvas|String} canvas a canvas
  * @return {zebra.ui.zCanvas} a zebra canvas
  */
 pkg.$detectZCanvas = function(canvas) {
-    if (zebra.isString(canvas)) canvas = document.getElementById(canvas);
+    if (zebra.isString(canvas)) {
+        canvas = document.getElementById(canvas);
+    }
+
     for(var i=0; canvas != null && i < pkg.$canvases.length; i++) {
         if (pkg.$canvases[i].canvas == canvas) return pkg.$canvases[i];
     }
@@ -532,9 +533,18 @@ pkg.RoundBorder = Class(pkg.View, [
         this.outline = function(g,x,y,w,h,d) {
             g.beginPath();
             g.lineWidth = this.width;
-            g.arc(~~(x + w/2), ~~(y + h/2), ~~(w/2 - 0.5), 0, 2 * Math.PI, false);
+            g.arc(Math.floor(x + w/2) + (w%2 === 0 ? 0 :0.5),
+                  Math.floor(y + h/2) + (h%2 === 0 ? 0 :0.5),
+                  ~~((w - g.lineWidth)/2), 0, 2 * Math.PI, false);
             g.closePath();
             return true;
+        };
+
+        this.getPreferredSize = function() {
+            var s = this.lineWidth * 8;
+            return  {
+                width :s, height:s
+            };
         };
 
         this[''] = function(col, width) {
@@ -721,7 +731,7 @@ pkg.Picture = Class(pkg.Render, [
         };
 
         this.paint = function(g,x,y,w,h,d) {
-            if (this.target != null && w > 0 && h > 0){
+            if (this.target != null && this.target.complete === true && this.target.naturalWidth > 0 && w > 0 && h > 0){
                 if (this.width > 0) {
                     g.drawImage(this.target, this.x, this.y,
                                 this.width, this.height, x, y, w, h);
@@ -734,7 +744,8 @@ pkg.Picture = Class(pkg.Render, [
 
         this.getPreferredSize = function(){
             var img = this.target;
-            return img == null ? { width:0, height:0 }
+            return img == null || this.target.naturalWidth <= 0 || img.complete !== true
+                               ? { width:0, height:0 }
                                : (this.width > 0) ? { width:this.width, height:this.height }
                                                   : { width:img.width, height:img.height };
         };
@@ -1045,7 +1056,9 @@ pkg.Bag = Class(zebra.util.Bag, [
 ]);
 
 rgb.prototype.paint = function(g,x,y,w,h,d) {
-    if (this.s != g.fillStyle) g.fillStyle = this.s;
+    if (this.s != g.fillStyle) {
+        g.fillStyle = this.s;
+    }
 
     // fix for IE10/11, calculate intersection of clipped area
     // and the area that has to be filled. IE11/10 have a bug
@@ -1859,7 +1872,7 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * @method  loadImage
  */
 pkg.loadImage = function(img, ready) {
-    if (img instanceof Image && img.complete && img.naturalWidth !== 0) {
+    if (img instanceof Image && img.complete === true && img.naturalWidth !== 0) {
         if (arguments.length > 1)  {
             ready(img.src, true, img);
         }
@@ -3260,9 +3273,11 @@ pkg.PaintManager = Class(pkg.Manager, [
                                     $this.paint(context, canvas);
 
                                     canvas.$da.width = -1; //!!!
-                                }
-                                finally {
                                     context.restore();
+                                }
+                                catch(e) {
+                                    context.restore();
+                                    throw e;
                                 }
                             });
                         }
@@ -3277,7 +3292,9 @@ pkg.PaintManager = Class(pkg.Manager, [
         };
 
         this.paint = function(g,c){
-            var dw = c.width, dh = c.height, ts = g.stack[g.counter];
+            var dw = c.width,
+                dh = c.height,
+                ts = g.stack[g.counter];
 
             if (dw !== 0      &&
                 dh !== 0      &&
@@ -3802,10 +3819,11 @@ pkg.CommandManager = Class(pkg.Manager, [
         this.keyCommands = {};
         this._ = new zebra.util.Listeners("commandFired");
 
-
-        this.setCommands(commands.common);
-        if (zebra.isMacOS && commands.osx != null) {
-            this.setCommands(commands.osx);
+        if (commands != null) {
+            this.setCommands(commands.common);
+            if (zebra.isMacOS && commands.osx != null) {
+                this.setCommands(commands.osx);
+            }
         }
     }
 ]);
@@ -5243,9 +5261,9 @@ pkg.zCanvas = Class(pkg.Panel, [
             this.height = h;
 
            // if (zebra.isTouchable) {
-           //      the strange fix for Android native browser
-           //      that can render text blurry before you click
-           //      it happens because the browser auto-fit option
+           //      // the strange fix for Android native browser
+           //      // that can render text blurry before you click
+           //      // it happens because the browser auto-fit option
            //      var $this = this;
            //      setTimeout(function() {
            //          $this.invalidate();

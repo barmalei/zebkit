@@ -798,12 +798,12 @@ pkg.List = Class(pkg.BaseList, [
                         y += this.heights[i];
                         if (y > yy) break;
                     }
+
+                    g.translate(-sx,  -sy);
                 }
                 catch(e) {
-                    throw e;
-                }
-                finally {
                     g.translate(-sx,  -sy);
+                    throw e;
                 }
             }
         };

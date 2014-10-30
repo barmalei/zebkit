@@ -8,21 +8,21 @@ var webserver = require('gulp-webserver');
 var zip = require('gulp-zip');
 
 var zebraFiles = [
-    'lib/zebra/easyoop.js',
-    'lib/zebra/layout.js',
-    'lib/zebra/util.js',
-    'lib/zebra/io.js',
-    'lib/zebra/data.js',
-    'lib/zebra/canvas.js',
-    'lib/zebra/ui.webstuff.js',
-    'lib/zebra/ui.js',
-    'lib/zebra/ui.TextField.js',
-    'lib/zebra/ui.list.js',
-    'lib/zebra/ui.window.js',
-    'lib/zebra/ui.grid.js',
-    'lib/zebra/ui.tree.js',
-    'lib/zebra/ui.html.js',
-    'lib/zebra/ui.designer.js'
+    'src/easyoop.js',
+    'src/layout.js',
+    'src/util.js',
+    'src/io.js',
+    'src/data.js',
+    'src/ui.webstuff.js',
+    'src/canvas.js',
+    'src/ui.js',
+    'src/ui.TextField.js',
+    'src/ui.list.js',
+    'src/ui.window.js',
+    'src/ui.grid.js',
+    'src/ui.tree.js',
+    'src/ui.html.js',
+    'src/ui.designer.js'
 ];
 
 var demoFiles = [
@@ -41,8 +41,9 @@ gulp.task('http', function() {
     gulp.src('.')
         .pipe(webserver({
             port: 8090,
+            host: "localhost",
             directoryListing: true,
-            open: true
+            open: false
         }));
 });
 
@@ -53,7 +54,7 @@ gulp.task('lint', function() {
 });
 
 gulp.task('copy', function() {
-    return gulp.src(["lib/zebra/zebra.json", "lib/zebra/zebra.png"]).pipe(gulp.dest("."));
+    return gulp.src(["src/zebra.json", "src/zebra.png"]).pipe(gulp.dest("."));
 });
 
 gulp.task('zebrascript', function() {
@@ -85,6 +86,13 @@ gulp.task('demoscript', function() {
         .pipe(rename('demo.all.min.js'))
         .pipe(uglify({ compress: false, mangle: false }))
         .pipe(gulp.dest('samples/demo'));
+});
+
+
+gulp.task('watch', function() {
+    gulp.watch(zebraFiles, ['zebrascript']);
+    gulp.watch(demoFiles, ['demoscript']);
+    gulp.watch("samples/js/uiengine.samples.js", ['samplescript']);
 });
 
 gulp.task('scripts', [ "demoscript", "samplescript", "zebrascript"]);

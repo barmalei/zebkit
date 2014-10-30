@@ -1,4 +1,6 @@
 (function(pkg) {
+    pkg.$canvases = [];
+
     zebra.ready(function() {
         pkg.$deviceRatio = typeof window.devicePixelRatio !== "undefined" ? window.devicePixelRatio
                                                                           : (typeof window.screen.deviceXDPI !== "undefined" ? // IE

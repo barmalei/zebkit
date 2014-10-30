@@ -787,9 +787,9 @@ pkg.TextField = Class(pkg.Label, [
                 this.view.paint(g, l, t, this.width  - l - this.getRight(),
                                          this.height - t - this.getBottom(), this);
                 this.drawCursor(g);
+                g.translate( -sx,  -sy);
             }
-            catch(e) { throw e; }
-            finally { g.translate( -sx,  -sy); }
+            catch(e) { g.translate( -sx,  -sy); throw e; }
         };
     },
 

@@ -2,9 +2,9 @@
 if (typeof(zebra) === "undefined") {
     if (typeof arguments[0] === "undefined") p = "";
     else p = arguments[0] + "/";
-    load(p + 'lib/zebra/easyoop.js');
-    load(p + 'lib/zebra/extras.js');
-    load(p + 'lib/zebra/tools.js');
+    load(p + 'src/easyoop.js');
+    load(p + 'src/extras.js');
+    load(p + 'src/tools.js');
 }
 
 (function () {
@@ -1419,8 +1419,8 @@ if (typeof(zebra) === "undefined") {
             assert((new A()).b(), 1000);
 
 
-            // one method with the given name means it will be alwyas called
-            // neverteheless number of paramaters it gets
+            // one method with the given name means it will be always called
+            // nevertheless number of parameters it gets
             var A = Class([
                 function a(b1, b2) {
                     return 10;
@@ -1964,9 +1964,7 @@ if (typeof(zebra) === "undefined") {
             var a = new A(), clz = a.$clazz;
             assert(a.a(), 10);
             assert(a.a(111), 111);
-            assert(zebra.instanceOf(a, zebra.$Extended), false);
-
-
+            assert(a.$extended, undefined);
 
             a.extend([
                 function() {
@@ -1982,15 +1980,12 @@ if (typeof(zebra) === "undefined") {
                 }
             ]);
 
-
-
             var mclz = a.$clazz;
             assert(a.a(), 200);
             assert(a.a(123), 133);
             assert(a.ff, 333);
             assert(mclz != clz, true);
-            assert(zebra.instanceOf(a, zebra.$Extended), true);
-
+            assert(a.$extended, true, "Anonymous is extended ");
 
             // one more extension on the same instance
             a.extend([
@@ -2016,15 +2011,13 @@ if (typeof(zebra) === "undefined") {
             assert(a.fff, 333);
             assert(a.a(100,11), 111);
             assert(mclz == a.$clazz, true);
-            assert(zebra.instanceOf(a, zebra.$Extended), true)
+            assert(a.$extended, true)
 
             // no side effect to parent class
             var a = new A(), clz = a.$clazz;
             assert(a.a(), 10);
             assert(a.a(111), 111);
-            assert(zebra.instanceOf(a, zebra.$Extended), false);
-
-
+            assert(a.$extended, undefined);
 
             // more deep super calling
             var B = Class(A, [
@@ -2036,7 +2029,7 @@ if (typeof(zebra) === "undefined") {
             assert(b.a(), 10);
             assert(b.b(), 10);
             assert(b.a(111), 111);
-            assert(zebra.instanceOf(b, zebra.$Extended), false);
+            assert(b.$extended,  undefined);
             assert(zebra.instanceOf(b, I), false);
 
             b.extend(I, [
@@ -2048,7 +2041,7 @@ if (typeof(zebra) === "undefined") {
             assert(b.a(), 10);
             assert(b.b(), 121);
             assert(b.a(112), 112);
-            assert(zebra.instanceOf(b, zebra.$Extended), true);
+            assert(b.$extended, true);
             assert(zebra.instanceOf(b, I), true);
 
 
@@ -2057,7 +2050,7 @@ if (typeof(zebra) === "undefined") {
             assert(b.a(), 10);
             assert(b.b(), 10);
             assert(b.a(111), 111);
-            assert(zebra.instanceOf(b, zebra.$Extended), false);
+            assert(b.$extended, undefined);
             assert(zebra.instanceOf(b, I), false);
 
             var A = Class([

@@ -3,9 +3,8 @@
 
 eval(zebra.Import("ui", "layout", "util"));
 
-zebra.ui.configure(function(conf) {
-    conf.loadByUrl(pkg.$url + "uiengine.samples.json");
-});
+pkg.borderColor = "#FFFFFF";
+pkg.borderSize = 6;
 
 pkg.Shape = Class(View, [
     function(){

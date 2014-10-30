@@ -14,7 +14,7 @@ var colors = [ ["white", "lightGray", "white"],
                ["orange", "black", "orange"],
                ["white", "lightGray", "white"] ];
 
-var ColumnsAlignmentProvider = Class(DefViews, [
+var ColumnsAlignmentProvider = Class(zebra.ui.grid.DefViews, [
     function getView(target,row,col,data){
         var tf = new BoldTextRender(data);
         tf.setFont(new Font("Helvetica", 16));
@@ -48,7 +48,7 @@ var ColumnsAlignmentProvider = Class(DefViews, [
 ]);
 
 var IMAGES = [ "android", "google", "yelp", "gmail" ];
-var CustomGridEditor = new Class(DefEditors, [
+var CustomGridEditor = new Class(zebra.ui.grid.DefEditors, [
     function() {
         this.$super();
 
@@ -132,13 +132,13 @@ var CustomGridEditor = new Class(DefEditors, [
     }
 ]);
 
-var CompViewProvider = new Class(DefViews,[
+var CompViewProvider = new Class(zebra.ui.grid.DefViews,[
     function getView(target, row,col,o){
         return row == 2 ? new CompRender(o) : this.$super(target, row, col, o);
     }
 ]);
 
-var CompEditorProvider = new Class(DefEditors, [
+var CompEditorProvider = new Class(zebra.ui.grid.DefEditors, [
     function getEditor(t,r,c,v){
         if(r == 2) return v;
         else {
@@ -163,7 +163,7 @@ function longGrid() {
 	for(var i=0; i < m.rows*m.cols; i++) { m.puti(i, "Cell [" + i +"]");  }
 
 	var g = new Grid(m);
-    g.setViewProvider(new DefViews([
+    g.setViewProvider(new zebra.ui.grid.DefViews([
         function getCellColor(target, row,col) {
             return (row % 2 === 0) ? ui.cellbg1 : ui.cellbg2 ;
         },
@@ -265,7 +265,7 @@ function editableGrid() {
 
 	var g = new Grid();
     g.defXAlignment = CENTER;
-    g.setViewProvider(new DefViews([
+    g.setViewProvider(new zebra.ui.grid.DefViews([
         function getView(target, row, col, data) {
             if (col === 0) return (data == "on") ? onView : offView;
             else {
@@ -315,14 +315,22 @@ function customCellAlignmentGrid() {
               "Bottom-Left\nAlignment", "Bottom-Center\nAlignment", "Bottom-Right\nAlignment"];
     var titles = [ "Left Aligned", new CompRender(new zebra.ui.ImageLabel("Center", zebra.ui.demo.ringtone)), "Right Aligned"];
 
-    var root = new Panel(new RasterLayout(USE_PS_SIZE)), data = new Matrix(3, 3);
+    var root = new Panel(new RasterLayout(USE_PS_SIZE)),
+        data = new Matrix(3, 3);
+
     for(var i = 0;i < data.rows*data.cols; i ++ ){
         data.puti(i, d[i]);
     }
+
     var grid = new Grid(data), caption = new GridCaption(grid);
-    for(var i = 0;i < data.cols; i ++ ) caption.putTitle(i, titles[i]);
-    caption.setTitleProps(0, LEFT, CENTER, null);
-    caption.setTitleProps(2, RIGHT, CENTER, null);
+    for(var i = 0;i < data.cols; i++) {
+        caption.putTitle(i, titles[i]);
+    }
+
+
+    caption.setTitleAlignments(0, LEFT, CENTER);
+    caption.setTitleAlignments(1, RIGHT, CENTER);
+    caption.setTitleAlignments(2, RIGHT, CENTER);
     caption.render.setFont(new Font("Helvetica", "bold", 14));
     caption.isResizable = false;
 
@@ -337,6 +345,40 @@ function customCellAlignmentGrid() {
     return wrapWithPan(root);
 }
 
+function createDynamicGrid() {
+    var grid = new Grid(200, 10);
+
+    for(var i=0; i<grid.getGridRows() * grid.getGridCols(); i++) {
+        grid.model.puti(i, "Item [" + i+ "]");
+    }
+
+    var topCaption = new CompGridCaption();
+    grid.add(TOP, topCaption);
+
+    var addBt = new Button("+");
+    addBt.setBorder(new RoundBorder("gray", 2));
+    addBt.setPadding(3);
+    addBt.canHaveFocus = false;
+    //grid.add(NONE, addBt);
+    topCaption.add(new Panel({
+        layout: new FlowLayout("center", "center"),
+        padding: 2,
+        kids: addBt
+    }));
+
+    addBt.bind(function() {
+        grid.model.insertCols(1, 1);
+    });
+
+    return new Panel({
+        layout : new BorderLayout(8),
+        kids   : {
+            CENTER : new ScrollPan(grid)
+        }
+    });
+}
+
+
 pkg.GridDemo = new Class(pkg.DemoPan, [
     function() {
         this.$super();
@@ -348,8 +390,9 @@ pkg.GridDemo = new Class(pkg.DemoPan, [
         n.add("Grid", customCellAlignmentGrid());
         n.add("Editable grid", editableGrid());
         n.add("Sortable", createSortableGrid());
+        n.add("Dynamic", createDynamicGrid());
 
-		this.add(CENTER, n);
+        this.add(CENTER, n);
     }
 ]);
 

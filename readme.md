@@ -1,7 +1,7 @@
 
 ![ScreenShot](/samples/images/header.jpg)
 
-v4.2014 (Luda)
+v11.2014 (Anna)
 
 ## For impatient: look at few demos   
 
@@ -9,17 +9,9 @@ v4.2014 (Luda)
    * Zebra UI engine simple samples: http://repo.zebkit.org/latest/samples/uiengine.html
    * Zebra UI documentation http://www.zebkit.org/documentation
 
- Send claims to: ask@zebkit.org
-
-## Special thanks for Zebra font effect idea:
-
- Michael Deal, http://www.html5rocks.com/en/tutorials/canvas/texteffects/
-
 ## What is Zebra ?
 
-Zebra is JavaScript library that implements graceful and easy to use OOP concept together with rich set of UI components, decoupled UI engine, IO and other packages. The UI components are developed based on HTML5 Canvas 
-element. This approach differs from traditional WEB UI, where user interface is built around HTML DOM and than "colored" with CSS. Zebra UI components are implemented from scratch as a number of widgets rendered 
-on HTML Canvas. 
+Zebra is JavaScript library that implements graceful and easy to use OOP concept together with rich set of UI components, decoupled UI engine, IO and other packages. UI are fully based on HTML5 Canvas element. This approach differs from traditional WEB UI, where user interface is built around HTML DOM and than "colored" with CSS. 
 
 ### Features
 
@@ -36,7 +28,7 @@ on HTML Canvas.
       * Layered UI architecture
       * and many other ...
    *  Zebra rich UI Components set developed basing on Zebra UI Engine:
-      * More than 30 various UI components
+      * More than 40 various UI components
       * Look and feel customization
       * Complex UI components: Grid, Tree, Tabs, Combo, Designer, Scroll, Menu, etc
       * Thanks to easy OOP concept and proper design: expendable and fully customizable UI components
@@ -54,6 +46,51 @@ on HTML Canvas.
    	  * **Inertial scrolling**
    	  * **Virtual keyboard input**
 
+
+### Build and run zebra demos 
+
+To build zebra artifacts and run zebra samples you have to install nodejs (http://nodejs.org/) on your PC. Than go to zebra home directory and deploy required node JS packages:
+
+```bash
+    $ npm install 
+```
+
+Than re-build zebra artifacts:
+```bash
+    $ gulp 
+```
+
+And if you want open demos and samples on your in a browser start simple test HTTP server:
+```bash
+    $ gulp http
+```
+
+To track changes and zebra artifact re-building you should start watch task: 
+```bash
+    $ gulp watch
+```
+
+Open demos in a browser: http://127.0.0.1:8090/ 
+
+### Zebra package structure:
+
+      ```bash
+      zebra-home
+        |
+        +--- [src]        # zebra source code
+        +--- [apidoc]     # the latest zebra API documentation
+        +--- [samples]    # various zebra snippets and general UI set demo
+        +--- gulpfile.js  # zebra building and deploying tasks
+        +--- package.json # nodejs package descriptor
+        +--- index.html   # index WEB page to see main samples and demos
+        +--- zebra.png         # zebra (Runtime) UI elements icons
+        +--- zebra.json        # zebra (Runtime) JSON configuration 
+        +--- zebra.js          # Zebra (Runtime) JS code 
+        +--- zebra.min.js      # minified (Runtime) Zebra JS code 
+        +--- zebra.runtime.zip # zipped all you need in runtime
+      ```
+
+**Use artifacts packaged in "zebra.runtime.zip" file if you need to keep zebra on your web site. Unpack it in you web folder and include "zebra.min.js" in your HTML page.**
 
 ### Simple UI Zebra application
 
@@ -95,7 +132,6 @@ We can write the application following more graceful manner using JSON-like styl
 		    zebra.ready(function() {
 				// import classes and variables from "ui" and "layout" packages in local space
 				eval(zebra.Import("ui", "layout"));
-
 				// create Canvas using JSON like style
 			    (new zCanvas()).root.properties({
 			    	layout: new BorderLayout(),
@@ -145,7 +181,6 @@ Load the JSON UI form definition as it is illustrated below:
 				// load UI form from JSON file
 			    var root = (new zebra.ui.zCanvas()).root;
 			    root.load("myform.json");
-
 			    // find by class "Button" component and register button
 			    // event handler to clear text field content by button click
 			    root.find("//zebra.ui.Button").bind(function() {
@@ -174,7 +209,6 @@ By implementing special methods __"clipCopy()"__  and/or __"clipPaste(s)"__ a fo
 		<script type='text/javascript'>
 			zebra.ready(function() {
 				eval(zebra.Import("ui", "layout"));
-
 				// define our own UI component class that wants to handle 
                 // clipboard events
 				var MyComponent = zebra.Class(MLabel, [
@@ -183,14 +217,14 @@ By implementing special methods __"clipCopy()"__  and/or __"clipPaste(s)"__ a fo
 				    function canHaveFocus() { return true; },
 
 				    // returns what you want to put in clipboard
-				    function copy() {
+				    function clipCopy() {
 				    	this.setColor("#FF3311");
 				    	return this.getValue();
 				    },
 
 				    // this method is called when paste event has 
                     // happened for this component 
-				    function paste(s) { 
+				    function clipPaste(s) { 
 				    	this.setColor("#000000");
 				    	this.setValue(s); 
 				    },
@@ -198,15 +232,15 @@ By implementing special methods __"clipCopy()"__  and/or __"clipPaste(s)"__ a fo
 				    // use border as an indication the component has focus
 				    function focused() {
 				    	this.$super() // call super
-				    	this.setBorder(this.hasFocus() ? new Border("red", 2,3) : borders.plain);
+				    	this.setBorder(this.hasFocus() ? new Border("red",2,3) : borders.plain);
 				    }
 				]); 
-
 				// create UI application with our clipboard handler UI
                 // component
 				(new zCanvas()).root.properties({
 					background: "#EEEEEE",
-					layout: new BorderLayout(8,8), padding:8,
+					layout: new BorderLayout(8,8), 
+                    padding: 8,
 					kids  : {
 						TOP   : new BoldLabel("Copy/Paste in box below"),
 						CENTER: new MyComponent("Copy me in clipboard").properties({border:borders.plain, padding:8})
@@ -245,7 +279,6 @@ The module provides handy manner to interact with remote services.
 // get, post data
 var gdata = zebra.io.GET(url),
 	pdata = zebra.io.POST(url, "request");
-
 // async GET/POST
 zebra.io.GET(url, function(request) {
     if (request.status == 200) {
@@ -264,11 +297,9 @@ zebra.io.GET(url, function(request) {
 ```js
 // XML-RPC server
 var s = new zebra.io.XRPC(url, [ "method1", "method2", "method3" ]);
-
 // call remote methods
 s.method1(p1, p2);
 var res = s.method2(p2);
-
 // async remote method call
 s.method1(p1, p2, function(res) {
     ...
@@ -280,11 +311,9 @@ s.method1(p1, p2, function(res) {
 ```js
 // JSON-RPC server
 var s = new zebra.io.JRPC(url, [ "method1", "method2", "method3" ]);
-
 // call remote methods
 s.method1(p1, p2);
 var res = s.method2(p2);
-
 // async remote method call
 s.method1(p1, p2, function(res) {
     ...
@@ -296,77 +325,11 @@ s.method1(p1, p2, function(res) {
 ```js
 // JSON-RPC remote method execution
 var res = zebra.io.JRPC.invoke(url, "method1")(param1, param2);
-
 // Async JSON-RPC remote method execution
 zebra.io.JRPC.invoke(url, "method1")(param1, param2, function(res) {
   ....
 });
 ```
-
-### Requirements and installation
-
-Zebra doesn't require extra installation or configuration steps. 
-
-Zebra package:
-```bash
-zebra-home
-  |
-  +--- [lib]        # zebra source code
-  +--- [apidoc]     # the latest zebra API documentation
-  +--- [samples]    # various zebra snippets and general UI set demo
-  +--- startup.py   # small HTTP Web server
-  +--- index.html   # index WEB page to see main samples and demos
-```
-
-### Run demos and samples
-
-Zebra include "samples" folder that keeps various Zebra UI snippets. A desired sample can be run by opening appropriate HTML with a browser. Some sample cannot be opened as file (because of security restrictions browsers can have), 
-In this case they have to be opened through a web server. Zebra includes small, simple but buggy Python web server that can be used for demo purposes. 
-
-To see snippets and demo it is preferable to start embedded Python HTTP web server. To do it following the instruction below:
-   	  * Open terminal
-      * Go to zebra home directory
-      * Run small python HTTP server on your PC:
-```bash
-   $ python startup.py
-```
-
-Than you can:
-  * Run list of links to various samples and demos following http://127.0.0.1:8080/ URL
-  * Run main Rich UI engine demo following http://127.0.0.1:8080/samples/richui.demo.html URL
-  * Run UI engine samples following http://127.0.0.1:8080/samples/uiengine.samples.html URL
-  * Find many other snippets in "samples" folder
-
-
-### Developing and building
-
-Zebra source code is split into bunch of JS files you can find in "lib/zebra" folder. Also there is number of JSON configuration and resources files that are required in runtime. To build or update generated Zebra packages, scripts, docs and so on run the following command:
-```bash
-   $ ruby ./bin/lithium.rb build
-```
-
-
-The following JS files are generated:    
-```bash
-zebra-home
-  |
-  +-- [lib]     
-  |     |
-  |     [zebra]
-  |       +- *.js      # zebra JS source files
-  |       +- *.json    # configuration files
-  |       +- *.png|pxm # binary resources 
-  |
-  +-- zebra.png         # zebra (Runtime) UI elements icons
-  +-- zebra.json        # zebra (Runtime) JSON configuration 
-  +-- zebra.js          # Zebra (Runtime) JS code 
-  +-- zebra.min.js      # minified (Runtime) Zebra JS code 
-  +-- zebra.runtime.zip # all you need in runtime
-```
-
-
-**Use artifacts packaged in "zebra.runtime.zip" file if you need to keep zebra on your web site. Unpack it in you web folder and include "zebra.min.js" in your HTML page.**
-
 
 ### License
 

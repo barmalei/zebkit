@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1, minimal-ui">
+<meta name="msapplication-tap-highlight" content="no" />
+
+
+
+<script src='../src/easyoop.js'    type='text/javascript'></script>
+<script src='../src/util.js' type='text/javascript'></script>
+<script src='../src/io.js'    type='text/javascript'></script>
+<script src='../src/data.js' type='text/javascript'></script>
+<script src='../src/layout.js' type='text/javascript'></script>
+<script src='../src/ui.webstuff.js' type='text/javascript'></script>
+<script src='../src/canvas.js' type='text/javascript'></script>
+<script src='../src/ui.js' type='text/javascript'></script>
+
+
+<script src='../src/ui.TextField.js' type='text/javascript'></script>
+<script src='../src/ui.list.js' type='text/javascript'></script>
+<script src='../src/ui.window.js' type='text/javascript'></script>
+<script src='../src/ui.tree.js' type='text/javascript'></script>
+<script src='../src/ui.grid.js' type='text/javascript'></script>
+<script src='../src/ui.vk.js' type='text/javascript'></script>
+
+
+<script>
+
+
+zebra.ready(function() {
+    var canvas = new zebra.ui.zCanvas(600,400);
+
+    canvas.root.setLayout(new zebra.layout.BorderLayout(8));
+    canvas.root.setPadding(16);
+    canvas.root.setBorder("plain");
+
+    //TODO: remove test code
+    zebra.ui.vk.activateVK();
+    var vk = zebra.ui.vk.getVK();
+
+    vk.bind(function vkMaskUpdated(vkey, om, nm) {
+        if ((nm & zebra.ui.KeyEvent.M_SHIFT) > 0) {
+            vk.eachKey(function(g, k) {
+                if (k.mask == 0 && k.upperCase) k.upperCase();
+            });
+        }
+        else {
+            vk.eachKey(function(g, k) {
+                if (k.mask == 0 && k.lowerCase) k.lowerCase();
+            });
+        }
+    });
+
+    vk.bind(function vkOptionSelected(vkey, i, o) {
+        vk.setActiveGroup(o);
+    });
+
+    canvas.root.add("top", new zebra.ui.TextField());
+    canvas.fullScreen();
+});
+
+</script>
+</head>
+<body>
+<script>
+
+
+</script>
+</body>
+</html>

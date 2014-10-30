@@ -1,5 +1,3 @@
-(function() {
-
 /**
  * This is the core module that provides powerful easy OOP concept, packaging and number of utility methods.
  * The module has no any dependency from others zebra modules and can be used independently.  
@@ -128,13 +126,17 @@ var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
         if (arguments.length === 0) return f.$env;
 
         if (typeof name === 'function') {
-            for(var k in f) if (f[k] instanceof Package) name(k, f[k]);
+            for(var k in f) {
+                if (f[k] instanceof Package) name(k, f[k]);
+            }
             return null;
         }
 
         var b = Array.isArray(name);
         if (isString(name) === false && b === false) {
-            for(var k in name) if (name.hasOwnProperty(k)) f.$env[k] = name[k];
+            for(var k in name) {
+                if (name.hasOwnProperty(k)) f.$env[k] = name[k];
+            }
             return;
         }
 
@@ -268,7 +270,7 @@ pkg.getPropertySetter = function(obj, name) {
     return (typeof m  === "function") ? m : null;
 };
 
-// target - is object whose propeties have to populated
+// target - is object whose properties have to populated
 // p      - properties
 pkg.properties = function(target, p) {
     for(var k in p) {
@@ -341,43 +343,54 @@ pkg.Interface = make_template(null, function() {
     return $Interface;
 });
 
-pkg.$Extended = pkg.Interface();
+// single method proxy
+function sProxyMethod(name, f) {
+    var a = function() {
+        var cm = pkg.$caller;
+        pkg.$caller = a.f;
+        // don't use finally section it slower than try-catch
+        try {
+            var r = a.f.apply(this, arguments);
+            pkg.$caller = cm;
+            return r;
+        }
+        catch(e) { pkg.$caller = cm; throw e; }
+    };
 
-function ProxyMethod(name, f) {
-    if (isString(name) === false) {
-        throw new TypeError('Invalid method name');
-    }
-
-    var a = null;
-    if (arguments.length == 1) {
-        a = function() {
-            var nm = a.methods[arguments.length];
-            if (nm != null) {
-                var cm = pkg.$caller;
-                pkg.$caller = nm;
-                try { return nm.apply(this, arguments); }
-                catch(e) { throw e; }
-                finally { pkg.$caller = cm; }
-            }
-            mnf.call(this, a.methodName, arguments.length);
-        };
-        a.methods = {};
-    }
-    else {
-        a = function() {
-            var cm = pkg.$caller;
-            pkg.$caller = a.f;
-            try { return a.f.apply(this, arguments); }
-            catch(e) { throw e; }
-            finally { pkg.$caller = cm; }
-        };
-        a.f = f;
-    }
+    a.f = f;
+    a.methodName = name;
 
     a.$clone$ = function() {
-        if (a.methodName === CNAME) return null;
-        if (a.f) return ProxyMethod(a.methodName, a.f);
-        var m = ProxyMethod(a.methodName);
+        return sProxyMethod(a.methodName, a.f);
+    };
+
+    return a;
+};
+
+// multiple methods proxy
+function nProxyMethod(name) {
+    var a = function() {
+        var nm = a.methods[arguments.length];
+        if (nm != null) {
+            var cm = pkg.$caller;
+            pkg.$caller = nm;
+            // don't use finally section it slower than try-catch
+            try {
+                var r = nm.apply(this, arguments);
+                pkg.$caller = cm;
+                return r;
+            }
+            catch(e) { pkg.$caller = cm; throw e; }
+        }
+        mnf.call(this, a.methodName, arguments.length);
+    };
+
+    a.methods = {};
+    a.methodName = name;
+
+    a.$clone$ = function() {
+        // multiple methods, so overloading is possible
+        var m = nProxyMethod(a.methodName);
         for(var k in a.methods) {
             if (a.methods.hasOwnProperty(k)) {
                 m.methods[k] = a.methods[k];
@@ -386,7 +399,6 @@ function ProxyMethod(name, f) {
         return m;
     };
 
-    a.methodName = name;
     return a;
 }
 
@@ -527,11 +539,13 @@ pkg.Class = make_template(null, function() {
 
     var df = arguments[arguments.length - 1],
         $parent = null,
-        args = [] // using slice can be slower that trivial copying array
+        args = []; // using slice can be slower that trivial copying array
                   // Array.prototype.slice.call(arguments, 0, arguments.length-1);
 
     // use instead of slice for performance reason
-    for(var i=0; i < arguments.length-1; i++) args[i] = arguments[i];
+    for(var i=0; i < arguments.length-1; i++) {
+        args[i] = arguments[i];
+    }
 
     if (args.length > 0 && (args[0] == null || args[0].$clazz == pkg.Class)) {
         $parent = args[0];
@@ -560,7 +574,6 @@ pkg.Class = make_template(null, function() {
                 args.push(arguments[arguments.length - 1]);
 
                 var cl = pkg.Class.apply(null, args),  // declare new anonymous class
-
                     // create a function to instantiate an object that will be made the 
                     // anonymous class instance. The intermediate object is required to 
                     // call constructor properly since we have arguments as an array 
@@ -589,31 +602,37 @@ pkg.Class = make_template(null, function() {
         }
     }, args);
 
-
+    // prepare fields that caches the class properties
     $template.$propertyInfo = {};
     
-    // copy parents prototype    
+    // copy parents prototype methods and fields into
+    // new class template
     $template.$parent = $parent;
     if ($parent != null) {
         for (var k in $parent.prototype) {
             if ($parent.prototype.hasOwnProperty(k)) {
                 var f = $parent.prototype[k];
-                if (f != null && f.$clone$ != null) {
-                    f = f.$clone$();
 
-                    // skip constructors
-                    if (f == null) continue;
+                // constructor should not be copied
+                if (k != CNAME) {
+                    $template.prototype[k] = (f != null && f.$clone$ != null) ? f.$clone$() : f;
                 }
-                $template.prototype[k] = f;
             }
         }
     }
 
     // extend method cannot be overridden 
     $template.prototype.extend = function() {
-        var c = this.$clazz, l = arguments.length, f = arguments[l-1];
-        if (pkg.instanceOf(this, pkg.$Extended) === false) {
-            c = Class(c, pkg.$Extended, []);
+        var c = this.$clazz,
+            l = arguments.length,
+            f = arguments[l-1];
+
+        // replace the instance class with a new intermediate class
+        // that inherits the replaced class. it is done to support
+        // $super method calls.
+        if (this.$extended !== true) {
+            c = Class(c,[]);
+            this.$extended = true;               // mark the instance as extended to avoid double extending.
             c.$name = this.$clazz.$name;
             this.$clazz = c;
         }
@@ -635,7 +654,7 @@ pkg.Class = make_template(null, function() {
                     // the class instance
                     var pv = this[n]; 
                     if (pv != null && this.hasOwnProperty(n) === false)  {
-                        this[n] = (pv.$clone$ != null ? pv.$clone$() : ProxyMethod(n, pv)); 
+                        this[n] = (pv.$clone$ != null ? pv.$clone$() : sProxyMethod(n, pv));
                     }
                     
                     this[n] = createMethod(n, f[i], this, c);
@@ -644,7 +663,7 @@ pkg.Class = make_template(null, function() {
             l--;
         }
 
-        // add new interfaces 
+        // add new interfaces if they
         for(var i=0; i < l; i++) {
             if (pkg.instanceOf(arguments[i], pkg.Interface) === false) {
                 throw new Error("Invalid argument: " + arguments[i]);
@@ -656,23 +675,29 @@ pkg.Class = make_template(null, function() {
 
     $template.prototype.$super = function() {
         if (pkg.$caller) {
-            var name = pkg.$caller.methodName, $s = pkg.$caller.boundTo.$parent, args = arguments;
+            var name = pkg.$caller.methodName,
+                $s   = pkg.$caller.boundTo.$parent,
+                args = arguments;
+
             if (arguments.length > 0 && typeof arguments[0] === 'function') {
                 name = arguments[0].methodName;
                 args = [];
-                // slice is slower Array.prototype.slice.call(arguments, 1);
                 for(var i=1; i < arguments.length; i++) args[i-1] = arguments[i];
             }
 
-            var params = args.length;
             while ($s != null) {
                 var m = $s.prototype[name];
-                if (m && (typeof m.methods === "undefined" || m.methods[params])) {
+
+                // if the method found and the method is
+                //     not proxy method       <or>
+                //     single proxy method    <or>
+                //     multiple proxy method that contains a method with the required arity
+                if (m != null && (typeof m.methods === "undefined" || m.methods[args.length] != null)) {
                     return m.apply(this, args);
                 }
                 $s = $s.$parent;
             }
-            mnf.call(this, name, params);
+            mnf.call(this, name, args.length);
         }
         throw new Error("$super is called outside of class context");
     };
@@ -712,6 +737,14 @@ pkg.Class = make_template(null, function() {
         };
     }
 
+    /**
+     * Create method
+     * @param  {String} n     a method name
+     * @param  {Function} f   a method to be added
+     * @param  {Object} obj   an object where all declared method sits
+     * @param  {Class} clazz  a class
+     * @return {Function}     a method
+     */
     function createMethod(n, f, obj, clazz) {
         var arity = f.length, vv = obj[n];
 
@@ -729,8 +762,14 @@ pkg.Class = make_template(null, function() {
 
         if (typeof vv === 'undefined') {
             // declare new class method
-            return ProxyMethod(n, f); // no parent or previously declared method exists, 
-                                      // create new proxy method
+            return sProxyMethod(n, f); // no parent or previously declared method exists,
+                                       // create new proxy single method
+
+            // Pay attention we cannot avoid of proxy creation since we
+            // cannot say in advance if the declared method will call
+            // super. For instance class can declare method "b" and which
+            // doesn't have an implementation on the level of parent class
+            // but it can call super method "a" method !
         }
 
         if (typeof vv === 'function') {
@@ -750,8 +789,7 @@ pkg.Class = make_template(null, function() {
                     // single method has been defined in this class and arity of
                     // the single method differs from arity of the new method 
                     // than overload the old method with new one method  
-                             
-                    var sw = ProxyMethod(n);
+                    var sw = nProxyMethod(n);
                     sw.methods[vv.f.length] = vv.f;
                     sw.methods[arity] = f;
                     return sw;
@@ -766,12 +804,12 @@ pkg.Class = make_template(null, function() {
             if (arity == vv.length) {  // the new method arity is the same to old method
                                        // arity than override it with single method proxy 
                 
-                return ProxyMethod(n, f);  // new single proxy method 
+                return sProxyMethod(n, f);  // new single proxy method
             }
 
             // the new method arity is not the same to new one
             // than overload it with new one ()
-            var sw = ProxyMethod(n);
+            var sw = nProxyMethod(n);
             vv.methodName = n;
             vv.boundTo    = clazz;
             sw.methods[vv.length] = vv;
@@ -821,13 +859,15 @@ pkg.Class = make_template(null, function() {
      * extended with
      * @method extend
      */
-    var extend = function(df) {
+    function extend(df) {
         if (Array.isArray(df) === false) {
             throw new Error("Invalid class definition '" + df + "', array is expected");
         }
 
         for(var i=0; i < df.length; i++) {
-            var f = df[i], n = FN(f), arity = f.length;
+            var f     = df[i],
+                n     = FN(f),
+                arity = f.length;
 
             // map user defined constructor to internal constructor name
             if (n == CDNAME) n = CNAME;
@@ -836,17 +876,21 @@ pkg.Class = make_template(null, function() {
                 // populate prototype fields if a special method has been defined 
                 if (n === "$prototype") {
                     var protoFields = {};
-                    f.call(protoFields, $template);
+                    f.call(protoFields, this);  // call $prototype to populate methods in protoFields
+                                                     // dictionary
+
+                    // add "boundTo" and "methodName" fields to the prototype methods
+                    // and add the new method to class prototype
                     for(var k in protoFields) {
                         if (protoFields.hasOwnProperty(k)) {
                             var protoFieldVal = protoFields[k];
                             // map user defined constructor to internal constructor name
                             if (k == CDNAME) k = CNAME;
 
-                            $template.prototype[k] = protoFieldVal;
+                            this.prototype[k] = protoFieldVal;
                             if (protoFieldVal && typeof protoFieldVal === "function") {
                                 protoFieldVal.methodName = k;
-                                protoFieldVal.boundTo = $template;
+                                protoFieldVal.boundTo = this;
                             }
                         }
                     }
@@ -855,16 +899,16 @@ pkg.Class = make_template(null, function() {
                 
                 // populate class level fields if a special method has been defined 
                 if (n === "$clazz") {
-                    f.call($template);
+                    f.call(this);
                     continue;
                 }
             }
 
-            $template.prototype[n] = createMethod(n, f, $template.prototype, $template); 
+            this.prototype[n] = createMethod(n, f, this.prototype, this);
         }
     };
 
-    extend(df);
+    extend.call($template, df);
 
     // populate static fields 
     // TODO: exclude the basic static methods and static constant
@@ -872,18 +916,30 @@ pkg.Class = make_template(null, function() {
     if ($parent != null) {
         for (var k in $parent) {
             if (k[0] != '$' && $parent.hasOwnProperty(k) && $template.hasOwnProperty(k) === false) {
-                $template[k] = $parent[k];
+                var val = $parent[k];
+
+                // clone direct JS Object
+                if (val != null && val.constructor === Object) {
+                    var nval = {};
+                    for (var vk in val) {
+                        if (val.hasOwnProperty(vk)) nval[vk] = val[vk];
+                    }
+                    $template[k] = nval;
+                }
+                else {
+                    $template[k] = $parent[k];
+                }
             }
         }
     }
 
-    $template.extend = extend; // add extend later to avoid it duplication as a class static field 
+    $template.extend = extend; // add extend later to avoid the method be inherited as a class static field
 
     // add parent class constructor(s) if the class doesn't declare own 
     // constructors
     if ($template.$parent != null && 
         $template.$parent.prototype[CNAME] != null &&
-        typeof $template.prototype[CNAME] === "undefined")
+        $template.prototype[CNAME] == null)
     {
         $template.prototype[CNAME] = $template.$parent.prototype[CNAME];
     }
@@ -895,9 +951,9 @@ var Class    = pkg.Class,
     $busy    = 1, 
     $cachedO = pkg.$cachedO = {}, 
     $cachedE = pkg.$cachedE = [],
-    $f       = []; // stores method that wait for redness
+    $readyCallbacks = []; // stores method that wait for redness
 
-pkg.$cacheSize = 5000;
+pkg.$cacheSize = 7777;
 
 /**
  * Get an object by the given key from cache (and cached it if necessary)
@@ -1016,15 +1072,15 @@ pkg.ready = function() {
         if ($busy > 0) $busy--;
     }
     else {
-        if (arguments.length == 1 && $busy === 0 && $f.length === 0) {
+        if (arguments.length == 1 && $busy === 0 && $readyCallbacks.length === 0) {
             arguments[0]();
             return;
         }
     }
 
-    for(var i = 0; i < arguments.length; i++) $f.push(arguments[i]);
-    while($busy === 0 && $f.length > 0) {
-        $f.shift()();
+    for(var i = 0; i < arguments.length; i++) $readyCallbacks.push(arguments[i]);
+    while($busy === 0 && $readyCallbacks.length > 0) {
+        $readyCallbacks.shift()();
     }
 };
 
@@ -1201,7 +1257,1898 @@ else {
 
 })();
 
+(function(pkg, Class) {
 
+pkg.NONE        = 0;
+pkg.LEFT        = 1;
+pkg.RIGHT       = 2;
+pkg.TOP         = 4;
+pkg.BOTTOM      = 8;
+pkg.CENTER      = 16;
+pkg.HORIZONTAL  = 32;
+pkg.VERTICAL    = 64;
+pkg.TEMPORARY   = 128;
+
+pkg.UsePsSize   = pkg.USE_PS_SIZE = 512;
+pkg.STRETCH     = 256;
+
+pkg.TopLeft     = pkg.LEFT  | pkg.TOP;
+pkg.TopRight    = pkg.RIGHT | pkg.TOP;
+pkg.BottomLeft  = pkg.LEFT  | pkg.BOTTOM;
+pkg.BottomRight = pkg.RIGHT | pkg.BOTTOM;
+
+// collect constraints into a separate dictionary
+var $ctrs = {};
+for(var k in pkg) {
+    if (pkg.hasOwnProperty(k) && /^\d+$/.test(pkg[k])) {
+        $ctrs[k] = pkg[k];
+        $ctrs[k.toUpperCase()] = pkg[k];
+        var lc = k.toLowerCase();
+        $ctrs[lc] = pkg[k];
+        $ctrs[lc[0].toUpperCase() + lc.substring(1)] = pkg[k];
+    }
+}
+
+pkg.$constraints = function(v) {
+    return (  v != null &&
+             (typeof v === "string" || v.constructor === String)) &&
+            $ctrs[v] != null ? $ctrs[v] : v;
+};
+
+/**
+ * Layout package provides number of classes, interfaces, methods and 
+ * variables that allows developer easily implement rules based layouting 
+ * of hierarchy of rectangular elements. The package has no relation 
+ * to any concrete UI, but it can be applied to a required UI framework
+ *
+ * The package declares the following constraints constants:
+     
+    - **NONE** no constraints 
+    - **LEFT** left alignment constraint
+    - **TOP** top alignment constraint
+    - **RIGHT** right alignment constraint
+    - **BOTTOM** bottom alignment constraint
+    - **CENTER** center alignment constraint
+    - **HORIZONTAL** horizontal elements alignment constraint
+    - **VERTICAL** vertical elements alignment constraint
+    - **TopLeft** top left alignment constraint
+    - **TopRight** top right alignment constraint
+    - **BottomLeft** bottom left alignment constraint
+    - **BottomRight** bottom right alignment constraint
+    - **STRETCH** stretch element
+    - **USE_PS_SIZE** use preferred size for an element
+ * 
+ * @module layout
+ * @main layout
+ */
+
+/**
+ * Layout manager interface
+ * @class zebra.layout.Layout
+ * @interface
+ */
+
+/**
+ * Calculate preferred size of the given component
+ * @param {zebra.layout.Layoutable} t a target layoutable component
+ * @method calcPreferredSize
+ */
+
+/**
+ * Layout children components of the specified layoutable target component 
+ * @param {zebra.layout.Layoutable} t a target layoutable component
+ * @method doLayout
+ */
+var L = pkg.Layout = new zebra.Interface();
+
+/**
+ * Find a direct children element for the given children component 
+ * and the specified parent component
+ * @param  {zebra.layout.Layoutable} parent  a parent component 
+ * @param  {zebra.layout.Layoutable} child  a children component
+ * @return {zebra.layout.Layoutable}  a direct children component
+ * @method getDirectChild
+ * @api zebra.layout.getDirectChild()
+ */
+pkg.getDirectChild = function(parent,child){
+    for(; child != null && child.parent != parent; child = child.parent) {}
+    return child;
+};
+
+/**
+ * Find a direct component located at the given location of the specified 
+ * parent component and the specified parent component
+ * @param  {Integer} x a x coordinate relatively to the parent component
+ * @param  {Integer} y a y coordinate relatively to the parent component
+ * @param  {zebra.layout.Layoutable} parent  a parent component 
+ * @return {zebra.layout.Layoutable} an index of direct children component 
+ * or -1 if no a children component can be found
+ * @method getDirectAt
+ * @api zebra.layout.getDirectAt()
+ */
+pkg.getDirectAt = function(x,y,p){
+    for(var i = 0;i < p.kids.length; i++){
+        var c = p.kids[i];
+        if (c.isVisible === true && c.x <= x && c.y <= y && c.x + c.width > x && c.y + c.height > y) return i;
+    }
+    return -1;
+};
+
+/**
+ * Get a top (the highest in component hierarchy) parent component 
+ * of the given component 
+ * @param  {zebra.layout.Layoutable} c a component
+ * @return {zebra.layout.Layoutable}  a top parent component
+ * @method getTopParent
+ * @api zebra.layout.getTopParent()
+ */
+pkg.getTopParent = function(c){
+    for(; c != null && c.parent != null; c = c.parent);
+    return c;
+};
+
+/**
+ * Translate the given relative location into the parent relative location. 
+ * @param  {Integer} [x] a x coordinate relatively  to the given component
+ * @param  {Integer} [y] a y coordinate relatively  to the given component
+ * @param  {zebra.layout.Layoutable} c a component
+ * @param  {zebra.layout.Layoutable} [p] a parent component
+ * @return {Object} a relative to the given parent UI component location:
+ 
+        { x:{Integer}, y:{Integer} } 
+
+ * @method toParentOrigin
+ * @api zebra.layout.toParentOrigin()
+ */
+pkg.toParentOrigin = function(x,y,c,p){
+    if (arguments.length == 1) {
+        c = x;
+        x = y = 0;
+        p = null;
+    }
+    else {
+        if (arguments.length < 4) p = null;
+    }
+
+    while (c != p) {
+        x += c.x;
+        y += c.y;
+        c = c.parent;
+    }
+    return { x:x, y:y };
+};
+
+/**
+ * Convert the given component location into relative 
+ * location of the specified children component successor.      
+ * @param  {Integer} x a x coordinate relatively to the given 
+ * component
+ * @param  {Integer} y a y coordinate relatively to the given 
+ * component
+ * @param  {zebra.layout.Layoutable} p a component
+ * @param  {zebra.layout.Layoutable} c a children successor component
+ * @return {Object} a relative location 
+ *
+ *      { x:{Integer}, y:{Integer} } 
+ *
+ * @method toChildOrigin
+ * @api zebra.layout.toChildOrigin()
+ */
+pkg.toChildOrigin = function(x, y, p, c){
+    while(c != p){
+        x -= c.x;
+        y -= c.y;
+        c = c.parent;
+    }
+    return { x:x, y:y };
+};
+
+/**
+ * Calculate maximal preferred width and height of 
+ * children component of the given target component.
+ * @param  {zebra.layout.Layoutable} target a target component  
+ * @return {Object} a maximal preferred width and height 
+ 
+        { width:{Integer}, height:{Integer} }
+
+ * @method getMaxPreferredSize
+ * @api zebra.layout.getMaxPreferredSize()
+ */
+pkg.getMaxPreferredSize = function(target) {
+    var maxWidth = 0, maxHeight = 0;
+    for(var i = 0;i < target.kids.length; i++){
+        var l = target.kids[i];
+        if (l.isVisible === true){
+            var ps = l.getPreferredSize();
+            if (ps.width > maxWidth) maxWidth = ps.width;
+            if (ps.height > maxHeight) maxHeight = ps.height;
+        }
+    }
+    return { width:maxWidth, height:maxHeight };
+};
+
+pkg.isAncestorOf = function(p,c){
+    for(; c != null && c != p; c = c.parent);
+    return c != null;
+};
+
+/**
+ * Layoutable class defines rectangular component that 
+ * has elementary metrical properties like width, height 
+ * and location and can be a participant of layout management 
+ * process. Layoutable component is container that can 
+ * contains other layoutable component as its children. 
+ * The children components are ordered by applying a layout 
+ * manager of its parent component. 
+ * @class zebra.layout.Layoutable
+ * @constructor
+ * @extends {zebra.layout.Layout}
+ */
+pkg.Layoutable = Class(L, [
+    function $prototype() {
+        /**
+         * x coordinate 
+         * @attribute x
+         * @default 0
+         * @readOnly
+         * @type {Integer}
+         */
+
+        /**
+        * y coordinate 
+        * @attribute y
+        * @default 0
+        * @readOnly
+        * @type {Integer}
+        */
+
+        /**
+        * Width of rectangular area 
+        * @attribute width
+        * @default 0
+        * @readOnly
+        * @type {Integer}
+        */
+
+        /**
+        * Height of rectangular area 
+        * @attribute height
+        * @default 0
+        * @readOnly
+        * @type {Integer}
+        */
+
+        /**
+        * Indicate a layoutable component visibility
+        * @attribute isVisible
+        * @default true
+        * @readOnly
+        * @type {Boolean}
+        */
+
+        /**
+        * Indicate a layoutable component validity 
+        * @attribute isValid
+        * @default false
+        * @readOnly
+        * @type {Boolean}
+        */
+
+        /**
+        * Reference to a parent layoutable component
+        * @attribute parent
+        * @default null
+        * @readOnly
+        * @type {zebra.layout.Layoutable}
+        */
+
+        this.x = this.y = this.height = this.width = this.cachedHeight= 0;
+
+        this.psWidth = this.psHeight = this.cachedWidth = -1;
+        this.isLayoutValid = this.isValid = false;
+
+        /**
+         * The component layout constraints. The constraints is specific to 
+         * the parent component layout manager value that customizes the 
+         * children component layouting on the parent component. 
+         * @attribute constraints 
+         * @default null
+         * @type {Object}
+         */
+        this.constraints = this.parent = null;
+        this.isVisible = true;
+
+        function $normPath(p) {
+            p = p.trim();
+            if (p[0] == '/') return p;
+            if (p[0] == '#') return "//*[@id='" + p.substring(1).trim() + "']";
+            return "//" + (p[0] == '.' ? p.substring(1).trim() : p);
+        }
+
+        /**
+         * Find a first children component that satisfies the passed path expression. 
+         * @param  {String} path path expression. Path expression is simplified form 
+         * of XPath-like expression:
+         
+        "/Panel"  - find first children that is an instance of zebra.ui.Panel
+        "/Panel[@id='top']" - find first children that is an instance of zebra.ui.Panel with "id" property that equals "top"
+        "//Panel"  - find first children that is an instance of zebra.ui.Panel recursively 
+        
+         * Shortcuts:
+        
+            "#id" - find a component by its "id" attribute value. This is equivalent of "//*[@id='a component id property']" path
+            "zebra.ui.Button" - find a component by its class.  This is equivalent of "//className" path
+            
+         *
+         * @method find
+         * @return {zebra.layout.Layoutable} found children component or null if 
+         * no children component can be found
+         */
+        this.find = function(path){
+            var res = null;
+            zebra.util.findInTree(this, $normPath(path),
+                function(node, name) {
+                    return node.$clazz != null && zebra.instanceOf(node, zebra.Class.forName(name)); 
+                },
+
+                function(kid) {
+                   res = kid;
+                   return true;
+            });
+            return res;
+        };
+
+        /**
+         * Find children components that satisfy the passed path expression. 
+         * @param  {String} path path expression. Path expression is 
+         * simplified form of XPath-like expression:
+         
+         "/Panel"  - find first children that is an instance of zebra.ui.Panel
+         "/Panel[@id='top']" - find first children that is an instance of zebra.ui.Panel with "id" property that equals "top"
+         "//Panel"  - find first children that is an instance of zebra.ui.Panel recursively 
+
+         * Shortcuts:
+        
+            "#id" - find a component by its "id" attribute value. This is equivalent of "//*[@id='a component id property']" path
+            "zebra.ui.Button" - find a component by its class.  This is equivalent of "//className" path
+         
+         * @param {Function} [callback] function that is called every time a 
+         * new children component has been found.  
+         * @method findAll
+         * @return {Array}  return array of found children components if 
+         * passed function has not been passed
+         */
+        this.findAll = function(path, callback){
+            var res = [];
+            if (callback == null) {
+                callback =  function(kid) {
+                    res.push(kid);
+                    return false;
+                };
+            }
+
+            zebra.util.findInTree(this, $normPath(path),
+                function(node, name) {
+                    return node.$clazz != null && zebra.instanceOf(node, zebra.Class.forName(name)); 
+                }, callback);
+            return res;
+        };
+
+        /**
+         * Set the given id for the component 
+         * @chainable 
+         * @param {String} id an ID to be set
+         * @method setId
+         */
+        this.setId = function(id) {
+            this.id = id;
+            return this;
+        };
+
+        /**
+         * Apply the given set of properties to the given component or a number of children
+         * components. 
+ 
+        var c = new zebra.layout.Layoutable();
+        c.properties({
+            width: [100, 100],
+            location: [10,10],
+            layout: new zebra.layout.BorderLayout()
+        })
+
+        c.add(new zebra.layout.Layoutable()).add(zebra.layout.Layoutable()).add(zebra.layout.Layoutable());
+        c.properties("//*", {
+            size: [100, 200]
+        });
+
+
+         *
+         * @param  {String} [path]  a path to find children components
+         * @param  {Object} props a dictionary of properties to be applied
+         * @return {zebra.ui.Layoutable} a component itself
+         * @chainable
+         * @method properties
+         */
+        this.properties = function(path, props) {
+            if (arguments.length === 1) {
+                return zebra.properties(this, path);     
+            }
+
+            this.findAll(path, function(kid) {
+                zebra.properties(kid, props);   
+            });
+            return this;
+        };
+
+        /**
+         * Validate the component metrics. The method is called as 
+         * a one step of the component validation procedure. The 
+         * method causes "recalc" method execution if the method
+         * has been implemented and the component is in invalid
+         * state. It is supposed the "recalc" method has to be
+         * implemented by a component as safe place where the 
+         * component metrics can be calculated. Component 
+         * metrics is individual for the given component 
+         * properties that has influence to the component 
+         * preferred size value. In many cases the properties
+         * calculation has to be minimized what can be done
+         * by moving the calculation in "recalc" method  
+         * @method validateMetric
+         * @protected
+         */
+        this.validateMetric = function(){
+            if (this.isValid === false) {
+                if (this.recalc != null) this.recalc();
+                this.isValid = true;
+            }
+        };
+
+        /**
+         * By default there is no any implementation of "recalc" method
+         * in the layoutable component. In other words the method doesn't
+         * exist. Developer should implement the method if the need a proper
+         * and efficient place  to calculate component properties that 
+         * have influence to the component preferred size. The "recalc"
+         * method is called only when it is really necessary to compute
+         * the component metrics.
+         * @method recalc
+         * @protected
+         */
+
+        /**
+         * Invalidate the component layout. Layout invalidation means the 
+         * component children components have to be placed with the component
+         * layout manager. Layout invalidation causes a parent component 
+         * layout is also invalidated.
+         * @method invalidateLayout
+         * @protected
+         */
+        this.invalidateLayout = function(){
+            this.isLayoutValid = false;
+            if (this.parent != null) this.parent.invalidateLayout();
+        };
+
+        /**
+         * Invalidate component layout and metrics.
+         * @method invalidate
+         */
+        this.invalidate = function(){
+            this.isValid = this.isLayoutValid = false;
+            this.cachedWidth =  -1;
+            if (this.parent != null) this.parent.invalidate();
+        };
+
+        /**
+         * Force validation of the component metrics and layout if it is not valid
+         * @method validate
+         */
+        this.validate = function(){
+            this.validateMetric();
+            if (this.width > 0 && this.height > 0 &&
+                this.isLayoutValid === false && 
+                this.isVisible === true)
+            {
+                this.layout.doLayout(this);
+                for(var i = 0;i < this.kids.length; i++) {
+                    this.kids[i].validate();
+                }
+                this.isLayoutValid = true;
+                if (this.laidout != null) this.laidout();
+            }
+        };
+
+        /**
+         * The method can be implemented to be informed every time 
+         * the component has completed to layout its children components
+         * @method laidout
+         */
+
+        /**
+         * Get preferred size. The preferred size includes  top, left, 
+         * bottom and right paddings and 
+         * the size the component wants to have 
+         * @method getPreferredSize
+         * @return {Object} return size object the component wants to 
+         * have as the following structure:
+                
+         {width:{Integer}, height:{Integer}} object
+         
+         */
+        this.getPreferredSize = function(){
+            this.validateMetric();
+            if (this.cachedWidth < 0){
+                var ps = (this.psWidth < 0 || this.psHeight < 0) ? this.layout.calcPreferredSize(this)
+                                                                 : { width:0, height:0 };
+
+                ps.width  = this.psWidth  >= 0 ? this.psWidth
+                                               : ps.width  + this.getLeft() + this.getRight();
+                ps.height = this.psHeight >= 0 ? this.psHeight
+                                               : ps.height + this.getTop()  + this.getBottom();
+                this.cachedWidth  = ps.width;
+                this.cachedHeight = ps.height;
+                return ps;
+            }
+            return { width:this.cachedWidth,
+                     height:this.cachedHeight };
+        };
+
+        /**
+         * Get top padding.
+         * @method getTop
+         * @return {Integer} top padding in pixel
+         */
+        this.getTop = function ()  { return 0; };
+
+        /**
+         * Get left padding.
+         * @method getLeft
+         * @return {Integer} left padding in pixel
+         */
+        this.getLeft = function ()  { return 0; };
+
+        /**
+         * Get bottom padding.
+         * @method getBottom
+         * @return {Integer} bottom padding in pixel
+         */
+        this.getBottom = function ()  { return 0; };
+
+        /**
+         * Get right padding.
+         * @method getRight
+         * @return {Integer} right padding in pixel
+         */
+        this.getRight = function ()  { return 0; };
+
+        /**
+         * Set the parent component.  
+         * @protected
+         * @param {zebra.layout.Layoutable} o a parent component 
+         * @method setParent
+         * @protected
+         */
+        this.setParent = function (o){
+            if (o != this.parent){
+                this.parent = o;
+                this.invalidate();
+            }
+        };
+
+        /**
+         * Set the given layout manager that is used to place 
+         * children component. Layout manager is simple class 
+         * that defines number of rules concerning the way 
+         * children components have to be ordered on its parent 
+         * surface.  
+         * @method setLayout
+         * @param {zebra.ui.Layout} m a layout manager 
+         * @chainable 
+         */
+        this.setLayout = function (m){
+            if (m == null) throw new Error("Null layout");
+
+            if (this.layout != m){
+                var pl = this.layout;
+                this.layout = m;
+                this.invalidate();
+            }
+
+            return this;
+        };
+
+        /**
+         * Internal implementation of the component 
+         * preferred size calculation.  
+         * @param  {zebra.layout.Layoutable} target a component 
+         * for that the metric has to be calculated
+         * @return {Object} a preferred size. The method always 
+         * returns { width:10, height:10 } as the component preferred 
+         * size
+         * @private
+         * @method calcPreferredSize
+         */
+        this.calcPreferredSize = function (target){
+            return { width:10, height:10 };
+        };
+
+        /**
+         * By default layoutbable component itself implements 
+         * layout manager to order its children components.
+         * This method implementation does nothing, so children 
+         * component will placed according locations and sizes they 
+         * have set.  
+         * @method doLayout
+         * @private
+         */
+        this.doLayout = function (target) {};
+
+        /**
+         * Detect index of a children component.
+         * @param  {zebra.ui.Layoutbale} c a children component
+         * @method indexOf
+         * @return {Integer}
+         */
+        this.indexOf = function (c){
+            return this.kids.indexOf(c);
+        };
+
+        /**
+         * Insert the new children component at the given index with the specified layout constraints. 
+         * The passed constraints can be set via a layoutable component that is inserted. Just 
+         * set "constraints" property of in inserted component.
+         * @param  {Integer} i an index at that the new children component has to be inserted 
+         * @param  {Object} constr layout constraints of the new children component
+         * @param  {zebra.layout.Layoutbale} d a new children layoutable component to be added
+         * @return {zebra.layout.Layoutable} an inserted children layoutable component
+         * @method insert
+         */
+        this.insert = function(i,constr,d){
+            if (d.constraints != null) constr = d.constraints;
+            else                       d.constraints = constr;
+
+            if (i == this.kids.length) this.kids.push(d);
+            else this.kids.splice(i, 0, d);
+
+            d.setParent(this);
+
+            if (this.kidAdded != null) this.kidAdded(i, constr, d);
+            this.invalidate();
+            return d;
+        };
+
+        /**
+         * The method can be implemented to be informed every time a new component 
+         * has been inserted into the component
+         * @param  {Integer} i an index at that the new children component has been inserted 
+         * @param  {Object} constr layout constraints of the new children component
+         * @param  {zebra.layout.Layoutbale} d a new children layoutable component that has 
+         * been added
+         * @method kidAdded
+         */
+
+        /**
+         * Set the layoutable component location. Location is x, y coordinates relatively to 
+         * a parent component 
+         * @param  {Integer} xx x coordinate relatively to the layoutable component parent
+         * @param  {Integer} yy y coordinate relatively to the layoutable component parent
+         * @method setLocation
+         */
+        this.setLocation = function (xx,yy){
+            if (xx != this.x || this.y != yy){
+                var px = this.x, py = this.y;
+                this.x = xx;
+                this.y = yy;
+                if (this.relocated != null) this.relocated(px, py);
+            }
+        };
+
+        /**
+         * The method can be implemented to be informed every time the component
+         * has been moved
+         * @param  {Integer} px x previous coordinate of moved children component
+         * @param  {Integer} py y previous coordinate of moved children component
+         * @method relocated
+         */
+
+
+        /**
+         * Set the layoutable component bounds. Bounds defines the component location and size.
+         * @param  {Integer} x x coordinate relatively to the layoutable component parent
+         * @param  {Integer} y y coordinate relatively to the layoutable component parent
+         * @param  {Integer} w a width of the component
+         * @param  {Integer} h a height of the component
+         * @method setBounds
+         * @chainable
+         */
+        this.setBounds = function (x, y, w, h){
+            this.setLocation(x, y);
+            this.setSize(w, h);
+            return this;
+        };
+
+        /**
+         * Set the layoutable component size. 
+         * @param  {Integer} w a width of the component
+         * @param  {Integer} h a height of the component
+         * @method setSize
+         */
+        this.setSize = function (w,h){
+            if (w != this.width || h != this.height){
+                var pw = this.width, ph = this.height;
+                this.width = w;
+                this.height = h;
+                this.isLayoutValid = false;
+                if (this.resized != null) this.resized(pw, ph);
+            }
+            return this;
+        };
+
+        /**
+         * The method can be implemented to be informed every time the component
+         * has been resized
+         * @param  {Integer} w a previous width of the component
+         * @param  {Integer} h a previous height of the component
+         * @method resized
+         */
+
+        /**
+         * Get a children layoutable component by the given constraints.  
+         * @param  {zebra.layout.Layoutable} c a constraints
+         * @return {zebra.layout.Layoutable} a children component
+         * @method getByConstraints
+         */
+        this.getByConstraints = function (c) {
+            if (this.kids.length > 0){
+                for(var i = 0;i < this.kids.length; i++ ){
+                    var l = this.kids[i];
+                    if (c == l.constraints) return l;
+                }
+            }
+            return null;
+        };
+
+        /**
+         * Remove the given children component.
+         * @param {zebra.layout.Layoutable} c a children component to be removed
+         * @method remove
+         * @return {zebra.layout.Layoutable} a removed children component 
+         */
+        this.remove = function(c) { 
+            return this.removeAt(this.kids.indexOf(c)); 
+        };
+
+        /**
+         * Remove a children component at the specified position.
+         * @param {Integer} i a children component index at which it has to be removed 
+         * @method removeAt
+         * @return {zebra.layout.Layoutable} a removed children component 
+         */
+        this.removeAt = function (i){
+            var obj = this.kids[i];
+            obj.setParent(null);
+            if (obj.constraints) obj.constraints = null;
+            this.kids.splice(i, 1);
+            if (this.kidRemoved != null) this.kidRemoved(i, obj);
+            this.invalidate();
+            return obj;
+        };
+
+        /**
+         * Remove the component from its parent if it has a parent 
+         * @method removeMe
+         */
+        this.removeMe = function() {
+            var i = -1;
+            if (this.parent != null && (i = this.parent.indexOf(this)) >=0) {
+                this.parent.removeAt(i);
+            }
+        };
+
+        /**
+         * The method can be implemented to be informed every time a children component
+         * has been removed
+         * @param {Integer} i a children component index at which it has been removed 
+         * @param  {zebra.layout.Layoutable} c a children component that has been removed
+         * @method kidRemoved
+         */
+
+        /**
+         * Set the specified preferred size the component has to have. 
+         * Component preferred size is important thing that is widely 
+         * used to layout the component. Usually the preferred 
+         * size is calculated by a concrete component basing on 
+         * its metrics. For instance, label component calculates its
+         * preferred size basing on text size. But if it is required  
+         * the component preferred size can be fixed with the desired 
+         * value.
+         * @param  {Integer} w a preferred width. Pass "-1" as the 
+         * argument value to not set preferred width
+         * @param  {Integer} h a preferred height. Pass "-1" as the 
+         * argument value to not set preferred height
+         * @method setPreferredSize
+         */
+        this.setPreferredSize = function(w,h) {
+            if (w != this.psWidth || h != this.psHeight){
+                this.psWidth  = w;
+                this.psHeight = h;
+                this.invalidate();
+            }
+        };
+
+        /**
+         * Replace a children component at the specified index
+         * with the given new children component
+         * @param  {Integer} i an index of a children component to be replaced
+         * @param  {zebra.layout.Layoutable} d a new children 
+         * @return {zebra.layout.Layoutable} a previous component that has 
+         * been re-set with the new one
+         * @method setAt
+         */
+        this.setAt = function(i, d) {
+            var pd = this.removeAt(i);
+            if (d != null) this.insert(i, constr, d);
+            return pd;
+        };
+
+        /**
+         * Add the new children component with the given constraints 
+         * @param  {Object} constr a constraints of a new children component
+         * @param  {zebra.layout.Layoutable} d a new children component to 
+         * be added
+         * @method add
+         * @return {zebra.layout.Layoutable} added layoutable component 
+         */
+        this.add = function(constr,d) {
+            return (arguments.length == 1) ? this.insert(this.kids.length, null, constr) 
+                                           : this.insert(this.kids.length, constr, d);
+        };
+
+        // speedup constructor execution
+        this[''] = function() {
+            /**
+             *  Reference to children components 
+             *  @attribute kids
+             *  @type {Array}
+             *  @default empty array
+             *  @readOnly
+             */
+            this.kids = [];
+            
+            /**
+            * Layout manager that is used to order children layoutable components 
+            * @attribute layout
+            * @default itself
+            * @readOnly
+            * @type {zebra.layout.Layout}
+            */
+            this.layout = this;
+        };
+    }
+]);
+
+/**
+ *  Layout manager implementation that places layoutbale components 
+ *  on top of each other stretching its to fill all available parent 
+ *  component space 
+ *  @class zebra.layout.StackLayout
+ *  @constructor
+ */
+pkg.StackLayout = Class(L, [
+    function $prototype() {
+        this.calcPreferredSize = function (target){
+            return pkg.getMaxPreferredSize(target);
+        };
+
+        this.doLayout = function(t){
+            var top = t.getTop()  , hh = t.height - t.getBottom() - top,
+                left = t.getLeft(), ww = t.width - t.getRight() - left;
+
+            for(var i = 0;i < t.kids.length; i++){
+                var l = t.kids[i];
+                if (l.isVisible === true) {
+                    var ctr =l.constraints == null ? null : pkg.$constraints(l.constraints);
+
+                    if (ctr == pkg.USE_PS_SIZE) {
+                        var ps = l.getPreferredSize();
+                        l.setSize(ps.width, ps.height);
+                        l.setLocation(left + ~~((ww - ps.width )/2),
+                                      top  + ~~((hh - ps.height)/2) );
+                    }
+                    else {
+                        l.setSize(ww, hh);
+                        l.setLocation(left, top);
+                    }
+                }
+            }
+        };
+    }
+]);
+
+/**
+ *  Layout manager implementation that logically splits component area into five areas: TOP, BOTTOM, LEFT, RIGHT and CENTER.
+ *  TOP and BOTTOM components are stretched to fill all available space horizontally and are sized to have preferred height horizontally. 
+ *  LEFT and RIGHT components are stretched to fill all available space vertically and are sized to have preferred width vertically.
+ *  CENTER component is stretched to occupy all available space taking in account TOP, LEFT, RIGHT and BOTTOM components.
+ 
+       // create panel with border layout
+       var p = new zebra.ui.Panel(new zebra.layout.BorderLayout());
+       
+       // add children UI components with top, center and left constraints 
+       p.add(zebra.layout.TOP,    new zebra.ui.Label("Top"));
+       p.add(zebra.layout.CENTER, new zebra.ui.Label("Center"));
+       p.add(zebra.layout.LEFT,   new zebra.ui.Label("Left"));
+ 
+ * Construct the layout with the given vertical and horizontal gaps. 
+ * @param  {Integer} [hgap] horizontal gap. The gap is a horizontal distance between laid out components  
+ * @param  {Integer} [vgap] vertical gap. The gap is a vertical distance between laid out components  
+ * @constructor 
+ * @class zebra.layout.BorderLayout
+ * @extends {zebra.layout.Layout}
+ */
+pkg.BorderLayout = Class(L, [
+    function $prototype() {
+        /**
+         * Horizontal gap (space between components)
+         * @attribute hgap
+         * @default 0
+         * @readOnly
+         * @type {Integer}
+         */
+
+        /**
+         * Vertical gap (space between components)
+         * @attribute vgap
+         * @default 0
+         * @readOnly
+         * @type {Integer}
+         */
+        this.hgap = this.vgap = 0;
+
+        this[''] = function(hgap,vgap){
+            if (arguments.length > 0) {
+                this.hgap = this.vgap = hgap;    
+                if (arguments.length > 1) {
+                    this.vgap = vgap;
+                }
+            }
+        };
+
+        this.calcPreferredSize = function (target){
+            var center = null, west = null,  east = null, north = null, south = null, d = null;
+            for(var i = 0; i < target.kids.length; i++){
+                var l = target.kids[i];
+                if (l.isVisible === true){
+                    var ctr = pkg.$constraints(l.constraints);
+                    switch(ctr) {
+                       case pkg.CENTER : center = l;break;
+                       case pkg.TOP    : north  = l;break;
+                       case pkg.BOTTOM : south  = l;break;
+                       case pkg.LEFT   : west   = l;break;
+                       case pkg.RIGHT  : east   = l;break;
+                       default: throw new Error("Invalid constraints: " + ctr);
+                    }
+                }
+            }
+
+            var dim = { width:0, height:0 };
+            if (east != null) {
+                d = east.getPreferredSize();
+                dim.width += d.width + this.hgap;
+                dim.height = (d.height > dim.height ? d.height: dim.height );
+            }
+
+            if (west != null) {
+                d = west.getPreferredSize();
+                dim.width += d.width + this.hgap;
+                dim.height = d.height > dim.height ? d.height : dim.height;
+            }
+
+            if (center != null) {
+                d = center.getPreferredSize();
+                dim.width += d.width;
+                dim.height = d.height > dim.height ? d.height : dim.height;
+            }
+
+            if (north != null) {
+                d = north.getPreferredSize();
+                dim.width = d.width > dim.width ? d.width : dim.width;
+                dim.height += d.height + this.vgap;
+            }
+
+            if (south != null) {
+                d = south.getPreferredSize();
+                dim.width = d.width > dim.width ? d.width : dim.width;
+                dim.height += d.height + this.vgap;
+            }
+            return dim;
+        };
+
+        this.doLayout = function(t){
+            var top    = t.getTop(),
+                bottom = t.height - t.getBottom(),
+                left   = t.getLeft(),
+                right  = t.width - t.getRight(),
+                center = null,
+                west   = null,
+                east   = null;
+
+            for(var i = 0;i < t.kids.length; i++){
+                var l = t.kids[i];
+                if (l.isVisible === true) {
+                    var ctr = pkg.$constraints(l.constraints);
+                    switch(ctr) {
+                        case pkg.CENTER: center = l; break;
+                        case pkg.TOP :
+                            var ps = l.getPreferredSize();
+                            l.setLocation(left, top);
+                            l.setSize(right - left, ps.height);
+                            top += ps.height + this.vgap;
+                            break;
+                        case pkg.BOTTOM:
+                            var ps = l.getPreferredSize();
+                            l.setLocation(left, bottom - ps.height);
+                            l.setSize(right - left, ps.height);
+                            bottom -= ps.height + this.vgap;
+                            break;
+                        case pkg.LEFT: west = l; break;
+                        case pkg.RIGHT: east = l; break;
+                        default: throw new Error("Invalid constraints: " + ctr);
+                    }
+                }
+            }
+
+            if (east != null){
+                var d = east.getPreferredSize();
+                east.setLocation(right - d.width, top);
+                east.setSize(d.width, bottom - top);
+                right -= d.width + this.hgap;
+            }
+
+            if (west != null){
+                var d = west.getPreferredSize();
+                west.setLocation(left, top);
+                west.setSize(d.width, bottom - top);
+                left += d.width + this.hgap;
+            }
+
+            if (center != null){
+                center.setLocation(left, top);
+                center.setSize(right - left, bottom - top);
+            }
+        };
+    }
+]);
+
+/**
+ * Rester layout manager can be used to use absolute position of 
+ * layoutable components. That means all components will be laid 
+ * out according coordinates and size they have. Raster layout manager 
+ * provides extra possibilities to control children components placing. 
+ * It is possible to align components by specifying layout constraints, 
+ * size component to its preferred size and so on.  
+ * @param {Integer} [m] flag to add extra rule to components layouting. 
+ * For instance use zebra.layout.USE_PS_SIZE as the flag value to set 
+ * components size to its preferred sizes.  
+ * @class  zebra.layout.RasterLayout
+ * @constructor
+ * @extends {zebra.layout.Layout}
+ */
+pkg.RasterLayout = Class(L, [
+    function $prototype() {
+        this.calcPreferredSize = function(c){
+            var m = { width:0, height:0 }, b = (this.flag & pkg.USE_PS_SIZE) > 0;
+            for(var i = 0;i < c.kids.length; i++ ){
+                var el = c.kids[i];
+                if (el.isVisible === true){
+                    var ps = b ? el.getPreferredSize() : { width:el.width, height:el.height },
+                        px = el.x + ps.width, py = el.y + ps.height;
+                    if (px > m.width) m.width = px;
+                    if (py > m.height) m.height = py;
+                }
+            }
+            return m;
+        };
+
+        this.doLayout = function(c){
+            var r = c.width - c.getRight(), 
+                b = c.height - c.getBottom(),
+                usePsSize = (this.flag & pkg.USE_PS_SIZE) > 0;
+
+            for(var i = 0;i < c.kids.length; i++){
+                var el = c.kids[i], ww = 0, hh = 0;
+
+                if (el.isVisible === true){
+                    if (usePsSize){
+                        var ps = el.getPreferredSize();
+                        ww = ps.width;
+                        hh = ps.height;
+                    }
+                    else{
+                        ww = el.width;
+                        hh = el.height;
+                    }
+
+                    var ctr = el.constraints == null ? null : pkg.$constraints(el.constraints);
+
+                    if (ctr != null) {
+                        if ((ctr & pkg.HORIZONTAL)  > 0) ww = r - el.x;
+                        if ((ctr & pkg.VERTICAL)    > 0) hh = b - el.y;
+                    }
+                    el.setSize(ww, hh);
+
+                    if (ctr != null) {
+                        var x = el.x, y = el.y;
+                        if (ctr == pkg.CENTER) {
+                            x = (c.width - ww)/2;
+                            y = (c.height - hh)/2;
+                        }
+                        else {
+                            if ((ctr & pkg.TOP) > 0)  y = 0;
+                            else
+                            if ((ctr & pkg.BOTTOM) > 0)  y = c.height - hh;
+
+                            if ((ctr & pkg.LEFT) > 0)  x = 0;
+                            else
+                            if ((ctr & pkg.RIGHT) > 0)  x = c.width - ww;
+                        }
+
+                        el.setLocation(x, y);
+                    }
+                }
+            }
+        };
+
+        //!!! speed up
+        this[''] = function(f) {
+            this.flag = f ? f : 0;
+        };
+    }
+]);
+
+/**
+ * Flow layout manager group and places components aligned with 
+ * different vertical and horizontal alignments
+  
+        // create panel and set flow layout for it
+        // components added to the panel will be placed 
+        // horizontally aligned at the center of the panel 
+        var p = new zebra.ui.Panel();
+        p.setLayout(new zebra.layout.FlowLayout(zebra.layout.CENTER, zebra.layout.CENTER));
+
+        // add three buttons into the panel with flow layout 
+        p.add(new zebra.ui.Button("Button 1"));
+        p.add(new zebra.ui.Button("Button 2"));
+        p.add(new zebra.ui.Button("Button 3"));
+  
+ * @param {Integer|String} [ax] (zebra.layout.LEFT by default) horizontal alignment:
+  
+     zebra.layout.LEFT - left alignment 
+     zebra.layout.RIGHT - right alignment 
+     zebra.layout.CENTER - center alignment 
+
+     or
+     
+     "left" 
+     "center"
+     "right"  
+ 
+ * @param {Integer|String} [ay] (zebra.layout.TOP by default) vertical alignment:
+ 
+     zebra.layout.TOP - top alignment 
+     zebra.layout.CENTER - center alignment 
+     zebra.layout.BOTTOM - bottom alignment 
+
+     or
+     
+     "top" 
+     "center"
+     "bottom"  
+
+ * @param {Integer|String} [dir] (zebra.layout.HORIZONTAL by default) a direction 
+ * the component has to be placed in the layout
+ 
+     zebra.layout.VERTICAL - vertical placed components
+     zebra.layout.HORIZONTAL - horizontal placed components 
+      
+     or
+     
+     "vertical" 
+     "horizontal"  
+    
+
+ * @param {Integer} [gap] a space in pixels between laid out components
+ * @class  zebra.layout.FlowLayout
+ * @constructor
+ * @extends {zebra.layout.Layout}
+ */
+pkg.FlowLayout = Class(L, [
+    function $prototype() {
+        /**
+         * Gap between laid out components
+         * @attribute gap
+         * @readOnly
+         * @type {Integer}
+         * @default 0
+         */
+        this.gap = 0;
+
+        /**
+         * Horizontal laid out components alignment 
+         * @attribute ax
+         * @readOnly
+         * @type {Integer|String}
+         * @default zebra.layout.LEFT
+         */
+        this.ax = pkg.LEFT;
+
+        /**
+         * Vertical laid out components alignment 
+         * @attribute ay
+         * @readOnly
+         * @type {Integer|String}
+         * @default zebra.layout.TOP
+         */
+        this.ay = pkg.TOP;
+
+        /**
+         * Laid out components direction
+         * @attribute direction
+         * @readOnly
+         * @type {Integer|String}
+         * @default zebra.layout.HORIZONTAL
+         */
+        this.direction = pkg.HORIZONTAL;
+
+        this.stretchLast = false;
+
+        this[''] =  function (ax,ay,dir,g){
+            if (arguments.length == 1) this.gap = ax;
+            else {
+                if (arguments.length >= 2) {
+                    this.ax = pkg.$constraints(ax);
+                    this.ay = pkg.$constraints(ay);
+                }
+
+                if (arguments.length > 2)  {
+                    dir = pkg.$constraints(dir);
+                    if (dir != pkg.HORIZONTAL && dir != pkg.VERTICAL) {
+                        throw new Error("Invalid direction " + dir);
+                    }
+                    this.direction = dir;
+                }
+
+                if (arguments.length > 3) this.gap = g;
+            }
+        };
+
+        this.calcPreferredSize = function (c){
+            var m = { width:0, height:0 }, cc = 0;
+            for(var i = 0;i < c.kids.length; i++){
+                var a = c.kids[i];
+                if (a.isVisible === true){
+                    var d = a.getPreferredSize();
+                    if (this.direction == pkg.HORIZONTAL){
+                        m.width += d.width;
+                        m.height = d.height > m.height ? d.height : m.height;
+                    }
+                    else {
+                        m.width = d.width > m.width ? d.width : m.width;
+                        m.height += d.height;
+                    }
+                    cc++;
+                }
+            }
+
+            var add = this.gap * (cc > 0 ? cc - 1 : 0);
+            if (this.direction == pkg.HORIZONTAL) m.width += add;
+            else m.height += add;
+            return m;
+        };
+
+        this.doLayout = function(c){
+            var psSize  = this.calcPreferredSize(c),
+                t       = c.getTop(),
+                l       = c.getLeft(),
+                lastOne = null,
+                ew      = c.width  - l - c.getRight(),
+                eh      = c.height - t - c.getBottom(),
+                px      = ((this.ax == pkg.RIGHT) ? ew - psSize.width
+                                                  : ((this.ax == pkg.CENTER) ? ~~((ew - psSize.width) / 2) : 0)) + l,
+                py      = ((this.ay == pkg.TOP  ) ? eh - psSize.height
+                                                  : ((this.ay == pkg.CENTER) ? ~~((eh - psSize.height) / 2) : 0)) + t;
+
+            for(var i = 0;i < c.kids.length; i++){
+                var a = c.kids[i];
+                if (a.isVisible === true){
+
+                    var d = a.getPreferredSize(),
+                        ctr = a.constraints == null ? null : pkg.$constraints(a.constraints);
+
+                    if (this.direction == pkg.HORIZONTAL){
+                        if (ctr === pkg.STRETCH) {
+                            d.height = c.height - t - c.getBottom();
+                        }
+
+                        a.setLocation(px, ~~((psSize.height - d.height) / 2) + py);
+                        px += (d.width + this.gap);
+                    }
+                    else {
+                        if (ctr === pkg.STRETCH) d.width = c.width - l - c.getRight();
+                        a.setLocation(px + ~~((psSize.width - d.width) / 2), py);
+                        py += d.height + this.gap;
+                    }
+
+                    a.setSize(d.width, d.height);
+                    lastOne = a;
+                }
+            }
+
+            if (lastOne !== null && this.stretchLast === true){
+                if (this.direction == pkg.HORIZONTAL) {
+                    lastOne.setSize(c.width - lastOne.x - c.getRight(), lastOne.height);
+                }
+                else {
+                    lastOne.setSize(lastOne.width, c.height - lastOne.y - c.getBottom());
+                }
+            }
+        };
+    }
+]);
+
+/**
+ * List layout places components vertically one by one 
+  
+        // create panel and set list layout for it
+        var p = new zebra.ui.Panel();
+        p.setLayout(new zebra.layout.ListLayout());
+
+        // add three buttons into the panel with list layout 
+        p.add(new zebra.ui.Button("Item 1"));
+        p.add(new zebra.ui.Button("Item 2"));
+        p.add(new zebra.ui.Button("Item 3"));
+  
+ * @param {Integer|String} [ax] horizontal list item alignment:
+  
+     zebra.layout.LEFT - left alignment 
+     zebra.layout.RIGHT - right alignment 
+     zebra.layout.CENTER - center alignment 
+     zebra.layout.STRETCH - stretching item to occupy the whole horizontal space
+
+     or
+
+     "left"
+     "right"
+     "center"
+     "stretch"
+
+ * @param {Integer} [gap] a space in pixels between laid out components
+ * @class  zebra.layout.ListLayout
+ * @constructor
+ * @extends {zebra.layout.Layout}
+ */
+pkg.ListLayout = Class(L,[
+    function $prototype() {
+        this[''] = function (ax, gap) {
+            if (arguments.length == 1) {
+                gap = ax;
+            }
+
+            ax = (arguments.length <= 1) ? pkg.STRETCH : pkg.$constraints(ax);
+
+            if (arguments.length === 0) {
+                gap = 0;
+            }
+
+            if (ax != pkg.STRETCH && ax != pkg.LEFT && 
+                ax != pkg.RIGHT && ax != pkg.CENTER) 
+            {
+                throw new Error("Invalid alignment");
+            }
+
+            /**
+             * Horizontal list items alignment 
+             * @attribute ax
+             * @type {Integer}
+             * @readOnly
+             */
+            this.ax = ax;
+
+            /**
+             * Pixel gap between list items
+             * @attribute gap
+             * @type {Integer}
+             * @readOnly
+             */
+            this.gap = gap;
+        };
+
+        this.calcPreferredSize = function (lw){
+            var w = 0, h = 0, c = 0;
+            for(var i = 0; i < lw.kids.length; i++){
+                var kid = lw.kids[i];
+                if (kid.isVisible === true){
+                    var d = kid.getPreferredSize();
+                    h += (d.height + (c > 0 ? this.gap : 0));
+                    c++;
+                    if (w < d.width) w = d.width;
+                }
+            }
+            return { width:w, height:h };
+        };
+
+        this.doLayout = function (lw){
+            var x   = lw.getLeft(),
+                y   = lw.getTop(),
+                psw = lw.width - x - lw.getRight();
+
+            for(var i = 0;i < lw.kids.length; i++){
+                var cc = lw.kids[i];
+
+                if (cc.isVisible === true){
+                    var d      = cc.getPreferredSize(),
+                        constr = cc.constraints == null ? this.ax : pkg.$constraints(cc.constraints);
+
+                    cc.setSize    ((constr == pkg.STRETCH) ? psw
+                                                           : d.width, d.height);
+                    cc.setLocation((constr == pkg.STRETCH) ? x
+                                                           : x + ((constr == pkg.RIGHT) ? psw - cc.width
+                                                                                        : ((constr == pkg.CENTER) ? ~~((psw - cc.width) / 2)
+                                                                                                                  : 0)), y);
+                    y += (d.height + this.gap);
+                }
+            }
+        };
+    }
+]);
+
+/**
+ * Percent layout places components vertically or horizontally and 
+ * sizes its according to its percentage constraints.
+  
+        // create panel and set percent layout for it
+        var p = new zebra.ui.Panel();
+        p.setLayout(new zebra.layout.PercentLayout());
+
+        // add three buttons to the panel that are laid out horizontally with
+        // percent layout according to its constraints: 20, 30 and 50 percents
+        p.add(20, new zebra.ui.Button("20%"));
+        p.add(30, new zebra.ui.Button("30%"));
+        p.add(50, new zebra.ui.Button("50%"));
+  
+ * @param {Integer|String} [dir] a direction of placing components. The 
+ * value can be "zebra.layout.HORIZONTAL" or "zebra.layout.VERTICAL" or 
+ * "horizontal" or "vertical" 
+ * @param {Integer} [gap] a space in pixels between laid out components
+ * @param {Boolean} [stretch] true if the component should be stretched 
+ * vertically or horizontally
+ * @class  zebra.layout.PercentLayout
+ * @constructor
+ * @extends {zebra.layout.Layout}
+ */
+pkg.PercentLayout = Class(L, [
+    function $prototype() {
+         /**
+          * Direction the components have to be placed (vertically or horizontally)
+          * @attribute direction
+          * @readOnly
+          * @type {Integer}
+          * @default zebra.layout.HORIZONTAL
+          */
+        this.direction = pkg.HORIZONTAL;
+
+        /**
+         * Pixel gap between components
+         * @attribute gap
+         * @readOnly
+         * @type {Integer}
+         * @default 2
+         */
+        this.gap = 2;
+
+        /**
+         * Boolean flag that say if the laid out components have 
+         * to be stretched vertically (if direction is set to zebra.layout.VERTICAL) 
+         * or horizontally (if direction is set to zebra.layout.HORIZONTAL) 
+         * @attribute stretch
+         * @readOnly
+         * @type {Integer}
+         * @default true
+         */
+        this.stretch = true;
+
+        this[''] = function(dir, gap, stretch) {
+            if (arguments.length > 0) {
+                this.direction = pkg.$constraints(dir);
+                if (this.direction != pkg.HORIZONTAL && this.direction != pkg.VERTICAL) {
+                    throw new Error("Invalid direction : " + this.direction);
+                }
+                
+                if (arguments.length > 1) this.gap = gap;
+                if (arguments.length > 2) this.stretch = stretch;
+            }
+        };
+
+        this.doLayout = function(target){
+            var right  = target.getRight(),
+                top    = target.getTop(),
+                bottom = target.getBottom(),
+                left   = target.getLeft(),
+                size   = target.kids.length,
+                rs     = -this.gap * (size === 0 ? 0 : size - 1),
+                loc    = 0,
+                ns     = 0;
+
+            if (this.direction == pkg.HORIZONTAL){
+                rs += target.width - left - right;
+                loc = left;
+            }
+            else{
+                rs += target.height - top - bottom;
+                loc = top;
+            }
+
+            for(var i = 0;i < size; i ++ ){
+                var l = target.kids[i], c = l.constraints, useps = (c == pkg.USE_PS_SIZE);
+                if (this.direction == pkg.HORIZONTAL){
+                    ns = ((size - 1) == i) ? target.width - right - loc
+                                           : (useps ? l.getPreferredSize().width
+                                                      : ~~((rs * c) / 100));
+                    var yy = top, hh = target.height - top - bottom;
+                    if (this.stretch === false) {
+                        var ph = hh;
+                        hh = l.getPreferredSize().height;
+                        yy = top + ~~((ph - hh) / 2);
+                    }
+
+                    l.setLocation(loc, yy);
+                    l.setSize(ns, hh);
+                }
+                else {
+                    ns = ((size - 1) == i) ? target.height - bottom - loc
+                                           : (useps ? l.getPreferredSize().height
+                                                    : ~~((rs * c) / 100));
+                    var xx = left, ww = target.width - left - right;
+                    if (this.stretch === false) {
+                        var pw = ww;
+                        ww = l.getPreferredSize().width;
+                        xx = left + ~~((pw - ww) / 2 );
+                    }
+
+                    l.setLocation(xx, loc);
+                    l.setSize(ww, ns);
+                }
+                loc += (ns + this.gap);
+            }
+        };
+
+        this.calcPreferredSize = function (target){
+            var max  = 0,
+                size = target.kids.length,
+                as   = this.gap * (size === 0 ? 0 : size - 1);
+
+            for(var i = 0;i < size; i++){
+                var d = target.kids[i].getPreferredSize();
+                if (this.direction == pkg.HORIZONTAL){
+                    if(d.height > max) max = d.height;
+                    as += d.width;
+                }
+                else {
+                    if(d.width > max) max = d.width;
+                    as += d.height;
+                }
+            }
+            return (this.direction == pkg.HORIZONTAL) ? { width:as, height:max }
+                                                      : { width:max, height:as };
+        };
+    }
+]);
+
+/**
+ * Grid layout manager constraints. Constraints says how a  component has to be placed in 
+ * grid layout virtual cell. The constraints specifies vertical and horizontal alignments, 
+ * a virtual cell paddings, etc.
+ * @param {Integer} [ax] a horizontal alignment 
+ * @param {Integer} [ay] a vertical alignment
+ * @param {Integer} [p]  a cell padding
+ * @constructor 
+ * @class zebra.layout.Constraints
+ */
+pkg.Constraints = Class([
+    function $prototype() {
+        /**
+         * Top cell padding
+         * @attribute top
+         * @type {Integer}
+         * @default 0
+         */
+
+        /**
+         * Left cell padding
+         * @attribute left
+         * @type {Integer}
+         * @default 0
+         */
+
+        /**
+         * Right cell padding
+         * @attribute right
+         * @type {Integer}
+         * @default 0
+         */
+
+        /**
+         * Bottom cell padding
+         * @attribute bottom
+         * @type {Integer}
+         * @default 0
+         */
+
+        /**
+         * Horizontal alignment
+         * @attribute ax
+         * @type {Integer}
+         * @default zebra.layout.STRETCH
+         */
+
+        /**
+         * Vertical alignment
+         * @attribute ay
+         * @type {Integer}
+         * @default zebra.layout.STRETCH
+         */
+
+        this.top = this.bottom = this.left = this.right = 0;
+        this.ay = this.ax = pkg.STRETCH;
+        this.rowSpan = this.colSpan = 1;
+
+        this[''] = function(ax, ay, p) {
+            if (arguments.length > 0) {
+                this.ax = pkg.$constraints(ax);
+                if (arguments.length > 1) this.ay = pkg.$constraints(ay);
+                if (arguments.length > 2) this.setPadding(p);
+            }
+        };
+
+        /**
+         * Set all four paddings (top, left, bottom, right) to the given value 
+         * @param  {Integer} p a padding
+         * @method setPadding
+         */
+
+        /**
+         * Set top, left, bottom, right paddings 
+         * @param  {Integer} t a top padding
+         * @param  {Integer} l a left padding
+         * @param  {Integer} b a bottom padding
+         * @param  {Integer} r a right padding
+         * @method setPadding
+         */
+        this.setPadding = function(t,l,b,r) {
+            if (arguments.length == 1) {
+                this.bottom = this.left = this.right = t;
+            }
+            else {
+                this.top    = t;
+                this.bottom = b;
+                this.left   = l;
+                this.right  = r;
+            }
+        };
+    }
+]);
+
+/**
+ * Grid layout manager. can be used to split a component area to 
+ * number of virtual cells where children components can be placed. 
+ * The way how the children components have to be laid out in the cells can 
+ * be customized by using "zebra.layout.Constraints" class:
+ 
+        // create constraints
+        var ctr = new zebra.layout.Constraints();
+        
+        // specify cell top, left, right, bottom paddings 
+        ctr.setPadding(8);
+        // say the component has to be left aligned in a 
+        // virtual cell of grid layout 
+        ctr.ax = zebra.layout.LEFT;
+
+        // create panel and set grid layout manager with two 
+        // virtual rows and columns
+        var p = new zebra.ui.Panel();
+        p.setLayout(new zebra.layout.GridLayout(2,2));
+
+        // add children component
+        p.add(ctr, new zebra.ui.Label("Cell 1,1"));
+        p.add(ctr, new zebra.ui.Label("Cell 1,2"));
+        p.add(ctr, new zebra.ui.Label("Cell 2,1"));
+        p.add(ctr, new zebra.ui.Label("Cell 2,2"));
+
+ * @param {Integer} rows a number of virtual rows to layout 
+ * children components
+ * @param {Integer} cols a number of virtual columns to 
+ * layout children components
+ * @constructor 
+ * @class  zebra.layout.GridLayout
+ * @extends {zebra.layout.Layout}
+ */
+pkg.GridLayout = Class(L, [
+    function $prototype() {
+        this[''] = function(r,c,m) {
+            if (arguments.length < 3) m = 0;
+
+        /**
+         * Number of virtual rows to place children components 
+         * @attribute rows
+         * @readOnly
+         * @type {Integer}
+         */
+        this.rows = r;
+
+        /**
+         * Number of virtual columns to place children components 
+         * @attribute cols
+         * @readOnly
+         * @type {Integer}
+         */
+        this.cols = c;
+        this.mask = m;
+        this.colSizes = Array(c + 1);
+        this.rowSizes = Array(r + 1);
+    
+        /**
+         * Default constraints that is applied for children components 
+         * that doesn't define own constraints 
+         * @type {zebra.layout.Constraints}
+         * @attribute constraints
+         */
+        this.constraints = new pkg.Constraints();
+        };
+
+        /**
+         * Calculate columns metrics
+         * @param  {zebra.layout.Layoutable} c the target container
+         * @return {Array} a columns widths
+         * @method calcCols
+         * @protected
+         */
+        this.calcCols = function(c){
+            this.colSizes[this.cols] = 0;
+            for(var i = 0;i < this.cols; i++){
+                this.colSizes[i] = this.calcCol(i, c);
+                this.colSizes[this.cols] += this.colSizes[i];
+            }
+            return this.colSizes;
+        };
+
+        /**
+         * Calculate rows metrics
+         * @param  {zebra.layout.Layoutable} c the target container
+         * @return {Array} a rows heights
+         * @method calcRows
+         * @protected
+         */
+        this.calcRows = function(c){
+            this.rowSizes[this.rows] = 0;
+            for(var i = 0;i < this.rows; i++){
+                this.rowSizes[i] = this.calcRow(i, c);
+                this.rowSizes[this.rows] += this.rowSizes[i];
+            }
+            return this.rowSizes;
+        };
+
+        /**
+         * Calculate the given row height
+         * @param  {Integer} row a row
+         * @param  {zebra.layout.Layoutable} c the target container
+         * @return {Integer} a size of the row
+         * @method calcRow
+         * @protected
+         */
+        this.calcRow = function(row, c){
+            var max = 0, s = row * this.cols;
+            for (var i = s; i < c.kids.length && i < s + this.cols; i++) {
+                var a = c.kids[i];
+                if (a.isVisible === true) {
+                    var arg = a.constraints || this.constraints, d = a.getPreferredSize().height;
+                    d += (arg.top + arg.bottom);
+                    if (d > max) max = d;
+                }
+            }
+            return max;
+        };
+
+        /**
+         * Calculate the given column width
+         * @param  {Integer} col a column
+         * @param  {zebra.layout.Layoutable} c the target container
+         * @return {Integer} a size of the column
+         * @method calcCol
+         * @protected
+         */
+        this.calcCol = function(col, c){
+            var max = 0;
+
+            for(var i = col; i < c.kids.length; i += this.cols) {
+                var a = c.kids[i];
+                if (a.isVisible === true) {
+                    var arg = a.constraints || this.constraints,
+                        d   = a.getPreferredSize().width + arg.left + arg.right;
+
+                    if (d > max) max = d;
+                }            
+            }
+            return max;
+        };
+
+        this.calcPreferredSize = function(c){
+            return { width : this.calcCols(c)[this.cols],
+                     height: this.calcRows(c)[this.rows] };
+        };
+
+        this.doLayout = function(c){
+            var rows     = this.rows, 
+                cols     = this.cols,
+                colSizes = this.calcCols(c),
+                rowSizes = this.calcRows(c),
+                top      = c.getTop(), 
+                left     = c.getLeft();
+
+            if ((this.mask & pkg.HORIZONTAL) > 0) {
+                var dw = c.width - left - c.getRight() - colSizes[cols];
+                for(var i = 0;i < cols; i ++ ) {
+                    colSizes[i] = colSizes[i] + (colSizes[i] !== 0 ? ~~((dw * colSizes[i]) / colSizes[cols]) : 0);
+                }
+            }
+
+            if ((this.mask & pkg.VERTICAL) > 0) {
+                var dh = c.height - top - c.getBottom() - rowSizes[rows];
+                for(var i = 0;i < rows; i++) {
+                    rowSizes[i] = rowSizes[i] + (rowSizes[i] !== 0 ? ~~((dh * rowSizes[i]) / rowSizes[rows]) : 0);
+                }
+            }
+
+            var cc = 0;
+            for (var i = 0;i < rows && cc < c.kids.length; i++) {
+                var xx = left;
+                for(var j = 0;j < cols && cc < c.kids.length; j++, cc++){
+                    var l = c.kids[cc];
+                    if (l.isVisible === true){
+                        var arg   = l.constraints || this.constraints,
+                            d     = l.getPreferredSize(),
+                            cellW = colSizes[j], 
+                            cellH = rowSizes[i];
+
+                        cellW -= (arg.left + arg.right);
+                        cellH -= (arg.top  + arg.bottom);
+
+                        if (pkg.STRETCH == arg.ax) d.width  = cellW;
+                        if (pkg.STRETCH == arg.ay) d.height = cellH;
+
+                        l.setSize(d.width, d.height);
+                        l.setLocation(
+                            xx  + arg.left + (pkg.STRETCH == arg.ax ? 0 : ((arg.ax == pkg.RIGHT) ? cellW - d.width
+                                                                                                 : ((arg.ax == pkg.CENTER) ? ~~((cellW - d.width) / 2)
+                                                                                                                           : 0))),
+                            top + arg.top  + (pkg.STRETCH == arg.ay ? 0 : ((arg.ay == pkg.TOP  ) ? cellH - d.height
+                                                                                                 : ((arg.ay == pkg.CENTER) ? ~~((cellH - d.height) / 2)
+                                                                                                                           : 0)))
+                        );
+
+                        xx += colSizes[j];
+                    }
+                }
+                top += rowSizes[i];
+            }
+        };
+    }
+]);
+
+/**
+ * @for
+ */
+
+
+})(zebra("layout"), zebra.Class);
 /**
  * Number of different utilities methods and classes
  * @module util
@@ -1210,7 +3157,7 @@ else {
 
 (function(pkg, Class, Interface) {
 /**
- * Instantiate a new class instance by the given class name with the specified constructor 
+ * Instantiate a new class instance by the given class name with the specified constructor
  * arguments.
  * @param  {String} clazz a class name
  * @param  {Array} [args] an arguments list
@@ -1236,39 +3183,39 @@ function hex(v) {
 }
 
 /**
- * Find by xpath-like path an element in a tree-like structure. The method is flexible way to look up 
+ * Find by xpath-like path an element in a tree-like structure. The method is flexible way to look up
  * elements in tree structures. The only requirements the passed tree-like structure has to follow is
- * declaring a "kids" array field if the element has a children element. To understand if the given tree 
+ * declaring a "kids" array field if the element has a children element. To understand if the given tree
  * element matches the current path fragment a special equality function has to be passed.
- 
-        var treeLikeRoot = { 
-            value : "Root", 
+
+        var treeLikeRoot = {
+            value : "Root",
             kids : [
                 { value: "Item 1" },
                 { value: "Item 2" }
             ]
         };
 
-        zebra.util.findInTree(treeLikeRoot, 
-                              "/Root/item1", 
+        zebra.util.findInTree(treeLikeRoot,
+                              "/Root/item1",
                               function(item, fragment) {
                                   return item.value == fragment;
                               },
                               function(foundElement) {
                                  ...
                                  // true means stop lookup
-                                 return true;   
+                                 return true;
                               });
 
 
- * @param  {Object} root a tree root element. If the element has a children element it has to 
+ * @param  {Object} root a tree root element. If the element has a children element it has to
  * declare "kids" field. This field is an array of all children elements
- * @param  {String}   path a xpath-like path. The path has to satisfy number of requirements 
+ * @param  {String}   path a xpath-like path. The path has to satisfy number of requirements
  * and rules:
- 
-    - "/"" means lookup among all direct children elements 
+
+    - "/"" means lookup among all direct children elements
     - "//"" means lookup among all children elements recursively
-    - "*" means any path value 
+    - "*" means any path value
     -[@attr=100] means number attribute
     -[@attr=true] means boolean attribute
     -[@attr='value'] means string attribute
@@ -1277,14 +3224,14 @@ function hex(v) {
 
  *
  * Path examples:
- 
+
     - "//*" traverse all tree elements
     - "//*[@a=10]" traverse all tree elements that has an attribute "a" that equals 10
-    - "/Root/Item" find an element by exact path 
+    - "/Root/Item" find an element by exact path
 
- * @param  {Function}  eq  an equality function. The function gets current evaluated tree element  
- * and a path fragment against which the tree element has to be evaluated. It is expected the method 
- * returns boolean value to say if the given passed tree element matches the path fragment.  
+ * @param  {Function}  eq  an equality function. The function gets current evaluated tree element
+ * and a path fragment against which the tree element has to be evaluated. It is expected the method
+ * returns boolean value to say if the given passed tree element matches the path fragment.
  * @param  {Function} cb callback function that is called every time a new tree element
  * matches the given path fragment. The function has to return true if the tree look up
  * has to be stopped
@@ -1334,7 +3281,7 @@ pkg.findInTree = function(root, path, eq, cb) {
         res.push(m);
     }
 
-    if (res.length == 0 || c < path.length) {
+    if (res.length === 0 || c < path.length) {
         throw new Error("Invalid path: '" + path + "'," + c);
     }
 
@@ -1344,20 +3291,20 @@ pkg.findInTree = function(root, path, eq, cb) {
 
 /**
  * RGB color class. This class represents rgb(a) color as JavaScript structure:
- 
+
        // rgb color
        var rgb1 = new zebra.util.rgb(100,200,100);
 
-       // rgb with transparency 
+       // rgb with transparency
        var rgb2 = new zebra.util.rgb(100,200,100, 0.6);
-       
+
        // encoded as a string rgb color
        var rgb3 = new zebra.util.rgb("rgb(100,100,200)");
 
        // hex rgb color
        var rgb3 = new zebra.util.rgb("#CCDDFF");
 
- * @param  {Integer|String} r  red color intensity or if this is the only constructor parameter it denotes 
+ * @param  {Integer|String} r  red color intensity or if this is the only constructor parameter it denotes
  * encoded in string rgb color
  * @param  {Integer} [g]  green color intensity
  * @param  {Integer} [b] blue color intensity
@@ -1369,7 +3316,7 @@ pkg.rgb = function (r, g, b, a) {
 
     /**
      * Red color intensity
-     * @attribute r 
+     * @attribute r
      * @type {Integer}
      * @readOnly
      */
@@ -1394,7 +3341,7 @@ pkg.rgb = function (r, g, b, a) {
      * @type {Float}
      * @readOnly
      */
-    
+
     /**
      * Indicates if the color is opaque
      * @attribute isTransparent
@@ -1463,13 +3410,13 @@ rgb.darkBlue    = new rgb(0, 0, 140);
 rgb.transparent = new rgb(0, 0, 0, 0.0);
 
 /**
- * Compute intersection of the two given rectangular areas 
+ * Compute intersection of the two given rectangular areas
  * @param  {Integer} x1 a x coordinate of the first rectangular area
- * @param  {Integer} y1 a y coordinate of the first rectangular area 
+ * @param  {Integer} y1 a y coordinate of the first rectangular area
  * @param  {Integer} w1 a width of the first rectangular area
  * @param  {Integer} h1 a height of the first rectangular area
  * @param  {Integer} x2 a x coordinate of the first rectangular area
- * @param  {Integer} y2 a y coordinate of the first rectangular area 
+ * @param  {Integer} y2 a y coordinate of the first rectangular area
  * @param  {Integer} w2 a width of the first rectangular area
  * @param  {Integer} h2 a height of the first rectangular area
  * @param  {Object}  r  an object to store result
@@ -1498,10 +3445,6 @@ pkg.unite = function(x1,y1,w1,h1,x2,y2,w2,h2,r){
     r.height = Math.max(y1 + h1, y2 + h2) - r.y;
 };
 
-pkg.arraycopy = function(src, spos, dest, dpos, dlen) {
-    for(var i=0; i<dlen; i++) dest[i + dpos] = src[spos + i];
-};
-
 var letterRE = /[A-Za-z]/;
 pkg.isLetter = function (ch) {
     if (ch.length != 1) throw new Error("Incorrect character");
@@ -1511,35 +3454,35 @@ pkg.isLetter = function (ch) {
 /**
  * This this META class is handy container to keep different types of listeners and
  * fire events to the listeners:
- 
-        // create listener container to keep three different events 
+
+        // create listener container to keep three different events
         // handlers
-        var MyListenerContainerClass = zebra.util.ListenersClass("event1", 
-                                                                  "event2", 
-                                                                  "event3"); 
+        var MyListenerContainerClass = zebra.util.ListenersClass("event1",
+                                                                  "event2",
+                                                                  "event3");
 
         // instantiate listener class container
         var listeners = new MyListenerContainerClass();
 
-        // add "event1" listener 
+        // add "event1" listener
         listeners.add(function event1() {
             ...
         });
 
-        // add "event2" listener 
+        // add "event2" listener
         listeners.add(function event2() {
            ...
         });
 
         // and firing event1 to registered handlers
-        listeners.event1(...); 
+        listeners.event1(...);
 
         // and firing event2 to registered handlers
-        listeners.event2(...); 
+        listeners.event2(...);
 
  * @class zebra.util.Listeners
  * @constructor
- * @param {String} [events]* events types the container has to support 
+ * @param {String} [events]* events types the container has to support
  */
 var $NewListener = function() {
     if (arguments.length === 0) {
@@ -1553,14 +3496,14 @@ var $NewListener = function() {
 
         clazz.prototype.add = function() {
             if (this.v == null) this.v = [];
-            
+
             var ctx = this,
                 l   = arguments[arguments.length - 1]; // last arguments are handler(s)
-            
+
 
             if (typeof l !== 'function') {
                 ctx = l;
-                l   = l[name]; 
+                l   = l[name];
 
                 if (l == null || typeof l !== "function") {
                     throw new Error("Instance doesn't declare '" + name + "' listener method");
@@ -1569,7 +3512,7 @@ var $NewListener = function() {
 
             if (arguments.length > 1 && arguments[0] != name) {
                 throw new Error("Unknown event type :" + name);
-            } 
+            }
 
             this.v.push(ctx, l);
             return l;
@@ -1579,7 +3522,7 @@ var $NewListener = function() {
             if (this.v != null) {
                 if (arguments.length === 0) {
                     // remove all
-                    this.v.length = 0; 
+                    this.v.length = 0;
                 }
                 else {
                     var i = 0;
@@ -1641,8 +3584,8 @@ var $NewListener = function() {
             return l;
         };
 
-        // populate methods that has to be called to send appropriate events to 
-        // registered listeners 
+        // populate methods that has to be called to send appropriate events to
+        // registered listeners
         for(var i=0; i < arguments.length; i++) {
             var m = arguments[i];
             (function(m) {
@@ -1655,7 +3598,7 @@ var $NewListener = function() {
 
                         c = this.methods[''];
                         if (c != null) {
-                            for(var i=0; i < c.length; i+=2) c[i+1].apply(c[i], arguments);   
+                            for(var i=0; i < c.length; i+=2) c[i+1].apply(c[i], arguments);
                         }
                     }
                 };
@@ -1694,10 +3637,10 @@ pkg.ListenersClass = $NewListener;
 
 
 /**
- * Useful class to track a virtual cursor position in a structure that has 
- * dedicated number of lines where every line has a number of elements. The 
- * structure metric has to be described by providing an instance of  
- * zebra.util.Position.Metric interface that discovers how many 
+ * Useful class to track a virtual cursor position in a structure that has
+ * dedicated number of lines where every line has a number of elements. The
+ * structure metric has to be described by providing an instance of
+ * zebra.util.Position.Metric interface that discovers how many
  * lines the structure has and how many elements every line includes.
  * @param {zebra.util.Position.Metric} m a position metric
  * @constructor
@@ -1706,7 +3649,7 @@ pkg.ListenersClass = $NewListener;
 
 /**
  * Fire when a virtual cursor position has been updated
- 
+
         position.bind(function(src, prevOffset, prevLine, prevCol) {
             ...
         });
@@ -1720,14 +3663,14 @@ pkg.ListenersClass = $NewListener;
 var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = Class([
     function $clazz() {
         /**
-         * Position metric interface. This interface is designed for describing 
+         * Position metric interface. This interface is designed for describing
          * a navigational structure that consists on number of lines where
          * every line consists of number of elements
          * @class zebra.util.Position.Metric
          */
-        
+
         /**
-         * Get number of lines to navigate through  
+         * Get number of lines to navigate through
          * @return {Integer} a number of lines
          * @method  getLines
          */
@@ -1746,7 +3689,7 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
           */
 
         this.Metric = Interface();
-        
+
         this.DOWN = 1;
         this.UP   = 2;
         this.BEG  = 3;
@@ -1756,15 +3699,18 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
     function $prototype() {
         /**
          * Set the specified virtual cursor offsest
-         * @param {Integer} o an offset, pass -1 to set position to indefinite state
+         * @param {Integer} o an offset, pass null to set position to indefinite state
          * @return {Integer} an offset that has been set
          * @method setOffset
          */
         this.setOffset = function(o){
-            if (o < 0) o = -1;
+            if (o < 0) o = 0;
             else {
-                var max = this.metrics.getMaxOffset();
-                if (o >= max) o = max;
+                if (o == null) o = -1;
+                else {
+                    var max = this.metrics.getMaxOffset();
+                    if (o >= max) o = max;
+                }
             }
 
             if (o != this.offset){
@@ -1796,12 +3742,12 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
         };
 
         /**
-         * Set the vurtual cursor line and the given column in the line 
+         * Set the vurtual cursor line and the given column in the line
          * @param {Integer} r a line
          * @param {Integer} c a column in the line
          * @method setRowCol
          */
-        this.setRowCol = function (r,c){
+        this.setRowCol = function(r,c) {
             if (r != this.currentLine || c != this.currentCol){
                 var prevOffset = this.offset,
                     prevLine = this.currentLine,
@@ -1814,7 +3760,7 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
             }
         };
 
-        this.inserted = function (off,size){
+        this.inserted = function(off,size) {
             if (this.offset >= 0 && off <= this.offset){
                 this.isValid = false;
                 this.setOffset(this.offset + size);
@@ -1824,64 +3770,64 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
         this.removed = function (off,size){
             if (this.offset >= 0 && this.offset >= off){
                 this.isValid = false;
-                if (this.offset >= (off + size)) this.setOffset(this.offset - size);
-                else this.setOffset(off);
+                this.setOffset(this.offset >= (off + size) ? this.offset - size
+                                                           : off);
             }
         };
 
         /**
-         * Calculate a line and line column by the given offset. 
+         * Calculate a line and line column by the given offset.
          * @param  {Integer} off an offset
-         * @return {Array} an array that contains a line as the first 
-         * element and a column in the line as the second element. 
+         * @return {Array} an array that contains a line as the first
+         * element and a column in the line as the second element.
          * @method getPointByOffset
          */
         this.getPointByOffset = function(off){
-            if (off == -1) return [-1, -1];
+            if (off >= 0) {
+                var m = this.metrics, max = m.getMaxOffset();
+                if (off > max) {
+                    throw new Error("Out of bounds:" + off);
+                }
 
-            var m = this.metrics, max = m.getMaxOffset();
-            if (off > max) {
-                throw new Error("Out of bounds:" + off);
-            }
+                if (max === 0) return [(m.getLines() > 0 ? 0 : -1), 0];
+                if (off === 0) return [0, 0];
 
-            if (max === 0) return [(m.getLines() > 0 ? 0 : -1), 0];
-            if (off === 0) return [0, 0];
-
-            var d = 0, sl = 0, so = 0;
-            if (this.isValid && this.offset !=  -1){
-                sl = this.currentLine;
-                so = this.offset - this.currentCol;
-                if(off > this.offset) d = 1;
+                var d = 0, sl = 0, so = 0;
+                if (this.isValid && this.offset != -1) {
+                    sl = this.currentLine;
+                    so = this.offset - this.currentCol;
+                    if (off > this.offset) d = 1;
+                    else {
+                        if (off < this.offset) d =  -1;
+                        else return [sl, this.currentCol];
+                    }
+                }
                 else {
-                    if(off < this.offset) d =  -1;
-                    else return [sl, this.currentCol];
+                    d = (~~(max / off) === 0) ?  -1 : 1;
+                    if (d < 0) {
+                        sl = m.getLines() - 1;
+                        so = max - m.getLineSize(sl);
+                    }
                 }
-            }
-            else{
-                d = (~~(max / off) === 0) ?  -1 : 1;
-                if(d < 0){
-                    sl = m.getLines() - 1;
-                    so = max - m.getLineSize(sl);
+                for(; sl < m.getLines() && sl >= 0; sl += d){
+                    var ls = m.getLineSize(sl);
+                    if (off >= so && off < so + ls) {
+                        return [sl, off - so];
+                    }
+                    so += d > 0 ? ls : -m.getLineSize(sl - 1);
                 }
-            }
-            for(; sl < m.getLines() && sl >= 0; sl += d){
-                var ls = m.getLineSize(sl);
-                if (off >= so && off < so + ls) {
-                    return [sl, off - so];
-                }
-                so += d > 0 ? ls : -m.getLineSize(sl - 1);
             }
             return [-1, -1];
         };
 
         /**
-         * Calculate an offset by the given line and column in the line 
-         * @param  {Integer} row a line 
+         * Calculate an offset by the given line and column in the line
+         * @param  {Integer} row a line
          * @param  {Integer} col a column in the line
          * @return {Integer} an offset
          * @method getOffsetByPoint
          */
-        this.getOffsetByPoint = function (row,col){
+        this.getOffsetByPoint = function (row, col){
             var startOffset = 0, startLine = 0, m = this.metrics;
 
             if (row >= m.getLines() || col >= m.getLineSize(row)) {
@@ -1906,84 +3852,70 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
         };
 
         /**
-         * Calculate maximal possible offset
-         * @protected
-         * @method calcMaxOffset
-         * @return {Integer} a maximal possible offset
-         */
-        this.calcMaxOffset = function (){
-            var max = 0, m = this.metrics;
-            for(var i = 0;i < m.getLines(); i ++ ) max += m.getLineSize(i);
-            return max - 1;
-        };
-
-        /**
          * Seek virtual cursor to the next position. How the method has to seek to the next position
          * has to be denoted by one of the following constants:
-    
+
     - **zebra.util.Position.BEG** seek cursor to the begin of the current line
     - **zebra.util.Position.END** seek cursor to the end of the current line
     - **zebra.util.Position.UP** seek cursor one line up
-    - **zebra.util.Position.DOWN** seek cursor one line down 
-    
-         * If the current virtual position is not known (-1) the method always sets 
+    - **zebra.util.Position.DOWN** seek cursor one line down
+
+         * If the current virtual position is not known (-1) the method always sets
          * it to the first line, the first column in the line (offset is zero).
          * @param  {Integer} t   an action the seek has to be done
-         * @param  {Integer} num number of seek actions 
+         * @param  {Integer} num number of seek actions
          * @method seekLineTo
          */
         this.seekLineTo = function(t,num){
             if (this.offset < 0){
                 this.setOffset(0);
-                return;
             }
+            else {
+                if (arguments.length == 1) num = 1;
 
-            if (arguments.length == 1) num = 1;
-
-            var prevOffset = this.offset, prevLine = this.currentLine, prevCol = this.currentCol;
-            switch(t) {
-                case Position.BEG:
-                    if (this.currentCol > 0){
-                        this.offset -= this.currentCol;
-                        this.currentCol = 0;
-                        this._.posChanged(this, prevOffset, prevLine, prevCol);
-                    } break;
-                case Position.END:
-                    var maxCol = this.metrics.getLineSize(this.currentLine);
-                    if (this.currentCol < (maxCol - 1)){
-                        this.offset += (maxCol - this.currentCol - 1);
-                        this.currentCol = maxCol - 1;
-                        this._.posChanged(this, prevOffset, prevLine, prevCol);
-                    } break;
-                case Position.UP:
-                    if (this.currentLine > 0){
-                        this.offset -= (this.currentCol + 1);
-                        this.currentLine--;
-                        for(var i = 0;this.currentLine > 0 && i < (num - 1); i++ , this.currentLine--){
-                            this.offset -= this.metrics.getLineSize(this.currentLine);
-                        }
+                var prevOffset = this.offset, prevLine = this.currentLine, prevCol = this.currentCol;
+                switch(t) {
+                    case Position.BEG:
+                        if (this.currentCol > 0){
+                            this.offset -= this.currentCol;
+                            this.currentCol = 0;
+                        } break;
+                    case Position.END:
                         var maxCol = this.metrics.getLineSize(this.currentLine);
-                        if (this.currentCol < maxCol) this.offset -= (maxCol - this.currentCol - 1);
-                        else this.currentCol = maxCol - 1;
-                        this._.posChanged(this, prevOffset, prevLine, prevCol);
-                    } break;
-                case Position.DOWN:
-                    if (this.currentLine < (this.metrics.getLines() - 1)){
-                        this.offset += (this.metrics.getLineSize(this.currentLine) - this.currentCol);
-                        this.currentLine++;
-                        var size = this.metrics.getLines() - 1;
-                        for(var i = 0;this.currentLine < size && i < (num - 1); i++ ,this.currentLine++ ){
-                            this.offset += this.metrics.getLineSize(this.currentLine);
-                        }
-                        var maxCol = this.metrics.getLineSize(this.currentLine);
-                        if (this.currentCol < maxCol) this.offset += this.currentCol;
-                        else {
+                        if (this.currentCol < (maxCol - 1)){
+                            this.offset += (maxCol - this.currentCol - 1);
                             this.currentCol = maxCol - 1;
-                            this.offset += this.currentCol;
-                        }
-                        this._.posChanged(this, prevOffset, prevLine, prevCol);
-                    } break;
-                default: throw new Error();
+                        } break;
+                    case Position.UP:
+                        if (this.currentLine > 0){
+                            this.offset -= (this.currentCol + 1);
+                            this.currentLine--;
+                            for(var i = 0;this.currentLine > 0 && i < (num - 1); i++, this.currentLine--){
+                                this.offset -= this.metrics.getLineSize(this.currentLine);
+                            }
+                            var maxCol = this.metrics.getLineSize(this.currentLine);
+                            if (this.currentCol < maxCol) this.offset -= (maxCol - this.currentCol - 1);
+                            else this.currentCol = maxCol - 1;
+                        } break;
+                    case Position.DOWN:
+                        if (this.currentLine < (this.metrics.getLines() - 1)){
+                            this.offset += (this.metrics.getLineSize(this.currentLine) - this.currentCol);
+                            this.currentLine++;
+                            var size = this.metrics.getLines() - 1;
+                            for(var i = 0;this.currentLine < size && i < (num - 1); i++ ,this.currentLine++ ){
+                                this.offset += this.metrics.getLineSize(this.currentLine);
+                            }
+                            var maxCol = this.metrics.getLineSize(this.currentLine);
+                            if (this.currentCol < maxCol) this.offset += this.currentCol;
+                            else {
+                                this.currentCol = maxCol - 1;
+                                this.offset += this.currentCol;
+                            }
+                        } break;
+                    default: throw new Error();
+                }
+
+                this._.posChanged(this, prevOffset, prevLine, prevCol);
             }
         };
 
@@ -2004,7 +3936,7 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
              * @type {Integer}
              * @readOnly
              */
-            
+
             /**
              * Current virtual cursor offset
              * @attribute offset
@@ -2017,7 +3949,7 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
         };
 
         /**
-         * Set position metric. Metric describes how many lines  
+         * Set position metric. Metric describes how many lines
          * and elements in these line the virtual cursor can be navigated
          * @param {zebra.util.Position.Metric} p a position metric
          * @method setMetric
@@ -2026,11 +3958,66 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
             if (p == null) throw new Error("Null metric");
             if (p != this.metrics){
                 this.metrics = p;
-                this.setOffset(-1);
+                this.setOffset(null);
             }
         };
     }
 ]);
+
+pkg.SingleColPosition = Class(pkg.Position, [
+    function $prototype() {
+        this.setRowCol = function(r,c) {
+            this.setOffset(r);
+        };
+
+        this.setOffset = function(o){
+            if (o < 0) o = 0;
+            else {
+                if (o == null) o = -1;
+                else {
+                    var max = this.metrics.getMaxOffset();
+                    if (o >= max) o = max;
+                }
+            }
+
+            if (o != this.offset) {
+                var prevOffset = this.offset,
+                    prevLine   = this.currentLine,
+                    prevCol    = this.currentCol;
+
+                this.offset = o;
+                this.currentLine = o;
+                this.isValid = true;
+                this._.posChanged(this, prevOffset, prevLine, prevCol);
+            }
+
+            return o;
+        };
+
+        this.seekLineTo = function(t, num){
+            if (this.offset < 0){
+                this.setOffset(0);
+            }
+            else {
+                if (arguments.length == 1) num = 1;
+                switch(t) {
+                    case Position.BEG:
+                    case Position.END: break;
+                    case Position.UP:
+                        if (this.offset > 0) {
+                            this.setOffset(this.offset - n);
+                        } break;
+                    case Position.DOWN:
+                        if (this.offset < (this.metrics.getLines() - 1)){
+                            this.setOffset(this.offset + n);
+                        } break;
+                    default: throw new Error();
+                }
+            }
+        };
+    }
+]);
+
 
 (function() {
     var quantum = 40, tasks = Array(5), count = 0, pid = -1;
@@ -2043,11 +4030,11 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
             if (t.isStarted === true) {
                 c++;
                 if (t.si <= 0) {
-                    try {            
+                    try {
                         if (t.ctx == null) t.task(t);
-                        else               t.task.call(t.ctx, t); 
+                        else               t.task.call(t.ctx, t);
                     }
-                    catch(e) { 
+                    catch(e) {
                         console.log(e.stack ? e.stack : e);
                     }
 
@@ -2066,17 +4053,17 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
     }
 
     /**
-     * Task is keeps a context of and allows developers 
+     * Task is keeps a context of and allows developers
      * to run, shutdown, pause a required method as a task
-     * Developer cannot instantiate the class directly. 
+     * Developer cannot instantiate the class directly.
      * Use "zebra.util.task(...)" method to do it:
-     
+
         var t = zebra.util.task(function(context) {
             // task body
             ...
         });
 
-        // run task in 1 second and repeat the task execution 
+        // run task in 1 second and repeat the task execution
         // every half second
         t.run(1000, 500);
         ...
@@ -2086,23 +4073,23 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
      * @class zebra.util.TaskCotext
      */
     function Task() {
-        this.ctx = this.task = null; 
+        this.ctx = this.task = null;
         this.ri  = this.si  = 0;
-        
+
         /**
-         * Indicates if the task is executed (active) 
+         * Indicates if the task is executed (active)
          * @type {Boolean}
          * @attribute isStarted
          * @readOnly
          */
-        this.isStarted = false; 
+        this.isStarted = false;
     }
 
     pkg.TaskCotext = Task;
 
     /**
      * Shutdown the given task.
-     * @method shutdown 
+     * @method shutdown
      */
     Task.prototype.shutdown = function() {
         if (this.task != null) {
@@ -2120,8 +4107,8 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
 
     /**
      * Run the task
-     * @param {Integer} [startIn] a time (in milliseconds) in which the task has to be started   
-     * @param {Integer} [repeatIn] a period (in milliseconds) the task has to be executed 
+     * @param {Integer} [startIn] a time (in milliseconds) in which the task has to be started
+     * @param {Integer} [repeatIn] a period (in milliseconds) the task has to be executed
      * @method run
      */
     Task.prototype.run = function(startIn, repeatIn) {
@@ -2130,7 +4117,7 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
         }
 
         if (arguments.length > 0) this.si = startIn;
-        if (arguments.length > 1) this.ri = repeatIn; 
+        if (arguments.length > 1) this.ri = repeatIn;
         if (this.ri <= 0) this.ri = 150;
 
         this.isStarted = true;
@@ -2159,7 +4146,7 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
         }
     };
 
-    // pre-fill tasks pool 
+    // pre-fill tasks pool
     for(var i = 0; i < tasks.length; i++) {
         tasks[i] = new Task();
     }
@@ -2167,28 +4154,28 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
     /**
      * Take a free task from pool and run it with the specified
      * body and the given context.
-        
-        // allocate task 
+
+        // allocate task
         var task = zebra.util.task(function (ctx) {
-            // do something 
-            
-            // complete task if necessary 
+            // do something
+
+            // complete task if necessary
             ctx.shutdown();
         });
 
         // run task in second and re-run it every 2 seconds
         task.run(1000, 2000);
-      
+
         ...
 
         // pause the task
         task.pause();
 
         ...
-        // run it again 
+        // run it again
         task.run();
 
-     * @param  {Function|Object} f a function that has to be executed    
+     * @param  {Function|Object} f a function that has to be executed
      * @param  {Object} [ctx]  a context the task has to be executed
      * @return {zebra.util.Task} an allocated task
      * @method task
@@ -2209,8 +4196,8 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
             var j = (i + count) % tasks.length, t = tasks[j];
             if (t.task == null) {
                 t.task = f;
-                t.ctx  = ctx;    
-                count++;                  
+                t.ctx  = ctx;
+                count++;
                 return t;
             }
         }
@@ -2233,26 +4220,26 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
 
 
 /**
- * JSON configuration objects loader class. The class is 
- * handy way to keep and load configuration encoded in JSON 
- * format. Except standard JSON types the class uses number 
+ * JSON configuration objects loader class. The class is
+ * handy way to keep and load configuration encoded in JSON
+ * format. Except standard JSON types the class uses number
  * of JSON values and key interpretations such as:
-  
-    - **"@key_of_refernced_value"** String values that start from "@" character are considered 
-      as a reference to other values 
-    - **{ "$class_name":[ arg1, arg2, ...], "prop1": ...}** Key names that starts from "$" character 
+
+    - **"@key_of_refernced_value"** String values that start from "@" character are considered
+      as a reference to other values
+    - **{ "$class_name":[ arg1, arg2, ...], "prop1": ...}** Key names that starts from "$" character
       are considered as name of class that has to be instantiated as the value
     - **{"?isToucable": { "label": true } }** Key names that start from "?" are considered as
-      conditional section.   
+      conditional section.
 
- * Also the class support section inheritance. That means 
- * you can say to include part of JSON to another part of JSON. 
- * For instance, imagine JSON describes properties for number 
- * of UI components where an UI component can inherits another 
- * one. 
- 
+ * Also the class support section inheritance. That means
+ * you can say to include part of JSON to another part of JSON.
+ * For instance, imagine JSON describes properties for number
+ * of UI components where an UI component can inherits another
+ * one.
+
         {
-           // base component  
+           // base component
            "BaseComponent": {
                "background": "red",
                "border": "plain",
@@ -2266,14 +4253,14 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
                "background": "green"
            }
         }
- 
- * 
- * The loading of JSON can be multi steps procedure where 
- * you can load few JSON. That means you can compose the 
+
+ *
+ * The loading of JSON can be multi steps procedure where
+ * you can load few JSON. That means you can compose the
  * final configuration from number of JSON files:
- 
+
         // prepare object that will keep loaded data
-        var loadedData = {}; 
+        var loadedData = {};
 
         // create bag
         var bag = zebra.util.Bag(loadedData);
@@ -2284,15 +4271,15 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
 
  * @class zebra.util.Bag
  * @constructor
- * @param {Object} [obj] a root object to be loaded with 
- * the given JSON configuration  
+ * @param {Object} [obj] a root object to be loaded with
+ * the given JSON configuration
  */
 pkg.Bag = zebra.Class([
     function $prototype() {
         /**
-         * The attribute rules how arrays have to be merged if the bag is loaded from few 
+         * The attribute rules how arrays have to be merged if the bag is loaded from few
          * JSON sources. true means that if a two JSON have the same key that reference to
-         * array values the final value will be a concatenation of the two arrays from the 
+         * array values the final value will be a concatenation of the two arrays from the
          * two JSON sources.
          * @attribute concatArrays
          * @type {Boolean}
@@ -2301,16 +4288,16 @@ pkg.Bag = zebra.Class([
         this.concatArrays = false;
 
         /**
-         * The property says if the object introspection is required to try find a setter 
-         * method for the given key. For instance if an object is loaded with the 
+         * The property says if the object introspection is required to try find a setter
+         * method for the given key. For instance if an object is loaded with the
          * following JSON:
-         
+
          {
             "color": "red"
          }
-        
-         * the introspection will cause bag class to try finding "setColor(c)" method in 
-         * the loaded with the JSON object and call it to set "red" property value.  
+
+         * the introspection will cause bag class to try finding "setColor(c)" method in
+         * the loaded with the JSON object and call it to set "red" property value.
          * @attribute usePropertySetters
          * @default true
          * @type {Boolean}
@@ -2327,10 +4314,10 @@ pkg.Bag = zebra.Class([
          *
          * Also the special property type is considered - factory. Access to such property
          * causes a new instance of a class object will be created. Property is considered
-         * as a factory property if it declares a "$new" field. The filed should point to 
+         * as a factory property if it declares a "$new" field. The filed should point to
          * a method that will be called to instantiate the property value.
-         * 
-         * @param  {String} key a property key. 
+         *
+         * @param  {String} key a property key.
          * @return {Object} a property value
          * @method  get
          */
@@ -2348,9 +4335,9 @@ pkg.Bag = zebra.Class([
         };
 
         /**
-         * Merge content of the specified object with the specified value and return 
+         * Merge content of the specified object with the specified value and return
          * a merge result.
-         * @param  {Object} o an object with that the value is merged 
+         * @param  {Object} o an object with that the value is merged
          * @param  {Object} v a value to be merged
          * @return {Object} a merge result
          * @protected
@@ -2376,22 +4363,22 @@ pkg.Bag = zebra.Class([
                 if (v.hasOwnProperty(k)) {
                     if (k[0] == '?') {
                         eval("var x=" + k.substring(1).trim());
-                        
+
                         if (x) {
                             o = this.mergeContent(o, v[k]);
                         }
                         continue;
                     }
 
-                    o[k] = o.hasOwnProperty(k) ? this.mergeContent(o[k], v[k]) 
-                                               : v[k] // this.mergeContent({}, v[k]);
+                    o[k] = o.hasOwnProperty(k) ? this.mergeContent(o[k], v[k])
+                                               : v[k];  // this.mergeContent({}, v[k]);
                 }
             }
             return o;
         };
 
-        // create, merge to o and return a value by the given 
-        // description d that is designed to be assigned to 
+        // create, merge to o and return a value by the given
+        // description d that is designed to be assigned to
         // -- atomic types int string boolean number are returned as is
         // -- created by the given description array are append to o array
         // -- structure description (dictionary) are merged to o
@@ -2415,8 +4402,8 @@ pkg.Bag = zebra.Class([
                 return (o != null) ? o.concat(v) : v;
             }
 
-            // string is atomic, but  string can encode type other 
-            // than string, decode string (if necessary) by calling 
+            // string is atomic, but  string can encode type other
+            // than string, decode string (if necessary) by calling
             // decodeStringValue method
             if (zebra.isString(d)) {
                 if (d[0] == "@") {
@@ -2452,8 +4439,8 @@ pkg.Bag = zebra.Class([
             // store and cleanup $inherit synthetic field from description.
             var inh = null;
             if (d.hasOwnProperty("$inherit")) {
-                inh = d["$inherit"];
-                delete d["$inherit"];
+                inh = d.$inherit;
+                delete d.$inherit;
             }
 
             // test whether we have a class definition
@@ -2476,18 +4463,18 @@ pkg.Bag = zebra.Class([
                     return this.mergeObjWithDesc(pkg.newInstance(this.resolveClass(classname), args), d);
                 }
 
-                //!!!!  trust the name of class occurs first what in general 
-                //      cannot be guaranteed by JSON spec but we can trust 
-                //      since many other third party applications stands 
+                //!!!!  trust the name of class occurs first what in general
+                //      cannot be guaranteed by JSON spec but we can trust
+                //      since many other third party applications stands
                 //      on it too :)
                 break;
             }
 
-            // the description is not atomic or array type. it can 
-            // be either a number of fields that should be merged 
-            // with appropriate field of "o" object, or it can define 
-            // how to instantiate an instance of a class. There is 
-            // one special case: ".name" property says that object 
+            // the description is not atomic or array type. it can
+            // be either a number of fields that should be merged
+            // with appropriate field of "o" object, or it can define
+            // how to instantiate an instance of a class. There is
+            // one special case: ".name" property says that object
             // is created by calling "name" method
             var v = (o == null         || zebra.isNumber(o) ||
                     zebra.isBoolean(o) || zebra.isString(o) ||
@@ -2495,13 +4482,13 @@ pkg.Bag = zebra.Class([
 
             for (var k in d) {
                 if (d.hasOwnProperty(k)) {
-                    // special field name that says to call method to create a 
+                    // special field name that says to call method to create a
                     // value by the given description
                     if (k[0] == ".") {
-                        var vv = d[k], 
-                            mn = k.substring(1).trim(), 
+                        var vv = d[k],
+                            mn = k.substring(1).trim(),
                             m = this.objects[mn] != null ? this.objects[mn] : this[mn];
-                        
+
                         if (m == null || typeof m != 'function') {
                             throw new Error("Method '" + mn + "' cannot be found");
                         }
@@ -2521,7 +4508,7 @@ pkg.Bag = zebra.Class([
                     var nv = this.mergeObjWithDesc(po, d[k]);
 
                     if (this.usePropertySetters && k[0] != '.') {
-                        m  = zebra.getPropertySetter(v, k);
+                        var m  = zebra.getPropertySetter(v, k);
                         if (m != null) {
                             if (Array.isArray(nv)) m.apply(v, nv);
                             else                   m.call(v, nv);
@@ -2539,8 +4526,8 @@ pkg.Bag = zebra.Class([
         };
 
         /**
-         * Called every time the given class name has to be transformed into 
-         * the class object (constructor) reference. 
+         * Called every time the given class name has to be transformed into
+         * the class object (constructor) reference.
          * @param  {String} className a class name
          * @return {Function}   a class reference
          * @method resolveClass
@@ -2569,8 +4556,8 @@ pkg.Bag = zebra.Class([
         };
 
         /**
-         * Load the given JSON content and parse if the given flag is true. The passed  
-         * boolean flag controls parsing. The flag is used to load few JSON. Before 
+         * Load the given JSON content and parse if the given flag is true. The passed
+         * boolean flag controls parsing. The flag is used to load few JSON. Before
          * parsing the JSONs are merged and than the final result is parsed.
          * @param  {String} s a JSON content to be loaded
          * @param  {Boolean} [b] true if the loading has to be completed
@@ -2578,7 +4565,7 @@ pkg.Bag = zebra.Class([
          * @method load
          */
         this.load = function (s, b) {
-            if (this.isloaded === true) { 
+            if (this.isloaded === true) {
                 throw new Error("Load is done");
             }
 
@@ -2600,11 +4587,11 @@ pkg.Bag = zebra.Class([
 
         /**
          * Callback method that can be implemented to be called when
-         * the bag JSON has been completely loaded but not parsed. 
-         * The method can be useful for custom bag implementation 
-         * that need to perform extra handling over the parsed JSON 
+         * the bag JSON has been completely loaded but not parsed.
+         * The method can be useful for custom bag implementation
+         * that need to perform extra handling over the parsed JSON
          * content
-         * @param {Object} content a parsed JSON content 
+         * @param {Object} content a parsed JSON content
          * @method contentLoaded
          */
 
@@ -2616,13 +4603,13 @@ pkg.Bag = zebra.Class([
             if (typeof this.isloaded === "undefined") {
                 this.isloaded = true;
                 if (this.content.hasOwnProperty("variables")) {
-                    var vars = this.content["variables"];
+                    var vars = this.content.variables;
                     for(var k in vars) {
                         var v = vars[k].trim();
-                        this.vars[k.trim()] = (v[0] == '$' ? Class.forName(v.substring(1).trim()) 
+                        this.vars[k.trim()] = (v[0] == '$' ? Class.forName(v.substring(1).trim())
                                                            : v);
                     }
-                    delete this.content["variables"];
+                    delete this.content.variables;
                 }
                 this.objects = this.mergeObjWithDesc(this.objects, this.content);
             }
@@ -2656,7 +4643,7 @@ pkg.Bag = zebra.Class([
     /**
      * Load JSON by the given URL
      * @param  {String} url an URL to a JSON
-     * @param  {Boolean} [b] true if the loading has to be completed 
+     * @param  {Boolean} [b] true if the loading has to be completed
      * @return {zebra.util.Bag} a reference to the bag class instance
      * @method loadByUrl
      */
@@ -2672,1000 +4659,6 @@ pkg.Bag = zebra.Class([
  */
 
 })(zebra("util"), zebra.Class, zebra.Interface);
-
-/**
- * Collection of variouse data models. 
- * @module data
- * @main 
- * @requires zebra, util
- */
-
-(function(pkg, Class, Interface) {
-
-pkg.descent = function descent(a, b) {
-    if (a == null) return 1;
-    return (zebra.isString(a)) ? a.localeCompare(b) : a - b;
-};
-
-pkg.ascent = function ascent(a, b) {
-    if (b == null) return 1;
-    return (zebra.isString(b)) ? b.localeCompare(a) : b - a;
-};
-
-
-/**
- * Text model interface
- * @class zebra.data.TextModel
- * @interface
-*/
-
-/**
- * Get the given string line stored in the model
- * @method getLine  
- * @param  {Integer} line a line number
- * @return {String}  a string line
- */
-
-/**
- * Get wrapped by the text model original text string 
- * @method getValue
- * @return {String} an original text
- */
-
-/**
- * Get number of lines stored in the text model
- * @method getLines
- * @return {Integer} a number of lines
- */
-
-/**
- * Get number of characters stored in the model 
- * @method getTextLength
- * @return {Integer} a number of characters
- */
-
-/**
- * Write the given string in the text model starting from the
- * specified offset
- * @method write
- * @param  {String} s a string to be written into the text model 
- * @param  {Integer} offset an offset starting from that the passed
- * string has to be written into the text model
- */
-
-/**
- * Remove substring from the text model. 
- * @method remove
- * @param  {Integer} offset an offset starting from that a substring 
- * will be removed 
- * @param  {Integer} size a size of a substring to be removed 
- */
-
-/**
- * Fill the text model with the given text  
- * @method  setValue
- * @param  {String} text a new text to be set for the text model
- */
-
-/**
- * Fired when the text model has been updated: a string has been 
- * inserted or removed
-
-        text.bind(function (src, b, off, len, startLine, lines) {
-            ...
-        });
-
- *
- * @event textUpdated 
- * @param {zebra.data.Text} src a text model that triggers the event
- * @param {Boolean}  b a flag that is true if a string has been written 
- * in the text model, false if the model substring has been removed
- * @param {Integer}  off an offset starting form that the text update 
- * took place
- * @param {Integer}  len a length of text that has been affected by 
- * the text model update
- * @param {Integer}  startLine a first line that has been affected 
- * by the text model update
- * @param {Integer}  lines a number of lines that has been affected 
- * by the text model update
- */
-pkg.TextModel = Interface();
-
-
-var MB = zebra.util, oobi = "Index is out of bounds: ";
-
-function Line(s) {
-    this.s = s;
-    this.l = 0;
-}
-
-//  toString for array.join method
-Line.prototype.toString = function() { return this.s; };
-
-pkg.TextModelListeners = MB.ListenersClass("textUpdated");
-
-/**
- * Multi-lines text model implementation
- * @class zebra.data.Text
- * @param  {String}  [s] the specified text the model has to be filled
- * @constructor
- * @extends zebra.data.TextModel
- */
-pkg.Text = Class(pkg.TextModel, [
-    function $prototype() {
-        this.textLength = 0;
-
-        this.getLnInfo = function(lines, start, startOffset, o){
-            for(; start < lines.length; start++){
-                var line = lines[start].s;
-                if (o >= startOffset && o <= startOffset + line.length){
-                    return [start, startOffset];
-                }
-                startOffset += (line.length + 1);
-            }
-            return [];
-        };
-
-        this.setExtraChar = function(i,ch){ this.lines[i].l = ch; };
-        
-        this.getExtraChar = function (i) { return this.lines[i].l; };
-
-        this.getLine = function(line) { return this.lines[line].s; };
-
-        this.getValue = function(){ return this.lines.join("\n"); };
-
-        this.getLines = function () { return this.lines.length; };
-        
-        this.getTextLength = function() { return this.textLength; };
-
-        this.write = function (s, offset){
-            var slen = s.length,
-                info = this.getLnInfo(this.lines, 0, 0, offset),
-                line = this.lines[info[0]].s, j = 0,
-                lineOff = offset - info[1],
-                tmp = [line.substring(0, lineOff), s, line.substring(lineOff)].join('');
-
-            for(; j < slen && s[j] != '\n'; j++);
-
-            if(j >= slen) {
-                this.lines[info[0]].s = tmp;
-                j = 1;
-            }
-            else {
-                this.lines.splice(info[0], 1);
-                j = this.parse(info[0], tmp, this.lines);
-            }
-            this.textLength += slen;
-            this._.textUpdated(this, true, offset, slen, info[0], j);
-        };
-
-        this.remove = function (offset,size){
-            var i1   = this.getLnInfo(this.lines, 0, 0, offset),
-                i2   = this.getLnInfo(this.lines, i1[0], i1[1], offset + size),
-                l2   = this.lines[i2[0]].s,
-                l1   = this.lines[i1[0]].s,
-                off1 = offset - i1[1], off2 = offset + size - i2[1],
-                buf  = [l1.substring(0, off1), l2.substring(off2)].join('');
-
-            if (i2[0] == i1[0]) this.lines.splice(i1[0], 1, new Line(buf));
-            else {
-                this.lines.splice(i1[0], i2[0] - i1[0] + 1);
-                this.lines.splice(i1[0], 0, new Line(buf));
-            }
-            this.textLength -= size;
-            this._.textUpdated(this, false, offset, size, i1[0], i2[0] - i1[0] + 1);
-        };
-
-        this.parse = function (startLine, text, lines){
-            var size = text.length, prevIndex = 0, prevStartLine = startLine;
-            for(var index = 0; index <= size; prevIndex = index, startLine++){
-                var fi = text.indexOf("\n", index);
-                index = (fi < 0 ? size : fi);
-                this.lines.splice(startLine, 0, new Line(text.substring(prevIndex, index)));
-                index++;
-            }
-            return startLine - prevStartLine;
-        };
-
-        this.setValue = function(text){
-            if (text == null) {
-                throw new Error("Invalid null string");
-            }
-            var old = this.getValue();
-            if (old !== text) {
-                if (old.length > 0) {
-                    var numLines = this.getLines(), txtLen = this.getTextLength();
-                    this.lines.length = 0;
-                    this.lines = [ new Line("") ];
-                    this._.textUpdated(this, false, 0, txtLen, 0, numLines);
-                }
-
-                this.lines = [];
-                this.parse(0, text, this.lines);
-                this.textLength = text.length;
-                this._.textUpdated(this, true, 0, this.textLength, 0, this.getLines());
-            }
-        };
-
-        this[''] = function(s){
-            this.lines = [ new Line("") ];
-            this._ = new pkg.TextModelListeners();
-            this.setValue(s == null ? "" : s);
-        };
-    }
-]);
-
-/**
- * Single line text model implementation
- * @param  {String}  [s] the specified text the model has to be filled
- * @param  {Integer} [max] the specified maximal text length
- * @constructor
- * @class zebra.data.SingleLineTxt
- * @extends zebra.data.TextModel
- */
-pkg.SingleLineTxt = Class(pkg.TextModel, [
-    function $prototype() {
-        /**
-         * Maximal text length. -1 means the text is not restricted 
-         * regarding its length. 
-         * @attribute maxLen
-         * @type {Integer}
-         * @default -1
-         * @readOnly
-         */
-
-        this.setExtraChar = function(i,ch) {
-            this.extra = ch;
-        };
-        
-        this.getExtraChar = function(i){
-            return this.extra;
-        };
-
-        this.getValue = function(){
-            return this.buf;
-        };
-
-        /**
-         * Get number of lines stored in the text model. The model 
-         * can have only one line
-         * @method getLines
-         * @return {Integer} a number of lines
-         */
-        this.getLines = function(){
-            return 1;
-        };
-
-        this.getTextLength = function(){
-            return this.buf.length;
-        };
-
-        this.getLine = function(line){ 
-            if (line != 0) {
-                throw new Error(oobi + line);
-            }
-            return this.buf;
-        };
-
-        this.write = function(s,offset){
-            var buf = this.buf, j = s.indexOf("\n");
-            if (j >= 0) s = s.substring(0, j);
-            var l = (this.maxLen > 0 && (buf.length + s.length) >= this.maxLen) ? this.maxLen - buf.length
-                                                                                : s.length;
-            if (l!==0) {
-                this.buf = [buf.substring(0, offset), s.substring(0, l), buf.substring(offset)].join('');
-                if (l > 0) this._.textUpdated(this, true, offset, l, 0, 1);
-            }
-        };
-
-        this.remove = function(offset,size){
-            this.buf = [ this.buf.substring(0, offset), this.buf.substring(offset + size)].join('');
-            this._.textUpdated(this, false, offset, size, 0, 1);
-        };
-
-        this.setValue = function(text){
-            if (text == null) {
-                throw new Error("Invalid null string");
-            }
-
-            var i = text.indexOf('\n');
-            if (i >= 0) text = text.substring(0, i);
-            if(this.buf == null || this.buf !== text) {
-                if (this.buf != null && this.buf.length > 0) this._.textUpdated(this, false, 0, this.buf.length, 0, 1);
-                if (this.maxLen > 0 && text.length > this.maxLen) text = text.substring(0, this.maxLen);
-                this.buf = text;
-                this._.textUpdated(this, true, 0, text.length, 0, 1);
-            }
-        };
-
-        /**
-         * Set the given maximal length the text can have
-         * @method setMaxLength
-         * @param  {Integer} max a maximal length of text
-         */
-        this.setMaxLength = function (max){
-            if(max != this.maxLen){
-                this.maxLen = max;
-                this.setValue("");
-            }
-        };
-
-        this[''] = function (s, max) {   
-            this.maxLen = max == null ? -1 : max;
-            this.buf = null;
-            this.extra = 0;
-            this._ = new pkg.TextModelListeners();
-            this.setValue(s == null ? "" : s);
-        };
-    }
-]);
-
-pkg.ListModelListeners = MB.ListenersClass("elementInserted", "elementRemoved", "elementSet");
-
-/**
- * List model class
- * @param  {Array} [a] an array the list model has to be initialized with
- * @example
- 
-      // create list model that contains three integer elements
-      var l = new zebra.data.ListModel([1,2,3]);
- 
- * @constructor 
- * @class zebra.data.ListModel
- */
-
- /**
-  * Fired when a new element has been added to the list model 
-
-     list.bind(function elementInserted(src, o, i) {
-         ...
-     });
-
-  * @event elementInserted 
-  * @param {zebra.data.ListModel} src a list model that triggers the event
-  * @param {Object}  o an element that has been added
-  * @param {Integer} i an index at that the new element has been added
-  */
-
- /**
-  * Fired when an element has been removed from the list model 
-
-     list.bind(function elementRemoved(src, o, i) {
-         ...
-     });
-
-  * @event elementRemoved
-  * @param {zebra.data.ListModel} src a list model that triggers the event
-  * @param {Object}  o an element that has been removed
-  * @param {Integer} i an index at that the element has been removed
-  */
-
- /**
-  * Fired when an element has been re-set 
-
-     list.bind(function elementSet(src, o, pe, i) {
-         ...
-     });
-
-  * @event elementSet
-  * @param {zebra.data.ListModel} src a list model that triggers the event
-  * @param {Object}  o an element that has been set
-  * @param {Object}  pe a previous element 
-  * @param {Integer} i an index at that the element has been re-set
-  */
-
-pkg.ListModel = Class([
-    function $prototype() {
-        /**
-         * Get an item stored at the given location in the list 
-         * @method get
-         * @param  {Integer} i an item location
-         * @return {object}  a list item
-         */
-        this.get = function(i) {
-            if (i < 0 || i >= this.d.length) {
-                throw new Error(oobi + i);
-            }
-            return this.d[i];
-        };
-
-        /**
-         * Add the given item to the end of the list 
-         * @method add
-         * @param  {Object} o an item to be added
-         */
-        this.add = function(o) {
-            this.d.push(o);
-            this._.elementInserted(this, o, this.d.length - 1);
-        };
-
-        /**
-         * Remove all elements from the list model
-         * @method removeAll
-         */
-        this.removeAll = function() {
-            var size = this.d.length;
-            for(var i = size - 1; i >= 0; i--) this.removeAt(i);
-        };
-
-        /**
-         * Remove an element at the given location of the list model
-         * @method removeAt
-         * @param {Integer} i a location of an element to be removed from the list
-         */
-        this.removeAt = function(i) {
-            var re = this.d[i];
-            this.d.splice(i, 1);
-            this._.elementRemoved(this, re, i);
-        };
-
-        /**
-         * Remove the given element from the list
-         * @method remove
-         * @param {Object} o an element to be removed from the list
-         */
-        this.remove = function(o) {
-            for(var i = 0;i < this.d.length; i++ ){
-                if (this.d[i] === o) this.removeAt(i);
-            }
-        };
-
-        /**
-         * Insert the given element into the given position of the list
-         * @method insert
-         * @param {Object} o an element to be inserted into the list
-         * @param {Integer} i a position at which the element has to be inserted into the list 
-         */
-        this.insert = function(o,i){
-            if(i < 0 || i >= this.d.length) {
-                throw new Error(oobi + i);
-            }
-            this.d.splice(i, 0, o);
-            this._.elementInserted(this, o, i);
-        };
-
-        /**
-         * Get number of elements stored in the list
-         * @method count
-         * @return {Integer} a number of element in the list
-         */
-        this.count = function () {
-            return this.d.length;
-        };
-
-        /**
-         * Set the new element at the given position
-         * @method set
-         * @param  {Object} o a new element to be set as the list element at the given position
-         * @param  {Integer} i a position
-         * @return {Object}  previous element that was stored at the given position
-         */
-        this.set = function (o,i){
-            if (i < 0 || i >= this.d.length) {
-                throw new Error(oobi + i);
-            }
-            var pe = this.d[i];
-            this.d[i] = o;
-            this._.elementSet(this, o, pe, i);
-            return pe;
-        };
-
-        /**
-         * Check if the element is in the list
-         * @method contains
-         * @param  {Object} o an element to be checked 
-         * @return {Boolean} true if the element is in the list  
-         */
-        this.contains = function (o){
-            return this.indexOf(o) >= 0;
-        };
-
-        /**
-         * Get position the given element is stored in the list
-         * @method indexOf
-         * @param  {Object} o an element 
-         * @return {Integer} the element position. -1 if the element cannot be found in the list 
-         */
-        this.indexOf = function(o){
-            return this.d.indexOf(o);
-        };
-
-        this[''] = function() {
-            this._ = new pkg.ListModelListeners();
-            this.d = (arguments.length === 0) ? [] : arguments[0];
-        };
-    }
-]);
-
-/**
- * Tree model item class. The structure is used by tree model to store 
- * tree items values, parent and children item references.
- * @class zebra.data.Item
- * @param  {Object} [v] the item value
- * @constructor 
- */
-var Item = pkg.Item = Class([
-    function $prototype() {
-        this[''] = function(v) {
-            /**
-             * Array of children items of the item element
-             * @attribute kids
-             * @type {Array}
-             * @default []
-             * @readOnly
-             */
-            this.kids = [];
-
-            /**
-             * Value stored with this item
-             * @attribute value
-             * @type {Object}
-             * @default null
-             * @readOnly
-             */
-            this.value = v;
-
-            /**
-             * Reference to a parent item
-             * @attribute parent
-             * @type {zebra.data.Item}
-             * @default undefined
-             * @readOnly
-             */
-        };
-    }
-]);
-
-
-pkg.find = function(root, value, cb) {
-    if (root.value === value) {
-        if (cb.call(null, root) === true) return true;
-    }
-
-    for (var i = 0; i < root.kids.length; i++) {
-        if (pkg.find(root.kids[i], value, cb)) return true;
-    }
-};
-
-pkg.TreeModelListeners = MB.ListenersClass("itemModified", "itemRemoved", "itemInserted");
-
-
-/**
- * Tree model class. The class is simple and handy way to keep hierarchical structure. 
- * @constructor
- * @param  {zebra.data.Item|Object} [r] a root item. As the argument you can pass "zebra.data.Item" or
- * a JavaType object. In the second case you can describe the tree as follow:
-
-     // create tree model initialized with tree structure passed as 
-     // special formated JavaScript object   
-     var tree = new zebra.data.TreeModel({ value:"Root",
-                                          kids: [
-                                              "Root kid 1",
-                                              { 
-                                                value: "Root kid 2",
-                                                kids:  [ "Kid of kid 2"] 
-                                              }
-                                          ]});
-
- * @class zebra.data.TreeModel
- */
-
-/**
- * Fired when the tree model item value has been updated. 
-
-    tree.bind(function itemModified(src, item) {
-        ...
-    });
-
- * @event itemModified 
- * @param {zebra.data.TreeModel} src a tree model that triggers the event
- * @param {zebra.data.Item}  item an item whose value has been updated
- */
-
-/**
- * Fired when the tree model item has been removed
-
-    tree.bind(function itemRemoved(src, item) {
-       ...
-    });
-
- * @event itemRemoved
- * @param {zebra.data.TreeModel} src a tree model that triggers the event
- * @param {zebra.data.Item}  item an item that has been removed from the tree model
- */
-
-/**
- * Fired when the tree model item has been inserted into the model
-
-    tree.bind(function itemInserted(src, item) {
-       ...
-    });
-
- * @event itemInserted
- * @param {zebra.data.TreeModel} src a tree model that triggers the event
- * @param {zebra.data.Item}  item an item that has been inserted into the tree model
- */
-
-pkg.TreeModel = Class([
-    function $clazz() {
-        this.create = function(r, p) {
-            var item = new Item(r.hasOwnProperty("value")? r.value : r);
-            item.parent = p;
-            if (r.hasOwnProperty("kids")) {
-                for(var i = 0; i < r.kids.length; i++) {
-                    item.kids[i] = pkg.TreeModel.create(r.kids[i], item);
-                }
-            }
-            return item;
-        };
-    },
-
-    function $prototype() {
-        this.iterate = function(r, f) {
-            var res = f.call(this, r);
-            if (res === 1 || res === 2) return r;
-
-            for (var i = 0; i < r.kids.length; i++) {
-                res = this.iterate(r.kids[i], f);
-                if (res === 2) return res;
-            }
-        };
-
-        /**
-         * Update a value of the given tree model item with the new one
-         * @method setValue
-         * @param  {zebra.data.Item} item an item whose value has to be updated
-         * @param  {[type]} v   a new item value
-         */
-        this.setValue = function(item, v){
-            item.value = v;
-            this._.itemModified(this, item);
-        };
-
-        /**
-         * Add the new item to the tree model as a children element of the given parent item
-         * @method add
-         * @param  {zebra.data.Item} to a parent item to which the new item has to be added
-         * @param  {Object|zebra.data.Item} an item or value of the item to be
-         * added to the parent item of the tree model 
-         */
-        this.add = function(to,item){
-            this.insert(to, item, to.kids.length);
-        };
-
-        /**
-         * Insert the new item to the tree model as a children element at the 
-         * given position of the parent element
-         * @method insert
-         * @param  {zebra.data.Item} to a parent item to which the new item 
-         * has to be inserted
-         * @param  {Object|zebra.data.Item} an item or value of the item to be
-         * inserted to the parent item
-         * @param  {Integer} i a position the new item has to be inserted into
-         * the parent item
-         */
-        this.insert = function(to,item,i){
-            if (i < 0 || to.kids.length < i) throw new Error(oobi + i);
-            if (zebra.isString(item)) {
-                item = new Item(item);
-            }
-            to.kids.splice(i, 0, item);
-            item.parent = to;
-            this._.itemInserted(this, item);
-
-            // !!!
-            // it is necessary to analyze if the inserted item has kids and
-            // generate inserted event for all kids recursively
-        };
-
-        /**
-         * Remove the given item from the tree model
-         * @method remove
-         * @param  {zebra.data.Item} item an item to be removed from the tree model
-         */
-        this.remove = function(item){
-            if (item == this.root) {
-                this.root = null;
-            }
-            else {
-                for(var i=0; i < item.kids.length; i++) {
-                    this.remove(item.kids[i]);
-                }
-                item.parent.kids.splice(item.parent.kids.indexOf(item), 1);
-                item.parent = null;
-            }
-
-            this._.itemRemoved(this, item);
-        };
-
-        /**
-         * Remove all children items from the given item of the tree model
-         * @method removeKids
-         * @param  {zebra.data.Item} item an item from that all children items have to be removed
-         */
-        this.removeKids = function(item){
-            for(var i = 0; i < items.kids.length; i++) this.remove(items[i]);
-        };
-
-        this[''] = function(r) {
-            if (arguments.length === 0) r = new Item();
-
-            /**
-             * Reference to the tree model root item
-             * @attribute root
-             * @type {zebra.data.Item}
-             * @readOnly
-             */
-            this.root = zebra.instanceOf(r, Item) ? r : pkg.TreeModel.create(r);
-            this._ = new pkg.TreeModelListeners();
-        };
-    }
-]);
-
-pkg.MatrixListeners = MB.ListenersClass("matrixResized", "cellModified", "matrixSorted");
-
-/**
- *  Matrix model class. 
- *  @constructor
- *  @param  {Array of Array} [data] the given data 
- *  @param  {Integer} [rows] a number of rows
- *  @param  {Integer} [cols] a number of columns
- *  @class zebra.data.Matrix
- */
-pkg.Matrix = Class([
-    function $prototype() {        
-        /**
-         * Fired when the matrix model size (number of rows or columns) is changed. 
-          
-         matrix.bind(function matrixResized(src, pr, pc) {
-            ...
-         });
-          
-         * @event matrixResized 
-         * @param {zebra.data.Matrix} src a matrix that triggers the event
-         * @param {Integer}  pr a previous number of rows 
-         * @param {Integer}  pc a previous number of columns 
-         */
-
-         /**
-          * Fired when the matrix model cell has been updated. 
-          
-          matrix.bind(function cellModified(src, row, col, old) {
-             ...
-          });
-
-          * @event cellModified 
-          * @param {zebra.data.Matrix} src a matrix that triggers the event
-          * @param {Integer}  row an updated row 
-          * @param {Integer}  col an updated column 
-          * @param {Object}  old a previous cell value
-          */
-
-          /**
-           * Fired when the matrix data has been re-ordered. 
-           
-           matrix.bind(function matrixSorted(src, sortInfo) {
-              ...
-           });
-
-           * @event matrixSorted
-           * @param {zebra.data.Matrix} src a matrix that triggers the event
-           * @param {Object}  sortInfo a new data order info. The information 
-           * contains:
-           *
-           *      { 
-           *         func: sortFunction,
-           *         name: sortFunctionName,
-           *         col : sortColumn
-           *      }   
-           * 
-           */
-       
-        /**
-         * Get a matrix model cell value at the specified row and column
-         * @method get
-         * @param  {Integer} row a cell row
-         * @param  {Integer} col a cell column
-         * @return {Object}  matrix model cell value
-         */
-        this.get = function (row,col){
-            if (row < 0 || row >= this.rows || col < 0 || col >= this.cols) {
-                throw new Error("Row of col is out of bounds: " + row + "," + col);
-            }
-            return this.objs[row][col];
-        };
-
-        /**
-         * Set the specified by row and column cell value. If the specified row or column
-         * is greater than the matrix model has the model size will be adjusted to new one.
-         * @method put
-         * @param  {Integer} row a cell row
-         * @param  {Integer} col a cell column
-         * @param  {Object} obj a new cell value
-         */
-        this.put = function(row,col,obj){
-            var nr = this.rows, nc = this.cols;
-            if (row >= nr) nr += (row - nr + 1);
-            if (col >= nc) nc += (col - nc + 1);
-
-            this.setRowsCols(nr, nc);
-            var old = this.objs[row] ? this.objs[row][col] : undefined;
-            if (obj != old) {
-                this.objs[row][col] = obj;
-                this._.cellModified(this, row, col, old);
-            }
-        };
-
-        /**
-         * Set the specified by index cell value. The index identifies cell starting from [0,0]
-         * cell till [rows,columns]. If the index is greater than size of model the model size
-         * will be adjusted to new one.
-         * @method puti
-         * @param  {Integer} i a cell row
-         * @param  {Object} obj a new cell value
-         */
-        this.puti = function(i, obj){
-            this.put( ~~(i / this.cols),
-                         i % this.cols, obj);
-        };
-
-        /**
-         * Set the given number of rows and columns the model has to have.
-         * @method setRowsCols
-         * @param  {Integer} rows a new number of rows
-         * @param  {Integer} cols a new number of columns
-         */
-        this.setRowsCols = function(rows, cols){
-            if (rows != this.rows || cols != this.cols){
-                var pc = this.cols,
-                    pr = this.rows;
-
-                this.rellocate(rows, cols);
-                this.cols = cols;
-                this.rows = rows;
-                this._.matrixResized(this, pr, pc);
-            }
-        };
-
-        /**
-         * Reallocate the matrix model space with the new number of rows and columns 
-         * @method re-locate.
-         * @private
-         * @param  {Integer} r a new number of rows
-         * @param  {Integer} c a new number of columns
-         */
-        this.rellocate = function(r, c) {
-            if (r >= this.rows) {
-                for(var i=this.rows; i < r; i++) {
-                    this.objs[i] = [];
-                }
-            }
-        };
-
-         /**
-         * Set the given number of rows the model has to have.
-         * @method setRows
-         * @param  {Integer} rows a new number of rows
-         */
-        this.setRows = function(rows) {
-            this.setRowsCols(rows, this.cols);
-        };
-
-        /**
-         * Set the given number of columns the model has to have.
-         * @method setCols
-         * @param  {Integer} cols a new number of columns
-         */
-        this.setCols = function(cols) {
-            this.setRowsCols(this.rows, cols);
-        };
-
-        /**
-         * Remove specified number of rows from the model starting
-         * from the given row.
-         * @method removeRows
-         * @param  {Integer}  begrow a start row 
-         * @param  {Integer} count  a number of rows to be removed
-         */
-        this.removeRows = function(begrow,count){
-            if (begrow < 0 || begrow + count > this.rows) {
-                throw new Error();
-            }
-
-            for(var i = (begrow + count);i < this.rows; i++, begrow++){
-                for(var j = 0;j < this.cols; j ++ ){
-                    this.objs[begrow][j] = this.objs[i][j];
-                    this.objs[i][j] = null;
-                }
-            }
-
-            this.rows -= count;
-            this._.matrixResized(this, this.rows + count, this.cols);
-        };
-
-        /**
-         * Remove specified number of columns from the model starting
-         * from the given column.
-         * @method removeCols
-         * @param  {Integer}  begcol a start column
-         * @param  {Integer} count  a number of columns to be removed
-         */
-        this.removeCols = function (begcol,count){
-            if (begcol < 0 || begcol + count > this.cols) {
-                throw new Error();
-            }
-            
-            for(var i = (begcol + count);i < this.cols; i++, begcol++){
-                for(var j = 0;j < this.rows; j++){
-                    this.objs[j][begcol] = this.objs[j][i];
-                    this.objs[j][i] = null;
-                }
-            }
-
-            this.cols -= count;
-            this._.matrixResized(this, this.rows, this.cols + count);
-        };
-
-        /**
-         * Sort the given column of the matrix model.
-         * @param  {Integer} col a column to be re-ordered
-         * @param  {Function} [f] an optional sort function. The name of the function 
-         * is grabbed to indicate type of the sorting the method does. For instance:
-         * "descent", "ascent".  
-         * @method sortCol
-         */
-        this.sortCol = function(col, f) {
-            if (f == null) {
-                f = pkg.descent;
-            }
-
-            this.objs.sort(function(a, b) {
-                return f(a[col],b[col]);
-            });
-
-            this._.matrixSorted(this, { col : col,
-                                        func: f,
-                                        name: zebra.$FN(f).toLowerCase() });
-        };
-
-        this[''] = function() {
-            /**
-             * Number of rows in the matrix model
-             * @attribute rows
-             * @type {Integer}
-             * @readOnly
-             */
-
-            /**
-             * Number of columns in the matrix model
-             * @attribute cols
-             * @type {Integer}
-             * @readOnly
-             */
-
-            this._ = new pkg.MatrixListeners();
-            if (arguments.length == 1) {
-                this.objs = arguments[0];
-                this.cols = (this.objs.length > 0) ? this.objs[0].length : 0;
-                this.rows = this.objs.length;
-            }
-            else {
-                this.objs = [];
-                this.rows = this.cols = 0;
-                if (arguments.length > 1) {
-                    this.setRowsCols(arguments[0], arguments[1]);
-                }
-            }
-        };
-    }
-]);
-
-/**
- * @for
- */
-
-})(zebra("data"), zebra.Class, zebra.Interface);
-
 /**
  * The module provides number of classes to help to communicate
  * with remote services and servers by HTTP, JSON-RPC, XML-RPC
@@ -3693,7 +4686,9 @@ pkg.ID = function UUID(size) {
 };
 
 pkg.$sleep = function() {
-    var r = new XMLHttpRequest(), t = (new Date()).getTime().toString(), i = window.location.toString().lastIndexOf("?");
+    var r = new XMLHttpRequest(),
+        t = (new Date()).getTime().toString(),
+        i = window.location.toString().lastIndexOf("?");
     r.open('GET', window.location + (i > 0 ? "&" : "?") + t, false);
     r.send(null);
 };
@@ -3715,7 +4710,10 @@ pkg.b64encode = function(input) {
         if (input instanceof ArrayBuffer) input = new Uint8Array(input);
         input.charCodeAt = function(i) { return this[i]; };
     }
-    if (Array.isArray(input)) input.charCodeAt = function(i) { return this[i]; };
+
+    if (Array.isArray(input)) {
+        input.charCodeAt = function(i) { return this[i]; };
+    }
 
     while(i < len) {
         c1 = input.charCodeAt(i++) & 0xff;
@@ -3798,14 +4796,18 @@ pkg.parseXML = function(s) {
         if (node.childNodes !== null) {
             for (var i = node.childNodes.length; i-->0;) {
                 var child= node.childNodes[i];
-                if (child.nodeType === 3 && child.data.match(/^\s*$/)) node.removeChild(child);
+                if (child.nodeType === 3 && child.data.match(/^\s*$/)) {
+                    node.removeChild(child);
+                }
                 if (child.nodeType === 1) rmws(child);
             }
         }
         return node;
     }
 
-    if (typeof DOMParser !== "undefined") return rmws((new DOMParser()).parseFromString(s, "text/xml"));
+    if (typeof DOMParser !== "undefined") {
+        return rmws((new DOMParser()).parseFromString(s, "text/xml"));
+    }
     else {
         for (var n in { "Microsoft.XMLDOM":0, "MSXML2.DOMDocument":1, "MSXML.DOMDocument":2 }) {
             var p = null;
@@ -4667,1887 +5669,1013 @@ pkg.JRPC.invoke = function(url, method) {
 
 })(zebra("io"), zebra.Class);
 
-
-(function(pkg, Class) {
-
-pkg.NONE        = 0;
-pkg.LEFT        = 1;
-pkg.RIGHT       = 2;
-pkg.TOP         = 4;
-pkg.BOTTOM      = 8;
-pkg.CENTER      = 16;
-pkg.HORIZONTAL  = 32;
-pkg.VERTICAL    = 64;
-pkg.TEMPORARY   = 128;
-
-pkg.USE_PS_SIZE = 512;
-pkg.STRETCH     = 256;
-
-pkg.TLEFT  = pkg.LEFT  | pkg.TOP;
-pkg.TRIGHT = pkg.RIGHT | pkg.TOP;
-pkg.BLEFT  = pkg.LEFT  | pkg.BOTTOM;
-pkg.BRIGHT = pkg.RIGHT | pkg.BOTTOM;
-
-
-// collect constraints into a separate dictionary
-var $ctrs = {};
-for(var k in pkg) {
-    if (pkg.hasOwnProperty(k) && /^\d+$/.test(pkg[k])) {
-        $ctrs[k.toUpperCase()] = pkg[k];
-    }
-}
-
-pkg.$constraints = function(v) {
-    return zebra.isString(v) ? $ctrs[v.toUpperCase()] : v;
-};
-
 /**
- * Layout package provides number of classes, interfaces, methods and 
- * variables that allows developer easily implement rules based layouting 
- * of hierarchy of rectangular elements. The package has no relation 
- * to any concrete UI, but it can be applied to a required UI framework
- *
- * The package declares the following constraints constants:
-     
-    - **NONE** no constraints 
-    - **LEFT** left alignment constraint
-    - **TOP** top alignment constraint
-    - **RIGHT** right alignment constraint
-    - **BOTTOM** bottom alignment constraint
-    - **CENTER** center alignment constraint
-    - **HORIZONTAL** horizontal elements alignment constraint
-    - **VERTICAL** vertical elements alignment constraint
-    - **TLEFT** top left alignment constraint
-    - **TRIGHT** top right alignment constraint
-    - **BLEFT** bottom left alignment constraint
-    - **BRIGHT** bottom right alignment constraint
-    - **STRETCH** stretch element
-    - **USE_PS_SIZE** use preferred size for an element
-        
- * 
- * @module layout
- * @main layout
+ * Collection of variouse data models. 
+ * @module data
+ * @main 
+ * @requires zebra, util
  */
 
+(function(pkg, Class, Interface) {
+
+pkg.descent = function descent(a, b) {
+    if (a == null) return 1;
+    return (zebra.isString(a)) ? a.localeCompare(b) : a - b;
+};
+
+pkg.ascent = function ascent(a, b) {
+    if (b == null) return 1;
+    return (zebra.isString(b)) ? b.localeCompare(a) : b - a;
+};
+
+
 /**
- * Layout manager interface
- * @class zebra.layout.Layout
+ * Text model interface
+ * @class zebra.data.TextModel
  * @interface
+*/
+
+/**
+ * Get the given string line stored in the model
+ * @method getLine  
+ * @param  {Integer} line a line number
+ * @return {String}  a string line
  */
 
 /**
- * Calculate preferred size of the given component
- * @param {zebra.layout.Layoutable} t a target layoutable component
- * @method calcPreferredSize
+ * Get wrapped by the text model original text string 
+ * @method getValue
+ * @return {String} an original text
  */
 
 /**
- * Layout children components of the specified layoutable target component 
- * @param {zebra.layout.Layoutable} t a target layoutable component
- * @method doLayout
+ * Get number of lines stored in the text model
+ * @method getLines
+ * @return {Integer} a number of lines
  */
-var L = pkg.Layout = new zebra.Interface();
 
 /**
- * Find a direct children element for the given children component 
- * and the specified parent component
- * @param  {zebra.layout.Layoutable} parent  a parent component 
- * @param  {zebra.layout.Layoutable} child  a children component
- * @return {zebra.layout.Layoutable}  a direct children component
- * @method getDirectChild
- * @api zebra.layout.getDirectChild()
+ * Get number of characters stored in the model 
+ * @method getTextLength
+ * @return {Integer} a number of characters
  */
-pkg.getDirectChild = function(parent,child){
-    for(; child != null && child.parent != parent; child = child.parent) {}
-    return child;
-};
 
 /**
- * Find a direct component located at the given location of the specified 
- * parent component and the specified parent component
- * @param  {Integer} x a x coordinate relatively to the parent component
- * @param  {Integer} y a y coordinate relatively to the parent component
- * @param  {zebra.layout.Layoutable} parent  a parent component 
- * @return {zebra.layout.Layoutable} an index of direct children component 
- * or -1 if no a children component can be found
- * @method getDirectAt
- * @api zebra.layout.getDirectAt()
+ * Write the given string in the text model starting from the
+ * specified offset
+ * @method write
+ * @param  {String} s a string to be written into the text model 
+ * @param  {Integer} offset an offset starting from that the passed
+ * string has to be written into the text model
  */
-pkg.getDirectAt = function(x,y,p){
-    for(var i = 0;i < p.kids.length; i++){
-        var c = p.kids[i];
-        if (c.isVisible === true && c.x <= x && c.y <= y && c.x + c.width > x && c.y + c.height > y) return i;
-    }
-    return -1;
-};
 
 /**
- * Get a top (the highest in component hierarchy) parent component 
- * of the given component 
- * @param  {zebra.layout.Layoutable} c a component
- * @return {zebra.layout.Layoutable}  a top parent component
- * @method getTopParent
- * @api zebra.layout.getTopParent()
+ * Remove substring from the text model. 
+ * @method remove
+ * @param  {Integer} offset an offset starting from that a substring 
+ * will be removed 
+ * @param  {Integer} size a size of a substring to be removed 
  */
-pkg.getTopParent = function(c){
-    for(; c != null && c.parent != null; c = c.parent);
-    return c;
-};
 
 /**
- * Translate the given relative location into the parent relative location. 
- * @param  {Integer} [x] a x coordinate relatively  to the given component
- * @param  {Integer} [y] a y coordinate relatively  to the given component
- * @param  {zebra.layout.Layoutable} c a component
- * @param  {zebra.layout.Layoutable} [p] a parent component
- * @return {Object} a relative to the given parent UI component location:
- 
-        { x:{Integer}, y:{Integer} } 
-
- * @method toParentOrigin
- * @api zebra.layout.toParentOrigin()
+ * Fill the text model with the given text  
+ * @method  setValue
+ * @param  {String} text a new text to be set for the text model
  */
-pkg.toParentOrigin = function(x,y,c,p){
-    if (arguments.length == 1) {
-        c = x;
-        x = y = 0;
-        p = null;
-    }
-    else {
-        if (arguments.length < 4) p = null;
-    }
-
-    while (c != p) {
-        x += c.x;
-        y += c.y;
-        c = c.parent;
-    }
-    return { x:x, y:y };
-};
 
 /**
- * Convert the given component location into relative 
- * location of the specified children component successor.      
- * @param  {Integer} x a x coordinate relatively to the given 
- * component
- * @param  {Integer} y a y coordinate relatively to the given 
- * component
- * @param  {zebra.layout.Layoutable} p a component
- * @param  {zebra.layout.Layoutable} c a children successor component
- * @return {Object} a relative location 
- *
- *      { x:{Integer}, y:{Integer} } 
- *
- * @method toChildOrigin
- * @api zebra.layout.toChildOrigin()
- */
-pkg.toChildOrigin = function(x, y, p, c){
-    while(c != p){
-        x -= c.x;
-        y -= c.y;
-        c = c.parent;
-    }
-    return { x:x, y:y };
-};
+ * Fired when the text model has been updated: a string has been 
+ * inserted or removed
 
-pkg.xAlignment = function(aow,alignX,aw){
-    if (alignX == pkg.RIGHT)  return aw - aow;
-    if (alignX == pkg.CENTER) return ~~((aw - aow) / 2);
-    if (alignX == pkg.LEFT || alignX == pkg.NONE) return 0;
-    throw new Error("Invalid alignment " + alignX);
-};
-
-pkg.yAlignment = function(aoh,alignY,ah){
-    if (alignY == pkg.BOTTOM) return ah - aoh;
-    if (alignY == pkg.CENTER) return ~~((ah - aoh) / 2);
-    if (alignY == pkg.TOP || alignY == pkg.NONE) return 0;
-    throw new Error("Invalid alignment " + alignY);
-};
-
-/**
- * Calculate maximal preferred width and height of 
- * children component of the given target component.
- * @param  {zebra.layout.Layoutable} target a target component  
- * @return {Object} a maximal preferred width and height 
- 
-        { width:{Integer}, height:{Integer} }
-
- * @method getMaxPreferredSize
- * @api zebra.layout.getMaxPreferredSize()
- */
-pkg.getMaxPreferredSize = function(target) {
-    var maxWidth = 0, maxHeight = 0;
-    for(var i = 0;i < target.kids.length; i++){
-        var l = target.kids[i];
-        if (l.isVisible === true){
-            var ps = l.getPreferredSize();
-            if (ps.width > maxWidth) maxWidth = ps.width;
-            if (ps.height > maxHeight) maxHeight = ps.height;
-        }
-    }
-    return { width:maxWidth, height:maxHeight };
-};
-
-pkg.isAncestorOf = function(p,c){
-    for(; c != null && c != p; c = c.parent);
-    return c != null;
-};
-
-/**
- * Layoutable class defines rectangular component that 
- * has elementary metrical properties like width, height 
- * and location and can be a participant of layout management 
- * process. Layoutable component is container that can 
- * contains other layoutable component as its children. 
- * The children components are ordered by applying a layout 
- * manager of its parent component. 
- * @class zebra.layout.Layoutable
- * @constructor
- * @extends {zebra.layout.Layout}
- */
-pkg.Layoutable = Class(L, [
-    function $prototype() {
-        /**
-         * x coordinate 
-         * @attribute x
-         * @default 0
-         * @readOnly
-         * @type {Integer}
-         */
-
-        /**
-        * y coordinate 
-        * @attribute y
-        * @default 0
-        * @readOnly
-        * @type {Integer}
-        */
-
-        /**
-        * Width of rectangular area 
-        * @attribute width
-        * @default 0
-        * @readOnly
-        * @type {Integer}
-        */
-
-        /**
-        * Height of rectangular area 
-        * @attribute height
-        * @default 0
-        * @readOnly
-        * @type {Integer}
-        */
-
-        /**
-        * Indicate a layoutable component visibility
-        * @attribute isVisible
-        * @default true
-        * @readOnly
-        * @type {Boolean}
-        */
-
-        /**
-        * Indicate a layoutable component validity 
-        * @attribute isValid
-        * @default false
-        * @readOnly
-        * @type {Boolean}
-        */
-
-        /**
-        * Reference to a parent layoutable component
-        * @attribute parent
-        * @default null
-        * @readOnly
-        * @type {zebra.layout.Layoutable}
-        */
-
-        this.x = this.y = this.height = this.width = this.cachedHeight= 0;
-
-        this.psWidth = this.psHeight = this.cachedWidth = -1;
-        this.isLayoutValid = this.isValid = false;
-
-        /**
-         * The component layout constraints. The constraints is specific to 
-         * the parent component layout manager value that customizes the 
-         * children component layouting on the parent component. 
-         * @attribute constraints 
-         * @default null
-         * @type {Object}
-         */
-        this.constraints = this.parent = null;
-        this.isVisible = true;
-
-        function $normPath(p) {
-            p = p.trim();
-            if (p[0] == '/') return p;
-            if (p[0] == '#') return "//*[@id='" + p.substring(1).trim() + "']";
-            return "//" + (p[0] == '.' ? p.substring(1).trim() : p);
-        }
-
-        /**
-         * Find a first children component that satisfies the passed path expression. 
-         * @param  {String} path path expression. Path expression is simplified form 
-         * of XPath-like expression:
-         
-        "/Panel"  - find first children that is an instance of zebra.ui.Panel
-        "/Panel[@id='top']" - find first children that is an instance of zebra.ui.Panel with "id" property that equals "top"
-        "//Panel"  - find first children that is an instance of zebra.ui.Panel recursively 
-        
-         * Shortcuts:
-        
-            "#id" - find a component by its "id" attribute value. This is equivalent of "//*[@id='a component id property']" path
-            "zebra.ui.Button" - find a component by its class.  This is equivalent of "//className" path
-            
-         *
-         * @method find
-         * @return {zebra.layout.Layoutable} found children component or null if 
-         * no children component can be found
-         */
-        this.find = function(path){
-            var res = null;
-            zebra.util.findInTree(this, $normPath(path),
-                function(node, name) {
-                    return node.$clazz != null && zebra.instanceOf(node, zebra.Class.forName(name)); 
-                },
-
-                function(kid) {
-                   res = kid;
-                   return true;
-            });
-            return res;
-        };
-
-        /**
-         * Find children components that satisfy the passed path expression. 
-         * @param  {String} path path expression. Path expression is 
-         * simplified form of XPath-like expression:
-         
-         "/Panel"  - find first children that is an instance of zebra.ui.Panel
-         "/Panel[@id='top']" - find first children that is an instance of zebra.ui.Panel with "id" property that equals "top"
-         "//Panel"  - find first children that is an instance of zebra.ui.Panel recursively 
-
-         * Shortcuts:
-        
-            "#id" - find a component by its "id" attribute value. This is equivalent of "//*[@id='a component id property']" path
-            "zebra.ui.Button" - find a component by its class.  This is equivalent of "//className" path
-         
-         * @param {Function} [callback] function that is called every time a 
-         * new children component has been found.  
-         * @method findAll
-         * @return {Array}  return array of found children components if 
-         * passed function has not been passed
-         */
-        this.findAll = function(path, callback){
-            var res = [];
-            if (callback == null) {
-                callback =  function(kid) {
-                    res.push(kid);
-                    return false;
-                };
-            }
-
-            zebra.util.findInTree(this, $normPath(path),
-                function(node, name) {
-                    return node.$clazz != null && zebra.instanceOf(node, zebra.Class.forName(name)); 
-                }, callback);
-            return res;
-        };
-
-        /**
-         * Set the given id for the component 
-         * @chainable 
-         * @param {String} id an ID to be set
-         * @method setId
-         */
-        this.setId = function(id) {
-            this.id = id;
-            return this;
-        };
-
-        /**
-         * Apply the given set of properties to the given component or a number of children
-         * components. 
- 
-        var c = new zebra.layout.Layoutable();
-        c.properties({
-            width: [100, 100],
-            location: [10,10],
-            layout: new zebra.layout.BorderLayout()
-        })
-
-        c.add(new zebra.layout.Layoutable()).add(zebra.layout.Layoutable()).add(zebra.layout.Layoutable());
-        c.properties("//*", {
-            size: [100, 200]
+        text.bind(function (src, b, off, len, startLine, lines) {
+            ...
         });
 
+ *
+ * @event textUpdated 
+ * @param {zebra.data.Text} src a text model that triggers the event
+ * @param {Boolean}  b a flag that is true if a string has been written 
+ * in the text model, false if the model substring has been removed
+ * @param {Integer}  off an offset starting form that the text update 
+ * took place
+ * @param {Integer}  len a length of text that has been affected by 
+ * the text model update
+ * @param {Integer}  startLine a first line that has been affected 
+ * by the text model update
+ * @param {Integer}  lines a number of lines that has been affected 
+ * by the text model update
+ */
+pkg.TextModel = Interface();
 
-         *
-         * @param  {String} [path]  a path to find children components
-         * @param  {Object} props a dictionary of properties to be applied
-         * @return {zebra.ui.Layoutable} a component itself
-         * @chainable
-         * @method properties
-         */
-        this.properties = function(path, props) {
-            if (arguments.length === 1) {
-                return zebra.properties(this, path);     
-            }
 
-            this.findAll(path, function(kid) {
-                zebra.properties(kid, props);   
-            });
-            return this;
-        };
+var MB = zebra.util, oobi = "Index is out of bounds: ";
 
-        /**
-         * Validate the component metrics. The method is called as 
-         * a one step of the component validation procedure. The 
-         * method causes "recalc" method execution if the method
-         * has been implemented and the component is in invalid
-         * state. It is supposed the "recalc" method has to be
-         * implemented by a component as safe place where the 
-         * component metrics can be calculated. Component 
-         * metrics is individual for the given component 
-         * properties that has influence to the component 
-         * preferred size value. In many cases the properties
-         * calculation has to be minimized what can be done
-         * by moving the calculation in "recalc" method  
-         * @method validateMetric
-         * @protected
-         */
-        this.validateMetric = function(){
-            if (this.isValid === false) {
-                if (this.recalc != null) this.recalc();
-                this.isValid = true;
-            }
-        };
+function Line(s) {
+    this.s = s;
+    this.l = 0;
+}
 
-        /**
-         * By default there is no any implementation of "recalc" method
-         * in the layoutable component. In other words the method doesn't
-         * exist. Developer should implement the method if the need a proper
-         * and efficient place  to calculate component properties that 
-         * have influence to the component preferred size. The "recalc"
-         * method is called only when it is really necessary to compute
-         * the component metrics.
-         * @method recalc
-         * @protected
-         */
+//  toString for array.join method
+Line.prototype.toString = function() { return this.s; };
 
-        /**
-         * Invalidate the component layout. Layout invalidation means the 
-         * component children components have to be placed with the component
-         * layout manager. Layout invalidation causes a parent component 
-         * layout is also invalidated.
-         * @method invalidateLayout
-         * @protected
-         */
-        this.invalidateLayout = function(){
-            this.isLayoutValid = false;
-            if (this.parent != null) this.parent.invalidateLayout();
-        };
+pkg.TextModelListeners = MB.ListenersClass("textUpdated");
 
-        /**
-         * Invalidate component layout and metrics.
-         * @method invalidate
-         */
-        this.invalidate = function(){
-            this.isValid = this.isLayoutValid = false;
-            this.cachedWidth =  -1;
-            if (this.parent != null) this.parent.invalidate();
-        };
+/**
+ * Multi-lines text model implementation
+ * @class zebra.data.Text
+ * @param  {String}  [s] the specified text the model has to be filled
+ * @constructor
+ * @extends zebra.data.TextModel
+ */
+pkg.Text = Class(pkg.TextModel, [
+    function $prototype() {
+        this.textLength = 0;
 
-        /**
-         * Force validation of the component metrics and layout if it is not valid
-         * @method validate
-         */
-        this.validate = function(){
-            this.validateMetric();
-            if (this.width > 0 && this.height > 0 &&
-                this.isLayoutValid === false && 
-                this.isVisible === true)
-            {
-                this.layout.doLayout(this);
-                for(var i = 0;i < this.kids.length; i++) {
-                    this.kids[i].validate();
+        this.getLnInfo = function(lines, start, startOffset, o){
+            for(; start < lines.length; start++){
+                var line = lines[start].s;
+                if (o >= startOffset && o <= startOffset + line.length){
+                    return [start, startOffset];
                 }
-                this.isLayoutValid = true;
-                if (this.laidout != null) this.laidout();
+                startOffset += (line.length + 1);
             }
+            return [];
         };
 
-        /**
-         * The method can be implemented to be informed every time 
-         * the component has completed to layout its children components
-         * @method laidout
-         */
+        this.setExtraChar = function(i,ch){ this.lines[i].l = ch; };
+        
+        this.getExtraChar = function (i) { return this.lines[i].l; };
 
-        /**
-         * Get preferred size. The preferred size includes  top, left, 
-         * bottom and right paddings and 
-         * the size the component wants to have 
-         * @method getPreferredSize
-         * @return {Object} return size object the component wants to 
-         * have as the following structure:
-                
-         {width:{Integer}, height:{Integer}} object
-         
-         */
-        this.getPreferredSize = function(){
-            this.validateMetric();
-            if (this.cachedWidth < 0){
-                var ps = (this.psWidth < 0 || this.psHeight < 0) ? this.layout.calcPreferredSize(this)
-                                                                 : { width:0, height:0 };
+        this.getLine = function(line) { return this.lines[line].s; };
 
-                ps.width  = this.psWidth  >= 0 ? this.psWidth
-                                               : ps.width  + this.getLeft() + this.getRight();
-                ps.height = this.psHeight >= 0 ? this.psHeight
-                                               : ps.height + this.getTop()  + this.getBottom();
-                this.cachedWidth  = ps.width;
-                this.cachedHeight = ps.height;
-                return ps;
+        this.getValue = function(){ return this.lines.join("\n"); };
+
+        this.getLines = function () { return this.lines.length; };
+        
+        this.getTextLength = function() { return this.textLength; };
+
+        this.write = function (s, offset){
+            var slen = s.length,
+                info = this.getLnInfo(this.lines, 0, 0, offset),
+                line    = this.lines[info[0]].s,
+                j       = 0,
+                lineOff = offset - info[1],
+                tmp = [line.substring(0, lineOff), s, line.substring(lineOff)].join('');
+
+            for(; j < slen && s[j] != '\n'; j++);
+
+            if(j >= slen) {
+                this.lines[info[0]].s = tmp;
+                j = 1;
             }
-            return { width:this.cachedWidth,
-                     height:this.cachedHeight };
-        };
-
-        /**
-         * Get top padding.
-         * @method getTop
-         * @return {Integer} top padding in pixel
-         */
-        this.getTop = function ()  { return 0; };
-
-        /**
-         * Get left padding.
-         * @method getLeft
-         * @return {Integer} left padding in pixel
-         */
-        this.getLeft = function ()  { return 0; };
-
-        /**
-         * Get bottom padding.
-         * @method getBottom
-         * @return {Integer} bottom padding in pixel
-         */
-        this.getBottom = function ()  { return 0; };
-
-        /**
-         * Get right padding.
-         * @method getRight
-         * @return {Integer} right padding in pixel
-         */
-        this.getRight = function ()  { return 0; };
-
-        /**
-         * Set the parent component.  
-         * @protected
-         * @param {zebra.layout.Layoutable} o a parent component 
-         * @method setParent
-         * @protected
-         */
-        this.setParent = function (o){
-            if (o != this.parent){
-                this.parent = o;
-                this.invalidate();
+            else {
+                this.lines.splice(info[0], 1);
+                j = this.parse(info[0], tmp, this.lines);
             }
+            this.textLength += slen;
+            this._.textUpdated(this, true, offset, slen, info[0], j);
         };
 
-        /**
-         * Set the given layout manager that is used to place 
-         * children component. Layout manager is simple class 
-         * that defines number of rules concerning the way 
-         * children components have to be ordered on its parent 
-         * surface.  
-         * @method setLayout
-         * @param {zebra.ui.Layout} m a layout manager 
-         * @chainable 
-         */
-        this.setLayout = function (m){
-            if (m == null) throw new Error("Null layout");
+        this.remove = function (offset,size){
+            var i1   = this.getLnInfo(this.lines, 0, 0, offset),
+                i2   = this.getLnInfo(this.lines, i1[0], i1[1], offset + size),
+                l2   = this.lines[i2[0]].s,
+                l1   = this.lines[i1[0]].s,
+                off1 = offset - i1[1], off2 = offset + size - i2[1],
+                buf  = [l1.substring(0, off1), l2.substring(off2)].join('');
 
-            if (this.layout != m){
-                var pl = this.layout;
-                this.layout = m;
-                this.invalidate();
+            if (i2[0] == i1[0]) this.lines.splice(i1[0], 1, new Line(buf));
+            else {
+                this.lines.splice(i1[0], i2[0] - i1[0] + 1);
+                this.lines.splice(i1[0], 0, new Line(buf));
             }
-
-            return this;
+            this.textLength -= size;
+            this._.textUpdated(this, false, offset, size, i1[0], i2[0] - i1[0] + 1);
         };
 
-        /**
-         * Internal implementation of the component 
-         * preferred size calculation.  
-         * @param  {zebra.layout.Layoutable} target a component 
-         * for that the metric has to be calculated
-         * @return {Object} a preferred size. The method always 
-         * returns { width:10, height:10 } as the component preferred 
-         * size
-         * @private
-         * @method calcPreferredSize
-         */
-        this.calcPreferredSize = function (target){
-            return { width:10, height:10 };
-        };
-
-        /**
-         * By default layoutbable component itself implements 
-         * layout manager to order its children components.
-         * This method implementation does nothing, so children 
-         * component will placed according locations and sizes they 
-         * have set.  
-         * @method doLayout
-         * @private
-         */
-        this.doLayout = function (target) {};
-
-        /**
-         * Detect index of a children component.
-         * @param  {zebra.ui.Layoutbale} c a children component
-         * @method indexOf
-         * @return {Integer}
-         */
-        this.indexOf = function (c){
-            return this.kids.indexOf(c);
-        };
-
-        /**
-         * Insert the new children component at the given index with the specified layout constraints. 
-         * The passed constraints can be set via a layoutable component that is inserted. Just 
-         * set "constraints" property of in inserted component.
-         * @param  {Integer} i an index at that the new children component has to be inserted 
-         * @param  {Object} constr layout constraints of the new children component
-         * @param  {zebra.layout.Layoutbale} d a new children layoutable component to be added
-         * @return {zebra.layout.Layoutable} an inserted children layoutable component
-         * @method insert
-         */
-        this.insert = function(i,constr,d){
-            if (d.constraints != null) constr = d.constraints;
-            else                       d.constraints = constr;
-
-            if (i == this.kids.length) this.kids.push(d);
-            else this.kids.splice(i, 0, d);
-
-            d.setParent(this);
-
-            if (this.kidAdded != null) this.kidAdded(i, constr, d);
-            this.invalidate();
-            return d;
-        };
-
-        /**
-         * The method can be implemented to be informed every time a new component 
-         * has been inserted into the component
-         * @param  {Integer} i an index at that the new children component has been inserted 
-         * @param  {Object} constr layout constraints of the new children component
-         * @param  {zebra.layout.Layoutbale} d a new children layoutable component that has 
-         * been added
-         * @method kidAdded
-         */
-
-        /**
-         * Set the layoutable component location. Location is x, y coordinates relatively to 
-         * a parent component 
-         * @param  {Integer} xx x coordinate relatively to the layoutable component parent
-         * @param  {Integer} yy y coordinate relatively to the layoutable component parent
-         * @method setLocation
-         */
-        this.setLocation = function (xx,yy){
-            if (xx != this.x || this.y != yy){
-                var px = this.x, py = this.y;
-                this.x = xx;
-                this.y = yy;
-                if (this.relocated != null) this.relocated(px, py);
+        this.parse = function (startLine, text, lines){
+            var size = text.length, prevIndex = 0, prevStartLine = startLine;
+            for(var index = 0; index <= size; prevIndex = index, startLine++){
+                var fi = text.indexOf("\n", index);
+                index = (fi < 0 ? size : fi);
+                this.lines.splice(startLine, 0, new Line(text.substring(prevIndex, index)));
+                index++;
             }
+            return startLine - prevStartLine;
         };
 
-        /**
-         * The method can be implemented to be informed every time the component
-         * has been moved
-         * @param  {Integer} px x previous coordinate of moved children component
-         * @param  {Integer} py y previous coordinate of moved children component
-         * @method relocated
-         */
-
-
-        /**
-         * Set the layoutable component bounds. Bounds defines the component location and size.
-         * @param  {Integer} x x coordinate relatively to the layoutable component parent
-         * @param  {Integer} y y coordinate relatively to the layoutable component parent
-         * @param  {Integer} w a width of the component
-         * @param  {Integer} h a height of the component
-         * @method setBounds
-         * @chainable
-         */
-        this.setBounds = function (x, y, w, h){
-            this.setLocation(x, y);
-            this.setSize(w, h);
-            return this;
-        };
-
-        /**
-         * Set the layoutable component size. 
-         * @param  {Integer} w a width of the component
-         * @param  {Integer} h a height of the component
-         * @method setSize
-         */
-        this.setSize = function (w,h){
-            if (w != this.width || h != this.height){
-                var pw = this.width, ph = this.height;
-                this.width = w;
-                this.height = h;
-                this.isLayoutValid = false;
-                if (this.resized != null) this.resized(pw, ph);
+        this.setValue = function(text){
+            if (text == null) {
+                throw new Error("Invalid null string");
             }
-            return this;
-        };
-
-        /**
-         * The method can be implemented to be informed every time the component
-         * has been resized
-         * @param  {Integer} w a previous width of the component
-         * @param  {Integer} h a previous height of the component
-         * @method resized
-         */
-
-        /**
-         * Get a children layoutable component by the given constraints.  
-         * @param  {zebra.layout.Layoutable} c a constraints
-         * @return {zebra.layout.Layoutable} a children component
-         * @method getByConstraints
-         */
-        this.getByConstraints = function (c) {
-            if (this.kids.length > 0){
-                for(var i = 0;i < this.kids.length; i++ ){
-                    var l = this.kids[i];
-                    if (c == l.constraints) return l;
+            var old = this.getValue();
+            if (old !== text) {
+                if (old.length > 0) {
+                    var numLines = this.getLines(), txtLen = this.getTextLength();
+                    this.lines.length = 0;
+                    this.lines = [ new Line("") ];
+                    this._.textUpdated(this, false, 0, txtLen, 0, numLines);
                 }
-            }
-            return null;
-        };
 
-        /**
-         * Remove the given children component.
-         * @param {zebra.layout.Layoutable} c a children component to be removed
-         * @method remove
-         * @return {zebra.layout.Layoutable} a removed children component 
-         */
-        this.remove = function(c) { 
-            return this.removeAt(this.kids.indexOf(c)); 
-        };
-
-        /**
-         * Remove a children component at the specified position.
-         * @param {Integer} i a children component index at which it has to be removed 
-         * @method removeAt
-         * @return {zebra.layout.Layoutable} a removed children component 
-         */
-        this.removeAt = function (i){
-            var obj = this.kids[i];
-            obj.setParent(null);
-            if (obj.constraints) obj.constraints = null;
-            this.kids.splice(i, 1);
-            if (this.kidRemoved != null) this.kidRemoved(i, obj);
-            this.invalidate();
-            return obj;
-        };
-
-        /**
-         * Remove the component from its parent if it has a parent 
-         * @method removeMe
-         */
-        this.removeMe = function() {
-            var i = -1;
-            if (this.parent != null && (i = this.parent.indexOf(this)) >=0) {
-                this.parent.removeAt(i);
+                this.lines = [];
+                this.parse(0, text, this.lines);
+                this.textLength = text.length;
+                this._.textUpdated(this, true, 0, this.textLength, 0, this.getLines());
             }
         };
 
+        this[''] = function(s){
+            this.lines = [ new Line("") ];
+            this._ = new pkg.TextModelListeners();
+            this.setValue(s == null ? "" : s);
+        };
+    }
+]);
+
+/**
+ * Single line text model implementation
+ * @param  {String}  [s] the specified text the model has to be filled
+ * @param  {Integer} [max] the specified maximal text length
+ * @constructor
+ * @class zebra.data.SingleLineTxt
+ * @extends zebra.data.TextModel
+ */
+pkg.SingleLineTxt = Class(pkg.TextModel, [
+    function $prototype() {
         /**
-         * The method can be implemented to be informed every time a children component
-         * has been removed
-         * @param {Integer} i a children component index at which it has been removed 
-         * @param  {zebra.layout.Layoutable} c a children component that has been removed
-         * @method kidRemoved
+         * Maximal text length. -1 means the text is not restricted 
+         * regarding its length. 
+         * @attribute maxLen
+         * @type {Integer}
+         * @default -1
+         * @readOnly
          */
 
+        this.setExtraChar = function(i,ch) {
+            this.extra = ch;
+        };
+        
+        this.getExtraChar = function(i){
+            return this.extra;
+        };
+
+        this.getValue = function(){
+            return this.buf;
+        };
+
         /**
-         * Set the specified preferred size the component has to have. 
-         * Component preferred size is important thing that is widely 
-         * used to layout the component. Usually the preferred 
-         * size is calculated by a concrete component basing on 
-         * its metrics. For instance, label component calculates its
-         * preferred size basing on text size. But if it is required  
-         * the component preferred size can be fixed with the desired 
-         * value.
-         * @param  {Integer} w a preferred width. Pass "-1" as the 
-         * argument value to not set preferred width
-         * @param  {Integer} h a preferred height. Pass "-1" as the 
-         * argument value to not set preferred height
-         * @method setPreferredSize
+         * Get number of lines stored in the text model. The model 
+         * can have only one line
+         * @method getLines
+         * @return {Integer} a number of lines
          */
-        this.setPreferredSize = function(w,h) {
-            if (w != this.psWidth || h != this.psHeight){
-                this.psWidth  = w;
-                this.psHeight = h;
-                this.invalidate();
+        this.getLines = function(){
+            return 1;
+        };
+
+        this.getTextLength = function(){
+            return this.buf.length;
+        };
+
+        this.getLine = function(line){ 
+            if (line !== 0) {
+                throw new Error(oobi + line);
+            }
+            return this.buf;
+        };
+
+        this.write = function(s,offset){
+            var buf = this.buf, j = s.indexOf("\n");
+            if (j >= 0) s = s.substring(0, j);
+            var l = (this.maxLen > 0 && (buf.length + s.length) >= this.maxLen) ? this.maxLen - buf.length
+                                                                                : s.length;
+            if (l!==0) {
+                this.buf = [buf.substring(0, offset), s.substring(0, l), buf.substring(offset)].join('');
+                if (l > 0) this._.textUpdated(this, true, offset, l, 0, 1);
+            }
+        };
+
+        this.remove = function(offset,size){
+            this.buf = [ this.buf.substring(0, offset), this.buf.substring(offset + size)].join('');
+            this._.textUpdated(this, false, offset, size, 0, 1);
+        };
+
+        this.setValue = function(text){
+            if (text == null) {
+                throw new Error("Invalid null string");
+            }
+
+            var i = text.indexOf('\n');
+            if (i >= 0) text = text.substring(0, i);
+            if(this.buf == null || this.buf !== text) {
+                if (this.buf != null && this.buf.length > 0) this._.textUpdated(this, false, 0, this.buf.length, 0, 1);
+                if (this.maxLen > 0 && text.length > this.maxLen) text = text.substring(0, this.maxLen);
+                this.buf = text;
+                this._.textUpdated(this, true, 0, text.length, 0, 1);
             }
         };
 
         /**
-         * Replace a children component at the specified index
-         * with the given new children component
-         * @param  {Integer} i an index of a children component to be replaced
-         * @param  {zebra.layout.Layoutable} d a new children 
-         * @return {zebra.layout.Layoutable} a previous component that has 
-         * been re-set with the new one
-         * @method setAt
+         * Set the given maximal length the text can have
+         * @method setMaxLength
+         * @param  {Integer} max a maximal length of text
          */
-        this.setAt = function(i, d) {
-            var pd = this.removeAt(i);
-            if (d != null) this.insert(i, constr, d);
-            return pd;
+        this.setMaxLength = function (max){
+            if(max != this.maxLen){
+                this.maxLen = max;
+                this.setValue("");
+            }
+        };
+
+        this[''] = function (s, max) {   
+            this.maxLen = max == null ? -1 : max;
+            this.buf = null;
+            this.extra = 0;
+            this._ = new pkg.TextModelListeners();
+            this.setValue(s == null ? "" : s);
+        };
+    }
+]);
+
+pkg.ListModelListeners = MB.ListenersClass("elementInserted", "elementRemoved", "elementSet");
+
+/**
+ * List model class
+ * @param  {Array} [a] an array the list model has to be initialized with
+ * @example
+ 
+      // create list model that contains three integer elements
+      var l = new zebra.data.ListModel([1,2,3]);
+ 
+ * @constructor 
+ * @class zebra.data.ListModel
+ */
+
+ /**
+  * Fired when a new element has been added to the list model 
+
+     list.bind(function elementInserted(src, o, i) {
+         ...
+     });
+
+  * @event elementInserted 
+  * @param {zebra.data.ListModel} src a list model that triggers the event
+  * @param {Object}  o an element that has been added
+  * @param {Integer} i an index at that the new element has been added
+  */
+
+ /**
+  * Fired when an element has been removed from the list model 
+
+     list.bind(function elementRemoved(src, o, i) {
+         ...
+     });
+
+  * @event elementRemoved
+  * @param {zebra.data.ListModel} src a list model that triggers the event
+  * @param {Object}  o an element that has been removed
+  * @param {Integer} i an index at that the element has been removed
+  */
+
+ /**
+  * Fired when an element has been re-set 
+
+     list.bind(function elementSet(src, o, pe, i) {
+         ...
+     });
+
+  * @event elementSet
+  * @param {zebra.data.ListModel} src a list model that triggers the event
+  * @param {Object}  o an element that has been set
+  * @param {Object}  pe a previous element 
+  * @param {Integer} i an index at that the element has been re-set
+  */
+
+pkg.ListModel = Class([
+    function $prototype() {
+        /**
+         * Get an item stored at the given location in the list 
+         * @method get
+         * @param  {Integer} i an item location
+         * @return {object}  a list item
+         */
+        this.get = function(i) {
+            if (i < 0 || i >= this.d.length) {
+                throw new Error(oobi + i);
+            }
+            return this.d[i];
         };
 
         /**
-         * Add the new children component with the given constraints 
-         * @param  {Object} constr a constraints of a new children component
-         * @param  {zebra.layout.Layoutable} d a new children component to 
-         * be added
+         * Add the given item to the end of the list 
          * @method add
-         * @return {zebra.layout.Layoutable} added layoutable component 
+         * @param  {Object} o an item to be added
          */
-        this.add = function(constr,d) {
-            return (arguments.length == 1) ? this.insert(this.kids.length, null, constr) 
-                                           : this.insert(this.kids.length, constr, d);
+        this.add = function(o) {
+            this.d.push(o);
+            this._.elementInserted(this, o, this.d.length - 1);
         };
 
-        // speedup constructor execution
+        /**
+         * Remove all elements from the list model
+         * @method removeAll
+         */
+        this.removeAll = function() {
+            var size = this.d.length;
+            for(var i = size - 1; i >= 0; i--) this.removeAt(i);
+        };
+
+        /**
+         * Remove an element at the given location of the list model
+         * @method removeAt
+         * @param {Integer} i a location of an element to be removed from the list
+         */
+        this.removeAt = function(i) {
+            var re = this.d[i];
+            this.d.splice(i, 1);
+            this._.elementRemoved(this, re, i);
+        };
+
+        /**
+         * Remove the given element from the list
+         * @method remove
+         * @param {Object} o an element to be removed from the list
+         */
+        this.remove = function(o) {
+            for(var i = 0;i < this.d.length; i++ ){
+                if (this.d[i] === o) this.removeAt(i);
+            }
+        };
+
+        /**
+         * Insert the given element into the given position of the list
+         * @method insert
+         * @param {Object} o an element to be inserted into the list
+         * @param {Integer} i a position at which the element has to be inserted into the list 
+         */
+        this.insert = function(o,i){
+            if(i < 0 || i >= this.d.length) {
+                throw new Error(oobi + i);
+            }
+            this.d.splice(i, 0, o);
+            this._.elementInserted(this, o, i);
+        };
+
+        /**
+         * Get number of elements stored in the list
+         * @method count
+         * @return {Integer} a number of element in the list
+         */
+        this.count = function () {
+            return this.d.length;
+        };
+
+        /**
+         * Set the new element at the given position
+         * @method set
+         * @param  {Object} o a new element to be set as the list element at the given position
+         * @param  {Integer} i a position
+         * @return {Object}  previous element that was stored at the given position
+         */
+        this.set = function (o,i){
+            if (i < 0 || i >= this.d.length) {
+                throw new Error(oobi + i);
+            }
+            var pe = this.d[i];
+            this.d[i] = o;
+            this._.elementSet(this, o, pe, i);
+            return pe;
+        };
+
+        /**
+         * Check if the element is in the list
+         * @method contains
+         * @param  {Object} o an element to be checked 
+         * @return {Boolean} true if the element is in the list  
+         */
+        this.contains = function (o){
+            return this.indexOf(o) >= 0;
+        };
+
+        /**
+         * Get position the given element is stored in the list
+         * @method indexOf
+         * @param  {Object} o an element 
+         * @return {Integer} the element position. -1 if the element cannot be found in the list 
+         */
+        this.indexOf = function(o){
+            return this.d.indexOf(o);
+        };
+
         this[''] = function() {
+            this._ = new pkg.ListModelListeners();
+            this.d = (arguments.length === 0) ? [] : arguments[0];
+        };
+    }
+]);
+
+/**
+ * Tree model item class. The structure is used by tree model to store 
+ * tree items values, parent and children item references.
+ * @class zebra.data.Item
+ * @param  {Object} [v] the item value
+ * @constructor 
+ */
+var Item = pkg.Item = Class([
+    function $prototype() {
+        this[''] = function(v) {
             /**
-             *  Reference to children components 
-             *  @attribute kids
-             *  @type {Array}
-             *  @default empty array
-             *  @readOnly
+             * Array of children items of the item element
+             * @attribute kids
+             * @type {Array}
+             * @default []
+             * @readOnly
              */
             this.kids = [];
-            
+
             /**
-            * Layout manager that is used to order children layoutable components 
-            * @attribute layout
-            * @default itself
-            * @readOnly
-            * @type {zebra.layout.Layout}
-            */
-            this.layout = this;
+             * Value stored with this item
+             * @attribute value
+             * @type {Object}
+             * @default null
+             * @readOnly
+             */
+            this.value = v;
+
+            /**
+             * Reference to a parent item
+             * @attribute parent
+             * @type {zebra.data.Item}
+             * @default undefined
+             * @readOnly
+             */
         };
     }
 ]);
 
+
+pkg.find = function(root, value, cb) {
+    if (root.value === value) {
+        if (cb.call(null, root) === true) return true;
+    }
+
+    for (var i = 0; i < root.kids.length; i++) {
+        if (pkg.find(root.kids[i], value, cb)) return true;
+    }
+};
+
+pkg.TreeModelListeners = MB.ListenersClass("itemModified", "itemRemoved", "itemInserted");
+
+
 /**
- *  Layout manager implementation that places layoutbale components 
- *  on top of each other stretching its to fill all available parent 
- *  component space 
- *  @class zebra.layout.StackLayout
+ * Tree model class. The class is simple and handy way to keep hierarchical structure. 
+ * @constructor
+ * @param  {zebra.data.Item|Object} [r] a root item. As the argument you can pass "zebra.data.Item" or
+ * a JavaType object. In the second case you can describe the tree as follow:
+
+     // create tree model initialized with tree structure passed as 
+     // special formated JavaScript object   
+     var tree = new zebra.data.TreeModel({ value:"Root",
+                                          kids: [
+                                              "Root kid 1",
+                                              { 
+                                                value: "Root kid 2",
+                                                kids:  [ "Kid of kid 2"] 
+                                              }
+                                          ]});
+
+ * @class zebra.data.TreeModel
+ */
+
+/**
+ * Fired when the tree model item value has been updated. 
+
+    tree.bind(function itemModified(src, item) {
+        ...
+    });
+
+ * @event itemModified 
+ * @param {zebra.data.TreeModel} src a tree model that triggers the event
+ * @param {zebra.data.Item}  item an item whose value has been updated
+ */
+
+/**
+ * Fired when the tree model item has been removed
+
+    tree.bind(function itemRemoved(src, item) {
+       ...
+    });
+
+ * @event itemRemoved
+ * @param {zebra.data.TreeModel} src a tree model that triggers the event
+ * @param {zebra.data.Item}  item an item that has been removed from the tree model
+ */
+
+/**
+ * Fired when the tree model item has been inserted into the model
+
+    tree.bind(function itemInserted(src, item) {
+       ...
+    });
+
+ * @event itemInserted
+ * @param {zebra.data.TreeModel} src a tree model that triggers the event
+ * @param {zebra.data.Item}  item an item that has been inserted into the tree model
+ */
+
+pkg.TreeModel = Class([
+    function $clazz() {
+        this.create = function(r, p) {
+            var item = new Item(r.hasOwnProperty("value")? r.value : r);
+            item.parent = p;
+            if (r.hasOwnProperty("kids")) {
+                for(var i = 0; i < r.kids.length; i++) {
+                    item.kids[i] = pkg.TreeModel.create(r.kids[i], item);
+                }
+            }
+            return item;
+        };
+    },
+
+    function $prototype() {
+        this.iterate = function(r, f) {
+            var res = f.call(this, r);
+            if (res === 1 || res === 2) return r;
+
+            for (var i = 0; i < r.kids.length; i++) {
+                res = this.iterate(r.kids[i], f);
+                if (res === 2) return res;
+            }
+        };
+
+        /**
+         * Update a value of the given tree model item with the new one
+         * @method setValue
+         * @param  {zebra.data.Item} item an item whose value has to be updated
+         * @param  {[type]} v   a new item value
+         */
+        this.setValue = function(item, v){
+            item.value = v;
+            this._.itemModified(this, item);
+        };
+
+        /**
+         * Add the new item to the tree model as a children element of the given parent item
+         * @method add
+         * @param  {zebra.data.Item} to a parent item to which the new item has to be added
+         * @param  {Object|zebra.data.Item} an item or value of the item to be
+         * added to the parent item of the tree model 
+         */
+        this.add = function(to,item){
+            this.insert(to, item, to.kids.length);
+        };
+
+        /**
+         * Insert the new item to the tree model as a children element at the 
+         * given position of the parent element
+         * @method insert
+         * @param  {zebra.data.Item} to a parent item to which the new item 
+         * has to be inserted
+         * @param  {Object|zebra.data.Item} an item or value of the item to be
+         * inserted to the parent item
+         * @param  {Integer} i a position the new item has to be inserted into
+         * the parent item
+         */
+        this.insert = function(to,item,i){
+            if (i < 0 || to.kids.length < i) throw new Error(oobi + i);
+            if (zebra.isString(item)) {
+                item = new Item(item);
+            }
+            to.kids.splice(i, 0, item);
+            item.parent = to;
+            this._.itemInserted(this, item);
+
+            // !!!
+            // it is necessary to analyze if the inserted item has kids and
+            // generate inserted event for all kids recursively
+        };
+
+        /**
+         * Remove the given item from the tree model
+         * @method remove
+         * @param  {zebra.data.Item} item an item to be removed from the tree model
+         */
+        this.remove = function(item){
+            if (item == this.root) {
+                this.root = null;
+            }
+            else {
+                for(var i=0; i < item.kids.length; i++) {
+                    this.remove(item.kids[i]);
+                }
+                item.parent.kids.splice(item.parent.kids.indexOf(item), 1);
+                item.parent = null;
+            }
+
+            this._.itemRemoved(this, item);
+        };
+
+        /**
+         * Remove all children items from the given item of the tree model
+         * @method removeKids
+         * @param  {zebra.data.Item} item an item from that all children items have to be removed
+         */
+        this.removeKids = function(item){
+            for(var i = 0; i < items.kids.length; i++) this.remove(items[i]);
+        };
+
+        this[''] = function(r) {
+            if (arguments.length === 0) r = new Item();
+
+            /**
+             * Reference to the tree model root item
+             * @attribute root
+             * @type {zebra.data.Item}
+             * @readOnly
+             */
+            this.root = zebra.instanceOf(r, Item) ? r : pkg.TreeModel.create(r);
+            this._ = new pkg.TreeModelListeners();
+        };
+    }
+]);
+
+pkg.MatrixListeners = MB.ListenersClass("matrixResized", "cellModified",
+                                        "matrixSorted", "matrixRowInserted",
+                                        "matrixColInserted");
+
+/**
+ *  Matrix model class. 
  *  @constructor
+ *  @param  {Array of Array} [data] the given data 
+ *  @param  {Integer} [rows] a number of rows
+ *  @param  {Integer} [cols] a number of columns
+ *  @class zebra.data.Matrix
  */
-pkg.StackLayout = Class(L, [
-    function $prototype() {
-        this.calcPreferredSize = function (target){
-            return pkg.getMaxPreferredSize(target);
-        };
-
-        this.doLayout = function(t){
-            var top = t.getTop()  , hh = t.height - t.getBottom() - top,
-                left = t.getLeft(), ww = t.width - t.getRight() - left;
-
-            for(var i = 0;i < t.kids.length; i++){
-                var l = t.kids[i];
-                if (l.isVisible === true) {
-                    if (l.constraints == pkg.USE_PS_SIZE) {
-                        var ps = l.getPreferredSize();
-                        l.setSize(ps.width, ps.height);
-                        l.setLocation(left + (ww - ps.width)/2, top + (hh - ps.height)/2);
-                    }
-                    else {
-                        l.setSize(ww, hh);
-                        l.setLocation(left, top);
-                    }
-                }
-            }
-        };
-    }
-]);
-
-/**
- *  Layout manager implementation that logically splits component area into five areas: TOP, BOTTOM, LEFT, RIGHT and CENTER.
- *  TOP and BOTTOM components are stretched to fill all available space horizontally and are sized to have preferred height horizontally. 
- *  LEFT and RIGHT components are stretched to fill all available space vertically and are sized to have preferred width vertically.
- *  CENTER component is stretched to occupy all available space taking in account TOP, LEFT, RIGHT and BOTTOM components.
- 
-       // create panel with border layout
-       var p = new zebra.ui.Panel(new zebra.layout.BorderLayout());
-       
-       // add children UI components with top, center and left constraints 
-       p.add(zebra.layout.TOP,    new zebra.ui.Label("Top"));
-       p.add(zebra.layout.CENTER, new zebra.ui.Label("Center"));
-       p.add(zebra.layout.LEFT,   new zebra.ui.Label("Left"));
- 
- * Construct the layout with the given vertical and horizontal gaps. 
- * @param  {Integer} [hgap] horizontal gap. The gap is a horizontal distance between laid out components  
- * @param  {Integer} [vgap] vertical gap. The gap is a vertical distance between laid out components  
- * @constructor 
- * @class zebra.layout.BorderLayout
- * @extends {zebra.layout.Layout}
- */
-pkg.BorderLayout = Class(L, [
-    function $prototype() {
+pkg.Matrix = Class([
+    function $prototype() {        
         /**
-         * Horizontal gap (space between components)
-         * @attribute hgap
-         * @default 0
-         * @readOnly
-         * @type {Integer}
+         * Fired when the matrix model size (number of rows or columns) is changed. 
+          
+         matrix.bind(function matrixResized(src, pr, pc) {
+            ...
+         });
+          
+         * @event matrixResized 
+         * @param {zebra.data.Matrix} src a matrix that triggers the event
+         * @param {Integer}  pr a previous number of rows 
+         * @param {Integer}  pc a previous number of columns 
          */
 
-        /**
-         * Vertical gap (space between components)
-         * @attribute vgap
-         * @default 0
-         * @readOnly
-         * @type {Integer}
-         */
-        this.hgap = this.vgap = 0;
-
-        this[''] = function(hgap,vgap){
-            if (arguments.length > 0) {
-                this.hgap = this.vgap = hgap;    
-                if (arguments.length > 1) {
-                    this.vgap = vgap;
-                }
-            }
-        };
-
-        this.calcPreferredSize = function (target){
-            var center = null, west = null,  east = null, north = null, south = null, d = null;
-            for(var i = 0; i < target.kids.length; i++){
-                var l = target.kids[i];
-                if (l.isVisible === true){
-                    switch(l.constraints) {
-                       case pkg.CENTER : center = l;break;
-                       case pkg.TOP    : north  = l;break;
-                       case pkg.BOTTOM : south  = l;break;
-                       case pkg.LEFT   : west   = l;break;
-                       case pkg.RIGHT  : east   = l;break;
-                       default: throw new Error("Invalid constraints: " + l.constraints);
-                    }
-                }
-            }
-
-            var dim = { width:0, height:0 };
-            if (east != null) {
-                d = east.getPreferredSize();
-                dim.width += d.width + this.hgap;
-                dim.height = (d.height > dim.height ? d.height: dim.height );
-            }
-
-            if (west != null) {
-                d = west.getPreferredSize();
-                dim.width += d.width + this.hgap;
-                dim.height = d.height > dim.height ? d.height : dim.height;
-            }
-
-            if (center != null) {
-                d = center.getPreferredSize();
-                dim.width += d.width;
-                dim.height = d.height > dim.height ? d.height : dim.height;
-            }
-
-            if (north != null) {
-                d = north.getPreferredSize();
-                dim.width = d.width > dim.width ? d.width : dim.width;
-                dim.height += d.height + this.vgap;
-            }
-
-            if (south != null) {
-                d = south.getPreferredSize();
-                dim.width = d.width > dim.width ? d.width : dim.width;
-                dim.height += d.height + this.vgap;
-            }
-            return dim;
-        };
-
-        this.doLayout = function(t){
-            var top    = t.getTop(),
-                bottom = t.height - t.getBottom(),
-                left   = t.getLeft(),
-                right  = t.width - t.getRight(),
-                center = null,
-                west   = null,
-                east   = null;
-
-            for(var i = 0;i < t.kids.length; i++){
-                var l = t.kids[i];
-                if (l.isVisible === true) {
-                    switch(l.constraints) {
-                        case pkg.CENTER: center = l; break;
-                        case pkg.TOP :
-                            var ps = l.getPreferredSize();
-                            l.setLocation(left, top);
-                            l.setSize(right - left, ps.height);
-                            top += ps.height + this.vgap;
-                            break;
-                        case pkg.BOTTOM:
-                            var ps = l.getPreferredSize();
-                            l.setLocation(left, bottom - ps.height);
-                            l.setSize(right - left, ps.height);
-                            bottom -= ps.height + this.vgap;
-                            break;
-                        case pkg.LEFT: west = l; break;
-                        case pkg.RIGHT: east = l; break;
-                        default: throw new Error("Invalid constraints: " + l.constraints);
-                    }
-                }
-            }
-
-            if (east != null){
-                var d = east.getPreferredSize();
-                east.setLocation(right - d.width, top);
-                east.setSize(d.width, bottom - top);
-                right -= d.width + this.hgap;
-            }
-
-            if (west != null){
-                var d = west.getPreferredSize();
-                west.setLocation(left, top);
-                west.setSize(d.width, bottom - top);
-                left += d.width + this.hgap;
-            }
-
-            if (center != null){
-                center.setLocation(left, top);
-                center.setSize(right - left, bottom - top);
-            }
-        };
-    }
-]);
-
-/**
- * Rester layout manager can be used to use absolute position of 
- * layoutable components. That means all components will be laid 
- * out according coordinates and size they have. Raster layout manager 
- * provides extra possibilities to control children components placing. 
- * It is possible to align components by specifying layout constraints, 
- * size component to its preferred size and so on.  
- * @param {Integer} [m] flag to add extra rule to components layouting. 
- * For instance use zebra.layout.USE_PS_SIZE as the flag value to set 
- * components size to its preferred sizes.  
- * @class  zebra.layout.RasterLayout
- * @constructor
- * @extends {zebra.layout.Layout}
- */
-pkg.RasterLayout = Class(L, [
-    function $prototype() {
-        this.calcPreferredSize = function(c){
-            var m = { width:0, height:0 }, b = (this.flag & pkg.USE_PS_SIZE) > 0;
-            for(var i = 0;i < c.kids.length; i++ ){
-                var el = c.kids[i];
-                if (el.isVisible === true){
-                    var ps = b ? el.getPreferredSize() : { width:el.width, height:el.height },
-                        px = el.x + ps.width, py = el.y + ps.height;
-                    if (px > m.width) m.width = px;
-                    if (py > m.height) m.height = py;
-                }
-            }
-            return m;
-        };
-
-        this.doLayout = function(c){
-            var r = c.width - c.getRight(), 
-                b = c.height - c.getBottom(),
-                usePsSize = (this.flag & pkg.USE_PS_SIZE) > 0;
-
-            for(var i = 0;i < c.kids.length; i++){
-                var el = c.kids[i], ww = 0, hh = 0;
-
-                if (el.isVisible === true){
-                    if (usePsSize){
-                        var ps = el.getPreferredSize();
-                        ww = ps.width;
-                        hh = ps.height;
-                    }
-                    else{
-                        ww = el.width;
-                        hh = el.height;
-                    }
-
-                    if ((this.flag & pkg.HORIZONTAL) > 0) ww = r - el.x;
-                    if ((this.flag & pkg.VERTICAL  ) > 0) hh = b - el.y;
-                    el.setSize(ww, hh);
-
-                    if (el.constraints) {
-                        var x = el.x, y = el.y;
-                        if (el.constraints == pkg.CENTER) {
-                            x = (c.width - ww)/2;
-                            y = (c.height - hh)/2;
-                        }
-                        else {
-                            if ((el.constraints & pkg.TOP) > 0)  y = 0;
-                            else
-                            if ((el.constraints & pkg.BOTTOM) > 0)  y = c.height - hh;
-
-                            if ((el.constraints & pkg.LEFT) > 0)  x = 0;
-                            else
-                            if ((el.constraints & pkg.RIGHT) > 0)  x = c.width - ww;
-                        }
-
-                        el.setLocation(x, y);
-                    }
-                }
-            }
-        };
-
-        //!!! speed up
-        this[''] = function(f) {
-            this.flag = f ? f : 0;
-        };
-    }
-]);
-
-/**
- * Flow layout manager group and places components aligned with 
- * different vertical and horizontal alignments
-  
-        // create panel and set flow layout for it
-        // components added to the panel will be placed 
-        // horizontally aligned at the center of the panel 
-        var p = new zebra.ui.Panel();
-        p.setLayout(new zebra.layout.FlowLayout(zebra.layout.CENTER, zebra.layout.CENTER));
-
-        // add three buttons into the panel with flow layout 
-        p.add(new zebra.ui.Button("Button 1"));
-        p.add(new zebra.ui.Button("Button 2"));
-        p.add(new zebra.ui.Button("Button 3"));
-  
- * @param {Integer|String} [ax] (zebra.layout.LEFT by default) horizontal alignment:
-  
-     zebra.layout.LEFT - left alignment 
-     zebra.layout.RIGHT - right alignment 
-     zebra.layout.CENTER - center alignment 
-
-     or
-     
-     "left" 
-     "center"
-     "right"  
- 
- * @param {Integer|String} [ay] (zebra.layout.TOP by default) vertical alignment:
- 
-     zebra.layout.TOP - top alignment 
-     zebra.layout.CENTER - center alignment 
-     zebra.layout.BOTTOM - bottom alignment 
-
-     or
-     
-     "top" 
-     "center"
-     "bottom"  
-
- * @param {Integer|String} [dir] (zebra.layout.HORIZONTAL by default) a direction 
- * the component has to be placed in the layout
- 
-     zebra.layout.VERTICAL - vertical placed components
-     zebra.layout.HORIZONTAL - horizontal placed components 
-      
-     or
-     
-     "vertical" 
-     "horizontal"  
-    
-
- * @param {Integer} [gap] a space in pixels between laid out components
- * @class  zebra.layout.FlowLayout
- * @constructor
- * @extends {zebra.layout.Layout}
- */
-pkg.FlowLayout = Class(L, [
-    function $prototype() {
-        /**
-         * Gap between laid out components
-         * @attribute gap
-         * @readOnly
-         * @type {Integer}
-         * @default 0
-         */
-        this.gap = 0;
-
-        /**
-         * Horizontal laid out components alignment 
-         * @attribute ax
-         * @readOnly
-         * @type {Integer|String}
-         * @default zebra.layout.LEFT
-         */
-        this.ax = pkg.LEFT;
-
-        /**
-         * Vertical laid out components alignment 
-         * @attribute ay
-         * @readOnly
-         * @type {Integer|String}
-         * @default zebra.layout.TOP
-         */
-        this.ay = pkg.TOP;
-
-        /**
-         * Laid out components direction
-         * @attribute direction
-         * @readOnly
-         * @type {Integer|String}
-         * @default zebra.layout.HORIZONTAL
-         */
-        this.direction = pkg.HORIZONTAL;
-
-        this.stretchLast = false;
-
-        this[''] =  function (ax,ay,dir,g){
-            if (arguments.length == 1) this.gap = ax;
-            else {
-                if (arguments.length >= 2) {
-                    this.ax = pkg.$constraints(ax);
-                    this.ay = pkg.$constraints(ay);
-                }
-
-                if (arguments.length > 2)  {
-                    dir = pkg.$constraints(dir);
-                    if (dir != pkg.HORIZONTAL && dir != pkg.VERTICAL) {
-                        throw new Error("Invalid direction " + dir);
-                    }
-                    this.direction = dir;
-                }
-
-                if (arguments.length > 3) this.gap = g;
-            }
-        };
-
-        this.calcPreferredSize = function (c){
-            var m = { width:0, height:0 }, cc = 0;
-            for(var i = 0;i < c.kids.length; i++){
-                var a = c.kids[i];
-                if (a.isVisible === true){
-                    var d = a.getPreferredSize();
-                    if (this.direction == pkg.HORIZONTAL){
-                        m.width += d.width;
-                        m.height = d.height > m.height ? d.height : m.height;
-                    }
-                    else {
-                        m.width = d.width > m.width ? d.width : m.width;
-                        m.height += d.height;
-                    }
-                    cc++;
-                }
-            }
-
-            var add = this.gap * (cc > 0 ? cc - 1 : 0);
-            if (this.direction == pkg.HORIZONTAL) m.width += add;
-            else m.height += add;
-            return m;
-        };
-
-        this.doLayout = function(c){
-            var psSize  = this.calcPreferredSize(c),
-                t       = c.getTop(),
-                l       = c.getLeft(),
-                lastOne = null,
-                ew      = c.width  - l - c.getRight(),
-                eh      = c.height - t - c.getBottom(),
-                px      = ((this.ax == pkg.RIGHT) ? ew - psSize.width
-                                                  : ((this.ax == pkg.CENTER) ? ~~((ew - psSize.width) / 2) : 0)) + l,
-                py      = ((this.ay == pkg.TOP  ) ? eh - psSize.height
-                                                  : ((this.ay == pkg.CENTER) ? ~~((eh - psSize.height) / 2) : 0)) + t;
-
-            for(var i = 0;i < c.kids.length; i++){
-                var a = c.kids[i];
-                if (a.isVisible === true){
-
-                    var d = a.getPreferredSize();
-                    if (this.direction == pkg.HORIZONTAL){
-                        if (a.constraints === pkg.STRETCH) { 
-                            d.height = c.height - t - c.getBottom();
-                        }
-
-                        a.setLocation(px, ~~((psSize.height - d.height) / 2) + py);
-                        px += (d.width + this.gap);
-                    }
-                    else {
-                        if (a.constraints === pkg.STRETCH) d.width = c.width - l - c.getRight();
-                        a.setLocation(px + ~~((psSize.width - d.width) / 2), py);
-                        py += d.height + this.gap;
-                    }
-
-                    a.setSize(d.width, d.height);
-                    lastOne = a;
-                }
-            }
-
-            if (lastOne !== null && this.stretchLast === true){
-                if (this.direction == pkg.HORIZONTAL) {
-                    lastOne.setSize(c.width - lastOne.x - c.getRight(), lastOne.height);
-                }
-                else {
-                    lastOne.setSize(lastOne.width, c.height - lastOne.y - c.getBottom());
-                }
-            }
-        };
-    }
-]);
-
-/**
- * List layout places components vertically one by one 
-  
-        // create panel and set list layout for it
-        var p = new zebra.ui.Panel();
-        p.setLayout(new zebra.layout.ListLayout());
-
-        // add three buttons into the panel with list layout 
-        p.add(new zebra.ui.Button("Item 1"));
-        p.add(new zebra.ui.Button("Item 2"));
-        p.add(new zebra.ui.Button("Item 3"));
-  
- * @param {Integer|String} [ax] horizontal list item alignment:
-  
-     zebra.layout.LEFT - left alignment 
-     zebra.layout.RIGHT - right alignment 
-     zebra.layout.CENTER - center alignment 
-     zebra.layout.STRETCH - stretching item to occupy the whole horizontal space
-
-     or
-
-     "left"
-     "right"
-     "center"
-     "stretch"
-
- * @param {Integer} [gap] a space in pixels between laid out components
- * @class  zebra.layout.ListLayout
- * @constructor
- * @extends {zebra.layout.Layout}
- */
-pkg.ListLayout = Class(L,[
-    function $prototype() {
-        this[''] = function (ax, gap) {
-            if (arguments.length == 1) {
-                gap = ax;
-            }
-
-            ax = (arguments.length <= 1) ? pkg.STRETCH : pkg.$constraints(ax);
-
-            if (arguments.length === 0) {
-                gap = 0;
-            }
-
-            if (ax != pkg.STRETCH && ax != pkg.LEFT && 
-                ax != pkg.RIGHT && ax != pkg.CENTER) 
-            {
-                throw new Error("Invalid alignment");
-            }
-
-            /**
-             * Horizontal list items alignment 
-             * @attribute ax
-             * @type {Integer}
-             * @readOnly
-             */
-            this.ax = ax;
-
-            /**
-             * Pixel gap between list items
-             * @attribute gap
-             * @type {Integer}
-             * @readOnly
-             */
-            this.gap = gap;
-        };
-
-        this.calcPreferredSize = function (lw){
-            var w = 0, h = 0, c = 0;
-            for(var i = 0; i < lw.kids.length; i++){
-                var kid = lw.kids[i];
-                if (kid.isVisible === true){
-                    var d = kid.getPreferredSize();
-                    h += (d.height + (c > 0 ? this.gap : 0));
-                    c++;
-                    if (w < d.width) w = d.width;
-                }
-            }
-            return { width:w, height:h };
-        };
-
-        this.doLayout = function (lw){
-            var x   = lw.getLeft(),
-                y   = lw.getTop(),
-                psw = lw.width - x - lw.getRight();
-
-            for(var i = 0;i < lw.kids.length; i++){
-                var cc = lw.kids[i];
-
-                if (cc.isVisible === true){
-                    var d = cc.getPreferredSize(), constr = cc.constraints;
-                    if (constr == null) constr = this.ax;
-
-                    cc.setSize    ((constr == pkg.STRETCH) ? psw
-                                                           : d.width, d.height);
-                    cc.setLocation((constr == pkg.STRETCH) ? x
-                                                           : x + ((constr == pkg.RIGHT) ? psw - cc.width
-                                                                                        : ((constr == pkg.CENTER) ? ~~((psw - cc.width) / 2)
-                                                                                                                  : 0)), y);
-                    y += (d.height + this.gap);
-                }
-            }
-        };
-    }
-]);
-
-/**
- * Percent layout places components vertically or horizontally and 
- * sizes its according to its percentage constraints.
-  
-        // create panel and set percent layout for it
-        var p = new zebra.ui.Panel();
-        p.setLayout(new zebra.layout.PercentLayout());
-
-        // add three buttons to the panel that are laid out horizontally with
-        // percent layout according to its constraints: 20, 30 and 50 percents
-        p.add(20, new zebra.ui.Button("20%"));
-        p.add(30, new zebra.ui.Button("30%"));
-        p.add(50, new zebra.ui.Button("50%"));
-  
- * @param {Integer|String} [dir] a direction of placing components. The 
- * value can be "zebra.layout.HORIZONTAL" or "zebra.layout.VERTICAL" or 
- * "horizontal" or "vertical" 
- * @param {Integer} [gap] a space in pixels between laid out components
- * @param {Boolean} [stretch] true if the component should be stretched 
- * vertically or horizontally
- * @class  zebra.layout.PercentLayout
- * @constructor
- * @extends {zebra.layout.Layout}
- */
-pkg.PercentLayout = Class(L, [
-    function $prototype() {
          /**
-          * Direction the components have to be placed (vertically or horizontally)
-          * @attribute direction
-          * @readOnly
-          * @type {Integer}
-          * @default zebra.layout.HORIZONTAL
+          * Fired when the matrix model cell has been updated. 
+          
+          matrix.bind(function cellModified(src, row, col, old) {
+             ...
+          });
+
+          * @event cellModified 
+          * @param {zebra.data.Matrix} src a matrix that triggers the event
+          * @param {Integer}  row an updated row 
+          * @param {Integer}  col an updated column 
+          * @param {Object}  old a previous cell value
           */
-        this.direction = pkg.HORIZONTAL;
 
+          /**
+           * Fired when the matrix data has been re-ordered. 
+           
+           matrix.bind(function matrixSorted(src, sortInfo) {
+              ...
+           });
+
+           * @event matrixSorted
+           * @param {zebra.data.Matrix} src a matrix that triggers the event
+           * @param {Object}  sortInfo a new data order info. The information 
+           * contains:
+           *
+           *      { 
+           *         func: sortFunction,
+           *         name: sortFunctionName,
+           *         col : sortColumn
+           *      }   
+           * 
+           */
+       
         /**
-         * Pixel gap between components
-         * @attribute gap
-         * @readOnly
-         * @type {Integer}
-         * @default 2
+         * Get a matrix model cell value at the specified row and column
+         * @method get
+         * @param  {Integer} row a cell row
+         * @param  {Integer} col a cell column
+         * @return {Object}  matrix model cell value
          */
-        this.gap = 2;
-
-        /**
-         * Boolean flag that say if the laid out components have 
-         * to be stretched vertically (if direction is set to zebra.layout.VERTICAL) 
-         * or horizontally (if direction is set to zebra.layout.HORIZONTAL) 
-         * @attribute stretch
-         * @readOnly
-         * @type {Integer}
-         * @default true
-         */
-        this.stretch = true;
-
-        this[''] = function(dir, gap, stretch) {
-            if (arguments.length > 0) {
-                this.direction = pkg.$constraints(dir);
-                if (this.direction != pkg.HORIZONTAL && this.direction != pkg.VERTICAL) {
-                    throw new Error("Invalid direction : " + this.direction);
-                }
-                
-                if (arguments.length > 1) this.gap = gap;
-                if (arguments.length > 2) this.stretch = stretch;
+        this.get = function (row,col){
+            if (row < 0 || row >= this.rows || col < 0 || col >= this.cols) {
+                throw new Error("Row of col is out of bounds: " + row + "," + col);
             }
+            return this.objs[row][col];
         };
 
-        this.doLayout = function(target){
-            var right  = target.getRight(),
-                top    = target.getTop(),
-                bottom = target.getBottom(),
-                left   = target.getLeft(),
-                size   = target.kids.length,
-                rs     = -this.gap * (size === 0 ? 0 : size - 1),
-                loc    = 0,
-                ns     = 0;
-
-            if (this.direction == pkg.HORIZONTAL){
-                rs += target.width - left - right;
-                loc = left;
-            }
-            else{
-                rs += target.height - top - bottom;
-                loc = top;
-            }
-
-            for(var i = 0;i < size; i ++ ){
-                var l = target.kids[i], c = l.constraints, useps = (c == pkg.USE_PS_SIZE);
-                if (this.direction == pkg.HORIZONTAL){
-                    ns = ((size - 1) == i) ? target.width - right - loc
-                                           : (useps ? l.getPreferredSize().width
-                                                      : ~~((rs * c) / 100));
-                    var yy = top, hh = target.height - top - bottom;
-                    if (this.stretch === false) {
-                        var ph = hh;
-                        hh = l.getPreferredSize().height;
-                        yy = top + ~~((ph - hh) / 2);
-                    }
-
-                    l.setLocation(loc, yy);
-                    l.setSize(ns, hh);
-                }
-                else {
-                    ns = ((size - 1) == i) ? target.height - bottom - loc
-                                           : (useps ? l.getPreferredSize().height
-                                                    : ~~((rs * c) / 100));
-                    var xx = left, ww = target.width - left - right;
-                    if (this.stretch === false) {
-                        var pw = ww;
-                        ww = l.getPreferredSize().width;
-                        xx = left + ~~((pw - ww) / 2 );
-                    }
-
-                    l.setLocation(xx, loc);
-                    l.setSize(ww, ns);
-                }
-                loc += (ns + this.gap);
-            }
-        };
-
-        this.calcPreferredSize = function (target){
-            var max  = 0,
-                size = target.kids.length,
-                as   = this.gap * (size === 0 ? 0 : size - 1);
-
-            for(var i = 0;i < size; i++){
-                var d = target.kids[i].getPreferredSize();
-                if (this.direction == pkg.HORIZONTAL){
-                    if(d.height > max) max = d.height;
-                    as += d.width;
-                }
-                else {
-                    if(d.width > max) max = d.width;
-                    as += d.height;
-                }
-            }
-            return (this.direction == pkg.HORIZONTAL) ? { width:as, height:max }
-                                                      : { width:max, height:as };
-        };
-    }
-]);
-
-/**
- * Grid layout manager constraints. Constraints says how a  component has to be placed in 
- * grid layout virtual cell. The constraints specifies vertical and horizontal alignments, 
- * a virtual cell paddings, etc.
- * @param {Integer} [ax] a horizontal alignment 
- * @param {Integer} [ay] a vertical alignment
- * @param {Integer} [p]  a cell padding
- * @constructor 
- * @class zebra.layout.Constraints
- */
-pkg.Constraints = Class([
-    function $prototype() {
         /**
-         * Top cell padding
-         * @attribute top
-         * @type {Integer}
-         * @default 0
+         * Set the specified by row and column cell value. If the specified row or column
+         * is greater than the matrix model has the model size will be adjusted to new one.
+         * @method put
+         * @param  {Integer} row a cell row
+         * @param  {Integer} col a cell column
+         * @param  {Object} obj a new cell value
          */
+        this.put = function(row,col,obj){
+            var nr = this.rows, nc = this.cols;
+            if (row >= nr) nr += (row - nr + 1);
+            if (col >= nc) nc += (col - nc + 1);
 
-        /**
-         * Left cell padding
-         * @attribute left
-         * @type {Integer}
-         * @default 0
-         */
-
-        /**
-         * Right cell padding
-         * @attribute right
-         * @type {Integer}
-         * @default 0
-         */
-
-        /**
-         * Bottom cell padding
-         * @attribute bottom
-         * @type {Integer}
-         * @default 0
-         */
-
-        /**
-         * Horizontal alignment
-         * @attribute ax
-         * @type {Integer}
-         * @default zebra.layout.STRETCH
-         */
-
-        /**
-         * Vertical alignment
-         * @attribute ay
-         * @type {Integer}
-         * @default zebra.layout.STRETCH
-         */
-
-        this.top = this.bottom = this.left = this.right = 0;
-        this.ay = this.ax = pkg.STRETCH;
-        this.rowSpan = this.colSpan = 1;
-
-        this[''] = function(ax, ay, p) {
-            if (arguments.length > 0) {
-                this.ax = pkg.$constraints(ax);
-                if (arguments.length > 1) this.ay = pkg.$constraints(ay);
-                if (arguments.length > 2) this.setPadding(p);
+            this.setRowsCols(nr, nc);
+            var old = this.objs[row] ? this.objs[row][col] : undefined;
+            if (obj != old) {
+                this.objs[row][col] = obj;
+                this._.cellModified(this, row, col, old);
             }
         };
 
         /**
-         * Set all four paddings (top, left, bottom, right) to the given value 
-         * @param  {Integer} p a padding
-         * @method setPadding
+         * Set the specified by index cell value. The index identifies cell starting from [0,0]
+         * cell till [rows,columns]. If the index is greater than size of model the model size
+         * will be adjusted to new one.
+         * @method puti
+         * @param  {Integer} i a cell row
+         * @param  {Object} obj a new cell value
          */
+        this.puti = function(i, obj){
+            this.put( ~~(i / this.cols),
+                         i % this.cols, obj);
+        };
 
         /**
-         * Set top, left, bottom, right paddings 
-         * @param  {Integer} t a top padding
-         * @param  {Integer} l a left padding
-         * @param  {Integer} b a bottom padding
-         * @param  {Integer} r a right padding
-         * @method setPadding
+         * Set the given number of rows and columns the model has to have.
+         * @method setRowsCols
+         * @param  {Integer} rows a new number of rows
+         * @param  {Integer} cols a new number of columns
          */
-        this.setPadding = function(t,l,b,r) {
+        this.setRowsCols = function(rows, cols){
+            if (rows != this.rows || cols != this.cols){
+                var pc = this.cols,
+                    pr = this.rows;
+
+                this.rellocate(rows, cols);
+                this.cols = cols;
+                this.rows = rows;
+                this._.matrixResized(this, pr, pc);
+            }
+        };
+
+        /**
+         * Reallocate the matrix model space with the new number of rows and columns 
+         * @method re-locate.
+         * @private
+         * @param  {Integer} r a new number of rows
+         * @param  {Integer} c a new number of columns
+         */
+        this.rellocate = function(r, c) {
+            if (r >= this.rows) {
+                for(var i=this.rows; i < r; i++) {
+                    this.objs[i] = [];
+                }
+            }
+        };
+
+         /**
+         * Set the given number of rows the model has to have.
+         * @method setRows
+         * @param  {Integer} rows a new number of rows
+         */
+        this.setRows = function(rows) {
+            this.setRowsCols(rows, this.cols);
+        };
+
+        /**
+         * Set the given number of columns the model has to have.
+         * @method setCols
+         * @param  {Integer} cols a new number of columns
+         */
+        this.setCols = function(cols) {
+            this.setRowsCols(this.rows, cols);
+        };
+
+        /**
+         * Remove specified number of rows from the model starting
+         * from the given row.
+         * @method removeRows
+         * @param  {Integer}  begrow a start row 
+         * @param  {Integer} count  a number of rows to be removed
+         */
+        this.removeRows = function(begrow,count){
+            if (begrow < 0 || begrow + count > this.rows) {
+                throw new Error();
+            }
+
+            for(var i = (begrow + count);i < this.rows; i++, begrow++){
+                for(var j = 0;j < this.cols; j ++ ){
+                    this.objs[begrow][j] = this.objs[i][j];
+                    this.objs[i][j] = null;
+                }
+            }
+
+            this.rows -= count;
+            this._.matrixResized(this, this.rows + count, this.cols);
+        };
+
+        /**
+         * Remove specified number of columns from the model starting
+         * from the given column.
+         * @method removeCols
+         * @param  {Integer}  begcol a start column
+         * @param  {Integer} count  a number of columns to be removed
+         */
+        this.removeCols = function (begcol,count){
+            if (begcol < 0 || begcol + count > this.cols) {
+                throw new Error();
+            }
+            
+            for(var i = (begcol + count);i < this.cols; i++, begcol++){
+                for(var j = 0;j < this.rows; j++){
+                    this.objs[j][begcol] = this.objs[j][i];
+                    this.objs[j][i] = null;
+                }
+            }
+
+            this.cols -= count;
+            this._.matrixResized(this, this.rows, this.cols + count);
+        };
+
+        this.insertRows = function(row, count) {
+            if (arguments.length === 1) count = 1;
+            for(var i=0; i < count; i++) {
+                this.objs.splice(row, 0, []);
+                this._.matrixRowInserted(this, row + i);
+            }
+            this.rows += count;
+            this._.matrixResized(this, this.rows - count, this.cols);
+        };
+
+        this.insertCols = function(col, count) {
+            if (arguments.length === 1) count = 1;
+            for(var j=0; j < count; j++) {
+                for(var i=0; i < this.rows; i++) {
+                    this.objs[i].splice(col, 0, undefined);
+                }
+                this._.matrixColInserted(this, col + j);
+            }
+            this.cols += count;
+            this._.matrixResized(this, this.rows, this.cols - count);
+        };
+
+        /**
+         * Sort the given column of the matrix model.
+         * @param  {Integer} col a column to be re-ordered
+         * @param  {Function} [f] an optional sort function. The name of the function 
+         * is grabbed to indicate type of the sorting the method does. For instance:
+         * "descent", "ascent".  
+         * @method sortCol
+         */
+        this.sortCol = function(col, f) {
+            if (f == null) {
+                f = pkg.descent;
+            }
+
+            this.objs.sort(function(a, b) {
+                return f(a[col],b[col]);
+            });
+
+            this._.matrixSorted(this, { col : col,
+                                        func: f,
+                                        name: zebra.$FN(f).toLowerCase() });
+        };
+
+        this[''] = function() {
+            /**
+             * Number of rows in the matrix model
+             * @attribute rows
+             * @type {Integer}
+             * @readOnly
+             */
+
+            /**
+             * Number of columns in the matrix model
+             * @attribute cols
+             * @type {Integer}
+             * @readOnly
+             */
+
+            this._ = new pkg.MatrixListeners();
             if (arguments.length == 1) {
-                this.bottom = this.left = this.right = t;
+                this.objs = arguments[0];
+                this.cols = (this.objs.length > 0) ? this.objs[0].length : 0;
+                this.rows = this.objs.length;
             }
             else {
-                this.top    = t;
-                this.bottom = b;
-                this.left   = l;
-                this.right  = r;
-            }
-        };
-    }
-]);
-
-/**
- * Grid layout manager. can be used to split a component area to 
- * number of virtual cells where children components can be placed. 
- * The way how the children components have to be laid out in the cells can 
- * be customized by using "zebra.layout.Constraints" class:
- 
-        // create constraints
-        var ctr = new zebra.layout.Constraints();
-        
-        // specify cell top, left, right, bottom paddings 
-        ctr.setPadding(8);
-        // say the component has to be left aligned in a 
-        // virtual cell of grid layout 
-        ctr.ax = zebra.layout.LEFT;
-
-        // create panel and set grid layout manager with two 
-        // virtual rows and columns
-        var p = new zebra.ui.Panel();
-        p.setLayout(new zebra.layout.GridLayout(2,2));
-
-        // add children component
-        p.add(ctr, new zebra.ui.Label("Cell 1,1"));
-        p.add(ctr, new zebra.ui.Label("Cell 1,2"));
-        p.add(ctr, new zebra.ui.Label("Cell 2,1"));
-        p.add(ctr, new zebra.ui.Label("Cell 2,2"));
-
- * @param {Integer} rows a number of virtual rows to layout 
- * children components
- * @param {Integer} cols a number of virtual columns to 
- * layout children components
- * @constructor 
- * @class  zebra.layout.GridLayout
- * @extends {zebra.layout.Layout}
- */
-pkg.GridLayout = Class(L, [
-    function $prototype() {
-        this[''] = function(r,c,m) {
-            if (arguments.length < 3) m = 0;
-
-        /**
-         * Number of virtual rows to place children components 
-         * @attribute rows
-         * @readOnly
-         * @type {Integer}
-         */
-        this.rows = r;
-
-        /**
-         * Number of virtual columns to place children components 
-         * @attribute cols
-         * @readOnly
-         * @type {Integer}
-         */
-        this.cols = c;
-        this.mask = m;
-        this.colSizes = Array(c + 1);
-        this.rowSizes = Array(r + 1);
-    
-        /**
-         * Default constraints that is applied for children components 
-         * that doesn't define own constraints 
-         * @type {zebra.layout.Constraints}
-         * @attribute constraints
-         */
-        this.constraints = new pkg.Constraints();
-        };
-
-        /**
-         * Calculate columns metrics
-         * @param  {zebra.layout.Layoutable} c the target container
-         * @return {Array} a columns widths
-         * @method calcCols
-         * @protected
-         */
-        this.calcCols = function(c){
-            this.colSizes[this.cols] = 0;
-            for(var i = 0;i < this.cols; i++){
-                this.colSizes[i] = this.calcCol(i, c);
-                this.colSizes[this.cols] += this.colSizes[i];
-            }
-            return this.colSizes;
-        };
-
-        /**
-         * Calculate rows metrics
-         * @param  {zebra.layout.Layoutable} c the target container
-         * @return {Array} a rows heights
-         * @method calcRows
-         * @protected
-         */
-        this.calcRows = function(c){
-            this.rowSizes[this.rows] = 0;
-            for(var i = 0;i < this.rows; i++){
-                this.rowSizes[i] = this.calcRow(i, c);
-                this.rowSizes[this.rows] += this.rowSizes[i];
-            }
-            return this.rowSizes;
-        };
-
-        /**
-         * Calculate the given row height
-         * @param  {Integer} row a row
-         * @param  {zebra.layout.Layoutable} c the target container
-         * @return {Integer} a size of the row
-         * @method calcRow
-         * @protected
-         */
-        this.calcRow = function(row, c){
-            var max = 0, s = row * this.cols;
-            for (var i = s; i < c.kids.length && i < s + this.cols; i++) {
-                var a = c.kids[i];
-                if (a.isVisible === true) {
-                    var arg = a.constraints || this.constraints, d = a.getPreferredSize().height;
-                    d += (arg.top + arg.bottom);
-                    if (d > max) max = d;
+                this.objs = [];
+                this.rows = this.cols = 0;
+                if (arguments.length > 1) {
+                    this.setRowsCols(arguments[0], arguments[1]);
                 }
-            }
-            return max;
-        };
-
-        /**
-         * Calculate the given column width
-         * @param  {Integer} col a column
-         * @param  {zebra.layout.Layoutable} c the target container
-         * @return {Integer} a size of the column
-         * @method calcCol
-         * @protected
-         */
-        this.calcCol = function(col, c){
-            var max = 0;
-
-            for(var i = col; i < c.kids.length; i += this.cols) {
-                var a = c.kids[i];
-                if (a.isVisible === true) {
-                    var arg = a.constraints || this.constraints,
-                        d   = a.getPreferredSize().width + arg.left + arg.right;
-
-                    if (d > max) max = d;
-                }            
-            }
-            return max;
-        };
-
-        this.calcPreferredSize = function(c){
-            return { width : this.calcCols(c)[this.cols],
-                     height: this.calcRows(c)[this.rows] };
-        };
-
-        this.doLayout = function(c){
-            var rows     = this.rows, 
-                cols     = this.cols,
-                colSizes = this.calcCols(c),
-                rowSizes = this.calcRows(c),
-                top      = c.getTop(), 
-                left     = c.getLeft();
-
-            if ((this.mask & pkg.HORIZONTAL) > 0) {
-                var dw = c.width - left - c.getRight() - colSizes[cols];
-                for(var i = 0;i < cols; i ++ ) {
-                    colSizes[i] = colSizes[i] + (colSizes[i] !== 0 ? ~~((dw * colSizes[i]) / colSizes[cols]) : 0);
-                }
-            }
-
-            if ((this.mask & pkg.VERTICAL) > 0) {
-                var dh = c.height - top - c.getBottom() - rowSizes[rows];
-                for(var i = 0;i < rows; i++) {
-                    rowSizes[i] = rowSizes[i] + (rowSizes[i] !== 0 ? ~~((dh * rowSizes[i]) / rowSizes[rows]) : 0);
-                }
-            }
-
-            var cc = 0;
-            for (var i = 0;i < rows && cc < c.kids.length; i++) {
-                var xx = left;
-                for(var j = 0;j < cols && cc < c.kids.length; j++, cc++){
-                    var l = c.kids[cc];
-                    if (l.isVisible === true){
-                        var arg   = l.constraints || this.constraints,
-                            d     = l.getPreferredSize(),
-                            cellW = colSizes[j], 
-                            cellH = rowSizes[i];
-
-                        cellW -= (arg.left + arg.right);
-                        cellH -= (arg.top  + arg.bottom);
-
-                        if (pkg.STRETCH == arg.ax) d.width  = cellW;
-                        if (pkg.STRETCH == arg.ay) d.height = cellH;
-
-                        l.setSize(d.width, d.height);
-                        l.setLocation(
-                            xx  + arg.left + (pkg.STRETCH == arg.ax ? 0 : ((arg.ax == pkg.RIGHT) ? cellW - d.width
-                                                                                                 : ((arg.ax == pkg.CENTER) ? ~~((cellW - d.width) / 2)
-                                                                                                                           : 0))),
-                            top + arg.top  + (pkg.STRETCH == arg.ay ? 0 : ((arg.ay == pkg.TOP  ) ? cellH - d.height
-                                                                                                 : ((arg.ay == pkg.CENTER) ? ~~((cellH - d.height) / 2)
-                                                                                                                           : 0)))
-                        );
-
-                        xx += colSizes[j];
-                    }
-                }
-                top += rowSizes[i];
             }
         };
     }
@@ -6557,15 +6685,14 @@ pkg.GridLayout = Class(L, [
  * @for
  */
 
-
-})(zebra("layout"), zebra.Class);
-
+})(zebra("data"), zebra.Class, zebra.Interface);
 (function(pkg) {
+    pkg.$canvases = [];
+
     zebra.ready(function() {
         pkg.$deviceRatio = typeof window.devicePixelRatio !== "undefined" ? window.devicePixelRatio
                                                                           : (typeof window.screen.deviceXDPI !== "undefined" ? // IE
                                                                              window.screen.deviceXDPI / window.screen.logicalXDPI : 1); 
-
 
         pkg.$applyRenderExploit = (parseInt(pkg.$deviceRatio) !== pkg.$deviceRatio || zebra.isIE);
 
@@ -6793,14 +6920,12 @@ pkg.GridLayout = Class(L, [
                     var dv = e[this.wheelInfo.dy] * this.wheelInfo.dir;  
 
                     if (dv !== 0 && owner.vBar != null) {
-
-
                         var bar = owner.vBar;
                         if (Math.abs(dv) < 1) {
                             dv *= bar.pageIncrement;
-                        };
+                        }
 
-                        dv = Math.floor(dv) % 100
+                        dv = Math.floor(dv) % 100;
 
                         if (bar.isVisible === true) {
                             var v =  bar.position.offset + dv;           
@@ -7064,8 +7189,7 @@ pkg.GridLayout = Class(L, [
         }
     ]);
 })(zebra("ui"));
-
-(function(pkg, Class, Interface) {
+(function(pkg, Class) {
 
 /**
  * Zebra UI. The UI is powerful way to create any imaginable
@@ -7114,8 +7238,6 @@ var instanceOf = zebra.instanceOf, L = zebra.layout, MB = zebra.util,
     MS = Math.sin, MC = Math.cos, $fmCanvas = null, $fmText = null,
     $fmImage = null, $clipboard = null, $clipboardCanvas;
 
-pkg.$canvases = [];
-
 pkg.clipboardTriggerKey = 0;
 
 function $meX(e, d) {
@@ -7150,11 +7272,14 @@ pkg.$view = function(v) {
 
 /**
  * Look up 2D canvas in the list of existent
- * @param  {2DCanvas} canvas a canvas
+ * @param  {2DCanvas|String} canvas a canvas
  * @return {zebra.ui.zCanvas} a zebra canvas
  */
 pkg.$detectZCanvas = function(canvas) {
-    if (zebra.isString(canvas)) canvas = document.getElementById(canvas);
+    if (zebra.isString(canvas)) {
+        canvas = document.getElementById(canvas);
+    }
+
     for(var i=0; canvas != null && i < pkg.$canvases.length; i++) {
         if (pkg.$canvases[i].canvas == canvas) return pkg.$canvases[i];
     }
@@ -7599,9 +7724,18 @@ pkg.RoundBorder = Class(pkg.View, [
         this.outline = function(g,x,y,w,h,d) {
             g.beginPath();
             g.lineWidth = this.width;
-            g.arc(~~(x + w/2), ~~(y + h/2), ~~(w/2 - 0.5), 0, 2 * Math.PI, false);
+            g.arc(Math.floor(x + w/2) + (w%2 === 0 ? 0 :0.5),
+                  Math.floor(y + h/2) + (h%2 === 0 ? 0 :0.5),
+                  ~~((w - g.lineWidth)/2), 0, 2 * Math.PI, false);
             g.closePath();
             return true;
+        };
+
+        this.getPreferredSize = function() {
+            var s = this.lineWidth * 8;
+            return  {
+                width :s, height:s
+            };
         };
 
         this[''] = function(col, width) {
@@ -7788,7 +7922,7 @@ pkg.Picture = Class(pkg.Render, [
         };
 
         this.paint = function(g,x,y,w,h,d) {
-            if (this.target != null && w > 0 && h > 0){
+            if (this.target != null && this.target.complete === true && this.target.naturalWidth > 0 && w > 0 && h > 0){
                 if (this.width > 0) {
                     g.drawImage(this.target, this.x, this.y,
                                 this.width, this.height, x, y, w, h);
@@ -7801,7 +7935,8 @@ pkg.Picture = Class(pkg.Render, [
 
         this.getPreferredSize = function(){
             var img = this.target;
-            return img == null ? { width:0, height:0 }
+            return img == null || this.target.naturalWidth <= 0 || img.complete !== true
+                               ? { width:0, height:0 }
                                : (this.width > 0) ? { width:this.width, height:this.height }
                                                   : { width:img.width, height:img.height };
         };
@@ -8112,7 +8247,9 @@ pkg.Bag = Class(zebra.util.Bag, [
 ]);
 
 rgb.prototype.paint = function(g,x,y,w,h,d) {
-    if (this.s != g.fillStyle) g.fillStyle = this.s;
+    if (this.s != g.fillStyle) {
+        g.fillStyle = this.s;
+    }
 
     // fix for IE10/11, calculate intersection of clipped area
     // and the area that has to be filled. IE11/10 have a bug
@@ -8139,7 +8276,7 @@ rgb.prototype.getPreferredSize = function() {
     return { width:0, height:0 };
 };
 
-pkg.getPreferredSize = function(l) {
+pkg.$getPS = function(l) {
     return l != null && l.isVisible === true ? l.getPreferredSize()
                                              : { width:0, height:0 };
 };
@@ -8313,9 +8450,13 @@ pkg.Cursor = {
  * any added to the panel zebra.ui.Button component will not react on any input
  * event:
 
-        // declare composite panel class that inherits standard zebra
-        // panel class and implements Composite interface
-        var CompositePan = zebra.Class(zebra.ui.Panel, zebra.ui.Composite, []);
+        // declare composite panel class that set "catchInput"
+        // property to true
+        var CompositePan = zebra.Class(zebra.ui.Panel, [
+            function $prototype() {
+                this.catchInput = true;
+            }
+        ]);
 
         // instantiate an instance
         var cp = new CompositePan(new zebra.layout.FlowLayout());
@@ -8330,9 +8471,9 @@ pkg.Cursor = {
  *
 
         // declare composite panel class that inherits standard zebra
-        // panel class, implements Composite interface and implements
-        // catchInput method to make first kid not event transparent
-        var CompositePan = zebra.Class(zebra.ui.Panel, zebra.ui.Composite, [
+        // panel class and implement catchInput method to make first
+        // kid not event transparent
+        var CompositePan = zebra.Class(zebra.ui.Panel, [
             function catchInput(kid) {
                 // make first kid not event transparent
                 return this.kids.length === 0 || this.kids[0] == kid;
@@ -8340,21 +8481,7 @@ pkg.Cursor = {
         ]);
 
         ...
-
- * @class zebra.ui.Composite
- * @interface
  */
-
-/**
- * The method is called to ask if the given children UI component
- * has to be input events transparent
- * @optional
- * @param {zebra.ui.Panel} c a children UI component
- * @return {Boolean} true if the given children component has
- * to be input events transparent
- * @method catchInput
- */
-var Composite = pkg.Composite = Interface(),
 
 /**
  * Input event class. Input event is everything what is bound to user
@@ -8368,7 +8495,7 @@ var Composite = pkg.Composite = Interface(),
  * @class  zebra.ui.InputEvent
  * @constructor
  */
-IE = pkg.InputEvent = Class([
+var IE = pkg.InputEvent = Class([
     function $clazz() {
         this.MOUSE_UID    = 1;
         this.KEY_UID      = 2;
@@ -8936,7 +9063,7 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * @method  loadImage
  */
 pkg.loadImage = function(img, ready) {
-    if (img instanceof Image && img.complete && img.naturalWidth !== 0) {
+    if (img instanceof Image && img.complete === true && img.naturalWidth !== 0) {
         if (arguments.length > 1)  {
             ready(img.src, true, img);
         }
@@ -9828,12 +9955,7 @@ var CL = pkg.Panel = Class(L.Layoutable, [
                 for(var k in kids) {
                     if (kids.hasOwnProperty(k)) {
                         var ctr = L.$constraints(k);
-                        if (ctr != null) {
-                            this.add(L[k], kids[k]);
-                        }
-                        else {
-                            this.add(k, kids[k]);
-                        }
+                        this.add(ctr, kids[k]);
                     }
                 }
             }
@@ -10342,9 +10464,11 @@ pkg.PaintManager = Class(pkg.Manager, [
                                     $this.paint(context, canvas);
 
                                     canvas.$da.width = -1; //!!!
-                                }
-                                finally {
                                     context.restore();
+                                }
+                                catch(e) {
+                                    context.restore();
+                                    throw e;
                                 }
                             });
                         }
@@ -10359,7 +10483,9 @@ pkg.PaintManager = Class(pkg.Manager, [
         };
 
         this.paint = function(g,c){
-            var dw = c.width, dh = c.height, ts = g.stack[g.counter];
+            var dw = c.width,
+                dh = c.height,
+                ts = g.stack[g.counter];
 
             if (dw !== 0      &&
                 dh !== 0      &&
@@ -10624,7 +10750,7 @@ pkg.FocusManager = Class(pkg.Manager, [
         // given direction (forward or backward lookup)
         this.fd = function(t,index,d) {
             if (t.kids.length > 0){
-                var isNComposite = (instanceOf(t, Composite) === false);
+                var isNComposite = t.catchInput == null || t.catchInput == false;
                 for(var i = index; i >= 0 && i < t.kids.length; i += d) {
                     var cc = t.kids[i];
 
@@ -10635,7 +10761,8 @@ pkg.FocusManager = Class(pkg.Manager, [
                         cc.isVisible === true                                           &&
                         cc.width      >  0                                              &&
                         cc.height     >  0                                              &&
-                        (isNComposite || (t.catchInput && t.catchInput(cc) === false))  &&
+                        (isNComposite || (t.catchInput != true       &&
+                                          t.catchInput(cc) === false)  )                &&
                         ( (cc.canHaveFocus === true || (cc.canHaveFocus !=  null  &&
                                                         cc.canHaveFocus !== false &&
                                                         cc.canHaveFocus())            ) ||
@@ -10883,10 +11010,11 @@ pkg.CommandManager = Class(pkg.Manager, [
         this.keyCommands = {};
         this._ = new zebra.util.Listeners("commandFired");
 
-
-        this.setCommands(commands["common"]);
-        if (zebra.isMacOS && commands["osx"] != null) {
-            this.setCommands(commands["osx"]);
+        if (commands != null) {
+            this.setCommands(commands.common);
+            if (zebra.isMacOS && commands.osx != null) {
+                this.setCommands(commands.osx);
+            }
         }
     }
 ]);
@@ -11063,9 +11191,9 @@ pkg.EventManager = Class(pkg.Manager, [
         // destination is component itself or one of his composite parent.
         // composite component is a component that grab control from his
         // children component. to make a component composite
-        // it has to implement Composite interface. If composite component
+        // it has to implement catchInput field or method. If composite component
         // has catchInput method it will be called
-        // to clarify if the composite component takes control for the given kid.
+        // to detect if the composite component takes control for the given kid.
         // composite components can be embedded (parent composite can take
         // control on its child composite component)
         this.getEventDestination = function(c) {
@@ -11073,18 +11201,12 @@ pkg.EventManager = Class(pkg.Manager, [
 
             var p = c;
             while ((p = p.parent) != null) {
-                // !!! instanceOf is replaced with
-                // !!! dirty trick since mouse event is fired very intensive
-                if ( p.$clazz != null &&
-                     p.$clazz.$parents != null &&
-                     p.$clazz.$parents[Composite] == true &&
-                    (p.catchInput == null || p.catchInput(c)))
-                {
+                if (p.catchInput != null && (p.catchInput === true || (p.catchInput !== false && p.catchInput(c)))) {
                     c = p;
                 }
             }
             return c;
-        }
+        };
 
         this.fireInputEvent = function(e){
             var t = e.source, id = e.ID, it = null, k = IEHM[id], b = false;
@@ -11396,7 +11518,7 @@ pkg.zCanvas = Class(pkg.Panel, [
                 var fo = pkg.focusManager.focusOwner;
                 if (fo != null) {
                     KE_STUB.reset(fo, KE.TYPED, e.keyCode, String.fromCharCode(e.charCode), km(e));
-                    if (EM.fireInputEvent(KE_STUB)) e.preventDefault();
+                    if (EM.fireInputEvent(KE_STUB) === true) e.preventDefault();
                 }
             }
 
@@ -11858,7 +11980,22 @@ pkg.zCanvas = Class(pkg.Panel, [
             for(var i = this.kids.length; --i >= 0; ){
                 var tl = this.kids[i];
                 if (tl.isLayerActiveAt == null || tl.isLayerActiveAt(x, y)) {
-                    return EM.getEventDestination(tl.getComponentAt(x, y));
+
+                    // !!!
+                    //  since the method is widely used the code below duplicates
+                    //  functionality of EM.getEventDestination(tl.getComponentAt(x, y));
+                    //  method
+                    // !!!
+                    var c = tl.getComponentAt(x, y);
+                    if (c != null)  {
+                        var p = c;
+                        while ((p = p.parent) != null) {
+                            if (p.catchInput != null && (p.catchInput === true || (p.catchInput !== false && p.catchInput(c)))) {
+                                c = p;
+                            }
+                        }
+                    }
+                    return c;
                 }
             }
             return null;
@@ -11959,7 +12096,7 @@ pkg.zCanvas = Class(pkg.Panel, [
         var e = document.createElement("canvas");
         e.setAttribute("class", "zebcanvas");
         e.setAttribute("id", this.toString());
-        e.onselectstart = function() { return false };
+        e.onselectstart = function() { return false; };
         this.$this(e, w, h);
     },
 
@@ -12315,9 +12452,9 @@ pkg.zCanvas = Class(pkg.Panel, [
             this.height = h;
 
            // if (zebra.isTouchable) {
-           //      the strange fix for Android native browser
-           //      that can render text blurry before you click
-           //      it happens because the browser auto-fit option
+           //      // the strange fix for Android native browser
+           //      // that can render text blurry before you click
+           //      // it happens because the browser auto-fit option
            //      var $this = this;
            //      setTimeout(function() {
            //          $this.invalidate();
@@ -12542,7 +12679,7 @@ zebra.ready(
                             pkg.focusManager.focusOwner.clipPaste(txt);
                         }
                         $clipboard.value = "";
-                    }
+                    };
                 }
                 document.body.appendChild($clipboard);
             }
@@ -12569,8 +12706,7 @@ zebra.ready(
  * @for
  */
 
-})(zebra("ui"), zebra.Class, zebra.Interface);
-
+})(zebra("ui"), zebra.Class);
 (function(pkg, Class) {
 
 // redefine configuration
@@ -13765,6 +13901,7 @@ pkg.Label = Class(pkg.ViewPan, [
          * @chainable
          */
         this.setValue = function(s){
+            if (s == null) s = "";
             this.view.setValue(s);
             this.repaint();
             return this;
@@ -14249,10 +14386,9 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
  * Composite event state panel
  * @constructor
  * @extends {zebra.ui.EvStatePan}
- * @uses zebra.ui.Composite
  * @class  zebra.ui.CompositeEvStatePan
  */
-pkg.CompositeEvStatePan = Class(pkg.EvStatePan, pkg.Composite, [
+pkg.CompositeEvStatePan = Class(pkg.EvStatePan, [
     function $prototype() {
         /**
          * Indicates if the component can have focus
@@ -14261,6 +14397,9 @@ pkg.CompositeEvStatePan = Class(pkg.EvStatePan, pkg.Composite, [
          * @type {Boolean}
          */
         this.canHaveFocus = true;
+
+
+        this.catchInput = true;
 
 
         this.focusComponent = null;
@@ -14404,6 +14543,9 @@ pkg.Button = Class(pkg.CompositeEvStatePan, [
          */
         this.firePeriod = -1;
 
+
+        this.startIn = 400;
+
         this.fire = function() {
             this._.fired(this);
             if (this.catchFired != null) this.catchFired();
@@ -14433,9 +14575,11 @@ pkg.Button = Class(pkg.CompositeEvStatePan, [
          * repeated
          * @method setFireParams
          */
-        this.setFireParams = function (b,time){
+        this.setFireParams = function (b, firePeriod, startIn){
+            if (this.repeatTask != null) this.repeatTask.shutdown();
             this.isFireByPress = b;
-            this.firePeriod = time;
+            this.firePeriod = firePeriod;
+            if (arguments.length > 2) this.startIn = startIn;
         };
     },
 
@@ -14446,6 +14590,9 @@ pkg.Button = Class(pkg.CompositeEvStatePan, [
     function (t){
         this._ = new Listeners();
         if (zebra.isString(t)) t = new this.$clazz.Label(t);
+        else {
+            if (t instanceof Image) t = new pkg.ImagePan(t);
+        }
         this.$super();
         if (t != null) {
             this.add(t);
@@ -14459,7 +14606,7 @@ pkg.Button = Class(pkg.CompositeEvStatePan, [
             if(this.isFireByPress){
                 this.fire();
                 if (this.firePeriod > 0) {
-                    this.repeatTask = task(this.run, this).run(400, this.firePeriod);
+                    this.repeatTask = task(this.run, this).run(this.startIn, this.firePeriod);
                 }
             }
         }
@@ -15215,9 +15362,9 @@ pkg.SplitPan = Class(pkg.Panel, [
         };
 
         this.calcPreferredSize = function(c){
-            var fSize = pkg.getPreferredSize(this.leftComp),
-                sSize = pkg.getPreferredSize(this.rightComp),
-                bSize = pkg.getPreferredSize(this.gripper);
+            var fSize = pkg.$getPS(this.leftComp),
+                sSize = pkg.$getPS(this.rightComp),
+                bSize = pkg.$getPS(this.gripper);
 
             if (this.orientation == L.HORIZONTAL){
                 bSize.width = Math.max(((fSize.width > sSize.width) ? fSize.width : sSize.width), bSize.width);
@@ -15235,7 +15382,7 @@ pkg.SplitPan = Class(pkg.Panel, [
                 top    = this.getTop(),
                 bottom = this.getBottom(),
                 left   = this.getLeft(),
-                bSize  = pkg.getPreferredSize(this.gripper);
+                bSize  = pkg.$getPS(this.gripper);
 
             if (this.orientation == L.HORIZONTAL){
                 var w = this.width - left - right;
@@ -15890,7 +16037,9 @@ pkg.ScrollManager = Class([
          * @method scrollTo
          */
         this.scrollTo = function(x, y){
-            var psx = this.getSX(), psy = this.getSY();
+            var psx = this.getSX(),
+                psy = this.getSY();
+
             if (psx != x || psy != y){
                 this.sx = x;
                 this.sy = y;
@@ -15940,10 +16089,9 @@ pkg.ScrollManager = Class([
 
  * @class zebra.ui.Scroll
  * @constructor
- * @uses zebra.ui.Composite
  * @extends {zebra.ui.Panel}
  */
-pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, pkg.Composite, [
+pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
     function $clazz() {
         var SB = Class(pkg.Button, [
             function $prototype() {
@@ -16084,7 +16232,9 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, pkg.Composite, [
          * @param  {zebra.ui.MouseEvent} e a mouse event
          * @method mouseDragEnded
          */
-        this.mouseDragEnded = function (e){ this.startDragLoc = Number.MAX_VALUE; };
+        this.mouseDragEnded = function(e) {
+            this.startDragLoc = Number.MAX_VALUE;
+        };
 
         /**
          * Define mouse clicked events handler
@@ -16105,9 +16255,9 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, pkg.Composite, [
         };
 
         this.calcPreferredSize = function (target){
-            var ps1 = pkg.getPreferredSize(this.incBt),
-                ps2 = pkg.getPreferredSize(this.decBt),
-                ps3 = pkg.getPreferredSize(this.bundle);
+            var ps1 = pkg.$getPS(this.incBt),
+                ps2 = pkg.$getPS(this.decBt),
+                ps3 = pkg.$getPS(this.bundle);
 
             if (this.type == L.HORIZONTAL){
                 ps1.width += (ps2.width + ps3.width);
@@ -16128,8 +16278,8 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, pkg.Composite, [
                 ew     = this.width - left - right,
                 eh     = this.height - top - bottom,
                 b      = (this.type == L.HORIZONTAL),
-                ps1    = pkg.getPreferredSize(this.decBt),
-                ps2    = pkg.getPreferredSize(this.incBt),
+                ps1    = pkg.$getPS(this.decBt),
+                ps2    = pkg.$getPS(this.incBt),
                 minbs  = pkg.Scroll.MIN_BUNDLE_SIZE;
 
             this.decBt.setSize(b ? ps1.width : ew, b ? eh : ps1.height);
@@ -16220,7 +16370,7 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, pkg.Composite, [
         this.add(L.BOTTOM, t == L.VERTICAL ? new pkg.Scroll.VIncButton() : new pkg.Scroll.HIncButton());
 
         this.type = t;
-        this.setPosition(new zebra.util.Position(this));
+        this.setPosition(new zebra.util.SingleColPosition(this));
     },
 
     function kidAdded(index,id,lw){
@@ -16334,7 +16484,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
                     if (this.vBar.decBt != null) this.vBar.decBt.setVisible(!b);
                 }
 
-                if (this.$interval != 0) {
+                if (this.$interval !== 0) {
                     clearInterval(this.$interval);
                     $this.$interval = 0;
                 }
@@ -16370,7 +16520,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
         };
 
         this.calcPreferredSize = function (target){
-            return pkg.getPreferredSize(this.scrollObj);
+            return pkg.$getPS(this.scrollObj);
         };
 
         this.doLayout = function (target){
@@ -16556,7 +16706,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
         if (L.CENTER == id){
             this.scrollObj = comp;
             this.scrollObj.scrollManager.bind(this);
-            return
+            return;
         }
 
         if (L.BOTTOM  == id || L.TOP == id){
@@ -16892,7 +17042,7 @@ pkg.Tabs = Class(pkg.Panel, [
             var i = this.getTabAt(e.x, e.y);
             if (this.overTab != i) {
                 this.overTab = i;
-                if (this.views["tabover"] != null) {
+                if (this.views.tabover != null) {
                     this.repaint(this.repaintX, this.repaintY,
                                  this.repaintWidth, this.repaintHeight);
                 }
@@ -16908,7 +17058,7 @@ pkg.Tabs = Class(pkg.Panel, [
             var i = this.getTabAt(e.x, e.y);
             if (this.overTab != i) {
                 this.overTab = i;
-                if (this.views["tabover"] != null) {
+                if (this.views.tabover != null) {
                     this.repaint(this.repaintX, this.repaintY,
                                  this.repaintWidth, this.repaintHeight);
                 }
@@ -16923,7 +17073,7 @@ pkg.Tabs = Class(pkg.Panel, [
         this.mouseExited = function(e) {
             if (this.overTab >= 0) {
                 this.overTab = -1;
-                if (this.views["tabover"] != null) {
+                if (this.views.tabover != null) {
                     this.repaint(this.repaintX, this.repaintY,
                                  this.repaintWidth, this.repaintHeight);
                 }
@@ -17018,10 +17168,10 @@ pkg.Tabs = Class(pkg.Panel, [
          * @method drawMarker
          */
         this.drawMarker = function(g,r){
-            var marker = this.views["marker"];
+            var marker = this.views.marker;
             if (marker != null){
                 //TODO: why only "tab" is checked ?
-                var bv = this.views["tab"];
+                var bv = this.views.tab;
                 marker.paint(g, r.x + bv.getLeft(), r.y + bv.getTop(),
                                 r.width - bv.getLeft() - bv.getRight(),
                                 r.height - bv.getTop() - bv.getBottom(), this);
@@ -17037,9 +17187,9 @@ pkg.Tabs = Class(pkg.Panel, [
         this.paintTab = function (g, pageIndex){
             var b       = this.getTabBounds(pageIndex),
                 page    = this.kids[pageIndex],
-                tab     = this.views["tab"],
-                tabover = this.views["tabover"],
-                tabon   = this.views["tabon"],
+                tab     = this.views.tab,
+                tabover = this.views.tabover,
+                tabon   = this.views.tabon,
                 v       = this.pages[pageIndex * 2],
                 ps      = v.getPreferredSize();
 
@@ -17096,12 +17246,16 @@ pkg.Tabs = Class(pkg.Panel, [
             if (b) {
                 this.repaintX = this.tabAreaX = left ;
                 this.repaintY = this.tabAreaY = (this.orient == L.TOP) ? top : this.height - bottom - this.tabAreaHeight;
-                if (this.orient == L.BOTTOM) this.repaintY -= this.border.getBottom();
+                if (this.orient == L.BOTTOM) {
+                    this.repaintY -= (this.border != null ? this.border.getBottom() : 0);
+                }
             }
             else {
                 this.repaintX = this.tabAreaX = (this.orient == L.LEFT ? left : this.width - right - this.tabAreaWidth);
                 this.repaintY = this.tabAreaY = top ;
-                if (this.orient == L.RIGHT) this.repaintX -= this.border.getRight();
+                if (this.orient == L.RIGHT) {
+                    this.repaintX -= (this.border != null ? this.border.getRight() : 0);
+                }
             }
 
             var count = this.kids.length,
@@ -17119,14 +17273,14 @@ pkg.Tabs = Class(pkg.Panel, [
                     xx += r.width;
                     if (i == this.selectedIndex) {
                         xx -= sp;
-                        if (this.orient == L.BOTTOM) r.y -= this.border.getBottom();
+                        if (this.orient == L.BOTTOM) r.y -= (this.border != null ? this.border.getBottom() : 0);
                     }
                 }
                 else {
                     yy += r.height;
                     if (i == this.selectedIndex) {
                         yy -= sp;
-                        if (this.orient == L.RIGHT) r.x -= this.border.getRight();
+                        if (this.orient == L.RIGHT) r.x -= (this.border != null ? this.border.getRight() : 0);
                     }
                 }
             }
@@ -17185,7 +17339,7 @@ pkg.Tabs = Class(pkg.Panel, [
             if (count > 0) {
                 this.tabAreaHeight = this.tabAreaWidth = 0;
 
-                var bv   = this.views["tab"],
+                var bv   = this.views.tab,
                     b    = (this.orient == L.LEFT || this.orient == L.RIGHT),
                     max  = 0,
                     hadd = bv.getLeft() + bv.getRight(),
@@ -17219,13 +17373,17 @@ pkg.Tabs = Class(pkg.Panel, [
                     this.tabAreaWidth   = max + this.sideSpace;
                     this.tabAreaHeight += (2 * this.sideSpace);
                     this.repaintHeight  = this.tabAreaHeight;
-                    this.repaintWidth   = this.tabAreaWidth + (b  == L.LEFT ? this.border.getLeft() : this.border.getRight());
+                    this.repaintWidth   = this.tabAreaWidth + (this.border != null ? (b == L.LEFT ? this.border.getLeft()
+                                                                                                  : this.border.getRight())
+                                                                                   : 0);
                 }
                 else {
                     this.tabAreaWidth += (2 * this.sideSpace);
                     this.tabAreaHeight = this.sideSpace + max;
                     this.repaintWidth  = this.tabAreaWidth;
-                    this.repaintHeight = this.tabAreaHeight + (b  == L.TOP ? this.border.getTop() : this.border.getBottom());
+                    this.repaintHeight = this.tabAreaHeight + (this.border != null ? (b  == L.TOP ? this.border.getTop()
+                                                                                                  : this.border.getBottom())
+                                                                                   : 0);
                 }
 
                 // make selected tab page title bigger
@@ -17233,10 +17391,14 @@ pkg.Tabs = Class(pkg.Panel, [
                     var r = this.getTabBounds(this.selectedIndex);
                     if (b) {
                         r.height += 2 * this.sideSpace;
-                        r.width += this.sideSpace  + (b == L.LEFT ? this.border.getLeft() : this.border.getRight());
+                        r.width += this.sideSpace +  (this.border != null ? (b == L.LEFT ? this.border.getLeft()
+                                                                                         : this.border.getRight())
+                                                                          : 0);
                     }
                     else {
-                        r.height += this.sideSpace + (b == L.TOP ? this.border.getTop() : this.border.getBottom());
+                        r.height += this.sideSpace + (this.border != null ? (b == L.TOP ? this.border.getTop()
+                                                                                        : this.border.getBottom())
+                                                                          : 0);
                         r.width  += 2 * this.sideSpace;
                     }
                 }
@@ -17485,7 +17647,7 @@ pkg.Tabs = Class(pkg.Panel, [
     },
 
     function insert(index,constr,c) {
-        var render = null
+        var render = null;
         if (instanceOf(constr, this.$clazz.TabView)) {
             render = constr;
         }
@@ -17562,7 +17724,7 @@ pkg.Slider = Class(pkg.Panel, [
         };
 
         this.getScaleSize = function(){
-            var bs = this.views["bundle"].getPreferredSize();
+            var bs = this.views.bundle.getPreferredSize();
             return (this.orient == L.HORIZONTAL ? this.width - this.getLeft() -
                                                   this.getRight() - bs.width
                                                 : this.height - this.getTop() -
@@ -17570,7 +17732,7 @@ pkg.Slider = Class(pkg.Panel, [
         };
 
         this.getScaleLocation = function(){
-            var bs = this.views["bundle"].getPreferredSize();
+            var bs = this.views.bundle.getPreferredSize();
             return (this.orient == L.HORIZONTAL ? this.getLeft() + ~~(bs.width / 2)
                                                 : this.getTop()  + ~~(bs.height/ 2)) + 1;
         };
@@ -17593,7 +17755,7 @@ pkg.Slider = Class(pkg.Panel, [
 
             var left = this.getLeft(), top = this.getTop(),
                 right = this.getRight(), bottom = this.getBottom(),
-                bnv = this.views["bundle"], gauge = this.views["gauge"],
+                bnv = this.views.bundle, gauge = this.views.gauge,
                 bs = bnv.getPreferredSize(), gs = gauge.getPreferredSize(),
                 w = this.width - left - right - 2, h = this.height - top - bottom - 2;
 
@@ -17662,8 +17824,8 @@ pkg.Slider = Class(pkg.Panel, [
                 bnv.paint(g, bx, this.getBundleLoc(this.value), bs.width, bs.height, this);
             }
 
-            if (this.hasFocus() && this.views["marker"]) {
-                this.views["marker"].paint(g, left, top, w + 2, h + 2, this);
+            if (this.hasFocus() && this.views.marker) {
+                this.views.marker.paint(g, left, top, w + 2, h + 2, this);
             }
         };
 
@@ -17712,13 +17874,13 @@ pkg.Slider = Class(pkg.Panel, [
         };
 
         this.getBundleLoc = function(v){
-            var bs = this.views["bundle"].getPreferredSize();
+            var bs = this.views.bundle.getPreferredSize();
             return this.value2loc(v) - (this.orient == L.HORIZONTAL ? ~~(bs.width / 2)
                                                                     : ~~(bs.height / 2));
         };
 
         this.getBundleBounds = function (v){
-            var bs = this.views["bundle"].getPreferredSize();
+            var bs = this.views.bundle.getPreferredSize();
             return this.orient == L.HORIZONTAL ? { x:this.getBundleLoc(v),
                                                    y:this.getTop() + ~~((this.height - this.getTop() - this.getBottom() - this.psH) / 2) + 1,
                                                    width:bs.width, height:bs.height }
@@ -17756,7 +17918,7 @@ pkg.Slider = Class(pkg.Panel, [
         };
 
         this.recalc = function(){
-            var ps = this.views["bundle"].getPreferredSize(),
+            var ps = this.views.bundle.getPreferredSize(),
                 ns = this.isShowScale ? (this.gap + 2 * this.netSize) : 0,
                 dt = this.max - this.min, hMax = 0, wMax = 0;
 
@@ -17867,7 +18029,7 @@ pkg.Slider = Class(pkg.Panel, [
         this.setScaleStep(1);
 
         this.$super();
-        this.views["bundle"] = (o == L.HORIZONTAL ? this.views["hbundle"] : this.views["vbundle"]);
+        this.views.bundle = (o == L.HORIZONTAL ? this.views.hbundle : this.views.vbundle);
 
         this.provider = this;
     },
@@ -18170,8 +18332,7 @@ pkg.VideoPan = Class(pkg.Panel,  [
                 window.requestAFrame(function anim() {
                     if ($this.isReady === true) $this.repaint();
                     if ($this.isPlaying === true) window.requestAFrame(anim);
-                })
-
+                });
             }
         };
 
@@ -18425,7 +18586,7 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
                 (e.touch.direction == L.BOTTOM || e.touch.direction == L.TOP) &&
                 this.target.vBar != null &&
                 this.target.vBar.isVisible === true &&
-                e.touch.dy != 0)
+                e.touch.dy !== 0)
             {
                 this.$dt = 2*e.touch.dy;
                 var $this = this, bar = this.target.vBar, k = 0;
@@ -18456,7 +18617,7 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
                 this.timer = null;
             }
             this.target = null;
-        }
+        };
     }
 ]);
 
@@ -18465,7 +18626,6 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
  */
 
 })(zebra("ui"), zebra.Class);
-
 
 (function(pkg, Class) {
 
@@ -18837,11 +18997,10 @@ pkg.TextField = Class(pkg.Label, [
          * @method drawCursor
          */
         this.drawCursor = function (g){
-            if (
-                this.position.offset >= 0 &&
+            if (this.position.offset >= 0 &&
                 this.curView != null      &&
                 this.blinkMe              &&
-                this.hasFocus()             )
+                (this.hasFocus() || this.$forceToShow == true))
             {
                 this.curView.paint(g, this.curX, this.curY,
                                       this.curW, this.curH, this);
@@ -19257,9 +19416,9 @@ pkg.TextField = Class(pkg.Label, [
                 this.view.paint(g, l, t, this.width  - l - this.getRight(),
                                          this.height - t - this.getBottom(), this);
                 this.drawCursor(g);
+                g.translate( -sx,  -sy);
             }
-            catch(e) { throw e; }
-            finally { g.translate( -sx,  -sy); }
+            catch(e) { g.translate( -sx,  -sy); throw e; }
         };
     },
 
@@ -19367,7 +19526,6 @@ pkg.PassTextField = Class(pkg.TextField, [
  */
 
 })(zebra("ui"), zebra.Class);
-
 (function(pkg, Class) {
 
 /**
@@ -19498,7 +19656,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
                 if (index != this.position.offset && (index < 0 || this.isItemSelectable(index) === true)) {
                     this.$triggeredByPointer = true;
 
-                    if (index < 0) this.position.setOffset(-1);
+                    if (index < 0) this.position.setOffset(null);
                     else this.position.setOffset(index);                    
                     this.notifyScrollMan(index);
 
@@ -19535,7 +19693,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
          * @method getItemSize
          */
         this.getItemSize = function (i){
-            throw new Error("Not implemented")
+            throw new Error("Not implemented");
         };
 
         this.getLines = function() {
@@ -19828,7 +19986,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
                 i += dd; 
             }            
             return i < c ? off : -1;
-        }
+        };
 
         this.posChanged = function (target,prevOffset,prevLine,prevCol){
             var off = this.position.offset;
@@ -20168,12 +20326,12 @@ pkg.List = Class(pkg.BaseList, [
                         y += this.heights[i];
                         if (y > yy) break;
                     }
+
+                    g.translate(-sx,  -sy);
                 }
                 catch(e) {
-                    throw e;
-                }
-                finally {
                     g.translate(-sx,  -sy);
+                    throw e;
                 }
             }
         };
@@ -20367,13 +20525,12 @@ pkg.List = Class(pkg.BaseList, [
  
  * @class zebra.ui.CompList
  * @extends zebra.ui.BaseList
- * @uses zebra.ui.Composite
  * @param {zebra.data.ListModel|Array} [model] a list model that should be passed as an instance
  * of zebra.data.ListModel or as an array.
  * @param {Boolean} [isComboMode] true if the list navigation has to be triggered by 
  * mouse cursor moving 
  */
-pkg.CompList = Class(pkg.BaseList, pkg.Composite, [
+pkg.CompList = Class(pkg.BaseList, [
     function $clazz() {
         this.Label      = Class(pkg.Label, []);
         this.ImageLabel = Class(pkg.ImageLabel, []);
@@ -20573,7 +20730,6 @@ var ContentListeners = zebra.util.ListenersClass("contentUpdated");
 
  * @class zebra.ui.Combo
  * @extends {zebra.ui.Panel}
- * @uses zebra.ui.Composite
  * @constructor
  * @param {Array|zebra.ui.BaseList} data an combo items array or a list component
  */
@@ -20590,7 +20746,7 @@ var ContentListeners = zebra.util.ListenersClass("contentUpdated");
  * has been selected
  * @param {Object} value a previously selected index
  */
-pkg.Combo = Class(pkg.Panel, pkg.Composite, [
+pkg.Combo = Class(pkg.Panel, [
     function $clazz() {
         /**
          * UI panel class that is used to implement combo box content area  
@@ -21122,6 +21278,16 @@ pkg.Combo = Class(pkg.Panel, pkg.Composite, [
             }
             this._.fired(this, data);
         }
+    },
+
+    function setVisible(b) {
+        if (b === false) this.hidePad();
+        this.$super(b);
+    },
+
+    function setParent(p) {
+        if (p == null) this.hidePad();
+        this.$super(p);
     }
 ]);
 
@@ -21209,7 +21375,6 @@ pkg.ComboArrowView = Class(pkg.View, [
  */
 
 })(zebra("ui"), zebra.Class);
-
 (function(pkg, Class) {
 
 var KE = pkg.KeyEvent, task = zebra.util.task, L = zebra.layout,
@@ -21623,10 +21788,9 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
  * @param {String} [content] a window title
  * @param {zebra.ui.Panel} [content] a window content  
  * @constructor
- * @uses zebra.ui.Composite
  * @extends {zebra.ui.Panel}
  */
-pkg.Window = Class(pkg.StatePan, pkg.Composite, [
+pkg.Window = Class(pkg.StatePan, [
 
     function $prototype() {
         var MOVE_ACTION = 1, SIZE_ACTION = 2;
@@ -22391,7 +22555,7 @@ pkg.Menu = Class(pkg.CompList, [
          * @method mouseExited
          */
         this.mouseExited = function(e){
-            this.position.setOffset(-1);
+            this.position.setOffset(null);
         };
 
         /**
@@ -22608,7 +22772,7 @@ pkg.Menu = Class(pkg.CompList, [
     function setParent(p) {
         if (p != null) {
             this.select(-1);
-            this.position.setOffset(-1);
+            this.position.setOffset(null);
         }
         else {
             this.$parentMenu = null;
@@ -23341,321 +23505,3116 @@ pkg.WindowTitleView = Class(pkg.View, [
  */
 
 })(zebra("ui"), zebra.Class);
-
 (function(pkg, Class, ui) {
 
+
+//      ---------------------------------------------------
+//      | x |    col0 width     | x |   col2 width    | x |
+//      .   .
+//    Line width
+//   -->.   .<--
+
 /**
- * The package contains number of UI components that can be helful to 
- * make visiual control of an UI component size and location
- * @module  ui.designer
- * @main 
+ * The package contains number of classes and interfaces to implement
+ * UI Grid component. The grid allows developers to visualize matrix
+ * model, customize the model data editing and rendering.
+ * @module ui.grid
+ * @main
  */
 
-var L = zebra.layout, Cursor = ui.Cursor, KeyEvent = ui.KeyEvent, CURSORS = [];
+var Matrix = zebra.data.Matrix, L = zebra.layout, MB = zebra.util,
+    Cursor = ui.Cursor, Position = zebra.util.Position, KE = ui.KeyEvent,
+    Listeners = zebra.util.Listeners;
 
-CURSORS[L.LEFT  ] = Cursor.W_RESIZE;
-CURSORS[L.RIGHT ] = Cursor.E_RESIZE;
-CURSORS[L.TOP   ] = Cursor.N_RESIZE;
-CURSORS[L.BOTTOM] = Cursor.S_RESIZE;
-CURSORS[L.TLEFT ] = Cursor.NW_RESIZE;
-CURSORS[L.TRIGHT] = Cursor.NE_RESIZE;
-CURSORS[L.BLEFT ] = Cursor.SW_RESIZE;
-CURSORS[L.BRIGHT] = Cursor.SE_RESIZE;
-CURSORS[L.CENTER] = Cursor.MOVE;
-CURSORS[L.NONE  ] = Cursor.DEFAULT;
+//!!! crappy function
+//TODO: think how to remove/replace it
+function arr(l, v) {
+    var a = Array(l);
+    for(var i=0; i<l; i++) a[i] = v;
+    return a;
+}
 
-pkg.ShaperBorder = Class(ui.View, [
-    function $prototype() {
-        this.color = "blue";
-        this.gap = 7;
+function CellsVisibility() {
+    this.hasVisibleCells = function(){
+        return this.fr != null && this.fc != null &&
+               this.lr != null && this.lc != null   ;
+    };
 
-        function contains(x, y, gx, gy, ww, hh) {
-            return gx <= x && (gx + ww) > x && gy <= y && (gy + hh) > y;
-        }
-
-        this.paint = function(g,x,y,w,h,d){
-            var cx = ~~((w - this.gap)/2), cy = ~~((h - this.gap)/2);
-            g.setColor(this.color);
-            g.beginPath();
-            g.rect(x, y, this.gap, this.gap);
-            g.rect(x + cx, y, this.gap, this.gap);
-            g.rect(x, y + cy, this.gap, this.gap);
-            g.rect(x + w - this.gap, y, this.gap, this.gap);
-            g.rect(x, y + h - this.gap, this.gap, this.gap);
-            g.rect(x + cx, y + h - this.gap, this.gap, this.gap);
-            g.rect(x + w - this.gap, y + cy, this.gap, this.gap);
-            g.rect(x + w - this.gap, y + h - this.gap, this.gap, this.gap);
-            g.fill();
-            g.beginPath();
-            g.rect(x + ~~(this.gap / 2), y + ~~(this.gap / 2), w - this.gap, h - this.gap);
-            g.stroke();
-        };
-
-        this.detectAt = function(target,x,y){
-            var gap = this.gap, gap2 = gap*2, w = target.width, h = target.height;
-
-            if (contains(x, y, gap, gap, w - gap2, h - gap2)) return L.CENTER;
-            if (contains(x, y, 0, 0, gap, gap))               return L.TLEFT;
-            if (contains(x, y, 0, h - gap, gap, gap))         return L.BLEFT;
-            if (contains(x, y, w - gap, 0, gap, gap))         return L.TRIGHT;
-            if (contains(x, y, w - gap, h - gap, gap, gap))   return L.BRIGHT;
-
-            var mx = ~~((w-gap)/2);
-            if (contains(x, y, mx, 0, gap, gap))        return L.TOP;
-            if (contains(x, y, mx, h - gap, gap, gap))  return L.BOTTOM;
-
-            var my = ~~((h-gap)/2);
-            if (contains(x, y, 0, my, gap, gap)) return L.LEFT;
-            return contains(x, y, w - gap, my, gap, gap) ? L.RIGHT : L.NONE;
-        };
-    }
-]);
-
-pkg.InsetsArea = Class([
-    function $prototype() {
-        this.top = this.right = this.left = this.bottom = 6;
-
-        this.detectAt = function (c,x,y){
-            var t = 0, b1 = false, b2 = false;
-            if (x < this.left) t += L.LEFT;
-            else {
-                if (x > (c.width - this.right)) t += L.RIGHT;
-                else b1 = true;
-            }
-
-            if (y < this.top) t += L.TOP;
-            else {
-                if (y > (c.height - this.bottom)) t += L.BOTTOM;
-                else b2 = true;
-            }
-            return b1 && b2 ? L.CENTER : t;
-        };
-    }
-]);
+    // first visible row (row and y), first visible
+    // col, last visible col and row
+    this.fr = this.fc = this.lr = this.lc = null;
+}
 
 /**
- * This is UI component class that implements possibility to embeds another
- * UI components to control the component size and location visually.
- 
-        // create canvas 
-        var canvas = new zebra.ui.zCanvas(300,300);
+ *  Interface that describes a grid component metrics
+ *  @class zebra.ui.grid.Metrics
+ */
+pkg.Metrics = zebra.Interface();
 
-        // create two UI components
-        var lab = new zebra.ui.Label("Label");
-        var but = new zebra.ui.Button("Button");
+/**
+ * Get the given column width of a grid component
+ * @param {Integer} col a column index
+ * @method getColWidth
+ * @return {Integer} a column width
+ */
 
-        // add created before label component as target of the shaper
-        // component and than add the shaper component into root panel 
-        canvas.root.add(new zebra.ui.designer.ShaperPan(lab).properties({
-            bounds: [ 30,30,100,40]
-        }));
+/**
+ * Get the given row height of a grid component
+ * @param {Integer} row a row index
+ * @method getRowHeight
+ * @return {Integer} a row height
+ */
 
-        // add created before button component as target of the shaper
-        // component and than add the shaper component into root panel 
-        canvas.root.add(new zebra.ui.designer.ShaperPan(but).properties({
-            bounds: [ 130,130,100,50]
-        }));
+/**
+ * Get the given row preferred height of a grid component
+ * @param {Integer} row a row index
+ * @method getPSRowHeight
+ * @return {Integer} a row preferred height
+ */
 
- * @class  zebra.ui.designer.ShaperPan
+/**
+ * Get the given column preferred width of a grid component
+ * @param {Integer} col a column index
+ * @method getPSColWidth
+ * @return {Integer} a column preferred width
+ */
+
+ /**
+  * Get a x origin of a grid component. Origin indicates how
+  * the grid component content has been scrolled
+  * @method getXOrigin
+  * @return {Integer} a x origin
+  */
+
+/**
+  * Get a y origin of a grid component. Origin indicates how
+  * the grid component content has been scrolled
+  * @method getYOrigin
+  * @return {Integer} a y origin
+  */
+
+  /**
+   * Set the given column width of a grid component
+   * @param {Integer} col a column index
+   * @param {Integer} w a column width
+   * @method setColWidth
+   */
+
+  /**
+   * Set the given row height of a grid component
+   * @param {Integer} row a row index
+   * @param {Integer} h a row height
+   * @method setRowHeight
+   */
+
+  /**
+   * Get number of columns in a grid component
+   * @return {Integer} a number of columns
+   * @method getGridCols
+   */
+
+  /**
+   * Get number of rows in a grid component
+   * @return {Integer} a number of rows
+   * @method getGridRows
+   */
+
+   /**
+    * Get a structure that describes a grid component
+    * columns and rows visibility
+    * @return {zebra.ui.grid.CellsVisibility} a grid cells visibility
+    * @method getCellsVisibility
+    */
+
+  /**
+   * Grid line size
+   * @attribute lineSize
+   * @type {Integer}
+   * @readOnly
+   */
+
+  /**
+   * Indicate if a grid sizes its rows and cols basing on its preferred sizes
+   * @attribute isUsePsMetric
+   * @type {Boolean}
+   * @readOnly
+   */
+
+/**
+ * Default grid cell views provider. The class rules how a grid cell content,
+ * background has to be rendered and aligned. Developers can implement an own
+ * views providers and than setup it for a grid by calling "setViewProvider(...)"
+ * method.
+ * @param {zebra.ui.TextRender|zebra.ui.StringText} [render] a string render
+ * @class zebra.ui.grid.DefViews
  * @constructor
- * @uses zebra.ui.Composite
- * @extends {zebra.ui.Panel}
- * @param {zebra.ui.Panel} target a target UI component whose size and location
- * has to be controlled
  */
-pkg.ShaperPan = Class(ui.Panel, ui.Composite, [
+pkg.DefViews = Class([
     function $prototype() {
-       /**
-        * Indicates if controlled component can be moved
-        * @attribute isMoveEnabled
-        * @type {Boolean}
-        * @default true
-        */
-
-       /**
-        * Indicates if controlled component can be sized
-        * @attribute isResizeEnabled
-        * @type {Boolean}
-        * @default true
-        */
-
-        /**
-         * Minimal possible height or controlled component 
-         * @attribute minHeight
-         * @type {Integer}
-         * @default 12
-         */
-
-        /**
-         * Minimal possible width or controlled component 
-         * @attribute minWidth
-         * @type {Integer}
-         * @default 12
-         */
-        this.minHeight = this.minWidth = 12;
-        this.canHaveFocus = this.isResizeEnabled = this.isMoveEnabled = true;
-        this.state = null;
-
-        this.getCursorType = function (t, x ,y) {
-            return this.kids.length > 0 ? CURSORS[this.shaperBr.detectAt(t, x, y)] : null;
+        this[''] = function(render){
+            /**
+             * Default render that is used to paint grid content.
+             * @type {zebra.ui.StringRender}
+             * @attribute render
+             * @readOnly
+             * @protected
+             */
+            this.render = (render == null ? new ui.StringRender("") : render);
+            zebra.properties(this, this.$clazz);
         };
 
         /**
-         * Define key pressed events handler
-         * @param  {zebra.ui.KeyEvent} e a key event
-         * @method keyPressed
+         * Set the default view provider text render font
+         * @param {zebra.ui.Font} f a font
+         * @method setFont
          */
-        this.keyPressed = function(e) {
-            if (this.kids.length > 0){
-                var b  = (e.mask & KeyEvent.M_SHIFT) > 0, 
-                    c  = e.code,
-                    dx = (c == KeyEvent.LEFT ?  -1 : (c == KeyEvent.RIGHT ? 1 : 0)),
-                    dy = (c == KeyEvent.UP   ?  -1 : (c == KeyEvent.DOWN  ? 1 : 0)),
-                    w  = this.width  + dx, 
-                    h  = this.height + dy,
-                    x  = this.x + dx, 
-                    y  = this.y + dy;
-
-                if (b) {
-                    if (this.isResizeEnabled && w > this.shaperBr.gap * 2 && h > this.shaperBr.gap * 2) {
-                        this.setSize(w, h);
-                    }
-                }
-                else {
-                    if (this.isMoveEnabled) {
-                        var ww = this.width, hh = this.height, p = this.parent;
-                        if (x + ww/2 > 0 && y + hh/2 > 0 && x < p.width - ww/2 && y < p.height - hh/2) this.setLocation(x, y);
-                    }
-                }
-            }
+        this.setFont = function(f) {
+            this.render.setFont(f);
         };
 
         /**
-         * Define mouse drag started events handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragStarted
+         * Set the default view provider text render color
+         * @param {String} c a color
+         * @method setColor
          */
-        this.mouseDragStarted = function(e){
-            this.state = null;
-            if (this.isResizeEnabled || this.isMoveEnabled) {
-                var t = this.shaperBr.detectAt(this, e.x, e.y);
-                if ((this.isMoveEnabled   === false && t == L.CENTER)||
-                    (this.isResizeEnabled === false && t != L.CENTER)  )
-                {
-                    return;
-                }
-
-                this.state = { top    : ((t & L.TOP   ) > 0 ? 1 : 0),
-                               left   : ((t & L.LEFT  ) > 0 ? 1 : 0),
-                               right  : ((t & L.RIGHT ) > 0 ? 1 : 0),
-                               bottom : ((t & L.BOTTOM) > 0 ? 1 : 0) };
-
-                if (this.state != null) {
-                    this.px = e.absX;
-                    this.py = e.absY;
-                }
-            }
+        this.setColor = function(c) {
+            this.render.setColor(c);
         };
 
         /**
-         * Define mouse dragged events handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragged
+         * Get a renderer to draw the specified grid model value.
+         * @param  {zebra.ui.grid.Grid} target a target Grid component
+         * @param  {Integer} row  a grid cell row
+         * @param  {Integer} col  a grid cell column
+         * @param  {Object} obj   a model value for the given grid cell
+         * @return {zebra.ui.View}  an instance of zebra view to be used to
+         * paint the given cell model value
+         * @method  getView
          */
-        this.mouseDragged = function(e){
-            if (this.state != null) {
-                var dy = (e.absY - this.py), 
-                    dx = (e.absX - this.px), 
-                    s  = this.state,
-                    nw = this.width  - dx * s.left + dx * s.right,
-                    nh = this.height - dy * s.top  + dy * s.bottom;
-
-                if (nw >= this.minWidth && nh >= this.minHeight) {
-                    this.px = e.absX;
-                    this.py = e.absY;
-                    if ((s.top + s.right + s.bottom + s.left) === 0) {
-                        this.setLocation(this.x + dx, this.y + dy);
-                    }
-                    else {                    
-                        this.setSize(nw, nh);
-                        this.setLocation(this.x + dx * s.left, this.y + dy * s.top);
-                    }
-                }
-            }
-        };
-
-        this.setColor = function (b, color) {
-            this.colors[b?1:0] = color;
-            this.shaperBr.color = this.colors[this.hasFocus()? 1 : 0];
-            this.repaint();
-        };
-    },
-
-    function (t){
-        this.$super(new L.BorderLayout());
-        this.px = this.py = 0;
-        this.shaperBr = new pkg.ShaperBorder();
-        this.colors   = [ "lightGray", "blue" ];
-        this.shaperBr.color = this.colors[0];
-        this.setBorder(this.shaperBr);
-        if (t != null) this.add(t);
-    },
-
-    function insert(i, constr, d) {
-        if (this.kids.length > 0) {
-            this.removeAll();
-        }
-
-        var top = this.getTop(), left = this.getLeft();
-        if (d.width === 0 || d.height === 0) d.toPreferredSize();
-        this.setLocation(d.x - left, d.y - top);
-        this.setSize(d.width + left + this.getRight(), d.height + top + this.getBottom());
-        this.$super(i, L.CENTER, d);
-    },
-
-    function focused(){
-        this.$super();
-        this.shaperBr.color = this.colors[this.hasFocus()? 1 : 0];
-        this.repaint();
-    }
-]);
-
-pkg.FormTreeModel = Class(zebra.data.TreeModel, [
-    function $prototype() {
-        this.buildModel = function(comp, root){
-            var b = this.exclude && this.exclude(comp), item = b ? root : this.createItem(comp);
-            for(var i = 0; i < comp.kids.length; i++) {
-                var r = this.buildModel(comp.kids[i], item);
-                if (r) {
-                    r.parent = item;
-                    item.kids.push(r);
-                }
-            }
-            return b ? null : item;
-        };
-
-        this.itemByComponent = function (c, r){
-            if (r == null) r = this.root;
-            if (r.comp == c) return c;
-            for(var i = 0;i < r.kids.length; i++) {
-                var item = this.itemByComponent(c, r.kids[i]);
-                if (item != null) return item;
+        this.getView = function(target, row,col,obj){
+            if (obj != null){
+                if (obj && obj.paint) return obj;
+                this.render.setValue(obj.toString());
+                return this.render;
             }
             return null;
         };
 
-        this.createItem = function(comp){
-            var name = comp.$clazz.$name;
-            if (name == null) name = comp.toString();
-            var index = name.lastIndexOf('.'),
-                item = new zebra.data.Item(index > 0 ? name.substring(index + 1) : name);
-            item.comp = comp;
-            return item;
+        /**
+         * Get an horizontal alignment a content in the given grid cell
+         * has to be adjusted. The method is optional.
+         * @param  {zebra.ui.grid.Grid} target a target grid component
+         * @param  {Integer} row   a grid cell row
+         * @param  {Integer} col   a grid cell column
+         * @return {Integer}  a horizontal alignment (zebra.layout.LEFT, zebra.layout.CENTER, zebra.layout.RIGHT)
+         * @method  getXAlignment
+         */
+
+         /**
+          * Get a vertical alignment a content in the given grid cell
+          * has to be adjusted. The method is optional.
+          * @param  {zebra.ui.grid.Grid} target a target grid component
+          * @param  {Integer} row   a grid cell row
+          * @param  {Integer} col   a grid cell column
+          * @return {Integer}  a vertical alignment (zebra.layout.TOP, zebra.layout.CENTER, zebra.layout.BOTTOM)
+          * @method  getYAlignment
+          */
+
+         /**
+          * Get the given grid cell color
+          * @param  {zebra.ui.grid.Grid} target a target grid component
+          * @param  {Integer} row   a grid cell row
+          * @param  {Integer} col   a grid cell column
+          * @return {String}  a cell color to be applied to the given grid cell
+          * @method  getCellColor
+          */
+    }
+]);
+
+/**
+ * Simple grid cells editors provider implementation. By default the editors provider
+ * uses a text field component or check box component as a cell content editor. Check
+ * box component is used if a cell data type is boolean, otherwise text filed is applied
+ * as the cell editor.
+
+        // grid with tree columns and three rows
+        // first and last column will be editable with text field component
+        // second column will be editable with check box component
+        var grid = new zebra.ui.grid.Grid([
+            ["Text Cell", true, "Text cell"],
+            ["Text Cell", false, "Text cell"],
+            ["Text Cell", true, "Text cell"]
+        ]);
+
+        // make grid cell editable
+        grid.setEditorProvider(new zebra.ui.grid.DefEditors());
+
+
+ * It is possible to customize a grid column editor by specifying setting "editors[col]" property
+ * value. You can define an UI component that has to be applied as an editor for the given column
+ * Also you can disable editing by setting appropriate column editor class to null:
+
+        // grid with tree columns and three rows
+        // first and last column will be editable with text field component
+        // second column will be editable with check box component
+        var grid = new zebra.ui.grid.Grid([
+            ["Text Cell", true, "Text cell"],
+            ["Text Cell", false, "Text cell"],
+            ["Text Cell", true, "Text cell"]
+        ]);
+
+        // grid cell editors provider
+        var editorsProvider = new zebra.ui.grid.DefEditors();
+
+        // disable the first column editing
+        editorsProvider.editors[0] = null;
+
+        // make grid cell editable
+        grid.setEditorProvider(editorsProvider);
+
+ * @constructor
+ * @class zebra.ui.grid.DefEditors
+ */
+pkg.DefEditors = Class([
+    function $clazz() {
+        this.TextField = Class(ui.TextField, []);
+        this.Checkbox  = Class(ui.Checkbox,  []);
+        this.Combo     = Class(ui.Combo,     []);
+    },
+
+    function $prototype() {
+        this[''] = function() {
+            this.textEditor = new this.$clazz.TextField("", 150);
+            this.boolEditor = new this.$clazz.Checkbox(null);
+            this.selectorEditor = new this.$clazz.Combo();
+            this.editors    = {};
+        };
+
+        /**
+         * Fetch an edited value from the given UI editor component.
+         * @param  {zebra.ui.grid.Grid} grid a target grid component
+         * @param  {Integer} row a grid cell row that has been edited
+         * @param  {Integer} col a grid cell column that has been edited
+         * @param  {Object} data an original cell content
+         * @param  {zebra.ui.Panel} editor an editor that has been used to
+         * edit the given cell
+         * @return {Object} a value that can be applied as a new content of
+         * the edited cell content
+         * @method  fetchEditedValue
+         */
+        this.fetchEditedValue = function(grid,row,col,data,editor) {
+            return editor.getValue();
+        };
+
+        /**
+         * Get an editor UI component to be used for the given cell of the specified grid
+         * @param  {zebra.ui.grid.Grid} grid a grid whose cell is going to be edited
+         * @param  {Integer} row  a grid cell row
+         * @param  {Integer} col  a grid cell column
+         * @param  {Object}  v    a grid cell model data
+         * @return {zebra.ui.Panel} an editor UI component to be used to edit the given cell
+         * @method  getEditor
+         */
+        this.getEditor = function(grid, row, col, v) {
+            var editor = null;
+            if (this.editors[col] === null) return;
+
+            if (this.editors[col] != null) {
+                editor = this.editors[col];
+            }
+            else {
+                editor = zebra.isBoolean(v) ? this.boolEditor : this.textEditor;
+            }
+
+            editor.setValue(v);
+            editor.setPadding(0);
+            var ah = ~~((grid.getRowHeight(row) - editor.getPreferredSize().height)/2);
+            editor.setPadding(ah, grid.cellInsetsLeft, ah, grid.cellInsetsRight);
+            return editor;
+        };
+
+        /**
+         * Test if the specified input event has to trigger the given grid cell editing
+         * @param  {zebra.ui.grid.Grid} grid a grid
+         * @param  {Integer} row  a grid cell row
+         * @param  {Integer} col  a grid cell column
+         * @param  {zebra.ui.InputEvent} e  an event to be evaluated
+         * @return {Boolean} true if the given input event triggers the given cell editing
+         * @method shouldStart
+         */
+        this.shouldStart = function(grid,row,col,e){
+            return e.ID == ui.MouseEvent.CLICKED && e.clicks == 1;
+        };
+
+        /**
+         * Test if the specified input event has to canceling the given grid cell editing
+         * @param  {zebra.ui.grid.Grid} grid a grid
+         * @param  {Integer} row  a grid cell row
+         * @param  {Integer} col  a grid cell column
+         * @param  {zebra.ui.InputEvent} e  an event to be evaluated
+         * @return {Boolean} true if the given input event triggers the given cell editing
+         * cancellation
+         * @method shouldCancel
+         */
+        this.shouldCancel = function(grid,row,col,e){
+            return e.ID == KE.PRESSED && KE.ESCAPE == e.code;
+        };
+
+        /**
+         * Test if the specified input event has to trigger finishing the given grid cell editing
+         * @param  {zebra.ui.grid.Grid} grid [description]
+         * @param  {Integer} row  a grid cell row
+         * @param  {Integer} col  a grid cell column
+         * @param  {zebra.ui.InputEvent} e  an event to be evaluated
+         * @return {Boolean} true if the given input event triggers finishing the given cell editing
+         * @method shouldFinish
+         */
+        this.shouldFinish = function(grid,row,col,e){
+            return e.ID == KE.PRESSED && KE.ENTER  == e.code;
+        };
+    }
+]);
+
+pkg.CaptionListeners = new zebra.util.ListenersClass("captionResized");
+
+/**
+ * Grid caption base UI component class. This class has to be used
+ * as base to implement grid caption components
+ * @class  zebra.ui.grid.BaseCaption
+ * @extends {zebra.ui.Panel}
+ * @constructor
+ * @param {Array} [titles] a caption component titles
+ */
+
+/**
+ * Fire when a grid row selection state has been changed
+
+        caption.bind(function captionResized(caption, rowcol, phw) {
+            ...
+        });
+
+ * @event captionResized
+ * @param  {zebra.ui.grid.BaseCaption} caption a caption
+ * @param  {Integer} rowcol a row or column that has been resized
+ * @param  {Integer} pwh a a previous row or column size
+ */
+
+pkg.BaseCaption = Class(ui.Panel, [
+    function $prototype() {
+        /**
+         * Minimal possible grid cell size
+         * @type {Number}
+         * @default 10
+         * @attribute minSize
+         */
+        this.minSize = 10;
+
+        /**
+         * Size of the active area where cells size can be changed by mouse dragging event
+         * @attribute activeAreaSize
+         * @type {Number}
+         * @default 5
+         */
+        this.activeAreaSize = 5;
+
+        /**
+         * Caption line color
+         * @attribute lineColor
+         * @type {String}
+         * @default "gray"
+         */
+        this.lineColor = "gray";
+
+        /**
+         * Indicate if the grid cell size has to be adjusted according
+         * to the cell preferred size by mouse double click event.
+         * @attribute isAutoFit
+         * @default true
+         * @type {Boolean}
+         */
+
+        /**
+         * Indicate if the grid cells are resize-able.
+         * to the cell preferred size by mouse double click event.
+         * @attribute isResizable
+         * @default true
+         * @type {Boolean}
+         */
+        this.isAutoFit = this.isResizable = true;
+
+        this.getCursorType = function (target,x,y){
+            return this.metrics != null     &&
+                   this.selectedColRow >= 0 &&
+                   this.isResizable         &&
+                   this.metrics.isUsePsMetric === false ? ((this.orient == L.HORIZONTAL) ? Cursor.W_RESIZE
+                                                                                         : Cursor.S_RESIZE)
+                                                        : null;
+        };
+
+        /**
+         * Define mouse dragged events handler.
+         * @param  {zebra.ui.MouseEvent} e a mouse event
+         * @method mouseDragged
+         */
+        this.mouseDragged = function(e){
+            if (this.pxy != null) {
+                var b  = (this.orient == L.HORIZONTAL),
+                    rc = this.selectedColRow,
+                    ns = (b ? this.metrics.getColWidth(rc) + e.x
+                            : this.metrics.getRowHeight(rc) + e.y) - this.pxy;
+
+                this.captionResized(rc, ns);
+
+                if (ns > this.minSize) {
+                    this.pxy = b ? e.x : e.y;
+                }
+            }
+        };
+
+        /**
+         * Define mouse drag started events handler.
+         * @param  {zebra.ui.MouseEvent} e a mouse event
+         * @method mouseDragStarted
+         */
+        this.mouseDragStarted = function(e){
+            if (this.metrics != null &&
+                this.isResizable     &&
+                this.metrics.isUsePsMetric === false)
+            {
+                this.calcRowColAt(e.x, e.y);
+
+                if (this.selectedColRow >= 0) {
+                    this.pxy = (this.orient == L.HORIZONTAL) ? e.x
+                                                             : e.y;
+                }
+            }
+        };
+
+        /**
+         * Define mouse drag ended events handler.
+         * @param  {zebra.ui.MouseEvent} e a mouse event
+         * @method mouseDragEnded
+         */
+        this.mouseDragEnded = function (e){
+            if (this.pxy != null) {
+                this.pxy = null;
+            }
+
+            if (this.metrics != null) {
+                this.calcRowColAt(e.x, e.y);
+            }
+        };
+
+        /**
+         * Define mouse moved events handler.
+         * @param  {zebra.ui.MouseEvent} e a mouse event
+         * @method mouseMoved
+         */
+        this.mouseMoved = function(e) {
+            if (this.metrics != null) {
+                this.calcRowColAt(e.x, e.y);
+            }
+        };
+
+        /**
+         * Define mouse clicked events handler.
+         * @param  {zebra.ui.MouseEvent} e a mouse event
+         * @method mouseClicked
+         */
+        this.mouseClicked = function (e){
+            if (this.pxy     == null     &&
+                this.metrics != null     &&
+                e.clicks > 1             &&
+                this.selectedColRow >= 0 &&
+                this.isAutoFit === true     )
+            {
+                var size = this.getCaptionPS(this.selectedColRow);
+                if (this.orient == L.HORIZONTAL) {
+                    this.metrics.setColWidth (this.selectedColRow, size);
+                }
+                else {
+                    this.metrics.setRowHeight(this.selectedColRow, size);
+                }
+                this.captionResized(this.selectedColRow, size);
+            }
+        };
+
+        /**
+         * Get the given row or column caption preferred size
+         * @param  {Integer} rowcol a row or column of a caption
+         * @return {Integer}  a size of row or column caption
+         * @method getCaptionPS
+         */
+        this.getCaptionPS = function(rowcol) {
+            return (this.orient == L.HORIZONTAL) ? this.metrics.getColPSWidth(this.selectedColRow)
+                                                 : this.metrics.getRowPSHeight(this.selectedColRow);
+        };
+
+        this.captionResized = function(rowcol, ns) {
+            if (ns > this.minSize) {
+                if (this.orient == L.HORIZONTAL) {
+                    var pw = this.metrics.getColWidth(rowcol);
+                    this.metrics.setColWidth(rowcol, ns);
+                    this._.captionResized(this, rowcol, pw);
+                }
+                else  {
+                    var ph = this.metrics.getRowHeight(rowcol);
+                    this.metrics.setRowHeight(rowcol, ns);
+                    this._.captionResized(this, rowcol, ph);
+                }
+            }
+        };
+
+        this.calcRowColAt = function(x, y){
+            var $this = this;
+            this.selectedColRow = this.getCaptionAt(x, y, function(m, xy, xxyy, wh, i) {
+                xxyy += (wh + m.lineSize);
+                return (xy < xxyy + $this.activeAreaSize &&
+                        xy > xxyy - $this.activeAreaSize   );
+
+            });
+        };
+
+        /**
+         * Compute a column (for horizontal caption component) or row (for
+         * vertically aligned caption component) at the given location
+         * @param  {Integer} x a x coordinate
+         * @param  {Integer} y an y coordinate
+         * @param  {Function} [f] an optional match function. The method can be passed
+         * if you need to detect a particular area of row or column. The method gets
+         * a grid metrics as the first argument, a x or y location to be detected,
+         * a row or column y or x coordinate, a row or column height or width and
+         * row or column index. The method has to return true if the given location
+         * is in.
+         * @return {Integer}  a row or column
+         * @method calcRowColAt
+         */
+        this.getCaptionAt = function (x,y,f){
+            if (this.metrics != null &&
+                x >= 0               &&
+                y >= 0               &&
+                x < this.width       &&
+                y < this.height        )
+            {
+                var m     = this.metrics,
+                    cv    = m.getCellsVisibility(),
+                    isHor = (this.orient == L.HORIZONTAL);
+
+                if ((isHor && cv.fc != null) || (isHor === false && cv.fr != null)) {
+                    var gap  = m.lineSize,
+                        xy   = isHor ? x : y,
+                        xxyy = isHor ? cv.fc[1] - this.x - gap + m.getXOrigin()
+                                     : cv.fr[1] - this.y - gap + m.getYOrigin();
+
+                    for(var i = (isHor ? cv.fc[0] : cv.fr[0]);i <= (isHor ? cv.lc[0] : cv.lr[0]); i ++ ){
+                        var wh = isHor ? m.getColWidth(i) : m.getRowHeight(i);
+                        if ((f != null && f(m, xy, xxyy, wh, i)) || (f == null && xy > xxyy && xy < xxyy + wh)) {
+                            return i;
+                        }
+                        xxyy += wh + gap;
+                    }
+                }
+            }
+            return -1;
+        };
+
+        this.paintOnTop = function(g) {
+            if (this.lineColor != null && this.metrics != null) {
+                var v = this.metrics.getCellsVisibility();
+                if (v != null) {
+                    var m       = this.metrics,
+                        b       = this.orient == L.HORIZONTAL,
+                        startRC = b ? v.fc[0] : v.fr[0],
+                        endRC   = b ? v.lc[0] : v.lr[0],
+                        xy      = b ? v.fc[1] - this.x - m.lineSize + m.getXOrigin()
+                                    : v.fr[1] - this.y - m.lineSize + m.getYOrigin();
+
+                    g.setColor(this.lineColor);
+                    for(var i = startRC; i <= endRC; i++) {
+                        if (i !== 0) {
+                            if (b) g.drawLine(xy, 0, xy, this.height, m.lineSize);
+                            else   g.drawLine(0, xy, this.width, xy, m.lineSize);
+                        }
+                        xy += (b ? m.getColWidth(i): m.getRowHeight(i)) + m.lineSize;
+                    }
+                }
+            }
+        };
+
+        /**
+         * Implement the method to be aware when number of rows or columns in
+         * a grid model has been updated
+         * @param  {zebra.ui.grid.Grid} target a target grid
+         * @param  {Integer} prevRows a previous number of rows
+         * @param  {Integer} prevCols a previous number of columns
+         * @method matrixResized
+         */
+
+        /**
+         * Implement the method to be aware when a grid model data has been
+         * re-ordered.
+         * @param  {zebra.ui.grid.Grid} target a target grid
+         * @param  {Object} sortInfo an order information
+         * @method matrixSorted
+         */
+    },
+
+    function(titles) {
+        this._ = new pkg.CaptionListeners();
+        this.orient = this.metrics = this.pxy = null;
+        this.selectedColRow = -1;
+        this.$super();
+        if (titles != null) {
+            for(var i=0; i < titles.length; i++) {
+                this.putTitle(i, titles[i]);
+            }
+        }
+    },
+
+    function setParent(p) {
+        this.$super(p);
+
+        this.metrics = this.orient = null;
+        if (p == null || zebra.instanceOf(p, pkg.Metrics)) {
+            this.metrics = p;
+            if (this.constraints != null) {
+                this.orient = (this.constraints == L.TOP    ||
+                               this.constraints == L.BOTTOM   ) ? L.HORIZONTAL
+                                                                : L.VERTICAL;
+            }
+        }
+    }
+]);
+
+/**
+ * Grid caption class that implements rendered caption.
+ * Rendered means all caption titles, border are painted
+ * as a number of views.
+ * @param  {Array} [titles] a caption titles. Title can be a string or
+ * a zebra.ui.View class instance
+ * @param  {zebra.ui.StringRender|zebra.ui.TextRender} [render] a text render to be used
+ * to paint grid titles
+ * @constructor
+ * @class zebra.ui.grid.GridCaption
+ * @extends zebra.ui.grid.BaseCaption
+ */
+pkg.GridCaption = Class(pkg.BaseCaption, [
+    function $prototype() {
+
+        this.defYAlignment = this.defXAlignment = L.CENTER;
+
+        /**
+         * Get a grid caption column or row title view
+         * @param  {Integer} i a row (if the caption is vertical) or
+         * column (if the caption is horizontal) index
+         * @return {zebra.ui.View} a view to be used as the given
+         * row or column title view
+         * @method getTitleView
+         */
+        this.getTitleView = function(i){
+            var value = this.getTitle(i);
+            if (value == null || value.paint != null) return value;
+            this.render.setValue(value.toString());
+            return this.render;
+        };
+
+        this.calcPreferredSize = function (l) {
+            return { width:this.psW, height:this.psH };
+        };
+
+        this.recalc = function(){
+            this.psW = this.psH = 0;
+            if (this.metrics != null){
+                var m     = this.metrics,
+                    isHor = (this.orient == L.HORIZONTAL),
+                    size  = isHor ? m.getGridCols() : m.getGridRows();
+
+                for(var i = 0;i < size; i++){
+                    var v = this.getTitleView(i);
+                    if (v != null) {
+                        var ps = v.getPreferredSize();
+                        if (isHor) {
+                            if (ps.height > this.psH) this.psH = ps.height;
+                            this.psW += ps.width;
+                        }
+                        else {
+                            if (ps.width > this.psW) this.psW = ps.width;
+                            this.psH += ps.height;
+                        }
+                    }
+                }
+
+                if (this.psH === 0) this.psH = pkg.Grid.DEF_ROWHEIGHT;
+                if (this.psW === 0) this.psW = pkg.Grid.DEF_COLWIDTH;
+            }
+        };
+
+        this.getTitle = function(rowcol) {
+            return this.titles[rowcol] == null ? null
+                                               : this.titles[rowcol].title;
+        };
+
+        /**
+         * Put the given title for the given caption cell.
+         * @param  {Integer} rowcol a grid caption cell index
+         * @param  {String|zebra.ui.View} title a title of the given grid caption cell.
+         * Can be a string or zebra.ui.View class instance
+         * @method putTitle
+         */
+        this.putTitle = function(rowcol, title){
+            var prev = this.titles[rowcol] != null ? this.titles[rowcol] : {};
+            if (prev.title != title) {
+                prev.title = title;
+                this.titles[rowcol] = prev;
+                this.vrp;
+            }
+        };
+
+        this.setTitleAlignments = function(rowcol, xa, ya){
+            xa = L.$constraints(xa);
+            ya = L.$constraints(ya);
+            var t = this.titles[rowcol];
+            if (t == null || t.xa != xa || t.ya != ya) {
+                if (t == null) t = {};
+                t.xa = xa;
+                t.ya = ya;
+                this.titles[rowcol] = t;
+                this.repaint();
+            }
+        };
+
+        this.setTitleBackground = function(i, v) {
+            v = ui.$view(v);
+            var t = this.titles[i];
+            if (t == null) t = {};
+            t.bg = v;
+            this.titles[i] = t;
+            this.repaint();
         };
     },
 
-    function (target){
-        this.$super(this.buildModel(target, null));
+    function getCaptionPS(rowcol) {
+        var size = this.$super(rowcol),
+            v    = this.getTitleView(this.selectedColRow);
+
+        if (v != null) {
+            size = Math.max(size, (this.orient == L.HORIZONTAL) ? v.getPreferredSize().width
+                                                                : v.getPreferredSize().height);
+        }
+
+        return size;
+    },
+
+    function paintOnTop(g) {
+        if (this.metrics != null){
+            var cv = this.metrics.getCellsVisibility();
+
+            if ((cv.fc != null && cv.lc != null && this.orient == L.HORIZONTAL)||
+                (cv.fr != null && cv.lr != null && this.orient == L.VERTICAL  )   )
+            {
+                var m      = this.metrics,
+                    isHor  = (this.orient == L.HORIZONTAL),
+                    gap    = m.lineSize,
+                    top    = this.getTop(),
+                    left   = this.getLeft(),
+                    bottom = this.getBottom(),
+                    right  = this.getRight();
+
+                var x = isHor ? cv.fc[1] - this.x + m.getXOrigin() - gap
+                              : left,
+                    y = isHor ? top
+                              : cv.fr[1] - this.y + m.getYOrigin() - gap,
+                    size = isHor ? m.getGridCols()
+                                 : m.getGridRows();
+
+                //           top
+                //           >|<
+                //  +=========|===========================
+                //  ||        |
+                //  ||   +====|============+     +========
+                //  ||   ||   |            ||   ||
+                //  ||--------> left       ||   ||
+                //  ||   ||<-------------->||   ||
+                //  ||   ||       ww       ||   ||
+                //  ||   ||                ||   ||
+                // >-------< lineSize      ||   ||
+                //  ||   ||                ||   ||
+                //  x   first
+                //      visible
+
+                for(var i = (isHor ? cv.fc[0] : cv.fr[0]); i <= (isHor ? cv.lc[0] : cv.lr[0]); i++)
+                {
+                    var ww = isHor ? m.getColWidth(i)
+                                   : this.width - left - right,
+                        hh = isHor ? this.height - top - bottom
+                                   : m.getRowHeight(i),
+                        v = this.getTitleView(i);
+
+                    if (v != null) {
+                        var t  = this.titles[i],
+                            xa = t != null && t.xa != null ? t.xa : this.defXAlignment,
+                            ya = t != null && t.ya != null ? t.ya : this.defYAlignment,
+                            bg = t == null ? null : t.bg,
+                            ps = v.getPreferredSize(),
+                            vx = xa == L.CENTER ? ~~((ww - ps.width)/2)
+                                                : (xa == L.RIGHT ? ww - ps.width - ((i==size-1) ? right : 0)
+                                                                 : (i === 0 ? left: 0)),
+                            vy = ya == L.CENTER ? ~~((hh - ps.height)/2)
+                                                : (ya == L.BOTTOM ? hh - ps.height - ((i==size-1) ? bottom : 0)
+                                                                  :  (i === 0 ? top: 0));
+                        if (bg != null) {
+                            if (isHor) bg.paint(g, x, 0, ww + gap , this.height, this);
+                            else       bg.paint(g, 0, y, this.width, hh + gap, this);
+                        }
+
+                        g.save();
+                        g.clipRect(x + gap, y + gap, ww, hh);
+                        v.paint(g, x + vx + gap, y + vy + gap, ps.width, ps.height, this);
+                        g.restore();
+                    }
+
+                    if (isHor) x += ww + gap;
+                    else       y += hh + gap;
+                }
+            }
+
+            this.$super(g);
+        }
+    },
+
+    function() {
+        this.$this(null);
+    },
+
+    function(titles) {
+        this.$this(titles, new ui.StringRender(""));
+    },
+
+    function(titles, render) {
+        this.psW = this.psH = 0;
+        this.titles = [];
+        this.render = render;
+        this.render.setFont(pkg.GridCaption.font);
+        this.render.setColor(pkg.GridCaption.fontColor);
+        this.$super(titles);
+    }
+]);
+
+/**
+ * Grid caption class that implements component based caption.
+ * Component based caption uses other UI component as the
+ * caption titles.
+ * @param  {Array} a caption titles. Title can be a string or
+ * a zebra.ui.Panel class instance
+ * @constructor
+ * @class zebra.ui.grid.CompGridCaption
+ * @extends zebra.ui.grid.BaseCaption
+ */
+pkg.CompGridCaption = Class(pkg.BaseCaption, [
+    function $clazz() {
+        this.Layout = Class(L.Layout, [
+            function $prototype() {
+                this.doLayout = function (target) {
+                    var m    = target.metrics,
+                        b    = target.orient == L.HORIZONTAL,
+                        top  = target.getTop(),
+                        left = target.getLeft(),
+                        wh   = (b ? target.height - top  - target.getBottom()
+                                  : target.width  - left - target.getRight());
+                        xy   = (b ? left + m.getXOrigin()
+                                  : top  + m.getYOrigin());
+
+                    for(var i=0; i < target.kids.length; i++) {
+                        var kid = target.kids[i],
+                            cwh = (b ? m.getColWidth(i) : m.getRowHeight(i));// + m.lineSize;
+
+                        if (i === 0) {
+                            cwh -= (b ? (left - m.lineSize) : top);
+                        }
+
+                        if (kid.isVisible === true) {
+                            if (b) {
+                                kid.setLocation(xy, top);
+                                kid.setSize(cwh, wh);
+                            }
+                            else {
+                                kid.setLocation(left, xy);
+                                kid.setSize(wh, cwh);
+                            }
+                        }
+
+                        xy += ( cwh + m.lineSize );
+                    }
+                };
+
+                this.calcPreferredSize = function (target) {
+                    return L.getMaxPreferredSize(target);
+                };
+            }
+        ]);
+
+        this.Link = Class(ui.Link, []);
+
+        this.StatusPan = Class(ui.StatePan, []);
+
+        /**
+         * Title panel that is designed to be used as
+         * CompGridCaption UI component title element.
+         * The panel keeps a grid column or row title,
+         * a column or row sort indicator. Using the
+         * component you can have sortable grid columns.
+         * @constructor
+         * @param {String} a grid column or row title
+         * @class zebra.ui.grid.CompGridCaption.TitlePan
+         */
+        this.TitlePan = Class(ui.Panel, [
+            function(title) {
+                this.$super(new L.FlowLayout(L.CENTER, L.CENTER, L.HORIZONTAL, 8));
+
+                this.sortState = 0;
+
+                /**
+                 * Indicates if the title panel has to initiate a column sorting
+                 * @default false
+                 * @attribute isSortable
+                 * @readOnly
+                 * @type {Boolean}
+                 */
+                this.isSortable = false;
+
+                /**
+                 * Image panel to keep grtid caption title
+                 * @attribute iconPan
+                 * @type {zebra.ui.ImagePan}
+                 * @readOnly
+                 */
+                this.iconPan = new ui.ImagePan(null);
+
+                /**
+                 * Title link
+                 * @attribute link
+                 * @type {zebra.ui.Link}
+                 * @readOnly
+                 */
+                this.link = new pkg.CompGridCaption.Link(title);
+
+                this.statusPan = new pkg.CompGridCaption.StatusPan();
+                this.statusPan.setVisible(this.isSortable);
+
+                this.add(this.iconPan);
+                this.add(this.link);
+                this.add(this.statusPan);
+            },
+
+            function getGridCaption() {
+                var c = this.parent;
+                while(c != null && zebra.instanceOf(c, pkg.BaseCaption) === false) {
+                    c = c.parent;
+                }
+                return c;
+            },
+
+            function matrixSorted(target, info) {
+                if (this.isSortable) {
+                    var col = this.parent.indexOf(this);
+                    if (info.col == col) {
+                        this.sortState = info.name == 'descent' ? 1 : -1;
+                        this.statusPan.setState(info.name);
+                    }
+                    else {
+                        this.sortState = 0;
+                        this.statusPan.setState("*");
+                    }
+                }
+            },
+
+            /**
+             * Set the caption icon
+             * @param {String|Image} path a path to an image or image object
+             * @method setIcon
+             */
+            function setIcon(path) {
+                this.iconPan.setImage(path);
+            },
+
+            function matrixResized(target,prevRows,prevCols){
+                if (this.isSortable) {
+                    this.sortState = 0;
+                    this.statusPan.setState("*");
+                }
+            },
+
+            function fired(target) {
+                if (this.isSortable) {
+                    var f = this.sortState == 1 ? zebra.data.ascent
+                                                : zebra.data.descent,
+                        model = this.getGridCaption().metrics.model,
+                        col   = this.parent.indexOf(this);
+
+                    model.sortCol(col, f);
+                }
+            },
+
+            function kidRemoved(index, kid) {
+                // TODO: not very prefect check
+                if (kid._ != null && kid._.fired != null) {
+                    kid.unbind(this);
+                }
+                this.$super(index, kid);
+            },
+
+            function kidAdded(index, constr, kid) {
+                // TODO: not very prefect check
+                if (kid._ != null && kid._.fired != null) {
+                    kid.bind(this);
+                }
+                this.$super(index, constr, kid);
+            }
+        ]);
+    },
+
+    /**
+     * @for zebra.ui.grid.CompGridCaption
+     */
+    function $prototype() {
+        this.catchInput = function(t) {
+            // TODO: not very prefect check
+            return t._ == null || t._.fired == null;
+        };
+
+        this.scrolled = function() {
+            this.vrp();
+        };
+
+        /**
+         * Put the given title component for the given caption cell.
+         * @param  {Integer} rowcol a grid caption cell index
+         * @param  {String|zebra.ui.Panel} title a title of the given grid caption cell.
+         * Can be a string or zebra.ui.Panel class instance
+         * @method putTitle
+         */
+        this.putTitle = function(rowcol, t) {
+            for(var i = this.kids.length-1; i < rowcol; i++) {
+                this.add(t);
+            }
+
+            if (rowcol < this.kids.length) {
+                this.removeAt(rowcol);
+            }
+
+            this.insert(rowcol, null, t);
+        };
+
+        /**
+         * Set the given column sortable state
+         * @param {Integer} col a column
+         * @param {Boolean} b true if the column has to be sortable
+         * @method setSortable
+         */
+        this.setSortable = function(col, b) {
+            var c = this.kids[col];
+            if (c.isSortable != b) {
+                c.isSortable = b;
+                c.statusPan.setVisible(b);
+            }
+        };
+
+        this.matrixSorted = function(target, info) {
+            for(var i=0; i < this.kids.length; i++) {
+                if (this.kids[i].matrixSorted) {
+                    this.kids[i].matrixSorted(target, info);
+                }
+            }
+        };
+
+        this.matrixResized = function(target,prevRows,prevCols){
+            for(var i=0; i < this.kids.length; i++) {
+                if (this.kids[i].matrixResized) {
+                    this.kids[i].matrixResized(target,prevRows,prevCols);
+                }
+            }
+        };
+    },
+
+    function() {
+        this.$this(null);
+    },
+
+    function(titles) {
+        this.$super(titles);
+        this.setLayout(new this.$clazz.Layout());
+    },
+
+    function captionResized(rowcol, ns) {
+        this.$super(rowcol, ns);
+        this.vrp();
+    },
+
+    function setParent(p) {
+        if (this.parent != null && this.parent.scrollManager != null) {
+            this.parent.scrollManager.unbind(this);
+        }
+
+        if (p != null && p.scrollManager != null) {
+            p.scrollManager.bind(this);
+        }
+
+        this.$super(p);
+    },
+
+    function insert(i,constr, c) {
+        if (zebra.isString(c)) {
+            c = new this.$clazz.TitlePan(c);
+        }
+        this.$super(i,constr, c);
+    }
+]);
+
+
+/**
+ * Grid UI component class. The grid component visualizes "zebra.data.Matrix" data model.
+ * Grid cell visualization can be customized by defining and setting an own view provider.
+ * Grid component supports cell editing. Every existent UI component can be configured
+ * as a cell editor by defining an own editor provider.
+ *
+
+        // create a grid that contains three rows and tree columns
+        var grid  = new zebra.ui.grid.Grid([
+            [ "Cell 1.1", "Cell 1.2", "Cell 1.3"],
+            [ "Cell 2.1", "Cell 2.2", "Cell 2.3"],
+            [ "Cell 3.1", "Cell 3.2", "Cell 3.3"]
+        ]);
+
+        // add the top caption
+        grid.add(zebra.layout.TOP, new zebra.ui.grid.GridCaption([
+            "Caption title 1", "Caption title 2", "Caption title 3"
+        ]));
+
+        // set rows size
+        grid.setRowsHeight(45);
+
+ *
+ * Grid can have top and left captions.
+ * @class  zebra.ui.grid.Grid
+ * @constructor
+ * @param {zebra.data.Matrix|Array} [model] a matrix model to be visualized with the grid
+ * component. It can be an instance of zebra.data.Matrix class or an array that contains
+ * embedded arrays. Every embedded array is a grid row.
+ * @param {Integer} [rows]  a number of rows
+ * @param {Integer} [columns] a number of columns
+ * @extends {zebra.ui.Panel}
+ * @uses zebra.ui.grid.Metrics
+ */
+
+/**
+ * Fire when a grid row selection state has been changed
+
+        grid.bind(function(grid, row, count, status) {
+            ...
+        });
+
+ * @event rowSelected
+ * @param  {zebra.ui.grid.Grid} grid a grid that triggers the event
+ * @param  {Integer} row a first row whose selection state has been updated. The row is
+ * -1 if all selected rows have been unselected
+ * @param  {Integer} count a number of rows whose selection state has been updated
+ * @param {Boolean} status a status. true means rows have been selected
+ */
+pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
+        function $clazz() {
+            this.DEF_COLWIDTH  = 80;
+            this.DEF_ROWHEIGHT = 25;
+            this.CornerPan = Class(ui.Panel, []);
+        },
+
+        function $prototype() {
+            /**
+             * Grid line size
+             * @attribute lineSize
+             * @default 1
+             * @type {Integer}
+             */
+
+            /**
+             * Grid cell top padding
+             * @attribute cellInsetsTop
+             * @default 1
+             * @type {Integer}
+             * @readOnly
+             */
+
+            /**
+             * Grid cell left padding
+             * @attribute cellInsetsLeft
+             * @default 2
+             * @type {Integer}
+             * @readOnly
+             */
+
+            /**
+             * Grid cell bottom padding
+             * @attribute cellInsetsBottom
+             * @default 1
+             * @type {Integer}
+             * @readOnly
+             */
+
+            /**
+             * Grid cell right padding
+             * @attribute cellInsetsRight
+             * @default 2
+             * @type {Integer}
+             * @readOnly
+             */
+            this.lineSize = this.cellInsetsTop = this.cellInsetsBottom = 1;
+            this.cellInsetsLeft = this.cellInsetsRight = 2;
+
+            /**
+             * Default cell content horizontal alignment
+             * @type {Integer}
+             * @attribute defXAlignment
+             * @default zebra.layout.LEFT
+             */
+            this.defXAlignment = L.LEFT;
+
+            /**
+             * Default cell content vertical alignment
+             * @type {Integer}
+             * @attribute defYAlignment
+             * @default zebra.layout.CENTER
+             */
+            this.defYAlignment = L.CENTER;
+
+            /**
+             * Indicate if vertical lines have to be rendered
+             * @attribute drawVerLines
+             * @type {Boolean}
+             * @readOnly
+             * @default true
+             */
+
+            /**
+             * Indicate if horizontal lines have to be rendered
+             * @attribute drawHorLines
+             * @type {Boolean}
+             * @readOnly
+             * @default true
+             */
+            this.drawVerLines = this.drawHorLines = true;
+
+            /**
+             * Line color
+             * @attribute lineColor
+             * @type {String}
+             * @default gray
+             * @readOnly
+             */
+            this.lineColor = "gray";
+
+            /**
+             * Indicate if size of grid cells have to be calculated
+             * automatically basing on its preferred heights and widths
+             * @attribute isUsePsMetric
+             * @type {Boolean}
+             * @default false
+             * @readOnly
+             */
+            this.isUsePsMetric = false;
+
+            this.$topY = function() {
+                // grid without top caption renders line at the top, so we have to take in account
+                // the place for the line
+                return this.getTop() +
+                      (this.topCaption == null || this.topCaption.isVisible == false ? this.lineSize
+                                                                                     : this.getTopCaptionHeight());
+            };
+
+            this.$leftX = function() {
+                // grid without left caption renders line at the left, so we have to take in account
+                // the place for the line
+                return this.getLeft() +
+                      (this.leftCaption == null || this.leftCaption.isVisible == false ? this.lineSize
+                                                                                       : this.getLeftCaptionWidth());
+            };
+
+            this.colVisibility = function(col,x,d,b){
+                var cols = this.getGridCols();
+                if (cols === 0) return null;
+
+                var left = this.getLeft(),
+                    dx   = this.scrollManager.getSX(),
+                    xx1  = Math.min(this.visibleArea.x + this.visibleArea.width,
+                                    this.width - this.getRight()),
+                    xx2  = Math.max(left, this.visibleArea.x +
+                                    this.getLeftCaptionWidth());
+
+                for(; col < cols && col >= 0; col += d) {
+                    if (x + dx < xx1 && (x + this.colWidths[col] + dx) > xx2){
+                        if (b) return [col, x];
+                    }
+                    else {
+                        if (b === false) return this.colVisibility(col, x, (d > 0 ?  -1 : 1), true);
+                    }
+                    if (d < 0) {
+                        if (col > 0) x -= (this.colWidths[col - 1] + this.lineSize);
+                    }
+                    else {
+                        if (col < cols - 1) x += (this.colWidths[col] + this.lineSize);
+                    }
+                }
+                return b ? null : ((d > 0) ? [col -1, x]
+                                           : [0, this.$leftX() ]);
+            };
+
+            this.rowVisibility = function(row,y,d,b) {
+                var rows = this.getGridRows();
+                if (rows === 0) return null;
+
+                var top = this.getTop(),
+                    dy  = this.scrollManager.getSY(),
+                    yy1 = Math.min(this.visibleArea.y + this.visibleArea.height,
+                                   this.height - this.getBottom()),
+                    yy2 = Math.max(this.visibleArea.y,
+                                   top + this.getTopCaptionHeight());
+
+                for(; row < rows && row >= 0; row += d){
+                    if (y + dy < yy1 && (y + this.rowHeights[row] + dy) > yy2){
+                        if (b) return [row, y];
+                    }
+                    else {
+                        if (b === false) return this.rowVisibility(row, y, (d > 0 ?  -1 : 1), true);
+                    }
+                    if (d < 0){
+                        if (row > 0) y -= (this.rowHeights[row - 1] + this.lineSize);
+                    }
+                    else {
+                        if (row < rows - 1) y += (this.rowHeights[row] + this.lineSize);
+                    }
+                }
+                return b ? null : ((d > 0) ? [row - 1, y]
+                                           : [0, this.$topY()]);
+            };
+
+            this.vVisibility = function(){
+                var va = ui.$cvp(this, {});
+                if (va == null) {
+                    this.visibleArea = null;
+                    this.visibility.fr = null; // say no visible cells are available
+                    return;
+                }
+                else {
+                    // visible area has not been calculated or
+                    // visible area has been changed
+                    if (this.visibleArea == null            ||
+                        va.x != this.visibleArea.x          ||
+                        va.y != this.visibleArea.y          ||
+                        va.width  != this.visibleArea.width ||
+                        va.height != this.visibleArea.height  )
+                    {
+                        this.iColVisibility(0);
+                        this.iRowVisibility(0);
+                        this.visibleArea = va;
+                    }
+                }
+
+                var v = this.visibility,
+                    b = v.hasVisibleCells();
+
+                if (this.colOffset != 100) {
+                    if (this.colOffset > 0 && b){
+                        v.lc = this.colVisibility(v.lc[0], v.lc[1],  -1, true);
+                        v.fc = this.colVisibility(v.lc[0], v.lc[1],  -1, false);
+                    }
+                    else {
+                        if (this.colOffset < 0 && b) {
+                            v.fc = this.colVisibility(v.fc[0], v.fc[1], 1, true);
+                            v.lc = this.colVisibility(v.fc[0], v.fc[1], 1, false);
+                        }
+                        else {
+                            v.fc = this.colVisibility(0, this.$leftX(), 1, true);
+                            v.lc = (v.fc != null) ? this.colVisibility(v.fc[0], v.fc[1], 1, false)
+                                                  : null;
+                        }
+                    }
+                    this.colOffset = 100;
+                }
+
+                if (this.rowOffset != 100) {
+                    if (this.rowOffset > 0 && b) {
+                        v.lr = this.rowVisibility(v.lr[0], v.lr[1],  -1, true);
+                        v.fr = this.rowVisibility(v.lr[0], v.lr[1],  -1, false);
+                    }
+                    else {
+                        if(this.rowOffset < 0 && b){
+                            v.fr = this.rowVisibility(v.fr[0], v.fr[1], 1, true);
+                            v.lr = (v.fr != null) ? this.rowVisibility(v.fr[0], v.fr[1], 1, false) : null;
+                        }
+                        else {
+                            v.fr = this.rowVisibility(0, this.$topY(), 1, true);
+                            v.lr = (v.fr != null) ? this.rowVisibility(v.fr[0], v.fr[1], 1, false) : null;
+                        }
+                    }
+                    this.rowOffset = 100;
+                }
+            };
+
+            this.makeVisible = function(row, col) {
+                var top  = this.getTop()  + this.getTopCaptionHeight(),
+                    left = this.getLeft() + this.getLeftCaptionWidth(),
+                    o    = ui.calcOrigin(this.getColX(col) ,
+                                         this.getRowY(row) ,
+
+                                         // width depends on marker mode: cell or row
+                                         this.getLineSize(row) > 1 ? this.colWidths[col] + this.lineSize
+                                                                 : this.psWidth_,
+                                         this.rowHeights[row] + this.lineSize,
+                                         this.scrollManager.getSX(),
+                                         this.scrollManager.getSY(),
+                                         this, top, left,
+                                         this.getBottom(),
+                                         this.getRight());
+
+                this.scrollManager.scrollTo(o[0], o[1]);
+            };
+
+            this.$se = function(row, col, e) {
+                if (row >= 0) {
+                    this.stopEditing(true);
+
+                    if (this.editors != null &&
+                        this.editors.shouldStart(this, row, col, e))
+                    {
+                        return this.startEditing(row, col);
+                    }
+                }
+                return false;
+            };
+
+            this.getXOrigin = function() {
+                return this.scrollManager.getSX();
+            };
+
+            this.getYOrigin = function () {
+                return this.scrollManager.getSY();
+            };
+
+            /**
+             * Get a preferred width the given column wants to have
+             * @param  {Integer} col a column
+             * @return {Integer} a preferred width of the given column
+             * @method getColPSWidth
+             */
+            this.getColPSWidth = function(col){
+                return this.getPSSize(col, false);
+            };
+
+            /**
+             * Get a preferred height the given row wants to have
+             * @param  {Integer} col a row
+             * @return {Integer} a preferred height of the given row
+             * @method getRowPSHeight
+             */
+            this.getRowPSHeight = function(row) {
+                return this.getPSSize(row, true);
+            };
+
+            this.recalc = function(){
+                if (this.isUsePsMetric) {
+                    this.rPsMetric();
+                }
+                else {
+                    this.rCustomMetric();
+                }
+
+                var cols = this.getGridCols(),
+                    rows = this.getGridRows();
+
+                this.psWidth_  = this.lineSize * (cols + ((this.leftCaption == null || this.leftCaption.isVisible == false) ? 1 : 0));
+                this.psHeight_ = this.lineSize * (rows + ((this.topCaption == null || this.topCaption.isVisible == false) ? 1 : 0));
+
+
+                for(var i = 0;i < cols; i++) this.psWidth_  += this.colWidths[i];
+                for(var i = 0;i < rows; i++) this.psHeight_ += this.rowHeights[i];
+            };
+
+            /**
+             * Get number of rows in the given grid
+             * @return {Integer} a number of rows
+             * @method getGridRows
+             */
+            this.getGridRows = function() {
+                return this.model != null ? this.model.rows : 0;
+            };
+
+            /**
+             * Get number of columns in the given grid
+             * @return {Integer} a number of columns
+             * @method getGridColumns
+             */
+            this.getGridCols = function(){
+                return this.model != null ? this.model.cols : 0;
+            };
+
+            /**
+             * Get the  given grid row height
+             * @param  {Integer} row a grid row
+             * @return {Integer} a height of the given row
+             * @method getRowHeight
+             */
+            this.getRowHeight = function(row){
+                this.validateMetric();
+                return this.rowHeights[row];
+            };
+
+            /**
+             * Get the given grid column width
+             * @param  {Integer} col a grid column
+             * @return {Integer} a width of the given column
+             * @method getColWidth
+             */
+            this.getColWidth = function(col){
+                this.validateMetric();
+                return this.colWidths[col];
+            };
+
+            this.getCellsVisibility = function(){
+                this.validateMetric();
+                return this.visibility;
+            };
+
+            /**
+             * Get the given column top-left corner x coordinate
+             * @param  {Integer} col a column
+             * @return {Integer} a top-left corner x coordinate of the given column
+             * @method getColX
+             */
+            this.getColX = function (col){
+                // speed up a little bit by avoiding calling validateMetric method
+                if (this.isValid === false) this.validateMetric();
+
+                var start = 0,
+                    d     = 1,
+                    x     = this.getLeft() +
+                            (this.leftCaption == null || this.leftCaption.isVisible == false ? this.lineSize : 0) +
+                            this.getLeftCaptionWidth();
+
+                if (this.visibility.hasVisibleCells()) {
+                    start = this.visibility.fc[0];
+                    x     = this.visibility.fc[1];
+                    d     = (col > this.visibility.fc[0]) ? 1 : -1;
+                }
+
+                for(var i = start;i != col; x += ((this.colWidths[i] + this.lineSize) * d),i += d);
+                return x;
+            };
+
+            /**
+             * Get the given row top-left corner y coordinate
+             * @param  {Integer} row a row
+             * @return {Integer} a top-left corner y coordinate
+             * of the given column
+             * @method getColX
+             */
+            this.getRowY = function (row){
+                // speed up a little bit by avoiding calling validateMetric method
+                if (this.isValid === false) {
+                    this.validateMetric();
+                }
+
+                var start = 0,
+                    d     = 1,
+                    y     = this.getTop() +
+                            (this.topCaption == null || this.topCaption.isVisible == false ? this.lineSize : 0) +
+                            this.getTopCaptionHeight();
+
+                if (this.visibility.hasVisibleCells()){
+                    start = this.visibility.fr[0];
+                    y     = this.visibility.fr[1];
+                    d     = (row > this.visibility.fr[0]) ? 1 : -1;
+                }
+
+                for(var i = start;i != row; y += ((this.rowHeights[i] + this.lineSize) * d),i += d);
+                return y;
+            };
+
+            this.childInputEvent = function(e){
+                if (this.editingRow >= 0) {
+                    if (this.editors.shouldCancel(this,
+                                                  this.editingRow,
+                                                  this.editingCol, e))
+                    {
+                        this.stopEditing(false);
+                    }
+                    else {
+                        if (this.editors.shouldFinish(this,
+                                                      this.editingRow,
+                                                      this.editingCol, e))
+                        {
+                            this.stopEditing(true);
+                        }
+                    }
+                }
+            };
+
+            this.iColVisibility = function(off) {
+                this.colOffset = (this.colOffset == 100) ? this.colOffset = off
+                                                         : ((off != this.colOffset) ? 0 : this.colOffset);
+            };
+
+            this.iRowVisibility = function(off) {
+                this.rowOffset = (this.rowOffset == 100) ? off
+                                                         : (((off + this.rowOffset) === 0) ? 0 : this.rowOffset);
+            };
+
+            /**
+             * Get top grid caption height. Return zero if no top caption element has been defined
+             * @return {Integer} a top caption height
+             * @protected
+             * @method  getTopCaptionHeight
+             */
+            this.getTopCaptionHeight = function(){
+                return (this.topCaption != null && this.topCaption.isVisible === true) ? this.topCaption.height : 0;
+            };
+
+            /**
+             * Get left grid caption width. Return zero if no left caption element has been defined
+             * @return {Integer} a left caption width
+             * @protected
+             * @method  getLeftCaptionWidth
+             */
+            this.getLeftCaptionWidth = function(){
+                return (this.leftCaption != null && this.leftCaption.isVisible === true) ? this.leftCaption.width : 0;
+            };
+
+            this.paint = function(g){
+                this.vVisibility();
+
+                if (this.visibility.hasVisibleCells()) {
+                    var dx = this.scrollManager.getSX(),
+                        dy = this.scrollManager.getSY(),
+                        th = this.getTopCaptionHeight(),
+                        tw = this.getLeftCaptionWidth();
+
+                    try {
+                        g.save();
+                        g.translate(dx, dy);
+
+                        if (th > 0 || tw > 0) {
+                            g.clipRect(tw - dx, th - dy, this.width  - tw, this.height - th);
+                        }
+
+                        this.paintSelection(g);
+                        this.paintData(g);
+
+                        if (this.drawHorLines || this.drawVerLines) {
+                            this.paintNet(g);
+                        }
+
+                        this.paintPosMarker(g);
+                        g.restore();
+                    }
+                    catch(e) {
+                        g.restore();
+                        throw e;
+                    }
+                }
+            };
+
+            this.catchScrolled = function (psx, psy){
+                var offx = this.scrollManager.getSX() - psx,
+                    offy = this.scrollManager.getSY() - psy;
+
+                if (offx !== 0) {
+                    this.iColVisibility(offx > 0 ? 1 :  - 1);
+                }
+
+                if (offy !== 0) {
+                    this.iRowVisibility(offy > 0 ? 1 :  - 1);
+                }
+
+                this.stopEditing(false);
+                this.repaint();
+            };
+
+            //TODO: zebra doesn't support yet the method
+            this.isInvalidatedByChild = function (c){
+                return c != this.editor || this.isUsePsMetric;
+            };
+
+            /**
+             * Stop editing a grid cell.
+             * @param  {Boolean} applyData true if the edited data has to be applied as a new
+             * grid cell content
+             * @protected
+             * @method stopEditing
+             */
+            this.stopEditing = function(applyData){
+                if (this.editors != null &&
+                    this.editingRow >= 0 &&
+                    this.editingCol >= 0   )
+                {
+                    try {
+                        if (zebra.instanceOf(this.editor, pkg.Grid)) {
+                            this.editor.stopEditing(applyData);
+                        }
+
+                        var data = this.getDataToEdit(this.editingRow, this.editingCol);
+                        if (applyData){
+                            this.setEditedData(this.editingRow,
+                                               this.editingCol,
+                                               this.editors.fetchEditedValue( this,
+                                                                              this.editingRow,
+                                                                              this.editingCol,
+                                                                              data, this.editor));
+                        }
+                        this.repaintRows(this.editingRow, this.editingRow);
+                    }
+                    finally {
+                        this.editingCol = this.editingRow = -1;
+                        if (this.indexOf(this.editor) >= 0) {
+                            this.remove(this.editor);
+                        }
+                        this.editor = null;
+                        this.requestFocus();
+                    }
+                }
+            };
+
+            /**
+             * Set if horizontal and vertical lines have to be painted
+             * @param {Boolean} hor true if horizontal lines have to be painted
+             * @param {Boolean} ver true if vertical lines have to be painted
+             * @method setDrawLines
+             */
+            this.setDrawLines = function(hor, ver){
+                if (this.drawVerLines != hor || this.drawHorLines != ver) {
+                    this.drawHorLines = hor;
+                    this.drawVerLines = ver;
+                    this.repaint();
+                }
+            };
+
+            this.setPosMarkerMode = function(mode) {
+                if (mode == "row") {
+                    this.getLineSize = function(row) {
+                        return 1;
+                    };
+
+                    this.getMaxOffset = function() {
+                        return this.getGridRows()-1;
+                    };
+                }
+                else {
+                    if (mode == "cell") {
+                        this.getLineSize = function(row) {
+                            return this.getGridCols();
+                        };
+
+                        this.getMaxOffset = function() {
+                            return this.getGridRows()* this.getGridCols() - 1;
+                        };
+                    }
+                    else {
+                        throw new Error("Unsupported position marker mode");
+                    }
+                }
+            };
+
+            this.getLines = function() {
+                return this.getGridRows();
+            };
+
+            this.getLineSize = function(line) {
+                return 1;
+            };
+
+            this.getMaxOffset = function() {
+                return this.getGridRows() - 1;
+            };
+
+            this.posChanged = function(target, prevOffset, prevLine, prevCol) {
+                var row = this.position.currentLine;
+                if (row >= 0) {
+                    this.makeVisible(row, this.position.currentCol);
+                    this.select(row, true);
+                    this.repaintRows(prevOffset, row);
+                }
+            };
+
+            this.keyReleased = function(e) {
+                if (this.position != null) {
+                    this.$se(this.position.currentLine,
+                             this.position.currentCol, e);
+                }
+            };
+
+            this.keyTyped = function(e){
+                if (this.position != null) {
+                    this.$se(this.position.currentLine, this.position.currentCol, e);
+                }
+            };
+
+            this.keyPressed = function(e){
+                if (this.position != null){
+                    switch(e.code) {
+                        case KE.LEFT    : this.position.seek(-1); break;
+                        case KE.UP      : this.position.seekLineTo(Position.UP); break;
+                        case KE.RIGHT   : this.position.seek(1); break;
+                        case KE.DOWN    : this.position.seekLineTo(Position.DOWN);break;
+                        case KE.PAGEUP  : this.position.seekLineTo(Position.UP, this.pageSize(-1));break;
+                        case KE.PAGEDOWN: this.position.seekLineTo(Position.DOWN, this.pageSize(1));break;
+                        case KE.END     : if (e.isControlPressed()) this.position.setOffset(this.getLines() - 1);break;
+                        case KE.HOME    : if (e.isControlPressed()) this.position.setOffset(0);break;
+                    }
+
+                    this.$se(this.position.currentLine, this.position.currentCol, e);
+                }
+            };
+
+            /**
+             * Checks if the given grid row is selected
+             * @param  {Integer}  row a grid row
+             * @return {Boolean}  true if the given row is selected
+             * @method isSelected
+             */
+            this.isSelected = function(row){
+                return (this.selected == null) ? row == this.selectedIndex
+                                               : this.selected[row] > 0;
+            };
+
+            /**
+             * Repaint range of grid rows
+             * @param  {Integer} r1 the first row to be repainted
+             * @param  {Integer} r2 the last row to be repainted
+             * @method repaintRows
+             */
+            this.repaintRows = function (r1,r2){
+                if (r1 < 0) r1 = r2;
+                if (r2 < 0) r2 = r1;
+                if (r1 > r2) {
+                    var i = r2;
+                    r2 = r1;
+                    r1 = i;
+                }
+
+                var rows = this.getGridRows();
+                if (r1 < rows) {
+                    if (r2 >= rows) r2 = rows - 1;
+                    var y1 = this.getRowY(r1),
+                        y2 = ((r1 == r2) ? y1 : this.getRowY(r2)) + this.rowHeights[r2];
+
+                    this.repaint(0, y1 + this.scrollManager.getSY(), this.width, y2 - y1);
+                }
+            };
+
+            /**
+             * Detect a cell by the given location
+             * @param  {Integer} x a x coordinate relatively the grid component
+             * @param  {Integer} y a y coordinate relatively the grid component
+             * @return {Array} an array that contains detected grid cell row as
+             * the first element and a grid column as the second element. The
+             * row and column values are set to -1 if no grid cell can be found
+             * at the given location
+             * @method cellByLocation
+             */
+            this.cellByLocation = function(x,y){
+                this.validate();
+                var dx  = this.scrollManager.getSX(),
+                    dy  = this.scrollManager.getSY(),
+                    v   = this.visibility,
+                    ry1 = v.fr[1] + dy,
+                    rx1 = v.fc[1] + dx,
+                    row = -1,
+                    col = -1,
+                    ry2 = v.lr[1] + this.rowHeights[v.lr[0]] + dy,
+                    rx2 = v.lc[1] + this.colWidths[v.lc[0]] + dx;
+
+                if (y > ry1 && y < ry2) {
+                    for(var i = v.fr[0];i <= v.lr[0]; ry1 += this.rowHeights[i] + this.lineSize, i++) {
+                        if (y > ry1 && y < ry1 + this.rowHeights[i]) {
+                            row = i;
+                            break;
+                        }
+                    }
+                }
+                if (x > rx1 && x < rx2) {
+                    for(var i = v.fc[0];i <= v.lc[0]; rx1 += this.colWidths[i] + this.lineSize, i++ ) {
+                        if (x > rx1 && x < rx1 + this.colWidths[i]) {
+                            col = i;
+                            break;
+                        }
+                    }
+                }
+                return (col >= 0 && row >= 0) ? [row, col] : null;
+            };
+
+            this.doLayout = function(target) {
+                var topHeight = (this.topCaption != null &&
+                                 this.topCaption.isVisible === true) ? this.topCaption.getPreferredSize().height : 0,
+                    leftWidth = (this.leftCaption != null &&
+                                 this.leftCaption.isVisible === true) ? this.leftCaption.getPreferredSize().width : 0;
+
+                if (this.topCaption != null){
+                    this.topCaption.setLocation(this.getLeft() + leftWidth, this.getTop());
+                    this.topCaption.setSize(Math.min(target.width - this.getLeft() - this.getRight() - leftWidth,
+                                                     this.psWidth_),
+                                            topHeight);
+                }
+
+                if (this.leftCaption != null){
+                    this.leftCaption.setLocation(this.getLeft(), this.getTop() + topHeight);
+                    this.leftCaption.setSize(leftWidth,
+                                             Math.min(target.height - this.getTop() - this.getBottom() - topHeight,
+                                                      this.psHeight_));
+                }
+
+                if (this.stub != null && this.stub.isVisible === true)
+                {
+                    if (this.topCaption  != null && this.topCaption.isVisible === true &&
+                        this.leftCaption != null && this.leftCaption.isVisible === true  )
+                    {
+                        this.stub.setLocation(this.getLeft(), this.getTop());
+                        this.stub.setSize(this.topCaption.x - this.stub.x,
+                                          this.leftCaption.y - this.stub.y);
+                    }
+                    else {
+                        this.stub.setSize(0, 0);
+                    }
+                }
+
+                if (this.editors != null &&
+                    this.editor  != null &&
+                    this.editor.parent == this &&
+                    this.editor.isVisible === true)
+                {
+                    var w = this.colWidths[this.editingCol],
+                        h = this.rowHeights[this.editingRow],
+                        x = this.getColX(this.editingCol),
+                        y = this.getRowY(this.editingRow);
+
+                    if (this.isUsePsMetric){
+                        x += this.cellInsetsLeft;
+                        y += this.cellInsetsTop;
+                        w -= (this.cellInsetsLeft + this.cellInsetsRight);
+                        h -= (this.cellInsetsTop + this.cellInsetsBottom);
+                    }
+
+                    this.editor.setLocation(x + this.scrollManager.getSX(),
+                                            y + this.scrollManager.getSY());
+                    this.editor.setSize(w, h);
+                }
+            };
+
+            this.canHaveFocus = function (){
+                return this.editor == null;
+            };
+
+            /**
+             * Clear grid row or rows selection
+             * @method clearSelect
+             */
+            this.clearSelect = function (){
+                if (this.selectedIndex >= 0) {
+                    var prev = this.selectedIndex;
+                    this.selectedIndex = -1;
+                    this._.fired(this, -1, 0, false);
+                    this.repaintRows(-1, prev);
+                }
+            };
+
+            /**
+             * Mark as selected or unselected the given grid row.
+             * @param  {Integer} row a grid row
+             * @param  {boolean} [b] a selection status. true if the parameter
+             * has not been specified
+             * @method select
+             */
+            this.select = function (row, b){
+                if (b == null) b = true;
+
+                if (this.isSelected(row) != b){
+                    if (this.selectedIndex >= 0) this.clearSelect();
+                    if (b) {
+                        this.selectedIndex = row;
+                        this._.fired(this, row, 1, b);
+                    }
+                }
+            };
+
+            this.laidout = function () {
+                this.vVisibility();
+            };
+
+            this.mouseClicked  = function(e) {
+                if (this.visibility.hasVisibleCells()){
+                    this.stopEditing(true);
+
+                    if (e.isActionMask()){
+                        var p = this.cellByLocation(e.x, e.y);
+                        if (p != null) {
+                            if (this.position != null){
+                                var row = this.position.currentLine,
+                                    col = this.position.currentCol,
+                                    ls  =  this.getLineSize(p[0]);
+
+                                // normalize column depending on marker mode: row or cell
+                                // in row mode marker can select only the whole row, so
+                                // column can be only 1  (this.getLineSize returns 1)
+                                if (row == p[0] && col == p[1] % ls) {
+                                    this.makeVisible(row, col);
+                                }
+                                else {
+                                    this.clearSelect();
+                                    this.position.setRowCol(p[0], p[1] % ls);
+                                }
+                            }
+
+                            if (this.$se(p[0], p[1], e)) {
+                                // TODO: initiated editor has get mouse clicked event
+                            }
+                        }
+                    }
+                }
+            };
+
+            this.calcPreferredSize = function (target){
+                return {
+                    width : this.psWidth_  +
+                           ((this.leftCaption != null  &&
+                             this.leftCaption.isVisible === true ) ? this.leftCaption.getPreferredSize().width : 0),
+                    height: this.psHeight_ +
+                           ((this.topCaption != null  &&
+                             this.topCaption.isVisible === true) ? this.topCaption.getPreferredSize().height : 0)
+                };
+            };
+
+            /**
+             * Paint vertical and horizontal grid component lines
+             * @param  {2DContext} g a HTML5 canvas 2d context
+             * @method paintNet
+             * @protected
+             */
+            this.paintNet = function(g){
+                var v = this.visibility,
+                    topX = v.fc[1] - this.lineSize,
+                    topY = v.fr[1] - this.lineSize,
+                    botX = v.lc[1] + this.colWidths[v.lc[0]],
+                    botY = v.lr[1] + this.rowHeights[v.lr[0]],
+                    prevWidth = g.lineWidth;
+
+                g.setColor(this.lineColor);
+                g.lineWidth = this.lineSize;
+                g.beginPath();
+
+                if (this.drawHorLines) {
+                    var y = topY + this.lineSize/2, i = v.fr[0];
+
+                    for(;i <= v.lr[0]; i++){
+                        g.moveTo(topX, y);
+                        g.lineTo(botX, y);
+                        y += this.rowHeights[i] + this.lineSize;
+                    }
+                    g.moveTo(topX, y);
+                    g.lineTo(botX, y);
+                }
+
+                if (this.drawVerLines) {
+                    var x = topX + this.lineSize/2, i = v.fc[0];
+
+                    for(;i <= v.lc[0]; i++ ){
+                        g.moveTo(x , topY);
+                        g.lineTo(x, botY);
+                        x += this.colWidths[i] + this.lineSize;
+                    }
+                    g.moveTo(x, topY);
+                    g.lineTo(x, botY);
+                }
+                g.stroke();
+                g.lineWidth = prevWidth;
+            };
+
+            /**
+             * Paint grid data
+             * @param  {2DContext} g a HTML5 canvas 2d context
+             * @method paintData
+             * @protected
+             */
+            this.paintData = function(g) {
+                var y    = this.visibility.fr[1] + this.cellInsetsTop,
+                    addW = this.cellInsetsLeft   + this.cellInsetsRight,
+                    addH = this.cellInsetsTop    + this.cellInsetsBottom,
+                    ts   = g.stack[g.counter],
+                    cx   = ts.x,
+                    cy   = ts.y,
+                    cw   = ts.width,
+                    ch   = ts.height,
+                    res  = {};
+
+                for(var i = this.visibility.fr[0];i <= this.visibility.lr[0] && y < cy + ch; i++){
+                    if (y + this.rowHeights[i] > cy) {
+                        var x = this.visibility.fc[1] + this.cellInsetsLeft,
+                            notSelectedRow = this.isSelected(i) === false;
+
+                        for(var j = this.visibility.fc[0];j <= this.visibility.lc[0]; j++ ){
+                            if (notSelectedRow){
+                                var bg = this.provider.getCellColor != null ? this.provider.getCellColor(this, i, j)
+                                                                            : this.defCellColor;
+                                if (bg != null){
+                                    g.setColor(bg);
+                                    g.fillRect(x - this.cellInsetsLeft,
+                                               y - this.cellInsetsTop,
+                                               this.colWidths[j], this.rowHeights[i]);
+                                }
+                            }
+
+                            var v = (i == this.editingRow &&
+                                     j == this.editingCol   ) ? null
+                                                              : this.provider.getView(this, i, j,
+                                                                                      this.model.get(i, j));
+                            if (v != null) {
+                                var w = this.colWidths[j]  - addW,
+                                    h = this.rowHeights[i] - addH;
+
+                                //MB.intersection(x, y, w, h, cx, cy, cw, ch, res);
+                                res.x = x > cx ? x : cx;
+                                res.width = Math.min(x + w, cx + cw) - res.x;
+                                res.y = y > cy ? y : cy;
+                                res.height = Math.min(y + h, cy + ch) - res.y;
+
+                                if (res.width > 0 && res.height > 0) {
+                                    if (this.isUsePsMetric) {
+                                        v.paint(g, x, y, w, h, this);
+                                    }
+                                    else
+                                    {
+                                        var ax = this.provider.getXAlignment != null ? this.provider.getXAlignment(this, i, j)
+                                                                                     : this.defXAlignment,
+                                            ay = this.provider.getYAlignment != null ? this.provider.getYAlignment(this, i, j)
+                                                                                     : this.defYAlignment,
+                                            vw = w, // cell width
+                                            vh = h, // cell height
+                                            xx = x,
+                                            yy = y,
+                                            id = -1,
+                                            ps = (ax != L.NONE || ay != L.NONE) ? v.getPreferredSize()
+                                                                                : null;
+
+                                        if (ax != L.NONE){
+                                            xx = x + ((ax == L.CENTER) ? ~~((w - ps.width) / 2)
+                                                                       : ((ax == L.RIGHT) ? w - ps.width : 0));
+                                            vw = ps.width;
+                                        }
+
+                                        if (ay != L.NONE){
+                                            yy = y + ((ay == L.CENTER) ? ~~((h - ps.height) / 2)
+                                                                       : ((ay == L.BOTTOM) ? h - ps.height : 0));
+                                            vh = ps.height;
+                                        }
+
+                                        if (xx < res.x || yy < res.y || (xx + vw) > (x + w) || (yy + vh) > (y + h)) {
+                                            id = g.save();
+                                            g.clipRect(res.x, res.y, res.width, res.height);
+                                        }
+
+                                        v.paint(g, xx, yy, vw, vh, this);
+
+                                        if (id >= 0) {
+                                           g.restore();
+                                        }
+                                     }
+                                }
+                            }
+                            x += (this.colWidths[j] + this.lineSize);
+                        }
+                    }
+                    y += (this.rowHeights[i] + this.lineSize);
+                }
+            };
+
+            this.paintPosMarker = function(g){
+                var markerView = this.hasFocus() ? this.views.marker : this.views.offmarker;
+
+                if (markerView          != null &&
+                    this.position       != null &&
+                    this.position.offset >= 0     )
+                {
+                    var row        = this.position.currentLine,
+                        col        = this.position.currentCol,
+                        rowPosMode = this.position.metrics.getLineSize(row) == 1,
+                        v          = this.visibility;
+
+                    // depending om position changing mode (cell or row) analyze
+                    // whether the current position is in visible area
+                    if (row >= v.fr[0] && row <= v.lr[0] &&
+                        (rowPosMode || (col >= v.fc[0] && col <= v.lc[0])))
+                    {
+                        // TODO: remove the clip, think it is redundant code
+                        // g.clipRect(this.getLeftCaptionWidth() - this.scrollManager.getSX(),
+                        //            this.getTopCaptionHeight() - this.scrollManager.getSY(),
+                        //            this.width, this.height);
+
+                        // detect if grid marker position works in row selection mode
+                        if (rowPosMode) {
+                            // row selection mode
+                            markerView.paint(g, v.fc[1],
+                                                this.getRowY(row),
+                                                v.lc[1] - v.fc[1] + this.colWidths[v.lc[0]],
+                                                this.rowHeights[row], this);
+                        }
+                        else {
+                            // cell selection mode
+                            markerView.paint(g, this.getColX(col),
+                                                this.getRowY(row),
+                                                this.colWidths[col],
+                                                this.rowHeights[row], this);
+                        }
+                    }
+                }
+            };
+
+            this.paintSelection = function(g) {
+                if (this.editingRow < 0) {
+                    var v = this.views[this.hasFocus() ? "onselection" : "offselection"];
+                    if (v != null)  {
+                        for(var j = this.visibility.fr[0]; j <= this.visibility.lr[0]; j++) {
+                            if (this.isSelected(j)) {
+                                var x = this.visibility.fc[1], y = this.getRowY(j), h = this.rowHeights[j];
+                                //!!! this code below can be used to implement cell oriented selection
+                                for(var i = this.visibility.fc[0]; i <= this.visibility.lc[0]; i ++ ){
+                                    v.paint(g, x, y, this.colWidths[i], h, this);
+                                    x += (this.colWidths[i] + this.lineSize);
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            this.rPsMetric = function(){
+                var cols = this.getGridCols(),
+                    rows = this.getGridRows();
+
+                if (this.colWidths == null || this.colWidths.length != cols) {
+                    this.colWidths = arr(cols, 0);
+                }
+                else {
+                    for(var i = 0;i < cols; i++ ) this.colWidths [i] = 0;
+                }
+
+                if (this.rowHeights == null || this.rowHeights.length != rows) {
+                    this.rowHeights = arr(rows, 0);
+                }
+                else {
+                    for(var i = 0;i < rows; i++ ) this.rowHeights[i] = 0;
+                }
+
+                var addW = this.cellInsetsLeft + this.cellInsetsRight,
+                    addH = this.cellInsetsTop  + this.cellInsetsBottom;
+
+                for(var i = 0;i < cols; i++ ){
+                    for(var j = 0;j < rows; j++ ){
+                        var v = this.provider.getView(this, j, i, this.model.get(j, i));
+                        if (v != null){
+                            var ps = v.getPreferredSize();
+                            ps.width  += addW;
+                            ps.height += addH;
+                            if (ps.width  > this.colWidths[i] ) this.colWidths [i] = ps.width;
+                            if (ps.height > this.rowHeights[j]) this.rowHeights[j] = ps.height;
+                        }
+                        else {
+                            if (pkg.Grid.DEF_COLWIDTH > this.colWidths [i]) {
+                                this.colWidths [i] = pkg.Grid.DEF_COLWIDTH;
+                            }
+
+                            if (pkg.Grid.DEF_ROWHEIGHT > this.rowHeights[j]) {
+                                this.rowHeights[j] = pkg.Grid.DEF_ROWHEIGHT;
+                            }
+                        }
+                    }
+                }
+            };
+
+            this.getPSSize = function (rowcol,b){
+                if (this.isUsePsMetric === true) {
+                    return b ? this.getRowHeight(rowcol) : this.getColWidth(rowcol);
+                }
+                else {
+                    var max = 0, count = b ? this.getGridCols() : this.getGridRows();
+                    for(var j = 0;j < count; j ++ ){
+                        var r = b ? rowcol : j, c = b ? j : rowcol,
+                            v = this.provider.getView(this, r, c, this.model.get(r, c));
+
+                        if (v != null){
+                            var ps = v.getPreferredSize();
+                            if (b) {
+                                if (ps.height > max) max = ps.height;
+                            }
+                            else {
+                                if (ps.width > max) max = ps.width;
+                            }
+                        }
+                    }
+                    return max + this.lineSize * 2 +
+                           (b ? this.cellInsetsTop + this.cellInsetsBottom
+                              : this.cellInsetsLeft + this.cellInsetsRight);
+                }
+            };
+
+            this.rCustomMetric = function(){
+                var start = 0;
+                if (this.colWidths != null) {
+                    start = this.colWidths.length;
+                    if (this.colWidths.length != this.getGridCols()) {
+                        this.colWidths.length = this.getGridCols();
+                    }
+                }
+                else {
+                    this.colWidths = Array(this.getGridCols());
+                }
+
+                for(; start < this.colWidths.length; start ++ ) {
+                    this.colWidths[start] = pkg.Grid.DEF_COLWIDTH;
+                }
+
+                start = 0;
+                if (this.rowHeights != null) {
+                    start = this.rowHeights.length;
+                    if (this.rowHeights.length != this.getGridRows()) {
+                        this.rowHeights.length = this.getGridRows();
+                    }
+                }
+                else {
+                    this.rowHeights = Array(this.getGridRows());
+                }
+
+                for(; start < this.rowHeights.length; start++) {
+                    this.rowHeights[start] = pkg.Grid.DEF_ROWHEIGHT;
+                }
+            };
+
+            /**
+             * Calculate number of rows to be scrolled up or down to scroll one page
+             * @param  {Integer} d a direction. 1 for scroll down and -1 for scroll up
+             * @return {Integer}  a page size in rows to be scrolled up or down
+             * @method pageSize
+             * @protected
+             */
+            this.pageSize = function(d){
+                this.validate();
+                if (this.visibility.hasVisibleCells() && this.position != null) {
+                    var off = this.position.offset;
+                    if (off >= 0){
+                        var hh  = this.visibleArea.height - this.getTopCaptionHeight(),
+                            sum = 0,
+                            poff = off;
+
+                        for(; off >= 0 && off < this.getGridRows() && sum < hh; sum += this.rowHeights[off] + this.lineSize,off += d);
+                        return Math.abs(poff - off);
+                    }
+                }
+                return 0;
+            };
+
+            /**
+             * Set the given height for the specified grid row. The method has no effect
+             * if the grid component is forced to use preferred size metric.
+             * @param {Integer} row a grid row
+             * @param {Integer} h   a height of the grid row
+             * @method setRowHeight
+             */
+            this.setRowHeight = function(row,h){
+                this.setRowsHeight(row, 1, h);
+            };
+
+            /**
+             * Set the given height for all or the specified range of rows
+             * @param {Integer} [row] start row
+             * @param {Integer} [len] number of rows whose height has to be set
+             * @param {Integer} h  a height
+             * @method setRowsHeight
+             */
+            this.setRowsHeight = function(row, len, h) {
+                if (this.isUsePsMetric === false){
+                    if (arguments.length === 1) {
+                        h   = arguments[0];
+                        row = 0;
+                        len = this.getGridRows();
+                    }
+
+                    if (len ===0) return;
+
+                    this.validateMetric();
+                    var b = false;
+                    for(var i=row; i < row + len; i++) {
+                        if (this.rowHeights[i] != h) {
+                            this.psHeight_ += (h - this.rowHeights[i]);
+                            this.rowHeights[i] = h;
+                            b = true;
+                        }
+                    }
+
+                    if (b === true) {
+                        this.stopEditing(false);
+                        this.cachedHeight = this.getTop() + this.getBottom() + this.psHeight_ +
+                                            ((this.topCaption != null && this.topCaption.isVisible === true) ? this.topCaption.getPreferredSize().height : 0);
+
+                        if (this.parent != null) this.parent.invalidate();
+                        this.iRowVisibility(0);
+                        this.invalidateLayout();
+                        this.repaint();
+                    }
+                }
+            };
+
+            /**
+             * Set the given width for the specified grid column. The method has no effect
+             * if the grid component is forced to use preferred size metric.
+             * @param {Integer} column a grid column
+             * @param {Integer} w   a width of the grid column
+             * @method setColWidth
+             */
+            this.setColWidth = function (col,w){
+                this.setColsWidth(col,1,w);
+            };
+
+            /**
+             * Set the given width for all or the specified range of columns
+             * @param {Integer} [col] start column
+             * @param {Integer} [len] number of columns whose height has to be set
+             * @param {Integer} w  a width
+             * @method setColsHeight
+             */
+            this.setColsWidth = function (col,len, w){
+                if (this.isUsePsMetric === false){
+                    if (arguments.length === 1) {
+                        h   = arguments[0];
+                        col = 0;
+                        len = this.getGridCols();
+                    }
+
+                    if (len === 0) return;
+
+                    this.validateMetric();
+                    var b = false;
+                    for(var i=col; i < col + len; i++) {
+                        if (this.colWidths[i] != w){
+                            this.psWidth_ += (w - this.colWidths[i]);
+                            this.colWidths[i] = w;
+                            b = true;
+                        }
+                    }
+
+                    if (b === true) {
+                        this.stopEditing(false);
+                        this.cachedWidth = this.getRight() + this.getLeft() +
+                                           this.psWidth_ + ((this.leftCaption != null && this.leftCaption.isVisible === true) ? this.leftCaption.getPreferredSize().width : 0);
+                        if(this.parent != null) this.parent.invalidate();
+                        this.iColVisibility(0);
+                        this.invalidateLayout();
+                        this.repaint();
+                    }
+                }
+            };
+
+            this.matrixResized = function(target, prevRows, prevCols){
+                this.clearSelect();
+                if (this.selected != null) {
+                    this.selected = arr(this.model.rows, false);
+                }
+                this.vrp();
+                if (this.position != null) {
+                    this.position.setOffset(null);
+                }
+
+                for(var i=0; i < this.kids.length; i++) {
+                    if (this.kids[i].matrixResized) {
+                        this.kids[i].matrixResized(target,prevRows,prevCols);
+                    }
+                }
+            };
+
+            this.cellModified = function(target,row,col,prevValue) {
+                if (this.isUsePsMetric){
+                    this.invalidate();
+                }
+
+                for(var i=0; i < this.kids.length; i++) {
+                    if (this.kids[i].cellModified) {
+                        this.kids[i].cellModified(target,row,col, prevValue);
+                    }
+                }
+            };
+
+            this.matrixSorted = function(target, info) {
+                this.clearSelect();
+                this.vrp();
+
+                for(var i=0; i < this.kids.length; i++) {
+                    if (this.kids[i].matrixSorted) {
+                        this.kids[i].matrixSorted(target, info);
+                    }
+                }
+            };
+
+            /**
+             * Set the given editor provider. Editor provider is a way to customize
+             * cell editing.
+             * @param {Object} p an editor provider
+             * @method setEditorProvider
+             */
+            this.setEditorProvider = function(p){
+                if (p != this.editors){
+                    this.stopEditing(true);
+                    this.editors = p;
+                }
+            };
+
+            /**
+             * Force to size grid columns and rows according to its preferred size
+             * @param {Boolean} b use true to use preferred size
+             * @method setUsePsMetric
+             */
+            this.setUsePsMetric = function(b){
+                if (this.isUsePsMetric != b){
+                    this.isUsePsMetric = b;
+                    this.vrp();
+                }
+            };
+
+            this.setPosition = function(p){
+                if (this.position != p){
+                    if (this.position != null) {
+                        this.position.unbind(this);
+                    }
+
+                    /**
+                     * Virtual cursor position controller
+                     * @readOnly
+                     * @attribute position
+                     * @type {zebra.util.Position}
+                     */
+                    this.position = p;
+                    if(this.position != null){
+                        this.position.bind(this);
+                        this.position.setMetric(this);
+                    }
+                    this.repaint();
+                }
+            };
+
+            /**
+             * Set the given cell view provider. Provider is a special
+             * class that says how grid cells content has to be rendered,
+             * aligned, colored
+             * @param {Object} p a view provider
+             * @method setViewProvider
+             */
+            this.setViewProvider = function(p){
+                if (this.provider != p){
+                    this.provider = p;
+                    this.vrp();
+                }
+            };
+
+            /**
+             * Set the given matrix model to be visualized and controlled
+             * with the grid component
+             * @param {zebra.data.Matrix|Array} d a model passed as an
+             * instance of zebra matrix model or an array that contains
+             * model rows as embedded arrays.
+             * @method setModel
+             */
+            this.setModel = function(d){
+                if (d != this.model) {
+                    this.clearSelect();
+                    if (Array.isArray(d)) d = new Matrix(d);
+
+                    if (this.model != null && this.model._) {
+                        this.model.unbind(this);
+                    }
+
+                    this.model = d;
+                    if (this.model != null && this.model._) {
+                        this.model.bind(this);
+                    }
+
+                    if (this.position != null) {
+                        this.position.setOffset(null);
+                    }
+
+                    if (this.model != null && this.selected != null) {
+                        this.selected = arr(this.model.rows, false);
+                    }
+
+                    this.vrp();
+                }
+            };
+
+            /**
+             * Set the given top, left, right, bottom cell paddings
+             * @param {Integer} p a top, left, right and bottom cell paddings
+             * @method setCellPadding
+             */
+            this.setCellPadding = function (p){
+                this.setCellPaddings(p,p,p,p);
+            };
+
+            /**
+             * Set the given top, left, right, bottom cell paddings
+             * @param {Integer} t a top cell padding
+             * @param {Integer} l a left cell padding
+             * @param {Integer} b a bottom cell padding
+             * @param {Integer} r a rightcell padding
+             * @method setCellPaddings
+             */
+            this.setCellPaddings = function (t,l,b,r){
+                if (t != this.cellInsetsTop    || l != this.cellInsetsLeft ||
+                    b != this.cellInsetsBottom || r != this.cellInsetsRight)
+                {
+                    this.cellInsetsTop = t;
+                    this.cellInsetsLeft = l;
+                    this.cellInsetsBottom = b;
+                    this.cellInsetsRight = r;
+                    this.vrp();
+                }
+            };
+
+            /**
+             * Set the given color to render the grid vertical and horizontal lines
+             * @param {String} c a color
+             * @method setLineColor
+             */
+            this.setLineColor = function (c){
+                if (c != this.lineColor){
+                    this.lineColor = c;
+                    if (this.drawVerLines || this.drawHorLines) {
+                        this.repaint();
+                    }
+                }
+            };
+
+            /**
+             * Set the given grid lines size
+             * @param {Integer} s a size
+             * @method setLineSize
+             */
+            this.setLineSize = function (s){
+                if (s != this.lineSize){
+                    this.lineSize = s;
+                    this.vrp();
+                }
+            };
+
+            /**
+             * Start editing the given grid cell. Editing is initiated only if an editor
+             * provider has been set and the editor provider defines not-null UI component
+             * as an editor for the given cell.
+             * @param  {Integer} row a grid cell row
+             * @param  {Integer} col a grid cell column
+             * @method startEditing
+             */
+            this.startEditing = function(row, col){
+                this.stopEditing(true);
+                if (this.editors != null){
+                    var editor = this.editors.getEditor(this, row, col,
+                                                        this.getDataToEdit(row, col));
+
+                    if (editor != null){
+                        this.editingRow = row;
+                        this.editingCol = col;
+                        if (editor.isPopupEditor === true) {
+                            var p = L.toParentOrigin(this.getColX(col) + this.scrollManager.getSX(),
+                                                     this.getRowY(row) + this.scrollManager.getSY(),
+                                                     this);
+
+                            editor.setLocation(p.x, p.y);
+                            ui.makeFullyVisible(this.getCanvas(), editor);
+                            this.editor = editor;
+                            ui.showModalWindow(this, editor, this);
+                        }
+                        else {
+                            this.add(L.TEMPORARY, editor);
+                            this.repaintRows(this.editingRow, this.editingRow);
+                        }
+                        ui.focusManager.requestFocus(editor);
+
+                        return true;
+                    }
+                }
+                return false;
+            };
+
+            this.winOpened = function(winLayer,target,b){
+                if (this.editor == target &&  b === false){
+                    this.stopEditing(this.editor.isAccepted());
+                }
+            };
+
+            /**
+             * Fetch a data from matrix model that has to be edited
+             * @param  {Integer} row a row
+             * @param  {Integer} col a column
+             * @return {Object} a matrix model data to be edited
+             * @method getDataToEdit
+             * @protected
+             */
+            this.getDataToEdit = function (row,col){
+                return this.model.get(row, col);
+            };
+
+            /**
+             * Apply the given edited data to grid matrix model
+             * @param  {Integer} row a row
+             * @param  {Integer} col a column
+             * @param  {Object}  an edited matrix model data to be applied
+             * @method setEditedData
+             * @protected
+             */
+            this.setEditedData = function (row,col,value){
+                this.model.put(row, col, value);
+            };
+        },
+
+        function (rows, cols){
+            this.$this(new Matrix(rows, cols));
+        },
+
+        function (){
+            this.$this(new Matrix(5, 5));
+        },
+
+        function (model){
+            /**
+             * Default cell background color
+             * @type {String}
+             * @attribute defCellColor
+             * @default pkg.DefViews.cellBackground
+             */
+            this.defCellColor = pkg.DefViews.cellBackground;
+
+            this.psWidth_ = this.psHeight_ = this.colOffset = 0;
+            this.rowOffset = this.pressedCol = this.selectedIndex = 0;
+            this.visibleArea = this.selected = null;
+            this._ = new Listeners();
+            this.views = {};
+
+            /**
+             * Currently editing row. -1 if no row is editing
+             * @attribute editingRow
+             * @type {Integer}
+             * @default -1
+             * @readOnly
+             */
+
+            /**
+             * Currently editing column. -1 if no column is editing
+             * @attribute editingCol
+             * @type {Integer}
+             * @default -1
+             * @readOnly
+             */
+
+            this.editingRow = this.editingCol = this.pressedRow = -1;
+
+            /**
+             * Reference to top caption component
+             * @attribute topCaption
+             * @type {zebra.ui.grid.GridCaption|zebra.ui.grid.CompGridCaption}
+             * @default null
+             * @readOnly
+             */
+
+            /**
+             * Reference to left caption component
+             * @attribute leftCaption
+             * @type {zebra.ui.grid.GridCaption|zebra.ui.grid.CompGridCaption}
+             * @default null
+             * @readOnly
+             */
+
+            this.editors = this.leftCaption = this.topCaption = this.colWidths = null;
+            this.rowHeights = this.position = this.stub = null;
+            this.visibility = new CellsVisibility();
+
+            this.$super();
+
+            this.add(L.NONE, new this.$clazz.CornerPan());
+            this.setModel(model);
+            this.setViewProvider(new pkg.DefViews());
+            this.setPosition(new Position(this));
+            this.scrollManager = new ui.ScrollManager(this);
+        },
+
+        function focused(){
+            this.$super();
+            this.repaint();
+        },
+
+        function invalidate(){
+            this.$super();
+            this.iColVisibility(0);
+            this.iRowVisibility(0);
+        },
+
+        function kidAdded(index,id,c){
+            this.$super(index, id, c);
+            if (L.TOP == id){
+                this.topCaption = c;
+            }
+            else {
+                if (L.TEMPORARY == id) this.editor = c;
+                else {
+                    if (L.LEFT == id){
+                        this.leftCaption = c;
+                    }
+                    else {
+                        if (L.NONE === id) this.stub = c;
+                    }
+                }
+            }
+        },
+
+        function kidRemoved(index,c){
+            this.$super(index, c);
+            if(c == this.editor) this.editor = null;
+            else {
+                if (c == this.topCaption){
+                    this.topCaption = null;
+                }
+                else {
+                    if (c == this.leftCaption){
+                        this.leftCaption = null;
+                    }
+                    else {
+                        if (c == this.stub) this.stub = null;
+                    }
+                }
+            }
+        }
+
+        /**
+         *  Set number of views to render different grid component elements
+         *  @param {Object} a set of views as dictionary where key is a view
+         *  name and the value is a view instance, string (for color, border),
+         *  or render function. The following view elements can be passed:
+         *
+         *
+         *      {
+         *         "onselection" : <view to render selected row for the grid that holds focus>,
+         *         "offselection": <view to render selected row for the grid that doesn't hold focus>
+         *      }
+         *
+         *
+         *  @method  setViews
+         */
+]);
+pkg.Grid.prototype.setViews = ui.$ViewsSetter;
+
+
+/**
+ * Special UI panel that manages to stretch grid columns to occupy the whole panel space.
+ *
+
+        ...
+
+        var canvas = new zebra.ui.zCanvas();
+        var grid = new zebra.ui.grid.Grid(100,10);
+        var pan  = new zebra.ui.grid.GridStretchPan(grid);
+
+        canvas.root.setLayout(new zebra.layout.BorderLayout());
+        canvas.root.add(zebra.layout.CENTER, pan);
+
+        ...
+
+ * @constructor
+ * @param {zebra.ui.grid.Grid} grid a grid component that has to be added in the panel
+ * @class zebra.ui.grid.GridStretchPan
+ * @extends {zebra.ui.Panel}
+ */
+pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
+    function $prototype() {
+        this.calcPreferredSize = function(target){
+            this.recalcPS();
+            return (target.kids.length === 0 || target.grid.isVisible === false) ? { width:0, height:0 }
+                                                                                 : { width:this.strPs.width,
+                                                                                     height:this.strPs.height };
+        };
+
+        this.doLayout = function(target){
+            this.recalcPS();
+            if (target.kids.length > 0){
+                var grid = this.grid;
+                if (grid.isVisible === true){
+                    var left = target.getLeft(), top = target.getTop(), i = 0;
+                    grid.setLocation(left, top);
+                    grid.setSize(target.width  - left - target.getRight(),
+                                 target.height - top  - target.getBottom());
+
+                    for(i = 0; i < this.widths.length; i++) {
+                        grid.setColWidth(i, this.widths[i]);
+                    }
+
+                    if (this.heights != null){
+                        for(i = 0; i < this.heights.length; i++) {
+                            grid.setRowHeight(i, this.heights[i]);
+                        }
+                    }
+                }
+            }
+        };
+
+        this.captionResized = function(src, col, pw){
+            var grid = this.grid;
+            if (col < this.widths.length - 1){
+                var w = grid.getColWidth(col), dt = w - pw;
+                if (dt < 0) grid.setColWidth(col + 1, grid.getColWidth(col + 1) - dt);
+                else {
+                    var ww = grid.getColWidth(col + 1) - dt, mw = this.getMinWidth();
+                    if (ww < mw) {
+                        grid.setColWidth(col, w - (mw - ww));
+                        grid.setColWidth(col + 1, mw);
+                    }
+                    else grid.setColWidth(col + 1, ww);
+                }
+                this.proportions = null;
+            }
+        };
+
+        this.calcColProportions = function (targetAreaW, targetAreaH){
+            var g = this.grid, cols = g.getGridCols(), sw = 0;
+            for(var i = 0;i < cols; i++){
+                var w = g.getColWidth(i);
+                if (w === 0) w = g.getColPSWidth(i);
+                sw += w;
+            }
+
+            var props = Array(cols);
+            for(var i = 0;i < cols; i++){
+                var w = g.getColWidth(i);
+                if (w === 0) w = g.getColPSWidth(i);
+                props[i] = w / sw;
+            }
+            return props;
+        };
+
+        this.calcRowHeights = function(targetAreaW,targetAreaH,widths) {
+            return null;
+        };
+
+        this.getMinWidth = function (){
+            return zebra.instanceOf(this.grid.topCaption, pkg.BaseCaption) ? this.grid.topCaption.minSize
+                                                                           : 10;
+        };
+
+        this.calcColWidths = function (targetAreaW,targetAreaH){
+            var grid = this.grid,
+                w    = Array(grid.getGridCols()),
+                ew   = targetAreaW - (this.proportions.length + 1) * grid.lineSize, sw = 0;
+
+            for(var i = 0; i < this.proportions.length; i++){
+                if (this.proportions.length - 1 == i) w[i] = ew - sw;
+                else {
+                    var cw = ~~(ew * this.proportions[i]);
+                    w[i] = cw;
+                    sw += cw;
+                }
+            }
+            return w;
+        };
+
+        this.recalcPS = function (){
+            var grid = this.grid;
+            if (grid == null || grid.isVisible === false) return;
+
+            var p = this.parent, isScr = zebra.instanceOf(p, ui.ScrollPan),
+                taWidth   = (isScr ? p.width - p.getLeft() - p.getRight() - this.getRight() - this.getLeft()
+                                   : this.width - this.getRight() - this.getLeft()),
+                taHeight = (isScr  ? p.height - p.getTop() - p.getBottom() - this.getBottom() - this.getTop()
+                                   : this.height - this.getBottom() - this.getTop());
+
+
+            if (this.grid.leftCaption != null && this.grid.leftCaption.isVisible === true) {
+                taWidth -= this.grid.leftCaption.getPreferredSize().width;
+            }
+
+            if (this.strPs != null && this.prevTargetAreaSize.width == taWidth &&
+                                      this.prevTargetAreaSize.height == taHeight  ) {
+                return;
+            }
+
+            if (this.proportions == null || this.proportions.length != grid.getGridCols()) {
+                this.proportions = this.calcColProportions(taWidth, taHeight);
+            }
+
+            this.prevTargetAreaSize.width = taWidth;
+            this.prevTargetAreaSize.height = taHeight;
+            this.widths  = this.calcColWidths (taWidth, taHeight);
+            this.heights = this.calcRowHeights(taWidth, taHeight, this.widths);
+            this.strPs   = this.summarizePS(taWidth, taHeight, this.widths, this.heights);
+
+            if (isScr === true && p.height > 0 && p.vBar && p.autoHide === false && taHeight < this.strPs.height){
+                taWidth -= p.vBar.getPreferredSize().width;
+                this.widths  = this.calcColWidths(taWidth, taHeight);
+                this.heights = this.calcRowHeights(taWidth, taHeight, this.widths);
+                this.strPs   = this.summarizePS(taWidth, taHeight, this.widths, this.heights);
+            }
+        };
+
+        this.summarizePS = function (targetAreaW,targetAreaH,widths,heights){
+            var ps = { width: targetAreaW, height:0 }, grid = this.grid;
+            if (heights != null){
+                for(var i = 0;i < heights.length; i++) ps.height += heights[i];
+                if (grid.topCaption != null && grid.topCaption.isVisible === true) {
+                    ps.height += grid.topCaption.getPreferredSize().height;
+                }
+                ps.height += (grid.getTop() + grid.getBottom());
+            }
+            else {
+                ps.height = grid.getPreferredSize().height;
+            }
+            return ps;
+        };
+    },
+
+    function (grid){
+        this.$super(this);
+        this.heights = [];
+        this.widths  = [];
+
+        /**
+         * Target grid component
+         * @type {zebra.ui.Grid}
+         * @readOnly
+         * @attribute grid
+         */
+        this.grid = grid;
+
+        this.proportions = this.strPs = null;
+        this.prevTargetAreaSize = { width:0, height:0 };
+        this.add(grid);
+    },
+
+    function kidAdded(index,constr,l){
+        this.proportions = null;
+        if (l.topCaption != null) {
+            l.topCaption.bind(this);
+        }
+        this.scrollManager = l.scrollManager;
+        this.$super(index, constr, l);
+    },
+
+    function kidRemoved(i,l){
+        this.proportions = null;
+        if (l.topCaption != null) {
+            l.topCaption.unbind(this);
+        }
+        this.scrollManager = null;
+        this.$super(i, l);
+    },
+
+    function invalidate(){
+        this.strPs = null;
+        this.$super();
     }
 ]);
 
@@ -23663,9 +26622,1759 @@ pkg.FormTreeModel = Class(zebra.data.TreeModel, [
  * @for
  */
 
+})(zebra("ui.grid"), zebra.Class, zebra("ui"));
 
-})(zebra("ui.designer"), zebra.Class, zebra("ui"));
+(function(pkg, Class, ui)  {
 
+/**
+ * Tree UI components and all related to the component classes and interfaces.
+ * Tree components are graphical representation of a tree model that allows a user
+ * to navigate over the model item, customize the items rendering and
+ * organize customizable editing of the items.
+
+        // create tree component instance to visualize the given tree model
+        var tree = new zebra.ui.tree.Tree({
+            value: "Root",
+            kids : [
+                "Item 1",
+                "Item 2",
+                "Item 3"
+            ]
+        });
+
+        // make all tree items editable with text field component
+        tree.setEditorProvider(new zebra.ui.tree.DefEditors());
+
+ * One more tree  component implementation - "CompTree" - allows developers
+ * to create tree whose nodes are  other UI components
+
+        // create tree component instance to visualize the given tree model
+        var tree = new zebra.ui.tree.CompTree({
+            value: new zebra.ui.Label("Root label item"),
+            kids : [
+                new zebra.ui.Checkbox("Checkbox Item"),
+                new zebra.ui.Button("Button Item"),
+                new zebra.ui.TextField("Text field item")
+            ]
+        });
+
+ * @module ui.tree
+ * @main
+ */
+
+
+//  tree node metrics:
+//   |
+//   |-- <-gapx-> {icon} -- <-gapx-> {view}
+//
+//
+
+
+var KE = ui.KeyEvent;
+
+/**
+ * Simple private structure to keep a tree model item metrical characteristics
+ * @constructor
+ * @param {Boolean} b a state of an appropriate tree component node of the given
+ * tree model item. The state is sensible for item that has children items and
+ * the state indicates if the given tree node is collapsed (false) or expanded
+ * (true)
+ * @private
+ * @class zebra.ui.tree.$IM
+ */
+pkg.$IM = function(b) {
+    /**
+     *  The whole width of tree node that includes a rendered item preferred
+     *  width, all icons and gaps widths
+     *  @attribute width
+     *  @type {Integer}
+     *  @readOnly
+     */
+
+    /**
+     *  The whole height of tree node that includes a rendered item preferred
+     *  height, all icons and gaps heights
+     *  @attribute height
+     *  @type {Integer}
+     *  @readOnly
+     */
+
+    /**
+     *  Width of an area of rendered tree model item. It excludes icons, toggle
+     *  and gaps widths
+     *  @attribute viewWidth
+     *  @type {Integer}
+     *  @readOnly
+     */
+
+    /**
+     *  Height of an area of rendered tree model item. It excludes icons, toggle
+     *  and gaps heights
+     *  @attribute viewHeight
+     *  @type {Integer}
+     *  @readOnly
+     */
+
+    /**
+     *  Indicates whether a node is in expanded or collapsed state
+     *  @attribute isOpen
+     *  @type {Boolean}
+     *  @readOnly
+     */
+
+    this.width = this.height = this.x = this.y = this.viewHeight = 0;
+    this.viewWidth = -1;
+    this.isOpen = b;
+};
+
+pkg.TreeListeners = zebra.util.ListenersClass("toggled", "selected");
+
+/**
+ * Abstract tree component that can used as basement for building own tree components.
+ * The component is responsible for rendering tree, calculating tree nodes metrics,
+ * computing visible area, organizing basic user interaction. Classes that inherit it
+ * has to provide the following important things:
+
+    * **A tree model item metric** Developers have to implement "getItemPreferredSize(item)"
+      method to say which size the given tree item wants to have.
+    * **Tree node item rendering** If necessary developers have to implement the way
+      a tree item has to be visualized by implementing "this.paintItem(...)" method
+
+ *
+ * @class zebra.ui.tree.BaseTree
+ * @constructor
+ * @param {zebra.data.TreeModel|Object} a tree model. It can be an instance of tree model
+ * class or an object that described tree model. An example of such object is shown below:
+
+        {
+            value : "Root",
+            kids  : [
+                {
+                    value: "Child 1",
+                    kids :[
+                        "Sub child 1"
+                    ]
+                },
+                "Child 2",
+                "Child 3"
+            ]
+        }
+
+ * @param {Boolean} [nodeState] a default tree nodes state (expanded or collapsed)
+ * @extends {zebra.ui.Panel}
+ */
+
+ /**
+  * Fired when a tree item has been toggled
+
+        tree.bind(function toggled(src, item) {
+           ...
+        });
+
+  * @event toggled
+  * @param  {zebra.ui.tree.BaseTree} src an tree component that triggers the event
+  * @param  {zebra.data.Item} item an tree item that has been toggled
+  */
+
+ /**
+  * Fired when a tree item has been selected
+
+      tree.bind(function selected(src, item) {
+         ...
+      });
+
+  * @event selected
+  * @param  {zebra.ui.tree.BaseTree} src an tree component that triggers the event
+  * @param  {zebra.data.Item} item an tree item that has been toggled
+  */
+pkg.BaseTree = Class(ui.Panel, [
+    function $prototype() {
+
+        /**
+         * Horizontal gap between a node elements: toggle, icons and tree item view
+         * @attribute gapx
+         * @readOnly
+         * @default 2
+         * @type {Integer}
+         */
+
+        /**
+         * Vertical gap between a node elements: toggle, icons and tree item view
+         * @attribute gapy
+         * @readOnly
+         * @default 2
+         * @type {Integer}
+         */
+
+        this.gapx = this.gapy = 2;
+        this.canHaveFocus = true;
+
+        /**
+         * Test if the given tree component item is opened
+         * @param  {zebra.data.Item}  i a tree model item
+         * @return {Boolean} true if the given tree component item is opened
+         * @method isOpen
+         */
+        this.isOpen = function(i){
+            this.validate();
+            return this.isOpen_(i);
+        };
+
+        /**
+         * Get calculated for the given tree model item metrics
+         * @param  {zebra.data.Item} i a tree item
+         * @return {Object}   an tree model item metrics. Th
+         * @method getItemMetrics
+         */
+        this.getItemMetrics = function(i){
+            this.validate();
+            return this.getIM(i);
+        };
+
+        this.togglePressed = function(root) {
+            this.toggle(root);
+        };
+
+        this.itemPressed = function(root, e) {
+            this.select(root);
+        };
+
+        this.mousePressed = function(e){
+            if (this.firstVisible != null && e.isActionMask()) {
+                var x = e.x,
+                    y = e.y,
+                    root = this.getItemAt(this.firstVisible, x, y);
+
+                if (root != null) {
+                    x -= this.scrollManager.getSX();
+                    y -= this.scrollManager.getSY();
+                    var r = this.getToggleBounds(root);
+
+                    if (x >= r.x && x < r.x + r.width && y >= r.y && y < r.y + r.height){
+                        this.togglePressed(root);
+                    }
+                    else {
+                        if (x > r.x + r.width) this.itemPressed(root, e);
+                    }
+                }
+            }
+        };
+
+        this.vVisibility = function (){
+            if (this.model == null) this.firstVisible = null;
+            else {
+                var nva = ui.$cvp(this, {});
+                if (nva == null) this.firstVisible = null;
+                else {
+                    if (this._isVal === false ||
+                        (this.visibleArea == null              ||
+                         this.visibleArea.x != nva.x           ||
+                         this.visibleArea.y != nva.y           ||
+                         this.visibleArea.width != nva.width   ||
+                         this.visibleArea.height != nva.height   ))
+                    {
+                        this.visibleArea = nva;
+                        if (this.firstVisible != null) {
+                            this.firstVisible = this.findOpened(this.firstVisible);
+                            this.firstVisible = this.isOverVisibleArea(this.firstVisible) ? this.nextVisible(this.firstVisible)
+                                                                                          : this.prevVisible(this.firstVisible);
+                        }
+                        else {
+                            this.firstVisible = (-this.scrollManager.getSY() > ~~(this.maxh / 2)) ? this.prevVisible(this.findLast(this.model.root))
+                                                                                                  : this.nextVisible(this.model.root);
+                        }
+                    }
+                }
+            }
+            this._isVal = true;
+        };
+
+        this.recalc = function(){
+            this.maxh = this.maxw = 0;
+            if (this.model != null && this.model.root != null) {
+                this.recalc_(this.getLeft(), this.getTop(), null, this.model.root, true);
+                this.maxw -= this.getLeft();
+                this.maxh -= this.gapy;
+            }
+        };
+
+        /**
+         * Get tree model item  metrical bounds (location and size).
+         * @param  {zebra.data.Item} root an tree model item
+         * @return {Object} a structure that keeps an item view location
+         * and size:
+
+                {
+                    x: {Integer},
+                    y: {Integer},
+                    width: {Integer},
+                    height: {Integer}
+                }
+
+         * @method getItemBounds
+         * @protected
+         */
+        this.getItemBounds = function(root){
+            var metrics = this.getIM(root),
+                toggle  = this.getToggleBounds(root),
+                image   = this.getIconBounds(root);
+
+            toggle.x = image.x + image.width + (image.width > 0 || toggle.width > 0 ? this.gapx : 0);
+            toggle.y = metrics.y + ~~((metrics.height - metrics.viewHeight) / 2);
+            toggle.width = metrics.viewWidth;
+            toggle.height = metrics.viewHeight;
+            return toggle;
+        };
+
+        /**
+         * Get toggle element bounds for the given tree model item.
+         * @param  {zebra.data.Item} root an tree model item
+         * @return {Object} a structure that keeps an item toggle location
+         * and size:
+
+                {
+                    x: {Integer},
+                    y: {Integer},
+                    width: {Integer},
+                    height: {Integer}
+                }
+
+         * @method getToggleBounds
+         * @protected
+         */
+        this.getToggleBounds = function(root){
+            var node = this.getIM(root), d = this.getToggleSize(root);
+            return { x:node.x, y:node.y + ~~((node.height - d.height) / 2), width:d.width, height:d.height };
+        };
+
+        /**
+         * Get current toggle element view. The view depends on the state of tree item.
+         * @param  {zebra.data.Item} i a tree model item
+         * @protected
+         * @return {zebra.ui.View}  a toggle element view
+         * @method getToogleView
+         */
+        this.getToggleView = function(i){
+            return i.kids.length > 0 ? (this.getIM(i).isOpen ? this.views.on
+                                                             : this.views.off) : null;
+        };
+
+        /**
+         * An abstract method that a concrete tree component implementations have to
+         * override. The method has to return a preferred size the given tree model
+         * item wants to have.
+         * @param  {zebra.data.Item} root an tree model item
+         * @return {Object} a structure that keeps an item preferred size:
+
+                {
+                    width: {Integer},
+                    height: {Integer}
+                }
+
+         * @method getItemPreferredSize
+         * @protected
+         */
+        this.getItemPreferredSize = function(root) {
+            throw new Error("Not implemented");
+        };
+
+        /**
+         * An abstract method that a concrete tree component implementations should
+         * override. The method has to render the given tree node of the specified
+         * tree model item at the given location
+         * @param  {2DContext} g a graphical context
+         * @param  {zebra.data.Item} root a tree model item to be rendered
+         * @param  {zebra.ui.tree.$IM} node a tree node metrics
+         * @param  {Ineteger} x a x location where the tree node has to be rendered
+         * @param  {Ineteger} y a y location where the tree node has to be rendered
+         * @method paintItem
+         * @protected
+         */
+
+        this.recalc_ = function (x,y,parent,root,isVis){
+            var node = this.getIM(root);
+            if (isVis === true) {
+                if (node.viewWidth < 0){
+                    var viewSize = this.getItemPreferredSize(root);
+                    node.viewWidth  = viewSize.width === 0 ? 5 : viewSize.width;
+                    node.viewHeight = viewSize.height;
+                }
+
+                var imageSize = this.getIconSize(root), toggleSize = this.getToggleSize(root);
+                if (parent != null){
+                    var pImg = this.getIconBounds(parent);
+                    x = pImg.x + ~~((pImg.width - toggleSize.width) / 2);
+                }
+
+                node.x = x;
+                node.y = y;
+                node.width = toggleSize.width + imageSize.width +
+                             node.viewWidth + (toggleSize.width > 0 ? this.gapx : 0) + 10 +
+                                              (imageSize.width  > 0 ? this.gapx : 0);
+
+                node.height = Math.max(((toggleSize.height > imageSize.height) ? toggleSize.height
+                                                                               : imageSize.height),
+                                        node.viewHeight);
+
+                if (node.x + node.width > this.maxw) {
+                    this.maxw = node.x + node.width;
+                }
+
+                this.maxh += (node.height + this.gapy);
+                x = node.x + toggleSize.width + (toggleSize.width > 0 ? this.gapx : 0);
+                y += (node.height + this.gapy);
+            }
+
+            var b = node.isOpen && isVis === true;
+            if (b) {
+                var count = root.kids.length;
+                for(var i = 0; i < count; i++) {
+                    y = this.recalc_(x, y, root, root.kids[i], b);
+                }
+            }
+            return y;
+        };
+
+        this.isOpen_ = function (i){
+            return i == null || (i.kids.length > 0 && this.getIM(i).isOpen && this.isOpen_(i.parent));
+        };
+
+        /**
+         * Get a tree node metrics by the given tree model item.
+         * @param  {zebra.data.Item} i a tree model item
+         * @return {zebra.ui.tree.$IM} a tree node metrics
+         * @protected
+         * @method getIM
+         */
+        this.getIM = function (i){
+            var node = this.nodes[i];
+            if (typeof node === 'undefined'){
+                node = new pkg.$IM(this.isOpenVal);
+                this.nodes[i] = node;
+            }
+            return node;
+        };
+
+        /**
+         * Get a tree item that is located at the given location.
+         * @param  {zebra.data.Item} [root] a starting tree node
+         * @param  {Integer} x a x coordinate
+         * @param  {Integer} y a y coordinate
+         * @return {zebra.data.Item} a tree model item
+         * @method getItemAt
+         */
+        this.getItemAt = function(root, x, y){
+            this.validate();
+
+            if (arguments.length < 3) {
+                x = arguments[0];
+                y = arguments[1];
+                root = this.model.root;
+            }
+
+            if (this.firstVisible != null && y >= this.visibleArea.y && y < this.visibleArea.y + this.visibleArea.height){
+                var dx    = this.scrollManager.getSX(),
+                    dy    = this.scrollManager.getSY(),
+                    found = this.getItemAtInBranch(root, x - dx, y - dy);
+
+                if (found != null) return found;
+
+                var parent = root.parent;
+                while (parent != null) {
+                    var count = parent.kids.length;
+                    for(var i = parent.kids.indexOf(root) + 1;i < count; i ++ ){
+                        found = this.getItemAtInBranch(parent.kids[i], x - dx, y - dy);
+                        if (found != null) return found;
+                    }
+                    root = parent;
+                    parent = root.parent;
+                }
+            }
+            return null;
+        };
+
+        this.getItemAtInBranch = function(root,x,y){
+            if (root != null){
+                var node = this.getIM(root);
+                if (x >= node.x && y >= node.y && x < node.x + node.width && y < node.y + node.height + this.gapy) {
+                    return root;
+                }
+
+                if (this.isOpen_(root)){
+                    for(var i = 0;i < root.kids.length; i++) {
+                        var res = this.getItemAtInBranch(root.kids[i], x, y);
+                        if (res != null) return res;
+                    }
+                }
+            }
+            return null;
+        };
+
+        this.getIconView = function (i){
+            return i.kids.length > 0 ? (this.getIM(i).isOpen ? this.views.open
+                                                             : this.views.close)
+                                     : this.views.leaf;
+        };
+
+        this.getIconSize = function (i) {
+            var v =  i.kids.length > 0 ? (this.getIM(i).isOpen ? this.viewSizes.open
+                                                               : this.viewSizes.close)
+                                       : this.viewSizes.leaf;
+            return v ? v : { width:0, height:0 };
+        };
+
+        /**
+         * Get icon element bounds for the given tree model item.
+         * @param  {zebra.data.Item} root an tree model item
+         * @return {Object} a structure that keeps an item icon location
+         * and size:
+
+                {
+                    x: {Integer},
+                    y: {Integer},
+                    width: {Integer},
+                    height: {Integer}
+                }
+
+         * @method getToggleBounds
+         * @protected
+         */
+        this.getIconBounds = function (root){
+            var node = this.getIM(root),
+                id   = this.getIconSize(root),
+                td   = this.getToggleSize(root);
+            return { x:node.x + td.width + (td.width > 0 ? this.gapx : 0),
+                     y:node.y + ~~((node.height - id.height) / 2),
+                     width:id.width, height:id.height };
+        };
+
+        this.getToggleSize = function (i){
+            return this.isOpen_(i) ? this.viewSizes.on : this.viewSizes.off;
+        };
+
+        this.isOverVisibleArea = function (i){
+            var node = this.getIM(i);
+            return node.y + node.height + this.scrollManager.getSY() < this.visibleArea.y;
+        };
+
+        this.findOpened = function (item){
+            var parent = item.parent;
+            return (parent == null || this.isOpen_(parent)) ? item : this.findOpened(parent);
+        };
+
+        this.findNext = function (item){
+            if (item != null){
+                if (item.kids.length > 0 && this.isOpen_(item)){
+                    return item.kids[0];
+                }
+                var parent = null;
+                while ((parent = item.parent) != null){
+                    var index = parent.kids.indexOf(item);
+                    if (index + 1 < parent.kids.length) return parent.kids[index + 1];
+                    item = parent;
+                }
+            }
+            return null;
+        };
+
+        this.findPrev = function (item){
+            if (item != null) {
+                var parent = item.parent;
+                if (parent != null) {
+                    var index = parent.kids.indexOf(item);
+                    return (index - 1 >= 0) ? this.findLast(parent.kids[index - 1]) : parent;
+                }
+            }
+            return null;
+        };
+
+        this.findLast = function (item){
+            return this.isOpen_(item) && item.kids.length > 0 ? this.findLast(item.kids[item.kids.length - 1])
+                                                              : item;
+        };
+
+        this.prevVisible = function (item){
+            if (item == null || this.isOverVisibleArea(item)) return this.nextVisible(item);
+            var parent = null;
+            while((parent = item.parent) != null){
+                for(var i = parent.kids.indexOf(item) - 1;i >= 0; i-- ){
+                    var child = parent.kids[i];
+                    if (this.isOverVisibleArea(child)) return this.nextVisible(child);
+                }
+                item = parent;
+            }
+            return item;
+        };
+
+        this.isVerVisible = function (item){
+            if (this.visibleArea == null) return false;
+
+            var node = this.getIM(item),
+                yy1  = node.y + this.scrollManager.getSY(),
+                yy2  = yy1 + node.height - 1,
+                by   = this.visibleArea.y + this.visibleArea.height;
+
+            return ((this.visibleArea.y <= yy1 && yy1 < by) ||
+                    (this.visibleArea.y <= yy2 && yy2 < by) ||
+                    (this.visibleArea.y > yy1 && yy2 >= by)    );
+        };
+
+        this.nextVisible = function(item){
+            if (item == null || this.isVerVisible(item)) return item;
+            var res = this.nextVisibleInBranch(item), parent = null;
+            if (res != null) return res;
+            while((parent = item.parent) != null){
+                var count = parent.kids.length;
+                for(var i = parent.kids.indexOf(item) + 1;i < count; i++){
+                    res = this.nextVisibleInBranch(parent.kids[i]);
+                    if (res != null) return res;
+                }
+                item = parent;
+            }
+            return null;
+        };
+
+        this.nextVisibleInBranch = function (item){
+            if (this.isVerVisible(item)) return item;
+            if (this.isOpen_(item)){
+                for(var i = 0;i < item.kids.length; i++){
+                    var res = this.nextVisibleInBranch(item.kids[i]);
+                    if (res != null) return res;
+                }
+            }
+            return null;
+        };
+
+        this.paintSelectedItem = function(g, root, node, x, y) {
+            var v = this.hasFocus() ? this.views.aselect : this.views.iselect;
+            if (v != null) {
+                v.paint(g, x, y, node.viewWidth, node.viewHeight, this);
+            }
+        };
+
+        this.paintTree = function (g,item){
+            this.paintBranch(g, item);
+            var parent = null;
+            while((parent = item.parent) != null){
+                this.paintChild(g, parent, parent.kids.indexOf(item) + 1);
+                item = parent;
+            }
+        };
+
+        this.paintBranch = function (g, root){
+            if (root == null) return false;
+
+            var node = this.getIM(root),
+                dx   = this.scrollManager.getSX(),
+                dy   = this.scrollManager.getSY();
+
+            if (zebra.util.isIntersect(node.x + dx, node.y + dy,
+                                       node.width, node.height,
+                                       this.visibleArea.x, this.visibleArea.y,
+                                       this.visibleArea.width, this.visibleArea.height))
+            {
+                var toggle     = this.getToggleBounds(root),
+                    toggleView = this.getToggleView(root),
+                    image      = this.getIconBounds(root),
+                    vx         = image.x + image.width + this.gapx,
+                    vy         = node.y + ~~((node.height - node.viewHeight) / 2);
+
+                if (toggleView != null) {
+                    toggleView.paint(g, toggle.x, toggle.y, toggle.width, toggle.height, this);
+                }
+
+                if (image.width > 0) {
+                    this.getIconView(root).paint(g, image.x, image.y,
+                                                 image.width, image.height, this);
+                }
+
+                if (this.selected == root){
+                    this.paintSelectedItem(g, root, node, vx, vy);
+                }
+
+                if (this.paintItem != null) {
+                    this.paintItem(g, root, node, vx, vy);
+                }
+
+                if (this.lnColor != null){
+                    g.setColor(this.lnColor);
+                    var yy = toggle.y + ~~(toggle.height / 2) + 0.5;
+
+                    g.beginPath();
+                    g.moveTo(toggle.x + (toggleView == null ? ~~(toggle.width / 2) : toggle.width - 1), yy);
+                    g.lineTo(image.x, yy);
+                    g.stroke();
+                }
+            }
+            else {
+                if (node.y + dy > this.visibleArea.y + this.visibleArea.height ||
+                    node.x + dx > this.visibleArea.x + this.visibleArea.width    )
+                {
+                    return false;
+                }
+            }
+            return this.paintChild(g, root, 0);
+        };
+
+        this.y_ = function (item, isStart){
+            var node = this.getIM(item),
+                th = this.getToggleSize(item).height,
+                ty = node.y + ~~((node.height - th) / 2),
+                dy = this.scrollManager.getSY(),
+                y  = (item.kids.length > 0) ? (isStart ? ty + th : ty - 1) : ty + ~~(th / 2);
+
+            return (y + dy < 0) ?  -dy - 1
+                                : ((y + dy > this.height) ? this.height - dy : y);
+        };
+
+        /**
+         * Paint children items of the given root tree item.
+         * @param  {2DContext} g a graphical context
+         * @param  {zebra.data.Item} root a root tree item
+         * @param  {Integer} index an index
+         * @return {Boolean}
+         * @protected
+         * @method paintChild
+         */
+        this.paintChild = function (g, root, index){
+            var b = this.isOpen_(root);
+            if (root == this.firstVisible && this.lnColor != null){
+                g.setColor(this.lnColor);
+                var xx = this.getIM(root).x + ~~((b ? this.viewSizes.on.width
+                                                    : this.viewSizes.off.width) / 2);
+                g.beginPath();
+                g.moveTo(xx + 0.5, this.getTop());
+                g.lineTo(xx + 0.5, this.y_(root, false));
+                g.stroke();
+            }
+            if (b && root.kids.length > 0){
+                var firstChild = root.kids[0];
+                if (firstChild == null) return true;
+
+                var x = this.getIM(firstChild).x + ~~((this.isOpen_(firstChild) ? this.viewSizes.on.width
+                                                                                : this.viewSizes.off.width) / 2),
+                count = root.kids.length;
+                if (index < count) {
+                    var  node = this.getIM(root),
+                         y    = (index > 0) ? this.y_(root.kids[index - 1], true)
+                                            : node.y + ~~((node.height + this.getIconSize(root).height) / 2);
+
+                    for(var i = index;i < count; i ++ ){
+                        var child = root.kids[i];
+                        if (this.lnColor != null){
+                            g.setColor(this.lnColor);
+                            g.beginPath();
+                            g.moveTo(x + 0.5, y);
+                            g.lineTo(x + 0.5, this.y_(child, false));
+                            g.stroke();
+                            y = this.y_(child, true);
+                        }
+                        if (this.paintBranch(g, child) === false){
+                            if (this.lnColor != null && i + 1 != count){
+                                g.setColor(this.lnColor);
+                                g.beginPath();
+                                g.moveTo(x + 0.5, y);
+                                g.lineTo(x + 0.5, this.height - this.scrollManager.getSY());
+                                g.stroke();
+                            }
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        };
+
+        this.nextPage = function (item,dir){
+            var sum = 0, prev = item;
+            while(item != null && sum < this.visibleArea.height){
+                sum += (this.getIM(item).height + this.gapy);
+                prev = item;
+                item = dir < 0 ? this.findPrev(item) : this.findNext(item);
+            }
+            return prev;
+        };
+
+        this.paint = function(g){
+            if (this.model != null){
+                this.vVisibility();
+                if (this.firstVisible != null){
+                    var sx = this.scrollManager.getSX(), sy = this.scrollManager.getSY();
+                    try{
+                        g.translate(sx, sy);
+                        this.paintTree(g, this.firstVisible);
+                        g.translate(-sx,  -sy);
+                    }
+                    catch(e) {
+                        g.translate(-sx,  -sy);
+                        throw e;
+                    }
+                }
+            }
+        };
+
+        /**
+         * Select the given item.
+         * @param  {zebra.data.Item} an item to be selected. Use null value to clear any selection
+         * @method  select
+         */
+        this.select = function(item){
+            if (this.isSelectable == true && item != this.selected){
+                var old = this.selected;
+
+                this.selected = item;
+
+                if (this.selected != null) {
+                    this.makeVisible(this.selected);
+                }
+
+                this._.selected(this, this.selected);
+
+                if (old != null && this.isVerVisible(old)){
+                    var m = this.getItemMetrics(old);
+                    this.repaint(m.x + this.scrollManager.getSX(),
+                                 m.y + this.scrollManager.getSY(),
+                                 m.width, m.height);
+                }
+
+                if (this.selected != null && this.isVerVisible(this.selected)){
+                    var m = this.getItemMetrics(this.selected);
+                    this.repaint(m.x + this.scrollManager.getSX(),
+                                 m.y + this.scrollManager.getSY(),
+                                 m.width, m.height);
+                }
+            }
+        };
+
+        /**
+         * Make the given tree item visible. Tree component rendered content can takes more space than
+         * the UI component size is. In this case the content can be scrolled to make visible required
+         * tree item.
+         * @param  {zebra.data.Item} item an item to be visible
+         * @method makeVisible
+         */
+        this.makeVisible = function(item){
+            this.validate();
+            var r = this.getItemBounds(item);
+            this.scrollManager.makeVisible(r.x, r.y, r.width, r.height);
+        };
+
+        /**
+         * Toggle off or on recursively all items of the given item
+         * @param  {zebra.data.Item} root a starting item to toggle
+         * @param  {Boolean} b  true if all items have to be in opened
+         * state and false otherwise
+         * @method toggleAll
+         */
+        this.toggleAll = function (root,b){
+            var model = this.model;
+            if (root.kids.length > 0){
+                if (this.getItemMetrics(root).isOpen != b) this.toggle(root);
+                for(var i = 0;i < root.kids.length; i++ ){
+                    this.toggleAll(root.kids[i], b);
+                }
+            }
+        };
+
+        /**
+         * Toggle the given tree item
+         * @param  {zebra.data.Item} item an item to be toggled
+         * @method toggle
+         */
+        this.toggle = function(item){
+            if (item.kids.length > 0){
+                this.validate();
+                var node = this.getIM(item);
+                node.isOpen = (node.isOpen ? false : true);
+                this.invalidate();
+                this._.toggled(this, item);
+                if( !node.isOpen && this.selected != null){
+                    var parent = this.selected;
+                    do {
+                        parent = parent.parent;
+                    }
+                    while(parent != item && parent != null);
+                    if(parent == item) this.select(item);
+                }
+                this.repaint();
+            }
+        };
+
+        this.itemInserted = function (target,item){
+            this.vrp();
+        };
+
+        this.itemRemoved = function (target,item){
+            if (item == this.firstVisible) this.firstVisible = null;
+            if (item == this.selected) this.select(null);
+            delete this.nodes[item];
+            this.vrp();
+        };
+
+        this.itemModified = function (target,item){
+            var node = this.getIM(item);
+            if (node != null) node.viewWidth = -1;
+            this.vrp();
+        };
+
+        this.calcPreferredSize = function (target){
+            return this.model == null ? { width:0, height:0 }
+                                      : { width:this.maxw, height:this.maxh };
+        };
+    },
+
+    function () { this.$this(null); },
+    function (d){ this.$this(d, true);},
+
+    function (d,b){
+         /**
+          * Selected tree model item
+          * @attribute selected
+          * @type {zebra.data.Item}
+          * @default null
+          * @readOnly
+          */
+
+        this.selected = this.firstVisible = null;
+        this.maxw = this.maxh = 0;
+
+         /**
+          * Tree component line color
+          * @attribute lnColor
+          * @type {String}
+          * @readOnly
+          */
+
+        this.visibleArea = this.lnColor = null;
+
+        this.views     = {};
+        this.viewSizes = {};
+
+        this._isVal = false;
+        this.nodes = {};
+        this._ = new pkg.TreeListeners();
+        this.setLineColor("gray");
+
+        this.isOpenVal = b;
+
+        this.setSelectable(true);
+        this.$super();
+        this.setModel(d);
+        this.scrollManager = new ui.ScrollManager(this);
+    },
+
+    function focused(){
+        this.$super();
+        if (this.selected != null) {
+            var m = this.getItemMetrics(this.selected);
+            this.repaint(m.x + this.scrollManager.getSX(),
+                         m.y + this.scrollManager.getSY(), m.width, m.height);
+        }
+    },
+    /**
+     * Say if items of the tree component should be selectable
+     * @param {Boolean} b true is tree component items can be selected
+     * @method setSelectable
+     */
+    function setSelectable(b){
+        if (this.isSelectable != b){
+            if (b === false && this.selected != null) this.select(null);
+            this.isSelectable = b;
+            this.repaint();
+        }
+    },
+
+    /**
+     * Set tree component connector lines color
+     * @param {String} c a color
+     * @method setLineColor
+     */
+    function setLineColor(c){
+        this.lnColor = c;
+        this.repaint();
+    },
+
+    /**
+     * Set the given horizontal gaps between tree node graphical elements:
+     * toggle, icon, item view
+     * @param {Integer} gx horizontal gap
+     * @param {Integer} gy vertical gap
+     * @method setGaps
+     */
+    function setGaps(gx,gy){
+        if (gx != this.gapx || gy != this.gapy){
+            this.gapx = gx;
+            this.gapy = gy;
+            this.vrp();
+        }
+    },
+
+    /**
+     * Set the number of views to customize rendering of different visual elements of the tree
+     * UI component. The following decorative elements can be customized:
+
+    - **"close" ** - closed tree item icon view
+    - **"open" **  - opened tree item icon view
+    - **"leaf" **  - leaf tree item icon view
+    - **"on" **    - toggle on view
+    - **"off" **   - toggle off view
+    - **"iselect" **   - a view to express an item selection when tree component doesn't hold focus
+    - **"aselect" **   - a view to express an item selection when tree component holds focus
+
+     * For instance:
+
+        // build tree UI component
+        var tree = new zebra.ui.tree.Tree({
+            value: "Root",
+            kids: [
+                "Item 1",
+                "Item 2"
+            ]
+        });
+
+        // set " [x] " text render for toggle on and
+        // " [o] " text render for toggle off tree elements
+        tree.setViews({
+            "on": new zebra.ui.TextRender(" [x] "),
+            "off": new zebra.ui.TextRender(" [o] ")
+        });
+
+     * @param {Object} v dictionary of tree component decorative elements views
+     * @method setViews
+     */
+    function setViews(v){
+        for(var k in v) {
+            if (v.hasOwnProperty(k)) {
+                var vv = ui.$view(v[k]);
+
+                this.views[k] = vv;
+                if (k != "aselect" && k != "iselect"){
+                    this.viewSizes[k] = vv ? vv.getPreferredSize() : null;
+                    this.vrp();
+                }
+            }
+        }
+    },
+
+    /**
+     * Set the given tree model to be visualized with the UI component.
+     * @param {zebra.data.TreeModel|Object} d a tree model
+     * @method setModel
+     */
+    function setModel(d){
+        if (this.model != d) {
+            if (zebra.instanceOf(d, zebra.data.TreeModel) === false) {
+                d = new zebra.data.TreeModel(d);
+            }
+
+            this.select(null);
+            if (this.model != null && this.model._) this.model.bind(this);
+            this.model = d;
+            if (this.model != null && this.model._) this.model.bind(this);
+            this.firstVisible = null;
+            delete this.nodes;
+            this.nodes = {};
+            this.vrp();
+        }
+    },
+
+    function invalidate(){
+        if (this.isValid === true){
+            this._isVal = false;
+            this.$super();
+        }
+    }
+]);
+
+/**
+ * Default tree editor provider
+ * @class zebra.ui.tree.DefEditors
+ */
+pkg.DefEditors = Class([
+    function (){
+        /**
+         * Internal component that are designed as default editor component
+         * @private
+         * @readOnly
+         * @attribute tf
+         * @type {zebra.ui.TextField}
+         */
+        this.tf = new ui.TextField(new zebra.data.SingleLineTxt(""));
+        this.tf.setBackground("white");
+        this.tf.setBorder(null);
+        this.tf.setPadding(0);
+    },
+
+    function $prototype() {
+        /**
+         * Get an UI component to edit the given tree model element
+         * @param  {zebra.ui.tree.Tree} src a tree component
+         * @param  {zebra.data.Item} item an data model item
+         * @return {zebra.ui.Panel} an editor UI component
+         * @method getEditor
+         */
+        this.getEditor = function(src,item){
+            var o = item.value;
+            this.tf.setValue((o == null) ? "" : o.toString());
+            return this.tf;
+        };
+
+        /**
+         * Fetch a model item from the given UI editor component
+         * @param  {zebra.ui.tree.Tree} src a tree UI component
+         * @param  {zebra.ui.Panel} editor an editor that has been used to edit the tree model element
+         * @return {Object} an new tree model element value fetched from the given UI editor component
+         * @method fetchEditedValue
+         */
+        this.fetchEditedValue = function(src, editor){
+            return editor.view.target.getValue();
+        };
+
+        /**
+         * The method is called to ask if the given input event should trigger an tree component item
+         * @param  {zebra.ui.tree.Tree} src a tree UI component
+         * @param  {zebra.ui.MouseEvent|zebra.ui.KeyEvent} e   an input event: mouse or key event
+         * @return {Boolean} true if the event should trigger edition of a tree component item
+         * @method @shouldStartEdit
+         */
+        this.shouldStartEdit = function(src,e){
+            return (e.ID == ui.MouseEvent.CLICKED && e.clicks > 1) ||
+                   (e.ID == KE.PRESSED && e.code == KE.ENTER);
+        };
+    }
+]);
+
+/**
+ * Default tree editor view provider
+ * @class zebra.ui.tree.DefViews
+ * @constructor
+ * @param {String} [color] the tree item text color
+ * @param {String} [font] the tree item text font
+ */
+pkg.DefViews = Class([
+    function $prototype() {
+        /**
+         * Get a view for the given model item of the UI tree component
+         * @param  {zebra.ui.tree.Tree} tree  a tree component
+         * @param  {zebra.data.Item} item a tree model element
+         * @return {zebra.ui.View}  a view to visualize the given tree data model element
+         * @method  getView
+         */
+        this.getView = function (tree, item){
+            if (item.value && item.value.paint != null) {
+                return item.value;
+            }
+            this.render.setValue(item.value == null ? "<null>" : item.value);
+            return this.render;
+        };
+
+        /**
+         * Set the default view provider text render font
+         * @param {zebra.ui.Font} f a font
+         * @method setFont
+         */
+        this.setFont = function(f) {
+            this.render.setFont(f);
+        };
+
+        /**
+         * Set the default view provider text render color
+         * @param {String} c a color
+         * @method setColor
+         */
+        this.setColor = function(c) {
+            this.render.setColor(c);
+        };
+
+        this[''] = function(color, font) {
+            /**
+             * Default tree item render
+             * @attribute render
+             * @readOnly
+             * @type {zebra.ui.StringRender}
+             */
+            this.render = new ui.StringRender("");
+
+            zebra.properties(this, this.$clazz);
+
+            if (color != null) this.setColor(color);
+            if (font  != null) this.setFont(font);
+        };
+    }
+]);
+
+/**
+ * Tree UI component that visualizes a tree data model. The model itself can be passed as JavaScript
+ * structure or as a instance of zebra.data.TreeModel. Internally tree component keeps the model always
+ * as zebra.data.TreeModel class instance:
+
+     var tree = new zebra.ui.tree.Tree({
+          value: "Root",
+          kids : [  "Item 1", "Item 2"]
+     });
+
+ * or
+
+     var model = new zebra.data.TreeModel("Root");
+     model.add(model.root, "Item 1");
+     model.add(model.root, "Item 2");
+
+     var tree = new zebra.ui.tree.Tree(model);
+
+ * Tree model rendering is fully customizable by defining an own views provider. Default views
+ * provider renders tree model item as text. The tree node can be made editable by defining an
+ * editor provider. By default tree modes are not editable.
+ * @class  zebra.ui.tree.Tree
+ * @constructor
+ * @extends zebra.ui.tree.BaseTree
+ * @param {Object|zebra.data.TreeModel} [model] a tree data model passed as JavaScript
+ * structure or as an instance
+ * @param {Boolean} [b] the tree component items toggle state. true to have all items
+ * in opened state.
+ */
+pkg.Tree = Class(pkg.BaseTree, [
+    function $prototype() {
+        this.itemGapY = 2;
+        this.itemGapX = 4;
+
+        this.childInputEvent = function(e){
+            if (e.ID == KE.PRESSED){
+                if (e.code == KE.ESCAPE) {
+                    this.stopEditing(false);
+                }
+                else {
+                    if (e.code == KE.ENTER) {
+                        if ((zebra.instanceOf(e.source, ui.TextField) === false) ||
+                            (zebra.instanceOf(e.source.view.target, zebra.data.SingleLineTxt)))
+                        {
+                            this.stopEditing(true);
+                        }
+                    }
+                }
+            }
+        };
+
+        this.catchScrolled = function (psx, psy){
+            if (this.kids.length > 0) this.stopEditing(false);
+
+            if (this.firstVisible == null) this.firstVisible = this.model.root;
+            this.firstVisible = (this.y < psy) ? this.nextVisible(this.firstVisible)
+                                               : this.prevVisible(this.firstVisible);
+            this.repaint();
+        };
+
+        this.laidout = function() {
+            this.vVisibility();
+        };
+
+        this.getItemPreferredSize = function(root) {
+            var ps = this.provider.getView(this, root).getPreferredSize();
+            ps.width  += this.itemGapX * 2;
+            ps.height += this.itemGapY * 2;
+            return ps;
+        };
+
+        this.paintItem = function(g, root, node, x, y) {
+            if (root != this.editedItem){
+                var v = this.provider.getView(this, root);
+                v.paint(g, x + this.itemGapX, y + this.itemGapY,
+                        node.viewWidth, node.viewHeight, this);
+            }
+        };
+
+        /**
+         * Initiate the given item editing if the specified event matches condition
+         * @param  {zebra.data.Item} item an item to be edited
+         * @param  {zebra.ui.InputEvent} e an even that may trigger the item editing
+         * @return {Boolean}  return true if an item editing process has been started,
+         * false otherwise
+         * @method  se
+         * @private
+         */
+        this.se = function (item,e ){
+            if (item != null){
+                this.stopEditing(true);
+                if (this.editors != null && this.editors.shouldStartEdit(item, e)){
+                    this.startEditing(item);
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        this.mouseClicked = function(e){
+            if (this.se(this.pressedItem, e)) {
+                this.pressedItem = null;
+            }
+            else {
+                if (this.selected != null &&
+                    e.clicks > 1 && e.isActionMask() &&
+                   this.getItemAt(this.firstVisible, e.x, e.y) == this.selected)
+                {
+                    this.toggle(this.selected);
+                }
+            }
+        };
+
+        this.mouseReleased = function(e){
+            if (this.se(this.pressedItem, e)) this.pressedItem = null;
+        };
+
+        this.keyTyped = function(e){
+            if (this.selected != null){
+                switch(e.ch) {
+                    case '+': if (this.isOpen(this.selected) === false) {
+                        this.toggle(this.selected);
+                    } break;
+                    case '-': if (this.isOpen(this.selected)) {
+                        this.toggle(this.selected);
+                    } break;
+                }
+            }
+        };
+
+        this.keyPressed = function(e){
+            var newSelection = null;
+            switch(e.code) {
+                case KE.DOWN    :
+                case KE.RIGHT   : newSelection = this.findNext(this.selected);break;
+                case KE.UP      :
+                case KE.LEFT    : newSelection = this.findPrev(this.selected);break;
+                case KE.HOME    : if (e.isControlPressed()) this.select(this.model.root);break;
+                case KE.END     : if (e.isControlPressed()) this.select(this.findLast(this.model.root));break;
+                case KE.PAGEDOWN: if (this.selected != null) this.select(this.nextPage(this.selected, 1));break;
+                case KE.PAGEUP  : if (this.selected != null) this.select(this.nextPage(this.selected,  -1));break;
+                //!!!!case KE.ENTER: if(this.selected != null) this.toggle(this.selected);break;
+            }
+            if (newSelection != null) this.select(newSelection);
+            this.se(this.selected, e);
+        };
+
+        /**
+         * Start editing the given if an editor for the item has been defined.
+         * @param  {zebra.data.Item} item an item whose content has to be edited
+         * @method startEditing
+         * @protected
+         */
+        this.startEditing = function (item){
+            this.stopEditing(true);
+            if (this.editors != null){
+                var editor = this.editors.getEditor(this, item);
+                if (editor != null){
+                    this.editedItem = item;
+                    var b  = this.getItemBounds(this.editedItem),
+                        ps = editor.getPreferredSize();
+
+                    editor.setLocation(b.x + this.scrollManager.getSX() + this.itemGapX,
+                                       b.y - ~~((ps.height - b.height + 2 * this.itemGapY) / 2) +
+                                      this.scrollManager.getSY() + this.itemGapY);
+
+                    editor.setSize(ps.width, ps.height);
+                    this.add(editor);
+                    ui.focusManager.requestFocus(editor);
+                }
+            }
+        };
+
+        /**
+         * Stop editing currently edited tree item and apply or discard the result of the
+         * editing to tree data model.
+         * @param  {Boolean} true if the editing result has to be applied to tree data model
+         * @method stopEditing
+         * @protected
+         */
+        this.stopEditing = function(applyData){
+            if (this.editors != null && this.editedItem != null){
+                try {
+                    if (applyData)  {
+                        this.model.setValue(this.editedItem,
+                                            this.editors.fetchEditedValue(this.editedItem, this.kids[0]));
+                    }
+                }
+                finally{
+                    this.editedItem = null;
+                    this.removeAt(0);
+                    this.requestFocus();
+                }
+            }
+        };
+    },
+
+    function () { this.$this(null); },
+    function (d){ this.$this(d, true);},
+
+    function (d,b){
+        this.provider = this.editedItem = this.pressedItem = null;
+
+        /**
+         * A tree model items view provider
+         * @readOnly
+         * @attribute provider
+         * @default an instance of zebra.ui.tree.DefsViews
+         * @type {zebra.ui.tree.DefsViews}
+         */
+
+        /**
+         * A tree model editor provider
+         * @readOnly
+         * @attribute editors
+         * @default null
+         * @type {zebra.ui.tree.DefEditors}
+         */
+
+        this.editors = null;
+        this.setViewProvider(new pkg.DefViews());
+        this.$super(d, b);
+    },
+
+    function toggle() {
+        this.stopEditing(false);
+        this.$super();
+    },
+
+    function itemInserted(target,item){
+        this.stopEditing(false);
+        this.$super(target,item);
+    },
+
+    function itemRemoved(target,item){
+        this.stopEditing(false);
+        this.$super(target,item);
+    },
+
+    /**
+     * Set the given editor provider. The editor provider is a class that is used to decide which UI
+     * component has to be used as an item editor, how the editing should be triggered and how the
+     * edited value has to be fetched from an UI editor.
+     * @param {zebra.ui.tree.DefEditors} p an editor provider
+     * @method setEditorProvider
+     */
+    function setEditorProvider(p){
+        if (p != this.editors){
+            this.stopEditing(false);
+            this.editors = p;
+        }
+    },
+
+    /**
+     * Set tree component items view provider. Provider says how tree model items
+     * have to be visualized.
+     * @param {zebra.ui.tree.DefViews} p a view provider
+     * @method setViewProvider
+     */
+    function setViewProvider(p){
+        if (this.provider != p) {
+            this.stopEditing(false);
+            this.provider = p;
+            delete this.nodes;
+            this.nodes = {};
+            this.vrp();
+        }
+    },
+
+    /**
+     * Set the given tree model to be visualized with the UI component.
+     * @param {zebra.data.TreeModel|Object} d a tree model
+     * @method setModel
+     */
+    function setModel(d){
+        this.stopEditing(false);
+        this.$super(d);
+    },
+
+    function paintSelectedItem(g, root, node, x, y) {
+        if (root != this.editedItem) {
+            this.$super(g, root, node, x, y);
+        }
+    },
+
+    function itemPressed(root, e) {
+        this.$super(root, e);
+        if (this.se(root, e) === false) this.pressedItem = root;
+    },
+
+    function mousePressed(e){
+        this.pressedItem = null;
+        this.stopEditing(true);
+        this.$super(e);
+    }
+]);
+
+/**
+ * Component tree component that expects other UI components to be a tree model values. 
+ * In general the implementation lays out passed via tree model UI components as tree 
+ * component nodes. For instance:
+
+     var tree = new zebra.ui.tree.Tree({
+          value: new zebra.ui.Label("Label root item"),
+          kids : [
+                new zebra.ui.Checkbox("Checkbox Item"),
+                new zebra.ui.Button("Button item"),
+                new zebra.ui.Combo(["Combo item 1", "Combo item 2"])
+         ]
+     });
+
+ * But to prevent unexpected navigation it is better to use number of predefined 
+ * with component tree UI components: 
+
+   - zebra.ui.tree.CompTree.Label
+   - zebra.ui.tree.CompTree.Checkbox
+   - zebra.ui.tree.CompTree.Combo
+
+ * You can describe tree model keeping in mind special notation
+
+     var tree = new zebra.ui.tree.Tree({
+          value: "Label root item",  // zebra.ui.tree.CompTree.Label
+          kids : [
+                "[ ] Checkbox Item 1", // unchecked zebra.ui.tree.CompTree.Checkbox
+                "[x] Checkbox Item 2", // checked zebra.ui.tree.CompTree.Checkbox
+                ["Combo item 1", "Combo item 2"] // zebra.ui.tree.CompTree.Combo
+         ]
+     });
+
+ *
+ * @class  zebra.ui.tree.CompTree
+ * @constructor
+ * @extends zebra.ui.tree.BaseTree
+ * @param {Object|zebra.data.TreeModel} [model] a tree data model passed as JavaScript
+ * structure or as an instance
+ * @param {Boolean} [b] the tree component items toggle state. true to have all items
+ * in opened state.
+ */
+pkg.CompTree = Class(pkg.BaseTree, [
+    function $clazz() {
+        this.Label = Class(ui.Label, [
+            function $prototype() {
+                this.canHaveFocus = true;
+            }
+        ]);
+
+        this.Checkbox = Class(ui.Checkbox, []);
+
+        this.Combo = Class(ui.Combo, [
+            function keyPressed(e) {
+                if (e.code != KE.UP && e.code != KE.DOWN) this.$super(e);
+            }
+        ]);
+    },
+
+    function $prototype() {
+        this.canHaveFocus = false;
+
+        this.getItemPreferredSize = function(root) {
+            return root.value.getPreferredSize();
+        };
+
+        this.childInputEvent = function(e) {
+            if (this.isSelectable) {
+                if (e.ID == ui.InputEvent.FOCUS_LOST) {
+                    this.select(null);
+                    return;
+                }
+
+                if (e.ID == ui.InputEvent.FOCUS_GAINED || e.ID == ui.MouseEvent.PRESSED) {
+                    var $this = this;
+                    zebra.data.find(this.model.root, zebra.layout.getDirectChild(this, e.source), function(item) {
+                        $this.select(item);
+                        return true;
+                    });
+                    return;
+                }
+
+                if (e.ID  == KE.PRESSED) {
+                    var newSelection = (e.code == KE.DOWN) ? this.findNext(this.selected) 
+                                                           : (e.code == KE.UP) ? this.findPrev(this.selected): null;
+                    if (newSelection != null) {
+                        this.select(newSelection);
+                    }
+                    return;
+                }      
+            }
+
+            if (e.ID == KE.TYPED) {
+                if (this.selected != null){
+                    switch(e.ch) {
+                        case '+': if (this.isOpen(this.selected) === false) {
+                            this.toggle(this.selected);
+                        } break;
+                        case '-': if (this.isOpen(this.selected)) {
+                            this.toggle(this.selected);
+                        } break;
+                    }
+                }
+            }
+        };
+
+        this.catchScrolled = function(psx, psy){
+            this.vrp();
+        };
+
+        this.doLayout = function() {
+            this.vVisibility();
+
+            // hide all components
+            for(var i=0; i < this.kids.length; i++) {
+                this.kids[i].isVisible = false;
+            }
+
+            if (this.firstVisible != null) {
+                var $this = this, fvNode = this.getIM(this.firstVisible), started = 0;
+
+                this.model.iterate(this.model.root, function(item) {
+                    var node = $this.nodes[item];  // slightly improve performance (instead of calling $this.getIM(...))
+
+                    if (started === 0 && item == $this.firstVisible) {
+                        started = 1;
+                    }
+
+                    if (started === 1) {
+                        var sy = $this.scrollManager.getSY();
+
+                        if (node.y + sy < $this.height) {
+                            var image = $this.getIconBounds(item);
+
+                            item.value.x = image.x + image.width + (image.width > 0 || $this.getToggleSize().width > 0 ? $this.gapx : 0) + $this.scrollManager.getSX();
+                            item.value.y = node.y + ~~((node.height - node.viewHeight) / 2) + sy;
+                            item.value.isVisible = true;
+                            item.value.width  = node.viewWidth;
+                            item.value.height = node.viewHeight;
+                        }
+                        else {
+                            started = 2;
+                        }
+                    }
+
+                    return (started === 2) ? 2 :  (node.isOpen === false ? 1 : 0);
+                });
+            }
+        };
+    },
+
+    function itemInserted(target, item){
+        this.add(item.value);
+    },
+
+    function itemRemoved(target,item){
+        this.$super(target,item);
+        this.remove(item.value);
+    },
+
+    function setModel(d){
+        var old = this.model;
+        this.$super(d);
+
+        if (old != this.model) {
+            this.removeAll();
+
+            if (this.model != null) {
+                var $this = this;
+                this.model.iterate(this.model.root, function(item) {
+                    if (item.value == null ||
+                        zebra.isString(item.value))
+                    {
+                        if (item.value == null) item.value = "";
+                        item.value = item.value.trim();
+
+                        var m = item.value.match(/\[\s*(.*)\s*\](.*)/);
+
+                        if (m != null) {
+                            item.value = new $this.$clazz.Checkbox(m[2]);
+                            item.value.setValue(m[1].trim().length > 0);
+                        }
+                        else {
+                            item.value = new $this.$clazz.Label(item.value);
+                        }
+                    }
+                    else {
+                        if (Array.isArray(item.value)) {
+                            item.value = new $this.$clazz.Combo(item.value);
+                        }
+                    }
+
+                    $this.add(item.value);
+                });
+            }
+        }
+    },
+
+    function select(item) {
+        if (this.isSelectable && item != this.selected) {
+            var old = this.selected;
+
+            if (old != null && old.value.hasFocus()) {
+                ui.focusManager.requestFocus(null);
+            }
+
+            this.$super(item);
+
+            if (item != null) {
+                item.value.requestFocus();
+            }
+
+        }
+    },
+
+    function makeVisible(item) {
+       item.value.setVisible(true);
+       this.$super(item);
+    }
+]);
+
+/**
+ * Toggle view element class
+ * @class  zebra.ui.tree.TreeSignView
+ * @extends {zebra.ui.View}
+ * @constructor
+ * @param  {Boolean} plus indicates the sign type plus (true) or minus (false)
+ * @param  {String} color a color
+ * @param  {String} bg a background
+ */
+pkg.TreeSignView = Class(ui.View, [
+    function $prototype() {
+        this[''] = function(plus, color, bg) {
+            this.color = color == null ? "white" : color;
+            this.bg    = bg   == null ? "lightGray" : bg ;
+            this.plus  = plus == null ? false : plus;
+            this.br = new ui.Border("rgb(65, 131, 215)", 1, 3);
+            this.width = this.height = 12;
+        };
+
+        this.paint = function(g, x, y, w, h, d) {
+            this.br.outline(g, x, y, w, h, d);
+
+            g.setColor(this.bg);
+            g.fill();
+            this.br.paint(g, x, y, w, h, d);
+
+            g.setColor(this.color);
+            g.lineWidth = 2;
+            x+=2;
+            w-=4;
+            h-=4;
+            y+=2;
+            g.beginPath();
+            g.moveTo(x, y + h/2);
+            g.lineTo(x + w, y + h/2);
+            if (this.plus) {
+                g.moveTo(x + w/2, y);
+                g.lineTo(x + w/2, y + h);
+            }
+
+            g.stroke();
+            g.lineWidth = 1;
+        };
+
+        this.getPreferredSize = function() {
+            return { width:this.width, height:this.height};
+        };
+    }
+]);
+
+/**
+ * @for
+ */
+
+})(zebra("ui.tree"), zebra.Class, zebra.ui);
 (function(pkg, Class) {
 
 /**
@@ -24302,4767 +29011,321 @@ pkg.HtmlTextArea = Class(pkg.HtmlTextInput, [
  */
 
 })(zebra("ui"), zebra.Class);
-
-(function(pkg, Class, ui)  {
-
-/**
- * Tree UI components and all related to the component classes and interfaces.
- * Tree components are graphical representation of a tree model that allows a user
- * to navigate over the model item, customize the items rendering and
- * organize customizable editing of the items.
-
-        // create tree component instance to visualize the given tree model
-        var tree = new zebra.ui.tree.Tree({
-            value: "Root",
-            kids : [
-                "Item 1",
-                "Item 2",
-                "Item 3"
-            ]
-        });
-
-        // make all tree items editable with text field component
-        tree.setEditorProvider(new zebra.ui.tree.DefEditors());
-
- * One more tree  component implementation - "CompTree" - allows developers
- * to create tree whose nodes are  other UI components
-
-        // create tree component instance to visualize the given tree model
-        var tree = new zebra.ui.tree.CompTree({
-            value: new zebra.ui.Label("Root label item"),
-            kids : [
-                new zebra.ui.Checkbox("Checkbox Item"),
-                new zebra.ui.Button("Button Item"),
-                new zebra.ui.TextField("Text field item")
-            ]
-        });
-
- * @module ui.tree
- * @main
- */
-
-
-//  tree node metrics:
-//   |
-//   |-- <-gapx-> {icon} -- <-gapx-> {view}
-//
-//
-
-
-var KE = ui.KeyEvent;
-
-/**
- * Simple private structure to keep a tree model item metrical characteristics
- * @constructor
- * @param {Boolean} b a state of an appropriate tree component node of the given
- * tree model item. The state is sensible for item that has children items and
- * the state indicates if the given tree node is collapsed (false) or expanded
- * (true)
- * @private
- * @class zebra.ui.tree.$IM
- */
-pkg.$IM = function(b) {
-    /**
-     *  The whole width of tree node that includes a rendered item preferred
-     *  width, all icons and gaps widths
-     *  @attribute width
-     *  @type {Integer}
-     *  @readOnly
-     */
-
-    /**
-     *  The whole height of tree node that includes a rendered item preferred
-     *  height, all icons and gaps heights
-     *  @attribute height
-     *  @type {Integer}
-     *  @readOnly
-     */
-
-    /**
-     *  Width of an area of rendered tree model item. It excludes icons, toggle
-     *  and gaps widths
-     *  @attribute viewWidth
-     *  @type {Integer}
-     *  @readOnly
-     */
-
-    /**
-     *  Height of an area of rendered tree model item. It excludes icons, toggle
-     *  and gaps heights
-     *  @attribute viewHeight
-     *  @type {Integer}
-     *  @readOnly
-     */
-
-    /**
-     *  Indicates whether a node is in expanded or collapsed state
-     *  @attribute isOpen
-     *  @type {Boolean}
-     *  @readOnly
-     */
-
-    this.width = this.height = this.x = this.y = this.viewHeight = 0;
-    this.viewWidth = -1;
-    this.isOpen = b;
-};
-
-pkg.TreeListeners = zebra.util.ListenersClass("toggled", "selected");
-
-/**
- * Abstract tree component that can used as basement for building own tree components.
- * The component is responsible for rendering tree, calculating tree nodes metrics,
- * computing visible area, organizing basic user interaction. Classes that inherit it
- * has to provide the following important things:
-
-    * **A tree model item metric** Developers have to implement "getItemPreferredSize(item)"
-      method to say which size the given tree item wants to have.
-    * **Tree node item rendering** If necessary developers have to implement the way
-      a tree item has to be visualized by implementing "this.paintItem(...)" method
-
- *
- * @class zebra.ui.tree.BaseTree
- * @constructor
- * @param {zebra.data.TreeModel|Object} a tree model. It can be an instance of tree model
- * class or an object that described tree model. An example of such object is shown below:
-
-        {
-            value : "Root",
-            kids  : [
-                {
-                    value: "Child 1",
-                    kids :[
-                        "Sub child 1"
-                    ]
-                },
-                "Child 2",
-                "Child 3"
-            ]
-        }
-
- * @param {Boolean} [nodeState] a default tree nodes state (expanded or collapsed)
- * @extends {zebra.ui.Panel}
- */
-
- /**
-  * Fired when a tree item has been toggled
-
-        tree.bind(function toggled(src, item) {
-           ...
-        });
-
-  * @event toggled
-  * @param  {zebra.ui.tree.BaseTree} src an tree component that triggers the event
-  * @param  {zebra.data.Item} item an tree item that has been toggled
-  */
-
- /**
-  * Fired when a tree item has been selected
-
-      tree.bind(function selected(src, item) {
-         ...
-      });
-
-  * @event selected
-  * @param  {zebra.ui.tree.BaseTree} src an tree component that triggers the event
-  * @param  {zebra.data.Item} item an tree item that has been toggled
-  */
-pkg.BaseTree = Class(ui.Panel, [
-    function $prototype() {
-
-        /**
-         * Horizontal gap between a node elements: toggle, icons and tree item view
-         * @attribute gapx
-         * @readOnly
-         * @default 2
-         * @type {Integer}
-         */
-
-        /**
-         * Vertical gap between a node elements: toggle, icons and tree item view
-         * @attribute gapy
-         * @readOnly
-         * @default 2
-         * @type {Integer}
-         */
-
-        this.gapx = this.gapy = 2;
-        this.canHaveFocus = true;
-
-        /**
-         * Test if the given tree component item is opened
-         * @param  {zebra.data.Item}  i a tree model item
-         * @return {Boolean} true if the given tree component item is opened
-         * @method isOpen
-         */
-        this.isOpen = function(i){
-            this.validate();
-            return this.isOpen_(i);
-        };
-
-        /**
-         * Get calculated for the given tree model item metrics
-         * @param  {zebra.data.Item} i a tree item
-         * @return {Object}   an tree model item metrics. Th
-         * @method getItemMetrics
-         */
-        this.getItemMetrics = function(i){
-            this.validate();
-            return this.getIM(i);
-        };
-
-        this.togglePressed = function(root) {
-            this.toggle(root);
-        };
-
-        this.itemPressed = function(root, e) {
-            this.select(root);
-        };
-
-        this.mousePressed = function(e){
-            if (this.firstVisible != null && e.isActionMask()) {
-                var x = e.x,
-                    y = e.y,
-                    root = this.getItemAt(this.firstVisible, x, y);
-
-                if (root != null) {
-                    x -= this.scrollManager.getSX();
-                    y -= this.scrollManager.getSY();
-                    var r = this.getToggleBounds(root);
-
-                    if (x >= r.x && x < r.x + r.width && y >= r.y && y < r.y + r.height){
-                        this.togglePressed(root);
-                    }
-                    else {
-                        if (x > r.x + r.width) this.itemPressed(root, e);
-                    }
-                }
-            }
-        };
-
-        this.vVisibility = function (){
-            if (this.model == null) this.firstVisible = null;
-            else {
-                var nva = ui.$cvp(this, {});
-                if (nva == null) this.firstVisible = null;
-                else {
-                    if (this._isVal === false ||
-                        (this.visibleArea == null              ||
-                         this.visibleArea.x != nva.x           ||
-                         this.visibleArea.y != nva.y           ||
-                         this.visibleArea.width != nva.width   ||
-                         this.visibleArea.height != nva.height   ))
-                    {
-                        this.visibleArea = nva;
-                        if (this.firstVisible != null) {
-                            this.firstVisible = this.findOpened(this.firstVisible);
-                            this.firstVisible = this.isOverVisibleArea(this.firstVisible) ? this.nextVisible(this.firstVisible)
-                                                                                          : this.prevVisible(this.firstVisible);
-                        }
-                        else {
-                            this.firstVisible = (-this.scrollManager.getSY() > ~~(this.maxh / 2)) ? this.prevVisible(this.findLast(this.model.root))
-                                                                                                  : this.nextVisible(this.model.root);
-                        }
-                    }
-                }
-            }
-            this._isVal = true;
-        };
-
-        this.recalc = function(){
-            this.maxh = this.maxw = 0;
-            if (this.model != null && this.model.root != null) {
-                this.recalc_(this.getLeft(), this.getTop(), null, this.model.root, true);
-                this.maxw -= this.getLeft();
-                this.maxh -= this.gapy;
-            }
-        };
-
-        /**
-         * Get tree model item  metrical bounds (location and size).
-         * @param  {zebra.data.Item} root an tree model item
-         * @return {Object} a structure that keeps an item view location
-         * and size:
-
-                {
-                    x: {Integer},
-                    y: {Integer},
-                    width: {Integer},
-                    height: {Integer}
-                }
-
-         * @method getItemBounds
-         * @protected
-         */
-        this.getItemBounds = function(root){
-            var metrics = this.getIM(root),
-                toggle  = this.getToggleBounds(root),
-                image   = this.getIconBounds(root);
-
-            toggle.x = image.x + image.width + (image.width > 0 || toggle.width > 0 ? this.gapx : 0);
-            toggle.y = metrics.y + ~~((metrics.height - metrics.viewHeight) / 2);
-            toggle.width = metrics.viewWidth;
-            toggle.height = metrics.viewHeight;
-            return toggle;
-        };
-
-        /**
-         * Get toggle element bounds for the given tree model item.
-         * @param  {zebra.data.Item} root an tree model item
-         * @return {Object} a structure that keeps an item toggle location
-         * and size:
-
-                {
-                    x: {Integer},
-                    y: {Integer},
-                    width: {Integer},
-                    height: {Integer}
-                }
-
-         * @method getToggleBounds
-         * @protected
-         */
-        this.getToggleBounds = function(root){
-            var node = this.getIM(root), d = this.getToggleSize(root);
-            return { x:node.x, y:node.y + ~~((node.height - d.height) / 2), width:d.width, height:d.height };
-        };
-
-        /**
-         * Get current toggle element view. The view depends on the state of tree item.
-         * @param  {zebra.data.Item} i a tree model item
-         * @protected
-         * @return {zebra.ui.View}  a toggle element view
-         * @method getToogleView
-         */
-        this.getToggleView = function(i){
-            return i.kids.length > 0 ? (this.getIM(i).isOpen ? this.views["on"]
-                                                             : this.views["off"]) : null;
-        };
-
-        /**
-         * An abstract method that a concrete tree component implementations have to
-         * override. The method has to return a preferred size the given tree model
-         * item wants to have.
-         * @param  {zebra.data.Item} root an tree model item
-         * @return {Object} a structure that keeps an item preferred size:
-
-                {
-                    width: {Integer},
-                    height: {Integer}
-                }
-
-         * @method getItemPreferredSize
-         * @protected
-         */
-        this.getItemPreferredSize = function(root) {
-            throw new Error("Not implemented");
-        };
-
-        /**
-         * An abstract method that a concrete tree component implementations should
-         * override. The method has to render the given tree node of the specified
-         * tree model item at the given location
-         * @param  {2DContext} g a graphical context
-         * @param  {zebra.data.Item} root a tree model item to be rendered
-         * @param  {zebra.ui.tree.$IM} node a tree node metrics
-         * @param  {Ineteger} x a x location where the tree node has to be rendered
-         * @param  {Ineteger} y a y location where the tree node has to be rendered
-         * @method paintItem
-         * @protected
-         */
-
-        this.recalc_ = function (x,y,parent,root,isVis){
-            var node = this.getIM(root);
-            if (isVis === true) {
-                if (node.viewWidth < 0){
-                    var viewSize = this.getItemPreferredSize(root);
-                    node.viewWidth  = viewSize.width === 0 ? 5 : viewSize.width;
-                    node.viewHeight = viewSize.height;
-                }
-
-                var imageSize = this.getIconSize(root), toggleSize = this.getToggleSize(root);
-                if (parent != null){
-                    var pImg = this.getIconBounds(parent);
-                    x = pImg.x + ~~((pImg.width - toggleSize.width) / 2);
-                }
-
-                node.x = x;
-                node.y = y;
-                node.width = toggleSize.width + imageSize.width +
-                             node.viewWidth + (toggleSize.width > 0 ? this.gapx : 0) + 10 +
-                                              (imageSize.width  > 0 ? this.gapx : 0);
-
-                node.height = Math.max(((toggleSize.height > imageSize.height) ? toggleSize.height
-                                                                               : imageSize.height),
-                                        node.viewHeight);
-
-                if (node.x + node.width > this.maxw) {
-                    this.maxw = node.x + node.width;
-                }
-
-                this.maxh += (node.height + this.gapy);
-                x = node.x + toggleSize.width + (toggleSize.width > 0 ? this.gapx : 0);
-                y += (node.height + this.gapy);
-            }
-
-            var b = node.isOpen && isVis === true;
-            if (b) {
-                var count = root.kids.length;
-                for(var i = 0; i < count; i++) {
-                    y = this.recalc_(x, y, root, root.kids[i], b);
-                }
-            }
-            return y;
-        };
-
-        this.isOpen_ = function (i){
-            return i == null || (i.kids.length > 0 && this.getIM(i).isOpen && this.isOpen_(i.parent));
-        };
-
-        /**
-         * Get a tree node metrics by the given tree model item.
-         * @param  {zebra.data.Item} i a tree model item
-         * @return {zebra.ui.tree.$IM} a tree node metrics
-         * @protected
-         * @method getIM
-         */
-        this.getIM = function (i){
-            var node = this.nodes[i];
-            if (typeof node === 'undefined'){
-                node = new pkg.$IM(this.isOpenVal);
-                this.nodes[i] = node;
-            }
-            return node;
-        };
-
-        /**
-         * Get a tree item that is located at the given location.
-         * @param  {zebra.data.Item} [root] a starting tree node
-         * @param  {Integer} x a x coordinate
-         * @param  {Integer} y a y coordinate
-         * @return {zebra.data.Item} a tree model item
-         * @method getItemAt
-         */
-        this.getItemAt = function(root, x, y){
-            this.validate();
-
-            if (arguments.length < 3) {
-                x = arguments[0];
-                y = arguments[1];
-                root = this.model.root;
-            }
-
-            if (this.firstVisible != null && y >= this.visibleArea.y && y < this.visibleArea.y + this.visibleArea.height){
-                var dx    = this.scrollManager.getSX(),
-                    dy    = this.scrollManager.getSY(),
-                    found = this.getItemAtInBranch(root, x - dx, y - dy);
-
-                if (found != null) return found;
-
-                var parent = root.parent;
-                while (parent != null) {
-                    var count = parent.kids.length;
-                    for(var i = parent.kids.indexOf(root) + 1;i < count; i ++ ){
-                        found = this.getItemAtInBranch(parent.kids[i], x - dx, y - dy);
-                        if (found != null) return found;
-                    }
-                    root = parent;
-                    parent = root.parent;
-                }
-            }
-            return null;
-        };
-
-        this.getItemAtInBranch = function(root,x,y){
-            if (root != null){
-                var node = this.getIM(root);
-                if (x >= node.x && y >= node.y && x < node.x + node.width && y < node.y + node.height + this.gapy) {
-                    return root;
-                }
-
-                if (this.isOpen_(root)){
-                    for(var i = 0;i < root.kids.length; i++) {
-                        var res = this.getItemAtInBranch(root.kids[i], x, y);
-                        if (res != null) return res;
-                    }
-                }
-            }
-            return null;
-        };
-
-        this.getIconView = function (i){
-            return i.kids.length > 0 ? (this.getIM(i).isOpen ? this.views["open"]
-                                                             : this.views["close"])
-                                     : this.views["leaf"];
-        };
-
-        this.getIconSize = function (i) {
-            var v =  i.kids.length > 0 ? (this.getIM(i).isOpen ? this.viewSizes["open"]
-                                                               : this.viewSizes["close"])
-                                       : this.viewSizes["leaf"];
-            return v ? v : { width:0, height:0 };
-        };
-
-        /**
-         * Get icon element bounds for the given tree model item.
-         * @param  {zebra.data.Item} root an tree model item
-         * @return {Object} a structure that keeps an item icon location
-         * and size:
-
-                {
-                    x: {Integer},
-                    y: {Integer},
-                    width: {Integer},
-                    height: {Integer}
-                }
-
-         * @method getToggleBounds
-         * @protected
-         */
-        this.getIconBounds = function (root){
-            var node = this.getIM(root),
-                id   = this.getIconSize(root),
-                td   = this.getToggleSize(root);
-            return { x:node.x + td.width + (td.width > 0 ? this.gapx : 0),
-                     y:node.y + ~~((node.height - id.height) / 2),
-                     width:id.width, height:id.height };
-        };
-
-        this.getToggleSize = function (i){
-            return this.isOpen_(i) ? this.viewSizes["on"] : this.viewSizes["off"];
-        };
-
-        this.isOverVisibleArea = function (i){
-            var node = this.getIM(i);
-            return node.y + node.height + this.scrollManager.getSY() < this.visibleArea.y;
-        };
-
-        this.findOpened = function (item){
-            var parent = item.parent;
-            return (parent == null || this.isOpen_(parent)) ? item : this.findOpened(parent);
-        };
-
-        this.findNext = function (item){
-            if (item != null){
-                if (item.kids.length > 0 && this.isOpen_(item)){
-                    return item.kids[0];
-                }
-                var parent = null;
-                while ((parent = item.parent) != null){
-                    var index = parent.kids.indexOf(item);
-                    if (index + 1 < parent.kids.length) return parent.kids[index + 1];
-                    item = parent;
-                }
-            }
-            return null;
-        };
-
-        this.findPrev = function (item){
-            if (item != null) {
-                var parent = item.parent;
-                if (parent != null) {
-                    var index = parent.kids.indexOf(item);
-                    return (index - 1 >= 0) ? this.findLast(parent.kids[index - 1]) : parent;
-                }
-            }
-            return null;
-        };
-
-        this.findLast = function (item){
-            return this.isOpen_(item) && item.kids.length > 0 ? this.findLast(item.kids[item.kids.length - 1])
-                                                              : item;
-        };
-
-        this.prevVisible = function (item){
-            if (item == null || this.isOverVisibleArea(item)) return this.nextVisible(item);
-            var parent = null;
-            while((parent = item.parent) != null){
-                for(var i = parent.kids.indexOf(item) - 1;i >= 0; i-- ){
-                    var child = parent.kids[i];
-                    if (this.isOverVisibleArea(child)) return this.nextVisible(child);
-                }
-                item = parent;
-            }
-            return item;
-        };
-
-        this.isVerVisible = function (item){
-            if (this.visibleArea == null) return false;
-
-            var node = this.getIM(item),
-                yy1  = node.y + this.scrollManager.getSY(),
-                yy2  = yy1 + node.height - 1,
-                by   = this.visibleArea.y + this.visibleArea.height;
-
-            return ((this.visibleArea.y <= yy1 && yy1 < by) ||
-                    (this.visibleArea.y <= yy2 && yy2 < by) ||
-                    (this.visibleArea.y > yy1 && yy2 >= by)    );
-        };
-
-        this.nextVisible = function(item){
-            if (item == null || this.isVerVisible(item)) return item;
-            var res = this.nextVisibleInBranch(item), parent = null;
-            if (res != null) return res;
-            while((parent = item.parent) != null){
-                var count = parent.kids.length;
-                for(var i = parent.kids.indexOf(item) + 1;i < count; i++){
-                    res = this.nextVisibleInBranch(parent.kids[i]);
-                    if (res != null) return res;
-                }
-                item = parent;
-            }
-            return null;
-        };
-
-        this.nextVisibleInBranch = function (item){
-            if (this.isVerVisible(item)) return item;
-            if (this.isOpen_(item)){
-                for(var i = 0;i < item.kids.length; i++){
-                    var res = this.nextVisibleInBranch(item.kids[i]);
-                    if (res != null) return res;
-                }
-            }
-            return null;
-        };
-
-        this.paintSelectedItem = function(g, root, node, x, y) {
-            var v = this.views[this.hasFocus() ? "aselect" : "iselect"];
-            if (v != null) {
-                v.paint(g, x, y, node.viewWidth, node.viewHeight, this);
-            }
-        };
-
-        this.paintTree = function (g,item){
-            this.paintBranch(g, item);
-            var parent = null;
-            while((parent = item.parent) != null){
-                this.paintChild(g, parent, parent.kids.indexOf(item) + 1);
-                item = parent;
-            }
-        };
-
-        this.paintBranch = function (g, root){
-            if (root == null) return false;
-
-            var node = this.getIM(root),
-                dx   = this.scrollManager.getSX(),
-                dy   = this.scrollManager.getSY();
-
-            if (zebra.util.isIntersect(node.x + dx, node.y + dy,
-                                       node.width, node.height,
-                                       this.visibleArea.x, this.visibleArea.y,
-                                       this.visibleArea.width, this.visibleArea.height))
-            {
-                var toggle     = this.getToggleBounds(root),
-                    toggleView = this.getToggleView(root),
-                    image      = this.getIconBounds(root),
-                    vx         = image.x + image.width + this.gapx,
-                    vy         = node.y + ~~((node.height - node.viewHeight) / 2);
-
-                if (toggleView != null) {
-                    toggleView.paint(g, toggle.x, toggle.y, toggle.width, toggle.height, this);
-                }
-
-                if (image.width > 0) {
-                    this.getIconView(root).paint(g, image.x, image.y,
-                                                 image.width, image.height, this);
-                }
-
-                if (this.selected == root){
-                    this.paintSelectedItem(g, root, node, vx, vy);
-                }
-
-                if (this.paintItem != null) {
-                    this.paintItem(g, root, node, vx, vy);
-                }
-
-                if (this.lnColor != null){
-                    g.setColor(this.lnColor);
-                    var yy = toggle.y + ~~(toggle.height / 2) + 0.5;
-
-                    g.beginPath();
-                    g.moveTo(toggle.x + (toggleView == null ? ~~(toggle.width / 2) : toggle.width - 1), yy);
-                    g.lineTo(image.x, yy);
-                    g.stroke();
-                }
-            }
-            else {
-                if (node.y + dy > this.visibleArea.y + this.visibleArea.height ||
-                    node.x + dx > this.visibleArea.x + this.visibleArea.width    )
-                {
-                    return false;
-                }
-            }
-            return this.paintChild(g, root, 0);
-        };
-
-        this.y_ = function (item, isStart){
-            var node = this.getIM(item),
-                th = this.getToggleSize(item).height,
-                ty = node.y + ~~((node.height - th) / 2),
-                dy = this.scrollManager.getSY(),
-                y  = (item.kids.length > 0) ? (isStart ? ty + th : ty - 1) : ty + ~~(th / 2);
-
-            return (y + dy < 0) ?  -dy - 1
-                                : ((y + dy > this.height) ? this.height - dy : y);
-        };
-
-        /**
-         * Paint children items of the given root tree item.
-         * @param  {2DContext} g a graphical context
-         * @param  {zebra.data.Item} root a root tree item
-         * @param  {Integer} index an index
-         * @return {Boolean}
-         * @protected
-         * @method paintChild
-         */
-        this.paintChild = function (g, root, index){
-            var b = this.isOpen_(root);
-            if (root == this.firstVisible && this.lnColor != null){
-                g.setColor(this.lnColor);
-                var xx = this.getIM(root).x + ~~((b ? this.viewSizes["on"].width
-                                                    : this.viewSizes["off"].width) / 2);
-                g.beginPath();
-                g.moveTo(xx + 0.5, this.getTop());
-                g.lineTo(xx + 0.5, this.y_(root, false));
-                g.stroke();
-            }
-            if (b && root.kids.length > 0){
-                var firstChild = root.kids[0];
-                if (firstChild == null) return true;
-
-                var x = this.getIM(firstChild).x + ~~((this.isOpen_(firstChild) ? this.viewSizes["on"].width
-                                                                                : this.viewSizes["off"].width) / 2),
-                count = root.kids.length;
-                if (index < count) {
-                    var  node = this.getIM(root),
-                         y    = (index > 0) ? this.y_(root.kids[index - 1], true)
-                                            : node.y + ~~((node.height + this.getIconSize(root).height) / 2);
-
-                    for(var i = index;i < count; i ++ ){
-                        var child = root.kids[i];
-                        if (this.lnColor != null){
-                            g.setColor(this.lnColor);
-                            g.beginPath();
-                            g.moveTo(x + 0.5, y);
-                            g.lineTo(x + 0.5, this.y_(child, false));
-                            g.stroke();
-                            y = this.y_(child, true);
-                        }
-                        if (this.paintBranch(g, child) === false){
-                            if (this.lnColor != null && i + 1 != count){
-                                g.setColor(this.lnColor);
-                                g.beginPath();
-                                g.moveTo(x + 0.5, y);
-                                g.lineTo(x + 0.5, this.height - this.scrollManager.getSY());
-                                g.stroke();
-                            }
-                            return false;
-                        }
-                    }
-                }
-            }
-            return true;
-        };
-
-        this.nextPage = function (item,dir){
-            var sum = 0, prev = item;
-            while(item != null && sum < this.visibleArea.height){
-                sum += (this.getIM(item).height + this.gapy);
-                prev = item;
-                item = dir < 0 ? this.findPrev(item) : this.findNext(item);
-            }
-            return prev;
-        };
-
-        this.paint = function(g){
-            if (this.model != null){
-                this.vVisibility();
-                if (this.firstVisible != null){
-                    var sx = this.scrollManager.getSX(), sy = this.scrollManager.getSY();
-                    try{
-                        g.translate(sx, sy);
-                        this.paintTree(g, this.firstVisible);
-                    }
-                    finally{
-                        g.translate(-sx,  -sy);
-                    }
-                }
-            }
-        };
-
-        /**
-         * Select the given item.
-         * @param  {zebra.data.Item} an item to be selected. Use null value to clear any selection
-         * @method  select
-         */
-        this.select = function(item){
-            if (this.isSelectable == true && item != this.selected){
-                var old = this.selected;
-
-                this.selected = item;
-
-                if (this.selected != null) {
-                    this.makeVisible(this.selected);
-                }
-
-                this._.selected(this, this.selected);
-
-                if (old != null && this.isVerVisible(old)){
-                    var m = this.getItemMetrics(old);
-                    this.repaint(m.x + this.scrollManager.getSX(),
-                                 m.y + this.scrollManager.getSY(),
-                                 m.width, m.height);
-                }
-
-                if (this.selected != null && this.isVerVisible(this.selected)){
-                    var m = this.getItemMetrics(this.selected);
-                    this.repaint(m.x + this.scrollManager.getSX(),
-                                 m.y + this.scrollManager.getSY(),
-                                 m.width, m.height);
-                }
-            }
-        };
-
-        /**
-         * Make the given tree item visible. Tree component rendered content can takes more space than
-         * the UI component size is. In this case the content can be scrolled to make visible required
-         * tree item.
-         * @param  {zebra.data.Item} item an item to be visible
-         * @method makeVisible
-         */
-        this.makeVisible = function(item){
-            this.validate();
-            var r = this.getItemBounds(item);
-            this.scrollManager.makeVisible(r.x, r.y, r.width, r.height);
-        };
-
-        /**
-         * Toggle off or on recursively all items of the given item
-         * @param  {zebra.data.Item} root a starting item to toggle
-         * @param  {Boolean} b  true if all items have to be in opened
-         * state and false otherwise
-         * @method toggleAll
-         */
-        this.toggleAll = function (root,b){
-            var model = this.model;
-            if (root.kids.length > 0){
-                if (this.getItemMetrics(root).isOpen != b) this.toggle(root);
-                for(var i = 0;i < root.kids.length; i++ ){
-                    this.toggleAll(root.kids[i], b);
-                }
-            }
-        };
-
-        /**
-         * Toggle the given tree item
-         * @param  {zebra.data.Item} item an item to be toggled
-         * @method toggle
-         */
-        this.toggle = function(item){
-            if (item.kids.length > 0){
-                this.validate();
-                var node = this.getIM(item);
-                node.isOpen = (node.isOpen ? false : true);
-                this.invalidate();
-                this._.toggled(this, item);
-                if( !node.isOpen && this.selected != null){
-                    var parent = this.selected;
-                    do {
-                        parent = parent.parent;
-                    }
-                    while(parent != item && parent != null);
-                    if(parent == item) this.select(item);
-                }
-                this.repaint();
-            }
-        };
-
-        this.itemInserted = function (target,item){
-            this.vrp();
-        };
-
-        this.itemRemoved = function (target,item){
-            if (item == this.firstVisible) this.firstVisible = null;
-            if (item == this.selected) this.select(null);
-            delete this.nodes[item];
-            this.vrp();
-        };
-
-        this.itemModified = function (target,item){
-            var node = this.getIM(item);
-            if (node != null) node.viewWidth = -1;
-            this.vrp();
-        };
-
-        this.calcPreferredSize = function (target){
-            return this.model == null ? { width:0, height:0 }
-                                      : { width:this.maxw, height:this.maxh };
-        };
-    },
-
-    function () { this.$this(null); },
-    function (d){ this.$this(d, true);},
-
-    function (d,b){
-         /**
-          * Selected tree model item
-          * @attribute selected
-          * @type {zebra.data.Item}
-          * @default null
-          * @readOnly
-          */
-
-        this.selected = this.firstVisible = null;
-        this.maxw = this.maxh = 0;
-
-         /**
-          * Tree component line color
-          * @attribute lnColor
-          * @type {String}
-          * @readOnly
-          */
-
-        this.visibleArea = this.lnColor = null;
-
-        this.views     = {};
-        this.viewSizes = {};
-
-        this._isVal = false;
-        this.nodes = {};
-        this._ = new pkg.TreeListeners();
-        this.setLineColor("gray");
-
-        this.isOpenVal = b;
-
-        this.setSelectable(true);
-        this.$super();
-        this.setModel(d);
-        this.scrollManager = new ui.ScrollManager(this);
-    },
-
-    function focused(){
-        this.$super();
-        if (this.selected != null) {
-            var m = this.getItemMetrics(this.selected);
-            this.repaint(m.x + this.scrollManager.getSX(),
-                         m.y + this.scrollManager.getSY(), m.width, m.height);
-        }
-    },
-    /**
-     * Say if items of the tree component should be selectable
-     * @param {Boolean} b true is tree component items can be selected
-     * @method setSelectable
-     */
-    function setSelectable(b){
-        if (this.isSelectable != b){
-            if (b === false && this.selected != null) this.select(null);
-            this.isSelectable = b;
-            this.repaint();
-        }
-    },
-
-    /**
-     * Set tree component connector lines color
-     * @param {String} c a color
-     * @method setLineColor
-     */
-    function setLineColor(c){
-        this.lnColor = c;
-        this.repaint();
-    },
-
-    /**
-     * Set the given horizontal gaps between tree node graphical elements:
-     * toggle, icon, item view
-     * @param {Integer} gx horizontal gap
-     * @param {Integer} gy vertical gap
-     * @method setGaps
-     */
-    function setGaps(gx,gy){
-        if (gx != this.gapx || gy != this.gapy){
-            this.gapx = gx;
-            this.gapy = gy;
-            this.vrp();
-        }
-    },
-
-    /**
-     * Set the number of views to customize rendering of different visual elements of the tree
-     * UI component. The following decorative elements can be customized:
-
-    - **"close" ** - closed tree item icon view
-    - **"open" **  - opened tree item icon view
-    - **"leaf" **  - leaf tree item icon view
-    - **"on" **    - toggle on view
-    - **"off" **   - toggle off view
-    - **"iselect" **   - a view to express an item selection when tree component doesn't hold focus
-    - **"aselect" **   - a view to express an item selection when tree component holds focus
-
-     * For instance:
-
-        // build tree UI component
-        var tree = new zebra.ui.tree.Tree({
-            value: "Root",
-            kids: [
-                "Item 1",
-                "Item 2"
-            ]
-        });
-
-        // set " [x] " text render for toggle on and
-        // " [o] " text render for toggle off tree elements
-        tree.setViews({
-            "on": new zebra.ui.TextRender(" [x] "),
-            "off": new zebra.ui.TextRender(" [o] ")
-        });
-
-     * @param {Object} v dictionary of tree component decorative elements views
-     * @method setViews
-     */
-    function setViews(v){
-        for(var k in v) {
-            if (v.hasOwnProperty(k)) {
-                var vv = ui.$view(v[k]);
-
-                this.views[k] = vv;
-                if (k != "aselect" && k != "iselect"){
-                    this.viewSizes[k] = vv ? vv.getPreferredSize() : null;
-                    this.vrp();
-                }
-            }
-        }
-    },
-
-    /**
-     * Set the given tree model to be visualized with the UI component.
-     * @param {zebra.data.TreeModel|Object} d a tree model
-     * @method setModel
-     */
-    function setModel(d){
-        if (this.model != d) {
-            if (zebra.instanceOf(d, zebra.data.TreeModel) === false) {
-                d = new zebra.data.TreeModel(d);
-            }
-
-            this.select(null);
-            if (this.model != null && this.model._) this.model.bind(this);
-            this.model = d;
-            if (this.model != null && this.model._) this.model.bind(this);
-            this.firstVisible = null;
-            delete this.nodes;
-            this.nodes = {};
-            this.vrp();
-        }
-    },
-
-    function invalidate(){
-        if (this.isValid === true){
-            this._isVal = false;
-            this.$super();
-        }
-    }
-]);
-
-/**
- * Default tree editor provider
- * @class zebra.ui.tree.DefEditors
- */
-pkg.DefEditors = Class([
-    function (){
-        /**
-         * Internal component that are designed as default editor component
-         * @private
-         * @readOnly
-         * @attribute tf
-         * @type {zebra.ui.TextField}
-         */
-        this.tf = new ui.TextField(new zebra.data.SingleLineTxt(""));
-        this.tf.setBackground("white");
-        this.tf.setBorder(null);
-        this.tf.setPadding(0);
-    },
-
-    function $prototype() {
-        /**
-         * Get an UI component to edit the given tree model element
-         * @param  {zebra.ui.tree.Tree} src a tree component
-         * @param  {zebra.data.Item} item an data model item
-         * @return {zebra.ui.Panel} an editor UI component
-         * @method getEditor
-         */
-        this.getEditor = function(src,item){
-            var o = item.value;
-            this.tf.setValue((o == null) ? "" : o.toString());
-            return this.tf;
-        };
-
-        /**
-         * Fetch a model item from the given UI editor component
-         * @param  {zebra.ui.tree.Tree} src a tree UI component
-         * @param  {zebra.ui.Panel} editor an editor that has been used to edit the tree model element
-         * @return {Object} an new tree model element value fetched from the given UI editor component
-         * @method fetchEditedValue
-         */
-        this.fetchEditedValue = function(src, editor){
-            return editor.view.target.getValue();
-        };
-
-        /**
-         * The method is called to ask if the given input event should trigger an tree component item
-         * @param  {zebra.ui.tree.Tree} src a tree UI component
-         * @param  {zebra.ui.MouseEvent|zebra.ui.KeyEvent} e   an input event: mouse or key event
-         * @return {Boolean} true if the event should trigger edition of a tree component item
-         * @method @shouldStartEdit
-         */
-        this.shouldStartEdit = function(src,e){
-            return (e.ID == ui.MouseEvent.CLICKED && e.clicks > 1) ||
-                   (e.ID == KE.PRESSED && e.code == KE.ENTER);
-        };
-    }
-]);
-
-/**
- * Default tree editor view provider
- * @class zebra.ui.tree.DefViews
- * @constructor
- * @param {String} [color] the tree item text color
- * @param {String} [font] the tree item text font
- */
-pkg.DefViews = Class([
-    function $prototype() {
-        /**
-         * Get a view for the given model item of the UI tree component
-         * @param  {zebra.ui.tree.Tree} tree  a tree component
-         * @param  {zebra.data.Item} item a tree model element
-         * @return {zebra.ui.View}  a view to visualize the given tree data model element
-         * @method  getView
-         */
-        this.getView = function (tree, item){
-            if (item.value && item.value.paint != null) {
-                return item.value;
-            }
-            this.render.setValue(item.value == null ? "<null>" : item.value);
-            return this.render;
-        };
-
-        /**
-         * Set the default view provider text render font
-         * @param {zebra.ui.Font} f a font
-         * @method setFont
-         */
-        this.setFont = function(f) {
-            this.render.setFont(f);
-        };
-
-        /**
-         * Set the default view provider text render color
-         * @param {String} c a color
-         * @method setColor
-         */
-        this.setColor = function(c) {
-            this.render.setColor(c);
-        };
-
-        this[''] = function(color, font) {
-            /**
-             * Default tree item render
-             * @attribute render
-             * @readOnly
-             * @type {zebra.ui.StringRender}
-             */
-            this.render = new ui.StringRender("");
-
-            zebra.properties(this, this.$clazz);
-
-            if (color != null) this.setColor(color);
-            if (font  != null) this.setFont(font);
-        };
-    }
-]);
-
-/**
- * Tree UI component that visualizes a tree data model. The model itself can be passed as JavaScript
- * structure or as a instance of zebra.data.TreeModel. Internally tree component keeps the model always
- * as zebra.data.TreeModel class instance:
-
-     var tree = new zebra.ui.tree.Tree({
-          value: "Root",
-          kids : [  "Item 1", "Item 2"]
-     });
-
- * or
-
-     var model = new zebra.data.TreeModel("Root");
-     model.add(model.root, "Item 1");
-     model.add(model.root, "Item 2");
-
-     var tree = new zebra.ui.tree.Tree(model);
-
- * Tree model rendering is fully customizable by defining an own views provider. Default views
- * provider renders tree model item as text. The tree node can be made editable by defining an
- * editor provider. By default tree modes are not editable.
- * @class  zebra.ui.tree.Tree
- * @constructor
- * @extends zebra.ui.tree.BaseTree
- * @param {Object|zebra.data.TreeModel} [model] a tree data model passed as JavaScript
- * structure or as an instance
- * @param {Boolean} [b] the tree component items toggle state. true to have all items
- * in opened state.
- */
-pkg.Tree = Class(pkg.BaseTree, [
-    function $prototype() {
-        this.itemGapY = 2;
-        this.itemGapX = 4;
-
-        this.childInputEvent = function(e){
-            if (e.ID == KE.PRESSED){
-                if (e.code == KE.ESCAPE) {
-                    this.stopEditing(false);
-                }
-                else {
-                    if (e.code == KE.ENTER) {
-                        if ((zebra.instanceOf(e.source, ui.TextField) === false) ||
-                            (zebra.instanceOf(e.source.view.target, zebra.data.SingleLineTxt)))
-                        {
-                            this.stopEditing(true);
-                        }
-                    }
-                }
-            }
-        };
-
-        this.catchScrolled = function (psx, psy){
-            if (this.kids.length > 0) this.stopEditing(false);
-
-            if (this.firstVisible == null) this.firstVisible = this.model.root;
-            this.firstVisible = (this.y < psy) ? this.nextVisible(this.firstVisible)
-                                               : this.prevVisible(this.firstVisible);
-            this.repaint();
-        };
-
-        this.laidout = function() {
-            this.vVisibility();
-        };
-
-        this.getItemPreferredSize = function(root) {
-            var ps = this.provider.getView(this, root).getPreferredSize();
-            ps.width  += this.itemGapX * 2;
-            ps.height += this.itemGapY * 2;
-            return ps;
-        };
-
-        this.paintItem = function(g, root, node, x, y) {
-            if (root != this.editedItem){
-                var v = this.provider.getView(this, root);
-                v.paint(g, x + this.itemGapX, y + this.itemGapY,
-                        node.viewWidth, node.viewHeight, this);
-            }
-        };
-
-        /**
-         * Initiate the given item editing if the specified event matches condition
-         * @param  {zebra.data.Item} item an item to be edited
-         * @param  {zebra.ui.InputEvent} e an even that may trigger the item editing
-         * @return {Boolean}  return true if an item editing process has been started,
-         * false otherwise
-         * @method  se
-         * @private
-         */
-        this.se = function (item,e ){
-            if (item != null){
-                this.stopEditing(true);
-                if (this.editors != null && this.editors.shouldStartEdit(item, e)){
-                    this.startEditing(item);
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        this.mouseClicked = function(e){
-            if (this.se(this.pressedItem, e)) {
-                this.pressedItem = null;
-            }
-            else {
-                if (this.selected != null &&
-                    e.clicks > 1 && e.isActionMask() &&
-                   this.getItemAt(this.firstVisible, e.x, e.y) == this.selected)
-                {
-                    this.toggle(this.selected);
-                }
-            }
-        };
-
-        this.mouseReleased = function(e){
-            if (this.se(this.pressedItem, e)) this.pressedItem = null;
-        };
-
-        this.keyTyped = function(e){
-            if (this.selected != null){
-                switch(e.ch) {
-                    case '+': if (this.isOpen(this.selected) === false) {
-                        this.toggle(this.selected);
-                    } break;
-                    case '-': if (this.isOpen(this.selected)) {
-                        this.toggle(this.selected);
-                    } break;
-                }
-            }
-        };
-
-        this.keyPressed = function(e){
-            var newSelection = null;
-            switch(e.code) {
-                case KE.DOWN    :
-                case KE.RIGHT   : newSelection = this.findNext(this.selected);break;
-                case KE.UP      :
-                case KE.LEFT    : newSelection = this.findPrev(this.selected);break;
-                case KE.HOME    : if (e.isControlPressed()) this.select(this.model.root);break;
-                case KE.END     : if (e.isControlPressed()) this.select(this.findLast(this.model.root));break;
-                case KE.PAGEDOWN: if (this.selected != null) this.select(this.nextPage(this.selected, 1));break;
-                case KE.PAGEUP  : if (this.selected != null) this.select(this.nextPage(this.selected,  -1));break;
-                //!!!!case KE.ENTER: if(this.selected != null) this.toggle(this.selected);break;
-            }
-            if (newSelection != null) this.select(newSelection);
-            this.se(this.selected, e);
-        };
-
-        /**
-         * Start editing the given if an editor for the item has been defined.
-         * @param  {zebra.data.Item} item an item whose content has to be edited
-         * @method startEditing
-         * @protected
-         */
-        this.startEditing = function (item){
-            this.stopEditing(true);
-            if (this.editors != null){
-                var editor = this.editors.getEditor(this, item);
-                if (editor != null){
-                    this.editedItem = item;
-                    var b  = this.getItemBounds(this.editedItem),
-                        ps = editor.getPreferredSize();
-
-                    editor.setLocation(b.x + this.scrollManager.getSX() + this.itemGapX,
-                                       b.y - ~~((ps.height - b.height + 2 * this.itemGapY) / 2) + this.scrollManager.getSY() + this.itemGapY);
-
-                    editor.setSize(ps.width, ps.height);
-                    this.add(editor);
-                    ui.focusManager.requestFocus(editor);
-                }
-            }
-        };
-
-        /**
-         * Stop editing currently edited tree item and apply or discard the result of the
-         * editing to tree data model.
-         * @param  {Boolean} true if the editing result has to be applied to tree data model
-         * @method stopEditing
-         * @protected
-         */
-        this.stopEditing = function(applyData){
-            if (this.editors != null && this.editedItem != null){
-                try {
-                    if (applyData)  {
-                        this.model.setValue(this.editedItem, this.editors.fetchEditedValue(this.editedItem, this.kids[0]));
-                    }
-                }
-                finally{
-                    this.editedItem = null;
-                    this.removeAt(0);
-                    this.requestFocus();
-                }
-            }
-        };
-    },
-
-    function () { this.$this(null); },
-    function (d){ this.$this(d, true);},
-
-    function (d,b){
-        this.provider = this.editedItem = this.pressedItem = null;
-
-        /**
-         * A tree model items view provider
-         * @readOnly
-         * @attribute provider
-         * @default an instance of zebra.ui.tree.DefsViews
-         * @type {zebra.ui.tree.DefsViews}
-         */
-
-        /**
-         * A tree model editor provider
-         * @readOnly
-         * @attribute editors
-         * @default null
-         * @type {zebra.ui.tree.DefEditors}
-         */
-
-        this.editors = null;
-        this.setViewProvider(new pkg.DefViews());
-        this.$super(d, b);
-    },
-
-    function toggle() {
-        this.stopEditing(false);
-        this.$super();
-    },
-
-    function itemInserted(target,item){
-        this.stopEditing(false);
-        this.$super(target,item);
-    },
-
-    function itemRemoved(target,item){
-        this.stopEditing(false);
-        this.$super(target,item);
-    },
-
-    /**
-     * Set the given editor provider. The editor provider is a class that is used to decide which UI
-     * component has to be used as an item editor, how the editing should be triggered and how the
-     * edited value has to be fetched from an UI editor.
-     * @param {zebra.ui.tree.DefEditors} p an editor provider
-     * @method setEditorProvider
-     */
-    function setEditorProvider(p){
-        if (p != this.editors){
-            this.stopEditing(false);
-            this.editors = p;
-        }
-    },
-
-    /**
-     * Set tree component items view provider. Provider says how tree model items
-     * have to be visualized.
-     * @param {zebra.ui.tree.DefViews} p a view provider
-     * @method setViewProvider
-     */
-    function setViewProvider(p){
-        if (this.provider != p) {
-            this.stopEditing(false);
-            this.provider = p;
-            delete this.nodes;
-            this.nodes = {};
-            this.vrp();
-        }
-    },
-
-    /**
-     * Set the given tree model to be visualized with the UI component.
-     * @param {zebra.data.TreeModel|Object} d a tree model
-     * @method setModel
-     */
-    function setModel(d){
-        this.stopEditing(false);
-        this.$super(d);
-    },
-
-    function paintSelectedItem(g, root, node, x, y) {
-        if (root != this.editedItem) {
-            this.$super(g, root, node, x, y);
-        }
-    },
-
-    function itemPressed(root, e) {
-        this.$super(root, e);
-        if (this.se(root, e) === false) this.pressedItem = root;
-    },
-
-    function mousePressed(e){
-        this.pressedItem = null;
-        this.stopEditing(true);
-        this.$super(e);
-    }
-]);
-
-/**
- * Component tree component that expects other UI components to be a tree model values. 
- * In general the implementation lays out passed via tree model UI components as tree 
- * component nodes. For instance:
-
-     var tree = new zebra.ui.tree.Tree({
-          value: new zebra.ui.Label("Label root item"),
-          kids : [
-                new zebra.ui.Checkbox("Checkbox Item"),
-                new zebra.ui.Button("Button item"),
-                new zebra.ui.Combo(["Combo item 1", "Combo item 2"])
-         ]
-     });
-
- * But to prevent unexpected navigation it is better to use number of predefined 
- * with component tree UI components: 
-
-   - zebra.ui.tree.CompTree.Label
-   - zebra.ui.tree.CompTree.Checkbox
-   - zebra.ui.tree.CompTree.Combo
-
- * You can describe tree model keeping in mind special notation
-
-     var tree = new zebra.ui.tree.Tree({
-          value: "Label root item",  // zebra.ui.tree.CompTree.Label
-          kids : [
-                "[ ] Checkbox Item 1", // unchecked zebra.ui.tree.CompTree.Checkbox
-                "[x] Checkbox Item 2", // checked zebra.ui.tree.CompTree.Checkbox
-                ["Combo item 1", "Combo item 2"] // zebra.ui.tree.CompTree.Combo
-         ]
-     });
-
- *
- * @class  zebra.ui.tree.CompTree
- * @constructor
- * @extends zebra.ui.tree.BaseTree
- * @param {Object|zebra.data.TreeModel} [model] a tree data model passed as JavaScript
- * structure or as an instance
- * @param {Boolean} [b] the tree component items toggle state. true to have all items
- * in opened state.
- */
-pkg.CompTree = Class(pkg.BaseTree, [
-    function $clazz() {
-        this.Label = Class(ui.Label, [
-            function $prototype() {
-                this.canHaveFocus = true;
-            }
-        ]);
-
-        this.Checkbox = Class(ui.Checkbox, []);
-
-        this.Combo = Class(ui.Combo, [
-            function keyPressed(e) {
-                if (e.code != KE.UP && e.code != KE.DOWN) this.$super(e);
-            }
-        ]);
-    },
-
-    function $prototype() {
-        this.canHaveFocus = false;
-
-        this.getItemPreferredSize = function(root) {
-            return root.value.getPreferredSize();
-        };
-
-        this.childInputEvent = function(e) {
-            if (this.isSelectable) {
-                if (e.ID == ui.InputEvent.FOCUS_LOST) {
-                    this.select(null);
-                    return;
-                }
-
-                if (e.ID == ui.InputEvent.FOCUS_GAINED || e.ID == ui.MouseEvent.PRESSED) {
-                    var $this = this;
-                    zebra.data.find(this.model.root, zebra.layout.getDirectChild(this, e.source), function(item) {
-                        $this.select(item);
-                        return true;
-                    });
-                    return;
-                }
-
-                if (e.ID  == KE.PRESSED) {
-                    var newSelection = (e.code == KE.DOWN) ? this.findNext(this.selected) 
-                                                           : (e.code == KE.UP) ? this.findPrev(this.selected): null;
-                    if (newSelection != null) {
-                        this.select(newSelection);
-                    }
-                    return;
-                }      
-            }
-
-            if (e.ID == KE.TYPED) {
-                if (this.selected != null){
-                    switch(e.ch) {
-                        case '+': if (this.isOpen(this.selected) === false) {
-                            this.toggle(this.selected);
-                        } break;
-                        case '-': if (this.isOpen(this.selected)) {
-                            this.toggle(this.selected);
-                        } break;
-                    }
-                }
-            }
-        };
-
-        this.catchScrolled = function(psx, psy){
-            this.vrp();
-        };
-
-        this.doLayout = function() {
-            this.vVisibility();
-
-            // hide all components
-            for(var i=0; i < this.kids.length; i++) {
-                this.kids[i].isVisible = false;
-            }
-
-            if (this.firstVisible != null) {
-                var $this = this, fvNode = this.getIM(this.firstVisible), started = 0;
-
-                this.model.iterate(this.model.root, function(item) {
-                    var node = $this.nodes[item];  // slightly improve performance (instead of calling $this.getIM(...))
-
-                    if (started === 0 && item == $this.firstVisible) {
-                        started = 1;
-                    }
-
-                    if (started === 1) {
-                        var sy = $this.scrollManager.getSY();
-
-                        if (node.y + sy < $this.height) {
-                            var image = $this.getIconBounds(item);
-
-                            item.value.x = image.x + image.width + (image.width > 0 || $this.getToggleSize().width > 0 ? $this.gapx : 0) + $this.scrollManager.getSX();
-                            item.value.y = node.y + ~~((node.height - node.viewHeight) / 2) + sy;
-                            item.value.isVisible = true;
-                            item.value.width  = node.viewWidth;
-                            item.value.height = node.viewHeight;
-                        }
-                        else {
-                            started = 2;
-                        }
-                    }
-
-                    return (started === 2) ? 2 :  (node.isOpen === false ? 1 : 0);
-                });
-            }
-        };
-    },
-
-    function itemInserted(target, item){
-        this.add(item.value);
-    },
-
-    function itemRemoved(target,item){
-        this.$super(target,item);
-        this.remove(item.value);
-    },
-
-    function setModel(d){
-        var old = this.model;
-        this.$super(d);
-
-        if (old != this.model) {
-            this.removeAll();
-
-            if (this.model != null) {
-                var $this = this;
-                this.model.iterate(this.model.root, function(item) {
-                    if (item.value == null ||
-                        zebra.isString(item.value))
-                    {
-                        if (item.value == null) item.value = "";
-                        item.value = item.value.trim();
-
-                        var m = item.value.match(/\[\s*(.*)\s*\](.*)/);
-
-                        if (m != null) {
-                            item.value = new $this.$clazz.Checkbox(m[2]);
-                            item.value.setValue(m[1].trim().length > 0);
-                        }
-                        else {
-                            item.value = new $this.$clazz.Label(item.value);
-                        }
-                    }
-                    else {
-                        if (Array.isArray(item.value)) {
-                            item.value = new $this.$clazz.Combo(item.value);
-                        }
-                    }
-
-                    $this.add(item.value);
-                });
-            }
-        }
-    },
-
-    function select(item) {
-        if (this.isSelectable && item != this.selected) {
-            var old = this.selected;
-
-            if (old != null && old.value.hasFocus()) {
-                ui.focusManager.requestFocus(null);
-            }
-
-            this.$super(item);
-
-            if (item != null) {
-                item.value.requestFocus();
-            }
-
-        }
-    },
-
-    function makeVisible(item) {
-       item.value.setVisible(true);
-       this.$super(item);
-    }
-]);
-
-/**
- * Toggle view element class
- * @class  zebra.ui.tree.TreeSignView
- * @extends {zebra.ui.View}
- * @constructor
- * @param  {Boolean} plus indicates the sign type plus (true) or minus (false)
- * @param  {String} color a color
- * @param  {String} bg a background
- */
-pkg.TreeSignView = Class(ui.View, [
-    function $prototype() {
-        this[''] = function(plus, color, bg) {
-            this.color = color == null ? "white" : color;
-            this.bg    = bg   == null ? "lightGray" : bg ;
-            this.plus  = plus == null ? false : plus;
-            this.br = new ui.Border("rgb(65, 131, 215)", 1, 3);
-            this.width = this.height = 12;
-        };
-
-        this.paint = function(g, x, y, w, h, d) {
-            this.br.outline(g, x, y, w, h, d);
-
-            g.setColor(this.bg);
-            g.fill();
-            this.br.paint(g, x, y, w, h, d);
-
-            g.setColor(this.color);
-            g.lineWidth = 2;
-            x+=2;
-            w-=4;
-            h-=4;
-            y+=2;
-            g.beginPath();
-            g.moveTo(x, y + h/2);
-            g.lineTo(x + w, y + h/2);
-            if (this.plus) {
-                g.moveTo(x + w/2, y);
-                g.lineTo(x + w/2, y + h);
-            }
-
-            g.stroke();
-            g.lineWidth = 1;
-        };
-
-        this.getPreferredSize = function() {
-            return { width:this.width, height:this.height};
-        };
-    }
-]);
-
-/**
- * @for
- */
-
-})(zebra("ui.tree"), zebra.Class, zebra.ui);
-
 (function(pkg, Class, ui) {
 
-
-//      ---------------------------------------------------
-//      | x |    col0 width     | x |   col2 width    | x |
-//      .   .
-//    Line width  
-//   -->.   .<--         
-
 /**
- * The package contains number of classes and interfaces to implement
- * UI Grid component. The grid allows developers to visualize matrix 
- * model, customize the model data editing and rendering. 
- * @module ui.grid
- * @main
+ * The package contains number of UI components that can be helful to 
+ * make visiual control of an UI component size and location
+ * @module  ui.designer
+ * @main 
  */
 
-var Matrix = zebra.data.Matrix, L = zebra.layout, MB = zebra.util, 
-    Cursor = ui.Cursor, Position = zebra.util.Position, KE = ui.KeyEvent, 
-    Listeners = zebra.util.Listeners;
+var L = zebra.layout, Cursor = ui.Cursor, KeyEvent = ui.KeyEvent, CURSORS = [];
 
-//!!! crappy function
-//TODO: think how to remove/replace it
-function arr(l, v) {
-    var a = Array(l);
-    for(var i=0; i<l; i++) a[i] = v;
-    return a;
-}
+CURSORS[L.LEFT  ] = Cursor.W_RESIZE;
+CURSORS[L.RIGHT ] = Cursor.E_RESIZE;
+CURSORS[L.TOP   ] = Cursor.N_RESIZE;
+CURSORS[L.BOTTOM] = Cursor.S_RESIZE;
+CURSORS[L.TopLeft ]    = Cursor.NW_RESIZE;
+CURSORS[L.TopRight]    = Cursor.NE_RESIZE;
+CURSORS[L.BottomLeft ] = Cursor.SW_RESIZE;
+CURSORS[L.BottomRight] = Cursor.SE_RESIZE;
+CURSORS[L.CENTER] = Cursor.MOVE;
+CURSORS[L.NONE  ] = Cursor.DEFAULT;
 
-function CellsVisibility() {
-    this.hasVisibleCells = function(){
-        return this.fr != null && this.fc != null &&
-               this.lr != null && this.lc != null   ;
-    };
-
-    // first visible row (row and y), first visible 
-    // col, last visible col and row
-    this.fr = this.fc = this.lr = this.lc = null;
-}
-
-/**
- *  Interface that describes a grid component metrics 
- *  @class zebra.ui.grid.Metrics
- */
-pkg.Metrics = zebra.Interface();
-
-/**
- * Get the given column width of a grid component 
- * @param {Integer} col a column index 
- * @method getColWidth
- * @return {Integer} a column width 
- */
-
-/**
- * Get the given row height of a grid component 
- * @param {Integer} row a row index 
- * @method getRowHeight
- * @return {Integer} a row height
- */
-
-/**
- * Get the given row preferred height of a grid component 
- * @param {Integer} row a row index 
- * @method getPSRowHeight
- * @return {Integer} a row preferred height 
- */
-
-/**
- * Get the given column preferred width of a grid component 
- * @param {Integer} col a column index 
- * @method getPSColWidth
- * @return {Integer} a column preferred width
- */
-
- /**
-  * Get a x origin of a grid component. Origin indicates how 
-  * the grid component content has been scrolled
-  * @method getXOrigin
-  * @return {Integer} a x origin
-  */
-
-/**
-  * Get a y origin of a grid component. Origin indicates how 
-  * the grid component content has been scrolled
-  * @method getYOrigin
-  * @return {Integer} a y origin
-  */
-
-  /**
-   * Set the given column width of a grid component 
-   * @param {Integer} col a column index 
-   * @param {Integer} w a column width 
-   * @method setColWidth
-   */
-
-  /**
-   * Set the given row height of a grid component 
-   * @param {Integer} row a row index 
-   * @param {Integer} h a row height
-   * @method setRowHeight
-   */
-
-  /**
-   * Get number of columns in a grid component 
-   * @return {Integer} a number of columns 
-   * @method getGridCols
-   */
-
-  /**
-   * Get number of rows in a grid component 
-   * @return {Integer} a number of rows 
-   * @method getGridRows
-   */
-
-   /**
-    * Get a structure that describes a grid component 
-    * columns and rows visibility  
-    * @return {zebra.ui.grid.CellsVisibility} a grid cells visibility
-    * @method getCellsVisibility 
-    */
-  
-  /**
-   * Grid line size
-   * @attribute lineSize
-   * @type {Integer}
-   * @readOnly
-   */
-
-  /**
-   * Indicate if a grid sizes its rows and cols basing on its preferred sizes
-   * @attribute isUsePsMetric
-   * @type {Boolean}
-   * @readOnly
-   */
-
-/**
- * Default grid cell views provider. The class rules how a grid cell content,
- * background has to be rendered and aligned. Developers can implement an own
- * views providers and than setup it for a grid by calling "setViewProvider(...)"
- * method.
- * @param {zebra.ui.TextRender|zebra.ui.StringText} [render] a string render  
- * @class zebra.ui.grid.DefViews
- * @constructor
- */
-pkg.DefViews = Class([
+pkg.ShaperBorder = Class(ui.View, [
     function $prototype() {
-        this[''] = function(render){
-            /**
-             * Default render that is used to paint grid content. 
-             * @type {zebra.ui.StringRender}
-             * @attribute render
-             * @readOnly
-             * @protected
-             */
-            this.render = (render == null ? new ui.StringRender("") : render);
-            zebra.properties(this, this.$clazz);
-        };
-        
-        /**
-         * Set the default view provider text render font
-         * @param {zebra.ui.Font} f a font
-         * @method setFont
-         */
-        this.setFont = function(f) {
-            this.render.setFont(f);
-        };
+        this.color = "blue";
+        this.gap = 7;
 
-        /**
-         * Set the default view provider text render color
-         * @param {String} c a color
-         * @method setColor
-         */
-        this.setColor = function(c) {
-            this.render.setColor(c);
+        function contains(x, y, gx, gy, ww, hh) {
+            return gx <= x && (gx + ww) > x && gy <= y && (gy + hh) > y;
+        }
+
+        this.paint = function(g,x,y,w,h,d){
+            var cx = ~~((w - this.gap)/2), cy = ~~((h - this.gap)/2);
+            g.setColor(this.color);
+            g.beginPath();
+            g.rect(x, y, this.gap, this.gap);
+            g.rect(x + cx, y, this.gap, this.gap);
+            g.rect(x, y + cy, this.gap, this.gap);
+            g.rect(x + w - this.gap, y, this.gap, this.gap);
+            g.rect(x, y + h - this.gap, this.gap, this.gap);
+            g.rect(x + cx, y + h - this.gap, this.gap, this.gap);
+            g.rect(x + w - this.gap, y + cy, this.gap, this.gap);
+            g.rect(x + w - this.gap, y + h - this.gap, this.gap, this.gap);
+            g.fill();
+            g.beginPath();
+            g.rect(x + ~~(this.gap / 2), y + ~~(this.gap / 2), w - this.gap, h - this.gap);
+            g.stroke();
         };
 
-        /**
-         * Get a renderer to draw the specified grid model value.  
-         * @param  {zebra.ui.grid.Grid} target a target Grid component
-         * @param  {Integer} row  a grid cell row
-         * @param  {Integer} col  a grid cell column
-         * @param  {Object} obj   a model value for the given grid cell
-         * @return {zebra.ui.View}  an instance of zebra view to be used to 
-         * paint the given cell model value
-         * @method  getView
-         */
-        this.getView = function(target, row,col,obj){
-            if (obj != null){
-                if (obj && obj.paint) return obj;
-                this.render.setValue(obj.toString());
-                return this.render;
-            }
-            return null;
+        this.detectAt = function(target,x,y){
+            var gap = this.gap, gap2 = gap*2, w = target.width, h = target.height;
+
+            if (contains(x, y, gap, gap, w - gap2, h - gap2)) return L.CENTER;
+            if (contains(x, y, 0, 0, gap, gap))               return L.TopLeft;
+            if (contains(x, y, 0, h - gap, gap, gap))         return L.BottomLeft;
+            if (contains(x, y, w - gap, 0, gap, gap))         return L.TopRight;
+            if (contains(x, y, w - gap, h - gap, gap, gap))   return L.BottomRight;
+
+            var mx = ~~((w-gap)/2);
+            if (contains(x, y, mx, 0, gap, gap))        return L.TOP;
+            if (contains(x, y, mx, h - gap, gap, gap))  return L.BOTTOM;
+
+            var my = ~~((h-gap)/2);
+            if (contains(x, y, 0, my, gap, gap)) return L.LEFT;
+            return contains(x, y, w - gap, my, gap, gap) ? L.RIGHT : L.NONE;
         };
-
-        /**
-         * Get an horizontal alignment a content in the given grid cell
-         * has to be adjusted. The method is optional. 
-         * @param  {zebra.ui.grid.Grid} target a target grid component
-         * @param  {Integer} row   a grid cell row
-         * @param  {Integer} col   a grid cell column
-         * @return {Integer}  a horizontal alignment (zebra.layout.LEFT, zebra.layout.CENTER, zebra.layout.RIGHT)
-         * @method  getXAlignment
-         */
-
-         /**
-          * Get a vertical alignment a content in the given grid cell
-          * has to be adjusted. The method is optional. 
-          * @param  {zebra.ui.grid.Grid} target a target grid component
-          * @param  {Integer} row   a grid cell row
-          * @param  {Integer} col   a grid cell column
-          * @return {Integer}  a vertical alignment (zebra.layout.TOP, zebra.layout.CENTER, zebra.layout.BOTTOM)
-          * @method  getYAlignment
-          */
-         
-         /**
-          * Get the given grid cell color
-          * @param  {zebra.ui.grid.Grid} target a target grid component
-          * @param  {Integer} row   a grid cell row
-          * @param  {Integer} col   a grid cell column
-          * @return {String}  a cell color to be applied to the given grid cell
-          * @method  getCellColor
-          */
     }
 ]);
 
-/**
- * Simple grid cells editors provider implementation. By default the editors provider
- * uses a text field component or check box component as a cell content editor. Check 
- * box component is used if a cell data type is boolean, otherwise text filed is applied 
- * as the cell editor.    
- 
-        // grid with tree columns and three rows
-        // first and last column will be editable with text field component
-        // second column will be editable with check box component
-        var grid = new zebra.ui.grid.Grid([
-            ["Text Cell", true, "Text cell"],
-            ["Text Cell", false, "Text cell"],
-            ["Text Cell", true, "Text cell"]
-        ]);
-
-        // make grid cell editable
-        grid.setEditorProvider(new zebra.ui.grid.DefEditors());
- 
-  
- * It is possible to customize a grid column editor by specifying setting "editors[col]" property 
- * value. You can define an UI component that has to be applied as an editor for the given column 
- * Also you can disable editing by setting appropriate column editor class to null:
- 
-        // grid with tree columns and three rows
-        // first and last column will be editable with text field component
-        // second column will be editable with check box component
-        var grid = new zebra.ui.grid.Grid([
-            ["Text Cell", true, "Text cell"],
-            ["Text Cell", false, "Text cell"],
-            ["Text Cell", true, "Text cell"]
-        ]);
-
-        // grid cell editors provider
-        var editorsProvider = new zebra.ui.grid.DefEditors();
-
-        // disable the first column editing 
-        editorsProvider.editors[0] = null;
-    
-        // make grid cell editable
-        grid.setEditorProvider(editorsProvider);
-
- * @constructor
- * @class zebra.ui.grid.DefEditors
- */
-pkg.DefEditors = Class([
-    function $clazz() {
-        this.TextField = Class(ui.TextField, []);
-        this.Checkbox  = Class(ui.Checkbox,  []);
-        this.Combo     = Class(ui.Combo,     []);
-    },
-
+pkg.InsetsArea = Class([
     function $prototype() {
-        this[''] = function() {
-            this.textEditor = new this.$clazz.TextField("", 150);
-            this.boolEditor = new this.$clazz.Checkbox(null);
-            this.selectorEditor = new this.$clazz.Combo();
-            this.editors    = {};
-        };
+        this.top = this.right = this.left = this.bottom = 6;
 
-        /**
-         * Fetch an edited value from the given UI editor component. 
-         * @param  {zebra.ui.grid.Grid} grid a target grid component
-         * @param  {Integer} row a grid cell row that has been edited
-         * @param  {Integer} col a grid cell column that has been edited
-         * @param  {Object} data an original cell content
-         * @param  {zebra.ui.Panel} editor an editor that has been used to 
-         * edit the given cell
-         * @return {Object} a value that can be applied as a new content of 
-         * the edited cell content
-         * @method  fetchEditedValue 
-         */
-        this.fetchEditedValue = function(grid,row,col,data,editor) {
-            return editor.getValue();
-        };
- 
-        /**
-         * Get an editor UI component to be used for the given cell of the specified grid
-         * @param  {zebra.ui.grid.Grid} grid a grid whose cell is going to be edited
-         * @param  {Integer} row  a grid cell row
-         * @param  {Integer} col  a grid cell column
-         * @param  {Object}  v    a grid cell model data 
-         * @return {zebra.ui.Panel} an editor UI component to be used to edit the given cell 
-         * @method  getEditor
-         */
-        this.getEditor = function(grid, row, col, v) {
-            var editor = null;
-            if (this.editors[col] === null) return;
-            
-            if (this.editors[col] != null) {
-                editor = this.editors[col];
-            }
+        this.detectAt = function (c,x,y){
+            var t = 0, b1 = false, b2 = false;
+            if (x < this.left) t += L.LEFT;
             else {
-                editor = zebra.isBoolean(v) ? this.boolEditor : this.textEditor;
+                if (x > (c.width - this.right)) t += L.RIGHT;
+                else b1 = true;
             }
 
-            editor.setValue(v);
-            editor.setPadding(0);         
-            var ah = ~~((grid.getRowHeight(row) - editor.getPreferredSize().height)/2);
-            editor.setPadding(ah, grid.cellInsetsLeft, ah, grid.cellInsetsRight);
-            return editor;
-        };
-
-        /**
-         * Test if the specified input event has to trigger the given grid cell editing
-         * @param  {zebra.ui.grid.Grid} grid a grid
-         * @param  {Integer} row  a grid cell row
-         * @param  {Integer} col  a grid cell column
-         * @param  {zebra.ui.InputEvent} e  an event to be evaluated
-         * @return {Boolean} true if the given input event triggers the given cell editing
-         * @method shouldStart 
-         */
-        this.shouldStart = function(grid,row,col,e){
-            return e.ID == ui.MouseEvent.CLICKED && e.clicks == 1;
-        };
-
-        /**
-         * Test if the specified input event has to canceling the given grid cell editing
-         * @param  {zebra.ui.grid.Grid} grid a grid
-         * @param  {Integer} row  a grid cell row
-         * @param  {Integer} col  a grid cell column
-         * @param  {zebra.ui.InputEvent} e  an event to be evaluated
-         * @return {Boolean} true if the given input event triggers the given cell editing
-         * cancellation 
-         * @method shouldCancel
-         */
-        this.shouldCancel = function(grid,row,col,e){
-            return e.ID == KE.PRESSED && KE.ESCAPE == e.code;
-        };
-
-        /**
-         * Test if the specified input event has to trigger finishing the given grid cell editing
-         * @param  {zebra.ui.grid.Grid} grid [description]
-         * @param  {Integer} row  a grid cell row
-         * @param  {Integer} col  a grid cell column
-         * @param  {zebra.ui.InputEvent} e  an event to be evaluated
-         * @return {Boolean} true if the given input event triggers finishing the given cell editing
-         * @method shouldFinish
-         */
-        this.shouldFinish = function(grid,row,col,e){
-            return e.ID == KE.PRESSED && KE.ENTER  == e.code;
+            if (y < this.top) t += L.TOP;
+            else {
+                if (y > (c.height - this.bottom)) t += L.BOTTOM;
+                else b2 = true;
+            }
+            return b1 && b2 ? L.CENTER : t;
         };
     }
 ]);
 
-pkg.CaptionListeners = new zebra.util.ListenersClass("captionResized");
-
 /**
- * Grid caption base UI component class. This class has to be used 
- * as base to implement grid caption components
- * @class  zebra.ui.grid.BaseCaption
- * @extends {zebra.ui.Panel}
- * @constructor 
- * @param {Array} [titles] a caption component titles 
- */
-
-/**
- * Fire when a grid row selection state has been changed
+ * This is UI component class that implements possibility to embeds another
+ * UI components to control the component size and location visually.
  
-        caption.bind(function captionResized(caption, rowcol, phw) {
-            ... 
-        });
+        // create canvas 
+        var canvas = new zebra.ui.zCanvas(300,300);
 
- * @event captionResized
- * @param  {zebra.ui.grid.BaseCaption} caption a caption
- * @param  {Integer} rowcol a row or column that has been resized
- * @param  {Integer} pwh a a previous row or column size
+        // create two UI components
+        var lab = new zebra.ui.Label("Label");
+        var but = new zebra.ui.Button("Button");
+
+        // add created before label component as target of the shaper
+        // component and than add the shaper component into root panel 
+        canvas.root.add(new zebra.ui.designer.ShaperPan(lab).properties({
+            bounds: [ 30,30,100,40]
+        }));
+
+        // add created before button component as target of the shaper
+        // component and than add the shaper component into root panel 
+        canvas.root.add(new zebra.ui.designer.ShaperPan(but).properties({
+            bounds: [ 130,130,100,50]
+        }));
+
+ * @class  zebra.ui.designer.ShaperPan
+ * @constructor
+ * @extends {zebra.ui.Panel}
+ * @param {zebra.ui.Panel} target a target UI component whose size and location
+ * has to be controlled
  */
-
-pkg.BaseCaption = Class(ui.Panel, [
+pkg.ShaperPan = Class(ui.Panel, [
     function $prototype() {
-        /**
-         * Minimal possible grid cell size
-         * @type {Number}
-         * @default 10
-         * @attribute minSize
-         */
-        this.minSize = 10;
+       /**
+        * Indicates if controlled component can be moved
+        * @attribute isMoveEnabled
+        * @type {Boolean}
+        * @default true
+        */
+
+       /**
+        * Indicates if controlled component can be sized
+        * @attribute isResizeEnabled
+        * @type {Boolean}
+        * @default true
+        */
 
         /**
-         * Size of the active area where cells size can be changed by mouse dragging event 
-         * @attribute activeAreaSize
-         * @type {Number}
-         * @default 5
+         * Minimal possible height or controlled component 
+         * @attribute minHeight
+         * @type {Integer}
+         * @default 12
          */
-        this.activeAreaSize = 5;
 
         /**
-         * Caption line color
-         * @attribute lineColor
-         * @type {String}
-         * @default "gray"
+         * Minimal possible width or controlled component 
+         * @attribute minWidth
+         * @type {Integer}
+         * @default 12
          */
-        this.lineColor = "gray";
+        this.minHeight = this.minWidth = 12;
+        this.canHaveFocus = this.isResizeEnabled = this.isMoveEnabled = true;
+        this.state = null;
 
-        /**
-         * Indicate if the grid cell size has to be adjusted according 
-         * to the cell preferred size by mouse double click event.
-         * @attribute isAutoFit
-         * @default true
-         * @type {Boolean}
-         */
-        
-        /**
-         * Indicate if the grid cells are resize-able. 
-         * to the cell preferred size by mouse double click event.
-         * @attribute isResizable
-         * @default true
-         * @type {Boolean}
-         */
-        this.isAutoFit = this.isResizable = true;
+        this.catchInput = true;
 
-        this.getCursorType = function (target,x,y){
-            return this.metrics != null     &&
-                   this.selectedColRow >= 0 &&
-                   this.isResizable         &&
-                   this.metrics.isUsePsMetric === false ? ((this.orient == L.HORIZONTAL) ? Cursor.W_RESIZE
-                                                                                         : Cursor.S_RESIZE)
-                                                        : null;
+        this.getCursorType = function (t, x ,y) {
+            return this.kids.length > 0 ? CURSORS[this.shaperBr.detectAt(t, x, y)] : null;
         };
 
         /**
-         * Define mouse dragged events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragged
+         * Define key pressed events handler
+         * @param  {zebra.ui.KeyEvent} e a key event
+         * @method keyPressed
          */
-        this.mouseDragged = function(e){
-            if (this.pxy != null) {
-                var b  = (this.orient == L.HORIZONTAL),
-                    rc = this.selectedColRow,
-                    ns = (b ? this.metrics.getColWidth(rc) + e.x
-                            : this.metrics.getRowHeight(rc) + e.y) - this.pxy;
-                
-                this.captionResized(rc, ns);
+        this.keyPressed = function(e) {
+            if (this.kids.length > 0){
+                var b  = (e.mask & KeyEvent.M_SHIFT) > 0, 
+                    c  = e.code,
+                    dx = (c == KeyEvent.LEFT ?  -1 : (c == KeyEvent.RIGHT ? 1 : 0)),
+                    dy = (c == KeyEvent.UP   ?  -1 : (c == KeyEvent.DOWN  ? 1 : 0)),
+                    w  = this.width  + dx, 
+                    h  = this.height + dy,
+                    x  = this.x + dx, 
+                    y  = this.y + dy;
 
-                if (ns > this.minSize) {
-                    this.pxy = b ? e.x : e.y;
+                if (b) {
+                    if (this.isResizeEnabled && w > this.shaperBr.gap * 2 && h > this.shaperBr.gap * 2) {
+                        this.setSize(w, h);
+                    }
+                }
+                else {
+                    if (this.isMoveEnabled) {
+                        var ww = this.width, hh = this.height, p = this.parent;
+                        if (x + ww/2 > 0 && y + hh/2 > 0 && x < p.width - ww/2 && y < p.height - hh/2) this.setLocation(x, y);
+                    }
                 }
             }
         };
 
         /**
-         * Define mouse drag started events handler.
+         * Define mouse drag started events handler
          * @param  {zebra.ui.MouseEvent} e a mouse event
          * @method mouseDragStarted
          */
         this.mouseDragStarted = function(e){
-            if (this.metrics != null &&
-                this.isResizable     &&
-                this.metrics.isUsePsMetric === false)
-            {
-                this.calcRowColAt(e.x, e.y);
-
-                if (this.selectedColRow >= 0) {
-                    this.pxy = (this.orient == L.HORIZONTAL) ? e.x
-                                                             : e.y;
-                }
-            }
-        };
-
-        /**
-         * Define mouse drag ended events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragEnded   
-         */
-        this.mouseDragEnded = function (e){
-            if (this.pxy != null) {
-                this.pxy = null;
-            }
-
-            if (this.metrics != null) {
-                this.calcRowColAt(e.x, e.y);
-            }
-        };
-
-        /**
-         * Define mouse moved events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseMoved
-         */
-        this.mouseMoved = function(e) {
-            if (this.metrics != null) {
-                this.calcRowColAt(e.x, e.y);
-            }
-        };
-
-        /**
-         * Define mouse clicked events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseClicked
-         */
-        this.mouseClicked = function (e){
-            if (this.pxy     == null     &&
-                this.metrics != null     &&
-                e.clicks > 1             &&
-                this.selectedColRow >= 0 &&
-                this.isAutoFit === true     )
-            {
-                var size = this.getCaptionPS(this.selectedColRow);
-                if (this.orient == L.HORIZONTAL) {
-                    this.metrics.setColWidth (this.selectedColRow, size);
-                }
-                else {
-                    this.metrics.setRowHeight(this.selectedColRow, size);
-                }
-                this.captionResized(this.selectedColRow, size);
-            }
-        };
-
-        /**
-         * Get the given row or column caption preferred size  
-         * @param  {Integer} rowcol a row or column of a caption
-         * @return {Integer}  a size of row or column caption  
-         * @method getCaptionPS
-         */
-        this.getCaptionPS = function(rowcol) {
-            return (this.orient == L.HORIZONTAL) ? this.metrics.getColPSWidth(this.selectedColRow)
-                                                 : this.metrics.getRowPSHeight(this.selectedColRow);
-        };
-
-        this.captionResized = function(rowcol, ns) {
-            if (ns > this.minSize) {
-                if (this.orient == L.HORIZONTAL) {
-                    var pw = this.metrics.getColWidth(rowcol);
-                    this.metrics.setColWidth(rowcol, ns);
-                    this._.captionResized(this, rowcol, pw);
-                }
-                else  {
-                    var ph = this.metrics.getRowHeight(rowcol);
-                    this.metrics.setRowHeight(rowcol, ns);
-                    this._.captionResized(this, rowcol, ph);
-                }
-            }
-        };
-
-        this.calcRowColAt = function(x, y){
-            var $this = this;
-            this.selectedColRow = this.getCaptionAt(x, y, function(m, xy, xxyy, wh, i) {
-                xxyy += (wh + m.lineSize);
-                return (xy < xxyy + $this.activeAreaSize &&
-                        xy > xxyy - $this.activeAreaSize   );
-
-            });
-        };
-
-        /**
-         * Compute a column (for horizontal caption component) or row (for 
-         * vertically aligned caption component) at the given location
-         * @param  {Integer} x a x coordinate
-         * @param  {Integer} y an y coordinate 
-         * @param  {Function} [f] an optional match function. The method can be passed
-         * if you need to detect a particular area of row or column. The method gets 
-         * a grid metrics as the first argument, a x or y location to be detected,  
-         * a row or column y or x coordinate, a row or column height or width and 
-         * row or column index. The method has to return true if the given location
-         * is in. 
-         * @return {Integer}  a row or column 
-         * @method calcRowColAt
-         */
-        this.getCaptionAt = function (x,y,f){
-            if (this.metrics != null &&
-                x >= 0               &&
-                y >= 0               &&
-                x < this.width       &&
-                y < this.height        )
-            {
-                var m     = this.metrics,
-                    cv    = m.getCellsVisibility(),
-                    isHor = (this.orient == L.HORIZONTAL);
-
-                if ((isHor && cv.fc != null) || (isHor === false && cv.fr != null)) {
-                    var gap  = m.lineSize,
-                        xy   = isHor ? x : y,
-                        xxyy = isHor ? cv.fc[1] - this.x - gap + m.getXOrigin()
-                                     : cv.fr[1] - this.y - gap + m.getYOrigin();
-
-                    for(var i = (isHor ? cv.fc[0] : cv.fr[0]);i <= (isHor ? cv.lc[0] : cv.lr[0]); i ++ ){
-                        var wh = isHor ? m.getColWidth(i) : m.getRowHeight(i);
-                        if ((f != null && f(m, xy, xxyy, wh, i)) || (f == null && xy > xxyy && xy < xxyy + wh)) {
-                            return i;
-                        }
-                        xxyy += wh + gap;
-                    }
-                }
-            }
-            return -1;
-        };
-
-        this.paintOnTop = function(g) {
-            if (this.lineColor != null && this.metrics != null) {
-                var v = this.metrics.getCellsVisibility();
-                if (v != null) {
-                    var m       = this.metrics,
-                        b       = this.orient == L.HORIZONTAL,
-                        startRC = b ? v.fc[0] : v.fr[0],
-                        endRC   = b ? v.lc[0] : v.lr[0],
-                        xy      = b ? v.fc[1] - this.x - m.lineSize + m.getXOrigin()
-                                    : v.fr[1] - this.y - m.lineSize + m.getYOrigin();
-
-                    g.setColor(this.lineColor);
-                    for(var i = startRC; i <= endRC; i++) {
-                        if (i != 0) {
-                            if (b) g.drawLine(xy, 0, xy, this.height, m.lineSize);
-                            else   g.drawLine(0, xy, this.width, xy, m.lineSize);
-                        }
-                        xy += (b ? m.getColWidth(i): m.getRowHeight(i)) + m.lineSize;
-                    }
-                }
-            }
-        };
-
-        /**
-         * Implement the method to be aware when number of rows or columns in 
-         * a grid model has been updated
-         * @param  {zebra.ui.grid.Grid} target a target grid
-         * @param  {Integer} prevRows a previous number of rows
-         * @param  {Integer} prevCols a previous number of columns
-         * @method matrixResized
-         */
-
-        /**
-         * Implement the method to be aware when a grid model data has been 
-         * re-ordered.
-         * @param  {zebra.ui.grid.Grid} target a target grid
-         * @param  {Object} sortInfo an order information
-         * @method matrixSorted
-         */
-    },
-
-    function(titles) {
-        this._ = new pkg.CaptionListeners();
-        this.orient = this.metrics = this.pxy = null;
-        this.selectedColRow = -1;
-        this.$super();
-        if (titles != null) {
-            for(var i=0; i < titles.length; i++) {
-                this.putTitle(i, titles[i]);
-            }
-        }
-    },
-
-    function setParent(p) {
-        this.$super(p);
-
-        this.metrics = this.orient = null;
-        if (p == null || zebra.instanceOf(p, pkg.Metrics)) {
-            this.metrics = p;
-            if (this.constraints != null) {
-                this.orient = (this.constraints == L.TOP    ||
-                               this.constraints == L.BOTTOM   ) ? L.HORIZONTAL
-                                                                : L.VERTICAL;
-            }
-        }
-    }
-]);
-
-/**
- * Grid caption class that implements rendered caption. 
- * Rendered means all caption titles, border are painted 
- * as a number of views. 
- * @param  {Array} [titles] a caption titles. Title can be a string or 
- * a zebra.ui.View class instance
- * @param  {zebra.ui.StringRender|zebra.ui.TextRender} [render] a text render to be used
- * to paint grid titles
- * @constructor
- * @class zebra.ui.grid.GridCaption
- * @extends zebra.ui.grid.BaseCaption
- */
-pkg.GridCaption = Class(pkg.BaseCaption, [
-    function $prototype() {
-        this.getTitleProps = function(i){
-            return this.titles != null && i < this.titles.length / 2 ? this.titles[i * 2 + 1]
-                                                                     : null;
-        };
-
-        /**
-         * Get a grid caption column or row title view
-         * @param  {Integer} i a row (if the caption is vertical) or 
-         * column (if the caption is horizontal) index
-         * @return {zebra.ui.View} a view to be used as the given 
-         * row or column title view 
-         * @method getTitleView
-         */
-        this.getTitleView = function(i){
-            var data = this.getTitle(i);
-            if (data == null || data.paint) return data;
-            this.render.setValue(data.toString());
-            return this.render;
-        };
-
-        this.calcPreferredSize = function (l) {
-            return { width:this.psW, height:this.psH };
-        };
-
-        this.recalc = function(){
-            this.psW = this.psH = 0;
-            if (this.metrics != null){
-                var m     = this.metrics,
-                    isHor = (this.orient == L.HORIZONTAL),
-                    size  = isHor ? m.getGridCols() : m.getGridRows();
-                
-                for(var i = 0;i < size; i++){
-                    var v = this.getTitleView(i);
-                    if (v != null) {
-                        var ps = v.getPreferredSize();
-                        if (isHor) {
-                            if (ps.height > this.psH) this.psH = ps.height;
-                            this.psW += ps.width;
-                        }
-                        else {
-                            if (ps.width > this.psW) this.psW = ps.width;
-                            this.psH += ps.height;
-                        }
-                    }
-                }
-               
-                if (this.psH === 0) this.psH = pkg.Grid.DEF_ROWHEIGHT;
-                if (this.psW === 0) this.psW = pkg.Grid.DEF_COLWIDTH;
-            }
-        };
-
-        this.paint = function(g){
-            if (this.metrics != null){
-                var cv = this.metrics.getCellsVisibility();
-
-                if ((cv.fc != null && cv.lc != null && this.orient == L.HORIZONTAL)|| 
-                    (cv.fr != null && cv.lr != null && this.orient == L.VERTICAL  )   ) 
+            this.state = null;
+            if (this.isResizeEnabled || this.isMoveEnabled) {
+                var t = this.shaperBr.detectAt(this, e.x, e.y);
+                if ((this.isMoveEnabled   === false && t == L.CENTER)||
+                    (this.isResizeEnabled === false && t != L.CENTER)  )
                 {
-                    var m      = this.metrics, 
-                        isHor  = (this.orient == L.HORIZONTAL),
-                        gap    = m.lineSize,
-                        top    = this.getTop(), 
-                        left   = this.getLeft(), 
-                        bottom = this.getBottom(), 
-                        right  = this.getRight();
-                    
-                    var x = isHor ? cv.fc[1] - this.x + m.getXOrigin() - gap: left,
-                        y = isHor ? top : cv.fr[1] - this.y + m.getYOrigin() - gap,
-                        size = isHor ? m.getGridCols() : m.getGridRows();
-
-                    for(var i = (isHor ? cv.fc[0] : cv.fr[0]);i <= (isHor ? cv.lc[0] : cv.lr[0]); i++) {
-                        var wh1 = isHor ? m.getColWidth(i) + gap + (((size - 1) == i) ? gap : 0) 
-                                        : this.psW,
-                            wh2 = isHor ? this.psH 
-                                        : m.getRowHeight(i) + gap + (((size - 1) == i) ? gap : 0),
-                            v = this.getTitleView(i);
-
-                        if (v != null) {
-                            var props = this.getTitleProps(i), ps = v.getPreferredSize();
-                            if (props != null && props[2] != 0){
-                                g.setColor(props[2]);
-                                g.fillRect(x, y, wh1 - 1, wh2 - 1);
-                            }
-
-                            g.save();
-                            g.clipRect(x, y, wh1, wh2);
-
-                            var vx = x + L.xAlignment(ps.width, props != null ? props[0] 
-                                                                              : L.CENTER, wh1 - left - right) + left,
-                                vy = y + L.yAlignment(ps.height, props != null ? props[1] 
-                                                                               : L.CENTER, wh2 - top - bottom) + top;
-
-                            v.paint(g, vx, vy, ps.width, ps.height, this);
-                            g.restore();
-                        }
-
-                        if (isHor) x += wh1;
-                        else       y += wh2;
-                    }
-                }
-            }
-        };
-
-        this.getTitle = function(rowcol){
-            return this.titles == null || this.titles.length / 2 <= rowcol ? null
-                                                                           : this.titles[rowcol*2];
-        };
-    },
-
-    function() {
-        this.$this(null);
-    },
-
-    function(titles) {
-        this.$this(titles, new ui.StringRender(""));
-    },
-
-    function(titles, render) {  
-        this.psW = this.psH = 0;
-        this.render = render;
-        this.render.setFont(pkg.GridCaption.font);
-        this.render.setColor(pkg.GridCaption.fontColor);
-        this.$super(titles);
-    },
-
-    /**
-     * Put the given title for the given caption cell. 
-     * @param  {Integer} rowcol a grid caption cell index
-     * @param  {String|zebra.ui.View} title a title of the given grid caption cell.
-     * Can be a string or zebra.ui.View class instance
-     * @method putTitle
-     */
-    function putTitle(rowcol,title){
-        var old = this.getTitle(rowcol);
-        if (old != title) {
-            if (this.titles == null) {
-                this.titles = arr((rowcol + 1) * 2, null);
-            }
-            else {
-                if (Math.floor(this.titles.length / 2) <= rowcol){
-                    var nt = arr((rowcol + 1) * 2, null);
-                    zebra.util.arraycopy(this.titles, 0, nt, 0, this.titles.length);
-                    this.titles = nt;
-                }
-            }
-            var index = rowcol * 2;
-            this.titles[index] = title;
-            if (title == null && index + 2 == this.titles.length) {
-                var nt = arr(this.titles.length - 2, null);
-                zebra.util.arraycopy(this.titles, 0, nt, 0, index);
-                this.titles = nt;
-            }
-            this.vrp();
-        }
-    },
-
-    /**
-     * Set the given grid caption cell title properties such as: vertical and 
-     * horizontal alignment, background color. 
-     * @param {Integer} rowcol a grid caption cell index
-     * @param {Integer|String} ax     a horizontal alignment of the given cell title. Can
-     * be: zebra.layout.LEFT ("left"), zebra.layout.CENTER ("center"), zebra.layout.RIGHT ("right")
-     * @param {Integer|String} ay     a vertical alignment of the given cell title. Can
-     * be: zebra.layout.TOP ("top"), zebra.layout.CENTER ("center"), zebra.layout.BOTTOM ("bottom")
-     * @param {String} bg a background color
-     * @method  setTitleProps
-     */
-    function setTitleProps(rowcol,ax,ay,bg){
-        var p = this.getTitleProps(rowcol);
-        if (p == null) p = [];
-        p[0] = L.$constraints(ax);
-        p[1] = L.$constraints(ay);
-        p[2] = bg == null ? 0 : bg.getRGB();
-        this.titles[rowcol * 2 + 1] = p;
-        this.repaint();
-    },
-
-    function getCaptionPS(rowcol) {
-        var size = this.$super(rowcol),
-            v    = this.getTitleView(this.selectedColRow);
-
-        if (v != null) {
-            size = Math.max(size, (this.orient == L.HORIZONTAL) ? v.getPreferredSize().width
-                                                                : v.getPreferredSize().height);
-        }
-
-        return size;
-    }
-]);
-
-/**
- * Grid caption class that implements component based caption. 
- * Component based caption uses other UI component as the 
- * caption titles. 
- * @param  {Array} a caption titles. Title can be a string or 
- * a zebra.ui.Panel class instance
- * @constructor
- * @class zebra.ui.grid.CompGridCaption
- * @extends zebra.ui.grid.BaseCaption
- * @uses zebra.ui.Composite
- */
-pkg.CompGridCaption = Class(pkg.BaseCaption, ui.Composite, [
-    function $clazz() {
-        this.Layout = Class(L.Layout, [
-            function $prototype() {
-                this.doLayout = function (target) {
-                    var m    = target.metrics,
-                        b    = target.orient == L.HORIZONTAL,
-                        top  = target.getTop(),
-                        left = target.getLeft(),
-                        wh   = (b ? target.height - top  - target.getBottom() 
-                                  : target.width  - left - target.getRight());
-                        xy   = (b ? left + m.getXOrigin() 
-                                  : top  + m.getYOrigin());
-                    
-                    for(var i=0; i < target.kids.length; i++) {
-                        var kid = target.kids[i], 
-                            cwh = (b ? m.getColWidth(i) : m.getRowHeight(i));// + m.lineSize;
-                       
-                        if (i === 0) { 
-                            cwh -= (b ? (left - m.lineSize) : top);
-                        }
-
-                        if (kid.isVisible === true) {
-                            if (b) { 
-                                kid.setLocation(xy, top);
-                                kid.setSize(cwh, wh);
-                            }
-                            else {
-                                kid.setLocation(left, xy);
-                                kid.setSize(wh, cwh);
-                            }
-                        }
-
-                        xy += ( cwh + m.lineSize );
-                    }
-                };
-
-                this.calcPreferredSize = function (target) {
-                    return L.getMaxPreferredSize(target);
-                };
-            }
-        ]);
-
-        this.Link = Class(ui.Link, []);
-
-        this.StatusPan = Class(ui.StatePan, []);
-
-        /**
-         * Title panel that is designed to be used as 
-         * CompGridCaption UI component title element. 
-         * The panel keeps a grid column or row title, 
-         * a column or row sort indicator. Using the 
-         * component you can have sortable grid columns.
-         * @constructor
-         * @param {String} a grid column or row title
-         * @class zebra.ui.grid.CompGridCaption.TitlePan
-         */
-        this.TitlePan = Class(ui.Panel, [
-            function(title) {
-                this.$super(new L.FlowLayout(L.CENTER, L.CENTER, L.HORIZONTAL, 8));
-
-                this.sortState = 0;
-
-                /**
-                 * Indicates if the title panel has to initiate a column sorting
-                 * @default false
-                 * @attribute isSortable
-                 * @readOnly
-                 * @type {Boolean}
-                 */
-                this.isSortable = false;
-                
-                /**
-                 * Image panel to keep grtid caption title
-                 * @attribute iconPan
-                 * @type {zebra.ui.ImagePan}
-                 * @readOnly
-                 */
-                this.iconPan = new ui.ImagePan(null);
-
-                /**
-                 * Title link
-                 * @attribute link
-                 * @type {zebra.ui.Link}
-                 * @readOnly
-                 */
-                this.link = new pkg.CompGridCaption.Link(title);
-
-                this.statusPan = new pkg.CompGridCaption.StatusPan();
-                this.statusPan.setVisible(this.isSortable);
-
-                this.add(this.iconPan);
-                this.add(this.link);
-                this.add(this.statusPan);
-            },
-
-            function getGridCaption() {
-                var c = this.parent;
-                while(c != null && zebra.instanceOf(c, pkg.BaseCaption) === false) {
-                    c = c.parent;
-                }
-                return c;
-            },
-
-            function matrixSorted(target, info) {
-                if (this.isSortable) {
-                    var col = this.parent.indexOf(this);
-                    if (info.col == col) {
-                        this.sortState = info.name == 'descent' ? 1 : -1; 
-                        this.statusPan.setState(info.name);
-                    }
-                    else {
-                        this.sortState = 0;
-                        this.statusPan.setState("*");
-                    }
-                }
-            },
-
-            /**
-             * Set the caption icon
-             * @param {String|Image} path a path to an image or image object
-             * @method setIcon
-             */
-            function setIcon(path) {
-                this.iconPan.setImage(path);
-            },
-
-            function matrixResized(target,prevRows,prevCols){
-                if (this.isSortable) {
-                    this.sortState = 0;
-                    this.statusPan.setState("*");
-                }
-            },
-
-            function fired(target) {
-                if (this.isSortable) {
-                    var f = this.sortState == 1 ? zebra.data.ascent 
-                                                : zebra.data.descent,
-                        model = this.getGridCaption().metrics.model, 
-                        col   = this.parent.indexOf(this);
-
-                    model.sortCol(col, f);
-                }
-            },
-
-            function kidRemoved(index, kid) {
-                // TODO: not very prefect check
-                if (kid._ != null && kid._.fired != null) {
-                    kid.unbind(this);
-                }                
-                this.$super(index, kid);
-            },
-
-            function kidAdded(index, constr, kid) {
-                // TODO: not very prefect check
-                if (kid._ != null && kid._.fired != null) {
-                    kid.bind(this);
-                }
-                this.$super(index, constr, kid);
-            }
-        ]);
-    },
-
-    /**
-     * @for zebra.ui.grid.CompGridCaption
-     */
-    function $prototype() {
-        this.catchInput = function(t) {
-            // TODO: not very prefect check
-            return t._ == null || t._.fired == null;
-        };        
-
-        this.scrolled = function() {
-            this.vrp();
-        };
-
-        /**
-         * Put the given title component for the given caption cell. 
-         * @param  {Integer} rowcol a grid caption cell index
-         * @param  {String|zebra.ui.Panel} title a title of the given grid caption cell.
-         * Can be a string or zebra.ui.Panel class instance
-         * @method putTitle
-         */
-        this.putTitle = function(rowcol, t) {
-            for(var i = this.kids.length-1; i < rowcol; i++) {
-                this.add(t);
-            }
-
-            if (rowcol < this.kids.length) {
-                this.removeAt(rowcol);
-            }
-
-            this.insert(rowcol, null, t);
-        };
-
-        /**
-         * Set the given column sortable state 
-         * @param {Integer} col a column 
-         * @param {Boolean} b true if the column has to be sortable
-         * @method setSortable
-         */
-        this.setSortable = function(col, b) {
-            var c = this.kids[col];
-            if (c.isSortable != b) {
-                c.isSortable = b;
-                c.statusPan.setVisible(b);
-            }
-        };
-
-        this.matrixSorted = function(target, info) {
-            for(var i=0; i < this.kids.length; i++) {
-                if (this.kids[i].matrixSorted) {
-                    this.kids[i].matrixSorted(target, info);
-                }
-            }
-        };
-
-        this.matrixResized = function(target,prevRows,prevCols){
-            for(var i=0; i < this.kids.length; i++) {
-                if (this.kids[i].matrixResized) {
-                    this.kids[i].matrixResized(target,prevRows,prevCols);
-                }
-            }
-        };
-    },
-
-    function() {
-        this.$this(null);
-    },
-
-    function(titles) {
-        this.$super(titles);
-        this.setLayout(new this.$clazz.Layout());
-    },
-
-    function captionResized(rowcol, ns) {
-        this.$super(rowcol, ns);
-        this.vrp();
-    },
-
-    function setParent(p) {
-        if (this.parent != null && this.parent.scrollManager != null) {
-            this.parent.scrollManager.unbind(this);
-        }
-
-        if (p != null && p.scrollManager != null) {
-            p.scrollManager.bind(this);
-        }
-
-        this.$super(p);
-    },
-
-    function insert(i,constr, c) {
-        if (zebra.isString(c)) {
-            c = new this.$clazz.TitlePan(c);
-        }
-        this.$super(i,constr, c);
-    }
-]);
-
-
-/**
- * Grid UI component class. The grid component visualizes "zebra.data.Matrix" data model.
- * Grid cell visualization can be customized by defining and setting an own view provider.
- * Grid component supports cell editing. Every existent UI component can be configured 
- * as a cell editor by defining an own editor provider. 
- *
-  
-        // create a grid that contains three rows and tree columns
-        var grid  = new zebra.ui.grid.Grid([
-            [ "Cell 1.1", "Cell 1.2", "Cell 1.3"],
-            [ "Cell 2.1", "Cell 2.2", "Cell 2.3"],
-            [ "Cell 3.1", "Cell 3.2", "Cell 3.3"]
-        ]); 
-
-        // add the top caption 
-        grid.add(zebra.layout.TOP, new zebra.ui.grid.GridCaption([
-            "Caption title 1", "Caption title 2", "Caption title 3"
-        ]));
-
-        // set rows size
-        grid.setRowsHeight(45);
-
- *
- * Grid can have top and left captions.
- * @class  zebra.ui.grid.Grid
- * @constructor
- * @param {zebra.data.Matrix|Array} [model] a matrix model to be visualized with the grid 
- * component. It can be an instance of zebra.data.Matrix class or an array that contains 
- * embedded arrays. Every embedded array is a grid row. 
- * @param {Integer} [rows]  a number of rows 
- * @param {Integer} [columns] a number of columns
- * @extends {zebra.ui.Panel} 
- * @uses zebra.ui.grid.Metrics
- */
-
-/**
- * Fire when a grid row selection state has been changed
- 
-        grid.bind(function(grid, row, count, status) {
-            ... 
-        });
-
- * @event rowSelected
- * @param  {zebra.ui.grid.Grid} grid a grid that triggers the event
- * @param  {Integer} row a first row whose selection state has been updated. The row is 
- * -1 if all selected rows have been unselected
- * @param  {Integer} count a number of rows whose selection state has been updated
- * @param {Boolean} status a status. true means rows have been selected 
- */
-pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
-        function $clazz() {
-            this.DEF_COLWIDTH  = 80;
-            this.DEF_ROWHEIGHT = 25;
-            this.CornerPan = Class(ui.Panel, []);
-        },
-
-        function $prototype() {
-            /**
-             * Grid line size
-             * @attribute lineSize
-             * @default 1
-             * @type {Integer}
-             */
-
-            /**
-             * Grid cell top padding
-             * @attribute cellInsetsTop
-             * @default 1
-             * @type {Integer}
-             * @readOnly
-             */
-
-            /**
-             * Grid cell left padding
-             * @attribute cellInsetsLeft
-             * @default 2
-             * @type {Integer}
-             * @readOnly
-             */
-
-            /**
-             * Grid cell bottom padding
-             * @attribute cellInsetsBottom
-             * @default 1
-             * @type {Integer}
-             * @readOnly
-             */
-
-            /**
-             * Grid cell right padding
-             * @attribute cellInsetsRight
-             * @default 2
-             * @type {Integer}
-             * @readOnly
-             */
-            this.lineSize = this.cellInsetsTop = this.cellInsetsBottom = 1;
-            this.cellInsetsLeft = this.cellInsetsRight = 2;
-
-            /**
-             * Default cell content horizontal alignment  
-             * @type {Integer}
-             * @attribute defXAlignment
-             * @default zebra.layout.LEFT
-             */
-            this.defXAlignment = L.LEFT;
-
-            /**
-             * Default cell content vertical alignment  
-             * @type {Integer}
-             * @attribute defYAlignment
-             * @default zebra.layout.CENTER
-             */
-            this.defYAlignment = L.CENTER;
-
-            /**
-             * Indicate if vertical lines have to be rendered
-             * @attribute drawVerLines
-             * @type {Boolean}
-             * @readOnly
-             * @default true
-             */
-            
-            /**
-             * Indicate if horizontal lines have to be rendered
-             * @attribute drawHorLines
-             * @type {Boolean}
-             * @readOnly
-             * @default true
-             */
-            this.drawVerLines = this.drawHorLines = true;
-
-            /**
-             * Line color
-             * @attribute lineColor
-             * @type {String}
-             * @default gray
-             * @readOnly
-             */
-            this.lineColor = "gray";
-
-            /**
-             * Indicate if size of grid cells have to be calculated 
-             * automatically basing on its preferred heights and widths
-             * @attribute isUsePsMetric
-             * @type {Boolean}
-             * @default false
-             * @readOnly
-             */
-            this.isUsePsMetric = false;
-
-            this.getColX_ = function (col){
-                var start = 0, d = 1, x = this.getLeft() + this.getLeftCaptionWidth() + this.lineSize, v = this.visibility;
-                if (v.hasVisibleCells()){
-                    start = v.fc[0];
-                    x = v.fc[1];
-                    d = (col > v.fc[0]) ? 1 :  - 1;
-                }
-                for(var i = start;i != col; x += ((this.colWidths[i] + this.lineSize) * d),i += d);
-                return x;
-            };
-
-            this.getRowY_ = function (row){
-                var start = 0, d = 1, y = this.getTop() + this.getTopCaptionHeight() + this.lineSize, v = this.visibility;
-                if (v.hasVisibleCells()){
-                    start = v.fr[0];
-                    y = v.fr[1];
-                    d = (row > v.fr[0]) ? 1 :  - 1;
-                }
-                for(var i = start;i != row; y += ((this.rowHeights[i] + this.lineSize) * d),i += d);
-                return y;
-            };
-
-            this.rPs = function(){
-                var cols = this.getGridCols(), rows = this.getGridRows();
-                this.psWidth_ = this.lineSize * (cols + 1);
-                this.psHeight_ = this.lineSize * (rows + 1);
-                for(var i = 0;i < cols; i ++ ) this.psWidth_ += this.colWidths[i];
-                for(var i = 0;i < rows; i ++ ) this.psHeight_ += this.rowHeights[i];
-            };
-
-            this.colVisibility = function(col,x,d,b){
-                var cols = this.getGridCols();
-                if (cols === 0) return null;
-                var left = this.getLeft(), dx = this.scrollManager.getSX(),
-                    xx1 = Math.min(this.visibleArea.x + this.visibleArea.width, this.width - this.getRight()),
-                    xx2 = Math.max(left, this.visibleArea.x + this.getLeftCaptionWidth());
-
-                for(; col < cols && col >= 0; col += d) {
-                    if(x + dx < xx1 && (x + this.colWidths[col] + dx) > xx2){
-                        if (b) return [col, x];
-                    }
-                    else {
-                        if (b === false) return this.colVisibility(col, x, (d > 0 ?  -1 : 1), true);
-                    }
-                    if (d < 0){
-                        if (col > 0) x -= (this.colWidths[col - 1] + this.lineSize);
-                    }
-                    else {
-                        if (col < cols - 1) x += (this.colWidths[col] + this.lineSize);
-                    }
-                }
-                return b ? null : ((d > 0) ? [col -1, x] : [0, left + this.getLeftCaptionWidth() + this.lineSize]);
-            };
-
-            this.rowVisibility = function(row,y,d,b){
-                var rows = this.getGridRows();
-
-                if (rows === 0) return null;
-                var top = this.getTop(), dy = this.scrollManager.getSY(),
-                    yy1 = Math.min(this.visibleArea.y + this.visibleArea.height, this.height - this.getBottom()),
-                    yy2 = Math.max(this.visibleArea.y, top + this.getTopCaptionHeight());
-
-                for(; row < rows && row >= 0; row += d){
-                    if(y + dy < yy1 && (y + this.rowHeights[row] + dy) > yy2){
-                        if(b) return [row, y];
-                    }
-                    else{
-                        if(b === false) return this.rowVisibility(row, y, (d > 0 ?  -1 : 1), true);
-                    }
-                    if(d < 0){
-                        if(row > 0) y -= (this.rowHeights[row - 1] + this.lineSize);
-                    }
-                    else{
-                        if(row < rows - 1) y += (this.rowHeights[row] + this.lineSize);
-                    }
-                }
-                return b ? null : ((d > 0) ? [row - 1, y]
-                                           : [0, top + this.getTopCaptionHeight() + this.lineSize]);
-            };
-
-            this.vVisibility = function(){
-                var va = ui.$cvp(this, {});
-                if (va == null) {
-                    this.visibleArea = null;
-                    this.visibility.cancelVisibleCells();
                     return;
                 }
-                else {
-                    if (this.visibleArea == null            ||
-                        va.x != this.visibleArea.x          ||
-                        va.y != this.visibleArea.y          ||
-                        va.width  != this.visibleArea.width ||
-                        va.height != this.visibleArea.height  )
-                    {
-                        this.iColVisibility(0);
-                        this.iRowVisibility(0);
-                        this.visibleArea = va;
-                    }
+
+                this.state = { top    : ((t & L.TOP   ) > 0 ? 1 : 0),
+                               left   : ((t & L.LEFT  ) > 0 ? 1 : 0),
+                               right  : ((t & L.RIGHT ) > 0 ? 1 : 0),
+                               bottom : ((t & L.BOTTOM) > 0 ? 1 : 0) };
+
+                if (this.state != null) {
+                    this.px = e.absX;
+                    this.py = e.absY;
                 }
-
-                var v = this.visibility, b = v.hasVisibleCells();
-                if (this.colOffset != 100) {
-                    if (this.colOffset > 0 && b){
-                        v.lc = this.colVisibility(v.lc[0], v.lc[1],  -1, true);
-                        v.fc = this.colVisibility(v.lc[0], v.lc[1],  -1, false);
-                    }
-                    else {
-                        if (this.colOffset < 0 && b){
-                            v.fc = this.colVisibility(v.fc[0], v.fc[1], 1, true);
-                            v.lc = this.colVisibility(v.fc[0], v.fc[1], 1, false);
-                        }
-                        else {
-                            v.fc = this.colVisibility(0, this.getLeft() + this.lineSize +
-                                                         this.getLeftCaptionWidth(), 1, true);
-                            v.lc = (v.fc != null) ? this.colVisibility(v.fc[0], v.fc[1], 1, false) 
-                                                  : null;
-                        }
-                    }
-                    this.colOffset = 100;
-                }
-
-                if (this.rowOffset != 100) {
-                    if (this.rowOffset > 0 && b) {
-                        v.lr = this.rowVisibility(v.lr[0], v.lr[1],  -1, true);
-                        v.fr = this.rowVisibility(v.lr[0], v.lr[1],  -1, false);
-                    }
-                    else {
-                        if(this.rowOffset < 0 && b){
-                            v.fr = this.rowVisibility(v.fr[0], v.fr[1], 1, true);
-                            v.lr = (v.fr != null) ? this.rowVisibility(v.fr[0], v.fr[1], 1, false) : null;
-                        }
-                        else {
-                            v.fr = this.rowVisibility(0, this.getTop() + this.getTopCaptionHeight() + this.lineSize, 1, true);
-                            v.lr = (v.fr != null) ? this.rowVisibility(v.fr[0], v.fr[1], 1, false) : null;
-                        }
-                    }
-                    this.rowOffset = 100;
-                }
-            };
-
-            this.calcOrigin = function(off,y){
-                var top  = this.getTop()  + this.getTopCaptionHeight(), 
-                    left = this.getLeft() + this.getLeftCaptionWidth(),
-                    o    = ui.calcOrigin(this.getColX(0) - this.lineSize, 
-                                         y - this.lineSize,
-                                         this.psWidth_,
-                                         this.rowHeights[off] + 2*this.lineSize, 
-                                         this.scrollManager.getSX(),
-                                         this.scrollManager.getSY(),
-                                         this, top, left,
-                                         this.getBottom(), 
-                                         this.getRight());
-
-                this.scrollManager.scrollTo(o[0], o[1]);
-            };
-
-            this.$se = function(row,col,e) {
-                if (row >= 0) {
-                    this.stopEditing(true);
-                    if (this.editors != null && 
-                        this.editors.shouldStart(this, row, col, e)) 
-                    {
-                        return this.startEditing(row, col);
-                    }
-                }
-                return false;
-            };
-
-            this.getXOrigin = function() {
-                return this.scrollManager.getSX();
-            };
-            
-            this.getYOrigin = function () {
-                return this.scrollManager.getSY();
-            };
-            
-            /**
-             * Get a preferred width the given column wants to have
-             * @param  {Integer} col a column 
-             * @return {Integer} a preferred width of the given column
-             * @method getColPSWidth 
-             */
-            this.getColPSWidth = function(col){
-                return this.getPSSize(col, false);
-            };
-            
-            /**
-             * Get a preferred height the given row wants to have
-             * @param  {Integer} col a row 
-             * @return {Integer} a preferred height of the given row
-             * @method getRowPSHeight 
-             */
-            this.getRowPSHeight = function(row) {
-                return this.getPSSize(row, true);
-            };
-
-            this.recalc = function(){
-                if (this.isUsePsMetric) {
-                    this.rPsMetric();
-                }
-                else {
-                    this.rCustomMetric();
-                }
-                this.rPs();
-            };
-
-            /**
-             * Get number of rows in the given grid
-             * @return {Integer} a number of rows
-             * @method getGridRows
-             */
-            this.getGridRows = function() {
-                return this.model != null ? this.model.rows : 0;
-            };
-
-            /**
-             * Get number of columns in the given grid
-             * @return {Integer} a number of columns
-             * @method getGridColumns
-             */
-            this.getGridCols = function(){
-                return this.model != null ? this.model.cols : 0;
-            };
-
-            /**
-             * Get the  given grid row height
-             * @param  {Integer} row a grid row
-             * @return {Integer} a height of the given row
-             * @method getRowHeight
-             */
-            this.getRowHeight = function(row){
-                this.validateMetric();
-                return this.rowHeights[row];
-            };
-
-            /**
-             * Get the given grid column width
-             * @param  {Integer} col a grid column
-             * @return {Integer} a width of the given column
-             * @method getColWidth
-             */
-            this.getColWidth = function(col){
-                this.validateMetric();
-                return this.colWidths[col];
-            };
-
-            this.getCellsVisibility = function(){
-                this.validateMetric();
-                return this.visibility;
-            };
-
-            /**
-             * Get the given column top-left corner x coordinate
-             * @param  {Integer} col a column
-             * @return {Integer} a top-left corner x coordinate of the given column
-             * @method getColX
-             */
-            this.getColX = function (col){
-                this.validateMetric();
-                return this.getColX_(col);
-            };
-
-            /**
-             * Get the given row top-left corner y coordinate
-             * @param  {Integer} row a row
-             * @return {Integer} a top-left corner y coordinate 
-             * of the given column
-             * @method getColX
-             */
-            this.getRowY = function (row){
-                this.validateMetric();
-                return this.getRowY_(row);
-            };
-
-            this.childInputEvent = function(e){
-                if (this.editingRow >= 0) {
-                    if (this.editors.shouldCancel(this, 
-                                                  this.editingRow, 
-                                                  this.editingCol, e)) 
-                    {
-                        this.stopEditing(false);
-                    }
-                    else {
-                        if (this.editors.shouldFinish(this, 
-                                                      this.editingRow,
-                                                      this.editingCol, e))
-                        {
-                            this.stopEditing(true);
-                        }
-                    }
-                }
-            };
-
-            this.iColVisibility = function(off) {
-                this.colOffset = (this.colOffset == 100) ? this.colOffset = off 
-                                                         : ((off != this.colOffset) ? 0 : this.colOffset);
-            };
-
-            this.iRowVisibility = function(off) {
-                this.rowOffset = (this.rowOffset == 100) ? off 
-                                                         : (((off + this.rowOffset) === 0) ? 0 : this.rowOffset);
-            };
-
-            /**
-             * Get top grid caption height. Return zero if no top caption element has been defined
-             * @return {Integer} a top caption height
-             * @protected
-             * @method  getTopCaptionHeight
-             */
-            this.getTopCaptionHeight = function(){
-                return (this.topCaption != null && this.topCaption.isVisible === true) ? this.topCaption.height : 0;
-            };
-
-            /**
-             * Get left grid caption width. Return zero if no left caption element has been defined
-             * @return {Integer} a left caption width
-             * @protected
-             * @method  getLeftCaptionWidth
-             */
-            this.getLeftCaptionWidth = function(){
-                return (this.leftCaption != null && this.leftCaption.isVisible === true) ? this.leftCaption.width : 0;
-            };
-
-            this.paint = function(g){
-                this.vVisibility();
-
-                if (this.visibility.hasVisibleCells()) {
-                    var dx = this.scrollManager.getSX(), 
-                        dy = this.scrollManager.getSY(), 
-                        th = this.getTopCaptionHeight(),
-                        tw = this.getLeftCaptionWidth();
-
-                    try {
-                        g.save();
-                        g.translate(dx, dy);
-                        
-                        if (th > 0 || tw > 0) {
-                            g.clipRect(tw - dx, th - dy, this.width  - tw, this.height - th);
-                        }
-
-                        this.paintSelection(g);
-                        this.paintData(g);
-                        
-                        if (this.drawHorLines || this.drawVerLines) {
-                            this.paintNet(g);
-                        }
-
-                        this.paintMarker(g);
-                    }
-                    finally {
-                        g.restore();
-                    }
-                }
-            };
-
-            this.catchScrolled = function (psx, psy){
-                var offx = this.scrollManager.getSX() - psx, 
-                    offy = this.scrollManager.getSY() - psy;
-                
-                if (offx !== 0) {
-                    this.iColVisibility(offx > 0 ? 1 :  - 1);
-                }
-
-                if (offy !== 0) {
-                    this.iRowVisibility(offy > 0 ? 1 :  - 1);
-                }
-
-                this.stopEditing(false);
-                this.repaint();
-            };
-
-            //TODO: zebra doesn't support yet the method
-            this.isInvalidatedByChild = function (c){
-                return c != this.editor || this.isUsePsMetric; 
-            };
-
-            /**
-             * Stop editing a grid cell.
-             * @param  {Boolean} applyData true if the edited data has to be applied as a new 
-             * grid cell content
-             * @protected
-             * @method stopEditing
-             */
-            this.stopEditing = function(applyData){
-                if (this.editors != null && 
-                    this.editingRow >= 0 && 
-                    this.editingCol >= 0   )
-                {
-                    try {
-                        if (zebra.instanceOf(this.editor, pkg.Grid)) { 
-                            this.editor.stopEditing(applyData);
-                        }
-
-                        var data = this.getDataToEdit(this.editingRow, this.editingCol);
-                        if (applyData){
-                            this.setEditedData(this.editingRow, 
-                                               this.editingCol, 
-                                               this.editors.fetchEditedValue( this,
-                                                                              this.editingRow, 
-                                                                              this.editingCol, 
-                                                                              data, this.editor));
-                        }
-                        this.repaintRows(this.editingRow, this.editingRow);
-                    }
-                    finally {
-                        this.editingCol = this.editingRow = -1;
-                        if (this.indexOf(this.editor) >= 0) {
-                            this.remove(this.editor);
-                        }
-                        this.editor = null;
-                        this.requestFocus();
-                    }
-                }
-            };
-
-            /**
-             * Set if horizontal and vertical lines have to be painted
-             * @param {Boolean} hor true if horizontal lines have to be painted
-             * @param {Boolean} ver true if vertical lines have to be painted
-             * @method setDrawLines
-             */
-            this.setDrawLines = function(hor, ver){
-                if (this.drawVerLines != hor || this.drawHorLines != ver) {
-                    this.drawHorLines = hor;
-                    this.drawVerLines = ver;
-                    this.repaint();
-                }
-            };
-
-            this.getLines = function (){ return this.getGridRows(); };
-            this.getLineSize = function (line){ return 1; };
-            this.getMaxOffset = function (){ return this.getGridRows() - 1; };
-
-            this.posChanged = function (target,prevOffset,prevLine,prevCol){
-                var off = this.position.currentLine;
-                if (off >= 0) {
-                    this.calcOrigin(off, this.getRowY(off));
-                    this.select(off, true);
-                    this.repaintRows(prevOffset, off);
-                }
-            };
-
-            this.makeRowVisible = function(row) {
-                this.calcOrigin(row, this.getRowY(row));
-                this.repaint();
-            };
-
-            this.keyPressed = function(e){
-                if (this.position != null){
-                    var cl = this.position.currentLine;
-                    switch(e.code) {
-                        case KE.LEFT    : this.position.seek( - 1);break;
-                        case KE.UP      : this.position.seekLineTo(Position.UP);break;
-                        case KE.RIGHT   : this.position.seek(1);break;
-                        case KE.DOWN    : this.position.seekLineTo(Position.DOWN);break;
-                        case KE.PAGEUP  : this.position.seekLineTo(Position.UP, this.pageSize(-1));break;
-                        case KE.PAGEDOWN: this.position.seekLineTo(Position.DOWN, this.pageSize(1));break;
-                        case KE.END     : if (e.isControlPressed()) this.position.setOffset(this.getLines() - 1);break;
-                        case KE.HOME    : if (e.isControlPressed()) this.position.setOffset(0);break;
-                    }
-
-                    this.$se(this.position.currentLine, this.position.currentCol, e);
-                    if (cl != this.position.currentLine && cl >= 0){
-                        for(var i = 0;i < this.getGridRows(); i++){
-                            if (i != this.position.currentLine) this.select(i, false);
-                        }
-                    }
-                }
-            };
-
-            /**
-             * Checks if the given grid row is selected
-             * @param  {Integer}  row a grid row
-             * @return {Boolean}  true if the given row is selected
-             * @method isSelected
-             */
-            this.isSelected = function(row){ 
-                return (this.selected == null) ? row == this.selectedIndex 
-                                               : this.selected[row] > 0; 
-            };
-
-            /**
-             * Repaint range of grid rows
-             * @param  {Integer} r1 the first row to be repainted
-             * @param  {Integer} r2 the last row to be repainted
-             * @method repaintRows
-             */
-            this.repaintRows = function (r1,r2){
-                if (r1 < 0) r1 = r2;
-                if (r2 < 0) r2 = r1;
-                if (r1 > r2){
-                    var i = r2;
-                    r2 = r1;
-                    r1 = i;
-                }
-
-                var rows = this.getGridRows();
-                if (r1 < rows){
-                    if (r2 >= rows) r2 = rows - 1;
-                    var y1 = this.getRowY(r1), y2 = ((r1 == r2) ? y1 : this.getRowY(r2)) + this.rowHeights[r2];
-                    this.repaint(0, y1 + this.scrollManager.getSY(), this.width, y2 - y1);
-                }
-            };
-
-            /**
-             * Detect a cell by the given location
-             * @param  {Integer} x a x coordinate relatively the grid component
-             * @param  {Integer} y a y coordinate relatively the grid component
-             * @return {Array} an array that contains detected grid cell row as 
-             * the first element and a grid column as the second element. The 
-             * row and column values are set to -1 if no grid cell can be found 
-             * at the given location
-             * @method cellByLocation
-             */
-            this.cellByLocation = function(x,y){
-                this.validate();
-                var dx  = this.scrollManager.getSX(), 
-                    dy  = this.scrollManager.getSY(), 
-                    v   = this.visibility,
-                    ry1 = v.fr[1] + dy, 
-                    rx1 = v.fc[1] + dx, 
-                    row = -1, 
-                    col = -1,
-                    ry2 = v.lr[1] + this.rowHeights[v.lr[0]] + dy,
-                    rx2 = v.lc[1] + this.colWidths[v.lc[0]] + dx;
-
-                if (y > ry1 && y < ry2) {
-                    for(var i = v.fr[0];i <= v.lr[0]; ry1 += this.rowHeights[i] + this.lineSize,i ++ ){
-                        if (y > ry1 && y < ry1 + this.rowHeights[i]) {
-                            row = i;
-                            break;
-                        }
-                    }
-                }
-                if (x > rx1 && x < rx2){
-                    for(var i = v.fc[0];i <= v.lc[0]; rx1 += this.colWidths[i] + this.lineSize, i++ ){
-                        if (x > rx1 && x < rx1 + this.colWidths[i]) {
-                            col = i;
-                            break;
-                        }
-                    }
-                }
-                return (col >= 0 && row >= 0) ? [row, col] : null;
-            };
-
-            this.doLayout = function(target) {
-                var topHeight = (this.topCaption != null && 
-                                 this.topCaption.isVisible === true) ? this.topCaption.getPreferredSize().height : 0,
-                    leftWidth = (this.leftCaption != null && 
-                                 this.leftCaption.isVisible === true) ? this.leftCaption.getPreferredSize().width : 0;
-
-                if (this.topCaption != null){
-                    this.topCaption.setLocation(this.getLeft() + leftWidth, this.getTop());
-                    this.topCaption.setSize(Math.min(target.width - this.getLeft() - this.getRight() - leftWidth,
-                                                     this.psWidth_),
-                                            topHeight);
-                }
-
-                if(this.leftCaption != null){
-                    this.leftCaption.setLocation(this.getLeft(), this.getTop() + topHeight);
-                    this.leftCaption.setSize(leftWidth,
-                                             Math.min(target.height - this.getTop() - this.getBottom() - topHeight,
-                                                      this.psHeight_));
-                }
-
-                if (this.stub != null && this.stub.isVisible === true)
-                {
-                    if (this.topCaption  != null && this.topCaption.isVisible === true && 
-                        this.leftCaption != null && this.leftCaption.isVisible === true  ) 
-                    {
-                        this.stub.setLocation(this.getLeft(), this.getTop());
-                        this.stub.setSize(this.topCaption.x - this.stub.x, 
-                                          this.leftCaption.y - this.stub.y);
-                    }
-                    else {
-                        this.stub.setSize(0, 0);   
-                    }
-                }
-
-                if (this.editors != null && 
-                    this.editor  != null && 
-                    this.editor.parent == this && 
-                    this.editor.isVisible === true)
-                {
-                    var w = this.colWidths[this.editingCol], 
-                        h = this.rowHeights[this.editingRow],
-                        x = this.getColX_(this.editingCol), 
-                        y = this.getRowY_(this.editingRow);
-
-                    if (this.isUsePsMetric){
-                        x += this.cellInsetsLeft;
-                        y += this.cellInsetsTop;
-                        w -= (this.cellInsetsLeft + this.cellInsetsRight);
-                        h -= (this.cellInsetsTop + this.cellInsetsBottom);
-                    }
- 
-                    this.editor.setLocation(x + this.scrollManager.getSX(), 
-                                            y + this.scrollManager.getSY());
-                    this.editor.setSize(w, h);
-                }
-            };
-
-            this.canHaveFocus = function (){ 
-                return this.editor == null; 
-            };
-
-            /**
-             * Clear grid row or rows selection
-             * @method clearSelect
-             */
-            this.clearSelect = function (){
-                if(this.selectedIndex >= 0){
-                    var prev = this.selectedIndex;
-                    this.selectedIndex =  - 1;
-                    this._.fired(this, -1, 0, false);
-                    this.repaintRows(-1, prev);
-                }
-            };
-
-            /**
-             * Mark as selected or unselected the given grid row.
-             * @param  {Integer} row a grid row
-             * @param  {boolean} [b] a selection status. true if the parameter 
-             * has not been specified 
-             * @method select
-             */
-            this.select = function (row, b){
-                if (b == null) b = true;
-
-                if (this.isSelected(row) != b){
-                    if(this.selectedIndex >= 0) this.clearSelect();
-                    if (b) {
-                        this.selectedIndex = row;
-                        this._.fired(this, row, 1, b);
-                    }
-                }
-            };
-
-            this.laidout = function () { 
-                this.vVisibility(); 
-            };
-
-            this.mouseClicked  = function(e) { 
-                if (this.visibility.hasVisibleCells()){
-                    this.stopEditing(true);
-
-                    if (e.isActionMask()){
-                        var p = this.cellByLocation(e.x, e.y);
-                        if (p != null){
-                            if(this.position != null){
-                                var off = this.position.currentLine;
-                                if (off == p[0]) {
-                                    this.calcOrigin(off, this.getRowY(off));
-                                }
-                                else {
-                                    this.clearSelect();
-                                    this.position.setOffset(p[0]);
-                                }
-                            }
-
-                            if (this.$se(p[0], p[1], e)) {
-                                // TODO: initiated editor has get mouse clicked event 
-                            }
-                        }
-                    }
-                }
-            };
-            
-            this.calcPreferredSize = function (target){
-                return { 
-                    width : this.psWidth_  + 
-                           ((this.leftCaption != null  && 
-                             this.leftCaption.isVisible === true ) ? this.leftCaption.getPreferredSize().width : 0),
-                    height: this.psHeight_ + 
-                           ((this.topCaption != null  && 
-                             this.topCaption.isVisible === true) ? this.topCaption.getPreferredSize().height : 0) 
-                };
-            };
-
-            /**
-             * Paint vertical and horizontal grid component lines
-             * @param  {2DContext} g a HTML5 canvas 2d context 
-             * @method paintNet
-             * @protected
-             */
-            this.paintNet = function(g){
-                var v = this.visibility, 
-                    topX = v.fc[1] - this.lineSize,
-                    topY = v.fr[1] - this.lineSize,
-                    botX = v.lc[1] + this.colWidths[v.lc[0]], 
-                    botY = v.lr[1] + this.rowHeights[v.lr[0]],
-                    prevWidth = g.lineWidth;
-
-                g.setColor(this.lineColor);
-                g.lineWidth = this.lineSize;
-                g.beginPath();
-
-                if (this.drawHorLines) {
-                    var y = topY + this.lineSize/2, i = v.fr[0];
-
-                    // if top caption exists and visible don't paint zero horizontal line
-                    if (i == 0 && this.topCaption != null && this.topCaption.isVisible === true) {
-                        i++;
-                        y += this.rowHeights[0] + this.lineSize;
-                    }
-
-                    for(;i <= v.lr[0]; i ++ ){
-                        g.moveTo(topX, y)
-                        g.lineTo(botX, y);
-                        y += this.rowHeights[i] + this.lineSize;
-                    }
-                    g.moveTo(topX, y);
-                    g.lineTo(botX, y);
-                }
-
-                if (this.drawVerLines) {
-                    var x = topX + this.lineSize/2, i = v.fc[0];
-
-                    // if left caption exists and visible don't paint zero vertical line
-                    if (i == 0 && this.leftCaption != null && this.leftCaption.isVisible === true) {
-                        i++;
-                        x += this.colWidths[0] + this.lineSize;
-                    }
-
-                    for(;i <= v.lc[0]; i ++ ){
-                        g.moveTo(x , topY);
-                        g.lineTo(x, botY);
-                        x += this.colWidths[i] + this.lineSize;
-                    }
-                    g.moveTo(x, topY);
-                    g.lineTo(x, botY);
-                }
-                g.stroke();
-                g.lineWidth = prevWidth;
-            };
-
-            /**
-             * Paint grid data
-             * @param  {2DContext} g a HTML5 canvas 2d context 
-             * @method paintData
-             * @protected
-             */
-            this.paintData = function(g){
-                var y    = this.visibility.fr[1] + this.cellInsetsTop, 
-                    addW = this.cellInsetsLeft + this.cellInsetsRight,
-                    addH = this.cellInsetsTop + this.cellInsetsBottom, 
-                    ts   = g.stack[g.counter],
-                    cx   = ts.x,
-                    cy   = ts.y,
-                    cw   = ts.width,
-                    ch   = ts.height,
-                    res  = {};
-
-                for(var i = this.visibility.fr[0];i <= this.visibility.lr[0] && y < cy + ch; i++){
-                    if(y + this.rowHeights[i] > cy){
-                        var x = this.visibility.fc[1] + this.cellInsetsLeft, 
-                            notSelectedRow = this.isSelected(i) === false;
-
-                        for(var j = this.visibility.fc[0];j <= this.visibility.lc[0]; j ++ ){
-                            if (notSelectedRow){
-                                var bg = this.provider.getCellColor != null ? this.provider.getCellColor(this, i, j)
-                                                                    : this.defCellColor;
-                                if (bg != null){
-                                    g.setColor(bg);
-                                    g.fillRect(x - this.cellInsetsLeft,
-                                               y - this.cellInsetsTop,
-                                               this.colWidths[j], this.rowHeights[i]);
-                                }
-                            }
-
-                            var v = (i == this.editingRow && 
-                                     j == this.editingCol   ) ? null
-                                                              : this.provider.getView(this, i, j, 
-                                                                                      this.model.get(i, j)); //!!! tree grid dataToPaint has to be called 
-                            if (v != null){
-                                var w = this.colWidths[j] - addW,
-                                    h = this.rowHeights[i] - addH;
-                                
-                                //MB.intersection(x, y, w, h, cx, cy, cw, ch, res);
-                                res.x = x > cx ? x : cx;
-                                res.width = Math.min(x + w, cx + cw) - res.x;
-                                res.y = y > cy ? y : cy;
-                                res.height = Math.min(y + h, cy + ch) - res.y;
-
-                                if (res.width > 0 && res.height > 0) {
-                                    if (this.isUsePsMetric) {
-                                        v.paint(g, x, y, w, h, this);
-                                    }
-                                    else 
-                                    {
-                                        var ax = this.provider.getXAlignment != null ? this.provider.getXAlignment(this, i, j)
-                                                                             : this.defXAlignment, 
-                                            ay = this.provider.getYAlignment != null ? this.provider.getYAlignment(this, i, j)
-                                                                             : this.defYAlignment,
-                                            vw = w, vh = h, xx = x, yy = y, id = -1,
-                                            ps = (ax != L.NONE || ay != L.NONE) ? v.getPreferredSize()
-                                                                                : null;
-
-                                        if (ax != L.NONE){
-                                            xx = x + ((ax == L.CENTER) ? ~~((w - ps.width) / 2) 
-                                                                       : ((ax == L.RIGHT) ? w - ps.width : 0));
-                                            vw = ps.width;
-                                        } 
-
-                                        if (ay != L.NONE){
-                                            yy = y + ((ay == L.CENTER) ? ~~((h - ps.height) / 2) 
-                                                                       : ((ay == L.BOTTOM) ? h - ps.height : 0));
-                                            vh = ps.height;
-                                        }
-
-                                        if (xx < res.x || yy < res.y || (xx + vw) > (x + w) ||  (yy + vh) > (y + h)) {
-                                            id = g.save();
-                                            g.clipRect(res.x, res.y, res.width, res.height);
-                                        }
-
-                                        v.paint(g, xx, yy, vw, vh, this);
-
-                                        if (id >= 0) {
-                                           g.restore();
-                                        }
-                                     }
-                                }
-                            }
-                            x += (this.colWidths[j] + this.lineSize);
-                        }
-                    }
-                    y += (this.rowHeights[i] + this.lineSize);
-                }
-            };
-
-            this.paintMarker = function(g){
-                var markerView = this.views["marker"];
-                if (markerView != null        &&
-                    this.position != null     &&
-                    this.position.offset >= 0 &&
-                    this.hasFocus()             )
-                {
-                    var offset = this.position.offset, v = this.visibility;
-                    if (offset >= v.fr[0] && offset <= v.lr[0]){
-                        g.clipRect(this.getLeftCaptionWidth() - this.scrollManager.getSX(),
-                                   this.getTopCaptionHeight() - this.scrollManager.getSY(), this.width, this.height);
-
-                        markerView.paint(g, v.fc[1], this.getRowY(offset),
-                                        v.lc[1] - v.fc[1] + this.getColWidth(v.lc[0]),
-                                        this.rowHeights[offset], this);
-                    }
-                }
-            };
-
-            this.paintSelection = function(g){
-                if (this.editingRow < 0) {
-                    var v = this.views[this.hasFocus()?"onselection":"offselection"];
-                    if (v == null) return;
-
-                    for(var j = this.visibility.fr[0];j <= this.visibility.lr[0]; j ++ ){
-                        if (this.isSelected(j)) {
-                            var x = this.visibility.fc[1], y = this.getRowY(j), h = this.rowHeights[j];
-                            //!!! this code below can be used to implement cell oriented selection
-                            for(var i = this.visibility.fc[0];i <= this.visibility.lc[0]; i ++ ){
-                                v.paint(g, x, y, this.colWidths[i], h, this);
-                                x += this.colWidths[i] + this.lineSize;
-                            }
-                        }
-                    }
-                }
-            };
-
-            this.rPsMetric = function(){
-                var cols = this.getGridCols(), rows = this.getGridRows();
-                
-                if (this.colWidths == null || this.colWidths.length != cols) {
-                    this.colWidths = arr(cols, 0);
-                }
-                else {
-                    for(var i = 0;i < cols; i++ ) this.colWidths [i] = 0;
-                }
-
-                if (this.rowHeights == null || this.rowHeights.length != rows) {
-                    this.rowHeights = arr(rows, 0);
-                }
-                else {
-                    for(var i = 0;i < rows; i++ ) this.rowHeights[i] = 0;
-                }
-
-                var addW = this.cellInsetsLeft + this.cellInsetsRight,
-                    addH = this.cellInsetsTop  + this.cellInsetsBottom;
-
-                for(var i = 0;i < cols; i++ ){
-                    for(var j = 0;j < rows; j++ ){
-                        var v = this.provider.getView(this, j, i, this.model.get(j, i));
-                        if (v != null){
-                            var ps = v.getPreferredSize();
-                            ps.width  += addW;
-                            ps.height += addH;
-                            if (ps.width  > this.colWidths[i] ) this.colWidths [i] = ps.width;
-                            if (ps.height > this.rowHeights[j]) this.rowHeights[j] = ps.height;
-                        }
-                        else {
-                            if (pkg.Grid.DEF_COLWIDTH > this.colWidths [i]) {
-                                this.colWidths [i] = pkg.Grid.DEF_COLWIDTH;
-                            }
-
-                            if (pkg.Grid.DEF_ROWHEIGHT > this.rowHeights[j]) {
-                                this.rowHeights[j] = pkg.Grid.DEF_ROWHEIGHT;
-                            }
-                        }
-                    }
-                }
-            };
-
-            this.getPSSize = function (rowcol,b){
-                if (this.isUsePsMetric) {
-                    return b ? this.getRowHeight(rowcol) : this.getColWidth(rowcol);
-                }
-                else {
-                    var max = 0, count = b ? this.getGridCols() : this.getGridRows();
-                    for(var j = 0;j < count; j ++ ){
-                        var r = b ? rowcol : j, c = b ? j : rowcol,
-                            v = this.provider.getView(this, r, c, this.model.get(r, c));
-
-                        if (v != null){
-                            var ps = v.getPreferredSize();
-                            if (b) {
-                                if (ps.height > max) max = ps.height;
-                            }
-                            else {
-                                if (ps.width > max) max = ps.width;
-                            }
-                        }
-                    }
-                    return max + this.lineSize * 2 + 
-                           (b ? this.cellInsetsTop + this.cellInsetsBottom 
-                              : this.cellInsetsLeft + this.cellInsetsRight);
-                }
-            };
-
-            this.rCustomMetric = function(){
-                var start = 0;
-                if (this.colWidths != null){
-                    start = this.colWidths.length;
-                    if (this.colWidths.length != this.getGridCols()){
-                        var na = arr(this.getGridCols(), 0);
-                        zebra.util.arraycopy(this.colWidths, 0, na, 0, 
-                                             this.colWidths.length < na.length ? this.colWidths.length : na.length);
-                        this.colWidths = na;
-                    }
-                }
-                else {
-                    this.colWidths = arr(this.getGridCols(), 0);
-                }
-
-                for(; start < this.colWidths.length; start ++ ) {
-                    this.colWidths[start] = pkg.Grid.DEF_COLWIDTH;
-                }
-
-                start = 0;
-                if(this.rowHeights != null){
-                    start = this.rowHeights.length;
-                    if(this.rowHeights.length != this.getGridRows()){
-                        var na = arr(this.getGridRows(), 0);
-                        zebra.util.arraycopy(this.rowHeights, 0, na, 0, 
-                                             this.rowHeights.length < na.length ? this.rowHeights.length : na.length);
-                        this.rowHeights = na;
-                    }
-                }
-                else {
-                    this.rowHeights = arr(this.getGridRows(), 0);
-                }
-
-                for(; start < this.rowHeights.length; start++) {
-                    this.rowHeights[start] = pkg.Grid.DEF_ROWHEIGHT;
-                }
-            };
-
-            /**
-             * Calculate number of rows to be scrolled up or down to scroll one page 
-             * @param  {Integer} d a direction. 1 for scroll down and -1 for scroll up
-             * @return {Integer}  a page size in rows to be scrolled up or down 
-             * @method pageSize
-             * @protected
-             */
-            this.pageSize = function(d){
-                this.validate();
-                if (this.visibility.hasVisibleCells()){
-                    var off = this.position.offset;
-                    if (off >= 0){
-                        var hh = this.visibleArea.height - this.getTopCaptionHeight(), sum = 0, poff = off;
-                        for(; off >= 0 && off < this.getGridRows() && sum < hh; sum += this.rowHeights[off] + this.lineSize,off += d);
-                        return Math.abs(poff - off);
-                    }
-                }
-                return 0;
-            };
-
-            /**
-             * Set the given height for the specified grid row. The method has no effect
-             * if the grid component is forced to use preferred size metric. 
-             * @param {Integer} row a grid row
-             * @param {Integer} h   a height of the grid row
-             * @method setRowHeight
-             */
-            this.setRowHeight = function(row,h){
-                this.setRowsHeight(row, 1, h);
-            };
-
-            /**
-             * Set the given height for all or the specified range of rows 
-             * @param {Integer} [row] start row 
-             * @param {Integer} [len] number of rows whose height has to be set
-             * @param {Integer} h  a height
-             * @method setRowsHeight
-             */
-            this.setRowsHeight = function(row, len, h) {
-                if (this.isUsePsMetric === false){
-                    if (arguments.length === 1) {
-                        h   = arguments[0];
-                        row = 0;
-                        len = this.getGridRows();
-                    }
-
-                    if (len ===0) return;
-
-                    this.validateMetric();
-                    var b = false;
-                    for(var i=row; i < row + len; i++) {
-                        if (this.rowHeights[i] != h) {
-                            this.psHeight_ += (h - this.rowHeights[i]);
-                            this.rowHeights[i] = h;
-                            b = true;
-                        }
-                    }
-
-                    if (b === true) {
-                        this.stopEditing(false);
-                        this.cachedHeight = this.getTop() + this.getBottom() + this.psHeight_ +
-                                            ((this.topCaption != null && this.topCaption.isVisible === true) ? this.topCaption.getPreferredSize().height : 0);
-
-                        if (this.parent != null) this.parent.invalidate();
-                        this.iRowVisibility(0);
-                        this.invalidateLayout();
-                        this.repaint();
-                    }
-                }
-            };
-                  
-            /**
-             * Set the given width for the specified grid column. The method has no effect
-             * if the grid component is forced to use preferred size metric. 
-             * @param {Integer} column a grid column
-             * @param {Integer} w   a width of the grid column
-             * @method setColWidth
-             */
-            this.setColWidth = function (col,w){
-                this.setColsWidth(col,1,w);
-            };
-
-            /**
-             * Set the given width for all or the specified range of columns 
-             * @param {Integer} [col] start column 
-             * @param {Integer} [len] number of columns whose height has to be set
-             * @param {Integer} w  a width
-             * @method setColsHeight
-             */
-            this.setColsWidth = function (col,len, w){
-                if (this.isUsePsMetric === false){
-                    if (arguments.length === 1) {
-                        h   = arguments[0];
-                        col = 0;
-                        len = this.getGridCols();
-                    }
-
-                    if (len === 0) return;
-
-                    this.validateMetric();
-                    var b = false;
-                    for(var i=col; i < col + len; i++) {
-                        if (this.colWidths[i] != w){
-                            this.psWidth_ += (w - this.colWidths[i]);
-                            this.colWidths[i] = w;
-                            b = true;
-                        }
-                    }
-
-                    if (b === true) {
-                        this.stopEditing(false);
-                        this.cachedWidth = this.getRight() + this.getLeft() +
-                                           this.psWidth_ + ((this.leftCaption != null && this.leftCaption.isVisible === true) ? this.leftCaption.getPreferredSize().width : 0);
-                        if(this.parent != null) this.parent.invalidate();
-                        this.iColVisibility(0);
-                        this.invalidateLayout();
-                        this.repaint();
-                    }
-                }
-            };
-
-        },
-
-        function (rows, cols){ 
-            this.$this(new Matrix(rows, cols)); 
-        },
-        
-        function (){ 
-            this.$this(new Matrix(5, 5)); 
-        },
-
-        function (model){
-            /**
-             * Default cell background color
-             * @type {String}
-             * @attribute defCellColor
-             * @default pkg.DefViews.cellBackground 
-             */
-            this.defCellColor = pkg.DefViews.cellBackground;
-
-            this.psWidth_ = this.psHeight_ = this.colOffset = 0;
-            this.rowOffset = this.pressedCol = this.selectedIndex = 0;
-            this.visibleArea = this.selected = null;
-            this._ = new Listeners();
-            this.views = {};
-
-            /**
-             * Currently editing row. -1 if no row is editing
-             * @attribute editingRow
-             * @type {Integer}
-             * @default -1
-             * @readOnly
-             */
-
-            /**
-             * Currently editing column. -1 if no column is editing
-             * @attribute editingCol
-             * @type {Integer}
-             * @default -1
-             * @readOnly
-             */
-
-            this.editingRow = this.editingCol = this.pressedRow = -1;
-            
-            /**
-             * Reference to top caption component
-             * @attribute topCaption
-             * @type {zebra.ui.grid.GridCaption|zebra.ui.grid.CompGridCaption}
-             * @default null
-             * @readOnly
-             */
-
-            /**
-             * Reference to left caption component
-             * @attribute leftCaption
-             * @type {zebra.ui.grid.GridCaption|zebra.ui.grid.CompGridCaption}
-             * @default null
-             * @readOnly
-             */
-
-            this.editors = this.leftCaption = this.topCaption = this.colWidths = null;
-            this.rowHeights = this.position = this.stub = null;
-            this.visibility = new CellsVisibility();
-
-            this.$super();
-
-            this.add(L.NONE, new this.$clazz.CornerPan());
-            this.setModel(model);
-            this.setViewProvider(new pkg.DefViews());
-            this.setPosition(new Position(this));
-            this.scrollManager = new ui.ScrollManager(this);
-        },
-
-        function focused(){ 
-            this.$super();
-            this.repaint(); 
-        },
+            }
+        };
 
         /**
-         * Set the given editor provider. Editor provider is a way to customize 
-         * cell editing.  
-         * @param {Object} p an editor provider
-         * @method setEditorProvider
+         * Define mouse dragged events handler
+         * @param  {zebra.ui.MouseEvent} e a mouse event
+         * @method mouseDragged
          */
-        function setEditorProvider(p){
-            if (p != this.editors){
-                this.stopEditing(true);
-                this.editors = p;
-            }
-        },
+        this.mouseDragged = function(e){
+            if (this.state != null) {
+                var dy = (e.absY - this.py), 
+                    dx = (e.absX - this.px), 
+                    s  = this.state,
+                    nw = this.width  - dx * s.left + dx * s.right,
+                    nh = this.height - dy * s.top  + dy * s.bottom;
 
-        /**
-         * Force to size grid columns and rows according to its preferred size  
-         * @param {Boolean} b use true to use preferred size 
-         * @method setUsePsMetric
-         */
-        function setUsePsMetric(b){
-            if (this.isUsePsMetric != b){
-                this.isUsePsMetric = b;
-                this.vrp();
-            }
-        },
-
-        function setPosition(p){
-            if (this.position != p){
-                if (this.position != null) {
-                    this.position.unbind(this);
-                }
-
-                /**
-                 * Virtual cursor position controller
-                 * @readOnly
-                 * @attribute position 
-                 * @type {zebra.util.Position}
-                 */
-                this.position = p;
-                if(this.position != null){
-                    this.position.bind(this);
-                    this.position.setMetric(this);
-                }
-                this.repaint();
-            }
-        },
-
-        /**
-         * Set the given cell view provider. Provider is a special
-         * class that says how grid cells content has to be rendered,
-         * aligned, colored
-         * @param {Object} p a view provider
-         * @method setViewProvider
-         */
-        function setViewProvider(p){
-            if (this.provider != p){
-                this.provider = p;
-                this.vrp();
-            }
-        },
-
-        /**
-         * Set the given matrix model to be visualized and controlled 
-         * with the grid component 
-         * @param {zebra.data.Matrix|Array} d a model passed as an 
-         * instance of zebra matrix model or an array that contains 
-         * model rows as embedded arrays.
-         * @method setModel 
-         */
-        function setModel(d){
-            if (d != this.model) {
-                this.clearSelect();
-                if (Array.isArray(d)) d = new Matrix(d);
-                
-                if (this.model != null && this.model._) {
-                    this.model.unbind(this);
-                }
-
-                this.model = d;
-                if (this.model != null && this.model._) {
-                    this.model.bind(this);
-                }
-
-                if (this.position != null) {
-                    this.position.setOffset(-1);
-                }
-
-                if (this.model != null && this.selected != null) {
-                    this.selected = arr(this.model.rows, false);
-                }
-                
-                this.vrp();
-            }
-        },
-
-        /**
-         * Set the given top, left, right, bottom cell paddings
-         * @param {Integer} p a top, left, right and bottom cell paddings
-         * @method setCellPadding
-         */
-        function setCellPadding(p){
-            this.setCellPaddings(p,p,p,p);
-        },
-
-        /**
-         * Set the given top, left, right, bottom cell paddings
-         * @param {Integer} t a top cell padding
-         * @param {Integer} l a left cell padding
-         * @param {Integer} b a bottom cell padding
-         * @param {Integer} r a rightcell padding
-         * @method setCellPaddings
-         */
-        function setCellPaddings(t,l,b,r){
-            if (t != this.cellInsetsTop    || l != this.cellInsetsLeft ||
-                b != this.cellInsetsBottom || r != this.cellInsetsRight)
-            {
-                this.cellInsetsTop = t;
-                this.cellInsetsLeft = l;
-                this.cellInsetsBottom = b;
-                this.cellInsetsRight = r;
-                this.vrp();
-            }
-        },
-
-        function matrixResized(target,prevRows,prevCols){
-            this.clearSelect();
-            if (this.selected != null) {
-                this.selected = arr(this.model.rows, false);
-            }
-            this.vrp();
-            if (this.position != null) { 
-                this.position.setOffset(-1);
-            }
-
-            for(var i=0; i < this.kids.length; i++) {
-                if (this.kids[i].matrixResized) {
-                    this.kids[i].matrixResized(target,prevRows,prevCols);
-                }
-            }
-        },
-
-        function cellModified(target,row,col,prevValue) {
-            if (this.isUsePsMetric){
-                this.invalidate();
-            }
-
-            for(var i=0; i < this.kids.length; i++) {
-                if (this.kids[i].cellModified) {
-                    this.kids[i].cellModified(target,row,col, prevValue);
-                }
-            }
-        },
-
-        function matrixSorted(target, info) {
-            this.clearSelect();
-            this.vrp();
-
-            for(var i=0; i < this.kids.length; i++) {
-                if (this.kids[i].matrixSorted) {
-                    this.kids[i].matrixSorted(target, info);
-                }
-            }
-        },
-
-        function invalidate(){
-            this.$super();
-            this.iColVisibility(0);
-            this.iRowVisibility(0);
-        },
-
-        /**
-         * Set the given color to render the grid vertical and horizontal lines
-         * @param {String} c a color
-         * @method setLineColor
-         */
-        function setLineColor(c){
-            if (c != this.lineColor){
-                this.lineColor = c;
-                if (this.drawVerLines || this.drawHorLines) {
-                    this.repaint();
-                }
-            }
-        },
-
-        function kidAdded(index,id,c){
-            this.$super(index, id, c);
-            if (L.TOP == id){
-                this.topCaption = c;
-            }
-            else {
-                if (L.TEMPORARY == id) this.editor = c;
-                else {
-                    if (L.LEFT == id){
-                        this.leftCaption = c;
+                if (nw >= this.minWidth && nh >= this.minHeight) {
+                    this.px = e.absX;
+                    this.py = e.absY;
+                    if ((s.top + s.right + s.bottom + s.left) === 0) {
+                        this.setLocation(this.x + dx, this.y + dy);
                     }
-                    else {
-                        if (L.NONE === id) this.stub = c;
+                    else {                    
+                        this.setSize(nw, nh);
+                        this.setLocation(this.x + dx * s.left, this.y + dy * s.top);
                     }
                 }
             }
-        },
+        };
 
-        function kidRemoved(index,c){
-            this.$super(index, c);
-            if(c == this.editor) this.editor = null;
-            else {
-                if (c == this.topCaption){
-                    this.topCaption = null;
-                }
-                else {
-                    if (c == this.leftCaption){
-                        this.leftCaption = null;
-                    }
-                    else {
-                        if (c == this.stub) this.stub = null;
-                    }
-                }
-            }
-        },
+        this.setColor = function (b, color) {
+            this.colors[b?1:0] = color;
+            this.shaperBr.color = this.colors[this.hasFocus()? 1 : 0];
+            this.repaint();
+        };
+    },
 
-        /**
-         * Set the given grid lines size
-         * @param {Integer} s a size
-         * @method setLineSize
-         */
-        function setLineSize(s){
-            if (s != this.lineSize){
-                this.lineSize = s;
-                this.vrp();
-            }
-        },
+    function (t){
+        this.$super(new L.BorderLayout());
+        this.px = this.py = 0;
+        this.shaperBr = new pkg.ShaperBorder();
+        this.colors   = [ "lightGray", "blue" ];
+        this.shaperBr.color = this.colors[0];
+        this.setBorder(this.shaperBr);
+        if (t != null) this.add(t);
+    },
 
-        /**
-         * Start editing the given grid cell. Editing is initiated only if an editor 
-         * provider has been set and the editor provider defines not-null UI component
-         * as an editor for the given cell. 
-         * @param  {Integer} row a grid cell row
-         * @param  {Integer} col a grid cell column
-         * @method startEditing
-         */
-        function startEditing(row,col){
-            this.stopEditing(true);
-            if (this.editors != null){
-                var editor = this.editors.getEditor(this, row, col, this.getDataToEdit(row, col));
-               
-                if (editor != null){
-                    this.editingRow = row;
-                    this.editingCol = col;
-                    if (editor.isPopupEditor === true) {
-                        var p = L.toParentOrigin(this.getColX(col) + this.scrollManager.getSX(), 
-                                                 this.getRowY(row) + this.scrollManager.getSY(), 
-                                                 this);
-
-                        editor.setLocation(p.x, p.y);
-                        ui.makeFullyVisible(this.getCanvas(), editor);
-                        this.editor = editor;
-                        ui.showModalWindow(this, editor, this);
-                    }
-                    else {
-                        this.add(L.TEMPORARY, editor);
-                        this.repaintRows(this.editingRow, this.editingRow);
-                    }
-                    ui.focusManager.requestFocus(editor);
-                    return true;
-                }
-            }
-            return false;
-        },
-
-        /**
-         * Get currently editing grid cell 
-         * @return {Array} am editing grid cell row and column as the first 
-         * and the second array elements correspondingly. null if there is no 
-         * any editing grid cell
-         * @method getEditingCell
-         */
-        function getEditingCell(){
-            return (this.editingRow >= 0 && this.editingCol >= 0) ? [this.editingRow, this.editingCol] : null;
-        },
-
-        function winOpened(winLayer,target,b){
-            if (this.editor == target &&  b === false){
-                this.stopEditing(this.editor.isAccepted());
-            }
-        },
-
-        /**
-         * Fetch a data from matrix model that has to be edited
-         * @param  {Integer} row a row 
-         * @param  {Integer} col a column
-         * @return {Object} a matrix model data to be edited
-         * @method getDataToEdit
-         * @protected
-         */
-        function getDataToEdit(row,col){ 
-            return this.model.get(row, col);
-        },
-        
-        /**
-         * Apply the given edited data to grid matrix model
-         * @param  {Integer} row a row 
-         * @param  {Integer} col a column
-         * @param  {Object}  an edited matrix model data to be applied
-         * @method setEditedData
-         * @protected
-         */
-        function setEditedData(row,col,value){
-            this.model.put(row, col, value);
+    function insert(i, constr, d) {
+        if (this.kids.length > 0) {
+            this.removeAll();
         }
 
-        /**
-         *  Set number of views to render different grid component elements 
-         *  @param {Object} a set of views as dictionary where key is a view 
-         *  name and the value is a view instance, string (for color, border), 
-         *  or render function. The following view elements can be passed:
-         *
-         * 
-         *      {
-         *         "onselection" : <view to render selected row for the grid that holds focus>,   
-         *         "offselection": <view to render selected row for the grid that doesn't hold focus>
-         *      }
-         *
-         * 
-         *  @method  setViews
-         */
-        
+        var top = this.getTop(), left = this.getLeft();
+        if (d.width === 0 || d.height === 0) d.toPreferredSize();
+        this.setLocation(d.x - left, d.y - top);
+        this.setSize(d.width + left + this.getRight(), d.height + top + this.getBottom());
+        this.$super(i, L.CENTER, d);
+    },
+
+    function focused(){
+        this.$super();
+        this.shaperBr.color = this.colors[this.hasFocus()? 1 : 0];
+        this.repaint();
+    }
 ]);
-pkg.Grid.prototype.setViews = ui.$ViewsSetter;
 
-
-/**
- * Special UI panel that manages to stretch grid columns to occupy the whole panel space. 
- *         
-  
-        ...
-        
-        var canvas = new zebra.ui.zCanvas();
-        var grid = new zebra.ui.grid.Grid(100,10);
-        var pan  = new zebra.ui.grid.GridStretchPan(grid);
-    
-        canvas.root.setLayout(new zebra.layout.BorderLayout());
-        canvas.root.add(zebra.layout.CENTER, pan);
-
-        ...
-
- * @constructor
- * @param {zebra.ui.grid.Grid} grid a grid component that has to be added in the panel
- * @class zebra.ui.grid.GridStretchPan
- * @extends {zebra.ui.Panel}
- */
-pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
+pkg.FormTreeModel = Class(zebra.data.TreeModel, [
     function $prototype() {
-        this.calcPreferredSize = function(target){
-            this.recalcPS();
-            return (target.kids.length === 0 || target.grid.isVisible === false) ? { width:0, height:0 }
-                                                                                 : { width:this.strPs.width, 
-                                                                                     height:this.strPs.height };
-        };
-
-        this.doLayout = function(target){
-            this.recalcPS();
-            if (target.kids.length > 0){
-                var grid = this.grid;
-                if (grid.isVisible === true){
-                    var left = target.getLeft(), top = target.getTop();
-                    grid.setLocation(left, top);
-                    grid.setSize(target.width  - left - target.getRight(),
-                                 target.height - top  - target.getBottom());
-
-                    for(var i = 0; i < this.widths.length; i++) {
-                        grid.setColWidth(i, this.widths[i]);
-                    }
-
-                    if (this.heights != null){
-                        for(var i = 0;i < this.heights.length; i++) {
-                            grid.setRowHeight(i, this.heights[i]);
-                        }
-                    }
+        this.buildModel = function(comp, root){
+            var b = this.exclude && this.exclude(comp), item = b ? root : this.createItem(comp);
+            for(var i = 0; i < comp.kids.length; i++) {
+                var r = this.buildModel(comp.kids[i], item);
+                if (r) {
+                    r.parent = item;
+                    item.kids.push(r);
                 }
             }
+            return b ? null : item;
         };
 
-        this.captionResized = function(src, col, pw){
-            var grid = this.grid;
-            if (col < this.widths.length - 1){
-                var w = grid.getColWidth(col), dt = w - pw;
-                if (dt < 0) grid.setColWidth(col + 1, grid.getColWidth(col + 1) - dt);
-                else {
-                    var ww = grid.getColWidth(col + 1) - dt, mw = this.getMinWidth();
-                    if (ww < mw) {
-                        grid.setColWidth(col, w - (mw - ww));
-                        grid.setColWidth(col + 1, mw);
-                    }
-                    else grid.setColWidth(col + 1, ww);
-                }
-                this.proportions = null;
+        this.itemByComponent = function (c, r){
+            if (r == null) r = this.root;
+            if (r.comp == c) return c;
+            for(var i = 0;i < r.kids.length; i++) {
+                var item = this.itemByComponent(c, r.kids[i]);
+                if (item != null) return item;
             }
-        };
-
-        this.calcColProportions = function (targetAreaW, targetAreaH){
-            var g = this.grid, cols = g.getGridCols(), sw = 0;
-            for(var i = 0;i < cols; i++){
-                var w = g.getColWidth(i);
-                if (w === 0) w = g.getColPSWidth(i);
-                sw += w;
-            }
-
-            var props = Array(cols);
-            for(var i = 0;i < cols; i++){
-                var w = g.getColWidth(i);
-                if (w === 0) w = g.getColPSWidth(i);
-                props[i] = w / sw;
-            }
-            return props;
-        };
-
-        this.calcRowHeights = function(targetAreaW,targetAreaH,widths) { 
             return null;
         };
 
-        this.getMinWidth = function (){
-            return zebra.instanceOf(this.grid.topCaption, pkg.BaseCaption) ? this.grid.topCaption.minSize
-                                                                           : 10;
-        };
-
-        this.calcColWidths = function (targetAreaW,targetAreaH){
-            var grid = this.grid,
-                w    = Array(grid.getGridCols()),
-                ew   = targetAreaW - (this.proportions.length + 1) * grid.lineSize, sw = 0;
-
-            for(var i = 0; i < this.proportions.length; i++){
-                if (this.proportions.length - 1 == i) w[i] = ew - sw;
-                else {
-                    var cw = ~~(ew * this.proportions[i]);
-                    w[i] = cw;
-                    sw += cw;
-                }
-            }
-            return w;
-        };
-
-        this.recalcPS = function (){
-            var grid = this.grid;
-            if (grid == null || grid.isVisible === false) return;
-
-            var p = this.parent, isScr = zebra.instanceOf(p, ui.ScrollPan),
-                taWidth   = (isScr ? p.width - p.getLeft() - p.getRight() - this.getRight() - this.getLeft()
-                                   : this.width - this.getRight() - this.getLeft()),
-                taHeight = (isScr  ? p.height - p.getTop() - p.getBottom() - this.getBottom() - this.getTop()
-                                   : this.height - this.getBottom() - this.getTop());
-
-
-            if (this.grid.leftCaption != null && this.grid.leftCaption.isVisible === true) {
-                taWidth -= this.grid.leftCaption.getPreferredSize().width;
-            }
-
-            if (this.strPs != null && this.prevTargetAreaSize.width == taWidth &&
-                                      this.prevTargetAreaSize.height == taHeight  ) {
-                return;
-            }
-
-            if (this.proportions == null || this.proportions.length != grid.getGridCols()) {
-                this.proportions = this.calcColProportions(taWidth, taHeight);
-            }
-
-            this.prevTargetAreaSize.width = taWidth;
-            this.prevTargetAreaSize.height = taHeight;
-            this.widths  = this.calcColWidths (taWidth, taHeight);
-            this.heights = this.calcRowHeights(taWidth, taHeight, this.widths);
-            this.strPs   = this.summarizePS(taWidth, taHeight, this.widths, this.heights);
-
-            if (isScr === true && p.height > 0 && p.vBar && p.autoHide === false && taHeight < this.strPs.height){
-                taWidth -= p.vBar.getPreferredSize().width;
-                this.widths  = this.calcColWidths(taWidth, taHeight);
-                this.heights = this.calcRowHeights(taWidth, taHeight, this.widths);
-                this.strPs   = this.summarizePS(taWidth, taHeight, this.widths, this.heights);
-            }
-        };
-
-        this.summarizePS = function (targetAreaW,targetAreaH,widths,heights){
-            var ps = { width: targetAreaW, height:0 }, grid = this.grid;
-            if (heights != null){
-                for(var i = 0;i < heights.length; i++) ps.height += heights[i];
-                if (grid.topCaption != null && grid.topCaption.isVisible === true) {
-                    ps.height += grid.topCaption.getPreferredSize().height;
-                }
-                ps.height += (grid.getTop() + grid.getBottom());
-            }
-            else {
-                ps.height = grid.getPreferredSize().height;
-            }
-            return ps;
+        this.createItem = function(comp){
+            var name = comp.$clazz.$name;
+            if (name == null) name = comp.toString();
+            var index = name.lastIndexOf('.'),
+                item = new zebra.data.Item(index > 0 ? name.substring(index + 1) : name);
+            item.comp = comp;
+            return item;
         };
     },
 
-    function (grid){
-        this.$super(this);
-        this.heights = [];
-        this.widths  = [];
-
-        /**
-         * Target grid component
-         * @type {zebra.ui.Grid}
-         * @readOnly
-         * @attribute grid
-         */
-        this.grid = grid;
-
-        this.proportions = this.strPs = null;
-        this.prevTargetAreaSize = { width:0, height:0 };
-        this.add(grid);
-    },
-
-    function kidAdded(index,constr,l){
-        this.proportions = null;
-        if (l.topCaption != null) {
-            l.topCaption.bind(this);
-        }
-        this.scrollManager = l.scrollManager;
-        this.$super(index, constr, l);
-    },
-
-    function kidRemoved(i,l){
-        this.proportions = null;
-        if (l.topCaption != null) {
-            l.topCaption.unbind(this);
-        }
-        this.scrollManager = null;
-        this.$super(i, l);
-    },
-
-    function invalidate(){
-        this.strPs = null;
-        this.$super();
+    function (target){
+        this.$super(this.buildModel(target, null));
     }
 ]);
 
@@ -29070,9 +29333,5 @@ pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
  * @for
  */
 
-})(zebra("ui.grid"), zebra.Class, zebra("ui"));
 
-
-
-
-})();
+})(zebra("ui.designer"), zebra.Class, zebra("ui"));

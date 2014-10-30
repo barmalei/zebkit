@@ -1,12 +1,12 @@
 
 if (typeof(zebra) === "undefined") {
-    load(arguments[0] + '/lib/zebra/easyoop.js');
-    load(arguments[0] + '/lib/zebra/tools.js');
-    load(arguments[0] + '/lib/zebra/util.js');
+    load(arguments[0] + '/src/easyoop.js');
+    load(arguments[0] + '/src/tools.js');
+    load(arguments[0] + '/src/util.js');
 }
 
-var assert = zebra.assert, Class = zebra.Class, assertException = zebra.assertException, 
-    assertNoException = zebra.assertNoException, Listeners = zebra.util.Listeners, 
+var assert = zebra.assert, Class = zebra.Class, assertException = zebra.assertException,
+    assertNoException = zebra.assertNoException, Listeners = zebra.util.Listeners,
     ListenersClass = zebra.util.ListenersClass;
 
 zebra.runTests("Zebra util",
@@ -48,11 +48,11 @@ zebra.runTests("Zebra util",
         ]), a = new A();
 
         assertException(function() {
-           l.add({}); 
+           l.add({});
         }, Error);
 
         assertException(function() {
-           l.add({ fired: 100 }); 
+           l.add({ fired: 100 });
         }, Error);
 
         l.add(a);
@@ -83,7 +83,7 @@ zebra.runTests("Zebra util",
         assert(l.v.length, 0);
         assert(aaa, 100);
 
-        l.remove();        
+        l.remove();
         assert(l.v != null, true);
         assert(l.v.length, 0);
         assert(aaa, 100);
@@ -92,7 +92,7 @@ zebra.runTests("Zebra util",
         assert(l.v != null, true);
         assert(l.v.length, 0);
         assert(aaa, 100);
-        
+
 
         // side effect
         var clazz2 = ListenersClass("tested"), l2 = new clazz2(), aaa2 = 100;
@@ -239,7 +239,7 @@ zebra.runTests("Zebra util",
         });
 
         var l3 = a.bind({
-            dd: function() { t2++; }, 
+            dd: function() { t2++; },
             tt: function() { t1++; }
         });
 
@@ -276,15 +276,15 @@ zebra.runTests("Zebra util",
         assert(t1, 3);
         assert(t2, 5);
 
-        assertException(function() { 
+        assertException(function() {
             a.bind(function mm() {});
         }, Error);
 
-        assertException(function() { 
+        assertException(function() {
             a.bind("mm", function() {});
         }, Error);
 
-        assertException(function() { 
+        assertException(function() {
             a.bind({});
         }, Error);
     },
@@ -320,7 +320,7 @@ zebra.runTests("Zebra util",
         assertException(function() { l.add(function t() {} )}, Error);
 
         assertNoException(function() {
-            l.test2();  
+            l.test2();
         })
 
         var A = Class([
@@ -363,7 +363,7 @@ zebra.runTests("Zebra util",
         assert(l.methods["test1"].length, 2);
 
         assertNoException(function() {
-            l.test2();  
+            l.test2();
         })
         assert(aaa, 200);
         assert(bbb, 0);
@@ -377,8 +377,8 @@ zebra.runTests("Zebra util",
         assert(l.methods["test2"], undefined);
 
         assertNoException(function() {
-            l.test1();  
-            l.test2();  
+            l.test1();
+            l.test2();
             l.remove();
         })
         assert(aaa, 0);
@@ -387,7 +387,7 @@ zebra.runTests("Zebra util",
 
         // side effect
         var clazz2 = ListenersClass("a1", "a2", "a3"), l2 = new clazz2();
-        
+
         assert(clazz.prototype.test1 != null, true);
         assert(clazz.prototype.test2 != null, true);
         assert(clazz.prototype.a1, undefined);
@@ -399,7 +399,7 @@ zebra.runTests("Zebra util",
         assert(clazz2.prototype.a3 != null, true);
         assert(clazz2.prototype.test1, undefined);
         assert(clazz2.prototype.test2, undefined);
-       
+
 
         assert(l2.test1, undefined);
         assert(l2.test2, undefined);
@@ -420,11 +420,11 @@ zebra.runTests("Zebra util",
         l2.add( {
             a1: function() {
                 aaa = 91;
-            }, 
+            },
 
             a2: function() {
                 bbb = 92;
-            }, 
+            },
 
             a3: function() {
                 ccc = 93;
@@ -440,7 +440,7 @@ zebra.runTests("Zebra util",
         assert(l2.methods["a3"].length, 2);
         assert(l2.methods[""].length, 2);
         assert(l2.methods["test1"], undefined);
-        assert(l2.methods["test2"], undefined);        
+        assert(l2.methods["test2"], undefined);
 
         assert(ddd, 100);
         l2.a1();
@@ -529,10 +529,10 @@ zebra.runTests("Zebra util",
                 this.t = 100;
             }
         ]);
-        
+
         l.fired("test2");
         assert(a.t, 100);
-    }  
+    }
 );
 
 

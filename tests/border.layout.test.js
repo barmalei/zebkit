@@ -1,9 +1,9 @@
 
 if (typeof(zebra) === "undefined") {
-    load(arguments[0] + '/lib/zebra/easyoop.js');
-    load(arguments[0] + '/lib/zebra/util.js');
-    load(arguments[0] + '/lib/zebra/tools.js');
-    load(arguments[0] + '/lib/zebra/layout.js');
+    load(arguments[0] + '/src/easyoop.js');
+    load(arguments[0] + '/src/util.js');
+    load(arguments[0] + '/src/tools.js');
+    load(arguments[0] + '/src/layout.js');
 }
 
 eval(zebra.Import("layout"));

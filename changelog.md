@@ -1,12 +1,15 @@
-**8.2014 (Luda)**
+**11.2014 (Anna)**
 
-  * Remove zebra.ui.CopyCutPaste interface
-  * Reorganize tree component
-  * Add Component Tree component 
-  * Fixes and improvements
-  * OOP Singleton classes support
-  * Composite interface has been removed, use catchInput property or method to build a composite component  
-
+   * New UI component tree. Add UI components directly as tree nodes  
+   * Grid cell marker mode support
+   * Own zebra custom virtual keyboard implementation 
+   * Remove "zebra.ui.Composite" interface, use "catchInput" field as boolean flag to say if component composite or as a method to say it dynamically
+   * Remove zebra.ui.CopyCutPaste interface. Use "clipCopy", "clipPaste" method to catch clipboard events
+   * Reorganized tree component
+   * OOP Singleton classes support
+   * Use nodejs/gulp to as deployment tool
+   * Fixes and improvements
+   
 **4.2014 (Luda)**
 
    * Reduce number of zebra artifact required to host zebra on a user side. To host zebra only three artifacts are required:

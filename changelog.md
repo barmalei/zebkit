@@ -2,14 +2,20 @@
 
    * New UI component tree. Add UI components directly as tree nodes  
    * Grid cell marker mode support
-   * Own zebra custom virtual keyboard implementation 
+   * Own zebra custom virtual keyboard implementation is provided 
    * Remove "zebra.ui.Composite" interface, use "catchInput" field as boolean flag to say if component composite or as a method to say it dynamically
    * Remove zebra.ui.CopyCutPaste interface. Use "clipCopy", "clipPaste" method to catch clipboard events
    * Reorganized tree component
    * OOP Singleton classes support
-   * Use nodejs/gulp to as deployment tool
-   * Fixes and improvements
-   * Matrix data model has been extended with row and col insertion  
+   * UI Component constraints can be passed as string "center", "left", etc
+   * zebra.layout.TLEFT, zebra.layout.TRIGHT, etc constants have been re-named into zebra.layout.TopLeft, zebra.layout.TopRight etc
+   * Pakcage has been re-organized:
+      - "zebra/lib" has been moved to "src"
+      - python debug server code has been moved to "tests/io" from "lib/jsonrpc" 
+      - home made building engine has been removed ("bin")
+      - nodejs/gulp are used as building tool
+   * Tones of fixes and improvements
+   * Matrix data model has been extended with row and col insertion methods
    * **Apache license** instead of LGPL
    
 **4.2014 (Luda)**

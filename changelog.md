@@ -9,6 +9,8 @@
    * OOP Singleton classes support
    * Use nodejs/gulp to as deployment tool
    * Fixes and improvements
+   * Matrix data model has been extended with row and col insertion  
+   * **Apache license** instead of LGPL
    
 **4.2014 (Luda)**
 

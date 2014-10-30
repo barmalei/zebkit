@@ -1,3 +1,5 @@
+(function() {
+
 /**
  * This is the core module that provides powerful easy OOP concept, packaging and number of utility methods.
  * The module has no any dependency from others zebra modules and can be used independently.  
@@ -1256,6 +1258,3547 @@ else {
  */
 
 })();
+
+
+/**
+ * Number of different utilities methods and classes
+ * @module util
+ * @requires zebra
+ */
+
+(function(pkg, Class, Interface) {
+/**
+ * Instantiate a new class instance by the given class name with the specified constructor
+ * arguments.
+ * @param  {String} clazz a class name
+ * @param  {Array} [args] an arguments list
+ * @return {Object}  a new instance of the given class initialized with the specified arguments
+ * @api  zebra.util.newInstance()
+ * @method newInstance
+ */
+pkg.newInstance = function(clazz, args) {
+    if (args && args.length > 0) {
+        var f = function() {};
+        f.prototype = clazz.prototype;
+        var o = new f();
+        o.constructor = clazz;
+        clazz.apply(o, args);
+        return o;
+    }
+    return new clazz();
+};
+
+
+function hex(v) {
+    return (v < 16) ? ["0", v.toString(16)].join('') :  v.toString(16);
+}
+
+/**
+ * Find by xpath-like path an element in a tree-like structure. The method is flexible way to look up
+ * elements in tree structures. The only requirements the passed tree-like structure has to follow is
+ * declaring a "kids" array field if the element has a children element. To understand if the given tree
+ * element matches the current path fragment a special equality function has to be passed.
+
+        var treeLikeRoot = {
+            value : "Root",
+            kids : [
+                { value: "Item 1" },
+                { value: "Item 2" }
+            ]
+        };
+
+        zebra.util.findInTree(treeLikeRoot,
+                              "/Root/item1",
+                              function(item, fragment) {
+                                  return item.value == fragment;
+                              },
+                              function(foundElement) {
+                                 ...
+                                 // true means stop lookup
+                                 return true;
+                              });
+
+
+ * @param  {Object} root a tree root element. If the element has a children element it has to
+ * declare "kids" field. This field is an array of all children elements
+ * @param  {String}   path a xpath-like path. The path has to satisfy number of requirements
+ * and rules:
+
+    - "/"" means lookup among all direct children elements
+    - "//"" means lookup among all children elements recursively
+    - "*" means any path value
+    -[@attr=100] means number attribute
+    -[@attr=true] means boolean attribute
+    -[@attr='value'] means string attribute
+    - Path has always starts from "/" or "//"
+    - Path element always has to be defined: "*" or an symbolic name
+
+ *
+ * Path examples:
+
+    - "//*" traverse all tree elements
+    - "//*[@a=10]" traverse all tree elements that has an attribute "a" that equals 10
+    - "/Root/Item" find an element by exact path
+
+ * @param  {Function}  eq  an equality function. The function gets current evaluated tree element
+ * and a path fragment against which the tree element has to be evaluated. It is expected the method
+ * returns boolean value to say if the given passed tree element matches the path fragment.
+ * @param  {Function} cb callback function that is called every time a new tree element
+ * matches the given path fragment. The function has to return true if the tree look up
+ * has to be stopped
+ * @api  zebra.util.findInTree()
+ * @method findInTree
+ */
+pkg.findInTree = function(root, path, eq, cb) {
+    var findRE = /(\/\/|\/)?([^\[\/]+)(\[\s*(\@[a-zA-Z_][a-zA-Z0-9_\.]*)\s*\=\s*([0-9]+|true|false|\'[^']*\')\s*\])?/g,
+        m = null, res = [];
+
+    function _find(root, ms, idx, cb) {
+        function list_child(r, name, deep, cb) {
+            if (r.kids) {
+                for (var i=0; i < r.kids.length; i++) {
+                    var kid = r.kids[i];
+                    if (name == '*' || eq(kid, name)) {
+                        if (cb(kid)) return true;
+                    }
+
+                    if (deep && list_child(kid, name, deep, cb)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        if (ms == null || idx >= ms.length) return cb(root);
+
+        var m = ms[idx];
+        return list_child(root, m[2], m[1] == "//", function(child) {
+            if (m[3] && child[m[4].substring(1)] != m[5]) return false;
+            return _find(child, ms, idx + 1, cb);
+        });
+    }
+
+    var c = 0;
+    while (m = findRE.exec(path)) {
+        if (m[1] == null || m[2] == null || m[2].trim().length === 0) {
+            break;
+        }
+
+        c += m[0].length;
+
+
+        if (m[3] && m[5][0] == "'") m[5] = m[5].substring(1, m[5].length - 1);
+        res.push(m);
+    }
+
+    if (res.length === 0 || c < path.length) {
+        throw new Error("Invalid path: '" + path + "'," + c);
+    }
+
+    _find({ kids:[root] }, res, 0, cb);
+};
+
+
+/**
+ * RGB color class. This class represents rgb(a) color as JavaScript structure:
+
+       // rgb color
+       var rgb1 = new zebra.util.rgb(100,200,100);
+
+       // rgb with transparency
+       var rgb2 = new zebra.util.rgb(100,200,100, 0.6);
+
+       // encoded as a string rgb color
+       var rgb3 = new zebra.util.rgb("rgb(100,100,200)");
+
+       // hex rgb color
+       var rgb3 = new zebra.util.rgb("#CCDDFF");
+
+ * @param  {Integer|String} r  red color intensity or if this is the only constructor parameter it denotes
+ * encoded in string rgb color
+ * @param  {Integer} [g]  green color intensity
+ * @param  {Integer} [b] blue color intensity
+ * @param  {Float}   [a] alpha color intensity
+ * @constructor
+ * @class zebra.util.rgb
+ */
+pkg.rgb = function (r, g, b, a) {
+
+    /**
+     * Red color intensity
+     * @attribute r
+     * @type {Integer}
+     * @readOnly
+     */
+
+    /**
+     * Green color intensity
+     * @attribute g
+     * @type {Integer}
+     * @readOnly
+     */
+
+    /**
+     * Blue color intensity
+     * @attribute b
+     * @type {Integer}
+     * @readOnly
+     */
+
+    /**
+     * Alpha
+     * @attribute a
+     * @type {Float}
+     * @readOnly
+     */
+
+    /**
+     * Indicates if the color is opaque
+     * @attribute isTransparent
+     * @readOnly
+     * @type {Boolean}
+     */
+    this.isOpaque = false;
+
+    if (arguments.length == 1) {
+        if (zebra.isString(r)) {
+            this.s = r;
+            if (r[0] === '#') {
+                r = parseInt(r.substring(1), 16);
+            }
+            else {
+                if (r[0] === 'r' && r[1] === 'g' && r[2] === 'b') {
+                    var i = r.indexOf('(', 3), p = r.substring(i + 1, r.indexOf(')', i + 1)).split(",");
+                    this.r = parseInt(p[0].trim(), 10);
+                    this.g = parseInt(p[1].trim(), 10);
+                    this.b = parseInt(p[2].trim(), 10);
+                    if (p.length > 3) {
+                        this.a = parseInt(p[3].trim(), 10);
+                        this.isOpaque = (this.a != 1);
+                    }
+                    return;
+                }
+            }
+        }
+        this.r =  r >> 16;
+        this.g = (r >> 8) & 0xFF;
+        this.b = (r & 0xFF);
+    }
+    else {
+        this.r = r;
+        this.g = g;
+        this.b = b;
+        if (arguments.length > 3) this.a = a;
+    }
+
+    if (this.s == null) {
+        this.s = (typeof this.a !== "undefined") ? ['rgba(', this.r, ",", this.g, ",",
+                                                             this.b, ",", this.a, ")"].join('')
+                                                 : ['#', hex(this.r), hex(this.g), hex(this.b)].join('');
+    }
+};
+
+var rgb = pkg.rgb;
+rgb.prototype.toString = function() {
+    return this.s;
+};
+
+rgb.black       = new rgb(0);
+rgb.white       = new rgb(0xFFFFFF);
+rgb.red         = new rgb(255,0,0);
+rgb.blue        = new rgb(0,0,255);
+rgb.green       = new rgb(0,255,0);
+rgb.gray        = new rgb(128,128,128);
+rgb.lightGray   = new rgb(211,211,211);
+rgb.darkGray    = new rgb(169,169,169);
+rgb.orange      = new rgb(255,165,0);
+rgb.yellow      = new rgb(255,255,0);
+rgb.pink        = new rgb(255,192,203);
+rgb.cyan        = new rgb(0,255,255);
+rgb.magenta     = new rgb(255,0,255);
+rgb.darkBlue    = new rgb(0, 0, 140);
+rgb.transparent = new rgb(0, 0, 0, 0.0);
+
+/**
+ * Compute intersection of the two given rectangular areas
+ * @param  {Integer} x1 a x coordinate of the first rectangular area
+ * @param  {Integer} y1 a y coordinate of the first rectangular area
+ * @param  {Integer} w1 a width of the first rectangular area
+ * @param  {Integer} h1 a height of the first rectangular area
+ * @param  {Integer} x2 a x coordinate of the first rectangular area
+ * @param  {Integer} y2 a y coordinate of the first rectangular area
+ * @param  {Integer} w2 a width of the first rectangular area
+ * @param  {Integer} h2 a height of the first rectangular area
+ * @param  {Object}  r  an object to store result
+ *
+ *      { x: {Integer}, y:{Integer}, width:{Integer}, height:{Integer} }
+ *
+ * @method intersection
+ * @api zebra.util.intersection();
+ */
+pkg.intersection = function(x1,y1,w1,h1,x2,y2,w2,h2,r){
+    r.x = x1 > x2 ? x1 : x2;
+    r.width = Math.min(x1 + w1, x2 + w2) - r.x;
+    r.y = y1 > y2 ? y1 : y2;
+    r.height = Math.min(y1 + h1, y2 + h2) - r.y;
+};
+
+pkg.isIntersect = function(x1,y1,w1,h1,x2,y2,w2,h2){
+    return (Math.min(x1 + w1, x2 + w2) - (x1 > x2 ? x1 : x2)) > 0 &&
+           (Math.min(y1 + h1, y2 + h2) - (y1 > y2 ? y1 : y2)) > 0;
+};
+
+pkg.unite = function(x1,y1,w1,h1,x2,y2,w2,h2,r){
+    r.x = x1 < x2 ? x1 : x2;
+    r.y = y1 < y2 ? y1 : y2;
+    r.width  = Math.max(x1 + w1, x2 + w2) - r.x;
+    r.height = Math.max(y1 + h1, y2 + h2) - r.y;
+};
+
+var letterRE = /[A-Za-z]/;
+pkg.isLetter = function (ch) {
+    if (ch.length != 1) throw new Error("Incorrect character");
+    return letterRE.test(ch);
+};
+
+/**
+ * This this META class is handy container to keep different types of listeners and
+ * fire events to the listeners:
+
+        // create listener container to keep three different events
+        // handlers
+        var MyListenerContainerClass = zebra.util.ListenersClass("event1",
+                                                                  "event2",
+                                                                  "event3");
+
+        // instantiate listener class container
+        var listeners = new MyListenerContainerClass();
+
+        // add "event1" listener
+        listeners.add(function event1() {
+            ...
+        });
+
+        // add "event2" listener
+        listeners.add(function event2() {
+           ...
+        });
+
+        // and firing event1 to registered handlers
+        listeners.event1(...);
+
+        // and firing event2 to registered handlers
+        listeners.event2(...);
+
+ * @class zebra.util.Listeners
+ * @constructor
+ * @param {String} [events]* events types the container has to support
+ */
+var $NewListener = function() {
+    if (arguments.length === 0) {
+       arguments = ["fired"];
+    }
+
+    var clazz = function() {};
+
+    if (arguments.length == 1) {
+        var name = arguments[0];
+
+        clazz.prototype.add = function() {
+            if (this.v == null) this.v = [];
+
+            var ctx = this,
+                l   = arguments[arguments.length - 1]; // last arguments are handler(s)
+
+
+            if (typeof l !== 'function') {
+                ctx = l;
+                l   = l[name];
+
+                if (l == null || typeof l !== "function") {
+                    throw new Error("Instance doesn't declare '" + name + "' listener method");
+                }
+            }
+
+            if (arguments.length > 1 && arguments[0] != name) {
+                throw new Error("Unknown event type :" + name);
+            }
+
+            this.v.push(ctx, l);
+            return l;
+        };
+
+        clazz.prototype.remove = function(l) {
+            if (this.v != null) {
+                if (arguments.length === 0) {
+                    // remove all
+                    this.v.length = 0;
+                }
+                else {
+                    var i = 0;
+                    while((i = this.v.indexOf(l)) >= 0) {
+                        if (i % 2 > 0) i--;
+                        this.v.splice(i, 2);
+                    }
+                }
+            }
+        };
+
+        clazz.prototype[name] = function() {
+            if (this.v != null) {
+                for(var i = 0;i < this.v.length; i+=2) {
+                    this.v[i + 1].apply(this.v[i], arguments);
+                }
+            }
+        };
+    }
+    else {
+        var names = {};
+        for(var i=0; i< arguments.length; i++) {
+            names[arguments[i]] = true;
+        }
+
+        clazz.prototype.add = function(l) {
+            if (this.methods == null) this.methods = {};
+
+            var n = null;
+            if (arguments.length > 1) {
+                n = arguments[0];
+                l = arguments[arguments.length - 1]; // last arguments are handler(s)
+            }
+
+            if (typeof l === 'function') {
+                if (n == null) n = zebra.$FN(l);
+
+                if (n != '' && names.hasOwnProperty(n) === false) {
+                    throw new Error("Unknown event type " + n);
+                }
+
+                if (this.methods[n] == null) this.methods[n] = [];
+                this.methods[n].push(this, l);
+            }
+            else {
+                var b = false;
+                for(var k in names) {
+                    if (typeof l[k] === "function") {
+                        b = true;
+                        if (this.methods[k] == null) this.methods[k] = [];
+                        this.methods[k].push(l, l[k]);
+                    }
+                }
+
+                if (b === false) {
+                    throw new Error("No listener methods have been found");
+                }
+            }
+            return l;
+        };
+
+        // populate methods that has to be called to send appropriate events to
+        // registered listeners
+        for(var i=0; i < arguments.length; i++) {
+            var m = arguments[i];
+            (function(m) {
+                clazz.prototype[m] = function() {
+                    if (this.methods != null) {
+                        var c = this.methods[m];
+                        if (c != null) {
+                            for(var i=0; i < c.length; i+=2) c[i+1].apply(c[i], arguments);
+                        }
+
+                        c = this.methods[''];
+                        if (c != null) {
+                            for(var i=0; i < c.length; i+=2) c[i+1].apply(c[i], arguments);
+                        }
+                    }
+                };
+            })(m);
+        }
+
+        clazz.prototype.remove = function(l) {
+            if (this.methods != null) {
+                if (arguments.length === 0) {
+                    for(var k in this.methods) {
+                        if (this.methods.hasOwnProperty(k)) this.methods[k].length = 0;
+                    }
+                    this.methods = {};
+                }
+                else {
+                    for (var k in this.methods) {
+                        var v = this.methods[k], i = 0;
+                        while ((i = v.indexOf(l)) >= 0) {
+                            if (i%2 > 0) i--;
+                            v.splice(i, 2);
+                        }
+
+                        if (v.length === 0) {
+                            delete this.methods[k];
+                        }
+                    }
+                }
+            }
+        };
+    }
+    return clazz;
+};
+
+pkg.Listeners = $NewListener();
+pkg.ListenersClass = $NewListener;
+
+
+/**
+ * Useful class to track a virtual cursor position in a structure that has
+ * dedicated number of lines where every line has a number of elements. The
+ * structure metric has to be described by providing an instance of
+ * zebra.util.Position.Metric interface that discovers how many
+ * lines the structure has and how many elements every line includes.
+ * @param {zebra.util.Position.Metric} m a position metric
+ * @constructor
+ * @class  zebra.util.Position
+ */
+
+/**
+ * Fire when a virtual cursor position has been updated
+
+        position.bind(function(src, prevOffset, prevLine, prevCol) {
+            ...
+        });
+
+ * @event posChanged
+ * @param {zebra.util.Position} src an object that triggers the event
+ * @param {Integer} prevOffest a previous virtual cursor offset
+ * @param {Integer} prevLine a previous virtual cursor line
+ * @param {Integer} prevCol a previous virtual cursor column in the previous line
+ */
+var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = Class([
+    function $clazz() {
+        /**
+         * Position metric interface. This interface is designed for describing
+         * a navigational structure that consists on number of lines where
+         * every line consists of number of elements
+         * @class zebra.util.Position.Metric
+         */
+
+        /**
+         * Get number of lines to navigate through
+         * @return {Integer} a number of lines
+         * @method  getLines
+         */
+
+         /**
+          * Get a number of elements in the given line
+          * @param {Integer} l a line index
+          * @return {Integer} a number of elements in a line
+          * @method  getLineSize
+          */
+
+         /**
+          * Get a maximal element index (a last element of a last line)
+          * @return {Integer} a maximal element index
+          * @method  getMaxOffset
+          */
+
+        this.Metric = Interface();
+
+        this.DOWN = 1;
+        this.UP   = 2;
+        this.BEG  = 3;
+        this.END  = 4;
+    },
+
+    function $prototype() {
+        /**
+         * Set the specified virtual cursor offsest
+         * @param {Integer} o an offset, pass null to set position to indefinite state
+         * @return {Integer} an offset that has been set
+         * @method setOffset
+         */
+        this.setOffset = function(o){
+            if (o < 0) o = 0;
+            else {
+                if (o == null) o = -1;
+                else {
+                    var max = this.metrics.getMaxOffset();
+                    if (o >= max) o = max;
+                }
+            }
+
+            if (o != this.offset){
+                var prevOffset = this.offset,
+                    prevLine   = this.currentLine,
+                    prevCol    = this.currentCol,
+                    p          = this.getPointByOffset(o);
+
+                this.offset = o;
+                if (p != null){
+                    this.currentLine = p[0];
+                    this.currentCol = p[1];
+                }
+                this.isValid = true;
+                this._.posChanged(this, prevOffset, prevLine, prevCol);
+            }
+
+            return o;
+        };
+
+        /**
+         * Seek virtual cursor offset with the given shift
+         * @param {Integer} off a shift
+         * @return {Integer} an offset that has been set
+         * @method seek
+         */
+        this.seek = function(off) {
+            return this.setOffset(this.offset + off);
+        };
+
+        /**
+         * Set the vurtual cursor line and the given column in the line
+         * @param {Integer} r a line
+         * @param {Integer} c a column in the line
+         * @method setRowCol
+         */
+        this.setRowCol = function(r,c) {
+            if (r != this.currentLine || c != this.currentCol){
+                var prevOffset = this.offset,
+                    prevLine = this.currentLine,
+                    prevCol = this.currentCol;
+
+                this.offset = this.getOffsetByPoint(r, c);
+                this.currentLine = r;
+                this.currentCol = c;
+                this._.posChanged(this, prevOffset, prevLine, prevCol);
+            }
+        };
+
+        this.inserted = function(off,size) {
+            if (this.offset >= 0 && off <= this.offset){
+                this.isValid = false;
+                this.setOffset(this.offset + size);
+            }
+        };
+
+        this.removed = function (off,size){
+            if (this.offset >= 0 && this.offset >= off){
+                this.isValid = false;
+                this.setOffset(this.offset >= (off + size) ? this.offset - size
+                                                           : off);
+            }
+        };
+
+        /**
+         * Calculate a line and line column by the given offset.
+         * @param  {Integer} off an offset
+         * @return {Array} an array that contains a line as the first
+         * element and a column in the line as the second element.
+         * @method getPointByOffset
+         */
+        this.getPointByOffset = function(off){
+            if (off >= 0) {
+                var m = this.metrics, max = m.getMaxOffset();
+                if (off > max) {
+                    throw new Error("Out of bounds:" + off);
+                }
+
+                if (max === 0) return [(m.getLines() > 0 ? 0 : -1), 0];
+                if (off === 0) return [0, 0];
+
+                var d = 0, sl = 0, so = 0;
+                if (this.isValid && this.offset != -1) {
+                    sl = this.currentLine;
+                    so = this.offset - this.currentCol;
+                    if (off > this.offset) d = 1;
+                    else {
+                        if (off < this.offset) d =  -1;
+                        else return [sl, this.currentCol];
+                    }
+                }
+                else {
+                    d = (~~(max / off) === 0) ?  -1 : 1;
+                    if (d < 0) {
+                        sl = m.getLines() - 1;
+                        so = max - m.getLineSize(sl);
+                    }
+                }
+                for(; sl < m.getLines() && sl >= 0; sl += d){
+                    var ls = m.getLineSize(sl);
+                    if (off >= so && off < so + ls) {
+                        return [sl, off - so];
+                    }
+                    so += d > 0 ? ls : -m.getLineSize(sl - 1);
+                }
+            }
+            return [-1, -1];
+        };
+
+        /**
+         * Calculate an offset by the given line and column in the line
+         * @param  {Integer} row a line
+         * @param  {Integer} col a column in the line
+         * @return {Integer} an offset
+         * @method getOffsetByPoint
+         */
+        this.getOffsetByPoint = function (row, col){
+            var startOffset = 0, startLine = 0, m = this.metrics;
+
+            if (row >= m.getLines() || col >= m.getLineSize(row)) {
+                throw new Error();
+            }
+
+            if (this.isValid && this.offset !=  -1) {
+                startOffset = this.offset - this.currentCol;
+                startLine = this.currentLine;
+            }
+            if (startLine <= row) {
+                for(var i = startLine;i < row; i++) {
+                    startOffset += m.getLineSize(i);
+                }
+            }
+            else {
+                for(var i = startLine - 1;i >= row; i--) {
+                    startOffset -= m.getLineSize(i);
+                }
+            }
+            return startOffset + col;
+        };
+
+        /**
+         * Seek virtual cursor to the next position. How the method has to seek to the next position
+         * has to be denoted by one of the following constants:
+
+    - **zebra.util.Position.BEG** seek cursor to the begin of the current line
+    - **zebra.util.Position.END** seek cursor to the end of the current line
+    - **zebra.util.Position.UP** seek cursor one line up
+    - **zebra.util.Position.DOWN** seek cursor one line down
+
+         * If the current virtual position is not known (-1) the method always sets
+         * it to the first line, the first column in the line (offset is zero).
+         * @param  {Integer} t   an action the seek has to be done
+         * @param  {Integer} num number of seek actions
+         * @method seekLineTo
+         */
+        this.seekLineTo = function(t,num){
+            if (this.offset < 0){
+                this.setOffset(0);
+            }
+            else {
+                if (arguments.length == 1) num = 1;
+
+                var prevOffset = this.offset, prevLine = this.currentLine, prevCol = this.currentCol;
+                switch(t) {
+                    case Position.BEG:
+                        if (this.currentCol > 0){
+                            this.offset -= this.currentCol;
+                            this.currentCol = 0;
+                        } break;
+                    case Position.END:
+                        var maxCol = this.metrics.getLineSize(this.currentLine);
+                        if (this.currentCol < (maxCol - 1)){
+                            this.offset += (maxCol - this.currentCol - 1);
+                            this.currentCol = maxCol - 1;
+                        } break;
+                    case Position.UP:
+                        if (this.currentLine > 0){
+                            this.offset -= (this.currentCol + 1);
+                            this.currentLine--;
+                            for(var i = 0;this.currentLine > 0 && i < (num - 1); i++, this.currentLine--){
+                                this.offset -= this.metrics.getLineSize(this.currentLine);
+                            }
+                            var maxCol = this.metrics.getLineSize(this.currentLine);
+                            if (this.currentCol < maxCol) this.offset -= (maxCol - this.currentCol - 1);
+                            else this.currentCol = maxCol - 1;
+                        } break;
+                    case Position.DOWN:
+                        if (this.currentLine < (this.metrics.getLines() - 1)){
+                            this.offset += (this.metrics.getLineSize(this.currentLine) - this.currentCol);
+                            this.currentLine++;
+                            var size = this.metrics.getLines() - 1;
+                            for(var i = 0;this.currentLine < size && i < (num - 1); i++ ,this.currentLine++ ){
+                                this.offset += this.metrics.getLineSize(this.currentLine);
+                            }
+                            var maxCol = this.metrics.getLineSize(this.currentLine);
+                            if (this.currentCol < maxCol) this.offset += this.currentCol;
+                            else {
+                                this.currentCol = maxCol - 1;
+                                this.offset += this.currentCol;
+                            }
+                        } break;
+                    default: throw new Error();
+                }
+
+                this._.posChanged(this, prevOffset, prevLine, prevCol);
+            }
+        };
+
+        this[''] = function(pi){
+            this._ = new PosListeners();
+            this.isValid = false;
+
+            /**
+             * Current virtual cursor line position
+             * @attribute currentLine
+             * @type {Integer}
+             * @readOnly
+             */
+
+            /**
+             * Current virtual cursor column position
+             * @attribute currentCol
+             * @type {Integer}
+             * @readOnly
+             */
+
+            /**
+             * Current virtual cursor offset
+             * @attribute offset
+             * @type {Integer}
+             * @readOnly
+             */
+
+            this.currentLine = this.currentCol = this.offset = 0;
+            this.setMetric(pi);
+        };
+
+        /**
+         * Set position metric. Metric describes how many lines
+         * and elements in these line the virtual cursor can be navigated
+         * @param {zebra.util.Position.Metric} p a position metric
+         * @method setMetric
+         */
+        this.setMetric = function (p){
+            if (p == null) throw new Error("Null metric");
+            if (p != this.metrics){
+                this.metrics = p;
+                this.setOffset(null);
+            }
+        };
+    }
+]);
+
+pkg.SingleColPosition = Class(pkg.Position, [
+    function $prototype() {
+        this.setRowCol = function(r,c) {
+            this.setOffset(r);
+        };
+
+        this.setOffset = function(o){
+            if (o < 0) o = 0;
+            else {
+                if (o == null) o = -1;
+                else {
+                    var max = this.metrics.getMaxOffset();
+                    if (o >= max) o = max;
+                }
+            }
+
+            if (o != this.offset) {
+                var prevOffset = this.offset,
+                    prevLine   = this.currentLine,
+                    prevCol    = this.currentCol;
+
+                this.offset = o;
+                this.currentLine = o;
+                this.isValid = true;
+                this._.posChanged(this, prevOffset, prevLine, prevCol);
+            }
+
+            return o;
+        };
+
+        this.seekLineTo = function(t, num){
+            if (this.offset < 0){
+                this.setOffset(0);
+            }
+            else {
+                if (arguments.length == 1) num = 1;
+                switch(t) {
+                    case Position.BEG:
+                    case Position.END: break;
+                    case Position.UP:
+                        if (this.offset > 0) {
+                            this.setOffset(this.offset - n);
+                        } break;
+                    case Position.DOWN:
+                        if (this.offset < (this.metrics.getLines() - 1)){
+                            this.setOffset(this.offset + n);
+                        } break;
+                    default: throw new Error();
+                }
+            }
+        };
+    }
+]);
+
+
+(function() {
+    var quantum = 40, tasks = Array(5), count = 0, pid = -1;
+
+    function dispatcher() {
+        var c = 0;
+        for(var i = 0; i < tasks.length; i++) {
+            var t = tasks[i];
+
+            if (t.isStarted === true) {
+                c++;
+                if (t.si <= 0) {
+                    try {
+                        if (t.ctx == null) t.task(t);
+                        else               t.task.call(t.ctx, t);
+                    }
+                    catch(e) {
+                        console.log(e.stack ? e.stack : e);
+                    }
+
+                    t.si += t.ri;
+                }
+                else {
+                    t.si -= quantum;
+                }
+            }
+        }
+
+        if (c === 0 && pid >= 0) {
+            window.clearInterval(pid);
+            pid = -1;
+        }
+    }
+
+    /**
+     * Task is keeps a context of and allows developers
+     * to run, shutdown, pause a required method as a task
+     * Developer cannot instantiate the class directly.
+     * Use "zebra.util.task(...)" method to do it:
+
+        var t = zebra.util.task(function(context) {
+            // task body
+            ...
+        });
+
+        // run task in 1 second and repeat the task execution
+        // every half second
+        t.run(1000, 500);
+        ...
+
+        t.shutdown(); // stop the task
+
+     * @class zebra.util.TaskCotext
+     */
+    function Task() {
+        this.ctx = this.task = null;
+        this.ri  = this.si  = 0;
+
+        /**
+         * Indicates if the task is executed (active)
+         * @type {Boolean}
+         * @attribute isStarted
+         * @readOnly
+         */
+        this.isStarted = false;
+    }
+
+    pkg.TaskCotext = Task;
+
+    /**
+     * Shutdown the given task.
+     * @method shutdown
+     */
+    Task.prototype.shutdown = function() {
+        if (this.task != null) {
+            count--;
+            this.ctx = this.task = null;
+            this.isStarted = false;
+            this.ri = this.si = 0;
+        }
+
+        if (count === 0 && pid  >= 0) {
+            window.clearInterval(pid);
+            pid = -1;
+        }
+    };
+
+    /**
+     * Run the task
+     * @param {Integer} [startIn] a time (in milliseconds) in which the task has to be started
+     * @param {Integer} [repeatIn] a period (in milliseconds) the task has to be executed
+     * @method run
+     */
+    Task.prototype.run = function(startIn, repeatIn) {
+        if (this.task == null) {
+            throw new Error("Task body has not been defined");
+        }
+
+        if (arguments.length > 0) this.si = startIn;
+        if (arguments.length > 1) this.ri = repeatIn;
+        if (this.ri <= 0) this.ri = 150;
+
+        this.isStarted = true;
+
+        if (count > 0 && pid < 0) {
+            pid = window.setInterval(dispatcher, quantum);
+        }
+
+        return this;
+    };
+
+    /**
+     * Pause the given task.
+     * @method pause
+     */
+    Task.prototype.pause = function(t) {
+        if (this.task == null) {
+            throw new Error();
+        }
+
+        if (arguments.length === 0) {
+            this.isStarted = false;
+        }
+        else {
+            this.si = t;
+        }
+    };
+
+    // pre-fill tasks pool
+    for(var i = 0; i < tasks.length; i++) {
+        tasks[i] = new Task();
+    }
+
+    /**
+     * Take a free task from pool and run it with the specified
+     * body and the given context.
+
+        // allocate task
+        var task = zebra.util.task(function (ctx) {
+            // do something
+
+            // complete task if necessary
+            ctx.shutdown();
+        });
+
+        // run task in second and re-run it every 2 seconds
+        task.run(1000, 2000);
+
+        ...
+
+        // pause the task
+        task.pause();
+
+        ...
+        // run it again
+        task.run();
+
+     * @param  {Function|Object} f a function that has to be executed
+     * @param  {Object} [ctx]  a context the task has to be executed
+     * @return {zebra.util.Task} an allocated task
+     * @method task
+     * @api zebra.util.task
+     */
+    pkg.task = function(f, ctx){
+        if (typeof f != "function") {
+            ctx = f;
+            f = f.run;
+        }
+
+        if (f == null) {
+            throw new Error();
+        }
+
+        // find free and return free task
+        for(var i=0; i < tasks.length; i++) {
+            var j = (i + count) % tasks.length, t = tasks[j];
+            if (t.task == null) {
+                t.task = f;
+                t.ctx  = ctx;
+                count++;
+                return t;
+            }
+        }
+
+        throw new Error("Out of tasks limit");
+    };
+
+    /**
+     * Shut down all active at the given moment tasks
+     * body and the given context.
+     * @method shutdownAll
+     * @api zebra.util.shutdownAll
+     */
+    pkg.shutdownAll = function() {
+        for(var i=0; i < tasks.length; i++) {
+            tasks[i].shutdown();
+        }
+    };
+})();
+
+
+/**
+ * JSON configuration objects loader class. The class is
+ * handy way to keep and load configuration encoded in JSON
+ * format. Except standard JSON types the class uses number
+ * of JSON values and key interpretations such as:
+
+    - **"@key_of_refernced_value"** String values that start from "@" character are considered
+      as a reference to other values
+    - **{ "$class_name":[ arg1, arg2, ...], "prop1": ...}** Key names that starts from "$" character
+      are considered as name of class that has to be instantiated as the value
+    - **{"?isToucable": { "label": true } }** Key names that start from "?" are considered as
+      conditional section.
+
+ * Also the class support section inheritance. That means
+ * you can say to include part of JSON to another part of JSON.
+ * For instance, imagine JSON describes properties for number
+ * of UI components where an UI component can inherits another
+ * one.
+
+        {
+           // base component
+           "BaseComponent": {
+               "background": "red",
+               "border": "plain",
+               "size": [300, 300]
+           },
+
+            // component that inherits properties from BaseComponent,
+            // but override background property with own value
+           "ExtenderComp": {
+               "$inherit": "BaseComponent",
+               "background": "green"
+           }
+        }
+
+ *
+ * The loading of JSON can be multi steps procedure where
+ * you can load few JSON. That means you can compose the
+ * final configuration from number of JSON files:
+
+        // prepare object that will keep loaded data
+        var loadedData = {};
+
+        // create bag
+        var bag = zebra.util.Bag(loadedData);
+
+        // load the bag with two JSON
+        bag.load("{ ... }", false).load("{  ...  }");
+
+
+ * @class zebra.util.Bag
+ * @constructor
+ * @param {Object} [obj] a root object to be loaded with
+ * the given JSON configuration
+ */
+pkg.Bag = zebra.Class([
+    function $prototype() {
+        /**
+         * The attribute rules how arrays have to be merged if the bag is loaded from few
+         * JSON sources. true means that if a two JSON have the same key that reference to
+         * array values the final value will be a concatenation of the two arrays from the
+         * two JSON sources.
+         * @attribute concatArrays
+         * @type {Boolean}
+         * @default false
+         */
+        this.concatArrays = false;
+
+        /**
+         * The property says if the object introspection is required to try find a setter
+         * method for the given key. For instance if an object is loaded with the
+         * following JSON:
+
+         {
+            "color": "red"
+         }
+
+         * the introspection will cause bag class to try finding "setColor(c)" method in
+         * the loaded with the JSON object and call it to set "red" property value.
+         * @attribute usePropertySetters
+         * @default true
+         * @type {Boolean}
+         */
+        this.usePropertySetters = true;
+
+        this.ignoreNonExistentKeys = false;
+
+        /**
+         * Get a property value. The property name can point to embedded fields:
+         *
+         *      var bag = new Bag().loadByUrl("my.json");
+         *      bag.get("a.b.c");
+         *
+         * Also the special property type is considered - factory. Access to such property
+         * causes a new instance of a class object will be created. Property is considered
+         * as a factory property if it declares a "$new" field. The filed should point to
+         * a method that will be called to instantiate the property value.
+         *
+         * @param  {String} key a property key.
+         * @return {Object} a property value
+         * @method  get
+         */
+        this.get = function(key) {
+            if (key == null) throw new Error("Null key");
+            var n = key.split('.'), v = this.objects;
+            for(var i = 0; i < n.length; i++) {
+                v = v[n[i]];
+                if (typeof v === "undefined") {
+                    if (this.ignoreNonExistentKeys) return v;
+                    throw new Error("Property '" + key + "' not found");
+                }
+            }
+            return v != null && v.$new ? v.$new() : v;
+        };
+
+        /**
+         * Merge content of the specified object with the specified value and return
+         * a merge result.
+         * @param  {Object} o an object with that the value is merged
+         * @param  {Object} v a value to be merged
+         * @return {Object} a merge result
+         * @protected
+         * @method mergeContent
+         */
+        this.mergeContent = function(o, v) {
+            if (v === null || zebra.isNumber(v) || zebra.isBoolean(v) || zebra.isString(v)) {
+                return v;
+            }
+
+            if (Array.isArray(v)) {
+                if (this.concatArrays === false) {
+                    return v;
+                }
+
+                if (o && Array.isArray(o) === false) {
+                    throw new Error("Array merging type inconsistency: " + o);
+                }
+                return o ? o.concat(v) : v;
+            }
+
+            for (var k in v) {
+                if (v.hasOwnProperty(k)) {
+                    if (k[0] == '?') {
+                        eval("var x=" + k.substring(1).trim());
+
+                        if (x) {
+                            o = this.mergeContent(o, v[k]);
+                        }
+                        continue;
+                    }
+
+                    o[k] = o.hasOwnProperty(k) ? this.mergeContent(o[k], v[k])
+                                               : v[k];  // this.mergeContent({}, v[k]);
+                }
+            }
+            return o;
+        };
+
+        // create, merge to o and return a value by the given
+        // description d that is designed to be assigned to
+        // -- atomic types int string boolean number are returned as is
+        // -- created by the given description array are append to o array
+        // -- structure description (dictionary) are merged to o
+        this.mergeObjWithDesc = function(o, d) {
+            // atomic type should be returned as is
+            if (d === null || zebra.isNumber(d) || zebra.isBoolean(d)) {
+                return d;
+            }
+
+            // array should be merged (concatenated)
+            if (Array.isArray(d)) {
+                var v = [];
+                for(var i=0; i< d.length; i++) v[i] = this.mergeObjWithDesc(null, d[i]);
+                if (this.concatArrays === false) {
+                    return v;
+                }
+
+                if (o && Array.isArray(o) === false) {
+                    throw new Error("Destination has to be array: " + o);
+                }
+                return (o != null) ? o.concat(v) : v;
+            }
+
+            // string is atomic, but  string can encode type other
+            // than string, decode string (if necessary) by calling
+            // decodeStringValue method
+            if (zebra.isString(d)) {
+                if (d[0] == "@") {
+                    // check if the reference point to external JSON
+                    // and load the JSON
+                    if (d[1] == "(" && d[d.length-1] == ")") {
+                        var $this = this,
+                            bag = new (this.$clazz)([
+                                function resolveVar(name) {
+                                    try { return this.$super(name); }
+                                    catch(e) {}
+                                    return $this.resolveVar(name);
+                                },
+
+                                function resolveClass(className) {
+                                    var clazz = this.vars.hasOwnProperty(className) ? this.$super(className)
+                                                                                         : null;
+                                    return (clazz != null) ? clazz
+                                                           : $this.resolveClass(className);
+                                }
+                            ]);
+                        bag.loadByUrl(d.substring(2, d.length-1));
+                        return bag.objects;
+                    }
+
+                    // resolve variable
+                    return this.resolveVar(d.substring(1).trim());
+                }
+
+                return this.decodeStringValue ? this.decodeStringValue(d) : d;
+            }
+
+            // store and cleanup $inherit synthetic field from description.
+            var inh = null;
+            if (d.hasOwnProperty("$inherit")) {
+                inh = d.$inherit;
+                delete d.$inherit;
+            }
+
+            // test whether we have a class definition
+            for (var k in d) {
+                // handle class definition
+                if (k[0] == '$' && d.hasOwnProperty(k)) {
+                    var classname = k.substring(1).trim(), args = d[k];
+                    args = this.mergeObjWithDesc(null, Array.isArray(args) ? args : [ args ]);
+                    delete d[k];
+
+                    if (classname[0] == "*") {
+                        return (function(clazz, args) {
+                            return {
+                                $new : function() {
+                                    return pkg.newInstance(clazz, args);
+                                }
+                            };
+                        })(this.resolveClass(classname.substring(1).trim()), args);
+                    }
+                    return this.mergeObjWithDesc(pkg.newInstance(this.resolveClass(classname), args), d);
+                }
+
+                //!!!!  trust the name of class occurs first what in general
+                //      cannot be guaranteed by JSON spec but we can trust
+                //      since many other third party applications stands
+                //      on it too :)
+                break;
+            }
+
+            // the description is not atomic or array type. it can
+            // be either a number of fields that should be merged
+            // with appropriate field of "o" object, or it can define
+            // how to instantiate an instance of a class. There is
+            // one special case: ".name" property says that object
+            // is created by calling "name" method
+            var v = (o == null         || zebra.isNumber(o) ||
+                    zebra.isBoolean(o) || zebra.isString(o) ||
+                    Array.isArray(o)) ? d : o;
+
+            for (var k in d) {
+                if (d.hasOwnProperty(k)) {
+                    // special field name that says to call method to create a
+                    // value by the given description
+                    if (k[0] == ".") {
+                        var vv = d[k],
+                            mn = k.substring(1).trim(),
+                            m = this.objects[mn] != null ? this.objects[mn] : this[mn];
+
+                        if (m == null || typeof m != 'function') {
+                            throw new Error("Method '" + mn + "' cannot be found");
+                        }
+
+                        if (Array.isArray(vv) === false) {
+                            vv = [ vv ];
+                        }
+                        return m.apply(this.objects, this.mergeObjWithDesc(null, vv));
+                    }
+
+                    // try to find if the destination object already has the property k
+                    var po = o && o.hasOwnProperty(k) ? o[k] : null;
+
+
+                   // v[k] = d[k];
+
+                    var nv = this.mergeObjWithDesc(po, d[k]);
+
+                    if (this.usePropertySetters && k[0] != '.') {
+                        var m  = zebra.getPropertySetter(v, k);
+                        if (m != null) {
+                            if (Array.isArray(nv)) m.apply(v, nv);
+                            else                   m.call(v, nv);
+                            continue;
+                        }
+                    }
+                    v[k] = nv;
+                }
+            }
+
+
+            if (inh !== null) this.inherit(v, inh);
+
+            return v;
+        };
+
+        /**
+         * Called every time the given class name has to be transformed into
+         * the class object (constructor) reference.
+         * @param  {String} className a class name
+         * @return {Function}   a class reference
+         * @method resolveClass
+         */
+        this.resolveClass = function (className) {
+            return this.vars.hasOwnProperty(className) ? this.vars[className]
+                                                       : zebra.Class.forName(className);
+        };
+
+        this.inherit = function(o, pp) {
+            for(var i=0; i < pp.length; i++) {
+                var op = this.objects, n = pp[i].trim(), nn = n.split("."), j = 0;
+                while (j < nn.length) {
+                    op = op[nn[j++]];
+                    if (op == null) {
+                        throw new Error("Wrong inherit path '" + n + "(" + nn[j-1] + ")'");
+                    }
+                }
+
+                for(var k in op) {
+                    if (k[0] != '$' && op.hasOwnProperty(k) && o.hasOwnProperty(k) === false) {
+                        o[k] = op[k];
+                    }
+                }
+            }
+        };
+
+        /**
+         * Load the given JSON content and parse if the given flag is true. The passed
+         * boolean flag controls parsing. The flag is used to load few JSON. Before
+         * parsing the JSONs are merged and than the final result is parsed.
+         * @param  {String} s a JSON content to be loaded
+         * @param  {Boolean} [b] true if the loading has to be completed
+         * @return {zebra.util.Bag} a reference to the bag class instance
+         * @method load
+         */
+        this.load = function (s, b) {
+            if (this.isloaded === true) {
+                throw new Error("Load is done");
+            }
+
+            if (b == null) {
+                b = true;
+            }
+
+            var content = null;
+            try { content = zebra.isString(s) ? JSON.parse(s) : s; }
+            catch(e) {
+                throw new Error("JSON loading error: " + e);
+            }
+
+            this.content = this.mergeContent(this.content, content);
+            if (this.contentLoaded) this.contentLoaded(this.content);
+            if (b === true) this.end();
+            return this;
+        };
+
+        /**
+         * Callback method that can be implemented to be called when
+         * the bag JSON has been completely loaded but not parsed.
+         * The method can be useful for custom bag implementation
+         * that need to perform extra handling over the parsed JSON
+         * content
+         * @param {Object} content a parsed JSON content
+         * @method contentLoaded
+         */
+
+        /**
+         * End loading JSONs and parse final result
+         * @method end
+         */
+        this.end = function() {
+            if (typeof this.isloaded === "undefined") {
+                this.isloaded = true;
+                if (this.content.hasOwnProperty("variables")) {
+                    var vars = this.content.variables;
+                    for(var k in vars) {
+                        var v = vars[k].trim();
+                        this.vars[k.trim()] = (v[0] == '$' ? Class.forName(v.substring(1).trim())
+                                                           : v);
+                    }
+                    delete this.content.variables;
+                }
+                this.objects = this.mergeObjWithDesc(this.objects, this.content);
+            }
+        };
+
+        this.resolveVar = function(name) {
+            if (this.vars.hasOwnProperty(name)) {
+                return this.vars[name];
+            }
+
+            return this.get(name);
+        };
+
+        this.expr = function(e) {
+            var s = "var r="+e;
+            eval(s);
+            return r;
+        };
+
+        this[''] = function (container) {
+            this.vars    = {};
+            this.objects = container == null ? {} : container;
+            this.content = {};
+        };
+    },
+
+    function loadByUrl(url) {
+        return this.loadByUrl(url, true);
+    },
+
+    /**
+     * Load JSON by the given URL
+     * @param  {String} url an URL to a JSON
+     * @param  {Boolean} [b] true if the loading has to be completed
+     * @return {zebra.util.Bag} a reference to the bag class instance
+     * @method loadByUrl
+     */
+    function loadByUrl(url, b) {
+        var p = url.toString();
+        p = p + (p.lastIndexOf("?") > 0 ? "&" : "?") + (new Date()).getTime().toString();
+        return this.load(zebra.io.GET(p), b);
+    }
+]);
+
+/**
+ * @for
+ */
+
+})(zebra("util"), zebra.Class, zebra.Interface);
+
+/**
+ * Collection of variouse data models. 
+ * @module data
+ * @main 
+ * @requires zebra, util
+ */
+
+(function(pkg, Class, Interface) {
+
+pkg.descent = function descent(a, b) {
+    if (a == null) return 1;
+    return (zebra.isString(a)) ? a.localeCompare(b) : a - b;
+};
+
+pkg.ascent = function ascent(a, b) {
+    if (b == null) return 1;
+    return (zebra.isString(b)) ? b.localeCompare(a) : b - a;
+};
+
+
+/**
+ * Text model interface
+ * @class zebra.data.TextModel
+ * @interface
+*/
+
+/**
+ * Get the given string line stored in the model
+ * @method getLine  
+ * @param  {Integer} line a line number
+ * @return {String}  a string line
+ */
+
+/**
+ * Get wrapped by the text model original text string 
+ * @method getValue
+ * @return {String} an original text
+ */
+
+/**
+ * Get number of lines stored in the text model
+ * @method getLines
+ * @return {Integer} a number of lines
+ */
+
+/**
+ * Get number of characters stored in the model 
+ * @method getTextLength
+ * @return {Integer} a number of characters
+ */
+
+/**
+ * Write the given string in the text model starting from the
+ * specified offset
+ * @method write
+ * @param  {String} s a string to be written into the text model 
+ * @param  {Integer} offset an offset starting from that the passed
+ * string has to be written into the text model
+ */
+
+/**
+ * Remove substring from the text model. 
+ * @method remove
+ * @param  {Integer} offset an offset starting from that a substring 
+ * will be removed 
+ * @param  {Integer} size a size of a substring to be removed 
+ */
+
+/**
+ * Fill the text model with the given text  
+ * @method  setValue
+ * @param  {String} text a new text to be set for the text model
+ */
+
+/**
+ * Fired when the text model has been updated: a string has been 
+ * inserted or removed
+
+        text.bind(function (src, b, off, len, startLine, lines) {
+            ...
+        });
+
+ *
+ * @event textUpdated 
+ * @param {zebra.data.Text} src a text model that triggers the event
+ * @param {Boolean}  b a flag that is true if a string has been written 
+ * in the text model, false if the model substring has been removed
+ * @param {Integer}  off an offset starting form that the text update 
+ * took place
+ * @param {Integer}  len a length of text that has been affected by 
+ * the text model update
+ * @param {Integer}  startLine a first line that has been affected 
+ * by the text model update
+ * @param {Integer}  lines a number of lines that has been affected 
+ * by the text model update
+ */
+pkg.TextModel = Interface();
+
+
+var MB = zebra.util, oobi = "Index is out of bounds: ";
+
+function Line(s) {
+    this.s = s;
+    this.l = 0;
+}
+
+//  toString for array.join method
+Line.prototype.toString = function() { return this.s; };
+
+pkg.TextModelListeners = MB.ListenersClass("textUpdated");
+
+/**
+ * Multi-lines text model implementation
+ * @class zebra.data.Text
+ * @param  {String}  [s] the specified text the model has to be filled
+ * @constructor
+ * @extends zebra.data.TextModel
+ */
+pkg.Text = Class(pkg.TextModel, [
+    function $prototype() {
+        this.textLength = 0;
+
+        this.getLnInfo = function(lines, start, startOffset, o){
+            for(; start < lines.length; start++){
+                var line = lines[start].s;
+                if (o >= startOffset && o <= startOffset + line.length){
+                    return [start, startOffset];
+                }
+                startOffset += (line.length + 1);
+            }
+            return [];
+        };
+
+        this.setExtraChar = function(i,ch){ this.lines[i].l = ch; };
+        
+        this.getExtraChar = function (i) { return this.lines[i].l; };
+
+        this.getLine = function(line) { return this.lines[line].s; };
+
+        this.getValue = function(){ return this.lines.join("\n"); };
+
+        this.getLines = function () { return this.lines.length; };
+        
+        this.getTextLength = function() { return this.textLength; };
+
+        this.write = function (s, offset){
+            var slen = s.length,
+                info = this.getLnInfo(this.lines, 0, 0, offset),
+                line    = this.lines[info[0]].s,
+                j       = 0,
+                lineOff = offset - info[1],
+                tmp = [line.substring(0, lineOff), s, line.substring(lineOff)].join('');
+
+            for(; j < slen && s[j] != '\n'; j++);
+
+            if(j >= slen) {
+                this.lines[info[0]].s = tmp;
+                j = 1;
+            }
+            else {
+                this.lines.splice(info[0], 1);
+                j = this.parse(info[0], tmp, this.lines);
+            }
+            this.textLength += slen;
+            this._.textUpdated(this, true, offset, slen, info[0], j);
+        };
+
+        this.remove = function (offset,size){
+            var i1   = this.getLnInfo(this.lines, 0, 0, offset),
+                i2   = this.getLnInfo(this.lines, i1[0], i1[1], offset + size),
+                l2   = this.lines[i2[0]].s,
+                l1   = this.lines[i1[0]].s,
+                off1 = offset - i1[1], off2 = offset + size - i2[1],
+                buf  = [l1.substring(0, off1), l2.substring(off2)].join('');
+
+            if (i2[0] == i1[0]) this.lines.splice(i1[0], 1, new Line(buf));
+            else {
+                this.lines.splice(i1[0], i2[0] - i1[0] + 1);
+                this.lines.splice(i1[0], 0, new Line(buf));
+            }
+            this.textLength -= size;
+            this._.textUpdated(this, false, offset, size, i1[0], i2[0] - i1[0] + 1);
+        };
+
+        this.parse = function (startLine, text, lines){
+            var size = text.length, prevIndex = 0, prevStartLine = startLine;
+            for(var index = 0; index <= size; prevIndex = index, startLine++){
+                var fi = text.indexOf("\n", index);
+                index = (fi < 0 ? size : fi);
+                this.lines.splice(startLine, 0, new Line(text.substring(prevIndex, index)));
+                index++;
+            }
+            return startLine - prevStartLine;
+        };
+
+        this.setValue = function(text){
+            if (text == null) {
+                throw new Error("Invalid null string");
+            }
+            var old = this.getValue();
+            if (old !== text) {
+                if (old.length > 0) {
+                    var numLines = this.getLines(), txtLen = this.getTextLength();
+                    this.lines.length = 0;
+                    this.lines = [ new Line("") ];
+                    this._.textUpdated(this, false, 0, txtLen, 0, numLines);
+                }
+
+                this.lines = [];
+                this.parse(0, text, this.lines);
+                this.textLength = text.length;
+                this._.textUpdated(this, true, 0, this.textLength, 0, this.getLines());
+            }
+        };
+
+        this[''] = function(s){
+            this.lines = [ new Line("") ];
+            this._ = new pkg.TextModelListeners();
+            this.setValue(s == null ? "" : s);
+        };
+    }
+]);
+
+/**
+ * Single line text model implementation
+ * @param  {String}  [s] the specified text the model has to be filled
+ * @param  {Integer} [max] the specified maximal text length
+ * @constructor
+ * @class zebra.data.SingleLineTxt
+ * @extends zebra.data.TextModel
+ */
+pkg.SingleLineTxt = Class(pkg.TextModel, [
+    function $prototype() {
+        /**
+         * Maximal text length. -1 means the text is not restricted 
+         * regarding its length. 
+         * @attribute maxLen
+         * @type {Integer}
+         * @default -1
+         * @readOnly
+         */
+
+        this.setExtraChar = function(i,ch) {
+            this.extra = ch;
+        };
+        
+        this.getExtraChar = function(i){
+            return this.extra;
+        };
+
+        this.getValue = function(){
+            return this.buf;
+        };
+
+        /**
+         * Get number of lines stored in the text model. The model 
+         * can have only one line
+         * @method getLines
+         * @return {Integer} a number of lines
+         */
+        this.getLines = function(){
+            return 1;
+        };
+
+        this.getTextLength = function(){
+            return this.buf.length;
+        };
+
+        this.getLine = function(line){ 
+            if (line !== 0) {
+                throw new Error(oobi + line);
+            }
+            return this.buf;
+        };
+
+        this.write = function(s,offset){
+            var buf = this.buf, j = s.indexOf("\n");
+            if (j >= 0) s = s.substring(0, j);
+            var l = (this.maxLen > 0 && (buf.length + s.length) >= this.maxLen) ? this.maxLen - buf.length
+                                                                                : s.length;
+            if (l!==0) {
+                this.buf = [buf.substring(0, offset), s.substring(0, l), buf.substring(offset)].join('');
+                if (l > 0) this._.textUpdated(this, true, offset, l, 0, 1);
+            }
+        };
+
+        this.remove = function(offset,size){
+            this.buf = [ this.buf.substring(0, offset), this.buf.substring(offset + size)].join('');
+            this._.textUpdated(this, false, offset, size, 0, 1);
+        };
+
+        this.setValue = function(text){
+            if (text == null) {
+                throw new Error("Invalid null string");
+            }
+
+            var i = text.indexOf('\n');
+            if (i >= 0) text = text.substring(0, i);
+            if(this.buf == null || this.buf !== text) {
+                if (this.buf != null && this.buf.length > 0) this._.textUpdated(this, false, 0, this.buf.length, 0, 1);
+                if (this.maxLen > 0 && text.length > this.maxLen) text = text.substring(0, this.maxLen);
+                this.buf = text;
+                this._.textUpdated(this, true, 0, text.length, 0, 1);
+            }
+        };
+
+        /**
+         * Set the given maximal length the text can have
+         * @method setMaxLength
+         * @param  {Integer} max a maximal length of text
+         */
+        this.setMaxLength = function (max){
+            if(max != this.maxLen){
+                this.maxLen = max;
+                this.setValue("");
+            }
+        };
+
+        this[''] = function (s, max) {   
+            this.maxLen = max == null ? -1 : max;
+            this.buf = null;
+            this.extra = 0;
+            this._ = new pkg.TextModelListeners();
+            this.setValue(s == null ? "" : s);
+        };
+    }
+]);
+
+pkg.ListModelListeners = MB.ListenersClass("elementInserted", "elementRemoved", "elementSet");
+
+/**
+ * List model class
+ * @param  {Array} [a] an array the list model has to be initialized with
+ * @example
+ 
+      // create list model that contains three integer elements
+      var l = new zebra.data.ListModel([1,2,3]);
+ 
+ * @constructor 
+ * @class zebra.data.ListModel
+ */
+
+ /**
+  * Fired when a new element has been added to the list model 
+
+     list.bind(function elementInserted(src, o, i) {
+         ...
+     });
+
+  * @event elementInserted 
+  * @param {zebra.data.ListModel} src a list model that triggers the event
+  * @param {Object}  o an element that has been added
+  * @param {Integer} i an index at that the new element has been added
+  */
+
+ /**
+  * Fired when an element has been removed from the list model 
+
+     list.bind(function elementRemoved(src, o, i) {
+         ...
+     });
+
+  * @event elementRemoved
+  * @param {zebra.data.ListModel} src a list model that triggers the event
+  * @param {Object}  o an element that has been removed
+  * @param {Integer} i an index at that the element has been removed
+  */
+
+ /**
+  * Fired when an element has been re-set 
+
+     list.bind(function elementSet(src, o, pe, i) {
+         ...
+     });
+
+  * @event elementSet
+  * @param {zebra.data.ListModel} src a list model that triggers the event
+  * @param {Object}  o an element that has been set
+  * @param {Object}  pe a previous element 
+  * @param {Integer} i an index at that the element has been re-set
+  */
+
+pkg.ListModel = Class([
+    function $prototype() {
+        /**
+         * Get an item stored at the given location in the list 
+         * @method get
+         * @param  {Integer} i an item location
+         * @return {object}  a list item
+         */
+        this.get = function(i) {
+            if (i < 0 || i >= this.d.length) {
+                throw new Error(oobi + i);
+            }
+            return this.d[i];
+        };
+
+        /**
+         * Add the given item to the end of the list 
+         * @method add
+         * @param  {Object} o an item to be added
+         */
+        this.add = function(o) {
+            this.d.push(o);
+            this._.elementInserted(this, o, this.d.length - 1);
+        };
+
+        /**
+         * Remove all elements from the list model
+         * @method removeAll
+         */
+        this.removeAll = function() {
+            var size = this.d.length;
+            for(var i = size - 1; i >= 0; i--) this.removeAt(i);
+        };
+
+        /**
+         * Remove an element at the given location of the list model
+         * @method removeAt
+         * @param {Integer} i a location of an element to be removed from the list
+         */
+        this.removeAt = function(i) {
+            var re = this.d[i];
+            this.d.splice(i, 1);
+            this._.elementRemoved(this, re, i);
+        };
+
+        /**
+         * Remove the given element from the list
+         * @method remove
+         * @param {Object} o an element to be removed from the list
+         */
+        this.remove = function(o) {
+            for(var i = 0;i < this.d.length; i++ ){
+                if (this.d[i] === o) this.removeAt(i);
+            }
+        };
+
+        /**
+         * Insert the given element into the given position of the list
+         * @method insert
+         * @param {Object} o an element to be inserted into the list
+         * @param {Integer} i a position at which the element has to be inserted into the list 
+         */
+        this.insert = function(o,i){
+            if(i < 0 || i >= this.d.length) {
+                throw new Error(oobi + i);
+            }
+            this.d.splice(i, 0, o);
+            this._.elementInserted(this, o, i);
+        };
+
+        /**
+         * Get number of elements stored in the list
+         * @method count
+         * @return {Integer} a number of element in the list
+         */
+        this.count = function () {
+            return this.d.length;
+        };
+
+        /**
+         * Set the new element at the given position
+         * @method set
+         * @param  {Object} o a new element to be set as the list element at the given position
+         * @param  {Integer} i a position
+         * @return {Object}  previous element that was stored at the given position
+         */
+        this.set = function (o,i){
+            if (i < 0 || i >= this.d.length) {
+                throw new Error(oobi + i);
+            }
+            var pe = this.d[i];
+            this.d[i] = o;
+            this._.elementSet(this, o, pe, i);
+            return pe;
+        };
+
+        /**
+         * Check if the element is in the list
+         * @method contains
+         * @param  {Object} o an element to be checked 
+         * @return {Boolean} true if the element is in the list  
+         */
+        this.contains = function (o){
+            return this.indexOf(o) >= 0;
+        };
+
+        /**
+         * Get position the given element is stored in the list
+         * @method indexOf
+         * @param  {Object} o an element 
+         * @return {Integer} the element position. -1 if the element cannot be found in the list 
+         */
+        this.indexOf = function(o){
+            return this.d.indexOf(o);
+        };
+
+        this[''] = function() {
+            this._ = new pkg.ListModelListeners();
+            this.d = (arguments.length === 0) ? [] : arguments[0];
+        };
+    }
+]);
+
+/**
+ * Tree model item class. The structure is used by tree model to store 
+ * tree items values, parent and children item references.
+ * @class zebra.data.Item
+ * @param  {Object} [v] the item value
+ * @constructor 
+ */
+var Item = pkg.Item = Class([
+    function $prototype() {
+        this[''] = function(v) {
+            /**
+             * Array of children items of the item element
+             * @attribute kids
+             * @type {Array}
+             * @default []
+             * @readOnly
+             */
+            this.kids = [];
+
+            /**
+             * Value stored with this item
+             * @attribute value
+             * @type {Object}
+             * @default null
+             * @readOnly
+             */
+            this.value = v;
+
+            /**
+             * Reference to a parent item
+             * @attribute parent
+             * @type {zebra.data.Item}
+             * @default undefined
+             * @readOnly
+             */
+        };
+    }
+]);
+
+
+pkg.find = function(root, value, cb) {
+    if (root.value === value) {
+        if (cb.call(null, root) === true) return true;
+    }
+
+    for (var i = 0; i < root.kids.length; i++) {
+        if (pkg.find(root.kids[i], value, cb)) return true;
+    }
+};
+
+pkg.TreeModelListeners = MB.ListenersClass("itemModified", "itemRemoved", "itemInserted");
+
+
+/**
+ * Tree model class. The class is simple and handy way to keep hierarchical structure. 
+ * @constructor
+ * @param  {zebra.data.Item|Object} [r] a root item. As the argument you can pass "zebra.data.Item" or
+ * a JavaType object. In the second case you can describe the tree as follow:
+
+     // create tree model initialized with tree structure passed as 
+     // special formated JavaScript object   
+     var tree = new zebra.data.TreeModel({ value:"Root",
+                                          kids: [
+                                              "Root kid 1",
+                                              { 
+                                                value: "Root kid 2",
+                                                kids:  [ "Kid of kid 2"] 
+                                              }
+                                          ]});
+
+ * @class zebra.data.TreeModel
+ */
+
+/**
+ * Fired when the tree model item value has been updated. 
+
+    tree.bind(function itemModified(src, item) {
+        ...
+    });
+
+ * @event itemModified 
+ * @param {zebra.data.TreeModel} src a tree model that triggers the event
+ * @param {zebra.data.Item}  item an item whose value has been updated
+ */
+
+/**
+ * Fired when the tree model item has been removed
+
+    tree.bind(function itemRemoved(src, item) {
+       ...
+    });
+
+ * @event itemRemoved
+ * @param {zebra.data.TreeModel} src a tree model that triggers the event
+ * @param {zebra.data.Item}  item an item that has been removed from the tree model
+ */
+
+/**
+ * Fired when the tree model item has been inserted into the model
+
+    tree.bind(function itemInserted(src, item) {
+       ...
+    });
+
+ * @event itemInserted
+ * @param {zebra.data.TreeModel} src a tree model that triggers the event
+ * @param {zebra.data.Item}  item an item that has been inserted into the tree model
+ */
+
+pkg.TreeModel = Class([
+    function $clazz() {
+        this.create = function(r, p) {
+            var item = new Item(r.hasOwnProperty("value")? r.value : r);
+            item.parent = p;
+            if (r.hasOwnProperty("kids")) {
+                for(var i = 0; i < r.kids.length; i++) {
+                    item.kids[i] = pkg.TreeModel.create(r.kids[i], item);
+                }
+            }
+            return item;
+        };
+    },
+
+    function $prototype() {
+        this.iterate = function(r, f) {
+            var res = f.call(this, r);
+            if (res === 1 || res === 2) return r;
+
+            for (var i = 0; i < r.kids.length; i++) {
+                res = this.iterate(r.kids[i], f);
+                if (res === 2) return res;
+            }
+        };
+
+        /**
+         * Update a value of the given tree model item with the new one
+         * @method setValue
+         * @param  {zebra.data.Item} item an item whose value has to be updated
+         * @param  {[type]} v   a new item value
+         */
+        this.setValue = function(item, v){
+            item.value = v;
+            this._.itemModified(this, item);
+        };
+
+        /**
+         * Add the new item to the tree model as a children element of the given parent item
+         * @method add
+         * @param  {zebra.data.Item} to a parent item to which the new item has to be added
+         * @param  {Object|zebra.data.Item} an item or value of the item to be
+         * added to the parent item of the tree model 
+         */
+        this.add = function(to,item){
+            this.insert(to, item, to.kids.length);
+        };
+
+        /**
+         * Insert the new item to the tree model as a children element at the 
+         * given position of the parent element
+         * @method insert
+         * @param  {zebra.data.Item} to a parent item to which the new item 
+         * has to be inserted
+         * @param  {Object|zebra.data.Item} an item or value of the item to be
+         * inserted to the parent item
+         * @param  {Integer} i a position the new item has to be inserted into
+         * the parent item
+         */
+        this.insert = function(to,item,i){
+            if (i < 0 || to.kids.length < i) throw new Error(oobi + i);
+            if (zebra.isString(item)) {
+                item = new Item(item);
+            }
+            to.kids.splice(i, 0, item);
+            item.parent = to;
+            this._.itemInserted(this, item);
+
+            // !!!
+            // it is necessary to analyze if the inserted item has kids and
+            // generate inserted event for all kids recursively
+        };
+
+        /**
+         * Remove the given item from the tree model
+         * @method remove
+         * @param  {zebra.data.Item} item an item to be removed from the tree model
+         */
+        this.remove = function(item){
+            if (item == this.root) {
+                this.root = null;
+            }
+            else {
+                for(var i=0; i < item.kids.length; i++) {
+                    this.remove(item.kids[i]);
+                }
+                item.parent.kids.splice(item.parent.kids.indexOf(item), 1);
+                item.parent = null;
+            }
+
+            this._.itemRemoved(this, item);
+        };
+
+        /**
+         * Remove all children items from the given item of the tree model
+         * @method removeKids
+         * @param  {zebra.data.Item} item an item from that all children items have to be removed
+         */
+        this.removeKids = function(item){
+            for(var i = 0; i < items.kids.length; i++) this.remove(items[i]);
+        };
+
+        this[''] = function(r) {
+            if (arguments.length === 0) r = new Item();
+
+            /**
+             * Reference to the tree model root item
+             * @attribute root
+             * @type {zebra.data.Item}
+             * @readOnly
+             */
+            this.root = zebra.instanceOf(r, Item) ? r : pkg.TreeModel.create(r);
+            this._ = new pkg.TreeModelListeners();
+        };
+    }
+]);
+
+pkg.MatrixListeners = MB.ListenersClass("matrixResized", "cellModified",
+                                        "matrixSorted", "matrixRowInserted",
+                                        "matrixColInserted");
+
+/**
+ *  Matrix model class. 
+ *  @constructor
+ *  @param  {Array of Array} [data] the given data 
+ *  @param  {Integer} [rows] a number of rows
+ *  @param  {Integer} [cols] a number of columns
+ *  @class zebra.data.Matrix
+ */
+pkg.Matrix = Class([
+    function $prototype() {        
+        /**
+         * Fired when the matrix model size (number of rows or columns) is changed. 
+          
+         matrix.bind(function matrixResized(src, pr, pc) {
+            ...
+         });
+          
+         * @event matrixResized 
+         * @param {zebra.data.Matrix} src a matrix that triggers the event
+         * @param {Integer}  pr a previous number of rows 
+         * @param {Integer}  pc a previous number of columns 
+         */
+
+         /**
+          * Fired when the matrix model cell has been updated. 
+          
+          matrix.bind(function cellModified(src, row, col, old) {
+             ...
+          });
+
+          * @event cellModified 
+          * @param {zebra.data.Matrix} src a matrix that triggers the event
+          * @param {Integer}  row an updated row 
+          * @param {Integer}  col an updated column 
+          * @param {Object}  old a previous cell value
+          */
+
+          /**
+           * Fired when the matrix data has been re-ordered. 
+           
+           matrix.bind(function matrixSorted(src, sortInfo) {
+              ...
+           });
+
+           * @event matrixSorted
+           * @param {zebra.data.Matrix} src a matrix that triggers the event
+           * @param {Object}  sortInfo a new data order info. The information 
+           * contains:
+           *
+           *      { 
+           *         func: sortFunction,
+           *         name: sortFunctionName,
+           *         col : sortColumn
+           *      }   
+           * 
+           */
+       
+        /**
+         * Get a matrix model cell value at the specified row and column
+         * @method get
+         * @param  {Integer} row a cell row
+         * @param  {Integer} col a cell column
+         * @return {Object}  matrix model cell value
+         */
+        this.get = function (row,col){
+            if (row < 0 || row >= this.rows || col < 0 || col >= this.cols) {
+                throw new Error("Row of col is out of bounds: " + row + "," + col);
+            }
+            return this.objs[row][col];
+        };
+
+        /**
+         * Set the specified by row and column cell value. If the specified row or column
+         * is greater than the matrix model has the model size will be adjusted to new one.
+         * @method put
+         * @param  {Integer} row a cell row
+         * @param  {Integer} col a cell column
+         * @param  {Object} obj a new cell value
+         */
+        this.put = function(row,col,obj){
+            var nr = this.rows, nc = this.cols;
+            if (row >= nr) nr += (row - nr + 1);
+            if (col >= nc) nc += (col - nc + 1);
+
+            this.setRowsCols(nr, nc);
+            var old = this.objs[row] ? this.objs[row][col] : undefined;
+            if (obj != old) {
+                this.objs[row][col] = obj;
+                this._.cellModified(this, row, col, old);
+            }
+        };
+
+        /**
+         * Set the specified by index cell value. The index identifies cell starting from [0,0]
+         * cell till [rows,columns]. If the index is greater than size of model the model size
+         * will be adjusted to new one.
+         * @method puti
+         * @param  {Integer} i a cell row
+         * @param  {Object} obj a new cell value
+         */
+        this.puti = function(i, obj){
+            this.put( ~~(i / this.cols),
+                         i % this.cols, obj);
+        };
+
+        /**
+         * Set the given number of rows and columns the model has to have.
+         * @method setRowsCols
+         * @param  {Integer} rows a new number of rows
+         * @param  {Integer} cols a new number of columns
+         */
+        this.setRowsCols = function(rows, cols){
+            if (rows != this.rows || cols != this.cols){
+                var pc = this.cols,
+                    pr = this.rows;
+
+                this.rellocate(rows, cols);
+                this.cols = cols;
+                this.rows = rows;
+                this._.matrixResized(this, pr, pc);
+            }
+        };
+
+        /**
+         * Reallocate the matrix model space with the new number of rows and columns 
+         * @method re-locate.
+         * @private
+         * @param  {Integer} r a new number of rows
+         * @param  {Integer} c a new number of columns
+         */
+        this.rellocate = function(r, c) {
+            if (r >= this.rows) {
+                for(var i=this.rows; i < r; i++) {
+                    this.objs[i] = [];
+                }
+            }
+        };
+
+         /**
+         * Set the given number of rows the model has to have.
+         * @method setRows
+         * @param  {Integer} rows a new number of rows
+         */
+        this.setRows = function(rows) {
+            this.setRowsCols(rows, this.cols);
+        };
+
+        /**
+         * Set the given number of columns the model has to have.
+         * @method setCols
+         * @param  {Integer} cols a new number of columns
+         */
+        this.setCols = function(cols) {
+            this.setRowsCols(this.rows, cols);
+        };
+
+        /**
+         * Remove specified number of rows from the model starting
+         * from the given row.
+         * @method removeRows
+         * @param  {Integer}  begrow a start row 
+         * @param  {Integer} count  a number of rows to be removed
+         */
+        this.removeRows = function(begrow,count){
+            if (begrow < 0 || begrow + count > this.rows) {
+                throw new Error();
+            }
+
+            for(var i = (begrow + count);i < this.rows; i++, begrow++){
+                for(var j = 0;j < this.cols; j ++ ){
+                    this.objs[begrow][j] = this.objs[i][j];
+                    this.objs[i][j] = null;
+                }
+            }
+
+            this.rows -= count;
+            this._.matrixResized(this, this.rows + count, this.cols);
+        };
+
+        /**
+         * Remove specified number of columns from the model starting
+         * from the given column.
+         * @method removeCols
+         * @param  {Integer}  begcol a start column
+         * @param  {Integer} count  a number of columns to be removed
+         */
+        this.removeCols = function (begcol,count){
+            if (begcol < 0 || begcol + count > this.cols) {
+                throw new Error();
+            }
+            
+            for(var i = (begcol + count);i < this.cols; i++, begcol++){
+                for(var j = 0;j < this.rows; j++){
+                    this.objs[j][begcol] = this.objs[j][i];
+                    this.objs[j][i] = null;
+                }
+            }
+
+            this.cols -= count;
+            this._.matrixResized(this, this.rows, this.cols + count);
+        };
+
+        this.insertRows = function(row, count) {
+            if (arguments.length === 1) count = 1;
+            for(var i=0; i < count; i++) {
+                this.objs.splice(row, 0, []);
+                this._.matrixRowInserted(this, row + i);
+            }
+            this.rows += count;
+            this._.matrixResized(this, this.rows - count, this.cols);
+        };
+
+        this.insertCols = function(col, count) {
+            if (arguments.length === 1) count = 1;
+            for(var j=0; j < count; j++) {
+                for(var i=0; i < this.rows; i++) {
+                    this.objs[i].splice(col, 0, undefined);
+                }
+                this._.matrixColInserted(this, col + j);
+            }
+            this.cols += count;
+            this._.matrixResized(this, this.rows, this.cols - count);
+        };
+
+        /**
+         * Sort the given column of the matrix model.
+         * @param  {Integer} col a column to be re-ordered
+         * @param  {Function} [f] an optional sort function. The name of the function 
+         * is grabbed to indicate type of the sorting the method does. For instance:
+         * "descent", "ascent".  
+         * @method sortCol
+         */
+        this.sortCol = function(col, f) {
+            if (f == null) {
+                f = pkg.descent;
+            }
+
+            this.objs.sort(function(a, b) {
+                return f(a[col],b[col]);
+            });
+
+            this._.matrixSorted(this, { col : col,
+                                        func: f,
+                                        name: zebra.$FN(f).toLowerCase() });
+        };
+
+        this[''] = function() {
+            /**
+             * Number of rows in the matrix model
+             * @attribute rows
+             * @type {Integer}
+             * @readOnly
+             */
+
+            /**
+             * Number of columns in the matrix model
+             * @attribute cols
+             * @type {Integer}
+             * @readOnly
+             */
+
+            this._ = new pkg.MatrixListeners();
+            if (arguments.length == 1) {
+                this.objs = arguments[0];
+                this.cols = (this.objs.length > 0) ? this.objs[0].length : 0;
+                this.rows = this.objs.length;
+            }
+            else {
+                this.objs = [];
+                this.rows = this.cols = 0;
+                if (arguments.length > 1) {
+                    this.setRowsCols(arguments[0], arguments[1]);
+                }
+            }
+        };
+    }
+]);
+
+/**
+ * @for
+ */
+
+})(zebra("data"), zebra.Class, zebra.Interface);
+
+/**
+ * The module provides number of classes to help to communicate
+ * with remote services and servers by HTTP, JSON-RPC, XML-RPC
+ * protocols
+ * @module io
+ * @requires zebra, util
+ */
+
+(function(pkg, Class) {
+
+var HEX = "0123456789ABCDEF";
+
+/**
+ * Generate UUID of the given length
+ * @param {Integer} [size] the generated UUID length. The default size is 16 characters.
+ * @return {String} an UUID
+ * @method  ID
+ * @api  zebra.io.ID()
+ */
+pkg.ID = function UUID(size) {
+    if (typeof size === 'undefined') size = 16;
+    var id = [];
+    for (var i=0; i < size; i++) id[i] = HEX[~~(Math.random() * 16)];
+    return id.join('');
+};
+
+pkg.$sleep = function() {
+    var r = new XMLHttpRequest(),
+        t = (new Date()).getTime().toString(),
+        i = window.location.toString().lastIndexOf("?");
+    r.open('GET', window.location + (i > 0 ? "&" : "?") + t, false);
+    r.send(null);
+};
+
+// !!!
+// b64 is supposed to be used with binary stuff, applying it to utf-8 encoded data can bring to error
+// !!!
+var b64str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+/**
+ * Encode the given string into base64
+ * @param  {String} input a string to be encoded
+ * @method  b64encode
+ * @api  zebra.io.b64encode()
+ */
+pkg.b64encode = function(input) {
+    var out = [], i = 0, len = input.length, c1, c2, c3;
+    if (typeof ArrayBuffer !== "undefined") {
+        if (input instanceof ArrayBuffer) input = new Uint8Array(input);
+        input.charCodeAt = function(i) { return this[i]; };
+    }
+
+    if (Array.isArray(input)) {
+        input.charCodeAt = function(i) { return this[i]; };
+    }
+
+    while(i < len) {
+        c1 = input.charCodeAt(i++) & 0xff;
+        out.push(b64str.charAt(c1 >> 2));
+        if (i == len) {
+            out.push(b64str.charAt((c1 & 0x3) << 4), "==");
+            break;
+        }
+        c2 = input.charCodeAt(i++);
+        out.push(b64str.charAt(((c1 & 0x3) << 4) | ((c2 & 0xF0) >> 4)));
+        if (i == len) {
+            out.push(b64str.charAt((c2 & 0xF) << 2), "=");
+            break;
+        }
+        c3 = input.charCodeAt(i++);
+        out.push(b64str.charAt(((c2 & 0xF) << 2) | ((c3 & 0xC0) >> 6)), b64str.charAt(c3 & 0x3F));
+    }
+    return out.join('');
+};
+
+/**
+ * Decode the base64 encoded string
+ * @param {String} input base64 encoded string
+ * @return {String} a string
+ * @api zebra.io.b64decode()
+ * @method b64decode
+ */
+pkg.b64decode = function(input) {
+    var output = [], chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+    input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+
+    while ((input.length % 4) !== 0) input += "=";
+
+    for(var i=0; i < input.length;) {
+        enc1 = b64str.indexOf(input.charAt(i++));
+        enc2 = b64str.indexOf(input.charAt(i++));
+        enc3 = b64str.indexOf(input.charAt(i++));
+        enc4 = b64str.indexOf(input.charAt(i++));
+
+        chr1 = (enc1 << 2) | (enc2 >> 4);
+        chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+        chr3 = ((enc3 & 3) << 6) | enc4;
+        output.push(String.fromCharCode(chr1));
+        if (enc3 != 64) output.push(String.fromCharCode(chr2));
+        if (enc4 != 64) output.push(String.fromCharCode(chr3));
+    }
+    return output.join('');
+};
+
+pkg.dateToISO8601 = function(d) {
+    function pad(n) { return n < 10 ? '0'+n : n; }
+    return [ d.getUTCFullYear(), '-', pad(d.getUTCMonth()+1), '-', pad(d.getUTCDate()), 'T', pad(d.getUTCHours()), ':',
+             pad(d.getUTCMinutes()), ':', pad(d.getUTCSeconds()), 'Z'].join('');
+};
+
+// http://webcloud.se/log/JavaScript-and-ISO-8601/
+pkg.ISO8601toDate = function(v) {
+    var regexp = ["([0-9]{4})(-([0-9]{2})(-([0-9]{2})", "(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?",
+                  "(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?"].join(''), d = v.match(new RegExp(regexp)),
+                  offset = 0, date = new Date(d[1], 0, 1);
+
+    if (d[3])  date.setMonth(d[3] - 1);
+    if (d[5])  date.setDate(d[5]);
+    if (d[7])  date.setHours(d[7]);
+    if (d[8])  date.setMinutes(d[8]);
+    if (d[10]) date.setSeconds(d[10]);
+    if (d[12]) date.setMilliseconds(Number("0." + d[12]) * 1000);
+    if (d[14]) {
+        offset = (Number(d[16]) * 60) + Number(d[17]);
+        offset *= ((d[15] == '-') ? 1 : -1);
+    }
+
+    offset -= date.getTimezoneOffset();
+    date.setTime(Number(date) + (offset * 60 * 1000));
+    return date;
+};
+
+pkg.parseXML = function(s) {
+    function rmws(node) {
+        if (node.childNodes !== null) {
+            for (var i = node.childNodes.length; i-->0;) {
+                var child= node.childNodes[i];
+                if (child.nodeType === 3 && child.data.match(/^\s*$/)) {
+                    node.removeChild(child);
+                }
+                if (child.nodeType === 1) rmws(child);
+            }
+        }
+        return node;
+    }
+
+    if (typeof DOMParser !== "undefined") {
+        return rmws((new DOMParser()).parseFromString(s, "text/xml"));
+    }
+    else {
+        for (var n in { "Microsoft.XMLDOM":0, "MSXML2.DOMDocument":1, "MSXML.DOMDocument":2 }) {
+            var p = null;
+            try {
+                p = new ActiveXObject(n);
+                p.async = false;
+            }  catch (e) { continue; }
+            if (p === null) throw new Error("XML parser is not available");
+            p.loadXML(s);
+            return p;
+        }
+    }
+    throw new Error("No XML parser is available");
+};
+
+/**
+ * Query string parser class. The class provides number of
+ * useful static methods to manipulate with a query string
+ * of an URL
+ * @class zebra.io.QS
+ * @static
+ */
+pkg.QS = Class([
+    function $clazz() {
+        /**
+         * Append the given parameters to a query string of the specified URL
+         * @param  {String} url an URL
+         * @param  {Object} obj a dictionary of parameters to be appended to
+         * the URL query string
+         * @return {String} a new URL
+         * @static
+         * @method append
+         */
+        this.append = function (url, obj) {
+            return url + ((obj === null) ? '' : ((url.indexOf("?") > 0) ? '&' : '?') + pkg.QS.toQS(obj, true));
+        };
+
+        /**
+         * Fetch and parse query string of the given URL
+         * @param  {String} url an URL
+         * @return {Object} a parsed query string as a dictionary of parameters
+         * @method parse
+         * @static
+         */
+        this.parse = function(url) {
+            var m = window.location.search.match(/[?&][a-zA-Z0-9_.]+=[^?&=]+/g), r = {};
+            for(var i=0; m && i < m.length; i++) {
+                var l = m[i].split('=');
+                r[l[0].substring(1)] = decodeURIComponent(l[1]);
+            }
+            return r;
+        };
+
+        /**
+         * Convert the given dictionary of parameters to a query string.
+         * @param  {Object} obj a dictionary of parameters
+         * @param  {Boolean} encode say if the parameters values have to be
+         * encoded
+         * @return {String} a query string built from parameters list
+         * @static
+         * @method toQS
+         */
+        this.toQS = function(obj, encode) {
+            if (typeof encode === "undefined") encode = true;
+            if (zebra.isString(obj) || zebra.isBoolean(obj) || zebra.isNumber(obj)) return "" + obj;
+            var p = [];
+            for(var k in obj) {
+                if (obj.hasOwnProperty(k)) p.push(k + '=' + (encode ? encodeURIComponent(obj[k].toString()) : obj[k].toString()));
+            }
+            return p.join("&");
+        };
+    }
+]);
+
+function $Request() {
+    this.responseText = this.statusText = "";
+    this.onreadystatechange = this.responseXml = null;
+    this.readyState = this.status = 0;
+}
+
+$Request.prototype.open = function(method, url, async, user, password) {
+    if (location.protocol.toLowerCase() == "file:" ||
+        (new zebra.URL(url)).host.toLowerCase() == location.host.toLowerCase())
+    {
+        this._request = new XMLHttpRequest();
+        this._xdomain = false;
+
+        var $this = this;
+        this._request.onreadystatechange = function() {
+            $this.readyState = $this._request.readyState;
+            if ($this._request.readyState == 4) {
+                $this.responseText = $this._request.responseText;
+                $this.responseXml  = $this._request.responseXml;
+                $this.status     = $this._request.status;
+                $this.statusText = $this._request.statusText;
+            }
+
+            if ($this.onreadystatechange) {
+                $this.onreadystatechange();
+            }
+        };
+
+        return this._request.open(method, url, (async !== false), user, password);
+    }
+    else {
+        this._xdomain = true;
+        this._async = (async === true);
+        this._request = new XDomainRequest();
+        return this._request.open(method, url);
+    }
+};
+
+$Request.prototype.send = function(data) {
+    if (this._xdomain) {
+        var originalReq = this._request, $this = this;
+
+        //!!!! handler has to be defined after
+        //!!!! open method has been called and all
+        //!!!! four handlers have to be defined
+        originalReq.ontimeout = originalReq.onprogress = function () {};
+
+        originalReq.onerror = function() {
+            $this.readyState = 4;
+            $this.status = 404;
+            if ($this._async && $this.onreadystatechange) {
+                $this.onreadystatechange();
+            }
+        };
+
+        originalReq.onload  = function() {
+            $this.readyState = 4;
+            $this.status = 200;
+
+            if ($this._async && $this.onreadystatechange) {
+                $this.onreadystatechange(originalReq.responseText, originalReq);
+            }
+        };
+
+        //!!! set time out zero to prevent data lost
+        originalReq.timeout = 0;
+
+        if (this._async === false) {
+            originalReq.send(data);
+
+            while (this.status === 0) {
+                pkg.$sleep();
+            }
+
+            this.readyState = 4;
+            this.responseText = originalReq.responseText;
+            return;
+        }
+
+        //!!! make short timeout to make sure bloody IE is ready
+        setTimeout(function () {
+           originalReq.send(data);
+        }, 10);
+    }
+    else  {
+        return this._request.send(data);
+    }
+};
+
+$Request.prototype.abort = function(data) {
+    return this._request.abort();
+};
+
+$Request.prototype.setRequestHeader = function(name, value) {
+    if (this._xdomain) {
+        if (name == "Content-Type") {
+            //!!!
+            // IE8 and IE9 anyway don't take in account the assignment
+            // IE8 throws exception every time a value is assigned to
+            // the property
+            // !!!
+            //this._request.contentType = value;
+            return;
+        }
+        else {
+            throw new Error("Method 'setRequestHeader' is not supported for " + name);
+        }
+    }
+    else {
+        this._request.setRequestHeader(name, value);
+    }
+};
+
+$Request.prototype.getResponseHeader = function(name) {
+    if (this._xdomain) {
+        throw new Error("Method is not supported");
+    }
+    return this._request.getResponseHeader(name);
+};
+
+$Request.prototype.getAllResponseHeaders = function() {
+    if (this._xdomain) {
+        throw new Error("Method is not supported");
+    }
+    return this._request.getAllResponseHeaders();
+};
+
+pkg.getRequest = function() {
+    if (typeof XMLHttpRequest !== "undefined") {
+        var r = new XMLHttpRequest();
+
+        if (zebra.isFF) {
+            r.__send = r.send;
+            r.send = function(data) {
+                // !!! FF can throw NS_ERROR_FAILURE exception instead of
+                // !!! returning 404 File Not Found HTTP error code
+                // !!! No request status, statusText are defined in this case
+                try { return this.__send(data); }
+                catch(e) {
+                    if (!e.message || e.message.toUpperCase().indexOf("NS_ERROR_FAILURE") < 0) {
+                        // exception has to be re-instantiate to be Error class instance
+                        var ee = new Error(e.toString());
+                        throw ee;
+                    }
+                }
+            };
+        }
+
+        // CORS is supported out of box
+        if ("withCredentials" in r) {
+            return r;
+        }
+
+        return new $Request(); // IE
+    }
+
+    throw new Error("Archaic browser detected");
+};
+
+/**
+ * HTTP request class. This class provides API to generate different
+ * (GET, POST, etc) HTTP requests in sync and async modes
+ * @class zebra.io.HTTP
+ * @constructor
+ * @param {String} url an URL to a HTTP resource
+ */
+pkg.HTTP = Class([
+    function(url) {
+        this.url = url;
+        this.header = {};
+    },
+
+    /**
+     * Perform HTTP GET request synchronously or asynchronously with the given
+     * query parameters.
+     * @param {Object} [q] a dictionary of query parameters
+     * @param {Function} [f] a callback function that is called when the HTTP GET
+     * request is done. The method gets a request object as its only argument
+     * and is called in context of the HTTP class instance.
+
+        // synchronous HTTP GET request with the number of
+        // query parameters
+        var result = zebra.io.HTTP("google.com").GET({
+            param1: "var1",
+            param3: "var2",
+            param3: "var3"
+        });
+
+        // asynchronouse GET requests
+        zebra.io.HTTP("google.com").GET(function(request) {
+            // handle HTTP GET response
+            if (request.status == 200) {
+                request.responseText
+            }
+            else {
+                // handle error
+                ...
+            }
+            ...
+        });
+
+
+     * @method GET
+     */
+    function GET(q, f) {
+        if (typeof q == 'function') {
+            f = q;
+            q = null;
+        }
+        return this.SEND("GET", pkg.QS.append(this.url, q), null, f);
+    },
+
+    /**
+     * Perform HTTP POST request synchronously or asynchronously with the given
+     * data to be sent.
+     * @param {String|Object} d a data to be sent by HTTP POST request.  It can be
+     * either a parameters set or a string.
+     * @param {Function} [f] a callback function that is called when HTTP POST
+     * request is done. The method gets a request as its only  argument
+     * and called in context of appropriate HTTP class instance. If the argument
+     * is null the POST request will be done synchronously.
+
+       // asynchronously send POST
+       zebra.io.HTTP("google.com").POST(function(request) {
+           // handle HTTP GET response
+           if (request.status == 200) {
+               request.responseText
+           }
+           else {
+               // handle error
+               ...
+           }
+       });
+
+    * Or you can pass a number of parameters to be sent synchronously by
+    * HTTP POST request:
+
+       // send parameters synchronously by HTTP POST request
+       zebra.io.HTTP("google.com").POST({
+           param1: "val1",
+           param2: "val3",
+           param3: "val3"
+       });
+
+     * @method POST
+     */
+    function POST(d, f) {
+        if (typeof d == 'function') {
+            f = d;
+            d = null;
+        }
+
+        // if the passed data is simple dictionary object encode it as POST
+        // parameters
+        //
+        // TODO: think also about changing content type
+        // "application/x-www-form-urlencoded; charset=UTF-8"
+        if (d != null && zebra.isString(d) == false && d.constructor === Object) {
+            d = pkg.QS.toQS(d, false);
+        }
+
+        return this.SEND("POST", this.url, d, f);
+    },
+
+    /**
+     * Universal HTTP request method that can be used to generate
+     * a HTTP request with any HTTP method to the given URL with
+     * the given data to be sent asynchronously or synchronously
+     * @param {String}   method   an HTTP method (GET,POST,DELETE,PUT, etc)
+     * @param {String}   url      an URL
+     * @param {String}   data     a data to be sent to the given URL
+     * @param {Function} [callback] a callback method to be defined
+     * if the HTTP request has to be sent asynchronously.
+     * @method SEND
+     */
+    function SEND(method, url, data, callback) {
+        //!!! IE9 returns 404 if XDomainRequest is used for the same domain but for different paths.
+        //!!! Using standard XMLHttpRequest has to be forced in this case
+        var r = pkg.getRequest(), $this = this;
+
+        if (callback != null) {
+            r.onreadystatechange = function() {
+                if (r.readyState == 4) {
+                    callback.call($this, r);
+                }
+            };
+        }
+
+        r.open(method, url, callback != null);
+        for(var k in this.header) {
+            r.setRequestHeader(k, this.header[k]);
+        }
+
+        try {
+            r.send(data);
+        }
+        catch(e) {
+            // exception has to be redefined since the type of exception
+            // can be browser dependent
+            if (callback == null) {
+                var ee = new Error(e.toString());
+                ee.request = r;
+                throw ee;
+            }
+            else {
+                r.status = 500;
+                r.statusText = e.toString();
+                callback.call(this, r);
+            }
+        }
+
+        if (callback == null) {
+            if (r.status != 200) {
+
+                // requesting local files can return 0 as a success result
+                if (r.status !== 0 || new zebra.URL(this.url).protocol != "file:") {
+                    var e = new Error("HTTP error " + r.status + " response = '" + r.statusText + "' url = " + url);
+                    e.request = r;
+                    throw e;
+                }
+            }
+            return r.responseText;
+        }
+    }
+]);
+
+/**
+ * Shortcut method to perform asynchronous or synchronous HTTP GET requests.
+
+        // synchronous HTTP GET call
+        var res = zebra.io.GET("http://test.com");
+
+        // asynchronous HTTP GET call
+        zebra.io.GET("http://test.com", function(request) {
+            // handle result
+            if (request.status == 200) {
+                request.responseText
+            }
+            else {
+                // handle error
+            }
+            ...
+        });
+
+        // synchronous HTTP GET call with query parameters
+        var res = zebra.io.GET("http://test.com", {
+            param1 : "var1",
+            param1 : "var2",
+            param1 : "var3"
+        });
+
+ * @param {String} url an URL
+ * @param {Object} [parameters] a dictionary of query parameters
+ * @param {Funcion} [callback] a callback function that is called
+ * when the GET request is completed. Pass it  to perform request
+ * asynchronously
+ * @api  zebra.io.GET()
+ * @method GET
+ */
+pkg.GET = function(url) {
+    if (zebra.isString(url)) {
+        var http = new pkg.HTTP(url);
+        return http.GET.apply(http, Array.prototype.slice.call(arguments, 1));
+    }
+    else {
+        var http = new pkg.HTTP(url.url);
+        if (url.header) {
+            http.header = url.header;
+        }
+        var args = [];
+        if (url.parameters) args.push(url.parameters);
+        if (url.calback) args.push(url.calback);
+        return http.GET.apply(http, args);
+    }
+};
+
+/**
+ * Shortcut method to perform asynchronous or synchronous HTTP POST requests.
+
+        // synchronous HTTP POST call
+        var res = zebra.io.POST("http://test.com");
+
+        // asynchronous HTTP POST call
+        zebra.io.POST("http://test.com", function(request) {
+            // handle result
+            if (request.status == 200) {
+
+            }
+            else {
+                // handle error
+                ...
+            }
+            ...
+        });
+
+        // synchronous HTTP POST call with query parameters
+        var res = zebra.io.POST("http://test.com", {
+            param1 : "var1",
+            param1 : "var2",
+            param1 : "var3"
+        });
+
+        // synchronous HTTP POST call with data
+        var res = zebra.io.POST("http://test.com", "data");
+
+        // asynchronous HTTP POST call with data
+        zebra.io.POST("http://test.com", "request", function(request) {
+            // handle result
+            if (request.status == 200) {
+
+            }
+            else {
+                // handle error
+                ...
+            }
+        });
+
+ * @param {String} url an URL
+ * @param {Object} [parameters] a dictionary of query parameters
+ * @param {Function} [callback] a callback function that is called
+ * when the GET request is completed. Pass it if to perform request
+ * asynchronously
+ * @method  POST
+ * @api  zebra.io.POST()
+ */
+pkg.POST = function(url) {
+    var http = new pkg.HTTP(url);
+    return http.POST.apply(http, Array.prototype.slice.call(arguments, 1));
+};
+
+/**
+ * A remote service connector class. It is supposed the class has to be extended with
+ * different protocols like RPC, JSON etc. The typical pattern of connecting to
+ * a remote service is shown below:
+
+        // create service connector that has two methods "a()" and "b(param1)"
+        var service = new zebra.io.Service("http://myservice.com", [
+            "a", "b"
+        ]);
+
+        // call the methods of the remote service
+        service.a();
+        service.b(10);
+
+ * Also the methods of a remote service can be called asynchronously. In this case
+ * a callback method has to be passed as the last argument of called remote methods:
+
+        // create service connector that has two methods "a()" and "b(param1)"
+        var service = new zebra.io.Service("http://myservice.com", [
+            "a", "b"
+        ]);
+
+        // call "b" method from the remote service asynchronously
+        service.b(10, function(res) {
+            // handle a result of the remote method execution here
+            ...
+        });
+ *
+ * Ideally any specific remote service extension of "zebra.io.Service"
+ * class has to implement two methods:
+
+    - **encode** to say how the given remote method with passed parameters have
+    to be transformed into a concrete service side protocol (JSON, XML, etc)
+    - **decode** to say how the specific service response has to be converted into
+    JavaScript object
+
+ * @class  zebra.io.Service
+ * @constructor
+ * @param {String} url an URL of remote service
+ * @param {Array} methods a list of methods names the remote service provides
+ */
+pkg.Service = Class([
+    function(url, methods) {
+        var $this = this;
+        /**
+         * Remote service url
+         * @attribute url
+         * @readOnly
+         * @type {String}
+         */
+        this.url = url;
+
+        /**
+         * Remote service methods names
+         * @attribute methods
+         * @readOnly
+         * @type {Array}
+         */
+
+        if (Array.isArray(methods) === false) methods = [ methods ];
+
+        for(var i=0; i < methods.length; i++) {
+            (function() {
+                var name = methods[i];
+                $this[name] = function() {
+                    var args = Array.prototype.slice.call(arguments);
+                    if (args.length > 0 && typeof args[args.length - 1] == "function") {
+                        var callback = args.pop();
+                        return this.send(url, this.encode(name, args), function(request) {
+                                                                            var r = null;
+                                                                            try {
+                                                                                if (request.status == 200) {
+                                                                                    r = $this.decode(request.responseText);
+                                                                                }
+                                                                                else {
+                                                                                    r = new Error("Status: " + request.status +
+                                                                                                   ", '" + request.statusText + "'");
+                                                                                }
+                                                                            }
+                                                                            catch(e) {  r = e; }
+                                                                            callback(r);
+                                                                       });
+                    }
+                    return this.decode(this.send(url, this.encode(name, args), null));
+                };
+            })();
+        }
+    },
+
+    /**
+     * Transforms the given remote method execution with the specified parameters
+     * to service specific protocol.
+     * @param {String} name a remote method name
+     * @param {Array} args an passed to the remote method arguments
+     * @return {String} a remote service specific encoded string
+     * @protected
+     * @method encode
+     */
+
+    /**
+     * Transforms the given remote method response to a JavaScript
+     * object.
+     * @param {String} name a remote method name
+     * @return {Object} a result of the remote method calling as a JavaScript
+     * object
+     * @protected
+     * @method decode
+     */
+
+     /**
+      * Send the given data to the given url and return a response. Callback
+      * function can be passed for asynchronous result handling.
+      * @protected
+      * @param  {String}   url an URL
+      * @param  {String}   data  a data to be send
+      * @param  {Function} [callback] a callback function
+      * @return {String}  a result
+      * @method  send
+      */
+    function send(url, data, callback) {
+        var http = new pkg.HTTP(url);
+        if (this.contentType != null) {
+            http.header['Content-Type'] = this.contentType;
+        }
+        return http.POST(data, callback);
+    }
+]);
+
+pkg.Service.invoke = function(clazz, url, method) {
+    var rpc = new clazz(url, method);
+    return function() { return rpc[method].apply(rpc, arguments); };
+};
+
+/**
+ * The class is implementation of JSON-RPC remote service connector.
+
+        // create JSON-RPC connector to a remote service that
+        // has three remote methods
+        var service = new zebra.io.JRPC("json-rpc.com", [
+            "method1", "method2", "method3"
+        ]);
+
+        // synchronously call remote method "method1"
+        service.method1();
+
+        // asynchronously call remote method "method1"
+        service.method1(function(res) {
+            ...
+        });
+
+ * @class zebra.io.JRPC
+ * @constructor
+ * @param {String} url an URL of remote service
+ * @param {Array} methods a list of methods names the remote service provides
+ * @extends {zebra.io.Service}
+ */
+pkg.JRPC = Class(pkg.Service, [
+    function(url, methods) {
+        this.$super(url, methods);
+        this.version = "2.0";
+        this.contentType = "application/json; charset=ISO-8859-1;";
+    },
+
+    function encode(name, args) {
+        return JSON.stringify({ jsonrpc: this.version, method: name, params: args, id: pkg.ID() });
+    },
+
+    function decode(r) {
+        if (r === null || r.length === 0) {
+            throw new Error("Empty JSON result string");
+        }
+
+        r = JSON.parse(r);
+        if (typeof(r.error) !== "undefined") {
+            throw new Error(r.error.message);
+        }
+
+        if (typeof r.result === "undefined" || typeof r.id === "undefined") {
+            throw new Error("Wrong JSON response format");
+        }
+        return r.result;
+    }
+]);
+
+pkg.Base64 = function(s) { if (arguments.length > 0) this.encoded = pkg.b64encode(s); };
+pkg.Base64.prototype.toString = function() { return this.encoded; };
+pkg.Base64.prototype.decode   = function() { return pkg.b64decode(this.encoded); };
+
+/**
+ * The class is implementation of XML-RPC remote service connector.
+
+        // create XML-RPC connector to a remote service that
+        // has three remote methods
+        var service = new zebra.io.XRPC("xmlrpc.com", [
+            "method1", "method2", "method3"
+        ]);
+
+        // synchronously call remote method "method1"
+        service.method1();
+
+        // asynchronously call remote method "method1"
+        service.method1(function(res) {
+            ...
+        });
+
+ * @class zebra.io.XRPC
+ * @constructor
+ * @extends {zebra.io.Service}
+ * @param {String} url an URL of remote service
+ * @param {Array} methods a list of methods names the remote service provides
+ */
+pkg.XRPC = Class(pkg.Service, [
+    function(url, methods) {
+        this.$super(url, methods);
+        this.contentType = "text/xml";
+    },
+
+    function encode(name, args) {
+        var p = ["<?xml version=\"1.0\"?>\n<methodCall><methodName>", name, "</methodName><params>"];
+        for(var i=0; i < args.length;i++) {
+            p.push("<param>");
+            this.encodeValue(args[i], p);
+            p.push("</param>");
+        }
+        p.push("</params></methodCall>");
+        return p.join('');
+    },
+
+    function encodeValue(v, p)  {
+        if (v === null) {
+            throw new Error("Null is not allowed");
+        }
+
+        if (zebra.isString(v)) {
+            v = v.replace("<", "&lt;");
+            v = v.replace("&", "&amp;");
+            p.push("<string>", v, "</string>");
+        }
+        else {
+            if (zebra.isNumber(v)) {
+                if (Math.round(v) == v) p.push("<i4>", v.toString(), "</i4>");
+                else                    p.push("<double>", v.toString(), "</double>");
+            }
+            else {
+                if (zebra.isBoolean(v)) p.push("<boolean>", v?"1":"0", "</boolean>");
+                else {
+                    if (v instanceof Date)  p.push("<dateTime.iso8601>", pkg.dateToISO8601(v), "</dateTime.iso8601>");
+                    else {
+                        if (Array.isArray(v))  {
+                            p.push("<array><data>");
+                            for(var i=0;i<v.length;i++) {
+                                p.push("<value>");
+                                this.encodeValue(v[i], p);
+                                p.push("</value>");
+                            }
+                            p.push("</data></array>");
+                        }
+                        else {
+                            if (v instanceof pkg.Base64) p.push("<base64>", v.toString(), "</base64>");
+                            else {
+                                p.push("<struct>");
+                                for(var k in v) {
+                                    if (v.hasOwnProperty(k)) {
+                                        p.push("<member><name>", k, "</name><value>");
+                                        this.encodeValue(v[k], p);
+                                        p.push("</value></member>");
+                                    }
+                                }
+                                p.push("</struct>");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+
+    function decodeValue(node) {
+        var tag = node.tagName.toLowerCase();
+        if (tag == "struct")
+        {
+             var p = {};
+             for(var i=0; i < node.childNodes.length; i++) {
+                var member = node.childNodes[i],  // <member>
+                    key    = member.childNodes[0].childNodes[0].nodeValue.trim(); // <name>/text()
+                p[key] = this.decodeValue(member.childNodes[1].childNodes[0]);   // <value>/<xxx>
+            }
+            return p;
+        }
+        if (tag == "array") {
+            var a = [];
+            node = node.childNodes[0]; // <data>
+            for(var i=0; i < node.childNodes.length; i++) {
+                a[i] = this.decodeValue(node.childNodes[i].childNodes[0]); // <value>
+            }
+            return a;
+        }
+
+        var v = node.childNodes[0].nodeValue.trim();
+        switch (tag) {
+            case "datetime.iso8601": return pkg.ISO8601toDate(v);
+            case "boolean": return v == "1";
+            case "int":
+            case "i4":     return parseInt(v, 10);
+            case "double": return Number(v);
+            case "base64":
+                var b64 = new pkg.Base64();
+                b64.encoded = v;
+                return b64;
+            case "string": return v;
+        }
+        throw new Error("Unknown tag " + tag);
+    },
+
+    function decode(r) {
+        var p = pkg.parseXML(r), c = p.getElementsByTagName("fault");
+        if (c.length > 0) {
+            var err = this.decodeValue(c[0].getElementsByTagName("struct")[0]);
+            throw new Error(err.faultString);
+        }
+        c = p.getElementsByTagName("methodResponse")[0];
+        c = c.childNodes[0].childNodes[0]; // <params>/<param>
+        if (c.tagName.toLowerCase() === "param") {
+            return this.decodeValue(c.childNodes[0].childNodes[0]); // <value>/<xxx>
+        }
+        throw new Error("incorrect XML-RPC response");
+    }
+]);
+
+/**
+ * Shortcut to call the specified method of a XML-RPC service.
+ * @param  {String} url an URL
+ * @param  {String} method a method name
+ * @api zebra.io.XRPC.invoke()
+ * @method invoke
+ */
+pkg.XRPC.invoke = function(url, method) {
+    return pkg.Service.invoke(pkg.XRPC, url, method);
+};
+
+/**
+ * Shortcut to call the specified method of a JSON-RPC service.
+ * @param  {String} url an URL
+ * @param  {String} method a method name
+ * @api zebra.io.JRPC.invoke()
+ * @method invoke
+ */
+pkg.JRPC.invoke = function(url, method) {
+    return pkg.Service.invoke(pkg.JRPC, url, method);
+};
+
+/**
+ * @for
+ */
+
+})(zebra("io"), zebra.Class);
+
 
 (function(pkg, Class) {
 
@@ -3149,3543 +6692,7 @@ pkg.GridLayout = Class(L, [
 
 
 })(zebra("layout"), zebra.Class);
-/**
- * Number of different utilities methods and classes
- * @module util
- * @requires zebra
- */
 
-(function(pkg, Class, Interface) {
-/**
- * Instantiate a new class instance by the given class name with the specified constructor
- * arguments.
- * @param  {String} clazz a class name
- * @param  {Array} [args] an arguments list
- * @return {Object}  a new instance of the given class initialized with the specified arguments
- * @api  zebra.util.newInstance()
- * @method newInstance
- */
-pkg.newInstance = function(clazz, args) {
-    if (args && args.length > 0) {
-        var f = function() {};
-        f.prototype = clazz.prototype;
-        var o = new f();
-        o.constructor = clazz;
-        clazz.apply(o, args);
-        return o;
-    }
-    return new clazz();
-};
-
-
-function hex(v) {
-    return (v < 16) ? ["0", v.toString(16)].join('') :  v.toString(16);
-}
-
-/**
- * Find by xpath-like path an element in a tree-like structure. The method is flexible way to look up
- * elements in tree structures. The only requirements the passed tree-like structure has to follow is
- * declaring a "kids" array field if the element has a children element. To understand if the given tree
- * element matches the current path fragment a special equality function has to be passed.
-
-        var treeLikeRoot = {
-            value : "Root",
-            kids : [
-                { value: "Item 1" },
-                { value: "Item 2" }
-            ]
-        };
-
-        zebra.util.findInTree(treeLikeRoot,
-                              "/Root/item1",
-                              function(item, fragment) {
-                                  return item.value == fragment;
-                              },
-                              function(foundElement) {
-                                 ...
-                                 // true means stop lookup
-                                 return true;
-                              });
-
-
- * @param  {Object} root a tree root element. If the element has a children element it has to
- * declare "kids" field. This field is an array of all children elements
- * @param  {String}   path a xpath-like path. The path has to satisfy number of requirements
- * and rules:
-
-    - "/"" means lookup among all direct children elements
-    - "//"" means lookup among all children elements recursively
-    - "*" means any path value
-    -[@attr=100] means number attribute
-    -[@attr=true] means boolean attribute
-    -[@attr='value'] means string attribute
-    - Path has always starts from "/" or "//"
-    - Path element always has to be defined: "*" or an symbolic name
-
- *
- * Path examples:
-
-    - "//*" traverse all tree elements
-    - "//*[@a=10]" traverse all tree elements that has an attribute "a" that equals 10
-    - "/Root/Item" find an element by exact path
-
- * @param  {Function}  eq  an equality function. The function gets current evaluated tree element
- * and a path fragment against which the tree element has to be evaluated. It is expected the method
- * returns boolean value to say if the given passed tree element matches the path fragment.
- * @param  {Function} cb callback function that is called every time a new tree element
- * matches the given path fragment. The function has to return true if the tree look up
- * has to be stopped
- * @api  zebra.util.findInTree()
- * @method findInTree
- */
-pkg.findInTree = function(root, path, eq, cb) {
-    var findRE = /(\/\/|\/)?([^\[\/]+)(\[\s*(\@[a-zA-Z_][a-zA-Z0-9_\.]*)\s*\=\s*([0-9]+|true|false|\'[^']*\')\s*\])?/g,
-        m = null, res = [];
-
-    function _find(root, ms, idx, cb) {
-        function list_child(r, name, deep, cb) {
-            if (r.kids) {
-                for (var i=0; i < r.kids.length; i++) {
-                    var kid = r.kids[i];
-                    if (name == '*' || eq(kid, name)) {
-                        if (cb(kid)) return true;
-                    }
-
-                    if (deep && list_child(kid, name, deep, cb)) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        if (ms == null || idx >= ms.length) return cb(root);
-
-        var m = ms[idx];
-        return list_child(root, m[2], m[1] == "//", function(child) {
-            if (m[3] && child[m[4].substring(1)] != m[5]) return false;
-            return _find(child, ms, idx + 1, cb);
-        });
-    }
-
-    var c = 0;
-    while (m = findRE.exec(path)) {
-        if (m[1] == null || m[2] == null || m[2].trim().length === 0) {
-            break;
-        }
-
-        c += m[0].length;
-
-
-        if (m[3] && m[5][0] == "'") m[5] = m[5].substring(1, m[5].length - 1);
-        res.push(m);
-    }
-
-    if (res.length === 0 || c < path.length) {
-        throw new Error("Invalid path: '" + path + "'," + c);
-    }
-
-    _find({ kids:[root] }, res, 0, cb);
-};
-
-
-/**
- * RGB color class. This class represents rgb(a) color as JavaScript structure:
-
-       // rgb color
-       var rgb1 = new zebra.util.rgb(100,200,100);
-
-       // rgb with transparency
-       var rgb2 = new zebra.util.rgb(100,200,100, 0.6);
-
-       // encoded as a string rgb color
-       var rgb3 = new zebra.util.rgb("rgb(100,100,200)");
-
-       // hex rgb color
-       var rgb3 = new zebra.util.rgb("#CCDDFF");
-
- * @param  {Integer|String} r  red color intensity or if this is the only constructor parameter it denotes
- * encoded in string rgb color
- * @param  {Integer} [g]  green color intensity
- * @param  {Integer} [b] blue color intensity
- * @param  {Float}   [a] alpha color intensity
- * @constructor
- * @class zebra.util.rgb
- */
-pkg.rgb = function (r, g, b, a) {
-
-    /**
-     * Red color intensity
-     * @attribute r
-     * @type {Integer}
-     * @readOnly
-     */
-
-    /**
-     * Green color intensity
-     * @attribute g
-     * @type {Integer}
-     * @readOnly
-     */
-
-    /**
-     * Blue color intensity
-     * @attribute b
-     * @type {Integer}
-     * @readOnly
-     */
-
-    /**
-     * Alpha
-     * @attribute a
-     * @type {Float}
-     * @readOnly
-     */
-
-    /**
-     * Indicates if the color is opaque
-     * @attribute isTransparent
-     * @readOnly
-     * @type {Boolean}
-     */
-    this.isOpaque = false;
-
-    if (arguments.length == 1) {
-        if (zebra.isString(r)) {
-            this.s = r;
-            if (r[0] === '#') {
-                r = parseInt(r.substring(1), 16);
-            }
-            else {
-                if (r[0] === 'r' && r[1] === 'g' && r[2] === 'b') {
-                    var i = r.indexOf('(', 3), p = r.substring(i + 1, r.indexOf(')', i + 1)).split(",");
-                    this.r = parseInt(p[0].trim(), 10);
-                    this.g = parseInt(p[1].trim(), 10);
-                    this.b = parseInt(p[2].trim(), 10);
-                    if (p.length > 3) {
-                        this.a = parseInt(p[3].trim(), 10);
-                        this.isOpaque = (this.a != 1);
-                    }
-                    return;
-                }
-            }
-        }
-        this.r =  r >> 16;
-        this.g = (r >> 8) & 0xFF;
-        this.b = (r & 0xFF);
-    }
-    else {
-        this.r = r;
-        this.g = g;
-        this.b = b;
-        if (arguments.length > 3) this.a = a;
-    }
-
-    if (this.s == null) {
-        this.s = (typeof this.a !== "undefined") ? ['rgba(', this.r, ",", this.g, ",",
-                                                             this.b, ",", this.a, ")"].join('')
-                                                 : ['#', hex(this.r), hex(this.g), hex(this.b)].join('');
-    }
-};
-
-var rgb = pkg.rgb;
-rgb.prototype.toString = function() {
-    return this.s;
-};
-
-rgb.black       = new rgb(0);
-rgb.white       = new rgb(0xFFFFFF);
-rgb.red         = new rgb(255,0,0);
-rgb.blue        = new rgb(0,0,255);
-rgb.green       = new rgb(0,255,0);
-rgb.gray        = new rgb(128,128,128);
-rgb.lightGray   = new rgb(211,211,211);
-rgb.darkGray    = new rgb(169,169,169);
-rgb.orange      = new rgb(255,165,0);
-rgb.yellow      = new rgb(255,255,0);
-rgb.pink        = new rgb(255,192,203);
-rgb.cyan        = new rgb(0,255,255);
-rgb.magenta     = new rgb(255,0,255);
-rgb.darkBlue    = new rgb(0, 0, 140);
-rgb.transparent = new rgb(0, 0, 0, 0.0);
-
-/**
- * Compute intersection of the two given rectangular areas
- * @param  {Integer} x1 a x coordinate of the first rectangular area
- * @param  {Integer} y1 a y coordinate of the first rectangular area
- * @param  {Integer} w1 a width of the first rectangular area
- * @param  {Integer} h1 a height of the first rectangular area
- * @param  {Integer} x2 a x coordinate of the first rectangular area
- * @param  {Integer} y2 a y coordinate of the first rectangular area
- * @param  {Integer} w2 a width of the first rectangular area
- * @param  {Integer} h2 a height of the first rectangular area
- * @param  {Object}  r  an object to store result
- *
- *      { x: {Integer}, y:{Integer}, width:{Integer}, height:{Integer} }
- *
- * @method intersection
- * @api zebra.util.intersection();
- */
-pkg.intersection = function(x1,y1,w1,h1,x2,y2,w2,h2,r){
-    r.x = x1 > x2 ? x1 : x2;
-    r.width = Math.min(x1 + w1, x2 + w2) - r.x;
-    r.y = y1 > y2 ? y1 : y2;
-    r.height = Math.min(y1 + h1, y2 + h2) - r.y;
-};
-
-pkg.isIntersect = function(x1,y1,w1,h1,x2,y2,w2,h2){
-    return (Math.min(x1 + w1, x2 + w2) - (x1 > x2 ? x1 : x2)) > 0 &&
-           (Math.min(y1 + h1, y2 + h2) - (y1 > y2 ? y1 : y2)) > 0;
-};
-
-pkg.unite = function(x1,y1,w1,h1,x2,y2,w2,h2,r){
-    r.x = x1 < x2 ? x1 : x2;
-    r.y = y1 < y2 ? y1 : y2;
-    r.width  = Math.max(x1 + w1, x2 + w2) - r.x;
-    r.height = Math.max(y1 + h1, y2 + h2) - r.y;
-};
-
-var letterRE = /[A-Za-z]/;
-pkg.isLetter = function (ch) {
-    if (ch.length != 1) throw new Error("Incorrect character");
-    return letterRE.test(ch);
-};
-
-/**
- * This this META class is handy container to keep different types of listeners and
- * fire events to the listeners:
-
-        // create listener container to keep three different events
-        // handlers
-        var MyListenerContainerClass = zebra.util.ListenersClass("event1",
-                                                                  "event2",
-                                                                  "event3");
-
-        // instantiate listener class container
-        var listeners = new MyListenerContainerClass();
-
-        // add "event1" listener
-        listeners.add(function event1() {
-            ...
-        });
-
-        // add "event2" listener
-        listeners.add(function event2() {
-           ...
-        });
-
-        // and firing event1 to registered handlers
-        listeners.event1(...);
-
-        // and firing event2 to registered handlers
-        listeners.event2(...);
-
- * @class zebra.util.Listeners
- * @constructor
- * @param {String} [events]* events types the container has to support
- */
-var $NewListener = function() {
-    if (arguments.length === 0) {
-       arguments = ["fired"];
-    }
-
-    var clazz = function() {};
-
-    if (arguments.length == 1) {
-        var name = arguments[0];
-
-        clazz.prototype.add = function() {
-            if (this.v == null) this.v = [];
-
-            var ctx = this,
-                l   = arguments[arguments.length - 1]; // last arguments are handler(s)
-
-
-            if (typeof l !== 'function') {
-                ctx = l;
-                l   = l[name];
-
-                if (l == null || typeof l !== "function") {
-                    throw new Error("Instance doesn't declare '" + name + "' listener method");
-                }
-            }
-
-            if (arguments.length > 1 && arguments[0] != name) {
-                throw new Error("Unknown event type :" + name);
-            }
-
-            this.v.push(ctx, l);
-            return l;
-        };
-
-        clazz.prototype.remove = function(l) {
-            if (this.v != null) {
-                if (arguments.length === 0) {
-                    // remove all
-                    this.v.length = 0;
-                }
-                else {
-                    var i = 0;
-                    while((i = this.v.indexOf(l)) >= 0) {
-                        if (i % 2 > 0) i--;
-                        this.v.splice(i, 2);
-                    }
-                }
-            }
-        };
-
-        clazz.prototype[name] = function() {
-            if (this.v != null) {
-                for(var i = 0;i < this.v.length; i+=2) {
-                    this.v[i + 1].apply(this.v[i], arguments);
-                }
-            }
-        };
-    }
-    else {
-        var names = {};
-        for(var i=0; i< arguments.length; i++) {
-            names[arguments[i]] = true;
-        }
-
-        clazz.prototype.add = function(l) {
-            if (this.methods == null) this.methods = {};
-
-            var n = null;
-            if (arguments.length > 1) {
-                n = arguments[0];
-                l = arguments[arguments.length - 1]; // last arguments are handler(s)
-            }
-
-            if (typeof l === 'function') {
-                if (n == null) n = zebra.$FN(l);
-
-                if (n != '' && names.hasOwnProperty(n) === false) {
-                    throw new Error("Unknown event type " + n);
-                }
-
-                if (this.methods[n] == null) this.methods[n] = [];
-                this.methods[n].push(this, l);
-            }
-            else {
-                var b = false;
-                for(var k in names) {
-                    if (typeof l[k] === "function") {
-                        b = true;
-                        if (this.methods[k] == null) this.methods[k] = [];
-                        this.methods[k].push(l, l[k]);
-                    }
-                }
-
-                if (b === false) {
-                    throw new Error("No listener methods have been found");
-                }
-            }
-            return l;
-        };
-
-        // populate methods that has to be called to send appropriate events to
-        // registered listeners
-        for(var i=0; i < arguments.length; i++) {
-            var m = arguments[i];
-            (function(m) {
-                clazz.prototype[m] = function() {
-                    if (this.methods != null) {
-                        var c = this.methods[m];
-                        if (c != null) {
-                            for(var i=0; i < c.length; i+=2) c[i+1].apply(c[i], arguments);
-                        }
-
-                        c = this.methods[''];
-                        if (c != null) {
-                            for(var i=0; i < c.length; i+=2) c[i+1].apply(c[i], arguments);
-                        }
-                    }
-                };
-            })(m);
-        }
-
-        clazz.prototype.remove = function(l) {
-            if (this.methods != null) {
-                if (arguments.length === 0) {
-                    for(var k in this.methods) {
-                        if (this.methods.hasOwnProperty(k)) this.methods[k].length = 0;
-                    }
-                    this.methods = {};
-                }
-                else {
-                    for (var k in this.methods) {
-                        var v = this.methods[k], i = 0;
-                        while ((i = v.indexOf(l)) >= 0) {
-                            if (i%2 > 0) i--;
-                            v.splice(i, 2);
-                        }
-
-                        if (v.length === 0) {
-                            delete this.methods[k];
-                        }
-                    }
-                }
-            }
-        };
-    }
-    return clazz;
-};
-
-pkg.Listeners = $NewListener();
-pkg.ListenersClass = $NewListener;
-
-
-/**
- * Useful class to track a virtual cursor position in a structure that has
- * dedicated number of lines where every line has a number of elements. The
- * structure metric has to be described by providing an instance of
- * zebra.util.Position.Metric interface that discovers how many
- * lines the structure has and how many elements every line includes.
- * @param {zebra.util.Position.Metric} m a position metric
- * @constructor
- * @class  zebra.util.Position
- */
-
-/**
- * Fire when a virtual cursor position has been updated
-
-        position.bind(function(src, prevOffset, prevLine, prevCol) {
-            ...
-        });
-
- * @event posChanged
- * @param {zebra.util.Position} src an object that triggers the event
- * @param {Integer} prevOffest a previous virtual cursor offset
- * @param {Integer} prevLine a previous virtual cursor line
- * @param {Integer} prevCol a previous virtual cursor column in the previous line
- */
-var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = Class([
-    function $clazz() {
-        /**
-         * Position metric interface. This interface is designed for describing
-         * a navigational structure that consists on number of lines where
-         * every line consists of number of elements
-         * @class zebra.util.Position.Metric
-         */
-
-        /**
-         * Get number of lines to navigate through
-         * @return {Integer} a number of lines
-         * @method  getLines
-         */
-
-         /**
-          * Get a number of elements in the given line
-          * @param {Integer} l a line index
-          * @return {Integer} a number of elements in a line
-          * @method  getLineSize
-          */
-
-         /**
-          * Get a maximal element index (a last element of a last line)
-          * @return {Integer} a maximal element index
-          * @method  getMaxOffset
-          */
-
-        this.Metric = Interface();
-
-        this.DOWN = 1;
-        this.UP   = 2;
-        this.BEG  = 3;
-        this.END  = 4;
-    },
-
-    function $prototype() {
-        /**
-         * Set the specified virtual cursor offsest
-         * @param {Integer} o an offset, pass null to set position to indefinite state
-         * @return {Integer} an offset that has been set
-         * @method setOffset
-         */
-        this.setOffset = function(o){
-            if (o < 0) o = 0;
-            else {
-                if (o == null) o = -1;
-                else {
-                    var max = this.metrics.getMaxOffset();
-                    if (o >= max) o = max;
-                }
-            }
-
-            if (o != this.offset){
-                var prevOffset = this.offset,
-                    prevLine   = this.currentLine,
-                    prevCol    = this.currentCol,
-                    p          = this.getPointByOffset(o);
-
-                this.offset = o;
-                if (p != null){
-                    this.currentLine = p[0];
-                    this.currentCol = p[1];
-                }
-                this.isValid = true;
-                this._.posChanged(this, prevOffset, prevLine, prevCol);
-            }
-
-            return o;
-        };
-
-        /**
-         * Seek virtual cursor offset with the given shift
-         * @param {Integer} off a shift
-         * @return {Integer} an offset that has been set
-         * @method seek
-         */
-        this.seek = function(off) {
-            return this.setOffset(this.offset + off);
-        };
-
-        /**
-         * Set the vurtual cursor line and the given column in the line
-         * @param {Integer} r a line
-         * @param {Integer} c a column in the line
-         * @method setRowCol
-         */
-        this.setRowCol = function(r,c) {
-            if (r != this.currentLine || c != this.currentCol){
-                var prevOffset = this.offset,
-                    prevLine = this.currentLine,
-                    prevCol = this.currentCol;
-
-                this.offset = this.getOffsetByPoint(r, c);
-                this.currentLine = r;
-                this.currentCol = c;
-                this._.posChanged(this, prevOffset, prevLine, prevCol);
-            }
-        };
-
-        this.inserted = function(off,size) {
-            if (this.offset >= 0 && off <= this.offset){
-                this.isValid = false;
-                this.setOffset(this.offset + size);
-            }
-        };
-
-        this.removed = function (off,size){
-            if (this.offset >= 0 && this.offset >= off){
-                this.isValid = false;
-                this.setOffset(this.offset >= (off + size) ? this.offset - size
-                                                           : off);
-            }
-        };
-
-        /**
-         * Calculate a line and line column by the given offset.
-         * @param  {Integer} off an offset
-         * @return {Array} an array that contains a line as the first
-         * element and a column in the line as the second element.
-         * @method getPointByOffset
-         */
-        this.getPointByOffset = function(off){
-            if (off >= 0) {
-                var m = this.metrics, max = m.getMaxOffset();
-                if (off > max) {
-                    throw new Error("Out of bounds:" + off);
-                }
-
-                if (max === 0) return [(m.getLines() > 0 ? 0 : -1), 0];
-                if (off === 0) return [0, 0];
-
-                var d = 0, sl = 0, so = 0;
-                if (this.isValid && this.offset != -1) {
-                    sl = this.currentLine;
-                    so = this.offset - this.currentCol;
-                    if (off > this.offset) d = 1;
-                    else {
-                        if (off < this.offset) d =  -1;
-                        else return [sl, this.currentCol];
-                    }
-                }
-                else {
-                    d = (~~(max / off) === 0) ?  -1 : 1;
-                    if (d < 0) {
-                        sl = m.getLines() - 1;
-                        so = max - m.getLineSize(sl);
-                    }
-                }
-                for(; sl < m.getLines() && sl >= 0; sl += d){
-                    var ls = m.getLineSize(sl);
-                    if (off >= so && off < so + ls) {
-                        return [sl, off - so];
-                    }
-                    so += d > 0 ? ls : -m.getLineSize(sl - 1);
-                }
-            }
-            return [-1, -1];
-        };
-
-        /**
-         * Calculate an offset by the given line and column in the line
-         * @param  {Integer} row a line
-         * @param  {Integer} col a column in the line
-         * @return {Integer} an offset
-         * @method getOffsetByPoint
-         */
-        this.getOffsetByPoint = function (row, col){
-            var startOffset = 0, startLine = 0, m = this.metrics;
-
-            if (row >= m.getLines() || col >= m.getLineSize(row)) {
-                throw new Error();
-            }
-
-            if (this.isValid && this.offset !=  -1) {
-                startOffset = this.offset - this.currentCol;
-                startLine = this.currentLine;
-            }
-            if (startLine <= row) {
-                for(var i = startLine;i < row; i++) {
-                    startOffset += m.getLineSize(i);
-                }
-            }
-            else {
-                for(var i = startLine - 1;i >= row; i--) {
-                    startOffset -= m.getLineSize(i);
-                }
-            }
-            return startOffset + col;
-        };
-
-        /**
-         * Seek virtual cursor to the next position. How the method has to seek to the next position
-         * has to be denoted by one of the following constants:
-
-    - **zebra.util.Position.BEG** seek cursor to the begin of the current line
-    - **zebra.util.Position.END** seek cursor to the end of the current line
-    - **zebra.util.Position.UP** seek cursor one line up
-    - **zebra.util.Position.DOWN** seek cursor one line down
-
-         * If the current virtual position is not known (-1) the method always sets
-         * it to the first line, the first column in the line (offset is zero).
-         * @param  {Integer} t   an action the seek has to be done
-         * @param  {Integer} num number of seek actions
-         * @method seekLineTo
-         */
-        this.seekLineTo = function(t,num){
-            if (this.offset < 0){
-                this.setOffset(0);
-            }
-            else {
-                if (arguments.length == 1) num = 1;
-
-                var prevOffset = this.offset, prevLine = this.currentLine, prevCol = this.currentCol;
-                switch(t) {
-                    case Position.BEG:
-                        if (this.currentCol > 0){
-                            this.offset -= this.currentCol;
-                            this.currentCol = 0;
-                        } break;
-                    case Position.END:
-                        var maxCol = this.metrics.getLineSize(this.currentLine);
-                        if (this.currentCol < (maxCol - 1)){
-                            this.offset += (maxCol - this.currentCol - 1);
-                            this.currentCol = maxCol - 1;
-                        } break;
-                    case Position.UP:
-                        if (this.currentLine > 0){
-                            this.offset -= (this.currentCol + 1);
-                            this.currentLine--;
-                            for(var i = 0;this.currentLine > 0 && i < (num - 1); i++, this.currentLine--){
-                                this.offset -= this.metrics.getLineSize(this.currentLine);
-                            }
-                            var maxCol = this.metrics.getLineSize(this.currentLine);
-                            if (this.currentCol < maxCol) this.offset -= (maxCol - this.currentCol - 1);
-                            else this.currentCol = maxCol - 1;
-                        } break;
-                    case Position.DOWN:
-                        if (this.currentLine < (this.metrics.getLines() - 1)){
-                            this.offset += (this.metrics.getLineSize(this.currentLine) - this.currentCol);
-                            this.currentLine++;
-                            var size = this.metrics.getLines() - 1;
-                            for(var i = 0;this.currentLine < size && i < (num - 1); i++ ,this.currentLine++ ){
-                                this.offset += this.metrics.getLineSize(this.currentLine);
-                            }
-                            var maxCol = this.metrics.getLineSize(this.currentLine);
-                            if (this.currentCol < maxCol) this.offset += this.currentCol;
-                            else {
-                                this.currentCol = maxCol - 1;
-                                this.offset += this.currentCol;
-                            }
-                        } break;
-                    default: throw new Error();
-                }
-
-                this._.posChanged(this, prevOffset, prevLine, prevCol);
-            }
-        };
-
-        this[''] = function(pi){
-            this._ = new PosListeners();
-            this.isValid = false;
-
-            /**
-             * Current virtual cursor line position
-             * @attribute currentLine
-             * @type {Integer}
-             * @readOnly
-             */
-
-            /**
-             * Current virtual cursor column position
-             * @attribute currentCol
-             * @type {Integer}
-             * @readOnly
-             */
-
-            /**
-             * Current virtual cursor offset
-             * @attribute offset
-             * @type {Integer}
-             * @readOnly
-             */
-
-            this.currentLine = this.currentCol = this.offset = 0;
-            this.setMetric(pi);
-        };
-
-        /**
-         * Set position metric. Metric describes how many lines
-         * and elements in these line the virtual cursor can be navigated
-         * @param {zebra.util.Position.Metric} p a position metric
-         * @method setMetric
-         */
-        this.setMetric = function (p){
-            if (p == null) throw new Error("Null metric");
-            if (p != this.metrics){
-                this.metrics = p;
-                this.setOffset(null);
-            }
-        };
-    }
-]);
-
-pkg.SingleColPosition = Class(pkg.Position, [
-    function $prototype() {
-        this.setRowCol = function(r,c) {
-            this.setOffset(r);
-        };
-
-        this.setOffset = function(o){
-            if (o < 0) o = 0;
-            else {
-                if (o == null) o = -1;
-                else {
-                    var max = this.metrics.getMaxOffset();
-                    if (o >= max) o = max;
-                }
-            }
-
-            if (o != this.offset) {
-                var prevOffset = this.offset,
-                    prevLine   = this.currentLine,
-                    prevCol    = this.currentCol;
-
-                this.offset = o;
-                this.currentLine = o;
-                this.isValid = true;
-                this._.posChanged(this, prevOffset, prevLine, prevCol);
-            }
-
-            return o;
-        };
-
-        this.seekLineTo = function(t, num){
-            if (this.offset < 0){
-                this.setOffset(0);
-            }
-            else {
-                if (arguments.length == 1) num = 1;
-                switch(t) {
-                    case Position.BEG:
-                    case Position.END: break;
-                    case Position.UP:
-                        if (this.offset > 0) {
-                            this.setOffset(this.offset - n);
-                        } break;
-                    case Position.DOWN:
-                        if (this.offset < (this.metrics.getLines() - 1)){
-                            this.setOffset(this.offset + n);
-                        } break;
-                    default: throw new Error();
-                }
-            }
-        };
-    }
-]);
-
-
-(function() {
-    var quantum = 40, tasks = Array(5), count = 0, pid = -1;
-
-    function dispatcher() {
-        var c = 0;
-        for(var i = 0; i < tasks.length; i++) {
-            var t = tasks[i];
-
-            if (t.isStarted === true) {
-                c++;
-                if (t.si <= 0) {
-                    try {
-                        if (t.ctx == null) t.task(t);
-                        else               t.task.call(t.ctx, t);
-                    }
-                    catch(e) {
-                        console.log(e.stack ? e.stack : e);
-                    }
-
-                    t.si += t.ri;
-                }
-                else {
-                    t.si -= quantum;
-                }
-            }
-        }
-
-        if (c === 0 && pid >= 0) {
-            window.clearInterval(pid);
-            pid = -1;
-        }
-    }
-
-    /**
-     * Task is keeps a context of and allows developers
-     * to run, shutdown, pause a required method as a task
-     * Developer cannot instantiate the class directly.
-     * Use "zebra.util.task(...)" method to do it:
-
-        var t = zebra.util.task(function(context) {
-            // task body
-            ...
-        });
-
-        // run task in 1 second and repeat the task execution
-        // every half second
-        t.run(1000, 500);
-        ...
-
-        t.shutdown(); // stop the task
-
-     * @class zebra.util.TaskCotext
-     */
-    function Task() {
-        this.ctx = this.task = null;
-        this.ri  = this.si  = 0;
-
-        /**
-         * Indicates if the task is executed (active)
-         * @type {Boolean}
-         * @attribute isStarted
-         * @readOnly
-         */
-        this.isStarted = false;
-    }
-
-    pkg.TaskCotext = Task;
-
-    /**
-     * Shutdown the given task.
-     * @method shutdown
-     */
-    Task.prototype.shutdown = function() {
-        if (this.task != null) {
-            count--;
-            this.ctx = this.task = null;
-            this.isStarted = false;
-            this.ri = this.si = 0;
-        }
-
-        if (count === 0 && pid  >= 0) {
-            window.clearInterval(pid);
-            pid = -1;
-        }
-    };
-
-    /**
-     * Run the task
-     * @param {Integer} [startIn] a time (in milliseconds) in which the task has to be started
-     * @param {Integer} [repeatIn] a period (in milliseconds) the task has to be executed
-     * @method run
-     */
-    Task.prototype.run = function(startIn, repeatIn) {
-        if (this.task == null) {
-            throw new Error("Task body has not been defined");
-        }
-
-        if (arguments.length > 0) this.si = startIn;
-        if (arguments.length > 1) this.ri = repeatIn;
-        if (this.ri <= 0) this.ri = 150;
-
-        this.isStarted = true;
-
-        if (count > 0 && pid < 0) {
-            pid = window.setInterval(dispatcher, quantum);
-        }
-
-        return this;
-    };
-
-    /**
-     * Pause the given task.
-     * @method pause
-     */
-    Task.prototype.pause = function(t) {
-        if (this.task == null) {
-            throw new Error();
-        }
-
-        if (arguments.length === 0) {
-            this.isStarted = false;
-        }
-        else {
-            this.si = t;
-        }
-    };
-
-    // pre-fill tasks pool
-    for(var i = 0; i < tasks.length; i++) {
-        tasks[i] = new Task();
-    }
-
-    /**
-     * Take a free task from pool and run it with the specified
-     * body and the given context.
-
-        // allocate task
-        var task = zebra.util.task(function (ctx) {
-            // do something
-
-            // complete task if necessary
-            ctx.shutdown();
-        });
-
-        // run task in second and re-run it every 2 seconds
-        task.run(1000, 2000);
-
-        ...
-
-        // pause the task
-        task.pause();
-
-        ...
-        // run it again
-        task.run();
-
-     * @param  {Function|Object} f a function that has to be executed
-     * @param  {Object} [ctx]  a context the task has to be executed
-     * @return {zebra.util.Task} an allocated task
-     * @method task
-     * @api zebra.util.task
-     */
-    pkg.task = function(f, ctx){
-        if (typeof f != "function") {
-            ctx = f;
-            f = f.run;
-        }
-
-        if (f == null) {
-            throw new Error();
-        }
-
-        // find free and return free task
-        for(var i=0; i < tasks.length; i++) {
-            var j = (i + count) % tasks.length, t = tasks[j];
-            if (t.task == null) {
-                t.task = f;
-                t.ctx  = ctx;
-                count++;
-                return t;
-            }
-        }
-
-        throw new Error("Out of tasks limit");
-    };
-
-    /**
-     * Shut down all active at the given moment tasks
-     * body and the given context.
-     * @method shutdownAll
-     * @api zebra.util.shutdownAll
-     */
-    pkg.shutdownAll = function() {
-        for(var i=0; i < tasks.length; i++) {
-            tasks[i].shutdown();
-        }
-    };
-})();
-
-
-/**
- * JSON configuration objects loader class. The class is
- * handy way to keep and load configuration encoded in JSON
- * format. Except standard JSON types the class uses number
- * of JSON values and key interpretations such as:
-
-    - **"@key_of_refernced_value"** String values that start from "@" character are considered
-      as a reference to other values
-    - **{ "$class_name":[ arg1, arg2, ...], "prop1": ...}** Key names that starts from "$" character
-      are considered as name of class that has to be instantiated as the value
-    - **{"?isToucable": { "label": true } }** Key names that start from "?" are considered as
-      conditional section.
-
- * Also the class support section inheritance. That means
- * you can say to include part of JSON to another part of JSON.
- * For instance, imagine JSON describes properties for number
- * of UI components where an UI component can inherits another
- * one.
-
-        {
-           // base component
-           "BaseComponent": {
-               "background": "red",
-               "border": "plain",
-               "size": [300, 300]
-           },
-
-            // component that inherits properties from BaseComponent,
-            // but override background property with own value
-           "ExtenderComp": {
-               "$inherit": "BaseComponent",
-               "background": "green"
-           }
-        }
-
- *
- * The loading of JSON can be multi steps procedure where
- * you can load few JSON. That means you can compose the
- * final configuration from number of JSON files:
-
-        // prepare object that will keep loaded data
-        var loadedData = {};
-
-        // create bag
-        var bag = zebra.util.Bag(loadedData);
-
-        // load the bag with two JSON
-        bag.load("{ ... }", false).load("{  ...  }");
-
-
- * @class zebra.util.Bag
- * @constructor
- * @param {Object} [obj] a root object to be loaded with
- * the given JSON configuration
- */
-pkg.Bag = zebra.Class([
-    function $prototype() {
-        /**
-         * The attribute rules how arrays have to be merged if the bag is loaded from few
-         * JSON sources. true means that if a two JSON have the same key that reference to
-         * array values the final value will be a concatenation of the two arrays from the
-         * two JSON sources.
-         * @attribute concatArrays
-         * @type {Boolean}
-         * @default false
-         */
-        this.concatArrays = false;
-
-        /**
-         * The property says if the object introspection is required to try find a setter
-         * method for the given key. For instance if an object is loaded with the
-         * following JSON:
-
-         {
-            "color": "red"
-         }
-
-         * the introspection will cause bag class to try finding "setColor(c)" method in
-         * the loaded with the JSON object and call it to set "red" property value.
-         * @attribute usePropertySetters
-         * @default true
-         * @type {Boolean}
-         */
-        this.usePropertySetters = true;
-
-        this.ignoreNonExistentKeys = false;
-
-        /**
-         * Get a property value. The property name can point to embedded fields:
-         *
-         *      var bag = new Bag().loadByUrl("my.json");
-         *      bag.get("a.b.c");
-         *
-         * Also the special property type is considered - factory. Access to such property
-         * causes a new instance of a class object will be created. Property is considered
-         * as a factory property if it declares a "$new" field. The filed should point to
-         * a method that will be called to instantiate the property value.
-         *
-         * @param  {String} key a property key.
-         * @return {Object} a property value
-         * @method  get
-         */
-        this.get = function(key) {
-            if (key == null) throw new Error("Null key");
-            var n = key.split('.'), v = this.objects;
-            for(var i = 0; i < n.length; i++) {
-                v = v[n[i]];
-                if (typeof v === "undefined") {
-                    if (this.ignoreNonExistentKeys) return v;
-                    throw new Error("Property '" + key + "' not found");
-                }
-            }
-            return v != null && v.$new ? v.$new() : v;
-        };
-
-        /**
-         * Merge content of the specified object with the specified value and return
-         * a merge result.
-         * @param  {Object} o an object with that the value is merged
-         * @param  {Object} v a value to be merged
-         * @return {Object} a merge result
-         * @protected
-         * @method mergeContent
-         */
-        this.mergeContent = function(o, v) {
-            if (v === null || zebra.isNumber(v) || zebra.isBoolean(v) || zebra.isString(v)) {
-                return v;
-            }
-
-            if (Array.isArray(v)) {
-                if (this.concatArrays === false) {
-                    return v;
-                }
-
-                if (o && Array.isArray(o) === false) {
-                    throw new Error("Array merging type inconsistency: " + o);
-                }
-                return o ? o.concat(v) : v;
-            }
-
-            for (var k in v) {
-                if (v.hasOwnProperty(k)) {
-                    if (k[0] == '?') {
-                        eval("var x=" + k.substring(1).trim());
-
-                        if (x) {
-                            o = this.mergeContent(o, v[k]);
-                        }
-                        continue;
-                    }
-
-                    o[k] = o.hasOwnProperty(k) ? this.mergeContent(o[k], v[k])
-                                               : v[k];  // this.mergeContent({}, v[k]);
-                }
-            }
-            return o;
-        };
-
-        // create, merge to o and return a value by the given
-        // description d that is designed to be assigned to
-        // -- atomic types int string boolean number are returned as is
-        // -- created by the given description array are append to o array
-        // -- structure description (dictionary) are merged to o
-        this.mergeObjWithDesc = function(o, d) {
-            // atomic type should be returned as is
-            if (d === null || zebra.isNumber(d) || zebra.isBoolean(d)) {
-                return d;
-            }
-
-            // array should be merged (concatenated)
-            if (Array.isArray(d)) {
-                var v = [];
-                for(var i=0; i< d.length; i++) v[i] = this.mergeObjWithDesc(null, d[i]);
-                if (this.concatArrays === false) {
-                    return v;
-                }
-
-                if (o && Array.isArray(o) === false) {
-                    throw new Error("Destination has to be array: " + o);
-                }
-                return (o != null) ? o.concat(v) : v;
-            }
-
-            // string is atomic, but  string can encode type other
-            // than string, decode string (if necessary) by calling
-            // decodeStringValue method
-            if (zebra.isString(d)) {
-                if (d[0] == "@") {
-                    // check if the reference point to external JSON
-                    // and load the JSON
-                    if (d[1] == "(" && d[d.length-1] == ")") {
-                        var $this = this,
-                            bag = new (this.$clazz)([
-                                function resolveVar(name) {
-                                    try { return this.$super(name); }
-                                    catch(e) {}
-                                    return $this.resolveVar(name);
-                                },
-
-                                function resolveClass(className) {
-                                    var clazz = this.vars.hasOwnProperty(className) ? this.$super(className)
-                                                                                         : null;
-                                    return (clazz != null) ? clazz
-                                                           : $this.resolveClass(className);
-                                }
-                            ]);
-                        bag.loadByUrl(d.substring(2, d.length-1));
-                        return bag.objects;
-                    }
-
-                    // resolve variable
-                    return this.resolveVar(d.substring(1).trim());
-                }
-
-                return this.decodeStringValue ? this.decodeStringValue(d) : d;
-            }
-
-            // store and cleanup $inherit synthetic field from description.
-            var inh = null;
-            if (d.hasOwnProperty("$inherit")) {
-                inh = d.$inherit;
-                delete d.$inherit;
-            }
-
-            // test whether we have a class definition
-            for (var k in d) {
-                // handle class definition
-                if (k[0] == '$' && d.hasOwnProperty(k)) {
-                    var classname = k.substring(1).trim(), args = d[k];
-                    args = this.mergeObjWithDesc(null, Array.isArray(args) ? args : [ args ]);
-                    delete d[k];
-
-                    if (classname[0] == "*") {
-                        return (function(clazz, args) {
-                            return {
-                                $new : function() {
-                                    return pkg.newInstance(clazz, args);
-                                }
-                            };
-                        })(this.resolveClass(classname.substring(1).trim()), args);
-                    }
-                    return this.mergeObjWithDesc(pkg.newInstance(this.resolveClass(classname), args), d);
-                }
-
-                //!!!!  trust the name of class occurs first what in general
-                //      cannot be guaranteed by JSON spec but we can trust
-                //      since many other third party applications stands
-                //      on it too :)
-                break;
-            }
-
-            // the description is not atomic or array type. it can
-            // be either a number of fields that should be merged
-            // with appropriate field of "o" object, or it can define
-            // how to instantiate an instance of a class. There is
-            // one special case: ".name" property says that object
-            // is created by calling "name" method
-            var v = (o == null         || zebra.isNumber(o) ||
-                    zebra.isBoolean(o) || zebra.isString(o) ||
-                    Array.isArray(o)) ? d : o;
-
-            for (var k in d) {
-                if (d.hasOwnProperty(k)) {
-                    // special field name that says to call method to create a
-                    // value by the given description
-                    if (k[0] == ".") {
-                        var vv = d[k],
-                            mn = k.substring(1).trim(),
-                            m = this.objects[mn] != null ? this.objects[mn] : this[mn];
-
-                        if (m == null || typeof m != 'function') {
-                            throw new Error("Method '" + mn + "' cannot be found");
-                        }
-
-                        if (Array.isArray(vv) === false) {
-                            vv = [ vv ];
-                        }
-                        return m.apply(this.objects, this.mergeObjWithDesc(null, vv));
-                    }
-
-                    // try to find if the destination object already has the property k
-                    var po = o && o.hasOwnProperty(k) ? o[k] : null;
-
-
-                   // v[k] = d[k];
-
-                    var nv = this.mergeObjWithDesc(po, d[k]);
-
-                    if (this.usePropertySetters && k[0] != '.') {
-                        var m  = zebra.getPropertySetter(v, k);
-                        if (m != null) {
-                            if (Array.isArray(nv)) m.apply(v, nv);
-                            else                   m.call(v, nv);
-                            continue;
-                        }
-                    }
-                    v[k] = nv;
-                }
-            }
-
-
-            if (inh !== null) this.inherit(v, inh);
-
-            return v;
-        };
-
-        /**
-         * Called every time the given class name has to be transformed into
-         * the class object (constructor) reference.
-         * @param  {String} className a class name
-         * @return {Function}   a class reference
-         * @method resolveClass
-         */
-        this.resolveClass = function (className) {
-            return this.vars.hasOwnProperty(className) ? this.vars[className]
-                                                       : zebra.Class.forName(className);
-        };
-
-        this.inherit = function(o, pp) {
-            for(var i=0; i < pp.length; i++) {
-                var op = this.objects, n = pp[i].trim(), nn = n.split("."), j = 0;
-                while (j < nn.length) {
-                    op = op[nn[j++]];
-                    if (op == null) {
-                        throw new Error("Wrong inherit path '" + n + "(" + nn[j-1] + ")'");
-                    }
-                }
-
-                for(var k in op) {
-                    if (k[0] != '$' && op.hasOwnProperty(k) && o.hasOwnProperty(k) === false) {
-                        o[k] = op[k];
-                    }
-                }
-            }
-        };
-
-        /**
-         * Load the given JSON content and parse if the given flag is true. The passed
-         * boolean flag controls parsing. The flag is used to load few JSON. Before
-         * parsing the JSONs are merged and than the final result is parsed.
-         * @param  {String} s a JSON content to be loaded
-         * @param  {Boolean} [b] true if the loading has to be completed
-         * @return {zebra.util.Bag} a reference to the bag class instance
-         * @method load
-         */
-        this.load = function (s, b) {
-            if (this.isloaded === true) {
-                throw new Error("Load is done");
-            }
-
-            if (b == null) {
-                b = true;
-            }
-
-            var content = null;
-            try { content = zebra.isString(s) ? JSON.parse(s) : s; }
-            catch(e) {
-                throw new Error("JSON loading error: " + e);
-            }
-
-            this.content = this.mergeContent(this.content, content);
-            if (this.contentLoaded) this.contentLoaded(this.content);
-            if (b === true) this.end();
-            return this;
-        };
-
-        /**
-         * Callback method that can be implemented to be called when
-         * the bag JSON has been completely loaded but not parsed.
-         * The method can be useful for custom bag implementation
-         * that need to perform extra handling over the parsed JSON
-         * content
-         * @param {Object} content a parsed JSON content
-         * @method contentLoaded
-         */
-
-        /**
-         * End loading JSONs and parse final result
-         * @method end
-         */
-        this.end = function() {
-            if (typeof this.isloaded === "undefined") {
-                this.isloaded = true;
-                if (this.content.hasOwnProperty("variables")) {
-                    var vars = this.content.variables;
-                    for(var k in vars) {
-                        var v = vars[k].trim();
-                        this.vars[k.trim()] = (v[0] == '$' ? Class.forName(v.substring(1).trim())
-                                                           : v);
-                    }
-                    delete this.content.variables;
-                }
-                this.objects = this.mergeObjWithDesc(this.objects, this.content);
-            }
-        };
-
-        this.resolveVar = function(name) {
-            if (this.vars.hasOwnProperty(name)) {
-                return this.vars[name];
-            }
-
-            return this.get(name);
-        };
-
-        this.expr = function(e) {
-            var s = "var r="+e;
-            eval(s);
-            return r;
-        };
-
-        this[''] = function (container) {
-            this.vars    = {};
-            this.objects = container == null ? {} : container;
-            this.content = {};
-        };
-    },
-
-    function loadByUrl(url) {
-        return this.loadByUrl(url, true);
-    },
-
-    /**
-     * Load JSON by the given URL
-     * @param  {String} url an URL to a JSON
-     * @param  {Boolean} [b] true if the loading has to be completed
-     * @return {zebra.util.Bag} a reference to the bag class instance
-     * @method loadByUrl
-     */
-    function loadByUrl(url, b) {
-        var p = url.toString();
-        p = p + (p.lastIndexOf("?") > 0 ? "&" : "?") + (new Date()).getTime().toString();
-        return this.load(zebra.io.GET(p), b);
-    }
-]);
-
-/**
- * @for
- */
-
-})(zebra("util"), zebra.Class, zebra.Interface);
-/**
- * The module provides number of classes to help to communicate
- * with remote services and servers by HTTP, JSON-RPC, XML-RPC
- * protocols
- * @module io
- * @requires zebra, util
- */
-
-(function(pkg, Class) {
-
-var HEX = "0123456789ABCDEF";
-
-/**
- * Generate UUID of the given length
- * @param {Integer} [size] the generated UUID length. The default size is 16 characters.
- * @return {String} an UUID
- * @method  ID
- * @api  zebra.io.ID()
- */
-pkg.ID = function UUID(size) {
-    if (typeof size === 'undefined') size = 16;
-    var id = [];
-    for (var i=0; i < size; i++) id[i] = HEX[~~(Math.random() * 16)];
-    return id.join('');
-};
-
-pkg.$sleep = function() {
-    var r = new XMLHttpRequest(),
-        t = (new Date()).getTime().toString(),
-        i = window.location.toString().lastIndexOf("?");
-    r.open('GET', window.location + (i > 0 ? "&" : "?") + t, false);
-    r.send(null);
-};
-
-// !!!
-// b64 is supposed to be used with binary stuff, applying it to utf-8 encoded data can bring to error
-// !!!
-var b64str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-
-/**
- * Encode the given string into base64
- * @param  {String} input a string to be encoded
- * @method  b64encode
- * @api  zebra.io.b64encode()
- */
-pkg.b64encode = function(input) {
-    var out = [], i = 0, len = input.length, c1, c2, c3;
-    if (typeof ArrayBuffer !== "undefined") {
-        if (input instanceof ArrayBuffer) input = new Uint8Array(input);
-        input.charCodeAt = function(i) { return this[i]; };
-    }
-
-    if (Array.isArray(input)) {
-        input.charCodeAt = function(i) { return this[i]; };
-    }
-
-    while(i < len) {
-        c1 = input.charCodeAt(i++) & 0xff;
-        out.push(b64str.charAt(c1 >> 2));
-        if (i == len) {
-            out.push(b64str.charAt((c1 & 0x3) << 4), "==");
-            break;
-        }
-        c2 = input.charCodeAt(i++);
-        out.push(b64str.charAt(((c1 & 0x3) << 4) | ((c2 & 0xF0) >> 4)));
-        if (i == len) {
-            out.push(b64str.charAt((c2 & 0xF) << 2), "=");
-            break;
-        }
-        c3 = input.charCodeAt(i++);
-        out.push(b64str.charAt(((c2 & 0xF) << 2) | ((c3 & 0xC0) >> 6)), b64str.charAt(c3 & 0x3F));
-    }
-    return out.join('');
-};
-
-/**
- * Decode the base64 encoded string
- * @param {String} input base64 encoded string
- * @return {String} a string
- * @api zebra.io.b64decode()
- * @method b64decode
- */
-pkg.b64decode = function(input) {
-    var output = [], chr1, chr2, chr3, enc1, enc2, enc3, enc4;
-    input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
-
-    while ((input.length % 4) !== 0) input += "=";
-
-    for(var i=0; i < input.length;) {
-        enc1 = b64str.indexOf(input.charAt(i++));
-        enc2 = b64str.indexOf(input.charAt(i++));
-        enc3 = b64str.indexOf(input.charAt(i++));
-        enc4 = b64str.indexOf(input.charAt(i++));
-
-        chr1 = (enc1 << 2) | (enc2 >> 4);
-        chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-        chr3 = ((enc3 & 3) << 6) | enc4;
-        output.push(String.fromCharCode(chr1));
-        if (enc3 != 64) output.push(String.fromCharCode(chr2));
-        if (enc4 != 64) output.push(String.fromCharCode(chr3));
-    }
-    return output.join('');
-};
-
-pkg.dateToISO8601 = function(d) {
-    function pad(n) { return n < 10 ? '0'+n : n; }
-    return [ d.getUTCFullYear(), '-', pad(d.getUTCMonth()+1), '-', pad(d.getUTCDate()), 'T', pad(d.getUTCHours()), ':',
-             pad(d.getUTCMinutes()), ':', pad(d.getUTCSeconds()), 'Z'].join('');
-};
-
-// http://webcloud.se/log/JavaScript-and-ISO-8601/
-pkg.ISO8601toDate = function(v) {
-    var regexp = ["([0-9]{4})(-([0-9]{2})(-([0-9]{2})", "(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?",
-                  "(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?"].join(''), d = v.match(new RegExp(regexp)),
-                  offset = 0, date = new Date(d[1], 0, 1);
-
-    if (d[3])  date.setMonth(d[3] - 1);
-    if (d[5])  date.setDate(d[5]);
-    if (d[7])  date.setHours(d[7]);
-    if (d[8])  date.setMinutes(d[8]);
-    if (d[10]) date.setSeconds(d[10]);
-    if (d[12]) date.setMilliseconds(Number("0." + d[12]) * 1000);
-    if (d[14]) {
-        offset = (Number(d[16]) * 60) + Number(d[17]);
-        offset *= ((d[15] == '-') ? 1 : -1);
-    }
-
-    offset -= date.getTimezoneOffset();
-    date.setTime(Number(date) + (offset * 60 * 1000));
-    return date;
-};
-
-pkg.parseXML = function(s) {
-    function rmws(node) {
-        if (node.childNodes !== null) {
-            for (var i = node.childNodes.length; i-->0;) {
-                var child= node.childNodes[i];
-                if (child.nodeType === 3 && child.data.match(/^\s*$/)) {
-                    node.removeChild(child);
-                }
-                if (child.nodeType === 1) rmws(child);
-            }
-        }
-        return node;
-    }
-
-    if (typeof DOMParser !== "undefined") {
-        return rmws((new DOMParser()).parseFromString(s, "text/xml"));
-    }
-    else {
-        for (var n in { "Microsoft.XMLDOM":0, "MSXML2.DOMDocument":1, "MSXML.DOMDocument":2 }) {
-            var p = null;
-            try {
-                p = new ActiveXObject(n);
-                p.async = false;
-            }  catch (e) { continue; }
-            if (p === null) throw new Error("XML parser is not available");
-            p.loadXML(s);
-            return p;
-        }
-    }
-    throw new Error("No XML parser is available");
-};
-
-/**
- * Query string parser class. The class provides number of
- * useful static methods to manipulate with a query string
- * of an URL
- * @class zebra.io.QS
- * @static
- */
-pkg.QS = Class([
-    function $clazz() {
-        /**
-         * Append the given parameters to a query string of the specified URL
-         * @param  {String} url an URL
-         * @param  {Object} obj a dictionary of parameters to be appended to
-         * the URL query string
-         * @return {String} a new URL
-         * @static
-         * @method append
-         */
-        this.append = function (url, obj) {
-            return url + ((obj === null) ? '' : ((url.indexOf("?") > 0) ? '&' : '?') + pkg.QS.toQS(obj, true));
-        };
-
-        /**
-         * Fetch and parse query string of the given URL
-         * @param  {String} url an URL
-         * @return {Object} a parsed query string as a dictionary of parameters
-         * @method parse
-         * @static
-         */
-        this.parse = function(url) {
-            var m = window.location.search.match(/[?&][a-zA-Z0-9_.]+=[^?&=]+/g), r = {};
-            for(var i=0; m && i < m.length; i++) {
-                var l = m[i].split('=');
-                r[l[0].substring(1)] = decodeURIComponent(l[1]);
-            }
-            return r;
-        };
-
-        /**
-         * Convert the given dictionary of parameters to a query string.
-         * @param  {Object} obj a dictionary of parameters
-         * @param  {Boolean} encode say if the parameters values have to be
-         * encoded
-         * @return {String} a query string built from parameters list
-         * @static
-         * @method toQS
-         */
-        this.toQS = function(obj, encode) {
-            if (typeof encode === "undefined") encode = true;
-            if (zebra.isString(obj) || zebra.isBoolean(obj) || zebra.isNumber(obj)) return "" + obj;
-            var p = [];
-            for(var k in obj) {
-                if (obj.hasOwnProperty(k)) p.push(k + '=' + (encode ? encodeURIComponent(obj[k].toString()) : obj[k].toString()));
-            }
-            return p.join("&");
-        };
-    }
-]);
-
-function $Request() {
-    this.responseText = this.statusText = "";
-    this.onreadystatechange = this.responseXml = null;
-    this.readyState = this.status = 0;
-}
-
-$Request.prototype.open = function(method, url, async, user, password) {
-    if (location.protocol.toLowerCase() == "file:" ||
-        (new zebra.URL(url)).host.toLowerCase() == location.host.toLowerCase())
-    {
-        this._request = new XMLHttpRequest();
-        this._xdomain = false;
-
-        var $this = this;
-        this._request.onreadystatechange = function() {
-            $this.readyState = $this._request.readyState;
-            if ($this._request.readyState == 4) {
-                $this.responseText = $this._request.responseText;
-                $this.responseXml  = $this._request.responseXml;
-                $this.status     = $this._request.status;
-                $this.statusText = $this._request.statusText;
-            }
-
-            if ($this.onreadystatechange) {
-                $this.onreadystatechange();
-            }
-        };
-
-        return this._request.open(method, url, (async !== false), user, password);
-    }
-    else {
-        this._xdomain = true;
-        this._async = (async === true);
-        this._request = new XDomainRequest();
-        return this._request.open(method, url);
-    }
-};
-
-$Request.prototype.send = function(data) {
-    if (this._xdomain) {
-        var originalReq = this._request, $this = this;
-
-        //!!!! handler has to be defined after
-        //!!!! open method has been called and all
-        //!!!! four handlers have to be defined
-        originalReq.ontimeout = originalReq.onprogress = function () {};
-
-        originalReq.onerror = function() {
-            $this.readyState = 4;
-            $this.status = 404;
-            if ($this._async && $this.onreadystatechange) {
-                $this.onreadystatechange();
-            }
-        };
-
-        originalReq.onload  = function() {
-            $this.readyState = 4;
-            $this.status = 200;
-
-            if ($this._async && $this.onreadystatechange) {
-                $this.onreadystatechange(originalReq.responseText, originalReq);
-            }
-        };
-
-        //!!! set time out zero to prevent data lost
-        originalReq.timeout = 0;
-
-        if (this._async === false) {
-            originalReq.send(data);
-
-            while (this.status === 0) {
-                pkg.$sleep();
-            }
-
-            this.readyState = 4;
-            this.responseText = originalReq.responseText;
-            return;
-        }
-
-        //!!! make short timeout to make sure bloody IE is ready
-        setTimeout(function () {
-           originalReq.send(data);
-        }, 10);
-    }
-    else  {
-        return this._request.send(data);
-    }
-};
-
-$Request.prototype.abort = function(data) {
-    return this._request.abort();
-};
-
-$Request.prototype.setRequestHeader = function(name, value) {
-    if (this._xdomain) {
-        if (name == "Content-Type") {
-            //!!!
-            // IE8 and IE9 anyway don't take in account the assignment
-            // IE8 throws exception every time a value is assigned to
-            // the property
-            // !!!
-            //this._request.contentType = value;
-            return;
-        }
-        else {
-            throw new Error("Method 'setRequestHeader' is not supported for " + name);
-        }
-    }
-    else {
-        this._request.setRequestHeader(name, value);
-    }
-};
-
-$Request.prototype.getResponseHeader = function(name) {
-    if (this._xdomain) {
-        throw new Error("Method is not supported");
-    }
-    return this._request.getResponseHeader(name);
-};
-
-$Request.prototype.getAllResponseHeaders = function() {
-    if (this._xdomain) {
-        throw new Error("Method is not supported");
-    }
-    return this._request.getAllResponseHeaders();
-};
-
-pkg.getRequest = function() {
-    if (typeof XMLHttpRequest !== "undefined") {
-        var r = new XMLHttpRequest();
-
-        if (zebra.isFF) {
-            r.__send = r.send;
-            r.send = function(data) {
-                // !!! FF can throw NS_ERROR_FAILURE exception instead of
-                // !!! returning 404 File Not Found HTTP error code
-                // !!! No request status, statusText are defined in this case
-                try { return this.__send(data); }
-                catch(e) {
-                    if (!e.message || e.message.toUpperCase().indexOf("NS_ERROR_FAILURE") < 0) {
-                        // exception has to be re-instantiate to be Error class instance
-                        var ee = new Error(e.toString());
-                        throw ee;
-                    }
-                }
-            };
-        }
-
-        // CORS is supported out of box
-        if ("withCredentials" in r) {
-            return r;
-        }
-
-        return new $Request(); // IE
-    }
-
-    throw new Error("Archaic browser detected");
-};
-
-/**
- * HTTP request class. This class provides API to generate different
- * (GET, POST, etc) HTTP requests in sync and async modes
- * @class zebra.io.HTTP
- * @constructor
- * @param {String} url an URL to a HTTP resource
- */
-pkg.HTTP = Class([
-    function(url) {
-        this.url = url;
-        this.header = {};
-    },
-
-    /**
-     * Perform HTTP GET request synchronously or asynchronously with the given
-     * query parameters.
-     * @param {Object} [q] a dictionary of query parameters
-     * @param {Function} [f] a callback function that is called when the HTTP GET
-     * request is done. The method gets a request object as its only argument
-     * and is called in context of the HTTP class instance.
-
-        // synchronous HTTP GET request with the number of
-        // query parameters
-        var result = zebra.io.HTTP("google.com").GET({
-            param1: "var1",
-            param3: "var2",
-            param3: "var3"
-        });
-
-        // asynchronouse GET requests
-        zebra.io.HTTP("google.com").GET(function(request) {
-            // handle HTTP GET response
-            if (request.status == 200) {
-                request.responseText
-            }
-            else {
-                // handle error
-                ...
-            }
-            ...
-        });
-
-
-     * @method GET
-     */
-    function GET(q, f) {
-        if (typeof q == 'function') {
-            f = q;
-            q = null;
-        }
-        return this.SEND("GET", pkg.QS.append(this.url, q), null, f);
-    },
-
-    /**
-     * Perform HTTP POST request synchronously or asynchronously with the given
-     * data to be sent.
-     * @param {String|Object} d a data to be sent by HTTP POST request.  It can be
-     * either a parameters set or a string.
-     * @param {Function} [f] a callback function that is called when HTTP POST
-     * request is done. The method gets a request as its only  argument
-     * and called in context of appropriate HTTP class instance. If the argument
-     * is null the POST request will be done synchronously.
-
-       // asynchronously send POST
-       zebra.io.HTTP("google.com").POST(function(request) {
-           // handle HTTP GET response
-           if (request.status == 200) {
-               request.responseText
-           }
-           else {
-               // handle error
-               ...
-           }
-       });
-
-    * Or you can pass a number of parameters to be sent synchronously by
-    * HTTP POST request:
-
-       // send parameters synchronously by HTTP POST request
-       zebra.io.HTTP("google.com").POST({
-           param1: "val1",
-           param2: "val3",
-           param3: "val3"
-       });
-
-     * @method POST
-     */
-    function POST(d, f) {
-        if (typeof d == 'function') {
-            f = d;
-            d = null;
-        }
-
-        // if the passed data is simple dictionary object encode it as POST
-        // parameters
-        //
-        // TODO: think also about changing content type
-        // "application/x-www-form-urlencoded; charset=UTF-8"
-        if (d != null && zebra.isString(d) == false && d.constructor === Object) {
-            d = pkg.QS.toQS(d, false);
-        }
-
-        return this.SEND("POST", this.url, d, f);
-    },
-
-    /**
-     * Universal HTTP request method that can be used to generate
-     * a HTTP request with any HTTP method to the given URL with
-     * the given data to be sent asynchronously or synchronously
-     * @param {String}   method   an HTTP method (GET,POST,DELETE,PUT, etc)
-     * @param {String}   url      an URL
-     * @param {String}   data     a data to be sent to the given URL
-     * @param {Function} [callback] a callback method to be defined
-     * if the HTTP request has to be sent asynchronously.
-     * @method SEND
-     */
-    function SEND(method, url, data, callback) {
-        //!!! IE9 returns 404 if XDomainRequest is used for the same domain but for different paths.
-        //!!! Using standard XMLHttpRequest has to be forced in this case
-        var r = pkg.getRequest(), $this = this;
-
-        if (callback != null) {
-            r.onreadystatechange = function() {
-                if (r.readyState == 4) {
-                    callback.call($this, r);
-                }
-            };
-        }
-
-        r.open(method, url, callback != null);
-        for(var k in this.header) {
-            r.setRequestHeader(k, this.header[k]);
-        }
-
-        try {
-            r.send(data);
-        }
-        catch(e) {
-            // exception has to be redefined since the type of exception
-            // can be browser dependent
-            if (callback == null) {
-                var ee = new Error(e.toString());
-                ee.request = r;
-                throw ee;
-            }
-            else {
-                r.status = 500;
-                r.statusText = e.toString();
-                callback.call(this, r);
-            }
-        }
-
-        if (callback == null) {
-            if (r.status != 200) {
-
-                // requesting local files can return 0 as a success result
-                if (r.status !== 0 || new zebra.URL(this.url).protocol != "file:") {
-                    var e = new Error("HTTP error " + r.status + " response = '" + r.statusText + "' url = " + url);
-                    e.request = r;
-                    throw e;
-                }
-            }
-            return r.responseText;
-        }
-    }
-]);
-
-/**
- * Shortcut method to perform asynchronous or synchronous HTTP GET requests.
-
-        // synchronous HTTP GET call
-        var res = zebra.io.GET("http://test.com");
-
-        // asynchronous HTTP GET call
-        zebra.io.GET("http://test.com", function(request) {
-            // handle result
-            if (request.status == 200) {
-                request.responseText
-            }
-            else {
-                // handle error
-            }
-            ...
-        });
-
-        // synchronous HTTP GET call with query parameters
-        var res = zebra.io.GET("http://test.com", {
-            param1 : "var1",
-            param1 : "var2",
-            param1 : "var3"
-        });
-
- * @param {String} url an URL
- * @param {Object} [parameters] a dictionary of query parameters
- * @param {Funcion} [callback] a callback function that is called
- * when the GET request is completed. Pass it  to perform request
- * asynchronously
- * @api  zebra.io.GET()
- * @method GET
- */
-pkg.GET = function(url) {
-    if (zebra.isString(url)) {
-        var http = new pkg.HTTP(url);
-        return http.GET.apply(http, Array.prototype.slice.call(arguments, 1));
-    }
-    else {
-        var http = new pkg.HTTP(url.url);
-        if (url.header) {
-            http.header = url.header;
-        }
-        var args = [];
-        if (url.parameters) args.push(url.parameters);
-        if (url.calback) args.push(url.calback);
-        return http.GET.apply(http, args);
-    }
-};
-
-/**
- * Shortcut method to perform asynchronous or synchronous HTTP POST requests.
-
-        // synchronous HTTP POST call
-        var res = zebra.io.POST("http://test.com");
-
-        // asynchronous HTTP POST call
-        zebra.io.POST("http://test.com", function(request) {
-            // handle result
-            if (request.status == 200) {
-
-            }
-            else {
-                // handle error
-                ...
-            }
-            ...
-        });
-
-        // synchronous HTTP POST call with query parameters
-        var res = zebra.io.POST("http://test.com", {
-            param1 : "var1",
-            param1 : "var2",
-            param1 : "var3"
-        });
-
-        // synchronous HTTP POST call with data
-        var res = zebra.io.POST("http://test.com", "data");
-
-        // asynchronous HTTP POST call with data
-        zebra.io.POST("http://test.com", "request", function(request) {
-            // handle result
-            if (request.status == 200) {
-
-            }
-            else {
-                // handle error
-                ...
-            }
-        });
-
- * @param {String} url an URL
- * @param {Object} [parameters] a dictionary of query parameters
- * @param {Function} [callback] a callback function that is called
- * when the GET request is completed. Pass it if to perform request
- * asynchronously
- * @method  POST
- * @api  zebra.io.POST()
- */
-pkg.POST = function(url) {
-    var http = new pkg.HTTP(url);
-    return http.POST.apply(http, Array.prototype.slice.call(arguments, 1));
-};
-
-/**
- * A remote service connector class. It is supposed the class has to be extended with
- * different protocols like RPC, JSON etc. The typical pattern of connecting to
- * a remote service is shown below:
-
-        // create service connector that has two methods "a()" and "b(param1)"
-        var service = new zebra.io.Service("http://myservice.com", [
-            "a", "b"
-        ]);
-
-        // call the methods of the remote service
-        service.a();
-        service.b(10);
-
- * Also the methods of a remote service can be called asynchronously. In this case
- * a callback method has to be passed as the last argument of called remote methods:
-
-        // create service connector that has two methods "a()" and "b(param1)"
-        var service = new zebra.io.Service("http://myservice.com", [
-            "a", "b"
-        ]);
-
-        // call "b" method from the remote service asynchronously
-        service.b(10, function(res) {
-            // handle a result of the remote method execution here
-            ...
-        });
- *
- * Ideally any specific remote service extension of "zebra.io.Service"
- * class has to implement two methods:
-
-    - **encode** to say how the given remote method with passed parameters have
-    to be transformed into a concrete service side protocol (JSON, XML, etc)
-    - **decode** to say how the specific service response has to be converted into
-    JavaScript object
-
- * @class  zebra.io.Service
- * @constructor
- * @param {String} url an URL of remote service
- * @param {Array} methods a list of methods names the remote service provides
- */
-pkg.Service = Class([
-    function(url, methods) {
-        var $this = this;
-        /**
-         * Remote service url
-         * @attribute url
-         * @readOnly
-         * @type {String}
-         */
-        this.url = url;
-
-        /**
-         * Remote service methods names
-         * @attribute methods
-         * @readOnly
-         * @type {Array}
-         */
-
-        if (Array.isArray(methods) === false) methods = [ methods ];
-
-        for(var i=0; i < methods.length; i++) {
-            (function() {
-                var name = methods[i];
-                $this[name] = function() {
-                    var args = Array.prototype.slice.call(arguments);
-                    if (args.length > 0 && typeof args[args.length - 1] == "function") {
-                        var callback = args.pop();
-                        return this.send(url, this.encode(name, args), function(request) {
-                                                                            var r = null;
-                                                                            try {
-                                                                                if (request.status == 200) {
-                                                                                    r = $this.decode(request.responseText);
-                                                                                }
-                                                                                else {
-                                                                                    r = new Error("Status: " + request.status +
-                                                                                                   ", '" + request.statusText + "'");
-                                                                                }
-                                                                            }
-                                                                            catch(e) {  r = e; }
-                                                                            callback(r);
-                                                                       });
-                    }
-                    return this.decode(this.send(url, this.encode(name, args), null));
-                };
-            })();
-        }
-    },
-
-    /**
-     * Transforms the given remote method execution with the specified parameters
-     * to service specific protocol.
-     * @param {String} name a remote method name
-     * @param {Array} args an passed to the remote method arguments
-     * @return {String} a remote service specific encoded string
-     * @protected
-     * @method encode
-     */
-
-    /**
-     * Transforms the given remote method response to a JavaScript
-     * object.
-     * @param {String} name a remote method name
-     * @return {Object} a result of the remote method calling as a JavaScript
-     * object
-     * @protected
-     * @method decode
-     */
-
-     /**
-      * Send the given data to the given url and return a response. Callback
-      * function can be passed for asynchronous result handling.
-      * @protected
-      * @param  {String}   url an URL
-      * @param  {String}   data  a data to be send
-      * @param  {Function} [callback] a callback function
-      * @return {String}  a result
-      * @method  send
-      */
-    function send(url, data, callback) {
-        var http = new pkg.HTTP(url);
-        if (this.contentType != null) {
-            http.header['Content-Type'] = this.contentType;
-        }
-        return http.POST(data, callback);
-    }
-]);
-
-pkg.Service.invoke = function(clazz, url, method) {
-    var rpc = new clazz(url, method);
-    return function() { return rpc[method].apply(rpc, arguments); };
-};
-
-/**
- * The class is implementation of JSON-RPC remote service connector.
-
-        // create JSON-RPC connector to a remote service that
-        // has three remote methods
-        var service = new zebra.io.JRPC("json-rpc.com", [
-            "method1", "method2", "method3"
-        ]);
-
-        // synchronously call remote method "method1"
-        service.method1();
-
-        // asynchronously call remote method "method1"
-        service.method1(function(res) {
-            ...
-        });
-
- * @class zebra.io.JRPC
- * @constructor
- * @param {String} url an URL of remote service
- * @param {Array} methods a list of methods names the remote service provides
- * @extends {zebra.io.Service}
- */
-pkg.JRPC = Class(pkg.Service, [
-    function(url, methods) {
-        this.$super(url, methods);
-        this.version = "2.0";
-        this.contentType = "application/json; charset=ISO-8859-1;";
-    },
-
-    function encode(name, args) {
-        return JSON.stringify({ jsonrpc: this.version, method: name, params: args, id: pkg.ID() });
-    },
-
-    function decode(r) {
-        if (r === null || r.length === 0) {
-            throw new Error("Empty JSON result string");
-        }
-
-        r = JSON.parse(r);
-        if (typeof(r.error) !== "undefined") {
-            throw new Error(r.error.message);
-        }
-
-        if (typeof r.result === "undefined" || typeof r.id === "undefined") {
-            throw new Error("Wrong JSON response format");
-        }
-        return r.result;
-    }
-]);
-
-pkg.Base64 = function(s) { if (arguments.length > 0) this.encoded = pkg.b64encode(s); };
-pkg.Base64.prototype.toString = function() { return this.encoded; };
-pkg.Base64.prototype.decode   = function() { return pkg.b64decode(this.encoded); };
-
-/**
- * The class is implementation of XML-RPC remote service connector.
-
-        // create XML-RPC connector to a remote service that
-        // has three remote methods
-        var service = new zebra.io.XRPC("xmlrpc.com", [
-            "method1", "method2", "method3"
-        ]);
-
-        // synchronously call remote method "method1"
-        service.method1();
-
-        // asynchronously call remote method "method1"
-        service.method1(function(res) {
-            ...
-        });
-
- * @class zebra.io.XRPC
- * @constructor
- * @extends {zebra.io.Service}
- * @param {String} url an URL of remote service
- * @param {Array} methods a list of methods names the remote service provides
- */
-pkg.XRPC = Class(pkg.Service, [
-    function(url, methods) {
-        this.$super(url, methods);
-        this.contentType = "text/xml";
-    },
-
-    function encode(name, args) {
-        var p = ["<?xml version=\"1.0\"?>\n<methodCall><methodName>", name, "</methodName><params>"];
-        for(var i=0; i < args.length;i++) {
-            p.push("<param>");
-            this.encodeValue(args[i], p);
-            p.push("</param>");
-        }
-        p.push("</params></methodCall>");
-        return p.join('');
-    },
-
-    function encodeValue(v, p)  {
-        if (v === null) {
-            throw new Error("Null is not allowed");
-        }
-
-        if (zebra.isString(v)) {
-            v = v.replace("<", "&lt;");
-            v = v.replace("&", "&amp;");
-            p.push("<string>", v, "</string>");
-        }
-        else {
-            if (zebra.isNumber(v)) {
-                if (Math.round(v) == v) p.push("<i4>", v.toString(), "</i4>");
-                else                    p.push("<double>", v.toString(), "</double>");
-            }
-            else {
-                if (zebra.isBoolean(v)) p.push("<boolean>", v?"1":"0", "</boolean>");
-                else {
-                    if (v instanceof Date)  p.push("<dateTime.iso8601>", pkg.dateToISO8601(v), "</dateTime.iso8601>");
-                    else {
-                        if (Array.isArray(v))  {
-                            p.push("<array><data>");
-                            for(var i=0;i<v.length;i++) {
-                                p.push("<value>");
-                                this.encodeValue(v[i], p);
-                                p.push("</value>");
-                            }
-                            p.push("</data></array>");
-                        }
-                        else {
-                            if (v instanceof pkg.Base64) p.push("<base64>", v.toString(), "</base64>");
-                            else {
-                                p.push("<struct>");
-                                for(var k in v) {
-                                    if (v.hasOwnProperty(k)) {
-                                        p.push("<member><name>", k, "</name><value>");
-                                        this.encodeValue(v[k], p);
-                                        p.push("</value></member>");
-                                    }
-                                }
-                                p.push("</struct>");
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    },
-
-    function decodeValue(node) {
-        var tag = node.tagName.toLowerCase();
-        if (tag == "struct")
-        {
-             var p = {};
-             for(var i=0; i < node.childNodes.length; i++) {
-                var member = node.childNodes[i],  // <member>
-                    key    = member.childNodes[0].childNodes[0].nodeValue.trim(); // <name>/text()
-                p[key] = this.decodeValue(member.childNodes[1].childNodes[0]);   // <value>/<xxx>
-            }
-            return p;
-        }
-        if (tag == "array") {
-            var a = [];
-            node = node.childNodes[0]; // <data>
-            for(var i=0; i < node.childNodes.length; i++) {
-                a[i] = this.decodeValue(node.childNodes[i].childNodes[0]); // <value>
-            }
-            return a;
-        }
-
-        var v = node.childNodes[0].nodeValue.trim();
-        switch (tag) {
-            case "datetime.iso8601": return pkg.ISO8601toDate(v);
-            case "boolean": return v == "1";
-            case "int":
-            case "i4":     return parseInt(v, 10);
-            case "double": return Number(v);
-            case "base64":
-                var b64 = new pkg.Base64();
-                b64.encoded = v;
-                return b64;
-            case "string": return v;
-        }
-        throw new Error("Unknown tag " + tag);
-    },
-
-    function decode(r) {
-        var p = pkg.parseXML(r), c = p.getElementsByTagName("fault");
-        if (c.length > 0) {
-            var err = this.decodeValue(c[0].getElementsByTagName("struct")[0]);
-            throw new Error(err.faultString);
-        }
-        c = p.getElementsByTagName("methodResponse")[0];
-        c = c.childNodes[0].childNodes[0]; // <params>/<param>
-        if (c.tagName.toLowerCase() === "param") {
-            return this.decodeValue(c.childNodes[0].childNodes[0]); // <value>/<xxx>
-        }
-        throw new Error("incorrect XML-RPC response");
-    }
-]);
-
-/**
- * Shortcut to call the specified method of a XML-RPC service.
- * @param  {String} url an URL
- * @param  {String} method a method name
- * @api zebra.io.XRPC.invoke()
- * @method invoke
- */
-pkg.XRPC.invoke = function(url, method) {
-    return pkg.Service.invoke(pkg.XRPC, url, method);
-};
-
-/**
- * Shortcut to call the specified method of a JSON-RPC service.
- * @param  {String} url an URL
- * @param  {String} method a method name
- * @api zebra.io.JRPC.invoke()
- * @method invoke
- */
-pkg.JRPC.invoke = function(url, method) {
-    return pkg.Service.invoke(pkg.JRPC, url, method);
-};
-
-/**
- * @for
- */
-
-})(zebra("io"), zebra.Class);
-
-/**
- * Collection of variouse data models. 
- * @module data
- * @main 
- * @requires zebra, util
- */
-
-(function(pkg, Class, Interface) {
-
-pkg.descent = function descent(a, b) {
-    if (a == null) return 1;
-    return (zebra.isString(a)) ? a.localeCompare(b) : a - b;
-};
-
-pkg.ascent = function ascent(a, b) {
-    if (b == null) return 1;
-    return (zebra.isString(b)) ? b.localeCompare(a) : b - a;
-};
-
-
-/**
- * Text model interface
- * @class zebra.data.TextModel
- * @interface
-*/
-
-/**
- * Get the given string line stored in the model
- * @method getLine  
- * @param  {Integer} line a line number
- * @return {String}  a string line
- */
-
-/**
- * Get wrapped by the text model original text string 
- * @method getValue
- * @return {String} an original text
- */
-
-/**
- * Get number of lines stored in the text model
- * @method getLines
- * @return {Integer} a number of lines
- */
-
-/**
- * Get number of characters stored in the model 
- * @method getTextLength
- * @return {Integer} a number of characters
- */
-
-/**
- * Write the given string in the text model starting from the
- * specified offset
- * @method write
- * @param  {String} s a string to be written into the text model 
- * @param  {Integer} offset an offset starting from that the passed
- * string has to be written into the text model
- */
-
-/**
- * Remove substring from the text model. 
- * @method remove
- * @param  {Integer} offset an offset starting from that a substring 
- * will be removed 
- * @param  {Integer} size a size of a substring to be removed 
- */
-
-/**
- * Fill the text model with the given text  
- * @method  setValue
- * @param  {String} text a new text to be set for the text model
- */
-
-/**
- * Fired when the text model has been updated: a string has been 
- * inserted or removed
-
-        text.bind(function (src, b, off, len, startLine, lines) {
-            ...
-        });
-
- *
- * @event textUpdated 
- * @param {zebra.data.Text} src a text model that triggers the event
- * @param {Boolean}  b a flag that is true if a string has been written 
- * in the text model, false if the model substring has been removed
- * @param {Integer}  off an offset starting form that the text update 
- * took place
- * @param {Integer}  len a length of text that has been affected by 
- * the text model update
- * @param {Integer}  startLine a first line that has been affected 
- * by the text model update
- * @param {Integer}  lines a number of lines that has been affected 
- * by the text model update
- */
-pkg.TextModel = Interface();
-
-
-var MB = zebra.util, oobi = "Index is out of bounds: ";
-
-function Line(s) {
-    this.s = s;
-    this.l = 0;
-}
-
-//  toString for array.join method
-Line.prototype.toString = function() { return this.s; };
-
-pkg.TextModelListeners = MB.ListenersClass("textUpdated");
-
-/**
- * Multi-lines text model implementation
- * @class zebra.data.Text
- * @param  {String}  [s] the specified text the model has to be filled
- * @constructor
- * @extends zebra.data.TextModel
- */
-pkg.Text = Class(pkg.TextModel, [
-    function $prototype() {
-        this.textLength = 0;
-
-        this.getLnInfo = function(lines, start, startOffset, o){
-            for(; start < lines.length; start++){
-                var line = lines[start].s;
-                if (o >= startOffset && o <= startOffset + line.length){
-                    return [start, startOffset];
-                }
-                startOffset += (line.length + 1);
-            }
-            return [];
-        };
-
-        this.setExtraChar = function(i,ch){ this.lines[i].l = ch; };
-        
-        this.getExtraChar = function (i) { return this.lines[i].l; };
-
-        this.getLine = function(line) { return this.lines[line].s; };
-
-        this.getValue = function(){ return this.lines.join("\n"); };
-
-        this.getLines = function () { return this.lines.length; };
-        
-        this.getTextLength = function() { return this.textLength; };
-
-        this.write = function (s, offset){
-            var slen = s.length,
-                info = this.getLnInfo(this.lines, 0, 0, offset),
-                line    = this.lines[info[0]].s,
-                j       = 0,
-                lineOff = offset - info[1],
-                tmp = [line.substring(0, lineOff), s, line.substring(lineOff)].join('');
-
-            for(; j < slen && s[j] != '\n'; j++);
-
-            if(j >= slen) {
-                this.lines[info[0]].s = tmp;
-                j = 1;
-            }
-            else {
-                this.lines.splice(info[0], 1);
-                j = this.parse(info[0], tmp, this.lines);
-            }
-            this.textLength += slen;
-            this._.textUpdated(this, true, offset, slen, info[0], j);
-        };
-
-        this.remove = function (offset,size){
-            var i1   = this.getLnInfo(this.lines, 0, 0, offset),
-                i2   = this.getLnInfo(this.lines, i1[0], i1[1], offset + size),
-                l2   = this.lines[i2[0]].s,
-                l1   = this.lines[i1[0]].s,
-                off1 = offset - i1[1], off2 = offset + size - i2[1],
-                buf  = [l1.substring(0, off1), l2.substring(off2)].join('');
-
-            if (i2[0] == i1[0]) this.lines.splice(i1[0], 1, new Line(buf));
-            else {
-                this.lines.splice(i1[0], i2[0] - i1[0] + 1);
-                this.lines.splice(i1[0], 0, new Line(buf));
-            }
-            this.textLength -= size;
-            this._.textUpdated(this, false, offset, size, i1[0], i2[0] - i1[0] + 1);
-        };
-
-        this.parse = function (startLine, text, lines){
-            var size = text.length, prevIndex = 0, prevStartLine = startLine;
-            for(var index = 0; index <= size; prevIndex = index, startLine++){
-                var fi = text.indexOf("\n", index);
-                index = (fi < 0 ? size : fi);
-                this.lines.splice(startLine, 0, new Line(text.substring(prevIndex, index)));
-                index++;
-            }
-            return startLine - prevStartLine;
-        };
-
-        this.setValue = function(text){
-            if (text == null) {
-                throw new Error("Invalid null string");
-            }
-            var old = this.getValue();
-            if (old !== text) {
-                if (old.length > 0) {
-                    var numLines = this.getLines(), txtLen = this.getTextLength();
-                    this.lines.length = 0;
-                    this.lines = [ new Line("") ];
-                    this._.textUpdated(this, false, 0, txtLen, 0, numLines);
-                }
-
-                this.lines = [];
-                this.parse(0, text, this.lines);
-                this.textLength = text.length;
-                this._.textUpdated(this, true, 0, this.textLength, 0, this.getLines());
-            }
-        };
-
-        this[''] = function(s){
-            this.lines = [ new Line("") ];
-            this._ = new pkg.TextModelListeners();
-            this.setValue(s == null ? "" : s);
-        };
-    }
-]);
-
-/**
- * Single line text model implementation
- * @param  {String}  [s] the specified text the model has to be filled
- * @param  {Integer} [max] the specified maximal text length
- * @constructor
- * @class zebra.data.SingleLineTxt
- * @extends zebra.data.TextModel
- */
-pkg.SingleLineTxt = Class(pkg.TextModel, [
-    function $prototype() {
-        /**
-         * Maximal text length. -1 means the text is not restricted 
-         * regarding its length. 
-         * @attribute maxLen
-         * @type {Integer}
-         * @default -1
-         * @readOnly
-         */
-
-        this.setExtraChar = function(i,ch) {
-            this.extra = ch;
-        };
-        
-        this.getExtraChar = function(i){
-            return this.extra;
-        };
-
-        this.getValue = function(){
-            return this.buf;
-        };
-
-        /**
-         * Get number of lines stored in the text model. The model 
-         * can have only one line
-         * @method getLines
-         * @return {Integer} a number of lines
-         */
-        this.getLines = function(){
-            return 1;
-        };
-
-        this.getTextLength = function(){
-            return this.buf.length;
-        };
-
-        this.getLine = function(line){ 
-            if (line !== 0) {
-                throw new Error(oobi + line);
-            }
-            return this.buf;
-        };
-
-        this.write = function(s,offset){
-            var buf = this.buf, j = s.indexOf("\n");
-            if (j >= 0) s = s.substring(0, j);
-            var l = (this.maxLen > 0 && (buf.length + s.length) >= this.maxLen) ? this.maxLen - buf.length
-                                                                                : s.length;
-            if (l!==0) {
-                this.buf = [buf.substring(0, offset), s.substring(0, l), buf.substring(offset)].join('');
-                if (l > 0) this._.textUpdated(this, true, offset, l, 0, 1);
-            }
-        };
-
-        this.remove = function(offset,size){
-            this.buf = [ this.buf.substring(0, offset), this.buf.substring(offset + size)].join('');
-            this._.textUpdated(this, false, offset, size, 0, 1);
-        };
-
-        this.setValue = function(text){
-            if (text == null) {
-                throw new Error("Invalid null string");
-            }
-
-            var i = text.indexOf('\n');
-            if (i >= 0) text = text.substring(0, i);
-            if(this.buf == null || this.buf !== text) {
-                if (this.buf != null && this.buf.length > 0) this._.textUpdated(this, false, 0, this.buf.length, 0, 1);
-                if (this.maxLen > 0 && text.length > this.maxLen) text = text.substring(0, this.maxLen);
-                this.buf = text;
-                this._.textUpdated(this, true, 0, text.length, 0, 1);
-            }
-        };
-
-        /**
-         * Set the given maximal length the text can have
-         * @method setMaxLength
-         * @param  {Integer} max a maximal length of text
-         */
-        this.setMaxLength = function (max){
-            if(max != this.maxLen){
-                this.maxLen = max;
-                this.setValue("");
-            }
-        };
-
-        this[''] = function (s, max) {   
-            this.maxLen = max == null ? -1 : max;
-            this.buf = null;
-            this.extra = 0;
-            this._ = new pkg.TextModelListeners();
-            this.setValue(s == null ? "" : s);
-        };
-    }
-]);
-
-pkg.ListModelListeners = MB.ListenersClass("elementInserted", "elementRemoved", "elementSet");
-
-/**
- * List model class
- * @param  {Array} [a] an array the list model has to be initialized with
- * @example
- 
-      // create list model that contains three integer elements
-      var l = new zebra.data.ListModel([1,2,3]);
- 
- * @constructor 
- * @class zebra.data.ListModel
- */
-
- /**
-  * Fired when a new element has been added to the list model 
-
-     list.bind(function elementInserted(src, o, i) {
-         ...
-     });
-
-  * @event elementInserted 
-  * @param {zebra.data.ListModel} src a list model that triggers the event
-  * @param {Object}  o an element that has been added
-  * @param {Integer} i an index at that the new element has been added
-  */
-
- /**
-  * Fired when an element has been removed from the list model 
-
-     list.bind(function elementRemoved(src, o, i) {
-         ...
-     });
-
-  * @event elementRemoved
-  * @param {zebra.data.ListModel} src a list model that triggers the event
-  * @param {Object}  o an element that has been removed
-  * @param {Integer} i an index at that the element has been removed
-  */
-
- /**
-  * Fired when an element has been re-set 
-
-     list.bind(function elementSet(src, o, pe, i) {
-         ...
-     });
-
-  * @event elementSet
-  * @param {zebra.data.ListModel} src a list model that triggers the event
-  * @param {Object}  o an element that has been set
-  * @param {Object}  pe a previous element 
-  * @param {Integer} i an index at that the element has been re-set
-  */
-
-pkg.ListModel = Class([
-    function $prototype() {
-        /**
-         * Get an item stored at the given location in the list 
-         * @method get
-         * @param  {Integer} i an item location
-         * @return {object}  a list item
-         */
-        this.get = function(i) {
-            if (i < 0 || i >= this.d.length) {
-                throw new Error(oobi + i);
-            }
-            return this.d[i];
-        };
-
-        /**
-         * Add the given item to the end of the list 
-         * @method add
-         * @param  {Object} o an item to be added
-         */
-        this.add = function(o) {
-            this.d.push(o);
-            this._.elementInserted(this, o, this.d.length - 1);
-        };
-
-        /**
-         * Remove all elements from the list model
-         * @method removeAll
-         */
-        this.removeAll = function() {
-            var size = this.d.length;
-            for(var i = size - 1; i >= 0; i--) this.removeAt(i);
-        };
-
-        /**
-         * Remove an element at the given location of the list model
-         * @method removeAt
-         * @param {Integer} i a location of an element to be removed from the list
-         */
-        this.removeAt = function(i) {
-            var re = this.d[i];
-            this.d.splice(i, 1);
-            this._.elementRemoved(this, re, i);
-        };
-
-        /**
-         * Remove the given element from the list
-         * @method remove
-         * @param {Object} o an element to be removed from the list
-         */
-        this.remove = function(o) {
-            for(var i = 0;i < this.d.length; i++ ){
-                if (this.d[i] === o) this.removeAt(i);
-            }
-        };
-
-        /**
-         * Insert the given element into the given position of the list
-         * @method insert
-         * @param {Object} o an element to be inserted into the list
-         * @param {Integer} i a position at which the element has to be inserted into the list 
-         */
-        this.insert = function(o,i){
-            if(i < 0 || i >= this.d.length) {
-                throw new Error(oobi + i);
-            }
-            this.d.splice(i, 0, o);
-            this._.elementInserted(this, o, i);
-        };
-
-        /**
-         * Get number of elements stored in the list
-         * @method count
-         * @return {Integer} a number of element in the list
-         */
-        this.count = function () {
-            return this.d.length;
-        };
-
-        /**
-         * Set the new element at the given position
-         * @method set
-         * @param  {Object} o a new element to be set as the list element at the given position
-         * @param  {Integer} i a position
-         * @return {Object}  previous element that was stored at the given position
-         */
-        this.set = function (o,i){
-            if (i < 0 || i >= this.d.length) {
-                throw new Error(oobi + i);
-            }
-            var pe = this.d[i];
-            this.d[i] = o;
-            this._.elementSet(this, o, pe, i);
-            return pe;
-        };
-
-        /**
-         * Check if the element is in the list
-         * @method contains
-         * @param  {Object} o an element to be checked 
-         * @return {Boolean} true if the element is in the list  
-         */
-        this.contains = function (o){
-            return this.indexOf(o) >= 0;
-        };
-
-        /**
-         * Get position the given element is stored in the list
-         * @method indexOf
-         * @param  {Object} o an element 
-         * @return {Integer} the element position. -1 if the element cannot be found in the list 
-         */
-        this.indexOf = function(o){
-            return this.d.indexOf(o);
-        };
-
-        this[''] = function() {
-            this._ = new pkg.ListModelListeners();
-            this.d = (arguments.length === 0) ? [] : arguments[0];
-        };
-    }
-]);
-
-/**
- * Tree model item class. The structure is used by tree model to store 
- * tree items values, parent and children item references.
- * @class zebra.data.Item
- * @param  {Object} [v] the item value
- * @constructor 
- */
-var Item = pkg.Item = Class([
-    function $prototype() {
-        this[''] = function(v) {
-            /**
-             * Array of children items of the item element
-             * @attribute kids
-             * @type {Array}
-             * @default []
-             * @readOnly
-             */
-            this.kids = [];
-
-            /**
-             * Value stored with this item
-             * @attribute value
-             * @type {Object}
-             * @default null
-             * @readOnly
-             */
-            this.value = v;
-
-            /**
-             * Reference to a parent item
-             * @attribute parent
-             * @type {zebra.data.Item}
-             * @default undefined
-             * @readOnly
-             */
-        };
-    }
-]);
-
-
-pkg.find = function(root, value, cb) {
-    if (root.value === value) {
-        if (cb.call(null, root) === true) return true;
-    }
-
-    for (var i = 0; i < root.kids.length; i++) {
-        if (pkg.find(root.kids[i], value, cb)) return true;
-    }
-};
-
-pkg.TreeModelListeners = MB.ListenersClass("itemModified", "itemRemoved", "itemInserted");
-
-
-/**
- * Tree model class. The class is simple and handy way to keep hierarchical structure. 
- * @constructor
- * @param  {zebra.data.Item|Object} [r] a root item. As the argument you can pass "zebra.data.Item" or
- * a JavaType object. In the second case you can describe the tree as follow:
-
-     // create tree model initialized with tree structure passed as 
-     // special formated JavaScript object   
-     var tree = new zebra.data.TreeModel({ value:"Root",
-                                          kids: [
-                                              "Root kid 1",
-                                              { 
-                                                value: "Root kid 2",
-                                                kids:  [ "Kid of kid 2"] 
-                                              }
-                                          ]});
-
- * @class zebra.data.TreeModel
- */
-
-/**
- * Fired when the tree model item value has been updated. 
-
-    tree.bind(function itemModified(src, item) {
-        ...
-    });
-
- * @event itemModified 
- * @param {zebra.data.TreeModel} src a tree model that triggers the event
- * @param {zebra.data.Item}  item an item whose value has been updated
- */
-
-/**
- * Fired when the tree model item has been removed
-
-    tree.bind(function itemRemoved(src, item) {
-       ...
-    });
-
- * @event itemRemoved
- * @param {zebra.data.TreeModel} src a tree model that triggers the event
- * @param {zebra.data.Item}  item an item that has been removed from the tree model
- */
-
-/**
- * Fired when the tree model item has been inserted into the model
-
-    tree.bind(function itemInserted(src, item) {
-       ...
-    });
-
- * @event itemInserted
- * @param {zebra.data.TreeModel} src a tree model that triggers the event
- * @param {zebra.data.Item}  item an item that has been inserted into the tree model
- */
-
-pkg.TreeModel = Class([
-    function $clazz() {
-        this.create = function(r, p) {
-            var item = new Item(r.hasOwnProperty("value")? r.value : r);
-            item.parent = p;
-            if (r.hasOwnProperty("kids")) {
-                for(var i = 0; i < r.kids.length; i++) {
-                    item.kids[i] = pkg.TreeModel.create(r.kids[i], item);
-                }
-            }
-            return item;
-        };
-    },
-
-    function $prototype() {
-        this.iterate = function(r, f) {
-            var res = f.call(this, r);
-            if (res === 1 || res === 2) return r;
-
-            for (var i = 0; i < r.kids.length; i++) {
-                res = this.iterate(r.kids[i], f);
-                if (res === 2) return res;
-            }
-        };
-
-        /**
-         * Update a value of the given tree model item with the new one
-         * @method setValue
-         * @param  {zebra.data.Item} item an item whose value has to be updated
-         * @param  {[type]} v   a new item value
-         */
-        this.setValue = function(item, v){
-            item.value = v;
-            this._.itemModified(this, item);
-        };
-
-        /**
-         * Add the new item to the tree model as a children element of the given parent item
-         * @method add
-         * @param  {zebra.data.Item} to a parent item to which the new item has to be added
-         * @param  {Object|zebra.data.Item} an item or value of the item to be
-         * added to the parent item of the tree model 
-         */
-        this.add = function(to,item){
-            this.insert(to, item, to.kids.length);
-        };
-
-        /**
-         * Insert the new item to the tree model as a children element at the 
-         * given position of the parent element
-         * @method insert
-         * @param  {zebra.data.Item} to a parent item to which the new item 
-         * has to be inserted
-         * @param  {Object|zebra.data.Item} an item or value of the item to be
-         * inserted to the parent item
-         * @param  {Integer} i a position the new item has to be inserted into
-         * the parent item
-         */
-        this.insert = function(to,item,i){
-            if (i < 0 || to.kids.length < i) throw new Error(oobi + i);
-            if (zebra.isString(item)) {
-                item = new Item(item);
-            }
-            to.kids.splice(i, 0, item);
-            item.parent = to;
-            this._.itemInserted(this, item);
-
-            // !!!
-            // it is necessary to analyze if the inserted item has kids and
-            // generate inserted event for all kids recursively
-        };
-
-        /**
-         * Remove the given item from the tree model
-         * @method remove
-         * @param  {zebra.data.Item} item an item to be removed from the tree model
-         */
-        this.remove = function(item){
-            if (item == this.root) {
-                this.root = null;
-            }
-            else {
-                for(var i=0; i < item.kids.length; i++) {
-                    this.remove(item.kids[i]);
-                }
-                item.parent.kids.splice(item.parent.kids.indexOf(item), 1);
-                item.parent = null;
-            }
-
-            this._.itemRemoved(this, item);
-        };
-
-        /**
-         * Remove all children items from the given item of the tree model
-         * @method removeKids
-         * @param  {zebra.data.Item} item an item from that all children items have to be removed
-         */
-        this.removeKids = function(item){
-            for(var i = 0; i < items.kids.length; i++) this.remove(items[i]);
-        };
-
-        this[''] = function(r) {
-            if (arguments.length === 0) r = new Item();
-
-            /**
-             * Reference to the tree model root item
-             * @attribute root
-             * @type {zebra.data.Item}
-             * @readOnly
-             */
-            this.root = zebra.instanceOf(r, Item) ? r : pkg.TreeModel.create(r);
-            this._ = new pkg.TreeModelListeners();
-        };
-    }
-]);
-
-pkg.MatrixListeners = MB.ListenersClass("matrixResized", "cellModified",
-                                        "matrixSorted", "matrixRowInserted",
-                                        "matrixColInserted");
-
-/**
- *  Matrix model class. 
- *  @constructor
- *  @param  {Array of Array} [data] the given data 
- *  @param  {Integer} [rows] a number of rows
- *  @param  {Integer} [cols] a number of columns
- *  @class zebra.data.Matrix
- */
-pkg.Matrix = Class([
-    function $prototype() {        
-        /**
-         * Fired when the matrix model size (number of rows or columns) is changed. 
-          
-         matrix.bind(function matrixResized(src, pr, pc) {
-            ...
-         });
-          
-         * @event matrixResized 
-         * @param {zebra.data.Matrix} src a matrix that triggers the event
-         * @param {Integer}  pr a previous number of rows 
-         * @param {Integer}  pc a previous number of columns 
-         */
-
-         /**
-          * Fired when the matrix model cell has been updated. 
-          
-          matrix.bind(function cellModified(src, row, col, old) {
-             ...
-          });
-
-          * @event cellModified 
-          * @param {zebra.data.Matrix} src a matrix that triggers the event
-          * @param {Integer}  row an updated row 
-          * @param {Integer}  col an updated column 
-          * @param {Object}  old a previous cell value
-          */
-
-          /**
-           * Fired when the matrix data has been re-ordered. 
-           
-           matrix.bind(function matrixSorted(src, sortInfo) {
-              ...
-           });
-
-           * @event matrixSorted
-           * @param {zebra.data.Matrix} src a matrix that triggers the event
-           * @param {Object}  sortInfo a new data order info. The information 
-           * contains:
-           *
-           *      { 
-           *         func: sortFunction,
-           *         name: sortFunctionName,
-           *         col : sortColumn
-           *      }   
-           * 
-           */
-       
-        /**
-         * Get a matrix model cell value at the specified row and column
-         * @method get
-         * @param  {Integer} row a cell row
-         * @param  {Integer} col a cell column
-         * @return {Object}  matrix model cell value
-         */
-        this.get = function (row,col){
-            if (row < 0 || row >= this.rows || col < 0 || col >= this.cols) {
-                throw new Error("Row of col is out of bounds: " + row + "," + col);
-            }
-            return this.objs[row][col];
-        };
-
-        /**
-         * Set the specified by row and column cell value. If the specified row or column
-         * is greater than the matrix model has the model size will be adjusted to new one.
-         * @method put
-         * @param  {Integer} row a cell row
-         * @param  {Integer} col a cell column
-         * @param  {Object} obj a new cell value
-         */
-        this.put = function(row,col,obj){
-            var nr = this.rows, nc = this.cols;
-            if (row >= nr) nr += (row - nr + 1);
-            if (col >= nc) nc += (col - nc + 1);
-
-            this.setRowsCols(nr, nc);
-            var old = this.objs[row] ? this.objs[row][col] : undefined;
-            if (obj != old) {
-                this.objs[row][col] = obj;
-                this._.cellModified(this, row, col, old);
-            }
-        };
-
-        /**
-         * Set the specified by index cell value. The index identifies cell starting from [0,0]
-         * cell till [rows,columns]. If the index is greater than size of model the model size
-         * will be adjusted to new one.
-         * @method puti
-         * @param  {Integer} i a cell row
-         * @param  {Object} obj a new cell value
-         */
-        this.puti = function(i, obj){
-            this.put( ~~(i / this.cols),
-                         i % this.cols, obj);
-        };
-
-        /**
-         * Set the given number of rows and columns the model has to have.
-         * @method setRowsCols
-         * @param  {Integer} rows a new number of rows
-         * @param  {Integer} cols a new number of columns
-         */
-        this.setRowsCols = function(rows, cols){
-            if (rows != this.rows || cols != this.cols){
-                var pc = this.cols,
-                    pr = this.rows;
-
-                this.rellocate(rows, cols);
-                this.cols = cols;
-                this.rows = rows;
-                this._.matrixResized(this, pr, pc);
-            }
-        };
-
-        /**
-         * Reallocate the matrix model space with the new number of rows and columns 
-         * @method re-locate.
-         * @private
-         * @param  {Integer} r a new number of rows
-         * @param  {Integer} c a new number of columns
-         */
-        this.rellocate = function(r, c) {
-            if (r >= this.rows) {
-                for(var i=this.rows; i < r; i++) {
-                    this.objs[i] = [];
-                }
-            }
-        };
-
-         /**
-         * Set the given number of rows the model has to have.
-         * @method setRows
-         * @param  {Integer} rows a new number of rows
-         */
-        this.setRows = function(rows) {
-            this.setRowsCols(rows, this.cols);
-        };
-
-        /**
-         * Set the given number of columns the model has to have.
-         * @method setCols
-         * @param  {Integer} cols a new number of columns
-         */
-        this.setCols = function(cols) {
-            this.setRowsCols(this.rows, cols);
-        };
-
-        /**
-         * Remove specified number of rows from the model starting
-         * from the given row.
-         * @method removeRows
-         * @param  {Integer}  begrow a start row 
-         * @param  {Integer} count  a number of rows to be removed
-         */
-        this.removeRows = function(begrow,count){
-            if (begrow < 0 || begrow + count > this.rows) {
-                throw new Error();
-            }
-
-            for(var i = (begrow + count);i < this.rows; i++, begrow++){
-                for(var j = 0;j < this.cols; j ++ ){
-                    this.objs[begrow][j] = this.objs[i][j];
-                    this.objs[i][j] = null;
-                }
-            }
-
-            this.rows -= count;
-            this._.matrixResized(this, this.rows + count, this.cols);
-        };
-
-        /**
-         * Remove specified number of columns from the model starting
-         * from the given column.
-         * @method removeCols
-         * @param  {Integer}  begcol a start column
-         * @param  {Integer} count  a number of columns to be removed
-         */
-        this.removeCols = function (begcol,count){
-            if (begcol < 0 || begcol + count > this.cols) {
-                throw new Error();
-            }
-            
-            for(var i = (begcol + count);i < this.cols; i++, begcol++){
-                for(var j = 0;j < this.rows; j++){
-                    this.objs[j][begcol] = this.objs[j][i];
-                    this.objs[j][i] = null;
-                }
-            }
-
-            this.cols -= count;
-            this._.matrixResized(this, this.rows, this.cols + count);
-        };
-
-        this.insertRows = function(row, count) {
-            if (arguments.length === 1) count = 1;
-            for(var i=0; i < count; i++) {
-                this.objs.splice(row, 0, []);
-                this._.matrixRowInserted(this, row + i);
-            }
-            this.rows += count;
-            this._.matrixResized(this, this.rows - count, this.cols);
-        };
-
-        this.insertCols = function(col, count) {
-            if (arguments.length === 1) count = 1;
-            for(var j=0; j < count; j++) {
-                for(var i=0; i < this.rows; i++) {
-                    this.objs[i].splice(col, 0, undefined);
-                }
-                this._.matrixColInserted(this, col + j);
-            }
-            this.cols += count;
-            this._.matrixResized(this, this.rows, this.cols - count);
-        };
-
-        /**
-         * Sort the given column of the matrix model.
-         * @param  {Integer} col a column to be re-ordered
-         * @param  {Function} [f] an optional sort function. The name of the function 
-         * is grabbed to indicate type of the sorting the method does. For instance:
-         * "descent", "ascent".  
-         * @method sortCol
-         */
-        this.sortCol = function(col, f) {
-            if (f == null) {
-                f = pkg.descent;
-            }
-
-            this.objs.sort(function(a, b) {
-                return f(a[col],b[col]);
-            });
-
-            this._.matrixSorted(this, { col : col,
-                                        func: f,
-                                        name: zebra.$FN(f).toLowerCase() });
-        };
-
-        this[''] = function() {
-            /**
-             * Number of rows in the matrix model
-             * @attribute rows
-             * @type {Integer}
-             * @readOnly
-             */
-
-            /**
-             * Number of columns in the matrix model
-             * @attribute cols
-             * @type {Integer}
-             * @readOnly
-             */
-
-            this._ = new pkg.MatrixListeners();
-            if (arguments.length == 1) {
-                this.objs = arguments[0];
-                this.cols = (this.objs.length > 0) ? this.objs[0].length : 0;
-                this.rows = this.objs.length;
-            }
-            else {
-                this.objs = [];
-                this.rows = this.cols = 0;
-                if (arguments.length > 1) {
-                    this.setRowsCols(arguments[0], arguments[1]);
-                }
-            }
-        };
-    }
-]);
-
-/**
- * @for
- */
-
-})(zebra("data"), zebra.Class, zebra.Interface);
 (function(pkg) {
     pkg.$canvases = [];
 
@@ -7189,6 +7196,7 @@ pkg.Matrix = Class([
         }
     ]);
 })(zebra("ui"));
+
 (function(pkg, Class) {
 
 /**
@@ -12710,6 +12718,7 @@ zebra.ready(
  */
 
 })(zebra("ui"), zebra.Class);
+
 (function(pkg, Class) {
 
 // redefine configuration
@@ -18630,6 +18639,7 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
 
 })(zebra("ui"), zebra.Class);
 
+
 (function(pkg, Class) {
 
 /**
@@ -19529,6 +19539,7 @@ pkg.PassTextField = Class(pkg.TextField, [
  */
 
 })(zebra("ui"), zebra.Class);
+
 (function(pkg, Class) {
 
 /**
@@ -21378,6 +21389,7 @@ pkg.ComboArrowView = Class(pkg.View, [
  */
 
 })(zebra("ui"), zebra.Class);
+
 (function(pkg, Class) {
 
 var KE = pkg.KeyEvent, task = zebra.util.task, L = zebra.layout,
@@ -23508,6 +23520,2721 @@ pkg.WindowTitleView = Class(pkg.View, [
  */
 
 })(zebra("ui"), zebra.Class);
+
+(function(pkg, Class, ui) {
+
+/**
+ * The package contains number of UI components that can be helful to 
+ * make visiual control of an UI component size and location
+ * @module  ui.designer
+ * @main 
+ */
+
+var L = zebra.layout, Cursor = ui.Cursor, KeyEvent = ui.KeyEvent, CURSORS = [];
+
+CURSORS[L.LEFT  ] = Cursor.W_RESIZE;
+CURSORS[L.RIGHT ] = Cursor.E_RESIZE;
+CURSORS[L.TOP   ] = Cursor.N_RESIZE;
+CURSORS[L.BOTTOM] = Cursor.S_RESIZE;
+CURSORS[L.TopLeft ]    = Cursor.NW_RESIZE;
+CURSORS[L.TopRight]    = Cursor.NE_RESIZE;
+CURSORS[L.BottomLeft ] = Cursor.SW_RESIZE;
+CURSORS[L.BottomRight] = Cursor.SE_RESIZE;
+CURSORS[L.CENTER] = Cursor.MOVE;
+CURSORS[L.NONE  ] = Cursor.DEFAULT;
+
+pkg.ShaperBorder = Class(ui.View, [
+    function $prototype() {
+        this.color = "blue";
+        this.gap = 7;
+
+        function contains(x, y, gx, gy, ww, hh) {
+            return gx <= x && (gx + ww) > x && gy <= y && (gy + hh) > y;
+        }
+
+        this.paint = function(g,x,y,w,h,d){
+            var cx = ~~((w - this.gap)/2), cy = ~~((h - this.gap)/2);
+            g.setColor(this.color);
+            g.beginPath();
+            g.rect(x, y, this.gap, this.gap);
+            g.rect(x + cx, y, this.gap, this.gap);
+            g.rect(x, y + cy, this.gap, this.gap);
+            g.rect(x + w - this.gap, y, this.gap, this.gap);
+            g.rect(x, y + h - this.gap, this.gap, this.gap);
+            g.rect(x + cx, y + h - this.gap, this.gap, this.gap);
+            g.rect(x + w - this.gap, y + cy, this.gap, this.gap);
+            g.rect(x + w - this.gap, y + h - this.gap, this.gap, this.gap);
+            g.fill();
+            g.beginPath();
+            g.rect(x + ~~(this.gap / 2), y + ~~(this.gap / 2), w - this.gap, h - this.gap);
+            g.stroke();
+        };
+
+        this.detectAt = function(target,x,y){
+            var gap = this.gap, gap2 = gap*2, w = target.width, h = target.height;
+
+            if (contains(x, y, gap, gap, w - gap2, h - gap2)) return L.CENTER;
+            if (contains(x, y, 0, 0, gap, gap))               return L.TopLeft;
+            if (contains(x, y, 0, h - gap, gap, gap))         return L.BottomLeft;
+            if (contains(x, y, w - gap, 0, gap, gap))         return L.TopRight;
+            if (contains(x, y, w - gap, h - gap, gap, gap))   return L.BottomRight;
+
+            var mx = ~~((w-gap)/2);
+            if (contains(x, y, mx, 0, gap, gap))        return L.TOP;
+            if (contains(x, y, mx, h - gap, gap, gap))  return L.BOTTOM;
+
+            var my = ~~((h-gap)/2);
+            if (contains(x, y, 0, my, gap, gap)) return L.LEFT;
+            return contains(x, y, w - gap, my, gap, gap) ? L.RIGHT : L.NONE;
+        };
+    }
+]);
+
+pkg.InsetsArea = Class([
+    function $prototype() {
+        this.top = this.right = this.left = this.bottom = 6;
+
+        this.detectAt = function (c,x,y){
+            var t = 0, b1 = false, b2 = false;
+            if (x < this.left) t += L.LEFT;
+            else {
+                if (x > (c.width - this.right)) t += L.RIGHT;
+                else b1 = true;
+            }
+
+            if (y < this.top) t += L.TOP;
+            else {
+                if (y > (c.height - this.bottom)) t += L.BOTTOM;
+                else b2 = true;
+            }
+            return b1 && b2 ? L.CENTER : t;
+        };
+    }
+]);
+
+/**
+ * This is UI component class that implements possibility to embeds another
+ * UI components to control the component size and location visually.
+ 
+        // create canvas 
+        var canvas = new zebra.ui.zCanvas(300,300);
+
+        // create two UI components
+        var lab = new zebra.ui.Label("Label");
+        var but = new zebra.ui.Button("Button");
+
+        // add created before label component as target of the shaper
+        // component and than add the shaper component into root panel 
+        canvas.root.add(new zebra.ui.designer.ShaperPan(lab).properties({
+            bounds: [ 30,30,100,40]
+        }));
+
+        // add created before button component as target of the shaper
+        // component and than add the shaper component into root panel 
+        canvas.root.add(new zebra.ui.designer.ShaperPan(but).properties({
+            bounds: [ 130,130,100,50]
+        }));
+
+ * @class  zebra.ui.designer.ShaperPan
+ * @constructor
+ * @extends {zebra.ui.Panel}
+ * @param {zebra.ui.Panel} target a target UI component whose size and location
+ * has to be controlled
+ */
+pkg.ShaperPan = Class(ui.Panel, [
+    function $prototype() {
+       /**
+        * Indicates if controlled component can be moved
+        * @attribute isMoveEnabled
+        * @type {Boolean}
+        * @default true
+        */
+
+       /**
+        * Indicates if controlled component can be sized
+        * @attribute isResizeEnabled
+        * @type {Boolean}
+        * @default true
+        */
+
+        /**
+         * Minimal possible height or controlled component 
+         * @attribute minHeight
+         * @type {Integer}
+         * @default 12
+         */
+
+        /**
+         * Minimal possible width or controlled component 
+         * @attribute minWidth
+         * @type {Integer}
+         * @default 12
+         */
+        this.minHeight = this.minWidth = 12;
+        this.canHaveFocus = this.isResizeEnabled = this.isMoveEnabled = true;
+        this.state = null;
+
+        this.catchInput = true;
+
+        this.getCursorType = function (t, x ,y) {
+            return this.kids.length > 0 ? CURSORS[this.shaperBr.detectAt(t, x, y)] : null;
+        };
+
+        /**
+         * Define key pressed events handler
+         * @param  {zebra.ui.KeyEvent} e a key event
+         * @method keyPressed
+         */
+        this.keyPressed = function(e) {
+            if (this.kids.length > 0){
+                var b  = (e.mask & KeyEvent.M_SHIFT) > 0, 
+                    c  = e.code,
+                    dx = (c == KeyEvent.LEFT ?  -1 : (c == KeyEvent.RIGHT ? 1 : 0)),
+                    dy = (c == KeyEvent.UP   ?  -1 : (c == KeyEvent.DOWN  ? 1 : 0)),
+                    w  = this.width  + dx, 
+                    h  = this.height + dy,
+                    x  = this.x + dx, 
+                    y  = this.y + dy;
+
+                if (b) {
+                    if (this.isResizeEnabled && w > this.shaperBr.gap * 2 && h > this.shaperBr.gap * 2) {
+                        this.setSize(w, h);
+                    }
+                }
+                else {
+                    if (this.isMoveEnabled) {
+                        var ww = this.width, hh = this.height, p = this.parent;
+                        if (x + ww/2 > 0 && y + hh/2 > 0 && x < p.width - ww/2 && y < p.height - hh/2) this.setLocation(x, y);
+                    }
+                }
+            }
+        };
+
+        /**
+         * Define mouse drag started events handler
+         * @param  {zebra.ui.MouseEvent} e a mouse event
+         * @method mouseDragStarted
+         */
+        this.mouseDragStarted = function(e){
+            this.state = null;
+            if (this.isResizeEnabled || this.isMoveEnabled) {
+                var t = this.shaperBr.detectAt(this, e.x, e.y);
+                if ((this.isMoveEnabled   === false && t == L.CENTER)||
+                    (this.isResizeEnabled === false && t != L.CENTER)  )
+                {
+                    return;
+                }
+
+                this.state = { top    : ((t & L.TOP   ) > 0 ? 1 : 0),
+                               left   : ((t & L.LEFT  ) > 0 ? 1 : 0),
+                               right  : ((t & L.RIGHT ) > 0 ? 1 : 0),
+                               bottom : ((t & L.BOTTOM) > 0 ? 1 : 0) };
+
+                if (this.state != null) {
+                    this.px = e.absX;
+                    this.py = e.absY;
+                }
+            }
+        };
+
+        /**
+         * Define mouse dragged events handler
+         * @param  {zebra.ui.MouseEvent} e a mouse event
+         * @method mouseDragged
+         */
+        this.mouseDragged = function(e){
+            if (this.state != null) {
+                var dy = (e.absY - this.py), 
+                    dx = (e.absX - this.px), 
+                    s  = this.state,
+                    nw = this.width  - dx * s.left + dx * s.right,
+                    nh = this.height - dy * s.top  + dy * s.bottom;
+
+                if (nw >= this.minWidth && nh >= this.minHeight) {
+                    this.px = e.absX;
+                    this.py = e.absY;
+                    if ((s.top + s.right + s.bottom + s.left) === 0) {
+                        this.setLocation(this.x + dx, this.y + dy);
+                    }
+                    else {                    
+                        this.setSize(nw, nh);
+                        this.setLocation(this.x + dx * s.left, this.y + dy * s.top);
+                    }
+                }
+            }
+        };
+
+        this.setColor = function (b, color) {
+            this.colors[b?1:0] = color;
+            this.shaperBr.color = this.colors[this.hasFocus()? 1 : 0];
+            this.repaint();
+        };
+    },
+
+    function (t){
+        this.$super(new L.BorderLayout());
+        this.px = this.py = 0;
+        this.shaperBr = new pkg.ShaperBorder();
+        this.colors   = [ "lightGray", "blue" ];
+        this.shaperBr.color = this.colors[0];
+        this.setBorder(this.shaperBr);
+        if (t != null) this.add(t);
+    },
+
+    function insert(i, constr, d) {
+        if (this.kids.length > 0) {
+            this.removeAll();
+        }
+
+        var top = this.getTop(), left = this.getLeft();
+        if (d.width === 0 || d.height === 0) d.toPreferredSize();
+        this.setLocation(d.x - left, d.y - top);
+        this.setSize(d.width + left + this.getRight(), d.height + top + this.getBottom());
+        this.$super(i, L.CENTER, d);
+    },
+
+    function focused(){
+        this.$super();
+        this.shaperBr.color = this.colors[this.hasFocus()? 1 : 0];
+        this.repaint();
+    }
+]);
+
+pkg.FormTreeModel = Class(zebra.data.TreeModel, [
+    function $prototype() {
+        this.buildModel = function(comp, root){
+            var b = this.exclude && this.exclude(comp), item = b ? root : this.createItem(comp);
+            for(var i = 0; i < comp.kids.length; i++) {
+                var r = this.buildModel(comp.kids[i], item);
+                if (r) {
+                    r.parent = item;
+                    item.kids.push(r);
+                }
+            }
+            return b ? null : item;
+        };
+
+        this.itemByComponent = function (c, r){
+            if (r == null) r = this.root;
+            if (r.comp == c) return c;
+            for(var i = 0;i < r.kids.length; i++) {
+                var item = this.itemByComponent(c, r.kids[i]);
+                if (item != null) return item;
+            }
+            return null;
+        };
+
+        this.createItem = function(comp){
+            var name = comp.$clazz.$name;
+            if (name == null) name = comp.toString();
+            var index = name.lastIndexOf('.'),
+                item = new zebra.data.Item(index > 0 ? name.substring(index + 1) : name);
+            item.comp = comp;
+            return item;
+        };
+    },
+
+    function (target){
+        this.$super(this.buildModel(target, null));
+    }
+]);
+
+/**
+ * @for
+ */
+
+
+})(zebra("ui.designer"), zebra.Class, zebra("ui"));
+
+(function(pkg, Class) {
+
+/**
+ * @module  ui
+ */
+
+/**
+ * HTML element UI component wrapper class. The class represents
+ * an HTML element as if it is standard UI component. It helps to use
+ * some standard HTML element as zebra UI components and embeds it
+ * in zebra UI application layout.
+ * @class zebra.ui.HtmlElement
+ * @constructor
+ * @param {String|HTMLElement} [element] an HTML element to be represented
+ * as a standard zebra UI component. If the passed parameter is string
+ * it denotes a name of an HTML element. In this case a new HTML element
+ * will be created.
+ * @extends {zebra.ui.Panel}
+ */
+pkg.HtmlElement = Class(pkg.Panel, [
+    function $prototype() {
+        this.isLocAdjusted = false;
+        this.canvas = null;
+        this.ePsW = this.ePsH = 0;
+
+        /**
+         * Set the CSS font of the wrapped HTML element
+         * @param {String|zebra.ui.Font} f a font
+         * @method setFont
+         */
+        this.setFont = function(f) {
+            this.element.style.font = f.toString();
+            this.vrp();
+        };
+
+        /**
+         * Set the CSS color of the wrapped HTML element
+         * @param {String} c a color
+         * @method setColor
+         */
+        this.setColor = function(c) {
+            this.element.style.color = c.toString();
+        };
+
+        this.adjustLocation = function() {
+            if (this.isLocAdjusted === false && this.canvas != null) {
+
+                // hidden DOM component before move
+                // makes moving more smooth
+                var visibility = this.element.style.visibility;
+                this.element.style.visibility = "hidden";
+
+                if (zebra.instanceOf( this.parent, pkg.HtmlElement)) {
+                    this.element.style.top  = "" + this.y + "px";
+                    this.element.style.left = "" + this.x + "px";
+                }
+                else {
+                    var a = zebra.layout.toParentOrigin(0,0,this);
+                    this.element.style.top  = "" + (this.canvas.offy + a.y) + "px";
+                    this.element.style.left = "" + (this.canvas.offx + a.x) + "px";
+                }
+                this.isLocAdjusted = true;
+                this.element.style.visibility = visibility;
+            }
+        };
+
+        this.calcPreferredSize = function(target) {
+            return { width: this.ePsW, height: this.ePsH };
+        };
+
+        var $store = [
+            "visibility",
+            "paddingTop","paddingLeft","paddingBottom","paddingRight",
+            "border","borderStyle","borderWidth",
+            "borderTopStyle","borderTopWidth",
+            "borderBottomStyle","borderBottomWidth",
+            "borderLeftStyle","borderLeftWidth",
+            "borderRightStyle","borderRightWidth",
+            "width", "height"
+        ];
+
+        this.recalc = function() {
+            // save element metrics
+            var e    = this.element,
+                vars = {};
+
+            for(var i=0; i<$store.length; i++) {
+                var k = $store[i];
+                vars[k] = e.style[k];
+            }
+
+            // force metrics to be calculated automatically
+            e.style.visibility = "hidden";
+            e.style.padding = "0px";
+            e.style.border  = "none";
+            e.style.width   = "auto";
+            e.style.height  = "auto";
+
+            // fetch preferred size
+            this.ePsW = e.offsetWidth;
+            this.ePsH = e.offsetHeight;
+
+            for(var k in vars) {
+                var v = vars[k];
+                if (v != null) e.style[k] = v;
+            }
+
+            this.setSize(this.width, this.height);
+        };
+
+        /**
+         * Set the inner content of the wrapped HTML element
+         * @param {String} an inner content
+         * @method setContent
+         */
+        this.setContent = function(content) {
+            this.element.innerHTML = content;
+            this.vrp();
+        };
+
+        /**
+         * Apply the given set of CSS styles to the wrapped HTML element
+         * @param {Object} styles a dictionary of CSS styles
+         * @method setStyles
+         */
+        this.setStyles = function(styles) {
+            for(var k in styles) {
+                this.setStyle(k, styles[k]);
+            }
+        };
+
+        /**
+         * Apply the given CSS style to the wrapped HTML element
+         * @param {String} a name of the CSS style
+         * @param {String} a value the CSS style has to be set
+         * @method setStyle
+         */
+        this.setStyle = function(name, value) {
+            name = name.trim();
+            var i = name.indexOf(':');
+            if (i > 0) {
+                if (zebra[name.substring(0, i)] == null) {
+                    return;
+                }
+                name = name.substring(i + 1);
+            }
+
+            this.element.style[name] = value;
+            this.vrp();
+        };
+
+        /**
+         * Set the specified attribute of the wrapped HTML element
+         * @param {String} name  a name of attribute
+         * @param {String} value a value of the attribute
+         * @method setAttribute
+         */
+        this.setAttribute = function(name, value) {
+            this.element.setAttribute(name, value);
+        };
+
+        this.isInInvisibleState = function() {
+            if (this.width       <= 0    || 
+                this.height      <= 0    ||
+                this.parent      == null || 
+                this.getCanvas() == null   ) 
+            {
+                return true;
+            }
+
+            var p = this.parent;
+            while (p != null && p.isVisible === true && p.width > 0 && p.height > 0) {
+                p = p.parent;
+            }
+          
+            return p != null || pkg.$cvp(this) == null; 
+            // canvas means the component is not
+                              // in hierarchy yet, that means it
+                              // has to be hidden
+        };
+
+        this.paint = function(g) {
+            // this method is used as an indication that the component
+            // is visible and no one of his parent is invisible
+            if (this.element.style.visibility == "hidden") {
+                this.element.style.visibility = "visible";
+            }
+        };
+    },
+
+    function(e) {
+        /**
+         * Reference to HTML element the UI component wraps
+         * @attribute element
+         * @readOnly
+         * @type {HTMLElement}
+         */
+        e = this.element = zebra.isString(e) ? document.createElement(e) : e;
+        e.setAttribute("id", this.toString());
+        e.style.visibility = "hidden";  // before the component will be attached
+                                        // to parent hierarchy of components that is
+                                        // attached to a canvas the component has to be hidden
+
+        this.$super();
+
+        var $this = this;
+
+        // TODO:
+        // It is not a very good idea to register global component listener per
+        // HTML component. Has to be re-designed, but at this moment this is the
+        // only way to understand when the HTML component parent hierarchy has got
+        // visibility updates
+        this.globalCompListener = {
+            compShown :function(c) {
+                if (c != $this && c.isVisible === false && zebra.layout.isAncestorOf(c, $this)) {
+                    $this.element.style.visibility = "hidden";
+                }
+            },
+
+            compMoved : function(c, px, py) {
+                if (zebra.layout.isAncestorOf(c, $this)) {
+                    // force location adjustment when the component
+                    // parent HTML canvas has been moved
+                    $this.isLocAdjusted = false;
+                    $this.adjustLocation();
+                }
+
+
+                if (c != $this && $this.isInInvisibleState()) {
+                    $this.element.style.visibility = "hidden";
+                }
+            },
+
+            compRemoved : function(p, i, c) {
+                // if an ancestor parent has been removed the HTML element
+                // has to be hidden
+                if (c != $this && zebra.layout.isAncestorOf(c, $this)) {
+                    $this.element.style.visibility = "hidden";
+                }
+            },
+
+            compSized : function(c, pw, ph) {
+                if (c != $this && zebra.layout.isAncestorOf(c, $this) && $this.isInInvisibleState()) {
+                    $this.element.style.visibility = "hidden";
+                }
+            }
+        };
+
+        this.globalWinListener = {
+            winActivated : function(layer, win, isActive) {
+                if (zebra.layout.isAncestorOf(win, $this) == false) {
+                    $this.element.style.visibility;   
+                }
+            }
+        };
+
+        // it is important to avoid mouse event since for some html element
+        // it can cause unexpected event generation. for instance text input
+        // element can generate mouse moved on mobile devices whenever it gets
+        // focus
+        if (zebra.isTouchable === false) {
+            e.onmousemove = function(ee) {
+                if ($this.canvas != null) {
+                    $this.canvas.$mouseMoved(1, {
+                        target: $this.canvas.canvas,
+                        pageX : ee.pageX,
+                        pageY : ee.pageY
+                    });
+                }
+            };
+
+            e.onmousedown = function(ee) {
+                if ($this.canvas != null) {
+                    $this.canvas.$mousePressed(1, {
+                        target: $this.canvas.canvas,
+                        pageX : ee.pageX,
+                        pageY : ee.pageY
+                    });
+                }
+            };
+
+            e.onmouseup = function(ee) {
+                if ($this.canvas != null) {
+                    $this.canvas.$mouseReleased(1, {
+                        target: $this.canvas.canvas,
+                        pageX : ee.pageX,
+                        pageY : ee.pageY
+                    },
+
+                    ee.button === 0 ? pkg.MouseEvent.LEFT_BUTTON
+                                    : (ee.button == 2 ? pkg.MouseEvent.RIGHT_BUTTON : 0));
+                }
+            };
+        }
+
+        e.addEventListener("focus", function(ee) {
+            // mark the element  has focus on the given canvas
+            $this.element.canvas = $this.canvas;
+
+            // notify focus manager the given component has got focus
+            zebra.ui.focusManager.requestFocus($this);
+        }, false);
+
+        e.addEventListener("blur", function(ee) {
+            // flush the native element canvas field to say the component doesn't
+            // have focus anymore
+            $this.element.canvas = null;
+
+            if ($this.canvas != null) {
+                // run timer that checks if the native web component has lost focus because of
+                // leaving the canvas where it hosts:
+                //  -- the focus doesn't belong to the canvas where the native component sits
+                //    AND
+                //  -- the focus doesn't belong to another native component that sits on the
+                //     canvas
+                setTimeout(function() {
+                    var fo = zebra.ui.focusManager.focusOwner;
+                    if (($this.canvas != null && document.activeElement != $this.canvas.canvas) &&
+                        (document.activeElement != null && $this.canvas != document.activeElement.canvas))
+                    {
+                       zebra.ui.focusManager.requestFocus(null);
+                    }
+                }, 100);
+            }
+        }, false);
+
+        e.onkeydown = function(ee) {
+            if ($this.canvas != null) {
+                // store current focus owner to analyze if the event triggered focus owner changing
+                var pfo = zebra.ui.focusManager.focusOwner;
+
+                // re-define key event since preventDefault has to be disabled,
+                // otherwise navigation key will not work
+                $this.canvas.$keyPressed({
+                    keyCode       : ee.keyCode,
+                    target        : ee.target,
+                    altKey        : ee.altKey,
+                    shiftKey      : ee.shiftKey,
+                    ctrlKey       : ee.ctrlKey,
+                    metaKey       : ee.metaKey,
+                    preventDefault: function() {}
+                });
+
+                var nfo = zebra.ui.focusManager.focusOwner;
+
+                // if focus owner has been updated
+                if (nfo != pfo) {
+                    ee.preventDefault();
+                    // if focus owner has been moved to another HTML component we have to pass focus to it
+                    if (nfo != null && zebra.instanceOf(nfo, pkg.HtmlElement) && document.activeElement != nfo.element) {
+                        nfo.element.focus();
+                    }
+                    else {
+                        // otherwise return focus back to canvas
+                        $this.canvas.canvas.focus();
+                    }
+                }
+            }
+        };
+
+        e.onkeyup  = function(ee) {
+            if ($this.canvas != null) {
+                $this.canvas.$keyReleased(ee);
+            }
+        };
+
+        e.onkeypress = function(ee) {
+            if ($this.canvas != null) {
+                $this.canvas.$keyTyped({
+                    keyCode       : ee.keyCode,
+                    target        : ee.target,
+                    altKey        : ee.altKey,
+                    shiftKey      : ee.shiftKey,
+                    ctrlKey       : ee.ctrlKey,
+                    metaKey       : ee.metaKey,
+                    preventDefault: function() {}
+                });
+            }
+        };
+    },
+
+    function focused() {
+        if (this.hasFocus()) {
+            // if the component has focus that has came from Zebra component we should
+            // set focus to native component that hosted by Zebra component
+
+            var canvas = this.getCanvas(),
+                pfo    = canvas.$prevFocusOwner;
+            
+            if (pfo == null || zebra.instanceOf(pfo, pkg.HtmlElement) === false) {
+                this.element.focus();
+            }
+        }
+
+        this.$super();
+    },
+
+    function setBorder(b) {
+        b = pkg.$view(b);
+
+        if (b == null) {
+            this.element.style.border = "none";
+        }
+        else {
+            var e = this.element;
+
+            //!!!! Bloody FF fix, the border can be made transparent
+            //!!!! only via "border" style
+            e.style.border = "0px solid transparent";
+
+            //!!! FF understands only decoupled border settings
+            e.style.borderTopStyle = "solid";
+            e.style.borderTopColor = "transparent";
+            e.style.borderTopWidth = "" + b.getTop() + "px";
+
+            e.style.borderLeftStyle = "solid";
+            e.style.borderLeftColor = "transparent";
+            e.style.borderLeftWidth = "" + b.getLeft() + "px";
+
+            e.style.borderBottomStyle = "solid";
+            e.style.borderBottomColor = "transparent";
+            e.style.borderBottomWidth = "" + b.getBottom() + "px";
+
+
+            e.style.borderRightStyle = "solid";
+            e.style.borderRightColor = "transparent";
+            e.style.borderRightWidth = "" + b.getRight() + "px";
+        }
+        this.$super(b);
+    },
+
+    function setPadding(t,l,b,r) {
+        if (arguments.length == 1) {
+            l = b = r = t;
+        }
+
+        var e = this.element;
+        e.style.paddingTop    = '' + t + "px";
+        e.style.paddingLeft   = '' + l + "px";
+        e.style.paddingRight  = '' + r + "px";
+        e.style.paddingBottom = '' + b + "px";
+        
+        this.$super.apply(this, arguments);
+    },
+
+    function setVisible(b) {
+        if (this.isInInvisibleState()) {
+            this.element.style.visibility = "hidden";
+        }
+        else {
+            this.element.style.visibility = b ? "visible" : "hidden";
+        }
+        this.$super(b);
+    },
+
+    function setEnabled(b) {
+        this.$super(b);
+        this.element.disabled = !b;
+    },
+
+    function setSize(w, h) {
+        this.$super(w, h);
+        var visibility = this.element.style.visibility;
+        this.element.style.visibility = "hidden"; // could make sizing smooth
+
+        // HTML element size is calculated as sum of "width"/"height", paddings, border
+        // So the passed width and height has to be corrected (before it will be applied to
+        // an HTML element) by reduction of extra HTML gaps. For this we firstly set the
+        // width and size
+        this.element.style.width  = "" + w + "px";
+        this.element.style.height = "" + h + "px";
+
+        // than we know the component metrics and can compute necessary reductions
+        var dx = this.element.offsetWidth  - w,
+            dy = this.element.offsetHeight - h;
+        this.element.style.width   = "" + (w - dx) + "px";
+        this.element.style.height  = "" + (h - dy) + "px";
+
+        if (this.isInInvisibleState()) {
+            this.element.style.visibility = "hidden";
+        }
+        else {
+            this.element.style.visibility = visibility;
+        }
+    },
+
+    function setLocation(x, y) {
+        this.$super(x, y);
+        this.isLocAdjusted = false;
+    },
+
+    function validate() {
+        if (this.canvas == null && this.parent != null) {
+            this.canvas = this.getCanvas();
+        }
+
+        if (this.canvas != null && this.isLocAdjusted === false) {
+            this.adjustLocation();
+        }
+
+        this.$super();
+    },
+
+    function setParent(p) {
+        this.$super(p);
+
+        if (p == null) {
+            if (this.element.parentNode != null) {
+                this.element.parentNode.removeChild(this.element);
+            }
+
+            this.element.style.visibility = "hidden";
+            pkg.events.removeComponentListener(this.globalCompListener);
+        }
+        else {
+            if (zebra.instanceOf(p, pkg.HtmlElement)) {
+                p.element.appendChild(this.element);
+            }
+            else {
+                document.body.appendChild(this.element);
+            }
+
+            if (this.isInInvisibleState()) {
+                this.element.style.visibility = "hidden";
+            }
+            else {
+                this.element.style.visibility = this.isVisible ? "visible" : "hidden";
+            }
+
+            pkg.events.addComponentListener(this.globalCompListener);
+        }
+
+        this.isLocAdjusted = false;
+
+        this.canvas = p != null ? this.getCanvas() : null;
+    }
+]);
+
+/**
+ * HTML input element wrapper class. The class can be used as basis class
+ * to wrap HTML elements that can be used to enter a textual information.
+ * @constructor
+ * @param {String} text a text the text input component has to be filled with
+ * @param {String} element an input element name
+ * @class zebra.ui.HtmlTextInput
+ * @extends zebra.ui.HtmlElement
+ */
+pkg.HtmlTextInput = Class(pkg.HtmlElement, [
+    function $prototype() {
+        this.canHaveFocus = true;
+
+        /**
+         * Get a text of the text input element
+         * @return {String} a text of the  text input element
+         * @method getValue
+         */
+        this.getValue = function() {
+            return this.element.value.toString();
+        };
+
+        /**
+         * Set the text
+         * @param {String} t a text
+         * @method setValue
+         */
+        this.setValue = function(t) {
+            if (this.element.value != t) {
+                this.element.value = t;
+                this.vrp();
+            }
+        };
+    },
+
+    function(text, elementName) {
+        if (text == null) text = "";
+        this.$super(elementName);
+        this.element.setAttribute("tabindex", 0);
+        this.setValue(text);
+    }
+]);
+
+
+pkg.HtmlContent = Class(pkg.HtmlElement, [
+    function() {
+        this.$super("div");
+        this.setStyle("overflow", "hidden");
+    },
+
+    function loadContent(url) {
+        var c = zebra.io.GET(url);
+        this.setContent(c);
+        this.vrp();
+    }
+]);
+
+
+/**
+ * HTML input text element wrapper class. The class wraps standard HTML text field
+ * and represents it as zebra UI component.
+ * @constructor
+ * @class zebra.ui.HtmlTextField
+ * @param {String} [text] a text the text field component has to be filled with
+ * @extends zebra.ui.HtmlTextInput
+ */
+pkg.HtmlTextField = Class(pkg.HtmlTextInput, [
+    function(text) {
+        this.$super(text, "input");
+        this.element.setAttribute("type",  "text");
+    }
+]);
+
+/**
+ * HTML input textarea element wrapper class. The class wraps standard HTML textarea
+ * element and represents it as zebra UI component.
+ * @constructor
+ * @param {String} [text] a text the text area component has to be filled with
+ * @class zebra.ui.HtmlTextArea
+ * @extends zebra.ui.HtmlTextInput
+ */
+pkg.HtmlTextArea = Class(pkg.HtmlTextInput, [
+    function setResizeable(b) {
+        if (b === false) this.setStyle("resize", "none");
+        else             this.setStyle("resize", "both");
+    },
+
+    function(text) {
+        this.$super(text, "textarea");
+        this.element.setAttribute("rows", 10);
+    }
+]);
+
+/**
+ * @for
+ */
+
+})(zebra("ui"), zebra.Class);
+
+(function(pkg, Class, ui)  {
+
+/**
+ * Tree UI components and all related to the component classes and interfaces.
+ * Tree components are graphical representation of a tree model that allows a user
+ * to navigate over the model item, customize the items rendering and
+ * organize customizable editing of the items.
+
+        // create tree component instance to visualize the given tree model
+        var tree = new zebra.ui.tree.Tree({
+            value: "Root",
+            kids : [
+                "Item 1",
+                "Item 2",
+                "Item 3"
+            ]
+        });
+
+        // make all tree items editable with text field component
+        tree.setEditorProvider(new zebra.ui.tree.DefEditors());
+
+ * One more tree  component implementation - "CompTree" - allows developers
+ * to create tree whose nodes are  other UI components
+
+        // create tree component instance to visualize the given tree model
+        var tree = new zebra.ui.tree.CompTree({
+            value: new zebra.ui.Label("Root label item"),
+            kids : [
+                new zebra.ui.Checkbox("Checkbox Item"),
+                new zebra.ui.Button("Button Item"),
+                new zebra.ui.TextField("Text field item")
+            ]
+        });
+
+ * @module ui.tree
+ * @main
+ */
+
+
+//  tree node metrics:
+//   |
+//   |-- <-gapx-> {icon} -- <-gapx-> {view}
+//
+//
+
+
+var KE = ui.KeyEvent;
+
+/**
+ * Simple private structure to keep a tree model item metrical characteristics
+ * @constructor
+ * @param {Boolean} b a state of an appropriate tree component node of the given
+ * tree model item. The state is sensible for item that has children items and
+ * the state indicates if the given tree node is collapsed (false) or expanded
+ * (true)
+ * @private
+ * @class zebra.ui.tree.$IM
+ */
+pkg.$IM = function(b) {
+    /**
+     *  The whole width of tree node that includes a rendered item preferred
+     *  width, all icons and gaps widths
+     *  @attribute width
+     *  @type {Integer}
+     *  @readOnly
+     */
+
+    /**
+     *  The whole height of tree node that includes a rendered item preferred
+     *  height, all icons and gaps heights
+     *  @attribute height
+     *  @type {Integer}
+     *  @readOnly
+     */
+
+    /**
+     *  Width of an area of rendered tree model item. It excludes icons, toggle
+     *  and gaps widths
+     *  @attribute viewWidth
+     *  @type {Integer}
+     *  @readOnly
+     */
+
+    /**
+     *  Height of an area of rendered tree model item. It excludes icons, toggle
+     *  and gaps heights
+     *  @attribute viewHeight
+     *  @type {Integer}
+     *  @readOnly
+     */
+
+    /**
+     *  Indicates whether a node is in expanded or collapsed state
+     *  @attribute isOpen
+     *  @type {Boolean}
+     *  @readOnly
+     */
+
+    this.width = this.height = this.x = this.y = this.viewHeight = 0;
+    this.viewWidth = -1;
+    this.isOpen = b;
+};
+
+pkg.TreeListeners = zebra.util.ListenersClass("toggled", "selected");
+
+/**
+ * Abstract tree component that can used as basement for building own tree components.
+ * The component is responsible for rendering tree, calculating tree nodes metrics,
+ * computing visible area, organizing basic user interaction. Classes that inherit it
+ * has to provide the following important things:
+
+    * **A tree model item metric** Developers have to implement "getItemPreferredSize(item)"
+      method to say which size the given tree item wants to have.
+    * **Tree node item rendering** If necessary developers have to implement the way
+      a tree item has to be visualized by implementing "this.paintItem(...)" method
+
+ *
+ * @class zebra.ui.tree.BaseTree
+ * @constructor
+ * @param {zebra.data.TreeModel|Object} a tree model. It can be an instance of tree model
+ * class or an object that described tree model. An example of such object is shown below:
+
+        {
+            value : "Root",
+            kids  : [
+                {
+                    value: "Child 1",
+                    kids :[
+                        "Sub child 1"
+                    ]
+                },
+                "Child 2",
+                "Child 3"
+            ]
+        }
+
+ * @param {Boolean} [nodeState] a default tree nodes state (expanded or collapsed)
+ * @extends {zebra.ui.Panel}
+ */
+
+ /**
+  * Fired when a tree item has been toggled
+
+        tree.bind(function toggled(src, item) {
+           ...
+        });
+
+  * @event toggled
+  * @param  {zebra.ui.tree.BaseTree} src an tree component that triggers the event
+  * @param  {zebra.data.Item} item an tree item that has been toggled
+  */
+
+ /**
+  * Fired when a tree item has been selected
+
+      tree.bind(function selected(src, item) {
+         ...
+      });
+
+  * @event selected
+  * @param  {zebra.ui.tree.BaseTree} src an tree component that triggers the event
+  * @param  {zebra.data.Item} item an tree item that has been toggled
+  */
+pkg.BaseTree = Class(ui.Panel, [
+    function $prototype() {
+
+        /**
+         * Horizontal gap between a node elements: toggle, icons and tree item view
+         * @attribute gapx
+         * @readOnly
+         * @default 2
+         * @type {Integer}
+         */
+
+        /**
+         * Vertical gap between a node elements: toggle, icons and tree item view
+         * @attribute gapy
+         * @readOnly
+         * @default 2
+         * @type {Integer}
+         */
+
+        this.gapx = this.gapy = 2;
+        this.canHaveFocus = true;
+
+        /**
+         * Test if the given tree component item is opened
+         * @param  {zebra.data.Item}  i a tree model item
+         * @return {Boolean} true if the given tree component item is opened
+         * @method isOpen
+         */
+        this.isOpen = function(i){
+            this.validate();
+            return this.isOpen_(i);
+        };
+
+        /**
+         * Get calculated for the given tree model item metrics
+         * @param  {zebra.data.Item} i a tree item
+         * @return {Object}   an tree model item metrics. Th
+         * @method getItemMetrics
+         */
+        this.getItemMetrics = function(i){
+            this.validate();
+            return this.getIM(i);
+        };
+
+        this.togglePressed = function(root) {
+            this.toggle(root);
+        };
+
+        this.itemPressed = function(root, e) {
+            this.select(root);
+        };
+
+        this.mousePressed = function(e){
+            if (this.firstVisible != null && e.isActionMask()) {
+                var x = e.x,
+                    y = e.y,
+                    root = this.getItemAt(this.firstVisible, x, y);
+
+                if (root != null) {
+                    x -= this.scrollManager.getSX();
+                    y -= this.scrollManager.getSY();
+                    var r = this.getToggleBounds(root);
+
+                    if (x >= r.x && x < r.x + r.width && y >= r.y && y < r.y + r.height){
+                        this.togglePressed(root);
+                    }
+                    else {
+                        if (x > r.x + r.width) this.itemPressed(root, e);
+                    }
+                }
+            }
+        };
+
+        this.vVisibility = function (){
+            if (this.model == null) this.firstVisible = null;
+            else {
+                var nva = ui.$cvp(this, {});
+                if (nva == null) this.firstVisible = null;
+                else {
+                    if (this._isVal === false ||
+                        (this.visibleArea == null              ||
+                         this.visibleArea.x != nva.x           ||
+                         this.visibleArea.y != nva.y           ||
+                         this.visibleArea.width != nva.width   ||
+                         this.visibleArea.height != nva.height   ))
+                    {
+                        this.visibleArea = nva;
+                        if (this.firstVisible != null) {
+                            this.firstVisible = this.findOpened(this.firstVisible);
+                            this.firstVisible = this.isOverVisibleArea(this.firstVisible) ? this.nextVisible(this.firstVisible)
+                                                                                          : this.prevVisible(this.firstVisible);
+                        }
+                        else {
+                            this.firstVisible = (-this.scrollManager.getSY() > ~~(this.maxh / 2)) ? this.prevVisible(this.findLast(this.model.root))
+                                                                                                  : this.nextVisible(this.model.root);
+                        }
+                    }
+                }
+            }
+            this._isVal = true;
+        };
+
+        this.recalc = function(){
+            this.maxh = this.maxw = 0;
+            if (this.model != null && this.model.root != null) {
+                this.recalc_(this.getLeft(), this.getTop(), null, this.model.root, true);
+                this.maxw -= this.getLeft();
+                this.maxh -= this.gapy;
+            }
+        };
+
+        /**
+         * Get tree model item  metrical bounds (location and size).
+         * @param  {zebra.data.Item} root an tree model item
+         * @return {Object} a structure that keeps an item view location
+         * and size:
+
+                {
+                    x: {Integer},
+                    y: {Integer},
+                    width: {Integer},
+                    height: {Integer}
+                }
+
+         * @method getItemBounds
+         * @protected
+         */
+        this.getItemBounds = function(root){
+            var metrics = this.getIM(root),
+                toggle  = this.getToggleBounds(root),
+                image   = this.getIconBounds(root);
+
+            toggle.x = image.x + image.width + (image.width > 0 || toggle.width > 0 ? this.gapx : 0);
+            toggle.y = metrics.y + ~~((metrics.height - metrics.viewHeight) / 2);
+            toggle.width = metrics.viewWidth;
+            toggle.height = metrics.viewHeight;
+            return toggle;
+        };
+
+        /**
+         * Get toggle element bounds for the given tree model item.
+         * @param  {zebra.data.Item} root an tree model item
+         * @return {Object} a structure that keeps an item toggle location
+         * and size:
+
+                {
+                    x: {Integer},
+                    y: {Integer},
+                    width: {Integer},
+                    height: {Integer}
+                }
+
+         * @method getToggleBounds
+         * @protected
+         */
+        this.getToggleBounds = function(root){
+            var node = this.getIM(root), d = this.getToggleSize(root);
+            return { x:node.x, y:node.y + ~~((node.height - d.height) / 2), width:d.width, height:d.height };
+        };
+
+        /**
+         * Get current toggle element view. The view depends on the state of tree item.
+         * @param  {zebra.data.Item} i a tree model item
+         * @protected
+         * @return {zebra.ui.View}  a toggle element view
+         * @method getToogleView
+         */
+        this.getToggleView = function(i){
+            return i.kids.length > 0 ? (this.getIM(i).isOpen ? this.views.on
+                                                             : this.views.off) : null;
+        };
+
+        /**
+         * An abstract method that a concrete tree component implementations have to
+         * override. The method has to return a preferred size the given tree model
+         * item wants to have.
+         * @param  {zebra.data.Item} root an tree model item
+         * @return {Object} a structure that keeps an item preferred size:
+
+                {
+                    width: {Integer},
+                    height: {Integer}
+                }
+
+         * @method getItemPreferredSize
+         * @protected
+         */
+        this.getItemPreferredSize = function(root) {
+            throw new Error("Not implemented");
+        };
+
+        /**
+         * An abstract method that a concrete tree component implementations should
+         * override. The method has to render the given tree node of the specified
+         * tree model item at the given location
+         * @param  {2DContext} g a graphical context
+         * @param  {zebra.data.Item} root a tree model item to be rendered
+         * @param  {zebra.ui.tree.$IM} node a tree node metrics
+         * @param  {Ineteger} x a x location where the tree node has to be rendered
+         * @param  {Ineteger} y a y location where the tree node has to be rendered
+         * @method paintItem
+         * @protected
+         */
+
+        this.recalc_ = function (x,y,parent,root,isVis){
+            var node = this.getIM(root);
+            if (isVis === true) {
+                if (node.viewWidth < 0){
+                    var viewSize = this.getItemPreferredSize(root);
+                    node.viewWidth  = viewSize.width === 0 ? 5 : viewSize.width;
+                    node.viewHeight = viewSize.height;
+                }
+
+                var imageSize = this.getIconSize(root), toggleSize = this.getToggleSize(root);
+                if (parent != null){
+                    var pImg = this.getIconBounds(parent);
+                    x = pImg.x + ~~((pImg.width - toggleSize.width) / 2);
+                }
+
+                node.x = x;
+                node.y = y;
+                node.width = toggleSize.width + imageSize.width +
+                             node.viewWidth + (toggleSize.width > 0 ? this.gapx : 0) + 10 +
+                                              (imageSize.width  > 0 ? this.gapx : 0);
+
+                node.height = Math.max(((toggleSize.height > imageSize.height) ? toggleSize.height
+                                                                               : imageSize.height),
+                                        node.viewHeight);
+
+                if (node.x + node.width > this.maxw) {
+                    this.maxw = node.x + node.width;
+                }
+
+                this.maxh += (node.height + this.gapy);
+                x = node.x + toggleSize.width + (toggleSize.width > 0 ? this.gapx : 0);
+                y += (node.height + this.gapy);
+            }
+
+            var b = node.isOpen && isVis === true;
+            if (b) {
+                var count = root.kids.length;
+                for(var i = 0; i < count; i++) {
+                    y = this.recalc_(x, y, root, root.kids[i], b);
+                }
+            }
+            return y;
+        };
+
+        this.isOpen_ = function (i){
+            return i == null || (i.kids.length > 0 && this.getIM(i).isOpen && this.isOpen_(i.parent));
+        };
+
+        /**
+         * Get a tree node metrics by the given tree model item.
+         * @param  {zebra.data.Item} i a tree model item
+         * @return {zebra.ui.tree.$IM} a tree node metrics
+         * @protected
+         * @method getIM
+         */
+        this.getIM = function (i){
+            var node = this.nodes[i];
+            if (typeof node === 'undefined'){
+                node = new pkg.$IM(this.isOpenVal);
+                this.nodes[i] = node;
+            }
+            return node;
+        };
+
+        /**
+         * Get a tree item that is located at the given location.
+         * @param  {zebra.data.Item} [root] a starting tree node
+         * @param  {Integer} x a x coordinate
+         * @param  {Integer} y a y coordinate
+         * @return {zebra.data.Item} a tree model item
+         * @method getItemAt
+         */
+        this.getItemAt = function(root, x, y){
+            this.validate();
+
+            if (arguments.length < 3) {
+                x = arguments[0];
+                y = arguments[1];
+                root = this.model.root;
+            }
+
+            if (this.firstVisible != null && y >= this.visibleArea.y && y < this.visibleArea.y + this.visibleArea.height){
+                var dx    = this.scrollManager.getSX(),
+                    dy    = this.scrollManager.getSY(),
+                    found = this.getItemAtInBranch(root, x - dx, y - dy);
+
+                if (found != null) return found;
+
+                var parent = root.parent;
+                while (parent != null) {
+                    var count = parent.kids.length;
+                    for(var i = parent.kids.indexOf(root) + 1;i < count; i ++ ){
+                        found = this.getItemAtInBranch(parent.kids[i], x - dx, y - dy);
+                        if (found != null) return found;
+                    }
+                    root = parent;
+                    parent = root.parent;
+                }
+            }
+            return null;
+        };
+
+        this.getItemAtInBranch = function(root,x,y){
+            if (root != null){
+                var node = this.getIM(root);
+                if (x >= node.x && y >= node.y && x < node.x + node.width && y < node.y + node.height + this.gapy) {
+                    return root;
+                }
+
+                if (this.isOpen_(root)){
+                    for(var i = 0;i < root.kids.length; i++) {
+                        var res = this.getItemAtInBranch(root.kids[i], x, y);
+                        if (res != null) return res;
+                    }
+                }
+            }
+            return null;
+        };
+
+        this.getIconView = function (i){
+            return i.kids.length > 0 ? (this.getIM(i).isOpen ? this.views.open
+                                                             : this.views.close)
+                                     : this.views.leaf;
+        };
+
+        this.getIconSize = function (i) {
+            var v =  i.kids.length > 0 ? (this.getIM(i).isOpen ? this.viewSizes.open
+                                                               : this.viewSizes.close)
+                                       : this.viewSizes.leaf;
+            return v ? v : { width:0, height:0 };
+        };
+
+        /**
+         * Get icon element bounds for the given tree model item.
+         * @param  {zebra.data.Item} root an tree model item
+         * @return {Object} a structure that keeps an item icon location
+         * and size:
+
+                {
+                    x: {Integer},
+                    y: {Integer},
+                    width: {Integer},
+                    height: {Integer}
+                }
+
+         * @method getToggleBounds
+         * @protected
+         */
+        this.getIconBounds = function (root){
+            var node = this.getIM(root),
+                id   = this.getIconSize(root),
+                td   = this.getToggleSize(root);
+            return { x:node.x + td.width + (td.width > 0 ? this.gapx : 0),
+                     y:node.y + ~~((node.height - id.height) / 2),
+                     width:id.width, height:id.height };
+        };
+
+        this.getToggleSize = function (i){
+            return this.isOpen_(i) ? this.viewSizes.on : this.viewSizes.off;
+        };
+
+        this.isOverVisibleArea = function (i){
+            var node = this.getIM(i);
+            return node.y + node.height + this.scrollManager.getSY() < this.visibleArea.y;
+        };
+
+        this.findOpened = function (item){
+            var parent = item.parent;
+            return (parent == null || this.isOpen_(parent)) ? item : this.findOpened(parent);
+        };
+
+        this.findNext = function (item){
+            if (item != null){
+                if (item.kids.length > 0 && this.isOpen_(item)){
+                    return item.kids[0];
+                }
+                var parent = null;
+                while ((parent = item.parent) != null){
+                    var index = parent.kids.indexOf(item);
+                    if (index + 1 < parent.kids.length) return parent.kids[index + 1];
+                    item = parent;
+                }
+            }
+            return null;
+        };
+
+        this.findPrev = function (item){
+            if (item != null) {
+                var parent = item.parent;
+                if (parent != null) {
+                    var index = parent.kids.indexOf(item);
+                    return (index - 1 >= 0) ? this.findLast(parent.kids[index - 1]) : parent;
+                }
+            }
+            return null;
+        };
+
+        this.findLast = function (item){
+            return this.isOpen_(item) && item.kids.length > 0 ? this.findLast(item.kids[item.kids.length - 1])
+                                                              : item;
+        };
+
+        this.prevVisible = function (item){
+            if (item == null || this.isOverVisibleArea(item)) return this.nextVisible(item);
+            var parent = null;
+            while((parent = item.parent) != null){
+                for(var i = parent.kids.indexOf(item) - 1;i >= 0; i-- ){
+                    var child = parent.kids[i];
+                    if (this.isOverVisibleArea(child)) return this.nextVisible(child);
+                }
+                item = parent;
+            }
+            return item;
+        };
+
+        this.isVerVisible = function (item){
+            if (this.visibleArea == null) return false;
+
+            var node = this.getIM(item),
+                yy1  = node.y + this.scrollManager.getSY(),
+                yy2  = yy1 + node.height - 1,
+                by   = this.visibleArea.y + this.visibleArea.height;
+
+            return ((this.visibleArea.y <= yy1 && yy1 < by) ||
+                    (this.visibleArea.y <= yy2 && yy2 < by) ||
+                    (this.visibleArea.y > yy1 && yy2 >= by)    );
+        };
+
+        this.nextVisible = function(item){
+            if (item == null || this.isVerVisible(item)) return item;
+            var res = this.nextVisibleInBranch(item), parent = null;
+            if (res != null) return res;
+            while((parent = item.parent) != null){
+                var count = parent.kids.length;
+                for(var i = parent.kids.indexOf(item) + 1;i < count; i++){
+                    res = this.nextVisibleInBranch(parent.kids[i]);
+                    if (res != null) return res;
+                }
+                item = parent;
+            }
+            return null;
+        };
+
+        this.nextVisibleInBranch = function (item){
+            if (this.isVerVisible(item)) return item;
+            if (this.isOpen_(item)){
+                for(var i = 0;i < item.kids.length; i++){
+                    var res = this.nextVisibleInBranch(item.kids[i]);
+                    if (res != null) return res;
+                }
+            }
+            return null;
+        };
+
+        this.paintSelectedItem = function(g, root, node, x, y) {
+            var v = this.hasFocus() ? this.views.aselect : this.views.iselect;
+            if (v != null) {
+                v.paint(g, x, y, node.viewWidth, node.viewHeight, this);
+            }
+        };
+
+        this.paintTree = function (g,item){
+            this.paintBranch(g, item);
+            var parent = null;
+            while((parent = item.parent) != null){
+                this.paintChild(g, parent, parent.kids.indexOf(item) + 1);
+                item = parent;
+            }
+        };
+
+        this.paintBranch = function (g, root){
+            if (root == null) return false;
+
+            var node = this.getIM(root),
+                dx   = this.scrollManager.getSX(),
+                dy   = this.scrollManager.getSY();
+
+            if (zebra.util.isIntersect(node.x + dx, node.y + dy,
+                                       node.width, node.height,
+                                       this.visibleArea.x, this.visibleArea.y,
+                                       this.visibleArea.width, this.visibleArea.height))
+            {
+                var toggle     = this.getToggleBounds(root),
+                    toggleView = this.getToggleView(root),
+                    image      = this.getIconBounds(root),
+                    vx         = image.x + image.width + this.gapx,
+                    vy         = node.y + ~~((node.height - node.viewHeight) / 2);
+
+                if (toggleView != null) {
+                    toggleView.paint(g, toggle.x, toggle.y, toggle.width, toggle.height, this);
+                }
+
+                if (image.width > 0) {
+                    this.getIconView(root).paint(g, image.x, image.y,
+                                                 image.width, image.height, this);
+                }
+
+                if (this.selected == root){
+                    this.paintSelectedItem(g, root, node, vx, vy);
+                }
+
+                if (this.paintItem != null) {
+                    this.paintItem(g, root, node, vx, vy);
+                }
+
+                if (this.lnColor != null){
+                    g.setColor(this.lnColor);
+                    var yy = toggle.y + ~~(toggle.height / 2) + 0.5;
+
+                    g.beginPath();
+                    g.moveTo(toggle.x + (toggleView == null ? ~~(toggle.width / 2) : toggle.width - 1), yy);
+                    g.lineTo(image.x, yy);
+                    g.stroke();
+                }
+            }
+            else {
+                if (node.y + dy > this.visibleArea.y + this.visibleArea.height ||
+                    node.x + dx > this.visibleArea.x + this.visibleArea.width    )
+                {
+                    return false;
+                }
+            }
+            return this.paintChild(g, root, 0);
+        };
+
+        this.y_ = function (item, isStart){
+            var node = this.getIM(item),
+                th = this.getToggleSize(item).height,
+                ty = node.y + ~~((node.height - th) / 2),
+                dy = this.scrollManager.getSY(),
+                y  = (item.kids.length > 0) ? (isStart ? ty + th : ty - 1) : ty + ~~(th / 2);
+
+            return (y + dy < 0) ?  -dy - 1
+                                : ((y + dy > this.height) ? this.height - dy : y);
+        };
+
+        /**
+         * Paint children items of the given root tree item.
+         * @param  {2DContext} g a graphical context
+         * @param  {zebra.data.Item} root a root tree item
+         * @param  {Integer} index an index
+         * @return {Boolean}
+         * @protected
+         * @method paintChild
+         */
+        this.paintChild = function (g, root, index){
+            var b = this.isOpen_(root);
+            if (root == this.firstVisible && this.lnColor != null){
+                g.setColor(this.lnColor);
+                var xx = this.getIM(root).x + ~~((b ? this.viewSizes.on.width
+                                                    : this.viewSizes.off.width) / 2);
+                g.beginPath();
+                g.moveTo(xx + 0.5, this.getTop());
+                g.lineTo(xx + 0.5, this.y_(root, false));
+                g.stroke();
+            }
+            if (b && root.kids.length > 0){
+                var firstChild = root.kids[0];
+                if (firstChild == null) return true;
+
+                var x = this.getIM(firstChild).x + ~~((this.isOpen_(firstChild) ? this.viewSizes.on.width
+                                                                                : this.viewSizes.off.width) / 2),
+                count = root.kids.length;
+                if (index < count) {
+                    var  node = this.getIM(root),
+                         y    = (index > 0) ? this.y_(root.kids[index - 1], true)
+                                            : node.y + ~~((node.height + this.getIconSize(root).height) / 2);
+
+                    for(var i = index;i < count; i ++ ){
+                        var child = root.kids[i];
+                        if (this.lnColor != null){
+                            g.setColor(this.lnColor);
+                            g.beginPath();
+                            g.moveTo(x + 0.5, y);
+                            g.lineTo(x + 0.5, this.y_(child, false));
+                            g.stroke();
+                            y = this.y_(child, true);
+                        }
+                        if (this.paintBranch(g, child) === false){
+                            if (this.lnColor != null && i + 1 != count){
+                                g.setColor(this.lnColor);
+                                g.beginPath();
+                                g.moveTo(x + 0.5, y);
+                                g.lineTo(x + 0.5, this.height - this.scrollManager.getSY());
+                                g.stroke();
+                            }
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        };
+
+        this.nextPage = function (item,dir){
+            var sum = 0, prev = item;
+            while(item != null && sum < this.visibleArea.height){
+                sum += (this.getIM(item).height + this.gapy);
+                prev = item;
+                item = dir < 0 ? this.findPrev(item) : this.findNext(item);
+            }
+            return prev;
+        };
+
+        this.paint = function(g){
+            if (this.model != null){
+                this.vVisibility();
+                if (this.firstVisible != null){
+                    var sx = this.scrollManager.getSX(), sy = this.scrollManager.getSY();
+                    try{
+                        g.translate(sx, sy);
+                        this.paintTree(g, this.firstVisible);
+                        g.translate(-sx,  -sy);
+                    }
+                    catch(e) {
+                        g.translate(-sx,  -sy);
+                        throw e;
+                    }
+                }
+            }
+        };
+
+        /**
+         * Select the given item.
+         * @param  {zebra.data.Item} an item to be selected. Use null value to clear any selection
+         * @method  select
+         */
+        this.select = function(item){
+            if (this.isSelectable == true && item != this.selected){
+                var old = this.selected;
+
+                this.selected = item;
+
+                if (this.selected != null) {
+                    this.makeVisible(this.selected);
+                }
+
+                this._.selected(this, this.selected);
+
+                if (old != null && this.isVerVisible(old)){
+                    var m = this.getItemMetrics(old);
+                    this.repaint(m.x + this.scrollManager.getSX(),
+                                 m.y + this.scrollManager.getSY(),
+                                 m.width, m.height);
+                }
+
+                if (this.selected != null && this.isVerVisible(this.selected)){
+                    var m = this.getItemMetrics(this.selected);
+                    this.repaint(m.x + this.scrollManager.getSX(),
+                                 m.y + this.scrollManager.getSY(),
+                                 m.width, m.height);
+                }
+            }
+        };
+
+        /**
+         * Make the given tree item visible. Tree component rendered content can takes more space than
+         * the UI component size is. In this case the content can be scrolled to make visible required
+         * tree item.
+         * @param  {zebra.data.Item} item an item to be visible
+         * @method makeVisible
+         */
+        this.makeVisible = function(item){
+            this.validate();
+            var r = this.getItemBounds(item);
+            this.scrollManager.makeVisible(r.x, r.y, r.width, r.height);
+        };
+
+        /**
+         * Toggle off or on recursively all items of the given item
+         * @param  {zebra.data.Item} root a starting item to toggle
+         * @param  {Boolean} b  true if all items have to be in opened
+         * state and false otherwise
+         * @method toggleAll
+         */
+        this.toggleAll = function (root,b){
+            var model = this.model;
+            if (root.kids.length > 0){
+                if (this.getItemMetrics(root).isOpen != b) this.toggle(root);
+                for(var i = 0;i < root.kids.length; i++ ){
+                    this.toggleAll(root.kids[i], b);
+                }
+            }
+        };
+
+        /**
+         * Toggle the given tree item
+         * @param  {zebra.data.Item} item an item to be toggled
+         * @method toggle
+         */
+        this.toggle = function(item){
+            if (item.kids.length > 0){
+                this.validate();
+                var node = this.getIM(item);
+                node.isOpen = (node.isOpen ? false : true);
+                this.invalidate();
+                this._.toggled(this, item);
+                if( !node.isOpen && this.selected != null){
+                    var parent = this.selected;
+                    do {
+                        parent = parent.parent;
+                    }
+                    while(parent != item && parent != null);
+                    if(parent == item) this.select(item);
+                }
+                this.repaint();
+            }
+        };
+
+        this.itemInserted = function (target,item){
+            this.vrp();
+        };
+
+        this.itemRemoved = function (target,item){
+            if (item == this.firstVisible) this.firstVisible = null;
+            if (item == this.selected) this.select(null);
+            delete this.nodes[item];
+            this.vrp();
+        };
+
+        this.itemModified = function (target,item){
+            var node = this.getIM(item);
+            if (node != null) node.viewWidth = -1;
+            this.vrp();
+        };
+
+        this.calcPreferredSize = function (target){
+            return this.model == null ? { width:0, height:0 }
+                                      : { width:this.maxw, height:this.maxh };
+        };
+    },
+
+    function () { this.$this(null); },
+    function (d){ this.$this(d, true);},
+
+    function (d,b){
+         /**
+          * Selected tree model item
+          * @attribute selected
+          * @type {zebra.data.Item}
+          * @default null
+          * @readOnly
+          */
+
+        this.selected = this.firstVisible = null;
+        this.maxw = this.maxh = 0;
+
+         /**
+          * Tree component line color
+          * @attribute lnColor
+          * @type {String}
+          * @readOnly
+          */
+
+        this.visibleArea = this.lnColor = null;
+
+        this.views     = {};
+        this.viewSizes = {};
+
+        this._isVal = false;
+        this.nodes = {};
+        this._ = new pkg.TreeListeners();
+        this.setLineColor("gray");
+
+        this.isOpenVal = b;
+
+        this.setSelectable(true);
+        this.$super();
+        this.setModel(d);
+        this.scrollManager = new ui.ScrollManager(this);
+    },
+
+    function focused(){
+        this.$super();
+        if (this.selected != null) {
+            var m = this.getItemMetrics(this.selected);
+            this.repaint(m.x + this.scrollManager.getSX(),
+                         m.y + this.scrollManager.getSY(), m.width, m.height);
+        }
+    },
+    /**
+     * Say if items of the tree component should be selectable
+     * @param {Boolean} b true is tree component items can be selected
+     * @method setSelectable
+     */
+    function setSelectable(b){
+        if (this.isSelectable != b){
+            if (b === false && this.selected != null) this.select(null);
+            this.isSelectable = b;
+            this.repaint();
+        }
+    },
+
+    /**
+     * Set tree component connector lines color
+     * @param {String} c a color
+     * @method setLineColor
+     */
+    function setLineColor(c){
+        this.lnColor = c;
+        this.repaint();
+    },
+
+    /**
+     * Set the given horizontal gaps between tree node graphical elements:
+     * toggle, icon, item view
+     * @param {Integer} gx horizontal gap
+     * @param {Integer} gy vertical gap
+     * @method setGaps
+     */
+    function setGaps(gx,gy){
+        if (gx != this.gapx || gy != this.gapy){
+            this.gapx = gx;
+            this.gapy = gy;
+            this.vrp();
+        }
+    },
+
+    /**
+     * Set the number of views to customize rendering of different visual elements of the tree
+     * UI component. The following decorative elements can be customized:
+
+    - **"close" ** - closed tree item icon view
+    - **"open" **  - opened tree item icon view
+    - **"leaf" **  - leaf tree item icon view
+    - **"on" **    - toggle on view
+    - **"off" **   - toggle off view
+    - **"iselect" **   - a view to express an item selection when tree component doesn't hold focus
+    - **"aselect" **   - a view to express an item selection when tree component holds focus
+
+     * For instance:
+
+        // build tree UI component
+        var tree = new zebra.ui.tree.Tree({
+            value: "Root",
+            kids: [
+                "Item 1",
+                "Item 2"
+            ]
+        });
+
+        // set " [x] " text render for toggle on and
+        // " [o] " text render for toggle off tree elements
+        tree.setViews({
+            "on": new zebra.ui.TextRender(" [x] "),
+            "off": new zebra.ui.TextRender(" [o] ")
+        });
+
+     * @param {Object} v dictionary of tree component decorative elements views
+     * @method setViews
+     */
+    function setViews(v){
+        for(var k in v) {
+            if (v.hasOwnProperty(k)) {
+                var vv = ui.$view(v[k]);
+
+                this.views[k] = vv;
+                if (k != "aselect" && k != "iselect"){
+                    this.viewSizes[k] = vv ? vv.getPreferredSize() : null;
+                    this.vrp();
+                }
+            }
+        }
+    },
+
+    /**
+     * Set the given tree model to be visualized with the UI component.
+     * @param {zebra.data.TreeModel|Object} d a tree model
+     * @method setModel
+     */
+    function setModel(d){
+        if (this.model != d) {
+            if (zebra.instanceOf(d, zebra.data.TreeModel) === false) {
+                d = new zebra.data.TreeModel(d);
+            }
+
+            this.select(null);
+            if (this.model != null && this.model._) this.model.bind(this);
+            this.model = d;
+            if (this.model != null && this.model._) this.model.bind(this);
+            this.firstVisible = null;
+            delete this.nodes;
+            this.nodes = {};
+            this.vrp();
+        }
+    },
+
+    function invalidate(){
+        if (this.isValid === true){
+            this._isVal = false;
+            this.$super();
+        }
+    }
+]);
+
+/**
+ * Default tree editor provider
+ * @class zebra.ui.tree.DefEditors
+ */
+pkg.DefEditors = Class([
+    function (){
+        /**
+         * Internal component that are designed as default editor component
+         * @private
+         * @readOnly
+         * @attribute tf
+         * @type {zebra.ui.TextField}
+         */
+        this.tf = new ui.TextField(new zebra.data.SingleLineTxt(""));
+        this.tf.setBackground("white");
+        this.tf.setBorder(null);
+        this.tf.setPadding(0);
+    },
+
+    function $prototype() {
+        /**
+         * Get an UI component to edit the given tree model element
+         * @param  {zebra.ui.tree.Tree} src a tree component
+         * @param  {zebra.data.Item} item an data model item
+         * @return {zebra.ui.Panel} an editor UI component
+         * @method getEditor
+         */
+        this.getEditor = function(src,item){
+            var o = item.value;
+            this.tf.setValue((o == null) ? "" : o.toString());
+            return this.tf;
+        };
+
+        /**
+         * Fetch a model item from the given UI editor component
+         * @param  {zebra.ui.tree.Tree} src a tree UI component
+         * @param  {zebra.ui.Panel} editor an editor that has been used to edit the tree model element
+         * @return {Object} an new tree model element value fetched from the given UI editor component
+         * @method fetchEditedValue
+         */
+        this.fetchEditedValue = function(src, editor){
+            return editor.view.target.getValue();
+        };
+
+        /**
+         * The method is called to ask if the given input event should trigger an tree component item
+         * @param  {zebra.ui.tree.Tree} src a tree UI component
+         * @param  {zebra.ui.MouseEvent|zebra.ui.KeyEvent} e   an input event: mouse or key event
+         * @return {Boolean} true if the event should trigger edition of a tree component item
+         * @method @shouldStartEdit
+         */
+        this.shouldStartEdit = function(src,e){
+            return (e.ID == ui.MouseEvent.CLICKED && e.clicks > 1) ||
+                   (e.ID == KE.PRESSED && e.code == KE.ENTER);
+        };
+    }
+]);
+
+/**
+ * Default tree editor view provider
+ * @class zebra.ui.tree.DefViews
+ * @constructor
+ * @param {String} [color] the tree item text color
+ * @param {String} [font] the tree item text font
+ */
+pkg.DefViews = Class([
+    function $prototype() {
+        /**
+         * Get a view for the given model item of the UI tree component
+         * @param  {zebra.ui.tree.Tree} tree  a tree component
+         * @param  {zebra.data.Item} item a tree model element
+         * @return {zebra.ui.View}  a view to visualize the given tree data model element
+         * @method  getView
+         */
+        this.getView = function (tree, item){
+            if (item.value && item.value.paint != null) {
+                return item.value;
+            }
+            this.render.setValue(item.value == null ? "<null>" : item.value);
+            return this.render;
+        };
+
+        /**
+         * Set the default view provider text render font
+         * @param {zebra.ui.Font} f a font
+         * @method setFont
+         */
+        this.setFont = function(f) {
+            this.render.setFont(f);
+        };
+
+        /**
+         * Set the default view provider text render color
+         * @param {String} c a color
+         * @method setColor
+         */
+        this.setColor = function(c) {
+            this.render.setColor(c);
+        };
+
+        this[''] = function(color, font) {
+            /**
+             * Default tree item render
+             * @attribute render
+             * @readOnly
+             * @type {zebra.ui.StringRender}
+             */
+            this.render = new ui.StringRender("");
+
+            zebra.properties(this, this.$clazz);
+
+            if (color != null) this.setColor(color);
+            if (font  != null) this.setFont(font);
+        };
+    }
+]);
+
+/**
+ * Tree UI component that visualizes a tree data model. The model itself can be passed as JavaScript
+ * structure or as a instance of zebra.data.TreeModel. Internally tree component keeps the model always
+ * as zebra.data.TreeModel class instance:
+
+     var tree = new zebra.ui.tree.Tree({
+          value: "Root",
+          kids : [  "Item 1", "Item 2"]
+     });
+
+ * or
+
+     var model = new zebra.data.TreeModel("Root");
+     model.add(model.root, "Item 1");
+     model.add(model.root, "Item 2");
+
+     var tree = new zebra.ui.tree.Tree(model);
+
+ * Tree model rendering is fully customizable by defining an own views provider. Default views
+ * provider renders tree model item as text. The tree node can be made editable by defining an
+ * editor provider. By default tree modes are not editable.
+ * @class  zebra.ui.tree.Tree
+ * @constructor
+ * @extends zebra.ui.tree.BaseTree
+ * @param {Object|zebra.data.TreeModel} [model] a tree data model passed as JavaScript
+ * structure or as an instance
+ * @param {Boolean} [b] the tree component items toggle state. true to have all items
+ * in opened state.
+ */
+pkg.Tree = Class(pkg.BaseTree, [
+    function $prototype() {
+        this.itemGapY = 2;
+        this.itemGapX = 4;
+
+        this.childInputEvent = function(e){
+            if (e.ID == KE.PRESSED){
+                if (e.code == KE.ESCAPE) {
+                    this.stopEditing(false);
+                }
+                else {
+                    if (e.code == KE.ENTER) {
+                        if ((zebra.instanceOf(e.source, ui.TextField) === false) ||
+                            (zebra.instanceOf(e.source.view.target, zebra.data.SingleLineTxt)))
+                        {
+                            this.stopEditing(true);
+                        }
+                    }
+                }
+            }
+        };
+
+        this.catchScrolled = function (psx, psy){
+            if (this.kids.length > 0) this.stopEditing(false);
+
+            if (this.firstVisible == null) this.firstVisible = this.model.root;
+            this.firstVisible = (this.y < psy) ? this.nextVisible(this.firstVisible)
+                                               : this.prevVisible(this.firstVisible);
+            this.repaint();
+        };
+
+        this.laidout = function() {
+            this.vVisibility();
+        };
+
+        this.getItemPreferredSize = function(root) {
+            var ps = this.provider.getView(this, root).getPreferredSize();
+            ps.width  += this.itemGapX * 2;
+            ps.height += this.itemGapY * 2;
+            return ps;
+        };
+
+        this.paintItem = function(g, root, node, x, y) {
+            if (root != this.editedItem){
+                var v = this.provider.getView(this, root);
+                v.paint(g, x + this.itemGapX, y + this.itemGapY,
+                        node.viewWidth, node.viewHeight, this);
+            }
+        };
+
+        /**
+         * Initiate the given item editing if the specified event matches condition
+         * @param  {zebra.data.Item} item an item to be edited
+         * @param  {zebra.ui.InputEvent} e an even that may trigger the item editing
+         * @return {Boolean}  return true if an item editing process has been started,
+         * false otherwise
+         * @method  se
+         * @private
+         */
+        this.se = function (item,e ){
+            if (item != null){
+                this.stopEditing(true);
+                if (this.editors != null && this.editors.shouldStartEdit(item, e)){
+                    this.startEditing(item);
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        this.mouseClicked = function(e){
+            if (this.se(this.pressedItem, e)) {
+                this.pressedItem = null;
+            }
+            else {
+                if (this.selected != null &&
+                    e.clicks > 1 && e.isActionMask() &&
+                   this.getItemAt(this.firstVisible, e.x, e.y) == this.selected)
+                {
+                    this.toggle(this.selected);
+                }
+            }
+        };
+
+        this.mouseReleased = function(e){
+            if (this.se(this.pressedItem, e)) this.pressedItem = null;
+        };
+
+        this.keyTyped = function(e){
+            if (this.selected != null){
+                switch(e.ch) {
+                    case '+': if (this.isOpen(this.selected) === false) {
+                        this.toggle(this.selected);
+                    } break;
+                    case '-': if (this.isOpen(this.selected)) {
+                        this.toggle(this.selected);
+                    } break;
+                }
+            }
+        };
+
+        this.keyPressed = function(e){
+            var newSelection = null;
+            switch(e.code) {
+                case KE.DOWN    :
+                case KE.RIGHT   : newSelection = this.findNext(this.selected);break;
+                case KE.UP      :
+                case KE.LEFT    : newSelection = this.findPrev(this.selected);break;
+                case KE.HOME    : if (e.isControlPressed()) this.select(this.model.root);break;
+                case KE.END     : if (e.isControlPressed()) this.select(this.findLast(this.model.root));break;
+                case KE.PAGEDOWN: if (this.selected != null) this.select(this.nextPage(this.selected, 1));break;
+                case KE.PAGEUP  : if (this.selected != null) this.select(this.nextPage(this.selected,  -1));break;
+                //!!!!case KE.ENTER: if(this.selected != null) this.toggle(this.selected);break;
+            }
+            if (newSelection != null) this.select(newSelection);
+            this.se(this.selected, e);
+        };
+
+        /**
+         * Start editing the given if an editor for the item has been defined.
+         * @param  {zebra.data.Item} item an item whose content has to be edited
+         * @method startEditing
+         * @protected
+         */
+        this.startEditing = function (item){
+            this.stopEditing(true);
+            if (this.editors != null){
+                var editor = this.editors.getEditor(this, item);
+                if (editor != null){
+                    this.editedItem = item;
+                    var b  = this.getItemBounds(this.editedItem),
+                        ps = editor.getPreferredSize();
+
+                    editor.setLocation(b.x + this.scrollManager.getSX() + this.itemGapX,
+                                       b.y - ~~((ps.height - b.height + 2 * this.itemGapY) / 2) +
+                                      this.scrollManager.getSY() + this.itemGapY);
+
+                    editor.setSize(ps.width, ps.height);
+                    this.add(editor);
+                    ui.focusManager.requestFocus(editor);
+                }
+            }
+        };
+
+        /**
+         * Stop editing currently edited tree item and apply or discard the result of the
+         * editing to tree data model.
+         * @param  {Boolean} true if the editing result has to be applied to tree data model
+         * @method stopEditing
+         * @protected
+         */
+        this.stopEditing = function(applyData){
+            if (this.editors != null && this.editedItem != null){
+                try {
+                    if (applyData)  {
+                        this.model.setValue(this.editedItem,
+                                            this.editors.fetchEditedValue(this.editedItem, this.kids[0]));
+                    }
+                }
+                finally{
+                    this.editedItem = null;
+                    this.removeAt(0);
+                    this.requestFocus();
+                }
+            }
+        };
+    },
+
+    function () { this.$this(null); },
+    function (d){ this.$this(d, true);},
+
+    function (d,b){
+        this.provider = this.editedItem = this.pressedItem = null;
+
+        /**
+         * A tree model items view provider
+         * @readOnly
+         * @attribute provider
+         * @default an instance of zebra.ui.tree.DefsViews
+         * @type {zebra.ui.tree.DefsViews}
+         */
+
+        /**
+         * A tree model editor provider
+         * @readOnly
+         * @attribute editors
+         * @default null
+         * @type {zebra.ui.tree.DefEditors}
+         */
+
+        this.editors = null;
+        this.setViewProvider(new pkg.DefViews());
+        this.$super(d, b);
+    },
+
+    function toggle() {
+        this.stopEditing(false);
+        this.$super();
+    },
+
+    function itemInserted(target,item){
+        this.stopEditing(false);
+        this.$super(target,item);
+    },
+
+    function itemRemoved(target,item){
+        this.stopEditing(false);
+        this.$super(target,item);
+    },
+
+    /**
+     * Set the given editor provider. The editor provider is a class that is used to decide which UI
+     * component has to be used as an item editor, how the editing should be triggered and how the
+     * edited value has to be fetched from an UI editor.
+     * @param {zebra.ui.tree.DefEditors} p an editor provider
+     * @method setEditorProvider
+     */
+    function setEditorProvider(p){
+        if (p != this.editors){
+            this.stopEditing(false);
+            this.editors = p;
+        }
+    },
+
+    /**
+     * Set tree component items view provider. Provider says how tree model items
+     * have to be visualized.
+     * @param {zebra.ui.tree.DefViews} p a view provider
+     * @method setViewProvider
+     */
+    function setViewProvider(p){
+        if (this.provider != p) {
+            this.stopEditing(false);
+            this.provider = p;
+            delete this.nodes;
+            this.nodes = {};
+            this.vrp();
+        }
+    },
+
+    /**
+     * Set the given tree model to be visualized with the UI component.
+     * @param {zebra.data.TreeModel|Object} d a tree model
+     * @method setModel
+     */
+    function setModel(d){
+        this.stopEditing(false);
+        this.$super(d);
+    },
+
+    function paintSelectedItem(g, root, node, x, y) {
+        if (root != this.editedItem) {
+            this.$super(g, root, node, x, y);
+        }
+    },
+
+    function itemPressed(root, e) {
+        this.$super(root, e);
+        if (this.se(root, e) === false) this.pressedItem = root;
+    },
+
+    function mousePressed(e){
+        this.pressedItem = null;
+        this.stopEditing(true);
+        this.$super(e);
+    }
+]);
+
+/**
+ * Component tree component that expects other UI components to be a tree model values. 
+ * In general the implementation lays out passed via tree model UI components as tree 
+ * component nodes. For instance:
+
+     var tree = new zebra.ui.tree.Tree({
+          value: new zebra.ui.Label("Label root item"),
+          kids : [
+                new zebra.ui.Checkbox("Checkbox Item"),
+                new zebra.ui.Button("Button item"),
+                new zebra.ui.Combo(["Combo item 1", "Combo item 2"])
+         ]
+     });
+
+ * But to prevent unexpected navigation it is better to use number of predefined 
+ * with component tree UI components: 
+
+   - zebra.ui.tree.CompTree.Label
+   - zebra.ui.tree.CompTree.Checkbox
+   - zebra.ui.tree.CompTree.Combo
+
+ * You can describe tree model keeping in mind special notation
+
+     var tree = new zebra.ui.tree.Tree({
+          value: "Label root item",  // zebra.ui.tree.CompTree.Label
+          kids : [
+                "[ ] Checkbox Item 1", // unchecked zebra.ui.tree.CompTree.Checkbox
+                "[x] Checkbox Item 2", // checked zebra.ui.tree.CompTree.Checkbox
+                ["Combo item 1", "Combo item 2"] // zebra.ui.tree.CompTree.Combo
+         ]
+     });
+
+ *
+ * @class  zebra.ui.tree.CompTree
+ * @constructor
+ * @extends zebra.ui.tree.BaseTree
+ * @param {Object|zebra.data.TreeModel} [model] a tree data model passed as JavaScript
+ * structure or as an instance
+ * @param {Boolean} [b] the tree component items toggle state. true to have all items
+ * in opened state.
+ */
+pkg.CompTree = Class(pkg.BaseTree, [
+    function $clazz() {
+        this.Label = Class(ui.Label, [
+            function $prototype() {
+                this.canHaveFocus = true;
+            }
+        ]);
+
+        this.Checkbox = Class(ui.Checkbox, []);
+
+        this.Combo = Class(ui.Combo, [
+            function keyPressed(e) {
+                if (e.code != KE.UP && e.code != KE.DOWN) this.$super(e);
+            }
+        ]);
+    },
+
+    function $prototype() {
+        this.canHaveFocus = false;
+
+        this.getItemPreferredSize = function(root) {
+            return root.value.getPreferredSize();
+        };
+
+        this.childInputEvent = function(e) {
+            if (this.isSelectable) {
+                if (e.ID == ui.InputEvent.FOCUS_LOST) {
+                    this.select(null);
+                    return;
+                }
+
+                if (e.ID == ui.InputEvent.FOCUS_GAINED || e.ID == ui.MouseEvent.PRESSED) {
+                    var $this = this;
+                    zebra.data.find(this.model.root, zebra.layout.getDirectChild(this, e.source), function(item) {
+                        $this.select(item);
+                        return true;
+                    });
+                    return;
+                }
+
+                if (e.ID  == KE.PRESSED) {
+                    var newSelection = (e.code == KE.DOWN) ? this.findNext(this.selected) 
+                                                           : (e.code == KE.UP) ? this.findPrev(this.selected): null;
+                    if (newSelection != null) {
+                        this.select(newSelection);
+                    }
+                    return;
+                }      
+            }
+
+            if (e.ID == KE.TYPED) {
+                if (this.selected != null){
+                    switch(e.ch) {
+                        case '+': if (this.isOpen(this.selected) === false) {
+                            this.toggle(this.selected);
+                        } break;
+                        case '-': if (this.isOpen(this.selected)) {
+                            this.toggle(this.selected);
+                        } break;
+                    }
+                }
+            }
+        };
+
+        this.catchScrolled = function(psx, psy){
+            this.vrp();
+        };
+
+        this.doLayout = function() {
+            this.vVisibility();
+
+            // hide all components
+            for(var i=0; i < this.kids.length; i++) {
+                this.kids[i].isVisible = false;
+            }
+
+            if (this.firstVisible != null) {
+                var $this = this, fvNode = this.getIM(this.firstVisible), started = 0;
+
+                this.model.iterate(this.model.root, function(item) {
+                    var node = $this.nodes[item];  // slightly improve performance (instead of calling $this.getIM(...))
+
+                    if (started === 0 && item == $this.firstVisible) {
+                        started = 1;
+                    }
+
+                    if (started === 1) {
+                        var sy = $this.scrollManager.getSY();
+
+                        if (node.y + sy < $this.height) {
+                            var image = $this.getIconBounds(item);
+
+                            item.value.x = image.x + image.width + (image.width > 0 || $this.getToggleSize().width > 0 ? $this.gapx : 0) + $this.scrollManager.getSX();
+                            item.value.y = node.y + ~~((node.height - node.viewHeight) / 2) + sy;
+                            item.value.isVisible = true;
+                            item.value.width  = node.viewWidth;
+                            item.value.height = node.viewHeight;
+                        }
+                        else {
+                            started = 2;
+                        }
+                    }
+
+                    return (started === 2) ? 2 :  (node.isOpen === false ? 1 : 0);
+                });
+            }
+        };
+    },
+
+    function itemInserted(target, item){
+        this.add(item.value);
+    },
+
+    function itemRemoved(target,item){
+        this.$super(target,item);
+        this.remove(item.value);
+    },
+
+    function setModel(d){
+        var old = this.model;
+        this.$super(d);
+
+        if (old != this.model) {
+            this.removeAll();
+
+            if (this.model != null) {
+                var $this = this;
+                this.model.iterate(this.model.root, function(item) {
+                    if (item.value == null ||
+                        zebra.isString(item.value))
+                    {
+                        if (item.value == null) item.value = "";
+                        item.value = item.value.trim();
+
+                        var m = item.value.match(/\[\s*(.*)\s*\](.*)/);
+
+                        if (m != null) {
+                            item.value = new $this.$clazz.Checkbox(m[2]);
+                            item.value.setValue(m[1].trim().length > 0);
+                        }
+                        else {
+                            item.value = new $this.$clazz.Label(item.value);
+                        }
+                    }
+                    else {
+                        if (Array.isArray(item.value)) {
+                            item.value = new $this.$clazz.Combo(item.value);
+                        }
+                    }
+
+                    $this.add(item.value);
+                });
+            }
+        }
+    },
+
+    function select(item) {
+        if (this.isSelectable && item != this.selected) {
+            var old = this.selected;
+
+            if (old != null && old.value.hasFocus()) {
+                ui.focusManager.requestFocus(null);
+            }
+
+            this.$super(item);
+
+            if (item != null) {
+                item.value.requestFocus();
+            }
+
+        }
+    },
+
+    function makeVisible(item) {
+       item.value.setVisible(true);
+       this.$super(item);
+    }
+]);
+
+/**
+ * Toggle view element class
+ * @class  zebra.ui.tree.TreeSignView
+ * @extends {zebra.ui.View}
+ * @constructor
+ * @param  {Boolean} plus indicates the sign type plus (true) or minus (false)
+ * @param  {String} color a color
+ * @param  {String} bg a background
+ */
+pkg.TreeSignView = Class(ui.View, [
+    function $prototype() {
+        this[''] = function(plus, color, bg) {
+            this.color = color == null ? "white" : color;
+            this.bg    = bg   == null ? "lightGray" : bg ;
+            this.plus  = plus == null ? false : plus;
+            this.br = new ui.Border("rgb(65, 131, 215)", 1, 3);
+            this.width = this.height = 12;
+        };
+
+        this.paint = function(g, x, y, w, h, d) {
+            this.br.outline(g, x, y, w, h, d);
+
+            g.setColor(this.bg);
+            g.fill();
+            this.br.paint(g, x, y, w, h, d);
+
+            g.setColor(this.color);
+            g.lineWidth = 2;
+            x+=2;
+            w-=4;
+            h-=4;
+            y+=2;
+            g.beginPath();
+            g.moveTo(x, y + h/2);
+            g.lineTo(x + w, y + h/2);
+            if (this.plus) {
+                g.moveTo(x + w/2, y);
+                g.lineTo(x + w/2, y + h);
+            }
+
+            g.stroke();
+            g.lineWidth = 1;
+        };
+
+        this.getPreferredSize = function() {
+            return { width:this.width, height:this.height};
+        };
+    }
+]);
+
+/**
+ * @for
+ */
+
+})(zebra("ui.tree"), zebra.Class, zebra.ui);
+
 (function(pkg, Class, ui) {
 
 
@@ -26627,2714 +29354,7 @@ pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
 
 })(zebra("ui.grid"), zebra.Class, zebra("ui"));
 
-(function(pkg, Class, ui)  {
 
-/**
- * Tree UI components and all related to the component classes and interfaces.
- * Tree components are graphical representation of a tree model that allows a user
- * to navigate over the model item, customize the items rendering and
- * organize customizable editing of the items.
 
-        // create tree component instance to visualize the given tree model
-        var tree = new zebra.ui.tree.Tree({
-            value: "Root",
-            kids : [
-                "Item 1",
-                "Item 2",
-                "Item 3"
-            ]
-        });
 
-        // make all tree items editable with text field component
-        tree.setEditorProvider(new zebra.ui.tree.DefEditors());
-
- * One more tree  component implementation - "CompTree" - allows developers
- * to create tree whose nodes are  other UI components
-
-        // create tree component instance to visualize the given tree model
-        var tree = new zebra.ui.tree.CompTree({
-            value: new zebra.ui.Label("Root label item"),
-            kids : [
-                new zebra.ui.Checkbox("Checkbox Item"),
-                new zebra.ui.Button("Button Item"),
-                new zebra.ui.TextField("Text field item")
-            ]
-        });
-
- * @module ui.tree
- * @main
- */
-
-
-//  tree node metrics:
-//   |
-//   |-- <-gapx-> {icon} -- <-gapx-> {view}
-//
-//
-
-
-var KE = ui.KeyEvent;
-
-/**
- * Simple private structure to keep a tree model item metrical characteristics
- * @constructor
- * @param {Boolean} b a state of an appropriate tree component node of the given
- * tree model item. The state is sensible for item that has children items and
- * the state indicates if the given tree node is collapsed (false) or expanded
- * (true)
- * @private
- * @class zebra.ui.tree.$IM
- */
-pkg.$IM = function(b) {
-    /**
-     *  The whole width of tree node that includes a rendered item preferred
-     *  width, all icons and gaps widths
-     *  @attribute width
-     *  @type {Integer}
-     *  @readOnly
-     */
-
-    /**
-     *  The whole height of tree node that includes a rendered item preferred
-     *  height, all icons and gaps heights
-     *  @attribute height
-     *  @type {Integer}
-     *  @readOnly
-     */
-
-    /**
-     *  Width of an area of rendered tree model item. It excludes icons, toggle
-     *  and gaps widths
-     *  @attribute viewWidth
-     *  @type {Integer}
-     *  @readOnly
-     */
-
-    /**
-     *  Height of an area of rendered tree model item. It excludes icons, toggle
-     *  and gaps heights
-     *  @attribute viewHeight
-     *  @type {Integer}
-     *  @readOnly
-     */
-
-    /**
-     *  Indicates whether a node is in expanded or collapsed state
-     *  @attribute isOpen
-     *  @type {Boolean}
-     *  @readOnly
-     */
-
-    this.width = this.height = this.x = this.y = this.viewHeight = 0;
-    this.viewWidth = -1;
-    this.isOpen = b;
-};
-
-pkg.TreeListeners = zebra.util.ListenersClass("toggled", "selected");
-
-/**
- * Abstract tree component that can used as basement for building own tree components.
- * The component is responsible for rendering tree, calculating tree nodes metrics,
- * computing visible area, organizing basic user interaction. Classes that inherit it
- * has to provide the following important things:
-
-    * **A tree model item metric** Developers have to implement "getItemPreferredSize(item)"
-      method to say which size the given tree item wants to have.
-    * **Tree node item rendering** If necessary developers have to implement the way
-      a tree item has to be visualized by implementing "this.paintItem(...)" method
-
- *
- * @class zebra.ui.tree.BaseTree
- * @constructor
- * @param {zebra.data.TreeModel|Object} a tree model. It can be an instance of tree model
- * class or an object that described tree model. An example of such object is shown below:
-
-        {
-            value : "Root",
-            kids  : [
-                {
-                    value: "Child 1",
-                    kids :[
-                        "Sub child 1"
-                    ]
-                },
-                "Child 2",
-                "Child 3"
-            ]
-        }
-
- * @param {Boolean} [nodeState] a default tree nodes state (expanded or collapsed)
- * @extends {zebra.ui.Panel}
- */
-
- /**
-  * Fired when a tree item has been toggled
-
-        tree.bind(function toggled(src, item) {
-           ...
-        });
-
-  * @event toggled
-  * @param  {zebra.ui.tree.BaseTree} src an tree component that triggers the event
-  * @param  {zebra.data.Item} item an tree item that has been toggled
-  */
-
- /**
-  * Fired when a tree item has been selected
-
-      tree.bind(function selected(src, item) {
-         ...
-      });
-
-  * @event selected
-  * @param  {zebra.ui.tree.BaseTree} src an tree component that triggers the event
-  * @param  {zebra.data.Item} item an tree item that has been toggled
-  */
-pkg.BaseTree = Class(ui.Panel, [
-    function $prototype() {
-
-        /**
-         * Horizontal gap between a node elements: toggle, icons and tree item view
-         * @attribute gapx
-         * @readOnly
-         * @default 2
-         * @type {Integer}
-         */
-
-        /**
-         * Vertical gap between a node elements: toggle, icons and tree item view
-         * @attribute gapy
-         * @readOnly
-         * @default 2
-         * @type {Integer}
-         */
-
-        this.gapx = this.gapy = 2;
-        this.canHaveFocus = true;
-
-        /**
-         * Test if the given tree component item is opened
-         * @param  {zebra.data.Item}  i a tree model item
-         * @return {Boolean} true if the given tree component item is opened
-         * @method isOpen
-         */
-        this.isOpen = function(i){
-            this.validate();
-            return this.isOpen_(i);
-        };
-
-        /**
-         * Get calculated for the given tree model item metrics
-         * @param  {zebra.data.Item} i a tree item
-         * @return {Object}   an tree model item metrics. Th
-         * @method getItemMetrics
-         */
-        this.getItemMetrics = function(i){
-            this.validate();
-            return this.getIM(i);
-        };
-
-        this.togglePressed = function(root) {
-            this.toggle(root);
-        };
-
-        this.itemPressed = function(root, e) {
-            this.select(root);
-        };
-
-        this.mousePressed = function(e){
-            if (this.firstVisible != null && e.isActionMask()) {
-                var x = e.x,
-                    y = e.y,
-                    root = this.getItemAt(this.firstVisible, x, y);
-
-                if (root != null) {
-                    x -= this.scrollManager.getSX();
-                    y -= this.scrollManager.getSY();
-                    var r = this.getToggleBounds(root);
-
-                    if (x >= r.x && x < r.x + r.width && y >= r.y && y < r.y + r.height){
-                        this.togglePressed(root);
-                    }
-                    else {
-                        if (x > r.x + r.width) this.itemPressed(root, e);
-                    }
-                }
-            }
-        };
-
-        this.vVisibility = function (){
-            if (this.model == null) this.firstVisible = null;
-            else {
-                var nva = ui.$cvp(this, {});
-                if (nva == null) this.firstVisible = null;
-                else {
-                    if (this._isVal === false ||
-                        (this.visibleArea == null              ||
-                         this.visibleArea.x != nva.x           ||
-                         this.visibleArea.y != nva.y           ||
-                         this.visibleArea.width != nva.width   ||
-                         this.visibleArea.height != nva.height   ))
-                    {
-                        this.visibleArea = nva;
-                        if (this.firstVisible != null) {
-                            this.firstVisible = this.findOpened(this.firstVisible);
-                            this.firstVisible = this.isOverVisibleArea(this.firstVisible) ? this.nextVisible(this.firstVisible)
-                                                                                          : this.prevVisible(this.firstVisible);
-                        }
-                        else {
-                            this.firstVisible = (-this.scrollManager.getSY() > ~~(this.maxh / 2)) ? this.prevVisible(this.findLast(this.model.root))
-                                                                                                  : this.nextVisible(this.model.root);
-                        }
-                    }
-                }
-            }
-            this._isVal = true;
-        };
-
-        this.recalc = function(){
-            this.maxh = this.maxw = 0;
-            if (this.model != null && this.model.root != null) {
-                this.recalc_(this.getLeft(), this.getTop(), null, this.model.root, true);
-                this.maxw -= this.getLeft();
-                this.maxh -= this.gapy;
-            }
-        };
-
-        /**
-         * Get tree model item  metrical bounds (location and size).
-         * @param  {zebra.data.Item} root an tree model item
-         * @return {Object} a structure that keeps an item view location
-         * and size:
-
-                {
-                    x: {Integer},
-                    y: {Integer},
-                    width: {Integer},
-                    height: {Integer}
-                }
-
-         * @method getItemBounds
-         * @protected
-         */
-        this.getItemBounds = function(root){
-            var metrics = this.getIM(root),
-                toggle  = this.getToggleBounds(root),
-                image   = this.getIconBounds(root);
-
-            toggle.x = image.x + image.width + (image.width > 0 || toggle.width > 0 ? this.gapx : 0);
-            toggle.y = metrics.y + ~~((metrics.height - metrics.viewHeight) / 2);
-            toggle.width = metrics.viewWidth;
-            toggle.height = metrics.viewHeight;
-            return toggle;
-        };
-
-        /**
-         * Get toggle element bounds for the given tree model item.
-         * @param  {zebra.data.Item} root an tree model item
-         * @return {Object} a structure that keeps an item toggle location
-         * and size:
-
-                {
-                    x: {Integer},
-                    y: {Integer},
-                    width: {Integer},
-                    height: {Integer}
-                }
-
-         * @method getToggleBounds
-         * @protected
-         */
-        this.getToggleBounds = function(root){
-            var node = this.getIM(root), d = this.getToggleSize(root);
-            return { x:node.x, y:node.y + ~~((node.height - d.height) / 2), width:d.width, height:d.height };
-        };
-
-        /**
-         * Get current toggle element view. The view depends on the state of tree item.
-         * @param  {zebra.data.Item} i a tree model item
-         * @protected
-         * @return {zebra.ui.View}  a toggle element view
-         * @method getToogleView
-         */
-        this.getToggleView = function(i){
-            return i.kids.length > 0 ? (this.getIM(i).isOpen ? this.views.on
-                                                             : this.views.off) : null;
-        };
-
-        /**
-         * An abstract method that a concrete tree component implementations have to
-         * override. The method has to return a preferred size the given tree model
-         * item wants to have.
-         * @param  {zebra.data.Item} root an tree model item
-         * @return {Object} a structure that keeps an item preferred size:
-
-                {
-                    width: {Integer},
-                    height: {Integer}
-                }
-
-         * @method getItemPreferredSize
-         * @protected
-         */
-        this.getItemPreferredSize = function(root) {
-            throw new Error("Not implemented");
-        };
-
-        /**
-         * An abstract method that a concrete tree component implementations should
-         * override. The method has to render the given tree node of the specified
-         * tree model item at the given location
-         * @param  {2DContext} g a graphical context
-         * @param  {zebra.data.Item} root a tree model item to be rendered
-         * @param  {zebra.ui.tree.$IM} node a tree node metrics
-         * @param  {Ineteger} x a x location where the tree node has to be rendered
-         * @param  {Ineteger} y a y location where the tree node has to be rendered
-         * @method paintItem
-         * @protected
-         */
-
-        this.recalc_ = function (x,y,parent,root,isVis){
-            var node = this.getIM(root);
-            if (isVis === true) {
-                if (node.viewWidth < 0){
-                    var viewSize = this.getItemPreferredSize(root);
-                    node.viewWidth  = viewSize.width === 0 ? 5 : viewSize.width;
-                    node.viewHeight = viewSize.height;
-                }
-
-                var imageSize = this.getIconSize(root), toggleSize = this.getToggleSize(root);
-                if (parent != null){
-                    var pImg = this.getIconBounds(parent);
-                    x = pImg.x + ~~((pImg.width - toggleSize.width) / 2);
-                }
-
-                node.x = x;
-                node.y = y;
-                node.width = toggleSize.width + imageSize.width +
-                             node.viewWidth + (toggleSize.width > 0 ? this.gapx : 0) + 10 +
-                                              (imageSize.width  > 0 ? this.gapx : 0);
-
-                node.height = Math.max(((toggleSize.height > imageSize.height) ? toggleSize.height
-                                                                               : imageSize.height),
-                                        node.viewHeight);
-
-                if (node.x + node.width > this.maxw) {
-                    this.maxw = node.x + node.width;
-                }
-
-                this.maxh += (node.height + this.gapy);
-                x = node.x + toggleSize.width + (toggleSize.width > 0 ? this.gapx : 0);
-                y += (node.height + this.gapy);
-            }
-
-            var b = node.isOpen && isVis === true;
-            if (b) {
-                var count = root.kids.length;
-                for(var i = 0; i < count; i++) {
-                    y = this.recalc_(x, y, root, root.kids[i], b);
-                }
-            }
-            return y;
-        };
-
-        this.isOpen_ = function (i){
-            return i == null || (i.kids.length > 0 && this.getIM(i).isOpen && this.isOpen_(i.parent));
-        };
-
-        /**
-         * Get a tree node metrics by the given tree model item.
-         * @param  {zebra.data.Item} i a tree model item
-         * @return {zebra.ui.tree.$IM} a tree node metrics
-         * @protected
-         * @method getIM
-         */
-        this.getIM = function (i){
-            var node = this.nodes[i];
-            if (typeof node === 'undefined'){
-                node = new pkg.$IM(this.isOpenVal);
-                this.nodes[i] = node;
-            }
-            return node;
-        };
-
-        /**
-         * Get a tree item that is located at the given location.
-         * @param  {zebra.data.Item} [root] a starting tree node
-         * @param  {Integer} x a x coordinate
-         * @param  {Integer} y a y coordinate
-         * @return {zebra.data.Item} a tree model item
-         * @method getItemAt
-         */
-        this.getItemAt = function(root, x, y){
-            this.validate();
-
-            if (arguments.length < 3) {
-                x = arguments[0];
-                y = arguments[1];
-                root = this.model.root;
-            }
-
-            if (this.firstVisible != null && y >= this.visibleArea.y && y < this.visibleArea.y + this.visibleArea.height){
-                var dx    = this.scrollManager.getSX(),
-                    dy    = this.scrollManager.getSY(),
-                    found = this.getItemAtInBranch(root, x - dx, y - dy);
-
-                if (found != null) return found;
-
-                var parent = root.parent;
-                while (parent != null) {
-                    var count = parent.kids.length;
-                    for(var i = parent.kids.indexOf(root) + 1;i < count; i ++ ){
-                        found = this.getItemAtInBranch(parent.kids[i], x - dx, y - dy);
-                        if (found != null) return found;
-                    }
-                    root = parent;
-                    parent = root.parent;
-                }
-            }
-            return null;
-        };
-
-        this.getItemAtInBranch = function(root,x,y){
-            if (root != null){
-                var node = this.getIM(root);
-                if (x >= node.x && y >= node.y && x < node.x + node.width && y < node.y + node.height + this.gapy) {
-                    return root;
-                }
-
-                if (this.isOpen_(root)){
-                    for(var i = 0;i < root.kids.length; i++) {
-                        var res = this.getItemAtInBranch(root.kids[i], x, y);
-                        if (res != null) return res;
-                    }
-                }
-            }
-            return null;
-        };
-
-        this.getIconView = function (i){
-            return i.kids.length > 0 ? (this.getIM(i).isOpen ? this.views.open
-                                                             : this.views.close)
-                                     : this.views.leaf;
-        };
-
-        this.getIconSize = function (i) {
-            var v =  i.kids.length > 0 ? (this.getIM(i).isOpen ? this.viewSizes.open
-                                                               : this.viewSizes.close)
-                                       : this.viewSizes.leaf;
-            return v ? v : { width:0, height:0 };
-        };
-
-        /**
-         * Get icon element bounds for the given tree model item.
-         * @param  {zebra.data.Item} root an tree model item
-         * @return {Object} a structure that keeps an item icon location
-         * and size:
-
-                {
-                    x: {Integer},
-                    y: {Integer},
-                    width: {Integer},
-                    height: {Integer}
-                }
-
-         * @method getToggleBounds
-         * @protected
-         */
-        this.getIconBounds = function (root){
-            var node = this.getIM(root),
-                id   = this.getIconSize(root),
-                td   = this.getToggleSize(root);
-            return { x:node.x + td.width + (td.width > 0 ? this.gapx : 0),
-                     y:node.y + ~~((node.height - id.height) / 2),
-                     width:id.width, height:id.height };
-        };
-
-        this.getToggleSize = function (i){
-            return this.isOpen_(i) ? this.viewSizes.on : this.viewSizes.off;
-        };
-
-        this.isOverVisibleArea = function (i){
-            var node = this.getIM(i);
-            return node.y + node.height + this.scrollManager.getSY() < this.visibleArea.y;
-        };
-
-        this.findOpened = function (item){
-            var parent = item.parent;
-            return (parent == null || this.isOpen_(parent)) ? item : this.findOpened(parent);
-        };
-
-        this.findNext = function (item){
-            if (item != null){
-                if (item.kids.length > 0 && this.isOpen_(item)){
-                    return item.kids[0];
-                }
-                var parent = null;
-                while ((parent = item.parent) != null){
-                    var index = parent.kids.indexOf(item);
-                    if (index + 1 < parent.kids.length) return parent.kids[index + 1];
-                    item = parent;
-                }
-            }
-            return null;
-        };
-
-        this.findPrev = function (item){
-            if (item != null) {
-                var parent = item.parent;
-                if (parent != null) {
-                    var index = parent.kids.indexOf(item);
-                    return (index - 1 >= 0) ? this.findLast(parent.kids[index - 1]) : parent;
-                }
-            }
-            return null;
-        };
-
-        this.findLast = function (item){
-            return this.isOpen_(item) && item.kids.length > 0 ? this.findLast(item.kids[item.kids.length - 1])
-                                                              : item;
-        };
-
-        this.prevVisible = function (item){
-            if (item == null || this.isOverVisibleArea(item)) return this.nextVisible(item);
-            var parent = null;
-            while((parent = item.parent) != null){
-                for(var i = parent.kids.indexOf(item) - 1;i >= 0; i-- ){
-                    var child = parent.kids[i];
-                    if (this.isOverVisibleArea(child)) return this.nextVisible(child);
-                }
-                item = parent;
-            }
-            return item;
-        };
-
-        this.isVerVisible = function (item){
-            if (this.visibleArea == null) return false;
-
-            var node = this.getIM(item),
-                yy1  = node.y + this.scrollManager.getSY(),
-                yy2  = yy1 + node.height - 1,
-                by   = this.visibleArea.y + this.visibleArea.height;
-
-            return ((this.visibleArea.y <= yy1 && yy1 < by) ||
-                    (this.visibleArea.y <= yy2 && yy2 < by) ||
-                    (this.visibleArea.y > yy1 && yy2 >= by)    );
-        };
-
-        this.nextVisible = function(item){
-            if (item == null || this.isVerVisible(item)) return item;
-            var res = this.nextVisibleInBranch(item), parent = null;
-            if (res != null) return res;
-            while((parent = item.parent) != null){
-                var count = parent.kids.length;
-                for(var i = parent.kids.indexOf(item) + 1;i < count; i++){
-                    res = this.nextVisibleInBranch(parent.kids[i]);
-                    if (res != null) return res;
-                }
-                item = parent;
-            }
-            return null;
-        };
-
-        this.nextVisibleInBranch = function (item){
-            if (this.isVerVisible(item)) return item;
-            if (this.isOpen_(item)){
-                for(var i = 0;i < item.kids.length; i++){
-                    var res = this.nextVisibleInBranch(item.kids[i]);
-                    if (res != null) return res;
-                }
-            }
-            return null;
-        };
-
-        this.paintSelectedItem = function(g, root, node, x, y) {
-            var v = this.hasFocus() ? this.views.aselect : this.views.iselect;
-            if (v != null) {
-                v.paint(g, x, y, node.viewWidth, node.viewHeight, this);
-            }
-        };
-
-        this.paintTree = function (g,item){
-            this.paintBranch(g, item);
-            var parent = null;
-            while((parent = item.parent) != null){
-                this.paintChild(g, parent, parent.kids.indexOf(item) + 1);
-                item = parent;
-            }
-        };
-
-        this.paintBranch = function (g, root){
-            if (root == null) return false;
-
-            var node = this.getIM(root),
-                dx   = this.scrollManager.getSX(),
-                dy   = this.scrollManager.getSY();
-
-            if (zebra.util.isIntersect(node.x + dx, node.y + dy,
-                                       node.width, node.height,
-                                       this.visibleArea.x, this.visibleArea.y,
-                                       this.visibleArea.width, this.visibleArea.height))
-            {
-                var toggle     = this.getToggleBounds(root),
-                    toggleView = this.getToggleView(root),
-                    image      = this.getIconBounds(root),
-                    vx         = image.x + image.width + this.gapx,
-                    vy         = node.y + ~~((node.height - node.viewHeight) / 2);
-
-                if (toggleView != null) {
-                    toggleView.paint(g, toggle.x, toggle.y, toggle.width, toggle.height, this);
-                }
-
-                if (image.width > 0) {
-                    this.getIconView(root).paint(g, image.x, image.y,
-                                                 image.width, image.height, this);
-                }
-
-                if (this.selected == root){
-                    this.paintSelectedItem(g, root, node, vx, vy);
-                }
-
-                if (this.paintItem != null) {
-                    this.paintItem(g, root, node, vx, vy);
-                }
-
-                if (this.lnColor != null){
-                    g.setColor(this.lnColor);
-                    var yy = toggle.y + ~~(toggle.height / 2) + 0.5;
-
-                    g.beginPath();
-                    g.moveTo(toggle.x + (toggleView == null ? ~~(toggle.width / 2) : toggle.width - 1), yy);
-                    g.lineTo(image.x, yy);
-                    g.stroke();
-                }
-            }
-            else {
-                if (node.y + dy > this.visibleArea.y + this.visibleArea.height ||
-                    node.x + dx > this.visibleArea.x + this.visibleArea.width    )
-                {
-                    return false;
-                }
-            }
-            return this.paintChild(g, root, 0);
-        };
-
-        this.y_ = function (item, isStart){
-            var node = this.getIM(item),
-                th = this.getToggleSize(item).height,
-                ty = node.y + ~~((node.height - th) / 2),
-                dy = this.scrollManager.getSY(),
-                y  = (item.kids.length > 0) ? (isStart ? ty + th : ty - 1) : ty + ~~(th / 2);
-
-            return (y + dy < 0) ?  -dy - 1
-                                : ((y + dy > this.height) ? this.height - dy : y);
-        };
-
-        /**
-         * Paint children items of the given root tree item.
-         * @param  {2DContext} g a graphical context
-         * @param  {zebra.data.Item} root a root tree item
-         * @param  {Integer} index an index
-         * @return {Boolean}
-         * @protected
-         * @method paintChild
-         */
-        this.paintChild = function (g, root, index){
-            var b = this.isOpen_(root);
-            if (root == this.firstVisible && this.lnColor != null){
-                g.setColor(this.lnColor);
-                var xx = this.getIM(root).x + ~~((b ? this.viewSizes.on.width
-                                                    : this.viewSizes.off.width) / 2);
-                g.beginPath();
-                g.moveTo(xx + 0.5, this.getTop());
-                g.lineTo(xx + 0.5, this.y_(root, false));
-                g.stroke();
-            }
-            if (b && root.kids.length > 0){
-                var firstChild = root.kids[0];
-                if (firstChild == null) return true;
-
-                var x = this.getIM(firstChild).x + ~~((this.isOpen_(firstChild) ? this.viewSizes.on.width
-                                                                                : this.viewSizes.off.width) / 2),
-                count = root.kids.length;
-                if (index < count) {
-                    var  node = this.getIM(root),
-                         y    = (index > 0) ? this.y_(root.kids[index - 1], true)
-                                            : node.y + ~~((node.height + this.getIconSize(root).height) / 2);
-
-                    for(var i = index;i < count; i ++ ){
-                        var child = root.kids[i];
-                        if (this.lnColor != null){
-                            g.setColor(this.lnColor);
-                            g.beginPath();
-                            g.moveTo(x + 0.5, y);
-                            g.lineTo(x + 0.5, this.y_(child, false));
-                            g.stroke();
-                            y = this.y_(child, true);
-                        }
-                        if (this.paintBranch(g, child) === false){
-                            if (this.lnColor != null && i + 1 != count){
-                                g.setColor(this.lnColor);
-                                g.beginPath();
-                                g.moveTo(x + 0.5, y);
-                                g.lineTo(x + 0.5, this.height - this.scrollManager.getSY());
-                                g.stroke();
-                            }
-                            return false;
-                        }
-                    }
-                }
-            }
-            return true;
-        };
-
-        this.nextPage = function (item,dir){
-            var sum = 0, prev = item;
-            while(item != null && sum < this.visibleArea.height){
-                sum += (this.getIM(item).height + this.gapy);
-                prev = item;
-                item = dir < 0 ? this.findPrev(item) : this.findNext(item);
-            }
-            return prev;
-        };
-
-        this.paint = function(g){
-            if (this.model != null){
-                this.vVisibility();
-                if (this.firstVisible != null){
-                    var sx = this.scrollManager.getSX(), sy = this.scrollManager.getSY();
-                    try{
-                        g.translate(sx, sy);
-                        this.paintTree(g, this.firstVisible);
-                        g.translate(-sx,  -sy);
-                    }
-                    catch(e) {
-                        g.translate(-sx,  -sy);
-                        throw e;
-                    }
-                }
-            }
-        };
-
-        /**
-         * Select the given item.
-         * @param  {zebra.data.Item} an item to be selected. Use null value to clear any selection
-         * @method  select
-         */
-        this.select = function(item){
-            if (this.isSelectable == true && item != this.selected){
-                var old = this.selected;
-
-                this.selected = item;
-
-                if (this.selected != null) {
-                    this.makeVisible(this.selected);
-                }
-
-                this._.selected(this, this.selected);
-
-                if (old != null && this.isVerVisible(old)){
-                    var m = this.getItemMetrics(old);
-                    this.repaint(m.x + this.scrollManager.getSX(),
-                                 m.y + this.scrollManager.getSY(),
-                                 m.width, m.height);
-                }
-
-                if (this.selected != null && this.isVerVisible(this.selected)){
-                    var m = this.getItemMetrics(this.selected);
-                    this.repaint(m.x + this.scrollManager.getSX(),
-                                 m.y + this.scrollManager.getSY(),
-                                 m.width, m.height);
-                }
-            }
-        };
-
-        /**
-         * Make the given tree item visible. Tree component rendered content can takes more space than
-         * the UI component size is. In this case the content can be scrolled to make visible required
-         * tree item.
-         * @param  {zebra.data.Item} item an item to be visible
-         * @method makeVisible
-         */
-        this.makeVisible = function(item){
-            this.validate();
-            var r = this.getItemBounds(item);
-            this.scrollManager.makeVisible(r.x, r.y, r.width, r.height);
-        };
-
-        /**
-         * Toggle off or on recursively all items of the given item
-         * @param  {zebra.data.Item} root a starting item to toggle
-         * @param  {Boolean} b  true if all items have to be in opened
-         * state and false otherwise
-         * @method toggleAll
-         */
-        this.toggleAll = function (root,b){
-            var model = this.model;
-            if (root.kids.length > 0){
-                if (this.getItemMetrics(root).isOpen != b) this.toggle(root);
-                for(var i = 0;i < root.kids.length; i++ ){
-                    this.toggleAll(root.kids[i], b);
-                }
-            }
-        };
-
-        /**
-         * Toggle the given tree item
-         * @param  {zebra.data.Item} item an item to be toggled
-         * @method toggle
-         */
-        this.toggle = function(item){
-            if (item.kids.length > 0){
-                this.validate();
-                var node = this.getIM(item);
-                node.isOpen = (node.isOpen ? false : true);
-                this.invalidate();
-                this._.toggled(this, item);
-                if( !node.isOpen && this.selected != null){
-                    var parent = this.selected;
-                    do {
-                        parent = parent.parent;
-                    }
-                    while(parent != item && parent != null);
-                    if(parent == item) this.select(item);
-                }
-                this.repaint();
-            }
-        };
-
-        this.itemInserted = function (target,item){
-            this.vrp();
-        };
-
-        this.itemRemoved = function (target,item){
-            if (item == this.firstVisible) this.firstVisible = null;
-            if (item == this.selected) this.select(null);
-            delete this.nodes[item];
-            this.vrp();
-        };
-
-        this.itemModified = function (target,item){
-            var node = this.getIM(item);
-            if (node != null) node.viewWidth = -1;
-            this.vrp();
-        };
-
-        this.calcPreferredSize = function (target){
-            return this.model == null ? { width:0, height:0 }
-                                      : { width:this.maxw, height:this.maxh };
-        };
-    },
-
-    function () { this.$this(null); },
-    function (d){ this.$this(d, true);},
-
-    function (d,b){
-         /**
-          * Selected tree model item
-          * @attribute selected
-          * @type {zebra.data.Item}
-          * @default null
-          * @readOnly
-          */
-
-        this.selected = this.firstVisible = null;
-        this.maxw = this.maxh = 0;
-
-         /**
-          * Tree component line color
-          * @attribute lnColor
-          * @type {String}
-          * @readOnly
-          */
-
-        this.visibleArea = this.lnColor = null;
-
-        this.views     = {};
-        this.viewSizes = {};
-
-        this._isVal = false;
-        this.nodes = {};
-        this._ = new pkg.TreeListeners();
-        this.setLineColor("gray");
-
-        this.isOpenVal = b;
-
-        this.setSelectable(true);
-        this.$super();
-        this.setModel(d);
-        this.scrollManager = new ui.ScrollManager(this);
-    },
-
-    function focused(){
-        this.$super();
-        if (this.selected != null) {
-            var m = this.getItemMetrics(this.selected);
-            this.repaint(m.x + this.scrollManager.getSX(),
-                         m.y + this.scrollManager.getSY(), m.width, m.height);
-        }
-    },
-    /**
-     * Say if items of the tree component should be selectable
-     * @param {Boolean} b true is tree component items can be selected
-     * @method setSelectable
-     */
-    function setSelectable(b){
-        if (this.isSelectable != b){
-            if (b === false && this.selected != null) this.select(null);
-            this.isSelectable = b;
-            this.repaint();
-        }
-    },
-
-    /**
-     * Set tree component connector lines color
-     * @param {String} c a color
-     * @method setLineColor
-     */
-    function setLineColor(c){
-        this.lnColor = c;
-        this.repaint();
-    },
-
-    /**
-     * Set the given horizontal gaps between tree node graphical elements:
-     * toggle, icon, item view
-     * @param {Integer} gx horizontal gap
-     * @param {Integer} gy vertical gap
-     * @method setGaps
-     */
-    function setGaps(gx,gy){
-        if (gx != this.gapx || gy != this.gapy){
-            this.gapx = gx;
-            this.gapy = gy;
-            this.vrp();
-        }
-    },
-
-    /**
-     * Set the number of views to customize rendering of different visual elements of the tree
-     * UI component. The following decorative elements can be customized:
-
-    - **"close" ** - closed tree item icon view
-    - **"open" **  - opened tree item icon view
-    - **"leaf" **  - leaf tree item icon view
-    - **"on" **    - toggle on view
-    - **"off" **   - toggle off view
-    - **"iselect" **   - a view to express an item selection when tree component doesn't hold focus
-    - **"aselect" **   - a view to express an item selection when tree component holds focus
-
-     * For instance:
-
-        // build tree UI component
-        var tree = new zebra.ui.tree.Tree({
-            value: "Root",
-            kids: [
-                "Item 1",
-                "Item 2"
-            ]
-        });
-
-        // set " [x] " text render for toggle on and
-        // " [o] " text render for toggle off tree elements
-        tree.setViews({
-            "on": new zebra.ui.TextRender(" [x] "),
-            "off": new zebra.ui.TextRender(" [o] ")
-        });
-
-     * @param {Object} v dictionary of tree component decorative elements views
-     * @method setViews
-     */
-    function setViews(v){
-        for(var k in v) {
-            if (v.hasOwnProperty(k)) {
-                var vv = ui.$view(v[k]);
-
-                this.views[k] = vv;
-                if (k != "aselect" && k != "iselect"){
-                    this.viewSizes[k] = vv ? vv.getPreferredSize() : null;
-                    this.vrp();
-                }
-            }
-        }
-    },
-
-    /**
-     * Set the given tree model to be visualized with the UI component.
-     * @param {zebra.data.TreeModel|Object} d a tree model
-     * @method setModel
-     */
-    function setModel(d){
-        if (this.model != d) {
-            if (zebra.instanceOf(d, zebra.data.TreeModel) === false) {
-                d = new zebra.data.TreeModel(d);
-            }
-
-            this.select(null);
-            if (this.model != null && this.model._) this.model.bind(this);
-            this.model = d;
-            if (this.model != null && this.model._) this.model.bind(this);
-            this.firstVisible = null;
-            delete this.nodes;
-            this.nodes = {};
-            this.vrp();
-        }
-    },
-
-    function invalidate(){
-        if (this.isValid === true){
-            this._isVal = false;
-            this.$super();
-        }
-    }
-]);
-
-/**
- * Default tree editor provider
- * @class zebra.ui.tree.DefEditors
- */
-pkg.DefEditors = Class([
-    function (){
-        /**
-         * Internal component that are designed as default editor component
-         * @private
-         * @readOnly
-         * @attribute tf
-         * @type {zebra.ui.TextField}
-         */
-        this.tf = new ui.TextField(new zebra.data.SingleLineTxt(""));
-        this.tf.setBackground("white");
-        this.tf.setBorder(null);
-        this.tf.setPadding(0);
-    },
-
-    function $prototype() {
-        /**
-         * Get an UI component to edit the given tree model element
-         * @param  {zebra.ui.tree.Tree} src a tree component
-         * @param  {zebra.data.Item} item an data model item
-         * @return {zebra.ui.Panel} an editor UI component
-         * @method getEditor
-         */
-        this.getEditor = function(src,item){
-            var o = item.value;
-            this.tf.setValue((o == null) ? "" : o.toString());
-            return this.tf;
-        };
-
-        /**
-         * Fetch a model item from the given UI editor component
-         * @param  {zebra.ui.tree.Tree} src a tree UI component
-         * @param  {zebra.ui.Panel} editor an editor that has been used to edit the tree model element
-         * @return {Object} an new tree model element value fetched from the given UI editor component
-         * @method fetchEditedValue
-         */
-        this.fetchEditedValue = function(src, editor){
-            return editor.view.target.getValue();
-        };
-
-        /**
-         * The method is called to ask if the given input event should trigger an tree component item
-         * @param  {zebra.ui.tree.Tree} src a tree UI component
-         * @param  {zebra.ui.MouseEvent|zebra.ui.KeyEvent} e   an input event: mouse or key event
-         * @return {Boolean} true if the event should trigger edition of a tree component item
-         * @method @shouldStartEdit
-         */
-        this.shouldStartEdit = function(src,e){
-            return (e.ID == ui.MouseEvent.CLICKED && e.clicks > 1) ||
-                   (e.ID == KE.PRESSED && e.code == KE.ENTER);
-        };
-    }
-]);
-
-/**
- * Default tree editor view provider
- * @class zebra.ui.tree.DefViews
- * @constructor
- * @param {String} [color] the tree item text color
- * @param {String} [font] the tree item text font
- */
-pkg.DefViews = Class([
-    function $prototype() {
-        /**
-         * Get a view for the given model item of the UI tree component
-         * @param  {zebra.ui.tree.Tree} tree  a tree component
-         * @param  {zebra.data.Item} item a tree model element
-         * @return {zebra.ui.View}  a view to visualize the given tree data model element
-         * @method  getView
-         */
-        this.getView = function (tree, item){
-            if (item.value && item.value.paint != null) {
-                return item.value;
-            }
-            this.render.setValue(item.value == null ? "<null>" : item.value);
-            return this.render;
-        };
-
-        /**
-         * Set the default view provider text render font
-         * @param {zebra.ui.Font} f a font
-         * @method setFont
-         */
-        this.setFont = function(f) {
-            this.render.setFont(f);
-        };
-
-        /**
-         * Set the default view provider text render color
-         * @param {String} c a color
-         * @method setColor
-         */
-        this.setColor = function(c) {
-            this.render.setColor(c);
-        };
-
-        this[''] = function(color, font) {
-            /**
-             * Default tree item render
-             * @attribute render
-             * @readOnly
-             * @type {zebra.ui.StringRender}
-             */
-            this.render = new ui.StringRender("");
-
-            zebra.properties(this, this.$clazz);
-
-            if (color != null) this.setColor(color);
-            if (font  != null) this.setFont(font);
-        };
-    }
-]);
-
-/**
- * Tree UI component that visualizes a tree data model. The model itself can be passed as JavaScript
- * structure or as a instance of zebra.data.TreeModel. Internally tree component keeps the model always
- * as zebra.data.TreeModel class instance:
-
-     var tree = new zebra.ui.tree.Tree({
-          value: "Root",
-          kids : [  "Item 1", "Item 2"]
-     });
-
- * or
-
-     var model = new zebra.data.TreeModel("Root");
-     model.add(model.root, "Item 1");
-     model.add(model.root, "Item 2");
-
-     var tree = new zebra.ui.tree.Tree(model);
-
- * Tree model rendering is fully customizable by defining an own views provider. Default views
- * provider renders tree model item as text. The tree node can be made editable by defining an
- * editor provider. By default tree modes are not editable.
- * @class  zebra.ui.tree.Tree
- * @constructor
- * @extends zebra.ui.tree.BaseTree
- * @param {Object|zebra.data.TreeModel} [model] a tree data model passed as JavaScript
- * structure or as an instance
- * @param {Boolean} [b] the tree component items toggle state. true to have all items
- * in opened state.
- */
-pkg.Tree = Class(pkg.BaseTree, [
-    function $prototype() {
-        this.itemGapY = 2;
-        this.itemGapX = 4;
-
-        this.childInputEvent = function(e){
-            if (e.ID == KE.PRESSED){
-                if (e.code == KE.ESCAPE) {
-                    this.stopEditing(false);
-                }
-                else {
-                    if (e.code == KE.ENTER) {
-                        if ((zebra.instanceOf(e.source, ui.TextField) === false) ||
-                            (zebra.instanceOf(e.source.view.target, zebra.data.SingleLineTxt)))
-                        {
-                            this.stopEditing(true);
-                        }
-                    }
-                }
-            }
-        };
-
-        this.catchScrolled = function (psx, psy){
-            if (this.kids.length > 0) this.stopEditing(false);
-
-            if (this.firstVisible == null) this.firstVisible = this.model.root;
-            this.firstVisible = (this.y < psy) ? this.nextVisible(this.firstVisible)
-                                               : this.prevVisible(this.firstVisible);
-            this.repaint();
-        };
-
-        this.laidout = function() {
-            this.vVisibility();
-        };
-
-        this.getItemPreferredSize = function(root) {
-            var ps = this.provider.getView(this, root).getPreferredSize();
-            ps.width  += this.itemGapX * 2;
-            ps.height += this.itemGapY * 2;
-            return ps;
-        };
-
-        this.paintItem = function(g, root, node, x, y) {
-            if (root != this.editedItem){
-                var v = this.provider.getView(this, root);
-                v.paint(g, x + this.itemGapX, y + this.itemGapY,
-                        node.viewWidth, node.viewHeight, this);
-            }
-        };
-
-        /**
-         * Initiate the given item editing if the specified event matches condition
-         * @param  {zebra.data.Item} item an item to be edited
-         * @param  {zebra.ui.InputEvent} e an even that may trigger the item editing
-         * @return {Boolean}  return true if an item editing process has been started,
-         * false otherwise
-         * @method  se
-         * @private
-         */
-        this.se = function (item,e ){
-            if (item != null){
-                this.stopEditing(true);
-                if (this.editors != null && this.editors.shouldStartEdit(item, e)){
-                    this.startEditing(item);
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        this.mouseClicked = function(e){
-            if (this.se(this.pressedItem, e)) {
-                this.pressedItem = null;
-            }
-            else {
-                if (this.selected != null &&
-                    e.clicks > 1 && e.isActionMask() &&
-                   this.getItemAt(this.firstVisible, e.x, e.y) == this.selected)
-                {
-                    this.toggle(this.selected);
-                }
-            }
-        };
-
-        this.mouseReleased = function(e){
-            if (this.se(this.pressedItem, e)) this.pressedItem = null;
-        };
-
-        this.keyTyped = function(e){
-            if (this.selected != null){
-                switch(e.ch) {
-                    case '+': if (this.isOpen(this.selected) === false) {
-                        this.toggle(this.selected);
-                    } break;
-                    case '-': if (this.isOpen(this.selected)) {
-                        this.toggle(this.selected);
-                    } break;
-                }
-            }
-        };
-
-        this.keyPressed = function(e){
-            var newSelection = null;
-            switch(e.code) {
-                case KE.DOWN    :
-                case KE.RIGHT   : newSelection = this.findNext(this.selected);break;
-                case KE.UP      :
-                case KE.LEFT    : newSelection = this.findPrev(this.selected);break;
-                case KE.HOME    : if (e.isControlPressed()) this.select(this.model.root);break;
-                case KE.END     : if (e.isControlPressed()) this.select(this.findLast(this.model.root));break;
-                case KE.PAGEDOWN: if (this.selected != null) this.select(this.nextPage(this.selected, 1));break;
-                case KE.PAGEUP  : if (this.selected != null) this.select(this.nextPage(this.selected,  -1));break;
-                //!!!!case KE.ENTER: if(this.selected != null) this.toggle(this.selected);break;
-            }
-            if (newSelection != null) this.select(newSelection);
-            this.se(this.selected, e);
-        };
-
-        /**
-         * Start editing the given if an editor for the item has been defined.
-         * @param  {zebra.data.Item} item an item whose content has to be edited
-         * @method startEditing
-         * @protected
-         */
-        this.startEditing = function (item){
-            this.stopEditing(true);
-            if (this.editors != null){
-                var editor = this.editors.getEditor(this, item);
-                if (editor != null){
-                    this.editedItem = item;
-                    var b  = this.getItemBounds(this.editedItem),
-                        ps = editor.getPreferredSize();
-
-                    editor.setLocation(b.x + this.scrollManager.getSX() + this.itemGapX,
-                                       b.y - ~~((ps.height - b.height + 2 * this.itemGapY) / 2) +
-                                      this.scrollManager.getSY() + this.itemGapY);
-
-                    editor.setSize(ps.width, ps.height);
-                    this.add(editor);
-                    ui.focusManager.requestFocus(editor);
-                }
-            }
-        };
-
-        /**
-         * Stop editing currently edited tree item and apply or discard the result of the
-         * editing to tree data model.
-         * @param  {Boolean} true if the editing result has to be applied to tree data model
-         * @method stopEditing
-         * @protected
-         */
-        this.stopEditing = function(applyData){
-            if (this.editors != null && this.editedItem != null){
-                try {
-                    if (applyData)  {
-                        this.model.setValue(this.editedItem,
-                                            this.editors.fetchEditedValue(this.editedItem, this.kids[0]));
-                    }
-                }
-                finally{
-                    this.editedItem = null;
-                    this.removeAt(0);
-                    this.requestFocus();
-                }
-            }
-        };
-    },
-
-    function () { this.$this(null); },
-    function (d){ this.$this(d, true);},
-
-    function (d,b){
-        this.provider = this.editedItem = this.pressedItem = null;
-
-        /**
-         * A tree model items view provider
-         * @readOnly
-         * @attribute provider
-         * @default an instance of zebra.ui.tree.DefsViews
-         * @type {zebra.ui.tree.DefsViews}
-         */
-
-        /**
-         * A tree model editor provider
-         * @readOnly
-         * @attribute editors
-         * @default null
-         * @type {zebra.ui.tree.DefEditors}
-         */
-
-        this.editors = null;
-        this.setViewProvider(new pkg.DefViews());
-        this.$super(d, b);
-    },
-
-    function toggle() {
-        this.stopEditing(false);
-        this.$super();
-    },
-
-    function itemInserted(target,item){
-        this.stopEditing(false);
-        this.$super(target,item);
-    },
-
-    function itemRemoved(target,item){
-        this.stopEditing(false);
-        this.$super(target,item);
-    },
-
-    /**
-     * Set the given editor provider. The editor provider is a class that is used to decide which UI
-     * component has to be used as an item editor, how the editing should be triggered and how the
-     * edited value has to be fetched from an UI editor.
-     * @param {zebra.ui.tree.DefEditors} p an editor provider
-     * @method setEditorProvider
-     */
-    function setEditorProvider(p){
-        if (p != this.editors){
-            this.stopEditing(false);
-            this.editors = p;
-        }
-    },
-
-    /**
-     * Set tree component items view provider. Provider says how tree model items
-     * have to be visualized.
-     * @param {zebra.ui.tree.DefViews} p a view provider
-     * @method setViewProvider
-     */
-    function setViewProvider(p){
-        if (this.provider != p) {
-            this.stopEditing(false);
-            this.provider = p;
-            delete this.nodes;
-            this.nodes = {};
-            this.vrp();
-        }
-    },
-
-    /**
-     * Set the given tree model to be visualized with the UI component.
-     * @param {zebra.data.TreeModel|Object} d a tree model
-     * @method setModel
-     */
-    function setModel(d){
-        this.stopEditing(false);
-        this.$super(d);
-    },
-
-    function paintSelectedItem(g, root, node, x, y) {
-        if (root != this.editedItem) {
-            this.$super(g, root, node, x, y);
-        }
-    },
-
-    function itemPressed(root, e) {
-        this.$super(root, e);
-        if (this.se(root, e) === false) this.pressedItem = root;
-    },
-
-    function mousePressed(e){
-        this.pressedItem = null;
-        this.stopEditing(true);
-        this.$super(e);
-    }
-]);
-
-/**
- * Component tree component that expects other UI components to be a tree model values. 
- * In general the implementation lays out passed via tree model UI components as tree 
- * component nodes. For instance:
-
-     var tree = new zebra.ui.tree.Tree({
-          value: new zebra.ui.Label("Label root item"),
-          kids : [
-                new zebra.ui.Checkbox("Checkbox Item"),
-                new zebra.ui.Button("Button item"),
-                new zebra.ui.Combo(["Combo item 1", "Combo item 2"])
-         ]
-     });
-
- * But to prevent unexpected navigation it is better to use number of predefined 
- * with component tree UI components: 
-
-   - zebra.ui.tree.CompTree.Label
-   - zebra.ui.tree.CompTree.Checkbox
-   - zebra.ui.tree.CompTree.Combo
-
- * You can describe tree model keeping in mind special notation
-
-     var tree = new zebra.ui.tree.Tree({
-          value: "Label root item",  // zebra.ui.tree.CompTree.Label
-          kids : [
-                "[ ] Checkbox Item 1", // unchecked zebra.ui.tree.CompTree.Checkbox
-                "[x] Checkbox Item 2", // checked zebra.ui.tree.CompTree.Checkbox
-                ["Combo item 1", "Combo item 2"] // zebra.ui.tree.CompTree.Combo
-         ]
-     });
-
- *
- * @class  zebra.ui.tree.CompTree
- * @constructor
- * @extends zebra.ui.tree.BaseTree
- * @param {Object|zebra.data.TreeModel} [model] a tree data model passed as JavaScript
- * structure or as an instance
- * @param {Boolean} [b] the tree component items toggle state. true to have all items
- * in opened state.
- */
-pkg.CompTree = Class(pkg.BaseTree, [
-    function $clazz() {
-        this.Label = Class(ui.Label, [
-            function $prototype() {
-                this.canHaveFocus = true;
-            }
-        ]);
-
-        this.Checkbox = Class(ui.Checkbox, []);
-
-        this.Combo = Class(ui.Combo, [
-            function keyPressed(e) {
-                if (e.code != KE.UP && e.code != KE.DOWN) this.$super(e);
-            }
-        ]);
-    },
-
-    function $prototype() {
-        this.canHaveFocus = false;
-
-        this.getItemPreferredSize = function(root) {
-            return root.value.getPreferredSize();
-        };
-
-        this.childInputEvent = function(e) {
-            if (this.isSelectable) {
-                if (e.ID == ui.InputEvent.FOCUS_LOST) {
-                    this.select(null);
-                    return;
-                }
-
-                if (e.ID == ui.InputEvent.FOCUS_GAINED || e.ID == ui.MouseEvent.PRESSED) {
-                    var $this = this;
-                    zebra.data.find(this.model.root, zebra.layout.getDirectChild(this, e.source), function(item) {
-                        $this.select(item);
-                        return true;
-                    });
-                    return;
-                }
-
-                if (e.ID  == KE.PRESSED) {
-                    var newSelection = (e.code == KE.DOWN) ? this.findNext(this.selected) 
-                                                           : (e.code == KE.UP) ? this.findPrev(this.selected): null;
-                    if (newSelection != null) {
-                        this.select(newSelection);
-                    }
-                    return;
-                }      
-            }
-
-            if (e.ID == KE.TYPED) {
-                if (this.selected != null){
-                    switch(e.ch) {
-                        case '+': if (this.isOpen(this.selected) === false) {
-                            this.toggle(this.selected);
-                        } break;
-                        case '-': if (this.isOpen(this.selected)) {
-                            this.toggle(this.selected);
-                        } break;
-                    }
-                }
-            }
-        };
-
-        this.catchScrolled = function(psx, psy){
-            this.vrp();
-        };
-
-        this.doLayout = function() {
-            this.vVisibility();
-
-            // hide all components
-            for(var i=0; i < this.kids.length; i++) {
-                this.kids[i].isVisible = false;
-            }
-
-            if (this.firstVisible != null) {
-                var $this = this, fvNode = this.getIM(this.firstVisible), started = 0;
-
-                this.model.iterate(this.model.root, function(item) {
-                    var node = $this.nodes[item];  // slightly improve performance (instead of calling $this.getIM(...))
-
-                    if (started === 0 && item == $this.firstVisible) {
-                        started = 1;
-                    }
-
-                    if (started === 1) {
-                        var sy = $this.scrollManager.getSY();
-
-                        if (node.y + sy < $this.height) {
-                            var image = $this.getIconBounds(item);
-
-                            item.value.x = image.x + image.width + (image.width > 0 || $this.getToggleSize().width > 0 ? $this.gapx : 0) + $this.scrollManager.getSX();
-                            item.value.y = node.y + ~~((node.height - node.viewHeight) / 2) + sy;
-                            item.value.isVisible = true;
-                            item.value.width  = node.viewWidth;
-                            item.value.height = node.viewHeight;
-                        }
-                        else {
-                            started = 2;
-                        }
-                    }
-
-                    return (started === 2) ? 2 :  (node.isOpen === false ? 1 : 0);
-                });
-            }
-        };
-    },
-
-    function itemInserted(target, item){
-        this.add(item.value);
-    },
-
-    function itemRemoved(target,item){
-        this.$super(target,item);
-        this.remove(item.value);
-    },
-
-    function setModel(d){
-        var old = this.model;
-        this.$super(d);
-
-        if (old != this.model) {
-            this.removeAll();
-
-            if (this.model != null) {
-                var $this = this;
-                this.model.iterate(this.model.root, function(item) {
-                    if (item.value == null ||
-                        zebra.isString(item.value))
-                    {
-                        if (item.value == null) item.value = "";
-                        item.value = item.value.trim();
-
-                        var m = item.value.match(/\[\s*(.*)\s*\](.*)/);
-
-                        if (m != null) {
-                            item.value = new $this.$clazz.Checkbox(m[2]);
-                            item.value.setValue(m[1].trim().length > 0);
-                        }
-                        else {
-                            item.value = new $this.$clazz.Label(item.value);
-                        }
-                    }
-                    else {
-                        if (Array.isArray(item.value)) {
-                            item.value = new $this.$clazz.Combo(item.value);
-                        }
-                    }
-
-                    $this.add(item.value);
-                });
-            }
-        }
-    },
-
-    function select(item) {
-        if (this.isSelectable && item != this.selected) {
-            var old = this.selected;
-
-            if (old != null && old.value.hasFocus()) {
-                ui.focusManager.requestFocus(null);
-            }
-
-            this.$super(item);
-
-            if (item != null) {
-                item.value.requestFocus();
-            }
-
-        }
-    },
-
-    function makeVisible(item) {
-       item.value.setVisible(true);
-       this.$super(item);
-    }
-]);
-
-/**
- * Toggle view element class
- * @class  zebra.ui.tree.TreeSignView
- * @extends {zebra.ui.View}
- * @constructor
- * @param  {Boolean} plus indicates the sign type plus (true) or minus (false)
- * @param  {String} color a color
- * @param  {String} bg a background
- */
-pkg.TreeSignView = Class(ui.View, [
-    function $prototype() {
-        this[''] = function(plus, color, bg) {
-            this.color = color == null ? "white" : color;
-            this.bg    = bg   == null ? "lightGray" : bg ;
-            this.plus  = plus == null ? false : plus;
-            this.br = new ui.Border("rgb(65, 131, 215)", 1, 3);
-            this.width = this.height = 12;
-        };
-
-        this.paint = function(g, x, y, w, h, d) {
-            this.br.outline(g, x, y, w, h, d);
-
-            g.setColor(this.bg);
-            g.fill();
-            this.br.paint(g, x, y, w, h, d);
-
-            g.setColor(this.color);
-            g.lineWidth = 2;
-            x+=2;
-            w-=4;
-            h-=4;
-            y+=2;
-            g.beginPath();
-            g.moveTo(x, y + h/2);
-            g.lineTo(x + w, y + h/2);
-            if (this.plus) {
-                g.moveTo(x + w/2, y);
-                g.lineTo(x + w/2, y + h);
-            }
-
-            g.stroke();
-            g.lineWidth = 1;
-        };
-
-        this.getPreferredSize = function() {
-            return { width:this.width, height:this.height};
-        };
-    }
-]);
-
-/**
- * @for
- */
-
-})(zebra("ui.tree"), zebra.Class, zebra.ui);
-(function(pkg, Class) {
-
-/**
- * @module  ui
- */
-
-/**
- * HTML element UI component wrapper class. The class represents
- * an HTML element as if it is standard UI component. It helps to use
- * some standard HTML element as zebra UI components and embeds it
- * in zebra UI application layout.
- * @class zebra.ui.HtmlElement
- * @constructor
- * @param {String|HTMLElement} [element] an HTML element to be represented
- * as a standard zebra UI component. If the passed parameter is string
- * it denotes a name of an HTML element. In this case a new HTML element
- * will be created.
- * @extends {zebra.ui.Panel}
- */
-pkg.HtmlElement = Class(pkg.Panel, [
-    function $prototype() {
-        this.isLocAdjusted = false;
-        this.canvas = null;
-        this.ePsW = this.ePsH = 0;
-
-        /**
-         * Set the CSS font of the wrapped HTML element
-         * @param {String|zebra.ui.Font} f a font
-         * @method setFont
-         */
-        this.setFont = function(f) {
-            this.element.style.font = f.toString();
-            this.vrp();
-        };
-
-        /**
-         * Set the CSS color of the wrapped HTML element
-         * @param {String} c a color
-         * @method setColor
-         */
-        this.setColor = function(c) {
-            this.element.style.color = c.toString();
-        };
-
-        this.adjustLocation = function() {
-            if (this.isLocAdjusted === false && this.canvas != null) {
-
-                // hidden DOM component before move
-                // makes moving more smooth
-                var visibility = this.element.style.visibility;
-                this.element.style.visibility = "hidden";
-
-                if (zebra.instanceOf( this.parent, pkg.HtmlElement)) {
-                    this.element.style.top  = "" + this.y + "px";
-                    this.element.style.left = "" + this.x + "px";
-                }
-                else {
-                    var a = zebra.layout.toParentOrigin(0,0,this);
-                    this.element.style.top  = "" + (this.canvas.offy + a.y) + "px";
-                    this.element.style.left = "" + (this.canvas.offx + a.x) + "px";
-                }
-                this.isLocAdjusted = true;
-                this.element.style.visibility = visibility;
-            }
-        };
-
-        this.calcPreferredSize = function(target) {
-            return { width: this.ePsW, height: this.ePsH };
-        };
-
-        var $store = [
-            "visibility",
-            "paddingTop","paddingLeft","paddingBottom","paddingRight",
-            "border","borderStyle","borderWidth",
-            "borderTopStyle","borderTopWidth",
-            "borderBottomStyle","borderBottomWidth",
-            "borderLeftStyle","borderLeftWidth",
-            "borderRightStyle","borderRightWidth",
-            "width", "height"
-        ];
-
-        this.recalc = function() {
-            // save element metrics
-            var e    = this.element,
-                vars = {};
-
-            for(var i=0; i<$store.length; i++) {
-                var k = $store[i];
-                vars[k] = e.style[k];
-            }
-
-            // force metrics to be calculated automatically
-            e.style.visibility = "hidden";
-            e.style.padding = "0px";
-            e.style.border  = "none";
-            e.style.width   = "auto";
-            e.style.height  = "auto";
-
-            // fetch preferred size
-            this.ePsW = e.offsetWidth;
-            this.ePsH = e.offsetHeight;
-
-            for(var k in vars) {
-                var v = vars[k];
-                if (v != null) e.style[k] = v;
-            }
-
-            this.setSize(this.width, this.height);
-        };
-
-        /**
-         * Set the inner content of the wrapped HTML element
-         * @param {String} an inner content
-         * @method setContent
-         */
-        this.setContent = function(content) {
-            this.element.innerHTML = content;
-            this.vrp();
-        };
-
-        /**
-         * Apply the given set of CSS styles to the wrapped HTML element
-         * @param {Object} styles a dictionary of CSS styles
-         * @method setStyles
-         */
-        this.setStyles = function(styles) {
-            for(var k in styles) {
-                this.setStyle(k, styles[k]);
-            }
-        };
-
-        /**
-         * Apply the given CSS style to the wrapped HTML element
-         * @param {String} a name of the CSS style
-         * @param {String} a value the CSS style has to be set
-         * @method setStyle
-         */
-        this.setStyle = function(name, value) {
-            name = name.trim();
-            var i = name.indexOf(':');
-            if (i > 0) {
-                if (zebra[name.substring(0, i)] == null) {
-                    return;
-                }
-                name = name.substring(i + 1);
-            }
-
-            this.element.style[name] = value;
-            this.vrp();
-        };
-
-        /**
-         * Set the specified attribute of the wrapped HTML element
-         * @param {String} name  a name of attribute
-         * @param {String} value a value of the attribute
-         * @method setAttribute
-         */
-        this.setAttribute = function(name, value) {
-            this.element.setAttribute(name, value);
-        };
-
-        this.isInInvisibleState = function() {
-            if (this.width       <= 0    || 
-                this.height      <= 0    ||
-                this.parent      == null || 
-                this.getCanvas() == null   ) 
-            {
-                return true;
-            }
-
-            var p = this.parent;
-            while (p != null && p.isVisible === true && p.width > 0 && p.height > 0) {
-                p = p.parent;
-            }
-          
-            return p != null || pkg.$cvp(this) == null; 
-            // canvas means the component is not
-                              // in hierarchy yet, that means it
-                              // has to be hidden
-        };
-
-        this.paint = function(g) {
-            // this method is used as an indication that the component
-            // is visible and no one of his parent is invisible
-            if (this.element.style.visibility == "hidden") {
-                this.element.style.visibility = "visible";
-            }
-        };
-    },
-
-    function(e) {
-        /**
-         * Reference to HTML element the UI component wraps
-         * @attribute element
-         * @readOnly
-         * @type {HTMLElement}
-         */
-        e = this.element = zebra.isString(e) ? document.createElement(e) : e;
-        e.setAttribute("id", this.toString());
-        e.style.visibility = "hidden";  // before the component will be attached
-                                        // to parent hierarchy of components that is
-                                        // attached to a canvas the component has to be hidden
-
-        this.$super();
-
-        var $this = this;
-
-        // TODO:
-        // It is not a very good idea to register global component listener per
-        // HTML component. Has to be re-designed, but at this moment this is the
-        // only way to understand when the HTML component parent hierarchy has got
-        // visibility updates
-        this.globalCompListener = {
-            compShown :function(c) {
-                if (c != $this && c.isVisible === false && zebra.layout.isAncestorOf(c, $this)) {
-                    $this.element.style.visibility = "hidden";
-                }
-            },
-
-            compMoved : function(c, px, py) {
-                if (zebra.layout.isAncestorOf(c, $this)) {
-                    // force location adjustment when the component
-                    // parent HTML canvas has been moved
-                    $this.isLocAdjusted = false;
-                    $this.adjustLocation();
-                }
-
-
-                if (c != $this && $this.isInInvisibleState()) {
-                    $this.element.style.visibility = "hidden";
-                }
-            },
-
-            compRemoved : function(p, i, c) {
-                // if an ancestor parent has been removed the HTML element
-                // has to be hidden
-                if (c != $this && zebra.layout.isAncestorOf(c, $this)) {
-                    $this.element.style.visibility = "hidden";
-                }
-            },
-
-            compSized : function(c, pw, ph) {
-                if (c != $this && zebra.layout.isAncestorOf(c, $this) && $this.isInInvisibleState()) {
-                    $this.element.style.visibility = "hidden";
-                }
-            }
-        };
-
-        this.globalWinListener = {
-            winActivated : function(layer, win, isActive) {
-                if (zebra.layout.isAncestorOf(win, $this) == false) {
-                    $this.element.style.visibility;   
-                }
-            }
-        };
-
-        // it is important to avoid mouse event since for some html element
-        // it can cause unexpected event generation. for instance text input
-        // element can generate mouse moved on mobile devices whenever it gets
-        // focus
-        if (zebra.isTouchable === false) {
-            e.onmousemove = function(ee) {
-                if ($this.canvas != null) {
-                    $this.canvas.$mouseMoved(1, {
-                        target: $this.canvas.canvas,
-                        pageX : ee.pageX,
-                        pageY : ee.pageY
-                    });
-                }
-            };
-
-            e.onmousedown = function(ee) {
-                if ($this.canvas != null) {
-                    $this.canvas.$mousePressed(1, {
-                        target: $this.canvas.canvas,
-                        pageX : ee.pageX,
-                        pageY : ee.pageY
-                    });
-                }
-            };
-
-            e.onmouseup = function(ee) {
-                if ($this.canvas != null) {
-                    $this.canvas.$mouseReleased(1, {
-                        target: $this.canvas.canvas,
-                        pageX : ee.pageX,
-                        pageY : ee.pageY
-                    },
-
-                    ee.button === 0 ? pkg.MouseEvent.LEFT_BUTTON
-                                    : (ee.button == 2 ? pkg.MouseEvent.RIGHT_BUTTON : 0));
-                }
-            };
-        }
-
-        e.addEventListener("focus", function(ee) {
-            // mark the element  has focus on the given canvas
-            $this.element.canvas = $this.canvas;
-
-            // notify focus manager the given component has got focus
-            zebra.ui.focusManager.requestFocus($this);
-        }, false);
-
-        e.addEventListener("blur", function(ee) {
-            // flush the native element canvas field to say the component doesn't
-            // have focus anymore
-            $this.element.canvas = null;
-
-            if ($this.canvas != null) {
-                // run timer that checks if the native web component has lost focus because of
-                // leaving the canvas where it hosts:
-                //  -- the focus doesn't belong to the canvas where the native component sits
-                //    AND
-                //  -- the focus doesn't belong to another native component that sits on the
-                //     canvas
-                setTimeout(function() {
-                    var fo = zebra.ui.focusManager.focusOwner;
-                    if (($this.canvas != null && document.activeElement != $this.canvas.canvas) &&
-                        (document.activeElement != null && $this.canvas != document.activeElement.canvas))
-                    {
-                       zebra.ui.focusManager.requestFocus(null);
-                    }
-                }, 100);
-            }
-        }, false);
-
-        e.onkeydown = function(ee) {
-            if ($this.canvas != null) {
-                // store current focus owner to analyze if the event triggered focus owner changing
-                var pfo = zebra.ui.focusManager.focusOwner;
-
-                // re-define key event since preventDefault has to be disabled,
-                // otherwise navigation key will not work
-                $this.canvas.$keyPressed({
-                    keyCode       : ee.keyCode,
-                    target        : ee.target,
-                    altKey        : ee.altKey,
-                    shiftKey      : ee.shiftKey,
-                    ctrlKey       : ee.ctrlKey,
-                    metaKey       : ee.metaKey,
-                    preventDefault: function() {}
-                });
-
-                var nfo = zebra.ui.focusManager.focusOwner;
-
-                // if focus owner has been updated
-                if (nfo != pfo) {
-                    ee.preventDefault();
-                    // if focus owner has been moved to another HTML component we have to pass focus to it
-                    if (nfo != null && zebra.instanceOf(nfo, pkg.HtmlElement) && document.activeElement != nfo.element) {
-                        nfo.element.focus();
-                    }
-                    else {
-                        // otherwise return focus back to canvas
-                        $this.canvas.canvas.focus();
-                    }
-                }
-            }
-        };
-
-        e.onkeyup  = function(ee) {
-            if ($this.canvas != null) {
-                $this.canvas.$keyReleased(ee);
-            }
-        };
-
-        e.onkeypress = function(ee) {
-            if ($this.canvas != null) {
-                $this.canvas.$keyTyped({
-                    keyCode       : ee.keyCode,
-                    target        : ee.target,
-                    altKey        : ee.altKey,
-                    shiftKey      : ee.shiftKey,
-                    ctrlKey       : ee.ctrlKey,
-                    metaKey       : ee.metaKey,
-                    preventDefault: function() {}
-                });
-            }
-        };
-    },
-
-    function focused() {
-        if (this.hasFocus()) {
-            // if the component has focus that has came from Zebra component we should
-            // set focus to native component that hosted by Zebra component
-
-            var canvas = this.getCanvas(),
-                pfo    = canvas.$prevFocusOwner;
-            
-            if (pfo == null || zebra.instanceOf(pfo, pkg.HtmlElement) === false) {
-                this.element.focus();
-            }
-        }
-
-        this.$super();
-    },
-
-    function setBorder(b) {
-        b = pkg.$view(b);
-
-        if (b == null) {
-            this.element.style.border = "none";
-        }
-        else {
-            var e = this.element;
-
-            //!!!! Bloody FF fix, the border can be made transparent
-            //!!!! only via "border" style
-            e.style.border = "0px solid transparent";
-
-            //!!! FF understands only decoupled border settings
-            e.style.borderTopStyle = "solid";
-            e.style.borderTopColor = "transparent";
-            e.style.borderTopWidth = "" + b.getTop() + "px";
-
-            e.style.borderLeftStyle = "solid";
-            e.style.borderLeftColor = "transparent";
-            e.style.borderLeftWidth = "" + b.getLeft() + "px";
-
-            e.style.borderBottomStyle = "solid";
-            e.style.borderBottomColor = "transparent";
-            e.style.borderBottomWidth = "" + b.getBottom() + "px";
-
-
-            e.style.borderRightStyle = "solid";
-            e.style.borderRightColor = "transparent";
-            e.style.borderRightWidth = "" + b.getRight() + "px";
-        }
-        this.$super(b);
-    },
-
-    function setPadding(t,l,b,r) {
-        if (arguments.length == 1) {
-            l = b = r = t;
-        }
-
-        var e = this.element;
-        e.style.paddingTop    = '' + t + "px";
-        e.style.paddingLeft   = '' + l + "px";
-        e.style.paddingRight  = '' + r + "px";
-        e.style.paddingBottom = '' + b + "px";
-        
-        this.$super.apply(this, arguments);
-    },
-
-    function setVisible(b) {
-        if (this.isInInvisibleState()) {
-            this.element.style.visibility = "hidden";
-        }
-        else {
-            this.element.style.visibility = b ? "visible" : "hidden";
-        }
-        this.$super(b);
-    },
-
-    function setEnabled(b) {
-        this.$super(b);
-        this.element.disabled = !b;
-    },
-
-    function setSize(w, h) {
-        this.$super(w, h);
-        var visibility = this.element.style.visibility;
-        this.element.style.visibility = "hidden"; // could make sizing smooth
-
-        // HTML element size is calculated as sum of "width"/"height", paddings, border
-        // So the passed width and height has to be corrected (before it will be applied to
-        // an HTML element) by reduction of extra HTML gaps. For this we firstly set the
-        // width and size
-        this.element.style.width  = "" + w + "px";
-        this.element.style.height = "" + h + "px";
-
-        // than we know the component metrics and can compute necessary reductions
-        var dx = this.element.offsetWidth  - w,
-            dy = this.element.offsetHeight - h;
-        this.element.style.width   = "" + (w - dx) + "px";
-        this.element.style.height  = "" + (h - dy) + "px";
-
-        if (this.isInInvisibleState()) {
-            this.element.style.visibility = "hidden";
-        }
-        else {
-            this.element.style.visibility = visibility;
-        }
-    },
-
-    function setLocation(x, y) {
-        this.$super(x, y);
-        this.isLocAdjusted = false;
-    },
-
-    function validate() {
-        if (this.canvas == null && this.parent != null) {
-            this.canvas = this.getCanvas();
-        }
-
-        if (this.canvas != null && this.isLocAdjusted === false) {
-            this.adjustLocation();
-        }
-
-        this.$super();
-    },
-
-    function setParent(p) {
-        this.$super(p);
-
-        if (p == null) {
-            if (this.element.parentNode != null) {
-                this.element.parentNode.removeChild(this.element);
-            }
-
-            this.element.style.visibility = "hidden";
-            pkg.events.removeComponentListener(this.globalCompListener);
-        }
-        else {
-            if (zebra.instanceOf(p, pkg.HtmlElement)) {
-                p.element.appendChild(this.element);
-            }
-            else {
-                document.body.appendChild(this.element);
-            }
-
-            if (this.isInInvisibleState()) {
-                this.element.style.visibility = "hidden";
-            }
-            else {
-                this.element.style.visibility = this.isVisible ? "visible" : "hidden";
-            }
-
-            pkg.events.addComponentListener(this.globalCompListener);
-        }
-
-        this.isLocAdjusted = false;
-
-        this.canvas = p != null ? this.getCanvas() : null;
-    }
-]);
-
-/**
- * HTML input element wrapper class. The class can be used as basis class
- * to wrap HTML elements that can be used to enter a textual information.
- * @constructor
- * @param {String} text a text the text input component has to be filled with
- * @param {String} element an input element name
- * @class zebra.ui.HtmlTextInput
- * @extends zebra.ui.HtmlElement
- */
-pkg.HtmlTextInput = Class(pkg.HtmlElement, [
-    function $prototype() {
-        this.canHaveFocus = true;
-
-        /**
-         * Get a text of the text input element
-         * @return {String} a text of the  text input element
-         * @method getValue
-         */
-        this.getValue = function() {
-            return this.element.value.toString();
-        };
-
-        /**
-         * Set the text
-         * @param {String} t a text
-         * @method setValue
-         */
-        this.setValue = function(t) {
-            if (this.element.value != t) {
-                this.element.value = t;
-                this.vrp();
-            }
-        };
-    },
-
-    function(text, elementName) {
-        if (text == null) text = "";
-        this.$super(elementName);
-        this.element.setAttribute("tabindex", 0);
-        this.setValue(text);
-    }
-]);
-
-
-pkg.HtmlContent = Class(pkg.HtmlElement, [
-    function() {
-        this.$super("div");
-        this.setStyle("overflow", "hidden");
-    },
-
-    function loadContent(url) {
-        var c = zebra.io.GET(url);
-        this.setContent(c);
-        this.vrp();
-    }
-]);
-
-
-/**
- * HTML input text element wrapper class. The class wraps standard HTML text field
- * and represents it as zebra UI component.
- * @constructor
- * @class zebra.ui.HtmlTextField
- * @param {String} [text] a text the text field component has to be filled with
- * @extends zebra.ui.HtmlTextInput
- */
-pkg.HtmlTextField = Class(pkg.HtmlTextInput, [
-    function(text) {
-        this.$super(text, "input");
-        this.element.setAttribute("type",  "text");
-    }
-]);
-
-/**
- * HTML input textarea element wrapper class. The class wraps standard HTML textarea
- * element and represents it as zebra UI component.
- * @constructor
- * @param {String} [text] a text the text area component has to be filled with
- * @class zebra.ui.HtmlTextArea
- * @extends zebra.ui.HtmlTextInput
- */
-pkg.HtmlTextArea = Class(pkg.HtmlTextInput, [
-    function setResizeable(b) {
-        if (b === false) this.setStyle("resize", "none");
-        else             this.setStyle("resize", "both");
-    },
-
-    function(text) {
-        this.$super(text, "textarea");
-        this.element.setAttribute("rows", 10);
-    }
-]);
-
-/**
- * @for
- */
-
-})(zebra("ui"), zebra.Class);
-(function(pkg, Class, ui) {
-
-/**
- * The package contains number of UI components that can be helful to 
- * make visiual control of an UI component size and location
- * @module  ui.designer
- * @main 
- */
-
-var L = zebra.layout, Cursor = ui.Cursor, KeyEvent = ui.KeyEvent, CURSORS = [];
-
-CURSORS[L.LEFT  ] = Cursor.W_RESIZE;
-CURSORS[L.RIGHT ] = Cursor.E_RESIZE;
-CURSORS[L.TOP   ] = Cursor.N_RESIZE;
-CURSORS[L.BOTTOM] = Cursor.S_RESIZE;
-CURSORS[L.TopLeft ]    = Cursor.NW_RESIZE;
-CURSORS[L.TopRight]    = Cursor.NE_RESIZE;
-CURSORS[L.BottomLeft ] = Cursor.SW_RESIZE;
-CURSORS[L.BottomRight] = Cursor.SE_RESIZE;
-CURSORS[L.CENTER] = Cursor.MOVE;
-CURSORS[L.NONE  ] = Cursor.DEFAULT;
-
-pkg.ShaperBorder = Class(ui.View, [
-    function $prototype() {
-        this.color = "blue";
-        this.gap = 7;
-
-        function contains(x, y, gx, gy, ww, hh) {
-            return gx <= x && (gx + ww) > x && gy <= y && (gy + hh) > y;
-        }
-
-        this.paint = function(g,x,y,w,h,d){
-            var cx = ~~((w - this.gap)/2), cy = ~~((h - this.gap)/2);
-            g.setColor(this.color);
-            g.beginPath();
-            g.rect(x, y, this.gap, this.gap);
-            g.rect(x + cx, y, this.gap, this.gap);
-            g.rect(x, y + cy, this.gap, this.gap);
-            g.rect(x + w - this.gap, y, this.gap, this.gap);
-            g.rect(x, y + h - this.gap, this.gap, this.gap);
-            g.rect(x + cx, y + h - this.gap, this.gap, this.gap);
-            g.rect(x + w - this.gap, y + cy, this.gap, this.gap);
-            g.rect(x + w - this.gap, y + h - this.gap, this.gap, this.gap);
-            g.fill();
-            g.beginPath();
-            g.rect(x + ~~(this.gap / 2), y + ~~(this.gap / 2), w - this.gap, h - this.gap);
-            g.stroke();
-        };
-
-        this.detectAt = function(target,x,y){
-            var gap = this.gap, gap2 = gap*2, w = target.width, h = target.height;
-
-            if (contains(x, y, gap, gap, w - gap2, h - gap2)) return L.CENTER;
-            if (contains(x, y, 0, 0, gap, gap))               return L.TopLeft;
-            if (contains(x, y, 0, h - gap, gap, gap))         return L.BottomLeft;
-            if (contains(x, y, w - gap, 0, gap, gap))         return L.TopRight;
-            if (contains(x, y, w - gap, h - gap, gap, gap))   return L.BottomRight;
-
-            var mx = ~~((w-gap)/2);
-            if (contains(x, y, mx, 0, gap, gap))        return L.TOP;
-            if (contains(x, y, mx, h - gap, gap, gap))  return L.BOTTOM;
-
-            var my = ~~((h-gap)/2);
-            if (contains(x, y, 0, my, gap, gap)) return L.LEFT;
-            return contains(x, y, w - gap, my, gap, gap) ? L.RIGHT : L.NONE;
-        };
-    }
-]);
-
-pkg.InsetsArea = Class([
-    function $prototype() {
-        this.top = this.right = this.left = this.bottom = 6;
-
-        this.detectAt = function (c,x,y){
-            var t = 0, b1 = false, b2 = false;
-            if (x < this.left) t += L.LEFT;
-            else {
-                if (x > (c.width - this.right)) t += L.RIGHT;
-                else b1 = true;
-            }
-
-            if (y < this.top) t += L.TOP;
-            else {
-                if (y > (c.height - this.bottom)) t += L.BOTTOM;
-                else b2 = true;
-            }
-            return b1 && b2 ? L.CENTER : t;
-        };
-    }
-]);
-
-/**
- * This is UI component class that implements possibility to embeds another
- * UI components to control the component size and location visually.
- 
-        // create canvas 
-        var canvas = new zebra.ui.zCanvas(300,300);
-
-        // create two UI components
-        var lab = new zebra.ui.Label("Label");
-        var but = new zebra.ui.Button("Button");
-
-        // add created before label component as target of the shaper
-        // component and than add the shaper component into root panel 
-        canvas.root.add(new zebra.ui.designer.ShaperPan(lab).properties({
-            bounds: [ 30,30,100,40]
-        }));
-
-        // add created before button component as target of the shaper
-        // component and than add the shaper component into root panel 
-        canvas.root.add(new zebra.ui.designer.ShaperPan(but).properties({
-            bounds: [ 130,130,100,50]
-        }));
-
- * @class  zebra.ui.designer.ShaperPan
- * @constructor
- * @extends {zebra.ui.Panel}
- * @param {zebra.ui.Panel} target a target UI component whose size and location
- * has to be controlled
- */
-pkg.ShaperPan = Class(ui.Panel, [
-    function $prototype() {
-       /**
-        * Indicates if controlled component can be moved
-        * @attribute isMoveEnabled
-        * @type {Boolean}
-        * @default true
-        */
-
-       /**
-        * Indicates if controlled component can be sized
-        * @attribute isResizeEnabled
-        * @type {Boolean}
-        * @default true
-        */
-
-        /**
-         * Minimal possible height or controlled component 
-         * @attribute minHeight
-         * @type {Integer}
-         * @default 12
-         */
-
-        /**
-         * Minimal possible width or controlled component 
-         * @attribute minWidth
-         * @type {Integer}
-         * @default 12
-         */
-        this.minHeight = this.minWidth = 12;
-        this.canHaveFocus = this.isResizeEnabled = this.isMoveEnabled = true;
-        this.state = null;
-
-        this.catchInput = true;
-
-        this.getCursorType = function (t, x ,y) {
-            return this.kids.length > 0 ? CURSORS[this.shaperBr.detectAt(t, x, y)] : null;
-        };
-
-        /**
-         * Define key pressed events handler
-         * @param  {zebra.ui.KeyEvent} e a key event
-         * @method keyPressed
-         */
-        this.keyPressed = function(e) {
-            if (this.kids.length > 0){
-                var b  = (e.mask & KeyEvent.M_SHIFT) > 0, 
-                    c  = e.code,
-                    dx = (c == KeyEvent.LEFT ?  -1 : (c == KeyEvent.RIGHT ? 1 : 0)),
-                    dy = (c == KeyEvent.UP   ?  -1 : (c == KeyEvent.DOWN  ? 1 : 0)),
-                    w  = this.width  + dx, 
-                    h  = this.height + dy,
-                    x  = this.x + dx, 
-                    y  = this.y + dy;
-
-                if (b) {
-                    if (this.isResizeEnabled && w > this.shaperBr.gap * 2 && h > this.shaperBr.gap * 2) {
-                        this.setSize(w, h);
-                    }
-                }
-                else {
-                    if (this.isMoveEnabled) {
-                        var ww = this.width, hh = this.height, p = this.parent;
-                        if (x + ww/2 > 0 && y + hh/2 > 0 && x < p.width - ww/2 && y < p.height - hh/2) this.setLocation(x, y);
-                    }
-                }
-            }
-        };
-
-        /**
-         * Define mouse drag started events handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragStarted
-         */
-        this.mouseDragStarted = function(e){
-            this.state = null;
-            if (this.isResizeEnabled || this.isMoveEnabled) {
-                var t = this.shaperBr.detectAt(this, e.x, e.y);
-                if ((this.isMoveEnabled   === false && t == L.CENTER)||
-                    (this.isResizeEnabled === false && t != L.CENTER)  )
-                {
-                    return;
-                }
-
-                this.state = { top    : ((t & L.TOP   ) > 0 ? 1 : 0),
-                               left   : ((t & L.LEFT  ) > 0 ? 1 : 0),
-                               right  : ((t & L.RIGHT ) > 0 ? 1 : 0),
-                               bottom : ((t & L.BOTTOM) > 0 ? 1 : 0) };
-
-                if (this.state != null) {
-                    this.px = e.absX;
-                    this.py = e.absY;
-                }
-            }
-        };
-
-        /**
-         * Define mouse dragged events handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragged
-         */
-        this.mouseDragged = function(e){
-            if (this.state != null) {
-                var dy = (e.absY - this.py), 
-                    dx = (e.absX - this.px), 
-                    s  = this.state,
-                    nw = this.width  - dx * s.left + dx * s.right,
-                    nh = this.height - dy * s.top  + dy * s.bottom;
-
-                if (nw >= this.minWidth && nh >= this.minHeight) {
-                    this.px = e.absX;
-                    this.py = e.absY;
-                    if ((s.top + s.right + s.bottom + s.left) === 0) {
-                        this.setLocation(this.x + dx, this.y + dy);
-                    }
-                    else {                    
-                        this.setSize(nw, nh);
-                        this.setLocation(this.x + dx * s.left, this.y + dy * s.top);
-                    }
-                }
-            }
-        };
-
-        this.setColor = function (b, color) {
-            this.colors[b?1:0] = color;
-            this.shaperBr.color = this.colors[this.hasFocus()? 1 : 0];
-            this.repaint();
-        };
-    },
-
-    function (t){
-        this.$super(new L.BorderLayout());
-        this.px = this.py = 0;
-        this.shaperBr = new pkg.ShaperBorder();
-        this.colors   = [ "lightGray", "blue" ];
-        this.shaperBr.color = this.colors[0];
-        this.setBorder(this.shaperBr);
-        if (t != null) this.add(t);
-    },
-
-    function insert(i, constr, d) {
-        if (this.kids.length > 0) {
-            this.removeAll();
-        }
-
-        var top = this.getTop(), left = this.getLeft();
-        if (d.width === 0 || d.height === 0) d.toPreferredSize();
-        this.setLocation(d.x - left, d.y - top);
-        this.setSize(d.width + left + this.getRight(), d.height + top + this.getBottom());
-        this.$super(i, L.CENTER, d);
-    },
-
-    function focused(){
-        this.$super();
-        this.shaperBr.color = this.colors[this.hasFocus()? 1 : 0];
-        this.repaint();
-    }
-]);
-
-pkg.FormTreeModel = Class(zebra.data.TreeModel, [
-    function $prototype() {
-        this.buildModel = function(comp, root){
-            var b = this.exclude && this.exclude(comp), item = b ? root : this.createItem(comp);
-            for(var i = 0; i < comp.kids.length; i++) {
-                var r = this.buildModel(comp.kids[i], item);
-                if (r) {
-                    r.parent = item;
-                    item.kids.push(r);
-                }
-            }
-            return b ? null : item;
-        };
-
-        this.itemByComponent = function (c, r){
-            if (r == null) r = this.root;
-            if (r.comp == c) return c;
-            for(var i = 0;i < r.kids.length; i++) {
-                var item = this.itemByComponent(c, r.kids[i]);
-                if (item != null) return item;
-            }
-            return null;
-        };
-
-        this.createItem = function(comp){
-            var name = comp.$clazz.$name;
-            if (name == null) name = comp.toString();
-            var index = name.lastIndexOf('.'),
-                item = new zebra.data.Item(index > 0 ? name.substring(index + 1) : name);
-            item.comp = comp;
-            return item;
-        };
-    },
-
-    function (target){
-        this.$super(this.buildModel(target, null));
-    }
-]);
-
-/**
- * @for
- */
-
-
-})(zebra("ui.designer"), zebra.Class, zebra("ui"));
+})();

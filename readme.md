@@ -70,6 +70,16 @@ To track changes and zebra artifact re-building you should start watch task:
     $ gulp watch
 ```
 
+To generate api doc install once yuidoc:
+```bash
+   $ [sudo] npm -g install yuidocjs.
+```
+and than run the following command from zebra home:
+```bash
+   $ yuidoc -t yuidoc/themes/default -c yuidoc/yuidoc.json -n -C -o apidoc .
+```
+
+
 Open demos in a browser: http://127.0.0.1:8090/ 
 
 ### Zebra package structure:

@@ -37,14 +37,14 @@ pkg.$constraints = function(v) {
 };
 
 /**
- * Layout package provides number of classes, interfaces, methods and 
- * variables that allows developer easily implement rules based layouting 
- * of hierarchy of rectangular elements. The package has no relation 
+ * Layout package provides number of classes, interfaces, methods and
+ * variables that allows developer easily implement rules based layouting
+ * of hierarchy of rectangular elements. The package has no relation
  * to any concrete UI, but it can be applied to a required UI framework
  *
  * The package declares the following constraints constants:
-     
-    - **NONE** no constraints 
+
+    - **NONE** no constraints
     - **LEFT** left alignment constraint
     - **TOP** top alignment constraint
     - **RIGHT** right alignment constraint
@@ -58,7 +58,7 @@ pkg.$constraints = function(v) {
     - **BottomRight** bottom right alignment constraint
     - **STRETCH** stretch element
     - **USE_PS_SIZE** use preferred size for an element
- * 
+ *
  * @module layout
  * @main layout
  */
@@ -76,16 +76,16 @@ pkg.$constraints = function(v) {
  */
 
 /**
- * Layout children components of the specified layoutable target component 
+ * Layout children components of the specified layoutable target component
  * @param {zebra.layout.Layoutable} t a target layoutable component
  * @method doLayout
  */
 var L = pkg.Layout = new zebra.Interface();
 
 /**
- * Find a direct children element for the given children component 
+ * Find a direct children element for the given children component
  * and the specified parent component
- * @param  {zebra.layout.Layoutable} parent  a parent component 
+ * @param  {zebra.layout.Layoutable} parent  a parent component
  * @param  {zebra.layout.Layoutable} child  a children component
  * @return {zebra.layout.Layoutable}  a direct children component
  * @method getDirectChild
@@ -97,12 +97,12 @@ pkg.getDirectChild = function(parent,child){
 };
 
 /**
- * Find a direct component located at the given location of the specified 
+ * Find a direct component located at the given location of the specified
  * parent component and the specified parent component
  * @param  {Integer} x a x coordinate relatively to the parent component
  * @param  {Integer} y a y coordinate relatively to the parent component
- * @param  {zebra.layout.Layoutable} parent  a parent component 
- * @return {zebra.layout.Layoutable} an index of direct children component 
+ * @param  {zebra.layout.Layoutable} parent  a parent component
+ * @return {zebra.layout.Layoutable} an index of direct children component
  * or -1 if no a children component can be found
  * @method getDirectAt
  * @api zebra.layout.getDirectAt()
@@ -116,8 +116,8 @@ pkg.getDirectAt = function(x,y,p){
 };
 
 /**
- * Get a top (the highest in component hierarchy) parent component 
- * of the given component 
+ * Get a top (the highest in component hierarchy) parent component
+ * of the given component
  * @param  {zebra.layout.Layoutable} c a component
  * @return {zebra.layout.Layoutable}  a top parent component
  * @method getTopParent
@@ -129,14 +129,14 @@ pkg.getTopParent = function(c){
 };
 
 /**
- * Translate the given relative location into the parent relative location. 
+ * Translate the given relative location into the parent relative location.
  * @param  {Integer} [x] a x coordinate relatively  to the given component
  * @param  {Integer} [y] a y coordinate relatively  to the given component
  * @param  {zebra.layout.Layoutable} c a component
  * @param  {zebra.layout.Layoutable} [p] a parent component
  * @return {Object} a relative to the given parent UI component location:
- 
-        { x:{Integer}, y:{Integer} } 
+
+        { x:{Integer}, y:{Integer} }
 
  * @method toParentOrigin
  * @api zebra.layout.toParentOrigin()
@@ -160,17 +160,17 @@ pkg.toParentOrigin = function(x,y,c,p){
 };
 
 /**
- * Convert the given component location into relative 
- * location of the specified children component successor.      
- * @param  {Integer} x a x coordinate relatively to the given 
+ * Convert the given component location into relative
+ * location of the specified children component successor.
+ * @param  {Integer} x a x coordinate relatively to the given
  * component
- * @param  {Integer} y a y coordinate relatively to the given 
+ * @param  {Integer} y a y coordinate relatively to the given
  * component
  * @param  {zebra.layout.Layoutable} p a component
  * @param  {zebra.layout.Layoutable} c a children successor component
- * @return {Object} a relative location 
+ * @return {Object} a relative location
  *
- *      { x:{Integer}, y:{Integer} } 
+ *      { x:{Integer}, y:{Integer} }
  *
  * @method toChildOrigin
  * @api zebra.layout.toChildOrigin()
@@ -185,11 +185,11 @@ pkg.toChildOrigin = function(x, y, p, c){
 };
 
 /**
- * Calculate maximal preferred width and height of 
+ * Calculate maximal preferred width and height of
  * children component of the given target component.
- * @param  {zebra.layout.Layoutable} target a target component  
- * @return {Object} a maximal preferred width and height 
- 
+ * @param  {zebra.layout.Layoutable} target a target component
+ * @return {Object} a maximal preferred width and height
+
         { width:{Integer}, height:{Integer} }
 
  * @method getMaxPreferredSize
@@ -214,13 +214,13 @@ pkg.isAncestorOf = function(p,c){
 };
 
 /**
- * Layoutable class defines rectangular component that 
- * has elementary metrical properties like width, height 
- * and location and can be a participant of layout management 
- * process. Layoutable component is container that can 
- * contains other layoutable component as its children. 
- * The children components are ordered by applying a layout 
- * manager of its parent component. 
+ * Layoutable class defines rectangular component that
+ * has elementary metrical properties like width, height
+ * and location and can be a participant of layout management
+ * process. Layoutable component is container that can
+ * contains other layoutable component as its children.
+ * The children components are ordered by applying a layout
+ * manager of its parent component.
  * @class zebra.layout.Layoutable
  * @constructor
  * @extends {zebra.layout.Layout}
@@ -228,7 +228,7 @@ pkg.isAncestorOf = function(p,c){
 pkg.Layoutable = Class(L, [
     function $prototype() {
         /**
-         * x coordinate 
+         * x coordinate
          * @attribute x
          * @default 0
          * @readOnly
@@ -236,7 +236,7 @@ pkg.Layoutable = Class(L, [
          */
 
         /**
-        * y coordinate 
+        * y coordinate
         * @attribute y
         * @default 0
         * @readOnly
@@ -244,7 +244,7 @@ pkg.Layoutable = Class(L, [
         */
 
         /**
-        * Width of rectangular area 
+        * Width of rectangular area
         * @attribute width
         * @default 0
         * @readOnly
@@ -252,7 +252,7 @@ pkg.Layoutable = Class(L, [
         */
 
         /**
-        * Height of rectangular area 
+        * Height of rectangular area
         * @attribute height
         * @default 0
         * @readOnly
@@ -268,7 +268,7 @@ pkg.Layoutable = Class(L, [
         */
 
         /**
-        * Indicate a layoutable component validity 
+        * Indicate a layoutable component validity
         * @attribute isValid
         * @default false
         * @readOnly
@@ -289,10 +289,10 @@ pkg.Layoutable = Class(L, [
         this.isLayoutValid = this.isValid = false;
 
         /**
-         * The component layout constraints. The constraints is specific to 
-         * the parent component layout manager value that customizes the 
-         * children component layouting on the parent component. 
-         * @attribute constraints 
+         * The component layout constraints. The constraints is specific to
+         * the parent component layout manager value that customizes the
+         * children component layouting on the parent component.
+         * @attribute constraints
          * @default null
          * @type {Object}
          */
@@ -307,29 +307,29 @@ pkg.Layoutable = Class(L, [
         }
 
         /**
-         * Find a first children component that satisfies the passed path expression. 
-         * @param  {String} path path expression. Path expression is simplified form 
+         * Find a first children component that satisfies the passed path expression.
+         * @param  {String} path path expression. Path expression is simplified form
          * of XPath-like expression:
-         
+
         "/Panel"  - find first children that is an instance of zebra.ui.Panel
         "/Panel[@id='top']" - find first children that is an instance of zebra.ui.Panel with "id" property that equals "top"
-        "//Panel"  - find first children that is an instance of zebra.ui.Panel recursively 
-        
+        "//Panel"  - find first children that is an instance of zebra.ui.Panel recursively
+
          * Shortcuts:
-        
+
             "#id" - find a component by its "id" attribute value. This is equivalent of "//*[@id='a component id property']" path
             "zebra.ui.Button" - find a component by its class.  This is equivalent of "//className" path
-            
+
          *
          * @method find
-         * @return {zebra.layout.Layoutable} found children component or null if 
+         * @return {zebra.layout.Layoutable} found children component or null if
          * no children component can be found
          */
         this.find = function(path){
             var res = null;
             zebra.util.findInTree(this, $normPath(path),
                 function(node, name) {
-                    return node.$clazz != null && zebra.instanceOf(node, zebra.Class.forName(name)); 
+                    return node.$clazz != null && zebra.instanceOf(node, zebra.Class.forName(name));
                 },
 
                 function(kid) {
@@ -340,23 +340,23 @@ pkg.Layoutable = Class(L, [
         };
 
         /**
-         * Find children components that satisfy the passed path expression. 
-         * @param  {String} path path expression. Path expression is 
+         * Find children components that satisfy the passed path expression.
+         * @param  {String} path path expression. Path expression is
          * simplified form of XPath-like expression:
-         
+
          "/Panel"  - find first children that is an instance of zebra.ui.Panel
          "/Panel[@id='top']" - find first children that is an instance of zebra.ui.Panel with "id" property that equals "top"
-         "//Panel"  - find first children that is an instance of zebra.ui.Panel recursively 
+         "//Panel"  - find first children that is an instance of zebra.ui.Panel recursively
 
          * Shortcuts:
-        
+
             "#id" - find a component by its "id" attribute value. This is equivalent of "//*[@id='a component id property']" path
             "zebra.ui.Button" - find a component by its class.  This is equivalent of "//className" path
-         
-         * @param {Function} [callback] function that is called every time a 
-         * new children component has been found.  
+
+         * @param {Function} [callback] function that is called every time a
+         * new children component has been found.
          * @method findAll
-         * @return {Array}  return array of found children components if 
+         * @return {Array}  return array of found children components if
          * passed function has not been passed
          */
         this.findAll = function(path, callback){
@@ -370,14 +370,14 @@ pkg.Layoutable = Class(L, [
 
             zebra.util.findInTree(this, $normPath(path),
                 function(node, name) {
-                    return node.$clazz != null && zebra.instanceOf(node, zebra.Class.forName(name)); 
+                    return node.$clazz != null && zebra.instanceOf(node, zebra.Class.forName(name));
                 }, callback);
             return res;
         };
 
         /**
-         * Set the given id for the component 
-         * @chainable 
+         * Set the given id for the component
+         * @chainable
          * @param {String} id an ID to be set
          * @method setId
          */
@@ -388,8 +388,8 @@ pkg.Layoutable = Class(L, [
 
         /**
          * Apply the given set of properties to the given component or a number of children
-         * components. 
- 
+         * components.
+
         var c = new zebra.layout.Layoutable();
         c.properties({
             width: [100, 100],
@@ -412,28 +412,28 @@ pkg.Layoutable = Class(L, [
          */
         this.properties = function(path, props) {
             if (arguments.length === 1) {
-                return zebra.properties(this, path);     
+                return zebra.properties(this, path);
             }
 
             this.findAll(path, function(kid) {
-                zebra.properties(kid, props);   
+                zebra.properties(kid, props);
             });
             return this;
         };
 
         /**
-         * Validate the component metrics. The method is called as 
-         * a one step of the component validation procedure. The 
+         * Validate the component metrics. The method is called as
+         * a one step of the component validation procedure. The
          * method causes "recalc" method execution if the method
          * has been implemented and the component is in invalid
          * state. It is supposed the "recalc" method has to be
-         * implemented by a component as safe place where the 
-         * component metrics can be calculated. Component 
-         * metrics is individual for the given component 
-         * properties that has influence to the component 
+         * implemented by a component as safe place where the
+         * component metrics can be calculated. Component
+         * metrics is individual for the given component
+         * properties that has influence to the component
          * preferred size value. In many cases the properties
          * calculation has to be minimized what can be done
-         * by moving the calculation in "recalc" method  
+         * by moving the calculation in "recalc" method
          * @method validateMetric
          * @protected
          */
@@ -448,7 +448,7 @@ pkg.Layoutable = Class(L, [
          * By default there is no any implementation of "recalc" method
          * in the layoutable component. In other words the method doesn't
          * exist. Developer should implement the method if the need a proper
-         * and efficient place  to calculate component properties that 
+         * and efficient place  to calculate component properties that
          * have influence to the component preferred size. The "recalc"
          * method is called only when it is really necessary to compute
          * the component metrics.
@@ -457,9 +457,9 @@ pkg.Layoutable = Class(L, [
          */
 
         /**
-         * Invalidate the component layout. Layout invalidation means the 
+         * Invalidate the component layout. Layout invalidation means the
          * component children components have to be placed with the component
-         * layout manager. Layout invalidation causes a parent component 
+         * layout manager. Layout invalidation causes a parent component
          * layout is also invalidated.
          * @method invalidateLayout
          * @protected
@@ -486,7 +486,7 @@ pkg.Layoutable = Class(L, [
         this.validate = function(){
             this.validateMetric();
             if (this.width > 0 && this.height > 0 &&
-                this.isLayoutValid === false && 
+                this.isLayoutValid === false &&
                 this.isVisible === true)
             {
                 this.layout.doLayout(this);
@@ -499,21 +499,21 @@ pkg.Layoutable = Class(L, [
         };
 
         /**
-         * The method can be implemented to be informed every time 
+         * The method can be implemented to be informed every time
          * the component has completed to layout its children components
          * @method laidout
          */
 
         /**
-         * Get preferred size. The preferred size includes  top, left, 
-         * bottom and right paddings and 
-         * the size the component wants to have 
+         * Get preferred size. The preferred size includes  top, left,
+         * bottom and right paddings and
+         * the size the component wants to have
          * @method getPreferredSize
-         * @return {Object} return size object the component wants to 
+         * @return {Object} return size object the component wants to
          * have as the following structure:
-                
+
          {width:{Integer}, height:{Integer}} object
-         
+
          */
         this.getPreferredSize = function(){
             this.validateMetric();
@@ -562,9 +562,9 @@ pkg.Layoutable = Class(L, [
         this.getRight = function ()  { return 0; };
 
         /**
-         * Set the parent component.  
+         * Set the parent component.
          * @protected
-         * @param {zebra.layout.Layoutable} o a parent component 
+         * @param {zebra.layout.Layoutable} o a parent component
          * @method setParent
          * @protected
          */
@@ -576,14 +576,14 @@ pkg.Layoutable = Class(L, [
         };
 
         /**
-         * Set the given layout manager that is used to place 
-         * children component. Layout manager is simple class 
-         * that defines number of rules concerning the way 
-         * children components have to be ordered on its parent 
-         * surface.  
+         * Set the given layout manager that is used to place
+         * children component. Layout manager is simple class
+         * that defines number of rules concerning the way
+         * children components have to be ordered on its parent
+         * surface.
          * @method setLayout
-         * @param {zebra.ui.Layout} m a layout manager 
-         * @chainable 
+         * @param {zebra.ui.Layout} m a layout manager
+         * @chainable
          */
         this.setLayout = function (m){
             if (m == null) throw new Error("Null layout");
@@ -598,12 +598,12 @@ pkg.Layoutable = Class(L, [
         };
 
         /**
-         * Internal implementation of the component 
-         * preferred size calculation.  
-         * @param  {zebra.layout.Layoutable} target a component 
+         * Internal implementation of the component
+         * preferred size calculation.
+         * @param  {zebra.layout.Layoutable} target a component
          * for that the metric has to be calculated
-         * @return {Object} a preferred size. The method always 
-         * returns { width:10, height:10 } as the component preferred 
+         * @return {Object} a preferred size. The method always
+         * returns { width:10, height:10 } as the component preferred
          * size
          * @private
          * @method calcPreferredSize
@@ -613,11 +613,11 @@ pkg.Layoutable = Class(L, [
         };
 
         /**
-         * By default layoutbable component itself implements 
+         * By default layoutbable component itself implements
          * layout manager to order its children components.
-         * This method implementation does nothing, so children 
-         * component will placed according locations and sizes they 
-         * have set.  
+         * This method implementation does nothing, so children
+         * component will placed according locations and sizes they
+         * have set.
          * @method doLayout
          * @private
          */
@@ -634,10 +634,10 @@ pkg.Layoutable = Class(L, [
         };
 
         /**
-         * Insert the new children component at the given index with the specified layout constraints. 
-         * The passed constraints can be set via a layoutable component that is inserted. Just 
+         * Insert the new children component at the given index with the specified layout constraints.
+         * The passed constraints can be set via a layoutable component that is inserted. Just
          * set "constraints" property of in inserted component.
-         * @param  {Integer} i an index at that the new children component has to be inserted 
+         * @param  {Integer} i an index at that the new children component has to be inserted
          * @param  {Object} constr layout constraints of the new children component
          * @param  {zebra.layout.Layoutbale} d a new children layoutable component to be added
          * @return {zebra.layout.Layoutable} an inserted children layoutable component
@@ -658,18 +658,18 @@ pkg.Layoutable = Class(L, [
         };
 
         /**
-         * The method can be implemented to be informed every time a new component 
+         * The method can be implemented to be informed every time a new component
          * has been inserted into the component
-         * @param  {Integer} i an index at that the new children component has been inserted 
+         * @param  {Integer} i an index at that the new children component has been inserted
          * @param  {Object} constr layout constraints of the new children component
-         * @param  {zebra.layout.Layoutbale} d a new children layoutable component that has 
+         * @param  {zebra.layout.Layoutbale} d a new children layoutable component that has
          * been added
          * @method kidAdded
          */
 
         /**
-         * Set the layoutable component location. Location is x, y coordinates relatively to 
-         * a parent component 
+         * Set the layoutable component location. Location is x, y coordinates relatively to
+         * a parent component
          * @param  {Integer} xx x coordinate relatively to the layoutable component parent
          * @param  {Integer} yy y coordinate relatively to the layoutable component parent
          * @method setLocation
@@ -708,7 +708,7 @@ pkg.Layoutable = Class(L, [
         };
 
         /**
-         * Set the layoutable component size. 
+         * Set the layoutable component size.
          * @param  {Integer} w a width of the component
          * @param  {Integer} h a height of the component
          * @method setSize
@@ -733,7 +733,7 @@ pkg.Layoutable = Class(L, [
          */
 
         /**
-         * Get a children layoutable component by the given constraints.  
+         * Get a children layoutable component by the given constraints.
          * @param  {zebra.layout.Layoutable} c a constraints
          * @return {zebra.layout.Layoutable} a children component
          * @method getByConstraints
@@ -752,17 +752,17 @@ pkg.Layoutable = Class(L, [
          * Remove the given children component.
          * @param {zebra.layout.Layoutable} c a children component to be removed
          * @method remove
-         * @return {zebra.layout.Layoutable} a removed children component 
+         * @return {zebra.layout.Layoutable} a removed children component
          */
-        this.remove = function(c) { 
-            return this.removeAt(this.kids.indexOf(c)); 
+        this.remove = function(c) {
+            return this.removeAt(this.kids.indexOf(c));
         };
 
         /**
          * Remove a children component at the specified position.
-         * @param {Integer} i a children component index at which it has to be removed 
+         * @param {Integer} i a children component index at which it has to be removed
          * @method removeAt
-         * @return {zebra.layout.Layoutable} a removed children component 
+         * @return {zebra.layout.Layoutable} a removed children component
          */
         this.removeAt = function (i){
             var obj = this.kids[i];
@@ -775,7 +775,7 @@ pkg.Layoutable = Class(L, [
         };
 
         /**
-         * Remove the component from its parent if it has a parent 
+         * Remove the component from its parent if it has a parent
          * @method removeMe
          */
         this.removeMe = function() {
@@ -788,23 +788,23 @@ pkg.Layoutable = Class(L, [
         /**
          * The method can be implemented to be informed every time a children component
          * has been removed
-         * @param {Integer} i a children component index at which it has been removed 
+         * @param {Integer} i a children component index at which it has been removed
          * @param  {zebra.layout.Layoutable} c a children component that has been removed
          * @method kidRemoved
          */
 
         /**
-         * Set the specified preferred size the component has to have. 
-         * Component preferred size is important thing that is widely 
-         * used to layout the component. Usually the preferred 
-         * size is calculated by a concrete component basing on 
+         * Set the specified preferred size the component has to have.
+         * Component preferred size is important thing that is widely
+         * used to layout the component. Usually the preferred
+         * size is calculated by a concrete component basing on
          * its metrics. For instance, label component calculates its
-         * preferred size basing on text size. But if it is required  
-         * the component preferred size can be fixed with the desired 
+         * preferred size basing on text size. But if it is required
+         * the component preferred size can be fixed with the desired
          * value.
-         * @param  {Integer} w a preferred width. Pass "-1" as the 
+         * @param  {Integer} w a preferred width. Pass "-1" as the
          * argument value to not set preferred width
-         * @param  {Integer} h a preferred height. Pass "-1" as the 
+         * @param  {Integer} h a preferred height. Pass "-1" as the
          * argument value to not set preferred height
          * @method setPreferredSize
          */
@@ -820,8 +820,8 @@ pkg.Layoutable = Class(L, [
          * Replace a children component at the specified index
          * with the given new children component
          * @param  {Integer} i an index of a children component to be replaced
-         * @param  {zebra.layout.Layoutable} d a new children 
-         * @return {zebra.layout.Layoutable} a previous component that has 
+         * @param  {zebra.layout.Layoutable} d a new children
+         * @return {zebra.layout.Layoutable} a previous component that has
          * been re-set with the new one
          * @method setAt
          */
@@ -832,31 +832,31 @@ pkg.Layoutable = Class(L, [
         };
 
         /**
-         * Add the new children component with the given constraints 
+         * Add the new children component with the given constraints
          * @param  {Object} constr a constraints of a new children component
-         * @param  {zebra.layout.Layoutable} d a new children component to 
+         * @param  {zebra.layout.Layoutable} d a new children component to
          * be added
          * @method add
-         * @return {zebra.layout.Layoutable} added layoutable component 
+         * @return {zebra.layout.Layoutable} added layoutable component
          */
         this.add = function(constr,d) {
-            return (arguments.length == 1) ? this.insert(this.kids.length, null, constr) 
+            return (arguments.length == 1) ? this.insert(this.kids.length, null, constr)
                                            : this.insert(this.kids.length, constr, d);
         };
 
         // speedup constructor execution
         this[''] = function() {
             /**
-             *  Reference to children components 
+             *  Reference to children components
              *  @attribute kids
              *  @type {Array}
              *  @default empty array
              *  @readOnly
              */
             this.kids = [];
-            
+
             /**
-            * Layout manager that is used to order children layoutable components 
+            * Layout manager that is used to order children layoutable components
             * @attribute layout
             * @default itself
             * @readOnly
@@ -868,9 +868,9 @@ pkg.Layoutable = Class(L, [
 ]);
 
 /**
- *  Layout manager implementation that places layoutbale components 
- *  on top of each other stretching its to fill all available parent 
- *  component space 
+ *  Layout manager implementation that places layoutbale components
+ *  on top of each other stretching its to fill all available parent
+ *  component space
  *  @class zebra.layout.StackLayout
  *  @constructor
  */
@@ -907,22 +907,22 @@ pkg.StackLayout = Class(L, [
 
 /**
  *  Layout manager implementation that logically splits component area into five areas: TOP, BOTTOM, LEFT, RIGHT and CENTER.
- *  TOP and BOTTOM components are stretched to fill all available space horizontally and are sized to have preferred height horizontally. 
+ *  TOP and BOTTOM components are stretched to fill all available space horizontally and are sized to have preferred height horizontally.
  *  LEFT and RIGHT components are stretched to fill all available space vertically and are sized to have preferred width vertically.
  *  CENTER component is stretched to occupy all available space taking in account TOP, LEFT, RIGHT and BOTTOM components.
- 
+
        // create panel with border layout
        var p = new zebra.ui.Panel(new zebra.layout.BorderLayout());
-       
-       // add children UI components with top, center and left constraints 
+
+       // add children UI components with top, center and left constraints
        p.add(zebra.layout.TOP,    new zebra.ui.Label("Top"));
        p.add(zebra.layout.CENTER, new zebra.ui.Label("Center"));
        p.add(zebra.layout.LEFT,   new zebra.ui.Label("Left"));
- 
- * Construct the layout with the given vertical and horizontal gaps. 
- * @param  {Integer} [hgap] horizontal gap. The gap is a horizontal distance between laid out components  
- * @param  {Integer} [vgap] vertical gap. The gap is a vertical distance between laid out components  
- * @constructor 
+
+ * Construct the layout with the given vertical and horizontal gaps.
+ * @param  {Integer} [hgap] horizontal gap. The gap is a horizontal distance between laid out components
+ * @param  {Integer} [vgap] vertical gap. The gap is a vertical distance between laid out components
+ * @constructor
  * @class zebra.layout.BorderLayout
  * @extends {zebra.layout.Layout}
  */
@@ -947,7 +947,7 @@ pkg.BorderLayout = Class(L, [
 
         this[''] = function(hgap,vgap){
             if (arguments.length > 0) {
-                this.hgap = this.vgap = hgap;    
+                this.hgap = this.vgap = hgap;
                 if (arguments.length > 1) {
                     this.vgap = vgap;
                 }
@@ -1061,15 +1061,15 @@ pkg.BorderLayout = Class(L, [
 ]);
 
 /**
- * Rester layout manager can be used to use absolute position of 
- * layoutable components. That means all components will be laid 
- * out according coordinates and size they have. Raster layout manager 
- * provides extra possibilities to control children components placing. 
- * It is possible to align components by specifying layout constraints, 
- * size component to its preferred size and so on.  
- * @param {Integer} [m] flag to add extra rule to components layouting. 
- * For instance use zebra.layout.USE_PS_SIZE as the flag value to set 
- * components size to its preferred sizes.  
+ * Rester layout manager can be used to use absolute position of
+ * layoutable components. That means all components will be laid
+ * out according coordinates and size they have. Raster layout manager
+ * provides extra possibilities to control children components placing.
+ * It is possible to align components by specifying layout constraints,
+ * size component to its preferred size and so on.
+ * @param {Integer} [m] flag to add extra rule to components layouting.
+ * For instance use zebra.layout.USE_PS_SIZE as the flag value to set
+ * components size to its preferred sizes.
  * @class  zebra.layout.RasterLayout
  * @constructor
  * @extends {zebra.layout.Layout}
@@ -1091,7 +1091,7 @@ pkg.RasterLayout = Class(L, [
         };
 
         this.doLayout = function(c){
-            var r = c.width - c.getRight(), 
+            var r = c.width - c.getRight(),
                 b = c.height - c.getBottom(),
                 usePsSize = (this.flag & pkg.USE_PS_SIZE) > 0;
 
@@ -1147,55 +1147,55 @@ pkg.RasterLayout = Class(L, [
 ]);
 
 /**
- * Flow layout manager group and places components aligned with 
+ * Flow layout manager group and places components aligned with
  * different vertical and horizontal alignments
-  
+
         // create panel and set flow layout for it
-        // components added to the panel will be placed 
-        // horizontally aligned at the center of the panel 
+        // components added to the panel will be placed
+        // horizontally aligned at the center of the panel
         var p = new zebra.ui.Panel();
         p.setLayout(new zebra.layout.FlowLayout(zebra.layout.CENTER, zebra.layout.CENTER));
 
-        // add three buttons into the panel with flow layout 
+        // add three buttons into the panel with flow layout
         p.add(new zebra.ui.Button("Button 1"));
         p.add(new zebra.ui.Button("Button 2"));
         p.add(new zebra.ui.Button("Button 3"));
-  
+
  * @param {Integer|String} [ax] (zebra.layout.LEFT by default) horizontal alignment:
-  
-     zebra.layout.LEFT - left alignment 
-     zebra.layout.RIGHT - right alignment 
-     zebra.layout.CENTER - center alignment 
+
+     zebra.layout.LEFT - left alignment
+     zebra.layout.RIGHT - right alignment
+     zebra.layout.CENTER - center alignment
 
      or
-     
-     "left" 
+
+     "left"
      "center"
-     "right"  
- 
+     "right"
+
  * @param {Integer|String} [ay] (zebra.layout.TOP by default) vertical alignment:
- 
-     zebra.layout.TOP - top alignment 
-     zebra.layout.CENTER - center alignment 
-     zebra.layout.BOTTOM - bottom alignment 
+
+     zebra.layout.TOP - top alignment
+     zebra.layout.CENTER - center alignment
+     zebra.layout.BOTTOM - bottom alignment
 
      or
-     
-     "top" 
+
+     "top"
      "center"
-     "bottom"  
+     "bottom"
 
- * @param {Integer|String} [dir] (zebra.layout.HORIZONTAL by default) a direction 
+ * @param {Integer|String} [dir] (zebra.layout.HORIZONTAL by default) a direction
  * the component has to be placed in the layout
- 
+
      zebra.layout.VERTICAL - vertical placed components
-     zebra.layout.HORIZONTAL - horizontal placed components 
-      
+     zebra.layout.HORIZONTAL - horizontal placed components
+
      or
-     
-     "vertical" 
-     "horizontal"  
-    
+
+     "vertical"
+     "horizontal"
+
 
  * @param {Integer} [gap] a space in pixels between laid out components
  * @class  zebra.layout.FlowLayout
@@ -1214,7 +1214,7 @@ pkg.FlowLayout = Class(L, [
         this.gap = 0;
 
         /**
-         * Horizontal laid out components alignment 
+         * Horizontal laid out components alignment
          * @attribute ax
          * @readOnly
          * @type {Integer|String}
@@ -1223,7 +1223,7 @@ pkg.FlowLayout = Class(L, [
         this.ax = pkg.LEFT;
 
         /**
-         * Vertical laid out components alignment 
+         * Vertical laid out components alignment
          * @attribute ay
          * @readOnly
          * @type {Integer|String}
@@ -1295,7 +1295,7 @@ pkg.FlowLayout = Class(L, [
                 eh      = c.height - t - c.getBottom(),
                 px      = ((this.ax == pkg.RIGHT) ? ew - psSize.width
                                                   : ((this.ax == pkg.CENTER) ? ~~((ew - psSize.width) / 2) : 0)) + l,
-                py      = ((this.ay == pkg.TOP  ) ? eh - psSize.height
+                py      = ((this.ay == pkg.BOTTOM) ? eh - psSize.height
                                                   : ((this.ay == pkg.CENTER) ? ~~((eh - psSize.height) / 2) : 0)) + t;
 
             for(var i = 0;i < c.kids.length; i++){
@@ -1337,22 +1337,22 @@ pkg.FlowLayout = Class(L, [
 ]);
 
 /**
- * List layout places components vertically one by one 
-  
+ * List layout places components vertically one by one
+
         // create panel and set list layout for it
         var p = new zebra.ui.Panel();
         p.setLayout(new zebra.layout.ListLayout());
 
-        // add three buttons into the panel with list layout 
+        // add three buttons into the panel with list layout
         p.add(new zebra.ui.Button("Item 1"));
         p.add(new zebra.ui.Button("Item 2"));
         p.add(new zebra.ui.Button("Item 3"));
-  
+
  * @param {Integer|String} [ax] horizontal list item alignment:
-  
-     zebra.layout.LEFT - left alignment 
-     zebra.layout.RIGHT - right alignment 
-     zebra.layout.CENTER - center alignment 
+
+     zebra.layout.LEFT - left alignment
+     zebra.layout.RIGHT - right alignment
+     zebra.layout.CENTER - center alignment
      zebra.layout.STRETCH - stretching item to occupy the whole horizontal space
 
      or
@@ -1380,14 +1380,14 @@ pkg.ListLayout = Class(L,[
                 gap = 0;
             }
 
-            if (ax != pkg.STRETCH && ax != pkg.LEFT && 
-                ax != pkg.RIGHT && ax != pkg.CENTER) 
+            if (ax != pkg.STRETCH && ax != pkg.LEFT &&
+                ax != pkg.RIGHT && ax != pkg.CENTER)
             {
                 throw new Error("Invalid alignment");
             }
 
             /**
-             * Horizontal list items alignment 
+             * Horizontal list items alignment
              * @attribute ax
              * @type {Integer}
              * @readOnly
@@ -1443,9 +1443,9 @@ pkg.ListLayout = Class(L,[
 ]);
 
 /**
- * Percent layout places components vertically or horizontally and 
+ * Percent layout places components vertically or horizontally and
  * sizes its according to its percentage constraints.
-  
+
         // create panel and set percent layout for it
         var p = new zebra.ui.Panel();
         p.setLayout(new zebra.layout.PercentLayout());
@@ -1455,12 +1455,12 @@ pkg.ListLayout = Class(L,[
         p.add(20, new zebra.ui.Button("20%"));
         p.add(30, new zebra.ui.Button("30%"));
         p.add(50, new zebra.ui.Button("50%"));
-  
- * @param {Integer|String} [dir] a direction of placing components. The 
- * value can be "zebra.layout.HORIZONTAL" or "zebra.layout.VERTICAL" or 
- * "horizontal" or "vertical" 
+
+ * @param {Integer|String} [dir] a direction of placing components. The
+ * value can be "zebra.layout.HORIZONTAL" or "zebra.layout.VERTICAL" or
+ * "horizontal" or "vertical"
  * @param {Integer} [gap] a space in pixels between laid out components
- * @param {Boolean} [stretch] true if the component should be stretched 
+ * @param {Boolean} [stretch] true if the component should be stretched
  * vertically or horizontally
  * @class  zebra.layout.PercentLayout
  * @constructor
@@ -1487,9 +1487,9 @@ pkg.PercentLayout = Class(L, [
         this.gap = 2;
 
         /**
-         * Boolean flag that say if the laid out components have 
-         * to be stretched vertically (if direction is set to zebra.layout.VERTICAL) 
-         * or horizontally (if direction is set to zebra.layout.HORIZONTAL) 
+         * Boolean flag that say if the laid out components have
+         * to be stretched vertically (if direction is set to zebra.layout.VERTICAL)
+         * or horizontally (if direction is set to zebra.layout.HORIZONTAL)
          * @attribute stretch
          * @readOnly
          * @type {Integer}
@@ -1503,7 +1503,7 @@ pkg.PercentLayout = Class(L, [
                 if (this.direction != pkg.HORIZONTAL && this.direction != pkg.VERTICAL) {
                     throw new Error("Invalid direction : " + this.direction);
                 }
-                
+
                 if (arguments.length > 1) this.gap = gap;
                 if (arguments.length > 2) this.stretch = stretch;
             }
@@ -1585,13 +1585,13 @@ pkg.PercentLayout = Class(L, [
 ]);
 
 /**
- * Grid layout manager constraints. Constraints says how a  component has to be placed in 
- * grid layout virtual cell. The constraints specifies vertical and horizontal alignments, 
+ * Grid layout manager constraints. Constraints says how a  component has to be placed in
+ * grid layout virtual cell. The constraints specifies vertical and horizontal alignments,
  * a virtual cell paddings, etc.
- * @param {Integer} [ax] a horizontal alignment 
+ * @param {Integer} [ax] a horizontal alignment
  * @param {Integer} [ay] a vertical alignment
  * @param {Integer} [p]  a cell padding
- * @constructor 
+ * @constructor
  * @class zebra.layout.Constraints
  */
 pkg.Constraints = Class([
@@ -1651,13 +1651,13 @@ pkg.Constraints = Class([
         };
 
         /**
-         * Set all four paddings (top, left, bottom, right) to the given value 
+         * Set all four paddings (top, left, bottom, right) to the given value
          * @param  {Integer} p a padding
          * @method setPadding
          */
 
         /**
-         * Set top, left, bottom, right paddings 
+         * Set top, left, bottom, right paddings
          * @param  {Integer} t a top padding
          * @param  {Integer} l a left padding
          * @param  {Integer} b a bottom padding
@@ -1679,21 +1679,21 @@ pkg.Constraints = Class([
 ]);
 
 /**
- * Grid layout manager. can be used to split a component area to 
- * number of virtual cells where children components can be placed. 
- * The way how the children components have to be laid out in the cells can 
+ * Grid layout manager. can be used to split a component area to
+ * number of virtual cells where children components can be placed.
+ * The way how the children components have to be laid out in the cells can
  * be customized by using "zebra.layout.Constraints" class:
- 
+
         // create constraints
         var ctr = new zebra.layout.Constraints();
-        
-        // specify cell top, left, right, bottom paddings 
+
+        // specify cell top, left, right, bottom paddings
         ctr.setPadding(8);
-        // say the component has to be left aligned in a 
-        // virtual cell of grid layout 
+        // say the component has to be left aligned in a
+        // virtual cell of grid layout
         ctr.ax = zebra.layout.LEFT;
 
-        // create panel and set grid layout manager with two 
+        // create panel and set grid layout manager with two
         // virtual rows and columns
         var p = new zebra.ui.Panel();
         p.setLayout(new zebra.layout.GridLayout(2,2));
@@ -1704,11 +1704,11 @@ pkg.Constraints = Class([
         p.add(ctr, new zebra.ui.Label("Cell 2,1"));
         p.add(ctr, new zebra.ui.Label("Cell 2,2"));
 
- * @param {Integer} rows a number of virtual rows to layout 
+ * @param {Integer} rows a number of virtual rows to layout
  * children components
- * @param {Integer} cols a number of virtual columns to 
+ * @param {Integer} cols a number of virtual columns to
  * layout children components
- * @constructor 
+ * @constructor
  * @class  zebra.layout.GridLayout
  * @extends {zebra.layout.Layout}
  */
@@ -1718,7 +1718,7 @@ pkg.GridLayout = Class(L, [
             if (arguments.length < 3) m = 0;
 
         /**
-         * Number of virtual rows to place children components 
+         * Number of virtual rows to place children components
          * @attribute rows
          * @readOnly
          * @type {Integer}
@@ -1726,7 +1726,7 @@ pkg.GridLayout = Class(L, [
         this.rows = r;
 
         /**
-         * Number of virtual columns to place children components 
+         * Number of virtual columns to place children components
          * @attribute cols
          * @readOnly
          * @type {Integer}
@@ -1735,10 +1735,10 @@ pkg.GridLayout = Class(L, [
         this.mask = m;
         this.colSizes = Array(c + 1);
         this.rowSizes = Array(r + 1);
-    
+
         /**
-         * Default constraints that is applied for children components 
-         * that doesn't define own constraints 
+         * Default constraints that is applied for children components
+         * that doesn't define own constraints
          * @type {zebra.layout.Constraints}
          * @attribute constraints
          */
@@ -1816,7 +1816,7 @@ pkg.GridLayout = Class(L, [
                         d   = a.getPreferredSize().width + arg.left + arg.right;
 
                     if (d > max) max = d;
-                }            
+                }
             }
             return max;
         };
@@ -1827,11 +1827,11 @@ pkg.GridLayout = Class(L, [
         };
 
         this.doLayout = function(c){
-            var rows     = this.rows, 
+            var rows     = this.rows,
                 cols     = this.cols,
                 colSizes = this.calcCols(c),
                 rowSizes = this.calcRows(c),
-                top      = c.getTop(), 
+                top      = c.getTop(),
                 left     = c.getLeft();
 
             if ((this.mask & pkg.HORIZONTAL) > 0) {
@@ -1856,7 +1856,7 @@ pkg.GridLayout = Class(L, [
                     if (l.isVisible === true){
                         var arg   = l.constraints || this.constraints,
                             d     = l.getPreferredSize(),
-                            cellW = colSizes[j], 
+                            cellW = colSizes[j],
                             cellH = rowSizes[i];
 
                         cellW -= (arg.left + arg.right);

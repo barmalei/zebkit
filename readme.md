@@ -65,6 +65,11 @@ And if you want open demos and samples on your in a browser start simple test HT
     $ gulp http
 ```
 
+To track changes and zebra artifact re-building you should start watch task: 
+```bash
+    $ gulp watch
+```
+
 Open demos in a browser: http://127.0.0.1:8090/ 
 
 ### Zebra package structure:

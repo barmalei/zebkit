@@ -1,2 +1,2 @@
-lib/jsonrpclib/*.pyc
+tests/io/*.pyc
 node_modules

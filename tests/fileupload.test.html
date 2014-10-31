@@ -5,20 +5,34 @@
 
 
         <script type='text/javascript'>
-            zebra.ui.myFilesHandler = function(files) {
-                // !!! handle files
-                console.log(files);  
+            var imagePan = null;
+
+            zebra.ui.uploadHandler = function(files) {
+                if (files != null && files[0] != null) {
+                    var r = new FileReader();
+                    r.onload = function(e) {
+                        var img = new Image();
+                        img.src = e.target.result;
+                        img.onload = function() {
+                            imagePan.setImage(img);
+                        };
+                    };
+                    r.readAsDataURL(files[0]);
+                }
             };
 
             zebra.ready(function() {
                 eval(zebra.Import("ui", "layout"));
 
+                imagePan = new ImagePan(null);
+
                 var root = (new zebra.ui.zCanvas(400, 400)).root.properties({
-                    layout: new BorderLayout(),
-                    padding:6,
-                    border: borders.plain,
-                    kids  : {
-                        CENTER: new Button("Upload")
+                    layout:  new BorderLayout(4),
+                    padding: 6,
+                    border:  borders.plain,
+                    kids  :  {
+                        BOTTOM: new Button("Upload"),
+                        CENTER: imagePan
                     }
                 });
 
@@ -33,7 +47,7 @@
     </head>
 
     <body>
-        <input type="file" id="zebra.files" multiple  style="display:none" onchange="zebra.ui.myFilesHandler(this.files)">        
+        <input type="file" id="zebra.files" multiple  style="display:none" onchange="zebra.ui.uploadHandler(this.files)"/>
 
     </body>
 </html>

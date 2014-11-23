@@ -1,6 +1,6 @@
+zebra.package("ui.demo", function(pkg, Class) {
 
-(function(pkg, Class, ui) {
-
+var ui = zebra.ui;
 eval(zebra.Import("ui", "layout"));
 
 pkg.BasicUIDemo = new Class(pkg.DemoPan, [
@@ -182,4 +182,4 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
     }
 ]);
 
-})(zebra.ui.demo, zebra.Class, zebra.ui);
+});

@@ -1,6 +1,6 @@
+zebra.package("ui.demo", function(pkg, Class) {
 
-(function(pkg, Class, ui) {
-
+var ui = zebra.ui;
 eval(zebra.Import("ui", "ui.designer", "layout"));
 
 pkg.DesignerDemo = new Class(pkg.DemoPan, [
@@ -29,12 +29,12 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
         b.toPreferredSize();
         b.setLocation(20, 120);
         pp.add(new ShaperPan(b));
-        
+
         var b = new ImagePan(ui.demo.alpha);
         b.toPreferredSize();
         b.setLocation(310, 80);
         pp.add(new ShaperPan(b));
-        
+
         var b = new ImagePan(ui.demo.saab);
         b.toPreferredSize();
         b.setLocation(290, 270);
@@ -101,4 +101,4 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
     }
 ]);
 
-})(zebra.ui.demo, zebra.Class, zebra.ui);
+});

@@ -1,8 +1,7 @@
-
-(function(pkg, Class, ui) {
+zebra.package("ui.demo", function(pkg, Class) {
 
 eval(zebra.Import("ui", "layout"));
-var rgb = zebra.util.rgb;
+var rgb = zebra.util.rgb, ui = zebra.ui;
 
 function createColorPicker() {
     var m = new Menu(), i = 0;
@@ -30,8 +29,8 @@ function formMenuArray() {
                     },
                 "Car color": createColorPicker(),
                 "Car brand":
-                    [ new ImagePan(zebra.ui.demo.bmw).properties({ padding: 8}), 
-                      new ImagePan(zebra.ui.demo.saab).properties({ padding: 8}), 
+                    [ new ImagePan(zebra.ui.demo.bmw).properties({ padding: 8}),
+                      new ImagePan(zebra.ui.demo.saab).properties({ padding: 8}),
                       new ImagePan(zebra.ui.demo.alpha).properties({ padding: 8}) ]
                 };
     return mbar;
@@ -49,9 +48,9 @@ function $get(i, o) {
 
 function createToolbar() {
     var t = new zebra.ui.Toolbar();
- 
+
     var img = ui.demo.home;
-    t.addImage(img);
+    var imgPan1 = t.addImage(img);
     t.addImage(ui.demo.mail);
     t.addImage(ui.demo.attachment);
 
@@ -65,12 +64,17 @@ function createToolbar() {
     var c3 = t.addRadio(g,"Radio 3");
 
 
+    t.bind(function(src) {
+        console.log("::: " + src.$clazz.$name + ", src = " + (imgPan1 == src));
+    });
+
+
     // var m = new zebra.data.ListModel();
     // m.addElement("Item 1");
     // m.addElement("Item 2");
     // m.addElement("Item 3");
     // t.addComboElement(new zebra.ui.List(m));
-   
+
     return t;
 }
 
@@ -144,4 +148,4 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
     }
 ]);
 
-})(zebra.ui.demo, zebra.Class, zebra.ui);
+});

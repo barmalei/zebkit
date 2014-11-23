@@ -1,4 +1,4 @@
-(function(pkg, Class) {
+zebra.package("ui.demo", function(pkg, Class) {
 
 var Panel = zebra.ui.Panel;
 var Label = zebra.ui.Label;
@@ -100,4 +100,4 @@ pkg.ShDemo = new Class(pkg.DemoPan, [
     }
 ]);
 
-})(zebra.ui.demo, zebra.Class);
+});

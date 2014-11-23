@@ -1,47 +1,42 @@
-(function(pkg, Class) {
+zebra.package("ui.demo", function(pkg, Class) {
+    var Panel     = zebra.ui.Panel,
+        Label     = zebra.ui.Label,
+        Border    = zebra.ui.Border,
+        BorderPan = zebra.ui.BorderPan;
 
-var Panel = zebra.ui.Panel,
-    Label = zebra.ui.Label,
-    Border = zebra.ui.Border,
-    BorderPan = zebra.ui.BorderPan;
+    pkg.createLabel = function (txt, color, font) {
+        color = color || zebra.ui.palette.gray1;
+        var l = new Label(txt.indexOf("\n") >= 0 ? new zebra.data.Text(txt) : txt);
+        l.setColor(color);
+        if (font) l.setFont(font);
+        else l.setFont(zebra.ui.boldFont);
+        l.setBorder(new Border(zebra.util.rgb.gray));
+        l.setPadding(4);
+        return l;
+    };
 
-pkg.createLabel = function (txt, color, font) {
-    color = color || zebra.ui.palette.gray1;
-    var l = new Label(txt.indexOf("\n") >= 0 ? new zebra.data.Text(txt) : txt);
-    l.setColor(color);
-    if (font) l.setFont(font);  
-    else l.setFont(zebra.ui.boldFont);
-    l.setBorder(new Border(zebra.util.rgb.gray));
-    l.setPadding(4);
-    return l;
-};
+    pkg.createBorderPan = function (txt, content, w, h) {
+        content = content || new Panel();
+        var bp = new BorderPan(txt, content);
+        content.setPadding(4);
+        w = w || -1;
+        h = h || -1;
+        bp.setPreferredSize(w, h);
+        return bp;
+    };
 
-pkg.createBorderPan = function (txt, content, w, h) {
-    content = content || new Panel();
-    var bp = new BorderPan(txt, content);
-    content.setPadding(4);
-    w = w || -1;
-    h = h || -1;
-    bp.setPreferredSize(w, h);
-    return bp;
-};
+    pkg.DemoPan = Class(Panel, [
+        function() {
+            this.$super();
+            this.setPadding(6);
+        },
 
-pkg.DemoPan = Class(Panel, [
-    function() {
-        this.$super();
-        this.setPadding(6);
-    },
+        function activated(b) {}
+    ]);
 
-    function activated(b) {}
-]);
-
-zebra.ui.configure(function(conf) {
-    conf.loadByUrl(pkg.$url + "demo.json");
+    new zebra.ui.Bag(zebra.ui).loadByUrl(pkg.$url.join("demo.json"));
 });
-
-})(zebra("ui.demo"), zebra.Class);
-
-(function(pkg, Class) {
+zebra.package("ui.demo", function(pkg, Class) {
 
 eval(zebra.Import("ui", "layout"))
 
@@ -190,10 +185,10 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, [
     }
 ]);
 
-})(zebra.ui.demo, zebra.Class);
+});
+zebra.package("ui.demo", function(pkg, Class) {
 
-(function(pkg, Class, ui) {
-
+var ui = zebra.ui;
 eval(zebra.Import("ui", "layout"));
 
 pkg.BasicUIDemo = new Class(pkg.DemoPan, [
@@ -375,212 +370,215 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
     }
 ]);
 
-})(zebra.ui.demo, zebra.Class, zebra.ui);
+});
 
-(function(pkg, Class, ui) {
+zebra.package("ui.demo", function(pkg, Class) {
+
+    var ui = zebra.ui;
+    eval(zebra.Import("ui", "layout"));
+
+    pkg.PanelsDemo = new Class(pkg.DemoPan, [
+        function() {
+            this.$super();
+            this.setLayout(new BorderLayout());
+            var n = new Tabs(LEFT);
+            n.add("Split Panel",  this.createSplitPan());
+            n.add("Border Panel", this.createTitledPan());
+            n.add("Scroll Panel", this.createScrollPan());
+            this.add(CENTER, n);
+        },
+
+        function createTitledPan() {
+            var r = new Panel(new FlowLayout(CENTER, CENTER)),
+                p = new Panel(new GridLayout(4, 3)),
+                p1 = new BorderPan("Default title", new Label(""));
+            p1.setPreferredSize(130, 130);
+
+            var ll = new Label(""),
+                p2 = new BorderPan("Center aligned title", ll, CENTER | TOP);
+            p2.setPreferredSize(170, 130);
+
+            var p3 = new BorderPan("Right aligned title", new Label(""), TOP | RIGHT);
+            p3.setPreferredSize(170, 130);
+            var p4 = new BorderPan("Bottom title", new Label(""), BOTTOM | LEFT);
+            p4.setPreferredSize(170, 130);
+            var p5 = new BorderPan("Bottom centered title", new Label(""), CENTER | BOTTOM);
+            p5.setPreferredSize(170, 130);
+            var p6 = new BorderPan("Bottom right title", new Label(""), RIGHT | BOTTOM);
+            p6.setPreferredSize(170, 130);
+            var p7 = new BorderPan(new ImageLabel("image title", pkg.butterfly), new Label(""));
+            p7.setPreferredSize(170, 130);
+            var p8_1 = new BorderPan("Border pan as title", new Label(""));
+            p8_1.setPreferredSize(130, -1);
+            var p8 = new BorderPan(p8_1, new Label(""));
+            p8.setPreferredSize(170, 130);
+            var p9 = new BorderPan(new Checkbox("Checkbox title"), new Label(""));
+            p9.setPreferredSize(170, 130);
+            var ctr = new Constraints();
+            ctr.left = ctr.right = ctr.top = ctr.bottom = 6;
+            p.add(ctr, p1);
+            p.add(ctr, p2);
+            p.add(ctr, p3);
+            p.add(ctr, p4);
+            p.add(ctr, p5);
+            p.add(ctr, p6);
+            p.add(ctr, p7);
+            p.add(ctr, p8);
+            p.add(ctr, p9);
+            r.add(p);
+            return r;
+        },
+
+        function createSplitPan() {
+            var p = new Panel(new BorderLayout());
+            var s1_1 = new SplitPan(new ImagePan(pkg.cosmo1), new ImagePan(pkg.cosmo2));
+            var s1 = new SplitPan(new ImagePan(pkg.cosmo3), s1_1, HORIZONTAL);
+            p.setPadding(4);
+            s1.setGripperLoc(180);
+            s1_1.setGripperLoc(220);
+            p.add(CENTER, s1);
+            return p;
+        },
+
+        function createScrollPan() {
+            var rt = new Panel(new FlowLayout(CENTER, CENTER)),
+                p = new Panel(new GridLayout(2,2)),
+                img = new ImagePan(pkg.cosmo1),
+                p1 = new ScrollPan(img);
+
+            p1.setPreferredSize(270, 240);
+            p1.setBorder(zebra.ui.borders.plain);
+            var p2 = new ScrollPan(new ImagePan(pkg.cosmo1), VERTICAL);
+            p2.setPreferredSize(270, 240);
+            p2.setBorder(zebra.ui.borders.plain);
+
+            var p3_1 = new Panel(new zebra.layout.ListLayout(2));
+            for(var i=0; i<20; i++) {
+                var ch = new Checkbox("Checkbox " + i);
+                ch.setLayout(new FlowLayout(LEFT, CENTER, HORIZONTAL, 4));
+                p3_1.add(ch);
+            }
+
+            var p3 = new ScrollPan(p3_1);
+            p3.setAutoHide(true);
+
+            p3.setPreferredSize(270, 190);
+            p3.setBorder(zebra.ui.borders.plain);
+
+            var p4_1 = new TextField(new zebra.data.Text(zebra.io.GET("demo/test.txt")));
+            p4_1.setBorder(null);
+
+            var p4 = new ScrollPan(p4_1);
+            p4.setPreferredSize(270, 190);
+            p4.setBorder(zebra.ui.borders.plain);
+
+            var ctr = new Constraints();
+            ctr.setPadding(6);
+            p.add(ctr, p1);
+            p.add(ctr, p2);
+            p.add(ctr, p3);
+            p.add(ctr, p4);
+            rt.add(p);
+            return rt;
+        }
+    ]);
+
+});
+
+zebra.package("ui.demo", function(pkg, Class) {
+
+    var ui = zebra.ui;
+    eval(zebra.Import("ui", "ui.tree", "layout"));
+
+    function makeTreeModel() {
+        var tm = new zebra.data.TreeModel(new zebra.data.Item("Root"));
+        tm.add(tm.root, new zebra.data.Item("Item 1"));
+        tm.add(tm.root, new zebra.data.Item("Item 2"));
+        var ch = new zebra.data.Item("Item 3");
+        tm.add(tm.root, ch);
+        tm.add(ch, new zebra.data.Item("Item 3.1"));
+        tm.add(ch, new zebra.data.Item("Item 3.2"));
+        return tm;
+    }
+
+    function makeTreeModel2(items, deepness) {
+        function makeBranch(tm, r, items) {
+            for(var i=0; i < deepness; i++) {
+                var kid = new zebra.data.Item("Long tree item : " + items);
+                tm.add(r, kid);
+                if (i%2 > 0) r = kid;
+                items--;
+                if (items <= 0) break;
+            }
+            return items;
+        }
+
+        var tm = new zebra.data.TreeModel(new zebra.data.Item("Root")), r = tm.root;
+        while((items = makeBranch(tm, r, items)) > 0);
+        return tm;
+    }
+
+    pkg.TreeDemo = new Class(pkg.DemoPan, [
+        function() {
+            this.$super();
+
+            var p = new Panel(new FlowLayout(CENTER, TOP, HORIZONTAL, 8));
+            this.setLayout(new BorderLayout(4,4));
+
+            var t1 = new Tree(makeTreeModel()), p1 = new BorderPan("Standard tree", t1);
+            p1.setGaps(6,6);
+            p1.setPreferredSize(210, 180);
+            t1.select(t1.model.root);
+
+            var t2 = new Tree(makeTreeModel()), p2 = new BorderPan("Custom view tree", t2);
+            var fn = new Font("Arial", "bold", 14);
+            t2.setViewProvider(new zebra.Dummy([
+                  function getView(c, i) {
+                        var tr = new TextRender(i.value);
+                        if (i.value.indexOf("1") > 0) {
+                            tr.setColor("red");
+                        }
+
+                        if (i.value.indexOf("2") > 0) {
+                            return new BoldTextRender(i.value);
+                        }
+
+                        if (i.value.indexOf("Root") === 0) {
+                            return new CompRender(new ImageLabel("Root", ui.demo.butterfly));
+                        }
+                        return tr;
+                  }
+            ]));
+            t2.select(t2.model.root);
+            p2.setGaps(6,6);
+            p2.setPreferredSize(210, 180);
+
+            var t3 = new Tree(makeTreeModel()), p3 = new BorderPan("Editable tree(use enter)", new ScrollPan(t3));
+            t3.select(t3.model.root);
+            t3.setEditorProvider(new DefEditors());
+            p3.setGaps(6,6);
+            p3.setPreferredSize(210, 180);
+
+            var t4 = new Tree(makeTreeModel2(1000, 30)), p4 = new BorderPan("Long tree", new ScrollPan(t4));
+            t4.select(t4.model.root);
+            t4.setPadding(4);
+            p4.setPreferredSize(-1, 280);
+            this.add(BOTTOM, p4);
+
+            var ctr = new Constraints();
+            this.setPadding(8);
+            p.add(ctr, p1);
+            p.add(ctr, p2);
+            p.add(ctr, p3);
+            this.add(CENTER, p);
+        }
+    ]);
+
+});
+zebra.package("ui.demo", function(pkg, Class) {
 
 eval(zebra.Import("ui", "layout"));
-
-pkg.PanelsDemo = new Class(pkg.DemoPan, [
-    function() {
-        this.$super();
-        this.setLayout(new BorderLayout());
-        var n = new Tabs(LEFT);
-        n.add("Split Panel",  this.createSplitPan());
-        n.add("Border Panel", this.createTitledPan());
-        n.add("Scroll Panel", this.createScrollPan());
-        this.add(CENTER, n);
-    },
-
-    function createTitledPan() {
-        var r = new Panel(new FlowLayout(CENTER, CENTER)),
-            p = new Panel(new GridLayout(4, 3)),
-            p1 = new BorderPan("Default title", new Label(""));
-        p1.setPreferredSize(130, 130);
-
-        var ll = new Label(""),
-            p2 = new BorderPan("Center aligned title", ll, CENTER | TOP);
-        p2.setPreferredSize(170, 130);
-
-        var p3 = new BorderPan("Right aligned title", new Label(""), TOP | RIGHT);
-        p3.setPreferredSize(170, 130);
-        var p4 = new BorderPan("Bottom title", new Label(""), BOTTOM | LEFT);
-        p4.setPreferredSize(170, 130);
-        var p5 = new BorderPan("Bottom centered title", new Label(""), CENTER | BOTTOM);
-        p5.setPreferredSize(170, 130);
-        var p6 = new BorderPan("Bottom right title", new Label(""), RIGHT | BOTTOM);
-        p6.setPreferredSize(170, 130);
-        var p7 = new BorderPan(new ImageLabel("image title", ui.demo.butterfly), new Label(""));
-        p7.setPreferredSize(170, 130);
-        var p8_1 = new BorderPan("Border pan as title", new Label(""));
-        p8_1.setPreferredSize(130, -1);
-        var p8 = new BorderPan(p8_1, new Label(""));
-        p8.setPreferredSize(170, 130);
-        var p9 = new BorderPan(new Checkbox("Checkbox title"), new Label(""));
-        p9.setPreferredSize(170, 130);
-        var ctr = new Constraints();
-        ctr.left = ctr.right = ctr.top = ctr.bottom = 6;
-        p.add(ctr, p1);
-        p.add(ctr, p2);
-        p.add(ctr, p3);
-        p.add(ctr, p4);
-        p.add(ctr, p5);
-        p.add(ctr, p6);
-        p.add(ctr, p7);
-        p.add(ctr, p8);
-        p.add(ctr, p9);
-        r.add(p);
-        return r;
-    },
-
-    function createSplitPan() {
-        var p = new Panel(new BorderLayout());
-        var s1_1 = new SplitPan(new ImagePan(ui.demo.cosmo1), new ImagePan(ui.demo.cosmo2));
-        var s1 = new SplitPan(new ImagePan(ui.demo.cosmo3), s1_1, HORIZONTAL);
-        p.setPadding(4);
-        s1.setGripperLoc(180);
-        s1_1.setGripperLoc(220);
-        p.add(CENTER, s1);
-        return p;
-    },
-
-    function createScrollPan() {
-        var rt = new Panel(new FlowLayout(CENTER, CENTER)),
-            p = new Panel(new GridLayout(2,2)),
-            img = new ImagePan(ui.demo.cosmo1),
-            p1 = new ScrollPan(img);
-
-        p1.setPreferredSize(270, 240);
-        p1.setBorder(zebra.ui.borders.plain);
-        var p2 = new ScrollPan(new ImagePan(ui.demo.cosmo1), VERTICAL);
-        p2.setPreferredSize(270, 240);
-        p2.setBorder(zebra.ui.borders.plain);
-
-        var p3_1 = new Panel(new zebra.layout.ListLayout(2));
-        for(var i=0; i<20; i++) {
-            var ch = new Checkbox("Checkbox " + i);
-            ch.setLayout(new FlowLayout(LEFT, CENTER, HORIZONTAL, 4));
-            p3_1.add(ch);
-        }
-        p3 = new ScrollPan(p3_1);
-        p3.setAutoHide(true);
-
-        p3.setPreferredSize(270, 190);
-        p3.setBorder(zebra.ui.borders.plain);
-
-        var p4_1 = new TextField(new zebra.data.Text(zebra.io.GET("demo/test.txt")));
-        p4_1.setBorder(null);
-        p4 = new ScrollPan(p4_1);
-        p4.setPreferredSize(270, 190);
-        p4.setBorder(zebra.ui.borders.plain);
-
-        var ctr = new Constraints();
-        ctr.setPadding(6);
-        p.add(ctr, p1);
-        p.add(ctr, p2);
-        p.add(ctr, p3);
-        p.add(ctr, p4);
-        rt.add(p);
-        return rt;
-    }
-]);
-
-})(zebra.ui.demo, zebra.Class, zebra.ui);
-
-(function(pkg, Class, ui) {
-
-eval(zebra.Import("ui", "ui.tree", "layout"));
-
-function makeTreeModel() {
-    var tm = new zebra.data.TreeModel(new zebra.data.Item("Root"));
-    tm.add(tm.root, new zebra.data.Item("Item 1"));
-    tm.add(tm.root, new zebra.data.Item("Item 2"));
-    var ch = new zebra.data.Item("Item 3");
-    tm.add(tm.root, ch);
-    tm.add(ch, new zebra.data.Item("Item 3.1"));
-    tm.add(ch, new zebra.data.Item("Item 3.2"));
-    return tm;
-}
-
-function makeTreeModel2(items, deepness) {
-    function makeBranch(tm, r, items) {
-        for(var i=0; i < deepness; i++) {
-            var kid = new zebra.data.Item("Long tree item : " + items);
-            tm.add(r, kid);
-            if (i%2 > 0) r = kid;
-            items--;
-            if (items <= 0) break;
-        }
-        return items;
-    }
-
-    var tm = new zebra.data.TreeModel(new zebra.data.Item("Root")), r = tm.root;
-    while((items = makeBranch(tm, r, items)) > 0);
-    return tm;
-}
-
-pkg.TreeDemo = new Class(pkg.DemoPan, [
-    function() {
-        this.$super();
-
-        var p = new Panel(new FlowLayout(CENTER, TOP, HORIZONTAL, 8));
-        this.setLayout(new BorderLayout(4,4));
-
-        var t1 = new Tree(makeTreeModel()), p1 = new BorderPan("Standard tree", t1);
-        p1.setGaps(6,6);
-        p1.setPreferredSize(210, 180);
-        t1.select(t1.model.root);
-
-        var t2 = new Tree(makeTreeModel()), p2 = new BorderPan("Custom view tree", t2);
-        var fn = new Font("Arial", "bold", 14);
-        t2.setViewProvider(new zebra.Dummy([
-              function getView(c, i) {
-                    var tr = new TextRender(i.value);
-                    if (i.value.indexOf("1") > 0) {
-                        tr.setColor("red");
-                    }
-
-                    if (i.value.indexOf("2") > 0) {
-                        return new BoldTextRender(i.value);
-                    }
-
-                    if (i.value.indexOf("Root") === 0) {
-                        return new CompRender(new ImageLabel("Root", ui.demo.butterfly));
-                    }
-                    return tr;
-              }
-        ]));
-        t2.select(t2.model.root);
-        p2.setGaps(6,6);
-        p2.setPreferredSize(210, 180);
-
-        var t3 = new Tree(makeTreeModel()), p3 = new BorderPan("Editable tree(use enter)", new ScrollPan(t3));
-        t3.select(t3.model.root);
-        t3.setEditorProvider(new DefEditors());
-        p3.setGaps(6,6);
-        p3.setPreferredSize(210, 180);
-
-        var t4 = new Tree(makeTreeModel2(1000, 30)), p4 = new BorderPan("Long tree", new ScrollPan(t4));
-        t4.select(t4.model.root);
-        t4.setPadding(4);
-        p4.setPreferredSize(-1, 280);
-        this.add(BOTTOM, p4);
-
-        var ctr = new Constraints();
-        this.setPadding(8);
-        p.add(ctr, p1);
-        p.add(ctr, p2);
-        p.add(ctr, p3);
-        this.add(CENTER, p);
-    }
-]);
-
-})(zebra.ui.demo, zebra.Class, zebra.ui);
-
-(function(pkg, Class, ui) {
-
-eval(zebra.Import("ui", "layout"));
-var rgb = zebra.util.rgb;
+var rgb = zebra.util.rgb, ui = zebra.ui;
 
 function createColorPicker() {
     var m = new Menu(), i = 0;
@@ -608,8 +606,8 @@ function formMenuArray() {
                     },
                 "Car color": createColorPicker(),
                 "Car brand":
-                    [ new ImagePan(zebra.ui.demo.bmw).properties({ padding: 8}), 
-                      new ImagePan(zebra.ui.demo.saab).properties({ padding: 8}), 
+                    [ new ImagePan(zebra.ui.demo.bmw).properties({ padding: 8}),
+                      new ImagePan(zebra.ui.demo.saab).properties({ padding: 8}),
                       new ImagePan(zebra.ui.demo.alpha).properties({ padding: 8}) ]
                 };
     return mbar;
@@ -627,9 +625,9 @@ function $get(i, o) {
 
 function createToolbar() {
     var t = new zebra.ui.Toolbar();
- 
+
     var img = ui.demo.home;
-    t.addImage(img);
+    var imgPan1 = t.addImage(img);
     t.addImage(ui.demo.mail);
     t.addImage(ui.demo.attachment);
 
@@ -643,12 +641,17 @@ function createToolbar() {
     var c3 = t.addRadio(g,"Radio 3");
 
 
+    t.bind(function(src) {
+        console.log("::: " + src.$clazz.$name + ", src = " + (imgPan1 == src));
+    });
+
+
     // var m = new zebra.data.ListModel();
     // m.addElement("Item 1");
     // m.addElement("Item 2");
     // m.addElement("Item 3");
     // t.addComboElement(new zebra.ui.List(m));
-   
+
     return t;
 }
 
@@ -722,10 +725,11 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
     }
 ]);
 
-})(zebra.ui.demo, zebra.Class, zebra.ui);
+});
 
-(function(pkg, Class, ui) {
+zebra.package("ui.demo", function(pkg, Class) {
 
+var ui = zebra.ui;
 eval(zebra.Import("ui", "layout", "ui.grid"));
 
 var CardLayout = new Class(Layout, [
@@ -769,7 +773,7 @@ function createTooltipDemo() {
     ll.setFont(new Font("Helvetica", 14));
     pp.add(img);
     pp.add(ll);
-    l2.tooltip = new zebra.ui.Tooltip(pp); 
+    l2.tooltip = new zebra.ui.Tooltip(pp);
     l2.tooltip.setBackground("#E0F4FF");
 
     var grid = new Grid([
@@ -800,7 +804,7 @@ function createTooltipDemo() {
 }
 
 function createWindowComp(target) {
-    var w = new Window("Demo window"); 
+    var w = new Window("Demo window");
     //w.bind(function actionPerformed(src, id, data) { target.hideWin(); });
 
     w.setSize(350, 300);
@@ -810,7 +814,7 @@ function createWindowComp(target) {
     tf.setFont(new Font("Arial","bold", 18));
     tf.setEditable(false);
     tf.setValue("Drag and drop window\nby its title.\n\nResize window by\ndrag its right-bottom corner");
-    
+
     var center = new Panel(new BorderLayout(4));
     center.add(CENTER, tf);
     center.add(TOP, new Combo(["Combo item 1", "Combo item 2", "Combo item 3"]));
@@ -838,16 +842,19 @@ function createWindowComp(target) {
     b.bind(function(src, id, data) { target.hideWin(); });
 
 
-    w.root.add(TOP, new Menubar({ 
-        "MenuItem 1": [ 
-            "Item 1.1", "-", "[x]Item 1.2", "[]Item 1.3" 
-        ],  
-        "MenuItem 2": { 
-            "Item 2.1":null, 
-            "Item 2.2": [ "Item 2.2.1", "Item 2.2.2" ], 
-            "Item 2.3": null  
+    w.root.add(TOP, new Menubar({
+        "MenuItem 1": [
+            "Item 1.1", "-", "[x]Item 1.2", "[]Item 1.3"
+        ],
+        "MenuItem 2": {
+            "Item 2.1":null,
+            "Item 2.2": [ "Item 2.2.1", "Item 2.2.2" ],
+            "Item 2.3": null,
+            "-": null,
+            "Item 2.4": null,
+            "--": null
         },
-        "Ok": null 
+        "Ok": null
     }).properties({ border:null }) );
 
     return w;
@@ -904,10 +911,10 @@ pkg.WinDemo = new Class(pkg.DemoPan,  [
     }
 ]);
 
-})(zebra.ui.demo, zebra.Class, zebra.ui);
+});
+zebra.package("ui.demo", function(pkg, Class) {
 
-(function(pkg, Class, ui) {
-
+var ui = zebra.ui;
 eval(zebra.Import("ui", "layout", "ui.grid", "data", "ui.tree"));
 
 function wrapWithPan() {
@@ -1034,13 +1041,13 @@ var CustomGridEditor = new Class(zebra.ui.grid.DefEditors, [
 
     function fetchEditedValue(grid, row,col,data,editor){
         if (col == 0) return editor.getValue() ? "on" : "off";
-        return (col == 3) ? editor.list.selectedIndex 
+        return (col == 3) ? editor.list.selectedIndex
                           : this.$super(grid, row, col, data, editor);
     }
 ]);
 
 var CompViewProvider = new Class(zebra.ui.grid.DefViews,[
-    function getView(target, row,col,o){
+    function getView(target,row,col,o){
         return row == 2 ? new CompRender(o) : this.$super(target, row, col, o);
     }
 ]);
@@ -1088,9 +1095,6 @@ function longGrid() {
 	for(var i=0; i < m.rows; i++) gp2.putTitle(i, " " + i + " ");
     g.add(LEFT, gp2);
 
-	var corner = new Panel();
-	corner.setBorder(ui.borders.plain);
-	corner.setBackground(ui.grid.GridCaption.background);
 	var p = new ScrollPan(g);
 	p.setPadding(4);
 	return p;
@@ -1206,7 +1210,7 @@ function createSortableGrid() {
     }
 
     var cap = new CompGridCaption();
-    for (var i=0; i < 3; i++) { 
+    for (var i=0; i < 3; i++) {
         cap.add("Title " + i);
         cap.setSortable(i, true);
     }
@@ -1225,7 +1229,7 @@ function customCellAlignmentGrid() {
     var root = new Panel(new RasterLayout(USE_PS_SIZE)),
         data = new Matrix(3, 3);
 
-    for(var i = 0;i < data.rows*data.cols; i ++ ){
+    for(var i = 0;i < data.rows * data.cols; i ++ ){
         data.puti(i, d[i]);
     }
 
@@ -1266,7 +1270,6 @@ function createDynamicGrid() {
     addBt.setBorder(new RoundBorder("gray", 2));
     addBt.setPadding(3);
     addBt.canHaveFocus = false;
-    //grid.add(NONE, addBt);
     topCaption.add(new Panel({
         layout: new FlowLayout("center", "center"),
         padding: 2,
@@ -1299,14 +1302,14 @@ pkg.GridDemo = new Class(pkg.DemoPan, [
         n.add("Sortable", createSortableGrid());
         n.add("Dynamic", createDynamicGrid());
 
-        this.add(CENTER, n);
+		this.add(CENTER, n);
     }
 ]);
 
-})(zebra.ui.demo, zebra.Class, zebra.ui);
+});
+zebra.package("ui.demo", function(pkg, Class) {
 
-(function(pkg, Class, ui) {
-
+var ui = zebra.ui;
 eval(zebra.Import("ui", "ui.designer", "layout"));
 
 pkg.DesignerDemo = new Class(pkg.DemoPan, [
@@ -1335,12 +1338,12 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
         b.toPreferredSize();
         b.setLocation(20, 120);
         pp.add(new ShaperPan(b));
-        
+
         var b = new ImagePan(ui.demo.alpha);
         b.toPreferredSize();
         b.setLocation(310, 80);
         pp.add(new ShaperPan(b));
-        
+
         var b = new ImagePan(ui.demo.saab);
         b.toPreferredSize();
         b.setLocation(290, 270);
@@ -1407,4 +1410,4 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
     }
 ]);
 
-})(zebra.ui.demo, zebra.Class, zebra.ui);
+});

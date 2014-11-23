@@ -1,6 +1,7 @@
 
-(function(pkg, Class, ui) {
+zebra.package("ui.demo", function(pkg, Class) {
 
+var ui = zebra.ui;
 eval(zebra.Import("ui", "layout", "ui.grid"));
 
 var CardLayout = new Class(Layout, [
@@ -44,7 +45,7 @@ function createTooltipDemo() {
     ll.setFont(new Font("Helvetica", 14));
     pp.add(img);
     pp.add(ll);
-    l2.tooltip = new zebra.ui.Tooltip(pp); 
+    l2.tooltip = new zebra.ui.Tooltip(pp);
     l2.tooltip.setBackground("#E0F4FF");
 
     var grid = new Grid([
@@ -75,7 +76,7 @@ function createTooltipDemo() {
 }
 
 function createWindowComp(target) {
-    var w = new Window("Demo window"); 
+    var w = new Window("Demo window");
     //w.bind(function actionPerformed(src, id, data) { target.hideWin(); });
 
     w.setSize(350, 300);
@@ -85,7 +86,7 @@ function createWindowComp(target) {
     tf.setFont(new Font("Arial","bold", 18));
     tf.setEditable(false);
     tf.setValue("Drag and drop window\nby its title.\n\nResize window by\ndrag its right-bottom corner");
-    
+
     var center = new Panel(new BorderLayout(4));
     center.add(CENTER, tf);
     center.add(TOP, new Combo(["Combo item 1", "Combo item 2", "Combo item 3"]));
@@ -113,16 +114,19 @@ function createWindowComp(target) {
     b.bind(function(src, id, data) { target.hideWin(); });
 
 
-    w.root.add(TOP, new Menubar({ 
-        "MenuItem 1": [ 
-            "Item 1.1", "-", "[x]Item 1.2", "[]Item 1.3" 
-        ],  
-        "MenuItem 2": { 
-            "Item 2.1":null, 
-            "Item 2.2": [ "Item 2.2.1", "Item 2.2.2" ], 
-            "Item 2.3": null  
+    w.root.add(TOP, new Menubar({
+        "MenuItem 1": [
+            "Item 1.1", "-", "[x]Item 1.2", "[]Item 1.3"
+        ],
+        "MenuItem 2": {
+            "Item 2.1":null,
+            "Item 2.2": [ "Item 2.2.1", "Item 2.2.2" ],
+            "Item 2.3": null,
+            "-": null,
+            "Item 2.4": null,
+            "--": null
         },
-        "Ok": null 
+        "Ok": null
     }).properties({ border:null }) );
 
     return w;
@@ -179,4 +183,4 @@ pkg.WinDemo = new Class(pkg.DemoPan,  [
     }
 ]);
 
-})(zebra.ui.demo, zebra.Class, zebra.ui);
+});

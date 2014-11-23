@@ -1,5 +1,4 @@
-
-(function(pkg, Class) {
+zebra.package("ui.demo", function(pkg, Class) {
 
 eval(zebra.Import("ui", "layout"))
 
@@ -148,4 +147,4 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, [
     }
 ]);
 
-})(zebra.ui.demo, zebra.Class);
+});

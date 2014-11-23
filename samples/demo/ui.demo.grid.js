@@ -1,6 +1,6 @@
+zebra.package("ui.demo", function(pkg, Class) {
 
-(function(pkg, Class, ui) {
-
+var ui = zebra.ui;
 eval(zebra.Import("ui", "layout", "ui.grid", "data", "ui.tree"));
 
 function wrapWithPan() {
@@ -127,13 +127,13 @@ var CustomGridEditor = new Class(zebra.ui.grid.DefEditors, [
 
     function fetchEditedValue(grid, row,col,data,editor){
         if (col == 0) return editor.getValue() ? "on" : "off";
-        return (col == 3) ? editor.list.selectedIndex 
+        return (col == 3) ? editor.list.selectedIndex
                           : this.$super(grid, row, col, data, editor);
     }
 ]);
 
 var CompViewProvider = new Class(zebra.ui.grid.DefViews,[
-    function getView(target, row,col,o){
+    function getView(target,row,col,o){
         return row == 2 ? new CompRender(o) : this.$super(target, row, col, o);
     }
 ]);
@@ -181,9 +181,6 @@ function longGrid() {
 	for(var i=0; i < m.rows; i++) gp2.putTitle(i, " " + i + " ");
     g.add(LEFT, gp2);
 
-	var corner = new Panel();
-	corner.setBorder(ui.borders.plain);
-	corner.setBackground(ui.grid.GridCaption.background);
 	var p = new ScrollPan(g);
 	p.setPadding(4);
 	return p;
@@ -299,7 +296,7 @@ function createSortableGrid() {
     }
 
     var cap = new CompGridCaption();
-    for (var i=0; i < 3; i++) { 
+    for (var i=0; i < 3; i++) {
         cap.add("Title " + i);
         cap.setSortable(i, true);
     }
@@ -318,7 +315,7 @@ function customCellAlignmentGrid() {
     var root = new Panel(new RasterLayout(USE_PS_SIZE)),
         data = new Matrix(3, 3);
 
-    for(var i = 0;i < data.rows*data.cols; i ++ ){
+    for(var i = 0;i < data.rows * data.cols; i ++ ){
         data.puti(i, d[i]);
     }
 
@@ -359,7 +356,6 @@ function createDynamicGrid() {
     addBt.setBorder(new RoundBorder("gray", 2));
     addBt.setPadding(3);
     addBt.canHaveFocus = false;
-    //grid.add(NONE, addBt);
     topCaption.add(new Panel({
         layout: new FlowLayout("center", "center"),
         padding: 2,
@@ -392,8 +388,8 @@ pkg.GridDemo = new Class(pkg.DemoPan, [
         n.add("Sortable", createSortableGrid());
         n.add("Dynamic", createDynamicGrid());
 
-        this.add(CENTER, n);
+		this.add(CENTER, n);
     }
 ]);
 
-})(zebra.ui.demo, zebra.Class, zebra.ui);
+});

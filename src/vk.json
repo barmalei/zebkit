@@ -49,22 +49,25 @@
     },
 
     "VK" : {
-        "groups":  {  "latin": [
-                                    [ "1!", "2@", "3#", "4$", "5%", "6^", "7&", "8*", "9(", "0)" ],
-                                    [ "q", "w", "e", "r", "t",  "y", "u", "i", "o", "p" ],
-                                    [ "a", "s", "d", "f", "g", "h", "j", "k", "l"  ],
-                                    [ "shift", "z", "x", "c", "v", "b", "n", "m", "backSpace" ],
-                                    [ { "vkey": { "$zebra.ui.vk.VKeyOption": ["Lang", [ "rus" ]] }, "size": "ps" }, "/-+=", "space",  ".,:;", "enter" ]
-                                ],
-
-                        "rus" : [
-                                    [ "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" ],
-                                    [ "й", "ц", "у", "к", "е", "н", "г", "ш", "щ", "з" ],
-                                    [ "ф", "ы", "в", "а", "п", "р", "о", "л", "джэ"  ],
-                                    [ "я", "ч", "с", "м", "и", "т", "ь", "б", "ю"  ],
-                                    [ { "vkey": { "$zebra.ui.vk.VKeyOption" : [ "Lang", [ "latin" ]] }, "size": "ps" },  "shift", "space", "enter" ]
-                                ]
-                    },
-        "activeGroup" : "latin"
+        "groups":  {
+            "latin":[
+                [ "1!", "2@", "3#", "4$", "5%", "6^", "7&", "8*", "9(", "0)" ],
+                [ "q", "w", "e", "r", "t",  "y", "u", "i", "o", "p" ],
+                [ "a", "s", "d", "f", "g", "h", "j", "k", "l"  ],
+                [ "shift", "z", "x", "c", "v", "b", "n", "m", "backSpace" ],
+                [ { "vkey": { "$zebra.ui.vk.VKeyOption": ["Lang", [ "rus" ]] }, "size": "ps" }, "/-+=", "space",  ".,:;", "enter" ]
+            ],
+            "rus" : [
+                [ "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" ],
+                [ "й", "ц", "у", "к", "е", "н", "г", "ш", "щ", "з" ],
+                [ "ф", "ы", "в", "а", "п", "р", "о", "л", "джэ"  ],
+                [ "я", "ч", "с", "м", "и", "т", "ь", "б", "ю"  ],
+                [ { "vkey": { "$zebra.ui.vk.VKeyOption" : [ "Lang", [ "latin" ]] }, "size": "ps" },  "shift", "space", "enter" ]
+            ]
+        },
+        "activeGroup" : "latin",
+        "background"  : "lightGray",
+        "padding"     : 4,
+        "layout"      : { "$zebra.layout.StackLayout": null }
     }
 }

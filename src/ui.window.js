@@ -5,10 +5,10 @@ var KE = pkg.KeyEvent, task = zebra.util.task, L = zebra.layout,
     WinListeners = zebra.util.ListenersClass("winOpened", "winActivated");
 
 /**
- * Show the given UI component as a modal window 
- * @param  {zebra.ui.Panel} context  an UI component of zebra hierarchy  
+ * Show the given UI component as a modal window
+ * @param  {zebra.ui.Panel} context  an UI component of zebra hierarchy
  * @param  {zebra.ui.Panel} win a component to be shown as the modal window
- * @param  {Object} [listener] a window listener 
+ * @param  {Object} [listener] a window listener
 
         {
             winActivated : function(layer, win, isActive) {
@@ -28,20 +28,20 @@ pkg.showModalWindow = function(context, win, listener) {
 };
 
 /**
- * Show the given UI component as a window 
- * @param  {zebra.ui.Panel} context  an UI component of zebra hierarchy  
- * @param  {String} [type] a type of the window: "modal", "mdi", "info". The default 
+ * Show the given UI component as a window
+ * @param  {zebra.ui.Panel} context  an UI component of zebra hierarchy
+ * @param  {String} [type] a type of the window: "modal", "mdi", "info". The default
  * value is "info"
  * @param  {zebra.ui.Panel} win a component to be shown as the window
- * @param  {Object} [listener] a window listener 
- 
+ * @param  {Object} [listener] a window listener
+
         {
             winActivated : function(layer, win, isActive) {
-
+               ...
             },
 
             winOpened : function(layer, win, isOpened) {
-
+              ...
             }
         }
 
@@ -55,7 +55,6 @@ pkg.showWindow = function(context, type, win, listener) {
     }
     return context.getCanvas().getLayer("win").addWin(type, win, listener);
 };
-
 
 pkg.showPopupMenu = function(context, menu) {
     context.getCanvas().getLayer("pop").add(menu);
@@ -74,19 +73,19 @@ pkg.activateWindow = function(win) {
 
 /**
  * Window layer class. Window layer is supposed to be used for showing
- * modal and none modal internal window. There are special ready to use 
+ * modal and none modal internal window. There are special ready to use
  * "zebra.ui.Window" UI component that can be shown as internal window, but
- * zebra allows developers to show any UI component as modal or none modal 
- * window. Add an UI component to window layer to show it as modal o none 
+ * zebra allows developers to show any UI component as modal or none modal
+ * window. Add an UI component to window layer to show it as modal o none
  * modal window:
- 
+
         // create canvas
         var canvas   = new zebra.ui.zCanvas();
-       
-        // get windows layer 
+
+        // get windows layer
         var winLayer = canvas.getLayer(zebra.ui.WinLayer.ID);
 
-        // create standard UI window component 
+        // create standard UI window component
         var win = new zebra.ui.Window();
         win.setBounds(10,10,200,200);
 
@@ -94,11 +93,11 @@ pkg.activateWindow = function(win) {
         winLayer.addWin("modal", win);
 
  * Also shortcut method can be used
- 
+
         // create canvas
         var canvas   = new zebra.ui.zCanvas();
 
-        // create standard UI window component 
+        // create standard UI window component
         var win = new zebra.ui.Window();
         win.setBounds(10,10,200,200);
 
@@ -106,11 +105,11 @@ pkg.activateWindow = function(win) {
         zebra.ui.showModalWindow(canvas, win);
 
  * Window layer supports three types of windows:
- 
-    - **"modal"** a modal window catches all input till it will be closed 
-    - **"mdi"** a MDI window can get focus, but it doesn't block switching 
+
+    - **"modal"** a modal window catches all input till it will be closed
+    - **"mdi"** a MDI window can get focus, but it doesn't block switching
     focus to other UI elements
-    - **"info"** an INFO window cannot get focus. It is supposed to show 
+    - **"info"** an INFO window cannot get focus. It is supposed to show
     some information like tooltip.
 
  * @class zebra.ui.WinLayer
@@ -130,7 +129,7 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
         this.layerMousePressed = function(x,y,mask){
             var cnt = this.kids.length;
             if (cnt > 0) {
-                // check if mouse pressed has occurred in the topest window since 
+                // check if mouse pressed has occurred in the topest window since
                 // this is the most probable case
                 if (this.activeWin != null && this.indexOf(this.activeWin) == cnt - 1) {
                     var x1 = this.activeWin.x,
@@ -143,7 +142,7 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
                     }
                 }
 
-                // otherwise looking for a window starting from the topest one 
+                // otherwise looking for a window starting from the topest one
                 for(var i = cnt - 1; i >= 0 && i >= this.topModalIndex; i--){
                     var d = this.kids[i];
 
@@ -192,12 +191,12 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
 
         /**
          * Define children components input events handler.
-         * @param  {zebra.ui.InputEvent|zebra.ui.KeyEvent|zebra.ui.MouseEvent} e an input event 
+         * @param  {zebra.ui.InputEvent|zebra.ui.KeyEvent|zebra.ui.MouseEvent} e an input event
          * @method childInputEvent
          */
         this.childInputEvent = function (e) {
             if (e.ID == pkg.InputEvent.FOCUS_GAINED) {
-                this.activate(L.getDirectChild(this, e.source));           
+                this.activate(L.getDirectChild(this, e.source));
             }
         };
 
@@ -216,7 +215,7 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
         };
 
         /**
-         * Activate the given win layer children component window. 
+         * Activate the given win layer children component window.
          * @param  {zebra.ui.Panel} c a component to be activated as window
          * @method activate
          */
@@ -278,11 +277,11 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
         };
 
         /**
-         * Add the given window with the given type and the listener to the layer.  
-         * @param {String} type   a type of the window: "modal", 
+         * Add the given window with the given type and the listener to the layer.
+         * @param {String} type   a type of the window: "modal",
          * "mdi" or "info"
          * @param {zebra.ui.Panel} win an UI component to be shown as window
-         * @param {Object} [listener] an optional the window listener 
+         * @param {Object} [listener] an optional the window listener
 
          {
              winActivated : function(layer, win, isActive) {
@@ -294,7 +293,7 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
              }
          }
 
-         * @method addWin 
+         * @method addWin
          */
         this.addWin = function(type, win, listener) {
             this.winsTypes[win] = type;
@@ -323,7 +322,7 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
 
     function insert(index, constr, lw) {
         var type = this.winsTypes[lw];
-        
+
         if (typeof type === 'undefined') {
             type = "mdi";
             this.winsTypes[lw] = type;
@@ -332,7 +331,7 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
         if (type != "mdi" && type != "modal" && type != "info") {
             throw new Error("Invalid window type: " + type);
         }
-        
+
         return this.$super(index, constr, lw);
     },
 
@@ -361,7 +360,7 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
                 l  = this.winsListeners[lw];
 
             this.winsStack.splice(this.winsStack.indexOf(lw), 1);
-            
+
             if (ci < this.topModalIndex) {
                 this.topModalIndex--;
             }
@@ -383,7 +382,7 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
                 this.activate(this.winsStack[aindex]);
             }
         }
-        finally { 
+        finally {
             delete this.winsTypes[lw];
             delete this.winsListeners[lw];
         }
@@ -392,24 +391,24 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
 
 /**
  * Window UI component class. Implements window like UI component.
- * The window component has a header, status bar and content areas. The header component  
+ * The window component has a header, status bar and content areas. The header component
  * is usually placed at the top of window, the status bar component is placed at the bottom and
- * the content component at places the central part of the window. Also the window defines 
- * corner UI component that is supposed to be used to resize the window. The window implementation 
- * provides the following possibilities: 
- 
-    - Move window by dragging the window on its header 
+ * the content component at places the central part of the window. Also the window defines
+ * corner UI component that is supposed to be used to resize the window. The window implementation
+ * provides the following possibilities:
+
+    - Move window by dragging the window on its header
     - Resize window by dragging the window corner element
     - Place buttons in the header to maximize, minimize, close, etc the window
-    - Indicates state of window (active or inactive) by changing 
-    the widow header style 
+    - Indicates state of window (active or inactive) by changing
+    the widow header style
     - Define a window icon component
     - Define a window status bar component
 
  * @class zebra.ui.Window
- * 
+ *
  * @param {String} [content] a window title
- * @param {zebra.ui.Panel} [content] a window content  
+ * @param {zebra.ui.Panel} [content] a window content
  * @constructor
  * @extends {zebra.ui.Panel}
  */
@@ -429,7 +428,7 @@ pkg.Window = Class(pkg.StatePan, [
         this.minSize = 40;
 
         /**
-         * Indicate if the window can be resized by dragging its by corner 
+         * Indicate if the window can be resized by dragging its by corner
          * @attribute isSizeable
          * @type {Boolean}
          * @default true
@@ -439,7 +438,7 @@ pkg.Window = Class(pkg.StatePan, [
 
         /**
          * Test if the window is shown as a window and activated
-         * @return {Boolean} true is the window is shown as internal window and 
+         * @return {Boolean} true is the window is shown as internal window and
          * is active.
          * @method isActive
          */
@@ -487,9 +486,9 @@ pkg.Window = Class(pkg.StatePan, [
 
         /**
          * Test if the mouse cursor is inside the window corner component
-         * @protected 
-         * @param  {Integer} px a x coordinate of the mouse cursor 
-         * @param  {Integer} py a y coordinate of the mouse cursor 
+         * @protected
+         * @param  {Integer} px a x coordinate of the mouse cursor
+         * @param  {Integer} py a y coordinate of the mouse cursor
          * @return {Boolean}  true if the mouse cursor is inside window
          * corner component
          * @method insideCorner
@@ -499,7 +498,7 @@ pkg.Window = Class(pkg.StatePan, [
         };
 
         this.getCursorType = function(target,x,y){
-            return (this.isSizeable && this.insideCorner(x, y)) ? pkg.Cursor.SE_RESIZE 
+            return (this.isSizeable && this.insideCorner(x, y)) ? pkg.Cursor.SE_RESIZE
                                                                 : null;
         };
 
@@ -534,9 +533,9 @@ pkg.Window = Class(pkg.StatePan, [
         };
 
         /**
-         * Test if the window has been maximized to occupy the whole 
+         * Test if the window has been maximized to occupy the whole
          * window layer space.
-         * @return {Boolean} true if the window has been maximized 
+         * @return {Boolean} true if the window has been maximized
          * @method isMaximized
          */
         this.isMaximized = function() {
@@ -564,7 +563,7 @@ pkg.Window = Class(pkg.StatePan, [
     },
 
     function $clazz() {
-        this.CaptionPan = Class(pkg.StatePan, [ 
+        this.CaptionPan = Class(pkg.StatePan, [
             function $prototype() {
                 this.state = "inactive";
             }
@@ -596,7 +595,7 @@ pkg.Window = Class(pkg.StatePan, [
         this.prevW = this.action = -1;
 
         /**
-         * Root window panel. The root panel has to be used to 
+         * Root window panel. The root panel has to be used to
          * add any UI components
          * @attribute root
          * @type {zebra.ui.Panel}
@@ -605,16 +604,16 @@ pkg.Window = Class(pkg.StatePan, [
         this.root = (c == null ? this.createContentPan() : c);
 
         /**
-         * Window caption panel. The panel contains window 
+         * Window caption panel. The panel contains window
          * icons, button and title label
          * @attribute caption
          * @type {zebra.ui.Panel}
          * @readOnly
          */
         this.caption = this.createCaptionPan();
-        
+
         /**
-         * Window title component 
+         * Window title component
          * @type {zebra.ui.Panel}
          * @attribute title
          * @readOnly
@@ -623,7 +622,7 @@ pkg.Window = Class(pkg.StatePan, [
         this.title.setValue((s == null ? "" : s));
 
         /**
-         * Icons panel. The panel can contain number of icons. 
+         * Icons panel. The panel can contain number of icons.
          * @type {zebra.ui.Panel}
          * @attribute icons
          * @readOnly
@@ -632,7 +631,7 @@ pkg.Window = Class(pkg.StatePan, [
         this.icons.add(new this.$clazz.Icon());
 
         /**
-         * Window buttons panel. The panel can contain number of window buttons 
+         * Window buttons panel. The panel can contain number of window buttons
          * @type {zebra.ui.Panel}
          * @attribute buttons
          * @readOnly
@@ -644,7 +643,7 @@ pkg.Window = Class(pkg.StatePan, [
         this.caption.add(L.RIGHT, this.buttons);
 
         /**
-         * Window status panel. 
+         * Window status panel.
          * @attribute status
          * @readOnly
          * @type {zebra.ui.Panel}
@@ -689,7 +688,7 @@ pkg.Window = Class(pkg.StatePan, [
 
     /**
      * Maximize the window
-     * @method maximize 
+     * @method maximize
      */
     function maximize(){
         if(this.prevW < 0){
@@ -729,8 +728,8 @@ pkg.Window = Class(pkg.StatePan, [
 
     /**
      * Set the window buttons set.
-     * @param {Object} buttons dictionary of buttons icons for window buttons. 
-     * The dictionary key defines a method of the window component to be called 
+     * @param {Object} buttons dictionary of buttons icons for window buttons.
+     * The dictionary key defines a method of the window component to be called
      * when the given button has been pressed. So the method has to be defined
      * in the window component.
      * @method setButtons
@@ -758,26 +757,26 @@ pkg.Window = Class(pkg.StatePan, [
 ]);
 
 /**
- * Menu item panel class. The component holds menu item content like 
- * caption, icon, sub-menu sign elements. The area of the component 
- * is split into three parts: left, right and center. Central part 
- * keeps content, left side keeps checked sign element 
- * and the right side keeps sub-menu sign element.  
- * @param  {String|zebra.ui.Panel} caption a menu item caption string 
- * or component. Caption string can encode the item id, item icon and 
+ * Menu item panel class. The component holds menu item content like
+ * caption, icon, sub-menu sign elements. The area of the component
+ * is split into three parts: left, right and center. Central part
+ * keeps content, left side keeps checked sign element
+ * and the right side keeps sub-menu sign element.
+ * @param  {String|zebra.ui.Panel} caption a menu item caption string
+ * or component. Caption string can encode the item id, item icon and
  * item checked state. For instance:
-      
-    - **"Menu Item [@menu_item_id]"** - triggers creation of menu item component 
-      with "Menu Item" caption and "menu_item_id" id property value  
-    - **"[x] Menu Item"** - triggers creation of checked menu item component 
+
+    - **"Menu Item [@menu_item_id]"** - triggers creation of menu item component
+      with "Menu Item" caption and "menu_item_id" id property value
+    - **"[x] Menu Item"** - triggers creation of checked menu item component
       with checked on state
-    - **"@('mypicture.gif') Menu Item"** - triggers creation of menu item 
-       component with "Menu Item" caption and loaded mypicture.gif icon  
-  
-        // create menu item with icon and "Item 1" title 
+    - **"@('mypicture.gif') Menu Item"** - triggers creation of menu item
+       component with "Menu Item" caption and loaded mypicture.gif icon
+
+        // create menu item with icon and "Item 1" title
         var mi = new zebra.ui.MenuItem("@('mypicture.gif') Item 1");
 
- * @class zebra.ui.MenuItem 
+ * @class zebra.ui.MenuItem
  * @extends {zebra.ui.Panel}
  * @constructor
  */
@@ -807,7 +806,7 @@ pkg.MenuItem = Class(pkg.Panel, [
         this.manager = null;
 
         /**
-         * Callback method that is called every time the menu item has 
+         * Callback method that is called every time the menu item has
          * been selected.
          * @method  itemSelected
          */
@@ -837,12 +836,12 @@ pkg.MenuItem = Class(pkg.Panel, [
          * @method setCaption
          */
         this.setCaption = function(caption) {
-            this.getContent().setCaption(caption);  
-        }; 
+            this.getContent().setCaption(caption);
+        };
 
         /**
-         * Callback method that is called every time a checked state 
-         * of the menu item has been updated 
+         * Callback method that is called every time a checked state
+         * of the menu item has been updated
          * @param {Boolean} b a new checked state
          * @method switched
          * @protected
@@ -882,7 +881,7 @@ pkg.MenuItem = Class(pkg.Panel, [
         };
 
         /**
-         * Hide sub menu arrow component 
+         * Hide sub menu arrow component
          * @method hideSub
          */
         this.hideSub = function() {
@@ -890,7 +889,7 @@ pkg.MenuItem = Class(pkg.Panel, [
         };
 
         this.activateSub = function(b) {
-            var kid = this.getSub();            
+            var kid = this.getSub();
             kid.setState(b ? "arrow" : "*");
             if (this.parent != null && this.parent.noSubIfEmpty === true) {
                 kid.setVisible(b);
@@ -944,7 +943,7 @@ pkg.MenuItem = Class(pkg.Panel, [
                 content.setLocation(l, t + ~~((eh - content.height)/2));
             }
         };
-    
+
         /**
          * Set the menu item checked state
          * @param {Boolean} b a checked state
@@ -952,24 +951,24 @@ pkg.MenuItem = Class(pkg.Panel, [
          */
         this.setCheckState = function(b) {
             if (this.manager == null) {
-                this.setCheckManager(new pkg.SwitchManager());    
+                this.setCheckManager(new pkg.SwitchManager());
             }
-            this.manager.setValue(this, b);    
+            this.manager.setValue(this, b);
         };
 
         /**
-         * Get menu item checked state 
+         * Get menu item checked state
          * @return {Boolean} a menu item checked state
          * @method getCheckState
          */
         this.getCheckState = function() {
             if (this.manager == null) throw new Error();
-            return this.manager.getValue(this);      
+            return this.manager.getValue(this);
         };
 
         /**
-         * Set the menu item checked state manager. 
-         * @param {zebra.ui.SwitchManager|zebra.ui.Group} man a switch manager 
+         * Set the menu item checked state manager.
+         * @param {zebra.ui.SwitchManager|zebra.ui.Group} man a switch manager
          * @method setCheckManager
          */
         this.setCheckManager = function(man) {
@@ -984,10 +983,10 @@ pkg.MenuItem = Class(pkg.Panel, [
     },
 
     /**
-     * Override setParent method to catch the moment when the 
-     * item is inserted to a menu 
+     * Override setParent method to catch the moment when the
+     * item is inserted to a menu
      * @param {zebra.ui.Panel} p a parent
-     * @method setParent 
+     * @method setParent
      */
     function setParent(p) {
         this.$super(p);
@@ -1009,14 +1008,14 @@ pkg.MenuItem = Class(pkg.Panel, [
             if (m[2] != null) {
                 var s = m[2].trim();
                 this.setCheckManager(s[0] == '(' ? new pkg.Group() : new pkg.SwitchManager());
-                this.manager.setValue(this, m[2].indexOf('x') > 0);    
+                this.manager.setValue(this, m[2].indexOf('x') > 0);
             }
-            
+
             var img = null;
             if (m[1] != null) {
                 img = m[1].substring(m[1].indexOf("@(") + 2, m[1].lastIndexOf(")")).trim();
                 if (img[0] == "'") {
-                   img = img.substring(1, img.length-1); 
+                   img = img.substring(1, img.length-1);
                 }
                 else {
                     var parts = img.split('.'), scope = zebra.$global;
@@ -1034,7 +1033,7 @@ pkg.MenuItem = Class(pkg.Panel, [
             m = c.match(/(.*)\s*\[\s*@([a-zA-Z_][a-zA-Z0-9_]+)\s*]\s*/);
             if (m != null) {
                 this.id = m[2].trim();
-                c       = m[1].trim();  
+                c       = m[1].trim();
             }
             else {
                 this.id = c.toLowerCase().replace(/[ ]+/, '_');
@@ -1055,7 +1054,7 @@ pkg.MenuItem = Class(pkg.Panel, [
 
     function setEnabled(b) {
         this.$super(b);
-        // sync menu item enabled state with checkable element state  
+        // sync menu item enabled state with checkable element state
         if (this.manager != null) {
             this.switched(this.manager.getValue(this));
         }
@@ -1063,8 +1062,8 @@ pkg.MenuItem = Class(pkg.Panel, [
 ]);
 
 /**
- * Menu UI component class. The class implements popup menu UI component. 
- 
+ * Menu UI component class. The class implements popup menu UI component.
+
      var m = new Menu({
         "Menu Item 1" : [
             "[x] SubMenu Checked Item 1",
@@ -1076,15 +1075,15 @@ pkg.MenuItem = Class(pkg.Panel, [
         "Menu Item 3" : null
      });
 
- * 
+ *
  * @class zebra.ui.Menu
  * @constructor
  * @param {Object} [list] use special notation to define a menu
- 
+
         {
             'Menu Item 1': null,   // menu item 1 without a sub menu
             'Menu Item 2': null,   // menu item 2 without a sub menu
-            '-':null,              // decorative line element 
+            '-':null,              // decorative line element
             'Menu Item 3': {       // menu item 3 with a sub menu defined
                 "[x] Checkable menu item":null, // checkable menu item
                 "Sub item 1":null
@@ -1095,7 +1094,14 @@ pkg.MenuItem = Class(pkg.Panel, [
  */
 pkg.Menu = Class(pkg.CompList, [
     function $clazz() {
-        this.MenuItem = Class(pkg.MenuItem, []);
+        var Label = this.Label = Class(pkg.MenuItem.Label,[]);
+
+        this.MenuItem = Class(pkg.MenuItem, [
+            function $clazz() {
+                this.Label = Class(Label, []);
+            }
+        ]);
+
         this.Line     = Class(pkg.Line,     []);
         this.Line.prototype.$isDecorative = true;
     },
@@ -1107,9 +1113,9 @@ pkg.Menu = Class(pkg.CompList, [
         /**
          * Test if the given menu item is a decorative (not selectable) menu item.
          * Menu item is considered as decorative if it has been added with addDecorative(...)
-         * method or has "$isDecorative" property set to "true"   
+         * method or has "$isDecorative" property set to "true"
          * @param  {Integer}  i a menu item index
-         * @return {Boolean}  true if the given menu item is decorative 
+         * @return {Boolean}  true if the given menu item is decorative
          * @method isDecorative
          */
         this.isDecorative = function(i){
@@ -1118,10 +1124,10 @@ pkg.Menu = Class(pkg.CompList, [
         };
 
         /**
-         * Define component events handler. 
+         * Define component events handler.
          * @param  {Integer} id  a component event id
          * @param  {zebra.ui,Panel} src a component that triggers the event
-         * @param  {Object} p1  a first event parameter. 
+         * @param  {Object} p1  a first event parameter.
          * @param  {Object} p2  a second event parameter
          * @method  childCompEvent
          */
@@ -1131,8 +1137,8 @@ pkg.Menu = Class(pkg.CompList, [
                 id == pkg.Panel.ENABLED)
             {
                 for(var i = 0;i < this.kids.length; i++){
-                    if (this.kids[i] == src) {                        
-                        // clear selection if an item becomes not selectable 
+                    if (this.kids[i] == src) {
+                        // clear selection if an item becomes not selectable
                         if (this.isItemSelectable(i) === false) {
                             if (i == this.selectedIndex) this.select(-1);
                         }
@@ -1161,7 +1167,7 @@ pkg.Menu = Class(pkg.CompList, [
         };
 
         /**
-         * Test if the menu has a selectable item 
+         * Test if the menu has a selectable item
          * @return {Boolean} true if the menu has at least one selectable item
          * @method hasSelectableItems
          */
@@ -1173,7 +1179,7 @@ pkg.Menu = Class(pkg.CompList, [
         };
 
         /**
-         * Define mouse exited events handler 
+         * Define mouse exited events handler
          * @param  {zebra.ui.MouseEvent} e a mouse event
          * @method mouseExited
          */
@@ -1182,10 +1188,10 @@ pkg.Menu = Class(pkg.CompList, [
         };
 
         /**
-         * Get a sub menu for the given menu item 
+         * Get a sub menu for the given menu item
          * @param  {Integer} index a menu item index
-         * @return {zebra.ui.Menu} a sub menu or null if no sub menu 
-         * is defined for the given menu item 
+         * @return {zebra.ui.Menu} a sub menu or null if no sub menu
+         * is defined for the given menu item
          * @method getMenuAt
          */
         this.getMenuAt = function(index){
@@ -1194,7 +1200,7 @@ pkg.Menu = Class(pkg.CompList, [
 
         /**
          * Set the given menu as a sub-menu for the specified menu item
-         * @param {Integer} i an index of a menu item for that a sub menu 
+         * @param {Integer} i an index of a menu item for that a sub menu
          * has to be attached
          * @param {zebra.ui.Menu} m a sub menu to be attached
          * @method setMenuAt
@@ -1208,12 +1214,12 @@ pkg.Menu = Class(pkg.CompList, [
                 throw new Error("Decorative element cannot have a sub-menu");
             }
 
-            var p = this.kids[i]; 
+            var p = this.kids[i];
             if (p.activateSub != null) {
                 var sub = this.menus[p];
                 if (m != null) {
                     if (sub == null) {
-                        p.activateSub(true); 
+                        p.activateSub(true);
                     }
                 }
                 else {
@@ -1230,9 +1236,9 @@ pkg.Menu = Class(pkg.CompList, [
         };
 
         /**
-         * Get the specified sub-menu index  
+         * Get the specified sub-menu index
          * @param  {zebra.ui.Menu} menu a sub menu
-         * @return {Integer} a sub menu index. -1 if the menu is 
+         * @return {Integer} a sub menu index. -1 if the menu is
          * not a sub menu of the given menu
          * @method indexMenuOf
          */
@@ -1243,11 +1249,11 @@ pkg.Menu = Class(pkg.CompList, [
                 }
             }
             return -1;
-        };  
+        };
 
         /**
          * Called when the menu or a sub-menu has been canceled (key ESCAPE has been pressed).
-         * @param  {zebra.ui.Menu} m a menu (or sub menu) that has been canceled 
+         * @param  {zebra.ui.Menu} m a menu (or sub menu) that has been canceled
          * @method $canceled
          * @protected
          */
@@ -1274,7 +1280,7 @@ pkg.Menu = Class(pkg.CompList, [
 
         /**
          * Hide the menu and all visible sub-menus
-         * @param {zebra.ui.Menu} triggeredBy a menu that has triggered the hiding of 
+         * @param {zebra.ui.Menu} triggeredBy a menu that has triggered the hiding of
          * menu hierarchy
          * @method $hideMenu
          * @protected
@@ -1289,7 +1295,7 @@ pkg.Menu = Class(pkg.CompList, [
 
         /**
          * Get a sub menu that is shown at the given moment.
-         * @return {zebra.ui.Menu} a child sub menu. null if no child sub-menu 
+         * @return {zebra.ui.Menu} a child sub menu. null if no child sub-menu
          * has been shown
          * @method $childMenu
          * @protected
@@ -1302,7 +1308,7 @@ pkg.Menu = Class(pkg.CompList, [
                         return m;
                     }
                 }
-            }                
+            }
             return null;
         };
 
@@ -1312,7 +1318,7 @@ pkg.Menu = Class(pkg.CompList, [
          * @method $showSubMenu
          * @protected
          */
-        this.$showSubMenu = function(sub) {            
+        this.$showSubMenu = function(sub) {
             sub.setLocation(this.x + this.width - 10,
                             this.y + this.kids[this.selectedIndex].y);
             sub.toPreferredSize();
@@ -1329,14 +1335,14 @@ pkg.Menu = Class(pkg.CompList, [
         this.menus = {};
 
         /**
-         * Dictionary to keep decorative components 
-         * @attribute decoratives 
-         * @type {Object} 
-         
+         * Dictionary to keep decorative components
+         * @attribute decoratives
+         * @type {Object}
+
            {
                {zebra.ui.Panel}:true
            }
-         
+
          * @readOnly
          * @private
          */
@@ -1348,9 +1354,9 @@ pkg.Menu = Class(pkg.CompList, [
         this.$this();
         if (Array.isArray(d)) {
             for(var i = 0; i < d.length; i++) {
-                this.add(d[i]); 
+                this.add(d[i]);
             }
-        }        
+        }
         else {
             for(var k in d) {
                 if (d.hasOwnProperty(k)) {
@@ -1366,7 +1372,7 @@ pkg.Menu = Class(pkg.CompList, [
 
     /**
      * Override key pressed events handler to handle key events according to
-     * context menu component requirements  
+     * context menu component requirements
      * @param  {zebra.ui.KeyEvent} e a key event
      * @method keyPressed
      */
@@ -1375,7 +1381,7 @@ pkg.Menu = Class(pkg.CompList, [
             if (this.parent != null) {
                 var p = this.$parentMenu;
                 this.$canceled(this);
-                this.$hideMenu(this); 
+                this.$hideMenu(this);
                 if (p != null) p.requestFocus();
             }
         }
@@ -1387,7 +1393,7 @@ pkg.Menu = Class(pkg.CompList, [
     function insert(i, ctr, c) {
         if (zebra.isString(c)) {
             return this.$super(i, ctr, (c.match(/^\-+$/) != null) ? new this.$clazz.Line()
-                                                                  : new this.$clazz.MenuItem(c));            
+                                                                  : new this.$clazz.MenuItem(c));
         }
         return this.$super(i, ctr, c);
     },
@@ -1405,7 +1411,7 @@ pkg.Menu = Class(pkg.CompList, [
 
     /**
      * Add the specified component as a decorative item of the menu
-     * @param {zebra.ui.Panel} c an UI component 
+     * @param {zebra.ui.Panel} c an UI component
      * @method addDecorative
      */
     function addDecorative(c) {
@@ -1430,19 +1436,19 @@ pkg.Menu = Class(pkg.CompList, [
 
         if (off >= 0) {
             var rs = null;
-                
+
             // hide previously shown sub menu if position has been re-newed
             if (this.selectedIndex >= 0  && off != this.selectedIndex) {
                 var sub = this.getMenuAt(this.selectedIndex);
                 if (sub != null) {
                     sub.$hideMenu(this);
                     rs = -1; // ask to clear selection
-                }                
+                }
             }
 
             // request fire selection if the menu is shown and position has moved to new place
             if (this.parent != null && off != this.selectedIndex && this.isItemSelectable(off)) {
-                if (this.triggerSelectionByPos(off)) rs = off;  
+                if (this.triggerSelectionByPos(off)) rs = off;
             }
 
             if (rs !== null) {
@@ -1456,7 +1462,7 @@ pkg.Menu = Class(pkg.CompList, [
     function fireSelected(prev) {
         if (this.parent != null && this.selectedIndex >= 0) {
             var sub = this.getMenuAt(this.selectedIndex);
-            
+
             if (sub != null) {
                 if (sub.parent != null) {
                     // hide menu since it has been already shown
@@ -1490,7 +1496,7 @@ pkg.Menu = Class(pkg.CompList, [
 
 /**
  * Menu bar UI component class. Menu bar can be build in any part of UI application.
- * There is no restriction regarding the placement of the component. 
+ * There is no restriction regarding the placement of the component.
 
         var canvas = new zebra.ui.zCanvas(300,200);
         canvas.setLayout(new zebra.layout.BorderLayout());
@@ -1517,7 +1523,13 @@ pkg.Menu = Class(pkg.CompList, [
  */
 pkg.Menubar = Class(pkg.Menu, [
     function $clazz() {
+        var Label = this.Label = Class(pkg.MenuItem.Label, []);
+
         this.MenuItem = Class(pkg.MenuItem, [
+            function $clazz() {
+                this.Label = Class(Label, []);
+            },
+
             function(c) {
                 this.$super(c);
                 this.hideSub();
@@ -1533,15 +1545,15 @@ pkg.Menubar = Class(pkg.Menu, [
             return this.isItemSelectable(i) && this.$isActive === true;
         };
 
-        // making menu bar not removable by overriding the method 
-        this.$hideMenu = function(triggeredBy) { 
+        // making menu bar not removable by overriding the method
+        this.$hideMenu = function(triggeredBy) {
             var child = this.$childMenu();
             if (child != null) {
                 child.$hideMenu(triggeredBy);
             }
 
             // handle situation when calling hideMenu method has been triggered
-            // by a child sub-menu initiate it (an item has been selected or menu 
+            // by a child sub-menu initiate it (an item has been selected or menu
             if (triggeredBy != this) {
                 this.select(-1);
             }
@@ -1555,7 +1567,7 @@ pkg.Menubar = Class(pkg.Menu, [
             if (menu.hasSelectableItems()) {
                 var abs = L.toParentOrigin(0,0,k);
                 menu.setLocation(abs.x, abs.y + k.height + 1);
-                menu.toPreferredSize();             
+                menu.toPreferredSize();
                 pop.add(menu);
                 menu.requestFocus();
             }
@@ -1593,8 +1605,8 @@ pkg.Menubar = Class(pkg.Menu, [
 ]);
 
 /**
- * UI popup layer class. Special layer implementation to show 
- * context menu. Normally the layer is not used directly.   
+ * UI popup layer class. Special layer implementation to show
+ * context menu. Normally the layer is not used directly.
  * @class zebra.ui.PopupLayer
  * @constructor
  * @extends {zebra.ui.BaseLayer}
@@ -1608,13 +1620,13 @@ pkg.PopupLayer = Class(pkg.BaseLayer, [
         this.mTop = this.mLeft = this.mBottom = this.mRight = 0;
 
         this.layerMousePressed = function(x,y,mask) {
-            // if x,y is in extent active menu bar let 
+            // if x,y is in extent active menu bar let
             // the menu bar handle it
             if (this.activeMenubar != null  &&
                 y <= this.mBottom           &&
                 y >= this.mTop              &&
                 x >= this.mLeft             &&
-                x <= this.mRight              ) 
+                x <= this.mRight              )
             {
                 return false;
             }
@@ -1662,7 +1674,7 @@ pkg.PopupLayer = Class(pkg.BaseLayer, [
                                 this.activeMenubar.position.seekLineTo(zebra.util.Position.DOWN);
                             }
                             break;
-                        case KE.LEFT : 
+                        case KE.LEFT :
                             if (s > 0) {
                                // this.removeAll();
                                 this.activeMenubar.requestFocus();
@@ -1681,12 +1693,12 @@ pkg.PopupLayer = Class(pkg.BaseLayer, [
         this.setMenubar = function(mb){
             if (this.activeMenubar != mb){
                 this.removeAll();
-                
+
                 this.activeMenubar = mb;
                 if (this.activeMenubar != null){
-                    // save an area the menu bar component takes 
-                    // it is required to allow the menu bar getting input 
-                    // event by inactivating the pop up layer 
+                    // save an area the menu bar component takes
+                    // it is required to allow the menu bar getting input
+                    // event by inactivating the pop up layer
                     var abs = L.toParentOrigin(0, 0, this.activeMenubar);
                     this.mLeft   = abs.x;
                     this.mRight  = this.mLeft + this.activeMenubar.width - 1;
@@ -1704,7 +1716,7 @@ pkg.PopupLayer = Class(pkg.BaseLayer, [
                     var ps = m.getPreferredSize(),
                         xx = (m.x + ps.width  > this.width ) ? this.width  - ps.width  : m.x,
                         yy = (m.y + ps.height > this.height) ? this.height - ps.height : m.y;
-                 
+
                     m.setSize(ps.width, ps.height);
                     if (xx < 0) xx = 0;
                     if (yy < 0) yy = 0;
@@ -1721,7 +1733,7 @@ pkg.PopupLayer = Class(pkg.BaseLayer, [
 ]);
 
 /**
- * Tooltip UI component. The component can be used as a tooltip that 
+ * Tooltip UI component. The component can be used as a tooltip that
  * shows specified content in figured border.
  * @class  zebra.ui.Tooltip
  * @param  {zebra.util.Panel|String} a content component or test label to be shown in tooltip
@@ -1740,7 +1752,7 @@ pkg.Tooltip = Class(pkg.Panel, [
                 this[''] = function(col, size) {
                     this.color = col !=  null ? col : "black";
                     this.size  = size == null ? 4   : size;
-                    this.gap   = 2 * this.size; 
+                    this.gap   = 2 * this.size;
                 };
 
                 this.paint = function (g,x,y,w,h,d) {
@@ -1761,12 +1773,12 @@ pkg.Tooltip = Class(pkg.Panel, [
                     x+=this.size;
                     y+=this.size;
 
-                    var w2   = (w/2 + 0.5) | 0, 
-                        h3   = (h/3 + 0.5) | 0, 
+                    var w2   = (w/2 + 0.5) | 0,
+                        h3   = (h/3 + 0.5) | 0,
                         w3_8 = ((3 * w)/8 + 0.5) | 0,
                         h2_3 = ((2 * h)/3 + 0.5) | 0,
                         h3   = (h/3 + 0.5) | 0,
-                        w4   = (w/4 + 0.5) | 0; 
+                        w4   = (w/4 + 0.5) | 0;
 
                     g.moveTo(x + w2, y);
                     g.quadraticCurveTo(x, y, x, y + h3);
@@ -1784,10 +1796,10 @@ pkg.Tooltip = Class(pkg.Panel, [
 
     function(content) {
         this.$super();
-        this.setBorder(new this.$clazz.TooltipBorder(pkg.Tooltip.borderColor, 
+        this.setBorder(new this.$clazz.TooltipBorder(pkg.Tooltip.borderColor,
                                                      pkg.Tooltip.borderWidth));
-        this.add(zebra.instanceOf(content, pkg.Panel) ? content 
-                                                      : new this.$clazz.Label(content));   
+        this.add(zebra.instanceOf(content, pkg.Panel) ? content
+                                                      : new this.$clazz.Label(content));
         this.toPreferredSize();
     },
 
@@ -1797,7 +1809,7 @@ pkg.Tooltip = Class(pkg.Panel, [
     },
 
     function getBottom() {
-        return this.$super() + this.$contentPs.height; 
+        return this.$super() + this.$contentPs.height;
     },
 
     function getTop () {
@@ -1814,11 +1826,11 @@ pkg.Tooltip = Class(pkg.Panel, [
 ]);
 
 /**
- * Popup window manager class. The manager registering and triggers showing context popup menu 
+ * Popup window manager class. The manager registering and triggers showing context popup menu
  * and tooltips. Menu appearing is triggered by right mouse click or double fingers touch event.
- * To bind a popup menu to an UI component you can either set "tooltip" property of the component 
+ * To bind a popup menu to an UI component you can either set "tooltip" property of the component
  * with a popup menu instance:
- 
+
         // create canvas
         var canvas = new zebra.ui.zCanvas();
 
@@ -1827,18 +1839,18 @@ pkg.Tooltip = Class(pkg.Panel, [
         m.add("Menu Item 1");
         m.add("Menu Item 2");
         m.add("Menu Item 3");
-    
+
         // bind the menu to root panel
         canvas.root.popup = m;
- 
- * Or implement "getPopup(target,x,y)" method that can rule showing popup menu depending on 
+
+ * Or implement "getPopup(target,x,y)" method that can rule showing popup menu depending on
  * the current cursor location:
 
         // create canvas
         var canvas = new zebra.ui.zCanvas();
 
-        // visualize 50x50 pixels hot component spot  
-        // to which the context menu is bound 
+        // visualize 50x50 pixels hot component spot
+        // to which the context menu is bound
         canvas.root.paint = function(g) {
             g.setColor("red");
             g.fillRect(50,50,50,50);
@@ -1849,32 +1861,32 @@ pkg.Tooltip = Class(pkg.Panel, [
         m.add("Menu Item 1");
         m.add("Menu Item 2");
         m.add("Menu Item 3");
-    
-        // implement "getPopup" method that shows popup menu only 
-        // if mouse cursor located at red rectangular area of the 
+
+        // implement "getPopup" method that shows popup menu only
+        // if mouse cursor located at red rectangular area of the
         // component
         canvas.root.getPopup = function(target, x, y) {
             // test if mouse cursor position is in red spot area
-            // and return context menu if it is true 
+            // and return context menu if it is true
             if (x > 50 && y > 50 && x < 100 && y <  100)  {
                 return m;
             }
             return null;
         }
- 
+
  *  Defining a tooltip for an UI component follows the same approach. Other you
- *  define set "tooltip" property of your component with a component that has to 
+ *  define set "tooltip" property of your component with a component that has to
  *  be shown as the tooltip:
- 
+
          // create canvas
          var canvas = new zebra.ui.zCanvas();
 
-         // create tooltip 
+         // create tooltip
          var t = new zebra.ui.Label("Tooltip");
          t.setBorder("plain");
          t.setBackground("yellow");
          t.setPadding(6);
-         
+
          // bind the tooltip to root panel
          canvas.root.popup = t;
 
@@ -1885,7 +1897,7 @@ pkg.Tooltip = Class(pkg.Panel, [
         // create canvas
         var canvas = new zebra.ui.zCanvas();
 
-        // create tooltip 
+        // create tooltip
         var t = new zebra.ui.Label("Tooltip");
         t.setBorder("plain");
         t.setBackground("yellow");
@@ -1898,7 +1910,7 @@ pkg.Tooltip = Class(pkg.Panel, [
 
  * @class zebra.ui.PopupManager
  * @extends zebra.ui.Manager
- * @constructor 
+ * @constructor
  */
 
  /**
@@ -1912,7 +1924,7 @@ pkg.Tooltip = Class(pkg.Panel, [
   * @event menuItemSelected
   * @param {zebra.ui.Menu} menu a menu component that triggers the event
   * @param {Integer}  index a menu item index that has been selected
-  * @param {zebra.ui.Panel} item a menu item component that has been selected 
+  * @param {zebra.ui.Panel} item a menu item component that has been selected
   */
 pkg.PopupManager = Class(pkg.Manager, [
     function $prototype() {
@@ -1944,9 +1956,9 @@ pkg.PopupManager = Class(pkg.Manager, [
                 }
             }
         };
- 
+
         /**
-         * Indicates if a shown tooltip has to disappear by mouse pressed event 
+         * Indicates if a shown tooltip has to disappear by mouse pressed event
          * @attribute hideTooltipByPress
          * @type {Boolean}
          * @default true
@@ -2006,14 +2018,14 @@ pkg.PopupManager = Class(pkg.Manager, [
 
         /**
          * Task body method
-         * @private 
+         * @private
          * @param  {Task} t a task context
          * @method run
          */
         this.run = function(t){
             if (this.tooltip == null){
                 this.tooltip = this.target.tooltip != null ? this.target.tooltip
-                                                           : this.target.getTooltip(this.target, 
+                                                           : this.target.getTooltip(this.target,
                                                                                     this.$tooltipX,
                                                                                     this.$tooltipY);
                 if (this.tooltip != null) {
@@ -2022,7 +2034,7 @@ pkg.PopupManager = Class(pkg.Manager, [
                     var tx = p.x,
                         ty = p.y - this.tooltip.height,
                         dw = this.$targetTooltipLayer.width;
-                    
+
                     if (tx + this.tooltip.width > dw) {
                         tx = dw - this.tooltip.width - 1;
                     }
@@ -2082,11 +2094,13 @@ pkg.PopupManager = Class(pkg.Manager, [
         this.$popupMenuX = this.$popupMenuY = 0;
         this.$tooltipX = this.$tooltipY = 0;
         this.$targetTooltipLayer = this.tooltip = this.target = null;
-        this._ = new (zebra.util.ListenersClass("menuItemSelected"));
+
+        var LClass = zebra.util.ListenersClass("menuItemSelected");
+        this._ = new LClass();
 
         /**
-         * Define interval (in milliseconds) between entering a component and showing 
-         * a tooltip for the entered component 
+         * Define interval (in milliseconds) between entering a component and showing
+         * a tooltip for the entered component
          * @attribute showTooltipIn
          * @type {Integer}
          * @default 400
@@ -2121,7 +2135,7 @@ pkg.WindowTitleView = Class(pkg.View, [
             return true;
         };
     }
-]);  
+]);
 
 /**
  * @for

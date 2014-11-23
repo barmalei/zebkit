@@ -1,19 +1,14 @@
-pkg = zebra("ui.vk");
+(function() {
+
+var pkg = zebra("ui.vk"), Class = zebra.Class, L = zebra.layout, ui = zebra("ui"), $vk = null;
 
 zebra.ready(function() {
-
-
-console.log("parent: " + this.parent);
-
-
-console.log("document.currentScrip = " + document.currentScript);
 
 /**
  * Virtual keyboard implementation
  * @module  ui.vk
  * @main
  */
-var pkg = zebra("ui.vk"), Class = zebra.Class, L = zebra.layout, ui = zebra("ui"), $vk = null;
 
 pkg.VKLayout = Class(L.Layout, [
     function $prototype () {
@@ -39,9 +34,9 @@ pkg.VKLayout = Class(L.Layout, [
                     continue;
                 }
 
-                var r    = rows[i],
-                    w    = (r.keys > 0 ? r.keys - 1 : 0) * this.gap + m.fixKeyWidth * r.fixKeys + r.occupiedHorSpace,
-                    ex   = ew - w;
+                var r  = rows[i],
+                    w  = (r.keys > 0 ? r.keys - 1 : 0) * this.gap + m.fixKeyWidth * r.fixKeys + r.occupiedHorSpace,
+                    ex = ew - w;
 
                 ex =  Math.round(ex/r.fixKeys);
                 if (extra > ex) {
@@ -208,7 +203,6 @@ pkg.VKLayout = Class(L.Layout, [
         };
     }
 ]);
-
 
 pkg.ShiftKeyArrow = zebra.Class(ui.View, [
     function $prototype() {
@@ -696,11 +690,78 @@ pkg.VKeys = Class(pkg.VKey, [
         ]);
     },
 
+    function $prototype() {
+        this.getLabel = function() {
+            return this.kids[0].mainLab.getValue();
+        };
+
+        this.setLabel = function(l) {
+            this.kids[0].mainLab.setValue(l);
+        };
+
+        this.showKeysPopupPan = function() {
+            this.hideHint();
+
+            if (this.keysPopupPan == null) {
+                this.$counter = (this.$counter + 1 ) % 2;
+                this.showHint(this.$counter == 0 ? this.ch : this.altCh);
+            }
+            else {
+                this.$pressed.shutdown();
+
+                var rl = L.toParentOrigin(this);
+                for(var i = 0; i < this.keysPopupPan.kids.length; i++) {
+                    this.keysPopupPan.kids[i].setPreferredSize(this.width, this.height);
+                }
+
+                this.keysPopupPan.toPreferredSize();
+                this.keysPopupPan.setLocation(rl.x, rl.y - this.keysPopupPan.height);
+                ui.showWindow(this, "mdi", this.keysPopupPan);
+                ui.makeFullyVisible(this.keysPopupPan);
+                ui.activateWindow(this.keysPopupPan);
+            }
+        };
+
+        this.hideKeysPopupPan = function() {
+            if (this.keysPopupPan != null) {
+                this.keysPopupPan.removeMe();
+            }
+        };
+    },
+
+    function fireVkPressed(code, ch, mask) {
+        this.$counter = 0;
+        this.hideKeysPopupPan();
+        this.$super(code, ch, mask);
+        this.$pressed = zebra.util.task(this.showKeysPopupPan, this).run(700, 700);
+    },
+
+    function fireVkTyped(code, ch, mask) {
+        if (this.keysPopupPan == null) {
+            ch = this.$counter > 0 ? this.altCh : this.ch;
+            this.$super(ch.charCodeAt(0), ch, mask);
+        }
+        else {
+            if (this.keysPopupPan.parent == null) {
+                this.$super(code, ch, mask);
+            }
+        }
+    },
+
+    function fireVkReleased(code, ch, mask) {
+        this.$pressed.shutdown();
+        this.$super(code, ch, mask);
+    },
+
     function(chars) {
         if (chars.length < 2) {
             throw new Error();
         }
-        this.$super( { ch: chars[0], label : new this.$clazz.KeysLabelPan(chars) });
+
+        this.$super( {
+            ch    : chars[0],
+            label : new this.$clazz.KeysLabelPan(chars)
+        });
 
         this.keysPopupPan = null;
         if (chars.length > 2) {
@@ -725,81 +786,11 @@ pkg.VKeys = Class(pkg.VKey, [
         else {
             this.altCh = chars[1];
         }
-    },
-
-    function getLabel() {
-        return this.kids[0].mainLab.getValue();
-    },
-
-    function setLabel(l) {
-        this.kids[0].mainLab.setValue(l);
-    },
-
-    function hideKeysPopupPan() {
-        if (this.keysPopupPan != null) {
-            this.keysPopupPan.removeMe();
-        }
-    },
-
-    function fireVkPressed(code, ch, mask) {
-        this.$counter = 0;
-        this.hideKeysPopupPan();
-        this.$super(code, ch, mask);
-        this.$pressed = zebra.util.task(this.showKeysPopupPan, this).run(700, 700);
-    },
-
-    function showKeysPopupPan() {
-        this.hideHint();
-
-        if (this.keysPopupPan == null) {
-            this.$counter = (this.$counter + 1 ) % 2;
-            this.showHint(this.$counter == 0 ? this.ch : this.altCh);
-        }
-        else {
-            this.$pressed.shutdown();
-
-            var rl = L.toParentOrigin(this);
-            for(var i = 0; i < this.keysPopupPan.kids.length; i++) {
-                this.keysPopupPan.kids[i].setPreferredSize(this.width, this.height);
-            }
-
-            this.keysPopupPan.toPreferredSize();
-            this.keysPopupPan.setLocation(rl.x, rl.y - this.keysPopupPan.height);
-            ui.showWindow(this, "mdi", this.keysPopupPan);
-            ui.makeFullyVisible(this.keysPopupPan);
-            ui.activateWindow(this.keysPopupPan);
-
-        }
-    },
-
-    function fireVkTyped(code, ch, mask) {
-        if (this.keysPopupPan == null) {
-            ch = this.$counter > 0 ? this.altCh : this.ch;
-            this.$super(ch.charCodeAt(0), ch, mask);
-        }
-        else {
-            if (this.keysPopupPan.parent == null) {
-                this.$super(code, ch, mask);
-            }
-        }
-    },
-
-    function fireVkReleased(code, ch, mask) {
-        this.$pressed.shutdown();
-        this.$super(code, ch, mask);
     }
 ]);
 
 pkg.showVK = function(input) {
-    $vk.setInputField(input);
-    $vk.removeMe();
-    if (input != null) {
-        input.$forceToShow = true;
-        $vk.toPreferredSize();
-        $vk.constraints = L.HORIZONTAL | L.BOTTOM;
-        ui.showWindow(input, "mdi", $vk);
-        ui.activateWindow($vk);
-    }
+    $vk.show(input);
 };
 
 pkg.getVK = function() {
@@ -844,8 +835,41 @@ pkg.VK = Class(ui.Panel, [
             }
         };
 
-        this.setInputField = function(d) {
-            this.input = d;
+        this.show = function(d) {
+            if (d != this.input) {
+                this.removeMe();
+
+                if (this.input != null) {
+                    this.input.$forceToShow = false;
+                }
+
+                this.input = d;
+
+                if (d != null) {
+                    d.$forceToShow = true;
+                    this.constraints = L.HORIZONTAL | L.BOTTOM;
+                    this.toPreferredSize();
+                    ui.showWindow(d, "mdi", this);
+                    ui.activateWindow(this);
+
+                    // var p  = L.toParentOrigin(this.input),
+                    //    ps = this.getPreferredSize();
+
+
+                    // if (p.y + this.input.height > ps.height) {
+                    //     var parent = this.input.parent;
+                    //     while(parent != null && !(zebra.instanceOf(parent, ui.BaseLayer))) {
+                    //         parent = parent.parent;
+                    //     }
+
+                    //     console.log("parent = " + parent);
+
+                    //     if (parent != null) {
+                    //         var y = parent.y - (p.y + this.input.height - ps.height);
+                    //     }
+                    // }
+                }
+            }
         };
 
         this.isShiftOn = function() {
@@ -920,7 +944,6 @@ pkg.VK = Class(ui.Panel, [
             }
 
             this._.vkReleased(vk, code, ch, mask);
-
             KE.reset(this.input, ui.KeyEvent.RELEASED, code, ch, this.mask);
             ui.events.fireInputEvent(KE);
         };
@@ -961,7 +984,9 @@ pkg.VK = Class(ui.Panel, [
                     var v = r[col];
 
                     if (zebra.isString(v)) {
-                        if (pkg.PredefinedVKey.hasOwnProperty(v)) v = pkg.PredefinedVKey[v];
+                        if (pkg.PredefinedVKey.hasOwnProperty(v)) {
+                            v = pkg.PredefinedVKey[v];
+                        }
                     }
 
                     group.add({
@@ -974,12 +999,25 @@ pkg.VK = Class(ui.Panel, [
         };
     },
 
+    function setParent(p) {
+        // mean the vk is removed from its parent
+        if (p == null) {
+            if (this.parent != null) {
+                // remove other VK related elements
+                for(var i = this.parent.kids.length - 1; i >= 0; i--) {
+                    var kid = this.parent.kids[i];
+                    if (kid.$isVkElement === true) {
+                        kid.removeMe();
+                    }
+                }
+            }
+        }
+
+        this.$super(p);
+    },
+
     function() {
-        this.$super(new L.StackLayout());
-
-
-        this.setBackground(new ui.Gradient("lightGray", "white"));
-        this.setPadding(4);
+        this.$super();
         this._ = new pkg.VKListeners();
     }
 ]);
@@ -1017,13 +1055,13 @@ ui.events.addListener({
     }
 });
 
-
-var bag = new ui.Bag(pkg);
-bag.loadByUrl(pkg.$url + "vk.json");
-
+new ui.Bag(pkg).loadByUrl(pkg.$url + "vk.json");
 
 /**
  * @for
  */
 
 });
+
+
+})();

@@ -793,7 +793,7 @@ pkg.BaseTree = Class(ui.Panel, [
          * @method  select
          */
         this.select = function(item){
-            if (this.isSelectable == true && item != this.selected){
+            if (this.isSelectable === true && item != this.selected){
                 var old = this.selected;
 
                 this.selected = item;

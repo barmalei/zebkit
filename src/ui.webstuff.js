@@ -38,7 +38,7 @@
         pkg.$windowSize = function() {
             // iOS retina devices can have a problem with performance
             // in landscape mode because of a bug (full page size is
-            // just 1 pixels column more than video memory can keep)
+            // just 1 pixels column more than video memory that can keep it)
             // So, just make width always one pixel less.
             return { width : window.innerWidth - 1,
                      height: window.innerHeight   };
@@ -138,20 +138,19 @@
 
             if ($wrt != null) {
                 winSizeUpdated = true;
-                return;
             }
-
-            $wrt = zebra.util.task(
-                function(t) {
-                    if (winSizeUpdated === false) {
-                        pkg.$elBoundsUpdated();
-                        t.shutdown();
-                        $wrt = null;
+            else {
+                $wrt = zebra.util.task(
+                    function(t) {
+                        if (winSizeUpdated === false) {
+                            pkg.$elBoundsUpdated();
+                            t.shutdown();
+                            $wrt = null;
+                        }
+                        winSizeUpdated = false;
                     }
-                    winSizeUpdated = false;
-                }
-            ).run(200, 150);
-
+                ).run(200, 150);
+            }
         }, false);
 
         window.onbeforeunload = function(e) {
@@ -238,7 +237,6 @@
                         }
 
                         dv = Math.abs(dv) > 100 ? dv % 100 : dv;
-
                         if (bar.isVisible === true) {
                             var v =  bar.position.offset + dv;
                             if (v >= 0) bar.position.setOffset(v);

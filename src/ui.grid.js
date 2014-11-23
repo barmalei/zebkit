@@ -671,9 +671,9 @@ pkg.BaseCaption = Class(ui.Panel, [
         if (p == null || zebra.instanceOf(p, pkg.Metrics)) {
             this.metrics = p;
             if (this.constraints != null) {
-                this.orient = (this.constraints == L.TOP    ||
-                               this.constraints == L.BOTTOM   ) ? L.HORIZONTAL
-                                                                : L.VERTICAL;
+                this.orient = (this.constraints == L.TOP    || this.constraints == "top"   ||
+                               this.constraints == L.BOTTOM || this.constraints == "bottom"  ) ? L.HORIZONTAL
+                                                                                               : L.VERTICAL;
             }
         }
     }
@@ -693,7 +693,6 @@ pkg.BaseCaption = Class(ui.Panel, [
  */
 pkg.GridCaption = Class(pkg.BaseCaption, [
     function $prototype() {
-
         this.defYAlignment = this.defXAlignment = L.CENTER;
 
         /**
@@ -722,11 +721,11 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
                     isHor = (this.orient == L.HORIZONTAL),
                     size  = isHor ? m.getGridCols() : m.getGridRows();
 
-                for(var i = 0;i < size; i++){
+                for(var i = 0;i < size; i++) {
                     var v = this.getTitleView(i);
                     if (v != null) {
                         var ps = v.getPreferredSize();
-                        if (isHor) {
+                        if (isHor === true) {
                             if (ps.height > this.psH) this.psH = ps.height;
                             this.psW += ps.width;
                         }
@@ -855,6 +854,8 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
                             vy = ya == L.CENTER ? ~~((hh - ps.height)/2)
                                                 : (ya == L.BOTTOM ? hh - ps.height - ((i==size-1) ? bottom : 0)
                                                                   :  (i === 0 ? top: 0));
+
+
                         if (bg != null) {
                             if (isHor) bg.paint(g, x, 0, ww + gap , this.height, this);
                             else       bg.paint(g, 0, y, this.width, hh + gap, this);
@@ -1087,7 +1088,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
          * @method putTitle
          */
         this.putTitle = function(rowcol, t) {
-            for(var i = this.kids.length-1; i < rowcol; i++) {
+            for(var i = this.kids.length - 1; i < rowcol; i++) {
                 this.add(t);
             }
 
@@ -1162,7 +1163,6 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
         this.$super(i,constr, c);
     }
 ]);
-
 
 /**
  * Grid UI component class. The grid component visualizes "zebra.data.Matrix" data model.
@@ -1318,16 +1318,16 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 // grid without top caption renders line at the top, so we have to take in account
                 // the place for the line
                 return this.getTop() +
-                      (this.topCaption == null || this.topCaption.isVisible == false ? this.lineSize
-                                                                                     : this.getTopCaptionHeight());
+                      (this.topCaption == null || this.topCaption.isVisible === false ? this.lineSize
+                                                                                      : this.getTopCaptionHeight());
             };
 
             this.$leftX = function() {
                 // grid without left caption renders line at the left, so we have to take in account
                 // the place for the line
                 return this.getLeft() +
-                      (this.leftCaption == null || this.leftCaption.isVisible == false ? this.lineSize
-                                                                                       : this.getLeftCaptionWidth());
+                      (this.leftCaption == null || this.leftCaption.isVisible === false ? this.lineSize
+                                                                                        : this.getLeftCaptionWidth());
             };
 
             this.colVisibility = function(col,x,d,b){
@@ -1522,8 +1522,8 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 var cols = this.getGridCols(),
                     rows = this.getGridRows();
 
-                this.psWidth_  = this.lineSize * (cols + ((this.leftCaption == null || this.leftCaption.isVisible == false) ? 1 : 0));
-                this.psHeight_ = this.lineSize * (rows + ((this.topCaption == null || this.topCaption.isVisible == false) ? 1 : 0));
+                this.psWidth_  = this.lineSize * (cols + ((this.leftCaption == null || this.leftCaption.isVisible === false) ? 1 : 0));
+                this.psHeight_ = this.lineSize * (rows + ((this.topCaption == null || this.topCaption.isVisible === false) ? 1 : 0));
 
 
                 for(var i = 0;i < cols; i++) this.psWidth_  += this.colWidths[i];
@@ -2136,7 +2136,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 var y    = this.visibility.fr[1] + this.cellInsetsTop,
                     addW = this.cellInsetsLeft   + this.cellInsetsRight,
                     addH = this.cellInsetsTop    + this.cellInsetsBottom,
-                    ts   = g.stack[g.counter],
+                    ts   = g.$states[g.$curState],
                     cx   = ts.x,
                     cy   = ts.y,
                     cw   = ts.width,
@@ -2838,7 +2838,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
             this.scrollManager = new ui.ScrollManager(this);
         },
 
-        function focused(){
+        function focused() {
             this.$super();
             this.repaint();
         },
@@ -2849,19 +2849,23 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
             this.iRowVisibility(0);
         },
 
-        function kidAdded(index,id,c){
-            this.$super(index, id, c);
-            if (L.TOP == id){
+        function kidAdded(index,ctr,c){
+            ctr = L.$constraints(ctr);
+            this.$super(index, ctr, c);
+
+            if ((ctr == null && this.topCaption == null) || L.TOP == ctr){
                 this.topCaption = c;
             }
             else {
-                if (L.TEMPORARY == id) this.editor = c;
+                if (L.TEMPORARY == ctr) this.editor = c;
                 else {
-                    if (L.LEFT == id){
+                    if ((ctr == null && this.leftCaption == null) || L.LEFT == ctr) {
                         this.leftCaption = c;
                     }
                     else {
-                        if (L.NONE === id) this.stub = c;
+                        if ((ctr == null && this.stub == null) || L.NONE === ctr) {
+                            this.stub = c;
+                        }
                     }
                 }
             }
@@ -2926,153 +2930,153 @@ pkg.Grid.prototype.setViews = ui.$ViewsSetter;
  */
 pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
     function $prototype() {
-        this.calcPreferredSize = function(target){
+        this.calcPreferredSize = function(target) {
             this.recalcPS();
-            return (target.kids.length === 0 || target.grid.isVisible === false) ? { width:0, height:0 }
-                                                                                 : { width:this.strPs.width,
-                                                                                     height:this.strPs.height };
+            return (target.kids.length === 0 ||
+                    target.grid.isVisible === false) ? { width:0, height:0 }
+                                                     : { width:this.$strPs.width,
+                                                         height:this.$strPs.height };
         };
 
         this.doLayout = function(target){
             this.recalcPS();
             if (target.kids.length > 0){
-                var grid = this.grid;
-                if (grid.isVisible === true){
-                    var left = target.getLeft(), top = target.getTop(), i = 0;
+                var grid = this.grid, left = target.getLeft(), top = target.getTop();
+                if (grid.isVisible === true) {
                     grid.setLocation(left, top);
                     grid.setSize(target.width  - left - target.getRight(),
                                  target.height - top  - target.getBottom());
 
-                    for(i = 0; i < this.widths.length; i++) {
-                        grid.setColWidth(i, this.widths[i]);
-                    }
-
-                    if (this.heights != null){
-                        for(i = 0; i < this.heights.length; i++) {
-                            grid.setRowHeight(i, this.heights[i]);
-                        }
+                    for(var i = 0; i < this.$widths.length; i++) {
+                        grid.setColWidth(i, this.$widths[i]);
                     }
                 }
             }
         };
 
         this.captionResized = function(src, col, pw){
-            var grid = this.grid;
-            if (col < this.widths.length - 1){
-                var w = grid.getColWidth(col), dt = w - pw;
-                if (dt < 0) grid.setColWidth(col + 1, grid.getColWidth(col + 1) - dt);
+            if (col < this.$widths.length - 1) {
+                var grid = this.grid,
+                    w    = grid.getColWidth(col),
+                    dt   = w - pw;
+
+                if (dt < 0) {
+                    grid.setColWidth(col + 1, grid.getColWidth(col + 1) - dt);
+                }
                 else {
-                    var ww = grid.getColWidth(col + 1) - dt, mw = this.getMinWidth();
+                    var ww = grid.getColWidth(col + 1) - dt,
+                        mw = this.getMinWidth();
+
                     if (ww < mw) {
                         grid.setColWidth(col, w - (mw - ww));
                         grid.setColWidth(col + 1, mw);
                     }
-                    else grid.setColWidth(col + 1, ww);
+                    else {
+                        grid.setColWidth(col + 1, ww);
+                    }
                 }
-                this.proportions = null;
+
+                this.$propW = -1;
             }
         };
 
-        this.calcColProportions = function (targetAreaW, targetAreaH){
-            var g = this.grid, cols = g.getGridCols(), sw = 0;
-            for(var i = 0;i < cols; i++){
-                var w = g.getColWidth(i);
-                if (w === 0) w = g.getColPSWidth(i);
-                sw += w;
-            }
-
-            var props = Array(cols);
-            for(var i = 0;i < cols; i++){
-                var w = g.getColWidth(i);
-                if (w === 0) w = g.getColPSWidth(i);
-                props[i] = w / sw;
-            }
-            return props;
-        };
-
-        this.calcRowHeights = function(targetAreaW,targetAreaH,widths) {
-            return null;
-        };
-
-        this.getMinWidth = function (){
+        this.getMinWidth = function () {
             return zebra.instanceOf(this.grid.topCaption, pkg.BaseCaption) ? this.grid.topCaption.minSize
                                                                            : 10;
         };
 
-        this.calcColWidths = function (targetAreaW,targetAreaH){
+        this.calcColWidths = function(targetAreaW){
             var grid = this.grid,
-                w    = Array(grid.getGridCols()),
-                ew   = targetAreaW - (this.proportions.length + 1) * grid.lineSize, sw = 0;
+                cols = grid.getGridCols(),
+                ew   = targetAreaW - (this.$props.length + 1) * grid.lineSize,
+                sw   = 0;
 
-            for(var i = 0; i < this.proportions.length; i++){
-                if (this.proportions.length - 1 == i) w[i] = ew - sw;
+            if (this.$widths == null || this.$widths.length != cols) {
+                this.$widths = Array(cols);
+            }
+
+            for(var i = 0; i < cols; i++){
+                if (this.$props.length - 1 == i) {
+                    this.$widths[i] = ew - sw;
+                }
                 else {
-                    var cw = ~~(ew * this.proportions[i]);
-                    w[i] = cw;
-                    sw += cw;
+                    this.$widths[i] = Math.round(ew * this.$props[i]);
+                    sw += this.$widths[i];
                 }
             }
-            return w;
         };
 
         this.recalcPS = function (){
             var grid = this.grid;
-            if (grid == null || grid.isVisible === false) return;
+            if (grid != null && grid.isVisible === true) {
+                // calculate size excluding padding where
+                // the target grid columns have to be stretched
+                var p        = this.parent,
+                    isScr    = zebra.instanceOf(p, ui.ScrollPan),
+                    taWidth  = (isScr ? p.width - p.getLeft() - p.getRight() - this.getRight() - this.getLeft()
+                                      : this.width - this.getRight() - this.getLeft()),
+                    taHeight = (isScr ? p.height - p.getTop() - p.getBottom() - this.getBottom() - this.getTop()
+                                      : this.height - this.getBottom() - this.getTop());
 
-            var p = this.parent, isScr = zebra.instanceOf(p, ui.ScrollPan),
-                taWidth   = (isScr ? p.width - p.getLeft() - p.getRight() - this.getRight() - this.getLeft()
-                                   : this.width - this.getRight() - this.getLeft()),
-                taHeight = (isScr  ? p.height - p.getTop() - p.getBottom() - this.getBottom() - this.getTop()
-                                   : this.height - this.getBottom() - this.getTop());
-
-
-            if (this.grid.leftCaption != null && this.grid.leftCaption.isVisible === true) {
-                taWidth -= this.grid.leftCaption.getPreferredSize().width;
-            }
-
-            if (this.strPs != null && this.prevTargetAreaSize.width == taWidth &&
-                                      this.prevTargetAreaSize.height == taHeight  ) {
-                return;
-            }
-
-            if (this.proportions == null || this.proportions.length != grid.getGridCols()) {
-                this.proportions = this.calcColProportions(taWidth, taHeight);
-            }
-
-            this.prevTargetAreaSize.width = taWidth;
-            this.prevTargetAreaSize.height = taHeight;
-            this.widths  = this.calcColWidths (taWidth, taHeight);
-            this.heights = this.calcRowHeights(taWidth, taHeight, this.widths);
-            this.strPs   = this.summarizePS(taWidth, taHeight, this.widths, this.heights);
-
-            if (isScr === true && p.height > 0 && p.vBar && p.autoHide === false && taHeight < this.strPs.height){
-                taWidth -= p.vBar.getPreferredSize().width;
-                this.widths  = this.calcColWidths(taWidth, taHeight);
-                this.heights = this.calcRowHeights(taWidth, taHeight, this.widths);
-                this.strPs   = this.summarizePS(taWidth, taHeight, this.widths, this.heights);
-            }
-        };
-
-        this.summarizePS = function (targetAreaW,targetAreaH,widths,heights){
-            var ps = { width: targetAreaW, height:0 }, grid = this.grid;
-            if (heights != null){
-                for(var i = 0;i < heights.length; i++) ps.height += heights[i];
-                if (grid.topCaption != null && grid.topCaption.isVisible === true) {
-                    ps.height += grid.topCaption.getPreferredSize().height;
+                // exclude left caption
+                if (this.grid.leftCaption != null &&
+                    this.grid.leftCaption.isVisible === true)
+                {
+                    taWidth -= this.grid.leftCaption.getPreferredSize().width;
                 }
-                ps.height += (grid.getTop() + grid.getBottom());
+
+                if (this.$strPs == null || this.$prevWidth  != taWidth)
+                {
+                    if (this.$propW < 0) {
+                        // calculate col proportions
+                        var cols = grid.getGridCols();
+                        if (this.$props == null || this.$props.length != cols) {
+                            this.$props = Array(cols);
+                        }
+                        this.$propW = 0;
+
+                        for(var i = 0; i < cols; i++){
+                            var w = grid.getColWidth(i);
+                            if (w === 0) w = grid.getColPSWidth(i);
+                            this.$propW += w;
+                        }
+
+                        for(var i = 0; i < cols; i++){
+                            var w = grid.getColWidth(i);
+                            if (w === 0) w = grid.getColPSWidth(i);
+                            this.$props[i] = w / this.$propW;
+                        }
+                    }
+
+                    this.$prevWidth  = taWidth;
+                    this.calcColWidths(taWidth);
+                    this.$strPs   = {
+                        width : taWidth,
+                        height: grid.getPreferredSize().height
+                    };
+
+                    // check if the calculated height is greater than
+                    // height of the parent component and re-calculate
+                    // the metrics if vertical scroll bar is required
+                    // taking in account horizontal reduction because of
+                    // the scroll bar visibility
+                    if (isScr === true &&
+                        p.height > 0 &&
+                        p.vBar != null &&
+                        p.autoHide === false &&
+                        taHeight < this.$strPs.height)
+                    {
+                        taWidth -= p.vBar.getPreferredSize().width;
+                        this.calcColWidths(taWidth);
+                        this.$strPs.width = taWidth;
+                    }
+                }
             }
-            else {
-                ps.height = grid.getPreferredSize().height;
-            }
-            return ps;
         };
     },
 
     function (grid){
         this.$super(this);
-        this.heights = [];
-        this.widths  = [];
 
         /**
          * Target grid component
@@ -3082,13 +3086,15 @@ pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
          */
         this.grid = grid;
 
-        this.proportions = this.strPs = null;
-        this.prevTargetAreaSize = { width:0, height:0 };
+        this.$widths = [];
+        this.$props = this.$strPs = null;
+        this.$prevWidth = 0;
+        this.$propW = -1;
         this.add(grid);
     },
 
     function kidAdded(index,constr,l){
-        this.proportions = null;
+        this.$propsW = -1;
         if (l.topCaption != null) {
             l.topCaption.bind(this);
         }
@@ -3097,7 +3103,7 @@ pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
     },
 
     function kidRemoved(i,l){
-        this.proportions = null;
+        this.$propsW = -1;
         if (l.topCaption != null) {
             l.topCaption.unbind(this);
         }
@@ -3106,7 +3112,7 @@ pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
     },
 
     function invalidate(){
-        this.strPs = null;
+        this.$strPs = null;
         this.$super();
     }
 ]);

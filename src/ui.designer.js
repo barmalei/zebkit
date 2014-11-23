@@ -30,7 +30,9 @@ pkg.ShaperBorder = Class(ui.View, [
         }
 
         this.paint = function(g,x,y,w,h,d){
-            var cx = ~~((w - this.gap)/2), cy = ~~((h - this.gap)/2);
+            var cx = ~~((w - this.gap)/2),
+                cy = ~~((h - this.gap)/2);
+
             g.setColor(this.color);
             g.beginPath();
             g.rect(x, y, this.gap, this.gap);
@@ -63,28 +65,6 @@ pkg.ShaperBorder = Class(ui.View, [
             var my = ~~((h-gap)/2);
             if (contains(x, y, 0, my, gap, gap)) return L.LEFT;
             return contains(x, y, w - gap, my, gap, gap) ? L.RIGHT : L.NONE;
-        };
-    }
-]);
-
-pkg.InsetsArea = Class([
-    function $prototype() {
-        this.top = this.right = this.left = this.bottom = 6;
-
-        this.detectAt = function (c,x,y){
-            var t = 0, b1 = false, b2 = false;
-            if (x < this.left) t += L.LEFT;
-            else {
-                if (x > (c.width - this.right)) t += L.RIGHT;
-                else b1 = true;
-            }
-
-            if (y < this.top) t += L.TOP;
-            else {
-                if (y > (c.height - this.bottom)) t += L.BOTTOM;
-                else b2 = true;
-            }
-            return b1 && b2 ? L.CENTER : t;
         };
     }
 ]);
@@ -181,7 +161,9 @@ pkg.ShaperPan = Class(ui.Panel, [
                 else {
                     if (this.isMoveEnabled) {
                         var ww = this.width, hh = this.height, p = this.parent;
-                        if (x + ww/2 > 0 && y + hh/2 > 0 && x < p.width - ww/2 && y < p.height - hh/2) this.setLocation(x, y);
+                        if (x + ww/2 > 0 && y + hh/2 > 0 && x < p.width - ww/2 && y < p.height - hh/2) {
+                            this.setLocation(x, y);
+                        }
                     }
                 }
             }
@@ -196,20 +178,18 @@ pkg.ShaperPan = Class(ui.Panel, [
             this.state = null;
             if (this.isResizeEnabled || this.isMoveEnabled) {
                 var t = this.shaperBr.detectAt(this, e.x, e.y);
-                if ((this.isMoveEnabled   === false && t == L.CENTER)||
-                    (this.isResizeEnabled === false && t != L.CENTER)  )
+                if ((this.isMoveEnabled   === true || t != L.CENTER)||
+                    (this.isResizeEnabled === true || t == L.CENTER)  )
                 {
-                    return;
-                }
+                    this.state = { top    : ((t & L.TOP   ) > 0 ? 1 : 0),
+                                   left   : ((t & L.LEFT  ) > 0 ? 1 : 0),
+                                   right  : ((t & L.RIGHT ) > 0 ? 1 : 0),
+                                   bottom : ((t & L.BOTTOM) > 0 ? 1 : 0) };
 
-                this.state = { top    : ((t & L.TOP   ) > 0 ? 1 : 0),
-                               left   : ((t & L.LEFT  ) > 0 ? 1 : 0),
-                               right  : ((t & L.RIGHT ) > 0 ? 1 : 0),
-                               bottom : ((t & L.BOTTOM) > 0 ? 1 : 0) };
-
-                if (this.state != null) {
-                    this.px = e.absX;
-                    this.py = e.absY;
+                    if (this.state != null) {
+                        this.px = e.absX;
+                        this.py = e.absY;
+                    }
                 }
             }
         };
@@ -266,7 +246,8 @@ pkg.ShaperPan = Class(ui.Panel, [
         var top = this.getTop(), left = this.getLeft();
         if (d.width === 0 || d.height === 0) d.toPreferredSize();
         this.setLocation(d.x - left, d.y - top);
-        this.setSize(d.width + left + this.getRight(), d.height + top + this.getBottom());
+        this.setSize(d.width + left + this.getRight(),
+                     d.height + top + this.getBottom());
         this.$super(i, L.CENTER, d);
     },
 
@@ -280,10 +261,12 @@ pkg.ShaperPan = Class(ui.Panel, [
 pkg.FormTreeModel = Class(zebra.data.TreeModel, [
     function $prototype() {
         this.buildModel = function(comp, root){
-            var b = this.exclude && this.exclude(comp), item = b ? root : this.createItem(comp);
+            var b    = this.exclude != null && this.exclude(comp),
+                item = b ? root : this.createItem(comp);
+
             for(var i = 0; i < comp.kids.length; i++) {
                 var r = this.buildModel(comp.kids[i], item);
-                if (r) {
+                if (r != null) {
                     r.parent = item;
                     item.kids.push(r);
                 }

@@ -43,7 +43,7 @@
  */
 
 var instanceOf = zebra.instanceOf, L = zebra.layout, MB = zebra.util,
-    $configurators = [], rgb = zebra.util.rgb, temporary = { x:0, y:0, width:0, height:0 },
+    rgb = zebra.util.rgb, temporary = { x:0, y:0, width:0, height:0 },
     MS = Math.sin, MC = Math.cos, $fmCanvas = null, $fmText = null,
     $fmImage = null, $clipboard = null, $clipboardCanvas;
 
@@ -744,8 +744,9 @@ pkg.Picture = Class(pkg.Render, [
 
         this.getPreferredSize = function(){
             var img = this.target;
-            return img == null || this.target.naturalWidth <= 0 || img.complete !== true
-                               ? { width:0, height:0 }
+            return (img == null ||
+                   this.target.naturalWidth <= 0 ||
+                   img.complete !== true) ? { width:0, height:0 }
                                : (this.width > 0) ? { width:this.width, height:this.height }
                                                   : { width:img.width, height:img.height };
         };
@@ -1016,42 +1017,15 @@ pkg.ViewSet = Class(pkg.CompositeView, [
 
 pkg.Bag = Class(zebra.util.Bag, [
     function $prototype() {
-        this.usePropertySetters = true; //false;
+        this.usePropertySetters = true;
 
-        this.contentLoaded = function(v) {
-            if (v == null || zebra.isNumber(v) || zebra.isBoolean(v)) return v;
-            if (zebra.isString(v)) {
-                if (this.root != null && v[0] == "%" && v[1] == "r") {
-                    var s = "%root%/";
-                    if (v.indexOf(s) === 0) {
-                        return this.root.join(v.substring(s.length));
-                    }
-                }
-                return v;
+        this.loadImage = function(path) {
+            if (this.$url != null && zebra.URL.isAbsolute(path) == false) {
+                var base = (new zebra.URL(this.$url)).getParentURL();
+                path = base.join(path);
             }
-
-            if (Array.isArray(v)) {
-                for (var i = 0; i < v.length; i++) {
-                    v[i] = this.contentLoaded(v[i]);
-                }
-                return v;
-            }
-
-            for (var k in v) {
-                if (v.hasOwnProperty(k)) v[k] = this.contentLoaded(v[k]);
-            }
-            return v;
+            return pkg.loadImage(path);
         };
-    },
-
-    function loadByUrl(url, b) {
-        this.root = null;
-
-        if (zebra.URL.isAbsolute(url)) {
-            this.root = (new zebra.URL(url)).getParentURL();
-        }
-
-        return this.$super(url, b);
     }
 ]);
 
@@ -1064,8 +1038,8 @@ rgb.prototype.paint = function(g,x,y,w,h,d) {
     // and the area that has to be filled. IE11/10 have a bug
     // that triggers filling more space than it is restricted
     // with clip
-    if (g.stack != null) {
-        var t  = g.stack[g.counter],
+    if (g.$states != null) {
+        var t  = g.$states[g.$curState],
             rx = x > t.x ? x : t.x,
             rw = Math.min(x + w, t.x + t.width) - rx;
 
@@ -1118,16 +1092,6 @@ var $cvp = pkg.$cvp = function(c, r) {
         return r.width > 0 && r.height > 0 ? r : null;
     }
     return null;
-};
-
-pkg.configure = function(c) {
-    if (zebra.isString(c)) {
-        var path = c;
-        c = function(conf) {
-            conf.loadByUrl(path, false);
-        };
-    }
-    $configurators.push(c);
 };
 
 /**
@@ -1872,27 +1836,49 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * @method  loadImage
  */
 pkg.loadImage = function(img, ready) {
-    if (img instanceof Image && img.complete === true && img.naturalWidth !== 0) {
-        if (arguments.length > 1)  {
-            ready(img.src, true, img);
-        }
-        return img;
-    }
-
-    var i = new Image();
-    i.crossOrigin = '';
-    i.crossOrigin ='anonymous';
-
-    zebra.busy();
-    if (arguments.length > 1)  {
-        i.onerror = function() {  zebra.ready(); ready(img, false, i); };
-        i.onload  = function() {  zebra.ready(); ready(img, true, i);  };
+    var i = null;
+    if (img instanceof Image) {
+        i = img;
     }
     else {
-        i.onload = i.onerror = function() { zebra.ready(); };
+        i = new Image();
+        i.crossOrigin = '';
+        i.crossOrigin ='anonymous';
+        i.src = img;
     }
 
-    i.src = (img instanceof Image) ? img.src : img;
+    if (i.complete === true && i.naturalWidth !== 0) {
+        if (arguments.length > 1)  {
+            ready(i.src, true, i);
+        }
+        return i;
+    }
+
+    var pErr  = i.onerror,
+        pLoad = i.onload;
+
+    zebra.busy();
+
+    i.onerror = function(e) {
+        zebra.ready();
+        i.onerror = null;
+        if (ready != null) ready(img, false, i);
+        if (pErr != null) {
+            i.onerror = pErr;
+            pErr.call(this, e);
+        }
+    };
+
+    i.onload  = function(e) {
+        i.onload = null;
+        zebra.ready();
+        if (ready != null) ready(img, true, i);
+        if (pLoad != null) {
+            i.onload = pLoad;
+            pLoad.call(this, e);
+        }
+    };
+
     return i;
 };
 
@@ -2889,8 +2875,12 @@ var CL = pkg.Panel = Class(L.Layoutable, [
             // }
 
             if (arguments.length > 0) {
-                if (instanceOf(l, L.Layout)) this.setLayout(l);
-                else this.properties(l);
+                if (instanceOf(l, L.Layout)) {
+                    this.setLayout(l);
+                }
+                else {
+                    this.properties(l);
+                }
             }
         };
     }
@@ -3102,7 +3092,10 @@ pkg.ImagePan = Class(pkg.ViewPan, [
      */
     function setImage(img) {
         if (img != null) {
-            var $this = this, isPic = instanceOf(img, pkg.Picture), imgToLoad = isPic ? img.target : img ;
+            var $this     = this,
+                isPic     = instanceOf(img, pkg.Picture),
+                imgToLoad = isPic ? img.target : img ;
+
             pkg.loadImage(imgToLoad,
                 function(p, b, i) {
                     if (b) {
@@ -3253,33 +3246,31 @@ pkg.PaintManager = Class(pkg.Manager, [
                                     return ;
                                 }
 
-                                var context = canvas.$context;
+                                var g = canvas.$context;
                                 canvas.validate();
-                                context.save();
+                                g.save();
 
                                 try {
-                                    context.translate(canvas.x, canvas.y);
-                                    context.clipRect(canvas.$da.x, canvas.$da.y,
+                                    g.translate(canvas.x, canvas.y);
+                                    g.clipRect(canvas.$da.x, canvas.$da.y,
                                                      canvas.$da.width,
                                                      canvas.$da.height);
 
                                     if (canvas.bg == null) {
-                                        context.save();
-
-                                        context.setTransform(2, 0, 0, 2, 0, 0);
-                                        context.clearRect(canvas.$da.x, canvas.$da.y,
+                                        // TODO: make sure it works on bloody android
+                                        g.save();
+                                        g.setTransform(1 * g.$states[g.$curState].sx * 2, 0, 0, 1 * g.$states[g.$curState].sy * 2, 0, 0);
+                                        g.clearRect(canvas.$da.x, canvas.$da.y,
                                                           canvas.$da.width, canvas.$da.height);
-
-                                        context.restore();
+                                        g.restore();
                                     }
 
-                                    $this.paint(context, canvas);
-
+                                    $this.paint(g, canvas);
                                     canvas.$da.width = -1; //!!!
-                                    context.restore();
+                                    g.restore();
                                 }
                                 catch(e) {
-                                    context.restore();
+                                    g.restore();
                                     throw e;
                                 }
                             });
@@ -3297,7 +3288,7 @@ pkg.PaintManager = Class(pkg.Manager, [
         this.paint = function(g,c){
             var dw = c.width,
                 dh = c.height,
-                ts = g.stack[g.counter];
+                ts = g.$states[g.$curState];
 
             if (dw !== 0      &&
                 dh !== 0      &&
@@ -3313,7 +3304,7 @@ pkg.PaintManager = Class(pkg.Manager, [
                 g.translate(c.x, c.y);
                 g.clipRect(0, 0, dw, dh);
 
-                ts = g.stack[g.counter];
+                ts = g.$states[g.$curState];
 
                 var c_w = ts.width, c_h = ts.height;
                 if (c_w > 0 && c_h > 0) {
@@ -3400,7 +3391,7 @@ pkg.PaintManImpl = Class(pkg.PaintManager, [
                     right  = c.getRight();
 
                 if (left + right + top + bottom > 0) {
-                    var ts = g.stack[g.counter];
+                    var ts = g.$states[g.$curState];
 
                     if (ts.width > 0 && ts.height > 0) {
                         var cx   = ts.x,
@@ -3929,7 +3920,6 @@ pkg.CursorManager = Class(pkg.Manager, [
          * @default "default"
          */
         this.cursorType = "default";
-
         this.canvas = this.target = null;
         this.$isFunc = false;
     }
@@ -3945,7 +3935,9 @@ pkg.CursorManager = Class(pkg.Manager, [
  */
 pkg.EventManager = Class(pkg.Manager, [
     function $prototype() {
-        var IEHM = [], MUID = IE.MOUSE_UID, KUID = IE.KEY_UID;
+        var IEHM = [],
+            MUID = IE.MOUSE_UID,
+            KUID = IE.KEY_UID;
 
         IEHM[KE.TYPED]          = 'keyTyped';
         IEHM[KE.RELEASED]       = 'keyReleased';
@@ -4320,7 +4312,7 @@ pkg.zCanvas = Class(pkg.Panel, [
         };
 
         this.$keyTyped = function(e){
-            if (e.charCode == 0) {
+            if (e.charCode === 0) {
                 if ($keyPressedCode != e.keyCode) this.$keyPressed(e);
                 $keyPressedCode = -1;
                 return;
@@ -5112,9 +5104,11 @@ pkg.zCanvas = Class(pkg.Panel, [
     },
 
     function setLocation(x, y) {
+        // since zCanvas is root his x, y coordinates have to be 0,0
+        // so don't call super
         this.canvas.style.top  = y + "px";
         this.canvas.style.left = x + "px";
-        this.canvas.style.position = "absolute";
+        this.canvas.style.position = "fixed";
         this.recalcOffset();
         return this;
     },
@@ -5150,8 +5144,8 @@ pkg.zCanvas = Class(pkg.Panel, [
                     $restore   = ctx.restore;
 
                 ctx.reset = function(w, h) {
-                    this.counter = 0;
-                    var s = this.stack[0];
+                    this.$curState = 0;
+                    var s = this.$states[0];
                     s.srot = s.rotateVal = s.x = s.y = s.width = s.height = s.dx = s.dy = 0;
                     s.crot = s.sx = s.sy = 1;
                     s.width = w;
@@ -5160,29 +5154,29 @@ pkg.zCanvas = Class(pkg.Panel, [
                     this.setColor("white");
                 };
 
-                // pre-allocate canvas save stack
-                ctx.stack = Array(50);
-                for(var i=0; i < ctx.stack.length; i++) {
+                // pre-allocate canvas save $states
+                ctx.$states = Array(50);
+                for(var i=0; i < ctx.$states.length; i++) {
                     var s = {};
                     s.srot = s.rotateVal = s.x = s.y = s.width = s.height = s.dx = s.dy = 0;
                     s.crot = s.sx = s.sy = 1;
-                    ctx.stack[i] = s;
+                    ctx.$states[i] = s;
                 }
                 ctx.reset(w, h);
 
                 ctx.tX = function(x, y) {
-                    var c = this.stack[this.counter], b = (c.sx != 1 || c.sy != 1 || c.rotateVal !== 0);
+                    var c = this.$states[this.$curState], b = (c.sx != 1 || c.sy != 1 || c.rotateVal !== 0);
                     return (b ?  (((c.crot * x + y * c.srot)/c.sx + 0.5) | 0) : x) - c.dx;
                 };
 
                 ctx.tY = function(x, y) {
-                    var c = this.stack[this.counter], b = (c.sx != 1 || c.sy != 1 || c.rotateVal !== 0);
+                    var c = this.$states[this.$curState], b = (c.sx != 1 || c.sy != 1 || c.rotateVal !== 0);
                     return (b ? (((y * c.crot - c.srot * x)/c.sy + 0.5) | 0) : y) - c.dy;
                 };
 
                 ctx.translate = function(dx, dy) {
                     if (dx !== 0 || dy !== 0) {
-                        var c = this.stack[this.counter];
+                        var c = this.$states[this.$curState];
                         c.x  -= dx;
                         c.y  -= dy;
                         c.dx += dx;
@@ -5192,7 +5186,7 @@ pkg.zCanvas = Class(pkg.Panel, [
                 };
 
                 ctx.rotate = function(v) {
-                    var c = this.stack[this.counter];
+                    var c = this.$states[this.$curState];
                     c.rotateVal += v;
                     c.srot = MS(c.rotateVal);
                     c.crot = MC(c.rotateVal);
@@ -5200,15 +5194,15 @@ pkg.zCanvas = Class(pkg.Panel, [
                 };
 
                 ctx.scale = function(sx, sy) {
-                    var c = this.stack[this.counter];
+                    var c = this.$states[this.$curState];
                     c.sx = c.sx * sx;
                     c.sy = c.sy * sy;
                     $scale.call(this, sx, sy);
                 };
 
                 ctx.save = function() {
-                    this.counter++;
-                    var c = this.stack[this.counter], cc = this.stack[this.counter - 1];
+                    this.$curState++;
+                    var c = this.$states[this.$curState], cc = this.$states[this.$curState - 1];
                     c.x = cc.x;
                     c.y = cc.y;
                     c.width = cc.width;
@@ -5223,21 +5217,21 @@ pkg.zCanvas = Class(pkg.Panel, [
                     c.rotateVal = cc.rotateVal;
 
                     $save.call(this);
-                    return this.counter - 1;
+                    return this.$curState - 1;
                 };
 
                 ctx.restore = function() {
-                    if (this.counter === 0) {
+                    if (this.$curState === 0) {
                         throw new Error("Context restore history is empty");
                     }
 
-                    this.counter--;
+                    this.$curState--;
                     $restore.call(this);
-                    return this.counter;
+                    return this.$curState;
                 };
 
                 ctx.clipRect = function(x,y,w,h){
-                    var c = this.stack[this.counter];
+                    var c = this.$states[this.$curState];
                     if (c.x != x || y != c.y || w != c.width || h != c.height) {
                         var xx = c.x, yy = c.y,
                             ww = c.width, hh = c.height,
@@ -5416,14 +5410,8 @@ zebra.ready(
             pkg.$configuration = new pkg.Bag(pkg);
 
             var p = zebra()['zebra.json'];
-            pkg.$configuration.loadByUrl(p ? p
-                                           : pkg.$url.join("canvas.json"), false);
-
-            while($configurators.length > 0) {
-                $configurators.shift()(pkg.$configuration);
-            }
-
-            pkg.$configuration.end();
+            new pkg.Bag(pkg).loadByUrl(p ? p
+                                         : pkg.$url.join("canvas.json"));
 
             // store ref to event manager
             EM = pkg.events;

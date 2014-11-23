@@ -3,24 +3,23 @@
 /**
  * @module ui
  */
-
 var ME = pkg.MouseEvent, KE = pkg.KeyEvent, PO = zebra.util.Position;
 
 /**
  * Text field UI component. The component is designed to enter single line, multi lines or password text.
  * The component implement text field functionality from the scratch. It supports the following features
- 
+
     - Text selection
     - Redu/Undo actions
-    - Native WEB clipboard 
+    - Native WEB clipboard
     - Basic text navigation
     - Read-only mode
 
  * @constructor
- * @param {String|zebra.data.TextModel|zebra.ui.TextRender} [txt] a text the text field component 
+ * @param {String|zebra.data.TextModel|zebra.ui.TextRender} [txt] a text the text field component
  * has to be filled. The parameter can be a simple string, text model or text render class instance.
  * @param {Integer} [maxCol] a maximal size of entered text. -1 means the size of the edited text
- * has no length limit.  
+ * has no length limit.
  * @class zebra.ui.TextField
  * @extends zebra.ui.Label
  */
@@ -39,8 +38,8 @@ pkg.TextField = Class(pkg.Label, [
                 };
             },
 
-            function destroy() { 
-                this.metrics.target.unbind(this); 
+            function destroy() {
+                this.metrics.target.unbind(this);
             }
         ]);
     },
@@ -56,14 +55,14 @@ pkg.TextField = Class(pkg.Label, [
 
         /**
          * Specify the text field cursor blinking period in milliseconds.
-         * -1 means no blinkable cursor   
+         * -1 means no blinkable cursor
          * @type {Number}
          * @default -1
          * @readOnly
          * @attribute blinkigPeriod
          */
         this.blinkingPeriod = -1;
-        this.blinkMe = true;
+        this.blinkMe        = true;
         this.blinkMeCounter = 0;
 
         this.cursorType = pkg.Cursor.TEXT;
@@ -74,7 +73,7 @@ pkg.TextField = Class(pkg.Label, [
          * @type {zebra.ui.View}
          * @readOnly
          */
-        
+
         /**
          * Indicate if the text field is editable
          * @attribute  isEditable
@@ -85,7 +84,7 @@ pkg.TextField = Class(pkg.Label, [
         this.canHaveFocus = this.isEditable = true;
 
         /**
-         * Set the specified blinking period of the text field cursor 
+         * Set the specified blinking period of the text field cursor
          * @param {Integer} [period] a text field cursor blinking period (in milliseconds),
          * use -1 to disable cursor blinking. If the argument is not passed the default (500ms)
          * blinking period will be applied.
@@ -106,39 +105,44 @@ pkg.TextField = Class(pkg.Label, [
          * Compute a text column and row by the given location.
          * @param  {Integer} x  a x coordinate
          * @param  {Integer} y  a y coordinate
-         * @return {Array} a text row and column as an Array object. Fist element 
+         * @return {Array} a text row and column as an Array object. Fist element
          * of the array is row and the second one is column.
          * @method  getTextRowColAt
          */
-        this.getTextRowColAt = function(x,y){
-            var size = this.view.target.getLines();
-            if (size === 0) return null;
+        this.getTextRowColAt = function(x,y) {
+            var lines = this.view.target.getLines();
+            if (x >= 0 && y >= 0 && lines > 0) {
+                var lh = this.view.getLineHeight(),
+                    li = this.view.getLineIndent(),
+                    row = (y < 0) ? 0 : ~~((y + li) / (lh + li)) + ((y + li) % (lh + li) > li ? 1 : 0) -1;
 
-            var lh = this.view.getLineHeight(),
-                li = this.view.getLineIndent(),
-                ln = (y < 0) ? 0 : ~~((y + li) / (lh + li)) + ((y + li) % (lh + li) > li ? 1 : 0) -1;
+                if (row < lines && row >= 0) {
+                    var s    = this.view.getLine(row),
+                        pdt  = 1000000,
+                        pcol = -1;
 
-            if (ln >= size) { 
-                return [size - 1, this.view.getLine(size - 1).length];
+                    for(var col = ~~((x / this.view.lineWidth(row)) * s.length); col>=0 && col <= s.length;) {
+                        var l  = this.view.font.charsWidth(s, 0, col),
+                            dt = Math.abs(l - x);
+
+                        if (dt >= pdt) {
+                            return [row, pcol];
+                        }
+
+                        pdt  = dt;
+                        pcol = col;
+                        col += (l > x ? -1: 1);
+                    }
+
+                    return[row, s.length];
+                }
             }
-            else {
-                if (ln < 0) return [0,0];
-            }
-
-            if (x < 0) return [ln, 0];
-
-            var x1 = 0, x2 = 0, s = this.view.getLine(ln);
-            for(var c = 0; c < s.length; c++){
-                x1 = x2;
-                x2 = this.view.font.charsWidth(s, 0, c + 1);
-                if(x >= x1 && x < x2) return [ln, c];
-            }
-            return [ln, s.length];
+            return null;
         };
 
-        this.findNextWord = function(t,line,col,d){
+        this.findNextWord = function(t, line, col, d){
             if (line < 0 || line >= t.getLines()) return null;
-            
+
             var ln = t.getLine(line);
             col += d;
             if (col < 0 && line > 0) return [line - 1, t.getLine(line - 1).length];
@@ -149,7 +153,7 @@ pkg.TextField = Class(pkg.Label, [
             var b = false;
             for(; col >= 0 && col < ln.length; col += d){
                 if (b) {
-                    if (d > 0) { 
+                    if (d > 0) {
                         if (zebra.util.isLetter(ln[col])) return [line, col];
                     }
                     else {
@@ -163,17 +167,17 @@ pkg.TextField = Class(pkg.Label, [
             return (d > 0 ? [line, ln.length ]: [line, 0]);
         };
 
-        // accumulate text model lines into string by the given start and end offsets 
+        // accumulate text model lines into string by the given start and end offsets
         // r     - text view
         // start - start offset
-        // end   - end offset 
+        // end   - end offset
         this.getSubString = function(r,start,end){
             var res = [], sr = start[0], er = end[0], sc = start[1], ec = end[1];
             for(var i = sr; i < er + 1; i++){
                 var ln = r.getLine(i);
                 if (i != sr) res.push('\n');
                 else ln = ln.substring(sc);
-                if(i == er) ln = ln.substring(0, ec - ((sr == er) ? sc : 0));
+                if (i == er) ln = ln.substring(0, ec - ((sr == er) ? sc : 0));
                 res.push(ln);
             }
             return res.join('');
@@ -217,7 +221,7 @@ pkg.TextField = Class(pkg.Label, [
 
         this.nextWord_command = function(b, d) {
             if (b) this.startSelection();
-            var p = this.findNextWord(this.view.target, this.position.currentLine, 
+            var p = this.findNextWord(this.view.target, this.position.currentLine,
                                                         this.position.currentCol, d);
             if(p != null) this.position.setRowCol(p[0], p[1]);
         };
@@ -242,8 +246,8 @@ pkg.TextField = Class(pkg.Label, [
 
             switch(e.code)
             {
-                case KE.DOWN: position.seekLineTo(PO.DOWN);break;
-                case KE.UP: position.seekLineTo(PO.UP);break;
+                case KE.DOWN : position.seekLineTo(PO.DOWN);break;
+                case KE.UP   : position.seekLineTo(PO.UP);break;
                 case KE.LEFT : foff = -1;
                 case KE.RIGHT:
                     if (e.isControlPressed() === false && e.isCmdPressed() === false) {
@@ -289,9 +293,9 @@ pkg.TextField = Class(pkg.Label, [
          * Test if the given key pressed event has to be processed
          * @protected
          * @param  {zebra.ui.KeyEvent} e a key event
-         * @return {Boolean} true if the given key pressed event doesn't 
+         * @return {Boolean} true if the given key pressed event doesn't
          * have be processed
-         * @method isFiltered  
+         * @method isFiltered
          */
         this.isFiltered = function(e){
             var code = e.code;
@@ -299,7 +303,7 @@ pkg.TextField = Class(pkg.Label, [
         };
 
         /**
-         * Remove the specified part of edited text 
+         * Remove the specified part of edited text
          * @param  {Integer} pos  a start position of a removed text
          * @param  {Integer} size a size of removed text
          * @method remove
@@ -348,10 +352,10 @@ pkg.TextField = Class(pkg.Label, [
         this.recalc = function() {
             var r = this.view;
             if (this.position.offset >= 0) {
-                this.curX = r.font.charsWidth(r.getLine(this.position.currentLine), 
-                                              0, 
+                this.curX = r.font.charsWidth(r.getLine(this.position.currentLine),
+                                              0,
                                               this.position.currentCol) + this.getLeft();
-                
+
                 this.curY = this.position.currentLine * (r.getLineHeight() + r.getLineIndent()) + this.getTop();
             }
             this.curH = r.getLineHeight() - 1;
@@ -367,7 +371,7 @@ pkg.TextField = Class(pkg.Label, [
          * @param  {2DContext} g  a 2D contextnn
          * @method drawCursor
          */
-        this.drawCursor = function (g){
+        this.drawCursor = function (g) {
             if (this.position.offset >= 0 &&
                 this.curView != null      &&
                 this.blinkMe              &&
@@ -447,7 +451,7 @@ pkg.TextField = Class(pkg.Label, [
 
                 var lineHeight = this.view.getLineHeight(), top = this.getTop();
                 this.scrollManager.makeVisible(this.curX, this.curY, this.curW, lineHeight);
-                if (pl >= 0){
+                if (pl >= 0) {
                     if (this.startOff >= 0){
                         this.endLine = position.currentLine;
                         this.endCol = position.currentCol;
@@ -486,10 +490,10 @@ pkg.TextField = Class(pkg.Label, [
 
         /**
          * Set the specified hint text to be drawn with the given font and color.
-         * The hint is not-editable text that is shown in empty text field to help 
-         * a user to understand which input the text field expects. 
+         * The hint is not-editable text that is shown in empty text field to help
+         * a user to understand which input the text field expects.
          * @param {String} hint a hint text
-         * @param {String|zebra.ui.Font} font a font 
+         * @param {String|zebra.ui.Font} font a font
          * @param {String} color a hint color
          * @method setHint
          */
@@ -536,8 +540,8 @@ pkg.TextField = Class(pkg.Label, [
 
         /**
          * Get a starting position (row and column) of a selected text
-         * @return {Array} a position of a selected text. First element 
-         * of is a row and second column of selected text. null if 
+         * @return {Array} a position of a selected text. First element
+         * of is a row and second column of selected text. null if
          * there is no any selected text
          * @method getStartSelection
          */
@@ -548,8 +552,8 @@ pkg.TextField = Class(pkg.Label, [
 
         /**
          * Get an ending position (row and column) of a selected text
-         * @return {Array} a position of a selected text. First element 
-         * of is a row and second column of selected text. null if 
+         * @return {Array} a position of a selected text. First element
+         * of is a row and second column of selected text. null if
          * there is no any selected text
          * @method getEndSelection
          */
@@ -626,7 +630,7 @@ pkg.TextField = Class(pkg.Label, [
         };
 
         /**
-         * Clear a text selection. 
+         * Clear a text selection.
          * @method clearSelection
          */
         this.clearSelection = function (){
@@ -641,7 +645,7 @@ pkg.TextField = Class(pkg.Label, [
             var height = this.height - this.getTop() - this.getBottom(),
                 indent = this.view.getLineIndent(),
                 textHeight = this.view.getLineHeight();
-                
+
             return (((height + indent) / (textHeight + indent) + 0.5) | 0) +
                    (((height + indent) % (textHeight + indent) > indent) ? 1 : 0);
         };
@@ -668,7 +672,7 @@ pkg.TextField = Class(pkg.Label, [
         };
 
         /**
-         * Set the specified cursor position controller 
+         * Set the specified cursor position controller
          * @param {zebra.util.Position} p a position controller
          * @method setPosition
          */
@@ -685,16 +689,16 @@ pkg.TextField = Class(pkg.Label, [
         };
 
         /**
-         * Set the text field text model 
+         * Set the text field text model
          * @param  {zebra.data.TextModel} m a text model to be set
          * @method setModel
          */
         this.setModel = function(m) {
             this.setView(new pkg.TextRender(m));
         };
-        
+
         /**
-         * Set the cursor view. The view defines rendering of the text field 
+         * Set the cursor view. The view defines rendering of the text field
          * cursor.
          * @param {zebra.ui.View} v a cursor view
          * @method setCursorView
@@ -716,7 +720,7 @@ pkg.TextField = Class(pkg.Label, [
          * @method setPSByRowsCols
          */
         this.setPSByRowsCols = function (r,c){
-            var tr = this.view, 
+            var tr = this.view,
                 w  = (c > 0) ? (tr.font.stringWidth("W") * c)
                              : this.psWidth,
                 h  = (r > 0) ? (r * tr.getLineHeight() + (r - 1) * tr.getLineIndent())
@@ -735,7 +739,7 @@ pkg.TextField = Class(pkg.Label, [
                 if (b && this.blinkingPeriod > 0 && this.hasFocus()) {
                     if (this.blinkTask != null) this.blinkTask.shutdown();
                     this.blinkMe = true;
-                }  
+                }
                 this.vrp();
             }
         };
@@ -775,12 +779,12 @@ pkg.TextField = Class(pkg.Label, [
 
         //!!! to maximize optimize performance the method duplicates part of ViewPan.paint() code
         this.paint = function(g){
-            var sx = this.scrollManager.getSX(), 
+            var sx = this.scrollManager.getSX(),
                 sy = this.scrollManager.getSY(),
                 l  = this.getLeft(),
                 t  = this.getTop();
-            
-            try{
+
+            try {
                 g.translate(sx, sy);
                 //!!! this code can be found in ViewPan.paint()
 
@@ -835,7 +839,7 @@ pkg.TextField = Class(pkg.Label, [
      * @param {String} s a text the text field component has to be filled
      * @method setValue
      */
-    function setValue(s){
+    function setValue(s) {
         var txt = this.getValue();
         if (txt != s){
             this.position.setOffset(0);
@@ -854,7 +858,7 @@ pkg.TextField = Class(pkg.Label, [
  * Text area UI component. The UI component to render multi-lines text.
  * @class zebra.ui.TextArea
  * @constructor
- * @param {String} [txt] a text 
+ * @param {String} [txt] a text
  * @extends zebra.ui.TextField
  */
 pkg.TextArea = Class(pkg.TextField, [
@@ -872,8 +876,8 @@ pkg.TextArea = Class(pkg.TextField, [
  * @class zebra.ui.PassTextField
  * @param {String} txt password text
  * @param {Integer} [maxSize] maximal size
- * @param {Boolean} [showLast] indicates if last typed character should 
- * not be disguised with a star character 
+ * @param {Boolean} [showLast] indicates if last typed character should
+ * not be disguised with a star character
  * @extends zebra.ui.TextField
  */
 pkg.PassTextField = Class(pkg.TextField, [

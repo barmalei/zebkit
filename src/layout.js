@@ -422,6 +422,26 @@ pkg.Layoutable = Class(L, [
         };
 
         /**
+         * Set the given property to the component or children component
+         * specified by the given selector
+         * @param  {String} [path]  a path to find children components
+         * @param  {String} name a property name
+         * @param  {object} value a property value
+         * @chainable
+         * @method property
+         */
+        this.property = function() {
+            var p = {};
+            if (arguments.length > 2) {
+                p[arguments[1]] = arguments[2];
+                return this.properties(arguments[0], p);
+            }
+            p[arguments[0]] = arguments[1];
+            return this.properties(p);
+        };
+
+
+        /**
          * Validate the component metrics. The method is called as
          * a one step of the component validation procedure. The
          * method causes "recalc" method execution if the method
@@ -881,13 +901,16 @@ pkg.StackLayout = Class(L, [
         };
 
         this.doLayout = function(t){
-            var top = t.getTop()  , hh = t.height - t.getBottom() - top,
-                left = t.getLeft(), ww = t.width - t.getRight() - left;
+            var top  = t.getTop(),
+                hh   = t.height - t.getBottom() - top,
+                left = t.getLeft(),
+                ww   = t.width - t.getRight() - left;
 
             for(var i = 0;i < t.kids.length; i++){
                 var l = t.kids[i];
                 if (l.isVisible === true) {
-                    var ctr =l.constraints == null ? null : pkg.$constraints(l.constraints);
+                    var ctr = l.constraints == null ? null
+                                                    : pkg.$constraints(l.constraints);
 
                     if (ctr == pkg.USE_PS_SIZE) {
                         var ps = l.getPreferredSize();

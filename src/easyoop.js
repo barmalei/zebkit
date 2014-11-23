@@ -150,7 +150,7 @@ var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
         }
 
         var names = name.split('.'), target = f;
-        for(var i = 0, k = names[0]; i < names.length; i++, k = [k, '.', names[i]].join('')) {
+        for(var i = 0, k = names[0]; i < names.length; i++, k = k + '.' + names[i]) {
             var n = names[i], p = target[n];
             if (typeof p === "undefined") {
                 p = new Package();
@@ -169,14 +169,14 @@ var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
     };
 
     f.Import = function() {
-        var ns = ["=", nsname, "."].join(''), code = [],
+        var ns = "=" + nsname + ".", code = [],
             packages = arguments.length === 0 ? null 
                                               : Array.prototype.slice.call(arguments, 0);
         f(function(n, p) {
             if (packages == null || packages.indexOf(n) >= 0) {
                 for (var k in p) {
                     if (k[0] != '$' && k[0] != '_' && (p[k] instanceof Package) === false && p.hasOwnProperty(k)) {
-                        code.push([k, ns, n, ".", k].join(''));
+                        code.push(k + ns + n + "." + k);
                     }
                 }
                 if (packages != null) packages.splice(packages.indexOf(n), 1);
@@ -187,7 +187,7 @@ var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
             throw new Error("Unknown package(s): " + packages.join(","));
         }
 
-        return code.length > 0 ? [ "var ", code.join(","), ";"].join('') : null;
+        return code.length > 0 ?  "var " + code.join(",") + ";" : null;
     };
 
     f.$env = {};
@@ -236,7 +236,7 @@ function make_template(pt, tf, p) {
     tf.prototype.toString = $toString;
     tf.prototype.constructor = tf;
 
-    if (p && p.length > 0) {
+    if (p != null && p.length > 0) {
         tf.$parents = {};
         for(var i=0; i < p.length; i++) {
             var l = p[i];
@@ -274,11 +274,20 @@ pkg.getPropertySetter = function(obj, name) {
 // p      - properties
 pkg.properties = function(target, p) {
     for(var k in p) {
+        // skip private properties( properties that start from "$")
         if (k[0] != '$' && p.hasOwnProperty(k) && typeof p[k] !== 'function') {
-            var v = p[k], m = zebra.getPropertySetter(target, k);
-            if (v && v.$new != null) v = v.$new();
-            if (m == null) target[k] = v;
+            var v = p[k],
+                m = zebra.getPropertySetter(target, k);
+
+            // value factory detected
+            if (v != null && v.$new != null) v = v.$new();
+
+            if (m == null) {
+                target[k] = v;  // setter doesn't exist, setup it as a field
+            }
             else {
+                // property setter is detected, call setter to
+                // set the property value
                 if (Array.isArray(v)) m.apply(target, v);
                 else                  m.call(target, v);
             }
@@ -354,7 +363,10 @@ function sProxyMethod(name, f) {
             pkg.$caller = cm;
             return r;
         }
-        catch(e) { pkg.$caller = cm; throw e; }
+        catch(e) {
+            pkg.$caller = cm;
+            throw e;
+        }
     };
 
     a.f = f;
@@ -365,7 +377,7 @@ function sProxyMethod(name, f) {
     };
 
     return a;
-};
+}
 
 // multiple methods proxy
 function nProxyMethod(name) {
@@ -380,7 +392,10 @@ function nProxyMethod(name) {
                 pkg.$caller = cm;
                 return r;
             }
-            catch(e) { pkg.$caller = cm; throw e; }
+            catch(e) {
+                pkg.$caller = cm;
+                throw e;
+            }
         }
         mnf.call(this, a.methodName, arguments.length);
     };
@@ -682,7 +697,9 @@ pkg.Class = make_template(null, function() {
             if (arguments.length > 0 && typeof arguments[0] === 'function') {
                 name = arguments[0].methodName;
                 args = [];
-                for(var i=1; i < arguments.length; i++) args[i-1] = arguments[i];
+                for(var i = 1; i < arguments.length; i++) {
+                    args[i-1] = arguments[i];
+                }
             }
 
             while ($s != null) {
@@ -708,7 +725,7 @@ pkg.Class = make_template(null, function() {
         return pkg.$caller.boundTo.prototype[CNAME].apply(this, arguments); 
     };
 
-    // check if the method has been already defined in parent class
+    // check if the method has been already defined in the class
     if (typeof $template.prototype.properties === 'undefined') {
         $template.prototype.properties = function(p) {
             return pkg.properties(this, p);
@@ -717,7 +734,7 @@ pkg.Class = make_template(null, function() {
 
     var lans = "Listeners are not supported";
 
-    // check if the method has been already defined in parent class
+    // check if the method has been already defined in the class
     if (typeof $template.prototype.bind === 'undefined') {
         $template.prototype.bind = function() {
             if (this._ == null) {
@@ -727,7 +744,7 @@ pkg.Class = make_template(null, function() {
         };
     }
 
-    // check if the method has been already defined in parent class
+    // check if the method has been already defined in the class
     if (typeof $template.prototype.unbind === 'undefined') {
         $template.prototype.unbind = function() {
             if (this._ == null) {
@@ -854,7 +871,6 @@ pkg.Class = make_template(null, function() {
         a.b(); // show "EA:b()" message
         a.a(); // show "EA:a()" message
 
-     * @param {zebra.Interface} [interfaces*] zero or N interfaces
      * @param {Array} methods array of the methods the class have to be 
      * extended with
      * @method extend
@@ -906,7 +922,7 @@ pkg.Class = make_template(null, function() {
 
             this.prototype[n] = createMethod(n, f, this.prototype, this);
         }
-    };
+    }
 
     extend.call($template, df);
 
@@ -933,7 +949,8 @@ pkg.Class = make_template(null, function() {
         }
     }
 
-    $template.extend = extend; // add extend later to avoid the method be inherited as a class static field
+     // add extend later to avoid the method be inherited as a class static field
+    $template.extend = extend;
 
     // add parent class constructor(s) if the class doesn't declare own 
     // constructors
@@ -1072,15 +1089,31 @@ pkg.ready = function() {
         if ($busy > 0) $busy--;
     }
     else {
-        if (arguments.length == 1 && $busy === 0 && $readyCallbacks.length === 0) {
+        if (arguments.length == 1 &&
+            $busy === 0 &&
+            $readyCallbacks.length === 0)
+        {
             arguments[0]();
             return;
         }
     }
 
-    for(var i = 0; i < arguments.length; i++) $readyCallbacks.push(arguments[i]);
+    for(var i = 0; i < arguments.length; i++) {
+        $readyCallbacks.push(arguments[i]);
+    }
+
     while($busy === 0 && $readyCallbacks.length > 0) {
         $readyCallbacks.shift()();
+    }
+};
+
+pkg.package = function(name, callback) {
+    var p = zebra(name);
+    for(var i = 1; i < arguments.length; i++) {
+        var f = arguments[i];
+        zebra.ready(function() {
+            f.call(p, p, zebra.Class);
+        });
     }
 };
 
@@ -1120,7 +1153,7 @@ function complete() {
         function collect(pp, p) {
             for(var k in p) {
                 if (k[0] != "$" && p.hasOwnProperty(k) && zebra.instanceOf(p[k], Class)) {
-                    p[k].$name = pp ? [pp, k].join('.') : k;
+                    p[k].$name = pp ? pp + "." + k : k;
                     collect(k, p[k]);
                 }
             }
@@ -1157,8 +1190,7 @@ if (pkg.isInBrowser) {
             if (m == null) {
                 throw Error("Cannot resolve '" + url + "' url");
             }
-            var p = m[3];
-            a.href = m[1] + "//" + m[2] +  p.substring(0, p.lastIndexOf("/") + 1) + url;
+            a.href = m[1] + "//" + m[2] + m[3].substring(0, p.lastIndexOf("/") + 1) + url;
             m = purl.exec(a.href);
         }
 
@@ -1207,9 +1239,8 @@ if (pkg.isInBrowser) {
      */
     pkg.URL.prototype.getParentURL = function() {
         var i = this.path.lastIndexOf("/");
-        if (i < 0) return null;
-        var p = this.path.substring(0, i+1);
-        return new pkg.URL([this.protocol, "//", this.host, p].join(''));
+        return (i < 0) ? null
+                       : new pkg.URL(this.protocol + "//" + this.host + this.path.substring(0, i + 1));
     };
 
     /**
@@ -1236,8 +1267,8 @@ if (pkg.isInBrowser) {
             throw new Error("Absolute URL '" + p + "' cannot be joined");
         }
 
-        return p[0] == '/' ? [ this.protocol, "//", this.host, p ].join('')
-                           : [ this.protocol, "//", this.host, this.path, this.path[this.path.length-1] == '/' ? '' : '/', p ].join('');
+        return p[0] == '/' ? this.protocol + "//" + this.host + p
+                           : this.protocol + "//" + this.host + this.path + (this.path[this.path.length-1] == '/' ? '' : '/') + p;
     };
 
     var $interval = setInterval(function () {

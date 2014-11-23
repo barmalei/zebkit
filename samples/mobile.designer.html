@@ -9,7 +9,7 @@
 		<script type='text/javascript'>
 		    zebra.ready(function() {
 		    	eval(zebra.Import("ui", "layout", "ui.designer"));
-		    	
+
 		        var z  = new zebra.ui.zCanvas("test");
 			    z.fullScreen();
 
@@ -23,8 +23,8 @@
 			    				//this.$super(e);
 			    			}
 			    		]).properties({ font: new Font("Arial", "bold", 24), padding:8 }),
-			    		
-			    		CENTER: new Panel([  
+
+			    		CENTER: new Panel([
 			    			function() {
 			    				this.$super();
 			    				this.label = new Label("");
@@ -75,7 +75,7 @@
 			    					}
 				    				else {
 				    					this.hideWindow();
-			    					}	
+			    					}
 			    				}
 			    			},
 
@@ -87,25 +87,25 @@
 			    			},
 
 			    			function mouseDragged(e) {
-			    				
+
 			    				if (this.target != null && e.touchCounter == 2) {
 			    					var touches = [];
 			    					for(var k in e.touches) touches.push(e.touches[k]);
-			    					var t1  = touches[0], 
+			    					var t1  = touches[0],
 			    						t2  = touches[1],
-			    						ldx = (t1.pageX < t2.pageX) ? t1.dx : t2.dx, 
-			    						tdy = (t1.pageY < t2.pageY) ? t1.dy : t2.dy, 
-			    						rdx = (t1.pageX < t2.pageX) ? t2.dx : t1.dx, 
-			    						bdy = (t1.pageY < t2.pageY) ? t2.dy : t1.dy, 
-			    					    ww  = this.target.width  + rdx - ldx,  
+			    						ldx = (t1.pageX < t2.pageX) ? t1.dx : t2.dx,
+			    						tdy = (t1.pageY < t2.pageY) ? t1.dy : t2.dy,
+			    						rdx = (t1.pageX < t2.pageX) ? t2.dx : t1.dx,
+			    						bdy = (t1.pageY < t2.pageY) ? t2.dy : t1.dy,
+			    					    ww  = this.target.width  + rdx - ldx,
 			    					    hh  = this.target.height + bdy - tdy,
-			    					    xx  = this.target.x + ldx,  
-			    					    yy  = this.target.y + tdy;  
+			    					    xx  = this.target.x + ldx,
+			    					    yy  = this.target.y + tdy;
 
-		    					    this.target.setLocation(xx >= 0 ? xx : this.target.x, 
+		    					    this.target.setLocation(xx >= 0 ? xx : this.target.x,
 		    					    					 	yy >= 0 ? yy : this.target.y);
 
-			    					this.target.setSize(ww > 16 ? ww : this.target.width, 
+			    					this.target.setSize(ww > 16 ? ww : this.target.width,
 			    										hh > 16 ? hh : this.target.height);
 			    				}
 			    			}

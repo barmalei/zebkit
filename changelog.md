@@ -2,21 +2,26 @@
 
    * New UI component tree. Add UI components directly as tree nodes  
    * Grid cell marker mode support
-   * Own zebra custom virtual keyboard implementation is provided 
+   * Own zebra custom virtual keyboard implementation 
    * Remove "zebra.ui.Composite" interface, use "catchInput" field as boolean flag to say if component composite or as a method to say it dynamically
    * Remove zebra.ui.CopyCutPaste interface. Use "clipCopy", "clipPaste" method to catch clipboard events
    * Reorganized tree component
+   * Tabs setOrientation method added
+   * Singltone classes
+   * Text field performance of cursor position detection has been improved 
    * OOP Singleton classes support
-   * UI Component constraints can be passed as string "center", "left", etc
-   * zebra.layout.TLEFT, zebra.layout.TRIGHT, etc constants have been re-named into zebra.layout.TopLeft, zebra.layout.TopRight etc
-   * Pakcage has been re-organized:
-      - "zebra/lib" has been moved to "src"
-      - python debug server code has been moved to "tests/io" from "lib/jsonrpc" 
-      - home made building engine has been removed ("bin")
-      - nodejs/gulp are used as building tool
-   * Tones of fixes and improvements
-   * Matrix data model has been extended with row and col insertion methods
-   * **Apache license** instead of LGPL
+   * Use nodejs/gulp to as deployment tool
+   * Fixes and improvements
+   * Matrix model has been extended with rows and columns insertion methods 
+   * package objects dand clasess can be described with a special "package" method
+   * remove possibility to composite UI JSON configuration 
+   * remove %root% variable from JSON BAG, use relative to loaded JSON path or absolute path  
+   * zebra sources has been moved from lib/zebra to src
+   * json bag has been updated:
+      - Use classAliases property to define short names for classes
+      - Use variables property to define variables
+      - Variables can be classes and structure
+      - loadByUrl can get callback as an argument  
    
 **4.2014 (Luda)**
 

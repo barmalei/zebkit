@@ -181,6 +181,13 @@ pkg.StringRender = Class(pkg.Render, [
             this.owner = v;
         };
 
+        this.lineWidth = function() {
+            if (this.stringWidth < 0) {
+                this.stringWidth = this.font.stringWidth(this.target);
+            }
+            return this.stringWidth;
+        };
+
         /**
          * Set the rendered text font.
          * @param  {String|zebra.ui.Font} f a font as CSS string or
@@ -473,7 +480,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
         };
 
         this.paint = function(g,x,y,w,h,d) {
-            var ts = g.stack[g.counter];
+            var ts = g.$states[g.$curState];
             if (ts.width > 0 && ts.height > 0) {
                 var lineIndent = this.getLineIndent(),
                     lineHeight = this.getLineHeight(),
@@ -984,7 +991,7 @@ pkg.TitledBorder = Class(pkg.Render, [
 
                 var r = d.getTitleInfo();
                 if (r != null) {
-                    var xx = x + w, yy = y + h, t = g.stack[g.counter];
+                    var xx = x + w, yy = y + h, t = g.$states[g.$curState];
                     switch (r.orient) {
                         case L.TOP:
                             var top = this.target.getTop();
@@ -2097,9 +2104,10 @@ pkg.BorderPan = Class(pkg.Panel, [
         return this.$super(br);
     },
 
-    function kidAdded(index,id,lw){
-        this.$super(index, id, lw);
-        if (L.CENTER == id) this.content = lw;
+    function kidAdded(index,ctr,lw) {
+        this.$super(index, ctr, lw);
+        ctr = L.$constraints(ctr);
+        if ((ctr == null && this.content == null) || L.CENTER == ctr) this.content = lw;
         else this.label = lw;
     },
 
@@ -2560,13 +2568,16 @@ pkg.SplitPan = Class(pkg.Panel, [
                                                                                                : this.y + e.y);
                     if (xy > 0) this.target.setGripperLoc(xy);
                 };
+
+                this.getCursorType = function(t, x, y) {
+                    return (this.target.orientation == L.VERTICAL ? Cursor.W_RESIZE
+                                                                  : Cursor.N_RESIZE);
+                };
             },
 
             function(target) {
                 this.prevLoc = 0;
                 this.target = target;
-                this.cursorType = (target.orientation == L.VERTICAL ? Cursor.W_RESIZE
-                                                                    : Cursor.N_RESIZE);
                 this.$super();
             }
         ]);
@@ -2631,14 +2642,20 @@ pkg.SplitPan = Class(pkg.Panel, [
         this.gap = 1;
 
         this.normalizeBarLoc = function(xy){
-
             if (xy < this.minXY) xy = this.minXY;
             else {
                 if (xy > this.maxXY) xy = this.maxXY;
             }
-
             return (xy > this.maxXY || xy < this.minXY) ?  -1 : xy;
         };
+
+        this.setOrientation = function(o) {
+            o = L.$constraints(o);
+            if (o != this.orientation) {
+                this.orientation = o;
+                this.vrp();
+            }
+        }
 
         /**
          * Set gripper element location
@@ -2797,7 +2814,7 @@ pkg.SplitPan = Class(pkg.Panel, [
         this.minXY = this.maxXY = 0;
         this.barLocation = 70;
         this.leftComp = this.rightComp = this.gripper = null;
-        this.orientation = L.$constraints(o);
+        this.setOrientation(o);
 
         this.$super();
 
@@ -2806,13 +2823,16 @@ pkg.SplitPan = Class(pkg.Panel, [
         this.add(L.CENTER, new this.$clazz.Bar(this));
     },
 
-    function kidAdded(index,id,c){
-        this.$super(index, id, c);
-        if (L.LEFT == id) this.leftComp = c;
+    function kidAdded(index,ctr,c){
+        this.$super(index, ctr, c);
+
+        ctr = L.$constraints(ctr);
+
+        if ((ctr == null && this.leftComp == null) || L.LEFT == ctr) this.leftComp = c;
         else {
-            if (L.RIGHT == id) this.rightComp = c;
+            if ((ctr == null && this.rightComp == null) || L.RIGHT == ctr) this.rightComp = c;
             else {
-                if (L.CENTER == id) this.gripper = c;
+                if (L.CENTER == ctr) this.gripper = c;
                 else throw new Error($invalidC);
             }
         }
@@ -3082,6 +3102,7 @@ pkg.Link = Class(pkg.Button, [
     function(s){
         // do it before super
         this.view = new pkg.TextRender(s);
+        this.colors = ["gray"];
         this.$super(null);
         this.stateUpdated(this.state, this.state);
     },
@@ -3111,7 +3132,7 @@ pkg.Link = Class(pkg.Button, [
     function stateUpdated(o,n){
         this.$super(o, n);
         var r = this.view;
-        if (r && r.color != this.colors[n]){
+        if (r != null && r.color != this.colors[n] && this.colors[n] != null){
             r.setColor(this.colors[n]);
             this.repaint();
         }
@@ -3664,16 +3685,19 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
         this.setPosition(new zebra.util.SingleColPosition(this));
     },
 
-    function kidAdded(index,id,lw){
-        this.$super(index, id, lw);
-        if (L.CENTER == id) this.bundle = lw;
+    function kidAdded(index,ctr,lw){
+        this.$super(index, ctr, lw);
+
+        ctr = L.$constraints(ctr);
+
+        if (L.CENTER == ctr) this.bundle = lw;
         else {
-            if(L.BOTTOM == id){
+            if(L.BOTTOM == ctr){
                 this.incBt = lw;
                 this.incBt.bind(this);
             }
             else {
-                if(L.TOP == id){
+                if(L.TOP == ctr){
                     this.decBt = lw;
                     this.decBt.bind(this);
                 }
@@ -3992,19 +4016,22 @@ pkg.ScrollPan = Class(pkg.Panel, [
         return this.$super(i, ctr, c);
     },
 
-    function kidAdded(index,id,comp){
-        this.$super(index, id, comp);
-        if (L.CENTER == id){
+    function kidAdded(index,ctr,comp){
+        this.$super(index, ctr, comp);
+
+        ctr = L.$constraints(ctr);
+
+        if ((ctr == null && this.scrollObj == null) || L.CENTER == ctr){
             this.scrollObj = comp;
             this.scrollObj.scrollManager.bind(this);
             return;
         }
 
-        if (L.BOTTOM  == id || L.TOP == id){
+        if (L.BOTTOM  == ctr || L.TOP == ctr){
             this.hBar = comp;
         }
         else {
-            if (L.LEFT == id || L.RIGHT == id) this.vBar = comp;
+            if (L.LEFT == ctr || L.RIGHT == ctr) this.vBar = comp;
             else return;
         }
 
@@ -4043,7 +4070,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
  *  an UI component to a panel. For instance in the example below
  *  three pages with "Titl1", "Title2", "Title3" are added:
 
-      var tabs = zebra.ui.Tabs();
+      var tabs = new zebra.ui.Tabs();
       tabs.add("Title1", new zebra.ui.Label("Label as a page"));
       tabs.add("Title2", new zebra.ui.Button("Button as a page"));
       tabs.add("Title3", new zebra.ui.TextArea("Text area as a page"));
@@ -4425,7 +4452,7 @@ pkg.Tabs = Class(pkg.Panel, [
         };
 
         this.paintOnTop = function(g){
-            var ts = g.stack[g.counter];
+            var ts = g.$states[g.$curState];
             // stop painting if the tab area is outside of clip area
             if (zebra.util.isIntersect(this.repaintX, this.repaintY,
                                        this.repaintWidth, this.repaintHeight,
@@ -4937,32 +4964,48 @@ pkg.Tabs = Class(pkg.Panel, [
         }
     },
 
+    function kidAdded(index,constr,c) {
+        // correct wrong selection if inserted tab index is less or equals
+        if (this.selectedIndex >= 0 && index <= this.selectedIndex) {
+            this.selectedIndex++;
+        }
+
+        if (this.selectedIndex < 0) {
+            this.select(this.next(0, 1));
+        }
+
+        return this.$super(index,constr,c);
+    },
+
     function insert(index,constr,c) {
         var render = null;
         if (instanceOf(constr, this.$clazz.TabView)) {
             render = constr;
         }
         else {
-            render = new this.$clazz.TabView((constr == null ? "Page " + index : constr ));
-            render.ownerChanged(this); // TODO: a little bit ugly but settin an owner is required to
-                                       // keep tabs comppnent infprmed when an icon has been updated
+            render = new this.$clazz.TabView((constr == null ? "Page " + index
+                                                             : constr ));
+            render.ownerChanged(this); // TODO: a little bit ugly but setting an owner is required to
+                                       // keep tabs component informed when an icon has been updated
         }
 
         this.pages.splice(index * 2, 0, render, { x:0, y:0, width:0, height:0 });
-
-        var r = this.$super(index, constr, c);
-        if (this.selectedIndex < 0) this.select(this.next(0, 1));
-        return r;
+        return this.$super(index, constr, c);
     },
 
     function removeAt(i){
-        if (this.selectedIndex == i) this.select( -1);
+        if (this.selectedIndex >= 0 && i <= this.selectedIndex) {
+            if (i === this.selectedIndex) this.select(-1);
+            else {
+                this.selectedIndex--;
+            }
+        }
         this.pages.splice(i * 2, 2);
         this.$super(i);
     },
 
     function removeAll(){
-        if (this.selectedIndex >= 0) this.select( -1);
+        this.select(-1);
         this.pages.splice(0, this.pages.length);
         this.pages.length = 0;
         this.$super();
@@ -5000,7 +5043,7 @@ pkg.Slider = Class(pkg.Panel, [
         };
 
         this.paintNums = function(g,loc){
-            if(this.isShowTitle)
+            if (this.isShowTitle === true)
                 for(var i = 0;i < this.pl.length; i++ ){
                     var render = this.provider.getView(this, this.getPointValue(i)),
                         d = render.getPreferredSize();
@@ -5044,11 +5087,16 @@ pkg.Slider = Class(pkg.Panel, [
                 }
             }
 
-            var left = this.getLeft(), top = this.getTop(),
-                right = this.getRight(), bottom = this.getBottom(),
-                bnv = this.views.bundle, gauge = this.views.gauge,
-                bs = bnv.getPreferredSize(), gs = gauge.getPreferredSize(),
-                w = this.width - left - right - 2, h = this.height - top - bottom - 2;
+            var left   = this.getLeft(),
+                top    = this.getTop(),
+                right  = this.getRight(),
+                bottom = this.getBottom(),
+                bnv    = this.views.bundle,
+                gauge  = this.views.gauge,
+                bs     = bnv.getPreferredSize(),
+                gs     = gauge.getPreferredSize(),
+                w      = this.width - left - right - 2,
+                h      = this.height - top - bottom - 2;
 
             if (this.orient == L.HORIZONTAL){
                 var topY = top + ~~((h - this.psH) / 2) + 1, by = topY;
@@ -5061,6 +5109,7 @@ pkg.Slider = Class(pkg.Panel, [
                     g.setColor("gray");
                     g.strokeRect(left + 1, topY + ~~((bs.height - gs.height) / 2), w, gs.height);
                 }
+
                 topY += bs.height;
                 if (this.isShowScale){
                     topY += this.gap;
@@ -5133,6 +5182,7 @@ pkg.Slider = Class(pkg.Panel, [
                 }
                 return res;
             }
+
             v = this.exactStep * ~~((v + v % this.exactStep) / this.exactStep);
             if (v > this.max) v = this.max;
             else {
@@ -5251,8 +5301,7 @@ pkg.Slider = Class(pkg.Panel, [
 
         this.keyPressed = function(e){
             var b = this.isIntervalMode;
-            switch(e.code)
-            {
+            switch(e.code) {
                 case KE.UP:
                 case KE.LEFT:
                     var v = this.nextValue(this.value, this.exactStep,-1);
@@ -5298,7 +5347,9 @@ pkg.Slider = Class(pkg.Panel, [
             }
         };
 
-        this.mouseDragEnded = function(e){ this.dragged = false; };
+        this.mouseDragEnded = function(e) {
+            this.dragged = false;
+        };
 
         this.getView = function(d,o){
             this.render.setValue(o != null ? o.toString() : "");
@@ -5306,7 +5357,9 @@ pkg.Slider = Class(pkg.Panel, [
         };
     },
 
-    function() { this.$this(L.HORIZONTAL); },
+    function() {
+        this.$this(L.HORIZONTAL);
+    },
 
     function (o){
         this._ = new Listeners();
@@ -5477,10 +5530,14 @@ pkg.Toolbar = Class(pkg.Panel, [
                 this.add(L.CENTER, c);
             },
 
+            function getContentComponent() {
+                return this.kids[0];
+            },
+
             function stateUpdated(o, n) {
                 this.$super(o, n);
                 if (o == PRESSED_OVER && n == OVER) {
-                    this.parent._.fired(this.kids[0]);
+                    this.parent._.fired(this);
                 }
             }
         ]);

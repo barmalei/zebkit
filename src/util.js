@@ -137,7 +137,6 @@ pkg.findInTree = function(root, path, eq, cb) {
     _find({ kids:[root] }, res, 0, cb);
 };
 
-
 /**
  * RGB color class. This class represents rgb(a) color as JavaScript structure:
 
@@ -867,7 +866,6 @@ pkg.SingleColPosition = Class(pkg.Position, [
     }
 ]);
 
-
 (function() {
     var quantum = 40, tasks = Array(5), count = 0, pid = -1;
 
@@ -1172,7 +1170,7 @@ pkg.Bag = zebra.Class([
          */
         this.get = function(key) {
             if (key == null) throw new Error("Null key");
-            var n = key.split('.'), v = this.objects;
+            var n = key.split('.'), v = this.root;
             for(var i = 0; i < n.length; i++) {
                 v = v[n[i]];
                 if (typeof v === "undefined") {
@@ -1220,7 +1218,7 @@ pkg.Bag = zebra.Class([
                     }
 
                     o[k] = o.hasOwnProperty(k) ? this.mergeContent(o[k], v[k])
-                                               : v[k];  // this.mergeContent({}, v[k]);
+                                               : v[k];
                 }
             }
             return o;
@@ -1231,7 +1229,7 @@ pkg.Bag = zebra.Class([
         // -- atomic types int string boolean number are returned as is
         // -- created by the given description array are append to o array
         // -- structure description (dictionary) are merged to o
-        this.mergeObjWithDesc = function(o, d) {
+        this.mergeObjWithDesc = function(o, d, callback) {
             // atomic type should be returned as is
             if (d === null || zebra.isNumber(d) || zebra.isBoolean(d)) {
                 return d;
@@ -1259,8 +1257,11 @@ pkg.Bag = zebra.Class([
                     // check if the reference point to external JSON
                     // and load the JSON
                     if (d[1] == "(" && d[d.length-1] == ")") {
+
+
                         var $this = this,
                             bag = new (this.$clazz)([
+                                // child bag has to be able resolve variable using parent resolver
                                 function resolveVar(name) {
                                     try { return this.$super(name); }
                                     catch(e) {}
@@ -1268,21 +1269,21 @@ pkg.Bag = zebra.Class([
                                 },
 
                                 function resolveClass(className) {
-                                    var clazz = this.vars.hasOwnProperty(className) ? this.$super(className)
-                                                                                         : null;
+                                    var clazz = this.classAliases.hasOwnProperty(className) ? this.$super(className)
+                                                                                            : null;
                                     return (clazz != null) ? clazz
                                                            : $this.resolveClass(className);
                                 }
                             ]);
                         bag.loadByUrl(d.substring(2, d.length-1));
-                        return bag.objects;
+                        return bag.root;
                     }
 
                     // resolve variable
                     return this.resolveVar(d.substring(1).trim());
                 }
 
-                return this.decodeStringValue ? this.decodeStringValue(d) : d;
+                return this.decodeStringValue != null ? this.decodeStringValue(d) : d;
             }
 
             // store and cleanup $inherit synthetic field from description.
@@ -1298,7 +1299,7 @@ pkg.Bag = zebra.Class([
                 if (k[0] == '$' && d.hasOwnProperty(k)) {
                     var classname = k.substring(1).trim(), args = d[k];
                     args = this.mergeObjWithDesc(null, Array.isArray(args) ? args : [ args ]);
-                    delete d[k];
+                    delete d[k]; // delete class name
 
                     if (classname[0] == "*") {
                         return (function(clazz, args) {
@@ -1309,6 +1310,8 @@ pkg.Bag = zebra.Class([
                             };
                         })(this.resolveClass(classname.substring(1).trim()), args);
                     }
+
+                    // apply properties to instantiated class
                     return this.mergeObjWithDesc(pkg.newInstance(this.resolveClass(classname), args), d);
                 }
 
@@ -1334,29 +1337,33 @@ pkg.Bag = zebra.Class([
                     // special field name that says to call method to create a
                     // value by the given description
                     if (k[0] == ".") {
-                        var vv = d[k],
-                            mn = k.substring(1).trim(),
-                            m = this.objects[mn] != null ? this.objects[mn] : this[mn];
+                        var vv  = d[k],
+                            mn  = k.substring(1).trim(),
+                            vs  = [ this, this.root],
+                            m   = null,
+                            ctx = null;
+
+                        for(var ij = 0; ij < vs.length; ij++) {
+                            if (vs[ij] != null && vs[ij][mn] != null && typeof vs[ij][mn] == 'function') {
+                                ctx = vs[ij];
+                                m   = vs[ij][mn];
+                                break;
+                            }
+                        }
 
                         if (m == null || typeof m != 'function') {
                             throw new Error("Method '" + mn + "' cannot be found");
                         }
 
-                        if (Array.isArray(vv) === false) {
-                            vv = [ vv ];
-                        }
-                        return m.apply(this.objects, this.mergeObjWithDesc(null, vv));
+                        return m.apply(ctx, Array.isArray(vv) ? this.mergeObjWithDesc(null, vv)
+                                                              : [this.mergeObjWithDesc(null, vv)]);
                     }
 
                     // try to find if the destination object already has the property k
-                    var po = o && o.hasOwnProperty(k) ? o[k] : null;
+                    var nv = this.mergeObjWithDesc((o && o.hasOwnProperty(k) ? o[k]
+                                                                             : null), d[k]);
 
-
-                   // v[k] = d[k];
-
-                    var nv = this.mergeObjWithDesc(po, d[k]);
-
-                    if (this.usePropertySetters && k[0] != '.') {
+                    if (this.usePropertySetters === true) {
                         var m  = zebra.getPropertySetter(v, k);
                         if (m != null) {
                             if (Array.isArray(nv)) m.apply(v, nv);
@@ -1367,7 +1374,6 @@ pkg.Bag = zebra.Class([
                     v[k] = nv;
                 }
             }
-
 
             if (inh !== null) this.inherit(v, inh);
 
@@ -1382,13 +1388,13 @@ pkg.Bag = zebra.Class([
          * @method resolveClass
          */
         this.resolveClass = function (className) {
-            return this.vars.hasOwnProperty(className) ? this.vars[className]
-                                                       : zebra.Class.forName(className);
+            return this.classAliases.hasOwnProperty(className) ? this.classAliases[className]
+                                                               : zebra.Class.forName(className);
         };
 
         this.inherit = function(o, pp) {
             for(var i=0; i < pp.length; i++) {
-                var op = this.objects, n = pp[i].trim(), nn = n.split("."), j = 0;
+                var op = this.root, n = pp[i].trim(), nn = n.split("."), j = 0;
                 while (j < nn.length) {
                     op = op[nn[j++]];
                     if (op == null) {
@@ -1451,55 +1457,72 @@ pkg.Bag = zebra.Class([
         this.end = function() {
             if (typeof this.isloaded === "undefined") {
                 this.isloaded = true;
-                if (this.content.hasOwnProperty("variables")) {
-                    var vars = this.content.variables;
+
+                if (this.content.hasOwnProperty("classAliases")) {
+                    var vars = this.content.classAliases;
                     for(var k in vars) {
-                        var v = vars[k].trim();
-                        this.vars[k.trim()] = (v[0] == '$' ? Class.forName(v.substring(1).trim())
-                                                           : v);
+                        this.classAliases[k] = Class.forName(vars[k].trim());
                     }
+                    delete this.content.classAliases;
+                }
+
+                if (this.content.hasOwnProperty("variables")) {
+                    this.variables = this.mergeObjWithDesc(this.variables, this.content.variables);
                     delete this.content.variables;
                 }
-                this.objects = this.mergeObjWithDesc(this.objects, this.content);
+
+                this.root = this.mergeObjWithDesc(this.root, this.content);
             }
         };
 
         this.resolveVar = function(name) {
-            if (this.vars.hasOwnProperty(name)) {
-                return this.vars[name];
-            }
-
-            return this.get(name);
+            return this.variables.hasOwnProperty(name) ? this.variables[name]
+                                                       : this.get(name);
         };
 
         this.expr = function(e) {
-            var s = "var r="+e;
-            eval(s);
+            eval("var r="+e);
             return r;
         };
 
-        this[''] = function (container) {
-            this.vars    = {};
-            this.objects = container == null ? {} : container;
-            this.content = {};
+        /**
+         * Load JSON by the given URL
+         * @param  {String} url an URL to a JSON
+         * @param  {Boolean} [b] true if the loading has to be completed
+         * @return {zebra.util.Bag} a reference to the bag class instance
+         * @method loadByUrl
+         */
+        this.loadByUrl = function(url, b) {
+            var p = url.toString();
+            p = p + (p.lastIndexOf("?") > 0 ? "&" : "?") + (new Date()).getTime().toString();
+
+            if (b == null) {
+                b = true;
+            }
+
+            this.$url = url;
+            return this.load(zebra.io.GET(p), b);
         };
-    },
 
-    function loadByUrl(url) {
-        return this.loadByUrl(url, true);
-    },
+        this[''] = function (root) {
+            /**
+             * Environment variables that can be referred from loaded content
+             * @attribute variables
+             * @type {Object}
+             */
+            this.variables = {};
 
-    /**
-     * Load JSON by the given URL
-     * @param  {String} url an URL to a JSON
-     * @param  {Boolean} [b] true if the loading has to be completed
-     * @return {zebra.util.Bag} a reference to the bag class instance
-     * @method loadByUrl
-     */
-    function loadByUrl(url, b) {
-        var p = url.toString();
-        p = p + (p.lastIndexOf("?") > 0 ? "&" : "?") + (new Date()).getTime().toString();
-        return this.load(zebra.io.GET(p), b);
+            /**
+             * Object that keeps loaded and resolved content
+             * @readonly
+             * @attribute root
+             * @type {Object}
+             * @default {}
+             */
+            this.root = root == null ? {} : root;
+            this.content = {};
+            this.classAliases = {};
+        };
     }
 ]);
 

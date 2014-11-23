@@ -1,19 +1,19 @@
 {
     "version" : "10.2014",
 
-    "variables": {
-        "Picture"       : "$zebra.ui.Picture",
-        "Border"        : "$zebra.ui.Border",
-        "Dotted"        : "$zebra.ui.Dotted",
-        "ViewSet"       : "$zebra.ui.ViewSet",
-        "View"          : "$zebra.ui.View",
-        "Gradient"      : "$zebra.ui.Gradient",
-        "CompositeView" : "$zebra.ui.CompositeView",
-        "rgb"           : "$zebra.util.rgb",
-        "Font"          : "$zebra.ui.Font",
-        "FlowLayout"    : "$zebra.layout.FlowLayout",
-        "BorderLayout"  : "$zebra.layout.BorderLayout",
-        "ListLayout"    : "$zebra.layout.ListLayout"
+    "classAliases": {
+        "Picture"       : "zebra.ui.Picture",
+        "Border"        : "zebra.ui.Border",
+        "Dotted"        : "zebra.ui.Dotted",
+        "ViewSet"       : "zebra.ui.ViewSet",
+        "View"          : "zebra.ui.View",
+        "Gradient"      : "zebra.ui.Gradient",
+        "CompositeView" : "zebra.ui.CompositeView",
+        "rgb"           : "zebra.util.rgb",
+        "Font"          : "zebra.ui.Font",
+        "FlowLayout"    : "zebra.layout.FlowLayout",
+        "BorderLayout"  : "zebra.layout.BorderLayout",
+        "ListLayout"    : "zebra.layout.ListLayout"
     },
 
     "doubleClickDelta":180,

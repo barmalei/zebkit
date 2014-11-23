@@ -17,7 +17,6 @@ pkg.ascent = function ascent(a, b) {
     return (zebra.isString(b)) ? b.localeCompare(a) : b - a;
 };
 
-
 /**
  * Text model interface
  * @class zebra.data.TextModel
@@ -97,7 +96,7 @@ pkg.ascent = function ascent(a, b) {
 pkg.TextModel = Interface();
 
 
-var MB = zebra.util, oobi = "Index is out of bounds: ";
+var oobi = "Index is out of bounds: ";
 
 function Line(s) {
     this.s = s;
@@ -107,7 +106,7 @@ function Line(s) {
 //  toString for array.join method
 Line.prototype.toString = function() { return this.s; };
 
-pkg.TextModelListeners = MB.ListenersClass("textUpdated");
+pkg.TextModelListeners = zebra.util.ListenersClass("textUpdated");
 
 /**
  * Multi-lines text model implementation
@@ -326,7 +325,7 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
     }
 ]);
 
-pkg.ListModelListeners = MB.ListenersClass("elementInserted", "elementRemoved", "elementSet");
+pkg.ListModelListeners = zebra.util.ListenersClass("elementInserted", "elementRemoved", "elementSet");
 
 /**
  * List model class
@@ -553,7 +552,7 @@ pkg.find = function(root, value, cb) {
     }
 };
 
-pkg.TreeModelListeners = MB.ListenersClass("itemModified", "itemRemoved", "itemInserted");
+pkg.TreeModelListeners = zebra.util.ListenersClass("itemModified", "itemRemoved", "itemInserted");
 
 
 /**
@@ -728,7 +727,7 @@ pkg.TreeModel = Class([
     }
 ]);
 
-pkg.MatrixListeners = MB.ListenersClass("matrixResized", "cellModified",
+pkg.MatrixListeners = zebra.util.ListenersClass("matrixResized", "cellModified",
                                         "matrixSorted", "matrixRowInserted",
                                         "matrixColInserted");
 
@@ -934,6 +933,12 @@ pkg.Matrix = Class([
             this._.matrixResized(this, this.rows, this.cols + count);
         };
 
+        /**
+         * Insert the given number of rows at the specified row
+         * @param  {Integer} row   a starting row to insert
+         * @param  {Integer} count a number of rows to be added
+         * @method insertRows
+         */
         this.insertRows = function(row, count) {
             if (arguments.length === 1) count = 1;
             for(var i=0; i < count; i++) {
@@ -944,6 +949,12 @@ pkg.Matrix = Class([
             this._.matrixResized(this, this.rows - count, this.cols);
         };
 
+        /**
+         * Insert the given number of columns at the specified column
+         * @param  {Integer} col   a starting column to insert
+         * @param  {Integer} count a number of columns to be added
+         * @method insertCols
+         */
         this.insertCols = function(col, count) {
             if (arguments.length === 1) count = 1;
             for(var j=0; j < count; j++) {

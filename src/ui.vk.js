@@ -1055,7 +1055,7 @@ ui.events.addListener({
     }
 });
 
-new ui.Bag(pkg).loadByUrl(pkg.$url + "vk.json");
+new ui.Bag(pkg).load(pkg.$url + "vk.json");
 
 /**
  * @for

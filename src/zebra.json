@@ -1,5 +1,5 @@
 {
-    "version" : "11.2014",
+    "version" : "12.2014",
 
     "classAliases": {
         "Picture"       : "zebra.ui.Picture",
@@ -401,11 +401,11 @@
     },
 
     "?zebra.isTouchable": {
-        "mscroll": { "$zebra.ui.MobileScrollMan"  :[] },
+        "mscroll": { "$zebra.ui.MobileScrollMan"  :[] }
+    },
 
-        "ScrollPan": {
-            "autoHide": true
-        }
+    "ScrollPan": {
+        "autoHide": { ".expr": "zebra.isTouchable" }
     },
 
     "TextField": {

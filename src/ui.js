@@ -181,6 +181,10 @@ pkg.StringRender = Class(pkg.Render, [
             this.owner = v;
         };
 
+        this.getLineHeight = function() {
+            return this.font.height;
+        };
+
         this.lineWidth = function() {
             if (this.stringWidth < 0) {
                 this.stringWidth = this.font.stringWidth(this.target);
@@ -1175,6 +1179,16 @@ pkg.Label = Class(pkg.ViewPan, [
         };
 
         /**
+         * Set the text field text model
+         * @param  {zebra.data.TextModel|String} m a text model to be set
+         * @method setModel
+         */
+        this.setModel = function(m) {
+            this.setView(zebra.isString(m) ? new pkg.StringRender(m)
+                                           : new pkg.TextRender(m));
+        };
+
+        /**
          * Get the label text color
          * @return {String} a zebra label color
          * @method getColor
@@ -1235,11 +1249,11 @@ pkg.Label = Class(pkg.ViewPan, [
     },
 
     function (r){
-        if (zebra.isString(r)) {
-            this.setView(new pkg.StringRender(r));
+        if (instanceOf(r, pkg.Render)) {
+            this.setView(r);
         }
         else {
-            this.setView(instanceOf(r, zebra.data.TextModel) ? new pkg.TextRender(r) : r);
+            this.setModel(r);
         }
         this.$super();
     }
@@ -3755,16 +3769,38 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
  */
 pkg.ScrollPan = Class(pkg.Panel, [
     function $clazz() {
+        var contentPanLayout = new L.Layout([
+            function $prototype() {
+                this.calcPreferredSize = function(t) {
+                    return t.kids[0].getPreferredSize();
+                };
+
+                this.doLayout = function(t) {
+                    t.kids[0].toPreferredSize();
+                };
+            }
+        ]);
+
+        var ContentPanSM = Class(pkg.ScrollManager, [
+            function $prototype() {
+                this.getSX = function() {
+                    return this.target.x;
+                };
+
+                this.getSY = function() {
+                    return this.target.y;
+                };
+
+                this.scrollStateUpdated = function(sx,sy,psx,psy) {
+                    this.target.setLocation(sx, sy);
+                };
+            }
+        ]);
+
         this.ContentPan = Class(pkg.Panel, [
-            function(c){
-                this.$super(new L.RasterLayout(L.USE_PS_SIZE));
-                this.scrollManager = new pkg.ScrollManager(c, [
-                    function $prototype() {
-                        this.getSX   = function() { return this.target.x; };
-                        this.getSY   = function() { return this.target.y; };
-                        this.scrollStateUpdated = function(sx,sy,psx,psy) { this.target.setLocation(sx, sy); };
-                    }
-                ]);
+            function(c) {
+                this.$super(contentPanLayout);
+                this.scrollManager = new ContentPanSM(c);
                 this.add(c);
             }
         ]);
@@ -3969,8 +4005,13 @@ pkg.ScrollPan = Class(pkg.Panel, [
         };
     },
 
-    function () { this.$this(null, L.HORIZONTAL | L.VERTICAL); },
-    function (c){ this.$this(c, L.HORIZONTAL | L.VERTICAL); },
+    function () {
+        this.$this(null, L.HORIZONTAL | L.VERTICAL);
+    },
+
+    function (c) {
+        this.$this(c, L.HORIZONTAL | L.VERTICAL);
+    },
 
     function (c, barMask){
         /**
@@ -4009,36 +4050,37 @@ pkg.ScrollPan = Class(pkg.Panel, [
         if (c != null) this.add(L.CENTER, c);
     },
 
-    function insert(i,ctr,c){
-        if (L.CENTER == ctr && c.scrollManager == null) {
-            c = new this.$clazz.ContentPan(c);
-        }
-        return this.$super(i, ctr, c);
-    },
-
-    function kidAdded(index,ctr,comp){
-        this.$super(index, ctr, comp);
-
+    function insert(i,ctr,c) {
         ctr = L.$constraints(ctr);
 
-        if ((ctr == null && this.scrollObj == null) || L.CENTER == ctr){
-            this.scrollObj = comp;
-            this.scrollObj.scrollManager.bind(this);
-            return;
-        }
+        if (L.CENTER == ctr) {
+            if (c.scrollManager == null) {
+                c = new this.$clazz.ContentPan(c);
+            }
 
-        if (L.BOTTOM  == ctr || L.TOP == ctr){
-            this.hBar = comp;
+            this.scrollObj = c;
+            c.scrollManager.bind(this);
         }
         else {
-            if (L.LEFT == ctr || L.RIGHT == ctr) this.vBar = comp;
-            else return;
+            if (L.BOTTOM  == ctr || L.TOP == ctr){
+                this.hBar = c;
+            }
+            else {
+                if (L.LEFT == ctr || L.RIGHT == ctr) {
+                    this.vBar = c;
+                }
+                else  {
+                    throw new Error("Invalid constraints");
+                }
+            }
+
+            // valid for scroll bar only
+            if (c.incBt != null) c.incBt.setVisible(!this.autoHide);
+            if (c.decBt != null) c.decBt.setVisible(!this.autoHide);
+            c.position.bind(this);
         }
 
-        // valid for scroll bar only
-        if (comp.incBt != null) comp.incBt.setVisible(!this.autoHide);
-        if (comp.decBt != null) comp.decBt.setVisible(!this.autoHide);
-        comp.position.bind(this);
+        return this.$super(i, ctr, c);
     },
 
     function kidRemoved(index,comp){

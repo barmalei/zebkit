@@ -745,10 +745,10 @@ pkg.Picture = Class(pkg.Render, [
         this.getPreferredSize = function(){
             var img = this.target;
             return (img == null ||
-                   this.target.naturalWidth <= 0 ||
-                   img.complete !== true) ? { width:0, height:0 }
-                               : (this.width > 0) ? { width:this.width, height:this.height }
-                                                  : { width:img.width, height:img.height };
+                    img.naturalWidth <= 0 ||
+                    img.complete !== true) ? { width:0, height:0 }
+                                           : (this.width > 0) ? { width:this.width, height:this.height }
+                                                              : { width:img.width, height:img.height };
         };
     }
 ]);
@@ -2375,7 +2375,7 @@ var CL = pkg.Panel = Class(L.Layoutable, [
          * @method load
          */
         this.load = function(jsonPath) {
-            new pkg.Bag(this).loadByUrl(jsonPath);
+            new pkg.Bag(this).load(jsonPath);
             return this;
         };
 
@@ -2488,11 +2488,14 @@ var CL = pkg.Panel = Class(L.Layoutable, [
          * @param  {Integer} py a previous y coordinate of the component
          * @method relocated
          */
-        this.relocated = function(px,py){
+        this.relocated = function(px, py) {
             pkg.events.fireCompEvent(CL.MOVED, this, px, py);
 
-            var p = this.parent, w = this.width, h = this.height;
-            if (p != null && w > 0 && h > 0){
+            var p = this.parent,
+                w = this.width,
+                h = this.height;
+
+            if (p != null && w > 0 && h > 0) {
                 var x = this.x, y = this.y, nx = x < px ? x : px, ny = y < py ? y : py;
 
                 //TODO: some mobile browser has bug: moving a component
@@ -2789,7 +2792,10 @@ var CL = pkg.Panel = Class(L.Layoutable, [
                 h = this.height;
             }
 
-            if (this.parent != null && this.width > 0 && this.height > 0 && pkg.paintManager != null){
+            if (this.parent != null &&
+                this.isVisible === true &&
+                pkg.paintManager != null)
+            {
                 pkg.paintManager.repaint(this, x, y, w, h);
             }
         };
@@ -3104,14 +3110,16 @@ pkg.ImagePan = Class(pkg.ViewPan, [
                         // it is important to analyze if the given component has zero size
                         // if it is true the repainting will not occur what means validation
                         // is also will not happen, adjust width and height to be none zero
-                        if ($this.width === 0 || $this.height === 0) {
-                            $this.width  = i.width;
-                            $this.height = i.height;
-                        }
+                        //
+                        // !!! This has been fixed by changing paint manager behaviour
+                        // if ($this.width === 0 || $this.height === 0) {
+                        //     $this.width  = i.width;
+                        //     $this.height = i.height;
+                        // }
 
                         $this.vrp();
                     }
-
+                   
                     if ($this.imageLoaded != null) {
                         $this.imageLoaded(p, b, i);
                     }
@@ -3171,117 +3179,123 @@ pkg.PaintManager = Class(pkg.Manager, [
          * @param  {Integer} [h] h height of top-left corner of a rectangular area to be repainted
          * @method repaint
          */
-        this.repaint = function(c,x,y,w,h){
+        this.repaint = function(c,x,y,w,h) {
+
+            // step I: skip invisible components and components that are not in hierarchy
+            //         don't initiate repainting thread for such sort of the components
+            //console.log("PaintManager.repaint() : " + c.$clazz.$name + ", stop? = " + (c.isVisible === false || c.parent == null) + ", w = " + c.width);
+            if (c.isVisible === false || c.parent == null) {
+                return;
+            }
+
+            //!!! find context buffer that hold the given component
+            var canvas = c;
+            for(; canvas != null && canvas.$context == null; canvas = canvas.parent) {
+                if (canvas.isVisible === false) return;
+            }
+            if (canvas == null) {
+                return;
+            }
+
             if (arguments.length == 1) {
                 x = y = 0;
                 w = c.width;
                 h = c.height;
             }
 
-            if (w > 0 && h > 0 && c.isVisible === true){
+            // step II: calculate new current dirty area
+            if (w > 0 && h > 0) {
                 var r = $cvp(c, temporary);
-                if (r == null) return;
+                if (r != null)  {
+                    MB.intersection(r.x, r.y, r.width, r.height, x, y, w, h, r);
+                    if (r.width > 0 && r.height > 0) {
+                        x = r.x;
+                        y = r.y;
+                        w = r.width;
+                        h = r.height;
 
-                MB.intersection(r.x, r.y, r.width, r.height, x, y, w, h, r);
-                if (r.width <= 0 || r.height <= 0) return;
+                        var x2 = canvas.width,
+                            y2 = canvas.height,
+                            cc = c;
 
-                x = r.x;
-                y = r.y;
-                w = r.width;
-                h = r.height;
+                        // calculate abs location
+                        while (cc != canvas) {
+                            x += cc.x;
+                            y += cc.y;
+                            cc = cc.parent;
+                        }
 
-                //!!! find buffer that hold the given component
-                var canvas = c;
-                for(; canvas != null && canvas.$context == null; canvas = canvas.parent);
+                        if (x < 0) {
+                            w += x;
+                            x = 0;
+                        }
 
-                if (canvas != null){
-                    var x2 = canvas.width, y2 = canvas.height;
+                        if (y < 0) {
+                            h += y;
+                            y = 0;
+                        }
 
-                    // calculate abs location
-                    var cc = c;
-                    while (cc != canvas) {
-                        x += cc.x;
-                        y += cc.y;
-                        cc = cc.parent;
-                    }
+                        if (w + x > x2) w = x2 - x;
+                        if (h + y > y2) h = y2 - y;
 
-                    if (x < 0) {
-                        w += x;
-                        x = 0;
-                    }
-
-                    if (y < 0) {
-                        h += y;
-                        y = 0;
-                    }
-
-                    if (w + x > x2) w = x2 - x;
-                    if (h + y > y2) h = y2 - y;
-
-                    if (w > 0 && h > 0) {
-                        var da = canvas.$da;
-                        if (da.width > 0) {
-                            if (x >= da.x                &&
-                                y >= da.y                &&
-                                x + w <= da.x + da.width &&
-                                y + h <= da.y + da.height  )
-                            {
-                                return;
+                        if (w > 0 && h > 0) {
+                            var da = canvas.$da;
+                            if (da.width > 0) {
+                                if (x < da.x                ||
+                                    y < da.y                ||
+                                    x + w > da.x + da.width ||
+                                    y + h > da.y + da.height  )
+                                {
+                                    MB.unite(da.x, da.y, da.width, da.height, x, y, w, h, da);
+                                }
                             }
-                            MB.unite(da.x, da.y, da.width, da.height, x, y, w, h, da);
+                            else {
+                                MB.intersection(0, 0, canvas.width, canvas.height, x, y, w, h, da);
+                            }
                         }
-                        else {
-                            MB.intersection(0, 0, canvas.width, canvas.height, x, y, w, h, da);
-                        }
-
-                        if (da.width > 0 && $timers[canvas] == null) {
-                            var $this = this;
-                            $timers[canvas] = window.requestAFrame(function() {
-                                $timers[canvas] = null;
-
-                                // prevent double painting, sometimes
-                                // width can be -1 what cause clearRect
-                                // clean incorrectly
-                                if (canvas.$da.width <= 0) {
-                                    return ;
-                                }
-
-                                var g = canvas.$context;
-                                canvas.validate();
-                                g.save();
-
-                                try {
-                                    g.translate(canvas.x, canvas.y);
-                                    g.clipRect(canvas.$da.x, canvas.$da.y,
-                                                     canvas.$da.width,
-                                                     canvas.$da.height);
-
-                                    if (canvas.bg == null) {
-                                        // TODO: make sure it works on bloody android
-                                        g.save();
-                                        g.setTransform(1 * g.$states[g.$curState].sx * 2, 0, 0, 1 * g.$states[g.$curState].sy * 2, 0, 0);
-                                        g.clearRect(canvas.$da.x, canvas.$da.y,
-                                                          canvas.$da.width, canvas.$da.height);
-                                        g.restore();
-                                    }
-
-                                    $this.paint(g, canvas);
-                                    canvas.$da.width = -1; //!!!
-                                    g.restore();
-                                }
-                                catch(e) {
-                                    g.restore();
-                                    throw e;
-                                }
-                            });
-                        }
-
-                        // !!! not sure the code below is redundant, but it looks redundantly
-                        // if (da.width > 0) {
-                        //     canvas.repaint(da.x, da.y, da.width, da.height);
-                        // }
                     }
                 }
+            }
+
+            // step III: initiate repainting thread
+            if ($timers[canvas] == null && (canvas.isValid === false || canvas.$da.width > 0)) {
+                var $this = this;
+                $timers[canvas] = window.requestAFrame(function() {
+                    $timers[canvas] = null;
+                    canvas.validate();
+
+                    // prevent double painting, sometimes
+                    // width can be -1 what cause clearRect
+                    // clean incorrectly
+                    if (canvas.$da.width > 0) {
+                        var g = canvas.$context;
+                        g.save();
+
+                        try {
+                            g.translate(canvas.x, canvas.y);
+                            g.clipRect(canvas.$da.x, canvas.$da.y,
+                                             canvas.$da.width,
+                                             canvas.$da.height);
+
+                            if (canvas.bg == null) {
+                                // TODO: make sure it works on bloody android
+                                g.save();
+                                g.setTransform(1 * g.$states[g.$curState].sx * 2, 0, 0, 1 * g.$states[g.$curState].sy * 2, 0, 0);
+                                g.clearRect(canvas.$da.x, canvas.$da.y,
+                                            canvas.$da.width, canvas.$da.height);
+                                g.restore();
+                            }
+
+                            $this.paint(g, canvas);
+                            canvas.$da.width = -1; //!!!
+                            g.restore();
+                        }
+                        catch(e) {
+                            g.restore();
+                            throw e;
+                        }
+                    }
+                });
             }
         };
 
@@ -4879,7 +4893,7 @@ pkg.zCanvas = Class(pkg.Panel, [
                     h =  this.height;
                 }
 
-                if (w > 0 && h > 0 && pkg.paintManager != null) {
+                if (pkg.paintManager != null) {
                     pkg.paintManager.repaint(this, x,y,w,h);
                 }
             }
@@ -5410,10 +5424,10 @@ zebra.ready(
             pkg.$configuration = new pkg.Bag(pkg);
 
             var p = zebra()['zebra.json'];
-            new pkg.Bag(pkg).loadByUrl(p ? p
-                                         : pkg.$url.join("canvas.json"));
+            new pkg.Bag(pkg).load(p ? p
+                                    : pkg.$url.join("canvas.json"));
 
-            // store ref to event manager
+            // store reference to event manager
             EM = pkg.events;
 
             if (pkg.clipboardTriggerKey > 0) {

@@ -1,6 +1,6 @@
 /**
  * This is the core module that provides powerful easy OOP concept, packaging and number of utility methods.
- * The module has no any dependency from others zebra modules and can be used independently.  
+ * The module has no any dependency from others zebra modules and can be used independently.
  * @module zebra
  */
 (function() {
@@ -37,7 +37,7 @@ if (!Array.prototype.indexOf) {
         }
 
         var t = Object(this), len = t.length >>> 0;
-        if (len === 0) return -1;  
+        if (len === 0) return -1;
 
         var n = 0;
         if (arguments.length > 0) {
@@ -63,33 +63,33 @@ if (!Array.isArray) {
 }
 
 /**
- *  Create a new or return existent name space by the given name. The names space 
+ *  Create a new or return existent name space by the given name. The names space
  *  is structure to host various packages, classes, interfaces and so on. Usually
- *  developers should use "zebra" name space to access standard zebra classes, 
- *  interfaces, methods and packages and also to put own packages, classes etc 
- *  there. But in some cases it can be convenient to keep own stuff in a 
- *  dedicated project specific name space.   
+ *  developers should use "zebra" name space to access standard zebra classes,
+ *  interfaces, methods and packages and also to put own packages, classes etc
+ *  there. But in some cases it can be convenient to keep own stuff in a
+ *  dedicated project specific name space.
  *  @param {String} nsname a name space name
- *  @return {Function} an existent or created name space. Name space is function 
+ *  @return {Function} an existent or created name space. Name space is function
  *  that can be called to:
  *
  *    * Get the bound to the given name space variables:
- * @example    
- *          // get all variables of "zebra" namespace 
+ * @example
+ *          // get all variables of "zebra" namespace
  *          var variables = zebra();
  *          variables["myVariable"] = "myValue" // set variables in "zebra" name space
- * 
+ *
  *    * Get list of packages that are hosted under the given name space:
  * @example
  *         // get all packages that "zebra" name space contain
  *         zebra(function(packageName, package) {
- *               ...                
+ *               ...
  *         });
- * 
- *    * Create or access a package by the given package name (can be hierarchical):   
+ *
+ *    * Create or access a package by the given package name (can be hierarchical):
  * @example
  *         var pkg = zebra("test.io") // create or get "test.io" package
- * 
+ *
  *  @method namespace
  *  @api zebra.namespace()
  */
@@ -170,7 +170,7 @@ var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
 
     f.Import = function() {
         var ns = "=" + nsname + ".", code = [],
-            packages = arguments.length === 0 ? null 
+            packages = arguments.length === 0 ? null
                                               : Array.prototype.slice.call(arguments, 0);
         f(function(n, p) {
             if (packages == null || packages.indexOf(n) >= 0) {
@@ -227,8 +227,8 @@ function $toString() { return this.$hash$; }
 function make_template(pt, tf, p) {
     tf.$hash$ = "$ZBr$" + ($$$++);
     tf.toString = $toString;
-    
-    if (pt != null) { 
+
+    if (pt != null) {
         tf.prototype.$clazz = tf;
     }
 
@@ -326,17 +326,17 @@ pkg.Singleton = function(clazz) {
 /**
  * Interface is a special class that is used to "pitch" a class with a some marker.
  * It is not supposed an interface directly rules which method the class has to implement.
- 
+
         // declare "I" interface
         var I = zebra.Interface();
 
         // declare "A" class that implements "I" interface
         var A = zebra.Class(I, [ function m() {} ]);
-    
+
         // instantiate "A" class
         var a = new A();
-        zebra.instanceOf(a, I);  // true 
-        zebra.instanceOf(a, A);  // true 
+        zebra.instanceOf(a, I);  // true
+        zebra.instanceOf(a, A);  // true
 
 
  * @return {Function} an interface
@@ -394,6 +394,7 @@ function nProxyMethod(name) {
             }
             catch(e) {
                 pkg.$caller = cm;
+                console.log(e.stack);
                 throw e;
             }
         }
@@ -423,11 +424,11 @@ function nProxyMethod(name) {
  *
  *  __Single class inheritance.__ Any class can extend an another zebra class
 
-        // declare class "A" that with one method "a"   
+        // declare class "A" that with one method "a"
         var A = zebra.Class([
             function a() { ... }
         ]);
-    
+
         // declare class "B" that inherits class "A"
         var B = zebra.Class(A, []);
 
@@ -437,36 +438,36 @@ function nProxyMethod(name) {
 
     __Class method overriding.__ Override a parent class method implementation
 
-        // declare class "A" that with one method "a"   
+        // declare class "A" that with one method "a"
         var A = zebra.Class([
             function a() { ... }
         ]);
-    
+
         // declare class "B" that inherits class "A"
         // and overrides method a with an own implementation
         var B = zebra.Class(A, [
             function a() { ... }
         ]);
 
-    __Class method overloading.__ You can declare methods with the same names but 
+    __Class method overloading.__ You can declare methods with the same names but
     different parameter list. The methods are considered as different methods
 
-        // declare class "A" that with one method "a"   
+        // declare class "A" that with one method "a"
         var A = zebra.Class([
             function a() { ... }
         ]);
-    
+
         // declare class "B" that inherits class "A"
         // and overloads method "a" with another number of
-        // parameters 
+        // parameters
         var B = zebra.Class(A, [
             function a(param1) { ... }
         ]);
 
-        // instantiate class B and call two different 
+        // instantiate class B and call two different
         // methods "a()" and "a(param1)"
         var b = new B();
-        b.a();      // call method defined in "A" class 
+        b.a();      // call method defined in "A" class
         b.a(100);   // call overloaded method defined in "B" class
 
 
@@ -479,9 +480,9 @@ function nProxyMethod(name) {
 
         // instantiate "A"
         var a = new A();
-        a.variable // variable is 100 
+        a.variable // variable is 100
 
-    __Static methods and variables declaration.__ Static fields and methods can be defined 
+    __Static methods and variables declaration.__ Static fields and methods can be defined
     by declaring special "$clazz" method whose context is set to declared class
 
         var A = zebra.Class([
@@ -492,33 +493,33 @@ function nProxyMethod(name) {
                 // declare static method
                 this.staticMethod = function() {};
             }
-        ]); 
+        ]);
 
         // access static field an method
         A.staticVar      // 100
-        A.staticMethod() // call static method 
+        A.staticMethod() // call static method
 
-    __Access to super class context.__ You can call method declared in a parent class 
+    __Access to super class context.__ You can call method declared in a parent class
 
         // declare "A" class with one class method "a(p1,p2)"
         var A = zebra.Class([
-            function a(p1, p2) { ... }  
-        ]); 
-    
+            function a(p1, p2) { ... }
+        ]);
+
         // declare "B" class that inherits "A" class and overrides "a(p1,p2)" method
         var B = zebra.Class(A, [
-            function a(p1, p2) { 
+            function a(p1, p2) {
                 // call "a(p1,p2)" method implemented with "A" class
-                this.$super(p1,p2); 
-            }  
-        ]); 
+                this.$super(p1,p2);
+            }
+        ]);
 
  *
- *  One of the powerful feature of zebra easy OOP concept is possibility to instantiate 
- *  anonymous classes and interfaces. Anonymous class is an instance of an existing 
+ *  One of the powerful feature of zebra easy OOP concept is possibility to instantiate
+ *  anonymous classes and interfaces. Anonymous class is an instance of an existing
  *  class that can override the original class methods with own implementations, implements
  *  own list of interfaces. In other words the class instance customizes class definition
- *  for the particular instance of the class;  
+ *  for the particular instance of the class;
 
             // declare "A" class
             var A = zebra.Class([
@@ -531,8 +532,8 @@ function nProxyMethod(name) {
             ]);
             a.a() // return 2
 
- * @param {zebra.Class} [inheritedClass] an optional parent class to be inherited 
- * @param {zebra.Interface} [inheritedInterfaces*] an optional list of interfaces for 
+ * @param {zebra.Class} [inheritedClass] an optional parent class to be inherited
+ * @param {zebra.Interface} [inheritedInterfaces*] an optional list of interfaces for
  * the declared class to be extended
  * @param {Array} methods list of declared class methods. Can be empty array.
  * @return {Function} a class definition
@@ -577,10 +578,10 @@ pkg.Class = make_template(null, function() {
                 a = a[0];
 
                 // prepare arguments list to declare an anonymous class
-                var args = [ $template ],      // first of all the class has to inherit the original class 
+                var args = [ $template ],      // first of all the class has to inherit the original class
                     k = arguments.length - 2;
 
-                // collect interfaces the anonymous class has to implement 
+                // collect interfaces the anonymous class has to implement
                 for(; k >= 0 && pkg.instanceOf(arguments[k], pkg.Interface); k--) {
                     args.push(arguments[k]);
                 }
@@ -589,24 +590,24 @@ pkg.Class = make_template(null, function() {
                 args.push(arguments[arguments.length - 1]);
 
                 var cl = pkg.Class.apply(null, args),  // declare new anonymous class
-                    // create a function to instantiate an object that will be made the 
-                    // anonymous class instance. The intermediate object is required to 
-                    // call constructor properly since we have arguments as an array 
+                    // create a function to instantiate an object that will be made the
+                    // anonymous class instance. The intermediate object is required to
+                    // call constructor properly since we have arguments as an array
                     f  = function() {};
 
-                cl.$name = $template.$name; // the same class name for anonymous 
-                f.prototype = cl.prototype; // the same prototypes 
+                cl.$name = $template.$name; // the same class name for anonymous
+                f.prototype = cl.prototype; // the same prototypes
 
                 var o = new f();
 
-                // call constructor 
+                // call constructor
                 // use array copy instead of cloning with slice for performance reason
                 // (Array.prototype.slice.call(arguments, 0, k + 1))
                 var args = [];
                 for(var i=0; i < k + 1; i++) args[i] = arguments[i];
                 cl.apply(o, args);
-                
-                // set constructor field for consistency 
+
+                // set constructor field for consistency
                 o.constructor = cl;
                 return o;
             }
@@ -619,7 +620,7 @@ pkg.Class = make_template(null, function() {
 
     // prepare fields that caches the class properties
     $template.$propertyInfo = {};
-    
+
     // copy parents prototype methods and fields into
     // new class template
     $template.$parent = $parent;
@@ -636,7 +637,7 @@ pkg.Class = make_template(null, function() {
         }
     }
 
-    // extend method cannot be overridden 
+    // extend method cannot be overridden
     $template.prototype.extend = function() {
         var c = this.$clazz,
             l = arguments.length,
@@ -655,23 +656,23 @@ pkg.Class = make_template(null, function() {
         if (Array.isArray(f)) {
             for(var i=0; i < f.length; i++) {
                 var n = FN(f[i]);
-                
+
                 // map user defined constructor to internal constructor name
                 if (n == CDNAME) n = CNAME;
 
                 if (n === CNAME) {
-                    f[i].call(this);   // call constructor as an initializer 
+                    f[i].call(this);   // call constructor as an initializer
                     continue;
                 }
                 else {
-                    // clone method and put it in class instance 
-                    // if the method is not directly defined in 
+                    // clone method and put it in class instance
+                    // if the method is not directly defined in
                     // the class instance
-                    var pv = this[n]; 
+                    var pv = this[n];
                     if (pv != null && this.hasOwnProperty(n) === false)  {
                         this[n] = (pv.$clone$ != null ? pv.$clone$() : sProxyMethod(n, pv));
                     }
-                    
+
                     this[n] = createMethod(n, f[i], this, c);
                 }
             }
@@ -722,7 +723,7 @@ pkg.Class = make_template(null, function() {
     $template.prototype.$clazz = $template;
 
     $template.prototype.$this = function() {
-        return pkg.$caller.boundTo.prototype[CNAME].apply(this, arguments); 
+        return pkg.$caller.boundTo.prototype[CNAME].apply(this, arguments);
     };
 
     // check if the method has been already defined in the class
@@ -750,7 +751,7 @@ pkg.Class = make_template(null, function() {
             if (this._ == null) {
                 throw new Error(lans);
             }
-            this._.remove.apply(this._, arguments); 
+            this._.remove.apply(this._, arguments);
         };
     }
 
@@ -766,12 +767,12 @@ pkg.Class = make_template(null, function() {
         var arity = f.length, vv = obj[n];
 
         // if passed method has been already bound to
-        // create wrapper function as a clone function  
+        // create wrapper function as a clone function
         if (f.boundTo != null) {
             // clone method if it is bound to a class
             f = (function(f) {
-                return function() { return f.apply(this, arguments); }; 
-            })(f, arity, n); 
+                return function() { return f.apply(this, arguments); };
+            })(f, arity, n);
         }
 
         f.boundTo    = clazz;
@@ -790,37 +791,37 @@ pkg.Class = make_template(null, function() {
         }
 
         if (typeof vv === 'function') {
-            if (vv.$clone$ != null) {  // a proxy  method has been already defined 
-                
+            if (vv.$clone$ != null) {  // a proxy  method has been already defined
+
                 if (typeof vv.methods === "undefined") {  // single method proxy detected
-                     
-                    if (vv.f.boundTo != clazz || arity == vv.f.length) {  
-                                    // single method has been defined in a parent class or the single   
-                                    // method arity is the same to the new method arity than override 
+
+                    if (vv.f.boundTo != clazz || arity == vv.f.length) {
+                                    // single method has been defined in a parent class or the single
+                                    // method arity is the same to the new method arity than override
                                     // the single method with a new one
-                        
+
                         vv.f = f; // new single proxy method
                         return vv;
-                    } 
+                    }
 
                     // single method has been defined in this class and arity of
-                    // the single method differs from arity of the new method 
-                    // than overload the old method with new one method  
+                    // the single method differs from arity of the new method
+                    // than overload the old method with new one method
                     var sw = nProxyMethod(n);
                     sw.methods[vv.f.length] = vv.f;
                     sw.methods[arity] = f;
                     return sw;
                 }
-                
-                // multiple methods proxy detected 
+
+                // multiple methods proxy detected
                 vv.methods[arity] = f;
                 return vv;
             }
 
-            // old method has been defined directly in class prototype field         
+            // old method has been defined directly in class prototype field
             if (arity == vv.length) {  // the new method arity is the same to old method
-                                       // arity than override it with single method proxy 
-                
+                                       // arity than override it with single method proxy
+
                 return sProxyMethod(n, f);  // new single proxy method
             }
 
@@ -833,17 +834,17 @@ pkg.Class = make_template(null, function() {
             sw.methods[arity] = f;
             return sw;
         }
-        
+
         throw new Error("Method '" + n + "' clash with a property");
     }
 
     /**
-     * Extend existent class with the given methods and interfaces 
-     * Be  careful to use the method, pay attention the following facts: 
-     
+     * Extend existent class with the given methods and interfaces
+     * Be  careful to use the method, pay attention the following facts:
+
     - only the given class and the classes that inherit the class __after the extend method calling__ get the updates
-    - if the class gets method that already defined the old method will be overridden 
-    - **"$super"** cannot be called from the method the class is extended  
+    - if the class gets method that already defined the old method will be overridden
+    - **"$super"** cannot be called from the method the class is extended
 
      *
      * For example:
@@ -867,11 +868,11 @@ pkg.Class = make_template(null, function() {
             }
         ]);
 
-        // can call b() method we just added to the instance class 
+        // can call b() method we just added to the instance class
         a.b(); // show "EA:b()" message
         a.a(); // show "EA:a()" message
 
-     * @param {Array} methods array of the methods the class have to be 
+     * @param {Array} methods array of the methods the class have to be
      * extended with
      * @method extend
      */
@@ -889,7 +890,7 @@ pkg.Class = make_template(null, function() {
             if (n == CDNAME) n = CNAME;
 
             if (n[0] === "$") {
-                // populate prototype fields if a special method has been defined 
+                // populate prototype fields if a special method has been defined
                 if (n === "$prototype") {
                     var protoFields = {};
                     f.call(protoFields, this);  // call $prototype to populate methods in protoFields
@@ -912,8 +913,8 @@ pkg.Class = make_template(null, function() {
                     }
                     continue;
                 }
-                
-                // populate class level fields if a special method has been defined 
+
+                // populate class level fields if a special method has been defined
                 if (n === "$clazz") {
                     f.call(this);
                     continue;
@@ -926,9 +927,9 @@ pkg.Class = make_template(null, function() {
 
     extend.call($template, df);
 
-    // populate static fields 
+    // populate static fields
     // TODO: exclude the basic static methods and static constant
-    // static inheritance 
+    // static inheritance
     if ($parent != null) {
         for (var k in $parent) {
             if (k[0] != '$' && $parent.hasOwnProperty(k) && $template.hasOwnProperty(k) === false) {
@@ -952,9 +953,9 @@ pkg.Class = make_template(null, function() {
      // add extend later to avoid the method be inherited as a class static field
     $template.extend = extend;
 
-    // add parent class constructor(s) if the class doesn't declare own 
+    // add parent class constructor(s) if the class doesn't declare own
     // constructors
-    if ($template.$parent != null && 
+    if ($template.$parent != null &&
         $template.$parent.prototype[CNAME] != null &&
         $template.prototype[CNAME] == null)
     {
@@ -964,9 +965,9 @@ pkg.Class = make_template(null, function() {
     return $template;
 });
 
-var Class    = pkg.Class, 
-    $busy    = 1, 
-    $cachedO = pkg.$cachedO = {}, 
+var Class    = pkg.Class,
+    $busy    = 1,
+    $cachedO = pkg.$cachedO = {},
     $cachedE = pkg.$cachedE = [],
     $readyCallbacks = []; // stores method that wait for redness
 
@@ -974,8 +975,8 @@ pkg.$cacheSize = 7777;
 
 /**
  * Get an object by the given key from cache (and cached it if necessary)
- * @param  {String} key a key to an object. The key is hierarchical reference starting with the global 
- * name space as root. For instance "test.a" key will fetch $global.test.a object.  
+ * @param  {String} key a key to an object. The key is hierarchical reference starting with the global
+ * name space as root. For instance "test.a" key will fetch $global.test.a object.
  * @return {Object}  an object
  * @api  zebra.$cache
  */
@@ -989,32 +990,32 @@ pkg.$cache = function(key) {
         // read cached entry
         var e = $cachedO[key];
         if (e.i < ($cachedE.length-1)) { // cached entry is not last one
-            
+
             // move accessed entry to the list tail to increase its access weight
-            var pn = $cachedE[e.i + 1];  
+            var pn = $cachedE[e.i + 1];
             $cachedE[e.i]   = pn;
             $cachedE[++e.i] = key;
             $cachedO[pn].i--;
-        }   
+        }
         return e.o;
     }
 
-    var ctx = pkg.$global, i = 0, j = 0; 
+    var ctx = pkg.$global, i = 0, j = 0;
     for( ;ctx != null; ) {
         i = key.indexOf('.', j);
 
         if (i < 0) {
             ctx = ctx[key.substring(j, key.length)];
             break;
-        } 
+        }
 
         ctx = ctx[key.substring(j, i)];
         j = i + 1;
-    } 
+    }
 
     if (ctx != null) {
         if ($cachedE.length >= pkg.$cacheSize) {
-            // cache is full, replace first element with the new one 
+            // cache is full, replace first element with the new one
             var n = $cachedE[0];
             $cachedE[0]   = key;
             $cachedO[key] = { o:ctx, i:0 };
@@ -1033,7 +1034,7 @@ pkg.$cache = function(key) {
 /**
  * Get class by the given class name
  * @param  {String} name a class name
- * @return {Function} a class. Throws exception if the class cannot be 
+ * @return {Function} a class. Throws exception if the class cannot be
  * resolved by the given class name
  * @method forName
  * @api  zebra.forName()
@@ -1043,11 +1044,11 @@ Class.forName = function(name) {
 };
 
 /**
- * Test if the given object is instance of the specified class or interface. It is preferable 
- * to use this method instead of JavaScript "instanceof" operator whenever you are dealing with 
- * zebra classes and interfaces. 
- * @param  {Object} obj an object to be evaluated 
- * @param  {Function} clazz a class or interface 
+ * Test if the given object is instance of the specified class or interface. It is preferable
+ * to use this method instead of JavaScript "instanceof" operator whenever you are dealing with
+ * zebra classes and interfaces.
+ * @param  {Object} obj an object to be evaluated
+ * @param  {Function} clazz a class or interface
  * @return {Boolean} true if a passed object is instance of the given class or interface
  * @method instanceOf
  * @api  zebra.instanceOf()
@@ -1062,25 +1063,25 @@ pkg.instanceOf = function(obj, clazz) {
         return c != null && (c === clazz ||
                (typeof c.$parents !== 'undefined' && c.$parents.hasOwnProperty(clazz)));
     }
-    
+
     throw new Error("instanceOf(): null class");
 };
 
 /**
- * The method makes sure all variables, structures, elements are loaded 
- * and ready to be used. The result of the method execution is calling 
- * passed callback functions when the environment is ready. The goal of 
- * the method to provide safe place to run your code safely in proper 
+ * The method makes sure all variables, structures, elements are loaded
+ * and ready to be used. The result of the method execution is calling
+ * passed callback functions when the environment is ready. The goal of
+ * the method to provide safe place to run your code safely in proper
  * place and at proper time.
- 
+
         zebra.ready(function() {
             // run code here safely
             ...
         });
 
- * @param {Fucntion|Array} [f] a function or array of functions to be called 
+ * @param {Fucntion|Array} [f] a function or array of functions to be called
  * safely. If there no one callback method has been passed it causes busy
- * flag will be decremented.      
+ * flag will be decremented.
  * @method ready
  * @api  zebra.ready()
  */
@@ -1120,10 +1121,10 @@ pkg.package = function(name, callback) {
 pkg.busy = function() { $busy++; };
 
 /**
- * Dummy class that implements nothing but can be useful to instantiate 
+ * Dummy class that implements nothing but can be useful to instantiate
  * anonymous classes with some on "the fly" functionality:
- 
-        // instantiate and use zebra class with method "a()" implemented 
+
+        // instantiate and use zebra class with method "a()" implemented
         var ac = new zebra.Dummy([
              function a() {
                 ...
@@ -1132,7 +1133,7 @@ pkg.busy = function() { $busy++; };
 
         // use it
         ac.a();
- * 
+ *
  * @class zebra.Dummy
  */
 pkg.Dummy = Class([]);
@@ -1142,24 +1143,38 @@ pkg.isInBrowser = typeof navigator !== "undefined";
 pkg.isIE        = pkg.isInBrowser && (Object.hasOwnProperty.call(window, "ActiveXObject") || !!window.ActiveXObject);
 pkg.isFF        = pkg.isInBrowser && window.mozInnerScreenX != null;
 pkg.isTouchable = pkg.isInBrowser && ( (pkg.isIE === false && (!!('ontouchstart' in window ) || !!('onmsgesturechange' in window))) ||
-                                       (!!window.navigator['msPointerEnabled'] && !!window.navigator["msMaxTouchPoints"] > 0)); // IE10   
+                                       (!!window.navigator['msPointerEnabled'] && !!window.navigator["msMaxTouchPoints"] > 0)); // IE10
 
 pkg.isMacOS = pkg.isInBrowser && navigator.platform.toUpperCase().indexOf('MAC') !== -1;
 
-function complete() {
-    //!!! this code resolve names of classes  defined in a package
-    //    should be re-worked to use more generic and trust-able mechanism
+// TODO:
+//!!! this code resolve names of classes  defined in a package
+//    should be re-worked to use more generic and trust-able mechanism
+pkg.$resolveClassNames = function() {
     pkg(function(n, p) {
         function collect(pp, p) {
             for(var k in p) {
-                if (k[0] != "$" && p.hasOwnProperty(k) && zebra.instanceOf(p[k], Class)) {
-                    p[k].$name = pp ? pp + "." + k : k;
-                    collect(k, p[k]);
+                if (k[0] != "$" &&  p[k] != null && p[k].$name == null && p.hasOwnProperty(k) && zebra.instanceOf(p[k], Class)) {
+                    p[k].$name = pp != null ? pp + "." + k : k;
+                    collect(p[k].$name, p[k]);
                 }
             }
         }
         collect(null, p);
     });
+};
+
+function complete() {
+    // TODO:
+    //!!! this code resolve names of classes  defined in a package
+    //    should be re-worked to use more generic and trust-able mechanism
+    try {
+        pkg.$resolveClassNames();
+    }
+    catch(e) {
+        pkg.ready();
+        throw e;
+    }
     pkg.ready();
 }
 
@@ -1197,7 +1212,7 @@ if (pkg.isInBrowser) {
         /**
          * URL path
          * @attribute path
-         * @type {String} 
+         * @type {String}
          * @readOnly
          */
         this.path = m[3].replace(/[\/]+/g, "/");
@@ -1206,19 +1221,19 @@ if (pkg.isInBrowser) {
         /**
          * URL protocol
          * @attribute protocol
-         * @type {String} 
+         * @type {String}
          * @readOnly
          */
         this.protocol = (m[1] != null ? m[1].toLowerCase() : null);
 
         /**
-         * Host 
+         * Host
          * @attribute host
          * @type {String}
          * @readOnly
          */
         this.host = m[2];
-        
+
         /**
          * Query string
          * @attribute qs
@@ -1234,7 +1249,7 @@ if (pkg.isInBrowser) {
 
     /**
      * Get a parent URL of the URL
-     * @return  {zebra.URL} a parent URL 
+     * @return  {zebra.URL} a parent URL
      * @method getParentURL
      */
     pkg.URL.prototype.getParentURL = function() {
@@ -1244,7 +1259,7 @@ if (pkg.isInBrowser) {
     };
 
     /**
-     * Test if the given url is absolute 
+     * Test if the given url is absolute
      * @param  {u}  u an URL
      * @return {Boolean} true if the URL is absolute
      * @method isAbsolute
@@ -1256,7 +1271,7 @@ if (pkg.isInBrowser) {
     /**
      * Join the given relative path to the URL.
      * If the passed path starts from "/" character
-     * it will be joined without taking in account 
+     * it will be joined without taking in account
      * the URL path
      * @param  {String} p a relative path
      * @return {String} an absolute URL

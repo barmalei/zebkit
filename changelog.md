@@ -21,7 +21,7 @@
       - Use classAliases property to define short names for classes
       - Use variables property to define variables
       - Variables can be classes and structure
-      - loadByUrl can get callback as an argument  
+      - loadByUrl has been removed, use "load" method instead 
    
 **4.2014 (Luda)**
 

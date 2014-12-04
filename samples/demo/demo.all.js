@@ -34,7 +34,7 @@ zebra.package("ui.demo", function(pkg, Class) {
         function activated(b) {}
     ]);
 
-    new zebra.ui.Bag(zebra.ui).loadByUrl(pkg.$url.join("demo.json"));
+    new zebra.ui.Bag(zebra.ui).load(pkg.$url.join("demo.json"));
 });
 zebra.package("ui.demo", function(pkg, Class) {
 

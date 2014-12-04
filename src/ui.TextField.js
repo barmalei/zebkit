@@ -24,26 +24,6 @@ var ME = pkg.MouseEvent, KE = pkg.KeyEvent, PO = zebra.util.Position;
  * @extends zebra.ui.Label
  */
 pkg.TextField = Class(pkg.Label, [
-    function $clazz() {
-        this.TextPosition = Class(PO, [
-            function (render){
-                  this.$super(render);
-                  render.target.bind(this);
-            },
-
-            function $prototype() {
-                this.textUpdated = function(src, b, off, size, startLine, lines){
-                    if (b === true) this.inserted(off, size);
-                    else this.removed(off, size);
-                };
-            },
-
-            function destroy() {
-                this.metrics.target.unbind(this);
-            }
-        ]);
-    },
-
     function $prototype() {
         /**
          * Selection color
@@ -98,6 +78,13 @@ pkg.TextField = Class(pkg.Label, [
             if (period != this.blinkingPeriod) {
                 this.blinkingPeriod = period;
                 this.repaintCursor();
+            }
+        };
+
+        this.textUpdated = function(src, b, off, size, startLine, lines){
+            if (this.position != null) {
+                if (b === true) this.position.inserted(off, size);
+                else            this.position.removed(off, size);
             }
         };
 
@@ -196,7 +183,7 @@ pkg.TextField = Class(pkg.Label, [
         };
 
         this.startSelection = function(){
-            if (this.startOff < 0){
+            if (this.startOff < 0 && this.position != null){
                 var pos = this.position;
                 this.endLine = this.startLine = pos.currentLine;
                 this.endCol = this.startCol = pos.currentCol;
@@ -223,7 +210,9 @@ pkg.TextField = Class(pkg.Label, [
             if (b) this.startSelection();
             var p = this.findNextWord(this.view.target, this.position.currentLine,
                                                         this.position.currentCol, d);
-            if(p != null) this.position.setRowCol(p[0], p[1]);
+            if (p != null) {
+                this.position.setRowCol(p[0], p[1]);
+            }
         };
 
         this.nextPage_command = function(b, d) {
@@ -232,60 +221,60 @@ pkg.TextField = Class(pkg.Label, [
         };
 
         this.keyPressed = function(e) {
-            if (this.isFiltered(e)) return;
+            if (this.isFiltered(e) === false)  {
+                var position    = this.position,
+                    col         = position.currentCol,
+                    isShiftDown = e.isShiftPressed(),
+                    line        = position.currentLine,
+                    foff        = 1;
 
-            var position    = this.position,
-                col         = position.currentCol,
-                isShiftDown = e.isShiftPressed(),
-                line        = position.currentLine,
-                foff        = 1;
+                if (isShiftDown && (e.ch == KE.CHAR_UNDEFINED || e.ch == null)) {
+                    this.startSelection();
+                }
 
-            if (isShiftDown && (e.ch == KE.CHAR_UNDEFINED || e.ch == null)) {
-                this.startSelection();
-            }
-
-            switch(e.code)
-            {
-                case KE.DOWN : position.seekLineTo(PO.DOWN);break;
-                case KE.UP   : position.seekLineTo(PO.UP);break;
-                case KE.LEFT : foff = -1;
-                case KE.RIGHT:
-                    if (e.isControlPressed() === false && e.isCmdPressed() === false) {
-                        position.seek(foff);
-                    }
-                    break;
-                case KE.END:
-                    if (e.isControlPressed()) {
-                        position.seekLineTo(PO.DOWN, position.metrics.getLines() - line - 1);
-                    }
-                    else position.seekLineTo(PO.END);
-                    break;
-                case KE.HOME:
-                    if (e.isControlPressed()) position.seekLineTo(PO.UP, line);
-                    else position.seekLineTo(PO.BEG);
-                    break;
-                case KE.DELETE:
-                    if (this.hasSelection() && this.isEditable === true) {
-                        this.removeSelected();
-                    }
-                    else {
-                        if (this.isEditable === true) this.remove(position.offset, 1);
-                    } break;
-                case KE.BSPACE:
-                    if (this.isEditable === true) {
-                        if (this.hasSelection()) this.removeSelected();
-                        else {
-                            if (this.isEditable === true && position.offset > 0){
-                                position.seek(-1);
-                                this.remove(position.offset, 1);
-                            }
+                switch(e.code)
+                {
+                    case KE.DOWN : position.seekLineTo(PO.DOWN);break;
+                    case KE.UP   : position.seekLineTo(PO.UP);break;
+                    case KE.LEFT : foff = -1;
+                    case KE.RIGHT:
+                        if (e.isControlPressed() === false && e.isCmdPressed() === false) {
+                            position.seek(foff);
                         }
-                    } break;
-                default: return ;
-            }
+                        break;
+                    case KE.END:
+                        if (e.isControlPressed()) {
+                            position.seekLineTo(PO.DOWN, position.metrics.getLines() - line - 1);
+                        }
+                        else position.seekLineTo(PO.END);
+                        break;
+                    case KE.HOME:
+                        if (e.isControlPressed()) position.seekLineTo(PO.UP, line);
+                        else position.seekLineTo(PO.BEG);
+                        break;
+                    case KE.DELETE:
+                        if (this.hasSelection() && this.isEditable === true) {
+                            this.removeSelected();
+                        }
+                        else {
+                            if (this.isEditable === true) this.remove(position.offset, 1);
+                        } break;
+                    case KE.BSPACE:
+                        if (this.isEditable === true) {
+                            if (this.hasSelection()) this.removeSelected();
+                            else {
+                                if (this.isEditable === true && position.offset > 0){
+                                    position.seek(-1);
+                                    this.remove(position.offset, 1);
+                                }
+                            }
+                        } break;
+                    default: return ;
+                }
 
-            if (isShiftDown === false) {
-                this.clearSelection();
+                if (isShiftDown === false) {
+                    this.clearSelection();
+                }
             }
         };
 
@@ -299,7 +288,9 @@ pkg.TextField = Class(pkg.Label, [
          */
         this.isFiltered = function(e){
             var code = e.code;
-            return code == KE.SHIFT || code == KE.CTRL || code == KE.TAB || code == KE.ALT || (e.mask & KE.M_ALT) > 0;
+            return code == KE.SHIFT || code == KE.CTRL ||
+                   code == KE.TAB   || code == KE.ALT  ||
+                   (e.mask & KE.M_ALT) > 0;
         };
 
         /**
@@ -341,7 +332,10 @@ pkg.TextField = Class(pkg.Label, [
                     if (this.undoCounter < this.history.length) this.undoCounter++;
                 }
 
-                var old = this.position.offset, m = this.view.target, pl = m.getLines();
+                var old = this.position.offset,
+                    m   = this.view.target,
+                    pl  = m.getLines();
+
                 m.write(s, pos);
                 if (m.getLines() != pl || this.position.offset == old) {
                     this.repaint();
@@ -356,7 +350,8 @@ pkg.TextField = Class(pkg.Label, [
                                               0,
                                               this.position.currentCol) + this.getLeft();
 
-                this.curY = this.position.currentLine * (r.getLineHeight() + r.getLineIndent()) + this.getTop();
+                this.curY = this.position.currentLine * (r.getLineHeight() + r.getLineIndent()) +
+                            this.getTop();
             }
             this.curH = r.getLineHeight() - 1;
         };
@@ -375,7 +370,7 @@ pkg.TextField = Class(pkg.Label, [
             if (this.position.offset >= 0 &&
                 this.curView != null      &&
                 this.blinkMe              &&
-                (this.hasFocus() || this.$forceToShow == true))
+                (this.hasFocus() || this.$forceToShow == true)) // TODO: $forceToShow is akward solution
             {
                 this.curView.paint(g, this.curX, this.curY,
                                       this.curW, this.curH, this);
@@ -449,7 +444,9 @@ pkg.TextField = Class(pkg.Label, [
                 this.blinkMeCounter = 0;
                 this.blinkMe = true;
 
-                var lineHeight = this.view.getLineHeight(), top = this.getTop();
+                var lineHeight = this.view.getLineHeight(),
+                    top        = this.getTop();
+
                 this.scrollManager.makeVisible(this.curX, this.curY, this.curW, lineHeight);
                 if (pl >= 0) {
                     if (this.startOff >= 0){
@@ -468,7 +465,8 @@ pkg.TextField = Class(pkg.Label, [
                     if (y1 < top) y1 = top;
 
                     if (y1 < this.height - bottom){
-                        var h = (((pl > position.currentLine) ? pl : position.currentLine) - minUpdatedLine + 1) * (lineHeight + li);
+                        var h = ((pl > position.currentLine ? pl
+                                                            : position.currentLine) - minUpdatedLine + 1) * (lineHeight + li);
                         if (y1 + h > this.height - bottom) {
                             h = this.height - bottom - y1;
                         }
@@ -483,7 +481,8 @@ pkg.TextField = Class(pkg.Label, [
 
         this.paintOnTop = function(g) {
             if (this.hint && this.hasFocus() === false && this.getValue() == '') {
-                this.hint.paint(g, this.getLeft(), this.height - this.getBottom() - this.hint.getLineHeight(),
+                this.hint.paint(g, this.getLeft(),
+                                   this.height - this.getBottom() - this.hint.getLineHeight(),
                                 this.width, this.height, this);
             }
         };
@@ -500,7 +499,7 @@ pkg.TextField = Class(pkg.Label, [
         this.setHint = function(hint, font, color) {
             this.hint = hint;
             if (hint != null && zebra.instanceOf(hint, pkg.View) === false) {
-                this.hint = new pkg.TextRender(hint);
+                this.hint = new pkg.StringRender(hint);
                 font  = font  ? font  : pkg.TextField.hintFont;
                 color = color ? color : pkg.TextField.hintColor;
                 this.hint.setColor(color);
@@ -650,10 +649,6 @@ pkg.TextField = Class(pkg.Label, [
                    (((height + indent) % (textHeight + indent) > indent) ? 1 : 0);
         };
 
-        this.createPosition = function (r){
-            return new this.$clazz.TextPosition(r);
-        };
-
         this.clipPaste = function(txt){
             if (txt != null){
                 this.removeSelected();
@@ -680,21 +675,13 @@ pkg.TextField = Class(pkg.Label, [
             if (this.position != p){
                 if (this.position != null){
                     this.position.unbind(this);
-                    if (this.position.destroy != null) this.position.destroy();
                 }
                 this.position = p;
+                if (this.position != null) {
                 this.position.bind(this);
+                }
                 this.invalidate();
             }
-        };
-
-        /**
-         * Set the text field text model
-         * @param  {zebra.data.TextModel} m a text model to be set
-         * @method setModel
-         */
-        this.setModel = function(m) {
-            this.setView(new pkg.TextRender(m));
         };
 
         /**
@@ -788,12 +775,17 @@ pkg.TextField = Class(pkg.Label, [
                 g.translate(sx, sy);
                 //!!! this code can be found in ViewPan.paint()
 
-                this.view.paint(g, l, t, this.width  - l - this.getRight(),
-                                         this.height - t - this.getBottom(), this);
+                this.view.paint(g, l, t,
+                                this.width  - l - this.getRight(),
+                                this.height - t - this.getBottom(), this);
                 this.drawCursor(g);
-                g.translate( -sx,  -sy);
+
             }
-            catch(e) { g.translate( -sx,  -sy); throw e; }
+            catch(e) {
+                g.translate( -sx,  -sy);
+                throw e;
+            }
+            g.translate( -sx,  -sy);
         };
     },
 
@@ -829,8 +821,21 @@ pkg.TextField = Class(pkg.Label, [
 
     function setView(v){
         if (v != this.view) {
+            if (this.view != null && this.view.target != null) {
+                this.view.target.unbind(this);
+            }
+
             this.$super(v);
-            this.setPosition(this.createPosition(this.view));
+            if (this.position == null) {
+                this.setPosition(new PO(this.view));
+            }
+            else {
+                this.position.setMetric(this.view);
+            }
+
+            if (this.view != null && this.view.target != null) {
+                this.view.target.bind(this);
+            }
         }
     },
 
@@ -842,7 +847,9 @@ pkg.TextField = Class(pkg.Label, [
     function setValue(s) {
         var txt = this.getValue();
         if (txt != s){
-            this.position.setOffset(0);
+            if (this.position != null) {
+                this.position.setOffset(0);
+            }
             this.scrollManager.scrollTo(0, 0);
             this.$super(s);
         }

@@ -1102,7 +1102,7 @@ pkg.Menu = Class(pkg.CompList, [
             }
         ]);
 
-        this.Line     = Class(pkg.Line,     []);
+        this.Line = Class(pkg.Line, []);
         this.Line.prototype.$isDecorative = true;
     },
 

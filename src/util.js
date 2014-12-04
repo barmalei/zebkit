@@ -26,10 +26,161 @@ pkg.newInstance = function(clazz, args) {
     return new clazz();
 };
 
-
 function hex(v) {
-    return (v < 16) ? ["0", v.toString(16)].join('') :  v.toString(16);
+    return (v < 16) ? "0" + v.toString(16) : v.toString(16);
 }
+
+
+/**
+ * Sequential tasks runner. Allows developers to execute number of tasks (async and sync) in the
+ * the order they have been called by runner:
+
+        var r = new zebra.util.Runner();
+
+        r.run(function() {
+            // call three asynchronous HTTP GET requests to read three files
+            zebra.io.GET("http://test.com/a.txt", this.join());
+            zebra.io.GET("http://test.com/b.txt", this.join());
+            zebra.io.GET("http://test.com/c.txt", this.join());
+        })
+        .
+        run(function(r1, r2, r3) {
+            // handle completely read on previous step files
+            r1.responseText  // "a.txt" file content
+            r2.responseText  // "b.txt" file content
+            r3.responseText  // "c.txt" file content
+        })
+        .
+        error(function(e) {
+            // called when an error has occurred
+            ...
+        });
+
+
+ * @class zebra.ui.Runner
+ */
+pkg.Runner = function() {
+    this.$tasks      = [];
+    this.$task       = null;
+    this.$results    = [];
+    this.$hasError   = false;
+    this.$errorCause = null;
+
+    this.run = function(body) {
+        return this.$run(function() {
+            var times = 0,
+                $this = this,
+                ctx   = {
+                    join: function() {
+                        var index    = times++,
+                            $results = [];
+
+                        return function() {
+                            $results[index] = undefined;
+
+                            // since error can occur times can be reset to 0, so it has to be checked
+                            if (times > 0) {
+                                if (arguments.length === 1) {
+                                    $results[index] = arguments[0];
+                                }
+                                else {
+                                    if (arguments.length > 1) {
+                                        var r = [];
+                                        for(var i = 0; i < arguments.length; i++) {
+                                            r.push(arguments[i]);
+                                        }
+                                        $results[index] = r;
+                                    }
+                                }
+
+                                if (--times === 0) {
+                                    $this.$task = null;
+                                    if ($this.$schedule.apply($this, $results) == null) {
+                                        $results = []; // clear
+                                    }
+                                }
+                            }
+                        }
+                    },
+
+                    error : function(e) {
+                        times = 0;
+                        $this.$error(e);
+                    }
+                },
+                r = null;
+
+            try {
+                r = body.apply(ctx, arguments);
+            }
+            catch(e) {
+                times = 0;
+                this.$error(e);
+                return;
+            }
+
+            if (times === 0 && this.$hasError === false) {
+                this.$task = null;
+                this.$schedule.call(this, r);
+            }
+        });
+    };
+
+    this.error = function(callback) {
+        var $this = this,
+            f = function() {
+                $this.$task = null;
+                if ($this.$hasError === true) {
+                    $this.$hasError = false;
+                    var e = $this.$errorCause;
+                    $this.$errorCause = null;
+                    callback.call($this, e);
+                }
+                $this.$schedule();
+            };
+        f.$errorHandler = true;
+        return this.$run(f);
+    };
+
+    this.$run = function(f) {
+        this.$tasks.push(f);
+        //this.$schedule();
+        return this;
+    };
+
+    this.$schedule = function() {
+        if (this.$tasks.length > 0 && this.$task == null) {
+            if (this.$hasError === true) {
+                var t =  null;
+                while(this.$tasks.length > 0) {
+                    var t = this.$tasks.shift();
+                    if (t.$errorHandler === true) {
+                        t.call(this);
+                        break;
+                    }
+                }
+            }
+            else {
+                this.$task = this.$tasks.shift();
+                this.$task.apply(this, arguments);
+                return this.$task;
+            }
+        }
+
+        return null;
+    };
+
+    this.$error = function(e) {
+        if (this.$hasError === true) {
+            throw new Error();
+        }
+        this.$hasError   = true;
+        this.$errorCause = e;
+        this.$task       = null;
+        this.$schedule();
+    };
+};
+
 
 /**
  * Find by xpath-like path an element in a tree-like structure. The method is flexible way to look up
@@ -124,7 +275,6 @@ pkg.findInTree = function(root, path, eq, cb) {
         }
 
         c += m[0].length;
-
 
         if (m[3] && m[5][0] == "'") m[5] = m[5].substring(1, m[5].length - 1);
         res.push(m);
@@ -1156,7 +1306,7 @@ pkg.Bag = zebra.Class([
         /**
          * Get a property value. The property name can point to embedded fields:
          *
-         *      var bag = new Bag().loadByUrl("my.json");
+         *      var bag = new Bag().load("my.json");
          *      bag.get("a.b.c");
          *
          * Also the special property type is considered - factory. Access to such property
@@ -1174,54 +1324,11 @@ pkg.Bag = zebra.Class([
             for(var i = 0; i < n.length; i++) {
                 v = v[n[i]];
                 if (typeof v === "undefined") {
-                    if (this.ignoreNonExistentKeys) return v;
+                    if (this.ignoreNonExistentKeys === true) return v;
                     throw new Error("Property '" + key + "' not found");
                 }
             }
             return v != null && v.$new ? v.$new() : v;
-        };
-
-        /**
-         * Merge content of the specified object with the specified value and return
-         * a merge result.
-         * @param  {Object} o an object with that the value is merged
-         * @param  {Object} v a value to be merged
-         * @return {Object} a merge result
-         * @protected
-         * @method mergeContent
-         */
-        this.mergeContent = function(o, v) {
-            if (v === null || zebra.isNumber(v) || zebra.isBoolean(v) || zebra.isString(v)) {
-                return v;
-            }
-
-            if (Array.isArray(v)) {
-                if (this.concatArrays === false) {
-                    return v;
-                }
-
-                if (o && Array.isArray(o) === false) {
-                    throw new Error("Array merging type inconsistency: " + o);
-                }
-                return o ? o.concat(v) : v;
-            }
-
-            for (var k in v) {
-                if (v.hasOwnProperty(k)) {
-                    if (k[0] == '?') {
-                        eval("var x=" + k.substring(1).trim());
-
-                        if (x) {
-                            o = this.mergeContent(o, v[k]);
-                        }
-                        continue;
-                    }
-
-                    o[k] = o.hasOwnProperty(k) ? this.mergeContent(o[k], v[k])
-                                               : v[k];
-                }
-            }
-            return o;
         };
 
         // create, merge to o and return a value by the given
@@ -1275,7 +1382,7 @@ pkg.Bag = zebra.Class([
                                                            : $this.resolveClass(className);
                                 }
                             ]);
-                        bag.loadByUrl(d.substring(2, d.length-1));
+                        bag.load(d.substring(2, d.length-1));
                         return bag.root;
                     }
 
@@ -1334,6 +1441,14 @@ pkg.Bag = zebra.Class([
 
             for (var k in d) {
                 if (d.hasOwnProperty(k)) {
+                    if (k[0] == '?') {
+                        eval("var xx=" + k.substring(1).trim() + ";");
+                        if (xx) {
+                            o = this.mergeObjWithDesc(o, d[k]);
+                        }
+                        continue;
+                    }
+
                     // special field name that says to call method to create a
                     // value by the given description
                     if (k[0] == ".") {
@@ -1414,65 +1529,53 @@ pkg.Bag = zebra.Class([
          * Load the given JSON content and parse if the given flag is true. The passed
          * boolean flag controls parsing. The flag is used to load few JSON. Before
          * parsing the JSONs are merged and than the final result is parsed.
-         * @param  {String} s a JSON content to be loaded
-         * @param  {Boolean} [b] true if the loading has to be completed
+         * @param  {String|Object} s a JSON content to be loaded
          * @return {zebra.util.Bag} a reference to the bag class instance
          * @method load
          */
-        this.load = function (s, b) {
-            if (this.isloaded === true) {
-                throw new Error("Load is done");
-            }
-
-            if (b == null) {
-                b = true;
-            }
-
+        this.load = function(s) {
             var content = null;
-            try { content = zebra.isString(s) ? JSON.parse(s) : s; }
-            catch(e) {
-                throw new Error("JSON loading error: " + e);
+
+            if (zebra.isString(s)) {
+                s = s.trim();
+
+                // detect if the passed string is URL
+                if ((s[0] != '[' || s[s.length - 1] != ']') &&
+                    (s[0] != '{' || s[s.length - 1] != '}')   )
+                {
+                    var p = s.toString();
+                    p = p + (p.lastIndexOf("?") > 0 ? "&" : "?") + (new Date()).getTime().toString();
+
+                    this.$url = s.toString();
+                    s = zebra.io.GET(p);
+                }
+
+                try {
+                    content = JSON.parse(s);
+                }
+                catch(e) {
+                    throw new Error("JSON format error");
+                }
+            }
+            else {
+                content = s;
             }
 
-            this.content = this.mergeContent(this.content, content);
-            if (this.contentLoaded) this.contentLoaded(this.content);
-            if (b === true) this.end();
+            if (content.hasOwnProperty("classAliases")) {
+                var vars = content.classAliases;
+                for(var k in vars) {
+                    this.classAliases[k] = Class.forName(vars[k].trim());
+                }
+                delete content.classAliases;
+            }
+
+            if (content.hasOwnProperty("variables")) {
+                this.variables = this.mergeObjWithDesc(this.variables, content.variables);
+                delete content.variables;
+            }
+
+            this.root = this.mergeObjWithDesc(this.root, content);
             return this;
-        };
-
-        /**
-         * Callback method that can be implemented to be called when
-         * the bag JSON has been completely loaded but not parsed.
-         * The method can be useful for custom bag implementation
-         * that need to perform extra handling over the parsed JSON
-         * content
-         * @param {Object} content a parsed JSON content
-         * @method contentLoaded
-         */
-
-        /**
-         * End loading JSONs and parse final result
-         * @method end
-         */
-        this.end = function() {
-            if (typeof this.isloaded === "undefined") {
-                this.isloaded = true;
-
-                if (this.content.hasOwnProperty("classAliases")) {
-                    var vars = this.content.classAliases;
-                    for(var k in vars) {
-                        this.classAliases[k] = Class.forName(vars[k].trim());
-                    }
-                    delete this.content.classAliases;
-                }
-
-                if (this.content.hasOwnProperty("variables")) {
-                    this.variables = this.mergeObjWithDesc(this.variables, this.content.variables);
-                    delete this.content.variables;
-                }
-
-                this.root = this.mergeObjWithDesc(this.root, this.content);
-            }
         };
 
         this.resolveVar = function(name) {
@@ -1483,25 +1586,6 @@ pkg.Bag = zebra.Class([
         this.expr = function(e) {
             eval("var r="+e);
             return r;
-        };
-
-        /**
-         * Load JSON by the given URL
-         * @param  {String} url an URL to a JSON
-         * @param  {Boolean} [b] true if the loading has to be completed
-         * @return {zebra.util.Bag} a reference to the bag class instance
-         * @method loadByUrl
-         */
-        this.loadByUrl = function(url, b) {
-            var p = url.toString();
-            p = p + (p.lastIndexOf("?") > 0 ? "&" : "?") + (new Date()).getTime().toString();
-
-            if (b == null) {
-                b = true;
-            }
-
-            this.$url = url;
-            return this.load(zebra.io.GET(p), b);
         };
 
         this[''] = function (root) {
@@ -1519,8 +1603,15 @@ pkg.Bag = zebra.Class([
              * @type {Object}
              * @default {}
              */
-            this.root = root == null ? {} : root;
-            this.content = {};
+            this.root = (root == null ? {} : root);
+
+            /**
+             * Map of classes
+             * @attribute classAliases
+             * @protected
+             * @type {Object}
+             * @default {}
+             */
             this.classAliases = {};
         };
     }

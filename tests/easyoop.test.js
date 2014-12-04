@@ -2162,7 +2162,46 @@ if (typeof(zebra) === "undefined") {
             assert(b2.a, 100);
             assert(b1.m(), 2);
             assert(b2.m(), 2);
-        }
+        },
 
+        function test_class_names() {
+            zebra.package("test", function(pkg) {
+                pkg.A = Class([
+                    function $clazz() {
+                        this.B = Class([
+                            function $clazz() {
+                                this.A = Class([]);
+                            }
+                        ]);
+
+                        this.a = 100;
+                    }
+                ]);
+
+                pkg.AA = Class(pkg.A, [
+                    function $clazz() {
+                        this.BB = Class([
+                            function $clazz() {
+                                this.A = Class([]);
+                            }
+                        ]);
+                    }
+                ]);
+            });
+
+            zebra.$resolveClassNames();
+
+            assert(zebra.test.A.$name, "A");
+            assert(zebra.test.A.B.$name, "A.B");
+            assert(zebra.test.A.B.A.$name, "A.B.A");
+            assert(zebra.test.A.a, 100);
+
+            assert(zebra.test.AA.$name, "AA");
+            assert(zebra.test.AA.a, 100);
+            assert(zebra.test.AA.BB.$name, "AA.BB");
+            assert(zebra.test.AA.BB.A.$name, "AA.BB.A");
+            assert(zebra.test.AA.B.$name, "A.B");
+            assert(zebra.test.AA.B.A.$name, "A.B.A");
+        }
     );
 })();

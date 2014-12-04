@@ -305,7 +305,9 @@
         }
 
         var args = Array.prototype.slice.call(arguments);
-        if (args.length > 0 && zebra.isString(args[0])) title = args.shift();
+        if (args.length > 0 && zebra.isString(args[0])) {
+            title = args.shift();
+        }
 
         try {
             pkg.print("Running " + args.length + " test cases "  + (title !== null? "from '" + title + "' test suite" : "") + " :");
@@ -334,9 +336,6 @@
                     }
                     else {
                         pkg.error("" + k + " (unexpected error) " + (e.stack ? e.stack : e));
-                        // if (e.rhinoException)  {
-                        //     e.rhinoException.printStackTrace();
-                        // }
                         throw e;
                     }
                 }
@@ -345,8 +344,7 @@
             if (c === 0) {
                 pkg.warn("No test case to be run was found");
             }
-            else
-            {
+            else {
                 if (sk > 0) {
                     pkg.warn("" + sk + " test cases have been skipped");
                 }

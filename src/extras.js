@@ -177,7 +177,7 @@
         }
     ]);
 
-    // TODO: this is tne new code that has to be documented covered with test cases
+    // TODO: this is the new code that has to be documented, covered with test cases
     // and most likely the code has  to replace tasks !
     zebra.Runner = function() {
         this.$tasks   = [];

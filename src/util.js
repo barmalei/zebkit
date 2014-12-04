@@ -67,21 +67,23 @@ pkg.Runner = function() {
     this.$errorCause = null;
 
     this.run = function(body) {
-        return this.$run(function() {
+        var f = function() {
+            // call a task, clean previous results
+            this.$results = [];
+
             var times = 0,
                 $this = this,
                 ctx   = {
                     join: function() {
-                        var index    = times++,
-                            $results = [];
+                        var index = times++;
 
                         return function() {
-                            $results[index] = undefined;
+                            $this.$results[index] = undefined;
 
                             // since error can occur times can be reset to 0, so it has to be checked
                             if (times > 0) {
                                 if (arguments.length === 1) {
-                                    $results[index] = arguments[0];
+                                    $this.$results[index] = arguments[0];
                                 }
                                 else {
                                     if (arguments.length > 1) {
@@ -89,15 +91,13 @@ pkg.Runner = function() {
                                         for(var i = 0; i < arguments.length; i++) {
                                             r.push(arguments[i]);
                                         }
-                                        $results[index] = r;
+                                        $this.$results[index] = r;
                                     }
                                 }
 
                                 if (--times === 0) {
                                     $this.$task = null;
-                                    if ($this.$schedule.apply($this, $results) == null) {
-                                        $results = []; // clear
-                                    }
+                                    $this.$schedule();
                                 }
                             }
                         }
@@ -107,23 +107,30 @@ pkg.Runner = function() {
                         times = 0;
                         $this.$error(e);
                     }
-                },
+                };
                 r = null;
 
             try {
                 r = body.apply(ctx, arguments);
             }
             catch(e) {
+                this.$results = [];
                 times = 0;
                 this.$error(e);
                 return;
             }
 
+            // means we call synchroniouse method
             if (times === 0 && this.$hasError === false) {
                 this.$task = null;
-                this.$schedule.call(this, r);
+                if (r != undefined) this.$results[0] = r;
+                this.$schedule();
             }
-        });
+        }
+
+        this.$tasks.push(f);
+        this.$schedule();
+        return this;
     };
 
     this.error = function(callback) {
@@ -144,7 +151,7 @@ pkg.Runner = function() {
 
     this.$run = function(f) {
         this.$tasks.push(f);
-        //this.$schedule();
+        this.$schedule();
         return this;
     };
 
@@ -162,12 +169,9 @@ pkg.Runner = function() {
             }
             else {
                 this.$task = this.$tasks.shift();
-                this.$task.apply(this, arguments);
-                return this.$task;
+                this.$task.apply(this, this.$results);
             }
         }
-
-        return null;
     };
 
     this.$error = function(e) {
@@ -176,6 +180,7 @@ pkg.Runner = function() {
         }
         this.$hasError   = true;
         this.$errorCause = e;
+        this.$results    = [];
         this.$task       = null;
         this.$schedule();
     };

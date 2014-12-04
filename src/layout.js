@@ -1100,11 +1100,14 @@ pkg.BorderLayout = Class(L, [
 pkg.RasterLayout = Class(L, [
     function $prototype() {
         this.calcPreferredSize = function(c){
-            var m = { width:0, height:0 }, b = (this.flag & pkg.USE_PS_SIZE) > 0;
+            var m = { width:0, height:0 },
+                b = (this.flag & pkg.USE_PS_SIZE) > 0;
+
             for(var i = 0;i < c.kids.length; i++ ){
                 var el = c.kids[i];
                 if (el.isVisible === true){
-                    var ps = b ? el.getPreferredSize() : { width:el.width, height:el.height },
+                    var ps = b ? el.getPreferredSize()
+                               : { width:el.width, height:el.height },
                         px = el.x + ps.width, py = el.y + ps.height;
                     if (px > m.width) m.width = px;
                     if (py > m.height) m.height = py;

@@ -1108,7 +1108,9 @@ pkg.RasterLayout = Class(L, [
                 if (el.isVisible === true){
                     var ps = b ? el.getPreferredSize()
                                : { width:el.width, height:el.height },
-                        px = el.x + ps.width, py = el.y + ps.height;
+                        px = el.x + ps.width,
+                        py = el.y + ps.height;
+
                     if (px > m.width) m.width = px;
                     if (py > m.height) m.height = py;
                 }

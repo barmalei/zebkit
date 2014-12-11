@@ -30,7 +30,6 @@ function hex(v) {
     return (v < 16) ? "0" + v.toString(16) : v.toString(16);
 }
 
-
 /**
  * Sequential tasks runner. Allows developers to execute number of tasks (async and sync) in the
  * the order they have been called by runner:
@@ -52,7 +51,7 @@ function hex(v) {
         })
         .
         error(function(e) {
-            // called when an error has occurred
+            // called when an exception has occurred
             ...
         });
 
@@ -61,128 +60,100 @@ function hex(v) {
  */
 pkg.Runner = function() {
     this.$tasks      = [];
-    this.$task       = null;
     this.$results    = [];
-    this.$hasError   = false;
-    this.$errorCause = null;
+    this.$error      = null;
+    this.$busy       = 0;
 
     this.run = function(body) {
-        var f = function() {
-            // call a task, clean previous results
+        this.$tasks.push(function() {
+            // clean results of execution of a previous task
             this.$results = [];
+            this.$busy    = 0;
 
-            var times = 0,
-                $this = this,
-                ctx   = {
-                    join: function() {
-                        var index = times++;
+            if (this.$error == null) {
+                var r = null;
+                try {
+                    r = body.apply(this, arguments);
+                }
+                catch(e) {
+                    this.fireError(e);
+                }
 
-                        return function() {
-                            $this.$results[index] = undefined;
-
-                            // since error can occur times can be reset to 0, so it has to be checked
-                            if (times > 0) {
-                                if (arguments.length === 1) {
-                                    $this.$results[index] = arguments[0];
-                                }
-                                else {
-                                    if (arguments.length > 1) {
-                                        var r = [];
-                                        for(var i = 0; i < arguments.length; i++) {
-                                            r.push(arguments[i]);
-                                        }
-                                        $this.$results[index] = r;
-                                    }
-                                }
-
-                                if (--times === 0) {
-                                    $this.$task = null;
-                                    $this.$schedule();
-                                }
-                            }
-                        }
-                    },
-
-                    error : function(e) {
-                        times = 0;
-                        $this.$error(e);
+                // this.$busy === 0 means we have called synchronous task
+                if (this.$busy === 0 && this.$error == null) {
+                    // check if the task returned result
+                    if (typeof r !== "undefined") {
+                        this.$results[0] = r;
                     }
-                };
-                r = null;
-
-            try {
-                r = body.apply(ctx, arguments);
+                }
             }
-            catch(e) {
-                this.$results = [];
-                times = 0;
-                this.$error(e);
-                return;
-            }
+            this.$schedule();
+        });
 
-            // means we call synchroniouse method
-            if (times === 0 && this.$hasError === false) {
-                this.$task = null;
-                if (r != undefined) this.$results[0] = r;
-                this.$schedule();
-            }
-        }
-
-        this.$tasks.push(f);
         this.$schedule();
         return this;
     };
 
-    this.error = function(callback) {
-        var $this = this,
-            f = function() {
-                $this.$task = null;
-                if ($this.$hasError === true) {
-                    $this.$hasError = false;
-                    var e = $this.$errorCause;
-                    $this.$errorCause = null;
-                    callback.call($this, e);
-                }
-                $this.$schedule();
-            };
-        f.$errorHandler = true;
-        return this.$run(f);
+    this.fireError = function(e) {
+        if (this.$error == null)  {
+            this.$busy    = 0;
+            this.$error   = e;
+            this.$results = [];
+        }
     };
 
-    this.$run = function(f) {
-        this.$tasks.push(f);
+    this.join = function() {
+        var $this = this,
+            index = this.$busy++;
+
+        return function() {
+            $this.$results[index] = [];
+
+            // since error can occur and times variable
+            // can be reset to 0 we have to check it
+            if ($this.$busy > 0) {
+                if (arguments.length > 0) {
+                    for(var i = 0; i < arguments.length; i++) {
+                        $this.$results[index][i] = arguments[i];
+                    }
+                }
+
+                if (--$this.$busy === 0) {
+                    // make result
+                    if ($this.$results.length > 0) {
+                        var r = [];
+                        for(var i = 0; i < $this.$results.length; i++) {
+                            Array.prototype.push.apply(r, $this.$results[i]);
+                        }
+                        $this.$results = r;
+                    }
+                    $this.$schedule();
+                }
+            }
+        }
+    };
+
+    this.error = function(callback) {
+        var $this = this;
+        this.$tasks.push(function() {
+            if ($this.$error != null) {
+                try {
+                    callback.call($this, $this.$error);
+                }
+                finally {
+                    $this.$error = null;
+                }
+            }
+            $this.$schedule();
+        });
         this.$schedule();
         return this;
     };
 
     this.$schedule = function() {
-        if (this.$tasks.length > 0 && this.$task == null) {
-            if (this.$hasError === true) {
-                var t =  null;
-                while(this.$tasks.length > 0) {
-                    var t = this.$tasks.shift();
-                    if (t.$errorHandler === true) {
-                        t.call(this);
-                        break;
-                    }
-                }
-            }
-            else {
-                this.$task = this.$tasks.shift();
-                this.$task.apply(this, this.$results);
-            }
+        if (this.$tasks.length > 0 && this.$busy === 0) {
+            this.$tasks.shift().apply(this, this.$results);
         }
-    };
-
-    this.$error = function(e) {
-        if (this.$hasError === true) {
-            throw new Error();
-        }
-        this.$hasError   = true;
-        this.$errorCause = e;
-        this.$results    = [];
-        this.$task       = null;
-        this.$schedule();
     };
 };
 
@@ -1370,7 +1341,6 @@ pkg.Bag = zebra.Class([
                     // and load the JSON
                     if (d[1] == "(" && d[d.length-1] == ")") {
 
-
                         var $this = this,
                             bag = new (this.$clazz)([
                                 // child bag has to be able resolve variable using parent resolver
@@ -1387,7 +1357,18 @@ pkg.Bag = zebra.Class([
                                                            : $this.resolveClass(className);
                                 }
                             ]);
-                        bag.load(d.substring(2, d.length-1));
+
+                        // if the referenced path is not absolute path and the bag has been also
+                        // loaded by an URL than build the full URL as a relative path from
+                        // BAG URL
+                        var path = d.substring(2, d.length-1).trim();
+                        if (this.$url != null && zebra.URL.isAbsolute(path) === false) {
+                            var pURL = new zebra.URL(this.$url).getParentURL();
+                            if (pURL != null) {
+                                path = pURL.join(path);
+                            }
+                        }
+                        bag.load(path);
                         return bag.root;
                     }
 

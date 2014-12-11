@@ -7,8 +7,8 @@ var rename = require('gulp-rename');
 var webserver = require('gulp-webserver');
 var zip = require('gulp-zip');
 
-var zebraFiles = [
-    'src/easyoop.js',
+
+var uiFiles = [
     'src/layout.js',
     'src/util.js',
     'src/io.js',
@@ -24,6 +24,10 @@ var zebraFiles = [
     'src/ui.html.js',
     'src/ui.designer.js'
 ];
+
+var zebraFiles = [
+    'src/easyoop.js',
+].concat(uiFiles);
 
 var demoFiles = [
     "samples/demo/ui.demo.js",
@@ -55,6 +59,23 @@ gulp.task('lint', function() {
 
 gulp.task('copy', function() {
     return gulp.src(["src/zebra.json", "src/zebra.png"]).pipe(gulp.dest("."));
+});
+
+gulp.task('easyoopscript', function() {
+    return gulp.src("src/easyoop.js")
+        .pipe(gulp.dest('.'))
+        .pipe(rename('easyoop.min.js'))
+        .pipe(uglify({ compress: false, mangle: false }))
+        .pipe(gulp.dest('.'));
+});
+
+gulp.task('uiscript', function() {
+    return gulp.src(uiFiles)
+        .pipe(concat('zebra.ui.js'))
+        .pipe(gulp.dest('.'))
+        .pipe(rename('zebra.ui.min.js'))
+        .pipe(uglify({ compress: false, mangle: false }))
+        .pipe(gulp.dest('.'));
 });
 
 gulp.task('zebrascript', function() {

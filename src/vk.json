@@ -11,6 +11,13 @@
         "layout"    : { "$zebra.layout.FlowLayout" : [ "center", "top"] }
     },
 
+    "VKeyBase" : {
+    	"Label" : {
+    		"$zebra.ui.Label": [],
+    		"font": {"$zebra.ui.Font": ["Arial", "bold", 14] }
+    	 }
+    },
+
     "VKey" : {
         "Label" : {
             "color": "white"
@@ -37,6 +44,11 @@
     },
 
     "VKeys" : {
+    	"KeysPopupPan" : {
+    		"border" : { "$zebra.ui.Border" : [ "orange", 10, 10] },
+    		"layout" : { "$zebra.layout.GridLayout" : [ 6, 4 ] }
+    	},
+
         "SmallLabel" : {
             "color": "orange"
         },
@@ -53,17 +65,20 @@
             "latin":[
                 [ "1!", "2@", "3#", "4$", "5%", "6^", "7&", "8*", "9(", "0)" ],
                 [ "q", "w", "e", "r", "t",  "y", "u", "i", "o", "p" ],
-                [ "a", "s", "d", "f", "g", "h", "j", "k", "l"  ],
+                [ "a", "s", "d", "f", "g", "h", "j", "k", "l", ["ab", [ "cd" ], [ "kl" ]  ]  ],
                 [ "shift", "z", "x", "c", "v", "b", "n", "m", "backSpace" ],
-                [ { "vkey": { "$zebra.ui.vk.VKeyOption": ["Lang", [ "rus" ]] }, "size": "ps" }, "/-+=", "space",  ".,:;", "enter" ]
+                [ { "vkey": { "$zebra.ui.vk.VKeyOption": ["Lang", [ "rus","hindi" ]] }, "size": "ps" }, "/-+=", "space",  ".,:;", "enter" ]
             ],
+
             "rus" : [
-                [ "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" ],
+                [ "1!", "2@", "3#", "4$", "5%", "6^", "7&", "8*", "9(", "0)" ],
                 [ "й", "ц", "у", "к", "е", "н", "г", "ш", "щ", "з" ],
                 [ "ф", "ы", "в", "а", "п", "р", "о", "л", "джэ"  ],
-                [ "я", "ч", "с", "м", "и", "т", "ь", "б", "ю"  ],
-                [ { "vkey": { "$zebra.ui.vk.VKeyOption" : [ "Lang", [ "latin" ]] }, "size": "ps" },  "shift", "space", "enter" ]
-            ]
+                [ "shift", "я", "ч", "с", "м", "и", "т", "ь", "б", "ю", "backSpace"  ],
+                [ { "vkey": { "$zebra.ui.vk.VKeyOption" : [ "Lang", [ "latin", "hindi" ]] }, "size": "ps" }, "/-+=", "space",  ".,:;", "enter" ]
+            ],
+
+            "hindi": "@(vk.hindi.json)"
         },
         "activeGroup" : "latin",
         "background"  : "lightGray",

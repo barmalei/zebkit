@@ -365,6 +365,7 @@ function sProxyMethod(name, f) {
         }
         catch(e) {
             pkg.$caller = cm;
+            console.log("" + (e.stack ? e.stack : e));
             throw e;
         }
     };
@@ -394,7 +395,7 @@ function nProxyMethod(name) {
             }
             catch(e) {
                 pkg.$caller = cm;
-                console.log(e.stack);
+                console.log("" + (e.stack ? e.stack : e));
                 throw e;
             }
         }
@@ -1139,7 +1140,6 @@ pkg.busy = function() { $busy++; };
 pkg.Dummy = Class([]);
 
 pkg.isInBrowser = typeof navigator !== "undefined";
-
 pkg.isIE        = pkg.isInBrowser && (Object.hasOwnProperty.call(window, "ActiveXObject") || !!window.ActiveXObject);
 pkg.isFF        = pkg.isInBrowser && window.mozInnerScreenX != null;
 pkg.isTouchable = pkg.isInBrowser && ( (pkg.isIE === false && (!!('ontouchstart' in window ) || !!('onmsgesturechange' in window))) ||
@@ -1173,6 +1173,7 @@ function complete() {
     }
     catch(e) {
         pkg.ready();
+        console.log("" + (e.stack ? e.stack : e));
         throw e;
     }
     pkg.ready();

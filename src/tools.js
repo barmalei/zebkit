@@ -102,7 +102,7 @@
                             }
 
                             if ($this.buffer.length === 0) {
-                                clearInterval($this.$timer); 
+                                clearInterval($this.$timer);
                                 $this.$timer = null;
                                 return;
                             }
@@ -205,7 +205,7 @@
             }
 
             if (obj1 === obj2) return true;
-            
+
             if (obj1 === null || obj2 === null) {
                 throw new AssertionError("One of the compared object is null");
             }
@@ -249,10 +249,10 @@
 
     pkg.assertException = function(f, et, lab) {
         if (!(f instanceof Function)) throw new WrongArgument("Function as input is expected");
-        
+
         if (zebra.isString(et)) lab = et;
         if (arguments.length < 2 || zebra.isString(et)) et = Error;
-        
+
         try { f(); }
         catch(e) {
             if ((e.instanceOf && e.instanceOf(et)) || (e instanceof et)) return;
@@ -336,6 +336,7 @@
                     }
                     else {
                         pkg.error("" + k + " (unexpected error) " + (e.stack ? e.stack : e));
+                        console.log("" + e.stack);
                         throw e;
                     }
                 }

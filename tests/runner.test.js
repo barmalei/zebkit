@@ -15,10 +15,9 @@ zebra.runTests("Runner tests",
     function test_runner_state() {
         var runner = new Runner();
         assert(runner.$tasks.length, 0);
-        assert(runner.$task, null);
+        assert(runner.$busy, 0);
         assert(runner.$results.length, 0);
-        assert(runner.$hasError, false);
-        assert(runner.$errorCause, null);
+        assert(runner.$error, null);
     },
 
     function test_sync_run() {
@@ -31,14 +30,14 @@ zebra.runTests("Runner tests",
                 assertFDefined(this, "join");
                 assert(arguments.length, 0);
                 assert(runner.$results.length, 0);
-                assert(runner.$hasError, false);
+                assert(runner.$error, null);
             }
             catch(e) {
                 err.push(e);
                 throw e;
             }
 
-            runCounter ++;
+            runCounter++;
             return 10;
         })
         .
@@ -48,7 +47,7 @@ zebra.runTests("Runner tests",
                 assertFDefined(this, "join");
                 assert(arguments.length, 1);
                 assert(arguments[0], 10);
-                assert(runner.$hasError, false);
+                assert(runner.$error, null);
             }
             catch(e) {
                 err.push(e);
@@ -66,7 +65,7 @@ zebra.runTests("Runner tests",
                 assert(arguments[0][0], 20);
                 assert(arguments[0][1], 30);
                 assert(arguments[0][2], 40);
-                assert(runner.$hasError, false);
+                assert(runner.$error, null);
             }
             catch(e) {
                 err.push(e);
@@ -80,7 +79,7 @@ zebra.runTests("Runner tests",
                 assert(runner.$results.length, 0);
                 assertFDefined(this, "join");
                 assert(arguments.length, 0);
-                assert(runner.$hasError, false);
+                assert(runner.$error, null);
             }
             catch(e) {
                 err.push(e);
@@ -93,7 +92,7 @@ zebra.runTests("Runner tests",
             throw err.shift();
         }
 
-        assert(runner.$hasError, false);
+        assert(runner.$error, null);
         assert(runCounter, 4);
     },
 
@@ -103,10 +102,9 @@ zebra.runTests("Runner tests",
             err = [];
 
         function validateEndState(b) {
-            assert(runner.$tasks.length, 0);
-            assert(runner.$task, null);
-            assert(runner.$hasError, b);
-            assert(runner.$errorCause != null, b);
+            assert(runner.$tasks.length, 0, "not all tasks have been completed/skipped");
+            assert(runner.$busy, 0);
+            assert(runner.$error != null, b);
         }
 
         // exception has occured in first task
@@ -140,6 +138,7 @@ zebra.runTests("Runner tests",
         if (err.length > 0) throw err.shift();
         validateEndState(true);
         assert(runCounter, 1);
+
 
         // exception has occured in second task
         runCounter = 0;
@@ -217,10 +216,10 @@ zebra.runTests("Runner tests",
         error(function(e) {
             assert(runner.$results.length, 0);
             assert(e instanceof Error, true);
-            assert(this.$hasError, false);
-            assert(this.$errorCause, null);
+            assert(this.$error != null, true);
+            assert(this.$error, e);
             assert(this.$tasks.length, 0);
-            assert(this.$task, null);
+            assert(this.$busy, 0);
             runCounter++;
         });
 
@@ -330,6 +329,7 @@ zebra.runTests("Runner tests",
         validateEndState(false);
         assert(runCounter, 3);
 
+
         // two exceptions have to trigger two error handlers execution
         runCounter = 0;
         runner = new Runner();
@@ -392,6 +392,7 @@ zebra.runTests("Runner tests",
         validateEndState(false);
         assert(runCounter, 5);
 
+
         // error initated by ctx method with error handler
         runCounter = 0;
         runner = new Runner();
@@ -399,9 +400,9 @@ zebra.runTests("Runner tests",
 
         runner.run(function() {
             try {
-                assert(runner.$results.length, 0);
-                assertFDefined(this, "join");
-                assert(arguments.length, 0);
+                assert(runner.$results.length, 0, "result is cleaned");
+                assertFDefined(this, "join", "join is defined");
+                assert(arguments.length, 0, "no arguments");
             }
             catch(e) {
                 err.push(e);
@@ -414,16 +415,28 @@ zebra.runTests("Runner tests",
         .
         run(function() {
             try {
-                assert(runner.$results.length, 0);
-                assert(arguments.length, 1);
-                assert(arguments[0], 10);
+                assert(runner.$results.length, 0, "resukt is cleaned");
+                assert(arguments.length, 1, "one argument presents");
+                assert(arguments[0], 10, "argument is 10");
             }
             catch(e) {
                 err.push(e);
                 throw e;
             }
 
-            this.error(new Error());
+            this.fireError(new Error());
+
+            try {
+                assert(runner.$results.length, 0, "resukt is cleaned");
+                assert(runner.$error != null, true);
+                assert(runner.$busy, 0);
+            }
+            catch(e) {
+                err.push(e);
+                throw e;
+            }
+
+
             runCounter++;
         })
         .
@@ -433,12 +446,13 @@ zebra.runTests("Runner tests",
         })
         .
         error(function(e) {
-            runCounter++;
+            runCounter+=10;
         })
 
         if (err.length > 0) throw err.shift();
         validateEndState(false);
-        assert(runCounter, 3);
+        assert(runCounter, 12);
+
 
         // error initated by ctx method with error handler
         runCounter = 0;
@@ -446,7 +460,31 @@ zebra.runTests("Runner tests",
         err        = [];
 
         runner.run(function() {
-            this.error(new Error());
+            try {
+                assert(this.$results.length, 0);
+                assert(this.$busy, 0);
+                assert(this.$tasks.length, 0);
+            }
+            catch(e) {
+                err.push(e);
+                throw e;
+            }
+
+            var e = new Error("1")
+            this.fireError(e);
+            this.fireError(new Error("2"));
+
+            try {
+                assert(this.$error != null, true);
+                assert(this.$error, e);
+                assert(this.$busy, 0);
+                assert(this.$results.length, 0);
+            }
+            catch(e) {
+                err.push(e);
+                throw e;
+            }
+
             runCounter++;
             return 100;
         })
@@ -476,8 +514,8 @@ zebra.runTests("Runner tests",
             .
             run(function(r1, r2) {
                 try {
-                    assert(runner.$results.length, 0);
-                    assert(arguments.length, 2);
+                    assert(runner.$results.length, 0, "async result is zero");
+                    assert(arguments.length, 2, "two arguments are expected");
                     assert(r1.responseText, "hello");
                     assert(r2.responseText, "hello2");
                 }
@@ -490,7 +528,7 @@ zebra.runTests("Runner tests",
             .
             run(function() {
                 try {
-                    assert(runner.$results.length, 0);
+                    assert(runner.$results.length, 0, "No arguments");
                     assert(runCounter, 2);
                 }
                 catch(e) {
@@ -502,6 +540,29 @@ zebra.runTests("Runner tests",
             error(function(e) {
                 if (err.length > 0) throw err.shift();
             });
+
+
+            var runner22 = new Runner();
+            runner22._counter = 0;
+            runner22._err = [];
+
+            runner.run(function() {
+                zebra.io.GET("t1.txt", this.join());
+                runCounter++;
+            })
+            .
+            run(function(r1) {
+                try {
+                    assert(runner22.$results.length, 0);
+                    assert(arguments.length, 1);
+                    assert(r1.responseText, "hello");
+                }
+                catch(e) {
+                    runner22._err.push(e);
+                    throw e;
+                }
+                runCounter++;
+            })
 
 
             var runner2 = new Runner();

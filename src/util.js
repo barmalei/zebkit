@@ -1340,7 +1340,6 @@ pkg.Bag = zebra.Class([
                     // check if the reference point to external JSON
                     // and load the JSON
                     if (d[1] == "(" && d[d.length-1] == ")") {
-
                         var $this = this,
                             bag = new (this.$clazz)([
                                 // child bag has to be able resolve variable using parent resolver

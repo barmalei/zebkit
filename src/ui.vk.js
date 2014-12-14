@@ -29,17 +29,15 @@ zebra.package("ui.vk", function(pkg, Class) {
                 // take larger than preferred size horizontal
                 // space
                 for(var i = 0; i < rows.length; i++) {
-                    if (rows[i].fixKeys === 0) {
-                        continue;
-                    }
+                    if (rows[i].fixKeys !== 0) {
+                        var r  = rows[i],
+                            w  = (r.keys > 0 ? r.keys - 1 : 0) * this.gap + m.fixKeyWidth * r.fixKeys + r.occupiedHorSpace,
+                            ex = ew - w;
 
-                    var r  = rows[i],
-                        w  = (r.keys > 0 ? r.keys - 1 : 0) * this.gap + m.fixKeyWidth * r.fixKeys + r.occupiedHorSpace,
-                        ex = ew - w;
-
-                    ex =  Math.round(ex/r.fixKeys);
-                    if (extra > ex) {
-                        extra = ex;
+                        ex =  Math.round(ex/r.fixKeys);
+                        if (extra > ex) {
+                            extra = ex;
+                        }
                     }
                 }
 

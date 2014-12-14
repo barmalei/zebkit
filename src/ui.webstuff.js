@@ -239,7 +239,10 @@
                         dv = Math.abs(dv) > 100 ? dv % 100 : dv;
                         if (bar.isVisible === true) {
                             var v =  bar.position.offset + dv;
+
+
                             if (v >= 0) bar.position.setOffset(v);
+                            else        bar.position.setOffset(0);
                         }
                     }
 

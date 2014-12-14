@@ -365,6 +365,7 @@ function sProxyMethod(name, f) {
         }
         catch(e) {
             pkg.$caller = cm;
+            console.log("" + (e.stack ? e.stack : e));
             throw e;
         }
     };
@@ -394,7 +395,7 @@ function nProxyMethod(name) {
             }
             catch(e) {
                 pkg.$caller = cm;
-                console.log(e.stack);
+                console.log("" + (e.stack ? e.stack : e));
                 throw e;
             }
         }
@@ -1139,7 +1140,6 @@ pkg.busy = function() { $busy++; };
 pkg.Dummy = Class([]);
 
 pkg.isInBrowser = typeof navigator !== "undefined";
-
 pkg.isIE        = pkg.isInBrowser && (Object.hasOwnProperty.call(window, "ActiveXObject") || !!window.ActiveXObject);
 pkg.isFF        = pkg.isInBrowser && window.mozInnerScreenX != null;
 pkg.isTouchable = pkg.isInBrowser && ( (pkg.isIE === false && (!!('ontouchstart' in window ) || !!('onmsgesturechange' in window))) ||
@@ -1173,6 +1173,7 @@ function complete() {
     }
     catch(e) {
         pkg.ready();
+        console.log("" + (e.stack ? e.stack : e));
         throw e;
     }
     pkg.ready();
@@ -2413,7 +2414,9 @@ pkg.RasterLayout = Class(L, [
                 if (el.isVisible === true){
                     var ps = b ? el.getPreferredSize()
                                : { width:el.width, height:el.height },
-                        px = el.x + ps.width, py = el.y + ps.height;
+                        px = el.x + ps.width,
+                        py = el.y + ps.height;
+
                     if (px > m.width) m.width = px;
                     if (py > m.height) m.height = py;
                 }
@@ -3253,7 +3256,6 @@ function hex(v) {
     return (v < 16) ? "0" + v.toString(16) : v.toString(16);
 }
 
-
 /**
  * Sequential tasks runner. Allows developers to execute number of tasks (async and sync) in the
  * the order they have been called by runner:
@@ -3275,7 +3277,7 @@ function hex(v) {
         })
         .
         error(function(e) {
-            // called when an error has occurred
+            // called when an exception has occurred
             ...
         });
 
@@ -3284,123 +3286,100 @@ function hex(v) {
  */
 pkg.Runner = function() {
     this.$tasks      = [];
-    this.$task       = null;
     this.$results    = [];
-    this.$hasError   = false;
-    this.$errorCause = null;
+    this.$error      = null;
+    this.$busy       = 0;
 
     this.run = function(body) {
-        return this.$run(function() {
-            var times = 0,
-                $this = this,
-                ctx   = {
-                    join: function() {
-                        var index    = times++,
-                            $results = [];
+        this.$tasks.push(function() {
+            // clean results of execution of a previous task
+            this.$results = [];
+            this.$busy    = 0;
 
-                        return function() {
-                            $results[index] = undefined;
+            if (this.$error == null) {
+                var r = null;
+                try {
+                    r = body.apply(this, arguments);
+                }
+                catch(e) {
+                    this.fireError(e);
+                }
 
-                            // since error can occur times can be reset to 0, so it has to be checked
-                            if (times > 0) {
-                                if (arguments.length === 1) {
-                                    $results[index] = arguments[0];
-                                }
-                                else {
-                                    if (arguments.length > 1) {
-                                        var r = [];
-                                        for(var i = 0; i < arguments.length; i++) {
-                                            r.push(arguments[i]);
-                                        }
-                                        $results[index] = r;
-                                    }
-                                }
-
-                                if (--times === 0) {
-                                    $this.$task = null;
-                                    if ($this.$schedule.apply($this, $results) == null) {
-                                        $results = []; // clear
-                                    }
-                                }
-                            }
-                        }
-                    },
-
-                    error : function(e) {
-                        times = 0;
-                        $this.$error(e);
+                // this.$busy === 0 means we have called synchronous task
+                if (this.$busy === 0 && this.$error == null) {
+                    // check if the task returned result
+                    if (typeof r !== "undefined") {
+                        this.$results[0] = r;
                     }
-                },
-                r = null;
-
-            try {
-                r = body.apply(ctx, arguments);
+                }
             }
-            catch(e) {
-                times = 0;
-                this.$error(e);
-                return;
-            }
-
-            if (times === 0 && this.$hasError === false) {
-                this.$task = null;
-                this.$schedule.call(this, r);
-            }
+            this.$schedule();
         });
+
+        this.$schedule();
+        return this;
+    };
+
+    this.fireError = function(e) {
+        if (this.$error == null)  {
+            this.$busy    = 0;
+            this.$error   = e;
+            this.$results = [];
+        }
+    };
+
+    this.join = function() {
+        var $this = this,
+            index = this.$busy++;
+
+        return function() {
+            $this.$results[index] = [];
+
+            // since error can occur and times variable
+            // can be reset to 0 we have to check it
+            if ($this.$busy > 0) {
+                if (arguments.length > 0) {
+                    for(var i = 0; i < arguments.length; i++) {
+                        $this.$results[index][i] = arguments[i];
+                    }
+                }
+
+                if (--$this.$busy === 0) {
+                    // make result
+                    if ($this.$results.length > 0) {
+                        var r = [];
+                        for(var i = 0; i < $this.$results.length; i++) {
+                            Array.prototype.push.apply(r, $this.$results[i]);
+                        }
+                        $this.$results = r;
+                    }
+                    $this.$schedule();
+                }
+            }
+        }
     };
 
     this.error = function(callback) {
-        var $this = this,
-            f = function() {
-                $this.$task = null;
-                if ($this.$hasError === true) {
-                    $this.$hasError = false;
-                    var e = $this.$errorCause;
-                    $this.$errorCause = null;
-                    callback.call($this, e);
+        var $this = this;
+        this.$tasks.push(function() {
+            if ($this.$error != null) {
+                try {
+                    callback.call($this, $this.$error);
                 }
-                $this.$schedule();
-            };
-        f.$errorHandler = true;
-        return this.$run(f);
-    };
-
-    this.$run = function(f) {
-        this.$tasks.push(f);
-        //this.$schedule();
+                finally {
+                    $this.$error = null;
+                }
+            }
+            $this.$schedule();
+        });
+        this.$schedule();
         return this;
     };
 
     this.$schedule = function() {
-        if (this.$tasks.length > 0 && this.$task == null) {
-            if (this.$hasError === true) {
-                var t =  null;
-                while(this.$tasks.length > 0) {
-                    var t = this.$tasks.shift();
-                    if (t.$errorHandler === true) {
-                        t.call(this);
-                        break;
-                    }
-                }
-            }
-            else {
-                this.$task = this.$tasks.shift();
-                this.$task.apply(this, arguments);
-                return this.$task;
-            }
+        if (this.$tasks.length > 0 && this.$busy === 0) {
+            this.$tasks.shift().apply(this, this.$results);
         }
-
-        return null;
-    };
-
-    this.$error = function(e) {
-        if (this.$hasError === true) {
-            throw new Error();
-        }
-        this.$hasError   = true;
-        this.$errorCause = e;
-        this.$task       = null;
-        this.$schedule();
     };
 };
 
@@ -4587,8 +4566,6 @@ pkg.Bag = zebra.Class([
                     // check if the reference point to external JSON
                     // and load the JSON
                     if (d[1] == "(" && d[d.length-1] == ")") {
-
-
                         var $this = this,
                             bag = new (this.$clazz)([
                                 // child bag has to be able resolve variable using parent resolver
@@ -4605,7 +4582,18 @@ pkg.Bag = zebra.Class([
                                                            : $this.resolveClass(className);
                                 }
                             ]);
-                        bag.load(d.substring(2, d.length-1));
+
+                        // if the referenced path is not absolute path and the bag has been also
+                        // loaded by an URL than build the full URL as a relative path from
+                        // BAG URL
+                        var path = d.substring(2, d.length-1).trim();
+                        if (this.$url != null && zebra.URL.isAbsolute(path) === false) {
+                            var pURL = new zebra.URL(this.$url).getParentURL();
+                            if (pURL != null) {
+                                path = pURL.join(path);
+                            }
+                        }
+                        bag.load(path);
                         return bag.root;
                     }
 
@@ -7135,7 +7123,10 @@ pkg.Matrix = Class([
                         dv = Math.abs(dv) > 100 ? dv % 100 : dv;
                         if (bar.isVisible === true) {
                             var v =  bar.position.offset + dv;
+
+
                             if (v >= 0) bar.position.setOffset(v);
+                            else        bar.position.setOffset(0);
                         }
                     }
 
@@ -10479,6 +10470,7 @@ pkg.ImagePan = Class(pkg.ViewPan, [
     },
 
     function(img, w, h){
+        this.$runner = null;
         this.setImage(img != null ? img : null);
         this.$super();
         this.setPreferredSize(w, h);
@@ -10499,32 +10491,45 @@ pkg.ImagePan = Class(pkg.ViewPan, [
                 isPic     = instanceOf(img, pkg.Picture),
                 imgToLoad = isPic ? img.target : img ;
 
-            pkg.loadImage(imgToLoad,
-                function(p, b, i) {
-                    if (b) {
-                        $this.setView(isPic ? img : new pkg.Picture(i));
+            if (this.$runner == null) {
+                this.$runner = new zebra.util.Runner();
+            }
 
-                        // it is important to analyze if the given component has zero size
-                        // if it is true the repainting will not occur what means validation
-                        // is also will not happen, adjust width and height to be none zero
-                        //
-                        // !!! This has been fixed by changing paint manager behaviour
-                        // if ($this.width === 0 || $this.height === 0) {
-                        //     $this.width  = i.width;
-                        //     $this.height = i.height;
-                        // }
+            this.$runner.run(function() {
+                console.log("Load image = " + imgToLoad);
+                pkg.loadImage(imgToLoad, this.join());
+            })
+            .
+            run(function(p, b, i) {
 
-                        $this.vrp();
-                    }
-                   
-                    if ($this.imageLoaded != null) {
-                        $this.imageLoaded(p, b, i);
-                    }
+                console.log("arguments : " + arguments.length);
+
+                $this.$runner = null;
+                if (b) {
+                    $this.setView(isPic ? img : new pkg.Picture(i));
+                    $this.vrp();
                 }
-            );
+
+                if ($this.imageLoaded != null) {
+                    $this.imageLoaded(p, b, i);
+                }
+            })
+            .
+            error(function() {
+                this.$runner = null;
+                $this.setView(null);
+            });
         }
         else {
-            this.setView(null);
+            if (this.$runner == null) {
+                this.setView(null);
+            }
+            else {
+                var $this = this;
+                this.$runner.run(function() {
+                    $this.setView(null);
+                });
+            }
         }
         return this;
     }
@@ -12830,7 +12835,7 @@ zebra.ready(
             if (pkg.clipboardTriggerKey > 0) {
                 // create hidden text area to support clipboard
                 $clipboard = document.createElement("textarea");
-                $clipboard.setAttribute("style", "display:none; position: absolute; left: -99em; top:-99em;");
+                $clipboard.setAttribute("style", "display:none; position: fixed; left: -99em; top:-99em;");
 
                 $clipboard.onkeydown = function(ee) {
                     $clipboardCanvas.$keyPressed(ee);
@@ -18282,7 +18287,7 @@ pkg.Slider = Class(pkg.Panel, [
         };
 
         this.mousePressed = function (e){
-            if(e.isActionMask()){
+            if (e.isActionMask()){
                 var x = e.x, y = e.y, bb = this.getBundleBounds(this.value);
                 if (x < bb.x || y < bb.y || x >= bb.x + bb.width || y >= bb.y + bb.height) {
                     var l = ((this.orient == L.HORIZONTAL) ? x : y), v = this.loc2value(l);
@@ -28768,14 +28773,24 @@ pkg.HtmlElement = Class(pkg.Panel, [
                 var visibility = this.element.style.visibility;
                 this.element.style.visibility = "hidden";
 
-                if (zebra.instanceOf( this.parent, pkg.HtmlElement)) {
-                    this.element.style.top  = "" + this.y + "px";
-                    this.element.style.left = "" + this.x + "px";
+                if (zebra.instanceOf(this.parent, pkg.HtmlElement)) {
+                    this.element.style.top  = this.y + "px";
+                    this.element.style.left = this.x + "px";
                 }
                 else {
                     var a = zebra.layout.toParentOrigin(0,0,this);
-                    this.element.style.top  = "" + (this.canvas.offy + a.y) + "px";
-                    this.element.style.left = "" + (this.canvas.offx + a.x) + "px";
+                    this.element.style.top  = (this.canvas.offy + a.y) + "px";
+                    this.element.style.left = (this.canvas.offx + a.x) + "px";
+
+                    // TODO: this is really strange fix for Chrome browser: Chrome
+                    // doesn't move input field content together with the input field
+                    // itself.
+                    if (/Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)) {
+                        var e = this.element, pa = e.style.height;
+                        e.style.height  = "auto";
+                        e.offsetHeight // always access the property to trigger the fix
+                        e.style.height  = pa;
+                    }
                 }
                 this.isLocAdjusted = true;
                 this.element.style.visibility = visibility;
@@ -28802,7 +28817,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
             var e    = this.element,
                 vars = {};
 
-            for(var i=0; i<$store.length; i++) {
+            for(var i = 0; i < $store.length; i++) {
                 var k = $store[i];
                 vars[k] = e.style[k];
             }
@@ -28878,10 +28893,10 @@ pkg.HtmlElement = Class(pkg.Panel, [
         };
 
         this.isInInvisibleState = function() {
-            if (this.width       <= 0    || 
+            if (this.width       <= 0    ||
                 this.height      <= 0    ||
-                this.parent      == null || 
-                this.getCanvas() == null   ) 
+                this.parent      == null ||
+                this.getCanvas() == null   )
             {
                 return true;
             }
@@ -28890,8 +28905,8 @@ pkg.HtmlElement = Class(pkg.Panel, [
             while (p != null && p.isVisible === true && p.width > 0 && p.height > 0) {
                 p = p.parent;
             }
-          
-            return p != null || pkg.$cvp(this) == null; 
+
+            return p != null || pkg.$cvp(this) == null;
             // canvas means the component is not
                               // in hierarchy yet, that means it
                               // has to be hidden
@@ -28939,10 +28954,9 @@ pkg.HtmlElement = Class(pkg.Panel, [
                 if (zebra.layout.isAncestorOf(c, $this)) {
                     // force location adjustment when the component
                     // parent HTML canvas has been moved
-                    $this.isLocAdjusted = false;
-                    $this.adjustLocation();
+                   $this.isLocAdjusted = false;
+                   $this.adjustLocation();
                 }
-
 
                 if (c != $this && $this.isInInvisibleState()) {
                     $this.element.style.visibility = "hidden";
@@ -28967,7 +28981,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
         this.globalWinListener = {
             winActivated : function(layer, win, isActive) {
                 if (zebra.layout.isAncestorOf(win, $this) == false) {
-                    $this.element.style.visibility;   
+                    $this.element.style.visibility;
                 }
             }
         };
@@ -29104,7 +29118,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
 
             var canvas = this.getCanvas(),
                 pfo    = canvas.$prevFocusOwner;
-            
+
             if (pfo == null || zebra.instanceOf(pfo, pkg.HtmlElement) === false) {
                 this.element.focus();
             }
@@ -29157,7 +29171,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
         e.style.paddingLeft   = '' + l + "px";
         e.style.paddingRight  = '' + r + "px";
         e.style.paddingBottom = '' + b + "px";
-        
+
         this.$super.apply(this, arguments);
     },
 

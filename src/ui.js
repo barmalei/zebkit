@@ -5362,7 +5362,7 @@ pkg.Slider = Class(pkg.Panel, [
         };
 
         this.mousePressed = function (e){
-            if(e.isActionMask()){
+            if (e.isActionMask()){
                 var x = e.x, y = e.y, bb = this.getBundleBounds(this.value);
                 if (x < bb.x || y < bb.y || x >= bb.x + bb.width || y >= bb.y + bb.height) {
                     var l = ((this.orient == L.HORIZONTAL) ? x : y), v = this.loc2value(l);

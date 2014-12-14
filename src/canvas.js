@@ -3082,6 +3082,7 @@ pkg.ImagePan = Class(pkg.ViewPan, [
     },
 
     function(img, w, h){
+        this.$runner = null;
         this.setImage(img != null ? img : null);
         this.$super();
         this.setPreferredSize(w, h);
@@ -3102,32 +3103,45 @@ pkg.ImagePan = Class(pkg.ViewPan, [
                 isPic     = instanceOf(img, pkg.Picture),
                 imgToLoad = isPic ? img.target : img ;
 
-            pkg.loadImage(imgToLoad,
-                function(p, b, i) {
-                    if (b) {
-                        $this.setView(isPic ? img : new pkg.Picture(i));
+            if (this.$runner == null) {
+                this.$runner = new zebra.util.Runner();
+            }
 
-                        // it is important to analyze if the given component has zero size
-                        // if it is true the repainting will not occur what means validation
-                        // is also will not happen, adjust width and height to be none zero
-                        //
-                        // !!! This has been fixed by changing paint manager behaviour
-                        // if ($this.width === 0 || $this.height === 0) {
-                        //     $this.width  = i.width;
-                        //     $this.height = i.height;
-                        // }
+            this.$runner.run(function() {
+                console.log("Load image = " + imgToLoad);
+                pkg.loadImage(imgToLoad, this.join());
+            })
+            .
+            run(function(p, b, i) {
 
-                        $this.vrp();
-                    }
-                   
-                    if ($this.imageLoaded != null) {
-                        $this.imageLoaded(p, b, i);
-                    }
+                console.log("arguments : " + arguments.length);
+
+                $this.$runner = null;
+                if (b) {
+                    $this.setView(isPic ? img : new pkg.Picture(i));
+                    $this.vrp();
                 }
-            );
+
+                if ($this.imageLoaded != null) {
+                    $this.imageLoaded(p, b, i);
+                }
+            })
+            .
+            error(function() {
+                this.$runner = null;
+                $this.setView(null);
+            });
         }
         else {
-            this.setView(null);
+            if (this.$runner == null) {
+                this.setView(null);
+            }
+            else {
+                var $this = this;
+                this.$runner.run(function() {
+                    $this.setView(null);
+                });
+            }
         }
         return this;
     }
@@ -5433,7 +5447,7 @@ zebra.ready(
             if (pkg.clipboardTriggerKey > 0) {
                 // create hidden text area to support clipboard
                 $clipboard = document.createElement("textarea");
-                $clipboard.setAttribute("style", "display:none; position: absolute; left: -99em; top:-99em;");
+                $clipboard.setAttribute("style", "display:none; position: fixed; left: -99em; top:-99em;");
 
                 $clipboard.onkeydown = function(ee) {
                     $clipboardCanvas.$keyPressed(ee);

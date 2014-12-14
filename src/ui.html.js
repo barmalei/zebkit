@@ -50,14 +50,24 @@ pkg.HtmlElement = Class(pkg.Panel, [
                 var visibility = this.element.style.visibility;
                 this.element.style.visibility = "hidden";
 
-                if (zebra.instanceOf( this.parent, pkg.HtmlElement)) {
-                    this.element.style.top  = "" + this.y + "px";
-                    this.element.style.left = "" + this.x + "px";
+                if (zebra.instanceOf(this.parent, pkg.HtmlElement)) {
+                    this.element.style.top  = this.y + "px";
+                    this.element.style.left = this.x + "px";
                 }
                 else {
                     var a = zebra.layout.toParentOrigin(0,0,this);
-                    this.element.style.top  = "" + (this.canvas.offy + a.y) + "px";
-                    this.element.style.left = "" + (this.canvas.offx + a.x) + "px";
+                    this.element.style.top  = (this.canvas.offy + a.y) + "px";
+                    this.element.style.left = (this.canvas.offx + a.x) + "px";
+
+                    // TODO: this is really strange fix for Chrome browser: Chrome
+                    // doesn't move input field content together with the input field
+                    // itself.
+                    if (/Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)) {
+                        var e = this.element, pa = e.style.height;
+                        e.style.height  = "auto";
+                        e.offsetHeight // always access the property to trigger the fix
+                        e.style.height  = pa;
+                    }
                 }
                 this.isLocAdjusted = true;
                 this.element.style.visibility = visibility;
@@ -84,7 +94,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
             var e    = this.element,
                 vars = {};
 
-            for(var i=0; i<$store.length; i++) {
+            for(var i = 0; i < $store.length; i++) {
                 var k = $store[i];
                 vars[k] = e.style[k];
             }
@@ -160,10 +170,10 @@ pkg.HtmlElement = Class(pkg.Panel, [
         };
 
         this.isInInvisibleState = function() {
-            if (this.width       <= 0    || 
+            if (this.width       <= 0    ||
                 this.height      <= 0    ||
-                this.parent      == null || 
-                this.getCanvas() == null   ) 
+                this.parent      == null ||
+                this.getCanvas() == null   )
             {
                 return true;
             }
@@ -172,8 +182,8 @@ pkg.HtmlElement = Class(pkg.Panel, [
             while (p != null && p.isVisible === true && p.width > 0 && p.height > 0) {
                 p = p.parent;
             }
-          
-            return p != null || pkg.$cvp(this) == null; 
+
+            return p != null || pkg.$cvp(this) == null;
             // canvas means the component is not
                               // in hierarchy yet, that means it
                               // has to be hidden
@@ -221,10 +231,9 @@ pkg.HtmlElement = Class(pkg.Panel, [
                 if (zebra.layout.isAncestorOf(c, $this)) {
                     // force location adjustment when the component
                     // parent HTML canvas has been moved
-                    $this.isLocAdjusted = false;
-                    $this.adjustLocation();
+                   $this.isLocAdjusted = false;
+                   $this.adjustLocation();
                 }
-
 
                 if (c != $this && $this.isInInvisibleState()) {
                     $this.element.style.visibility = "hidden";
@@ -249,7 +258,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
         this.globalWinListener = {
             winActivated : function(layer, win, isActive) {
                 if (zebra.layout.isAncestorOf(win, $this) == false) {
-                    $this.element.style.visibility;   
+                    $this.element.style.visibility;
                 }
             }
         };
@@ -386,7 +395,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
 
             var canvas = this.getCanvas(),
                 pfo    = canvas.$prevFocusOwner;
-            
+
             if (pfo == null || zebra.instanceOf(pfo, pkg.HtmlElement) === false) {
                 this.element.focus();
             }
@@ -439,7 +448,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
         e.style.paddingLeft   = '' + l + "px";
         e.style.paddingRight  = '' + r + "px";
         e.style.paddingBottom = '' + b + "px";
-        
+
         this.$super.apply(this, arguments);
     },
 

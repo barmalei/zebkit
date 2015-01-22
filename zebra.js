@@ -17965,6 +17965,7 @@ pkg.Tabs = Class(pkg.Panel, [
             if (i === this.selectedIndex) this.select(-1);
             else {
                 this.selectedIndex--;
+                this.repaint();
             }
         }
         this.pages.splice(i * 2, 2);

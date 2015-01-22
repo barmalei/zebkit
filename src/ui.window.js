@@ -1333,7 +1333,8 @@ pkg.Menu = Class(pkg.CompList, [
 
     function () {
         this.menus = {};
-
+        this.functions = {};
+        
         /**
          * Dictionary to keep decorative components
          * @attribute decoratives
@@ -1363,7 +1364,10 @@ pkg.Menu = Class(pkg.CompList, [
                     var sub = d[k];
                     this.add(k);
                     if (sub != null) {
-                        this.setMenuAt(this.kids.length-1, zebra.instanceOf(sub, pkg.Menu) ? sub : new pkg.Menu(sub));
+                        if (typeof(sub) == "function")
+                            this.functions[this.kids.length - 1] = sub;
+                        else
+                            this.setMenuAt(this.kids.length-1, zebra.instanceOf(sub, pkg.Menu) ? sub : new pkg.Menu(sub));
                     }
                 }
             }
@@ -1479,6 +1483,10 @@ pkg.Menu = Class(pkg.CompList, [
                 if (k.itemSelected != null) {
                     k.itemSelected();
                 }
+                
+                var func = this.functions[this.selectedIndex];
+                if ( func )
+                    func();
 
                 // an atomic menu, what means a menu item has been selected
                 // remove this menu an all parents menus

@@ -3027,7 +3027,7 @@ pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
 
                 if (this.$strPs == null || this.$prevWidth  != taWidth)
                 {
-                    if (this.$propW < 0) {
+                    if (this.$propW < 0 || this.$props == null || this.$props.length != cols) {
                         // calculate col proportions
                         var cols = grid.getGridCols();
                         if (this.$props == null || this.$props.length != cols) {

@@ -3199,7 +3199,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
             this.togglePan.setState(this.isCollapsed ? "off" : "on");
             this.repaint();
 
-            if (this._) {
+            if (this._ != null) {
                 this._.fired(this, this.isCollapsed);
             }
         };
@@ -5105,13 +5105,7 @@ pkg.Slider = Class(pkg.Panel, [
             return (this.orient == L.HORIZONTAL ? this.width - this.getLeft() -
                                                   this.getRight() - bs.width
                                                 : this.height - this.getTop() -
-                                                  this.getBottom() - bs.height) - 2;
-        };
-
-        this.getScaleLocation = function(){
-            var bs = this.views.bundle.getPreferredSize();
-            return (this.orient == L.HORIZONTAL ? this.getLeft() + ~~(bs.width / 2)
-                                                : this.getTop()  + ~~(bs.height/ 2)) + 1;
+                                                  this.getBottom() - bs.height);
         };
 
         this.mouseDragged = function(e){
@@ -5154,7 +5148,7 @@ pkg.Slider = Class(pkg.Panel, [
                 }
 
                 topY += bs.height;
-                if (this.isShowScale){
+                if (this.isShowScale === true){
                     topY += this.gap;
                     g.setColor(this.isEnabled === true ? this.scaleColor : "gray");
                     g.beginPath();
@@ -5187,7 +5181,7 @@ pkg.Slider = Class(pkg.Panel, [
                 }
 
                 leftX += bs.width;
-                if (this.isShowScale) {
+                if (this.isShowScale === true) {
                     leftX += this.gap;
                     g.setColor(this.scaleColor);
                     g.beginPath();
@@ -5196,13 +5190,16 @@ pkg.Slider = Class(pkg.Panel, [
                         g.moveTo(leftX, yy);
                         g.lineTo(leftX + this.netSize, yy);
                     }
+
                     for(var i = 0;i < this.pl.length; i ++ ) {
                         g.moveTo(leftX, this.pl[i] + 0.5);
                         g.lineTo(leftX + 2 * this.netSize, this.pl[i] + 0.5);
                     }
+
                     g.stroke();
                     leftX += (2 * this.netSize);
                 }
+
                 this.paintNums(g, leftX);
                 bnv.paint(g, bx, this.getBundleLoc(this.value), bs.width, bs.height, this);
             }
@@ -5235,14 +5232,26 @@ pkg.Slider = Class(pkg.Panel, [
         };
 
         this.value2loc = function (v){
-            return ~~((this.getScaleSize() * (v - this.min)) / (this.max - this.min)) +
-                   this.getScaleLocation();
+            var ps = this.views.bundle.getPreferredSize(),
+                l  = ~~((this.getScaleSize() * (v - this.min)) / (this.max - this.min));
+            return  (this.orient == L.VERTICAL) ? this.height - ~~(ps.height/2) - this.getBottom() - l
+                                                : this.getLeft() + ~~(ps.width/2) + l;
         };
 
         this.loc2value = function(xy){
-            var sl = this.getScaleLocation(), ss = this.getScaleSize();
+            var ps = this.views.bundle.getPreferredSize(),
+                sl = (this.orient == L.VERTICAL) ? this.getLeft() + ~~(ps.width/2) : this.getTop() + ~~(ps.height/2),
+                ss = this.getScaleSize();
+
+            if (this.orient == L.VERTICAL) {
+                xy = this.height - xy;
+            }
+
             if(xy < sl) xy = sl;
-            else if(xy > sl + ss) xy = sl + ss;
+            else {
+                if (xy > sl + ss) xy = sl + ss;
+            }
+
             return this.min + ~~(((this.max - this.min) * (xy - sl)) / ss);
         };
 
@@ -5253,7 +5262,10 @@ pkg.Slider = Class(pkg.Panel, [
 
             var v = value + (d * s);
             if(v > this.max) v = this.max;
-            else if(v < this.min) v = this.min;
+            else {
+                if (v < this.min) v = this.min;
+            }
+
             return v;
         };
 
@@ -5265,15 +5277,23 @@ pkg.Slider = Class(pkg.Panel, [
 
         this.getBundleBounds = function (v){
             var bs = this.views.bundle.getPreferredSize();
-            return this.orient == L.HORIZONTAL ? { x:this.getBundleLoc(v),
+            return this.orient == L.HORIZONTAL ? {
+                                                   x:this.getBundleLoc(v),
                                                    y:this.getTop() + ~~((this.height - this.getTop() - this.getBottom() - this.psH) / 2) + 1,
-                                                   width:bs.width, height:bs.height }
-                                               : { x:this.getLeft() + ~~((this.width - this.getLeft() - this.getRight() - this.psW) / 2) + 1,
-                                                   y:this.getBundleLoc(v), width:bs.width, height:bs.height };
+                                                   width:bs.width,
+                                                   height:bs.height
+                                                 }
+                                               : {
+                                                   x:this.getLeft() + ~~((this.width - this.getLeft() - this.getRight() - this.psW) / 2) + 1,
+                                                   y:this.getBundleLoc(v),
+                                                   width:bs.width,
+                                                   height:bs.height
+                                                 };
         };
 
         this.getNeighborPoint = function (v,d){
-            var left = this.min + this.intervals[0], right = this.getPointValue(this.intervals.length - 1);
+            var left  = this.min + this.intervals[0],
+                right = this.getPointValue(this.intervals.length - 1);
             if (v < left) return left;
             else {
                 if (v > right) return right;
@@ -5345,12 +5365,12 @@ pkg.Slider = Class(pkg.Panel, [
         this.keyPressed = function(e){
             var b = this.isIntervalMode;
             switch(e.code) {
-                case KE.UP:
+                case KE.DOWN:
                 case KE.LEFT:
                     var v = this.nextValue(this.value, this.exactStep,-1);
                     if (v >= this.min) this.setValue(v);
                     break;
-                case KE.DOWN:
+                case KE.UP:
                 case KE.RIGHT:
                     var v = this.nextValue(this.value, this.exactStep, 1);
                     if (v <= this.max) this.setValue(v);

@@ -3572,8 +3572,8 @@ pkg.FocusManager = Class(pkg.Manager, [
             return d != null               &&
                    c.isEnabled    === true &&
                    c.isVisible    === true &&
-                   c.canHaveFocus === true ||
-                  (typeof c.canHaveFocus == "function" && c.canHaveFocus());
+                   (c.canHaveFocus === true ||
+                   (typeof c.canHaveFocus == "function" && c.canHaveFocus()));
         };
 
         // looking recursively a focusable component among children components of

@@ -10960,8 +10960,8 @@ pkg.FocusManager = Class(pkg.Manager, [
             return d != null               &&
                    c.isEnabled    === true &&
                    c.isVisible    === true &&
-                   c.canHaveFocus === true ||
-                  (typeof c.canHaveFocus == "function" && c.canHaveFocus());
+                   (c.canHaveFocus === true ||
+                   (typeof c.canHaveFocus == "function" && c.canHaveFocus()));
         };
 
         // looking recursively a focusable component among children components of
@@ -21093,6 +21093,19 @@ var ContentListeners = zebra.util.ListenersClass("contentUpdated");
  * has been selected
  * @param {Object} value a previously selected index
  */
+
+/**
+ * Implement the event handler method to detect when a combo pad window
+ * is shown or hidden
+
+     var p = new zebra.ui.Combo();
+     p.padShown = function(src, b) { ... }; // add event handler
+
+ * @event padShown
+ * @param {zebra.ui.Combo} src a combo box component that triggers the event
+ * @param {Boolean} b a flag that indicates if the combo pad window has been
+ * shown (true) or hidden (false)
+*/
 pkg.Combo = Class(pkg.Panel, [
     function $clazz() {
         /**
@@ -21142,7 +21155,7 @@ pkg.Combo = Class(pkg.Panel, [
          */
         this.ComboPadPan = Class(pkg.ScrollPan, [
             function $prototype() {
-                this.closeTime = 0;
+                this.$closeTime = 0;
 
                 /**
                  * A reference to combo that uses the list pad component
@@ -21164,7 +21177,7 @@ pkg.Combo = Class(pkg.Panel, [
                     this.owner.requestFocus();
                 }
 
-                this.closeTime = l == null ? new Date().getTime() : 0;
+                this.$closeTime = l == null ? new Date().getTime() : 0;
             }
         ]);
 
@@ -21293,8 +21306,10 @@ pkg.Combo = Class(pkg.Panel, [
                 this.selectionView != null &&
                 this.hasFocus())
             {
-                this.selectionView.paint(g, this.content.x, this.content.y,
-                                            this.content.width, this.content.height,
+                this.selectionView.paint(g, this.content.x,
+                                            this.content.y,
+                                            this.content.width,
+                                            this.content.height,
                                             this);
             }
         };
@@ -21367,13 +21382,17 @@ pkg.Combo = Class(pkg.Panel, [
          */
         this.mousePressed = function (e) {
             if (e.isActionMask() && this.content != null             &&
-                (new Date().getTime() - this.winpad.closeTime) > 100 &&
+                (new Date().getTime() - this.winpad.$closeTime) > 100 &&
                 e.x > this.content.x && e.y > this.content.y         &&
                 e.x < this.content.x + this.content.width            &&
                 e.y < this.content.y + this.content.height              )
             {
                 this.showPad();
             }
+        };
+
+        this.isPadShown = function() {
+            return this.winpad != null && this.winpad.parent != null;
         };
 
         /**
@@ -21383,7 +21402,7 @@ pkg.Combo = Class(pkg.Panel, [
         this.hidePad = function (){
             var d = this.getCanvas();
             if (d != null && this.winpad.parent != null){
-                d.getLayer(pkg.PopupLayer.ID).remove(this.winpad);
+                this.winpad.removeMe();
                 this.requestFocus();
             }
         };
@@ -21441,7 +21460,17 @@ pkg.Combo = Class(pkg.Panel, [
                 if (this.list != null) this.list.unbind(this);
                 this.list = l;
                 if (this.list._) this.list.bind(this);
-                this.winpad = new this.$clazz.ComboPadPan(this.list);
+
+                var $this = this;
+                this.winpad = new this.$clazz.ComboPadPan(this.list, [
+                    function setParent(p) {
+                        this.$super(p);
+                        if ($this.padShown != null) {
+                            $this.padShown($this, p != null);
+                        }
+                    }
+                ]);
+
                 this.winpad.owner = this;
                 if (this.content != null) {
                     this.content.comboValueUpdated(this, this.list.getSelected());
@@ -21575,10 +21604,16 @@ pkg.Combo = Class(pkg.Panel, [
 
     function kidAdded(index,s,c){
         if (zebra.instanceOf(c, this.$clazz.ContentPan)) {
-            if (this.content != null) throw new Error("Content panel is set");
+            if (this.content != null) {
+                throw new Error("Content panel is set");
+            }
+
             if (c._ != null) c.bind(this);
             this.content = c;
-            if (this.list != null) c.comboValueUpdated(this, this.list.getSelected());
+
+            if (this.list != null) {
+                c.comboValueUpdated(this, this.list.getSelected());
+            }
         }
 
         this.$super(index, s, c);
@@ -21608,7 +21643,7 @@ pkg.Combo = Class(pkg.Panel, [
      * @method fired
      */
     function fired(src) {
-        if ((new Date().getTime() - this.winpad.closeTime) > 100) {
+        if ((new Date().getTime() - this.winpad.$closeTime) > 100) {
             this.showPad();
         }
     },
@@ -24140,7 +24175,39 @@ pkg.DefEditors = Class([
     function $clazz() {
         this.TextField = Class(ui.TextField, []);
         this.Checkbox  = Class(ui.Checkbox,  []);
-        this.Combo     = Class(ui.Combo,     []);
+        this.Combo     = Class(ui.Combo,     [
+            function padShown(src, b) {
+                if (b == false) {
+                    this.parent.stopEditing(true);
+                    this.setSize(0,0);
+                }
+            },
+
+            function resized(pw, ph) {
+                this.$super(pw, ph);
+                if (this.width > 0 && this.height > 0 && this.hasFocus()) {
+                    this.showPad();
+                }
+            }
+        ]);
+
+        this.Items = Class([
+            function $prototype() {
+                this.toString = function() {
+                    return this.selectedIndex < 0 ? ""
+                                                  : this.items[this.selectedIndex];
+                }
+            },
+
+            function(items) {
+                this.$this(items, -1);
+            },
+
+            function(items, selectedIndex) {
+                this.items = items;
+                this.selectedIndex = selectedIndex;
+            }
+        ]);
     },
 
     function $prototype() {
@@ -24148,6 +24215,7 @@ pkg.DefEditors = Class([
             this.textEditor = new this.$clazz.TextField("", 150);
             this.boolEditor = new this.$clazz.Checkbox(null);
             this.selectorEditor = new this.$clazz.Combo();
+
             this.editors    = {};
         };
 
@@ -24164,6 +24232,10 @@ pkg.DefEditors = Class([
          * @method  fetchEditedValue
          */
         this.fetchEditedValue = function(grid,row,col,data,editor) {
+            if (editor == this.selectorEditor) {
+                data.selectedIndex = editor.list.selectedIndex;
+                return data;
+            }
             return editor.getValue();
         };
 
@@ -24177,17 +24249,23 @@ pkg.DefEditors = Class([
          * @method  getEditor
          */
         this.getEditor = function(grid, row, col, v) {
-            var editor = null;
-            if (this.editors[col] === null) return;
+            var editor = this.editors[col];
+            if (editor != null) {
+                editor.setValue(v);
+                return editor;
+            }
 
-            if (this.editors[col] != null) {
-                editor = this.editors[col];
+            editor = zebra.isBoolean(v) ? this.boolEditor
+                                        : (zebra.instanceOf(v, this.$clazz.Items) ? this.selectorEditor : this.textEditor);
+
+            if (editor == this.selectorEditor) {
+                editor.list.setModel(v.items);
+                editor.list.select(v.selectedIndex);
             }
             else {
-                editor = zebra.isBoolean(v) ? this.boolEditor : this.textEditor;
+                editor.setValue(v);
             }
 
-            editor.setValue(v);
             editor.setPadding(0);
             var ah = ~~((grid.getRowHeight(row) - editor.getPreferredSize().height)/2);
             editor.setPadding(ah, grid.cellInsetsLeft, ah, grid.cellInsetsRight);
@@ -26809,7 +26887,10 @@ pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
         this.doLayout = function(target){
             this.recalcPS();
             if (target.kids.length > 0){
-                var grid = this.grid, left = target.getLeft(), top = target.getTop();
+                var grid = this.grid,
+                    left = target.getLeft(),
+                    top = target.getTop();
+
                 if (grid.isVisible === true) {
                     grid.setLocation(left, top);
                     grid.setSize(target.width  - left - target.getRight(),

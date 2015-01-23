@@ -1218,6 +1218,19 @@ var ContentListeners = zebra.util.ListenersClass("contentUpdated");
  * has been selected
  * @param {Object} value a previously selected index
  */
+
+/**
+ * Implement the event handler method to detect when a combo pad window
+ * is shown or hidden
+
+     var p = new zebra.ui.Combo();
+     p.padShown = function(src, b) { ... }; // add event handler
+
+ * @event padShown
+ * @param {zebra.ui.Combo} src a combo box component that triggers the event
+ * @param {Boolean} b a flag that indicates if the combo pad window has been
+ * shown (true) or hidden (false)
+*/
 pkg.Combo = Class(pkg.Panel, [
     function $clazz() {
         /**
@@ -1267,7 +1280,7 @@ pkg.Combo = Class(pkg.Panel, [
          */
         this.ComboPadPan = Class(pkg.ScrollPan, [
             function $prototype() {
-                this.closeTime = 0;
+                this.$closeTime = 0;
 
                 /**
                  * A reference to combo that uses the list pad component
@@ -1289,7 +1302,7 @@ pkg.Combo = Class(pkg.Panel, [
                     this.owner.requestFocus();
                 }
 
-                this.closeTime = l == null ? new Date().getTime() : 0;
+                this.$closeTime = l == null ? new Date().getTime() : 0;
             }
         ]);
 
@@ -1418,8 +1431,10 @@ pkg.Combo = Class(pkg.Panel, [
                 this.selectionView != null &&
                 this.hasFocus())
             {
-                this.selectionView.paint(g, this.content.x, this.content.y,
-                                            this.content.width, this.content.height,
+                this.selectionView.paint(g, this.content.x,
+                                            this.content.y,
+                                            this.content.width,
+                                            this.content.height,
                                             this);
             }
         };
@@ -1492,13 +1507,17 @@ pkg.Combo = Class(pkg.Panel, [
          */
         this.mousePressed = function (e) {
             if (e.isActionMask() && this.content != null             &&
-                (new Date().getTime() - this.winpad.closeTime) > 100 &&
+                (new Date().getTime() - this.winpad.$closeTime) > 100 &&
                 e.x > this.content.x && e.y > this.content.y         &&
                 e.x < this.content.x + this.content.width            &&
                 e.y < this.content.y + this.content.height              )
             {
                 this.showPad();
             }
+        };
+
+        this.isPadShown = function() {
+            return this.winpad != null && this.winpad.parent != null;
         };
 
         /**
@@ -1508,7 +1527,7 @@ pkg.Combo = Class(pkg.Panel, [
         this.hidePad = function (){
             var d = this.getCanvas();
             if (d != null && this.winpad.parent != null){
-                d.getLayer(pkg.PopupLayer.ID).remove(this.winpad);
+                this.winpad.removeMe();
                 this.requestFocus();
             }
         };
@@ -1566,7 +1585,17 @@ pkg.Combo = Class(pkg.Panel, [
                 if (this.list != null) this.list.unbind(this);
                 this.list = l;
                 if (this.list._) this.list.bind(this);
-                this.winpad = new this.$clazz.ComboPadPan(this.list);
+
+                var $this = this;
+                this.winpad = new this.$clazz.ComboPadPan(this.list, [
+                    function setParent(p) {
+                        this.$super(p);
+                        if ($this.padShown != null) {
+                            $this.padShown($this, p != null);
+                        }
+                    }
+                ]);
+
                 this.winpad.owner = this;
                 if (this.content != null) {
                     this.content.comboValueUpdated(this, this.list.getSelected());
@@ -1700,10 +1729,16 @@ pkg.Combo = Class(pkg.Panel, [
 
     function kidAdded(index,s,c){
         if (zebra.instanceOf(c, this.$clazz.ContentPan)) {
-            if (this.content != null) throw new Error("Content panel is set");
+            if (this.content != null) {
+                throw new Error("Content panel is set");
+            }
+
             if (c._ != null) c.bind(this);
             this.content = c;
-            if (this.list != null) c.comboValueUpdated(this, this.list.getSelected());
+
+            if (this.list != null) {
+                c.comboValueUpdated(this, this.list.getSelected());
+            }
         }
 
         this.$super(index, s, c);
@@ -1733,7 +1768,7 @@ pkg.Combo = Class(pkg.Panel, [
      * @method fired
      */
     function fired(src) {
-        if ((new Date().getTime() - this.winpad.closeTime) > 100) {
+        if ((new Date().getTime() - this.winpad.$closeTime) > 100) {
             this.showPad();
         }
     },

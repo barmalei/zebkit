@@ -272,7 +272,39 @@ pkg.DefEditors = Class([
     function $clazz() {
         this.TextField = Class(ui.TextField, []);
         this.Checkbox  = Class(ui.Checkbox,  []);
-        this.Combo     = Class(ui.Combo,     []);
+        this.Combo     = Class(ui.Combo,     [
+            function padShown(src, b) {
+                if (b == false) {
+                    this.parent.stopEditing(true);
+                    this.setSize(0,0);
+                }
+            },
+
+            function resized(pw, ph) {
+                this.$super(pw, ph);
+                if (this.width > 0 && this.height > 0 && this.hasFocus()) {
+                    this.showPad();
+                }
+            }
+        ]);
+
+        this.Items = Class([
+            function $prototype() {
+                this.toString = function() {
+                    return this.selectedIndex < 0 ? ""
+                                                  : this.items[this.selectedIndex];
+                }
+            },
+
+            function(items) {
+                this.$this(items, -1);
+            },
+
+            function(items, selectedIndex) {
+                this.items = items;
+                this.selectedIndex = selectedIndex;
+            }
+        ]);
     },
 
     function $prototype() {
@@ -280,6 +312,7 @@ pkg.DefEditors = Class([
             this.textEditor = new this.$clazz.TextField("", 150);
             this.boolEditor = new this.$clazz.Checkbox(null);
             this.selectorEditor = new this.$clazz.Combo();
+
             this.editors    = {};
         };
 
@@ -296,6 +329,10 @@ pkg.DefEditors = Class([
          * @method  fetchEditedValue
          */
         this.fetchEditedValue = function(grid,row,col,data,editor) {
+            if (editor == this.selectorEditor) {
+                data.selectedIndex = editor.list.selectedIndex;
+                return data;
+            }
             return editor.getValue();
         };
 
@@ -309,17 +346,23 @@ pkg.DefEditors = Class([
          * @method  getEditor
          */
         this.getEditor = function(grid, row, col, v) {
-            var editor = null;
-            if (this.editors[col] === null) return;
+            var editor = this.editors[col];
+            if (editor != null) {
+                editor.setValue(v);
+                return editor;
+            }
 
-            if (this.editors[col] != null) {
-                editor = this.editors[col];
+            editor = zebra.isBoolean(v) ? this.boolEditor
+                                        : (zebra.instanceOf(v, this.$clazz.Items) ? this.selectorEditor : this.textEditor);
+
+            if (editor == this.selectorEditor) {
+                editor.list.setModel(v.items);
+                editor.list.select(v.selectedIndex);
             }
             else {
-                editor = zebra.isBoolean(v) ? this.boolEditor : this.textEditor;
+                editor.setValue(v);
             }
 
-            editor.setValue(v);
             editor.setPadding(0);
             var ah = ~~((grid.getRowHeight(row) - editor.getPreferredSize().height)/2);
             editor.setPadding(ah, grid.cellInsetsLeft, ah, grid.cellInsetsRight);
@@ -2941,7 +2984,10 @@ pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
         this.doLayout = function(target){
             this.recalcPS();
             if (target.kids.length > 0){
-                var grid = this.grid, left = target.getLeft(), top = target.getTop();
+                var grid = this.grid,
+                    left = target.getLeft(),
+                    top = target.getTop();
+
                 if (grid.isVisible === true) {
                     grid.setLocation(left, top);
                     grid.setSize(target.width  - left - target.getRight(),

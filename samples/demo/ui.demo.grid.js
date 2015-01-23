@@ -105,7 +105,7 @@ var CustomGridEditor = new Class(zebra.ui.grid.DefEditors, [
 
         this.editors["0"] = new Checkbox(null);
         this.editors["0"].setLayout(new FlowLayout(CENTER, CENTER));
-        this.editors["1"] = new Combo();
+        this.editors["1"] = new this.$clazz.Combo();
         this.editors["1"].setBorder(null);
         var list = this.editors["1"].list;
         list.model.add("Item 1");

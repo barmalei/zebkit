@@ -10496,14 +10496,10 @@ pkg.ImagePan = Class(pkg.ViewPan, [
             }
 
             this.$runner.run(function() {
-                console.log("Load image = " + imgToLoad);
                 pkg.loadImage(imgToLoad, this.join());
             })
             .
             run(function(p, b, i) {
-
-                console.log("arguments : " + arguments.length);
-
                 $this.$runner = null;
                 if (b) {
                     $this.setView(isPic ? img : new pkg.Picture(i));

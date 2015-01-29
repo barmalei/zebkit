@@ -6565,7 +6565,8 @@ pkg.TreeModel = Class([
          * @param  {zebra.data.Item} item an item from that all children items have to be removed
          */
         this.removeKids = function(item){
-            for(var i = 0; i < items.kids.length; i++) this.remove(items[i]);
+            var len = item.kids.length;
+            for(var i = 0; i < len; i++) this.remove(item.kids[0]);
         };
 
         this[''] = function(r) {

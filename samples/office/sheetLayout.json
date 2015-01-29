@@ -1,0 +1,54 @@
+{
+    "$zebra.ui.Panel" : {
+        "layout" : { "$zebra.layout.BorderLayout":[] },
+        "kids"   : {
+            "CENTER" : {
+                "$zebra.ui.excel.SheetPan":  {
+                    "$zebra.ui.excel.Grid": [],
+                    "model"          : { "$zebra.ui.excel.Matrix": [ 200, 23 ] },
+                    "lineColor"      : "lightGray",
+                    "background"     : "#F7F7F7",
+                    "editorProvider" : {
+                        "$zebra.ui.excel.EditorProvider": [],
+                        "textEditor" : {
+                            "border" : { "$zebra.ui.Border":"gray" },
+                            "background" : "white"
+                        }
+                    },
+                    "posMarkerMode"     : "cell",
+
+                    "views" : {
+                        "marker"       : { "$zebra.ui.Border": [ "orange", 2 ] },
+                        "offmarker"       : { "$zebra.ui.Border": [ "orange", 2 ] },
+                        "onselection"  : null,
+                        "offselection" : null
+                    },
+
+                    "kids" : {
+                        "TOP" : {
+                            "$zebra.ui.excel.TopCaption":[],
+                            "background": null,
+                            "border"    : null,
+                            "lineColor" : "lightGray",
+                            "markerView" : "#FFC48C"
+                        },
+
+                        "LEFT" : {
+                            "$zebra.ui.excel.LeftCaption":[],
+                            "background" : null,
+                            "border"     : null,
+                            "lineColor"  : "lightGray",
+                            "markerView"  : "#FFC48C"
+                        },
+
+                        "NONE": {
+                            "$zebra.ui.Panel": []
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+

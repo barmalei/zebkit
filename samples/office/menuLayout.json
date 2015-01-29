@@ -1,0 +1,33 @@
+{
+    "$zebra.ui.Menubar" : {
+        "Excel" :[
+            "About ...",
+            "-",
+            "Preferences ... "
+        ],
+
+        "File" : [
+            "Open",
+            "-",
+            "Save",
+            "Save As",
+            "-",
+            "Import",
+            "Export",
+            "-",
+            "Properties"
+        ],
+
+        "View" : [
+            "(x) Normal",
+            "-",
+            "[x] Toolbar",
+            "[x] Status bar"
+        ]
+    },
+
+    "border" : null,
+    "background": { "$zebra.ui.Gradient" : [ "black", "gray" ] }
+}
+
+

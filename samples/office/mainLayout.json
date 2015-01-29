@@ -1,0 +1,90 @@
+{
+    "layout": {
+        "$zebra.layout.BorderLayout":[]
+    },
+
+    "background": "#EEEEEE",
+
+    "kids": {
+        "TOP": {
+            "$zebra.ui.Panel" : {
+                "layout": { "$zebra.layout.BorderLayout": [] },
+                "kids"  : {
+                    "TOP"    : {
+                        "$zebra.ui.Panel" : { "$zebra.layout.ListLayout": [] },
+                        "kids": [
+                            "@(menuLayout.json)",
+                            "@(toolbarLayout.json)"
+                        ]
+                    },
+                    "CENTER" : {
+                        "$zebra.ui.Panel": {
+                            "id" : "topPan",
+                            "padding": 8,
+                            "layout" : { "$zebra.layout.FlowLayout": [ "left", "center", "horizontal", 8] },
+                            "kids"   : [
+                                {
+                                    "$zebra.ui.TextField": "",
+                                    "id": "cellLocation",
+                                    "preferredSize" : [250, -1],
+                                    "border": { "$zebra.ui.Border" : "gray" },
+                                    "background": "white",
+                                    "editable": false
+                                },
+
+                                {
+                                    "$zebra.ui.Line": [],
+                                    "preferredSize": [ -1, 18 ]
+                                },
+
+                                {
+                                    "$zebra.ui.Toolbar": null
+                                },
+
+                                {
+                                    "$zebra.ui.TextField": "",
+                                    "id": "cellContent",
+                                    "preferredSize" : [350, -1],
+                                    "border": { "$zebra.ui.Border" : "gray" },
+                                    "background": "white",
+                                    "constraints": "stretched",
+                                    "editable": false
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+
+        "CENTER" : {
+            "$zebra.ui.Tabs" : "bottom",
+            "id"    : "sheetsTab",
+            "canHaveFocus": false,
+            "border": null,
+            "views2"  : {
+                        "tab"    : { "$zebra.ui.Border": "gray", "gap":4 },
+                        "tabover": { "$zebra.ui.Border": "gray" },
+                        "tabon"  : null,
+                        "marker": null
+                    },
+            "kids" : {
+                "Sheet1" : "@(sheetLayout.json)",
+                "Sheet2" : "@(sheetLayout.json)",
+                "Sheet3" : "@(sheetLayout.json)",
+                "+"      :  { "$zebra.ui.Panel" : [] }
+            }
+        },
+
+        "BOTTOM" : {
+            "$zebra.ui.StatusBar" : [],
+            "borderView": null,
+            "kids" : [
+                { "$zebra.ui.BoldLabel":"test", "constraints":60, "padding":[0,4,0,4], "background":{ "$zebra.ui.Gradient" : [ "white", "lightGray" ] } },
+                { "$zebra.ui.BoldLabel":"test", "constraints":20, "padding":[0,4,0,4], "background":{ "$zebra.ui.Gradient" : [ "white", "lightGray" ] } },
+                { "$zebra.ui.BoldLabel":"test", "constraints":20, "padding":[0,4,0,4], "background":{ "$zebra.ui.Gradient" : [ "white", "lightGray" ] } }
+            ]
+        }
+    }
+}
+

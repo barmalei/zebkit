@@ -535,7 +535,7 @@ pkg.RoundBorder = Class(pkg.View, [
             g.lineWidth = this.width;
             g.arc(Math.floor(x + w/2) + (w%2 === 0 ? 0 :0.5),
                   Math.floor(y + h/2) + (h%2 === 0 ? 0 :0.5),
-                  ~~((w - g.lineWidth)/2), 0, 2 * Math.PI, false);
+                  Math.floor((w - g.lineWidth)/2), 0, 2 * Math.PI, false);
             g.closePath();
             return true;
         };
@@ -632,6 +632,7 @@ pkg.Gradient = Class(pkg.View, [
                 this.gx2 = x2;
                 this.gy1 = y1;
                 this.gy2 = y2;
+
                 this.gradient = g.createLinearGradient(x1, y1, x2, y2);
                 for(var i=0;i<this.colors.length;i++) {
                     this.gradient.addColorStop(i, this.colors[i].toString());
@@ -1067,8 +1068,13 @@ pkg.$getPS = function(l) {
 var $cvp = pkg.$cvp = function(c, r) {
     if (c.width > 0 && c.height > 0 && c.isVisible === true){
         var p = c.parent, px = -c.x, py = -c.y;
-        if (r == null) r = { x:0, y:0, width:0, height:0 };
-        else r.x = r.y = 0;
+        if (r == null) {
+            r = { x:0, y:0, width:0, height:0 };
+        }
+        else {
+            r.x = r.y = 0;
+        }
+
         r.width  = c.width;
         r.height = c.height;
 
@@ -1634,13 +1640,23 @@ document.addEventListener("mouseup", function(e) {
 // browser dependent
 var $alert = (function(){ return this.alert; }());
 window.alert = function() {
+    // !!!
+    // some browsers don't complete firing key events
+    // if a key was pressed we have to complete it with
+    // at least key released event
     if ($keyPressedCode > 0) {
         KE_STUB.reset($keyPressedOwner, KE.RELEASED,
                       $keyPressedCode, '', $keyPressedModifiers);
         EM.fireInputEvent(KE_STUB);
         $keyPressedCode = -1;
     }
+
+    // call original alert
     $alert.apply(window, arguments);
+
+    // !!!
+    // some browsers don't fire mouse released event
+    // we should do it
     for(var k in $mousePressedEvents) {
         var mp = $mousePressedEvents[k];
         if (mp.canvas != null) {
@@ -3563,7 +3579,7 @@ pkg.FocusManager = Class(pkg.Manager, [
          */
         this.isFocusable = function(c){
             var d = c.getCanvas();
-            //!!!
+            // TODO:
             // also we should checks whether parent isFocusable !!!
             return d != null               &&
                    c.isEnabled    === true &&
@@ -4339,18 +4355,18 @@ pkg.zCanvas = Class(pkg.Panel, [
             if (e.charCode === 0) {
                 if ($keyPressedCode != e.keyCode) this.$keyPressed(e);
                 $keyPressedCode = -1;
-                return;
             }
-
-            if (e.charCode > 0) {
-                var fo = pkg.focusManager.focusOwner;
-                if (fo != null) {
-                    KE_STUB.reset(fo, KE.TYPED, e.keyCode, String.fromCharCode(e.charCode), km(e));
-                    if (EM.fireInputEvent(KE_STUB) === true) e.preventDefault();
+            else {
+                if (e.charCode > 0) {
+                    var fo = pkg.focusManager.focusOwner;
+                    if (fo != null) {
+                        KE_STUB.reset(fo, KE.TYPED, e.keyCode, String.fromCharCode(e.charCode), km(e));
+                        if (EM.fireInputEvent(KE_STUB) === true) e.preventDefault();
+                    }
                 }
-            }
 
-            if (e.keyCode < 47) e.preventDefault();
+                if (e.keyCode < 47) e.preventDefault();
+            }
         };
 
         this.$keyPressed = function(e){
@@ -4404,6 +4420,7 @@ pkg.zCanvas = Class(pkg.Panel, [
             }
 
             //!!!!
+            //TODO: hard coded constants
             if ((code < 47 && code != 32) || b) {
                 e.preventDefault();
             }
@@ -4429,7 +4446,6 @@ pkg.zCanvas = Class(pkg.Panel, [
                 $cleanDragFix();
             }
 
-            // !!!
             // TODO: review it
             // quick and dirty fix
             // try to track a situation when the canvas has been moved
@@ -4495,9 +4511,8 @@ pkg.zCanvas = Class(pkg.Panel, [
             }
             else {
                 // if a button has been pressed but the mouse cursor is outside of
-                // the canvas temporary listen mouse moved events from window
-                // since canvas cannot perform mouse moved events if mouse cursor
-                // is outside of canvas element surface
+                // the canvas, for a time being start listening mouse moved events
+                // of Window to emulate mouse moved events in canvas
                 if ($temporaryWinListener == null && ME_STUB.touch == null) {  // !!! ignore touchscreen devices
                     var $this = this;
                     $temporaryWinListener = function(ee) {
@@ -4830,15 +4845,17 @@ pkg.zCanvas = Class(pkg.Panel, [
         };
 
         this.recalcOffset = function() {
-            // calculate offset
+            // calculate offset relative to window taking in account
+            // scrolling
             var poffx = this.offx,
                 poffy = this.offy,
                 ba    = this.canvas.getBoundingClientRect();
 
-            this.offx = ((ba.left + 0.5) | 0) + pkg.$measure(this.canvas, "padding-left") + window.pageXOffset;
-            this.offy = ((ba.top  + 0.5) | 0) + pkg.$measure(this.canvas, "padding-top" ) + window.pageYOffset;
+            this.offx = Math.round(ba.left) + pkg.$measure(this.canvas, "padding-left") + window.pageXOffset;
+            this.offy = Math.round(ba.top) + pkg.$measure(this.canvas, "padding-top" ) + window.pageYOffset;
 
             if (this.offx != poffx || this.offy != poffy) {
+                // force to fire component re-located event
                 this.relocated(this, poffx, poffy);
             }
         };
@@ -4996,10 +5013,47 @@ pkg.zCanvas = Class(pkg.Panel, [
          */
         this.$da = { x: 0, y: 0, width: -1, height: 0 };
 
-        if (zebra.isTouchable) {
-            new pkg.TouchHandler(this.canvas, [
+
+        var oldPX = -1, oldPY = -1, touchHandler = null;
+
+
+        if ("onpointerdown" in window || "onmspointerdown" in window) {
+
+            var names = "onpointerdown" in window ? [ "pointerdown", "pointerup", "pointermove", "pointerenter", "pointerleave" ]
+                                                  : [ "MSPointerDown", "MSPointerUp", "MSPointerMove", "MSPointerEnter", "MSPointerLeave" ];
+
+            this.canvas.addEventListener(names[0], function(e) {
+                if (e.pointerType == "touch") ME_STUB.touch = e;
+                $this.$mousePressed(e.pointerId, e,  e.button === 0 ? ME.LEFT_BUTTON
+                                                                    : (e.button == 2 ? ME.RIGHT_BUTTON : 0));
+            }, false);
+
+            this.canvas.addEventListener(names[1], function(e) {
+                if (e.pointerType == "touch") ME_STUB.touch = e;
+                $this.$mouseReleased(e.pointerId, e);
+            }, false);
+
+            this.canvas.addEventListener(names[2], function(e) {
+                if (e.pointerType == "touch") ME_STUB.touch = e;
+                $this.$mouseMoved(e.pointerId, e);
+            }, false);
+
+            this.canvas.addEventListener(names[3], function(e) {
+                if (e.pointerType == "touch") ME_STUB.touch = e;
+                $this.$mouseEntered(e.pointerId, e);
+            }, false);
+
+            this.canvas.addEventListener(names[4], function(e) {
+                if (e.pointerType == "touch") ME_STUB.touch = e;
+                $this.$mouseExited(e.pointerId, e);
+            }, false);
+        }
+        else {
+            if ('ontouchstart' in window) {
+                touchHandler = new pkg.TouchHandler(this.canvas, [
                 function $prototype() {
                     this.started = function(e) {
+
                         ME_STUB.touch          = e;
                         ME_STUB.touches        = this.touches;
                         ME_STUB.touchCounter   = this.touchCounter;
@@ -5024,60 +5078,75 @@ pkg.zCanvas = Class(pkg.Panel, [
                 }
             ]);
         }
-        else {
-            var oldPX = -1, oldPY = -1;
-            this.canvas.onmousemove = function(e) {
-                // ignore extra mouse moved event appearing in IE
-                if (oldPY != e.pageY || oldPX != e.pageX) {
-                    oldPX = e.pageX;
-                    oldPY = e.pageY;
-                    $this.$mouseMoved(1, e);
-                }
-                e.stopPropagation();
-            };
 
-            this.canvas.onmousedown = function(e) {
+        this.canvas.onmousemove = function(e) {
+            // ignore extra mouse moved event appearing in IE
+            if (oldPY != e.pageY || oldPX != e.pageX) {
+                oldPX = e.pageX;
+                oldPY = e.pageY;
+                $this.$mouseMoved(1, e);
+            }
+            e.stopPropagation();
+        };
+
+        this.canvas.onmousedown = function(e) {
+            // long touch generates mouse down event. Let's supress it
+            if (touchHandler != null && touchHandler.touchCounter > 0) {
+                e.preventDefault();
+            }
+            else {
                 $this.$mousePressed(1, e, e.button === 0 ? ME.LEFT_BUTTON
                                                         : (e.button == 2 ? ME.RIGHT_BUTTON : 0));
                 e.stopPropagation();
-            };
+            }
+        };
 
-            this.canvas.onmouseup = function(e) {
-                $cleanDragFix();
-                $this.$mouseReleased(1, e);
-                e.stopPropagation();
-            };
+        this.canvas.onmouseup = function(e) {
+            $cleanDragFix();
+            $this.$mouseReleased(1, e);
+            e.stopPropagation();
+        };
 
-            this.canvas.onmouseover = function(e) {
+        this.canvas.onmouseover = function(e) {
+            if (touchHandler != null && touchHandler.touchCounter > 0) {
+                e.preventDefault();
+            }
+            else {
                 $this.$mouseEntered(1, e);
                 e.stopPropagation();
-            };
+            }
+        };
 
-            this.canvas.onmouseout = function(e) {
-                $this.$mouseExited(1, e);
-                oldPX = oldPY = -1;
-                e.stopPropagation();
-            };
-
-            this.canvas.oncontextmenu = function(e) {
-                e.preventDefault();
-            };
-
-            this.canvas.onkeydown = function(e) {
-                $this.$keyPressed(e);
-                e.stopPropagation();
-            };
-
-            this.canvas.onkeyup = function(e) {
-                $this.$keyReleased(e);
-                e.stopPropagation();
-            };
-
-            this.canvas.onkeypress = function(e) {
-                $this.$keyTyped(e);
-                e.stopPropagation();
-            };
+          this.canvas.onmouseout = function(e) {
+              if (touchHandler != null && touchHandler.touchCounter > 0) {
+                  e.preventDefault();
+              }
+              else {
+                  $this.$mouseExited(1, e);
+                  oldPX = oldPY = -1;
+                  e.stopPropagation();
+              }
+          };
         }
+
+        this.canvas.oncontextmenu = function(e) {
+            e.preventDefault();
+        };
+
+        this.canvas.onkeydown = function(e) {
+            $this.$keyPressed(e);
+            e.stopPropagation();
+        };
+
+        this.canvas.onkeyup = function(e) {
+            $this.$keyReleased(e);
+            e.stopPropagation();
+        };
+
+        this.canvas.onkeypress = function(e) {
+            $this.$keyTyped(e);
+            e.stopPropagation();
+        };
 
         this.canvas.onfocus = function(e) {
             if ($this.$focusGainedCounter++ > 0) {
@@ -5190,12 +5259,12 @@ pkg.zCanvas = Class(pkg.Panel, [
 
                 ctx.tX = function(x, y) {
                     var c = this.$states[this.$curState], b = (c.sx != 1 || c.sy != 1 || c.rotateVal !== 0);
-                    return (b ?  (((c.crot * x + y * c.srot)/c.sx + 0.5) | 0) : x) - c.dx;
+                    return (b ? Math.round((c.crot * x + y * c.srot) / c.sx) : x) - c.dx;
                 };
 
                 ctx.tY = function(x, y) {
                     var c = this.$states[this.$curState], b = (c.sx != 1 || c.sy != 1 || c.rotateVal !== 0);
-                    return (b ? (((y * c.crot - c.srot * x)/c.sy + 0.5) | 0) : y) - c.dy;
+                    return (b ? Math.round((y * c.crot - c.srot * x) / c.sy) : y) - c.dy;
                 };
 
                 ctx.translate = function(dx, dy) {

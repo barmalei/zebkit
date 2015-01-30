@@ -364,7 +364,7 @@ pkg.DefEditors = Class([
             }
 
             editor.setPadding(0);
-            var ah = ~~((grid.getRowHeight(row) - editor.getPreferredSize().height)/2);
+            var ah = Math.floor((grid.getRowHeight(row) - editor.getPreferredSize().height)/2);
             editor.setPadding(ah, grid.cellInsetsLeft, ah, grid.cellInsetsRight);
             return editor;
         };
@@ -891,10 +891,10 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
                             ya = t != null && t.ya != null ? t.ya : this.defYAlignment,
                             bg = t == null ? null : t.bg,
                             ps = v.getPreferredSize(),
-                            vx = xa == L.CENTER ? ~~((ww - ps.width)/2)
+                            vx = xa == L.CENTER ? Math.floor((ww - ps.width)/2)
                                                 : (xa == L.RIGHT ? ww - ps.width - ((i==size-1) ? right : 0)
                                                                  : (i === 0 ? left: 0)),
-                            vy = ya == L.CENTER ? ~~((hh - ps.height)/2)
+                            vy = ya == L.CENTER ? Math.floor((hh - ps.height)/2)
                                                 : (ya == L.BOTTOM ? hh - ps.height - ((i==size-1) ? bottom : 0)
                                                                   :  (i === 0 ? top: 0));
 
@@ -2211,7 +2211,6 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                 var w = this.colWidths[j]  - addW,
                                     h = this.rowHeights[i] - addH;
 
-                                //MB.intersection(x, y, w, h, cx, cy, cw, ch, res);
                                 res.x = x > cx ? x : cx;
                                 res.width = Math.min(x + w, cx + cw) - res.x;
                                 res.y = y > cy ? y : cy;
@@ -2257,7 +2256,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                         if (id >= 0) {
                                            g.restore();
                                         }
-                                     }
+                                    }
                                 }
                             }
                             x += (this.colWidths[j] + this.lineSize);
@@ -2523,7 +2522,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
             this.setColsWidth = function (col,len, w){
                 if (this.isUsePsMetric === false){
                     if (arguments.length === 1) {
-                        h   = arguments[0];
+                        w   = arguments[0];
                         col = 0;
                         len = this.getGridCols();
                     }
@@ -2544,7 +2543,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                         this.stopEditing(false);
                         this.cachedWidth = this.getRight() + this.getLeft() +
                                            this.psWidth_ + ((this.leftCaption != null && this.leftCaption.isVisible === true) ? this.leftCaption.getPreferredSize().width : 0);
-                        if(this.parent != null) this.parent.invalidate();
+                        if (this.parent != null) this.parent.invalidate();
                         this.iColVisibility(0);
                         this.invalidateLayout();
                         this.repaint();

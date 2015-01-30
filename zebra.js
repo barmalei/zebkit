@@ -195,7 +195,7 @@ var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
     return f;
 };
 
-var pkg = zebra = namespace('zebra'),
+var pkg = zebkit = zebra = namespace('zebra'),
     CNAME = pkg.CNAME = '$', CDNAME = '',
     FN = pkg.$FN = (typeof namespace.name === "undefined") ? (function(f) {
                                                                 var mt = f.toString().match(/^function\s+([^\s(]+)/);
@@ -7923,7 +7923,7 @@ pkg.RoundBorder = Class(pkg.View, [
             g.lineWidth = this.width;
             g.arc(Math.floor(x + w/2) + (w%2 === 0 ? 0 :0.5),
                   Math.floor(y + h/2) + (h%2 === 0 ? 0 :0.5),
-                  ~~((w - g.lineWidth)/2), 0, 2 * Math.PI, false);
+                  Math.floor((w - g.lineWidth)/2), 0, 2 * Math.PI, false);
             g.closePath();
             return true;
         };
@@ -8020,6 +8020,7 @@ pkg.Gradient = Class(pkg.View, [
                 this.gx2 = x2;
                 this.gy1 = y1;
                 this.gy2 = y2;
+
                 this.gradient = g.createLinearGradient(x1, y1, x2, y2);
                 for(var i=0;i<this.colors.length;i++) {
                     this.gradient.addColorStop(i, this.colors[i].toString());
@@ -8455,8 +8456,13 @@ pkg.$getPS = function(l) {
 var $cvp = pkg.$cvp = function(c, r) {
     if (c.width > 0 && c.height > 0 && c.isVisible === true){
         var p = c.parent, px = -c.x, py = -c.y;
-        if (r == null) r = { x:0, y:0, width:0, height:0 };
-        else r.x = r.y = 0;
+        if (r == null) {
+            r = { x:0, y:0, width:0, height:0 };
+        }
+        else {
+            r.x = r.y = 0;
+        }
+
         r.width  = c.width;
         r.height = c.height;
 
@@ -9022,13 +9028,23 @@ document.addEventListener("mouseup", function(e) {
 // browser dependent
 var $alert = (function(){ return this.alert; }());
 window.alert = function() {
+    // !!!
+    // some browsers don't complete firing key events
+    // if a key was pressed we have to complete it with
+    // at least key released event
     if ($keyPressedCode > 0) {
         KE_STUB.reset($keyPressedOwner, KE.RELEASED,
                       $keyPressedCode, '', $keyPressedModifiers);
         EM.fireInputEvent(KE_STUB);
         $keyPressedCode = -1;
     }
+
+    // call original alert
     $alert.apply(window, arguments);
+
+    // !!!
+    // some browsers don't fire mouse released event
+    // we should do it
     for(var k in $mousePressedEvents) {
         var mp = $mousePressedEvents[k];
         if (mp.canvas != null) {
@@ -10951,7 +10967,7 @@ pkg.FocusManager = Class(pkg.Manager, [
          */
         this.isFocusable = function(c){
             var d = c.getCanvas();
-            //!!!
+            // TODO:
             // also we should checks whether parent isFocusable !!!
             return d != null               &&
                    c.isEnabled    === true &&
@@ -11727,18 +11743,18 @@ pkg.zCanvas = Class(pkg.Panel, [
             if (e.charCode === 0) {
                 if ($keyPressedCode != e.keyCode) this.$keyPressed(e);
                 $keyPressedCode = -1;
-                return;
             }
-
-            if (e.charCode > 0) {
-                var fo = pkg.focusManager.focusOwner;
-                if (fo != null) {
-                    KE_STUB.reset(fo, KE.TYPED, e.keyCode, String.fromCharCode(e.charCode), km(e));
-                    if (EM.fireInputEvent(KE_STUB) === true) e.preventDefault();
+            else {
+                if (e.charCode > 0) {
+                    var fo = pkg.focusManager.focusOwner;
+                    if (fo != null) {
+                        KE_STUB.reset(fo, KE.TYPED, e.keyCode, String.fromCharCode(e.charCode), km(e));
+                        if (EM.fireInputEvent(KE_STUB) === true) e.preventDefault();
+                    }
                 }
-            }
 
-            if (e.keyCode < 47) e.preventDefault();
+                if (e.keyCode < 47) e.preventDefault();
+            }
         };
 
         this.$keyPressed = function(e){
@@ -11792,6 +11808,7 @@ pkg.zCanvas = Class(pkg.Panel, [
             }
 
             //!!!!
+            //TODO: hard coded constants
             if ((code < 47 && code != 32) || b) {
                 e.preventDefault();
             }
@@ -11817,7 +11834,6 @@ pkg.zCanvas = Class(pkg.Panel, [
                 $cleanDragFix();
             }
 
-            // !!!
             // TODO: review it
             // quick and dirty fix
             // try to track a situation when the canvas has been moved
@@ -11883,9 +11899,8 @@ pkg.zCanvas = Class(pkg.Panel, [
             }
             else {
                 // if a button has been pressed but the mouse cursor is outside of
-                // the canvas temporary listen mouse moved events from window
-                // since canvas cannot perform mouse moved events if mouse cursor
-                // is outside of canvas element surface
+                // the canvas, for a time being start listening mouse moved events
+                // of Window to emulate mouse moved events in canvas
                 if ($temporaryWinListener == null && ME_STUB.touch == null) {  // !!! ignore touchscreen devices
                     var $this = this;
                     $temporaryWinListener = function(ee) {
@@ -12218,15 +12233,17 @@ pkg.zCanvas = Class(pkg.Panel, [
         };
 
         this.recalcOffset = function() {
-            // calculate offset
+            // calculate offset relative to window taking in account
+            // scrolling
             var poffx = this.offx,
                 poffy = this.offy,
                 ba    = this.canvas.getBoundingClientRect();
 
-            this.offx = ((ba.left + 0.5) | 0) + pkg.$measure(this.canvas, "padding-left") + window.pageXOffset;
-            this.offy = ((ba.top  + 0.5) | 0) + pkg.$measure(this.canvas, "padding-top" ) + window.pageYOffset;
+            this.offx = Math.round(ba.left) + pkg.$measure(this.canvas, "padding-left") + window.pageXOffset;
+            this.offy = Math.round(ba.top) + pkg.$measure(this.canvas, "padding-top" ) + window.pageYOffset;
 
             if (this.offx != poffx || this.offy != poffy) {
+                // force to fire component re-located event
                 this.relocated(this, poffx, poffy);
             }
         };
@@ -12384,10 +12401,47 @@ pkg.zCanvas = Class(pkg.Panel, [
          */
         this.$da = { x: 0, y: 0, width: -1, height: 0 };
 
-        if (zebra.isTouchable) {
-            new pkg.TouchHandler(this.canvas, [
+
+        var oldPX = -1, oldPY = -1, touchHandler = null;
+
+
+        if ("onpointerdown" in window || "onmspointerdown" in window) {
+
+            var names = "onpointerdown" in window ? [ "pointerdown", "pointerup", "pointermove", "pointerenter", "pointerleave" ]
+                                                  : [ "MSPointerDown", "MSPointerUp", "MSPointerMove", "MSPointerEnter", "MSPointerLeave" ];
+
+            this.canvas.addEventListener(names[0], function(e) {
+                if (e.pointerType == "touch") ME_STUB.touch = e;
+                $this.$mousePressed(e.pointerId, e,  e.button === 0 ? ME.LEFT_BUTTON
+                                                                    : (e.button == 2 ? ME.RIGHT_BUTTON : 0));
+            }, false);
+
+            this.canvas.addEventListener(names[1], function(e) {
+                if (e.pointerType == "touch") ME_STUB.touch = e;
+                $this.$mouseReleased(e.pointerId, e);
+            }, false);
+
+            this.canvas.addEventListener(names[2], function(e) {
+                if (e.pointerType == "touch") ME_STUB.touch = e;
+                $this.$mouseMoved(e.pointerId, e);
+            }, false);
+
+            this.canvas.addEventListener(names[3], function(e) {
+                if (e.pointerType == "touch") ME_STUB.touch = e;
+                $this.$mouseEntered(e.pointerId, e);
+            }, false);
+
+            this.canvas.addEventListener(names[4], function(e) {
+                if (e.pointerType == "touch") ME_STUB.touch = e;
+                $this.$mouseExited(e.pointerId, e);
+            }, false);
+        }
+        else {
+            if ('ontouchstart' in window) {
+                touchHandler = new pkg.TouchHandler(this.canvas, [
                 function $prototype() {
                     this.started = function(e) {
+
                         ME_STUB.touch          = e;
                         ME_STUB.touches        = this.touches;
                         ME_STUB.touchCounter   = this.touchCounter;
@@ -12412,60 +12466,75 @@ pkg.zCanvas = Class(pkg.Panel, [
                 }
             ]);
         }
-        else {
-            var oldPX = -1, oldPY = -1;
-            this.canvas.onmousemove = function(e) {
-                // ignore extra mouse moved event appearing in IE
-                if (oldPY != e.pageY || oldPX != e.pageX) {
-                    oldPX = e.pageX;
-                    oldPY = e.pageY;
-                    $this.$mouseMoved(1, e);
-                }
-                e.stopPropagation();
-            };
 
-            this.canvas.onmousedown = function(e) {
+        this.canvas.onmousemove = function(e) {
+            // ignore extra mouse moved event appearing in IE
+            if (oldPY != e.pageY || oldPX != e.pageX) {
+                oldPX = e.pageX;
+                oldPY = e.pageY;
+                $this.$mouseMoved(1, e);
+            }
+            e.stopPropagation();
+        };
+
+        this.canvas.onmousedown = function(e) {
+            // long touch generates mouse down event. Let's supress it
+            if (touchHandler != null && touchHandler.touchCounter > 0) {
+                e.preventDefault();
+            }
+            else {
                 $this.$mousePressed(1, e, e.button === 0 ? ME.LEFT_BUTTON
                                                         : (e.button == 2 ? ME.RIGHT_BUTTON : 0));
                 e.stopPropagation();
-            };
+            }
+        };
 
-            this.canvas.onmouseup = function(e) {
-                $cleanDragFix();
-                $this.$mouseReleased(1, e);
-                e.stopPropagation();
-            };
+        this.canvas.onmouseup = function(e) {
+            $cleanDragFix();
+            $this.$mouseReleased(1, e);
+            e.stopPropagation();
+        };
 
-            this.canvas.onmouseover = function(e) {
+        this.canvas.onmouseover = function(e) {
+            if (touchHandler != null && touchHandler.touchCounter > 0) {
+                e.preventDefault();
+            }
+            else {
                 $this.$mouseEntered(1, e);
                 e.stopPropagation();
-            };
+            }
+        };
 
-            this.canvas.onmouseout = function(e) {
-                $this.$mouseExited(1, e);
-                oldPX = oldPY = -1;
-                e.stopPropagation();
-            };
-
-            this.canvas.oncontextmenu = function(e) {
-                e.preventDefault();
-            };
-
-            this.canvas.onkeydown = function(e) {
-                $this.$keyPressed(e);
-                e.stopPropagation();
-            };
-
-            this.canvas.onkeyup = function(e) {
-                $this.$keyReleased(e);
-                e.stopPropagation();
-            };
-
-            this.canvas.onkeypress = function(e) {
-                $this.$keyTyped(e);
-                e.stopPropagation();
-            };
+          this.canvas.onmouseout = function(e) {
+              if (touchHandler != null && touchHandler.touchCounter > 0) {
+                  e.preventDefault();
+              }
+              else {
+                  $this.$mouseExited(1, e);
+                  oldPX = oldPY = -1;
+                  e.stopPropagation();
+              }
+          };
         }
+
+        this.canvas.oncontextmenu = function(e) {
+            e.preventDefault();
+        };
+
+        this.canvas.onkeydown = function(e) {
+            $this.$keyPressed(e);
+            e.stopPropagation();
+        };
+
+        this.canvas.onkeyup = function(e) {
+            $this.$keyReleased(e);
+            e.stopPropagation();
+        };
+
+        this.canvas.onkeypress = function(e) {
+            $this.$keyTyped(e);
+            e.stopPropagation();
+        };
 
         this.canvas.onfocus = function(e) {
             if ($this.$focusGainedCounter++ > 0) {
@@ -12578,12 +12647,12 @@ pkg.zCanvas = Class(pkg.Panel, [
 
                 ctx.tX = function(x, y) {
                     var c = this.$states[this.$curState], b = (c.sx != 1 || c.sy != 1 || c.rotateVal !== 0);
-                    return (b ?  (((c.crot * x + y * c.srot)/c.sx + 0.5) | 0) : x) - c.dx;
+                    return (b ? Math.round((c.crot * x + y * c.srot) / c.sx) : x) - c.dx;
                 };
 
                 ctx.tY = function(x, y) {
                     var c = this.$states[this.$curState], b = (c.sx != 1 || c.sy != 1 || c.rotateVal !== 0);
-                    return (b ? (((y * c.crot - c.srot * x)/c.sy + 0.5) | 0) : y) - c.dy;
+                    return (b ? Math.round((y * c.crot - c.srot * x) / c.sy) : y) - c.dy;
                 };
 
                 ctx.translate = function(dx, dy) {
@@ -13416,7 +13485,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
                 h = ts.height < h ? ts.height : h;
 
                 if (y < ts.y) {
-                    startLine = ~~((lineIndent + ts.y - y) / lilh);
+                    startLine = Math.floor((lineIndent + ts.y - y) / lilh);
                     h += (ts.y - startLine * lineHeight - startLine * lineIndent);
                 }
                 else {
@@ -13425,7 +13494,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
 
                 var size = this.target.getLines();
                 if (startLine < size){
-                    var lines =  ~~((h + lineIndent) / lilh) + (((h + lineIndent) % lilh > lineIndent) ? 1 : 0);
+                    var lines =  Math.floor((h + lineIndent) / lilh) + (((h + lineIndent) % lilh > lineIndent) ? 1 : 0);
                     if (startLine + lines > size) {
                         lines = size - startLine;
                     }
@@ -13682,7 +13751,7 @@ pkg.TabBorder = Class(View, [
                     g.stroke();
 
                     if (d.isEnabled === true) {
-                        var ww = ~~((w - 6) / 2);
+                        var ww = Math.floor((w - 6) / 2);
                         g.setColor(this.fillColor3);
                         g.fillRect(xx - ww + 1, y + s, ww, h - s - 1);
                     }
@@ -13713,7 +13782,7 @@ pkg.TabBorder = Class(View, [
                     g.stroke();
 
                     if (d.isEnabled === true) {
-                        var ww = ~~((w - 6) / 2);
+                        var ww = Math.floor((w - 6) / 2);
                         g.setColor(this.fillColor3);
                         g.fillRect(x, y + s, ww, h - s - 1);
                     }
@@ -13741,7 +13810,7 @@ pkg.TabBorder = Class(View, [
 
                     if (d.isEnabled === true){
                         g.setColor(this.fillColor3);
-                        var hh = ~~((h - 6) / 2);
+                        var hh = Math.floor((h - 6) / 2);
                         g.fillRect(x + s, yy - hh + 1 , w - s - 1, hh);
                     }
 
@@ -13774,7 +13843,7 @@ pkg.TabBorder = Class(View, [
 
                     if (d.isEnabled === true){
                         g.setColor(this.fillColor3);
-                        var hh = ~~((h - 6) / 2);
+                        var hh = Math.floor((h - 6) / 2);
                         g.fillRect(x + s, y, w - s - 1, hh);
                     }
 
@@ -13859,7 +13928,7 @@ pkg.TitledBorder = Class(pkg.Render, [
                         case L.BOTTOM:
                             var bottom = this.target.getBottom();
                             switch (this.lineAlignment) {
-                                case L.CENTER : yy = r.y + ~~((r.height - bottom)/ 2) + bottom; break;
+                                case L.CENTER : yy = r.y + Math.floor((r.height - bottom)/ 2) + bottom; break;
                                 case L.TOP    : yy = r.y + r.height + bottom; break;
                                 case L.BOTTOM : yy = r.y; break;
                             }
@@ -13867,7 +13936,7 @@ pkg.TitledBorder = Class(pkg.Render, [
                         case L.TOP:
                             var top = this.target.getTop();
                             switch (this.lineAlignment) {
-                                case L.CENTER : y = r.y + ~~((r.height - top)/2);   break; // y = r.y + ~~(r.height/ 2) ; break;
+                                case L.CENTER : y = r.y + Math.floor((r.height - top)/2);   break; // y = r.y + Math.floor(r.height/ 2) ; break;
                                 case L.TOP    : y = r.y - top; break;
                                 case L.BOTTOM : y = r.y + r.height; break;
                             }
@@ -13875,7 +13944,7 @@ pkg.TitledBorder = Class(pkg.Render, [
                         case L.LEFT:
                             var left = this.target.getLeft();
                             switch (this.lineAlignment) {
-                                case L.CENTER : x = r.x + ~~((r.width - left) / 2); break;
+                                case L.CENTER : x = r.x + Math.floor((r.width - left) / 2); break;
                                 case L.TOP    : x = r.x - left; break;
                                 case L.BOTTOM : x = r.x + r.width; break;
                             }
@@ -13883,7 +13952,7 @@ pkg.TitledBorder = Class(pkg.Render, [
                         case L.RIGHT:
                             var right = this.target.getRight();
                             switch (this.lineAlignment) {
-                                case L.CENTER : xx = r.x + ~~((r.width - right) / 2) + right; break;
+                                case L.CENTER : xx = r.x + Math.floor((r.width - right) / 2) + right; break;
                                 case L.TOP    : xx = r.x + r.width + right; break;
                                 case L.BOTTOM : xx = r.x; break;
                             }
@@ -13922,7 +13991,7 @@ pkg.TitledBorder = Class(pkg.Render, [
                             var top = this.target.getTop();
                             // compute border y
                             switch (this.lineAlignment) {
-                                case L.CENTER : y = r.y + ~~((r.height - top) / 2) ; break;
+                                case L.CENTER : y = r.y + Math.floor((r.height - top) / 2) ; break;
                                 case L.TOP    : y = r.y - top; break;
                                 case L.BOTTOM : y = r.y + r.height; break;
                             }
@@ -13957,7 +14026,7 @@ pkg.TitledBorder = Class(pkg.Render, [
                         case L.BOTTOM:
                             var bottom = this.target.getBottom();
                             switch (this.lineAlignment) {
-                                case L.CENTER : yy = r.y + ~~((r.height - bottom) / 2) + bottom; break;
+                                case L.CENTER : yy = r.y + Math.floor((r.height - bottom) / 2) + bottom; break;
                                 case L.TOP    : yy = r.y + r.height + bottom; break;
                                 case L.BOTTOM : yy = r.y ; break;
                             }
@@ -13986,7 +14055,7 @@ pkg.TitledBorder = Class(pkg.Render, [
                         case L.LEFT:
                             var left = this.target.getLeft();
                             switch (this.lineAlignment) {
-                                case L.CENTER : x = r.x + ~~((r.width - left) / 2); break;
+                                case L.CENTER : x = r.x + Math.floor((r.width - left) / 2); break;
                                 case L.TOP    : x = r.x  - left; break;
                                 case L.BOTTOM : x = r.x + r.width; break;
                             }
@@ -14015,7 +14084,7 @@ pkg.TitledBorder = Class(pkg.Render, [
                         case L.RIGHT:
                             var right = this.target.getRight();
                             switch (this.lineAlignment) {
-                                case L.CENTER : xx = r.x + ~~((r.width - right) / 2) + right; break;
+                                case L.CENTER : xx = r.x + Math.floor((r.width - right) / 2) + right; break;
                                 case L.TOP    : xx = r.x  + r.width + right; break;
                                 case L.BOTTOM : xx = r.x; break;
                             }
@@ -14965,7 +15034,7 @@ pkg.BorderPan = Class(pkg.Panel, [
                 this.label.setSize(ps.width, h);
                 this.label.setLocation((xa == L.LEFT) ? left + this.indent
                                                       : ((xa == L.RIGHT) ? this.width - right - ps.width - this.indent
-                                                                         : ~~((this.width - ps.width) / 2)),
+                                                                         : Math.floor((this.width - ps.width) / 2)),
                                         (ya == L.BOTTOM) ? (this.height - bottom - ps.height) : top);
             }
 
@@ -15644,7 +15713,7 @@ pkg.SplitPan = Class(pkg.Panel, [
                     else {
                         this.gripper.setSize(bSize.width, bSize.height);
                         this.gripper.toPreferredSize();
-                        this.gripper.setLocation(~~((w - bSize.width) / 2), this.barLocation);
+                        this.gripper.setLocation(Math.floor((w - bSize.width) / 2), this.barLocation);
                     }
                 }
                 if(this.leftComp != null){
@@ -15672,7 +15741,7 @@ pkg.SplitPan = Class(pkg.Panel, [
                     }
                     else{
                         this.gripper.setSize(bSize.width, bSize.height);
-                        this.gripper.setLocation(this.barLocation, ~~((h - bSize.height) / 2));
+                        this.gripper.setLocation(this.barLocation, Math.floor((h - bSize.height) / 2));
                     }
                 }
 
@@ -15849,7 +15918,7 @@ pkg.Progress = Class(pkg.Panel, [
                                                                 : this.bundleHeight;
 
             if (rs >= bundleSize){
-                var vLoc = ~~((rs * this.value) / this.maxValue),
+                var vLoc = Math.floor((rs * this.value) / this.maxValue),
                     x = left, y = this.height - bottom, bundle = this.bundleView,
                     wh = this.orientation == L.HORIZONTAL ? this.height - top - bottom
                                                           : this.width - left - right;
@@ -15867,8 +15936,8 @@ pkg.Progress = Class(pkg.Panel, [
 
                 if (this.titleView != null){
                     var ps = this.bundleView.getPreferredSize();
-                    this.titleView.paint(g, ~~((this.width  - ps.width ) / 2),
-                                            ~~((this.height - ps.height) / 2),
+                    this.titleView.paint(g, Math.floor((this.width  - ps.width ) / 2),
+                                            Math.floor((this.height - ps.height) / 2),
                                             ps.width, ps.height, this);
                 }
             }
@@ -16411,14 +16480,14 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
 
         this.pixel2value = function(p) {
             var db = this.decBt;
-            return (this.type == L.VERTICAL) ? ~~((this.max * (p - db.y - db.height)) / (this.amount() - this.bundle.height))
-                                             : ~~((this.max * (p - db.x - db.width )) / (this.amount() - this.bundle.width));
+            return (this.type == L.VERTICAL) ? Math.floor((this.max * (p - db.y - db.height)) / (this.amount() - this.bundle.height))
+                                             : Math.floor((this.max * (p - db.x - db.width )) / (this.amount() - this.bundle.width));
         };
 
         this.value2pixel = function(){
             var db = this.decBt, bn = this.bundle, off = this.position.offset;
-            return (this.type == L.VERTICAL) ? db.y + db.height +  ~~(((this.amount() - bn.height) * off) / this.max)
-                                             : db.x + db.width  +  ~~(((this.amount() - bn.width) * off) / this.max);
+            return (this.type == L.VERTICAL) ? db.y + db.height +  Math.floor(((this.amount() - bn.height) * off) / this.max)
+                                             : db.x + db.width  +  Math.floor(((this.amount() - bn.width) * off) / this.max);
         };
 
 
@@ -16492,10 +16561,10 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
             if (this.isInBundle(e.x, e.y) === false && e.isActionMask()){
                 var d = this.pageIncrement;
                 if (this.type == L.VERTICAL){
-                    if(e.y < (this.bundle != null ? this.bundle.y : ~~(this.height / 2))) d =  -d;
+                    if(e.y < (this.bundle != null ? this.bundle.y : Math.floor(this.height / 2))) d =  -d;
                 }
                 else {
-                    if(e.x < (this.bundle != null ? this.bundle.x : ~~(this.width / 2))) d =  -d;
+                    if(e.x < (this.bundle != null ? this.bundle.x : Math.floor(this.width / 2))) d =  -d;
                 }
                 this.position.setOffset(this.position.offset + d);
             }
@@ -16539,7 +16608,7 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
             if (this.bundle != null && this.bundle.isVisible === true){
                 var am = this.amount();
                 if (am > minbs) {
-                    var bsize = Math.max(Math.min(~~((this.extra * am) / this.max), am - minbs), minbs);
+                    var bsize = Math.max(Math.min(Math.floor((this.extra * am) / this.max), am - minbs), minbs);
                     this.bundle.setSize(b ? bsize : ew, b ? eh : bsize);
                     this.bundle.setLocation(b ? this.value2pixel() : left, b ? top : this.value2pixel());
                 }
@@ -17371,7 +17440,7 @@ pkg.Tabs = Class(pkg.Panel, [
          * @method next
          */
         this.next =  function (page, d){
-            for(; page >= 0 && page < ~~(this.pages.length / 2); page += d) {
+            for(; page >= 0 && page < Math.floor(this.pages.length / 2); page += d) {
                 if (this.isTabEnabled(page) === true) return page;
             }
             return -1;
@@ -17429,7 +17498,7 @@ pkg.Tabs = Class(pkg.Panel, [
                     this.paintTab(g, i);
                 }
 
-                for(var i = this.selectedIndex + 1;i < ~~(this.pages.length / 2); i++) {
+                for(var i = this.selectedIndex + 1;i < Math.floor(this.pages.length / 2); i++) {
                     this.paintTab(g, i);
                 }
 
@@ -17485,8 +17554,8 @@ pkg.Tabs = Class(pkg.Panel, [
                 tabover.paint(g, b.x, b.y, b.width, b.height, page);
             }
 
-            v.paint(g, b.x + ~~((b.width - ps.width) / 2),
-                       b.y + ~~((b.height - ps.height) / 2),
+            v.paint(g, b.x + Math.floor((b.width - ps.width) / 2),
+                       b.y + Math.floor((b.height - ps.height) / 2),
                        ps.width, ps.height, page);
         };
 
@@ -17616,7 +17685,7 @@ pkg.Tabs = Class(pkg.Panel, [
          * @method recalc
          */
         this.recalc = function(){
-            var count = ~~(this.pages.length / 2);
+            var count = Math.floor(this.pages.length / 2);
             if (count > 0) {
                 this.tabAreaHeight = this.tabAreaWidth = 0;
 
@@ -17709,7 +17778,7 @@ pkg.Tabs = Class(pkg.Panel, [
                     }
                 }
 
-                for(var i = 0; i < ~~(this.pages.length / 2); i++ ) {
+                for(var i = 0; i < Math.floor(this.pages.length / 2); i++ ) {
                     if (this.selectedIndex != i) {
                         var tb = this.getTabBounds(i);
                         if (x >= tb.x && y >= tb.y && x < tb.x + tb.width && y < tb.y + tb.height) {
@@ -18013,10 +18082,10 @@ pkg.Slider = Class(pkg.Panel, [
                         d = render.getPreferredSize();
 
                     if (this.orient == L.HORIZONTAL) {
-                        render.paint(g, this.pl[i] - ~~(d.width / 2), loc, d.width, d.height, this);
+                        render.paint(g, this.pl[i] - Math.floor(d.width / 2), loc, d.width, d.height, this);
                     }
                     else {
-                        render.paint(g, loc, this.pl[i] - ~~(d.height / 2),  d.width, d.height, this);
+                        render.paint(g, loc, this.pl[i] - Math.floor(d.height / 2),  d.width, d.height, this);
                     }
                 }
         };
@@ -18057,15 +18126,15 @@ pkg.Slider = Class(pkg.Panel, [
                 h      = this.height - top - bottom - 2;
 
             if (this.orient == L.HORIZONTAL){
-                var topY = top + ~~((h - this.psH) / 2) + 1, by = topY;
+                var topY = top + Math.floor((h - this.psH) / 2) + 1, by = topY;
                 if(this.isEnabled === true) {
                     gauge.paint(g, left + 1,
-                                   topY + ~~((bs.height - gs.height) / 2),
+                                   topY + Math.floor((bs.height - gs.height) / 2),
                                    w, gs.height, this);
                 }
                 else{
                     g.setColor("gray");
-                    g.strokeRect(left + 1, topY + ~~((bs.height - gs.height) / 2), w, gs.height);
+                    g.strokeRect(left + 1, topY + Math.floor((bs.height - gs.height) / 2), w, gs.height);
                 }
 
                 topY += bs.height;
@@ -18090,14 +18159,14 @@ pkg.Slider = Class(pkg.Panel, [
                 bnv.paint(g, this.getBundleLoc(this.value), by, bs.width, bs.height, this);
             }
             else {
-                var leftX = left + ~~((w - this.psW) / 2) + 1, bx = leftX;
+                var leftX = left + Math.floor((w - this.psW) / 2) + 1, bx = leftX;
                 if (this.isEnabled === true) {
-                    gauge.paint(g, leftX + ~~((bs.width - gs.width) / 2),
+                    gauge.paint(g, leftX + Math.floor((bs.width - gs.width) / 2),
                                    top + 1, gs.width, h, this);
                 }
                 else {
                     g.setColor("gray");
-                    g.strokeRect(leftX + ~~((bs.width - gs.width) / 2),
+                    g.strokeRect(leftX + Math.floor((bs.width - gs.width) / 2),
                                  top + 1, gs.width, h);
                 }
 
@@ -18144,7 +18213,7 @@ pkg.Slider = Class(pkg.Panel, [
                 return res;
             }
 
-            v = this.exactStep * ~~((v + v % this.exactStep) / this.exactStep);
+            v = this.exactStep * Math.floor((v + v % this.exactStep) / this.exactStep);
             if (v > this.max) v = this.max;
             else {
                 if(v < this.min) v = this.min;
@@ -18154,14 +18223,14 @@ pkg.Slider = Class(pkg.Panel, [
 
         this.value2loc = function (v){
             var ps = this.views.bundle.getPreferredSize(),
-                l  = ~~((this.getScaleSize() * (v - this.min)) / (this.max - this.min));
-            return  (this.orient == L.VERTICAL) ? this.height - ~~(ps.height/2) - this.getBottom() - l
-                                                : this.getLeft() + ~~(ps.width/2) + l;
+                l  = Math.floor((this.getScaleSize() * (v - this.min)) / (this.max - this.min));
+            return  (this.orient == L.VERTICAL) ? this.height - Math.floor(ps.height/2) - this.getBottom() - l
+                                                : this.getLeft() + Math.floor(ps.width/2) + l;
         };
 
         this.loc2value = function(xy){
             var ps = this.views.bundle.getPreferredSize(),
-                sl = (this.orient == L.VERTICAL) ? this.getLeft() + ~~(ps.width/2) : this.getTop() + ~~(ps.height/2),
+                sl = (this.orient == L.VERTICAL) ? this.getLeft() + Math.floor(ps.width/2) : this.getTop() + Math.floor(ps.height/2),
                 ss = this.getScaleSize();
 
             if (this.orient == L.VERTICAL) {
@@ -18173,7 +18242,7 @@ pkg.Slider = Class(pkg.Panel, [
                 if (xy > sl + ss) xy = sl + ss;
             }
 
-            return this.min + ~~(((this.max - this.min) * (xy - sl)) / ss);
+            return this.min + Math.floor(((this.max - this.min) * (xy - sl)) / ss);
         };
 
         this.nextValue = function(value,s,d){
@@ -18192,20 +18261,20 @@ pkg.Slider = Class(pkg.Panel, [
 
         this.getBundleLoc = function(v){
             var bs = this.views.bundle.getPreferredSize();
-            return this.value2loc(v) - (this.orient == L.HORIZONTAL ? ~~(bs.width / 2)
-                                                                    : ~~(bs.height / 2));
+            return this.value2loc(v) - (this.orient == L.HORIZONTAL ? Math.floor(bs.width / 2)
+                                                                    : Math.floor(bs.height / 2));
         };
 
         this.getBundleBounds = function (v){
             var bs = this.views.bundle.getPreferredSize();
             return this.orient == L.HORIZONTAL ? {
                                                    x:this.getBundleLoc(v),
-                                                   y:this.getTop() + ~~((this.height - this.getTop() - this.getBottom() - this.psH) / 2) + 1,
+                                                   y:this.getTop() + Math.floor((this.height - this.getTop() - this.getBottom() - this.psH) / 2) + 1,
                                                    width:bs.width,
                                                    height:bs.height
                                                  }
                                                : {
-                                                   x:this.getLeft() + ~~((this.width - this.getLeft() - this.getRight() - this.psW) / 2) + 1,
+                                                   x:this.getLeft() + Math.floor((this.width - this.getLeft() - this.getRight() - this.psW) / 2) + 1,
                                                    y:this.getBundleLoc(v),
                                                    width:bs.width,
                                                    height:bs.height
@@ -18326,8 +18395,8 @@ pkg.Slider = Class(pkg.Panel, [
                 e.y < r.y + r.height)
             {
                 this.dragged = true;
-                this.correctDt = this.orient == L.HORIZONTAL ? r.x + ~~(r.width  / 2) - e.x
-                                                             : r.y + ~~(r.height / 2) - e.y;
+                this.correctDt = this.orient == L.HORIZONTAL ? r.x + Math.floor(r.width  / 2) - e.x
+                                                             : r.y + Math.floor(r.height / 2) - e.y;
             }
         };
 
@@ -18830,12 +18899,12 @@ pkg.RadioView = Class(View, [
             g.beginPath();
 
             g.fillStyle = this.color1;
-            g.arc(~~(x + w/2), ~~(y + h/2) , ~~(w/3 - 0.5), 0, 2* Math.PI, 1, false);
+            g.arc(Math.floor(x + w/2), Math.floor(y + h/2) , Math.floor(w/3 - 0.5), 0, 2* Math.PI, 1, false);
             g.fill();
 
             g.beginPath();
             g.fillStyle = this.color2;
-            g.arc(~~(x + w/2), ~~(y + h/2) , ~~(w/4 - 0.5), 0, 2* Math.PI, 1, false);
+            g.arc(Math.floor(x + w/2), Math.floor(y + h/2) , Math.floor(w/4 - 0.5), 0, 2* Math.PI, 1, false);
             g.fill();
         };
     }
@@ -18928,7 +18997,7 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
 
                     bar.position.setOffset(o - $this.$dt);
                     if (++k%5 === 0) {
-                        $this.$dt = ~~($this.$dt/2);
+                        $this.$dt = Math.floor($this.$dt/2);
                     }
                     if (o == bar.position.offset || ($this.$dt >= -1  &&  $this.$dt <= 1)) {
                         clearInterval($this.timer);
@@ -24263,7 +24332,7 @@ pkg.DefEditors = Class([
             }
 
             editor.setPadding(0);
-            var ah = ~~((grid.getRowHeight(row) - editor.getPreferredSize().height)/2);
+            var ah = Math.floor((grid.getRowHeight(row) - editor.getPreferredSize().height)/2);
             editor.setPadding(ah, grid.cellInsetsLeft, ah, grid.cellInsetsRight);
             return editor;
         };
@@ -24790,10 +24859,10 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
                             ya = t != null && t.ya != null ? t.ya : this.defYAlignment,
                             bg = t == null ? null : t.bg,
                             ps = v.getPreferredSize(),
-                            vx = xa == L.CENTER ? ~~((ww - ps.width)/2)
+                            vx = xa == L.CENTER ? Math.floor((ww - ps.width)/2)
                                                 : (xa == L.RIGHT ? ww - ps.width - ((i==size-1) ? right : 0)
                                                                  : (i === 0 ? left: 0)),
-                            vy = ya == L.CENTER ? ~~((hh - ps.height)/2)
+                            vy = ya == L.CENTER ? Math.floor((hh - ps.height)/2)
                                                 : (ya == L.BOTTOM ? hh - ps.height - ((i==size-1) ? bottom : 0)
                                                                   :  (i === 0 ? top: 0));
 
@@ -26110,7 +26179,6 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                 var w = this.colWidths[j]  - addW,
                                     h = this.rowHeights[i] - addH;
 
-                                //MB.intersection(x, y, w, h, cx, cy, cw, ch, res);
                                 res.x = x > cx ? x : cx;
                                 res.width = Math.min(x + w, cx + cw) - res.x;
                                 res.y = y > cy ? y : cy;
@@ -26156,7 +26224,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                         if (id >= 0) {
                                            g.restore();
                                         }
-                                     }
+                                    }
                                 }
                             }
                             x += (this.colWidths[j] + this.lineSize);
@@ -26422,7 +26490,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
             this.setColsWidth = function (col,len, w){
                 if (this.isUsePsMetric === false){
                     if (arguments.length === 1) {
-                        h   = arguments[0];
+                        w   = arguments[0];
                         col = 0;
                         len = this.getGridCols();
                     }
@@ -26443,7 +26511,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                         this.stopEditing(false);
                         this.cachedWidth = this.getRight() + this.getLeft() +
                                            this.psWidth_ + ((this.leftCaption != null && this.leftCaption.isVisible === true) ? this.leftCaption.getPreferredSize().width : 0);
-                        if(this.parent != null) this.parent.invalidate();
+                        if (this.parent != null) this.parent.invalidate();
                         this.iColVisibility(0);
                         this.invalidateLayout();
                         this.repaint();

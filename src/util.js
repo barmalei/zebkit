@@ -220,8 +220,8 @@ pkg.findInTree = function(root, path, eq, cb) {
 
     function _find(root, ms, idx, cb) {
         function list_child(r, name, deep, cb) {
-            if (r.kids) {
-                for (var i=0; i < r.kids.length; i++) {
+            if (r.kids != null) {
+                for (var i = 0; i < r.kids.length; i++) {
                     var kid = r.kids[i];
                     if (name == '*' || eq(kid, name)) {
                         if (cb(kid)) return true;

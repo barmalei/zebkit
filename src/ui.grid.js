@@ -309,8 +309,8 @@ pkg.DefEditors = Class([
 
     function $prototype() {
         this[''] = function() {
-            this.textEditor = new this.$clazz.TextField("", 150);
-            this.boolEditor = new this.$clazz.Checkbox(null);
+            this.textEditor     = new this.$clazz.TextField("", 150);
+            this.boolEditor     = new this.$clazz.Checkbox(null);
             this.selectorEditor = new this.$clazz.Combo();
 
             this.editors    = {};

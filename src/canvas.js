@@ -3208,9 +3208,10 @@ pkg.PaintManager = Class(pkg.Manager, [
         this.repaint = function(c,x,y,w,h) {
 
             // step I: skip invisible components and components that are not in hierarchy
-            //         don't initiate repainting thread for such sort of the components
+            //         don't initiate repainting thread for such sort of the components,
+            //         but don't forget for zCanvas whose parent field is null
             //console.log("PaintManager.repaint() : " + c.$clazz.$name + ", stop? = " + (c.isVisible === false || c.parent == null) + ", w = " + c.width);
-            if (c.isVisible === false || c.parent == null) {
+            if ((c.isVisible === false || c.parent == null) && c.$context == null) {
                 return;
             }
 
@@ -3219,6 +3220,7 @@ pkg.PaintManager = Class(pkg.Manager, [
             for(; canvas != null && canvas.$context == null; canvas = canvas.parent) {
                 if (canvas.isVisible === false) return;
             }
+
             if (canvas == null) {
                 return;
             }
@@ -4903,6 +4905,8 @@ pkg.zCanvas = Class(pkg.Panel, [
 
         this.resized = function(pw,ph) {
             pkg.events.fireCompEvent(CL.SIZED, this, pw, ph);
+            // don't forget repaint it
+            this.repaint();
         };
 
         // override parent class repaint() method since the necessity
@@ -5015,8 +5019,6 @@ pkg.zCanvas = Class(pkg.Panel, [
 
 
         var oldPX = -1, oldPY = -1, touchHandler = null;
-
-
         if ("onpointerdown" in window || "onmspointerdown" in window) {
 
             var names = "onpointerdown" in window ? [ "pointerdown", "pointerup", "pointermove", "pointerenter", "pointerleave" ]
@@ -5206,146 +5208,156 @@ pkg.zCanvas = Class(pkg.Panel, [
         return this;
     },
 
+    function initContext(w, h) {
+        var ctx = pkg.$canvas.size(this.canvas, w, h);
+
+        // TODO: top works not good in FF and it is better don't use it
+        // So, ascent has to be taking in account as it was implemented
+        // before
+        if (ctx.textBaseline != "top" ) {
+            ctx.textBaseline = "top";
+        }
+
+        // canvas has one instance of context, the code below
+        // test if the context has been already full filled
+        // with necessary methods and if it is true reset and
+        // returns canvas
+        if (typeof ctx.tX !== "undefined") {
+            ctx.reset(w, h);
+        }
+        else {
+            // customize context with number of new methods
+            //var proto = ctx.constructor.prototype;
+            var $scale     = ctx.scale,
+                $translate = ctx.translate,
+                $rotate    = ctx.rotate,
+                $save      = ctx.save,
+                $restore   = ctx.restore;
+
+            ctx.reset = function(w, h) {
+                this.$curState = 0;
+                var s = this.$states[0];
+                s.srot = s.rotateVal = s.x = s.y = s.width = s.height = s.dx = s.dy = 0;
+                s.crot = s.sx = s.sy = 1;
+                s.width = w;
+                s.height = h;
+                this.setFont(pkg.font);
+                this.setColor("white");
+            };
+
+            // pre-allocate canvas save $states
+            ctx.$states = Array(50);
+            for(var i=0; i < ctx.$states.length; i++) {
+                var s = {};
+                s.srot = s.rotateVal = s.x = s.y = s.width = s.height = s.dx = s.dy = 0;
+                s.crot = s.sx = s.sy = 1;
+                ctx.$states[i] = s;
+            }
+            ctx.reset(w, h);
+
+            ctx.tX = function(x, y) {
+                var c = this.$states[this.$curState],
+                    b = (c.sx != 1 || c.sy != 1 || c.rotateVal !== 0);
+                return (b ? Math.round((c.crot * x + y * c.srot) / c.sx) : x) - c.dx;
+            };
+
+            ctx.tY = function(x, y) {
+                var c = this.$states[this.$curState],
+                    b = (c.sx != 1 || c.sy != 1 || c.rotateVal !== 0);
+                return (b ? Math.round((y * c.crot - c.srot * x) / c.sy) : y) - c.dy;
+            };
+
+            ctx.translate = function(dx, dy) {
+                if (dx !== 0 || dy !== 0) {
+                    var c = this.$states[this.$curState];
+                    c.x  -= dx;
+                    c.y  -= dy;
+                    c.dx += dx;
+                    c.dy += dy;
+                    $translate.call(this, dx, dy);
+                }
+            };
+
+            ctx.rotate = function(v) {
+                var c = this.$states[this.$curState];
+                c.rotateVal += v;
+                c.srot = MS(c.rotateVal);
+                c.crot = MC(c.rotateVal);
+                $rotate.call(this, v);
+            };
+
+            ctx.scale = function(sx, sy) {
+                var c = this.$states[this.$curState];
+                c.sx = c.sx * sx;
+                c.sy = c.sy * sy;
+                $scale.call(this, sx, sy);
+            };
+
+            ctx.save = function() {
+                this.$curState++;
+                var c = this.$states[this.$curState], cc = this.$states[this.$curState - 1];
+                c.x = cc.x;
+                c.y = cc.y;
+                c.width = cc.width;
+                c.height = cc.height;
+
+                c.dx = cc.dx;
+                c.dy = cc.dy;
+                c.sx = cc.sx;
+                c.sy = cc.sy;
+                c.srot = cc.srot;
+                c.crot = cc.crot;
+                c.rotateVal = cc.rotateVal;
+
+                $save.call(this);
+                return this.$curState - 1;
+            };
+
+            ctx.restore = function() {
+                if (this.$curState === 0) {
+                    throw new Error("Context restore history is empty");
+                }
+
+                this.$curState--;
+                $restore.call(this);
+                return this.$curState;
+            };
+
+            ctx.clipRect = function(x,y,w,h){
+                var c = this.$states[this.$curState];
+                if (c.x != x || y != c.y || w != c.width || h != c.height) {
+                    var xx = c.x, yy = c.y,
+                        ww = c.width,
+                        hh = c.height,
+                        xw = x + w,
+                        xxww = xx + ww,
+                        yh = y + h,
+                        yyhh = yy + hh;
+
+                    c.x      = x > xx ? x : xx;
+                    c.width  = (xw < xxww ? xw : xxww) - c.x;
+                    c.y      = y > yy ? y : yy;
+                    c.height = (yh < yyhh ? yh : yyhh) - c.y;
+
+                    if (c.x != xx || yy != c.y || ww != c.width || hh != c.height) {
+                        // begin path is very important to have proper clip area
+                        this.beginPath();
+                        this.rect(x, y, w, h);
+                        this.closePath();
+                        this.clip();
+                    }
+                }
+            };
+        }
+        return ctx;
+    },
+
     function setSize(w, h) {
         if (this.width != w || h != this.height) {
             var pw  = this.width,
-                ph  = this.height,
-                ctx = pkg.$canvas.size(this.canvas, w, h);
+                ph  = this.height;
 
-            //TODO: top works not good in FF and it is better don't use it
-            // So, ascent has to be taking in account as it was implemented
-            // before
-            this.$context = ctx;
-            if (this.$context.textBaseline != "top" ) {
-                this.$context.textBaseline = "top";
-            }
-
-            // canvas has one instance of context, the code below
-            // test if the context has been already full filled
-            // with necessary methods and if it is true reset and
-            // returns canvas
-            if (typeof ctx.tX !== "undefined") {
-                ctx.reset(w, h);
-            }
-            else {
-                // customize context with number of new methods
-                //var proto = ctx.constructor.prototype;
-                var $scale     = ctx.scale,
-                    $translate = ctx.translate,
-                    $rotate    = ctx.rotate,
-                    $save      = ctx.save,
-                    $restore   = ctx.restore;
-
-                ctx.reset = function(w, h) {
-                    this.$curState = 0;
-                    var s = this.$states[0];
-                    s.srot = s.rotateVal = s.x = s.y = s.width = s.height = s.dx = s.dy = 0;
-                    s.crot = s.sx = s.sy = 1;
-                    s.width = w;
-                    s.height = h;
-                    this.setFont(pkg.font);
-                    this.setColor("white");
-                };
-
-                // pre-allocate canvas save $states
-                ctx.$states = Array(50);
-                for(var i=0; i < ctx.$states.length; i++) {
-                    var s = {};
-                    s.srot = s.rotateVal = s.x = s.y = s.width = s.height = s.dx = s.dy = 0;
-                    s.crot = s.sx = s.sy = 1;
-                    ctx.$states[i] = s;
-                }
-                ctx.reset(w, h);
-
-                ctx.tX = function(x, y) {
-                    var c = this.$states[this.$curState], b = (c.sx != 1 || c.sy != 1 || c.rotateVal !== 0);
-                    return (b ? Math.round((c.crot * x + y * c.srot) / c.sx) : x) - c.dx;
-                };
-
-                ctx.tY = function(x, y) {
-                    var c = this.$states[this.$curState], b = (c.sx != 1 || c.sy != 1 || c.rotateVal !== 0);
-                    return (b ? Math.round((y * c.crot - c.srot * x) / c.sy) : y) - c.dy;
-                };
-
-                ctx.translate = function(dx, dy) {
-                    if (dx !== 0 || dy !== 0) {
-                        var c = this.$states[this.$curState];
-                        c.x  -= dx;
-                        c.y  -= dy;
-                        c.dx += dx;
-                        c.dy += dy;
-                        $translate.call(this, dx, dy);
-                    }
-                };
-
-                ctx.rotate = function(v) {
-                    var c = this.$states[this.$curState];
-                    c.rotateVal += v;
-                    c.srot = MS(c.rotateVal);
-                    c.crot = MC(c.rotateVal);
-                    $rotate.call(this, v);
-                };
-
-                ctx.scale = function(sx, sy) {
-                    var c = this.$states[this.$curState];
-                    c.sx = c.sx * sx;
-                    c.sy = c.sy * sy;
-                    $scale.call(this, sx, sy);
-                };
-
-                ctx.save = function() {
-                    this.$curState++;
-                    var c = this.$states[this.$curState], cc = this.$states[this.$curState - 1];
-                    c.x = cc.x;
-                    c.y = cc.y;
-                    c.width = cc.width;
-                    c.height = cc.height;
-
-                    c.dx = cc.dx;
-                    c.dy = cc.dy;
-                    c.sx = cc.sx;
-                    c.sy = cc.sy;
-                    c.srot = cc.srot;
-                    c.crot = cc.crot;
-                    c.rotateVal = cc.rotateVal;
-
-                    $save.call(this);
-                    return this.$curState - 1;
-                };
-
-                ctx.restore = function() {
-                    if (this.$curState === 0) {
-                        throw new Error("Context restore history is empty");
-                    }
-
-                    this.$curState--;
-                    $restore.call(this);
-                    return this.$curState;
-                };
-
-                ctx.clipRect = function(x,y,w,h){
-                    var c = this.$states[this.$curState];
-                    if (c.x != x || y != c.y || w != c.width || h != c.height) {
-                        var xx = c.x, yy = c.y,
-                            ww = c.width, hh = c.height,
-                            xw = x + w, xxww = xx + ww,
-                            yh = y + h, yyhh = yy + hh;
-
-                        c.x      = x > xx ? x : xx;
-                        c.width  = (xw < xxww ? xw : xxww) - c.x;
-                        c.y      = y > yy ? y : yy;
-                        c.height = (yh < yyhh ? yh : yyhh) - c.y;
-
-                        if (c.x != xx || yy != c.y || ww != c.width || hh != c.height) {
-                            // begin path is very important to have proper clip area
-                            this.beginPath();
-                            this.rect(x, y, w, h);
-                            this.closePath();
-                            this.clip();
-                        }
-                    }
-                };
-            }
+            this.$context = this.initContext(w, h);
 
             this.width  = w;
             this.height = h;
@@ -5433,6 +5445,9 @@ pkg.zCanvas = Class(pkg.Panel, [
         var prev = this.isVisible;
         this.canvas.style.visibility = b ? "visible" : "hidden";
         this.$super(b);
+
+        // Since zCanvas has no parent component calling the super
+        // method above doesn't trigger repainting. So, do it here.
         if (b != prev) {
             this.repaint();
         }

@@ -1,7 +1,7 @@
 /**
- * Collection of variouse data models. 
+ * Collection of variouse data models.
  * @module data
- * @main 
+ * @main
  * @requires zebra, util
  */
 
@@ -25,13 +25,13 @@ pkg.ascent = function ascent(a, b) {
 
 /**
  * Get the given string line stored in the model
- * @method getLine  
+ * @method getLine
  * @param  {Integer} line a line number
  * @return {String}  a string line
  */
 
 /**
- * Get wrapped by the text model original text string 
+ * Get wrapped by the text model original text string
  * @method getValue
  * @return {String} an original text
  */
@@ -43,7 +43,7 @@ pkg.ascent = function ascent(a, b) {
  */
 
 /**
- * Get number of characters stored in the model 
+ * Get number of characters stored in the model
  * @method getTextLength
  * @return {Integer} a number of characters
  */
@@ -52,27 +52,27 @@ pkg.ascent = function ascent(a, b) {
  * Write the given string in the text model starting from the
  * specified offset
  * @method write
- * @param  {String} s a string to be written into the text model 
+ * @param  {String} s a string to be written into the text model
  * @param  {Integer} offset an offset starting from that the passed
  * string has to be written into the text model
  */
 
 /**
- * Remove substring from the text model. 
+ * Remove substring from the text model.
  * @method remove
- * @param  {Integer} offset an offset starting from that a substring 
- * will be removed 
- * @param  {Integer} size a size of a substring to be removed 
+ * @param  {Integer} offset an offset starting from that a substring
+ * will be removed
+ * @param  {Integer} size a size of a substring to be removed
  */
 
 /**
- * Fill the text model with the given text  
+ * Fill the text model with the given text
  * @method  setValue
  * @param  {String} text a new text to be set for the text model
  */
 
 /**
- * Fired when the text model has been updated: a string has been 
+ * Fired when the text model has been updated: a string has been
  * inserted or removed
 
         text.bind(function (src, b, off, len, startLine, lines) {
@@ -80,17 +80,17 @@ pkg.ascent = function ascent(a, b) {
         });
 
  *
- * @event textUpdated 
+ * @event textUpdated
  * @param {zebra.data.Text} src a text model that triggers the event
- * @param {Boolean}  b a flag that is true if a string has been written 
+ * @param {Boolean}  b a flag that is true if a string has been written
  * in the text model, false if the model substring has been removed
- * @param {Integer}  off an offset starting form that the text update 
+ * @param {Integer}  off an offset starting form that the text update
  * took place
- * @param {Integer}  len a length of text that has been affected by 
+ * @param {Integer}  len a length of text that has been affected by
  * the text model update
- * @param {Integer}  startLine a first line that has been affected 
+ * @param {Integer}  startLine a first line that has been affected
  * by the text model update
- * @param {Integer}  lines a number of lines that has been affected 
+ * @param {Integer}  lines a number of lines that has been affected
  * by the text model update
  */
 pkg.TextModel = Interface();
@@ -131,7 +131,7 @@ pkg.Text = Class(pkg.TextModel, [
         };
 
         this.setExtraChar = function(i,ch){ this.lines[i].l = ch; };
-        
+
         this.getExtraChar = function (i) { return this.lines[i].l; };
 
         this.getLine = function(line) { return this.lines[line].s; };
@@ -139,7 +139,7 @@ pkg.Text = Class(pkg.TextModel, [
         this.getValue = function(){ return this.lines.join("\n"); };
 
         this.getLines = function () { return this.lines.length; };
-        
+
         this.getTextLength = function() { return this.textLength; };
 
         this.write = function (s, offset){
@@ -231,8 +231,8 @@ pkg.Text = Class(pkg.TextModel, [
 pkg.SingleLineTxt = Class(pkg.TextModel, [
     function $prototype() {
         /**
-         * Maximal text length. -1 means the text is not restricted 
-         * regarding its length. 
+         * Maximal text length. -1 means the text is not restricted
+         * regarding its length.
          * @attribute maxLen
          * @type {Integer}
          * @default -1
@@ -242,7 +242,7 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
         this.setExtraChar = function(i,ch) {
             this.extra = ch;
         };
-        
+
         this.getExtraChar = function(i){
             return this.extra;
         };
@@ -252,7 +252,7 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
         };
 
         /**
-         * Get number of lines stored in the text model. The model 
+         * Get number of lines stored in the text model. The model
          * can have only one line
          * @method getLines
          * @return {Integer} a number of lines
@@ -265,7 +265,7 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
             return this.buf.length;
         };
 
-        this.getLine = function(line){ 
+        this.getLine = function(line){
             if (line !== 0) {
                 throw new Error(oobi + line);
             }
@@ -315,7 +315,7 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
             }
         };
 
-        this[''] = function (s, max) {   
+        this[''] = function (s, max) {
             this.maxLen = max == null ? -1 : max;
             this.buf = null;
             this.extra = 0;
@@ -331,29 +331,29 @@ pkg.ListModelListeners = zebra.util.ListenersClass("elementInserted", "elementRe
  * List model class
  * @param  {Array} [a] an array the list model has to be initialized with
  * @example
- 
+
       // create list model that contains three integer elements
       var l = new zebra.data.ListModel([1,2,3]);
- 
- * @constructor 
+
+ * @constructor
  * @class zebra.data.ListModel
  */
 
  /**
-  * Fired when a new element has been added to the list model 
+  * Fired when a new element has been added to the list model
 
      list.bind(function elementInserted(src, o, i) {
          ...
      });
 
-  * @event elementInserted 
+  * @event elementInserted
   * @param {zebra.data.ListModel} src a list model that triggers the event
   * @param {Object}  o an element that has been added
   * @param {Integer} i an index at that the new element has been added
   */
 
  /**
-  * Fired when an element has been removed from the list model 
+  * Fired when an element has been removed from the list model
 
      list.bind(function elementRemoved(src, o, i) {
          ...
@@ -366,7 +366,7 @@ pkg.ListModelListeners = zebra.util.ListenersClass("elementInserted", "elementRe
   */
 
  /**
-  * Fired when an element has been re-set 
+  * Fired when an element has been re-set
 
      list.bind(function elementSet(src, o, pe, i) {
          ...
@@ -375,14 +375,14 @@ pkg.ListModelListeners = zebra.util.ListenersClass("elementInserted", "elementRe
   * @event elementSet
   * @param {zebra.data.ListModel} src a list model that triggers the event
   * @param {Object}  o an element that has been set
-  * @param {Object}  pe a previous element 
+  * @param {Object}  pe a previous element
   * @param {Integer} i an index at that the element has been re-set
   */
 
 pkg.ListModel = Class([
     function $prototype() {
         /**
-         * Get an item stored at the given location in the list 
+         * Get an item stored at the given location in the list
          * @method get
          * @param  {Integer} i an item location
          * @return {object}  a list item
@@ -395,7 +395,7 @@ pkg.ListModel = Class([
         };
 
         /**
-         * Add the given item to the end of the list 
+         * Add the given item to the end of the list
          * @method add
          * @param  {Object} o an item to be added
          */
@@ -439,7 +439,7 @@ pkg.ListModel = Class([
          * Insert the given element into the given position of the list
          * @method insert
          * @param {Object} o an element to be inserted into the list
-         * @param {Integer} i a position at which the element has to be inserted into the list 
+         * @param {Integer} i a position at which the element has to be inserted into the list
          */
         this.insert = function(o,i){
             if(i < 0 || i >= this.d.length) {
@@ -478,8 +478,8 @@ pkg.ListModel = Class([
         /**
          * Check if the element is in the list
          * @method contains
-         * @param  {Object} o an element to be checked 
-         * @return {Boolean} true if the element is in the list  
+         * @param  {Object} o an element to be checked
+         * @return {Boolean} true if the element is in the list
          */
         this.contains = function (o){
             return this.indexOf(o) >= 0;
@@ -488,8 +488,8 @@ pkg.ListModel = Class([
         /**
          * Get position the given element is stored in the list
          * @method indexOf
-         * @param  {Object} o an element 
-         * @return {Integer} the element position. -1 if the element cannot be found in the list 
+         * @param  {Object} o an element
+         * @return {Integer} the element position. -1 if the element cannot be found in the list
          */
         this.indexOf = function(o){
             return this.d.indexOf(o);
@@ -503,11 +503,11 @@ pkg.ListModel = Class([
 ]);
 
 /**
- * Tree model item class. The structure is used by tree model to store 
+ * Tree model item class. The structure is used by tree model to store
  * tree items values, parent and children item references.
  * @class zebra.data.Item
  * @param  {Object} [v] the item value
- * @constructor 
+ * @constructor
  */
 var Item = pkg.Item = Class([
     function $prototype() {
@@ -542,33 +542,23 @@ var Item = pkg.Item = Class([
 ]);
 
 
-pkg.find = function(root, value, cb) {
-    if (root.value === value) {
-        if (cb.call(null, root) === true) return true;
-    }
-
-    for (var i = 0; i < root.kids.length; i++) {
-        if (pkg.find(root.kids[i], value, cb)) return true;
-    }
-};
-
 pkg.TreeModelListeners = zebra.util.ListenersClass("itemModified", "itemRemoved", "itemInserted");
 
 
 /**
- * Tree model class. The class is simple and handy way to keep hierarchical structure. 
+ * Tree model class. The class is simple and handy way to keep hierarchical structure.
  * @constructor
  * @param  {zebra.data.Item|Object} [r] a root item. As the argument you can pass "zebra.data.Item" or
  * a JavaType object. In the second case you can describe the tree as follow:
 
-     // create tree model initialized with tree structure passed as 
-     // special formated JavaScript object   
+     // create tree model initialized with tree structure passed as
+     // special formated JavaScript object
      var tree = new zebra.data.TreeModel({ value:"Root",
                                           kids: [
                                               "Root kid 1",
-                                              { 
+                                              {
                                                 value: "Root kid 2",
-                                                kids:  [ "Kid of kid 2"] 
+                                                kids:  [ "Kid of kid 2"]
                                               }
                                           ]});
 
@@ -576,13 +566,13 @@ pkg.TreeModelListeners = zebra.util.ListenersClass("itemModified", "itemRemoved"
  */
 
 /**
- * Fired when the tree model item value has been updated. 
+ * Fired when the tree model item value has been updated.
 
     tree.bind(function itemModified(src, item) {
         ...
     });
 
- * @event itemModified 
+ * @event itemModified
  * @param {zebra.data.TreeModel} src a tree model that triggers the event
  * @param {zebra.data.Item}  item an item whose value has been updated
  */
@@ -600,9 +590,7 @@ pkg.TreeModelListeners = zebra.util.ListenersClass("itemModified", "itemRemoved"
  */
 
 /**
- * Fired when the tree model item has been inserted into the model
-
-    tree.bind(function itemInserted(src, item) {
+ * Fired when the tree model item has been inserted into the model) {
        ...
     });
 
@@ -622,6 +610,39 @@ pkg.TreeModel = Class([
                 }
             }
             return item;
+        };
+
+        this.findOne = function(root, value) {
+            var res = null;
+            pkg.TreeModel.find(root, value, function(item) {
+                res = item;
+                return true;
+            });
+            return res;
+        };
+
+        this.find = function(root, value, cb) {
+            if (cb == null) {
+                var res = [];
+                pkg.TreeModel.find(root, value, function(item) {
+                    res.push(item);
+                    return false;
+                });
+                return res;
+            }
+
+            if (root.value === value) {
+                if (cb.call(this, root) === true) return true;
+            }
+
+            if (root.kids != null) {
+                for (var i = 0; i < root.kids.length; i++) {
+                    if (pkg.TreeModel.find(root.kids[i], value, cb)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         };
     },
 
@@ -652,17 +673,17 @@ pkg.TreeModel = Class([
          * @method add
          * @param  {zebra.data.Item} to a parent item to which the new item has to be added
          * @param  {Object|zebra.data.Item} an item or value of the item to be
-         * added to the parent item of the tree model 
+         * added to the parent item of the tree model
          */
         this.add = function(to,item){
             this.insert(to, item, to.kids.length);
         };
 
         /**
-         * Insert the new item to the tree model as a children element at the 
+         * Insert the new item to the tree model as a children element at the
          * given position of the parent element
          * @method insert
-         * @param  {zebra.data.Item} to a parent item to which the new item 
+         * @param  {zebra.data.Item} to a parent item to which the new item
          * has to be inserted
          * @param  {Object|zebra.data.Item} an item or value of the item to be
          * inserted to the parent item
@@ -693,14 +714,24 @@ pkg.TreeModel = Class([
                 this.root = null;
             }
             else {
-                for(var i=0; i < item.kids.length; i++) {
-                    this.remove(item.kids[i]);
+                if (item.kids != null) {
+                    for(var i = item.kids.length - 1; i >= 0; i--) {
+                        this.remove(item.kids[i]);
+                    }
                 }
+
                 item.parent.kids.splice(item.parent.kids.indexOf(item), 1);
-                item.parent = null;
             }
 
-            this._.itemRemoved(this, item);
+            // preserve refernce to parent when we call a listener
+            try {
+                this._.itemRemoved(this, item);
+            }
+            catch(e) {
+                item.parent = null;
+                throw e;
+            }
+            item.parent = null;
         };
 
         /**
@@ -708,8 +739,10 @@ pkg.TreeModel = Class([
          * @method removeKids
          * @param  {zebra.data.Item} item an item from that all children items have to be removed
          */
-        this.removeKids = function(item){
-            for(var i = 0; i < items.kids.length; i++) this.remove(items[i]);
+        this.removeKids = function(item) {
+            for(var i = item.kids.length - 1; i >= 0; i--) {
+                this.remove(item.kids[i]);
+            }
         };
 
         this[''] = function(r) {
@@ -722,6 +755,7 @@ pkg.TreeModel = Class([
              * @readOnly
              */
             this.root = zebra.instanceOf(r, Item) ? r : pkg.TreeModel.create(r);
+            this.root.parent = null;
             this._ = new pkg.TreeModelListeners();
         };
     }
@@ -732,62 +766,62 @@ pkg.MatrixListeners = zebra.util.ListenersClass("matrixResized", "cellModified",
                                         "matrixColInserted");
 
 /**
- *  Matrix model class. 
+ *  Matrix model class.
  *  @constructor
- *  @param  {Array of Array} [data] the given data 
+ *  @param  {Array of Array} [data] the given data
  *  @param  {Integer} [rows] a number of rows
  *  @param  {Integer} [cols] a number of columns
  *  @class zebra.data.Matrix
  */
 pkg.Matrix = Class([
-    function $prototype() {        
+    function $prototype() {
         /**
-         * Fired when the matrix model size (number of rows or columns) is changed. 
-          
+         * Fired when the matrix model size (number of rows or columns) is changed.
+
          matrix.bind(function matrixResized(src, pr, pc) {
             ...
          });
-          
-         * @event matrixResized 
+
+         * @event matrixResized
          * @param {zebra.data.Matrix} src a matrix that triggers the event
-         * @param {Integer}  pr a previous number of rows 
-         * @param {Integer}  pc a previous number of columns 
+         * @param {Integer}  pr a previous number of rows
+         * @param {Integer}  pc a previous number of columns
          */
 
          /**
-          * Fired when the matrix model cell has been updated. 
-          
+          * Fired when the matrix model cell has been updated.
+
           matrix.bind(function cellModified(src, row, col, old) {
              ...
           });
 
-          * @event cellModified 
+          * @event cellModified
           * @param {zebra.data.Matrix} src a matrix that triggers the event
-          * @param {Integer}  row an updated row 
-          * @param {Integer}  col an updated column 
+          * @param {Integer}  row an updated row
+          * @param {Integer}  col an updated column
           * @param {Object}  old a previous cell value
           */
 
           /**
-           * Fired when the matrix data has been re-ordered. 
-           
+           * Fired when the matrix data has been re-ordered.
+
            matrix.bind(function matrixSorted(src, sortInfo) {
               ...
            });
 
            * @event matrixSorted
            * @param {zebra.data.Matrix} src a matrix that triggers the event
-           * @param {Object}  sortInfo a new data order info. The information 
+           * @param {Object}  sortInfo a new data order info. The information
            * contains:
            *
-           *      { 
+           *      {
            *         func: sortFunction,
            *         name: sortFunctionName,
            *         col : sortColumn
-           *      }   
-           * 
+           *      }
+           *
            */
-       
+
         /**
          * Get a matrix model cell value at the specified row and column
          * @method get
@@ -855,7 +889,7 @@ pkg.Matrix = Class([
         };
 
         /**
-         * Reallocate the matrix model space with the new number of rows and columns 
+         * Reallocate the matrix model space with the new number of rows and columns
          * @method re-locate.
          * @private
          * @param  {Integer} r a new number of rows
@@ -891,7 +925,7 @@ pkg.Matrix = Class([
          * Remove specified number of rows from the model starting
          * from the given row.
          * @method removeRows
-         * @param  {Integer}  begrow a start row 
+         * @param  {Integer}  begrow a start row
          * @param  {Integer} count  a number of rows to be removed
          */
         this.removeRows = function(begrow,count){
@@ -921,7 +955,7 @@ pkg.Matrix = Class([
             if (begcol < 0 || begcol + count > this.cols) {
                 throw new Error();
             }
-            
+
             for(var i = (begcol + count);i < this.cols; i++, begcol++){
                 for(var j = 0;j < this.rows; j++){
                     this.objs[j][begcol] = this.objs[j][i];
@@ -970,9 +1004,9 @@ pkg.Matrix = Class([
         /**
          * Sort the given column of the matrix model.
          * @param  {Integer} col a column to be re-ordered
-         * @param  {Function} [f] an optional sort function. The name of the function 
+         * @param  {Function} [f] an optional sort function. The name of the function
          * is grabbed to indicate type of the sorting the method does. For instance:
-         * "descent", "ascent".  
+         * "descent", "ascent".
          * @method sortCol
          */
         this.sortCol = function(col, f) {

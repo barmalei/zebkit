@@ -6,7 +6,7 @@ if (typeof(zebra) === "undefined") {
     load(arguments[0] + '/src/data.js');
 }
 
-var assert = zebra.assert, Class = zebra.Class, TreeModel = zebra.data.TreeModel, 
+var assert = zebra.assert, Class = zebra.Class, TreeModel = zebra.data.TreeModel,
     assertException = zebra.assertException, Matrix = zebra.data.Matrix,
     ListModel = zebra.data.ListModel, Text = zebra.data.Text, SingleLineTxt = zebra.data.SingleLineTxt;
 
@@ -25,7 +25,7 @@ zebra.runTests("Zebra util objects bag",
         }
 
         test(new TreeModel({
-            value: "Root", 
+            value: "Root",
             kids: [
                 "Item 1",
                 "Item 2"
@@ -33,7 +33,7 @@ zebra.runTests("Zebra util objects bag",
         }));
 
         test(new TreeModel({
-            value: "Root", 
+            value: "Root",
             kids: [
                 { value: "Item 1" },
                 { value: "Item 2" }
@@ -95,8 +95,88 @@ zebra.runTests("Zebra util objects bag",
         assert(indexOf(t.root.kids[0]), 0);
         assert(indexOf(t.root), -1);
 
-    },
+        var t = new TreeModel({
+            value: "Root",
+            kids : [
+                {
+                    value: "Item 1",
+                    kids : [
+                        "Item 1.1",
+                        "Item 1.2"
+                    ]
+                },
 
+                "Item 2"
+            ]
+        });
+
+        assert(t.root.kids.length, 2);
+        assert(TreeModel.find(t.root, "Item 1").length, 1);
+        assert(TreeModel.find(t.root, "Item 1.1").length, 1);
+        assert(TreeModel.find(t.root, "Item 1.2").length, 1);
+        assert(TreeModel.findOne(t.root, "Item 1").kids.length, 2);
+
+        var check = null, counter = 0;
+        t.bind(function itemRemoved(tree, item) {
+            counter++;
+            assert(tree, t);
+            assert(item == check || item.parent == check, true);
+            assert(item.parent != null, true);
+            assert(item.kids == null || item.kids.length == 0, true)
+        });
+
+        check = TreeModel.findOne(t.root, "Item 1.1");
+        t.remove(check);
+
+        assert(counter, 1);
+        assert(check.parent, null);
+        assert(TreeModel.findOne(t.root, "Item 1").kids.length, 1);
+        assert(TreeModel.findOne(t.root, "Item 1.1") == null, true);
+
+
+        check = TreeModel.findOne(t.root, "Item 1");
+        t.remove(check);
+
+        assert(counter, 3);
+        assert(check.parent, null);
+        assert(t.root.parent, null);
+        assert(t.root.kids.length == 1, true);
+        assert(t.root.kids[0].value, "Item 2");
+        assert(t.root.kids[0].parent, t.root);
+        assert(TreeModel.findOne(t.root, "Item 1") == null, true);
+        assert(TreeModel.findOne(t.root, "Item 1.1") == null, true);
+
+        var t = new TreeModel({
+            value: "Root",
+            kids : [
+                {
+                    value: "Item 1",
+                    kids : [
+                        "Item 1.1",
+                        "Item 1.2"
+                    ]
+                },
+
+                "Item 2"
+            ]
+        });
+
+        assert(t.root.parent, null);
+        assert(t.root.kids.length, 2);
+        assert(TreeModel.find(t.root, "Item 1").length, 1);
+        assert(TreeModel.find(t.root, "Item 1.1").length, 1);
+        assert(TreeModel.find(t.root, "Item 1.2").length, 1);
+        assert(TreeModel.findOne(t.root, "Item 1").kids.length, 2);
+
+        t.removeKids(TreeModel.findOne(t.root, "Item 1"));
+        assert(t.root.kids.length == 2, true);
+        assert(t.root.kids[0].value, "Item 1");
+        assert(t.root.kids[1].value, "Item 2");
+        assert(t.root.kids[0].parent, t.root);
+        assert(t.root.kids[1].parent, t.root);
+        assert(TreeModel.findOne(t.root, "Item 1.1") == null, true);
+        assert(TreeModel.findOne(t.root, "Item 1.2") == null, true);
+    },
 
     function test_matrix() {
         var m = new Matrix([ [1,2,3] ]);
@@ -119,7 +199,7 @@ zebra.runTests("Zebra util objects bag",
         assert(m.get(1,2), undefined);
         assertException(function () { m.get(1,3) }, Error);
         assertException(function () { m.get(-1,2) }, Error);
-        
+
     },
 
     function test_listmodel() {

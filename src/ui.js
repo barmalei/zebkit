@@ -222,7 +222,7 @@ pkg.StringRender = Class(pkg.Render, [
                                                                    : pkg.StringRender.disabledColor;
             }
 
-            g.fillText(this.target, x, y );
+            g.fillText(this.target, x, y);
         };
 
         this.getPreferredSize = function() {
@@ -5938,8 +5938,8 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
          * @method mouseDragStarted
          */
         this.mouseDragStarted = function(e) {
-            if (e.touchCounter == 1)  {
-                this.identifier = e.touch.identifier;  // finger
+            if (e.touchCounter == 1 && e.touch != null) {
+                this.identifier = e.identifier;  // finger
                 var owner = e.source;
 
                 while(owner != null && instanceOf(owner, pkg.ScrollPan) === false) {
@@ -5962,7 +5962,7 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
         this.mouseDragged = function(e) {
             if (e.touchCounter   == 1 &&
                 this.target      != null &&
-                this.identifier  == e.touch.identifier)
+                this.identifier  == e.identifier)
             {
                 var d = e.touch.direction;
                 if (d == L.BOTTOM || d == L.TOP) {
@@ -5993,13 +5993,13 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
         this.mouseDragEnded = function(e) {
             if (this.target != null &&
                 this.timer  == null &&
-                this.identifier == e.touch.identifier &&
+                this.identifier == e.identifier &&
                 (e.touch.direction == L.BOTTOM || e.touch.direction == L.TOP) &&
                 this.target.vBar != null &&
                 this.target.vBar.isVisible === true &&
                 e.touch.dy !== 0)
             {
-                this.$dt = 2*e.touch.dy;
+                this.$dt = 2 * e.touch.dy;
                 var $this = this, bar = this.target.vBar, k = 0;
 
                 this.timer = setInterval(function() {

@@ -427,6 +427,10 @@
         "$inherit" : [ "TextField" ]
     },
 
+    "PassTextField" : {
+        "$inherit" : [ "TextField" ]
+    },
+
     "Progress": {
         "border"    : { "$Border" : [ "rgb(200,200,255)", 1, 3] },
         "bundleView": "@palette.gray4",

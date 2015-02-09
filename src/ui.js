@@ -1188,6 +1188,10 @@ pkg.Label = Class(pkg.ViewPan, [
                                            : new pkg.TextRender(m));
         };
 
+        this.getModel = function() {
+            return this.view != null ? this.view.target : null;
+        };
+
         /**
          * Get the label text color
          * @return {String} a zebra label color

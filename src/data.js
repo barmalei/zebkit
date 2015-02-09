@@ -317,7 +317,7 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
 
         this[''] = function (s, max) {
             this.maxLen = max == null ? -1 : max;
-            this.buf = null;
+            this.buf = "";
             this.extra = 0;
             this._ = new pkg.TextModelListeners();
             this.setValue(s == null ? "" : s);

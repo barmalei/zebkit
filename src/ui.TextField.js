@@ -326,6 +326,7 @@ pkg.TextField = Class(pkg.Label, [
          */
         this.write = function (pos,s){
             if (this.isEditable === true) {
+                // TODO: remove hard coded undo/redo deepness value
                 if (s.length < 10000) {
                     this.historyPos = (this.historyPos + 1) % this.history.length;
                     this.history[this.historyPos] = [1, pos, s.length];
@@ -363,14 +364,14 @@ pkg.TextField = Class(pkg.Label, [
         /**
          * Draw the text field cursor
          * @protected
-         * @param  {2DContext} g  a 2D contextnn
+         * @param  {2DContext} g a 2D context
          * @method drawCursor
          */
         this.drawCursor = function (g) {
             if (this.position.offset >= 0 &&
                 this.curView != null      &&
                 this.blinkMe              &&
-                (this.hasFocus() || this.$forceToShow == true)) // TODO: $forceToShow is akward solution
+                (this.hasFocus() || this.$forceToShow == true)) // TODO: $forceToShow is awkward solution
             {
                 this.curView.paint(g, this.curX, this.curY,
                                       this.curW, this.curH, this);
@@ -448,7 +449,11 @@ pkg.TextField = Class(pkg.Label, [
                     top        = this.getTop();
 
                 this.scrollManager.makeVisible(this.curX, this.curY, this.curW, lineHeight);
+
                 if (pl >= 0) {
+
+                    // means selected text exists, than we have to correct selection
+                    // according to the new position
                     if (this.startOff >= 0){
                         this.endLine = position.currentLine;
                         this.endCol = position.currentCol;
@@ -900,6 +905,9 @@ pkg.PassTextField = Class(pkg.TextField, [
         var pt = new pkg.PasswordText(new zebra.data.SingleLineTxt(txt, size));
         pt.showLast = showLast;
         this.$super(pt);
+        if (size > 0) {
+            this.setPSByRowsCols(-1, size);
+        }
     }
 ]);
 

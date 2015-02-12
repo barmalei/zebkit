@@ -185,7 +185,7 @@ zebra.runTests("Zebra util objects bag",
         assert(m.get(0,0), 1);
         assert(m.get(0,1), 2);
         assert(m.get(0,2), 3);
-        assertException(function () { m.get(1,0) }, Error);
+        assertException(function () { m.get(1, 0) }, Error);
         assertException(function () { m.get(0,-1) }, Error);
 
         m.put(1,0, 10);
@@ -199,6 +199,142 @@ zebra.runTests("Zebra util objects bag",
         assert(m.get(1,2), undefined);
         assertException(function () { m.get(1,3) }, Error);
         assertException(function () { m.get(-1,2) }, Error);
+
+        var m = new Matrix(3,2);
+        assert(m.rows, 3);
+        assert(m.cols, 2);
+        for(var i = 0; i < m.rows ; i++) {
+            assert(m.objs[i], undefined);
+            for(var j = 0; j < m.cols ; j++) {
+                assert(m.get(i,j), undefined);
+            }
+        }
+
+        m.put(2, 1, 1);
+        for(var i = 0; i < m.rows ; i++) {
+            if (i != 2) assert(m.objs[i], undefined);
+            for(var j = 0; j < m.cols ; j++) {
+                if (i != 2 && j != 1) assert(m.get(i,j), undefined);
+            }
+        }
+        assert(m.get(2,1), 1);
+    },
+
+    function test_matrix_removeRows() {
+        var m = new Matrix(3,2);
+        assert(m.rows, 3);
+        assert(m.cols, 2);
+        assert(m.objs.length, 0);
+
+        m.removeRows(1, 1);
+        assert(m.rows, 2);
+        assert(m.cols, 2);
+        assert(m.objs.length, 0);
+        for(var i = 0; i < m.rows ; i++) {
+            assert(m.objs[i], undefined);
+            for(var j = 0; j < m.cols ; j++) {
+                assert(m.get(i,j), undefined);
+            }
+        }
+
+        m.put(0, 1, 10);
+        assert(m.get(0, 1), 10);
+        for(var i = 0; i < m.rows ; i++) {
+            if (i != 0) assert(m.objs[i], undefined);
+        }
+
+        m.removeRows(0, 2);
+        assert(m.rows, 0);
+        assert(m.cols, 2);
+        assert(m.objs.length, 0);
+
+        m.setRowsCols(3, 4);
+        assert(m.rows, 3);
+        assert(m.cols, 4);
+        assert(m.objs.length, 0); // no real data no space to be allocated
+        for(var i = 0; i < m.rows ; i++) {
+            assert(m.objs[i], undefined);
+        }
+
+        m.removeRows(1, 1);
+        assert(m.rows, 2);
+        assert(m.cols, 4);
+        assert(m.objs.length, 0);
+
+
+        var m = new Matrix([[0, 1, 2],[3, 4, 5]]);
+        assert(m.rows, 2);
+        assert(m.cols, 3);
+        assert(m.objs.length, m.rows);
+
+        var c = 0;
+        for(var i = 0; i < m.rows ; i++) {
+            assert(m.objs[i].length, m.cols);
+            for(var j = 0; j < m.cols ; j++) {
+                assert(m.objs[i][j], c);
+                assert(m.get(i, j), c++);
+            }
+        }
+
+        m.removeRows(0, 1);
+        assert(m.rows, 1);
+        assert(m.cols, 3);
+        assert(m.objs.length, m.rows);
+        var c = 3;
+        for(var i = 0; i < m.rows ; i++) {
+            assert(m.objs[i].length, m.cols);
+            for(var j = 0; j < m.cols ; j++) {
+                assert(m.objs[i][j], c);
+                assert(m.get(i, j), c++);
+            }
+        }
+
+
+        m.put(10, 2, 101);
+        assert(m.rows, 11);
+        assert(m.cols, 3);
+        assert(m.objs.length, m.rows);
+        var c = 3;
+        for(var i = 0; i < 1 ; i++) {
+            assert(m.objs[i].length, m.cols);
+            for(var j = 0; j < m.cols ; j++) {
+                assert(m.objs[i][j], c);
+                assert(m.get(i, j), c++);
+            }
+        }
+
+        for(var i = 1; i < 9 ; i++) {
+            assert(m.objs[i], undefined);
+            for(var j = 0; j < m.cols ; j++) {
+                assert(m.get(i, j), undefined);
+            }
+        }
+
+        assert(m.get(10, 2), 101);
+        assert(m.objs[10].length, 3);
+        for(var j = 0; j < m.cols ; j++) {
+            if (j != 2) assert(m.get(10, j), undefined);
+        }
+
+        m.removeRows(0, m.rows);
+        assert(m.rows, 0);
+        assert(m.cols, 3);
+        assert(m.objs.length, 0);
+
+        m.put(1, 1, 99);
+        assert(m.rows, 2);
+        assert(m.cols, 3);
+        assert(m.objs.length, 2);
+        assert(m.get(1,1), 99);
+
+        for(var i = 0; i < m.rows ; i++) {
+            if (i != 1) assert(m.objs[i], undefined);
+            else        assert(m.objs[i].length, 2);
+            for(var j = 0; j < m.cols ; j++) {
+                if (i != 1 || j != 1) assert(m.get(i, j), undefined);
+                else                  assert(m.get(i, j), 99);
+            }
+        }
 
     },
 

@@ -1057,7 +1057,9 @@ zebra.package("ui.vk", function(pkg, Class) {
         }
     });
 
-    new ui.Bag(pkg).load(pkg.$url + "vk.json");
+    new ui.Bag(pkg).load(pkg.$url + "vk.json", function(e) {
+        if (e != null) throw e;
+    });
 
     /**
      * @for

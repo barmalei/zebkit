@@ -1007,42 +1007,8 @@ pkg.Matrix = Class([
                 throw new Error("Invalid row " + begrow);
             }
 
-            for(var i = (begrow + count); i < this.objs.length; i++, begrow++) {
-                // copy rows content
-                if (this.objs[i] == null || this.objs[i].length === 0) {  // source row is not defined
-                    if (this.objs[begrow] != null) this.objs[begrow] = undefined;
-                }
-                else {
-                    var sourceCols = this.objs[i].length;
-
-                    // destination row has to be adjusted is not defined
-                    if (this.objs[begrow] == null) {
-                        this.objs[begrow] = [];
-                    }
-                    else {
-                        // adjust  destination row size (number of columns in row)
-                        // to match the source row size
-                        if (this.objs[begrow].length != sourceCols) {
-                            this.objs[begrow].length = sourceCols;
-                        }
-                    }
-
-                    // copy destination row to source
-                    for(var j = 0; j < sourceCols; j++) {
-                        this.objs[begrow][j] = this.objs[i][j];
-                    }
-
-                    this.objs[i] = undefined;
-                }
-            }
-
+            this.objs.splice(begrow, count);
             this.rows -= count;
-
-            // free memory if physical size of data is higher then necessary
-            if (this.objs.length > this.rows) {
-                this.objs.length = this.rows;
-            }
-
             this._.matrixResized(this, this.rows + count, this.cols);
         };
 
@@ -1063,26 +1029,8 @@ pkg.Matrix = Class([
             }
 
             for(var i = 0; i < this.objs.length; i++) {
-                if (this.objs[i] != null && this.objs[i].length > begcol) {
-                    for(var j = (begcol + count);j < this.cols; j++, begcol++) {
-
-                        for(var j = 0;j < this.rows; j++){
-                            this.objs[j][begcol] = this.objs[j][i];
-                            this.objs[j][i] = undefined;
-                        }
-                    }
-                }
-            }
-
-
-
-//            if (this.objs.length > )
-
-            for(var i = (begcol + count);i < this.cols; i++, begcol++) {
-
-                for(var j = 0;j < this.rows; j++){
-                    this.objs[j][begcol] = this.objs[j][i];
-                    this.objs[j][i] = undefined;
+                if (this.objs[i] != null && this.objs[i].length > 0) {
+                    this.objs[i].splice(begcol, count);
                 }
             }
 
@@ -1101,10 +1049,16 @@ pkg.Matrix = Class([
                 count = 1;
             }
 
-            if (this.objs.length )
-            for(var i = 0; i < count; i++) {
-                this.objs.splice(row, 0, []);
-                this._.matrixRowInserted(this, row + i);
+            if (row <= this.objs.length - 1) {
+                for(var i = 0; i < count; i++) {
+                    this.objs.splice(row, 0, undefined);
+                    this._.matrixRowInserted(this, row + i);
+                }
+            }
+            else {
+                for(var i = 0; i < count; i++) {
+                    this._.matrixRowInserted(this, row + i);
+                }
             }
 
             this.rows += count;
@@ -1118,14 +1072,21 @@ pkg.Matrix = Class([
          * @method insertCols
          */
         this.insertCols = function(col, count) {
-            if (arguments.length === 1) count = 1;
-
-            for(var j = 0; j < count; j++) {
-                for(var i=0; i < this.rows; i++) {
-                    this.objs[i].splice(col, 0, undefined);
-                }
-                this._.matrixColInserted(this, col + j);
+            if (arguments.length === 1) {
+                count = 1;
             }
+
+            if (this.objs.length  > 0) {
+                for(var j = 0; j < count; j++) {
+                    for(var i = 0; i < this.rows; i++) {
+                        if (this.objs[i] != null && j <= this.objs[i].length) {
+                            this.objs[i].splice(col, 0, undefined);
+                        }
+                    }
+                    this._.matrixColInserted(this, col + j);
+                }
+            }
+
             this.cols += count;
             this._.matrixResized(this, this.rows, this.cols - count);
         };
@@ -1144,7 +1105,7 @@ pkg.Matrix = Class([
             }
 
             this.objs.sort(function(a, b) {
-                return f(a[col],b[col]);
+                return f(a[col], b[col]);
             });
 
             this._.matrixSorted(this, { col : col,

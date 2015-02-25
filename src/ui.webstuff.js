@@ -443,13 +443,14 @@
                     }
 
                     for(var i=0; i < mt.length; i++) {
-                        var nmt = mt[i], t = $this.touches[nmt.identifier];
+                        var nmt = mt[i],
+                            t   = $this.touches[nmt.identifier];
 
-                        if (t != null) {
-                            if (t.pageX != nmt.pageX || t.pageY != nmt.pageY) {
+                        if (t != null && (t.pageX != nmt.pageX || t.pageY != nmt.pageY)) {
                                 var dx  = nmt.pageX - t.pageX,
                                     dy  = nmt.pageY - t.pageY,
-                                    d   = t.direction, gamma = null,
+                                    d   = t.direction,
+                                    gamma = null,
                                     dxs = (dx < 0 && t.dx < 0) || (dx > 0 && t.dx > 0),  // test if horizontal move direction has been changed
                                     dys = (dy < 0 && t.dy < 0) || (dy > 0 && t.dy > 0);  // test if vertical move direction has been changed
 
@@ -487,14 +488,13 @@
                                 if ($this.timer == null) {
                                     t.dx = dx;
                                     t.dy = dy;
-                                    $this.moved(t);
+                                    if ($this.moved != null) $this.moved(t);
                                 }
                                 else {
                                     $this.dc = 0;
                                 }
                             }
                         }
-                    }
 
                     e.preventDefault();
                 }, false);

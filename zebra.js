@@ -1342,6 +1342,7 @@ pkg.$constraints = function(v) {
             $ctrs[v] != null ? $ctrs[v] : v;
 };
 
+
 /**
  * Layout package provides number of classes, interfaces, methods and
  * variables that allows developer easily implement rules based layouting
@@ -1369,6 +1370,25 @@ pkg.$constraints = function(v) {
  * @main layout
  */
 
+
+
+
+
+ /**
+  * Find a direct children element for the given children component
+  * and the specified parent component
+  * @param  {zebra.layout.Layoutable} parent  a parent component
+  * @param  {zebra.layout.Layoutable} child  a children component
+  * @return {zebra.layout.Layoutable}  a direct children component
+  * @method getDirectChild
+  * @for zebra.layout
+  */
+pkg.getDirectChild = function(parent,child){
+    for(; child != null && child.parent != parent; child = child.parent) {}
+    return child;
+};
+
+
 /**
  * Layout manager interface
  * @class zebra.layout.Layout
@@ -1387,20 +1407,6 @@ pkg.$constraints = function(v) {
  * @method doLayout
  */
 var L = pkg.Layout = new zebra.Interface();
-
-/**
- * Find a direct children element for the given children component
- * and the specified parent component
- * @param  {zebra.layout.Layoutable} parent  a parent component
- * @param  {zebra.layout.Layoutable} child  a children component
- * @return {zebra.layout.Layoutable}  a direct children component
- * @method getDirectChild
- * @api zebra.layout.getDirectChild()
- */
-pkg.getDirectChild = function(parent,child){
-    for(; child != null && child.parent != parent; child = child.parent) {}
-    return child;
-};
 
 /**
  * Find a direct component located at the given location of the specified
@@ -4547,7 +4553,7 @@ pkg.Bag = zebra.Class([
             // array should be merged (concatenated)
             if (Array.isArray(d)) {
                 var v = [];
-                for(var i=0; i< d.length; i++) v[i] = this.mergeObjWithDesc(null, d[i]);
+                for(var i = 0; i < d.length; i++) v[i] = this.mergeObjWithDesc(null, d[i]);
                 if (this.concatArrays === false) {
                     return v;
                 }
@@ -4720,7 +4726,10 @@ pkg.Bag = zebra.Class([
 
         this.inherit = function(o, pp) {
             for(var i=0; i < pp.length; i++) {
-                var op = this.root, n = pp[i].trim(), nn = n.split("."), j = 0;
+                var op = this.root,
+                    nn = pp[i].trim().split("."),
+                    j  = 0;
+
                 while (j < nn.length) {
                     op = op[nn[j++]];
                     if (op == null) {
@@ -4740,52 +4749,92 @@ pkg.Bag = zebra.Class([
          * Load the given JSON content and parse if the given flag is true. The passed
          * boolean flag controls parsing. The flag is used to load few JSON. Before
          * parsing the JSONs are merged and than the final result is parsed.
-         * @param  {String|Object} s a JSON content to be loaded
+         * @param  {String|Object} s a JSON content to be loaded. It can be a JSON as string or
+         * URL to JSON or JSON object
+         * @param {Function} [cb] callback function if the JSOn content has to be loaded asynchronously
+         * @chainable
          * @return {zebra.util.Bag} a reference to the bag class instance
          * @method load
          */
-        this.load = function(s) {
-            var content = null;
+        this.load = function(s, cb) {
+            var runner = new pkg.Runner(),
+                $this  = this;
 
-            if (zebra.isString(s)) {
-                s = s.trim();
+            runner.run(function() {
+                if (zebra.isString(s)) {
+                    s = s.trim();
 
-                // detect if the passed string is URL
-                if ((s[0] != '[' || s[s.length - 1] != ']') &&
-                    (s[0] != '{' || s[s.length - 1] != '}')   )
-                {
-                    var p = s.toString();
-                    p = p + (p.lastIndexOf("?") > 0 ? "&" : "?") + (new Date()).getTime().toString();
+                    // detect if the passed string is not a JSON
+                    if ((s[0] != '[' || s[s.length - 1] != ']') &&
+                        (s[0] != '{' || s[s.length - 1] != '}')   )
+                    {
+                        var p = s.toString();
+                        p = p + (p.lastIndexOf("?") > 0 ? "&" : "?") + (new Date()).getTime().toString();
 
-                    this.$url = s.toString();
-                    s = zebra.io.GET(p);
+                        $this.$url = s.toString();
+
+                        if (cb == null) {
+                            return zebra.io.GET(p);
+                        }
+
+                        zebra.io.GET(p, this.join());
+                        return;
+                    }
+                }
+                return s;
+            })
+            .
+            run(function(s) {
+                if (typeof XMLHttpRequest !== "undefined" && s instanceof XMLHttpRequest) {
+                    if (s.status != 200) {
+                        throw new Error("Invalid JSON path");
+                    }
+                    s = s.responseText;
                 }
 
-                try {
-                    content = JSON.parse(s);
+                if (zebra.isString(s)) {
+                    try {
+                        return JSON.parse(s);
+                    }
+                    catch(e) {
+                        throw new Error("JSON format error");
+                    }
                 }
-                catch(e) {
-                    throw new Error("JSON format error");
+
+                return s;
+            })
+            .
+            run(function(content) {
+                if (content.hasOwnProperty("classAliases")) {
+                    var vars = content.classAliases;
+                    for(var k in vars) {
+                        $this.classAliases[k] = Class.forName(vars[k].trim());
+                    }
+                    delete content.classAliases;
                 }
-            }
-            else {
-                content = s;
-            }
 
-            if (content.hasOwnProperty("classAliases")) {
-                var vars = content.classAliases;
-                for(var k in vars) {
-                    this.classAliases[k] = Class.forName(vars[k].trim());
+                if (content.hasOwnProperty("variables")) {
+                    $this.variables = $this.mergeObjWithDesc($this.variables, content.variables);
+                    delete content.variables;
                 }
-                delete content.classAliases;
-            }
 
-            if (content.hasOwnProperty("variables")) {
-                this.variables = this.mergeObjWithDesc(this.variables, content.variables);
-                delete content.variables;
-            }
+                return content;
+            })
+            .
+            run(function(content) {
+                return $this.mergeObjWithDesc($this.root, content);
+            })
+            .
+            run(function(root) {
+                if (cb != null) cb.call($this);
+                $this.root = root;
+            })
+            .
+            error(function(e) {
+                if (cb != null) cb.call($this, e);
+                throw e;
+            });
 
-            this.root = this.mergeObjWithDesc(this.root, content);
             return this;
         };
 
@@ -5062,11 +5111,11 @@ pkg.QS = Class([
     }
 ]);
 
-function $Request() {
+var $Request = pkg.$Request = function() {
     this.responseText = this.statusText = "";
     this.onreadystatechange = this.responseXml = null;
     this.readyState = this.status = 0;
-}
+};
 
 $Request.prototype.open = function(method, url, async, user, password) {
     if (location.protocol.toLowerCase() == "file:" ||
@@ -5956,7 +6005,6 @@ var oobi = "Index is out of bounds: ";
 
 function Line(s) {
     this.s = s;
-    this.l = 0;
 }
 
 //  toString for array.join method
@@ -5986,55 +6034,79 @@ pkg.Text = Class(pkg.TextModel, [
             return [];
         };
 
-        this.setExtraChar = function(i,ch){ this.lines[i].l = ch; };
-
-        this.getExtraChar = function (i) { return this.lines[i].l; };
-
-        this.getLine = function(line) { return this.lines[line].s; };
-
-        this.getValue = function(){ return this.lines.join("\n"); };
-
-        this.getLines = function () { return this.lines.length; };
-
-        this.getTextLength = function() { return this.textLength; };
-
-        this.write = function (s, offset){
-            var slen = s.length,
-                info = this.getLnInfo(this.lines, 0, 0, offset),
-                line    = this.lines[info[0]].s,
-                j       = 0,
-                lineOff = offset - info[1],
-                tmp = [line.substring(0, lineOff), s, line.substring(lineOff)].join('');
-
-            for(; j < slen && s[j] != '\n'; j++);
-
-            if(j >= slen) {
-                this.lines[info[0]].s = tmp;
-                j = 1;
-            }
-            else {
-                this.lines.splice(info[0], 1);
-                j = this.parse(info[0], tmp, this.lines);
-            }
-            this.textLength += slen;
-            this._.textUpdated(this, true, offset, slen, info[0], j);
+        this.$lineTags = function(i, value) {
+            return this.lines[i];
         };
 
-        this.remove = function (offset,size){
-            var i1   = this.getLnInfo(this.lines, 0, 0, offset),
-                i2   = this.getLnInfo(this.lines, i1[0], i1[1], offset + size),
-                l2   = this.lines[i2[0]].s,
-                l1   = this.lines[i1[0]].s,
-                off1 = offset - i1[1], off2 = offset + size - i2[1],
-                buf  = [l1.substring(0, off1), l2.substring(off2)].join('');
+        this.getLine = function(line) {
+            return this.lines[line].s;
+        };
 
-            if (i2[0] == i1[0]) this.lines.splice(i1[0], 1, new Line(buf));
-            else {
-                this.lines.splice(i1[0], i2[0] - i1[0] + 1);
-                this.lines.splice(i1[0], 0, new Line(buf));
+        this.getValue = function() {
+            return this.lines.join("\n");
+        };
+
+        this.getLines = function () {
+            return this.lines.length;
+        };
+
+        this.getTextLength = function() {
+            return this.textLength;
+        };
+
+        this.write = function (s, offset) {
+            if (s.length > 0) {
+                var slen    = s.length,
+                    info    = this.getLnInfo(this.lines, 0, 0, offset),
+                    line    = this.lines[info[0]].s,
+                    j       = 0,
+                    lineOff = offset - info[1],
+                    tmp     = line.substring(0, lineOff) + s + line.substring(lineOff);
+
+                for(; j < slen && s[j] != '\n'; j++);
+
+                if (j >= slen) {
+                    this.lines[info[0]].s = tmp;
+                    j = 1;
+                }
+                else {
+                    this.lines.splice(info[0], 1);
+                    j = this.parse(info[0], tmp, this.lines);
+                }
+
+                if (slen > 0) {
+                    this.textLength += slen;
+                    this._.textUpdated(this, true, offset, slen, info[0], j);
+                    return true;
+                }
             }
-            this.textLength -= size;
-            this._.textUpdated(this, false, offset, size, i1[0], i2[0] - i1[0] + 1);
+            return false;
+        };
+
+        this.remove = function(offset, size) {
+            if (size > 0) {
+                var i1   = this.getLnInfo(this.lines, 0, 0, offset),
+                    i2   = this.getLnInfo(this.lines, i1[0], i1[1], offset + size),
+                    l2   = this.lines[i2[0]].s,
+                    l1   = this.lines[i1[0]].s,
+                    off1 = offset - i1[1], off2 = offset + size - i2[1],
+                    buf  = l1.substring(0, off1) + l2.substring(off2);
+
+                if (i2[0] == i1[0]) {
+                    this.lines.splice(i1[0], 1, new Line(buf));
+                }
+                else {
+                    this.lines.splice(i1[0], i2[0] - i1[0] + 1);
+                    this.lines.splice(i1[0], 0, new Line(buf));
+                }
+
+                if (size > 0) {
+                    this.textLength -= size;
+                    this._.textUpdated(this, false, offset, size, i1[0], i2[0] - i1[0] + 1);
+                    return true;
+                }
+            }
+            return false;
         };
 
         this.parse = function (startLine, text, lines){
@@ -6065,7 +6137,9 @@ pkg.Text = Class(pkg.TextModel, [
                 this.parse(0, text, this.lines);
                 this.textLength = text.length;
                 this._.textUpdated(this, true, 0, this.textLength, 0, this.getLines());
+                return true;
             }
+            return false;
         };
 
         this[''] = function(s){
@@ -6095,12 +6169,8 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
          * @readOnly
          */
 
-        this.setExtraChar = function(i,ch) {
-            this.extra = ch;
-        };
-
-        this.getExtraChar = function(i){
-            return this.extra;
+        this.$lineTags = function(i) {
+            return this;
         };
 
         this.getValue = function(){
@@ -6128,20 +6198,40 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
             return this.buf;
         };
 
-        this.write = function(s,offset){
-            var buf = this.buf, j = s.indexOf("\n");
-            if (j >= 0) s = s.substring(0, j);
-            var l = (this.maxLen > 0 && (buf.length + s.length) >= this.maxLen) ? this.maxLen - buf.length
-                                                                                : s.length;
-            if (l!==0) {
-                this.buf = [buf.substring(0, offset), s.substring(0, l), buf.substring(offset)].join('');
-                if (l > 0) this._.textUpdated(this, true, offset, l, 0, 1);
+        this.write = function(s,offset) {
+            // cut to the first new line character
+            var j = s.indexOf("\n");
+            if (j >= 0) {
+                s = s.substring(0, j);
             }
+
+            var l = (this.maxLen > 0 && (this.buf.length + s.length) >= this.maxLen) ? this.maxLen - this.buf.length
+                                                                                     : s.length;
+            if (l !== 0) {
+                var nl = this.buf.substring(0, offset) + s.substring(0, l) + this.buf.substring(offset);
+                if (this.validate == null || this.validate(nl)) {
+                    this.buf = nl;
+                    if (l > 0) {
+                        this._.textUpdated(this, true, offset, l, 0, 1);
+                        return true;
+                    }
+                }
+            }
+            return false;
         };
 
         this.remove = function(offset,size){
-            this.buf = [ this.buf.substring(0, offset), this.buf.substring(offset + size)].join('');
-            this._.textUpdated(this, false, offset, size, 0, 1);
+            if (size > 0) {
+                var nl = this.buf.substring(0, offset) +
+                         this.buf.substring(offset + size);
+
+                if (nl.length != this.buf.length && (this.validate == null || this.validate(nl))) {
+                    this.buf = nl;
+                    this._.textUpdated(this, false, offset, size, 0, 1);
+                    return true;
+                }
+            }
+            return false;
         };
 
         this.setValue = function(text){
@@ -6149,14 +6239,26 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
                 throw new Error("Invalid null string");
             }
 
+            // cut to next line
             var i = text.indexOf('\n');
-            if (i >= 0) text = text.substring(0, i);
-            if(this.buf == null || this.buf !== text) {
-                if (this.buf != null && this.buf.length > 0) this._.textUpdated(this, false, 0, this.buf.length, 0, 1);
-                if (this.maxLen > 0 && text.length > this.maxLen) text = text.substring(0, this.maxLen);
+            if (i >= 0) {
+                text = text.substring(0, i);
+            }
+
+            if ((this.buf == null || this.buf !== text) && (this.validate == null || this.validate(text))) {
+                if (this.buf != null && this.buf.length > 0) {
+                    this._.textUpdated(this, false, 0, this.buf.length, 0, 1);
+                }
+
+                if (this.maxLen > 0 && text.length > this.maxLen) {
+                    text = text.substring(0, this.maxLen);
+                }
+
                 this.buf = text;
                 this._.textUpdated(this, true, 0, text.length, 0, 1);
+                return true;
             }
+            return false;
         };
 
         /**
@@ -6165,11 +6267,21 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
          * @param  {Integer} max a maximal length of text
          */
         this.setMaxLength = function (max){
-            if(max != this.maxLen){
+            if (max != this.maxLen){
                 this.maxLen = max;
                 this.setValue("");
             }
         };
+
+        /**
+         *  Validate the given text. This method can be implemented to prevent
+         *  inserting text in text model that doesn't satisfy the given condition.
+         *  For instance text can allow only numeric.
+         *  @method validate
+         *  @param {String} text a text
+         *  @return {Boolean} return true if the text is valid otherwise return false
+         */
+
 
         this[''] = function (s, max) {
             this.maxLen = max == null ? -1 : max;
@@ -6687,9 +6799,9 @@ pkg.Matrix = Class([
          */
         this.get = function (row,col){
             if (row < 0 || row >= this.rows || col < 0 || col >= this.cols) {
-                throw new Error("Row of col is out of bounds: " + row + "," + col);
+                throw new Error("Row or col is out of bounds: " + row + "," + col);
             }
-            return this.objs[row][col];
+            return this.objs[row] == null ? undefined : this.objs[row][col];
         };
 
         /**
@@ -6701,13 +6813,19 @@ pkg.Matrix = Class([
          * @param  {Object} obj a new cell value
          */
         this.put = function(row,col,obj){
-            var nr = this.rows, nc = this.cols;
+            var nr = this.rows,
+                nc = this.cols;
+
             if (row >= nr) nr += (row - nr + 1);
             if (col >= nc) nc += (col - nc + 1);
 
             this.setRowsCols(nr, nc);
-            var old = this.objs[row] ? this.objs[row][col] : undefined;
+            var old = this.objs[row] != null ? this.objs[row][col] : undefined;
             if (obj != old) {
+
+                // allocate array if no data for the given row exists
+                if (this.objs[row] == null) this.objs[row] = [];
+
                 this.objs[row][col] = obj;
                 this._.cellModified(this, row, col, old);
             }
@@ -6737,25 +6855,26 @@ pkg.Matrix = Class([
                 var pc = this.cols,
                     pr = this.rows;
 
-                this.rellocate(rows, cols);
                 this.cols = cols;
                 this.rows = rows;
-                this._.matrixResized(this, pr, pc);
-            }
-        };
 
-        /**
-         * Reallocate the matrix model space with the new number of rows and columns
-         * @method re-locate.
-         * @private
-         * @param  {Integer} r a new number of rows
-         * @param  {Integer} c a new number of columns
-         */
-        this.rellocate = function(r, c) {
-            if (r >= this.rows) {
-                for(var i=this.rows; i < r; i++) {
-                    this.objs[i] = [];
+                // re-locate matrix space
+                if (this.objs.length > rows) {
+                    this.objs.length = rows;   // shrink number of rows
                 }
+
+                // shrink columns
+                if (pc > cols) {
+                    for(var i = 0; i < this.objs.length; i++) {
+                        // check if data for columns has been allocated and the size
+                        // is greater than set number of columns
+                        if (this.objs[i] != null && this.objs[i].length > cols) {
+                            this.objs[i].length = cols;
+                        }
+                    }
+                }
+
+                this._.matrixResized(this, pr, pc);
             }
         };
 
@@ -6781,21 +6900,19 @@ pkg.Matrix = Class([
          * Remove specified number of rows from the model starting
          * from the given row.
          * @method removeRows
-         * @param  {Integer}  begrow a start row
+         * @param  {Integer} begrow a start row
          * @param  {Integer} count  a number of rows to be removed
          */
-        this.removeRows = function(begrow,count){
+        this.removeRows = function(begrow,count) {
+            if (arguments.length === 1) {
+                count = 1;
+            }
+
             if (begrow < 0 || begrow + count > this.rows) {
-                throw new Error();
+                throw new Error("Invalid row " + begrow);
             }
 
-            for(var i = (begrow + count);i < this.rows; i++, begrow++){
-                for(var j = 0;j < this.cols; j ++ ){
-                    this.objs[begrow][j] = this.objs[i][j];
-                    this.objs[i][j] = null;
-                }
-            }
-
+            this.objs.splice(begrow, count);
             this.rows -= count;
             this._.matrixResized(this, this.rows + count, this.cols);
         };
@@ -6808,14 +6925,17 @@ pkg.Matrix = Class([
          * @param  {Integer} count  a number of columns to be removed
          */
         this.removeCols = function (begcol,count){
-            if (begcol < 0 || begcol + count > this.cols) {
-                throw new Error();
+            if (arguments.length === 1) {
+                count = 1;
             }
 
-            for(var i = (begcol + count);i < this.cols; i++, begcol++){
-                for(var j = 0;j < this.rows; j++){
-                    this.objs[j][begcol] = this.objs[j][i];
-                    this.objs[j][i] = null;
+            if (begcol < 0 || begcol + count > this.cols) {
+                throw new Error("Invalid column : " + begcol);
+            }
+
+            for(var i = 0; i < this.objs.length; i++) {
+                if (this.objs[i] != null && this.objs[i].length > 0) {
+                    this.objs[i].splice(begcol, count);
                 }
             }
 
@@ -6830,11 +6950,22 @@ pkg.Matrix = Class([
          * @method insertRows
          */
         this.insertRows = function(row, count) {
-            if (arguments.length === 1) count = 1;
-            for(var i=0; i < count; i++) {
-                this.objs.splice(row, 0, []);
-                this._.matrixRowInserted(this, row + i);
+            if (arguments.length === 1) {
+                count = 1;
             }
+
+            if (row <= this.objs.length - 1) {
+                for(var i = 0; i < count; i++) {
+                    this.objs.splice(row, 0, undefined);
+                    this._.matrixRowInserted(this, row + i);
+                }
+            }
+            else {
+                for(var i = 0; i < count; i++) {
+                    this._.matrixRowInserted(this, row + i);
+                }
+            }
+
             this.rows += count;
             this._.matrixResized(this, this.rows - count, this.cols);
         };
@@ -6846,13 +6977,21 @@ pkg.Matrix = Class([
          * @method insertCols
          */
         this.insertCols = function(col, count) {
-            if (arguments.length === 1) count = 1;
-            for(var j=0; j < count; j++) {
-                for(var i=0; i < this.rows; i++) {
-                    this.objs[i].splice(col, 0, undefined);
-                }
-                this._.matrixColInserted(this, col + j);
+            if (arguments.length === 1) {
+                count = 1;
             }
+
+            if (this.objs.length  > 0) {
+                for(var j = 0; j < count; j++) {
+                    for(var i = 0; i < this.rows; i++) {
+                        if (this.objs[i] != null && j <= this.objs[i].length) {
+                            this.objs[i].splice(col, 0, undefined);
+                        }
+                    }
+                    this._.matrixColInserted(this, col + j);
+                }
+            }
+
             this.cols += count;
             this._.matrixResized(this, this.rows, this.cols - count);
         };
@@ -6871,7 +7010,7 @@ pkg.Matrix = Class([
             }
 
             this.objs.sort(function(a, b) {
-                return f(a[col],b[col]);
+                return f(a[col], b[col]);
             });
 
             this._.matrixSorted(this, { col : col,
@@ -7361,13 +7500,14 @@ pkg.Matrix = Class([
                     }
 
                     for(var i=0; i < mt.length; i++) {
-                        var nmt = mt[i], t = $this.touches[nmt.identifier];
+                        var nmt = mt[i],
+                            t   = $this.touches[nmt.identifier];
 
-                        if (t != null) {
-                            if (t.pageX != nmt.pageX || t.pageY != nmt.pageY) {
+                        if (t != null && (t.pageX != nmt.pageX || t.pageY != nmt.pageY)) {
                                 var dx  = nmt.pageX - t.pageX,
                                     dy  = nmt.pageY - t.pageY,
-                                    d   = t.direction, gamma = null,
+                                    d   = t.direction,
+                                    gamma = null,
                                     dxs = (dx < 0 && t.dx < 0) || (dx > 0 && t.dx > 0),  // test if horizontal move direction has been changed
                                     dys = (dy < 0 && t.dy < 0) || (dy > 0 && t.dy > 0);  // test if vertical move direction has been changed
 
@@ -7405,14 +7545,13 @@ pkg.Matrix = Class([
                                 if ($this.timer == null) {
                                     t.dx = dx;
                                     t.dy = dy;
-                                    $this.moved(t);
+                                    if ($this.moved != null) $this.moved(t);
                                 }
                                 else {
                                     $this.dc = 0;
                                 }
                             }
                         }
-                    }
 
                     e.preventDefault();
                 }, false);
@@ -8449,6 +8588,28 @@ pkg.Bag = Class(zebra.util.Bag, [
             }
             return pkg.loadImage(path);
         };
+    },
+
+    function load(s) {
+        return this.load(s, null);
+    },
+
+    function load(s, cb) {
+        if (cb != null) {
+            zebra.busy();
+            try {
+                return this.$super(s, function() {
+                    zebra.ready();
+                    cb.apply(this, arguments);
+                });
+            }
+            catch(e) {
+                zebra.ready();
+                throw e;
+            }
+        }
+
+        return this.$super(s, null);
     }
 ]);
 
@@ -8517,6 +8678,7 @@ var $cvp = pkg.$cvp = function(c, r) {
             py -= p.y;
             p = p.parent;
         }
+
         return r.width > 0 && r.height > 0 ? r : null;
     }
     return null;
@@ -9934,7 +10096,10 @@ var CL = pkg.Panel = Class(L.Layoutable, [
                 h = this.height;
 
             if (p != null && w > 0 && h > 0) {
-                var x = this.x, y = this.y, nx = x < px ? x : px, ny = y < py ? y : py;
+                var x = this.x,
+                    y = this.y,
+                    nx = x < px ? x : px,
+                    ny = y < py ? y : py;
 
                 //TODO: some mobile browser has bug: moving a component
                 //      leaves 0.5 sized traces to fix it 1 pixel extra
@@ -10722,10 +10887,14 @@ pkg.PaintManager = Class(pkg.Manager, [
                         g.save();
 
                         try {
+
+                            console.log("Paintmanager.repaint() $timer: " +  canvas.$da.x + "," + canvas.$da.y + "," + canvas.$da.width + "," + canvas.$da.height);
+
                             g.translate(canvas.x, canvas.y);
-                            g.clipRect(canvas.$da.x, canvas.$da.y,
-                                             canvas.$da.width,
-                                             canvas.$da.height);
+                            g.clipRect(canvas.$da.x,
+                                       canvas.$da.y,
+                                       canvas.$da.width,
+                                       canvas.$da.height);
 
                             if (canvas.bg == null) {
                                 // TODO: make sure it works on bloody android
@@ -10821,6 +10990,7 @@ pkg.PaintManImpl = Class(pkg.PaintManager, [
     function $prototype() {
         this.paintComponent = function(g,c) {
             var b = c.bg != null && (c.parent == null || c.bg != c.parent.bg);
+
 
             // if component defines shape and has update, [paint?] or background that
             // differs from parent background try to apply the shape and than build
@@ -11981,8 +12151,9 @@ pkg.zCanvas = Class(pkg.Panel, [
                     // !!!!
                     // for the sake of performance $meX(e, this) and $meY(e, this)
                     // methods calls are replaced with direct code
-                    var x = this.$context.tX(e.pageX - this.offx, e.pageY - this.offy),
-                        y = this.$context.tY(e.pageX - this.offx, e.pageY - this.offy),
+                    //
+                    var x = Math.floor(this.$context.tX(e.pageX - this.offx, e.pageY - this.offy)),
+                        y = Math.floor(this.$context.tY(e.pageX - this.offx, e.pageY - this.offy)),
                         m = mp.button;
 
                         // setup modifiers
@@ -12003,8 +12174,8 @@ pkg.zCanvas = Class(pkg.Panel, [
                         // !!!!
                         // for the sake of performance $meX(e, this) and $meY(e, this)
                         // methods calls are replaced with direct code
-                        var xx = this.$context.tX(mp.pageX - this.offx, mp.pageY - this.offy),
-                            yy = this.$context.tY(mp.pageX - this.offx, mp.pageY - this.offy),
+                        var xx = Math.floor(this.$context.tX(mp.pageX - this.offx, mp.pageY - this.offy)),
+                            yy = Math.floor(this.$context.tY(mp.pageX - this.offx, mp.pageY - this.offy)),
                             d  = (pkg.$mouseMoveOwner == null) ? this.getComponentAt(xx, yy)
                                                                : pkg.$mouseMoveOwner;
 
@@ -12442,9 +12613,11 @@ pkg.zCanvas = Class(pkg.Panel, [
 
         var oldPX = -1, oldPY = -1, touchHandler = null;
         if ("onpointerdown" in window || "onmspointerdown" in window) {
-
             var names = "onpointerdown" in window ? [ "pointerdown", "pointerup", "pointermove", "pointerenter", "pointerleave" ]
                                                   : [ "MSPointerDown", "MSPointerUp", "MSPointerMove", "MSPointerEnter", "MSPointerLeave" ];
+
+
+            console.log("REG !!!!!");
 
             this.canvas.addEventListener(names[0], function(e) {
                 if (e.pointerType == "touch") ME_STUB.touch = e;
@@ -12475,82 +12648,81 @@ pkg.zCanvas = Class(pkg.Panel, [
         else {
             if ('ontouchstart' in window) {
                 touchHandler = new pkg.TouchHandler(this.canvas, [
-                function $prototype() {
-                    this.started = function(e) {
+                    function $prototype() {
+                        this.started = function(e) {
+                            ME_STUB.touch          = e;
+                            ME_STUB.touches        = this.touches;
+                            ME_STUB.touchCounter   = this.touchCounter;
+                            $this.$mousePressed(e.identifier, e,
+                                               this.touchCounter == 1 ? ME.LEFT_BUTTON
+                                                                      : (e.group != null && e.group.size == 2 && e.group.index == 1 ? ME.RIGHT_BUTTON : 0));
+                        };
 
-                        ME_STUB.touch          = e;
-                        ME_STUB.touches        = this.touches;
-                        ME_STUB.touchCounter   = this.touchCounter;
-                        $this.$mousePressed(e.identifier, e,
-                                           this.touchCounter == 1 ? ME.LEFT_BUTTON
-                                                                  : (e.group != null && e.group.size == 2 && e.group.index == 1 ? ME.RIGHT_BUTTON : 0));
-                    };
+                        this.ended = function(e) {
+                            ME_STUB.touch          = e;
+                            ME_STUB.touches        = this.touches;
+                            ME_STUB.touchCounter   = this.touchCounter;
+                            $this.$mouseReleased(e.identifier, e);
+                        };
 
-                    this.ended = function(e) {
-                        ME_STUB.touch          = e;
-                        ME_STUB.touches        = this.touches;
-                        ME_STUB.touchCounter   = this.touchCounter;
-                        $this.$mouseReleased(e.identifier, e);
-                    };
+                        this.moved = function(e) {
+                            ME_STUB.touch          = e;
+                            ME_STUB.touches        = this.touches;
+                            ME_STUB.touchCounter   = this.touchCounter;
+                            $this.$mouseMoved(e.identifier, e);
+                        };
+                    }
+                ]);
+            }
 
-                    this.moved = function(e) {
-                        ME_STUB.touch          = e;
-                        ME_STUB.touches        = this.touches;
-                        ME_STUB.touchCounter   = this.touchCounter;
-                        $this.$mouseMoved(e.identifier, e);
-                    };
+            this.canvas.onmousemove = function(e) {
+                // ignore extra mouse moved event appearing in IE
+                if (oldPY != e.pageY || oldPX != e.pageX) {
+                    oldPX = e.pageX;
+                    oldPY = e.pageY;
+                    $this.$mouseMoved(1, e);
                 }
-            ]);
-        }
-
-        this.canvas.onmousemove = function(e) {
-            // ignore extra mouse moved event appearing in IE
-            if (oldPY != e.pageY || oldPX != e.pageX) {
-                oldPX = e.pageX;
-                oldPY = e.pageY;
-                $this.$mouseMoved(1, e);
-            }
-            e.stopPropagation();
-        };
-
-        this.canvas.onmousedown = function(e) {
-            // long touch generates mouse down event. Let's supress it
-            if (touchHandler != null && touchHandler.touchCounter > 0) {
-                e.preventDefault();
-            }
-            else {
-                $this.$mousePressed(1, e, e.button === 0 ? ME.LEFT_BUTTON
-                                                        : (e.button == 2 ? ME.RIGHT_BUTTON : 0));
                 e.stopPropagation();
-            }
-        };
+            };
 
-        this.canvas.onmouseup = function(e) {
-            $cleanDragFix();
-            $this.$mouseReleased(1, e);
-            e.stopPropagation();
-        };
+            this.canvas.onmousedown = function(e) {
+                // long touch generates mouse down event. Let's supress it
+                if (touchHandler != null && touchHandler.touchCounter > 0) {
+                    e.preventDefault();
+                }
+                else {
+                    $this.$mousePressed(1, e, e.button === 0 ? ME.LEFT_BUTTON
+                                                            : (e.button == 2 ? ME.RIGHT_BUTTON : 0));
+                    e.stopPropagation();
+                }
+            };
 
-        this.canvas.onmouseover = function(e) {
-            if (touchHandler != null && touchHandler.touchCounter > 0) {
-                e.preventDefault();
-            }
-            else {
-                $this.$mouseEntered(1, e);
+            this.canvas.onmouseup = function(e) {
+                $cleanDragFix();
+                $this.$mouseReleased(1, e);
                 e.stopPropagation();
-            }
-        };
+            };
 
-          this.canvas.onmouseout = function(e) {
-              if (touchHandler != null && touchHandler.touchCounter > 0) {
-                  e.preventDefault();
-              }
-              else {
-                  $this.$mouseExited(1, e);
-                  oldPX = oldPY = -1;
-                  e.stopPropagation();
-              }
-          };
+            this.canvas.onmouseover = function(e) {
+                if (touchHandler != null && touchHandler.touchCounter > 0) {
+                    e.preventDefault();
+                }
+                else {
+                    $this.$mouseEntered(1, e);
+                    e.stopPropagation();
+                }
+            };
+
+            this.canvas.onmouseout = function(e) {
+                if (touchHandler != null && touchHandler.touchCounter > 0) {
+                    e.preventDefault();
+                }
+                else {
+                    $this.$mouseExited(1, e);
+                    oldPX = oldPY = -1;
+                    e.stopPropagation();
+                }
+            };
         }
 
         this.canvas.oncontextmenu = function(e) {
@@ -12935,13 +13107,17 @@ zebra.ready(
     },
 
     function() {
+        var p = zebra()['zebra.json'];
+        new pkg.Bag(pkg).load(p != null ? p : pkg.$url.join("canvas.json"),
+            function(result, e) {
+                if (e != null) throw e;
+            }
+        );
+    },
+
+    function() {
         try {
             zebra.busy();
-            pkg.$configuration = new pkg.Bag(pkg);
-
-            var p = zebra()['zebra.json'];
-            new pkg.Bag(pkg).load(p ? p
-                                    : pkg.$url.join("canvas.json"));
 
             // store reference to event manager
             EM = pkg.events;
@@ -13024,7 +13200,6 @@ zebra.ready(
             ///!!!!! for some reason throwing exception is not appeared in console.
             //       but it has side effect to the system, what causes other exception
             //       that is not relevant to initial one
-
             console.log(e.stack ? e.stack : e);
             throw new Error(e.toString());
         }
@@ -13205,7 +13380,7 @@ pkg.StringRender = Class(pkg.Render, [
              * @readOnly
              * @type {zebra.ui.Font}
              */
-            this.font = font != null ? font : pkg.StringRender.font ;
+            this.font = font != null ? font : this.$clazz.font;
 
             /**
              * Color to be used to render the target string
@@ -13213,7 +13388,7 @@ pkg.StringRender = Class(pkg.Render, [
              * @attribute color
              * @type {String}
              */
-            this.color = color != null ? color : pkg.StringRender.color;
+            this.color = color != null ? color : this.$clazz.color;
         };
 
         this.ownerChanged  = function(v) {
@@ -13288,7 +13463,7 @@ pkg.StringRender = Class(pkg.Render, [
          */
         this.setColor = function(c){
             if (c != this.color) {
-                this.color = c;
+                this.color = c.toString();
                 return true;
             }
             return false;
@@ -13405,7 +13580,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
                 this.invalidate(0, this.getLines());
             }
             else {
-                this.lines = 0;
+                this.invLines = 0;
             }
         };
 
@@ -13425,29 +13600,32 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
          * @method lineWidth
          */
         this.lineWidth = function(line){
-            this.recalc();
-            return this.target.getExtraChar(line);
+            if (this.invLines > 0) this.recalc();
+            return this.target.$lineTags(line).$lineWidth;
         };
 
         /**
          * Called every time the target text metrics has to be recalculated
          * @method recalc
          */
-        this.recalc = function(){
-            if (this.lines > 0 && this.target != null){
+        this.recalc = function() {
+            if (this.invLines > 0 && this.target != null){
                 var text = this.target;
                 if (text != null) {
-                    if (this.lines > 0) {
-                        for(var i = this.startLine + this.lines - 1;i >= this.startLine; i-- ){
-                            text.setExtraChar(i, this.font.stringWidth(this.getLine(i)));
+                    if (this.invLines > 0) {
+                        for(var i = this.startInvLine + this.invLines - 1; i >= this.startInvLine; i--) {
+                            text.$lineTags(i).$lineWidth = this.font.stringWidth(this.getLine(i));
                         }
-                        this.startLine = this.lines = 0;
+                        this.startInvLine = this.invLines = 0;
                     }
+
                     this.textWidth = 0;
                     var size = text.getLines();
                     for(var i = 0;i < size; i++){
-                        var len = text.getExtraChar(i);
-                        if (len > this.textWidth) this.textWidth = len;
+                        var len = text.$lineTags(i).$lineWidth;
+                        if (len > this.textWidth) {
+                            this.textWidth = len;
+                        }
                     }
                     this.textHeight = this.getLineHeight() * size + (size - 1) * this.getLineIndent();
                 }
@@ -13469,23 +13647,23 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
          */
         this.textUpdated = function(src,b,off,size,ful,updatedLines){
             if (b === false) {
-                if (this.lines > 0) {
-                    var p1 = ful - this.startLine,
-                        p2 = this.startLine + this.lines - ful - updatedLines;
-                    this.lines = ((p1 > 0) ? p1 : 0) + ((p2 > 0) ? p2 : 0) + 1;
-                    this.startLine = this.startLine < ful ? this.startLine : ful;
+                if (this.invLines > 0) {
+                    var p1 = ful - this.startInvLine,
+                        p2 = this.startInvLine + this.invLines - ful - updatedLines;
+                    this.invLines = ((p1 > 0) ? p1 : 0) + ((p2 > 0) ? p2 : 0) + 1;
+                    this.startInvLine = this.startInvLine < ful ? this.startInvLine : ful;
                 }
                 else {
-                    this.startLine = ful;
-                    this.lines = 1;
+                    this.startInvLine = ful;
+                    this.invLines = 1;
                 }
                 if (this.owner != null) this.owner.invalidate();
             }
             else {
-                if (this.lines > 0){
-                    if (ful <= this.startLine) this.startLine += (updatedLines - 1);
+                if (this.invLines > 0){
+                    if (ful <= this.startInvLine) this.startInvLine += (updatedLines - 1);
                     else {
-                        if (ful < (this.startLine + size)) size += (updatedLines - 1);
+                        if (ful < (this.startInvLine + size)) size += (updatedLines - 1);
                     }
                 }
                 this.invalidate(ful, updatedLines);
@@ -13500,15 +13678,15 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
          * @private
          */
         this.invalidate = function(start,size){
-            if (size > 0 && (this.startLine != start || size != this.lines)) {
-                if (this.lines === 0){
-                    this.startLine = start;
-                    this.lines = size;
+            if (size > 0 && (this.startInvLine != start || size != this.invLines)) {
+                if (this.invLines === 0){
+                    this.startInvLine = start;
+                    this.invLines = size;
                 }
                 else {
-                    var e = this.startLine + this.lines;
-                    this.startLine = start < this.startLine ? start : this.startLine;
-                    this.lines     = Math.max(start + size, e) - this.startLine;
+                    var e = this.startInvLine + this.invLines;
+                    this.startInvLine = start < this.startInvLine ? start : this.startInvLine;
+                    this.invLines     = Math.max(start + size, e) - this.startInvLine;
                 }
 
                 if (this.owner != null) {
@@ -13518,7 +13696,9 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
         };
 
         this.getPreferredSize = function(){
-            if (this.lines > 0 && this.target != null) this.recalc();
+            if (this.invLines > 0 && this.target != null) {
+                this.recalc();
+            }
             return { width:this.textWidth, height:this.textHeight };
         };
 
@@ -13528,60 +13708,67 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
                 var lineIndent = this.getLineIndent(),
                     lineHeight = this.getLineHeight(),
                     lilh       = lineHeight + lineIndent,
-                    startLine  = 0;
+                    startInvLine  = 0;
 
                 w = ts.width  < w ? ts.width  : w;
                 h = ts.height < h ? ts.height : h;
 
                 if (y < ts.y) {
-                    startLine = Math.floor((lineIndent + ts.y - y) / lilh);
-                    h += (ts.y - startLine * lineHeight - startLine * lineIndent);
+                    startInvLine = Math.floor((lineIndent + ts.y - y) / lilh);
+                    h += (ts.y - startInvLine * lineHeight - startInvLine * lineIndent);
                 }
                 else {
                     if (y > (ts.y + ts.height)) return;
                 }
 
                 var size = this.target.getLines();
-                if (startLine < size){
+                if (startInvLine < size){
                     var lines =  Math.floor((h + lineIndent) / lilh) + (((h + lineIndent) % lilh > lineIndent) ? 1 : 0);
-                    if (startLine + lines > size) {
-                        lines = size - startLine;
+                    if (startInvLine + lines > size) {
+                        lines = size - startInvLine;
                     }
-                    y += startLine * lilh;
+                    y += startInvLine * lilh;
 
                     g.setFont(this.font);
 
                     if (d == null || d.isEnabled === true){
+                        if (this.color != g.fillStyle) g.fillStyle = this.color;
 
-                        g.setColor(this.color);
-                        for(var i = 0;i < lines; i++){
-                            if (d && d.getStartSelection != null) {
-                                var p1 = d.getStartSelection();
-                                if (p1 != null){
-                                    var p2 = d.getEndSelection(), line = i + startLine;
-                                    if ((p1[0] != p2[0] || p1[1] != p2[1]) && line >= p1[0] && line <= p2[0]){
-                                        var s = this.getLine(line), lw = this.lineWidth(line), xx = x;
-                                        if (line == p1[0]) {
-                                            var ww = this.font.charsWidth(s, 0, p1[1]);
-                                            xx += ww;
-                                            lw -= ww;
-                                            if (p1[0] == p2[0]) {
-                                                lw -= this.font.charsWidth(s, p2[1], s.length - p2[1]);
-                                            }
-                                        }
-                                        else {
-                                            if (line == p2[0]) lw = this.font.charsWidth(s, 0, p2[1]);
-                                        }
-                                        this.paintSelection(g, xx, y, lw === 0 ? 1 : lw, lilh, line, d);
+                        var p1 = null, p2 = null, bsel = false;
+                        if (lines > 0 && d != null && d.getStartSelection != null) {
+                            p1   = d.getStartSelection();
+                            p2   = d.getEndSelection();
+                            bsel = p1 != null && (p1[0] != p2[0] || p1[1] != p2[1]);
+                        }
 
-                                        // restore foreground color after selection has been rendered
-                                        // TODO: think to replace it with settting "fillStyle" directly
-                                        g.setColor(this.color);
+                        for(var i = 0; i < lines; i++){
+                            if (bsel === true) {
+                                var line = i + startInvLine;
+                                if (line >= p1[0] && line <= p2[0]){
+                                    var s  = this.getLine(line),
+                                        lw = this.lineWidth(line),
+                                        xx = x;
+
+                                    if (line == p1[0]) {
+                                        var ww = this.font.charsWidth(s, 0, p1[1]);
+                                        xx += ww;
+                                        lw -= ww;
+                                        if (p1[0] == p2[0]) {
+                                            lw -= this.font.charsWidth(s, p2[1], s.length - p2[1]);
+                                        }
                                     }
+                                    else {
+                                        if (line == p2[0]) lw = this.font.charsWidth(s, 0, p2[1]);
+                                    }
+                                    this.paintSelection(g, xx, y, lw === 0 ? 1 : lw, lilh, line, d);
+
+                                    // restore color to paint text since it can be
+                                    // res-set with paintSelection method
+                                    if (this.color != g.fillStyle) g.fillStyle = this.color;
                                 }
                             }
 
-                            this.paintLine(g, x, y, i + startLine, d);
+                            this.paintLine(g, x, y, i + startInvLine, d);
                             y += lilh;
                         }
                     }
@@ -13589,10 +13776,9 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
                         var dcol = d != null && d.disabledColor != null ? d.disabledColor
                                                                         : pkg.TextRender.disabledColor;
 
-
                         for(var i = 0;i < lines; i++) {
                             g.setColor(dcol);
-                            this.paintLine(g, x, y, i + startLine, d);
+                            this.paintLine(g, x, y, i + startInvLine, d);
                             y += lilh;
                         }
                     }
@@ -13655,7 +13841,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
          */
         this.setColor = function(c){
             if (c != this.color) {
-                this.color = c;
+                this.color = c.toString();
                 return true;
             }
             return false;
@@ -13671,7 +13857,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
              * @default zebra.ui.TextRender.color
              * @readOnly
              */
-            this.color = pkg.TextRender.color;
+            this.color = this.$clazz.color;
 
             /**
              * Text font
@@ -13680,12 +13866,13 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
              * @default zebra.ui.TextRender.font
              * @readOnly
              */
-            this.font = pkg.TextRender.font;
+            this.font = this.$clazz.font;
 
-            this.textWidth = this.textHeight = this.startLine = this.lines = 0;
+            this.textWidth = this.textHeight = this.startInvLine = this.invLines = 0;
 
             //!!!
-            //!!! since text is widely used structure we do slight hack - don't call parent constructor
+            //   since text render is widely used structure we do slight hack -
+            //   don't call parent constructor
             //!!!
             this.setTarget(zebra.isString(text) ? new zebra.data.Text(text) : text);
         };
@@ -14291,7 +14478,7 @@ pkg.Label = Class(pkg.ViewPan, [
         this.$this("");
     },
 
-    function (r){
+    function (r) {
         if (instanceOf(r, pkg.Render)) {
             this.setView(r);
         }
@@ -19107,6 +19294,10 @@ var ME = pkg.MouseEvent, KE = pkg.KeyEvent, PO = zebra.util.Position;
  * @extends zebra.ui.Label
  */
 pkg.TextField = Class(pkg.Label, [
+    function $clazz() {
+        this.HintRender = Class(pkg.StringRender, []);
+    },
+
     function $prototype() {
         /**
          * Selection color
@@ -19129,6 +19320,15 @@ pkg.TextField = Class(pkg.Label, [
         this.blinkMeCounter = 0;
 
         this.cursorType = pkg.Cursor.TEXT;
+
+
+        /**
+         * Text alignment
+         * @attribute textAlign
+         * @type {Integer}
+         * @default zebra.layout.LEFT
+         */
+        this.textAlign = zebra.layout.LEFT;
 
         /**
          * Cursor view
@@ -19164,10 +19364,55 @@ pkg.TextField = Class(pkg.Label, [
             }
         };
 
-        this.textUpdated = function(src, b, off, size, startLine, lines){
+        this.setTextAlign = function(a) {
+            a = zebra.layout.$constraints(a)
+            if (this.textAlign != a) {
+                this.textAlign = a;
+                this.vrp();
+            }
+        };
+
+        this.textUpdated = function(src, b, off, size, startLine, lines) {
             if (this.position != null) {
-                if (b === true) this.position.inserted(off, size);
-                else            this.position.removed(off, size);
+                if (b === true) {
+                    // Check if a selection presents
+                    // and clear it.  We do it here because it is important
+                    // to remove any selected text after update since:
+                    //   -- not every update brings to real text update, so we have remove selected text
+                    //      only if real text update has happened
+                    //   -- update can make selection start and end location invalid, so we have to take in
+                    //      account before we remove it
+                    if (this.startOff != this.endOff) {
+                        var start = this.startOff < this.endOff ? this.startOff : this.endOff,
+                            end   = this.startOff > this.endOff ? this.startOff : this.endOff;
+
+                        // if start of selection is less or equals
+                        // to inserted text offset than we have to correct
+                        // insertion area start and end offsets
+                        if (off <= start) {
+                            start += size;
+                            end += size;
+                        }
+                        else {
+                            // if offset of an inserted text if greater than start of
+                            // a selection but less or equals to end of the selection
+                            // we have to correct insertion offset to start (since the
+                            // selected text is going to be removed)
+                            if (off <= end) {
+                                if (off < end) end += size;
+                                off = start;
+                            }
+                        }
+
+                        this.endOff = this.startOff = -1; // clear selection
+                        this.remove(start, end - start);
+                    }
+
+                    this.position.inserted(off, size);
+                }
+                else {
+                    this.position.removed(off, size);
+                }
             }
         };
 
@@ -19175,12 +19420,22 @@ pkg.TextField = Class(pkg.Label, [
          * Compute a text column and row by the given location.
          * @param  {Integer} x  a x coordinate
          * @param  {Integer} y  a y coordinate
-         * @return {Array} a text row and column as an Array object. Fist element
-         * of the array is row and the second one is column.
+         * @return {Object} a text row and column as an object { row:, col }.
          * @method  getTextRowColAt
          */
-        this.getTextRowColAt = function(x,y) {
-            var lines = this.view.target.getLines();
+        this.getTextRowColAt = function(x, y) {
+            var lines = this.getLines();
+
+            // normalize text location to virtual (zero, zero)
+            y -= (this.scrollManager.getSY() + this.getTop());
+            x -= this.scrollManager.getSX();
+            if (this.textAlign === zebra.layout.LEFT) {
+                x -= this.getLeft();
+            }
+            else {
+                x -= (this.width - this.view.getPreferredSize().width - this.getRight());
+            }
+
             if (x >= 0 && y >= 0 && lines > 0) {
                 var lh = this.view.getLineHeight(),
                     li = this.view.getLineIndent(),
@@ -19191,12 +19446,12 @@ pkg.TextField = Class(pkg.Label, [
                         pdt  = 1000000,
                         pcol = -1;
 
-                    for(var col = ~~((x / this.view.lineWidth(row)) * s.length); col>=0 && col <= s.length;) {
+                    for(var col = ~~((x / this.view.lineWidth(row)) * s.length); col >= 0 && col <= s.length;) {
                         var l  = this.view.font.charsWidth(s, 0, col),
                             dt = Math.abs(l - x);
 
                         if (dt >= pdt) {
-                            return [row, pcol];
+                            return { row : row, col : pcol };
                         }
 
                         pdt  = dt;
@@ -19204,7 +19459,7 @@ pkg.TextField = Class(pkg.Label, [
                         col += (l > x ? -1: 1);
                     }
 
-                    return[row, s.length];
+                    return { row : row, col : s.length };
                 }
             }
             return null;
@@ -19215,7 +19470,9 @@ pkg.TextField = Class(pkg.Label, [
 
             var ln = t.getLine(line);
             col += d;
-            if (col < 0 && line > 0) return [line - 1, t.getLine(line - 1).length];
+            if (col < 0 && line > 0) {
+                return [line - 1, t.getLine(line - 1).length];
+            }
             else {
                 if (col > ln.length && line < t.getLines() - 1) return [line + 1, 0];
             }
@@ -19265,7 +19522,7 @@ pkg.TextField = Class(pkg.Label, [
             }
         };
 
-        this.startSelection = function(){
+        this.startSelection = function() {
             if (this.startOff < 0 && this.position != null){
                 var pos = this.position;
                 this.endLine = this.startLine = pos.currentLine;
@@ -19274,19 +19531,14 @@ pkg.TextField = Class(pkg.Label, [
             }
         };
 
-        this.keyTyped = function(e){
-            if (e.isControlPressed() || e.isCmdPressed() || this.isEditable === false ||
-                (e.ch == '\n' && zebra.instanceOf(this.view.target, zebra.data.SingleLineTxt)))
-            {
-                return;
+        this.keyTyped = function(e) {
+            if (this.isEditable === true && e.isControlPressed() == false && e.isCmdPressed() == false) {
+                this.write(this.position.offset, e.ch);
             }
-
-            this.removeSelected();
-            this.write(this.position.offset, e.ch);
         };
 
         this.selectAll_command = function() {
-            this.select(0, this.position.metrics.getMaxOffset());
+            this.select(0, this.getMaxOffset());
         };
 
         this.nextWord_command = function(b, d) {
@@ -19315,11 +19567,10 @@ pkg.TextField = Class(pkg.Label, [
                     this.startSelection();
                 }
 
-                switch(e.code)
-                {
+                switch(e.code) {
                     case KE.DOWN : position.seekLineTo(PO.DOWN);break;
                     case KE.UP   : position.seekLineTo(PO.UP);break;
-                    case KE.LEFT : foff = -1;
+                    case KE.LEFT : foff *= -1;
                     case KE.RIGHT:
                         if (e.isControlPressed() === false && e.isCmdPressed() === false) {
                             position.seek(foff);
@@ -19327,7 +19578,7 @@ pkg.TextField = Class(pkg.Label, [
                         break;
                     case KE.END:
                         if (e.isControlPressed()) {
-                            position.seekLineTo(PO.DOWN, position.metrics.getLines() - line - 1);
+                            position.seekLineTo(PO.DOWN, this.getLines() - line - 1);
                         }
                         else position.seekLineTo(PO.END);
                         break;
@@ -19347,7 +19598,7 @@ pkg.TextField = Class(pkg.Label, [
                             if (this.hasSelection()) this.removeSelected();
                             else {
                                 if (this.isEditable === true && position.offset > 0){
-                                    position.seek(-1);
+                                    position.seek(-1 * foff);
                                     this.remove(position.offset, 1);
                                 }
                             }
@@ -19378,36 +19629,36 @@ pkg.TextField = Class(pkg.Label, [
 
         /**
          * Remove the specified part of edited text
-         * @param  {Integer} pos  a start position of a removed text
+         * @param  {Integer} pos a start position of a removed text
          * @param  {Integer} size a size of removed text
          * @method remove
          */
         this.remove = function (pos,size){
             if (this.isEditable === true) {
                 var position = this.position;
-                if (pos >= 0 && (pos + size) <= position.metrics.getMaxOffset()) {
+                if (pos >= 0 && (pos + size) <= this.getMaxOffset()) {
                     if (size < 10000) {
                         this.historyPos = (this.historyPos + 1) % this.history.length;
                         this.history[this.historyPos] = [-1, pos, this.getValue().substring(pos, pos+size)];
                         if (this.undoCounter < this.history.length) this.undoCounter++;
                     }
 
-                    var pl = position.metrics.getLines(), old = position.offset;
-                    this.view.target.remove(pos, size);
-                    if (position.metrics.getLines() != pl || old == pos) {
+                    if (this.view.target.remove(pos, size)) {
                         this.repaint();
+                        return true;
                     }
                 }
             }
+            return false;
         };
 
         /**
          * Insert the specified text into the edited text at the given position
-         * @param  {Integer} pos  a start position of a removed text
+         * @param  {Integer} pos a start position of a removed text
          * @param  {String} s a text to be inserted
          * @method write
          */
-        this.write = function (pos,s){
+        this.write = function (pos,s) {
             if (this.isEditable === true) {
                 // TODO: remove hard coded undo/redo deepness value
                 if (s.length < 10000) {
@@ -19416,23 +19667,25 @@ pkg.TextField = Class(pkg.Label, [
                     if (this.undoCounter < this.history.length) this.undoCounter++;
                 }
 
-                var old = this.position.offset,
-                    m   = this.view.target,
-                    pl  = m.getLines();
-
-                m.write(s, pos);
-                if (m.getLines() != pl || this.position.offset == old) {
+                if (this.view.target.write(s, pos)) {
                     this.repaint();
+                    return true;
                 }
             }
+            return false;
         };
 
         this.recalc = function() {
             var r = this.view;
             if (this.position.offset >= 0) {
-                this.curX = r.font.charsWidth(r.getLine(this.position.currentLine),
-                                              0,
-                                              this.position.currentCol) + this.getLeft();
+                var l = r.getLine(this.position.currentLine);
+                if (this.textAlign === zebra.layout.LEFT) {
+                    this.curX = r.font.charsWidth(l, 0, this.position.currentCol) + this.getLeft();
+                }
+                else {
+                    this.curX = this.width - this.getRight() - this.view.getPreferredSize().width +
+                                r.font.charsWidth(l, 0, this.position.currentCol);
+                }
 
                 this.curY = this.position.currentLine * (r.getLineHeight() + r.getLineIndent()) +
                             this.getTop();
@@ -19454,15 +19707,19 @@ pkg.TextField = Class(pkg.Label, [
             if (this.position.offset >= 0 &&
                 this.curView != null      &&
                 this.blinkMe              &&
-                (this.hasFocus() || this.$forceToShow == true)) // TODO: $forceToShow is awkward solution
+                (this.hasFocus() || this.$forceToShow == true)) // TODO: $forceToShow is awkward solution sdesigned for VK
             {
-                this.curView.paint(g, this.curX, this.curY,
-                                      this.curW, this.curH, this);
+                if (this.textAlign === zebra.layout.LEFT)
+                    this.curView.paint(g, this.curX, this.curY,
+                                          this.curW, this.curH, this);
+                else
+                    this.curView.paint(g, this.curX - this.curW, this.curY,
+                                          this.curW, this.curH, this);
             }
         };
 
         this.mouseDragStarted = function (e){
-            if (e.mask == ME.LEFT_BUTTON && this.position.metrics.getMaxOffset() > 0) {
+            if (e.mask == ME.LEFT_BUTTON && this.getMaxOffset() > 0) {
                 this.startSelection();
             }
         };
@@ -19475,9 +19732,8 @@ pkg.TextField = Class(pkg.Label, [
 
         this.mouseDragged = function (e){
             if (e.mask == ME.LEFT_BUTTON){
-                var p = this.getTextRowColAt(e.x - this.scrollManager.getSX(),
-                                             e.y - this.scrollManager.getSY());
-                if (p != null) this.position.setRowCol(p[0], p[1]);
+                var p = this.getTextRowColAt(e.x, e.y);
+                if (p != null) this.position.setRowCol(p.row, p.col);
             }
         };
 
@@ -19490,7 +19746,7 @@ pkg.TextField = Class(pkg.Label, [
         this.select = function (startOffset,endOffset){
             if (endOffset < startOffset ||
                 startOffset < 0 ||
-                endOffset > this.position.metrics.getMaxOffset())
+                endOffset > this.getMaxOffset())
             {
                 throw new Error("Invalid selection offsets");
             }
@@ -19501,8 +19757,8 @@ pkg.TextField = Class(pkg.Label, [
                     this.startOff = startOffset;
                     var p = this.position.getPointByOffset(startOffset);
                     this.startLine = p[0];
-                    this.startCol = p[1];
-                    this.endOff = endOffset;
+                    this.startCol  = p[1];
+                    this.endOff    = endOffset;
                     p = this.position.getPointByOffset(endOffset);
                     this.endLine = p[0];
                     this.endCol = p[1];
@@ -19531,16 +19787,17 @@ pkg.TextField = Class(pkg.Label, [
                 var lineHeight = this.view.getLineHeight(),
                     top        = this.getTop();
 
-                this.scrollManager.makeVisible(this.curX, this.curY, this.curW, lineHeight);
+                this.scrollManager.makeVisible(this.textAlign === zebra.layout.LEFT ? this.curX
+                                                                                    : this.curX - this.curW,
+                                                this.curY, this.curW, lineHeight);
 
                 if (pl >= 0) {
-
                     // means selected text exists, than we have to correct selection
                     // according to the new position
                     if (this.startOff >= 0){
                         this.endLine = position.currentLine;
-                        this.endCol = position.currentCol;
-                        this.endOff = position.offset;
+                        this.endCol  = position.currentCol;
+                        this.endOff  = position.offset;
                     }
 
                     var minUpdatedLine = pl < position.currentLine ? pl : position.currentLine,
@@ -19550,7 +19807,9 @@ pkg.TextField = Class(pkg.Label, [
                         y1             = lineHeight * minUpdatedLine + minUpdatedLine * li +
                                          top + this.scrollManager.getSY();
 
-                    if (y1 < top) y1 = top;
+                    if (y1 < top) {
+                        y1 = top;
+                    }
 
                     if (y1 < this.height - bottom){
                         var h = ((pl > position.currentLine ? pl
@@ -19568,10 +19827,13 @@ pkg.TextField = Class(pkg.Label, [
         };
 
         this.paintOnTop = function(g) {
-            if (this.hint && this.hasFocus() === false && this.getValue() == '') {
-                this.hint.paint(g, this.getLeft(),
-                                   this.height - this.getBottom() - this.hint.getLineHeight(),
-                                this.width, this.height, this);
+            if (this.hint != null && this.getMaxOffset() == 0) {
+                var ps = this.hint.getPreferredSize(),
+                    yy = Math.floor((this.height - ps.height)/2),
+                    xx = (zebra.layout.LEFT === this.textAlign) ? this.getLeft() + this.curW
+                                                                : this.width - ps.width - this.getRight() - this.curW;
+
+                this.hint.paint(g, xx, yy, this.width, this.height, this);
             }
         };
 
@@ -19579,20 +19841,12 @@ pkg.TextField = Class(pkg.Label, [
          * Set the specified hint text to be drawn with the given font and color.
          * The hint is not-editable text that is shown in empty text field to help
          * a user to understand which input the text field expects.
-         * @param {String} hint a hint text
-         * @param {String|zebra.ui.Font} font a font
-         * @param {String} color a hint color
+         * @param {String|zebra.ui.View|Function} hint a hint text, view or view render method
+         * @return {zebra.ui.View} a hint view
          * @method setHint
          */
-        this.setHint = function(hint, font, color) {
-            this.hint = hint;
-            if (hint != null && zebra.instanceOf(hint, pkg.View) === false) {
-                this.hint = new pkg.StringRender(hint);
-                font  = font  ? font  : pkg.TextField.hintFont;
-                color = color ? color : pkg.TextField.hintColor;
-                this.hint.setColor(color);
-                this.hint.setFont(font);
-            }
+        this.setHint = function(hint) {
+            this.hint = zebra.isString(hint) ? new this.$clazz.HintRender(hint) : pkg.$view(hint);
             this.repaint();
             return this.hint;
         };
@@ -19661,9 +19915,17 @@ pkg.TextField = Class(pkg.Label, [
                                                 : null;
         };
 
+        this.getLines = function() {
+            return this.position == null ? -1 : this.position.metrics.getLines();
+        };
+
+        this.getMaxOffset = function() {
+            return this.position == null ? -1 : this.position.metrics.getMaxOffset();
+        };
+
         this.focusGained = function (e){
             if (this.position.offset < 0) {
-                this.position.setOffset(0);
+                this.position.setOffset(this.textAlign === zebra.layout.LEFT  || this.getLines() > 1 ? 0 : this.getMaxOffset());
             }
             else {
                 if (this.hint != null) this.repaint();
@@ -19723,7 +19985,7 @@ pkg.TextField = Class(pkg.Label, [
         this.clearSelection = function (){
             if (this.startOff >= 0){
                 var b = this.hasSelection();
-                this.endOff = this.startOff =  -1;
+                this.endOff = this.startOff = -1;
                 if (b) this.repaint();
             }
         };
@@ -19760,13 +20022,13 @@ pkg.TextField = Class(pkg.Label, [
          * @method setPosition
          */
         this.setPosition = function (p){
-            if (this.position != p){
-                if (this.position != null){
+            if (this.position != p) {
+                if (this.position != null) {
                     this.position.unbind(this);
                 }
                 this.position = p;
                 if (this.position != null) {
-                this.position.bind(this);
+                    this.position.bind(this);
                 }
                 this.invalidate();
             }
@@ -19779,8 +20041,7 @@ pkg.TextField = Class(pkg.Label, [
          * @method setCursorView
          */
         this.setCursorView = function (v){
-            // !!!
-            // cursor size should be set by property
+            // TODO: cursor size should be set by property
             this.curW = 1;
             this.curView = pkg.$view(v);
             //this.curW = this.curView != null ? this.curView.getPreferredSize().width : 1;
@@ -19822,14 +20083,18 @@ pkg.TextField = Class(pkg.Label, [
         this.mousePressed = function(e){
             if (e.isActionMask()) {
                 if (e.clicks > 1) {
-                    this.select(0, this.position.metrics.getMaxOffset());
+                    this.select(0, this.getMaxOffset());
                 }
                 else {
-                    if ((e.mask & KE.M_SHIFT) > 0) this.startSelection();
-                    else this.clearSelection();
-                    var p = this.getTextRowColAt(e.x - this.scrollManager.getSX() - this.getLeft(),
-                                                 e.y - this.scrollManager.getSY() - this.getTop());
-                    if (p != null) this.position.setRowCol(p[0], p[1]);
+                    if ((e.mask & KE.M_SHIFT) > 0) {
+                        this.startSelection();
+                    }
+                    else {
+                        this.clearSelection();
+                    }
+
+                    var p = this.getTextRowColAt(e.x, e.y);
+                    if (p != null) this.position.setRowCol(p.row, p.col);
                 }
             }
         };
@@ -19857,23 +20122,30 @@ pkg.TextField = Class(pkg.Label, [
             var sx = this.scrollManager.getSX(),
                 sy = this.scrollManager.getSY(),
                 l  = this.getLeft(),
-                t  = this.getTop();
+                t  = this.getTop(),
+                r  = this.getRight();
 
             try {
                 g.translate(sx, sy);
-                //!!! this code can be found in ViewPan.paint()
 
-                this.view.paint(g, l, t,
-                                this.width  - l - this.getRight(),
-                                this.height - t - this.getBottom(), this);
+                if (this.textAlign === zebra.layout.LEFT) {
+                    this.view.paint(g, l, t,
+                                    this.width  - l - r,
+                                    this.height - t - this.getBottom(), this);
+                }
+                else {
+                    this.view.paint(g, this.width - r - this.view.getPreferredSize().width, t,
+                                       this.width  - l - r,
+                                       this.height - t - this.getBottom(), this);
+                }
+
                 this.drawCursor(g);
-
             }
             catch(e) {
-                g.translate( -sx,  -sy);
+                g.translate(-sx, -sy);
                 throw e;
             }
-            g.translate( -sx,  -sy);
+            g.translate(-sx, -sy);
         };
     },
 
@@ -20008,8 +20280,8 @@ pkg.PassTextField = Class(pkg.TextField, [
 var L = zebra.layout, Position = zebra.util.Position, KE = pkg.KeyEvent;
 
 /**
- * Base UI list component class that has to be extended with a 
- * concrete list component implementation. The list component 
+ * Base UI list component class that has to be extended with a
+ * concrete list component implementation. The list component
  * visualizes list data model (zebra.data.ListModel).
  * @class  zebra.ui.BaseList
  * @extends {zebra.ui.Panel}
@@ -20017,19 +20289,19 @@ var L = zebra.layout, Position = zebra.util.Position, KE = pkg.KeyEvent;
 
 /**
  * Fire when a list item has been selected:
-        
+
         list.bind(function (src, prev) {
             ...
         });
 
  * @event selected
  * @param {zebra.ui.BaseList} src a list that triggers the event
- * @param {Integer|Object} prev a previous selected index, return null if the selected item has been re-selected 
+ * @param {Integer|Object} prev a previous selected index, return null if the selected item has been re-selected
  */
 pkg.BaseList = Class(pkg.Panel, Position.Metric, [
     function $prototype() {
         this.canHaveFocus = true;
-        
+
         /**
          * List model the component visualizes
          * @attribute model
@@ -20038,11 +20310,11 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
          */
 
         /**
-         * Select the specified list item. 
-         * @param {Object} v a list item to be selected. Use null as 
+         * Select the specified list item.
+         * @param {Object} v a list item to be selected. Use null as
          * the parameter value to clean an item selection
          * @return {Integer} an index of a selected item
-         * @method setValue 
+         * @method setValue
          */
         this.setValue = function(v) {
             if (v == null) {
@@ -20050,7 +20322,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
             }
             else {
                 if (this.model != null) {
-                    for(var i=0; i<this.model.count(); i++) {
+                    for(var i = 0; i < this.model.count(); i++) {
                         if (this.model.get(i) == v && this.isItemSelectable(i)) {
                             this.select(i);
                             return i;
@@ -20064,12 +20336,12 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         /**
          * Get the list component selected item
          * @return {Object} a selected item
-         * @method getValue 
+         * @method getValue
          */
         this.getValue = function() {
             return this.getSelected();
         };
- 
+
         /**
          * Test if the given item is selectable.
          * @param  {Integer}  i an item index
@@ -20082,7 +20354,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
 
         /**
          * Get selected list item
-         * @return {Object} an item 
+         * @return {Object} an item
          * @method getSelected
          */
         this.getSelected = function(){
@@ -20111,8 +20383,8 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
          * @return {Boolean}  true if the item with the given index is selected
          * @method isSelected
          */
-        this.isSelected = function(i) { 
-            return i == this.selectedIndex; 
+        this.isSelected = function(i) {
+            return i == this.selectedIndex;
         };
 
         /**
@@ -20130,7 +20402,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
                     this.$triggeredByPointer = true;
 
                     if (index < 0) this.position.setOffset(null);
-                    else this.position.setOffset(index);                    
+                    else this.position.setOffset(index);
                     this.notifyScrollMan(index);
 
                     this.$triggeredByPointer = false;
@@ -20139,9 +20411,9 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         };
 
         /**
-         * Return the given list item location. 
+         * Return the given list item location.
          * @param  {Integer} i a list item index
-         * @return {Object}  a location of the list item. The result is object that 
+         * @return {Object}  a location of the list item. The result is object that
          * has the following structure:
                 { x:{Integer}, y:{Integer} }
          * @method getItemLocation
@@ -20149,18 +20421,18 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         this.getItemLocation = function(i) {
             this.validate();
             var y = this.getTop() + this.scrollManager.getSY();
-            
+
             for(var i = 0;i < index; i++) {
                 y += this.getItemSize(i).height;
             }
-            
+
             return { x:this.getLeft(), y:y };
         };
 
         /**
-         * Return the given list item size. 
+         * Return the given list item size.
          * @param  {Integer} i a list item index
-         * @return {Object}  a size of the list item. The result is object that 
+         * @return {Object}  a size of the list item. The result is object that
          * has the following structure:
                 { width:{Integer}, height:{Integer} }
          * @method getItemSize
@@ -20173,10 +20445,10 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
             return this.model == null ? 0 : this.model.count();
         };
 
-        this.getLineSize  = function(l) { 
-            return 1; 
+        this.getLineSize  = function(l) {
+            return 1;
         };
-        
+
         this.getMaxOffset = function() {
             return this.getLines() - 1;
         };
@@ -20184,14 +20456,14 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         this.catchScrolled = function(psx,psy) {
             this.repaint();
         };
-       
+
         /**
          * Detect an item by the specified location
          * @param  {Integer} x a x coordinate
          * @param  {Integer} y a y coordinate
-         * @return {Integer} a list item that is located at the given position. 
+         * @return {Integer} a list item that is located at the given position.
          * -1 if no any list item can be found.
-         * @method getItemIdxAt   
+         * @method getItemIdxAt
          */
         this.getItemIdxAt = function(x,y) {
             return -1;
@@ -20217,7 +20489,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         };
 
         /**
-         * Force repainting of the given list items 
+         * Force repainting of the given list items
          * @protected
          * @param  {Integer} p an index of the first list item to be repainted
          * @param  {Integer} n an index of the second list item to be repainted
@@ -20240,20 +20512,20 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         };
 
         /**
-         * Draw the given list view element identified by the given id 
-         * on the given list item. 
+         * Draw the given list view element identified by the given id
+         * on the given list item.
          * @param  {2DGraphics} g     a graphical context
-         * @param  {String}     id    a view id 
+         * @param  {String}     id    a view id
          * @param  {Integer}    index a list item index
          * @protected
          * @method drawViewAt
          */
-        this.drawViewAt = function(g, id, index) {            
-            if (index >= 0 && this.views[id] != null && this.isItemSelectable(index)){
+        this.drawViewAt = function(g, id, index) {
+            if (index >= 0 && this.views[id] != null && this.isItemSelectable(index)) {
                 var is  = this.getItemSize(index),
                     l   = this.getItemLocation(index);
 
-                this.drawView(g, id, this.views[id], 
+                this.drawView(g, id, this.views[id],
                               l.x, l.y,
                               is.width ,
                               is.height);
@@ -20261,18 +20533,18 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         };
 
         /**
-         * Draw the given list view element identified by the given id 
-         * at the specified location. 
+         * Draw the given list view element identified by the given id
+         * at the specified location.
          * @param  {2DGraphics} g     a graphical context
-         * @param  {String}     id    a view id 
-         * @param  {Integer}    x a x coordinate the view has to be drawn 
+         * @param  {String}     id    a view id
+         * @param  {Integer}    x a x coordinate the view has to be drawn
          * @param  {Integer}    y a y coordinate the view has to be drawn
          * @param  {Integer}    w a view width
          * @param  {Integer}    h a view height
          * @protected
          * @method drawView
          */
-        this.drawView = function(g, id, v, x, y, w ,h) {            
+        this.drawView = function(g, id, v, x, y, w ,h) {
             this.views[id].paint(g, x, y, w, h, this);
         };
 
@@ -20315,8 +20587,8 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
 
         /**
          * Fire selected event
-         * @param  {Integer|null} prev a previous selected item index. null if the 
-         * same item has been re-selected 
+         * @param  {Integer|null} prev a previous selected item index. null if the
+         * same item has been re-selected
          * @method fireSelected
          * @protected
          */
@@ -20357,11 +20629,11 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
             this.pointerMoved(-10, -10);
         };
 
-        this.mouseDragEnded = function(e){ 
+        this.mouseDragEnded = function(e){
             if (this.model != null && this.model.count() > 0 && this.position.offset >= 0) {
                 this.select(this.position.offset < 0 ? 0 : this.position.offset);
-            }            
-        };        
+            }
+        };
 
         this.keyPressed = function(e){
             if (this.model != null && this.model.count() > 0){
@@ -20393,7 +20665,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
 
 
         /**
-         * Select the given list item. The method is called when an item 
+         * Select the given list item. The method is called when an item
          * selection is triggered by a user interaction: key board, or mouse
          * @param  {Integer} o an item index
          * @method $select
@@ -20439,13 +20711,13 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         this.elementSet = function (target, e, pe,index){
             if (this.selectedIndex == index) {
                 this.select(-1);
-            }            
+            }
             this.vrp();
         };
 
         /**
-         * Find a next selectable list item starting from the given offset 
-         * with the specified direction 
+         * Find a next selectable list item starting from the given offset
+         * with the specified direction
          * @param  {Integer} off a start item index to perform search
          * @param  {Integer} d   a direction increment. Cam be -1 or 1
          * @return {Integer} a next selectable item index
@@ -20453,11 +20725,11 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
          * @protected
          */
         this.findSelectable = function(off, d) {
-            var c = this.model.count(), i = 0, dd = Math.abs(d); 
-            while (this.isItemSelectable(off) === false && i < c) { 
-                off = (c + off + d) % c; 
-                i += dd; 
-            }            
+            var c = this.model.count(), i = 0, dd = Math.abs(d);
+            while (this.isItemSelectable(off) === false && i < c) {
+                off = (c + off + d) % c;
+                i += dd;
+            }
             return i < c ? off : -1;
         };
 
@@ -20489,7 +20761,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
          * Set the list model to be rendered with the list component
          * @param {zebra.data.ListModel} m a list model
          * @method setModel
-         * @chainable 
+         * @chainable
          */
         this.setModel = function (m){
             if (m != this.model){
@@ -20506,9 +20778,9 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         };
 
         /**
-         * Set the given position controller. List component uses position to 
+         * Set the given position controller. List component uses position to
          * track virtual cursor.
-         * @param {zebra.util.Position} c a position 
+         * @param {zebra.util.Position} c a position
          * @method setPosition
          */
         this.setPosition = function(c){
@@ -20525,9 +20797,9 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
 
         /**
          * Set the list items view provider. Defining a view provider allows developers
-         * to customize list item rendering.  
-         * @param {Object|Function} v a view provider class instance or a function that 
-         * says which view has to be used for the given list model data. The function 
+         * to customize list item rendering.
+         * @param {Object|Function} v a view provider class instance or a function that
+         * says which view has to be used for the given list model data. The function
          * has to satisfy the following method signature: "function(list, modelItem, index)"
          * @method setViewProvider
          */
@@ -20551,7 +20823,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
 
                 if (is.width > 0 && is.height > 0) {
                     var l = this.getItemLocation(index);
-                    this.scrollManager.makeVisible(l.x - this.scrollManager.getSX(), 
+                    this.scrollManager.makeVisible(l.x - this.scrollManager.getSX(),
                                                    l.y - this.scrollManager.getSY(),
                                                    is.width, is.height);
                 }
@@ -20560,7 +20832,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
 
         /**
          * The method returns the page size that has to be scroll up or down
-         * @param  {Integer} d a scrolling direction. -1 means scroll up, 1 means scroll down  
+         * @param  {Integer} d a scrolling direction. -1 means scroll up, 1 means scroll down
          * @return {Integer} a number of list items to be scrolled
          * @method pageSize
          * @protected
@@ -20583,20 +20855,20 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
 
     function (m, b){
         /**
-         * Currently selected list item index 
+         * Currently selected list item index
          * @type {Integer}
          * @attribute selectedIndex
          * @default -1
          * @readOnly
          */
         this.selectedIndex = -1;
-        
+
         this._ = new zebra.util.Listeners();
 
         /**
          * Indicate the current mode the list items selection has to work
          * @readOnly
-         * @default false 
+         * @default false
          * @attribute isComboMode
          * @type {Boolean}
          */
@@ -20610,7 +20882,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
          * @type {zebra.ui.ScrollManager}
          */
         this.scrollManager = new pkg.ScrollManager(this);
-   
+
         this.$super();
 
         // position manager should be set before model initialization
@@ -20626,12 +20898,12 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
 
 
     /**
-     * Sets the views for the list visual elements. The following elements are 
+     * Sets the views for the list visual elements. The following elements are
      * supported:
-     
-        - "select" -  a selection view element   
+
+        - "select" -  a selection view element
         - "top.marker" - a position marker view element that is rendered  on top of list item
-        - "marker" - a position marker view element 
+        - "marker" - a position marker view element
 
      * @param {Object} views view elements
      * @method setViews
@@ -20646,13 +20918,13 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
 pkg.BaseList.prototype.setViews = pkg.$ViewsSetter;
 
 /**
- * The class is list component implementation that visualizes zebra.data.ListModel. 
- * It is supposed the model can have any type of items. Visualization of the items 
- * is customized by defining a view provider. 
+ * The class is list component implementation that visualizes zebra.data.ListModel.
+ * It is supposed the model can have any type of items. Visualization of the items
+ * is customized by defining a view provider.
  *
  * The general use case:
-    
-        // create list component that contains three item 
+
+        // create list component that contains three item
         var list = new zebra.ui.List([
             "Item 1",
             "Item 2",
@@ -20669,18 +20941,18 @@ pkg.BaseList.prototype.setViews = pkg.$ViewsSetter;
 
 
  * To customize list items views you can redefine item view provider as following:
- 
+
         // suppose every model item is an array that contains two elements,
         // first element points to the item icon and the second element defines
-        // the list item text 
+        // the list item text
         var list = new zebra.ui.List([
             [ "icon1.gif", "Caption 1" ],
             [ "icon2.gif", "Caption 1" ],
             [ "icon3.gif", "Caption 1" ]
-        ]); 
+        ]);
 
-        // define new list item views provider that represents every 
-        // list model item as icon with a caption 
+        // define new list item views provider that represents every
+        // list model item as icon with a caption
         list.setViewProvider(new zebra.ui.List.ViewProvider([
             function getView(target, value, i) {
                 var caption = value[1];
@@ -20694,14 +20966,14 @@ pkg.BaseList.prototype.setViews = pkg.$ViewsSetter;
  * @constructor
  * @param {zebra.data.ListModel|Array} [model] a list model that should be passed as an instance
  * of zebra.data.ListModel or as an array.
- * @param {Boolean} [isComboMode] true if the list navigation has to be triggered by 
+ * @param {Boolean} [isComboMode] true if the list navigation has to be triggered by
  * mouse cursor moving
  */
 pkg.List = Class(pkg.BaseList, [
     function $clazz() {
         /**
-         * List view provider class. This implementation renders list item using string 
-         * render. If a list item is an instance of "zebra.ui.View" class than it will 
+         * List view provider class. This implementation renders list item using string
+         * render. If a list item is an instance of "zebra.ui.View" class than it will
          * be rendered as the view.
          * @class zebra.ui.List.ViewProvider
          * @constructor
@@ -20722,15 +20994,24 @@ pkg.List = Class(pkg.BaseList, [
                     zebra.properties(this, this.$clazz);
                     if (f != null) this.text.setFont(f);
                     if (c != null) this.text.setColor(c);
-                }; 
+                };
+
+
+                this.setColor = function(c) {
+                    this.text.setColor(c);
+                };
+
+                this.setFont = function(f) {
+                    this.text.setFont(f);
+                };
 
                 /**
                  * Get a view for the given model data element of the
-                 * specified list component 
+                 * specified list component
                  * @param  {zebra.ui.List} target a list component
                  * @param  {Object} value  a data model value
                  * @param  {Integer} i  an item index
-                 * @return {zebra.ui.View}  a view to be used to render 
+                 * @return {zebra.ui.View}  a view to be used to render
                  * the given list component item
                  * @method getView
                  */
@@ -20774,7 +21055,7 @@ pkg.List = Class(pkg.BaseList, [
             if (this.firstVisible >= 0){
                 var sx = this.scrollManager.getSX(),
                     sy = this.scrollManager.getSY();
-                
+
                 try {
                     g.translate(sx, sy);
                     var y        = this.firstVisibleY,
@@ -20791,11 +21072,11 @@ pkg.List = Class(pkg.BaseList, [
                                 g.fillRect(x, y, this.width, this.heights[i]);
                             }
                         }
-                        
-                        this.provider.getView(this, this.model.get(i), i).paint(g, x + this.gap, y + this.gap, 
-                            this.widths[i] - dg, 
+
+                        this.provider.getView(this, this.model.get(i), i).paint(g, x + this.gap, y + this.gap,
+                            this.widths[i] - dg,
                             this.heights[i]- dg, this);
-                        
+
                         y += this.heights[i];
                         if (y > yy) break;
                     }
@@ -20953,11 +21234,11 @@ pkg.List = Class(pkg.BaseList, [
          */
         this.firstVisibleY = this.psWidth_ = this.psHeight_ = 0;
         this.heights = this.widths = this.vArea = null;
-        
+
         /**
-         * Internal flag to track list items visibility status. It is set 
-         * to false to trigger list items metrics and visibility recalculation 
-         * @attribute visValid 
+         * Internal flag to track list items visibility status. It is set
+         * to false to trigger list items metrics and visibility recalculation
+         * @attribute visValid
          * @type {Boolean}
          * @private
          */
@@ -20985,23 +21266,23 @@ pkg.List = Class(pkg.BaseList, [
 ]);
 
 /**
- * List component consider its children UI components as a list model items. Every added to the component 
- * UI children component becomes a list model element. The implementation allows developers to use 
+ * List component consider its children UI components as a list model items. Every added to the component
+ * UI children component becomes a list model element. The implementation allows developers to use
  * other UI components as its elements what makes list item view customization very easy and powerful:
- 
-        // use image label as the component list items 
+
+        // use image label as the component list items
         var list = new zebra.ui.CompList();
         list.add(new zebra.ui.ImageLabel("Caption 1", "icon1.gif"));
         list.add(new zebra.ui.ImageLabel("Caption 2", "icon2.gif"));
         list.add(new zebra.ui.ImageLabel("Caption 3", "icon3.gif"));
 
- 
+
  * @class zebra.ui.CompList
  * @extends zebra.ui.BaseList
  * @param {zebra.data.ListModel|Array} [model] a list model that should be passed as an instance
  * of zebra.data.ListModel or as an array.
- * @param {Boolean} [isComboMode] true if the list navigation has to be triggered by 
- * mouse cursor moving 
+ * @param {Boolean} [isComboMode] true if the list navigation has to be triggered by
+ * mouse cursor moving
  */
 pkg.CompList = Class(pkg.BaseList, [
     function $clazz() {
@@ -21071,7 +21352,7 @@ pkg.CompList = Class(pkg.BaseList, [
             while (p != this) {
                 if (p.stopCatchInput === true) return false;
                 p = p.parent;
-            }  
+            }
             return true;
         };
     },
@@ -21175,9 +21456,9 @@ pkg.CompList = Class(pkg.BaseList, [
 var ContentListeners = zebra.util.ListenersClass("contentUpdated");
 
 /**
- * Combo box UI component class. Combo uses a list component to show in drop down window. 
+ * Combo box UI component class. Combo uses a list component to show in drop down window.
  * You can use any available list component implementation:
- 
+
         // use simple list as combo box drop down window
         var combo = new zebra.ui.Combo(new zebra.ui.List([
             "Item 1",
@@ -21198,7 +21479,7 @@ var ContentListeners = zebra.util.ListenersClass("contentUpdated");
         var combo = new zebra.ui.Combo([
             "Item 1",
             "Item 2",
-            "Item 3"            
+            "Item 3"
         ]);
 
  * @class zebra.ui.Combo
@@ -21209,7 +21490,7 @@ var ContentListeners = zebra.util.ListenersClass("contentUpdated");
 
 /**
  * Fired when a new value in a combo box component has been selected
-  
+
      combo.bind(function(combo, value) {
          ...
      });
@@ -21235,24 +21516,24 @@ var ContentListeners = zebra.util.ListenersClass("contentUpdated");
 pkg.Combo = Class(pkg.Panel, [
     function $clazz() {
         /**
-         * UI panel class that is used to implement combo box content area  
+         * UI panel class that is used to implement combo box content area
          * @class  zebra.ui.Combo.ContentPan
          * @extends {zebra.ui.Panel}
          */
         this.ContentPan = Class(pkg.Panel, [
             function $prototype() {
                 /**
-                 * Called whenever the given combo box value has been updated with the specified 
-                 * value. Implement the method to synchronize content panel with updated combo 
+                 * Called whenever the given combo box value has been updated with the specified
+                 * value. Implement the method to synchronize content panel with updated combo
                  * box value
                  * @method comboValueUpdated
                  * @param {zebra.ui.Combo} combo a combo box component that has been updated
                  * @param {Object} value a value with which the combo box has been updated
                  */
                 this.comboValueUpdated = function(combo, value) {};
-                
+
                 /**
-                 * Indicates if the content panel is editable. Set the property to true 
+                 * Indicates if the content panel is editable. Set the property to true
                  * to indicate the content panel implementation is editable. Editable
                  * means the combo box content can be editable by a user
                  * @attribute isEditable
@@ -21275,7 +21556,7 @@ pkg.Combo = Class(pkg.Panel, [
         ]);
 
         /**
-         * Combo box list pad component class 
+         * Combo box list pad component class
          * @extends zebra.ui.ScrollPan
          * @class  zebra.ui.Combo.ComboPadPan
          */
@@ -21320,7 +21601,7 @@ pkg.Combo = Class(pkg.Panel, [
                 };
 
                 this.paintOnTop = function(g){
-                    var list = this.getCombo().list, 
+                    var list = this.getCombo().list,
                         selected = list.getSelected(),
                         v = selected != null ? list.provider.getView(list, selected, list.selectedIndex) : null;
 
@@ -21338,15 +21619,15 @@ pkg.Combo = Class(pkg.Panel, [
          * @class zebra.ui.Combo.EditableContentPan
          * @extends zebra.ui.Combo.ContentPan
          */
-        
+
         /**
-         * Fired when a content value has been updated. 
-         
+         * Fired when a content value has been updated.
+
         content.bind(function(contentPan, newValue) {
             ...
         });
-        
-         * @param {zebra.ui.Combo.ContentPan} contentPan a content panel that 
+
+         * @param {zebra.ui.Combo.ContentPan} contentPan a content panel that
          * updated its value
          * @param {Object} newValue a new value the content panel has been set
          * with
@@ -21366,7 +21647,7 @@ pkg.Combo = Class(pkg.Panel, [
                 this.dontGenerateUpdateEvent = false;
 
                 /**
-                 * A reference to a text field component the content panel uses as a 
+                 * A reference to a text field component the content panel uses as a
                  * value editor
                  * @attribute textField
                  * @readOnly
@@ -21395,7 +21676,7 @@ pkg.Combo = Class(pkg.Panel, [
                 /**
                  * Called when the combo box content has been updated
                  * @param {zebra.ui.Combo} combo a combo where the new value has been set
-                 * @param {Object} v a new combo box value 
+                 * @param {Object} v a new combo box value
                  * @method comboValueUpdated
                  */
                 this.comboValueUpdated = function(combo, v){
@@ -21471,8 +21752,8 @@ pkg.Combo = Class(pkg.Panel, [
 
         /**
          * Select the given value from the list as the combo box value
-         * @param  {Integer} i an index of a list element to be selected 
-         * as the combo box value 
+         * @param  {Integer} i an index of a list element to be selected
+         * as the combo box value
          * @method select
          */
         this.select = function(i) {
@@ -21485,7 +21766,7 @@ pkg.Combo = Class(pkg.Panel, [
 
         /**
          * Set combo box value selected value.
-         * @param {Object} v a value 
+         * @param {Object} v a value
          * @method  setValue
          */
         this.setValue = function(v) {
@@ -21523,7 +21804,7 @@ pkg.Combo = Class(pkg.Panel, [
 
         /**
          * Hide combo drop down list
-         * @method hidePad 
+         * @method hidePad
          */
         this.hidePad = function (){
             var d = this.getCanvas();
@@ -21535,7 +21816,7 @@ pkg.Combo = Class(pkg.Panel, [
 
         /**
          * Show combo drop down list
-         * @method showPad 
+         * @method showPad
          */
         this.showPad = function(){
             var canvas = this.getCanvas();
@@ -21575,7 +21856,7 @@ pkg.Combo = Class(pkg.Panel, [
         };
 
         /**
-         * Bind the given list component to the combo box component. 
+         * Bind the given list component to the combo box component.
          * @param {zebra.ui.BaseList} l a list component
          * @method setList
          */
@@ -21620,7 +21901,7 @@ pkg.Combo = Class(pkg.Panel, [
                     case KE.DOWN :
                     case KE.RIGHT: if (this.list.model.count() - 1 > index) this.list.select(index + 1); break;
                 }
-            }    
+            }
         };
 
         /**
@@ -21643,7 +21924,7 @@ pkg.Combo = Class(pkg.Panel, [
         };
 
         /**
-         * Set the maximal height of the combo box pad element. 
+         * Set the maximal height of the combo box pad element.
          * @param {Integer} h a maximal combo box pad size
          * @method setMaxPadHeight
          */
@@ -21695,7 +21976,7 @@ pkg.Combo = Class(pkg.Panel, [
          * @readOnly
          * @type {zebra.ui.Panel}
          */
-        
+
         /**
          * Reference to selection view
          * @attribute selectionView
@@ -21704,7 +21985,7 @@ pkg.Combo = Class(pkg.Panel, [
          */
 
         this.button = this.content = this.winpad = null;
-        
+
         /**
          * Maximal size the combo box height can have
          * @attribute maxPadHeight
@@ -21712,7 +21993,7 @@ pkg.Combo = Class(pkg.Panel, [
          * @type {Integer}
          */
         this.maxPadHeight = 0;
-        
+
         this.$lockListSelEvent = false;
         this._ = new zebra.util.Listeners();
         this.setList(list);
@@ -21763,7 +22044,7 @@ pkg.Combo = Class(pkg.Panel, [
     },
 
     /**
-     * Combo box button listener method. The method triggers showing 
+     * Combo box button listener method. The method triggers showing
      * combo box pad window when the combo button has been pressed
      * @param  {zebra.ui.Button} src a button that has been pressed
      * @method fired
@@ -21801,18 +22082,18 @@ pkg.Combo = Class(pkg.Panel, [
 
 /**
  * Combo box arrow view. The view is used to render combo box arrow element
- * in pressed  and unpressed state.  
+ * in pressed  and unpressed state.
  * @class zebra.ui.ComboArrowView
  * @constructor
- * @param {String} [col] a color of arrow element 
+ * @param {String} [col] a color of arrow element
  * @param {Boolean} [state] a state of arrow element. true means pressed state.
- * @extends zebra.ui.View 
+ * @extends zebra.ui.View
  */
 pkg.ComboArrowView = Class(pkg.View, [
     function $prototype() {
         this[''] = function(col, state) {
             /**
-             * Arrow color 
+             * Arrow color
              * @type {String}
              * @readOnly
              * @default "black"
@@ -21820,7 +22101,7 @@ pkg.ComboArrowView = Class(pkg.View, [
              */
 
             /**
-             * Arrow state to be rendered 
+             * Arrow state to be rendered
              * @type {Boolean}
              * @readOnly
              * @default false
@@ -21828,7 +22109,7 @@ pkg.ComboArrowView = Class(pkg.View, [
              */
 
             /**
-             * Top, left, right and bottom gap value 
+             * Top, left, right and bottom gap value
              * @type {Integer}
              * @readOnly
              * @default 4
@@ -22343,13 +22624,16 @@ pkg.Window = Class(pkg.StatePan, [
         };
 
         this.mouseDragged = function(e){
-            if (this.action > 0){
+            if (this.action > 0) {
                 if (this.action != MOVE_ACTION){
-                    var nw = this.psw + this.dx, nh = this.psh + this.dy;
+                    var nw = this.psw + this.dx,
+                        nh = this.psh + this.dy;
+
                     if (nw > this.minSize && nh > this.minSize) {
                         this.setSize(nw, nh);
                     }
                 }
+
                 this.dx = (e.x - this.px);
                 this.dy = (e.y - this.py);
                 if (this.action == MOVE_ACTION){

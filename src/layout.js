@@ -36,6 +36,7 @@ pkg.$constraints = function(v) {
             $ctrs[v] != null ? $ctrs[v] : v;
 };
 
+
 /**
  * Layout package provides number of classes, interfaces, methods and
  * variables that allows developer easily implement rules based layouting
@@ -63,6 +64,25 @@ pkg.$constraints = function(v) {
  * @main layout
  */
 
+
+
+
+
+ /**
+  * Find a direct children element for the given children component
+  * and the specified parent component
+  * @param  {zebra.layout.Layoutable} parent  a parent component
+  * @param  {zebra.layout.Layoutable} child  a children component
+  * @return {zebra.layout.Layoutable}  a direct children component
+  * @method getDirectChild
+  * @for zebra.layout
+  */
+pkg.getDirectChild = function(parent,child){
+    for(; child != null && child.parent != parent; child = child.parent) {}
+    return child;
+};
+
+
 /**
  * Layout manager interface
  * @class zebra.layout.Layout
@@ -81,20 +101,6 @@ pkg.$constraints = function(v) {
  * @method doLayout
  */
 var L = pkg.Layout = new zebra.Interface();
-
-/**
- * Find a direct children element for the given children component
- * and the specified parent component
- * @param  {zebra.layout.Layoutable} parent  a parent component
- * @param  {zebra.layout.Layoutable} child  a children component
- * @return {zebra.layout.Layoutable}  a direct children component
- * @method getDirectChild
- * @api zebra.layout.getDirectChild()
- */
-pkg.getDirectChild = function(parent,child){
-    for(; child != null && child.parent != parent; child = child.parent) {}
-    return child;
-};
 
 /**
  * Find a direct component located at the given location of the specified

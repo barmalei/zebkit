@@ -7,8 +7,8 @@
 var L = zebra.layout, Position = zebra.util.Position, KE = pkg.KeyEvent;
 
 /**
- * Base UI list component class that has to be extended with a 
- * concrete list component implementation. The list component 
+ * Base UI list component class that has to be extended with a
+ * concrete list component implementation. The list component
  * visualizes list data model (zebra.data.ListModel).
  * @class  zebra.ui.BaseList
  * @extends {zebra.ui.Panel}
@@ -16,19 +16,19 @@ var L = zebra.layout, Position = zebra.util.Position, KE = pkg.KeyEvent;
 
 /**
  * Fire when a list item has been selected:
-        
+
         list.bind(function (src, prev) {
             ...
         });
 
  * @event selected
  * @param {zebra.ui.BaseList} src a list that triggers the event
- * @param {Integer|Object} prev a previous selected index, return null if the selected item has been re-selected 
+ * @param {Integer|Object} prev a previous selected index, return null if the selected item has been re-selected
  */
 pkg.BaseList = Class(pkg.Panel, Position.Metric, [
     function $prototype() {
         this.canHaveFocus = true;
-        
+
         /**
          * List model the component visualizes
          * @attribute model
@@ -37,11 +37,11 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
          */
 
         /**
-         * Select the specified list item. 
-         * @param {Object} v a list item to be selected. Use null as 
+         * Select the specified list item.
+         * @param {Object} v a list item to be selected. Use null as
          * the parameter value to clean an item selection
          * @return {Integer} an index of a selected item
-         * @method setValue 
+         * @method setValue
          */
         this.setValue = function(v) {
             if (v == null) {
@@ -49,7 +49,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
             }
             else {
                 if (this.model != null) {
-                    for(var i=0; i<this.model.count(); i++) {
+                    for(var i = 0; i < this.model.count(); i++) {
                         if (this.model.get(i) == v && this.isItemSelectable(i)) {
                             this.select(i);
                             return i;
@@ -63,12 +63,12 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         /**
          * Get the list component selected item
          * @return {Object} a selected item
-         * @method getValue 
+         * @method getValue
          */
         this.getValue = function() {
             return this.getSelected();
         };
- 
+
         /**
          * Test if the given item is selectable.
          * @param  {Integer}  i an item index
@@ -81,7 +81,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
 
         /**
          * Get selected list item
-         * @return {Object} an item 
+         * @return {Object} an item
          * @method getSelected
          */
         this.getSelected = function(){
@@ -110,8 +110,8 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
          * @return {Boolean}  true if the item with the given index is selected
          * @method isSelected
          */
-        this.isSelected = function(i) { 
-            return i == this.selectedIndex; 
+        this.isSelected = function(i) {
+            return i == this.selectedIndex;
         };
 
         /**
@@ -129,7 +129,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
                     this.$triggeredByPointer = true;
 
                     if (index < 0) this.position.setOffset(null);
-                    else this.position.setOffset(index);                    
+                    else this.position.setOffset(index);
                     this.notifyScrollMan(index);
 
                     this.$triggeredByPointer = false;
@@ -138,9 +138,9 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         };
 
         /**
-         * Return the given list item location. 
+         * Return the given list item location.
          * @param  {Integer} i a list item index
-         * @return {Object}  a location of the list item. The result is object that 
+         * @return {Object}  a location of the list item. The result is object that
          * has the following structure:
                 { x:{Integer}, y:{Integer} }
          * @method getItemLocation
@@ -148,18 +148,18 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         this.getItemLocation = function(i) {
             this.validate();
             var y = this.getTop() + this.scrollManager.getSY();
-            
+
             for(var i = 0;i < index; i++) {
                 y += this.getItemSize(i).height;
             }
-            
+
             return { x:this.getLeft(), y:y };
         };
 
         /**
-         * Return the given list item size. 
+         * Return the given list item size.
          * @param  {Integer} i a list item index
-         * @return {Object}  a size of the list item. The result is object that 
+         * @return {Object}  a size of the list item. The result is object that
          * has the following structure:
                 { width:{Integer}, height:{Integer} }
          * @method getItemSize
@@ -172,10 +172,10 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
             return this.model == null ? 0 : this.model.count();
         };
 
-        this.getLineSize  = function(l) { 
-            return 1; 
+        this.getLineSize  = function(l) {
+            return 1;
         };
-        
+
         this.getMaxOffset = function() {
             return this.getLines() - 1;
         };
@@ -183,14 +183,14 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         this.catchScrolled = function(psx,psy) {
             this.repaint();
         };
-       
+
         /**
          * Detect an item by the specified location
          * @param  {Integer} x a x coordinate
          * @param  {Integer} y a y coordinate
-         * @return {Integer} a list item that is located at the given position. 
+         * @return {Integer} a list item that is located at the given position.
          * -1 if no any list item can be found.
-         * @method getItemIdxAt   
+         * @method getItemIdxAt
          */
         this.getItemIdxAt = function(x,y) {
             return -1;
@@ -216,7 +216,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         };
 
         /**
-         * Force repainting of the given list items 
+         * Force repainting of the given list items
          * @protected
          * @param  {Integer} p an index of the first list item to be repainted
          * @param  {Integer} n an index of the second list item to be repainted
@@ -239,20 +239,20 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         };
 
         /**
-         * Draw the given list view element identified by the given id 
-         * on the given list item. 
+         * Draw the given list view element identified by the given id
+         * on the given list item.
          * @param  {2DGraphics} g     a graphical context
-         * @param  {String}     id    a view id 
+         * @param  {String}     id    a view id
          * @param  {Integer}    index a list item index
          * @protected
          * @method drawViewAt
          */
-        this.drawViewAt = function(g, id, index) {            
-            if (index >= 0 && this.views[id] != null && this.isItemSelectable(index)){
+        this.drawViewAt = function(g, id, index) {
+            if (index >= 0 && this.views[id] != null && this.isItemSelectable(index)) {
                 var is  = this.getItemSize(index),
                     l   = this.getItemLocation(index);
 
-                this.drawView(g, id, this.views[id], 
+                this.drawView(g, id, this.views[id],
                               l.x, l.y,
                               is.width ,
                               is.height);
@@ -260,18 +260,18 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         };
 
         /**
-         * Draw the given list view element identified by the given id 
-         * at the specified location. 
+         * Draw the given list view element identified by the given id
+         * at the specified location.
          * @param  {2DGraphics} g     a graphical context
-         * @param  {String}     id    a view id 
-         * @param  {Integer}    x a x coordinate the view has to be drawn 
+         * @param  {String}     id    a view id
+         * @param  {Integer}    x a x coordinate the view has to be drawn
          * @param  {Integer}    y a y coordinate the view has to be drawn
          * @param  {Integer}    w a view width
          * @param  {Integer}    h a view height
          * @protected
          * @method drawView
          */
-        this.drawView = function(g, id, v, x, y, w ,h) {            
+        this.drawView = function(g, id, v, x, y, w ,h) {
             this.views[id].paint(g, x, y, w, h, this);
         };
 
@@ -314,8 +314,8 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
 
         /**
          * Fire selected event
-         * @param  {Integer|null} prev a previous selected item index. null if the 
-         * same item has been re-selected 
+         * @param  {Integer|null} prev a previous selected item index. null if the
+         * same item has been re-selected
          * @method fireSelected
          * @protected
          */
@@ -356,11 +356,11 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
             this.pointerMoved(-10, -10);
         };
 
-        this.mouseDragEnded = function(e){ 
+        this.mouseDragEnded = function(e){
             if (this.model != null && this.model.count() > 0 && this.position.offset >= 0) {
                 this.select(this.position.offset < 0 ? 0 : this.position.offset);
-            }            
-        };        
+            }
+        };
 
         this.keyPressed = function(e){
             if (this.model != null && this.model.count() > 0){
@@ -392,7 +392,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
 
 
         /**
-         * Select the given list item. The method is called when an item 
+         * Select the given list item. The method is called when an item
          * selection is triggered by a user interaction: key board, or mouse
          * @param  {Integer} o an item index
          * @method $select
@@ -438,13 +438,13 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         this.elementSet = function (target, e, pe,index){
             if (this.selectedIndex == index) {
                 this.select(-1);
-            }            
+            }
             this.vrp();
         };
 
         /**
-         * Find a next selectable list item starting from the given offset 
-         * with the specified direction 
+         * Find a next selectable list item starting from the given offset
+         * with the specified direction
          * @param  {Integer} off a start item index to perform search
          * @param  {Integer} d   a direction increment. Cam be -1 or 1
          * @return {Integer} a next selectable item index
@@ -452,11 +452,11 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
          * @protected
          */
         this.findSelectable = function(off, d) {
-            var c = this.model.count(), i = 0, dd = Math.abs(d); 
-            while (this.isItemSelectable(off) === false && i < c) { 
-                off = (c + off + d) % c; 
-                i += dd; 
-            }            
+            var c = this.model.count(), i = 0, dd = Math.abs(d);
+            while (this.isItemSelectable(off) === false && i < c) {
+                off = (c + off + d) % c;
+                i += dd;
+            }
             return i < c ? off : -1;
         };
 
@@ -488,7 +488,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
          * Set the list model to be rendered with the list component
          * @param {zebra.data.ListModel} m a list model
          * @method setModel
-         * @chainable 
+         * @chainable
          */
         this.setModel = function (m){
             if (m != this.model){
@@ -505,9 +505,9 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         };
 
         /**
-         * Set the given position controller. List component uses position to 
+         * Set the given position controller. List component uses position to
          * track virtual cursor.
-         * @param {zebra.util.Position} c a position 
+         * @param {zebra.util.Position} c a position
          * @method setPosition
          */
         this.setPosition = function(c){
@@ -524,9 +524,9 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
 
         /**
          * Set the list items view provider. Defining a view provider allows developers
-         * to customize list item rendering.  
-         * @param {Object|Function} v a view provider class instance or a function that 
-         * says which view has to be used for the given list model data. The function 
+         * to customize list item rendering.
+         * @param {Object|Function} v a view provider class instance or a function that
+         * says which view has to be used for the given list model data. The function
          * has to satisfy the following method signature: "function(list, modelItem, index)"
          * @method setViewProvider
          */
@@ -550,7 +550,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
 
                 if (is.width > 0 && is.height > 0) {
                     var l = this.getItemLocation(index);
-                    this.scrollManager.makeVisible(l.x - this.scrollManager.getSX(), 
+                    this.scrollManager.makeVisible(l.x - this.scrollManager.getSX(),
                                                    l.y - this.scrollManager.getSY(),
                                                    is.width, is.height);
                 }
@@ -559,7 +559,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
 
         /**
          * The method returns the page size that has to be scroll up or down
-         * @param  {Integer} d a scrolling direction. -1 means scroll up, 1 means scroll down  
+         * @param  {Integer} d a scrolling direction. -1 means scroll up, 1 means scroll down
          * @return {Integer} a number of list items to be scrolled
          * @method pageSize
          * @protected
@@ -582,20 +582,20 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
 
     function (m, b){
         /**
-         * Currently selected list item index 
+         * Currently selected list item index
          * @type {Integer}
          * @attribute selectedIndex
          * @default -1
          * @readOnly
          */
         this.selectedIndex = -1;
-        
+
         this._ = new zebra.util.Listeners();
 
         /**
          * Indicate the current mode the list items selection has to work
          * @readOnly
-         * @default false 
+         * @default false
          * @attribute isComboMode
          * @type {Boolean}
          */
@@ -609,7 +609,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
          * @type {zebra.ui.ScrollManager}
          */
         this.scrollManager = new pkg.ScrollManager(this);
-   
+
         this.$super();
 
         // position manager should be set before model initialization
@@ -625,12 +625,12 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
 
 
     /**
-     * Sets the views for the list visual elements. The following elements are 
+     * Sets the views for the list visual elements. The following elements are
      * supported:
-     
-        - "select" -  a selection view element   
+
+        - "select" -  a selection view element
         - "top.marker" - a position marker view element that is rendered  on top of list item
-        - "marker" - a position marker view element 
+        - "marker" - a position marker view element
 
      * @param {Object} views view elements
      * @method setViews
@@ -645,13 +645,13 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
 pkg.BaseList.prototype.setViews = pkg.$ViewsSetter;
 
 /**
- * The class is list component implementation that visualizes zebra.data.ListModel. 
- * It is supposed the model can have any type of items. Visualization of the items 
- * is customized by defining a view provider. 
+ * The class is list component implementation that visualizes zebra.data.ListModel.
+ * It is supposed the model can have any type of items. Visualization of the items
+ * is customized by defining a view provider.
  *
  * The general use case:
-    
-        // create list component that contains three item 
+
+        // create list component that contains three item
         var list = new zebra.ui.List([
             "Item 1",
             "Item 2",
@@ -668,18 +668,18 @@ pkg.BaseList.prototype.setViews = pkg.$ViewsSetter;
 
 
  * To customize list items views you can redefine item view provider as following:
- 
+
         // suppose every model item is an array that contains two elements,
         // first element points to the item icon and the second element defines
-        // the list item text 
+        // the list item text
         var list = new zebra.ui.List([
             [ "icon1.gif", "Caption 1" ],
             [ "icon2.gif", "Caption 1" ],
             [ "icon3.gif", "Caption 1" ]
-        ]); 
+        ]);
 
-        // define new list item views provider that represents every 
-        // list model item as icon with a caption 
+        // define new list item views provider that represents every
+        // list model item as icon with a caption
         list.setViewProvider(new zebra.ui.List.ViewProvider([
             function getView(target, value, i) {
                 var caption = value[1];
@@ -693,14 +693,14 @@ pkg.BaseList.prototype.setViews = pkg.$ViewsSetter;
  * @constructor
  * @param {zebra.data.ListModel|Array} [model] a list model that should be passed as an instance
  * of zebra.data.ListModel or as an array.
- * @param {Boolean} [isComboMode] true if the list navigation has to be triggered by 
+ * @param {Boolean} [isComboMode] true if the list navigation has to be triggered by
  * mouse cursor moving
  */
 pkg.List = Class(pkg.BaseList, [
     function $clazz() {
         /**
-         * List view provider class. This implementation renders list item using string 
-         * render. If a list item is an instance of "zebra.ui.View" class than it will 
+         * List view provider class. This implementation renders list item using string
+         * render. If a list item is an instance of "zebra.ui.View" class than it will
          * be rendered as the view.
          * @class zebra.ui.List.ViewProvider
          * @constructor
@@ -721,15 +721,24 @@ pkg.List = Class(pkg.BaseList, [
                     zebra.properties(this, this.$clazz);
                     if (f != null) this.text.setFont(f);
                     if (c != null) this.text.setColor(c);
-                }; 
+                };
+
+
+                this.setColor = function(c) {
+                    this.text.setColor(c);
+                };
+
+                this.setFont = function(f) {
+                    this.text.setFont(f);
+                };
 
                 /**
                  * Get a view for the given model data element of the
-                 * specified list component 
+                 * specified list component
                  * @param  {zebra.ui.List} target a list component
                  * @param  {Object} value  a data model value
                  * @param  {Integer} i  an item index
-                 * @return {zebra.ui.View}  a view to be used to render 
+                 * @return {zebra.ui.View}  a view to be used to render
                  * the given list component item
                  * @method getView
                  */
@@ -773,7 +782,7 @@ pkg.List = Class(pkg.BaseList, [
             if (this.firstVisible >= 0){
                 var sx = this.scrollManager.getSX(),
                     sy = this.scrollManager.getSY();
-                
+
                 try {
                     g.translate(sx, sy);
                     var y        = this.firstVisibleY,
@@ -790,11 +799,11 @@ pkg.List = Class(pkg.BaseList, [
                                 g.fillRect(x, y, this.width, this.heights[i]);
                             }
                         }
-                        
-                        this.provider.getView(this, this.model.get(i), i).paint(g, x + this.gap, y + this.gap, 
-                            this.widths[i] - dg, 
+
+                        this.provider.getView(this, this.model.get(i), i).paint(g, x + this.gap, y + this.gap,
+                            this.widths[i] - dg,
                             this.heights[i]- dg, this);
-                        
+
                         y += this.heights[i];
                         if (y > yy) break;
                     }
@@ -952,11 +961,11 @@ pkg.List = Class(pkg.BaseList, [
          */
         this.firstVisibleY = this.psWidth_ = this.psHeight_ = 0;
         this.heights = this.widths = this.vArea = null;
-        
+
         /**
-         * Internal flag to track list items visibility status. It is set 
-         * to false to trigger list items metrics and visibility recalculation 
-         * @attribute visValid 
+         * Internal flag to track list items visibility status. It is set
+         * to false to trigger list items metrics and visibility recalculation
+         * @attribute visValid
          * @type {Boolean}
          * @private
          */
@@ -984,23 +993,23 @@ pkg.List = Class(pkg.BaseList, [
 ]);
 
 /**
- * List component consider its children UI components as a list model items. Every added to the component 
- * UI children component becomes a list model element. The implementation allows developers to use 
+ * List component consider its children UI components as a list model items. Every added to the component
+ * UI children component becomes a list model element. The implementation allows developers to use
  * other UI components as its elements what makes list item view customization very easy and powerful:
- 
-        // use image label as the component list items 
+
+        // use image label as the component list items
         var list = new zebra.ui.CompList();
         list.add(new zebra.ui.ImageLabel("Caption 1", "icon1.gif"));
         list.add(new zebra.ui.ImageLabel("Caption 2", "icon2.gif"));
         list.add(new zebra.ui.ImageLabel("Caption 3", "icon3.gif"));
 
- 
+
  * @class zebra.ui.CompList
  * @extends zebra.ui.BaseList
  * @param {zebra.data.ListModel|Array} [model] a list model that should be passed as an instance
  * of zebra.data.ListModel or as an array.
- * @param {Boolean} [isComboMode] true if the list navigation has to be triggered by 
- * mouse cursor moving 
+ * @param {Boolean} [isComboMode] true if the list navigation has to be triggered by
+ * mouse cursor moving
  */
 pkg.CompList = Class(pkg.BaseList, [
     function $clazz() {
@@ -1070,7 +1079,7 @@ pkg.CompList = Class(pkg.BaseList, [
             while (p != this) {
                 if (p.stopCatchInput === true) return false;
                 p = p.parent;
-            }  
+            }
             return true;
         };
     },
@@ -1174,9 +1183,9 @@ pkg.CompList = Class(pkg.BaseList, [
 var ContentListeners = zebra.util.ListenersClass("contentUpdated");
 
 /**
- * Combo box UI component class. Combo uses a list component to show in drop down window. 
+ * Combo box UI component class. Combo uses a list component to show in drop down window.
  * You can use any available list component implementation:
- 
+
         // use simple list as combo box drop down window
         var combo = new zebra.ui.Combo(new zebra.ui.List([
             "Item 1",
@@ -1197,7 +1206,7 @@ var ContentListeners = zebra.util.ListenersClass("contentUpdated");
         var combo = new zebra.ui.Combo([
             "Item 1",
             "Item 2",
-            "Item 3"            
+            "Item 3"
         ]);
 
  * @class zebra.ui.Combo
@@ -1208,7 +1217,7 @@ var ContentListeners = zebra.util.ListenersClass("contentUpdated");
 
 /**
  * Fired when a new value in a combo box component has been selected
-  
+
      combo.bind(function(combo, value) {
          ...
      });
@@ -1234,24 +1243,24 @@ var ContentListeners = zebra.util.ListenersClass("contentUpdated");
 pkg.Combo = Class(pkg.Panel, [
     function $clazz() {
         /**
-         * UI panel class that is used to implement combo box content area  
+         * UI panel class that is used to implement combo box content area
          * @class  zebra.ui.Combo.ContentPan
          * @extends {zebra.ui.Panel}
          */
         this.ContentPan = Class(pkg.Panel, [
             function $prototype() {
                 /**
-                 * Called whenever the given combo box value has been updated with the specified 
-                 * value. Implement the method to synchronize content panel with updated combo 
+                 * Called whenever the given combo box value has been updated with the specified
+                 * value. Implement the method to synchronize content panel with updated combo
                  * box value
                  * @method comboValueUpdated
                  * @param {zebra.ui.Combo} combo a combo box component that has been updated
                  * @param {Object} value a value with which the combo box has been updated
                  */
                 this.comboValueUpdated = function(combo, value) {};
-                
+
                 /**
-                 * Indicates if the content panel is editable. Set the property to true 
+                 * Indicates if the content panel is editable. Set the property to true
                  * to indicate the content panel implementation is editable. Editable
                  * means the combo box content can be editable by a user
                  * @attribute isEditable
@@ -1274,7 +1283,7 @@ pkg.Combo = Class(pkg.Panel, [
         ]);
 
         /**
-         * Combo box list pad component class 
+         * Combo box list pad component class
          * @extends zebra.ui.ScrollPan
          * @class  zebra.ui.Combo.ComboPadPan
          */
@@ -1319,7 +1328,7 @@ pkg.Combo = Class(pkg.Panel, [
                 };
 
                 this.paintOnTop = function(g){
-                    var list = this.getCombo().list, 
+                    var list = this.getCombo().list,
                         selected = list.getSelected(),
                         v = selected != null ? list.provider.getView(list, selected, list.selectedIndex) : null;
 
@@ -1337,15 +1346,15 @@ pkg.Combo = Class(pkg.Panel, [
          * @class zebra.ui.Combo.EditableContentPan
          * @extends zebra.ui.Combo.ContentPan
          */
-        
+
         /**
-         * Fired when a content value has been updated. 
-         
+         * Fired when a content value has been updated.
+
         content.bind(function(contentPan, newValue) {
             ...
         });
-        
-         * @param {zebra.ui.Combo.ContentPan} contentPan a content panel that 
+
+         * @param {zebra.ui.Combo.ContentPan} contentPan a content panel that
          * updated its value
          * @param {Object} newValue a new value the content panel has been set
          * with
@@ -1365,7 +1374,7 @@ pkg.Combo = Class(pkg.Panel, [
                 this.dontGenerateUpdateEvent = false;
 
                 /**
-                 * A reference to a text field component the content panel uses as a 
+                 * A reference to a text field component the content panel uses as a
                  * value editor
                  * @attribute textField
                  * @readOnly
@@ -1394,7 +1403,7 @@ pkg.Combo = Class(pkg.Panel, [
                 /**
                  * Called when the combo box content has been updated
                  * @param {zebra.ui.Combo} combo a combo where the new value has been set
-                 * @param {Object} v a new combo box value 
+                 * @param {Object} v a new combo box value
                  * @method comboValueUpdated
                  */
                 this.comboValueUpdated = function(combo, v){
@@ -1470,8 +1479,8 @@ pkg.Combo = Class(pkg.Panel, [
 
         /**
          * Select the given value from the list as the combo box value
-         * @param  {Integer} i an index of a list element to be selected 
-         * as the combo box value 
+         * @param  {Integer} i an index of a list element to be selected
+         * as the combo box value
          * @method select
          */
         this.select = function(i) {
@@ -1484,7 +1493,7 @@ pkg.Combo = Class(pkg.Panel, [
 
         /**
          * Set combo box value selected value.
-         * @param {Object} v a value 
+         * @param {Object} v a value
          * @method  setValue
          */
         this.setValue = function(v) {
@@ -1522,7 +1531,7 @@ pkg.Combo = Class(pkg.Panel, [
 
         /**
          * Hide combo drop down list
-         * @method hidePad 
+         * @method hidePad
          */
         this.hidePad = function (){
             var d = this.getCanvas();
@@ -1534,7 +1543,7 @@ pkg.Combo = Class(pkg.Panel, [
 
         /**
          * Show combo drop down list
-         * @method showPad 
+         * @method showPad
          */
         this.showPad = function(){
             var canvas = this.getCanvas();
@@ -1574,7 +1583,7 @@ pkg.Combo = Class(pkg.Panel, [
         };
 
         /**
-         * Bind the given list component to the combo box component. 
+         * Bind the given list component to the combo box component.
          * @param {zebra.ui.BaseList} l a list component
          * @method setList
          */
@@ -1619,7 +1628,7 @@ pkg.Combo = Class(pkg.Panel, [
                     case KE.DOWN :
                     case KE.RIGHT: if (this.list.model.count() - 1 > index) this.list.select(index + 1); break;
                 }
-            }    
+            }
         };
 
         /**
@@ -1642,7 +1651,7 @@ pkg.Combo = Class(pkg.Panel, [
         };
 
         /**
-         * Set the maximal height of the combo box pad element. 
+         * Set the maximal height of the combo box pad element.
          * @param {Integer} h a maximal combo box pad size
          * @method setMaxPadHeight
          */
@@ -1694,7 +1703,7 @@ pkg.Combo = Class(pkg.Panel, [
          * @readOnly
          * @type {zebra.ui.Panel}
          */
-        
+
         /**
          * Reference to selection view
          * @attribute selectionView
@@ -1703,7 +1712,7 @@ pkg.Combo = Class(pkg.Panel, [
          */
 
         this.button = this.content = this.winpad = null;
-        
+
         /**
          * Maximal size the combo box height can have
          * @attribute maxPadHeight
@@ -1711,7 +1720,7 @@ pkg.Combo = Class(pkg.Panel, [
          * @type {Integer}
          */
         this.maxPadHeight = 0;
-        
+
         this.$lockListSelEvent = false;
         this._ = new zebra.util.Listeners();
         this.setList(list);
@@ -1762,7 +1771,7 @@ pkg.Combo = Class(pkg.Panel, [
     },
 
     /**
-     * Combo box button listener method. The method triggers showing 
+     * Combo box button listener method. The method triggers showing
      * combo box pad window when the combo button has been pressed
      * @param  {zebra.ui.Button} src a button that has been pressed
      * @method fired
@@ -1800,18 +1809,18 @@ pkg.Combo = Class(pkg.Panel, [
 
 /**
  * Combo box arrow view. The view is used to render combo box arrow element
- * in pressed  and unpressed state.  
+ * in pressed  and unpressed state.
  * @class zebra.ui.ComboArrowView
  * @constructor
- * @param {String} [col] a color of arrow element 
+ * @param {String} [col] a color of arrow element
  * @param {Boolean} [state] a state of arrow element. true means pressed state.
- * @extends zebra.ui.View 
+ * @extends zebra.ui.View
  */
 pkg.ComboArrowView = Class(pkg.View, [
     function $prototype() {
         this[''] = function(col, state) {
             /**
-             * Arrow color 
+             * Arrow color
              * @type {String}
              * @readOnly
              * @default "black"
@@ -1819,7 +1828,7 @@ pkg.ComboArrowView = Class(pkg.View, [
              */
 
             /**
-             * Arrow state to be rendered 
+             * Arrow state to be rendered
              * @type {Boolean}
              * @readOnly
              * @default false
@@ -1827,7 +1836,7 @@ pkg.ComboArrowView = Class(pkg.View, [
              */
 
             /**
-             * Top, left, right and bottom gap value 
+             * Top, left, right and bottom gap value
              * @type {Integer}
              * @readOnly
              * @default 4

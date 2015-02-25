@@ -1,5 +1,5 @@
 {
-    "version" : "12.2014",
+    "version" : "02.2015",
 
     "classAliases": {
         "Picture"       : "zebra.ui.Picture",
@@ -409,8 +409,11 @@
     },
 
     "TextField": {
-        "hintFont"  : { "$Font": ["Arial", "bold italic", 12] },
-        "hintColor" : "#C1C1C1",
+        "HintRender" : {
+            "font"  : { "$Font": ["Arial", "bold italic", 12] },
+            "color" : "#C1C1C1"
+        },
+
         "border"        : {
             "focuson" :  { "$Border" : [ "#66CCFF", 2, 8 ] },
             "focusoff":  { "$Border" : [ "#DDDDDD", 2, 8 ] }

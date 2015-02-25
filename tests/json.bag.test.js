@@ -152,49 +152,6 @@ zebra.runTests("Zebra util objects bag",
         assert(bag.get("p1.p11.p12"), 100, "3");
     },
 
-    function test_load_merge() {
-        var o = { p1: { "p1":333, "p2": [1,2,3]  }, p2:[0]},
-            bag = new Bag(o),
-            l1 = '{ "p1": { "p1": { "p1": 100, "p2":true  } }, "p2": [4,5,6], "p33":["a", "b"],  "p3": { "p3":["a", "b"], "p4": { "p4": 1} } }';
-            l2 = '{ "p1": { "p1": { "p1": 200, "p3":false } }, "p2": [7,8,9], "p33":["a", "b"],  "p3": { "p3":["c", "d"], "p4": { "p4": 12, "p5":122 } } }';
-        bag.concatArrays = true;
-        bag.load(l1, false).load(l2);
-        var r = bag.root;
-
-        assert(r.p1.p1.p1, 200);
-        assert(r.p1.p1.p2, true);
-        assert(r.p1.p1.p3, false);
-        zebra.assertObjEqual(r.p1.p2, [1,2,3]);
-        zebra.assertObjEqual(r.p2, [0,4,5,6,7,8,9]);
-
-        zebra.assertObjEqual(r.p3.p3, ["a", "b", "c", "d"]);
-        zebra.assertObjEqual(r.p33, ["a", "b", "a", "b"]);
-        zebra.assert(r.p3.p4.p4, 12);
-        zebra.assert(r.p3.p4.p5, 122);
-    },
-
-
-    function test_objload_merge() {
-        var o = { p1: { "p1":333, "p2": [1,2,3]  }, p2:[0]},
-            bag = new Bag(o),
-            l1 = { p1: { p1: { p1: 100, p2:true  } }, p2: [4,5,6], p33:["a", "b"],  p3: { p3:["a", "b"], p4: { p4: 1} } };
-            l2 = { p1: { p1: { p1: 200, p3:false } }, p2: [7,8,9], p33:["a", "b"],  p3: { p3:["c", "d"], p4: { p4: 12, p5:122 } } };
-        bag.concatArrays = true;
-        bag.load(l1, false).load(l2);
-        var r = bag.root;
-
-        assert(r.p1.p1.p1, 200);
-        assert(r.p1.p1.p2, true);
-        assert(r.p1.p1.p3, false);
-        zebra.assertObjEqual(r.p1.p2, [1,2,3]);
-        zebra.assertObjEqual(r.p2, [0,4,5,6,7,8,9]);
-
-        zebra.assertObjEqual(r.p3.p3, ["a", "b", "c", "d"]);
-        zebra.assertObjEqual(r.p33, ["a", "b", "a", "b"]);
-        zebra.assert(r.p3.p4.p4, 12);
-        zebra.assert(r.p3.p4.p5, 122);
-    },
-
     function test_inherit() {
         var o = {},
             bag = new Bag(o),
@@ -256,7 +213,7 @@ zebra.runTests("Zebra util objects bag",
         assert(o.a.id, 100);
     },
 
-    function test_optional_fields() {
+    function _test_optional_fields() {
         zebra.$a = 100;
 
         var o = {}, bag = new Bag(o), l = '{ "? zebra.$a == 100": { "p1": 100, "p2": 200, "p4":"abc"  }, "? zebra.$a == 200": { "p1": 300, "p2":400, "p3":500 } }';

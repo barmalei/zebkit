@@ -71,12 +71,10 @@ zebra.runTests("Zebra util objects bag",
         assert(k2.parent == null, true);
         assert(k2.kids.length, 0);
 
-
         var t = new TreeModel({
             value: "Root",
             kids : [ "Item 1", "Item 1" ]
         });
-
 
         assert(t.root.kids[0] != t.root.kids[1], true);
 
@@ -336,6 +334,98 @@ zebra.runTests("Zebra util objects bag",
             }
         }
 
+    },
+
+
+    function test_matrix_removeCols() {
+        var m = new Matrix(3, 4);
+        assert(m.rows, 3);
+        assert(m.cols, 4);
+        assert(m.objs.length, 0);
+        for(var i = 0; i < m.rows ; i++) {
+            assert(m.objs[i], undefined);
+            for(var j = 0; j < m.cols ; j++) {
+                assert(m.get(i,j), undefined);
+            }
+        }
+
+        m.removeCols(1, 2);
+        assert(m.rows, 3);
+        assert(m.cols, 2);
+        assert(m.objs.length, 0);
+        for(var i = 0; i < m.rows ; i++) {
+            assert(m.objs[i], undefined);
+            for(var j = 0; j < m.cols ; j++) {
+                assert(m.get(i,j), undefined);
+            }
+        }
+
+        m.put(2, 1, 150);
+        assert(m.objs.length, 3);
+        assert(m.get(2, 1), 150);
+        assert(m.get(2, 0), undefined);
+
+        m.removeCols(0, 1);
+        assert(m.rows, 3);
+        assert(m.cols, 1);
+        assert(m.objs.length, 3);
+        assert(m.get(2, 0), 150);
+
+        m.removeCols(0, 1);
+        assert(m.rows, 3);
+        assert(m.cols, 0);
+        assert(m.objs.length, 3);
+    },
+
+    function test_matrix_insertRows() {
+        var m = new Matrix(10, 4);
+        assert(m.rows, 10);
+        assert(m.cols, 4);
+        assert(m.objs.length, 0);
+
+        m.insertRows(1, 3);
+        assert(m.rows, 13);
+        assert(m.cols, 4);
+        assert(m.objs.length, 0);
+
+        m.put(10, 0, 88);
+        m.insertRows(10, 2);
+        assert(m.rows, 15);
+        assert(m.cols, 4);
+        assert(m.objs.length, 13);
+        assert(m.get(12, 0), 88);
+
+        for(var i = 0; i < 12 ; i++) {
+            assert(m.objs[i], undefined);
+        }
+    },
+
+    function test_matrix_insertCols() {
+        var m = new Matrix(10, 4);
+        assert(m.rows, 10);
+        assert(m.cols, 4);
+        assert(m.objs.length, 0);
+
+        m.insertCols(1, 3);
+        assert(m.rows, 10);
+        assert(m.cols, 7);
+        assert(m.objs.length, 0);
+
+        m.put(5, 3, 881);
+        m.insertCols(2, 2);
+
+        assert(m.rows, 10);
+        assert(m.cols, 9);
+        assert(m.objs.length, 6);
+        assert(m.get(5, 5), 881);
+
+        for(var i = 0; i < m.rows ; i++) {
+            if (i == 5) assert(m.objs[i].length, 6);
+            else        assert(m.objs[i], undefined);
+            for(var j = 0; j < m.cols ; j++) {
+                if (i != 5 && j != 5) assert(m.get(i,j), undefined);
+            }
+        }
     },
 
     function test_listmodel() {

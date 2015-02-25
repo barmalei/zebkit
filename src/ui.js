@@ -166,7 +166,7 @@ pkg.StringRender = Class(pkg.Render, [
              * @readOnly
              * @type {zebra.ui.Font}
              */
-            this.font = font != null ? font : pkg.StringRender.font ;
+            this.font = font != null ? font : this.$clazz.font;
 
             /**
              * Color to be used to render the target string
@@ -174,7 +174,7 @@ pkg.StringRender = Class(pkg.Render, [
              * @attribute color
              * @type {String}
              */
-            this.color = color != null ? color : pkg.StringRender.color;
+            this.color = color != null ? color : this.$clazz.color;
         };
 
         this.ownerChanged  = function(v) {
@@ -249,7 +249,7 @@ pkg.StringRender = Class(pkg.Render, [
          */
         this.setColor = function(c){
             if (c != this.color) {
-                this.color = c;
+                this.color = c.toString();
                 return true;
             }
             return false;
@@ -366,7 +366,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
                 this.invalidate(0, this.getLines());
             }
             else {
-                this.lines = 0;
+                this.invLines = 0;
             }
         };
 
@@ -386,29 +386,32 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
          * @method lineWidth
          */
         this.lineWidth = function(line){
-            this.recalc();
-            return this.target.getExtraChar(line);
+            if (this.invLines > 0) this.recalc();
+            return this.target.$lineTags(line).$lineWidth;
         };
 
         /**
          * Called every time the target text metrics has to be recalculated
          * @method recalc
          */
-        this.recalc = function(){
-            if (this.lines > 0 && this.target != null){
+        this.recalc = function() {
+            if (this.invLines > 0 && this.target != null){
                 var text = this.target;
                 if (text != null) {
-                    if (this.lines > 0) {
-                        for(var i = this.startLine + this.lines - 1;i >= this.startLine; i-- ){
-                            text.setExtraChar(i, this.font.stringWidth(this.getLine(i)));
+                    if (this.invLines > 0) {
+                        for(var i = this.startInvLine + this.invLines - 1; i >= this.startInvLine; i--) {
+                            text.$lineTags(i).$lineWidth = this.font.stringWidth(this.getLine(i));
                         }
-                        this.startLine = this.lines = 0;
+                        this.startInvLine = this.invLines = 0;
                     }
+
                     this.textWidth = 0;
                     var size = text.getLines();
                     for(var i = 0;i < size; i++){
-                        var len = text.getExtraChar(i);
-                        if (len > this.textWidth) this.textWidth = len;
+                        var len = text.$lineTags(i).$lineWidth;
+                        if (len > this.textWidth) {
+                            this.textWidth = len;
+                        }
                     }
                     this.textHeight = this.getLineHeight() * size + (size - 1) * this.getLineIndent();
                 }
@@ -430,23 +433,23 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
          */
         this.textUpdated = function(src,b,off,size,ful,updatedLines){
             if (b === false) {
-                if (this.lines > 0) {
-                    var p1 = ful - this.startLine,
-                        p2 = this.startLine + this.lines - ful - updatedLines;
-                    this.lines = ((p1 > 0) ? p1 : 0) + ((p2 > 0) ? p2 : 0) + 1;
-                    this.startLine = this.startLine < ful ? this.startLine : ful;
+                if (this.invLines > 0) {
+                    var p1 = ful - this.startInvLine,
+                        p2 = this.startInvLine + this.invLines - ful - updatedLines;
+                    this.invLines = ((p1 > 0) ? p1 : 0) + ((p2 > 0) ? p2 : 0) + 1;
+                    this.startInvLine = this.startInvLine < ful ? this.startInvLine : ful;
                 }
                 else {
-                    this.startLine = ful;
-                    this.lines = 1;
+                    this.startInvLine = ful;
+                    this.invLines = 1;
                 }
                 if (this.owner != null) this.owner.invalidate();
             }
             else {
-                if (this.lines > 0){
-                    if (ful <= this.startLine) this.startLine += (updatedLines - 1);
+                if (this.invLines > 0){
+                    if (ful <= this.startInvLine) this.startInvLine += (updatedLines - 1);
                     else {
-                        if (ful < (this.startLine + size)) size += (updatedLines - 1);
+                        if (ful < (this.startInvLine + size)) size += (updatedLines - 1);
                     }
                 }
                 this.invalidate(ful, updatedLines);
@@ -461,15 +464,15 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
          * @private
          */
         this.invalidate = function(start,size){
-            if (size > 0 && (this.startLine != start || size != this.lines)) {
-                if (this.lines === 0){
-                    this.startLine = start;
-                    this.lines = size;
+            if (size > 0 && (this.startInvLine != start || size != this.invLines)) {
+                if (this.invLines === 0){
+                    this.startInvLine = start;
+                    this.invLines = size;
                 }
                 else {
-                    var e = this.startLine + this.lines;
-                    this.startLine = start < this.startLine ? start : this.startLine;
-                    this.lines     = Math.max(start + size, e) - this.startLine;
+                    var e = this.startInvLine + this.invLines;
+                    this.startInvLine = start < this.startInvLine ? start : this.startInvLine;
+                    this.invLines     = Math.max(start + size, e) - this.startInvLine;
                 }
 
                 if (this.owner != null) {
@@ -479,7 +482,9 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
         };
 
         this.getPreferredSize = function(){
-            if (this.lines > 0 && this.target != null) this.recalc();
+            if (this.invLines > 0 && this.target != null) {
+                this.recalc();
+            }
             return { width:this.textWidth, height:this.textHeight };
         };
 
@@ -489,60 +494,67 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
                 var lineIndent = this.getLineIndent(),
                     lineHeight = this.getLineHeight(),
                     lilh       = lineHeight + lineIndent,
-                    startLine  = 0;
+                    startInvLine  = 0;
 
                 w = ts.width  < w ? ts.width  : w;
                 h = ts.height < h ? ts.height : h;
 
                 if (y < ts.y) {
-                    startLine = Math.floor((lineIndent + ts.y - y) / lilh);
-                    h += (ts.y - startLine * lineHeight - startLine * lineIndent);
+                    startInvLine = Math.floor((lineIndent + ts.y - y) / lilh);
+                    h += (ts.y - startInvLine * lineHeight - startInvLine * lineIndent);
                 }
                 else {
                     if (y > (ts.y + ts.height)) return;
                 }
 
                 var size = this.target.getLines();
-                if (startLine < size){
+                if (startInvLine < size){
                     var lines =  Math.floor((h + lineIndent) / lilh) + (((h + lineIndent) % lilh > lineIndent) ? 1 : 0);
-                    if (startLine + lines > size) {
-                        lines = size - startLine;
+                    if (startInvLine + lines > size) {
+                        lines = size - startInvLine;
                     }
-                    y += startLine * lilh;
+                    y += startInvLine * lilh;
 
                     g.setFont(this.font);
 
                     if (d == null || d.isEnabled === true){
+                        if (this.color != g.fillStyle) g.fillStyle = this.color;
 
-                        g.setColor(this.color);
-                        for(var i = 0;i < lines; i++){
-                            if (d && d.getStartSelection != null) {
-                                var p1 = d.getStartSelection();
-                                if (p1 != null){
-                                    var p2 = d.getEndSelection(), line = i + startLine;
-                                    if ((p1[0] != p2[0] || p1[1] != p2[1]) && line >= p1[0] && line <= p2[0]){
-                                        var s = this.getLine(line), lw = this.lineWidth(line), xx = x;
-                                        if (line == p1[0]) {
-                                            var ww = this.font.charsWidth(s, 0, p1[1]);
-                                            xx += ww;
-                                            lw -= ww;
-                                            if (p1[0] == p2[0]) {
-                                                lw -= this.font.charsWidth(s, p2[1], s.length - p2[1]);
-                                            }
-                                        }
-                                        else {
-                                            if (line == p2[0]) lw = this.font.charsWidth(s, 0, p2[1]);
-                                        }
-                                        this.paintSelection(g, xx, y, lw === 0 ? 1 : lw, lilh, line, d);
+                        var p1 = null, p2 = null, bsel = false;
+                        if (lines > 0 && d != null && d.getStartSelection != null) {
+                            p1   = d.getStartSelection();
+                            p2   = d.getEndSelection();
+                            bsel = p1 != null && (p1[0] != p2[0] || p1[1] != p2[1]);
+                        }
 
-                                        // restore foreground color after selection has been rendered
-                                        // TODO: think to replace it with settting "fillStyle" directly
-                                        g.setColor(this.color);
+                        for(var i = 0; i < lines; i++){
+                            if (bsel === true) {
+                                var line = i + startInvLine;
+                                if (line >= p1[0] && line <= p2[0]){
+                                    var s  = this.getLine(line),
+                                        lw = this.lineWidth(line),
+                                        xx = x;
+
+                                    if (line == p1[0]) {
+                                        var ww = this.font.charsWidth(s, 0, p1[1]);
+                                        xx += ww;
+                                        lw -= ww;
+                                        if (p1[0] == p2[0]) {
+                                            lw -= this.font.charsWidth(s, p2[1], s.length - p2[1]);
+                                        }
                                     }
+                                    else {
+                                        if (line == p2[0]) lw = this.font.charsWidth(s, 0, p2[1]);
+                                    }
+                                    this.paintSelection(g, xx, y, lw === 0 ? 1 : lw, lilh, line, d);
+
+                                    // restore color to paint text since it can be
+                                    // res-set with paintSelection method
+                                    if (this.color != g.fillStyle) g.fillStyle = this.color;
                                 }
                             }
 
-                            this.paintLine(g, x, y, i + startLine, d);
+                            this.paintLine(g, x, y, i + startInvLine, d);
                             y += lilh;
                         }
                     }
@@ -550,10 +562,9 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
                         var dcol = d != null && d.disabledColor != null ? d.disabledColor
                                                                         : pkg.TextRender.disabledColor;
 
-
                         for(var i = 0;i < lines; i++) {
                             g.setColor(dcol);
-                            this.paintLine(g, x, y, i + startLine, d);
+                            this.paintLine(g, x, y, i + startInvLine, d);
                             y += lilh;
                         }
                     }
@@ -616,7 +627,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
          */
         this.setColor = function(c){
             if (c != this.color) {
-                this.color = c;
+                this.color = c.toString();
                 return true;
             }
             return false;
@@ -632,7 +643,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
              * @default zebra.ui.TextRender.color
              * @readOnly
              */
-            this.color = pkg.TextRender.color;
+            this.color = this.$clazz.color;
 
             /**
              * Text font
@@ -641,12 +652,13 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
              * @default zebra.ui.TextRender.font
              * @readOnly
              */
-            this.font = pkg.TextRender.font;
+            this.font = this.$clazz.font;
 
-            this.textWidth = this.textHeight = this.startLine = this.lines = 0;
+            this.textWidth = this.textHeight = this.startInvLine = this.invLines = 0;
 
             //!!!
-            //!!! since text is widely used structure we do slight hack - don't call parent constructor
+            //   since text render is widely used structure we do slight hack -
+            //   don't call parent constructor
             //!!!
             this.setTarget(zebra.isString(text) ? new zebra.data.Text(text) : text);
         };
@@ -1252,7 +1264,7 @@ pkg.Label = Class(pkg.ViewPan, [
         this.$this("");
     },
 
-    function (r){
+    function (r) {
         if (instanceOf(r, pkg.Render)) {
             this.setView(r);
         }

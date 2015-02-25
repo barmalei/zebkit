@@ -1321,7 +1321,7 @@ pkg.Bag = zebra.Class([
             // array should be merged (concatenated)
             if (Array.isArray(d)) {
                 var v = [];
-                for(var i=0; i< d.length; i++) v[i] = this.mergeObjWithDesc(null, d[i]);
+                for(var i = 0; i < d.length; i++) v[i] = this.mergeObjWithDesc(null, d[i]);
                 if (this.concatArrays === false) {
                     return v;
                 }
@@ -1494,7 +1494,10 @@ pkg.Bag = zebra.Class([
 
         this.inherit = function(o, pp) {
             for(var i=0; i < pp.length; i++) {
-                var op = this.root, n = pp[i].trim(), nn = n.split("."), j = 0;
+                var op = this.root,
+                    nn = pp[i].trim().split("."),
+                    j  = 0;
+
                 while (j < nn.length) {
                     op = op[nn[j++]];
                     if (op == null) {
@@ -1514,52 +1517,92 @@ pkg.Bag = zebra.Class([
          * Load the given JSON content and parse if the given flag is true. The passed
          * boolean flag controls parsing. The flag is used to load few JSON. Before
          * parsing the JSONs are merged and than the final result is parsed.
-         * @param  {String|Object} s a JSON content to be loaded
+         * @param  {String|Object} s a JSON content to be loaded. It can be a JSON as string or
+         * URL to JSON or JSON object
+         * @param {Function} [cb] callback function if the JSOn content has to be loaded asynchronously
+         * @chainable
          * @return {zebra.util.Bag} a reference to the bag class instance
          * @method load
          */
-        this.load = function(s) {
-            var content = null;
+        this.load = function(s, cb) {
+            var runner = new pkg.Runner(),
+                $this  = this;
 
-            if (zebra.isString(s)) {
-                s = s.trim();
+            runner.run(function() {
+                if (zebra.isString(s)) {
+                    s = s.trim();
 
-                // detect if the passed string is URL
-                if ((s[0] != '[' || s[s.length - 1] != ']') &&
-                    (s[0] != '{' || s[s.length - 1] != '}')   )
-                {
-                    var p = s.toString();
-                    p = p + (p.lastIndexOf("?") > 0 ? "&" : "?") + (new Date()).getTime().toString();
+                    // detect if the passed string is not a JSON
+                    if ((s[0] != '[' || s[s.length - 1] != ']') &&
+                        (s[0] != '{' || s[s.length - 1] != '}')   )
+                    {
+                        var p = s.toString();
+                        p = p + (p.lastIndexOf("?") > 0 ? "&" : "?") + (new Date()).getTime().toString();
 
-                    this.$url = s.toString();
-                    s = zebra.io.GET(p);
+                        $this.$url = s.toString();
+
+                        if (cb == null) {
+                            return zebra.io.GET(p);
+                        }
+
+                        zebra.io.GET(p, this.join());
+                        return;
+                    }
+                }
+                return s;
+            })
+            .
+            run(function(s) {
+                if (typeof XMLHttpRequest !== "undefined" && s instanceof XMLHttpRequest) {
+                    if (s.status != 200) {
+                        throw new Error("Invalid JSON path");
+                    }
+                    s = s.responseText;
                 }
 
-                try {
-                    content = JSON.parse(s);
+                if (zebra.isString(s)) {
+                    try {
+                        return JSON.parse(s);
+                    }
+                    catch(e) {
+                        throw new Error("JSON format error");
+                    }
                 }
-                catch(e) {
-                    throw new Error("JSON format error");
+
+                return s;
+            })
+            .
+            run(function(content) {
+                if (content.hasOwnProperty("classAliases")) {
+                    var vars = content.classAliases;
+                    for(var k in vars) {
+                        $this.classAliases[k] = Class.forName(vars[k].trim());
+                    }
+                    delete content.classAliases;
                 }
-            }
-            else {
-                content = s;
-            }
 
-            if (content.hasOwnProperty("classAliases")) {
-                var vars = content.classAliases;
-                for(var k in vars) {
-                    this.classAliases[k] = Class.forName(vars[k].trim());
+                if (content.hasOwnProperty("variables")) {
+                    $this.variables = $this.mergeObjWithDesc($this.variables, content.variables);
+                    delete content.variables;
                 }
-                delete content.classAliases;
-            }
 
-            if (content.hasOwnProperty("variables")) {
-                this.variables = this.mergeObjWithDesc(this.variables, content.variables);
-                delete content.variables;
-            }
+                return content;
+            })
+            .
+            run(function(content) {
+                return $this.mergeObjWithDesc($this.root, content);
+            })
+            .
+            run(function(root) {
+                if (cb != null) cb.call($this);
+                $this.root = root;
+            })
+            .
+            error(function(e) {
+                if (cb != null) cb.call($this, e);
+                throw e;
+            });
 
-            this.root = this.mergeObjWithDesc(this.root, content);
             return this;
         };
 

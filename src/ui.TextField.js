@@ -24,6 +24,10 @@ var ME = pkg.MouseEvent, KE = pkg.KeyEvent, PO = zebra.util.Position;
  * @extends zebra.ui.Label
  */
 pkg.TextField = Class(pkg.Label, [
+    function $clazz() {
+        this.HintRender = Class(pkg.StringRender, []);
+    },
+
     function $prototype() {
         /**
          * Selection color
@@ -46,6 +50,15 @@ pkg.TextField = Class(pkg.Label, [
         this.blinkMeCounter = 0;
 
         this.cursorType = pkg.Cursor.TEXT;
+
+
+        /**
+         * Text alignment
+         * @attribute textAlign
+         * @type {Integer}
+         * @default zebra.layout.LEFT
+         */
+        this.textAlign = zebra.layout.LEFT;
 
         /**
          * Cursor view
@@ -81,10 +94,55 @@ pkg.TextField = Class(pkg.Label, [
             }
         };
 
-        this.textUpdated = function(src, b, off, size, startLine, lines){
+        this.setTextAlign = function(a) {
+            a = zebra.layout.$constraints(a)
+            if (this.textAlign != a) {
+                this.textAlign = a;
+                this.vrp();
+            }
+        };
+
+        this.textUpdated = function(src, b, off, size, startLine, lines) {
             if (this.position != null) {
-                if (b === true) this.position.inserted(off, size);
-                else            this.position.removed(off, size);
+                if (b === true) {
+                    // Check if a selection presents
+                    // and clear it.  We do it here because it is important
+                    // to remove any selected text after update since:
+                    //   -- not every update brings to real text update, so we have remove selected text
+                    //      only if real text update has happened
+                    //   -- update can make selection start and end location invalid, so we have to take in
+                    //      account before we remove it
+                    if (this.startOff != this.endOff) {
+                        var start = this.startOff < this.endOff ? this.startOff : this.endOff,
+                            end   = this.startOff > this.endOff ? this.startOff : this.endOff;
+
+                        // if start of selection is less or equals
+                        // to inserted text offset than we have to correct
+                        // insertion area start and end offsets
+                        if (off <= start) {
+                            start += size;
+                            end += size;
+                        }
+                        else {
+                            // if offset of an inserted text if greater than start of
+                            // a selection but less or equals to end of the selection
+                            // we have to correct insertion offset to start (since the
+                            // selected text is going to be removed)
+                            if (off <= end) {
+                                if (off < end) end += size;
+                                off = start;
+                            }
+                        }
+
+                        this.endOff = this.startOff = -1; // clear selection
+                        this.remove(start, end - start);
+                    }
+
+                    this.position.inserted(off, size);
+                }
+                else {
+                    this.position.removed(off, size);
+                }
             }
         };
 
@@ -92,12 +150,22 @@ pkg.TextField = Class(pkg.Label, [
          * Compute a text column and row by the given location.
          * @param  {Integer} x  a x coordinate
          * @param  {Integer} y  a y coordinate
-         * @return {Array} a text row and column as an Array object. Fist element
-         * of the array is row and the second one is column.
+         * @return {Object} a text row and column as an object { row:, col }.
          * @method  getTextRowColAt
          */
-        this.getTextRowColAt = function(x,y) {
-            var lines = this.view.target.getLines();
+        this.getTextRowColAt = function(x, y) {
+            var lines = this.getLines();
+
+            // normalize text location to virtual (zero, zero)
+            y -= (this.scrollManager.getSY() + this.getTop());
+            x -= this.scrollManager.getSX();
+            if (this.textAlign === zebra.layout.LEFT) {
+                x -= this.getLeft();
+            }
+            else {
+                x -= (this.width - this.view.getPreferredSize().width - this.getRight());
+            }
+
             if (x >= 0 && y >= 0 && lines > 0) {
                 var lh = this.view.getLineHeight(),
                     li = this.view.getLineIndent(),
@@ -108,12 +176,12 @@ pkg.TextField = Class(pkg.Label, [
                         pdt  = 1000000,
                         pcol = -1;
 
-                    for(var col = ~~((x / this.view.lineWidth(row)) * s.length); col>=0 && col <= s.length;) {
+                    for(var col = ~~((x / this.view.lineWidth(row)) * s.length); col >= 0 && col <= s.length;) {
                         var l  = this.view.font.charsWidth(s, 0, col),
                             dt = Math.abs(l - x);
 
                         if (dt >= pdt) {
-                            return [row, pcol];
+                            return { row : row, col : pcol };
                         }
 
                         pdt  = dt;
@@ -121,7 +189,7 @@ pkg.TextField = Class(pkg.Label, [
                         col += (l > x ? -1: 1);
                     }
 
-                    return[row, s.length];
+                    return { row : row, col : s.length };
                 }
             }
             return null;
@@ -132,7 +200,9 @@ pkg.TextField = Class(pkg.Label, [
 
             var ln = t.getLine(line);
             col += d;
-            if (col < 0 && line > 0) return [line - 1, t.getLine(line - 1).length];
+            if (col < 0 && line > 0) {
+                return [line - 1, t.getLine(line - 1).length];
+            }
             else {
                 if (col > ln.length && line < t.getLines() - 1) return [line + 1, 0];
             }
@@ -182,7 +252,7 @@ pkg.TextField = Class(pkg.Label, [
             }
         };
 
-        this.startSelection = function(){
+        this.startSelection = function() {
             if (this.startOff < 0 && this.position != null){
                 var pos = this.position;
                 this.endLine = this.startLine = pos.currentLine;
@@ -191,19 +261,14 @@ pkg.TextField = Class(pkg.Label, [
             }
         };
 
-        this.keyTyped = function(e){
-            if (e.isControlPressed() || e.isCmdPressed() || this.isEditable === false ||
-                (e.ch == '\n' && zebra.instanceOf(this.view.target, zebra.data.SingleLineTxt)))
-            {
-                return;
+        this.keyTyped = function(e) {
+            if (this.isEditable === true && e.isControlPressed() == false && e.isCmdPressed() == false) {
+                this.write(this.position.offset, e.ch);
             }
-
-            this.removeSelected();
-            this.write(this.position.offset, e.ch);
         };
 
         this.selectAll_command = function() {
-            this.select(0, this.position.metrics.getMaxOffset());
+            this.select(0, this.getMaxOffset());
         };
 
         this.nextWord_command = function(b, d) {
@@ -232,11 +297,10 @@ pkg.TextField = Class(pkg.Label, [
                     this.startSelection();
                 }
 
-                switch(e.code)
-                {
+                switch(e.code) {
                     case KE.DOWN : position.seekLineTo(PO.DOWN);break;
                     case KE.UP   : position.seekLineTo(PO.UP);break;
-                    case KE.LEFT : foff = -1;
+                    case KE.LEFT : foff *= -1;
                     case KE.RIGHT:
                         if (e.isControlPressed() === false && e.isCmdPressed() === false) {
                             position.seek(foff);
@@ -244,7 +308,7 @@ pkg.TextField = Class(pkg.Label, [
                         break;
                     case KE.END:
                         if (e.isControlPressed()) {
-                            position.seekLineTo(PO.DOWN, position.metrics.getLines() - line - 1);
+                            position.seekLineTo(PO.DOWN, this.getLines() - line - 1);
                         }
                         else position.seekLineTo(PO.END);
                         break;
@@ -264,7 +328,7 @@ pkg.TextField = Class(pkg.Label, [
                             if (this.hasSelection()) this.removeSelected();
                             else {
                                 if (this.isEditable === true && position.offset > 0){
-                                    position.seek(-1);
+                                    position.seek(-1 * foff);
                                     this.remove(position.offset, 1);
                                 }
                             }
@@ -295,36 +359,36 @@ pkg.TextField = Class(pkg.Label, [
 
         /**
          * Remove the specified part of edited text
-         * @param  {Integer} pos  a start position of a removed text
+         * @param  {Integer} pos a start position of a removed text
          * @param  {Integer} size a size of removed text
          * @method remove
          */
         this.remove = function (pos,size){
             if (this.isEditable === true) {
                 var position = this.position;
-                if (pos >= 0 && (pos + size) <= position.metrics.getMaxOffset()) {
+                if (pos >= 0 && (pos + size) <= this.getMaxOffset()) {
                     if (size < 10000) {
                         this.historyPos = (this.historyPos + 1) % this.history.length;
                         this.history[this.historyPos] = [-1, pos, this.getValue().substring(pos, pos+size)];
                         if (this.undoCounter < this.history.length) this.undoCounter++;
                     }
 
-                    var pl = position.metrics.getLines(), old = position.offset;
-                    this.view.target.remove(pos, size);
-                    if (position.metrics.getLines() != pl || old == pos) {
+                    if (this.view.target.remove(pos, size)) {
                         this.repaint();
+                        return true;
                     }
                 }
             }
+            return false;
         };
 
         /**
          * Insert the specified text into the edited text at the given position
-         * @param  {Integer} pos  a start position of a removed text
+         * @param  {Integer} pos a start position of a removed text
          * @param  {String} s a text to be inserted
          * @method write
          */
-        this.write = function (pos,s){
+        this.write = function (pos,s) {
             if (this.isEditable === true) {
                 // TODO: remove hard coded undo/redo deepness value
                 if (s.length < 10000) {
@@ -333,23 +397,25 @@ pkg.TextField = Class(pkg.Label, [
                     if (this.undoCounter < this.history.length) this.undoCounter++;
                 }
 
-                var old = this.position.offset,
-                    m   = this.view.target,
-                    pl  = m.getLines();
-
-                m.write(s, pos);
-                if (m.getLines() != pl || this.position.offset == old) {
+                if (this.view.target.write(s, pos)) {
                     this.repaint();
+                    return true;
                 }
             }
+            return false;
         };
 
         this.recalc = function() {
             var r = this.view;
             if (this.position.offset >= 0) {
-                this.curX = r.font.charsWidth(r.getLine(this.position.currentLine),
-                                              0,
-                                              this.position.currentCol) + this.getLeft();
+                var l = r.getLine(this.position.currentLine);
+                if (this.textAlign === zebra.layout.LEFT) {
+                    this.curX = r.font.charsWidth(l, 0, this.position.currentCol) + this.getLeft();
+                }
+                else {
+                    this.curX = this.width - this.getRight() - this.view.getPreferredSize().width +
+                                r.font.charsWidth(l, 0, this.position.currentCol);
+                }
 
                 this.curY = this.position.currentLine * (r.getLineHeight() + r.getLineIndent()) +
                             this.getTop();
@@ -371,15 +437,19 @@ pkg.TextField = Class(pkg.Label, [
             if (this.position.offset >= 0 &&
                 this.curView != null      &&
                 this.blinkMe              &&
-                (this.hasFocus() || this.$forceToShow == true)) // TODO: $forceToShow is awkward solution
+                (this.hasFocus() || this.$forceToShow == true)) // TODO: $forceToShow is awkward solution sdesigned for VK
             {
-                this.curView.paint(g, this.curX, this.curY,
-                                      this.curW, this.curH, this);
+                if (this.textAlign === zebra.layout.LEFT)
+                    this.curView.paint(g, this.curX, this.curY,
+                                          this.curW, this.curH, this);
+                else
+                    this.curView.paint(g, this.curX - this.curW, this.curY,
+                                          this.curW, this.curH, this);
             }
         };
 
         this.mouseDragStarted = function (e){
-            if (e.mask == ME.LEFT_BUTTON && this.position.metrics.getMaxOffset() > 0) {
+            if (e.mask == ME.LEFT_BUTTON && this.getMaxOffset() > 0) {
                 this.startSelection();
             }
         };
@@ -392,9 +462,8 @@ pkg.TextField = Class(pkg.Label, [
 
         this.mouseDragged = function (e){
             if (e.mask == ME.LEFT_BUTTON){
-                var p = this.getTextRowColAt(e.x - this.scrollManager.getSX(),
-                                             e.y - this.scrollManager.getSY());
-                if (p != null) this.position.setRowCol(p[0], p[1]);
+                var p = this.getTextRowColAt(e.x, e.y);
+                if (p != null) this.position.setRowCol(p.row, p.col);
             }
         };
 
@@ -407,7 +476,7 @@ pkg.TextField = Class(pkg.Label, [
         this.select = function (startOffset,endOffset){
             if (endOffset < startOffset ||
                 startOffset < 0 ||
-                endOffset > this.position.metrics.getMaxOffset())
+                endOffset > this.getMaxOffset())
             {
                 throw new Error("Invalid selection offsets");
             }
@@ -418,8 +487,8 @@ pkg.TextField = Class(pkg.Label, [
                     this.startOff = startOffset;
                     var p = this.position.getPointByOffset(startOffset);
                     this.startLine = p[0];
-                    this.startCol = p[1];
-                    this.endOff = endOffset;
+                    this.startCol  = p[1];
+                    this.endOff    = endOffset;
                     p = this.position.getPointByOffset(endOffset);
                     this.endLine = p[0];
                     this.endCol = p[1];
@@ -448,16 +517,17 @@ pkg.TextField = Class(pkg.Label, [
                 var lineHeight = this.view.getLineHeight(),
                     top        = this.getTop();
 
-                this.scrollManager.makeVisible(this.curX, this.curY, this.curW, lineHeight);
+                this.scrollManager.makeVisible(this.textAlign === zebra.layout.LEFT ? this.curX
+                                                                                    : this.curX - this.curW,
+                                                this.curY, this.curW, lineHeight);
 
                 if (pl >= 0) {
-
                     // means selected text exists, than we have to correct selection
                     // according to the new position
                     if (this.startOff >= 0){
                         this.endLine = position.currentLine;
-                        this.endCol = position.currentCol;
-                        this.endOff = position.offset;
+                        this.endCol  = position.currentCol;
+                        this.endOff  = position.offset;
                     }
 
                     var minUpdatedLine = pl < position.currentLine ? pl : position.currentLine,
@@ -467,7 +537,9 @@ pkg.TextField = Class(pkg.Label, [
                         y1             = lineHeight * minUpdatedLine + minUpdatedLine * li +
                                          top + this.scrollManager.getSY();
 
-                    if (y1 < top) y1 = top;
+                    if (y1 < top) {
+                        y1 = top;
+                    }
 
                     if (y1 < this.height - bottom){
                         var h = ((pl > position.currentLine ? pl
@@ -485,10 +557,13 @@ pkg.TextField = Class(pkg.Label, [
         };
 
         this.paintOnTop = function(g) {
-            if (this.hint && this.hasFocus() === false && this.getValue() == '') {
-                this.hint.paint(g, this.getLeft(),
-                                   this.height - this.getBottom() - this.hint.getLineHeight(),
-                                this.width, this.height, this);
+            if (this.hint != null && this.getMaxOffset() == 0) {
+                var ps = this.hint.getPreferredSize(),
+                    yy = Math.floor((this.height - ps.height)/2),
+                    xx = (zebra.layout.LEFT === this.textAlign) ? this.getLeft() + this.curW
+                                                                : this.width - ps.width - this.getRight() - this.curW;
+
+                this.hint.paint(g, xx, yy, this.width, this.height, this);
             }
         };
 
@@ -496,20 +571,12 @@ pkg.TextField = Class(pkg.Label, [
          * Set the specified hint text to be drawn with the given font and color.
          * The hint is not-editable text that is shown in empty text field to help
          * a user to understand which input the text field expects.
-         * @param {String} hint a hint text
-         * @param {String|zebra.ui.Font} font a font
-         * @param {String} color a hint color
+         * @param {String|zebra.ui.View|Function} hint a hint text, view or view render method
+         * @return {zebra.ui.View} a hint view
          * @method setHint
          */
-        this.setHint = function(hint, font, color) {
-            this.hint = hint;
-            if (hint != null && zebra.instanceOf(hint, pkg.View) === false) {
-                this.hint = new pkg.StringRender(hint);
-                font  = font  ? font  : pkg.TextField.hintFont;
-                color = color ? color : pkg.TextField.hintColor;
-                this.hint.setColor(color);
-                this.hint.setFont(font);
-            }
+        this.setHint = function(hint) {
+            this.hint = zebra.isString(hint) ? new this.$clazz.HintRender(hint) : pkg.$view(hint);
             this.repaint();
             return this.hint;
         };
@@ -578,9 +645,17 @@ pkg.TextField = Class(pkg.Label, [
                                                 : null;
         };
 
+        this.getLines = function() {
+            return this.position == null ? -1 : this.position.metrics.getLines();
+        };
+
+        this.getMaxOffset = function() {
+            return this.position == null ? -1 : this.position.metrics.getMaxOffset();
+        };
+
         this.focusGained = function (e){
             if (this.position.offset < 0) {
-                this.position.setOffset(0);
+                this.position.setOffset(this.textAlign === zebra.layout.LEFT  || this.getLines() > 1 ? 0 : this.getMaxOffset());
             }
             else {
                 if (this.hint != null) this.repaint();
@@ -640,7 +715,7 @@ pkg.TextField = Class(pkg.Label, [
         this.clearSelection = function (){
             if (this.startOff >= 0){
                 var b = this.hasSelection();
-                this.endOff = this.startOff =  -1;
+                this.endOff = this.startOff = -1;
                 if (b) this.repaint();
             }
         };
@@ -677,13 +752,13 @@ pkg.TextField = Class(pkg.Label, [
          * @method setPosition
          */
         this.setPosition = function (p){
-            if (this.position != p){
-                if (this.position != null){
+            if (this.position != p) {
+                if (this.position != null) {
                     this.position.unbind(this);
                 }
                 this.position = p;
                 if (this.position != null) {
-                this.position.bind(this);
+                    this.position.bind(this);
                 }
                 this.invalidate();
             }
@@ -696,8 +771,7 @@ pkg.TextField = Class(pkg.Label, [
          * @method setCursorView
          */
         this.setCursorView = function (v){
-            // !!!
-            // cursor size should be set by property
+            // TODO: cursor size should be set by property
             this.curW = 1;
             this.curView = pkg.$view(v);
             //this.curW = this.curView != null ? this.curView.getPreferredSize().width : 1;
@@ -739,14 +813,18 @@ pkg.TextField = Class(pkg.Label, [
         this.mousePressed = function(e){
             if (e.isActionMask()) {
                 if (e.clicks > 1) {
-                    this.select(0, this.position.metrics.getMaxOffset());
+                    this.select(0, this.getMaxOffset());
                 }
                 else {
-                    if ((e.mask & KE.M_SHIFT) > 0) this.startSelection();
-                    else this.clearSelection();
-                    var p = this.getTextRowColAt(e.x - this.scrollManager.getSX() - this.getLeft(),
-                                                 e.y - this.scrollManager.getSY() - this.getTop());
-                    if (p != null) this.position.setRowCol(p[0], p[1]);
+                    if ((e.mask & KE.M_SHIFT) > 0) {
+                        this.startSelection();
+                    }
+                    else {
+                        this.clearSelection();
+                    }
+
+                    var p = this.getTextRowColAt(e.x, e.y);
+                    if (p != null) this.position.setRowCol(p.row, p.col);
                 }
             }
         };
@@ -774,23 +852,30 @@ pkg.TextField = Class(pkg.Label, [
             var sx = this.scrollManager.getSX(),
                 sy = this.scrollManager.getSY(),
                 l  = this.getLeft(),
-                t  = this.getTop();
+                t  = this.getTop(),
+                r  = this.getRight();
 
             try {
                 g.translate(sx, sy);
-                //!!! this code can be found in ViewPan.paint()
 
-                this.view.paint(g, l, t,
-                                this.width  - l - this.getRight(),
-                                this.height - t - this.getBottom(), this);
+                if (this.textAlign === zebra.layout.LEFT) {
+                    this.view.paint(g, l, t,
+                                    this.width  - l - r,
+                                    this.height - t - this.getBottom(), this);
+                }
+                else {
+                    this.view.paint(g, this.width - r - this.view.getPreferredSize().width, t,
+                                       this.width  - l - r,
+                                       this.height - t - this.getBottom(), this);
+                }
+
                 this.drawCursor(g);
-
             }
             catch(e) {
-                g.translate( -sx,  -sy);
+                g.translate(-sx, -sy);
                 throw e;
             }
-            g.translate( -sx,  -sy);
+            g.translate(-sx, -sy);
         };
     },
 

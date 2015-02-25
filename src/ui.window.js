@@ -458,13 +458,16 @@ pkg.Window = Class(pkg.StatePan, [
         };
 
         this.mouseDragged = function(e){
-            if (this.action > 0){
+            if (this.action > 0) {
                 if (this.action != MOVE_ACTION){
-                    var nw = this.psw + this.dx, nh = this.psh + this.dy;
+                    var nw = this.psw + this.dx,
+                        nh = this.psh + this.dy;
+
                     if (nw > this.minSize && nh > this.minSize) {
                         this.setSize(nw, nh);
                     }
                 }
+
                 this.dx = (e.x - this.px);
                 this.dy = (e.y - this.py);
                 if (this.action == MOVE_ACTION){

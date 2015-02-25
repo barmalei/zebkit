@@ -227,11 +227,11 @@ pkg.QS = Class([
     }
 ]);
 
-function $Request() {
+var $Request = pkg.$Request = function() {
     this.responseText = this.statusText = "";
     this.onreadystatechange = this.responseXml = null;
     this.readyState = this.status = 0;
-}
+};
 
 $Request.prototype.open = function(method, url, async, user, password) {
     if (location.protocol.toLowerCase() == "file:" ||

@@ -168,6 +168,7 @@ pkg.StringRender = Class(pkg.Render, [
              */
             this.font = font != null ? font : this.$clazz.font;
 
+
             /**
              * Color to be used to render the target string
              * @readOnly
@@ -202,7 +203,7 @@ pkg.StringRender = Class(pkg.Render, [
         this.setFont = function(f){
             var old = this.font;
             if (f != null && zebra.isString(f)) f = new pkg.Font(f);
-            if (f != old && (f == null || f.s != old.s)){
+            if (f != old) {
                 this.font = f;
                 if (this.owner != null && this.owner.isValid === false) {
                     this.owner.invalidate();
@@ -219,7 +220,7 @@ pkg.StringRender = Class(pkg.Render, [
 
             if (d != null && d.isEnabled === false) {
                 g.fillStyle = d != null && d.disabledColor != null ? d.disabledColor
-                                                                   : pkg.StringRender.disabledColor;
+                                                                   : this.$clazz.disabledColor;
             }
 
             g.fillText(this.target, x, y);
@@ -610,8 +611,9 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
          */
         this.setFont = function(f){
             var old = this.font;
+
             if (f && zebra.isString(f)) f = new pkg.Font(f);
-            if (f != old && (f == null || f.s != old.s)){
+            if (f != old) {
                 this.font = f;
                 this.invalidate(0, this.getLines());
                 return true;

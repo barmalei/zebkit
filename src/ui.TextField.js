@@ -420,6 +420,7 @@ pkg.TextField = Class(pkg.Label, [
                 this.curY = this.position.currentLine * (r.getLineHeight() + r.getLineIndent()) +
                             this.getTop();
             }
+
             this.curH = r.getLineHeight() - 1;
         };
 

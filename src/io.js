@@ -368,19 +368,14 @@ pkg.getRequest = function() {
                 catch(e) {
                     if (!e.message || e.message.toUpperCase().indexOf("NS_ERROR_FAILURE") < 0) {
                         // exception has to be re-instantiate to be Error class instance
-                        var ee = new Error(e.toString());
-                        throw ee;
+                        throw new Error(e.toString());
                     }
                 }
             };
         }
 
-        // CORS is supported out of box
-        if ("withCredentials" in r) {
-            return r;
-        }
-
-        return new $Request(); // IE
+        return ("withCredentials" in r) ? r  // CORS is supported out of box
+                                        : new $Request(); // IE
     }
 
     throw new Error("Archaic browser detected");

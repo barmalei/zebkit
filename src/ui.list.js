@@ -390,7 +390,6 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
             }
         };
 
-
         /**
          * Select the given list item. The method is called when an item
          * selection is triggered by a user interaction: key board, or mouse

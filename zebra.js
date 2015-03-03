@@ -7269,6 +7269,11 @@ pkg.Matrix = Class([
      *  @constructor
      */
     pkg.MouseWheelSupport = zebra.Class([
+        function $clazz() {
+            this.dxZoom = this.dyZoom = 20;
+            this.dxNorma = this.dyNorma = 80;
+        },
+
         function $prototype() {
             this.naturalDirection = true;
 
@@ -7279,31 +7284,30 @@ pkg.Matrix = Class([
              */
             this.wheeled  = function(e){
                 var owner = pkg.$mouseMoveOwner;
-
-                while (owner != null && zebra.instanceOf(owner, pkg.ScrollPan) === false) {
+                while (owner != null && owner.doScroll == null) {
                     owner = owner.parent;
                 }
 
-                if (owner != null && (owner.vBar != null || owner.hBar != null)) {
-                    var dv = e[this.wheelInfo.dy] * this.wheelInfo.dir;
+                if (owner != null) {
+                    var dy = e[this.wheelInfo.dy] != null ? e[this.wheelInfo.dy] * this.wheelInfo.dir : 0,
+                        dx = e[this.wheelInfo.dx] != null ? e[this.wheelInfo.dx] * this.wheelInfo.dir : 0;
 
-                    if (dv !== 0 && owner.vBar != null) {
-                        var bar = owner.vBar;
-                        if (Math.abs(dv) < 1) {
-                            dv *= bar.pageIncrement;
-                        }
-
-                        dv = Math.abs(dv) > 100 ? dv % 100 : dv;
-                        if (bar.isVisible === true) {
-                            var v =  bar.position.offset + dv;
-
-
-                            if (v >= 0) bar.position.setOffset(v);
-                            else        bar.position.setOffset(0);
-                        }
+                    // some version of FF can generates dx/dy  < 1
+                    if (Math.abs(dy) < 1) {
+                        dy *= this.$clazz.dyZoom;
                     }
 
-                    e.preventDefault();
+                    if (Math.abs(dx) < 1) {
+                        dx *= this.$clazz.dxZoom;
+                    }
+
+
+                    dy = Math.abs(dy) > this.$clazz.dyNorma ? dy % this.$clazz.dyNorma : dy;
+                    dx = Math.abs(dx) > this.$clazz.dxNorma ? dx % this.$clazz.dxNorma : dx;
+
+                    if (owner.doScroll(dx, dy, "wheel")) {
+                        e.preventDefault();
+                    }
                 }
             };
         },
@@ -7316,13 +7320,15 @@ pkg.Matrix = Class([
             var WHEEL = {
                 wheel: {
                     dy  : "deltaY",
+                    dx  : "deltaX",
                     dir : 1,
                     test: function() {
-                        return "onwheel" in document.createElement("div");
+                        return "WheelEvent" in window;
                     }
                 },
                 mousewheel: {
                     dy  : "wheelDelta",
+                    dx  : "wheelDeltaX",
                     dir : -1,
                     test: function() {
                         return document.onmousewheel !== undefined;
@@ -17078,6 +17084,26 @@ pkg.ScrollPan = Class(pkg.Panel, [
 
                 this.vrp();
             }
+        };
+
+        this.doScroll = function(dx, dy, source) {
+            var b = false;
+
+            if (dy !== 0 && this.vBar != null && this.vBar.isVisible == true) {
+                var v =  this.vBar.position.offset + dy;
+                if (v >= 0) this.vBar.position.setOffset(v);
+                else        this.vBar.position.setOffset(0);
+                b = true;
+            }
+
+            if (dx !== 0 && this.hBar != null && this.hBar.isVisible == true) {
+                var v =  this.hBar.position.offset + dx;
+                if (v >= 0) this.hBar.position.setOffset(v);
+                else        this.hBar.position.setOffset(0);
+                b = true;
+            }
+
+            return b;
         };
 
         /**

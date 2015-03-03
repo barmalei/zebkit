@@ -29,6 +29,7 @@
    * For the really big number for that can be used as a component coordinates (for instance large grid) a fix of 2S Context precision issue can be used by including 'src/fix2d.precision.js' script
    * TextField component supports right alignment 
    *  zebra.package(...) method has been used as more graceful and safe method of an own package definition.
+   *  UI components can handle mouse scroll (wheel) events by implementing "doScroll(dx, dy, source)" method.
    
 **4.2014 (Luda)**
 

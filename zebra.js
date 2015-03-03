@@ -365,7 +365,7 @@ function sProxyMethod(name, f) {
         }
         catch(e) {
             pkg.$caller = cm;
-            console.log("" + (e.stack ? e.stack : e));
+            console.log(name + "(" + arguments.length + ") " + (e.stack ? e.stack : e));
             throw e;
         }
     };
@@ -1113,6 +1113,8 @@ pkg.package = function(name, callback) {
     var p = zebra(name);
     for(var i = 1; i < arguments.length; i++) {
         var f = arguments[i];
+        // call in ready section since every call
+        // can have influence on ready state
         zebra.ready(function() {
             f.call(p, p, zebra.Class);
         });
@@ -3309,6 +3311,7 @@ pkg.Runner = function() {
                 }
                 catch(e) {
                     this.fireError(e);
+                    return;
                 }
 
                 // this.$busy === 0 means we have called synchronous task
@@ -3327,11 +3330,12 @@ pkg.Runner = function() {
     };
 
     this.fireError = function(e) {
-        if (this.$error == null)  {
+        if (this.$error == null) {
             this.$busy    = 0;
             this.$error   = e;
             this.$results = [];
         }
+        this.$schedule();
     };
 
     this.join = function() {
@@ -4777,7 +4781,16 @@ pkg.Bag = zebra.Class([
                             return zebra.io.GET(p);
                         }
 
-                        zebra.io.GET(p, this.join());
+                        var join = this.join();
+                        zebra.io.GET(p, function(r) {
+                            if (r.status != 200) {
+                                runner.fireError(new Error("Invalid JSON path"));
+                            }
+                            else {
+                                join.call($this, r.responseText);
+                            }
+                        });
+
                         return;
                     }
                 }
@@ -4785,13 +4798,6 @@ pkg.Bag = zebra.Class([
             })
             .
             run(function(s) {
-                if (typeof XMLHttpRequest !== "undefined" && s instanceof XMLHttpRequest) {
-                    if (s.status != 200) {
-                        throw new Error("Invalid JSON path");
-                    }
-                    s = s.responseText;
-                }
-
                 if (zebra.isString(s)) {
                     try {
                         return JSON.parse(s);
@@ -4800,7 +4806,6 @@ pkg.Bag = zebra.Class([
                         throw new Error("JSON format error");
                     }
                 }
-
                 return s;
             })
             .
@@ -5252,19 +5257,14 @@ pkg.getRequest = function() {
                 catch(e) {
                     if (!e.message || e.message.toUpperCase().indexOf("NS_ERROR_FAILURE") < 0) {
                         // exception has to be re-instantiate to be Error class instance
-                        var ee = new Error(e.toString());
-                        throw ee;
+                        throw new Error(e.toString());
                     }
                 }
             };
         }
 
-        // CORS is supported out of box
-        if ("withCredentials" in r) {
-            return r;
-        }
-
-        return new $Request(); // IE
+        return ("withCredentials" in r) ? r  // CORS is supported out of box
+                                        : new $Request(); // IE
     }
 
     throw new Error("Archaic browser detected");
@@ -8598,10 +8598,17 @@ pkg.Bag = Class(zebra.util.Bag, [
         if (cb != null) {
             zebra.busy();
             try {
-                return this.$super(s, function() {
+                if (cb != null) {
+                    return this.$super(s, function() {
+                        zebra.ready();
+                        cb.apply(this, arguments);
+                    });
+                }
+                else {
+                    var r = this.$super(s);
                     zebra.ready();
-                    cb.apply(this, arguments);
-                });
+                    return r;
+                }
             }
             catch(e) {
                 zebra.ready();
@@ -10888,7 +10895,7 @@ pkg.PaintManager = Class(pkg.Manager, [
 
                         try {
 
-                            console.log("Paintmanager.repaint() $timer: " +  canvas.$da.x + "," + canvas.$da.y + "," + canvas.$da.width + "," + canvas.$da.height);
+                         //   console.log("Paintmanager.repaint() $timer: " +  canvas.$da.x + "," + canvas.$da.y + "," + canvas.$da.width + "," + canvas.$da.height);
 
                             g.translate(canvas.x, canvas.y);
                             g.clipRect(canvas.$da.x,
@@ -12616,9 +12623,6 @@ pkg.zCanvas = Class(pkg.Panel, [
             var names = "onpointerdown" in window ? [ "pointerdown", "pointerup", "pointermove", "pointerenter", "pointerleave" ]
                                                   : [ "MSPointerDown", "MSPointerUp", "MSPointerMove", "MSPointerEnter", "MSPointerLeave" ];
 
-
-            console.log("REG !!!!!");
-
             this.canvas.addEventListener(names[0], function(e) {
                 if (e.pointerType == "touch") ME_STUB.touch = e;
                 $this.$mousePressed(e.pointerId, e,  e.button === 0 ? ME.LEFT_BUTTON
@@ -13382,6 +13386,7 @@ pkg.StringRender = Class(pkg.Render, [
              */
             this.font = font != null ? font : this.$clazz.font;
 
+
             /**
              * Color to be used to render the target string
              * @readOnly
@@ -13416,7 +13421,7 @@ pkg.StringRender = Class(pkg.Render, [
         this.setFont = function(f){
             var old = this.font;
             if (f != null && zebra.isString(f)) f = new pkg.Font(f);
-            if (f != old && (f == null || f.s != old.s)){
+            if (f != old) {
                 this.font = f;
                 if (this.owner != null && this.owner.isValid === false) {
                     this.owner.invalidate();
@@ -13433,7 +13438,7 @@ pkg.StringRender = Class(pkg.Render, [
 
             if (d != null && d.isEnabled === false) {
                 g.fillStyle = d != null && d.disabledColor != null ? d.disabledColor
-                                                                   : pkg.StringRender.disabledColor;
+                                                                   : this.$clazz.disabledColor;
             }
 
             g.fillText(this.target, x, y);
@@ -13824,8 +13829,9 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
          */
         this.setFont = function(f){
             var old = this.font;
+
             if (f && zebra.isString(f)) f = new pkg.Font(f);
-            if (f != old && (f == null || f.s != old.s)){
+            if (f != old) {
                 this.font = f;
                 this.invalidate(0, this.getLines());
                 return true;
@@ -19690,6 +19696,7 @@ pkg.TextField = Class(pkg.Label, [
                 this.curY = this.position.currentLine * (r.getLineHeight() + r.getLineIndent()) +
                             this.getTop();
             }
+
             this.curH = r.getLineHeight() - 1;
         };
 
@@ -20662,7 +20669,6 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
                 }
             }
         };
-
 
         /**
          * Select the given list item. The method is called when an item

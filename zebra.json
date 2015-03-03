@@ -225,6 +225,10 @@
         "font" : "@font"
     },
 
+    "PasswordText" : {
+        "$inherit" : [ "TextRender"]
+    },
+
     "CompositeEvStatePan": {
         "layout"     : { "$FlowLayout": [ "center","center", "horizontal",2 ] },
         "focusMarker": "@borders.dot"

@@ -77,6 +77,7 @@ pkg.Runner = function() {
                 }
                 catch(e) {
                     this.fireError(e);
+                    return;
                 }
 
                 // this.$busy === 0 means we have called synchronous task
@@ -95,11 +96,12 @@ pkg.Runner = function() {
     };
 
     this.fireError = function(e) {
-        if (this.$error == null)  {
+        if (this.$error == null) {
             this.$busy    = 0;
             this.$error   = e;
             this.$results = [];
         }
+        this.$schedule();
     };
 
     this.join = function() {
@@ -1545,7 +1547,16 @@ pkg.Bag = zebra.Class([
                             return zebra.io.GET(p);
                         }
 
-                        zebra.io.GET(p, this.join());
+                        var join = this.join();
+                        zebra.io.GET(p, function(r) {
+                            if (r.status != 200) {
+                                runner.fireError(new Error("Invalid JSON path"));
+                            }
+                            else {
+                                join.call($this, r.responseText);
+                            }
+                        });
+
                         return;
                     }
                 }
@@ -1553,13 +1564,6 @@ pkg.Bag = zebra.Class([
             })
             .
             run(function(s) {
-                if (typeof XMLHttpRequest !== "undefined" && s instanceof XMLHttpRequest) {
-                    if (s.status != 200) {
-                        throw new Error("Invalid JSON path");
-                    }
-                    s = s.responseText;
-                }
-
                 if (zebra.isString(s)) {
                     try {
                         return JSON.parse(s);
@@ -1568,7 +1572,6 @@ pkg.Bag = zebra.Class([
                         throw new Error("JSON format error");
                     }
                 }
-
                 return s;
             })
             .

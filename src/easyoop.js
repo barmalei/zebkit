@@ -365,7 +365,7 @@ function sProxyMethod(name, f) {
         }
         catch(e) {
             pkg.$caller = cm;
-            console.log("" + (e.stack ? e.stack : e));
+            console.log(name + "(" + arguments.length + ") " + (e.stack ? e.stack : e));
             throw e;
         }
     };
@@ -1113,6 +1113,8 @@ pkg.package = function(name, callback) {
     var p = zebra(name);
     for(var i = 1; i < arguments.length; i++) {
         var f = arguments[i];
+        // call in ready section since every call
+        // can have influence on ready state
         zebra.ready(function() {
             f.call(p, p, zebra.Class);
         });

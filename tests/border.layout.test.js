@@ -11,7 +11,7 @@ eval(zebra.Import("layout"));
 var assert = zebra.assert;
 
 
-var MIX = [ 
+var MIX = [
     function () {
         this.top = this.bottom = this.left = this.right = 0;
     },
@@ -27,7 +27,7 @@ var MIX = [
     function  getLeft() {
         return this.left;
     },
-    
+
     function  getRight() {
         return this.right;
     },
@@ -45,7 +45,7 @@ function assertMetrics(c,x,y,w,h) {
     assert(c.height, h);
 }
 
-zebra.runTests("Zebra layout test",
+zebra.runTests("BorderLayout test",
 
     function test_layoutable() {
         var l = new Layoutable();
@@ -61,7 +61,7 @@ zebra.runTests("Zebra layout test",
         assert(l.isValid, false);
         assert(l.isLayoutValid, false);
         assert(l.getPreferredSize().width, 10);
-        assert(l.getPreferredSize().height, 10);        
+        assert(l.getPreferredSize().height, 10);
 
         assert(l.isValid, true);
         assert(l.isLayoutValid, false);
@@ -82,16 +82,16 @@ zebra.runTests("Zebra layout test",
 
     function test_borderlayout() {
         var bl = new BorderLayout();
-        assert(bl.hgap, 0); 
-        assert(bl.vgap, 0); 
+        assert(bl.hgap, 0);
+        assert(bl.vgap, 0);
 
         var bl = new BorderLayout(2,3);
-        assert(bl.hgap, 2); 
-        assert(bl.vgap, 3); 
+        assert(bl.hgap, 2);
+        assert(bl.vgap, 3);
 
         var bl = new BorderLayout(10);
-        assert(bl.hgap, 10); 
-        assert(bl.vgap, 10); 
+        assert(bl.hgap, 10);
+        assert(bl.vgap, 10);
 
         function tbl(w, h, hg, vg) {
 
@@ -119,7 +119,7 @@ zebra.runTests("Zebra layout test",
             var tp = new Layoutable();
             t.add(TOP, tp);
 
-            t.validate();    
+            t.validate();
             assertMetrics(l,4,14,10,182);
             assertMetrics(c,14,14,182,182);
             assertMetrics(tp, 4, 4, 192, 10);
@@ -127,7 +127,7 @@ zebra.runTests("Zebra layout test",
             var r = new Layoutable();
             t.add(RIGHT, r);
 
-            t.validate();    
+            t.validate();
             assertMetrics(l, 4, 14, 10,182);
             assertMetrics(c, 14, 14, 172, 182);
             assertMetrics(tp, 4,4,192,10);
@@ -136,7 +136,7 @@ zebra.runTests("Zebra layout test",
             var bt = new Layoutable();
             t.add(BOTTOM, bt);
 
-            t.validate();    
+            t.validate();
             assertMetrics(l, 4, 14, 10,172);
             assertMetrics(c, 14, 14, 172, 172);
             assertMetrics(tp, 4,4,192,10);

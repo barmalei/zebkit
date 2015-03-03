@@ -152,37 +152,40 @@
 
                     function testGET() {
                         assert(zebra.io.GET(furl), txt, "Test sync get");
-                        zebra.io.GET(furl, function(r) {
+
+                        zebra.io.GET(furl, this.assertCallback(function(r) {
                             assert(this.url, furl);
                             assert(r.status, 200);
                             assert(r.readyState, 4);
                             assert(txt, r.responseText, "Test async 2");
-                        });
+                        }));
                     },
 
                     function testGET404() {
                         zebra.assertException(function() { zebra.io.GET(wfurl) },  Error);
 
-                        try { zebra.io.GET(wfurl); }
+                        try {
+                            zebra.io.GET(wfurl);
+                        }
                         catch(e) {
                             assert(e.request.status != 200, true);
                             assert(e.request.readyState, 4);
                         }
 
-                        zebra.io.GET(wfurl, function(r) {
+                        zebra.io.GET(wfurl, this.assertCallback(function(r) {
                             assert(r.status != 200, true);
                             assert(r.readyState, 4);
-                        });
+                        }));
                     },
 
                     function testPOST() {
                         assert(zebra.io.POST(furl), txt);
-                        zebra.io.POST(furl, function(r) {
+                        zebra.io.POST(furl, this.assertCallback(function(r)  {
                             assert(r.status, 200);
                             assert(r.readyState, 4);
                             assert(r.responseText, txt);
                             assert(this.url, furl);
-                        });
+                        }));
                     },
 
                     function testPOST_404() {
@@ -192,12 +195,12 @@
                     function _testEchoPOST() {
                         var data = "echo=!!!!!", txt = "!!!!!";
                         zebra.assert(zebra.io.POST(eurl, data).trim(), txt);
-                        zebra.io.POST(eurl, data, function(r) {
+                        zebra.io.POST(eurl, data, this.assertCallback(function(r) {
                             zebra.assert(r.status, 200);
                             zebra.assert(r.readyState, 4);
                             zebra.assert(r.responseText.trim(), txt);
                             zebra.assert(this.url, eurl);
-                        });
+                        }));
 
                         assert(zebra.io.POST(eurl, {"echo":"test2"}).trim(), "test2");
                     },
@@ -373,13 +376,13 @@
                          assert(zebra.io.QS.append(url5, {a:10, b:18}), url5 + "?a=10&b=18", "10");
                     },
 
-                    function testJSON_RPC() {
+                    function _testJSON_RPC() {
                         // var url = "http://repo.gravitysoft.org/test/testjsonserver.php"
                         //testRPC("http://192.168.1.10:8091/jrpc", zebra.io.JRPC);
                         testRPC("http://192.168.178.11:8091/jrpc", zebra.io.JRPC);
                     },
 
-                    function testXML_RPC() {
+                    function _testXML_RPC() {
                         //testRPC("http://10.26.214.170:8080/xrpc", zebra.io.XRPC);
                         //testRPC("http://192.168.1.10:8090/xrpc", zebra.io.XRPC);
                         testRPC("http://192.168.178.11:8090/xrpc", zebra.io.XRPC);

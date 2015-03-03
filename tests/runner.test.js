@@ -11,6 +11,9 @@ var assert = zebra.assert, Class = zebra.Class,
     assertFDefined = zebra.assertFDefined,
     Runner = zebra.util.Runner;
 
+
+zebra.$useSyncTest = true;
+
 zebra.runTests("Runner tests",
     function test_runner_state() {
         var runner = new Runner();

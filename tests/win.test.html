@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<META http-equiv="X-UA-Compatible" content="IE=9">
 
 		<script src='../src/easyoop.js' 	 type='text/javascript'></script>
 	    <script src='../src/util.js' type='text/javascript'></script>
@@ -20,12 +21,12 @@
 	    <script src='../src/ui.grid.js' type='text/javascript'></script>
 	    <script src='../src/ui.designer.js' type='text/javascript'></script>
 
-        
+
 		<script type='text/javascript'>
 		    zebra.ready(function() {
-				// import all classes, functions and cosntans from 
+				// import all classes, functions and cosntans from
 				// zebra.ui, zebra.layout packages
-				eval(zebra.Import("ui", "layout"));			
+				eval(zebra.Import("ui", "layout"));
 
 				zebra.ui.Panel.extend([
 					function getTooltip(target, x, y) {
@@ -40,16 +41,20 @@
 
 				function makeWin() {
 					var w1 = new Window();
-					w1.root.setLayout(new FlowLayout());
+
+					w1.root.setLayout(new BorderLayout(4));
+
+					var buttons = new Panel();
+					buttons.setLayout(new FlowLayout());
 					var b1 = new Button("mdi");
 					var b2 = new Button("modal");
-					w1.root.add(b1);
-					w1.root.add(b2);
+					buttons.add(b1);
+					buttons.add(b2);
 
 					w1.setSize(200,200);
 					w1.setLocation(x,y);
-					x+=30;
-					y+=30;
+					x += 30;
+					y += 30;
 
 					b1.bind(function() {
 						zebra.ui.showWindow(c, "mdi", makeWin());
@@ -59,15 +64,27 @@
 						zebra.ui.showWindow(c, "modal", makeWin());
 					});
 
+
+					//w1.root.add("top", buttons);
+					//w1.root.add("center", new ScrollPan(new TextArea()));
+
 					return w1;
 				}
 
 				// create canvas
 			    var c = new zCanvas(400, 300);
-			    c.fullScreen();
 
 				zebra.ui.showModalWindow(c, makeWin());
 			    zebra.ui.showModalWindow(c, makeWin());
+
+
+			    c.root.setLayout(new FlowLayout());
+			  //  c.root.add(new ImagePan("../samples/images/gripens.jpg"));
+
+			    var ta = new TextArea("Test \n test 2")
+			    c.root.add(ta);
+
+			    console.log("" + ta.$clazz.$name);
 
 	 		});
 
@@ -75,6 +92,6 @@
 	</head>
 
 	<body bgcolor="#EEEEEE" align="center" style="padding:15px;">
-	    
+
 	</body>
 </html>

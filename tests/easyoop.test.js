@@ -4,6 +4,7 @@ if (typeof(zebra) === "undefined") {
     else p = arguments[0] + "/";
     load(p + 'src/easyoop.js');
     load(p + 'src/extras.js');
+    load(p + 'src/util.js');
     load(p + 'src/tools.js');
 }
 
@@ -2187,21 +2188,27 @@ if (typeof(zebra) === "undefined") {
                         ]);
                     }
                 ]);
+
+                zebra.$resolveClassNames();
+
+                assert(zebra.test != null, true);
+                assert(zebra.test.A != null, true);
+                assert(zebra.test.AA != null, true);
+                assert(zebra.test.A.B != null, true);
+                assert(zebra.test.AA.BB != null, true);
+
+                assert(zebra.test.A.$name, "A");
+                assert(zebra.test.A.B.$name, "A.B");
+                assert(zebra.test.A.B.A.$name, "A.B.A");
+                assert(zebra.test.A.a, 100);
+
+                assert(zebra.test.AA.$name, "AA");
+                assert(zebra.test.AA.a, 100);
+                assert(zebra.test.AA.BB.$name, "AA.BB");
+                assert(zebra.test.AA.BB.A.$name, "AA.BB.A");
+                assert(zebra.test.AA.B.$name, "A.B");
+                assert(zebra.test.AA.B.A.$name, "A.B.A");
             });
-
-            zebra.$resolveClassNames();
-
-            assert(zebra.test.A.$name, "A");
-            assert(zebra.test.A.B.$name, "A.B");
-            assert(zebra.test.A.B.A.$name, "A.B.A");
-            assert(zebra.test.A.a, 100);
-
-            assert(zebra.test.AA.$name, "AA");
-            assert(zebra.test.AA.a, 100);
-            assert(zebra.test.AA.BB.$name, "AA.BB");
-            assert(zebra.test.AA.BB.A.$name, "AA.BB.A");
-            assert(zebra.test.AA.B.$name, "A.B");
-            assert(zebra.test.AA.B.A.$name, "A.B.A");
         }
     );
 })();

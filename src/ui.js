@@ -3862,6 +3862,26 @@ pkg.ScrollPan = Class(pkg.Panel, [
             }
         };
 
+        this.doScroll = function(dx, dy, source) {
+            var b = false;
+
+            if (dy !== 0 && this.vBar != null && this.vBar.isVisible == true) {
+                var v =  this.vBar.position.offset + dy;
+                if (v >= 0) this.vBar.position.setOffset(v);
+                else        this.vBar.position.setOffset(0);
+                b = true;
+            }
+
+            if (dx !== 0 && this.hBar != null && this.hBar.isVisible == true) {
+                var v =  this.hBar.position.offset + dx;
+                if (v >= 0) this.hBar.position.setOffset(v);
+                else        this.hBar.position.setOffset(0);
+                b = true;
+            }
+
+            return b;
+        };
+
         /**
          * Scroll manager listener method that is called every time
          * a target component has been scrolled

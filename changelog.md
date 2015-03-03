@@ -1,4 +1,4 @@
-**12.2014 (Anna)**
+**03.2015 (Anna)**
 
    * New UI component tree. Add UI components directly as tree nodes  
    * Grid cell marker mode support
@@ -17,13 +17,18 @@
    * remove possibility to composite UI JSON configuration 
    * remove %root% variable from JSON BAG, use relative to loaded JSON path or absolute path  
    * zebra sources has been moved from "lib/zebra" to "src"
-   * json bag has been updated:
+   * json bag utility class has been updated:
       - Use classAliases property to define short names for classes
       - Use variables property to define variables
       - Variables can be classes and structure
       - loadByUrl has been removed, use in all cases "load" method instead
-   * new zebra.Runner class has been added. It provides graceful way to represent sync and async code as sequence of tasks
+      - load can be run asynchronously 
+   * new "zebra.Runner" class has been added. It provides graceful way to represent sync and async code as sequence of tasks
    * virtual keyboard hindi layout has been added
+   * Matrix model has been re-worked to be less resource consuming 
+   * For the really big number for that can be used as a component coordinates (for instance large grid) a fix of 2S Context precision issue can be used by including 'src/fix2d.precision.js' script
+   * TextField component supports right alignment 
+   *  zebra.package(...) method has been used as more graceful and safe method of an own package definition.
    
 **4.2014 (Luda)**
 

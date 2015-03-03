@@ -1037,10 +1037,17 @@ pkg.Bag = Class(zebra.util.Bag, [
         if (cb != null) {
             zebra.busy();
             try {
-                return this.$super(s, function() {
+                if (cb != null) {
+                    return this.$super(s, function() {
+                        zebra.ready();
+                        cb.apply(this, arguments);
+                    });
+                }
+                else {
+                    var r = this.$super(s);
                     zebra.ready();
-                    cb.apply(this, arguments);
-                });
+                    return r;
+                }
             }
             catch(e) {
                 zebra.ready();
@@ -3327,7 +3334,7 @@ pkg.PaintManager = Class(pkg.Manager, [
 
                         try {
 
-                            console.log("Paintmanager.repaint() $timer: " +  canvas.$da.x + "," + canvas.$da.y + "," + canvas.$da.width + "," + canvas.$da.height);
+                         //   console.log("Paintmanager.repaint() $timer: " +  canvas.$da.x + "," + canvas.$da.y + "," + canvas.$da.width + "," + canvas.$da.height);
 
                             g.translate(canvas.x, canvas.y);
                             g.clipRect(canvas.$da.x,
@@ -5054,9 +5061,6 @@ pkg.zCanvas = Class(pkg.Panel, [
         if ("onpointerdown" in window || "onmspointerdown" in window) {
             var names = "onpointerdown" in window ? [ "pointerdown", "pointerup", "pointermove", "pointerenter", "pointerleave" ]
                                                   : [ "MSPointerDown", "MSPointerUp", "MSPointerMove", "MSPointerEnter", "MSPointerLeave" ];
-
-
-            console.log("REG !!!!!");
 
             this.canvas.addEventListener(names[0], function(e) {
                 if (e.pointerType == "touch") ME_STUB.touch = e;

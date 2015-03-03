@@ -21,6 +21,9 @@ var ColumnsAlignmentProvider = Class(zebra.ui.grid.DefViews, [
         if (row == 1 && col == 1) {
             tf.setColor("white");
         }
+        else {
+            tf.setColor("black");
+        }
         return tf;
     },
 
@@ -324,9 +327,8 @@ function customCellAlignmentGrid() {
         caption.putTitle(i, titles[i]);
     }
 
-
     caption.setTitleAlignments(0, LEFT, CENTER);
-    caption.setTitleAlignments(1, RIGHT, CENTER);
+    caption.setTitleAlignments(1, CENTER, CENTER);
     caption.setTitleAlignments(2, RIGHT, CENTER);
     caption.render.setFont(new Font("Helvetica", "bold", 14));
     caption.isResizable = false;

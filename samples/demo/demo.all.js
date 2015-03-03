@@ -235,6 +235,8 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         p.add(ctr, new BoldLabel("Text field:"));
         p.add(ctr, tf);
 
+
+
         tf = new TextField(new zebra.data.SingleLineTxt("dsd", 5));
         tf.setPreferredSize(150, -1);
         p.add(ctr, new BoldLabel("Fixed size(5):"));
@@ -341,7 +343,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
 
     function createComboPan() {
         var p = new Panel(new ListLayout(8));
-        
+
         var cb = new Combo(["Item 1", "Item 2", "Item 3"]);
         cb.list.select(0);
         p.add(cb);
@@ -935,6 +937,9 @@ var ColumnsAlignmentProvider = Class(zebra.ui.grid.DefViews, [
         if (row == 1 && col == 1) {
             tf.setColor("white");
         }
+        else {
+            tf.setColor("black");
+        }
         return tf;
     },
 
@@ -1238,9 +1243,8 @@ function customCellAlignmentGrid() {
         caption.putTitle(i, titles[i]);
     }
 
-
     caption.setTitleAlignments(0, LEFT, CENTER);
-    caption.setTitleAlignments(1, RIGHT, CENTER);
+    caption.setTitleAlignments(1, CENTER, CENTER);
     caption.setTitleAlignments(2, RIGHT, CENTER);
     caption.render.setFont(new Font("Helvetica", "bold", 14));
     caption.isResizable = false;

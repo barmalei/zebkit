@@ -47,6 +47,8 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         p.add(ctr, new BoldLabel("Text field:"));
         p.add(ctr, tf);
 
+
+
         tf = new TextField(new zebra.data.SingleLineTxt("dsd", 5));
         tf.setPreferredSize(150, -1);
         p.add(ctr, new BoldLabel("Fixed size(5):"));
@@ -153,7 +155,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
 
     function createComboPan() {
         var p = new Panel(new ListLayout(8));
-        
+
         var cb = new Combo(["Item 1", "Item 2", "Item 3"]);
         cb.list.select(0);
         p.add(cb);

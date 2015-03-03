@@ -336,7 +336,41 @@ zebra.runTests("Zebra util objects bag",
         assert(bag.root.a.d, 222);
         assert(bag.root.cc, 2000);
         assert(typeof bag.root.c  == 'function', true);
+    },
+
+    function test_fileload() {
+        if (zebra.isInBrowser) {
+            var bag = new Bag({});
+            assertException(function() {
+                bag.load("test2.json");
+            });
+
+            var bag = new Bag({});
+            bag.load("json.bag.test.json");
+            assert(bag.root.test, 100);
+        }
+        else {
+            zebra.warn("Test case is ignored, since browser context cannot be detected");
+        }
+    },
+
+    function test_fileasyncload() {
+        if (zebra.isInBrowser) {
+            var bag = new Bag({});
+            bag.load("test2.json", this.assertCallback(function(e) {
+                assert(e instanceof Error, true);
+            }));
+
+
+            var bag = new Bag({});
+            bag.load("json.bag.test.json", this.assertCallback(function() {
+                assert(bag.root.test, 100);
+            }));
+        }
+        else {
+            zebra.warn("Test case is ignored, since browser context cannot be detected");
+        }
     }
 );
 
-A = Class([ function a() { return "!!!"; } ]);
+

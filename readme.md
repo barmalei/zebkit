@@ -11,76 +11,76 @@ v11.2014 (Anna)
 
 ## What is Zebra ?
 
-Zebra is JavaScript library that implements graceful and easy to use OOP concept together with rich set of UI components, decoupled UI engine, IO and other packages. UI are fully based on HTML5 Canvas element. This approach differs from traditional WEB UI, where user interface is built around HTML DOM and than "colored" with CSS. 
+Zebra is a JavaScript library that implements a graceful and easy to use OOP concept together with a rich set of UI components, decoupled UI engine, IO and other packages. UI are fully based on the HTML5 Canvas element. This approach differs from traditional WEB UI, where user interface is built around HTML DOM and then "colored" with CSS.
 
 ### Features
 
-   *  Zebra easy OOP concept JavaScript: classes, interfaces, overriding, overloading, constructors, packaging, anonymous class, access to super class methods, mixing, etc
-   *  **Zebra UI Engine that can be used as powerful basis for:**
-      * Pixel by pixel UI components rendering controlling 
+   *  Zebra's easy OOP concept JavaScript: classes, interfaces, overriding, overloading, constructors, packaging, anonymous class, access to super class methods, mixing, etc
+   *  **Zebra UI Engine can be used as powerful basis for:**
+      * Pixel by pixel UI components rendering controlling
       * Simple and flexible events (keyboard, mouse, etc) manipulation, advanced event technique to develop composite UI components
-      * Layouting UI components using number of predefined layout managers
-      * Easy developing of own layout managers 
+      * Laying out UI components using a number of predefined layout managers
+      * Easy developing of own layout managers
       * Full control of UI components rendering
       * **Play video in Zebra UI panel**
-      * **Flash-free, pure web native clipboard paste and copy supporting**
-      * **Font metrics calculation** 
+      * **Flash-free, pure web native clipboard paste and copy support**
+      * **Font metrics calculation**
       * Layered UI architecture
-      * and many other ...
-   *  Zebra rich UI Components set developed basing on Zebra UI Engine:
+      * and many more ...
+   *  Zebra's rich UI Components set is developed based on the Zebra UI Engine:
       * More than 40 various UI components
       * Look and feel customization
       * Complex UI components: Grid, Tree, Tabs, Combo, Designer, Scroll, Menu, etc
-      * Thanks to easy OOP concept and proper design: expendable and fully customizable UI components
+      * Thanks to easy OOP concept and proper design: expandable and fully customizable UI components
       * **Simple data model description**
-      * **HTML DOM as part of Zebra UI** 
-      * and many other ...
+      * **HTML DOM as part of Zebra UI**
+      * and many more ...
    *  **JSON as Zebra UI form descriptive language**
    *  **JSON as Zebra UI look and feel configuration**
    *  **Zebra IO**   
       *  GET/POST/etc Ajax requests  
       *  XML-RPC, JSON-RPC Service communication
       *  binary data handling
-   * **Mobile devices support** 
-   	  * **Touch screen support**
-   	  * **Inertial scrolling**
-   	  * **Virtual keyboard input**
+   * **Mobile devices support**
+      * **Touch screen support**
+      * **Inertial scrolling**
+      * **Virtual keyboard input**
 
 
-### Build and run zebra demos 
+### Build and run zebra demos
 
-To build zebra artifacts and run zebra samples you have to install nodejs (http://nodejs.org/) on your PC. Than go to zebra home directory and deploy required node JS packages:
+To build zebra artifacts and run zebra samples you have to install nodejs (http://nodejs.org/) on your PC. Then go to zebra home directory and deploy required node JS packages:
 
 ```bash
-    $ npm install 
+    $ npm install
 ```
 
-Than re-build zebra artifacts:
+Then re-build zebra artifacts:
 ```bash
-    $ gulp 
+    $ gulp
 ```
 
-And if you want open demos and samples on your in a browser start simple test HTTP server:
+And if you want to open demos and samples on your computer in a browser start the simple test HTTP server:
 ```bash
     $ gulp http
 ```
 
-To track changes and zebra artifact re-building you should start watch task: 
+To track changes and zebra artifact re-building you should start the watch task:
 ```bash
     $ gulp watch
 ```
 
-To generate api doc install once yuidoc:
+To generate api doc install yuidoc once:
 ```bash
    $ [sudo] npm -g install yuidocjs.
 ```
-and than run the following command from zebra home:
+and then run the following command from zebra home:
 ```bash
    $ yuidoc -t yuidoc/themes/default -c yuidoc/yuidoc.json -n -C -o apidoc .
 ```
 
 
-Open demos in a browser: http://127.0.0.1:8090/ 
+Open demos in a browser: http://127.0.0.1:8090/
 
 ### Zebra package structure:
 
@@ -94,17 +94,17 @@ Open demos in a browser: http://127.0.0.1:8090/
         +--- package.json # nodejs package descriptor
         +--- index.html   # index WEB page to see main samples and demos
         +--- zebra.png         # zebra (Runtime) UI elements icons
-        +--- zebra.json        # zebra (Runtime) JSON configuration 
-        +--- zebra.js          # Zebra (Runtime) JS code 
-        +--- zebra.min.js      # minified (Runtime) Zebra JS code 
+        +--- zebra.json        # zebra (Runtime) JSON configuration
+        +--- zebra.js          # Zebra (Runtime) JS code
+        +--- zebra.min.js      # minified (Runtime) Zebra JS code
         +--- zebra.runtime.zip # zipped all you need in runtime
       ```
 
-**Use artifacts packaged in "zebra.runtime.zip" file if you need to keep zebra on your web site. Unpack it in you web folder and include "zebra.min.js" in your HTML page.**
+**Use artifacts packaged in "zebra.runtime.zip" file if you need to keep zebra on your web site. Unpack it in your web folder and include "zebra.min.js" in your HTML page.**
 
 ### Simple UI Zebra application
 
-To write the first application **no zebra stuff on you PC has to be downloaded and deployed (you need only this readme file :).** Let's start writing simple Zebra HTML following traditional style:
+To write the first application **no zebra stuff on your PC has to be downloaded and deployed (you need only this readme file :).** Let's start writing simple Zebra HTML following traditional style:
 
 ```html
 <!DOCTYPE html>
@@ -206,7 +206,7 @@ Load the JSON UI form definition as it is illustrated below:
 
 ### Native clipboard support
 
-Zebra support browser native clipboard. The implementation doesn't require any Flash or other plug-in installed. It is pure WEB based solution !
+Zebra supports native browser clipboard. The implementation doesn't require any Flash or other plug-in installed. It is pure WEB based solution !
 
 By implementing special methods __"clipCopy()"__  and/or __"clipPaste(s)"__ a focusable UI component can start participating in clipboard data exchange. For instance:
 
@@ -265,7 +265,7 @@ By implementing special methods __"clipCopy()"__  and/or __"clipPaste(s)"__ a fo
 
 ### UI look and feel customization
 
-Default values of UI components properties can be controlled by JSON configuration. You can define an own JSON configuration to override default Zebra configurations (that is stored in "zebra.json"). For instance, imagine we need to define new background and font for __"zebra.ui.Button"__ component. It can be done by providing the following JSON configuration file:
+Default values of UI components properties can be controlled by JSON configuration. You can define your own JSON configuration to override default Zebra configurations (that is stored in "zebra.json"). For instance, imagine we need to define new background and font for __"zebra.ui.Button"__ component. It can be done by providing the following JSON configuration file:
 
 ```json
 {
@@ -276,7 +276,7 @@ Default values of UI components properties can be controlled by JSON configurati
 }
 ```
 
-As soon as the file will be added in configuration chain, every new instantiated Button component will get the new font and background properties values. 
+As soon as the file is added in the configuration chain, every new Button instance will get the new font and background properties' values.
 
 
 ### IO API: HTTP POST/GET, JSON-RPC or XML-RPC
@@ -349,5 +349,5 @@ http://www.apache.org/licenses/LICENSE-2.0.html
 ### Contact
 
    * WEB     : http://www.zebkit.org
-   * e-mail  : ask@zebkit.org 
+   * e-mail  : ask@zebkit.org
    * linkedin: http://nl.linkedin.com/pub/andrei-vishneuski/14/525/34b/

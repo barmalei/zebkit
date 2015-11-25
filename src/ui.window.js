@@ -1,8 +1,7 @@
 (function(pkg, Class) {
 
 var KE = pkg.KeyEvent, task = zebra.util.task, L = zebra.layout,
-    WIN_OPENED = 1, WIN_CLOSED = 2, WIN_ACTIVATED = 3, WIN_DEACTIVATED = 4,
-    WinListeners = zebra.util.ListenersClass("winOpened", "winActivated");
+    WIN_OPENED = 1, WIN_CLOSED = 2, WIN_ACTIVATED = 3, WIN_DEACTIVATED = 4;
 
 /**
  * Show the given UI component as a modal window
@@ -62,7 +61,7 @@ pkg.showPopupMenu = function(context, menu) {
 
 /**
  * Activate the given window or a window the specified component belongs
- * @param  {zebra.ui.Panel} win [description]
+ * @param  {zebra.ui.Panel} win an UI component to be activated
  * @api zebra.ui.activateWindow()
  * @method activateWindow
  */
@@ -116,9 +115,10 @@ pkg.activateWindow = function(win) {
  * @constructor
  * @extends {zebra.ui.BaseLayer}
  */
-pkg.WinLayer = Class(pkg.BaseLayer, [
+pkg.WinLayer = Class(pkg.HtmlCanvas, [
     function $clazz() {
         this.ID = "win";
+        this.Listeners = zebra.util.ListenersClass("winOpened", "winActivated");
     },
 
     function $prototype() {
@@ -126,10 +126,10 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
             return this.activeWin != null;
         };
 
-        this.layerMousePressed = function(x,y,mask){
-            var cnt = this.kids.length;
+        this.layerPointerPressed = function(e){
+            var cnt = this.kids.length, x = e.x, y = e.y;
             if (cnt > 0) {
-                // check if mouse pressed has occurred in the topest window since
+                // check if pointer pressed has occurred in the topest window since
                 // this is the most probable case
                 if (this.activeWin != null && this.indexOf(this.activeWin) == cnt - 1) {
                     var x1 = this.activeWin.x,
@@ -168,10 +168,10 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
             return false;
         };
 
-        this.layerKeyPressed = function(keyCode,mask){
-            if (this.kids.length > 0    &&
-                keyCode == KE.TAB       &&
-                (mask & KE.M_SHIFT) > 0   )
+        this.layerKeyPressed = function(e){
+            if (this.kids.length > 0  &&
+                e.code === KE.TAB     &&
+                e.shiftKey              )
             {
                 if (this.activeWin == null) {
                     this.activate(this.kids[this.kids.length - 1]);
@@ -189,24 +189,41 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
             return false;
         };
 
-        /**
-         * Define children components input events handler.
-         * @param  {zebra.ui.InputEvent|zebra.ui.KeyEvent|zebra.ui.MouseEvent} e an input event
-         * @method childInputEvent
-         */
-        this.childInputEvent = function (e) {
-            if (e.ID == pkg.InputEvent.FOCUS_GAINED) {
-                this.activate(L.getDirectChild(this, e.source));
+        // TODO: the method never called since focus has been re-worked
+        this.elementFocusLost = function(src) {
+            if (this.activeWin != null && this.getWinType(this.activeWin) === "mdi") {
+                this.$prevActiveWin = this.activeWin;
+                this.activate(null);
             }
         };
 
-        this.getComponentAt = function(x,y){
+        // TODO: the method never called since focus has been re-worked
+        this.elementFocusGained = function(src) {
+            if (this.$prevActiveWin != null &&
+                this.$prevActiveWin.isVisible === true &&
+                this.$prevActiveWin.parent === this)
+            {
+                this.activate(this.$prevActiveWin);
+            }
+            this.$prevActiveWin = null;
+        };
+
+        /**
+         * Define children components input events handler.
+         * @param  {zebra.ui.InputEvent|zebra.ui.KeyEvent|zebra.ui.PointerEvent} e an input event
+         * @method childFocusGained
+         */
+        this.childFocusGained = function (e) {
+            this.activate(L.getDirectChild(this, e.source));
+        };
+
+        this.getComponentAt = function(x,y) {
             return (this.activeWin == null) ? null
                                             : this.activeWin.getComponentAt(x - this.activeWin.x,
                                                                             y - this.activeWin.y);
         };
 
-        this.getFocusRoot = function(child) {
+        this.getFocusRoot = function() {
             return this.activeWin;
         };
 
@@ -220,9 +237,8 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
          * @method activate
          */
         this.activate = function(c){
-
             if (c != null && (this.kids.indexOf(c) < 0 ||
-                              this.winsTypes[c] == "info"))
+                              this.winsTypes[c] === "info"))
             {
                 throw new Error("Window cannot be activated");
             }
@@ -230,8 +246,8 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
             if (c != this.activeWin) {
                 var old = this.activeWin;
                 if (c == null) {
-                    if (this.winsTypes[this.activeWin] == "modal") {
-                        throw new Error();
+                    if (this.winsTypes[this.activeWin] === "modal") {
+                        throw new Error("Modal window cannot be de-activated");
                     }
 
                     this.activeWin = null;
@@ -278,7 +294,7 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
 
         /**
          * Add the given window with the given type and the listener to the layer.
-         * @param {String} type   a type of the window: "modal",
+         * @param {String} [type]   a type of the window: "modal",
          * "mdi" or "info"
          * @param {zebra.ui.Panel} win an UI component to be shown as window
          * @param {Object} [listener] an optional the window listener
@@ -296,13 +312,21 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
          * @method addWin
          */
         this.addWin = function(type, win, listener) {
-            this.winsTypes[win] = type;
+            // check if window type argument has been passed
+            if (zebra.instanceOf(type, pkg.Panel) ) {
+                listener = win;
+                win      = type;
+            }
+            else {
+                this.winsTypes[win] = type;
+            }
+
             this.winsListeners[win] = listener;
             this.add(win);
         };
     },
 
-    function () {
+    function() {
         /**
          * Currently activated as a window children component
          * @attribute activeWin
@@ -316,49 +340,57 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
         this.winsListeners = {};
         this.winsTypes     = {};
 
-        this._ = new WinListeners();
-        this.$super(pkg.WinLayer.ID);
+        this._ = new this.$clazz.Listeners();
+        this.id = this.$clazz.ID;
+        this.$super();
     },
 
     function insert(index, constr, lw) {
         var type = this.winsTypes[lw];
 
         if (typeof type === 'undefined') {
-            type = "mdi";
-            this.winsTypes[lw] = type;
+            type = lw.winType != null ? lw.winType : "mdi";
         }
 
         if (type != "mdi" && type != "modal" && type != "info") {
             throw new Error("Invalid window type: " + type);
         }
 
+        this.winsTypes[lw] = type;
         return this.$super(index, constr, lw);
     },
 
-    function kidAdded(index,constr,lw){
+    function kidAdded(index, constr, lw){
         this.$super(index, constr, lw);
 
         var type = this.winsTypes[lw];
         this.winsStack.push(lw);
-        if (type == "modal") {
+        if (type === "modal") {
             this.topModalIndex = this.winsStack.length - 1;
+            this.fire(WIN_OPENED, lw);
+            this.activate(lw);
         }
-
-        this.fire(WIN_OPENED, lw);
-        if (type == "modal") this.activate(lw);
+        else {
+            this.fire(WIN_OPENED, lw);
+        }
     },
 
     function kidRemoved(index,lw){
         try {
             this.$super(this.kidRemoved,index, lw);
-            if (this.activeWin == lw){
+
+            var l = this.winsListeners[lw];
+            if (this.activeWin == lw) {
                 this.activeWin = null;
+
+                // TODO:  deactivated event can be used
+                // as a trigger of a window closing so
+                // it is better don't fire it here
+                // this.fire(WIN_DEACTIVATED, lw, l);
                 pkg.focusManager.requestFocus(null);
             }
 
-            var ci = this.winsStack.indexOf(lw),
-                l  = this.winsListeners[lw];
-
+            var ci = this.winsStack.indexOf(lw);
             this.winsStack.splice(this.winsStack.indexOf(lw), 1);
 
             if (ci < this.topModalIndex) {
@@ -367,7 +399,9 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
             else {
                 if (this.topModalIndex == ci){
                     for(this.topModalIndex = this.kids.length - 1;this.topModalIndex >= 0; this.topModalIndex--){
-                        if (this.winsTypes[this.winsStack[this.topModalIndex]] == "modal") break;
+                        if (this.winsTypes[this.winsStack[this.topModalIndex]] == "modal") {
+                            break;
+                        }
                     }
                 }
             }
@@ -413,7 +447,6 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
  * @extends {zebra.ui.Panel}
  */
 pkg.Window = Class(pkg.StatePan, [
-
     function $prototype() {
         var MOVE_ACTION = 1, SIZE_ACTION = 2;
 
@@ -447,7 +480,7 @@ pkg.Window = Class(pkg.StatePan, [
             return c != null && c.getLayer("win").activeWin == this;
         };
 
-        this.mouseDragStarted = function(e){
+        this.pointerDragStarted = function(e){
             this.px = e.x;
             this.py = e.y;
             this.psw = this.width;
@@ -457,7 +490,7 @@ pkg.Window = Class(pkg.StatePan, [
             if (this.action > 0) this.dy = this.dx = 0;
         };
 
-        this.mouseDragged = function(e){
+        this.pointerDragged = function(e){
             if (this.action > 0) {
                 if (this.action != MOVE_ACTION){
                     var nw = this.psw + this.dx,
@@ -477,7 +510,7 @@ pkg.Window = Class(pkg.StatePan, [
             }
         };
 
-        this.mouseDragEnded = function(e){
+        this.pointerDragEnded = function(e){
             if (this.action > 0){
                 if (this.action == MOVE_ACTION){
                     this.invalidate();
@@ -488,11 +521,11 @@ pkg.Window = Class(pkg.StatePan, [
         };
 
         /**
-         * Test if the mouse cursor is inside the window corner component
+         * Test if the pointer cursor is inside the window corner component
          * @protected
-         * @param  {Integer} px a x coordinate of the mouse cursor
-         * @param  {Integer} py a y coordinate of the mouse cursor
-         * @return {Boolean}  true if the mouse cursor is inside window
+         * @param  {Integer} px a x coordinate of the pointer cursor
+         * @param  {Integer} py a y coordinate of the pointer cursor
+         * @return {Boolean}  true if the pointer cursor is inside window
          * corner component
          * @method insideCorner
          */
@@ -525,9 +558,9 @@ pkg.Window = Class(pkg.StatePan, [
             this.winOpened(winLayer, target,b);
         };
 
-        this.mouseClicked= function (e){
+        this.pointerDoubleClicked = function (e){
             var x = e.x, y = e.y, cc = this.caption;
-            if (e.clicks == 2 && this.isSizeable && x > cc.x &&
+            if (this.isSizeable === true && x > cc.x &&
                 x < cc.y + cc.width && y > cc.y && y < cc.y + cc.height)
             {
                 if (this.prevW < 0) this.maximize();
@@ -580,14 +613,6 @@ pkg.Window = Class(pkg.StatePan, [
         this.Button     = Class(pkg.Button, []);
     },
 
-    function () {
-        this.$this(null, null);
-    },
-
-    function (s) {
-        if (s != null && zebra.isString(s)) this.$this(s, null);
-        else                                this.$this(null, s);
-    },
 
     function (s, c) {
         //!!! for some reason state has to be set beforehand
@@ -657,7 +682,9 @@ pkg.Window = Class(pkg.StatePan, [
 
         this.setSizeable(true);
 
-        this.$super(new L.BorderLayout(2,2));
+        this.$super();
+        this.setLayout(new L.BorderLayout(2,2));
+
 
         this.add(L.CENTER, this.root);
         this.add(L.TOP, this.caption);
@@ -703,9 +730,9 @@ pkg.Window = Class(pkg.StatePan, [
             this.prevY = this.y;
             this.prevW = this.width;
             this.prevH = this.height;
-            this.setLocation(left, top);
-            this.setSize(d.width - left - d.getRight(),
-                         d.height - top - d.getBottom());
+            this.setBounds(left, top,
+                           d.width - left - d.getRight(),
+                           d.height - top - d.getBottom());
         }
     },
 
@@ -715,8 +742,8 @@ pkg.Window = Class(pkg.StatePan, [
      */
     function restore(){
         if (this.prevW >= 0){
-            this.setLocation(this.prevX, this.prevY);
-            this.setSize(this.prevW, this.prevH);
+            this.setBounds(this.prevX, this.prevY,
+                           this.prevW, this.prevH);
             this.prevW = -1;
         }
     },
@@ -965,7 +992,6 @@ pkg.MenuItem = Class(pkg.Panel, [
          * @method getCheckState
          */
         this.getCheckState = function() {
-            if (this.manager == null) throw new Error();
             return this.manager.getValue(this);
         };
 
@@ -1128,25 +1154,18 @@ pkg.Menu = Class(pkg.CompList, [
 
         /**
          * Define component events handler.
-         * @param  {Integer} id  a component event id
-         * @param  {zebra.ui,Panel} src a component that triggers the event
-         * @param  {Object} p1  a first event parameter.
-         * @param  {Object} p2  a second event parameter
-         * @method  childCompEvent
+         * @param  {zebkit.ui.CompEvent} e  a component event
+         * @method  childCompEnabled
          */
-        this.childCompEvent = function(id, src, p1, p2){
-            // support dynamic disabling/enabling showing/hiding menu items
-            if (id == pkg.Panel.SHOWN ||
-                id == pkg.Panel.ENABLED)
-            {
-                for(var i = 0;i < this.kids.length; i++){
-                    if (this.kids[i] == src) {
-                        // clear selection if an item becomes not selectable
-                        if (this.isItemSelectable(i) === false) {
-                            if (i == this.selectedIndex) this.select(-1);
-                        }
-                        break;
+        this.childCompEnabled = this.childCompShown = function(e) {
+            var src = e.source;
+            for(var i = 0;i < this.kids.length; i++){
+                if (this.kids[i] == src) {
+                    // clear selection if an item becomes not selectable
+                    if (this.isItemSelectable(i) === false) {
+                        if (i == this.selectedIndex) this.select(-1);
                     }
+                    break;
                 }
             }
         };
@@ -1182,11 +1201,11 @@ pkg.Menu = Class(pkg.CompList, [
         };
 
         /**
-         * Define mouse exited events handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseExited
+         * Define pointer exited events handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerExited
          */
-        this.mouseExited = function(e){
+        this.pointerExited = function(e){
             this.position.setOffset(null);
         };
 
@@ -1231,7 +1250,7 @@ pkg.Menu = Class(pkg.CompList, [
             }
 
             // if the menu is shown and the menu item is selected
-            if (this.parent != null && i == this.selectedIndex) {
+            if (this.parent != null && i === this.selectedIndex) {
                 this.select(-1);
             }
 
@@ -1275,10 +1294,25 @@ pkg.Menu = Class(pkg.CompList, [
         this.$topMenu = function() {
             if (this.parent != null) {
                 var t = this;
+
                 while ((p = t.$parentMenu) != null) t = p;
                 return t;
             }
             return null;
+        };
+
+        this.doScroll = function(dx, dy, source) {
+            var sy = this.scrollManager.getSY(),
+                ps = this.layout.calcPreferredSize(this),
+                eh = this.height - this.getTop() - this.getBottom();
+
+            if (this.height < ps.height && sy + ps.height >= eh && sy - dy <= 0) {
+                var nsy = sy - dy;
+                if (nsy + ps.height < eh) {
+                    nsy = eh - ps.height;
+                }
+                if (sy != nsy) this.scrollManager.scrollYTo(nsy);
+            }
         };
 
         /**
@@ -1291,7 +1325,10 @@ pkg.Menu = Class(pkg.CompList, [
         this.$hideMenu = function(triggeredBy) {
             if (this.parent != null) {
                 var ch = this.$childMenu();
-                if (ch != null) ch.$hideMenu(triggeredBy);
+                if (ch != null) {
+                    ch.$hideMenu(triggeredBy);
+                }
+
                 this.removeMe();
             }
         };
@@ -1334,7 +1371,7 @@ pkg.Menu = Class(pkg.CompList, [
         };
     },
 
-    function () {
+    function (d) {
         this.menus = {};
 
         /**
@@ -1350,11 +1387,9 @@ pkg.Menu = Class(pkg.CompList, [
          * @private
          */
         this.decoratives = {};
-        this.$super(true);
-    },
 
-    function (d){
-        this.$this();
+        this.$super([], zebra.isBoolean(d) ? d : true);
+
         if (Array.isArray(d)) {
             for(var i = 0; i < d.length; i++) {
                 this.add(d[i]);
@@ -1380,7 +1415,7 @@ pkg.Menu = Class(pkg.CompList, [
      * @method keyPressed
      */
     function keyPressed(e){
-        if (e.code == KE.ESCAPE) {
+        if (e.code === KE.ESCAPE) {
             if (this.parent != null) {
                 var p = this.$parentMenu;
                 this.$canceled(this);
@@ -1445,7 +1480,7 @@ pkg.Menu = Class(pkg.CompList, [
                 var sub = this.getMenuAt(this.selectedIndex);
                 if (sub != null) {
                     sub.$hideMenu(this);
-                    rs = -1; // ask to clear selection
+                    rs = -1; // request to clear selection
                 }
             }
 
@@ -1597,7 +1632,7 @@ pkg.Menubar = Class(pkg.Menu, [
         this.$super(i);
     },
 
-    // called when an item is selected by user with mouse click or key
+    // called when an item is selected by user with pointer click or key
     function $select(i) {
         this.$isActive = !this.$isActive;
         if (this.$isActive === false) {
@@ -1614,7 +1649,7 @@ pkg.Menubar = Class(pkg.Menu, [
  * @constructor
  * @extends {zebra.ui.BaseLayer}
  */
-pkg.PopupLayer = Class(pkg.BaseLayer, [
+pkg.PopupLayer = Class(pkg.HtmlCanvas, [
     function $clazz() {
         this.ID = "pop";
     },
@@ -1622,19 +1657,19 @@ pkg.PopupLayer = Class(pkg.BaseLayer, [
     function $prototype() {
         this.mTop = this.mLeft = this.mBottom = this.mRight = 0;
 
-        this.layerMousePressed = function(x,y,mask) {
-            // if x,y is in extent active menu bar let
+        this.layerPointerPressed = function(e) {
+            // if x,y is inside active menu bar let
             // the menu bar handle it
             if (this.activeMenubar != null  &&
-                y <= this.mBottom           &&
-                y >= this.mTop              &&
-                x >= this.mLeft             &&
-                x <= this.mRight              )
+                e.y <= this.mBottom         &&
+                e.y >= this.mTop            &&
+                e.x >= this.mLeft           &&
+                e.x <= this.mRight            )
             {
                 return false;
             }
 
-            if (this.getComponentAt(x, y) == this){
+            if (this.getComponentAt(e.x, e.y) == this){
                 if (this.activeMenubar != null) {
                     this.activeMenubar.select(-1);
                 }
@@ -1658,33 +1693,35 @@ pkg.PopupLayer = Class(pkg.BaseLayer, [
                      x > this.mRight      );
         };
 
+        this.getFocusRoot = function() {
+            return this;
+        };
+
         /**
          * Define children components input events handler.
-         * @param  {zebra.ui.MouseEvent|zebra.ui.KeyEvent|zebra.ui.InputEvent} e an input event
-         * @method childInputEvent
+         * @param  {zebra.ui.KeyEvent} e an input event
+         * @method childKeyPressed
          */
-        this.childInputEvent = function(e){
-            if (e.UID == pkg.InputEvent.KEY_UID && e.ID == KE.PRESSED){
-                var dc = L.getDirectChild(this, e.source);
+        this.childKeyPressed = function(e){
+            var dc = L.getDirectChild(this, e.source);
 
-                if (zebra.instanceOf(dc, pkg.Menu) && this.activeMenubar != null) {
-                    var s = this.activeMenubar.selectedIndex;
-                    switch(e.code) {
-                        case KE.RIGHT :
-                            if (s < this.activeMenubar.model.count()-1) {
-                                //this.removeAll();
-                                this.activeMenubar.requestFocus();
-                                this.activeMenubar.position.seekLineTo(zebra.util.Position.DOWN);
-                            }
-                            break;
-                        case KE.LEFT :
-                            if (s > 0) {
-                               // this.removeAll();
-                                this.activeMenubar.requestFocus();
-                                this.activeMenubar.position.seekLineTo(zebra.util.Position.UP);
-                            }
-                            break;
-                    }
+            if (zebra.instanceOf(dc, pkg.Menu) && this.activeMenubar != null) {
+                var s = this.activeMenubar.selectedIndex;
+                switch(e.code) {
+                    case KE.RIGHT :
+                        if (s < this.activeMenubar.model.count()-1) {
+                            //this.removeAll();
+                            this.activeMenubar.requestFocus();
+                            this.activeMenubar.position.seekLineTo("down");
+                        }
+                        break;
+                    case KE.LEFT :
+                        if (s > 0) {
+                           // this.removeAll();
+                            this.activeMenubar.requestFocus();
+                            this.activeMenubar.position.seekLineTo("up");
+                        }
+                        break;
                 }
             }
         };
@@ -1731,7 +1768,8 @@ pkg.PopupLayer = Class(pkg.BaseLayer, [
 
     function () {
         this.activeMenubar = null;
-        this.$super(pkg.PopupLayer.ID);
+        this.id = this.$clazz.ID;
+        this.$super();
     }
 ]);
 
@@ -1815,22 +1853,22 @@ pkg.Tooltip = Class(pkg.Panel, [
         return this.$super() + this.$contentPs.height;
     },
 
-    function getTop () {
+    function getTop() {
         return this.$super() + ((this.$contentPs.height/6 + 0.5) | 0);
     },
 
-    function getLeft () {
+    function getLeft() {
         return this.$super() + ((this.$contentPs.height/6 + 0.5) | 0);
     },
 
-    function getRight () {
+    function getRight() {
         return this.$super() + ((this.$contentPs.height/6 + 0.5) | 0);
     }
 ]);
 
 /**
  * Popup window manager class. The manager registering and triggers showing context popup menu
- * and tooltips. Menu appearing is triggered by right mouse click or double fingers touch event.
+ * and tooltips. Menu appearing is triggered by right pointer click or double fingers touch event.
  * To bind a popup menu to an UI component you can either set "tooltip" property of the component
  * with a popup menu instance:
 
@@ -1866,10 +1904,10 @@ pkg.Tooltip = Class(pkg.Panel, [
         m.add("Menu Item 3");
 
         // implement "getPopup" method that shows popup menu only
-        // if mouse cursor located at red rectangular area of the
+        // if pointer cursor located at red rectangular area of the
         // component
         canvas.root.getPopup = function(target, x, y) {
-            // test if mouse cursor position is in red spot area
+            // test if pointer cursor position is in red spot area
             // and return context menu if it is true
             if (x > 50 && y > 50 && x < 100 && y <  100)  {
                 return m;
@@ -1894,7 +1932,7 @@ pkg.Tooltip = Class(pkg.Panel, [
          canvas.root.popup = t;
 
 *  Or you can implement "getTooltip(target,x,y)" method if the tooltip showing depends on
-*  the mouse cursor location:
+*  the pointer cursor location:
 
 
         // create canvas
@@ -1932,15 +1970,38 @@ pkg.Tooltip = Class(pkg.Panel, [
 pkg.PopupManager = Class(pkg.Manager, [
     function $prototype() {
         /**
-         * Define mouse clicked event handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseClicked
+         * Indicates if a shown tooltip has to disappear by pointer pressed event
+         * @attribute hideTooltipByPress
+         * @type {Boolean}
+         * @default true
          */
-        this.mouseClicked = function (e){
+        this.hideTooltipByPress = true;
+
+        /**
+         * Define interval (in milliseconds) between entering a component and showing
+         * a tooltip for the entered component
+         * @attribute showTooltipIn
+         * @type {Integer}
+         * @default 400
+         */
+        this.showTooltipIn = 400;
+
+        this.syncTooltipPosition = false;
+
+        /**
+         * Define pointer clicked event handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerClicked
+         */
+        this.pointerClicked = function (e){
             this.$popupMenuX = e.absX;
             this.$popupMenuY = e.absY;
 
-            if ((e.mask & pkg.MouseEvent.RIGHT_BUTTON) > 0) {
+
+
+            // Right button
+            // TODO: check if it is ok and compatiable with touch
+            if (e.isContext()) {
                 var popup = null;
 
                 if (e.source.popup != null) {
@@ -1961,22 +2022,14 @@ pkg.PopupManager = Class(pkg.Manager, [
         };
 
         /**
-         * Indicates if a shown tooltip has to disappear by mouse pressed event
-         * @attribute hideTooltipByPress
-         * @type {Boolean}
-         * @default true
+         * Define pointer entered event handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerEntered
          */
-        this.hideTooltipByPress = true;
-
-        /**
-         * Define mouse entered event handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseEntered
-         */
-        this.mouseEntered = function(e){
-            var c = e.source;
-            if (c.getTooltip != null || c.tooltip != null){
-                this.target = c;
+        this.pointerEntered = function(e) {
+            if (this.$target == null && (e.source.tooltip != null || e.source.getTooltip != null)) {
+                var c = e.source;
+                this.$target = c;
                 this.$targetTooltipLayer = c.getCanvas().getLayer(pkg.WinLayer.ID);
                 this.$tooltipX = e.x;
                 this.$tooltipY = e.y;
@@ -1985,36 +2038,35 @@ pkg.PopupManager = Class(pkg.Manager, [
         };
 
         /**
-         * Define mouse exited event handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseExited
+         * Define pointer exited event handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerExited
          */
-        this.mouseExited = function(e){
-            if (this.target != null){
-                if (this.$toolTask != null) {
-                    this.$toolTask.shutdown();
-                }
-
-                this.target = null;
-                this.hideTooltip();
+        this.pointerExited = function(e) {
+            // exited triggers tooltip hiding only for "info" tooltips
+            if (this.$target != null && (this.$tooltip == null || this.$tooltip.winType === "info")) {
+                this.stopShowingTooltip();
             }
         };
 
         /**
-         * Define mouse moved event handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseMoved
+         * Define pointer moved event handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerMoved
          */
-        this.mouseMoved = function(e){
-            if (this.target != null){
-                if (this.$toolTask != null) {
-                    this.$toolTask.run(this.$toolTask.ri);
-                }
-
+        this.pointerMoved = function(e) {
+            // to prevent handling pointer moved from component of mdi
+            // tooltip we have to check if target equals to source
+            // instead of just checking if target is not a null
+            if (this.$target === e.source) {
+                // store a new location for a tooltip
                 this.$tooltipX = e.x;
                 this.$tooltipY = e.y;
-                if (this.tooltip != null) {
-                    this.hideTooltip();
+
+                // wake up task try showing a tooltip
+                // at the new location
+                if (this.$toolTask != null) {
+                    this.$toolTask.run(this.showTooltipIn);
                 }
             }
         };
@@ -2025,31 +2077,90 @@ pkg.PopupManager = Class(pkg.Manager, [
          * @param  {Task} t a task context
          * @method run
          */
-        this.run = function(t){
-            if (this.tooltip == null){
-                this.tooltip = this.target.tooltip != null ? this.target.tooltip
-                                                           : this.target.getTooltip(this.target,
-                                                                                    this.$tooltipX,
-                                                                                    this.$tooltipY);
-                if (this.tooltip != null) {
-                    var p = L.toParentOrigin(this.$tooltipX, this.$tooltipY, this.target);
-                    this.tooltip.toPreferredSize();
-                    var tx = p.x,
-                        ty = p.y - this.tooltip.height,
-                        dw = this.$targetTooltipLayer.width;
-
-                    if (tx + this.tooltip.width > dw) {
-                        tx = dw - this.tooltip.width - 1;
+        this.run = function(t) {
+            if (this.$target != null) {
+                var ntooltip = this.$target.tooltip != null ? this.$target.tooltip
+                                                            : this.$target.getTooltip(this.$target,
+                                                                                      this.$tooltipX,
+                                                                                      this.$tooltipY);
+                if (this.$tooltip != ntooltip) {
+                    // hide previously shown tooltip
+                    if (this.$tooltip != null) {
+                        this.hideTooltip();
                     }
 
-                    this.tooltip.setLocation(tx < 0 ? 0 : tx, ty < 0 ? 0 : ty);
+                    // set new tooltip
+                    this.$tooltip = ntooltip;
 
-                    this.tooltip.winType = "info";
-                    this.$targetTooltipLayer.add(this.tooltip);
+                    // if new tooltip exists than show it
+                    if (ntooltip != null) {
+                        var p = L.toParentOrigin(this.$tooltipX, this.$tooltipY, this.$target);
+
+                        this.$tooltip.toPreferredSize();
+                        var tx = p.x,
+                            ty = p.y - this.$tooltip.height,
+                            dw = this.$targetTooltipLayer.width;
+
+                        if (tx + this.$tooltip.width > dw) {
+                            tx = dw - this.$tooltip.width - 1;
+                        }
+
+                        this.$tooltip.setLocation(tx < 0 ? 0 : tx, ty < 0 ? 0 : ty);
+
+                        if (this.$tooltip.winType == null) {
+                            this.$tooltip.winType = "info";
+                        }
+
+                        this.$targetTooltipLayer.addWin(this.$tooltip, this);
+
+                        if (this.$tooltip.winType !== "info") {
+                            pkg.activateWindow(this.$tooltip);
+                        }
+                    }
+                }
+                else {
+                    if (this.$tooltip != null && this.syncTooltipPosition === true) {
+                        var p  = L.toParentOrigin(this.$tooltipX, this.$tooltipY, this.$target),
+                            tx = p.x,
+                            ty = p.y - this.$tooltip.height;
+
+                        this.$tooltip.setLocation(tx < 0 ? 0 : tx, ty < 0 ? 0 : ty);
+                    }
                 }
             }
-
             t.pause();
+        };
+
+        this.winActivated = function(layer, win, b) {
+            // this method is called for only for mdi window
+            // consider every deactivation of a mdi window as
+            // a signal to stop showing tooltip
+            if (b === false && this.$tooltip != null)  {
+                this.$tooltip.removeMe();
+            }
+        };
+
+        this.winOpened = function(layer, win, b) {
+            if (b === false) {
+                // cleanup tooltip reference
+                this.$tooltip = null;
+
+                if (win.winType !== "info") {
+                    this.stopShowingTooltip();
+                }
+            }
+        };
+
+        this.stopShowingTooltip = function () {
+            if (this.$target != null) {
+                this.$target = null;
+            }
+
+            if (this.$toolTask != null) {
+                this.$toolTask.shutdown();
+            }
+
+            this.hideTooltip();
         };
 
         /**
@@ -2057,37 +2168,33 @@ pkg.PopupManager = Class(pkg.Manager, [
          * @method hideTooltip
          */
         this.hideTooltip = function(){
-            if (this.tooltip != null) {
-                this.$targetTooltipLayer.remove(this.tooltip);
-                this.tooltip = null;
+            if (this.$tooltip != null) {
+                this.$tooltip.removeMe();
+                this.$tooltip = null;
             }
         };
 
         /**
-         * Define mouse pressed event handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mousePressed
+         * Define pointer pressed event handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerPressed
          */
-        this.mousePressed = function(e){
-            if (this.hideTooltipByPress && this.target != null) {
-                if (this.$toolTask != null) {
-                    this.$toolTask.shutdown();
-                }
-                this.target = null;
-                this.hideTooltip();
+        this.pointerPressed = function(e){
+            if (this.hideTooltipByPress === true && this.$target != null &&
+                (this.$tooltip == null || this.$tooltip.winType === "info"))
+            {
+                this.stopShowingTooltip();
             }
         };
 
         /**
-         * Define mouse released event handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseReleased
+         * Define pointer released event handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerReleased
          */
-        this.mouseReleased = function(e){
-            if (this.hideTooltipByPress && this.target != null){
-                this.x = e.x;
-                this.y = e.y;
-                this.$toolTask = task(this).run(this.showTooltipIn, this.showTooltipIn);
+        this.pointerReleased = function(e) {
+            if (this.hideTooltipByPress === false && this.$target != null && (this.$tooltip == null || this.$tooltip.winType === "info")) {
+                this.stopShowingTooltip();
             }
         };
     },
@@ -2096,47 +2203,10 @@ pkg.PopupManager = Class(pkg.Manager, [
         this.$super();
         this.$popupMenuX = this.$popupMenuY = 0;
         this.$tooltipX = this.$tooltipY = 0;
-        this.$targetTooltipLayer = this.tooltip = this.target = null;
+        this.$targetTooltipLayer = this.$tooltip = this.$target = null;
 
         var LClass = zebra.util.ListenersClass("menuItemSelected");
         this._ = new LClass();
-
-        /**
-         * Define interval (in milliseconds) between entering a component and showing
-         * a tooltip for the entered component
-         * @attribute showTooltipIn
-         * @type {Integer}
-         * @default 400
-         */
-        this.showTooltipIn = 400;
-    }
-]);
-
-pkg.WindowTitleView = Class(pkg.View, [
-    function $prototype() {
-        this[''] = function(bg) {
-            this.radius = 6;
-            this.gap = this.radius;
-            this.bg = bg != null ? bg : "#66CCFF";
-        };
-
-        this.paint = function(g,x,y,w,h,d) {
-            this.outline(g,x,y,w,h,d);
-            g.setColor(this.bg);
-            g.fill();
-        };
-
-        this.outline = function (g,x,y,w,h,d) {
-            g.beginPath();
-            g.moveTo(x + this.radius, y);
-            g.lineTo(x + w - this.radius*2, y);
-            g.quadraticCurveTo(x + w, y, x + w, y + this.radius);
-            g.lineTo(x + w, y + h);
-            g.lineTo(x, y + h);
-            g.lineTo(x, y + this.radius);
-            g.quadraticCurveTo(x, y, x + this.radius, y);
-            return true;
-        };
     }
 ]);
 

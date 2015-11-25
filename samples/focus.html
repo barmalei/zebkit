@@ -2,9 +2,9 @@
 <html>
 	<head>
         <title>Tutorial</title>
-        
+
     <script src='../zebra.min.js' type='text/javascript'></script>
-        
+
 <script type='text/javascript'>
     zebra.ready(function() {
         if (document.getElementById("doc.focus1") != null) {
@@ -22,7 +22,7 @@
                    }
                 }
             ]));
-         
+
             r.add(zebra.layout.BOTTOM, new zebra.ui.Button("Bottom"));
         }
 
@@ -39,28 +39,28 @@
                     this.focusComponent.setColor("black");
                 }
             ]));
-         
-            r.add(zebra.layout.BOTTOM, new zebra.ui.Button("Bottom"));         
+
+            r.add(zebra.layout.BOTTOM, new zebra.ui.Button("Bottom"));
         }
 
         if (document.getElementById("doc.focus3") != null) {
 
             var r = new zebra.ui.zCanvas("doc.focus3").root;
             r.setLayout(new zebra.layout.BorderLayout());
-            zebra.ui.events.addListener({
+            zebra.ui.events.bind({
                 focusGained : function (e) {
-                    if (e.source.focusComponent) { 
+                    if (e.source.focusComponent) {
                         e.source.focusComponent.setColor("orange");
                     }
                 },
 
                 focusLost: function (e) {
-                    if (e.source.focusComponent) { 
+                    if (e.source.focusComponent) {
                         e.source.focusComponent.setColor("black");
                     }
                 }
             });
-         
+
             r.add(zebra.layout.BOTTOM, new zebra.ui.Button("Bottom"));
             r.add(zebra.layout.CENTER, new zebra.ui.Button("Center"));
             r.add(zebra.layout.TOP, new zebra.ui.Button("Top"));
@@ -72,7 +72,7 @@
             r.setLayout(new zebra.layout.BorderLayout(4,4));
             r.setPadding(8);
             r.setBorder(zebra.ui.borders.plain);
-            
+
 
             var p = new zebra.ui.Panel([
                function canHaveFocus() {
@@ -104,7 +104,7 @@
             r.setLayout(new zebra.layout.BorderLayout(4,4));
             r.setPadding(8);
             r.setBorder(zebra.ui.borders.plain);
-            
+
 
             var p = new zebra.ui.Panel([
                function canHaveFocus() {
@@ -123,7 +123,7 @@
         }
 
     });
-   
+
 		</script>
 	</head>
 

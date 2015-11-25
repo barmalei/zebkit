@@ -8,7 +8,6 @@
 //  Faster match operation analogues:
 //  Math.floor(f)  =>  ~~(a)
 //  Math.round(f)  =>  (f + 0.5) | 0
-//
 function isString(o)  {
     return typeof o !== "undefined" && o !== null &&
           (typeof o === "string" || o.constructor === String);
@@ -169,13 +168,14 @@ var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
     };
 
     f.Import = function() {
-        var ns = "=" + nsname + ".", code = [],
+        var ns   = "=" + nsname + ".",
+            code = [],
             packages = arguments.length === 0 ? null
                                               : Array.prototype.slice.call(arguments, 0);
         f(function(n, p) {
             if (packages == null || packages.indexOf(n) >= 0) {
                 for (var k in p) {
-                    if (k[0] != '$' && k[0] != '_' && (p[k] instanceof Package) === false && p.hasOwnProperty(k)) {
+                    if (k[0] !== '$' && k[0] !== '_' && (p[k] instanceof Package) === false && p.hasOwnProperty(k)) {
                         code.push(k + ns + n + "." + k);
                     }
                 }
@@ -197,9 +197,9 @@ var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
 
 var pkg = zebkit = zebra = namespace('zebra'),
     CNAME = pkg.CNAME = '$', CDNAME = '',
-    FN = pkg.$FN = (typeof namespace.name === "undefined") ? (function(f) {
+    FN = pkg.$FN = (typeof namespace.name === "undefined") ? (function(f) {     // IE stuff
                                                                 var mt = f.toString().match(/^function\s+([^\s(]+)/);
-                                                                return (mt == null) ? CNAME : mt[1];
+                                                                return (mt == null) ? CDNAME : mt[1];
                                                              })
                                                            : (function(f) { return f.name; });
 
@@ -209,16 +209,68 @@ pkg.$global    = (typeof window !== "undefined" && window != null) ? window : th
 pkg.isString   = isString;
 pkg.isNumber   = isNumber;
 pkg.isBoolean  = isBoolean;
-pkg.version    = "10.2014";
 pkg.$caller    = null; // current method which is called
 
-function mnf(name, params) {
-    var cln = this.$clazz && this.$clazz.$name ? this.$clazz.$name + "." : "";
-    throw new ReferenceError("Method '" + cln + (name === CNAME ? "constructor"
-                                                                : name) + "(" + params + ")" + "' not found");
-}
 
-function $toString() { return this.$hash$; }
+pkg.clone = function (obj) {
+    // clone atomic type
+    if (obj == null || zebra.isString(obj) || zebra.isBoolean(obj) || zebra.isNumber(obj)) {
+        return obj;
+    }
+
+    // clone with provided custom "clone" method
+    if (typeof obj.$clone !== "undefined") {
+        return obj.$clone();
+    }
+
+    // clone array
+    if (Array.isArray(obj)) {
+        var nobj = [];
+        for(var i = 0; i < obj.length; i++) {
+            nobj[i] = pkg.clone(obj[i]);
+        }
+        return nobj;
+    }
+
+    // function cannot be cloned
+    if (typeof obj === 'function' || obj.constructor !==  Object) {
+        return obj;
+    }
+
+    var nobj = {};
+    // clone object fields
+    for(var k in obj) {
+        if (obj.hasOwnProperty(k) === true) {
+            nobj[k] = pkg.clone(obj[k]);
+        }
+    }
+
+    return nobj;
+};
+
+/**
+ * Instantiate a new class instance by the given class name with the specified constructor
+ * arguments.
+ * @param  {Function} clazz a class
+ * @param  {Array} [args] an arguments list
+ * @return {Object}  a new instance of the given class initialized with the specified arguments
+ * @api  zebra.util.newInstance()
+ * @method newInstance
+ */
+pkg.newInstance = function(clazz, args) {
+    if (args && args.length > 0) {
+        function f() {}
+        f.prototype = clazz.prototype;
+        var o = new f();
+        clazz.apply(o, args);
+        return o;
+    }
+    return new clazz();
+};
+
+function $toString() {
+    return this.$hash$;
+}
 
 // return function that is meta class
 //  pt - parent template function (can be null)
@@ -245,7 +297,7 @@ function make_template(pt, tf, p) {
             }
 
             tf.$parents[l] = true;
-            if (l.$parents) {
+            if (l.$parents != null) {
                 var pp = l.$parents;
                 for(var k in pp) {
                     if (pp.hasOwnProperty(k)) tf.$parents[k] = true;
@@ -275,7 +327,7 @@ pkg.getPropertySetter = function(obj, name) {
 pkg.properties = function(target, p) {
     for(var k in p) {
         // skip private properties( properties that start from "$")
-        if (k[0] != '$' && p.hasOwnProperty(k) && typeof p[k] !== 'function') {
+        if (k[0] !== '$' && p.hasOwnProperty(k) && typeof p[k] !== 'function') {
             var v = p[k],
                 m = zebra.getPropertySetter(target, k);
 
@@ -303,7 +355,7 @@ pkg.Singleton = function(clazz) {
 
     var clz = Class(clazz, [
         function() {
-            // make sure this constructor is mot
+            // make sure this constructor is not
             // called from a successor class
             if (this.$clazz === clz) {
                 if (clz.$instance != null) {
@@ -353,13 +405,17 @@ pkg.Interface = make_template(null, function() {
 });
 
 // single method proxy
-function sProxyMethod(name, f) {
+function ProxyMethod(name, f, clazz) {
+    if (typeof f.methodBody !== "undefined") {
+        throw new Error("Proxy method '" + name + "' cannot be wrapped");
+    }
+
     var a = function() {
         var cm = pkg.$caller;
-        pkg.$caller = a.f;
+        pkg.$caller = a;
         // don't use finally section it slower than try-catch
         try {
-            var r = a.f.apply(this, arguments);
+            var r = a.methodBody.apply(this, arguments);
             pkg.$caller = cm;
             return r;
         }
@@ -370,52 +426,9 @@ function sProxyMethod(name, f) {
         }
     };
 
-    a.f = f;
+    a.methodBody = f;
     a.methodName = name;
-
-    a.$clone$ = function() {
-        return sProxyMethod(a.methodName, a.f);
-    };
-
-    return a;
-}
-
-// multiple methods proxy
-function nProxyMethod(name) {
-    var a = function() {
-        var nm = a.methods[arguments.length];
-        if (nm != null) {
-            var cm = pkg.$caller;
-            pkg.$caller = nm;
-            // don't use finally section it slower than try-catch
-            try {
-                var r = nm.apply(this, arguments);
-                pkg.$caller = cm;
-                return r;
-            }
-            catch(e) {
-                pkg.$caller = cm;
-                console.log("" + (e.stack ? e.stack : e));
-                throw e;
-            }
-        }
-        mnf.call(this, a.methodName, arguments.length);
-    };
-
-    a.methods = {};
-    a.methodName = name;
-
-    a.$clone$ = function() {
-        // multiple methods, so overloading is possible
-        var m = nProxyMethod(a.methodName);
-        for(var k in a.methods) {
-            if (a.methods.hasOwnProperty(k)) {
-                m.methods[k] = a.methods[k];
-            }
-        }
-        return m;
-    };
-
+    a.boundTo    = clazz;
     return a;
 }
 
@@ -449,28 +462,6 @@ function nProxyMethod(name) {
         var B = zebra.Class(A, [
             function a() { ... }
         ]);
-
-    __Class method overloading.__ You can declare methods with the same names but
-    different parameter list. The methods are considered as different methods
-
-        // declare class "A" that with one method "a"
-        var A = zebra.Class([
-            function a() { ... }
-        ]);
-
-        // declare class "B" that inherits class "A"
-        // and overloads method "a" with another number of
-        // parameters
-        var B = zebra.Class(A, [
-            function a(param1) { ... }
-        ]);
-
-        // instantiate class B and call two different
-        // methods "a()" and "a(param1)"
-        var b = new B();
-        b.a();      // call method defined in "A" class
-        b.a(100);   // call overloaded method defined in "B" class
-
 
     __Constructors.__ Constructor is a method with empty name
 
@@ -564,7 +555,7 @@ pkg.Class = make_template(null, function() {
         args[i] = arguments[i];
     }
 
-    if (args.length > 0 && (args[0] == null || args[0].$clazz == pkg.Class)) {
+    if (args.length > 0 && (args[0] == null || args[0].$clazz === pkg.Class)) {
         $parent = args[0];
     }
 
@@ -604,7 +595,7 @@ pkg.Class = make_template(null, function() {
                 // call constructor
                 // use array copy instead of cloning with slice for performance reason
                 // (Array.prototype.slice.call(arguments, 0, k + 1))
-                var args = [];
+                args = [];
                 for(var i=0; i < k + 1; i++) args[i] = arguments[i];
                 cl.apply(o, args);
 
@@ -622,20 +613,23 @@ pkg.Class = make_template(null, function() {
     // prepare fields that caches the class properties
     $template.$propertyInfo = {};
 
+    function copyProtoMethod(targetClazz, parentClazz, cb) {
+        for (var k in parentClazz.prototype) {
+            if (parentClazz.prototype.hasOwnProperty(k) === true) {
+                var f = parentClazz.prototype[k];
+                targetClazz.prototype[k] = (f != null && f.methodBody != null) ? ProxyMethod(f.methodName, f.methodBody, f.boundTo)
+                                                                               : f;
+
+                if (cb != null) cb(targetClazz, parentClazz, targetClazz.prototype[k], f);
+            }
+        }
+    }
+
     // copy parents prototype methods and fields into
     // new class template
     $template.$parent = $parent;
     if ($parent != null) {
-        for (var k in $parent.prototype) {
-            if ($parent.prototype.hasOwnProperty(k)) {
-                var f = $parent.prototype[k];
-
-                // constructor should not be copied
-                if (k != CNAME) {
-                    $template.prototype[k] = (f != null && f.$clone$ != null) ? f.$clone$() : f;
-                }
-            }
-        }
+        copyProtoMethod($template, $parent);
     }
 
     // extend method cannot be overridden
@@ -649,39 +643,31 @@ pkg.Class = make_template(null, function() {
         // $super method calls.
         if (this.$extended !== true) {
             c = Class(c,[]);
-            this.$extended = true;               // mark the instance as extended to avoid double extending.
+            this.$extended = true;         // mark the instance as extended to avoid double extending.
             c.$name = this.$clazz.$name;
             this.$clazz = c;
         }
 
         if (Array.isArray(f)) {
-            for(var i=0; i < f.length; i++) {
+            var init = null;
+            for(var i = 0; i < f.length; i++) {
                 var n = FN(f[i]);
-
-                // map user defined constructor to internal constructor name
-                if (n == CDNAME) n = CNAME;
-
-                if (n === CNAME) {
-                    f[i].call(this);   // call constructor as an initializer
-                    continue;
+                if (n === CDNAME) {
+                    init = f[i];  // postpone calling initializer before all methods will be defined
                 }
                 else {
-                    // clone method and put it in class instance
-                    // if the method is not directly defined in
-                    // the class instance
-                    var pv = this[n];
-                    if (pv != null && this.hasOwnProperty(n) === false)  {
-                        this[n] = (pv.$clone$ != null ? pv.$clone$() : sProxyMethod(n, pv));
+                    if (typeof this[n] !== 'undefined' && typeof this[n] !== 'function') {
+                        throw new Error("Method '" + n + "' clash with a property");
                     }
-
-                    this[n] = createMethod(n, f[i], this, c);
+                    this[n] = ProxyMethod(n, f[i], c);
                 }
             }
+            if (init != null) init.call(this);
             l--;
         }
 
-        // add new interfaces if they
-        for(var i=0; i < l; i++) {
+        // add new interfaces if they has been passed
+        for(var i = 0; i < l; i++) {
             if (pkg.instanceOf(arguments[i], pkg.Interface) === false) {
                 throw new Error("Invalid argument: " + arguments[i]);
             }
@@ -691,7 +677,7 @@ pkg.Class = make_template(null, function() {
     };
 
     $template.prototype.$super = function() {
-        if (pkg.$caller) {
+       if (pkg.$caller != null) {
             var name = pkg.$caller.methodName,
                 $s   = pkg.$caller.boundTo.$parent,
                 args = arguments;
@@ -706,26 +692,38 @@ pkg.Class = make_template(null, function() {
 
             while ($s != null) {
                 var m = $s.prototype[name];
-
                 // if the method found and the method is
                 //     not proxy method       <or>
                 //     single proxy method    <or>
                 //     multiple proxy method that contains a method with the required arity
-                if (m != null && (typeof m.methods === "undefined" || m.methods[args.length] != null)) {
+                if (m != null) {
                     return m.apply(this, args);
                 }
                 $s = $s.$parent;
             }
-            mnf.call(this, name, args.length);
+
+            var cln = this.$clazz && this.$clazz.$name ? this.$clazz.$name + "." : "";
+            throw new ReferenceError("Method '" + cln + (name === CNAME ? "constructor"
+                                                                        : name) + "(" + args.length + ")" + "' not found");
         }
         throw new Error("$super is called outside of class context");
     };
 
-    $template.prototype.$clazz = $template;
+    $template.prototype.$clone = function() {
+        var f = function() {};
+        f.prototype = this.constructor.prototype;
+        var nobj = new f();
+        for(var k in this) {
+            if (this.hasOwnProperty(k)) nobj[k] = zebra.clone(this[k]);
+        }
 
-    $template.prototype.$this = function() {
-        return pkg.$caller.boundTo.prototype[CNAME].apply(this, arguments);
+        nobj.constructor = this.constructor;
+        nobj.$hash$ = "$zObj_" + ($$$++);
+        nobj.$clazz = this.$clazz;
+        return nobj;
     };
+
+    $template.prototype.$clazz = $template;
 
     // check if the method has been already defined in the class
     if (typeof $template.prototype.properties === 'undefined') {
@@ -754,89 +752,6 @@ pkg.Class = make_template(null, function() {
             }
             this._.remove.apply(this._, arguments);
         };
-    }
-
-    /**
-     * Create method
-     * @param  {String} n     a method name
-     * @param  {Function} f   a method to be added
-     * @param  {Object} obj   an object where all declared method sits
-     * @param  {Class} clazz  a class
-     * @return {Function}     a method
-     */
-    function createMethod(n, f, obj, clazz) {
-        var arity = f.length, vv = obj[n];
-
-        // if passed method has been already bound to
-        // create wrapper function as a clone function
-        if (f.boundTo != null) {
-            // clone method if it is bound to a class
-            f = (function(f) {
-                return function() { return f.apply(this, arguments); };
-            })(f, arity, n);
-        }
-
-        f.boundTo    = clazz;
-        f.methodName = n;
-
-        if (typeof vv === 'undefined') {
-            // declare new class method
-            return sProxyMethod(n, f); // no parent or previously declared method exists,
-                                       // create new proxy single method
-
-            // Pay attention we cannot avoid of proxy creation since we
-            // cannot say in advance if the declared method will call
-            // super. For instance class can declare method "b" and which
-            // doesn't have an implementation on the level of parent class
-            // but it can call super method "a" method !
-        }
-
-        if (typeof vv === 'function') {
-            if (vv.$clone$ != null) {  // a proxy  method has been already defined
-
-                if (typeof vv.methods === "undefined") {  // single method proxy detected
-
-                    if (vv.f.boundTo != clazz || arity == vv.f.length) {
-                                    // single method has been defined in a parent class or the single
-                                    // method arity is the same to the new method arity than override
-                                    // the single method with a new one
-
-                        vv.f = f; // new single proxy method
-                        return vv;
-                    }
-
-                    // single method has been defined in this class and arity of
-                    // the single method differs from arity of the new method
-                    // than overload the old method with new one method
-                    var sw = nProxyMethod(n);
-                    sw.methods[vv.f.length] = vv.f;
-                    sw.methods[arity] = f;
-                    return sw;
-                }
-
-                // multiple methods proxy detected
-                vv.methods[arity] = f;
-                return vv;
-            }
-
-            // old method has been defined directly in class prototype field
-            if (arity == vv.length) {  // the new method arity is the same to old method
-                                       // arity than override it with single method proxy
-
-                return sProxyMethod(n, f);  // new single proxy method
-            }
-
-            // the new method arity is not the same to new one
-            // than overload it with new one ()
-            var sw = nProxyMethod(n);
-            vv.methodName = n;
-            vv.boundTo    = clazz;
-            sw.methods[vv.length] = vv;
-            sw.methods[arity] = f;
-            return sw;
-        }
-
-        throw new Error("Method '" + n + "' clash with a property");
     }
 
     /**
@@ -877,91 +792,105 @@ pkg.Class = make_template(null, function() {
      * extended with
      * @method extend
      */
-    function extend(df) {
+    function extend(clazz, df, isMixing) {
+        if (arguments.length === 1) {
+            df    = clazz;
+            clazz = this;
+        }
+
+        if (isMixing == null) {
+            isMixing = false;
+        }
+
         if (Array.isArray(df) === false) {
             throw new Error("Invalid class definition '" + df + "', array is expected");
         }
 
-        for(var i=0; i < df.length; i++) {
-            var f     = df[i],
-                n     = FN(f),
-                arity = f.length;
+        for(var i = 0; i < df.length; i++) {
+            var f  = df[i],
+                n  = FN(f);
 
             // map user defined constructor to internal constructor name
-            if (n == CDNAME) n = CNAME;
-
-            if (n[0] === "$") {
-                // populate prototype fields if a special method has been defined
-                if (n === "$prototype") {
-                    var protoFields = {};
-                    f.call(protoFields, this);  // call $prototype to populate methods in protoFields
-                                                     // dictionary
-
-                    // add "boundTo" and "methodName" fields to the prototype methods
-                    // and add the new method to class prototype
-                    for(var k in protoFields) {
-                        if (protoFields.hasOwnProperty(k)) {
-                            var protoFieldVal = protoFields[k];
-                            // map user defined constructor to internal constructor name
-                            if (k == CDNAME) k = CNAME;
-
-                            this.prototype[k] = protoFieldVal;
-                            if (protoFieldVal && typeof protoFieldVal === "function") {
-                                protoFieldVal.methodName = k;
-                                protoFieldVal.boundTo = this;
-                            }
+            if (n === CDNAME) {
+                n = CNAME;
+            }
+            else {
+                if (n[0] === "$") {
+                    // populate prototype fields if a special method has been defined
+                    if (n === "$prototype") {
+                        f.call(clazz.prototype, clazz);
+                        if (clazz.prototype[CDNAME]) {
+                            clazz.prototype[CNAME] = clazz.prototype[CDNAME];
+                            delete clazz.prototype[CDNAME];
                         }
+                        continue;
                     }
-                    continue;
-                }
 
-                // populate class level fields if a special method has been defined
-                if (n === "$clazz") {
-                    f.call(this);
-                    continue;
+                    // populate class level fields if a special method has been defined
+                    if (n === "$clazz") {
+                        f.call(clazz);
+                        continue;
+                    }
+
+                    if (n === "$mixing") {
+                        extend(clazz, f.call(clazz));
+                        continue;
+                    }
                 }
             }
 
-            this.prototype[n] = createMethod(n, f, this.prototype, this);
+            var v = clazz.prototype[n];
+
+            if (typeof v !== 'undefined') {
+                if (typeof v !== 'function') throw new Error("Method '" + n + "' clash with a property");
+
+                if (isMixing === false && v.boundTo === clazz) {
+                    throw new Error("Method ('" + n + "') overloading is not allowed");
+                }
+            }
+
+            clazz.prototype[n] = ProxyMethod(n, f, clazz);
         }
     }
 
-    extend.call($template, df);
+    extend($template, df);
 
     // populate static fields
     // TODO: exclude the basic static methods and static constant
     // static inheritance
     if ($parent != null) {
         for (var k in $parent) {
-            if (k[0] != '$' && $parent.hasOwnProperty(k) && $template.hasOwnProperty(k) === false) {
-                var val = $parent[k];
-
-                // clone direct JS Object
-                if (val != null && val.constructor === Object) {
-                    var nval = {};
-                    for (var vk in val) {
-                        if (val.hasOwnProperty(vk)) nval[vk] = val[vk];
-                    }
-                    $template[k] = nval;
-                }
-                else {
-                    $template[k] = $parent[k];
-                }
+            if (k[0] !== '$' &&
+                $parent.hasOwnProperty(k) === true &&
+                $template.hasOwnProperty(k) === false)
+            {
+                $template[k] = pkg.clone($parent[k]);
             }
         }
     }
 
      // add extend later to avoid the method be inherited as a class static field
-    $template.extend = extend;
+    $template.extend = function() {
+        // inject class
+        if (arguments[1] !== false && this.$isInjected !== true) {
+            // create intermediate class
+            var A = this.$parent != null ? Class(this.$parent, []) : Class([]);
 
-    // add parent class constructor(s) if the class doesn't declare own
-    // constructors
-    if ($template.$parent != null &&
-        $template.$parent.prototype[CNAME] != null &&
-        $template.prototype[CNAME] == null)
-    {
-        $template.prototype[CNAME] = $template.$parent.prototype[CNAME];
-    }
+            // copy this class prototypes methods to intermediate class A and re-define
+            // boundTo to the intermediate class A if they were bound to this class
+            copyProtoMethod(A, this, function(targetClazz, srcClazz, addedMethod, sourceMethod) {
+                if (addedMethod != sourceMethod && addedMethod.boundTo === srcClazz) {
+                    addedMethod.boundTo = A;
+                    if (sourceMethod.boundTo === srcClazz) sourceMethod.boundTo = A;
+                }
+            });
+
+            this.$parent = A;
+            this.$isInjected = true;
+        }
+
+        extend.call(this, this, arguments[0], true);
+    };
 
     return $template;
 });
@@ -1029,7 +958,7 @@ pkg.$cache = function(key) {
         return ctx;
     }
 
-    throw new Error("Class '" + key + "' cannot be found");
+    throw new Error("Reference '" + key + "' not found");
 };
 
 /**
@@ -1038,10 +967,15 @@ pkg.$cache = function(key) {
  * @return {Function} a class. Throws exception if the class cannot be
  * resolved by the given class name
  * @method forName
+ * @throws Error
  * @api  zebra.forName()
  */
 Class.forName = function(name) {
     return pkg.$cache(name);
+};
+
+Class.newInstance = function() {
+    return pkg.newInstance(this, arguments);
 };
 
 /**
@@ -1091,7 +1025,7 @@ pkg.ready = function() {
         if ($busy > 0) $busy--;
     }
     else {
-        if (arguments.length == 1 &&
+        if (arguments.length === 1 &&
             $busy === 0 &&
             $readyCallbacks.length === 0)
         {
@@ -1156,7 +1090,7 @@ pkg.$resolveClassNames = function() {
     pkg(function(n, p) {
         function collect(pp, p) {
             for(var k in p) {
-                if (k[0] != "$" &&  p[k] != null && p[k].$name == null && p.hasOwnProperty(k) && zebra.instanceOf(p[k], Class)) {
+                if (k[0] !== "$" && p[k] != null && p[k].$name == null && p.hasOwnProperty(k) && zebra.instanceOf(p[k], Class)) {
                     p[k].$name = pp != null ? pp + "." + k : k;
                     collect(p[k].$name, p[k]);
                 }
@@ -1206,7 +1140,7 @@ if (pkg.isInBrowser) {
         if (m == null) {
             m = purl.exec(window.location);
             if (m == null) {
-                throw Error("Cannot resolve '" + url + "' url");
+                throw new Error("Cannot resolve '" + url + "' url");
             }
             a.href = m[1] + "//" + m[2] + m[3].substring(0, p.lastIndexOf("/") + 1) + url;
             m = purl.exec(a.href);
@@ -1285,12 +1219,12 @@ if (pkg.isInBrowser) {
             throw new Error("Absolute URL '" + p + "' cannot be joined");
         }
 
-        return p[0] == '/' ? this.protocol + "//" + this.host + p
-                           : this.protocol + "//" + this.host + this.path + (this.path[this.path.length-1] == '/' ? '' : '/') + p;
+        return p[0] === '/' ? this.protocol + "//" + this.host + p
+                            : this.protocol + "//" + this.host + this.path + (this.path[this.path.length-1] === '/' ? '' : '/') + p;
     };
 
     var $interval = setInterval(function () {
-        if (document.readyState == "complete") {
+        if (document.readyState === "complete") {
             clearInterval($interval);
             complete();
         }
@@ -1303,5 +1237,4 @@ else {
 /**
  * @for
  */
-
 })();

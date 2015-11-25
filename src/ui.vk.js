@@ -8,22 +8,20 @@ zebra.package("ui.vk", function(pkg, Class) {
      * @module  ui.vk
      * @main
      */
-
     pkg.VKLayout = Class(L.Layout, [
         function $prototype () {
-            this.gap   = 2;
-            this.ratio = 2;
+            this.ratio = this.gap = 2;
 
             this.doLayout = function(t) {
-                var m     = this.keyboardMetrics(t),
-                    rows  = m.rows,
+                var m     =  this.keyboardMetrics(t),
+                    rows  =  m.rows,
                     row   = -1,
                     x     =  0,
                     y     =  0,
-                    left  = t.getLeft(),
-                    top   = t.getTop(),
-                    ew    = t.width - left - t.getRight(),
-                    extra = 1000000;
+                    left  =  t.getLeft(),
+                    top   =  t.getTop(),
+                    ew    =  t.width - left - t.getRight(),
+                    extra =  1000000;
 
                 // compute extra alignment for fixed size keys to
                 // take larger than preferred size horizontal
@@ -369,7 +367,7 @@ zebra.package("ui.vk", function(pkg, Class) {
             }
         },
 
-        function mousePressed(e) {
+        function pointerPressed(e) {
             this.$super(e);
             this.nextStatusView();
         }
@@ -491,10 +489,10 @@ zebra.package("ui.vk", function(pkg, Class) {
             this.$super(t.view || t.icon || t.label || this.ch);
         },
 
-        function _mousePressed(e) {
+        function _pointerPressed(e) {
             if (this.$sticked == true) {
                 this.$sticked = false;
-                this.$super(this._mouseReleased, e);
+                this.$super(this._pointerReleased, e);
                 this.fireVkReleased(this.code, this.ch, this.mask);
             }
             else {
@@ -506,7 +504,7 @@ zebra.package("ui.vk", function(pkg, Class) {
             }
         },
 
-        function _mouseReleased(e) {
+        function _pointerReleased(e) {
             if (this.mask == 0) {
                 this.$super(e);
                 this.fireVkReleased(this.code, this.ch, this.mask);
@@ -824,9 +822,11 @@ zebra.package("ui.vk", function(pkg, Class) {
         return new pkg.VKey(d);
     };
 
-    pkg.VKListeners = zebra.util.ListenersClass("vkPressed", "vkTyped", "vkReleased", "vkMaskUpdated", "vkOptionSelected");
-
     pkg.VK = Class(ui.Panel, [
+        function $clazz() {
+            this.Listeners = zebra.util.ListenersClass("vkPressed", "vkTyped", "vkReleased", "vkMaskUpdated", "vkOptionSelected");
+        },
+
         function $prototype() {
             this.mask = 0;
 
@@ -929,14 +929,14 @@ zebra.package("ui.vk", function(pkg, Class) {
                 this._.vkPressed(vk, code, ch, mask);
 
                 KE.reset(this.input, ui.KeyEvent.PRESSED, code, ch, this.mask);
-                ui.events.fireInputEvent(KE);
+                ui.events.fireEvent(KE);
             };
 
             this.vkTyped = function (vk, code, ch, mask) {
                 var ch = this.isShiftOn() ? ch.toUpperCase() : ch;
                 this._.vkTyped(vk, code, ch, mask);
                 KE.reset(this.input, ui.KeyEvent.TYPED, code, ch, this.mask);
-                ui.events.fireInputEvent(KE);
+                ui.events.fireEvent("keyTyped", KE);
             };
 
             this.vkReleased = function(vk, code, ch, mask) {
@@ -946,7 +946,7 @@ zebra.package("ui.vk", function(pkg, Class) {
 
                 this._.vkReleased(vk, code, ch, mask);
                 KE.reset(this.input, ui.KeyEvent.RELEASED, code, ch, this.mask);
-                ui.events.fireInputEvent(KE);
+                ui.events.fireEvent(KE);
             };
 
             this.setActiveGroup = function(name) {
@@ -1020,7 +1020,7 @@ zebra.package("ui.vk", function(pkg, Class) {
 
         function() {
             this.$super();
-            this._ = new pkg.VKListeners();
+            this._ = new this.$clazz.Listeners();
         }
     ]);
 
@@ -1035,14 +1035,14 @@ zebra.package("ui.vk", function(pkg, Class) {
         return p != null;
     }
 
-    ui.events.addListener({
+    ui.events.bind({
         focusGained : function (e) {
             if ($vk != null && $isVkElement(e.source) == false) {
                 pkg.showVK(zebra.instanceOf(e.source, ui.TextField) ? e.source : null);
             }
         },
 
-        mousePressed : function(e) {
+        pointerPressed : function(e) {
             if ($vk != null) {
                 if ($vk.input != null && $vk.input != e.source && $isVkElement(e.source) == false && L.isAncestorOf($vk, e.source) == false) {
                     pkg.showVK(null);
@@ -1058,7 +1058,9 @@ zebra.package("ui.vk", function(pkg, Class) {
     });
 
     new ui.Bag(pkg).load(pkg.$url + "vk.json", function(e) {
-        if (e != null) throw e;
+        if (e != null) {
+            console.log("VK JSON loading failed: " + (e.stack ? e.stack : e));
+        }
     });
 
     /**

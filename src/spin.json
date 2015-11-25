@@ -1,0 +1,29 @@
+{
+    "Spin" : {
+        "IncButton" : {
+            "canHaveFocus" : false,
+            "border": "plain",
+            "padding": [ 2,  0, 0,0],
+            "fireParams": [ true, 100, 1000],
+            "preferredSize": [14,12],
+            "arrowDirection": "top"
+        },
+
+        "DecButton" : {
+            "canHaveFocus" : false,
+            "border": "plain",
+            "padding": [ 0,  0, 2, 0 ],
+            "fireParams": [ true, 100, 1000],
+            "preferredSize": [14,12],
+            "arrowDirection": "bottom"
+        },
+
+        "TextField" : {
+            "border2": null,
+            "background": null,
+            "font" : "bold"
+        },
+
+        "border": { "$zebra.ui.Border" : ["gray", 1, 3] }
+    }
+}

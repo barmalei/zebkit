@@ -10,7 +10,7 @@
 		    zebra.ready(function() {
 		    	eval(zebra.Import("ui", "layout", "ui.designer"));
 
-		        var z  = new zebra.ui.zCanvas("test");
+		        var z = new zebra.ui.zCanvas("test");
 			    z.fullScreen();
 
 			    var root = z.root.properties({
@@ -35,8 +35,8 @@
 			    				this.infoWin.constraints = CENTER;
 			    			},
 
-			    			function childInputEvent(e) {
-			    				if (e.ID == InputEvent.FOCUS_GAINED && zebra.instanceOf(e.source, ShaperPan)) {
+			    			function childFocusGained(e) {
+			    				if (zebra.instanceOf(e.source, ShaperPan)) {
 			    					this.hideWindow();
 			    				}
 			    			},
@@ -87,7 +87,6 @@
 			    			},
 
 			    			function mouseDragged(e) {
-
 			    				if (this.target != null && e.touchCounter == 2) {
 			    					var touches = [];
 			    					for(var k in e.touches) touches.push(e.touches[k]);
@@ -112,8 +111,8 @@
 			    		]).properties({
 			    			kids: [
 			    				new ShaperPan(new Button("Test").properties({
-							    	location:[20,20],
-							    	preferredSize:[100,20],
+							    	location:[20, 20],
+							    	preferredSize:[100, 20],
 							    	padding:8
 							    })),
 			    				new ShaperPan(new Checkbox("Test").properties({

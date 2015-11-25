@@ -1,10 +1,31 @@
-**03.2015 (Anna)**
+**06.2015 (Anna)**
 
-   * New UI component tree. Add UI components directly as tree nodes  
-   * Grid cell marker mode support
-   * Own zebra custom virtual keyboard implementation 
+   * Significant changes in zebra easy OOP concept. For the sake of simplicity zebra doesn't support neither constructor nor method overloading. It makes development more simple less error prone. 
+   * OOP mixing.
+   * Powerful class level class extending with access to super context  
+   * New core API method to clone JS object. 
+   * New date API and UI components:
+      - Calendar component
+      - Input date component 
+      - Input date range
+   * Simple LineView has been added.
+   * format utility method
+   * Tooltip showing supports more options including showing tooltip that requires a user interaction 
+   * Decorated text render has been added. Use to paint underlined and strike text.
+   * Event manager listener support has been re-worked to follow common concept. Listeners are registered by single "bind" method. 
+   * Link component has been switched to use DecoratedTextRender 
+   * ArrowButton component has been added 
+   * Place source code of various views and renders in dedicated file "ui.views.js"  
+   * Decouple clipboard functionality to a dedicated manager class. No clipboard mess in code anymore. Clipboard manager supports listeners 
+   * Very light weight string render has been added. That is widely used by single line label component.
+   * Matrix model has been re-viewed and improved regarding the big amount of data  (millions cells) support.  
+   * Fully re-implement JSON bag. No conditional keys are allowed because of their inconsistency  
+   * String names for constraints and alignments 
+   * New UI component - component tree. It is allows developers to add UI components directly as tree nodes. The tree components have been re-designed to be more executable and re-usable system design.     
+   * Grid cell marker mode support. It is possible to navigate over grid. 
+   * Own zebra custom virtual keyboard implementation. This is special package that helps to implement own virtual keyboards. The basic features set allows developers to specify key, keys set, command key. As an example you can easily load Hind keyboard layout.  
    * Remove "zebra.ui.Composite" interface, use "catchInput" field as boolean flag to say if component composite or as a method to say it dynamically
-   * Remove zebra.ui.CopyCutPaste interface. Use "clipCopy", "clipPaste" method to catch clipboard events
+   * Remove zebra.ui.CopyCutPaste interface. Use "clipCopy", "clipPaste", "clipCut" method to catch clipboard events
    * Reorganized tree component
    * Tabs setOrientation method added
    * Singleton classes

@@ -2,34 +2,32 @@
 <html>
 	<head>
 
-        <script src='../zebra.min.js' type='text/javascript'></script>
-        
+        <script src='../zebra.js' type='text/javascript'></script>
+
 		<script type='text/javascript'>
 			(function () {
-				if (zebra.ui.$detectZCanvas("ui.zebrafont") != null) return;
-
 				var bg = null;
 
 				var ZebraTextRender = zebra.Class(zebra.ui.TextRender, [
 					function(t) {
 						this.$super(t);
 						this.setFont(new zebra.ui.Font("100px Futura, Helvetica, sans-serif"));
-						this.image = bg; 
+						this.image = bg;
 					},
 
-					function paintLine(g,x,y,line,d) { 
+					function paintLine(g,x,y,line,d) {
 						var gradient = g.createLinearGradient(x, y, x, y + this.font.height);
 						gradient.addColorStop(0.1, '#000');
 						gradient.addColorStop(0.35, '#fff');
 						gradient.addColorStop(0.65, '#fff');
 					    gradient.addColorStop(1.0, '#000');
 						g.fillStyle = gradient;
-						g.fillText(this.getLine(line), x, y); 
+						g.fillText(this.getLine(line), x, y);
 
 						var prev = g.globalCompositeOperation;
 						g.globalCompositeOperation = "source-atop";
 						g.fillStyle = this.pattern;
-						g.fillRect(x, y, this.lineWidth(line), this.getLineHeight());
+						g.fillRect(x, y, this.calcLineWidth(line), this.getLineHeight());
 						g.globalCompositeOperation = prev;
 					},
 
@@ -41,11 +39,11 @@
 
 			    zebra.ready(
 			    	function() {
-		    			if (zebra.ui.$detectZCanvas("ui.engine.sample8") != null) return;
-		    			bg = zebra.ui.loadImage("images/zebra-pattern.png");
+		    			bg = zebra.web.$loadImage("images/zebra-pattern.png");
 			    	},
 
 			    	function() {
+
 					    (new zebra.ui.zCanvas("ui.zebrafont")).root.properties({
 					    	layout : new zebra.layout.BorderLayout(4, 4),
 					    	border : new zebra.ui.Border(),
@@ -54,7 +52,7 @@
 					    		CENTER: new zebra.ui.Panel({
 									layout  : new zebra.layout.BorderLayout(8, 8),
 									padding : 8,
-									kids    : { 
+									kids    : {
 										CENTER: new zebra.ui.TextField(new ZebraTextRender("Zebra ...")).properties({
 											cursorView    : "red",
 											curW          : 3,
@@ -69,7 +67,7 @@
 									}
 								})
 					    	}
-					    });				
+					    });
 		 			}
 		 		);
 			})();

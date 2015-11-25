@@ -28,11 +28,11 @@
 				eval(zebra.Import("ui", "layout"));
 
 				var ZebraTextRender = zebra.Class(TextRender, [
-					function(t) {
-						this.$this(t, false);
-					},
-
 					function(t, reflection) {
+						if (arguments.length === 1) {
+							reflection = false;
+						}
+
 						this.$super(t);
 						this.setFont(new zebra.ui.Font("100px Futura, Helvetica, sans-serif"));
 						this.image = zebra.ui.demo.zebra_pattern;
@@ -69,13 +69,13 @@
 							gradient.addColorStop(0.0, 'rgba(0,0,0,0.65)');
 							gradient.addColorStop(1.0, '#000');
 							g.fillStyle = gradient;
-							g.fillRect(x, y + this.font.height + this.reflectionGap + 30, this.lineWidth(line), 2*this.font.height);
+							g.fillRect(x, y + this.font.height + this.reflectionGap + 30, this.calcLineWidth(line), 2*this.font.height);
 							g.restore();
 						}
 
 					//	g.globalCompositeOperation = "source-atop";
 						g.fillStyle = this.pattern;
-						g.fillRect(x, y, this.lineWidth(line), this.getLineHeight());
+						g.fillRect(x, y, this.calcLineWidth(line), this.getLineHeight());
 						g.globalCompositeOperation = prev;
 					},
 
@@ -130,7 +130,7 @@
 		    											}),
 		    											BOTTOM: new Panel({
 		    												layout: new FlowLayout(CENTER, TOP, HORIZONTAL, 12),
-		    												kids  : [ new Label("Copyright (c) Sandtube 2014") ]
+		    												kids  : [ new Label("Copyright (c) Andrei Vishneuski, 2015") ]
 		    											})
 		    										}
 		    									})

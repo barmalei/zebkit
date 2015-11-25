@@ -28,12 +28,12 @@
                         this.add(p);
                     },
 
-                    function mouseDragStarted(e) {
+                    function pointerDragStarted(e) {
                     	if (!this.pathes) this.pathes = {};
                     	this.pathes[e.identifier] = [ e.x, e.y ];
                     },
 
-                    function mouseDragged(e) {
+                    function pointerDragged(e) {
                     	this.pathes[e.identifier].push(e.x, e.y);
                         this.repaint();
                     },

@@ -16,7 +16,7 @@
 		 			kids : [
 		 				"Item 1",
 		 				"Item 2",
-		 				{ 
+		 				{
 		 					value:"Item 3",
 		 					kids: [
 		 						"Item 3.1",
@@ -25,9 +25,9 @@
 		 					]
 		 				}
 		 			]
-		 		}, 
+		 		},
 		 		[
-		 			function mouseDragStarted(e) {
+		 			function pointerDragStarted(e) {
 		 				if (this.selected != null && this.getItemAt(this.selected, e.x, e.y) == this.selected) {
 		 					var view = this.provider.getView(this, this.selected);
 
@@ -47,17 +47,17 @@
 		 				}
 		 			},
 
-		 			function mouseDragged(e) {
+		 			function pointerDragged(e) {
 		 				if (this.viewComp) {
 			 				var dx = e.x - this.cdx;
 			 				var dy = e.y - this.cdy;
 			 				this.cdy = e.y;
 			 				this.cdx = e.x;
-							this.viewComp.setLocation(this.viewComp.x + dx, this.viewComp.y + dy);		 				
+							this.viewComp.setLocation(this.viewComp.x + dx, this.viewComp.y + dy);
 						}
 		 			},
 
-		 			function mouseDragEnded(e) {
+		 			function pointerDragEnded(e) {
 		 				if (this.viewComp != null) {
 		 					this.viewComp.removeMe();
 		 					this.viewComp = null;
@@ -69,7 +69,7 @@
 		 						c.model.add("" + this.selected.value);
 		 					}
 		 				}
-		 			} 
+		 			}
 		 		]);
 
 

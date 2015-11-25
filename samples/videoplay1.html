@@ -6,7 +6,7 @@
 
 		<script type='text/javascript'>
 		    zebra.ready(function() {
-				// import all classes, functions and cosntans from 
+				// import all classes, functions and cosntans from
 				// zebra.ui, zebra.layout packages
 				eval(zebra.Import("ui", "layout"));
 
@@ -36,7 +36,7 @@
 					    					border: null,
 					    					background: null
 					    			  }),
-					    			
+
 					    		BOTTOM: new Panel().properties({
 					    			layout : new FlowLayout(CENTER, CENTER, HORIZONTAL, 8),
 					    			padding: 6,
@@ -45,33 +45,33 @@
 					    					preferredSize: [ 120, -1],
 					    				}),
 					    			]
-					    		}) 
+					    		})
 					    	}
 					    })
-			    	]	
+			    	]
 			    });
 
 			    var isPaused  = true,
-			    	video     = root.find("//zebra.ui.VideoPan"), 
-			    	button    = root.find("//zebra.ui.Button"), 
+			    	video     = root.find("//zebra.ui.VideoPan"),
+			    	button    = root.find("//zebra.ui.Button"),
 			    	slider    = root.find("//zebra.ui.Slider"),
-			    	tf        = root.find("//zebra.ui.TextField"); 
+			    	tf        = root.find("//zebra.ui.TextField");
 
-				// Highlight screen when mouse is in. It is done by zebra mixing.
-				root.find("//*[@id='mypanel']").extend([	
-  					function mouseExited(e)  { this.setBackground(null); },
-  					function mouseEntered(e) { this.setBackground("rgba(255, 255, 255, 0.5)");	 },
+				// Highlight screen when pointer is in. It is done by zebra mixing.
+				root.find("//*[@id='mypanel']").extend([
+  					function pointerExited(e)  { this.setBackground(null); },
+  					function pointerEntered(e) { this.setBackground("rgba(255, 255, 255, 0.5)");	 },
   					function catchInput(t) {  return t != slider && t != button && t != tf; }
 				]);
 
 				video.extend([ function finished() {  button.kids[0].setValue("Play video"); } ]);
 
 				button.bind(function() {
-					if (isPaused) video.play(); 
+					if (isPaused) video.play();
 					else          video.pause();
 					isPaused  = !isPaused ;
 					button.kids[0].setValue(isPaused  ? "Play video": "Pause video");
-				});		    
+				});
 
 				slider.bind(function(slider) {
 					video.video.volume = 1 - slider.value/10;

@@ -13,8 +13,12 @@ var uiFiles = [
     'src/util.js',
     'src/io.js',
     'src/data.js',
+    'src/web.js',
     'src/ui.webstuff.js',
-    'src/canvas.js',
+    'src/ui.webpointer.js',
+    'src/ui.webkey.js',
+    'src/ui.core.js',
+    'src/ui.views.js',
     'src/ui.js',
     'src/ui.TextField.js',
     'src/ui.list.js',
@@ -44,7 +48,7 @@ var demoFiles = [
 gulp.task('http', function() {
     gulp.src('.')
         .pipe(webserver({
-            port: 8090,
+            port: 8080,
             host: "localhost",
             directoryListing: true,
             open: false

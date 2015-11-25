@@ -12,6 +12,7 @@
 	<script src='../src/layout.js' type='text/javascript'></script>
 	<script src='../src/ui.webstuff.js' type='text/javascript'></script>
 	<script src='../src/canvas.js' type='text/javascript'></script>
+	<script src='../src/ui.views.js' type='text/javascript'></script>
 	<script src='../src/ui.js' type='text/javascript'></script>
 
 
@@ -22,14 +23,14 @@
 	<script src='../src/ui.grid.js' type='text/javascript'></script>
 	<script src='../src/ui.vk.js' type='text/javascript'></script>
 	<script src='../src/ui.html.js' type='text/javascript'></script>
-        
+
 		<script type='text/javascript'>
 		    zebra.ready(function() {
 			    eval(zebra.Import("ui", "layout"));
 
 		 		var canvas = new zCanvas("test1", 600, 300);
 		 		var tabs = new Tabs(), b = new Button("Test");
-		 		tabs.add("Tab1 ", new Panel({  
+		 		tabs.add("Tab1 ", new Panel({
 		 			layout: new BorderLayout(8,8),
 		 			padding:4,
 		 			kids  : {
@@ -46,7 +47,7 @@
 		 			xx +=20;
 		 			yy += 20;
 		 		});
-			
+
 				var cont = new HtmlContent();
 				tabs.add("Load", cont);
 				cont.loadContent("embeddedHtml.test.content");
@@ -71,21 +72,21 @@
 		 		var canvas = new zCanvas("test2", 600, 400);
 		 		canvas.root.load("embeddedHtml.test.json");
 		 		canvas.root.setBackground(null);
-		 		
+
 				canvas.root.find("//*[@id='Login/Login']").bind(function() {
-					canvas.root.find("#login").setVisible(false); 
+					canvas.root.find("#login").setVisible(false);
 					canvas.root.find("#welcome").setVisible(true);
 				});
-		 		
+
 				canvas.root.findAll("//*[@id='welcome']//zebra.ui.Button", function(b) {
 					b.bind(function() {
-						canvas.root.find("#welcome").setVisible(false); 
+						canvas.root.find("#welcome").setVisible(false);
 						canvas.root.find("#newAccount").setVisible(true);
 					});
 				})
 
 				canvas.root.find("//*[@id='NewAccount/Confirm']").bind(function() {
-					canvas.root.find("#newAccount").setVisible(false); 
+					canvas.root.find("#newAccount").setVisible(false);
 					canvas.root.find("#login").setVisible(true);
 				});
 		 	});
@@ -97,16 +98,16 @@
 	    <table height="100%" width="100%" border="1">
 	    	<tr height="50%">
 	    		<td>
-	    			<canvas id="test1"> </canvas>			
+	    			<canvas id="test1"> </canvas>
 	    		</td>
 	    	</tr>
 
 	    	<tr height="50%">
 	    		<td >
-	    			<canvas id="test2"> </canvas>			
+	    			<canvas id="test2"> </canvas>
 	    		</td>
 	    	</tr>
 	    </table>
-	    
+
 	</body>
 </html>

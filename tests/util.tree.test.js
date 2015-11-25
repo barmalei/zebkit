@@ -10,6 +10,30 @@ var assert = zebra.assert, Class = zebra.Class, assertException = zebra.assertEx
     assertNoException = zebra.assertNoException, Listeners = zebra.util.Listeners;
 
 zebra.runTests("Zebra util",
+    function test_format() {
+        var s = " -- ${a} ${b}.",
+            o = { a:  100, b: "abcdef", d:"b", getM: function() { return 0 }  };
+
+        var r = zebra.util.format(s, o);
+        assert(r, " -- 100 abcdef." );
+
+        var r = zebra.util.format(" ${${d}} ${m} ${m}", o);
+        assert(r, " abcdef 0 0");
+
+        var r = zebra.util.format(" ${4,0,a} ${m}", o);
+        assert(r, " 0100 0");
+
+        var r = zebra.util.format(" ${4,a} ${2,+,m}", o, '-');
+        assert(r, " -100 +0");
+
+        var o = new Date(1999, 9, 11);
+        var r = zebra.util.format("-- ${2,month} , ${3,+,date} k ${fullYear}. ${2,kk}", o, 'x');
+        assert(r, "-- x9 , +11 k 1999. xx");
+
+        var r = zebra.util.format(" ${4,a} ${2,+,m} ${d}", {}, '-');
+        assert(r, " ---- -- -");
+    },
+
     function test_invalidpath() {
         var treeLikeRoot = { value:"test" };
 

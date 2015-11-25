@@ -4,7 +4,7 @@
 		<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
 		<meta name="msapplication-tap-highlight" content="no" />
 
-		<script src='../zebra.min.js' type='text/javascript'></script>
+		<script src='../zebra.js' type='text/javascript'></script>
 
 
 		<script type='text/javascript'>
@@ -16,6 +16,7 @@
 				// create canvas
 			    var root = (new zCanvas(800, 400)).root;
 				root.setLayout(new BorderLayout(8,8));
+
 
 				var t = new CompTree({
 					value: "Root",
@@ -105,6 +106,9 @@
 				]);
 
 				var tt = new Tree(t.model);
+
+
+
 
                 t.bind("selected", function(tree) {
                     console.log("selected " + tree.selected);

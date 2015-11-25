@@ -450,7 +450,7 @@ zebra.package("ui.demo", function(pkg, Class) {
 
             p1.setPreferredSize(270, 240);
             p1.setBorder(zebra.ui.borders.plain);
-            var p2 = new ScrollPan(new ImagePan(pkg.cosmo1), VERTICAL);
+            var p2 = new ScrollPan(new ImagePan(pkg.cosmo1), "vertical");
             p2.setPreferredSize(270, 240);
             p2.setBorder(zebra.ui.borders.plain);
 
@@ -1368,6 +1368,9 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
         b.setLocation(140, 230);
         pp.add(new ShaperPan(b));
 
+
+        pp.setBorder(new Border("black"));
+
         var t = new zebra.ui.tree.Tree(new FormTreeModel(pp, [
             function exclude(c) { return zebra.instanceOf(c, ShaperPan); }
         ]));
@@ -1411,6 +1414,9 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
         l.setFont(ui.boldFont);
         this.add(TOP, l);
         this.add(CENTER, s);
+
+
+        //this.setBackground("gray");
     }
 ]);
 

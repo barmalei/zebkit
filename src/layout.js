@@ -77,8 +77,8 @@ pkg.$constraints = function(v) {
   * @method getDirectChild
   * @for zebra.layout
   */
-pkg.getDirectChild = function(parent,child){
-    for(; child != null && child.parent != parent; child = child.parent) {}
+pkg.getDirectChild = function(parent, child){
+    for(; child != null && child.parent !== parent; child = child.parent) {}
     return child;
 };
 
@@ -148,7 +148,7 @@ pkg.getTopParent = function(c){
  * @api zebra.layout.toParentOrigin()
  */
 pkg.toParentOrigin = function(x,y,c,p){
-    if (arguments.length == 1) {
+    if (arguments.length === 1) {
         c = x;
         x = y = 0;
         p = null;
@@ -157,7 +157,7 @@ pkg.toParentOrigin = function(x,y,c,p){
         if (arguments.length < 4) p = null;
     }
 
-    while (c != p) {
+    while (c !== p) {
         x += c.x;
         y += c.y;
         c = c.parent;
@@ -182,7 +182,7 @@ pkg.toParentOrigin = function(x,y,c,p){
  * @api zebra.layout.toChildOrigin()
  */
 pkg.toChildOrigin = function(x, y, p, c){
-    while(c != p){
+    while(c !== p){
         x -= c.x;
         y -= c.y;
         c = c.parent;
@@ -214,8 +214,8 @@ pkg.getMaxPreferredSize = function(target) {
     return { width:maxWidth, height:maxHeight };
 };
 
-pkg.isAncestorOf = function(p,c){
-    for(; c != null && c != p; c = c.parent);
+pkg.isAncestorOf = function(p, c){
+    for(; c != null && c !== p; c = c.parent);
     return c != null;
 };
 
@@ -307,9 +307,9 @@ pkg.Layoutable = Class(L, [
 
         function $normPath(p) {
             p = p.trim();
-            if (p[0] == '/') return p;
-            if (p[0] == '#') return "//*[@id='" + p.substring(1).trim() + "']";
-            return "//" + (p[0] == '.' ? p.substring(1).trim() : p);
+            if (p[0] === '/') return p;
+            if (p[0] === '#') return "//*[@id='" + p.substring(1).trim() + "']";
+            return "//" + (p[0] === '.' ? p.substring(1).trim() : p);
         }
 
         /**
@@ -509,8 +509,9 @@ pkg.Layoutable = Class(L, [
          * Force validation of the component metrics and layout if it is not valid
          * @method validate
          */
-        this.validate = function(){
-            this.validateMetric();
+        this.validate = function() {
+            if (this.isValid === false) this.validateMetric();
+
             if (this.width > 0 && this.height > 0 &&
                 this.isLayoutValid === false &&
                 this.isVisible === true)
@@ -543,7 +544,8 @@ pkg.Layoutable = Class(L, [
          */
         this.getPreferredSize = function(){
             this.validateMetric();
-            if (this.cachedWidth < 0){
+
+            if (this.cachedWidth < 0) {
                 var ps = (this.psWidth < 0 || this.psHeight < 0) ? this.layout.calcPreferredSize(this)
                                                                  : { width:0, height:0 };
 
@@ -673,7 +675,7 @@ pkg.Layoutable = Class(L, [
             if (d.constraints != null) constr = d.constraints;
             else                       d.constraints = constr;
 
-            if (i == this.kids.length) this.kids.push(d);
+            if (i === this.kids.length) this.kids.push(d);
             else this.kids.splice(i, 0, d);
 
             d.setParent(this);
@@ -768,7 +770,7 @@ pkg.Layoutable = Class(L, [
             if (this.kids.length > 0){
                 for(var i = 0;i < this.kids.length; i++ ){
                     var l = this.kids[i];
-                    if (c == l.constraints) return l;
+                    if (c === l.constraints) return l;
                 }
             }
             return null;
@@ -793,7 +795,7 @@ pkg.Layoutable = Class(L, [
         this.removeAt = function (i){
             var obj = this.kids[i];
             obj.setParent(null);
-            if (obj.constraints) obj.constraints = null;
+            if (obj.constraints != null) obj.constraints = null;
             this.kids.splice(i, 1);
             if (this.kidRemoved != null) this.kidRemoved(i, obj);
             this.invalidate();
@@ -852,7 +854,8 @@ pkg.Layoutable = Class(L, [
          * @method setAt
          */
         this.setAt = function(i, d) {
-            var pd = this.removeAt(i);
+            var constr = this.kids[i].constraints,
+                pd     = this.removeAt(i);
             if (d != null) this.insert(i, constr, d);
             return pd;
         };
@@ -866,8 +869,8 @@ pkg.Layoutable = Class(L, [
          * @return {zebra.layout.Layoutable} added layoutable component
          */
         this.add = function(constr,d) {
-            return (arguments.length == 1) ? this.insert(this.kids.length, null, constr)
-                                           : this.insert(this.kids.length, constr, d);
+            return (arguments.length === 1) ? this.insert(this.kids.length, null, constr)
+                                            : this.insert(this.kids.length, constr, d);
         };
 
         // speedup constructor execution
@@ -918,15 +921,14 @@ pkg.StackLayout = Class(L, [
                     var ctr = l.constraints == null ? null
                                                     : pkg.$constraints(l.constraints);
 
-                    if (ctr == pkg.USE_PS_SIZE) {
+                    if (ctr === pkg.USE_PS_SIZE) {
                         var ps = l.getPreferredSize();
-                        l.setSize(ps.width, ps.height);
-                        l.setLocation(left + ~~((ww - ps.width )/2),
-                                      top  + ~~((hh - ps.height)/2) );
+                        l.setBounds(left + Math.floor((ww - ps.width )/2),
+                                    top  + Math.floor((hh - ps.height)/2),
+                                    ps.width, ps.height);
                     }
                     else {
-                        l.setSize(ww, hh);
-                        l.setLocation(left, top);
+                        l.setBounds(left, top, ww, hh);
                     }
                 }
             }
@@ -1050,14 +1052,12 @@ pkg.BorderLayout = Class(L, [
                         case pkg.CENTER: center = l; break;
                         case pkg.TOP :
                             var ps = l.getPreferredSize();
-                            l.setLocation(left, top);
-                            l.setSize(right - left, ps.height);
+                            l.setBounds(left, top, right - left, ps.height);
                             top += ps.height + this.vgap;
                             break;
                         case pkg.BOTTOM:
                             var ps = l.getPreferredSize();
-                            l.setLocation(left, bottom - ps.height);
-                            l.setSize(right - left, ps.height);
+                            l.setBounds(left, bottom - ps.height, right - left, ps.height);
                             bottom -= ps.height + this.vgap;
                             break;
                         case pkg.LEFT: west = l; break;
@@ -1069,21 +1069,18 @@ pkg.BorderLayout = Class(L, [
 
             if (east != null){
                 var d = east.getPreferredSize();
-                east.setLocation(right - d.width, top);
-                east.setSize(d.width, bottom - top);
+                east.setBounds(right - d.width, top, d.width, bottom - top);
                 right -= d.width + this.hgap;
             }
 
             if (west != null){
                 var d = west.getPreferredSize();
-                west.setLocation(left, top);
-                west.setSize(d.width, bottom - top);
+                west.setBounds(left, top, d.width, bottom - top);
                 left += d.width + this.hgap;
             }
 
             if (center != null){
-                center.setLocation(left, top);
-                center.setSize(right - left, bottom - top);
+                center.setBounds(left, top, right - left, bottom - top);
             }
         };
     }
@@ -1110,14 +1107,14 @@ pkg.RasterLayout = Class(L, [
                 b = (this.flag & pkg.USE_PS_SIZE) > 0;
 
             for(var i = 0;i < c.kids.length; i++ ){
-                var el = c.kids[i];
-                if (el.isVisible === true){
-                    var ps = b ? el.getPreferredSize()
-                               : { width:el.width, height:el.height },
-                        px = el.x + ps.width,
-                        py = el.y + ps.height;
+                var kid = c.kids[i];
+                if (kid.isVisible === true) {
+                    var ps = b ? kid.getPreferredSize()
+                               : { width:kid.width, height:kid.height },
+                        px = kid.x + ps.width,
+                        py = kid.y + ps.height;
 
-                    if (px > m.width) m.width = px;
+                    if (px > m.width)  m.width  = px;
                     if (py > m.height) m.height = py;
                 }
             }
@@ -1133,12 +1130,12 @@ pkg.RasterLayout = Class(L, [
                 var el = c.kids[i], ww = 0, hh = 0;
 
                 if (el.isVisible === true){
-                    if (usePsSize){
+                    if (usePsSize) {
                         var ps = el.getPreferredSize();
                         ww = ps.width;
                         hh = ps.height;
                     }
-                    else{
+                    else {
                         ww = el.width;
                         hh = el.height;
                     }
@@ -1153,20 +1150,21 @@ pkg.RasterLayout = Class(L, [
 
                     if (ctr != null) {
                         var x = el.x, y = el.y;
-                        if (ctr == pkg.CENTER) {
-                            x = (c.width - ww)/2;
-                            y = (c.height - hh)/2;
+                        if (ctr === pkg.CENTER) {
+                            x = Math.floor((c.width  - ww)/2);
+                            y = Math.floor((c.height - hh)/2);
                         }
                         else {
                             if ((ctr & pkg.TOP) > 0)  y = 0;
-                            else
-                            if ((ctr & pkg.BOTTOM) > 0)  y = c.height - hh;
+                            else {
+                                if ((ctr & pkg.BOTTOM) > 0)  y = c.height - hh;
+                            }
 
-                            if ((ctr & pkg.LEFT) > 0)  x = 0;
-                            else
-                            if ((ctr & pkg.RIGHT) > 0)  x = c.width - ww;
+                            if ((ctr & pkg.LEFT) > 0)   x = 0;
+                            else {
+                                if ((ctr & pkg.RIGHT) > 0)  x = c.width - ww;
+                            }
                         }
-
                         el.setLocation(x, y);
                     }
                 }
@@ -1188,7 +1186,7 @@ pkg.RasterLayout = Class(L, [
         // components added to the panel will be placed
         // horizontally aligned at the center of the panel
         var p = new zebra.ui.Panel();
-        p.setLayout(new zebra.layout.FlowLayout(zebra.layout.CENTER, zebra.layout.CENTER));
+        p.setLayout(new zebra.layout.FlowLayout("center", "center"));
 
         // add three buttons into the panel with flow layout
         p.add(new zebra.ui.Button("Button 1"));
@@ -1277,7 +1275,7 @@ pkg.FlowLayout = Class(L, [
         this.stretchLast = false;
 
         this[''] =  function (ax,ay,dir,g){
-            if (arguments.length == 1) this.gap = ax;
+            if (arguments.length === 1) this.gap = ax;
             else {
                 if (arguments.length >= 2) {
                     this.ax = pkg.$constraints(ax);
@@ -1286,7 +1284,7 @@ pkg.FlowLayout = Class(L, [
 
                 if (arguments.length > 2)  {
                     dir = pkg.$constraints(dir);
-                    if (dir != pkg.HORIZONTAL && dir != pkg.VERTICAL) {
+                    if (dir !== pkg.HORIZONTAL && dir !== pkg.VERTICAL) {
                         throw new Error("Invalid direction " + dir);
                     }
                     this.direction = dir;
@@ -1302,7 +1300,7 @@ pkg.FlowLayout = Class(L, [
                 var a = c.kids[i];
                 if (a.isVisible === true){
                     var d = a.getPreferredSize();
-                    if (this.direction == pkg.HORIZONTAL){
+                    if (this.direction === pkg.HORIZONTAL){
                         m.width += d.width;
                         m.height = d.height > m.height ? d.height : m.height;
                     }
@@ -1315,7 +1313,7 @@ pkg.FlowLayout = Class(L, [
             }
 
             var add = this.gap * (cc > 0 ? cc - 1 : 0);
-            if (this.direction == pkg.HORIZONTAL) m.width += add;
+            if (this.direction === pkg.HORIZONTAL) m.width += add;
             else m.height += add;
             return m;
         };
@@ -1327,10 +1325,10 @@ pkg.FlowLayout = Class(L, [
                 lastOne = null,
                 ew      = c.width  - l - c.getRight(),
                 eh      = c.height - t - c.getBottom(),
-                px      = ((this.ax == pkg.RIGHT) ? ew - psSize.width
-                                                  : ((this.ax == pkg.CENTER) ? ~~((ew - psSize.width) / 2) : 0)) + l,
-                py      = ((this.ay == pkg.BOTTOM) ? eh - psSize.height
-                                                  : ((this.ay == pkg.CENTER) ? ~~((eh - psSize.height) / 2) : 0)) + t;
+                px      = ((this.ax === pkg.RIGHT) ? ew - psSize.width
+                                                   : ((this.ax === pkg.CENTER) ? Math.floor((ew - psSize.width) / 2) : 0)) + l,
+                py      = ((this.ay === pkg.BOTTOM) ? eh - psSize.height
+                                                    : ((this.ay === pkg.CENTER) ? Math.floor((eh - psSize.height) / 2): 0)) + t;
 
             for(var i = 0;i < c.kids.length; i++){
                 var a = c.kids[i];
@@ -1339,17 +1337,17 @@ pkg.FlowLayout = Class(L, [
                     var d = a.getPreferredSize(),
                         ctr = a.constraints == null ? null : pkg.$constraints(a.constraints);
 
-                    if (this.direction == pkg.HORIZONTAL){
+                    if (this.direction === pkg.HORIZONTAL){
                         if (ctr === pkg.STRETCH) {
                             d.height = c.height - t - c.getBottom();
                         }
 
-                        a.setLocation(px, ~~((psSize.height - d.height) / 2) + py);
+                        a.setLocation(px, Math.floor((psSize.height - d.height) / 2) + py);
                         px += (d.width + this.gap);
                     }
                     else {
                         if (ctr === pkg.STRETCH) d.width = c.width - l - c.getRight();
-                        a.setLocation(px + ~~((psSize.width - d.width) / 2), py);
+                        a.setLocation(px + Math.floor((psSize.width - d.width) / 2), py);
                         py += d.height + this.gap;
                     }
 
@@ -1359,7 +1357,7 @@ pkg.FlowLayout = Class(L, [
             }
 
             if (lastOne !== null && this.stretchLast === true){
-                if (this.direction == pkg.HORIZONTAL) {
+                if (this.direction === pkg.HORIZONTAL) {
                     lastOne.setSize(c.width - lastOne.x - c.getRight(), lastOne.height);
                 }
                 else {
@@ -1404,7 +1402,7 @@ pkg.FlowLayout = Class(L, [
 pkg.ListLayout = Class(L,[
     function $prototype() {
         this[''] = function (ax, gap) {
-            if (arguments.length == 1) {
+            if (arguments.length === 1) {
                 gap = ax;
             }
 
@@ -1414,8 +1412,8 @@ pkg.ListLayout = Class(L,[
                 gap = 0;
             }
 
-            if (ax != pkg.STRETCH && ax != pkg.LEFT &&
-                ax != pkg.RIGHT && ax != pkg.CENTER)
+            if (ax !== pkg.STRETCH && ax !== pkg.LEFT &&
+                ax !== pkg.RIGHT && ax !== pkg.CENTER)
             {
                 throw new Error("Invalid alignment");
             }
@@ -1461,14 +1459,15 @@ pkg.ListLayout = Class(L,[
 
                 if (cc.isVisible === true){
                     var d      = cc.getPreferredSize(),
-                        constr = cc.constraints == null ? this.ax : pkg.$constraints(cc.constraints);
+                        constr = cc.constraints == null ? this.ax
+                                                        : pkg.$constraints(cc.constraints);
 
-                    cc.setSize    ((constr == pkg.STRETCH) ? psw
-                                                           : d.width, d.height);
-                    cc.setLocation((constr == pkg.STRETCH) ? x
-                                                           : x + ((constr == pkg.RIGHT) ? psw - cc.width
-                                                                                        : ((constr == pkg.CENTER) ? ~~((psw - cc.width) / 2)
-                                                                                                                  : 0)), y);
+                    cc.setSize    ((constr === pkg.STRETCH) ? psw
+                                                            : d.width, d.height);
+                    cc.setLocation((constr === pkg.STRETCH) ? x
+                                                            : x + ((constr === pkg.RIGHT) ? psw - cc.width
+                                                                                          : ((constr === pkg.CENTER) ? Math.floor((psw - cc.width) / 2)
+                                                                                                                     : 0)), y);
                     y += (d.height + this.gap);
                 }
             }
@@ -1534,7 +1533,7 @@ pkg.PercentLayout = Class(L, [
         this[''] = function(dir, gap, stretch) {
             if (arguments.length > 0) {
                 this.direction = pkg.$constraints(dir);
-                if (this.direction != pkg.HORIZONTAL && this.direction != pkg.VERTICAL) {
+                if (this.direction !== pkg.HORIZONTAL && this.direction !== pkg.VERTICAL) {
                     throw new Error("Invalid direction : " + this.direction);
                 }
 
@@ -1553,7 +1552,7 @@ pkg.PercentLayout = Class(L, [
                 loc    = 0,
                 ns     = 0;
 
-            if (this.direction == pkg.HORIZONTAL){
+            if (this.direction === pkg.HORIZONTAL){
                 rs += target.width - left - right;
                 loc = left;
             }
@@ -1563,8 +1562,8 @@ pkg.PercentLayout = Class(L, [
             }
 
             for(var i = 0;i < size; i ++ ){
-                var l = target.kids[i], c = l.constraints, useps = (c == pkg.USE_PS_SIZE);
-                if (this.direction == pkg.HORIZONTAL){
+                var l = target.kids[i], c = l.constraints, useps = (c === pkg.USE_PS_SIZE);
+                if (this.direction === pkg.HORIZONTAL){
                     ns = ((size - 1) == i) ? target.width - right - loc
                                            : (useps ? l.getPreferredSize().width
                                                       : ~~((rs * c) / 100));
@@ -1572,25 +1571,23 @@ pkg.PercentLayout = Class(L, [
                     if (this.stretch === false) {
                         var ph = hh;
                         hh = l.getPreferredSize().height;
-                        yy = top + ~~((ph - hh) / 2);
+                        yy = top + Math.floor((ph - hh) / 2);
                     }
 
-                    l.setLocation(loc, yy);
-                    l.setSize(ns, hh);
+                    l.setBounds(loc, yy, ns, hh);
                 }
                 else {
-                    ns = ((size - 1) == i) ? target.height - bottom - loc
-                                           : (useps ? l.getPreferredSize().height
-                                                    : ~~((rs * c) / 100));
+                    ns = ((size - 1) === i) ? target.height - bottom - loc
+                                            : (useps ? l.getPreferredSize().height
+                                                     : Math.floor((rs * c) / 100));
                     var xx = left, ww = target.width - left - right;
                     if (this.stretch === false) {
                         var pw = ww;
                         ww = l.getPreferredSize().width;
-                        xx = left + ~~((pw - ww) / 2 );
+                        xx = left + Math.floor((pw - ww) / 2);
                     }
 
-                    l.setLocation(xx, loc);
-                    l.setSize(ww, ns);
+                    l.setBounds(xx, loc, ww, ns);
                 }
                 loc += (ns + this.gap);
             }
@@ -1603,8 +1600,8 @@ pkg.PercentLayout = Class(L, [
 
             for(var i = 0;i < size; i++){
                 var d = target.kids[i].getPreferredSize();
-                if (this.direction == pkg.HORIZONTAL){
-                    if(d.height > max) max = d.height;
+                if (this.direction === pkg.HORIZONTAL){
+                    if (d.height > max) max = d.height;
                     as += d.width;
                 }
                 else {
@@ -1612,8 +1609,8 @@ pkg.PercentLayout = Class(L, [
                     as += d.height;
                 }
             }
-            return (this.direction == pkg.HORIZONTAL) ? { width:as, height:max }
-                                                      : { width:max, height:as };
+            return (this.direction === pkg.HORIZONTAL) ? { width:as, height:max }
+                                                       : { width:max, height:as };
         };
     }
 ]);
@@ -1699,8 +1696,8 @@ pkg.Constraints = Class([
          * @method setPadding
          */
         this.setPadding = function(t,l,b,r) {
-            if (arguments.length == 1) {
-                this.bottom = this.left = this.right = t;
+            if (arguments.length === 1) {
+                this.top = this.bottom = this.left = this.right = t;
             }
             else {
                 this.top    = t;
@@ -1751,32 +1748,32 @@ pkg.GridLayout = Class(L, [
         this[''] = function(r,c,m) {
             if (arguments.length < 3) m = 0;
 
-        /**
-         * Number of virtual rows to place children components
-         * @attribute rows
-         * @readOnly
-         * @type {Integer}
-         */
-        this.rows = r;
+            /**
+             * Number of virtual rows to place children components
+             * @attribute rows
+             * @readOnly
+             * @type {Integer}
+             */
+            this.rows = r;
 
-        /**
-         * Number of virtual columns to place children components
-         * @attribute cols
-         * @readOnly
-         * @type {Integer}
-         */
-        this.cols = c;
-        this.mask = m;
-        this.colSizes = Array(c + 1);
-        this.rowSizes = Array(r + 1);
+            /**
+             * Number of virtual columns to place children components
+             * @attribute cols
+             * @readOnly
+             * @type {Integer}
+             */
+            this.cols = c;
+            this.mask = m;
+            this.colSizes = Array(c + 1);
+            this.rowSizes = Array(r + 1);
 
-        /**
-         * Default constraints that is applied for children components
-         * that doesn't define own constraints
-         * @type {zebra.layout.Constraints}
-         * @attribute constraints
-         */
-        this.constraints = new pkg.Constraints();
+            /**
+             * Default constraints that is applied for children components
+             * that doesn't define own constraints
+             * @type {zebra.layout.Constraints}
+             * @attribute constraints
+             */
+            this.constraints = new pkg.Constraints();
         };
 
         /**
@@ -1871,19 +1868,19 @@ pkg.GridLayout = Class(L, [
             if ((this.mask & pkg.HORIZONTAL) > 0) {
                 var dw = c.width - left - c.getRight() - colSizes[cols];
                 for(var i = 0;i < cols; i ++ ) {
-                    colSizes[i] = colSizes[i] + (colSizes[i] !== 0 ? ~~((dw * colSizes[i]) / colSizes[cols]) : 0);
+                    colSizes[i] = colSizes[i] + (colSizes[i] !== 0 ? Math.floor((dw * colSizes[i]) / colSizes[cols]) : 0);
                 }
             }
 
             if ((this.mask & pkg.VERTICAL) > 0) {
                 var dh = c.height - top - c.getBottom() - rowSizes[rows];
                 for(var i = 0;i < rows; i++) {
-                    rowSizes[i] = rowSizes[i] + (rowSizes[i] !== 0 ? ~~((dh * rowSizes[i]) / rowSizes[rows]) : 0);
+                    rowSizes[i] = rowSizes[i] + (rowSizes[i] !== 0 ? Math.floor((dh * rowSizes[i]) / rowSizes[rows]) : 0);
                 }
             }
 
             var cc = 0;
-            for (var i = 0;i < rows && cc < c.kids.length; i++) {
+            for (var i = 0; i < rows && cc < c.kids.length; i++) {
                 var xx = left;
                 for(var j = 0;j < cols && cc < c.kids.length; j++, cc++){
                     var l = c.kids[cc];
@@ -1896,17 +1893,18 @@ pkg.GridLayout = Class(L, [
                         cellW -= (arg.left + arg.right);
                         cellH -= (arg.top  + arg.bottom);
 
-                        if (pkg.STRETCH == arg.ax) d.width  = cellW;
-                        if (pkg.STRETCH == arg.ay) d.height = cellH;
+                        if (pkg.STRETCH === arg.ax) d.width  = cellW;
+                        if (pkg.STRETCH === arg.ay) d.height = cellH;
 
                         l.setSize(d.width, d.height);
                         l.setLocation(
-                            xx  + arg.left + (pkg.STRETCH == arg.ax ? 0 : ((arg.ax == pkg.RIGHT) ? cellW - d.width
-                                                                                                 : ((arg.ax == pkg.CENTER) ? ~~((cellW - d.width) / 2)
-                                                                                                                           : 0))),
-                            top + arg.top  + (pkg.STRETCH == arg.ay ? 0 : ((arg.ay == pkg.TOP  ) ? cellH - d.height
-                                                                                                 : ((arg.ay == pkg.CENTER) ? ~~((cellH - d.height) / 2)
-                                                                                                                           : 0)))
+                            xx  + arg.left + (pkg.STRETCH === arg.ax ? 0
+                                                                     : ((arg.ax === pkg.RIGHT) ? cellW - d.width
+                                                                                               : ((arg.ax === pkg.CENTER) ? Math.floor((cellW - d.width) / 2)
+                                                                                                                             : 0))),
+                            top + arg.top  + (pkg.STRETCH === arg.ay ? 0 : ((arg.ay === pkg.TOP  ) ? cellH - d.height
+                                                                                                   : ((arg.ay === pkg.CENTER) ? Math.floor((cellH - d.height) / 2)
+                                                                                                                              : 0)))
                         );
 
                         xx += colSizes[j];

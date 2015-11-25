@@ -8,20 +8,20 @@
 	    <script src='../zebra.min.js' type='text/javascript'></script>
 
 		<script type='text/javascript'>
-	
+
 		    zebra.ready(function() {
 		    	eval(zebra.Import("ui", "layout", "ui.grid"));
 
 		    	GridCaption.font = new Font("Arial", "bold", 20);
-				Button.Label.font = new Font("Arial", "bold", 20); 
-				HtmlTextField.font = new Font("Arial", 24); 
-				Menu.MenuItem.Label.font = new Font("Arial", 24); 
-				Tooltip.Label.font = new Font("Arial", 28); 
+				Button.Label.font = new Font("Arial", "bold", 20);
+				HtmlTextField.font = new Font("Arial", 24);
+				Menu.MenuItem.Label.font = new Font("Arial", 24);
+				Tooltip.Label.font = new Font("Arial", 28);
 
 		    	var grid = new Grid(), data = [];
 
 		    	for(var i=0; i < 100; i++) {
-		    		data[i] = []; 
+		    		data[i] = [];
 			    	for(var j=0; j < 3; j++) {
 			    		data[i][j] = "Item ["+ i + "," + j + "]";
 			    	}
@@ -50,11 +50,11 @@
 				// create canvas
 			    var z = new zebra.ui.zCanvas("test");
 			    z.fullScreen();
-	
-				var sp      = new ScrollPan(new GridStretchPan(grid), VERTICAL),
+
+				var sp      = new ScrollPan(new GridStretchPan(grid), "vertical"),
 				    button  = new Button("test"),
 				    button2 = new Button("T");
-				
+
 				// button.bind(function() {
 				// 	var p = new Panel(new FlowLayout("center", "center", "vertical", 16));
 				// 	p.setPadding(8);
@@ -70,9 +70,9 @@
 
 				// 	var w = new Window("Test window", p);
 				// 	w.toPreferredSize();
-			
+
 				// 	p.find("#apply").bind(function() {
-				// 		console.log("!!!!!");	
+				// 		console.log("!!!!!");
 				// 		w.removeMe();
 				// 	});
 

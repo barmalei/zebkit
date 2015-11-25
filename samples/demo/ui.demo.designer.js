@@ -55,6 +55,9 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
         b.setLocation(140, 230);
         pp.add(new ShaperPan(b));
 
+
+        pp.setBorder(new Border("black"));
+
         var t = new zebra.ui.tree.Tree(new FormTreeModel(pp, [
             function exclude(c) { return zebra.instanceOf(c, ShaperPan); }
         ]));
@@ -98,6 +101,9 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
         l.setFont(ui.boldFont);
         this.add(TOP, l);
         this.add(CENTER, s);
+
+
+        //this.setBackground("gray");
     }
 ]);
 

@@ -9,7 +9,7 @@ var assert = zebra.assert, Class = zebra.Class, assertException = zebra.assertEx
     assertNoException = zebra.assertNoException, Listeners = zebra.util.Listeners,
     ListenersClass = zebra.util.ListenersClass;
 
-zebra.runTests("Zebra util",
+zebra.runTests("Util Listeners",
     function test_single_listener() {
         var clazz = ListenersClass(), aaa = 10, bbb = null;
         assert(clazz.prototype.fired != null, true);
@@ -47,13 +47,10 @@ zebra.runTests("Zebra util",
             }
         ]), a = new A();
 
-        assertException(function() {
-           l.add({});
-        }, Error);
 
-        assertException(function() {
-           l.add({ fired: 100 });
-        }, Error);
+        assert(l.add({}), null);
+        assert(l.add({ fired: 100 }), null);
+
 
         l.add(a);
         assert(l.v != null, true);
@@ -160,7 +157,6 @@ zebra.runTests("Zebra util",
         assert(t2, 1);
         assert(t3, 1);
 
-
         a.unbind(l1);
         a._.ff();
         assert(t1, 1);
@@ -189,13 +185,9 @@ zebra.runTests("Zebra util",
             a.bind("tt", function() {});
         }, Error);
 
-        assertException(function() {
-            a.bind({ dd: function() {} });
-        }, Error);
+        assert(a.bind({ dd: function() {} }), null);
 
-        assertException(function() {
-            a.bind(new A());
-        }, Error);
+        assert(a.bind(new A()), null);
 
         var l1 = a.bind("ff", function() {
             t1++;
@@ -284,9 +276,7 @@ zebra.runTests("Zebra util",
             a.bind("mm", function() {});
         }, Error);
 
-        assertException(function() {
-            a.bind({});
-        }, Error);
+        assert(a.bind({}), null);
     },
 
     function test_multiple_listener() {
@@ -532,6 +522,70 @@ zebra.runTests("Zebra util",
 
         l.fired("test2");
         assert(a.t, 100);
+    },
+
+    function test_extending() {
+        var L = ListenersClass("test");
+        assert(L.eventNames[0], "test");
+        assert(L.eventNames.length, 1);
+
+        var A = Class([
+            function() {
+                this._ = new L();
+            },
+
+            function trigger() {
+                this._.test(this, 100);
+            }
+        ]);
+
+        var B = Class([function test(src, num) {
+            assert(src != null, true);
+            assert(num, 100);
+            assert(zebra.instanceOf(src, A), true);
+        }]);
+
+        var a = new A(), b = new B();
+        a.bind(b);
+        a.trigger();
+
+        var L = L.ListenersClass("test2");
+        assert(L.eventNames[0], "test");
+        assert(L.eventNames[1], "test2");
+        assert(L.eventNames.length, 2);
+
+        var A = Class([
+            function() {
+                this._ = new L();
+            },
+
+            function trigger1() {
+                this._.test(this, 100);
+            },
+
+            function trigger2() {
+                this._.test2(this, 101);
+            }
+        ]);
+
+        var B = Class([
+            function test(src, num) {
+                assert(src != null, true);
+                assert(num, 100);
+                assert(zebra.instanceOf(src, A), true);
+            },
+
+            function test2(src, num) {
+                assert(src != null, true);
+                assert(num, 101);
+                assert(zebra.instanceOf(src, A), true);
+            }
+        ]);
+
+        var a = new A(), b = new B();
+        a.bind(b);
+        a.trigger2();
+        a.trigger1();
     }
 );
 

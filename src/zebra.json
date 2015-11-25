@@ -1,7 +1,9 @@
 {
-    "version" : "02.2015",
+    "version" : "07.2015",
 
-    "classAliases": {
+    "doubleClickDelta":280,
+
+    ".addClassAliases": {
         "Picture"       : "zebra.ui.Picture",
         "Border"        : "zebra.ui.Border",
         "Dotted"        : "zebra.ui.Dotted",
@@ -16,8 +18,6 @@
         "ListLayout"    : "zebra.layout.ListLayout"
     },
 
-    "doubleClickDelta":180,
-
     "KeyEvent": {
         "A":65, "B":66, "C":67, "D":68, "E":69, "F":70, "G":71, "H":72, "I":73, "J":74, "K":75,
         "L":76, "M":77, "N":78, "O":79, "P":80, "Q":81, "R":82, "S":83, "T":84, "U":85, "V":86,
@@ -31,109 +31,110 @@
     },
 
     "events"        : { "$zebra.ui.EventManager":[]  },
-    "paintManager"  : { "$zebra.ui.PaintManImpl":[]  },
     "focusManager"  : { "$zebra.ui.FocusManager":[]  },
+    "htmlManager"   : { "$ ? zebra.ui.HtmlElementMan":[]  },
 
-    "?zebra.isTouchable == false": {
-        "clipboardTriggerKey" : {".expr" : "zebra.isMacOS ? zebra.ui.KeyEvent.CMD : zebra.ui.KeyEvent.CTRL" },
-        "cursorManager"  : { "$zebra.ui.CursorManager"  :[] },
-        "commandManager" : {
-            "$zebra.ui.CommandManager" :[{
-                "common": [
-                    {
-                        "command" : "undo_command",
-                        "key"     : "Ctrl+z"
-                    },
-                    {
-                        "command" : "redo_command",
-                        "key"     : "Ctrl+Shift+z"
-                    },
-                    {
-                        "command" : "selectAll_command",
-                        "key"     : "Ctrl+A"
-                    },
-                    {
-                        "command" : "nextWord_command",
-                        "args"    : [ false, 1 ],
-                        "key"     : "Ctrl+Right"
-                    },
-                    {
-                        "command" : "nextWord_command",
-                        "args"    : [ false, -1 ],
-                        "key"     : "Ctrl+Left"
-                    },
-                    {
-                        "command" : "nextWord_command",
-                        "args"    : [ true, 1],
-                        "key"     : "Ctrl+Shift+Right"
-                    },
-                    {
-                        "command" : "nextWord_command",
-                        "args"    : [ true, -1],
-                        "key"     : "Ctrl+Shift+Left"
-                    },
-                    {
-                        "command" : "nextPage_command",
-                        "args"    : [ false, -1],
-                        "key"     : "Ctrl+Up"
-                    },
-                    {
-                        "command" : "nextPage_command",
-                        "args"    : [ false, 1],
-                        "key"     : "Ctrl+Down"
-                    },
-                    {
-                        "command" : "nextPage_command",
-                        "args"    : [ true, -1],
-                        "key"     : "Ctrl+Up+Shift"
-                    },
-                    {
-                        "command" : "nextPage_command",
-                        "args"    : [ true, 1],
-                        "key"     : "Ctrl+Down+Shift"
-                    }
-                ],
-                "osx" : [
-                    {
-                        "command"   : "undo_command",
-                        "key"       : "Cmd+z"
-                    },
-                    {
-                        "command" : "redo_command",
-                        "key"     : "Cmd+Shift+z"
-                    },
-                    {
-                        "command" : "selectAll_command",
-                        "key"     : "Cmd+A"
-                    },
-                    {
-                        "command" : "nextWord_command",
-                        "args"    : [ false, 1 ],
-                        "key"     : "Cmd+Right"
-                    },
-                    {
-                        "command" : "nextWord_command",
-                        "args"    : [ false, -1 ],
-                        "key"     : "Cmd+Left"
-                    },
-                    {
-                        "command" : "nextWord_command",
-                        "args"    : [ true, 1],
-                        "key"     : "Cmd+Shift+Right"
-                    },
-                    {
-                        "command" : "nextWord_command",
-                        "args"    : [ true, -1],
-                        "key"     : "Cmd+Shift+Left"
-                    }
-                ]
-             }]
-        }
+    "cursorManager"  : { "$zebra.ui.CursorManager"  :[] },
+    "commandManager" : {
+        "$zebra.ui.CommandManager" :[{
+            "common": [
+                {
+                    "command" : "undo_command",
+                    "key"     : "Ctrl+z"
+                },
+                {
+                    "command" : "redo_command",
+                    "key"     : "Ctrl+Shift+z"
+                },
+                {
+                    "command" : "selectAll_command",
+                    "key"     : "Ctrl+A"
+                },
+                {
+                    "command" : "nextWord_command",
+                    "args"    : [ false, 1 ],
+                    "key"     : "Ctrl+Right"
+                },
+                {
+                    "command" : "nextWord_command",
+                    "args"    : [ false, -1 ],
+                    "key"     : "Ctrl+Left"
+                },
+                {
+                    "command" : "nextWord_command",
+                    "args"    : [ true, 1],
+                    "key"     : "Ctrl+Shift+Right"
+                },
+                {
+                    "command" : "nextWord_command",
+                    "args"    : [ true, -1],
+                    "key"     : "Ctrl+Shift+Left"
+                },
+                {
+                    "command" : "nextPage_command",
+                    "args"    : [ false, -1],
+                    "key"     : "Ctrl+Up"
+                },
+                {
+                    "command" : "nextPage_command",
+                    "args"    : [ false, 1],
+                    "key"     : "Ctrl+Down"
+                },
+                {
+                    "command" : "nextPage_command",
+                    "args"    : [ true, -1],
+                    "key"     : "Ctrl+Up+Shift"
+                },
+                {
+                    "command" : "nextPage_command",
+                    "args"    : [ true, 1],
+                    "key"     : "Ctrl+Down+Shift"
+                }
+            ],
+            "osx" : [
+                {
+                    "command"   : "undo_command",
+                    "key"       : "Cmd+z"
+                },
+                {
+                    "command" : "redo_command",
+                    "key"     : "Cmd+Shift+z"
+                },
+                {
+                    "command" : "selectAll_command",
+                    "key"     : "Cmd+A"
+                },
+                {
+                    "command" : "nextWord_command",
+                    "args"    : [ false, 1 ],
+                    "key"     : "Cmd+Right"
+                },
+                {
+                    "command" : "nextWord_command",
+                    "args"    : [ false, -1 ],
+                    "key"     : "Cmd+Left"
+                },
+                {
+                    "command" : "nextWord_command",
+                    "args"    : [ true, 1],
+                    "key"     : "Cmd+Shift+Right"
+                },
+                {
+                    "command" : "nextWord_command",
+                    "args"    : [ true, -1],
+                    "key"     : "Cmd+Shift+Left"
+                }
+            ]
+         }]
     },
 
     "popup" : {
-        "$zebra.ui.PopupManager": [],
+        "$ ? zebra.ui.PopupManager": [],
         "hideTooltipByPress": { ".expr": "!zebra.isTouchable" }
+    },
+
+    "clipboardSupport" : {
+        "$zebra.ui.ClipboardSupport":  {".expr" : "zebra.isMacOS ? zebra.ui.KeyEvent.CMD : zebra.ui.KeyEvent.CTRL" }
     },
 
     "font"          : { "$Font" : ["Arial", 14] },
@@ -169,20 +170,20 @@
     },
 
     "RootLayer" : {
-        "$inherit": [ "BaseLayer" ]
+        "inherit":  "BaseLayer"
     },
 
     "WinLayer" : {
-        "$inherit": [ "BaseLayer" ]
+        "inherit":  "BaseLayer"
     },
 
     "zCanvas": {
         "//"    :  "IT IS IMPORTANT TO HAVE CANVAS CSS PADDING = 0 TO FIX IE9 PROBLEM",
-        "background": "white",
-        "layout": { "$zebra.layout.StackLayout":[] },
+        "background2": "white",
+        "layout"    : { "$zebra.layout.StackLayout":[] },
 
         "styles": {
-            "background-color"           : "@palette.background",
+            "background-color2"           : "green",
             "outline"                    : "none",
             "padding"                    : "0px",
             "-webkit-user-select"        : "none",
@@ -205,12 +206,14 @@
         "kids": [
             { "$ *zebra.ui.RootLayer" : "root" },
             { "$ *zebra.ui.WinLayer"  : [] },
-            { "$ *zebra.ui.PopupLayer": [] }
+            { "$ ? *zebra.ui.PopupLayer": [] }
         ]
     },
 
     "pictures" : {
-        "zebra" : { ".loadImage":"zebra.png" }
+        "zebra" : {
+            ".loadImage": "zebra.png"
+        }
     },
 
     "StringRender" : {
@@ -225,12 +228,20 @@
         "font" : "@font"
     },
 
+    "DecoratedTextRender" : {
+        "inherit" :  "TextRender"
+    },
+
     "PasswordText" : {
-        "$inherit" : [ "TextRender"]
+        "inherit" :  "TextRender"
+    },
+
+    "BoldTextRender" : {
+        "inherit" :  "TextRender"
     },
 
     "CompositeEvStatePan": {
-        "layout"     : { "$FlowLayout": [ "center","center", "horizontal",2 ] },
+        "layout"     : { "$FlowLayout": [ "center", "center", "horizontal",2 ] },
         "focusMarker": "@borders.dot"
     },
 
@@ -244,7 +255,7 @@
             "disabledColor": "white"
         },
 
-        "layout": { "$FlowLayout": ["center","center", "horizontal",2] },
+        "layout": { "$FlowLayout": ["center", "center", "horizontal",2] },
 
         "background": {
             "pressed.over" : "#FFFFFF",
@@ -259,7 +270,7 @@
         },
 
         "focusMarkerView" : null,
-        "padding":6
+        "padding"         : 6
     },
 
     "Checkbox": {
@@ -285,7 +296,7 @@
             "disabledColor": "lightGray"
         },
 
-        "layout" : { "$FlowLayout": [ "left","center","horizontal",6 ] },
+        "layout" : { "$FlowLayout": [ "left", "center", "horizontal", 6 ] },
         "border" : {
              "focuson" :  { "$Border": [ "#66CCFF", 1, 4 ] },
              "focusoff":  { "$View" : [ ] }
@@ -294,7 +305,7 @@
     },
 
     "Radiobox": {
-        "$inherit" : [ "Checkbox" ],
+        "inherit" :  "Checkbox" ,
 
         "Label": {
             "disabledColor": "lightGray"
@@ -342,48 +353,26 @@
 
     "Scroll" : {
         "HIncButton": {
-            "view": {
-                "pressed.over" : { "$zebra.ui.ArrowView": [ 2, "gray" ] },
-                "out"          : { "$zebra.ui.ArrowView": [ 2 ] },
-                "over"         : { "$zebra.ui.ArrowView": [ 2, "red" ] },
-                "disabled"     : { "$zebra.ui.ArrowView": [ 2, "white" ] }
-            },
-            "preferredSize":[ 16, 11 ],
+            "arrowDirection" : "right",
+            "preferredSize":[ 12, 11 ],
             "canHaveFocus": false
         },
 
         "HDecButton": {
-            "view": {
-                "pressed.over" : { "$zebra.ui.ArrowView": [ 1, "gray" ] },
-                "out"     : { "$zebra.ui.ArrowView": [ 1 ] },
-                "over"    : { "$zebra.ui.ArrowView": [ 1, "red" ] },
-                "disabled": { "$zebra.ui.ArrowView": [ 1, "white" ] }
-            },
-            "preferredSize":[ 16, 11 ],
+            "arrowDirection" : "left",
+            "preferredSize":[ 12, 11 ],
             "canHaveFocus": false
         },
 
         "VIncButton": {
-            "view": {
-                "pressed.over" : { "$zebra.ui.ArrowView": [8, "gray"] },
-                "out"     : { "$zebra.ui.ArrowView": [8] },
-                "over"    : { "$zebra.ui.ArrowView": [8, "red"] },
-                "disabled": { "$zebra.ui.ArrowView": [8, "white"] }
-            },
-
-            "preferredSize" :[ 11, 16 ],
+            "arrowDirection" : "bottom",
+            "preferredSize" :[ 11, 12 ],
             "canHaveFocus": false
         },
 
         "VDecButton": {
-            "view": {
-                "pressed.over" : { "$zebra.ui.ArrowView": [ 4, "gray" ] },
-                "out"     : { "$zebra.ui.ArrowView": [ 4 ] },
-                "over"    : { "$zebra.ui.ArrowView": [ 4, "red" ] },
-                "disabled": { "$zebra.ui.ArrowView": [ 4, "white" ] }
-            },
-
-            "preferredSize":[ 11, 16 ],
+            "arrowDirection" : "top",
+            "preferredSize":[ 11, 12 ],
             "canHaveFocus": false
         },
 
@@ -404,9 +393,8 @@
         "border"    : { "$Border": [ null, 0, 4 ] }
     },
 
-    "?zebra.isTouchable": {
-        "mscroll": { "$zebra.ui.MobileScrollMan"  :[] }
-    },
+
+    "mscroll": { "$zebra.ui.MobileScrollMan"  :[] },
 
     "ScrollPan": {
         "autoHide": { ".expr": "zebra.isTouchable" }
@@ -431,11 +419,11 @@
     },
 
     "TextArea" : {
-        "$inherit" : [ "TextField" ]
+        "inherit" :  "TextField"
     },
 
     "PassTextField" : {
-        "$inherit" : [ "TextField" ]
+        "inherit" :  "TextField"
     },
 
     "Progress": {
@@ -464,7 +452,7 @@
                     "tabon"  : { "$zebra.ui.TabBorder": 0 },
                     "marker" : { "$Border": [ "#66CCFF", 1, 3 ] }
                 },
-        "pageGaps"  : [2 , 2]
+        "pageGaps": [2, 2]
     },
 
     "BaseList": {
@@ -483,12 +471,12 @@
     },
 
     "List": {
-        "$inherit" : [ "BaseList" ],
+        "inherit" :  "BaseList" ,
         "gap":4
     },
 
     "CompList": {
-        "$inherit" : [ "BaseList" ],
+        "inherit" :  "BaseList" ,
 
         "Label" : {
             "padding":4
@@ -504,7 +492,8 @@
     "Combo": {
         "ComboPadPan": {
             "border"    : { "$Border":[ "#969696", 1, 3] },
-            "background": "@palette.white"
+            "background": "@palette.white",
+            "autoHide"  : true
         },
 
         "ReadonlyContentPan": {
@@ -513,7 +502,7 @@
 
         "EditableContentPan": {
             "TextField": {
-                "$inherit"  : [ "TextField" ],
+                "inherit"  :  "TextField" ,
 
                 "border"    : null,
                 "background": null,
@@ -521,21 +510,24 @@
             },
 
             "padding": 4,
-            "layout": { "$BorderLayout": [ 0, 0 ] }
+            "layout": { "$BorderLayout": 0 }
         },
 
         "Button": {
             "preferredSize": [16, 16],
+            "canHaveFocus" : false,
+            "padding" : [4,0,4,0],
+
             "view": {
-               "out"       : { "$zebra.ui.ComboArrowView": [ ] },
-               "over"      : { "$zebra.ui.ComboArrowView": [ "red" ] },
-               "pressed.*" : { "$zebra.ui.ComboArrowView": [ "blue", true] },
-               "disabled"  : { "$zebra.ui.ComboArrowView": [ "#CCCCCC"] }
+               "out"       : { "$zebra.ui.ArrowView": [ "bottom", "black"], "gap" : 4 },
+               "over"      : { "$zebra.ui.ArrowView": [ "bottom", "red" ], "gap" : 4 },
+               "pressed.*" : { "$zebra.ui.ArrowView": [ "bottom", "blue"], "gap" : 4 },
+               "disabled"  : { "$zebra.ui.ArrowView": [ "bottom", "#CCCCCC"], "gap" : 4 }
             }
         },
 
         "List": {
-            "$inherit": [ "List" ],
+            "inherit":  "List" ,
             "border"  : null
         },
 
@@ -545,7 +537,7 @@
             "focusoff":  { "$Border" : [ "#DDDDDD", 2, 8 ] }
         },
         "background"   : { "$Gradient": [ "rgb(250, 250, 250)", "rgb(234, 234, 234)"] },
-        "layout"       : { "$BorderLayout": [0, 0] },
+        "layout"       : { "$BorderLayout": 0 },
         "selectionView":  null
     },
 
@@ -565,7 +557,13 @@
 
     "Link": {
         "font"        : "@boldFont",
-        "colors"      : [ "blue", "darkBlue", "black", "blue", "gray" ],
+        "colors"      : {
+            "pressed.over" : "blue",
+            "out"          : "white",
+            "over"         : "white",
+            "pressed.out"  : "black",
+            "disabled"     : "gray"
+        },
         "canHaveFocus": false
     },
 
@@ -601,9 +599,9 @@
         },
 
         "MenuItem" : {
-            "$inherit" : [ "MenuItem" ],
+            "inherit" : "MenuItem",
             "Label": {
-                "$inherit" : [ "MenuItem.Label" ]
+                "inherit" : "MenuItem.Label"
             }
         },
 
@@ -618,14 +616,14 @@
 
     "Menubar": {
         "MenuItem" : {
-            "$inherit" : [ "MenuItem" ],
+            "inherit" : "MenuItem",
             "padding"  : [6, 16, 6, 16],
             "Label": {
-                "$inherit" : [ "MenuItem.Label" ]
+                "inherit" : "MenuItem.Label"
             }
         },
 
-        "$inherit": [ "Menu" ],
+        "inherit":  "Menu",
 
         "background" : [ [ "#DCF0F7", { "$Gradient":["rgba(255, 255, 255, 0.8)", "rgba(255, 255, 255, 0.0)"] } ] ] ,
         "padding"   : [0,0,0,0],
@@ -662,7 +660,7 @@
         },
 
         "Checkbox": {
-            "$inherit": ["Checkbox"],
+            "inherit": "Checkbox",
             "canHaveFocus": false,
             "padding": 4,
             "background": {
@@ -672,7 +670,7 @@
         },
 
         "Radiobox" : {
-            "$inherit": ["Radiobox", "Toolbar.Checkbox"]
+            "inherit": ["Radiobox", "Toolbar.Checkbox"]
         },
 
         "layout" : { "$FlowLayout":[ "left", "center", "horizontal", 6 ] },
@@ -694,8 +692,8 @@
 
         "TogglePan":{
             "view" : {
-                "off" : { "$zebra.ui.tree.TreeSignView": [ true,  "white", "orange" ], "width":14, "height":14  },
-                "on"  : { "$zebra.ui.tree.TreeSignView": [ false, "white", "orange" ], "width":14, "height":14  }
+                "off" : { "$zebra.ui.ToggleView": [ true,  "white", "orange" ], "width":14, "height":14  },
+                "on"  : { "$zebra.ui.ToggleView": [ false, "white", "orange" ], "width":14, "height":14  }
             }
         },
 
@@ -714,38 +712,38 @@
                 "close"   : { "$Picture": [ "@pictures.zebra", 61 ,20 ,16,14, true ] },
                 "open"    : { "$Picture": [ "@pictures.zebra", 49 ,34,16,14, true ] },
                 "leaf"    : { "$Picture": [ "@pictures.zebra", 49 ,20 ,16,14, true ] },
-                "off"     : { "$zebra.ui.tree.TreeSignView": [] },
-                "on"      : { "$zebra.ui.tree.TreeSignView": false },
+                "off"     : { "$zebra.ui.ToggleView": [] },
+                "on"      : { "$zebra.ui.ToggleView": false },
                 "aselect" : [ [ "rgb(228, 244, 252)", { "$Border": "rgb(200,180,200)" } ] ]
             }
         },
 
         "Tree": {
-            "$inherit" : ["tree.BaseTree"]
+            "inherit" : "tree.BaseTree"
         },
 
         "CompTree": {
             "Checkbox" : {
-                "$inherit" : [ "Checkbox" ]
+                "inherit" : "Checkbox"
             },
 
             "Combo" : {
-                "$inherit" : [ "Combo" ]
+                "inherit" : "Combo"
             },
 
             "Label" : {
-                "$inherit" : [ "Label" ],
+                "inherit" : "Label",
                 "padding"  : 4
             },
 
-            "$inherit" : ["tree.BaseTree"],
+            "inherit" : "tree.BaseTree",
             "views": {
                 "close"   : { "$Picture": [ "@pictures.zebra", 61 ,20 ,16,14, true ] },
                 "open"    : { "$Picture": [ "@pictures.zebra", 49 ,34,16,14, true ] },
                 "leaf"    : { "$Picture": [ "@pictures.zebra", 49 ,20 ,16,14, true ] },
 
-                "off"     : { "$zebra.ui.tree.TreeSignView": [] },
-                "on"      : { "$zebra.ui.tree.TreeSignView": false },
+                "off"     : { "$zebra.ui.ToggleView": [] },
+                "on"      : { "$zebra.ui.ToggleView": false },
                 "iselect" : "#A0D9EA",
                 "aselect" : "#A0D9EA"
             }
@@ -761,18 +759,18 @@
 
         "DefEditors" : {
             "TextField": {
-                "$inherit" : [ "TextField" ],
+                "inherit" : "TextField",
                 "border": {"$Border":  "blue" },
                 "background": null
             },
 
             "Combo": {
-                 "$inherit" : [ "Combo" ],
+                 "inherit" : "Combo" ,
                 "border":null
             },
 
             "Checkbox": {
-                "$inherit" : [ "Checkbox" ],
+                "inherit" : "Checkbox",
                 "layout": { "$FlowLayout": [ "center", "center" ]},
                 "border": {"$Border":  "blue" }
             }
@@ -784,7 +782,7 @@
         },
 
         "CompGridCaption" :{
-            "$inherit" : [ "grid.BaseGridCaption" ],
+            "inherit" : "grid.BaseGridCaption" ,
 
             "StatusPan": {
                 "view" : {
@@ -805,16 +803,16 @@
         },
 
         "GridCaption" :{
-            "$inherit" : [ "grid.BaseGridCaption" ],
+            "inherit" :  "grid.BaseGridCaption" ,
 
-            "padding" : 4,
+            "padding"  : 4,
             "font"     : "@boldFont",
             "fontColor": "rgb(65, 131, 215)"
         },
 
         "Grid": {
             "CornerPan" : {
-                "$inherit": [ "grid.BaseGridCaption" ]
+                "inherit": "grid.BaseGridCaption"
             },
 
             "views" : {
@@ -843,8 +841,8 @@
         "CaptionPan": {
             "layout"     : { "$BorderLayout":[] },
             "background" : {
-                  "active"  : { "$zebra.ui.WindowTitleView": [] },
-                  "inactive": { "$zebra.ui.WindowTitleView": "#E0F4FF" }
+                  "active"  : { "$ zebra.ui.CaptionBgView": [] },
+                  "inactive": { "$ zebra.ui.CaptionBgView": "#E0F4FF" }
             },
             "padding"  : 8
         },
@@ -902,33 +900,34 @@
             "display"         : "block",
             "backgroundImage" : "none",
             "backgroundColor" : "transparent",
-            "position"        : "absolute",
-            "zIndex"          : 10,
-            "visibility"      : "hidden",
+            "position2"       : "absolute",
+            "zIndex2"          : 1,
             "boxShadow"       : "none",
             "-moz-box-shadow" : "none",
-            "isIE:overflow"   : "hidden"
+            "isIE:overflow"   : "hidden",
+            "top"             : "0px",
+            "left"            : "0px"
         },
 
         "border": null
     },
 
     "HtmlContent": {
-        "$inherit": [ "TextField", "HtmlElement" ]
+        "inherit": [ "TextField", "HtmlElement" ]
     },
 
     "HtmlTextInput": {
-        "$inherit": [ "TextField", "HtmlElement" ],
+        "inherit": [ "TextField", "HtmlElement" ],
         "style"   : [ "outline", "none"],
         "padding" : [4,4,4,4]
     },
 
     "HtmlTextField": {
-        "$inherit": [ "HtmlTextInput"]
+        "inherit":  "HtmlTextInput"
     },
 
     "HtmlTextArea": {
-        "$inherit": [  "HtmlTextInput" ],
+        "inherit":  "HtmlTextInput",
         "resizeable"  :  false
     }
 }

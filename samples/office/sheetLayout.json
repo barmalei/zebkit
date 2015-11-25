@@ -15,7 +15,7 @@
                             "background" : "white"
                         }
                     },
-                    "posMarkerMode"     : "cell",
+                    "navigationMode"     : "cell",
 
                     "views" : {
                         "marker"       : { "$zebra.ui.Border": [ "orange", 2 ] },

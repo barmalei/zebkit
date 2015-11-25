@@ -7,11 +7,8 @@ pkg.borderColor = "#FFFFFF";
 pkg.borderSize = 6;
 
 pkg.Shape = Class(View, [
-    function(){
-        this.$this("white");
-    },
-
     function(c){
+        if (arguments.length === 0) c = "white";
         this.color = c;
         this.lineWidth = pkg.borderSize;
     },
@@ -71,11 +68,8 @@ pkg.Pentahedron =  Class(pkg.Shape, [
 ]);
 
 pkg.EditablePan = Class(Panel, [
-    function() {
-        this.$this("white");
-    },
-
     function(color) {
+        if (arguments.length === 0) color = "white";
         this.color = color;
         this.showCursor = false;
         this.ch = '';
@@ -109,7 +103,7 @@ pkg.EditablePan = Class(Panel, [
 
     function focusLost(e) {
         this.border.color = this.pcolor;
-        if (this.task != null) { 
+        if (this.task != null) {
             this.task.shutdown();
             this.task = null;
         }
@@ -135,19 +129,19 @@ pkg.MouseEventHandlerPan = Class(Panel, [
         this.$super();
     },
 
-    function mouseMoved(e) {
+    function pointerMoved(e) {
         this.gx = e.x;
         this.gy = e.y;
         this.repaint();
     },
 
-    function mousePressed(e) {
+    function pointerPressed(e) {
         this.color1 = '#F7F3FC';
         this.color2 = '#417F92';
         this.repaint();
     },
 
-    function mouseReleased(e) {
+    function pointerReleased(e) {
         this.color1 = '#C7D3FC';
         this.color2 = '#316F92';
         this.repaint();
@@ -183,7 +177,7 @@ pkg.CursorPan = Class(Panel, [
         this.picture.paint(g, (this.width - ps.width)/2, (this.height - ps.height)/2, ps.width, ps.height, this);
     }
 ]);
-    
+
 pkg.Components = Class(Panel, [
     function () {
         function makePanel(brColor, txtCol, txt, constr) {
@@ -196,7 +190,7 @@ pkg.Components = Class(Panel, [
             return (new Panel([
                         function paint(g) {
                             var font = new Font("Arial", "bold", 16);
-                            
+
                             g.setColor(txtCol);
                             g.setFont(font);
 
@@ -255,21 +249,18 @@ pkg.Components = Class(Panel, [
         });
     },
 
-    function childInputEvent(e){
-        if (e.ID == MouseEvent.ENTERED) {
-            this.counter = 0;
-            this.target = e.source;
-            this.task = task(this).run(50, 90);
+    function childPointerEntered(e){
+        this.counter = 0;
+        this.target = e.source;
+        this.task = task(this).run(50, 90);
+    },
+
+    function childPointerExited(e){
+        if (this.task != null) {
+            this.task.shutdown();
+            this.task = null;
         }
-        else {
-            if (e.ID == MouseEvent.EXITED) {
-                if (this.task != null) {
-                    this.task.shutdown();
-                    this.task = null;
-                }
-                e.source.setBackground(null);
-            }
-        }
+        e.source.setBackground(null);
     },
 
     function run(t) {
@@ -291,11 +282,11 @@ pkg.CirclePan = Class(Panel, [
         return (ry - y) * (ry - y) + (rx - x) * (rx - x) < rx * rx;
     },
 
-    function mouseEntered(e) {
+    function pointerEntered(e) {
         this.setBackground("rgba(100,222,80,0.4)");
     },
 
-    function mouseExited(e) {
+    function pointerExited(e) {
         this.setBackground(null);
     }
 ]);
@@ -317,11 +308,11 @@ pkg.TrianglePan = Class(Panel, [
         return ab > 0 && bc > 0 && ca > 0;
     },
 
-    function mouseEntered(e) {
+    function pointerEntered(e) {
         this.setBackground("rgba(220,80,80, 0.4)");
     },
 
-    function mouseExited(e) {
+    function pointerExited(e) {
         this.setBackground(null);
     }
 ]);
@@ -412,7 +403,7 @@ pkg.CustomLayer = Class(BaseLayer, [
     function() {
         this.$super("CUSTOM");
         this.setLayout(new StackLayout());
-    
+
         var $this = this, font = new Font("Arial", "bold", 24);
         this.add(USE_PS_SIZE, new Panel([
             function paint(g) {
@@ -436,8 +427,9 @@ pkg.CustomLayer = Class(BaseLayer, [
             return this.bg != null;
         };
 
-        this.layerKeyPressed = function(code, m){
-            if (code == 68 && (m & KeyEvent.M_ALT) > 0) {
+        this.layerKeyPressed = function(e){
+            // TODO: mask can be changed to event method call
+            if (e.code == 68 && e.altKey) {
                 if (this.bg == null ) this.setBackground("rgba(255, 255, 255, 0.5)");
                 else                  this.setBackground(null);
                 this.activate(this.bg != null);

@@ -41,8 +41,6 @@
 //   |
 //   |-- <-gapx-> {icon} -- <-gapx-> {view}
 //
-//
-
 
 var KE = ui.KeyEvent;
 
@@ -101,8 +99,6 @@ pkg.$IM = function(b) {
     this.isOpen = b;
 };
 
-pkg.TreeListeners = zebra.util.ListenersClass("toggled", "selected");
-
 /**
  * Abstract tree component that can used as basement for building own tree components.
  * The component is responsible for rendering tree, calculating tree nodes metrics,
@@ -146,24 +142,57 @@ pkg.TreeListeners = zebra.util.ListenersClass("toggled", "selected");
         });
 
   * @event toggled
-  * @param  {zebra.ui.tree.BaseTree} src an tree component that triggers the event
+  * @param  {zebra.ui.tree.BaseTree} src a tree component that triggers the event
   * @param  {zebra.data.Item} item an tree item that has been toggled
   */
 
  /**
   * Fired when a tree item has been selected
 
-      tree.bind(function selected(src, item) {
+      tree.bind(function selected(src, prevItem) {
          ...
       });
 
   * @event selected
+  * @param  {zebra.ui.tree.BaseTree} src a tree component that triggers the event
+  * @param  {zebra.data.Item} prevItem a previously selected tree item
+  */
+
+
+/**
+  * Fired when a tree item editing has been started
+
+      tree.bind(function editingStarted(src, item, editor) {
+         ...
+      });
+
+  * @event editingStarted
   * @param  {zebra.ui.tree.BaseTree} src an tree component that triggers the event
-  * @param  {zebra.data.Item} item an tree item that has been toggled
+  * @param  {zebra.data.Item} item a tree item to be edited
+  * @param  {zebra.ui.Panel} editor an editor to be used to edit the given item
+  */
+
+/**
+  * Fired when a tree item editing has been stopped
+
+      tree.bind(function editingStopped(src, item, oldValue, editor, isApplied) {
+         ...
+      });
+
+  * @event editingStopped
+  * @param  {zebra.ui.tree.BaseTree} src a tree component that triggers the event
+  * @param  {zebra.data.Item} item a tree item that has been edited
+  * @param  {Object} oldValue an old value of the edited tree item
+  * @param  {zebra.ui.Panel} editor an editor to be used to edit the given item
+  * @param  {Boolean} isApplied flag that indicates if the edited value has been
+  * applied to the given tree item
   */
 pkg.BaseTree = Class(ui.Panel, [
-    function $prototype() {
+    function  $clazz() {
+        this.Listeners = zebra.util.ListenersClass("toggled", "selected", "editingStarted", "editingStopped");
+    },
 
+    function $prototype() {
         /**
          * Horizontal gap between a node elements: toggle, icons and tree item view
          * @attribute gapx
@@ -213,8 +242,8 @@ pkg.BaseTree = Class(ui.Panel, [
             this.select(root);
         };
 
-        this.mousePressed = function(e){
-            if (this.firstVisible != null && e.isActionMask()) {
+        this.pointerPressed = function(e){
+            if (this.firstVisible != null && e.isAction()) {
                 var x = e.x,
                     y = e.y,
                     root = this.getItemAt(this.firstVisible, x, y);
@@ -254,8 +283,8 @@ pkg.BaseTree = Class(ui.Panel, [
                                                                                           : this.prevVisible(this.firstVisible);
                         }
                         else {
-                            this.firstVisible = (-this.scrollManager.getSY() > ~~(this.maxh / 2)) ? this.prevVisible(this.findLast(this.model.root))
-                                                                                                  : this.nextVisible(this.model.root);
+                            this.firstVisible = (-this.scrollManager.getSY() > Math.floor(this.maxh / 2)) ? this.prevVisible(this.findLast(this.model.root))
+                                                                                                          : this.nextVisible(this.model.root);
                         }
                     }
                 }
@@ -294,7 +323,7 @@ pkg.BaseTree = Class(ui.Panel, [
                 image   = this.getIconBounds(root);
 
             toggle.x = image.x + image.width + (image.width > 0 || toggle.width > 0 ? this.gapx : 0);
-            toggle.y = metrics.y + ~~((metrics.height - metrics.viewHeight) / 2);
+            toggle.y = metrics.y + Math.floor((metrics.height - metrics.viewHeight) / 2);
             toggle.width = metrics.viewWidth;
             toggle.height = metrics.viewHeight;
             return toggle;
@@ -318,7 +347,10 @@ pkg.BaseTree = Class(ui.Panel, [
          */
         this.getToggleBounds = function(root){
             var node = this.getIM(root), d = this.getToggleSize(root);
-            return { x:node.x, y:node.y + ~~((node.height - d.height) / 2), width:d.width, height:d.height };
+            return { x     : node.x,
+                     y     : node.y + Math.floor((node.height - d.height) / 2),
+                     width : d.width,
+                     height: d.height };
         };
 
         /**
@@ -377,7 +409,7 @@ pkg.BaseTree = Class(ui.Panel, [
                 var imageSize = this.getIconSize(root), toggleSize = this.getToggleSize(root);
                 if (parent != null){
                     var pImg = this.getIconBounds(parent);
-                    x = pImg.x + ~~((pImg.width - toggleSize.width) / 2);
+                    x = pImg.x + Math.floor((pImg.width - toggleSize.width) / 2);
                 }
 
                 node.x = x;
@@ -518,7 +550,7 @@ pkg.BaseTree = Class(ui.Panel, [
                 id   = this.getIconSize(root),
                 td   = this.getToggleSize(root);
             return { x:node.x + td.width + (td.width > 0 ? this.gapx : 0),
-                     y:node.y + ~~((node.height - id.height) / 2),
+                     y:node.y + Math.floor((node.height - id.height) / 2),
                      width:id.width, height:id.height };
         };
 
@@ -651,7 +683,7 @@ pkg.BaseTree = Class(ui.Panel, [
                     toggleView = this.getToggleView(root),
                     image      = this.getIconBounds(root),
                     vx         = image.x + image.width + this.gapx,
-                    vy         = node.y + ~~((node.height - node.viewHeight) / 2);
+                    vy         = node.y + Math.floor((node.height - node.viewHeight) / 2);
 
                 if (toggleView != null) {
                     toggleView.paint(g, toggle.x, toggle.y, toggle.width, toggle.height, this);
@@ -672,10 +704,11 @@ pkg.BaseTree = Class(ui.Panel, [
 
                 if (this.lnColor != null){
                     g.setColor(this.lnColor);
-                    var yy = toggle.y + ~~(toggle.height / 2) + 0.5;
+                    var yy = toggle.y + Math.floor(toggle.height / 2) + 0.5;
 
                     g.beginPath();
-                    g.moveTo(toggle.x + (toggleView == null ? ~~(toggle.width / 2) : toggle.width - 1), yy);
+                    g.moveTo(toggle.x + (toggleView == null ? Math.floor(toggle.width / 2)
+                                                            : toggle.width - 1), yy);
                     g.lineTo(image.x, yy);
                     g.stroke();
                 }
@@ -693,9 +726,10 @@ pkg.BaseTree = Class(ui.Panel, [
         this.y_ = function (item, isStart){
             var node = this.getIM(item),
                 th = this.getToggleSize(item).height,
-                ty = node.y + ~~((node.height - th) / 2),
+                ty = node.y + Math.floor((node.height - th) / 2),
                 dy = this.scrollManager.getSY(),
-                y  = (item.kids.length > 0) ? (isStart ? ty + th : ty - 1) : ty + ~~(th / 2);
+                y  = (item.kids.length > 0) ? (isStart ? ty + th : ty - 1)
+                                            : ty + Math.floor(th / 2);
 
             return (y + dy < 0) ?  -dy - 1
                                 : ((y + dy > this.height) ? this.height - dy : y);
@@ -712,10 +746,10 @@ pkg.BaseTree = Class(ui.Panel, [
          */
         this.paintChild = function (g, root, index){
             var b = this.isOpen_(root);
-            if (root == this.firstVisible && this.lnColor != null){
+            if (root == this.firstVisible && this.lnColor != null) {
                 g.setColor(this.lnColor);
-                var xx = this.getIM(root).x + ~~((b ? this.viewSizes.on.width
-                                                    : this.viewSizes.off.width) / 2);
+                var xx = this.getIM(root).x + Math.floor((b ? this.viewSizes.on.width
+                                                            : this.viewSizes.off.width) / 2);
                 g.beginPath();
                 g.moveTo(xx + 0.5, this.getTop());
                 g.lineTo(xx + 0.5, this.y_(root, false));
@@ -725,13 +759,13 @@ pkg.BaseTree = Class(ui.Panel, [
                 var firstChild = root.kids[0];
                 if (firstChild == null) return true;
 
-                var x = this.getIM(firstChild).x + ~~((this.isOpen_(firstChild) ? this.viewSizes.on.width
-                                                                                : this.viewSizes.off.width) / 2),
+                var x = this.getIM(firstChild).x + Math.floor((this.isOpen_(firstChild) ? this.viewSizes.on.width
+                                                                                        : this.viewSizes.off.width) / 2),
                 count = root.kids.length;
                 if (index < count) {
                     var  node = this.getIM(root),
                          y    = (index > 0) ? this.y_(root.kids[index - 1], true)
-                                            : node.y + ~~((node.height + this.getIconSize(root).height) / 2);
+                                            : node.y + Math.floor((node.height + this.getIconSize(root).height) / 2);
 
                     for(var i = index;i < count; i ++ ){
                         var child = root.kids[i];
@@ -774,7 +808,7 @@ pkg.BaseTree = Class(ui.Panel, [
                 this.vVisibility();
                 if (this.firstVisible != null){
                     var sx = this.scrollManager.getSX(), sy = this.scrollManager.getSY();
-                    try{
+                    try {
                         g.translate(sx, sy);
                         this.paintTree(g, this.firstVisible);
                         g.translate(-sx,  -sy);
@@ -793,25 +827,24 @@ pkg.BaseTree = Class(ui.Panel, [
          * @method  select
          */
         this.select = function(item){
-            if (this.isSelectable === true && item != this.selected){
+            if (this.isSelectable === true){
                 var old = this.selected;
 
                 this.selected = item;
-
                 if (this.selected != null) {
                     this.makeVisible(this.selected);
                 }
 
-                this._.selected(this, this.selected);
+                this._.selected(this, old);
 
-                if (old != null && this.isVerVisible(old)){
+                if (old != null && this.isVerVisible(old)) {
                     var m = this.getItemMetrics(old);
                     this.repaint(m.x + this.scrollManager.getSX(),
                                  m.y + this.scrollManager.getSY(),
                                  m.width, m.height);
                 }
 
-                if (this.selected != null && this.isVerVisible(this.selected)){
+                if (this.selected != null && this.isVerVisible(this.selected)) {
                     var m = this.getItemMetrics(this.selected);
                     this.repaint(m.x + this.scrollManager.getSX(),
                                  m.y + this.scrollManager.getSY(),
@@ -844,7 +877,7 @@ pkg.BaseTree = Class(ui.Panel, [
             var model = this.model;
             if (root.kids.length > 0){
                 if (this.getItemMetrics(root).isOpen != b) this.toggle(root);
-                for(var i = 0;i < root.kids.length; i++ ){
+                for(var i = 0; i < root.kids.length; i++ ){
                     this.toggleAll(root.kids[i], b);
                 }
             }
@@ -897,10 +930,11 @@ pkg.BaseTree = Class(ui.Panel, [
         };
     },
 
-    function () { this.$this(null); },
-    function (d){ this.$this(d, true);},
+    function (d, b){
+        if (arguments.length < 2) {
+            b = true;
+        }
 
-    function (d,b){
          /**
           * Selected tree model item
           * @attribute selected
@@ -926,7 +960,7 @@ pkg.BaseTree = Class(ui.Panel, [
 
         this._isVal = false;
         this.nodes = {};
-        this._ = new pkg.TreeListeners();
+        this._ = new this.$clazz.Listeners();
         this.setLineColor("gray");
 
         this.isOpenVal = b;
@@ -1107,13 +1141,13 @@ pkg.DefEditors = Class([
         /**
          * The method is called to ask if the given input event should trigger an tree component item
          * @param  {zebra.ui.tree.Tree} src a tree UI component
-         * @param  {zebra.ui.MouseEvent|zebra.ui.KeyEvent} e   an input event: mouse or key event
+         * @param  {zebra.ui.PointerEvent|zebra.ui.KeyEvent} e   an input event: pointer or key event
          * @return {Boolean} true if the event should trigger edition of a tree component item
          * @method @shouldStartEdit
          */
         this.shouldStartEdit = function(src,e){
-            return (e.ID == ui.MouseEvent.CLICKED && e.clicks > 1) ||
-                   (e.ID == KE.PRESSED && e.code == KE.ENTER);
+            return  e.id === "pointerDoubleClicked" ||
+                   (e.id === "keyPressed" && e.code === KE.ENTER);
         };
     }
 ]);
@@ -1211,18 +1245,18 @@ pkg.Tree = Class(pkg.BaseTree, [
         this.itemGapY = 2;
         this.itemGapX = 4;
 
-        this.childInputEvent = function(e){
-            if (e.ID == KE.PRESSED){
-                if (e.code == KE.ESCAPE) {
-                    this.stopEditing(false);
-                }
-                else {
-                    if (e.code == KE.ENTER) {
-                        if ((zebra.instanceOf(e.source, ui.TextField) === false) ||
-                            (zebra.instanceOf(e.source.view.target, zebra.data.SingleLineTxt)))
-                        {
-                            this.stopEditing(true);
-                        }
+        this.childKeyPressed = function(e){
+            console.log("childKeyPressed : " + e.code);
+
+            if (e.code === KE.ESCAPE) {
+                this.stopEditing(false);
+            }
+            else {
+                if (e.code === KE.ENTER) {
+                    if ((zebra.instanceOf(e.source, ui.TextField) === false) ||
+                        (zebra.instanceOf(e.source.view.target, zebra.data.SingleLineTxt)))
+                    {
+                        this.stopEditing(true);
                     }
                 }
             }
@@ -1268,7 +1302,7 @@ pkg.Tree = Class(pkg.BaseTree, [
         this.se = function (item,e ){
             if (item != null){
                 this.stopEditing(true);
-                if (this.editors != null && this.editors.shouldStartEdit(item, e)){
+                if (this.editors != null && this.editors.shouldStartEdit(item, e)) {
                     this.startEditing(item);
                     return true;
                 }
@@ -1276,21 +1310,26 @@ pkg.Tree = Class(pkg.BaseTree, [
             return false;
         };
 
-        this.mouseClicked = function(e){
+        this.pointerClicked = function(e){
+            if (this.se(this.pressedItem, e)) {
+                this.pressedItem = null;
+            }
+        };
+
+        this.pointerDoubleClicked = function(e) {
             if (this.se(this.pressedItem, e)) {
                 this.pressedItem = null;
             }
             else {
                 if (this.selected != null &&
-                    e.clicks > 1 && e.isActionMask() &&
-                   this.getItemAt(this.firstVisible, e.x, e.y) == this.selected)
+                    this.getItemAt(this.firstVisible, e.x, e.y) == this.selected)
                 {
                     this.toggle(this.selected);
                 }
             }
         };
 
-        this.mouseReleased = function(e){
+        this.pointerReleased = function(e){
             if (this.se(this.pressedItem, e)) this.pressedItem = null;
         };
 
@@ -1314,8 +1353,8 @@ pkg.Tree = Class(pkg.BaseTree, [
                 case KE.RIGHT   : newSelection = this.findNext(this.selected);break;
                 case KE.UP      :
                 case KE.LEFT    : newSelection = this.findPrev(this.selected);break;
-                case KE.HOME    : if (e.isControlPressed()) this.select(this.model.root);break;
-                case KE.END     : if (e.isControlPressed()) this.select(this.findLast(this.model.root));break;
+                case KE.HOME    : if (e.ctrlKey) this.select(this.model.root);break;
+                case KE.END     : if (e.ctrlKey) this.select(this.findLast(this.model.root));break;
                 case KE.PAGEDOWN: if (this.selected != null) this.select(this.nextPage(this.selected, 1));break;
                 case KE.PAGEUP  : if (this.selected != null) this.select(this.nextPage(this.selected,  -1));break;
                 //!!!!case KE.ENTER: if(this.selected != null) this.toggle(this.selected);break;
@@ -1334,18 +1373,19 @@ pkg.Tree = Class(pkg.BaseTree, [
             this.stopEditing(true);
             if (this.editors != null){
                 var editor = this.editors.getEditor(this, item);
-                if (editor != null){
+                if (editor != null) {
                     this.editedItem = item;
                     var b  = this.getItemBounds(this.editedItem),
                         ps = editor.getPreferredSize();
 
-                    editor.setLocation(b.x + this.scrollManager.getSX() + this.itemGapX,
-                                       b.y - ~~((ps.height - b.height + 2 * this.itemGapY) / 2) +
-                                      this.scrollManager.getSY() + this.itemGapY);
+                    editor.setBounds(b.x + this.scrollManager.getSX() + this.itemGapX,
+                                     b.y - Math.floor((ps.height - b.height + 2 * this.itemGapY) / 2) +
+                                     this.scrollManager.getSY() + this.itemGapY,
+                                     ps.width, ps.height);
 
-                    editor.setSize(ps.width, ps.height);
                     this.add(editor);
                     ui.focusManager.requestFocus(editor);
+                    this._.editingStarted(this, item, editor);
                 }
             }
         };
@@ -1358,26 +1398,32 @@ pkg.Tree = Class(pkg.BaseTree, [
          * @protected
          */
         this.stopEditing = function(applyData){
-            if (this.editors != null && this.editedItem != null){
+            if (this.editors != null && this.editedItem != null) {
+                var item     = this.editedItem,
+                    oldValue = item.value,
+                    editor   = this.kids[0];
+
                 try {
                     if (applyData)  {
                         this.model.setValue(this.editedItem,
                                             this.editors.fetchEditedValue(this.editedItem, this.kids[0]));
                     }
                 }
-                finally{
+                finally {
                     this.editedItem = null;
                     this.removeAt(0);
                     this.requestFocus();
+                    this._.editingStopped(this, item, oldValue, editor, applyData);
                 }
             }
         };
     },
 
-    function () { this.$this(null); },
-    function (d){ this.$this(d, true);},
+    function (d, b){
+        if (arguments.length < 2) {
+            b  = true;
+        }
 
-    function (d,b){
         this.provider = this.editedItem = this.pressedItem = null;
 
         /**
@@ -1401,9 +1447,9 @@ pkg.Tree = Class(pkg.BaseTree, [
         this.$super(d, b);
     },
 
-    function toggle() {
+    function toggle(item) {
         this.stopEditing(false);
-        this.$super();
+        this.$super(item);
     },
 
     function itemInserted(target,item){
@@ -1467,7 +1513,7 @@ pkg.Tree = Class(pkg.BaseTree, [
         if (this.se(root, e) === false) this.pressedItem = root;
     },
 
-    function mousePressed(e){
+    function pointerPressed(e){
         this.pressedItem = null;
         this.stopEditing(true);
         this.$super(e);
@@ -1475,8 +1521,8 @@ pkg.Tree = Class(pkg.BaseTree, [
 ]);
 
 /**
- * Component tree component that expects other UI components to be a tree model values. 
- * In general the implementation lays out passed via tree model UI components as tree 
+ * Component tree component that expects other UI components to be a tree model values.
+ * In general the implementation lays out passed via tree model UI components as tree
  * component nodes. For instance:
 
      var tree = new zebra.ui.tree.Tree({
@@ -1488,8 +1534,8 @@ pkg.Tree = Class(pkg.BaseTree, [
          ]
      });
 
- * But to prevent unexpected navigation it is better to use number of predefined 
- * with component tree UI components: 
+ * But to prevent unexpected navigation it is better to use number of predefined
+ * with component tree UI components:
 
    - zebra.ui.tree.CompTree.Label
    - zebra.ui.tree.CompTree.Checkbox
@@ -1527,55 +1573,64 @@ pkg.CompTree = Class(pkg.BaseTree, [
 
         this.Combo = Class(ui.Combo, [
             function keyPressed(e) {
-                if (e.code != KE.UP && e.code != KE.DOWN) this.$super(e);
+                if (e.code != KE.UP && e.code != KE.DOWN) {
+                    this.$super(e);
+                }
             }
         ]);
     },
 
     function $prototype() {
+        this.$blockCIE = false;
         this.canHaveFocus = false;
 
         this.getItemPreferredSize = function(root) {
             return root.value.getPreferredSize();
         };
 
-        this.childInputEvent = function(e) {
-            if (this.isSelectable) {
-                if (e.ID == ui.InputEvent.FOCUS_LOST) {
-                    this.select(null);
-                    return;
-                }
 
-                if (e.ID == ui.InputEvent.FOCUS_GAINED || e.ID == ui.MouseEvent.PRESSED) {
-                    var $this = this;
-                    zebra.data.find(this.model.root, zebra.layout.getDirectChild(this, e.source), function(item) {
-                        $this.select(item);
-                        return true;
-                    });
-                    return;
+        this.childKeyTyped = function(e) {
+            if (this.selected != null){
+                switch(e.ch) {
+                    case '+': if (this.isOpen(this.selected) === false) {
+                        this.toggle(this.selected);
+                    } break;
+                    case '-': if (this.isOpen(this.selected)) {
+                        this.toggle(this.selected);
+                    } break;
                 }
-
-                if (e.ID  == KE.PRESSED) {
-                    var newSelection = (e.code == KE.DOWN) ? this.findNext(this.selected) 
-                                                           : (e.code == KE.UP) ? this.findPrev(this.selected): null;
-                    if (newSelection != null) {
-                        this.select(newSelection);
-                    }
-                    return;
-                }      
             }
+        };
 
-            if (e.ID == KE.TYPED) {
-                if (this.selected != null){
-                    switch(e.ch) {
-                        case '+': if (this.isOpen(this.selected) === false) {
-                            this.toggle(this.selected);
-                        } break;
-                        case '-': if (this.isOpen(this.selected)) {
-                            this.toggle(this.selected);
-                        } break;
-                    }
+        this.childKeyPressed = function(e) {
+            if (this.isSelectable === true){
+                var newSelection = (e.code == KE.DOWN) ? this.findNext(this.selected)
+                                                       : (e.code == KE.UP) ? this.findPrev(this.selected)
+                                                                           : null;
+                if (newSelection != null) {
+                    this.select(newSelection);
                 }
+            }
+        };
+
+        this.childPointerPressed = this.childFocusGained = function(e) {
+            if (this.isSelectable === true && this.$blockCIE !== true) {
+                this.$blockCIE = true;
+                try {
+                    var item = zebra.data.TreeModel.findOne(this.model.root,
+                                                            zebra.layout.getDirectChild(this,
+                                                                                        e.source));
+                    if (item != null) this.select(item);
+                }
+                finally {
+                    this.$blockCIE = false;
+                }
+            }
+        }
+
+        this.childFocusLost = function(e) {
+            if (this.isSelectable === true) {
+                this.select(null);
             }
         };
 
@@ -1595,7 +1650,8 @@ pkg.CompTree = Class(pkg.BaseTree, [
                 var $this = this, fvNode = this.getIM(this.firstVisible), started = 0;
 
                 this.model.iterate(this.model.root, function(item) {
-                    var node = $this.nodes[item];  // slightly improve performance (instead of calling $this.getIM(...))
+                    var node = $this.nodes[item];  // slightly improve performance
+                                                   // (instead of calling $this.getIM(...))
 
                     if (started === 0 && item == $this.firstVisible) {
                         started = 1;
@@ -1607,8 +1663,10 @@ pkg.CompTree = Class(pkg.BaseTree, [
                         if (node.y + sy < $this.height) {
                             var image = $this.getIconBounds(item);
 
-                            item.value.x = image.x + image.width + (image.width > 0 || $this.getToggleSize().width > 0 ? $this.gapx : 0) + $this.scrollManager.getSX();
-                            item.value.y = node.y + ~~((node.height - node.viewHeight) / 2) + sy;
+                            item.value.x = image.x + image.width +
+                                           (image.width > 0 || $this.getToggleSize().width > 0 ? $this.gapx : 0) +
+                                           $this.scrollManager.getSX();
+                            item.value.y = node.y + Math.floor((node.height - node.viewHeight) / 2) + sy;
                             item.value.isVisible = true;
                             item.value.width  = node.viewWidth;
                             item.value.height = node.viewHeight;
@@ -1618,7 +1676,7 @@ pkg.CompTree = Class(pkg.BaseTree, [
                         }
                     }
 
-                    return (started === 2) ? 2 :  (node.isOpen === false ? 1 : 0);
+                    return (started === 2) ? 2 : (node.isOpen === false ? 1 : 0);
                 });
             }
         };
@@ -1672,7 +1730,7 @@ pkg.CompTree = Class(pkg.BaseTree, [
     },
 
     function select(item) {
-        if (this.isSelectable && item != this.selected) {
+        if (this.isSelectable === true) {
             var old = this.selected;
 
             if (old != null && old.value.hasFocus()) {
@@ -1691,56 +1749,6 @@ pkg.CompTree = Class(pkg.BaseTree, [
     function makeVisible(item) {
        item.value.setVisible(true);
        this.$super(item);
-    }
-]);
-
-/**
- * Toggle view element class
- * @class  zebra.ui.tree.TreeSignView
- * @extends {zebra.ui.View}
- * @constructor
- * @param  {Boolean} plus indicates the sign type plus (true) or minus (false)
- * @param  {String} color a color
- * @param  {String} bg a background
- */
-pkg.TreeSignView = Class(ui.View, [
-    function $prototype() {
-        this[''] = function(plus, color, bg) {
-            this.color = color == null ? "white" : color;
-            this.bg    = bg   == null ? "lightGray" : bg ;
-            this.plus  = plus == null ? false : plus;
-            this.br = new ui.Border("rgb(65, 131, 215)", 1, 3);
-            this.width = this.height = 12;
-        };
-
-        this.paint = function(g, x, y, w, h, d) {
-            this.br.outline(g, x, y, w, h, d);
-
-            g.setColor(this.bg);
-            g.fill();
-            this.br.paint(g, x, y, w, h, d);
-
-            g.setColor(this.color);
-            g.lineWidth = 2;
-            x+=2;
-            w-=4;
-            h-=4;
-            y+=2;
-            g.beginPath();
-            g.moveTo(x, y + h/2);
-            g.lineTo(x + w, y + h/2);
-            if (this.plus) {
-                g.moveTo(x + w/2, y);
-                g.lineTo(x + w/2, y + h);
-            }
-
-            g.stroke();
-            g.lineWidth = 1;
-        };
-
-        this.getPreferredSize = function() {
-            return { width:this.width, height:this.height};
-        };
     }
 ]);
 

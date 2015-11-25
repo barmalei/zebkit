@@ -7,12 +7,8 @@ zebra()["zebra.json"] = pkg.$url.join("zebra.json");
  * @module  ui
  */
 
-var MB = zebra.util, ME = pkg.MouseEvent, Cursor = pkg.Cursor, View = pkg.View,
-    Listeners = zebra.util.Listeners, KE = pkg.KeyEvent, L = zebra.layout,
-    task = zebra.util.task, instanceOf = zebra.instanceOf,
-    $invalidA = "Invalid alignment",
-    $invalidO = "Invalid orientation",
-    $invalidC = "Invalid constraints";
+var Cursor = pkg.Cursor, Listeners = zebra.util.Listeners, KE = pkg.KeyEvent,
+    L = zebra.layout, instanceOf = zebra.instanceOf;
 
 pkg.$ViewsSetter = function (v){
     this.views = {};
@@ -21,53 +17,6 @@ pkg.$ViewsSetter = function (v){
     }
     this.vrp();
 };
-
-/**
- *  UI component render class. Renders the given target UI component
- *  on the given surface using the specified 2D context
- *  @param {zebra.ui.Panel} [target] an UI component to be rendered
- *  @class zebra.ui.CompRender
- *  @constructor
- *  @extends zebra.ui.Render
- */
-pkg.CompRender = Class(pkg.Render, [
-    function $prototype() {
-        /**
-         * Get preferred size of the render. The method doesn't calculates
-         * preferred size it simply calls the target component "getPreferredSize"
-         * method.
-         * @method getPreferredSize
-         * @return {Object} a preferred size
-         *
-         *      {width:<Integer>, height: <Integer>}
-         */
-        this.getPreferredSize = function(){
-            return this.target == null || this.target.isVisible === false ? { width:0, height:0 }
-                                                                          : this.target.getPreferredSize();
-        };
-
-        this.paint = function(g,x,y,w,h,d){
-            var c = this.target;
-            if (c != null && c.isVisible === true) {
-                c.validate();
-                var prevW =  -1, prevH = 0, cx = x - c.x, cy = y - c.y;
-                if (c.getCanvas() == null){
-                    prevW = c.width;
-                    prevH = c.height;
-                    c.setSize(w, h);
-                }
-
-                g.translate(cx, cy);
-                pkg.paintManager.paint(g, c);
-                g.translate(-cx,  -cy);
-                if (prevW >= 0){
-                    c.setSize(prevW, prevH);
-                    c.validate();
-                }
-            }
-        };
-    }
-]);
 
 /**
  * Line UI component class. Draw series of vertical or horizontal lines of using
@@ -82,12 +31,12 @@ pkg.Line = Class(pkg.Panel, [
     function() {
         /**
          * Line colors
-         * @attribute lineColors
+         * @attribute colors
          * @type {Array}
          * @readOnly
          * @default [ "gray" ]
          */
-        this.lineColors = ["gray"];
+        this.colors = [ "gray" ];
         this.$super();
     },
 
@@ -107,9 +56,9 @@ pkg.Line = Class(pkg.Panel, [
          * @method setLineColors
          */
         this.setLineColors = function() {
-            this.lineColors = (arguments.length === 1) ? (Array.isArray(arguments[0]) ? arguments[0].slice(0)
-                                                                                      : [ arguments[0] ] )
-                                                       : Array.prototype.slice.call(arguments);
+            this.colors = (arguments.length === 1) ? (Array.isArray(arguments[0]) ? arguments[0].slice(0)
+                                                                                  : [ arguments[0] ] )
+                                                    : Array.prototype.slice.call(arguments);
             this.repaint();
         };
 
@@ -121,9 +70,9 @@ pkg.Line = Class(pkg.Panel, [
                 bottom = this.getBottom(),
                 xy     = isHor ? top : left;
 
-            for(var i=0; i < this.lineColors.length; i++) {
-                if (this.lineColors[i] != null) {
-                    g.setColor(this.lineColors[i]);
+            for(var i=0; i < this.colors.length; i++) {
+                if (this.colors[i] != null) {
+                    g.setColor(this.colors[i]);
                     if (isHor === true) {
                         g.drawLine(this.left, xy, this.width - right - left, xy, this.lineWidth);
                     }
@@ -136,1027 +85,8 @@ pkg.Line = Class(pkg.Panel, [
         };
 
         this.calcPreferredSize = function(target) {
-            var s = this.lineColors.length * this.lineWidth;
+            var s = this.colors.length * this.lineWidth;
             return { width: s, height:s};
-        };
-    }
-]);
-
-/**
- * Lightweight implementation of single line string render. The render requires
- * a simple string as a target object.
- * @param {String} str a string to be rendered
- * @param {zebra.ui.Font} [font] a text font
- * @param {String} [color] a text color
- * @constructor
- * @extends {zebra.ui.Render}
- * @class zebra.ui.StringRender
- */
-pkg.StringRender = Class(pkg.Render, [
-    function $prototype() {
-        this.stringWidth = -1;
-        this.owner = null;
-
-        this[''] = function(txt, font, color) {
-            this.setTarget(txt);
-
-            /**
-             * Font to be used to render the target string
-             * @attribute font
-             * @readOnly
-             * @type {zebra.ui.Font}
-             */
-            this.font = font != null ? font : this.$clazz.font;
-
-
-            /**
-             * Color to be used to render the target string
-             * @readOnly
-             * @attribute color
-             * @type {String}
-             */
-            this.color = color != null ? color : this.$clazz.color;
-        };
-
-        this.ownerChanged  = function(v) {
-            this.owner = v;
-        };
-
-        this.getLineHeight = function() {
-            return this.font.height;
-        };
-
-        this.lineWidth = function() {
-            if (this.stringWidth < 0) {
-                this.stringWidth = this.font.stringWidth(this.target);
-            }
-            return this.stringWidth;
-        };
-
-        /**
-         * Set the rendered text font.
-         * @param  {String|zebra.ui.Font} f a font as CSS string or
-         * zebra.ui.Font class instance
-         * @return {Boolean} return true if a text font has been updated
-         * @method setFont
-         */
-        this.setFont = function(f){
-            var old = this.font;
-            if (f != null && zebra.isString(f)) f = new pkg.Font(f);
-            if (f != old) {
-                this.font = f;
-                if (this.owner != null && this.owner.isValid === false) {
-                    this.owner.invalidate();
-                }
-                this.stringWidth = -1;
-                return true;
-            }
-            return false;
-        };
-
-        this.paint = function(g,x,y,w,h,d) {
-            if (this.font.s != g.font) g.setFont(this.font);
-            if (this.color != g.fillStyle) g.fillStyle = this.color;
-
-            if (d != null && d.isEnabled === false) {
-                g.fillStyle = d != null && d.disabledColor != null ? d.disabledColor
-                                                                   : this.$clazz.disabledColor;
-            }
-
-            g.fillText(this.target, x, y);
-        };
-
-        this.getPreferredSize = function() {
-            if (this.stringWidth < 0) {
-                this.stringWidth = this.font.stringWidth(this.target);
-            }
-            return { width: this.stringWidth, height: this.font.height };
-        };
-
-        /**
-         * Return a string that is rendered by this class
-         * @return  {String} a string
-         * @method getValue
-         */
-        this.getValue = function(){
-            return this.target;
-        };
-
-        /**
-         * Set rendered text color
-         * @param  {String} c a text color
-         * @return {Boolean} return true if a text color has been updated
-         * @method setColor
-         */
-        this.setColor = function(c){
-            if (c != this.color) {
-                this.color = c.toString();
-                return true;
-            }
-            return false;
-        };
-
-        /**
-         * Set the string to be rendered
-         * @param  {String} s a string
-         * @method setValue
-         */
-        this.setValue = function(s) {
-            this.setTarget(s);
-        };
-
-        this.targetWasChanged = function(o, n) {
-            this.stringWidth = -1;
-            if (this.owner != null) this.owner.invalidate();
-        };
-    }
-]);
-
-/**
- * Text render that expects and draws a text model or a string as its target
- * @class zebra.ui.TextRender
- * @constructor
- * @extends zebra.ui.Render
- * @param  {String|zebra.data.TextModel} text a text as string or text model object
- */
-pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
-    function $prototype() {
-        /**
-         * UI component that holds the text render
-         * @attribute owner
-         * @default null
-         * @readOnly
-         * @protected
-         * @type {zebra.ui.Panel}
-         */
-        this.owner = null;
-
-        /**
-         * Get a line indent
-         * @default 1
-         * @return {Integer} line indent
-         * @method getLineIndent
-         */
-        this.getLineIndent = function() {
-            return 1;
-        };
-
-        /**
-         * Get number of lines of target text
-         * @return   {Integer} a number of line in the target text
-         * @method getLines
-         */
-        this.getLines = function() {
-            return this.target.getLines();
-        };
-
-        this.getLineSize = function(l) {
-            return this.target.getLine(l).length + 1;
-        };
-
-        /**
-         * Get the given line height in pixels
-         * @param {Integer} l a line number
-         * @return {Integer} a line height in pixels
-         * @method getLineHeight
-         */
-        this.getLineHeight = function(l) {
-            return this.font.height;
-        };
-
-        this.getMaxOffset = function() {
-            return this.target.getTextLength();
-        };
-
-        /**
-         * Called whenever an owner UI component has been changed
-         * @param  {zebra.ui.Panel} v a new owner UI component
-         * @method ownerChanged
-         */
-        this.ownerChanged  = function(v) {
-            this.owner = v;
-        };
-
-        /**
-         * Paint the specified text line
-         * @param  {2DContext} g graphical 2D context
-         * @param  {Integer} x x coordinate
-         * @param  {Integer} y y coordinate
-         * @param  {Integer} line a line number
-         * @param  {zebra.ui.Panel} d an UI component on that the line has to be rendered
-         * @method paintLine
-         */
-        this.paintLine = function(g,x,y,line,d) {
-            g.fillText(this.getLine(line), x, y);
-        };
-
-        /**
-         * Get text line by the given line number
-         * @param  {Integer} r a line number
-         * @return {String} a text line
-         * @method getLine
-         */
-        this.getLine = function(r) {
-            return this.target.getLine(r);
-        };
-
-        this.targetWasChanged = function(o,n){
-            if (o != null) o.unbind(this);
-            if (n != null) {
-                n.bind(this);
-                this.invalidate(0, this.getLines());
-            }
-            else {
-                this.invLines = 0;
-            }
-        };
-
-        /**
-         * Get the rendered target text as string object
-         * @return {String} rendered text
-         * @method getValue
-         */
-        this.getValue = function(){
-            return this.target == null ? null : this.target.getValue();
-        };
-
-        /**
-         * Get the given text line width in pixels
-         * @param  {Integer} line a text line number
-         * @return {Integer} a text line width in pixels
-         * @method lineWidth
-         */
-        this.lineWidth = function(line){
-            if (this.invLines > 0) this.recalc();
-            return this.target.$lineTags(line).$lineWidth;
-        };
-
-        /**
-         * Called every time the target text metrics has to be recalculated
-         * @method recalc
-         */
-        this.recalc = function() {
-            if (this.invLines > 0 && this.target != null){
-                var text = this.target;
-                if (text != null) {
-                    if (this.invLines > 0) {
-                        for(var i = this.startInvLine + this.invLines - 1; i >= this.startInvLine; i--) {
-                            text.$lineTags(i).$lineWidth = this.font.stringWidth(this.getLine(i));
-                        }
-                        this.startInvLine = this.invLines = 0;
-                    }
-
-                    this.textWidth = 0;
-                    var size = text.getLines();
-                    for(var i = 0;i < size; i++){
-                        var len = text.$lineTags(i).$lineWidth;
-                        if (len > this.textWidth) {
-                            this.textWidth = len;
-                        }
-                    }
-                    this.textHeight = this.getLineHeight() * size + (size - 1) * this.getLineIndent();
-                }
-            }
-        };
-
-        /**
-         * Text model update listener handler
-         * @param  {zebra.data.TextModel} src text model object
-         * @param  {Boolean} b
-         * @param  {Integer} off an offset starting from that
-         * the text has been updated
-         * @param  {Integer} size a size (in character) of text part that
-         * has been updated
-         * @param  {Integer} ful a first affected by the given update line
-         * @param  {Integer} updatedLines a number of text lines that have
-         * been affected by text updating
-         * @method textUpdated
-         */
-        this.textUpdated = function(src,b,off,size,ful,updatedLines){
-            if (b === false) {
-                if (this.invLines > 0) {
-                    var p1 = ful - this.startInvLine,
-                        p2 = this.startInvLine + this.invLines - ful - updatedLines;
-                    this.invLines = ((p1 > 0) ? p1 : 0) + ((p2 > 0) ? p2 : 0) + 1;
-                    this.startInvLine = this.startInvLine < ful ? this.startInvLine : ful;
-                }
-                else {
-                    this.startInvLine = ful;
-                    this.invLines = 1;
-                }
-                if (this.owner != null) this.owner.invalidate();
-            }
-            else {
-                if (this.invLines > 0){
-                    if (ful <= this.startInvLine) this.startInvLine += (updatedLines - 1);
-                    else {
-                        if (ful < (this.startInvLine + size)) size += (updatedLines - 1);
-                    }
-                }
-                this.invalidate(ful, updatedLines);
-            }
-        };
-
-        /**
-         * Invalidate metrics for the specified range of lines.
-         * @param  {Integer} start first line to be invalidated
-         * @param  {Integer} size  number of lines to be invalidated
-         * @method invalidate
-         * @private
-         */
-        this.invalidate = function(start,size){
-            if (size > 0 && (this.startInvLine != start || size != this.invLines)) {
-                if (this.invLines === 0){
-                    this.startInvLine = start;
-                    this.invLines = size;
-                }
-                else {
-                    var e = this.startInvLine + this.invLines;
-                    this.startInvLine = start < this.startInvLine ? start : this.startInvLine;
-                    this.invLines     = Math.max(start + size, e) - this.startInvLine;
-                }
-
-                if (this.owner != null) {
-                    this.owner.invalidate();
-                }
-            }
-        };
-
-        this.getPreferredSize = function(){
-            if (this.invLines > 0 && this.target != null) {
-                this.recalc();
-            }
-            return { width:this.textWidth, height:this.textHeight };
-        };
-
-        this.paint = function(g,x,y,w,h,d) {
-            var ts = g.$states[g.$curState];
-            if (ts.width > 0 && ts.height > 0) {
-                var lineIndent = this.getLineIndent(),
-                    lineHeight = this.getLineHeight(),
-                    lilh       = lineHeight + lineIndent,
-                    startInvLine  = 0;
-
-                w = ts.width  < w ? ts.width  : w;
-                h = ts.height < h ? ts.height : h;
-
-                if (y < ts.y) {
-                    startInvLine = Math.floor((lineIndent + ts.y - y) / lilh);
-                    h += (ts.y - startInvLine * lineHeight - startInvLine * lineIndent);
-                }
-                else {
-                    if (y > (ts.y + ts.height)) return;
-                }
-
-                var size = this.target.getLines();
-                if (startInvLine < size){
-                    var lines =  Math.floor((h + lineIndent) / lilh) + (((h + lineIndent) % lilh > lineIndent) ? 1 : 0);
-                    if (startInvLine + lines > size) {
-                        lines = size - startInvLine;
-                    }
-                    y += startInvLine * lilh;
-
-                    g.setFont(this.font);
-
-                    if (d == null || d.isEnabled === true){
-                        if (this.color != g.fillStyle) g.fillStyle = this.color;
-
-                        var p1 = null, p2 = null, bsel = false;
-                        if (lines > 0 && d != null && d.getStartSelection != null) {
-                            p1   = d.getStartSelection();
-                            p2   = d.getEndSelection();
-                            bsel = p1 != null && (p1[0] != p2[0] || p1[1] != p2[1]);
-                        }
-
-                        for(var i = 0; i < lines; i++){
-                            if (bsel === true) {
-                                var line = i + startInvLine;
-                                if (line >= p1[0] && line <= p2[0]){
-                                    var s  = this.getLine(line),
-                                        lw = this.lineWidth(line),
-                                        xx = x;
-
-                                    if (line == p1[0]) {
-                                        var ww = this.font.charsWidth(s, 0, p1[1]);
-                                        xx += ww;
-                                        lw -= ww;
-                                        if (p1[0] == p2[0]) {
-                                            lw -= this.font.charsWidth(s, p2[1], s.length - p2[1]);
-                                        }
-                                    }
-                                    else {
-                                        if (line == p2[0]) lw = this.font.charsWidth(s, 0, p2[1]);
-                                    }
-                                    this.paintSelection(g, xx, y, lw === 0 ? 1 : lw, lilh, line, d);
-
-                                    // restore color to paint text since it can be
-                                    // res-set with paintSelection method
-                                    if (this.color != g.fillStyle) g.fillStyle = this.color;
-                                }
-                            }
-
-                            this.paintLine(g, x, y, i + startInvLine, d);
-                            y += lilh;
-                        }
-                    }
-                    else {
-                        var dcol = d != null && d.disabledColor != null ? d.disabledColor
-                                                                        : pkg.TextRender.disabledColor;
-
-                        for(var i = 0;i < lines; i++) {
-                            g.setColor(dcol);
-                            this.paintLine(g, x, y, i + startInvLine, d);
-                            y += lilh;
-                        }
-                    }
-                }
-            }
-        };
-
-        /**
-         * Paint the specified text selection of the given line. The area
-         * where selection has to be rendered is denoted with the given
-         * rectangular area.
-         * @param  {2DContext} g a canvas graphical context
-         * @param  {Integer} x a x coordinate of selection rectangular area
-         * @param  {Integer} y a y coordinate of selection rectangular area
-         * @param  {Integer} w a width of of selection rectangular area
-         * @param  {Integer} h a height of of selection rectangular area
-         * @param  {Integer} line [description]
-         * @param  {zebra.ui.Panel} d a target UI component where the text
-         * has to be rendered
-         * @protected
-         * @method paintSelection
-         */
-        this.paintSelection = function(g, x, y, w, h, line, d){
-            g.setColor(d.selectionColor);
-            g.fillRect(x, y, w, h);
-        };
-
-        /**
-         * Set the text model content
-         * @param  {String} s a text as string object
-         * @method setValue
-         */
-        this.setValue = function (s) {
-            this.target.setValue(s);
-        };
-
-        /**
-         * Set the rendered text font.
-         * @param  {String|zebra.ui.Font} f a font as CSS string or
-         * zebra.ui.Font class instance
-         * @return {Boolean} return true if a text font has been updated
-         * @method setFont
-         */
-        this.setFont = function(f){
-            var old = this.font;
-
-            if (f && zebra.isString(f)) f = new pkg.Font(f);
-            if (f != old) {
-                this.font = f;
-                this.invalidate(0, this.getLines());
-                return true;
-            }
-            return false;
-        };
-
-        /**
-         * Set rendered text color
-         * @param  {String} c a text color
-         * @return {Boolean} return true if a text color has been updated
-         * @method setColor
-         */
-        this.setColor = function(c){
-            if (c != this.color) {
-                this.color = c.toString();
-                return true;
-            }
-            return false;
-        };
-
-        // speed up constructor by avoiding super execution since
-        // text render is one of the most used class
-        this[''] = function(text) {
-            /**
-             * Text color
-             * @attribute color
-             * @type {String}
-             * @default zebra.ui.TextRender.color
-             * @readOnly
-             */
-            this.color = this.$clazz.color;
-
-            /**
-             * Text font
-             * @attribute font
-             * @type {String|zebra.ui.Font}
-             * @default zebra.ui.TextRender.font
-             * @readOnly
-             */
-            this.font = this.$clazz.font;
-
-            this.textWidth = this.textHeight = this.startInvLine = this.invLines = 0;
-
-            //!!!
-            //   since text render is widely used structure we do slight hack -
-            //   don't call parent constructor
-            //!!!
-            this.setTarget(zebra.isString(text) ? new zebra.data.Text(text) : text);
-        };
-    }
-]);
-
-pkg.BoldTextRender = Class(pkg.TextRender, [
-    function(t) {
-        this.$super(t);
-        this.setFont(pkg.boldFont);
-    }
-]);
-
-/**
- * Password text render class. This class renders a secret text with hiding it with the given character.
- * @param {String|zebra.data.TextModel} [text] a text as string or text model instance
- * @class zebra.ui.PasswordText
- * @constructor
- * @extends zebra.ui.TextRender
- */
-pkg.PasswordText = Class(pkg.TextRender, [
-    function() {
-        this.$this(new zebra.data.SingleLineTxt(""));
-    },
-
-    function(text){
-        /**
-         * Echo character that will replace characters of hidden text
-         * @attribute echo
-         * @type {String}
-         * @readOnly
-         * @default "*"
-         */
-        this.echo = "*";
-
-        /**
-         * Indicates if the last entered character doesn't have to be replaced with echo character
-         * @type {Boolean}
-         * @attribute showLast
-         * @default true
-         * @readOnly
-         */
-        this.showLast = true;
-        this.$super(text);
-    },
-
-    /**
-     * Set the specified echo character. The echo character is used to hide secret text.
-     * @param {String} ch an echo character
-     * @method setEchoChar
-     */
-    function setEchoChar(ch){
-        if (this.echo != ch){
-            this.echo = ch;
-            if (this.target != null) this.invalidate(0, this.target.getLines());
-        }
-    },
-
-    function getLine(r){
-        var buf = [], ln = this.$super(r);
-        for(var i = 0;i < ln.length; i++) buf[i] = this.echo;
-        if (this.showLast && ln.length > 0) buf[ln.length-1] = ln[ln.length-1];
-        return buf.join('');
-    }
-]);
-
-pkg.TabBorder = Class(View, [
-    function(t) {
-        this.$this(t, 1);
-    },
-
-    function(t, w){
-        this.type  = t;
-        this.left = this.top = this.bottom = this.right = 6 + w;
-        this.width = w;
-
-        this.onColor1 = pkg.palette.black;
-        this.onColor2 = pkg.palette.gray5;
-        this.offColor = pkg.palette.gray1;
-
-        this.fillColor1 = "#DCF0F7";
-        this.fillColor2 = pkg.palette.white;
-        this.fillColor3 = pkg.palette.gray7;
-    },
-
-    function $prototype() {
-        this.paint = function(g,x,y,w,h,d){
-            var xx = x + w - 1,
-                yy = y + h - 1,
-                o  = d.parent.orient,
-                t  = this.type,
-                s  = this.width,
-                dt = s / 2;
-
-            g.beginPath();
-            g.lineWidth = s;
-            switch(o) {
-                case L.LEFT:
-                    g.moveTo(xx + 1, y + dt);
-                    g.lineTo(x + s*2, y + dt);
-                    g.lineTo(x + dt , y + s*2);
-                    g.lineTo(x + dt, yy - s*2 + dt);
-                    g.lineTo(x + s*2, yy + dt);
-                    g.lineTo(xx + 1, yy + dt);
-
-                    if (d.isEnabled === true){
-                        g.setColor(t == 2 ? this.fillColor1 : this.fillColor2);
-                        g.fill();
-                    }
-
-                    g.setColor((t === 0 || t == 2) ? this.onColor1 : this.offColor);
-                    g.stroke();
-
-                    if (d.isEnabled === true) {
-                        var ww = Math.floor((w - 6) / 2);
-                        g.setColor(this.fillColor3);
-                        g.fillRect(xx - ww + 1, y + s, ww, h - s - 1);
-                    }
-
-                    if (t == 1) {
-                        g.setColor(this.onColor2);
-                        g.drawLine(x + 2*s + 1, yy - s, xx + 1, yy - s, s);
-                    }
-                    break;
-                case L.RIGHT:
-                    xx -= dt; // thick line grows left side and right side proportionally
-                              // correct it
-
-                    g.moveTo(x, y + dt);
-                    g.lineTo(xx - 2*s, y + dt);
-
-                    g.lineTo(xx   , y + 2*s);
-                    g.lineTo(xx   , yy - 2*s);
-                    g.lineTo(xx - 2*s, yy + dt);
-                    g.lineTo(x, yy + dt);
-
-                    if (d.isEnabled === true){
-                        g.setColor(t == 2 ? this.fillColor1 : this.fillColor2);
-                        g.fill();
-                    }
-
-                    g.setColor((t === 0 || t == 2) ? this.onColor1 : this.offColor);
-                    g.stroke();
-
-                    if (d.isEnabled === true) {
-                        var ww = Math.floor((w - 6) / 2);
-                        g.setColor(this.fillColor3);
-                        g.fillRect(x, y + s, ww, h - s - 1);
-                    }
-
-                    if (t == 1) {
-                        g.setColor(this.onColor2);
-                        g.drawLine(x, yy - s, xx - s - 1, yy - s, s);
-                    }
-                    break;
-                case L.TOP:
-                    g.moveTo(x + dt, yy + 1 );
-                    g.lineTo(x + dt, y + s*2);
-                    g.lineTo(x + s*2, y + dt);
-                    g.lineTo(xx - s*2 + s, y + dt);
-                    g.lineTo(xx + dt, y + s*2);
-                    g.lineTo(xx + dt, yy + 1);
-
-                    if (d.isEnabled === true){
-                        g.setColor(t == 2 ? this.fillColor1 : this.fillColor2);
-                        g.fill();
-                    }
-
-                    g.setColor((t === 0 || t == 2) ? this.onColor1 : this.offColor);
-                    g.stroke();
-
-                    if (d.isEnabled === true){
-                        g.setColor(this.fillColor3);
-                        var hh = Math.floor((h - 6) / 2);
-                        g.fillRect(x + s, yy - hh + 1 , w - s - 1, hh);
-                    }
-
-                    if (t === 0) {
-                        g.setColor(this.onColor2);
-                        g.beginPath();
-                        g.moveTo(xx + dt - s, yy + 1);
-                        g.lineTo(xx + dt - s, y + s*2);
-                        g.stroke();
-                    }
-
-                    break;
-                case L.BOTTOM:
-                    yy -= dt;
-
-                    g.moveTo(x + dt, y);
-                    g.lineTo(x + dt, yy - 2*s);
-                    g.lineTo(x + 2*s + dt, yy);
-                    g.lineTo(xx - 2*s, yy);
-                    g.lineTo(xx + dt, yy - 2*s);
-                    g.lineTo(xx + dt, y);
-
-                    if (d.isEnabled === true){
-                        g.setColor(t == 2 ? this.fillColor1 : this.fillColor2);
-                        g.fill();
-                    }
-
-                    g.setColor((t === 0 || t == 2) ? this.onColor1 : this.offColor);
-                    g.stroke();
-
-                    if (d.isEnabled === true){
-                        g.setColor(this.fillColor3);
-                        var hh = Math.floor((h - 6) / 2);
-                        g.fillRect(x + s, y, w - s - 1, hh);
-                    }
-
-                    if (t === 0) {
-                        g.setColor(this.onColor2);
-                        g.beginPath();
-                        g.moveTo(xx + dt - s, y);
-                        g.lineTo(xx + dt - s, yy - s - 1);
-                        g.stroke();
-                    }
-                    break;
-                default: throw new Error("Invalid tab alignment");
-            }
-        };
-
-        this.getTop    = function () { return this.top;   };
-        this.getBottom = function () { return this.bottom;};
-        this.getLeft   = function () { return this.left;  };
-        this.getRight  = function () { return this.right; };
-    }
-]);
-
-/**
- * Render class that allows developers to render a border with a title area.
- * The title area has to be specified by an UI component that uses the border
- * by defining "getTitleInfo()"" method. The method has to return object that
- * describes title size, location and alignment:
- *
- *
- *      {
- *        x: {Integer}, y: {Integer},
- *        width: {Integer}, height: {Integer},
- *        orient: {Integer}
- *      }
- *
- *
- * @class zebra.ui.TitledBorder
- * @extends zebra.ui.Render
- * @constructor
- * @param {zebra.ui.View} border  a border to be rendered with a title area
- * @param {Integer|String} [lineAlignment] a line alignment. Specifies how
- * a title area has to be aligned relatively border line:
- *
- *      BOTTOM or "bottom"  - title area will be placed on top of border line:
- *                    ___| Title area |___
- *
- *
- *      CENTER or "center"  - title area will be centered relatively to border line:
- *                    ---| Title area |-----
- *
- *
- *      TOP or "top"  - title area will be placed underneath of border line:
- *                     ____              ________
- *                         |  Title area |
- *
- *
- */
-pkg.TitledBorder = Class(pkg.Render, [
-    function $prototype() {
-        this.getTop  = function (){
-            return this.target.getTop();
-        };
-
-        this.getLeft = function (){
-            return this.target.getLeft();
-        };
-
-        this.getRight = function (){
-            return this.target.getRight();
-        };
-
-        this.getBottom = function (){
-            return this.target.getBottom();
-        };
-
-        this.outline = function (g,x,y,w,h,d) {
-            var xx = x + w, yy = y + h;
-            if (d.getTitleInfo != null) {
-                var r = d.getTitleInfo();
-                if (r != null) {
-                    switch(r.orient) {
-                        case L.BOTTOM:
-                            var bottom = this.target.getBottom();
-                            switch (this.lineAlignment) {
-                                case L.CENTER : yy = r.y + Math.floor((r.height - bottom)/ 2) + bottom; break;
-                                case L.TOP    : yy = r.y + r.height + bottom; break;
-                                case L.BOTTOM : yy = r.y; break;
-                            }
-                            break;
-                        case L.TOP:
-                            var top = this.target.getTop();
-                            switch (this.lineAlignment) {
-                                case L.CENTER : y = r.y + Math.floor((r.height - top)/2);   break; // y = r.y + Math.floor(r.height/ 2) ; break;
-                                case L.TOP    : y = r.y - top; break;
-                                case L.BOTTOM : y = r.y + r.height; break;
-                            }
-                            break;
-                        case L.LEFT:
-                            var left = this.target.getLeft();
-                            switch (this.lineAlignment) {
-                                case L.CENTER : x = r.x + Math.floor((r.width - left) / 2); break;
-                                case L.TOP    : x = r.x - left; break;
-                                case L.BOTTOM : x = r.x + r.width; break;
-                            }
-                            break;
-                        case L.RIGHT:
-                            var right = this.target.getRight();
-                            switch (this.lineAlignment) {
-                                case L.CENTER : xx = r.x + Math.floor((r.width - right) / 2) + right; break;
-                                case L.TOP    : xx = r.x + r.width + right; break;
-                                case L.BOTTOM : xx = r.x; break;
-                            }
-                            break;
-                    }
-                }
-            }
-
-            if (this.target != null && this.target.outline != null) {
-               b = this.target.outline(g, x, y, xx - x, yy - y, d);
-               if (b === true) return b;
-            }
-
-            g.beginPath();
-            g.rect(x, y, xx - x, yy - y);
-            g.closePath();
-            return true;
-        };
-
-        this.$isIn = function(clip, x, y, w, h) {
-            var rx = clip.x > x ? clip.x : x,
-                ry = clip.y > y ? clip.y : y,
-                rw = Math.min(clip.x + clip.width, x + w) - rx,
-                rh = Math.min(clip.y + clip.height, y + h) - ry;
-            return (clip.x == rx && clip.y == ry && clip.width == rw && clip.height == rh);
-        };
-
-        this.paint = function(g,x,y,w,h,d){
-            if (d.getTitleInfo != null){
-
-                var r = d.getTitleInfo();
-                if (r != null) {
-                    var xx = x + w, yy = y + h, t = g.$states[g.$curState];
-                    switch (r.orient) {
-                        case L.TOP:
-                            var top = this.target.getTop();
-                            // compute border y
-                            switch (this.lineAlignment) {
-                                case L.CENTER : y = r.y + Math.floor((r.height - top) / 2) ; break;
-                                case L.TOP    : y = r.y - top; break;
-                                case L.BOTTOM : y = r.y + r.height; break;
-                            }
-
-
-                            // skip rendering border if the border is not in clip rectangle
-                            // This is workaround because of IE10/IE11 have bug what causes
-                            // handling rectangular clip + none-rectangular clip side effect
-                            // to "fill()" subsequent in proper working (fill without respect of
-                            // clipping  area)
-                            if (this.$isIn(t, x + this.target.getLeft(), y,
-                                           w - this.target.getRight() - this.target.getLeft(),
-                                           yy - y - this.target.getBottom()))
-                            {
-                                return;
-                            }
-
-                            g.save();
-                            g.beginPath();
-
-                            g.moveTo(x, y);
-                            g.lineTo(r.x, y);
-                            g.lineTo(r.x, y + top);
-                            g.lineTo(r.x + r.width, y + top);
-                            g.lineTo(r.x + r.width, y);
-                            g.lineTo(xx, y);
-                            g.lineTo(xx, yy);
-                            g.lineTo(x, yy);
-                            g.lineTo(x, y);
-
-                            break;
-                        case L.BOTTOM:
-                            var bottom = this.target.getBottom();
-                            switch (this.lineAlignment) {
-                                case L.CENTER : yy = r.y + Math.floor((r.height - bottom) / 2) + bottom; break;
-                                case L.TOP    : yy = r.y + r.height + bottom; break;
-                                case L.BOTTOM : yy = r.y ; break;
-                            }
-
-                            if (this.$isIn(t, x + this.target.getLeft(), y + this.target.getTop(),
-                                              w - this.target.getRight() - this.target.getLeft(),
-                                              yy - y - this.target.getTop()))
-                            {
-                                return;
-                            }
-
-                            g.save();
-                            g.beginPath();
-
-                            g.moveTo(x, y);
-                            g.lineTo(xx, y);
-                            g.lineTo(xx, yy);
-                            g.lineTo(r.x + r.width, yy);
-                            g.lineTo(r.x + r.width, yy - bottom);
-                            g.lineTo(r.x, yy - bottom);
-                            g.lineTo(r.x, yy);
-                            g.lineTo(x, yy);
-                            g.lineTo(x, y);
-
-                            break;
-                        case L.LEFT:
-                            var left = this.target.getLeft();
-                            switch (this.lineAlignment) {
-                                case L.CENTER : x = r.x + Math.floor((r.width - left) / 2); break;
-                                case L.TOP    : x = r.x  - left; break;
-                                case L.BOTTOM : x = r.x + r.width; break;
-                            }
-
-                            if (this.$isIn(t, x, y + this.target.getTop(),
-                                           xx - x - this.target.getRight(),
-                                           h - this.target.getTop() - this.target.getBottom()))
-                            {
-                                return;
-                            }
-
-                            g.save();
-                            g.beginPath();
-
-                            g.moveTo(x, y);
-                            g.lineTo(xx, y);
-                            g.lineTo(xx, yy);
-                            g.lineTo(x, yy);
-                            g.lineTo(x, r.y + r.height);
-                            g.lineTo(x + left, r.y + r.height);
-                            g.lineTo(x + left, r.y);
-                            g.lineTo(x, r.y);
-                            g.lineTo(x, y);
-
-                            break;
-                        case L.RIGHT:
-                            var right = this.target.getRight();
-                            switch (this.lineAlignment) {
-                                case L.CENTER : xx = r.x + Math.floor((r.width - right) / 2) + right; break;
-                                case L.TOP    : xx = r.x  + r.width + right; break;
-                                case L.BOTTOM : xx = r.x; break;
-                            }
-
-                            if (this.$isIn(t, x + this.target.getLeft(),
-                                              y + this.target.getTop(),
-                                              xx - x - this.target.getLeft(),
-                                              h - this.target.getTop() - this.target.getBottom()))
-                            {
-                                return;
-                            }
-
-                            g.save();
-                            g.beginPath();
-
-                            g.moveTo(x, y);
-                            g.lineTo(xx, y);
-                            g.lineTo(xx, r.y);
-                            g.lineTo(xx - right, r.y);
-                            g.lineTo(xx - right, r.y + r.height);
-                            g.lineTo(xx, r.y + r.height);
-                            g.lineTo(xx, yy);
-                            g.lineTo(x, yy);
-                            g.lineTo(x, y);
-                            break;
-                    }
-
-                    g.closePath();
-                    g.clip();
-                    this.target.paint(g, x, y, xx - x, yy - y, d);
-                    g.restore();
-                }
-            }
-            else {
-                this.target.paint(g, x, y, w, h, d);
-            }
-        };
-
-        this[''] = function (b, a){
-            this.lineAlignment = (a == null ? L.BOTTOM : L.$constraints(a));
-
-            if (b == null && this.lineAlignment != L.BOTTOM &&
-                             this.lineAlignment != L.TOP &&
-                             this.lineAlignment != L.CENTER)
-            {
-                throw new Error($invalidA);
-            }
-            this.setTarget(b);
         };
     }
 ]);
@@ -1232,8 +162,13 @@ pkg.Label = Class(pkg.ViewPan, [
          */
         this.setValue = function(s){
             if (s == null) s = "";
-            this.view.setValue(s);
-            this.repaint();
+
+            var old = this.view.getValue();
+            if (old !== s) {
+                this.view.setValue(s);
+                this.repaint();
+            }
+
             return this;
         };
 
@@ -1244,7 +179,9 @@ pkg.Label = Class(pkg.ViewPan, [
          * @chainable
          */
         this.setColor = function(c){
-            if (this.view.setColor(c)) this.repaint();
+            if (this.view.setColor(c)) {
+                this.repaint();
+            }
             return this;
         };
 
@@ -1262,17 +199,10 @@ pkg.Label = Class(pkg.ViewPan, [
         };
     },
 
-    function () {
-        this.$this("");
-    },
-
     function (r) {
-        if (instanceOf(r, pkg.Render)) {
-            this.setView(r);
-        }
-        else {
-            this.setModel(r);
-        }
+        this.setView(arguments.length === 0 ||
+                     zebra.isString(r)       ? new pkg.StringRender(r)
+                                             : (instanceOf(r, zebra.data.TextModel) ? new pkg.TextRender(r) : r));
         this.$super();
     }
 ]);
@@ -1285,9 +215,8 @@ pkg.Label = Class(pkg.ViewPan, [
  * @extends zebra.ui.Label
  */
 pkg.MLabel = Class(pkg.Label, [
-    function () { this.$this(""); },
     function(t){
-        this.$super(new zebra.data.Text(t));
+        this.$super(new zebra.data.Text(t == null ? "" : t));
     }
 ]);
 
@@ -1313,7 +242,7 @@ pkg.BoldLabel = Class(pkg.Label, []);
  */
 pkg.ImageLabel = Class(pkg.Panel, [
     function(txt, img) {
-        this.$super(new L.FlowLayout(L.LEFT, L.CENTER, L.HORIZONTAL, 6));
+        this.$super(new L.FlowLayout("left", "center", "horizontal", 6));
         this.add(new pkg.ImagePan(null));
         this.add(instanceOf(txt, pkg.Panel) ? txt : new pkg.Label(txt));
         this.kids[1].setVisible(txt != null);
@@ -1418,29 +347,27 @@ pkg.StatePan = Class(pkg.ViewPan, [
         this.stateUpdated = function(o,n){
             var b = false, id = (this.toViewId != null ? this.toViewId(n) : n);
 
-            if (id == null) {
-                return;
-            }
-
-            for(var i=0; i < this.kids.length; i++) {
-                if (this.kids[i].parentStateUpdated != null) {
-                    this.kids[i].parentStateUpdated(o, n, id);
+            if (id != null) {
+                for(var i=0; i < this.kids.length; i++) {
+                    if (this.kids[i].parentStateUpdated != null) {
+                        this.kids[i].parentStateUpdated(o, n, id);
+                    }
                 }
-            }
 
-            if (this.border != null && this.border.activate != null) {
-                b = this.border.activate(id) || b;
-            }
+                if (this.border != null && this.border.activate != null) {
+                    b = this.border.activate(id) || b;
+                }
 
-            if (this.view != null && this.view.activate != null) {
-                b = this.view.activate(id) || b;
-            }
+                if (this.view != null && this.view.activate != null) {
+                    b = this.view.activate(id) || b;
+                }
 
-            if (this.bg != null && this.bg.activate != null) {
-                b = this.bg.activate(id) || b;
-            }
+                if (this.bg != null && this.bg.activate != null) {
+                    b = this.bg.activate(id) || b;
+                }
 
-            if (b) this.repaint();
+                if (b) this.repaint();
+            }
         };
 
         /**
@@ -1456,7 +383,9 @@ pkg.StatePan = Class(pkg.ViewPan, [
     function setView(v){
         if (v != this.view){
             this.$super(v);
-            this.syncState(this.state, this.state);
+            // check if the method called after constructor execution
+            // othrwise sync is not possible
+            if (this.kids != null) this.syncState(this.state, this.state);
         }
         return this;
     },
@@ -1483,11 +412,11 @@ pkg.StatePan = Class(pkg.ViewPan, [
  * background view depends on its input events state. The component is good basis
  * for creation  dynamic view UI components.The state the component can be is:
 
-    - **over** the mouse cursor is inside the component
-    - **out** the mouse cursor is outside the component
-    - **pressed over** the mouse cursor is inside the component and an action mouse
+    - **over** the pointer cursor is inside the component
+    - **out** the pointer cursor is outside the component
+    - **pressed over** the pointer cursor is inside the component and an action pointer
       button or key is pressed
-    - **pressed out** the mouse cursor is outside the component and an action mouse
+    - **pressed out** the pointer cursor is outside the component and an action pointer
       button or key is pressed
     - **disabled** the component is disabled
 
@@ -1495,7 +424,7 @@ pkg.StatePan = Class(pkg.ViewPan, [
  * for the given component state view is identified by an id. By default corresponding to
  * component states views IDs are the following: "over", "pressed.over", "out", "pressed.out",
  * "disabled".  Imagine for example we have two colors and we need to change between the colors
- * every time mouse cursor is over/out of the component:
+ * every time pointer cursor is over/out of the component:
 
      // create state panel
      var statePan = new zebra.ui.EvStatePan();
@@ -1537,7 +466,6 @@ pkg.StatePan = Class(pkg.ViewPan, [
  */
 var OVER = 0, PRESSED_OVER = 1, OUT = 2, PRESSED_OUT = 3, DISABLED = 4;
 
-
 pkg.EvStatePan = Class(pkg.StatePan,  [
     function $prototype() {
         this.state = OUT;
@@ -1552,37 +480,40 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
         this._keyPressed = function(e) {
             if (this.state !== PRESSED_OVER &&
                 this.state !== PRESSED_OUT  &&
-                (e.code == KE.ENTER || e.code == KE.SPACE))
+                (e.code === KE.ENTER || e.code === KE.SPACE))
             {
                 this.setState(PRESSED_OVER);
             }
         };
 
         this._keyReleased = function(e) {
-            if (this.state == PRESSED_OVER || this.state == PRESSED_OUT){
+            if (this.state === PRESSED_OVER || this.state === PRESSED_OUT){
                 var prev = this.state;
                 this.setState(OVER);
                 if (this.$isIn === false) this.setState(OUT);
             }
         };
 
-        this._mouseEntered = function(e) {
+        this._pointerEntered = function(e) {
+            console.log("EvStatePan._pointerEntered() ");
             if (this.isEnabled === true) {
-                this.setState(this.state == PRESSED_OUT ? PRESSED_OVER : OVER);
+                this.setState(this.state === PRESSED_OUT ? PRESSED_OVER : OVER);
                 this.$isIn = true;
             }
         };
 
-        this._mousePressed = function(e) {
-            if (this.state != PRESSED_OVER && this.state != PRESSED_OUT && e.isActionMask()){
+        this._pointerPressed = function(e) {
+            if (this.state !== PRESSED_OVER && this.state !== PRESSED_OUT && e.isAction()){
                 this.setState(PRESSED_OVER);
             }
         };
 
-        this._mouseReleased = function(e) {
-            if ((this.state === PRESSED_OVER || this.state === PRESSED_OUT) && e.isActionMask()){
-                if (e.source == this) {
-                    this.setState(e.x >= 0 && e.y >= 0 && e.x < this.width && e.y < this.height ? OVER : OUT);
+        this._pointerReleased = function(e) {
+            console.log("EvStatePan._pointerReleased() " + e.isAction());
+            if ((this.state === PRESSED_OVER || this.state === PRESSED_OUT) && e.isAction()){
+                if (e.source === this) {
+                    this.setState(e.x >= 0 && e.y >= 0 && e.x < this.width && e.y < this.height ? OVER
+                                                                                                : OUT);
                 }
                 else {
                     var p = L.toParentOrigin(e.x, e.y, e.source, this);
@@ -1592,42 +523,40 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
             }
         };
 
-        /**
-         * Define children components events handler
-         * @param  {zebra.ui.InputEvent|zebra.ui.MouseEvent|zebra.ui.KeyEvent} e an input event
-         * @method childInputEvent
-         */
-        this.childInputEvent = function(e){
-            if (e.UID == pkg.InputEvent.MOUSE_UID) {
-                switch(e.ID) {
-                    case ME.ENTERED : this._mouseEntered(e); break;
-                    case ME.PRESSED : this._mousePressed(e); break;
-                    case ME.RELEASED: this._mouseReleased(e);break;
-                    case ME.EXITED:
-                        // check if the mouse cursor is in of the source component
-                        // that means another layer has grabbed control
-                        if (e.x >= 0 && e.y >= 0 && e.x < e.source.width && e.y < e.source.height) {
-                            this.$isIn = false;
-                        }
-                        else {
-                            var p = L.toParentOrigin(e.x, e.y, e.source, this);
-                            this.$isIn = p.x >= 0 && p.y >= 0 && p.x < this.width && p.y < this.height;
-                        }
+        this.childKeyPressed = function(e) {
+            this._keyPressed(e);
+        };
 
-                        if (this.$isIn === false) {
-                            this.setState(this.state === PRESSED_OVER ? PRESSED_OUT : OUT);
-                        }
-                        break;
-                }
+
+        this.childKeyReleased = function(e) {
+            this._keyReleased(e);
+        };
+
+        this.childPointerEntered = function(e) {
+            this._pointerEntered(e);
+        };
+
+        this.childPointerPressed = function(e) {
+            this._pointerPressed(e);
+        };
+
+        this.childPointerReleased = function(e) {
+            this._pointerReleased(e);
+        };
+
+        this.childPointerExited = function(e) {
+            // check if the pointer cursor is in of the source component
+            // that means another layer has grabbed control
+            if (e.x >= 0 && e.y >= 0 && e.x < e.source.width && e.y < e.source.height) {
+                this.$isIn = false;
             }
             else {
-                if (e.UID == pkg.InputEvent.KEY_UID) {
-                    if (e.ID == KE.PRESSED) this._keyPressed(e);
-                    else {
-                        if (e.ID == KE.RELEASED) this._keyReleased(e);
-                    }
+                var p = L.toParentOrigin(e.x, e.y, e.source, this);
+                this.$isIn = p.x >= 0 && p.y >= 0 && p.x < this.width && p.y < this.height;
+            }
 
-                }
+            if (this.$isIn === false) {
+                this.setState(this.state === PRESSED_OVER ? PRESSED_OUT : OUT);
             }
         };
 
@@ -1650,20 +579,22 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
         };
 
         /**
-         * Define mouse entered events handler
-         * @param  {zebra.ui.MouseEvent} e a key event
-         * @method mouseEntered
+         * Define pointer entered events handler
+         * @param  {zebra.ui.PointerEvent} e a key event
+         * @method pointerEntered
          */
-        this.mouseEntered = function (e){
-            this._mouseEntered();
+        this.pointerEntered = function (e){
+            this._pointerEntered();
         };
 
         /**
-         * Define mouse exited events handler
-         * @param  {zebra.ui.MouseEvent} e a key event
-         * @method mouseExited
+         * Define pointer exited events handler
+         * @param  {zebra.ui.PointerEvent} e a key event
+         * @method pointerExited
          */
-        this.mouseExited = function(e){
+        this.pointerExited = function(e){
+
+            console.log("EvStatePan.pointerExited() " + e + "," + (this.state == PRESSED_OVER ? PRESSED_OUT : OUT) );
             if (this.isEnabled === true) {
                 this.setState(this.state == PRESSED_OVER ? PRESSED_OUT : OUT);
                 this.$isIn = false;
@@ -1671,31 +602,31 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
         };
 
         /**
-         * Define mouse pressed events handler
-         * @param  {zebra.ui.MouseEvent} e a key event
-         * @method mousePressed
+         * Define pointer pressed events handler
+         * @param  {zebra.ui.PointerEvent} e a key event
+         * @method pointerPressed
          */
-        this.mousePressed = function(e){
-            this._mousePressed(e);
+        this.pointerPressed = function(e){
+            this._pointerPressed(e);
         };
 
         /**
-         * Define mouse released events handler
-         * @param  {zebra.ui.MouseEvent} e a key event
-         * @method mouseReleased
+         * Define pointer released events handler
+         * @param  {zebra.ui.PointerEvent} e a key event
+         * @method pointerReleased
          */
-        this.mouseReleased = function(e){
-            this._mouseReleased(e);
+        this.pointerReleased = function(e){
+            this._pointerReleased(e);
         };
 
         /**
-         * Define mouse dragged events handler
-         * @param  {zebra.ui.MouseEvent} e a key event
-         * @method mouseDragged
+         * Define pointer dragged events handler
+         * @param  {zebra.ui.PointerEvent} e a key event
+         * @method pointerDragged
          */
-        this.mouseDragged = function(e){
-            if (e.isActionMask()) {
-                var pressed = (this.state == PRESSED_OUT || this.state == PRESSED_OVER);
+        this.pointerDragged = function(e){
+            if (e.isAction()) {
+                var pressed = (this.state === PRESSED_OUT || this.state === PRESSED_OVER);
                 if (e.x > 0 && e.y > 0 && e.x < this.width && e.y < this.height) {
                     this.setState(pressed ? PRESSED_OVER : OVER);
                 }
@@ -1773,7 +704,7 @@ pkg.CompositeEvStatePan = Class(pkg.EvStatePan, [
         this.setCanHaveFocus = function(b){
             if (this.canHaveFocus != b){
                 var fm = pkg.focusManager;
-                if (b === false && fm.focusOwner == this) {
+                if (b === false && fm.focusOwner === this) {
                     fm.requestFocus(null);
                 }
                 this.canHaveFocus = b;
@@ -1791,7 +722,7 @@ pkg.CompositeEvStatePan = Class(pkg.EvStatePan, [
         this.setFocusAnchorComponent = function(c) {
             if (this.focusComponent != c) {
                 if (c != null && this.kids.indexOf(c) < 0) {
-                    throw Error("Focus component doesn't exist");
+                    throw new Error("Focus component doesn't exist");
                 }
                 this.focusComponent = c;
                 this.repaint();
@@ -1810,6 +741,155 @@ pkg.CompositeEvStatePan = Class(pkg.EvStatePan, [
     }
 ]);
 
+pkg.ButtonRepeatMix = [
+    function $prototype () {
+        /**
+         * Indicate if the button should
+         * fire event by pressed event
+         * @attribute isFireByPress
+         * @type {Boolean}
+         * @default false
+         * @readOnly
+         */
+        this.isFireByPress = false;
+
+        /**
+         * Fire button event repeating period. -1 means
+         * the button event repeating is disabled.
+         * @attribute firePeriod
+         * @type {Integer}
+         * @default -1
+         * @readOnly
+         */
+        this.firePeriod = -1;
+
+        this.startIn = 400;
+
+        /**
+         * The method is executed for a button that is configured
+         * to repeat fire events.
+         * @method run
+         * @protected
+         */
+        this.run = function() {
+            if (this.state === PRESSED_OVER) this.fire();
+        };
+
+        /**
+         * Set the mode the button has to fire events. Button can fire
+         * event after it has been unpressed or immediately when it has
+         * been pressed. Also button can start firing events periodically
+         * when it has been pressed and held in the pressed state.
+         * @param  {Boolean} b  true if the button has to fire event by
+         * pressed event
+         * @param  {Integer} firePeriod the period of time the button
+         * has to repeat firing events if it has been pressed and
+         * held in pressed state. -1 means event doesn't have
+         * repeated
+         * @param  {Integer} [startIn] the timeout when repeat events
+         * has to be initiated
+         * @method setFireParams
+         */
+        this.setFireParams = function (b, firePeriod, startIn){
+            if (this.repeatTask != null) this.repeatTask.shutdown();
+            this.isFireByPress = b;
+            this.firePeriod = firePeriod;
+            if (arguments.length > 2) this.startIn = startIn;
+        };
+
+        this.fire = function() {
+            this._.fired(this);
+            if (this.catchFired != null) this.catchFired();
+        };
+    },
+
+    function stateUpdated(o,n){
+        this.$super(o, n);
+        if (n === PRESSED_OVER){
+            if (this.isFireByPress === true){
+                this.fire();
+                if (this.firePeriod > 0) {
+                    this.repeatTask = zebra.util.task(this.run, this).run(this.startIn, this.firePeriod);
+                }
+            }
+        }
+        else {
+            if (this.firePeriod > 0 && this.repeatTask != null) {
+                this.repeatTask.shutdown();
+            }
+
+            if (n === OVER && (o === PRESSED_OVER && this.isFireByPress === false)) {
+                this.fire();
+            }
+        }
+    }
+];
+
+pkg.ArrowButton = Class(pkg.EvStatePan, [
+    function $clazz() {
+        this.ArrowView = Class(pkg.ArrowView, []);
+    },
+
+    function $prototype() {
+        this.setArrowDirection = function(d) {
+            d = L.$constraints(d);
+            this.iterateArrowViews(function(k, v) {
+                if (v != null) v.direction = d;
+            });
+            this.repaint();
+        };
+
+        this.setArrowSize = function(w, h) {
+            if (h == null) h = w;
+            this.iterateArrowViews(function(k, v) {
+                if (v != null) {
+                    v.width  = w;
+                    v.height = h;
+                }
+            });
+            this.vrp();
+        };
+
+        this.setArrowColors = function(pressedColor, overColor, outColor) {
+            var views = this.view.views;
+            if (views.out != null) views.out.color  = outColor;
+            if (views.over.color != null) views.over.color = overColor;
+            if (views["pressed.over"] != null) views["pressed.over"].color = pressedColor;
+            this.repaint();
+        };
+
+        this.iterateArrowViews = function(callback) {
+            var views = this.view.views;
+            for(var k in views) {
+                if (views.hasOwnProperty(k)) {
+                    callback.call(this, k, views[k]);
+                }
+            }
+        };
+    },
+
+    function $mixing() {
+        return pkg.ButtonRepeatMix;
+    },
+
+    function(direction) {
+        this._ = new Listeners();
+        this.cursorType = Cursor.HAND;
+
+        if (direction == null) direction = "left";
+
+        this.setView({
+            "out"          : new this.$clazz.ArrowView(direction, "black"),
+            "over"         : new this.$clazz.ArrowView(direction, "red"),
+            "pressed.over" : new this.$clazz.ArrowView(direction, "black"),
+            "disabled"     : new this.$clazz.ArrowView(direction, "lightGray")
+        });
+        this.$super();
+        this.syncState(this.state, this.state);
+    }
+]);
+
+
 /**
  *  Button UI component. Button is composite component whose look and feel can
  *  be easily customized:
@@ -1826,7 +906,7 @@ pkg.CompositeEvStatePan = Class(pkg.EvStatePan, [
 
  *  @class  zebra.ui.Button
  *  @constructor
- *  @param {String|zebra.ui.Panel} [t] a button label.
+ *  @param {String|zebra.ui.Panel|zebra.ui.View} [t] a button label.
  *  The label can be a simple text or an UI component.
  *  @extends zebra.ui.CompositeEvStatePan
  */
@@ -1848,106 +928,48 @@ pkg.CompositeEvStatePan = Class(pkg.EvStatePan, [
 pkg.Button = Class(pkg.CompositeEvStatePan, [
     function $clazz() {
         this.Label = Class(pkg.Label, []);
+
+        this.ViewPan = Class(pkg.ViewPan, [
+            function $prototype() {
+                this.parentStateUpdated = function(o, n, id) {
+                    if (instanceOf(this.view, pkg.ViewSet)) {
+                        this.activate(id);
+                    }
+                };
+            },
+
+            function(v) {
+                this.$super();
+                this.setView(v);
+            }
+        ]);
     },
 
     function $prototype() {
         this.canHaveFocus = true;
-
-        /**
-         * Indicate if the button should
-         * fire event by pressed event
-         * @attribute isFireByPress
-         * @type {Boolean}
-         * @default false
-         * @readOnly
-         */
-        this.isFireByPress = false;
-
-        /**
-         * Fire button event repeating period. -1 means
-         * the button event repeating is disabled.
-         * @attribute firePeriod
-         * @type {Integer}
-         * @default -1
-         * @readOnly
-         */
-        this.firePeriod = -1;
-
-
-        this.startIn = 400;
-
-        this.fire = function() {
-            this._.fired(this);
-            if (this.catchFired != null) this.catchFired();
-        };
-
-        /**
-         * The method is executed for a button that is configured
-         * to repeat fire events.
-         * @method run
-         * @protected
-         */
-        this.run  = function() {
-            if (this.state === PRESSED_OVER) this.fire();
-        };
-
-        /**
-         * Set the mode the button has to fire events.
-         * Button can fire event after it has been unpressed
-         * or immediately when it has been pressed. Also button
-         * can start firing events periodically when it has been
-         * pressed and held in the pressed state.
-         * @param  {Boolean} b   true if the button has to fire
-         * event by pressed event
-         * @param  {Integer} time the period of time the button
-         * has to repeat firing events if it has been pressed and
-         * held in pressed state. -1 means event doesn't have
-         * repeated
-         * @method setFireParams
-         */
-        this.setFireParams = function (b, firePeriod, startIn){
-            if (this.repeatTask != null) this.repeatTask.shutdown();
-            this.isFireByPress = b;
-            this.firePeriod = firePeriod;
-            if (arguments.length > 2) this.startIn = startIn;
-        };
     },
 
-    function() {
-        this.$this(null);
+    function $mixing() {
+        return pkg.ButtonRepeatMix;
     },
 
-    function (t){
+    function(t) {
         this._ = new Listeners();
         if (zebra.isString(t)) t = new this.$clazz.Label(t);
         else {
-            if (t instanceof Image) t = new pkg.ImagePan(t);
+            if (t instanceof Image) {
+                t = new pkg.ImagePan(t);
+            }
+            else {
+                if (t != null && instanceOf(t, pkg.Panel) === false) {
+                    t = new this.$clazz.ViewPan(t);
+                }
+            }
         }
         this.$super();
         if (t != null) {
             this.add(t);
             this.setFocusAnchorComponent(t);
-        }
-    },
-
-    function stateUpdated(o,n){
-        this.$super(o, n);
-        if (n === PRESSED_OVER){
-            if(this.isFireByPress){
-                this.fire();
-                if (this.firePeriod > 0) {
-                    this.repeatTask = task(this.run, this).run(this.startIn, this.firePeriod);
-                }
-            }
-        }
-        else {
-            if (this.firePeriod > 0 && this.repeatTask != null) {
-                this.repeatTask.shutdown();
-            }
-
-            if (n === OVER && (o === PRESSED_OVER && this.isFireByPress === false)) {
-                this.fire();
-            }
         }
     }
 ]);
@@ -2053,24 +1075,24 @@ pkg.BorderPan = Class(pkg.Panel, [
                 left   = this.getLeft(),
                 xa     = this.label != null ? this.label.constraints & (L.LEFT | L.CENTER | L.RIGHT): 0,
                 ya     = this.label != null ? this.label.constraints & (L.BOTTOM | L.TOP) : 0,
-                top    = ya == L.TOP ? this.top : this.getTop(),
-                bottom = ya == L.BOTTOM ? this.bottom : this.getBottom();
+                top    = ya === L.TOP    ? this.top    : this.getTop(),
+                bottom = ya === L.BOTTOM ? this.bottom : this.getBottom();
 
             if (this.label != null && this.label.isVisible === true){
                 var ps = this.label.getPreferredSize();
                 h = ps.height;
-                this.label.setSize(ps.width, h);
-                this.label.setLocation((xa == L.LEFT) ? left + this.indent
-                                                      : ((xa == L.RIGHT) ? this.width - right - ps.width - this.indent
-                                                                         : Math.floor((this.width - ps.width) / 2)),
-                                        (ya == L.BOTTOM) ? (this.height - bottom - ps.height) : top);
+                this.label.setBounds((xa === L.LEFT) ? left + this.indent
+                                                     : ((xa === L.RIGHT) ? this.width - right - ps.width - this.indent
+                                                                        : Math.floor((this.width - ps.width) / 2)),
+                                     (ya === L.BOTTOM) ? (this.height - bottom - ps.height) : top,
+                                     ps.width, h);
             }
 
             if (this.content != null && this.content.isVisible === true){
-                this.content.setLocation(left + this.hGap,
-                                         (ya == L.BOTTOM ? top : top + h) + this.vGap);
-                this.content.setSize(this.width - right - left - 2 * this.hGap,
-                                     this.height - top - bottom - h - 2 * this.vGap);
+                this.content.setBounds(left + this.hGap,
+                                       (ya === L.BOTTOM ? top : top + h) + this.vGap,
+                                        this.width - right - left - 2 * this.hGap,
+                                        this.height - top - bottom - h - 2 * this.vGap);
             }
         };
 
@@ -2093,20 +1115,13 @@ pkg.BorderPan = Class(pkg.Panel, [
         };
     },
 
-    function(title) {
-        this.$this(title, null);
-    },
-
-    function() {
-        this.$this(null);
-    },
-
-    function(title, center) {
-        this.$this(title, center, L.TOP | L.LEFT);
-    },
-
     function(title, center, ctr){
-        if (zebra.isString(title)) title = new this.$clazz.Label(title);
+
+        if (ctr == null) ctr = L.TOP | L.LEFT;
+
+        if (zebra.isString(title)) {
+            title = new this.$clazz.Label(title);
+        }
 
         /**
          * Border panel label component
@@ -2139,13 +1154,13 @@ pkg.BorderPan = Class(pkg.Panel, [
     function kidAdded(index,ctr,lw) {
         this.$super(index, ctr, lw);
         ctr = L.$constraints(ctr);
-        if ((ctr == null && this.content == null) || L.CENTER == ctr) this.content = lw;
+        if ((ctr == null && this.content == null) || L.CENTER === ctr) this.content = lw;
         else this.label = lw;
     },
 
     function kidRemoved(index,lw){
         this.$super(index, lw);
-        if (lw == this.label) this.label = null;
+        if (lw === this.label) this.label = null;
         else this.content = null;
     }
 ]);
@@ -2254,10 +1269,10 @@ pkg.Group = Class(pkg.SwitchManager, [
 
     function $prototype() {
         this.getValue = function(o) {
-            return o == this.state;
+            return o === this.state;
         };
 
-        this.setValue = function(o,b){
+        this.setValue = function(o, b){
             if (this.getValue(o) != b){
                 this.clearSelected();
                 this.state = o;
@@ -2288,12 +1303,12 @@ pkg.Group = Class(pkg.SwitchManager, [
  * the box or label components, etc. The check box extends state
  * panel component and re-map states  to own views IDs:
 
-    - "on.out" - checked and mouse cursor is out
-    - "off.out" - un-checked and mouse cursor is out
+    - "on.out" - checked and pointer cursor is out
+    - "off.out" - un-checked and pointer cursor is out
     - "don" - disabled and checked,
     - "doff" - disabled and un-checked ,
-    - "on.over" - checked and mouse cursor is over
-    - "off.over" - un-checked and mouse cursor is out
+    - "on.over" - checked and pointer cursor is over
+    - "off.over" - un-checked and pointer cursor is out
 
  *
  * Customize is quite similar to what explained for zebra.ui.EvStatePan:
@@ -2408,15 +1423,9 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
         };
     },
 
-    function () {
-        this.$this(null);
-    },
-
-    function (c){
-        this.$this(c, new pkg.SwitchManager());
-    },
-
     function (c, m) {
+        if (m == null) m = new pkg.SwitchManager();
+
         if (zebra.isString(c)) {
             c = new this.$clazz.Label(c);
         }
@@ -2443,9 +1452,9 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
     function keyPressed(e){
         if (instanceOf(this.manager, pkg.Group) && this.getValue()){
             var code = e.code, d = 0;
-            if (code == KE.LEFT || code == KE.UP) d = -1;
+            if (code === KE.LEFT || code === KE.UP) d = -1;
             else {
-                if (code == KE.RIGHT || code == KE.DOWN) d = 1;
+                if (code === KE.RIGHT || code === KE.DOWN) d = 1;
             }
 
             if (d !== 0) {
@@ -2455,7 +1464,7 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
                     if (l.isVisible === true &&
                         l.isEnabled === true &&
                         instanceOf(l, pkg.Checkbox) &&
-                        l.manager == this.manager      )
+                        l.manager === this.manager      )
                     {
                         l.requestFocus();
                         l.setValue(true);
@@ -2493,14 +1502,14 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
     },
 
     function stateUpdated(o, n) {
-        if (o == PRESSED_OVER && n == OVER) {
+        if (o === PRESSED_OVER && n === OVER) {
             this.setValue(!this.getValue());
         }
         this.$super(o, n);
     },
 
     function kidRemoved(index,c) {
-        if (this.box == c) {
+        if (this.box === c) {
             this.box = null;
         }
         this.$super(index,c);
@@ -2522,18 +1531,14 @@ pkg.Radiobox = Class(pkg.Checkbox, [
         this.Label = Class(pkg.Checkbox.Label, []);
     },
 
-    function(c) {
-        this.$this(c, new pkg.Group());
-    },
-
     function(c, group) {
-        this.$super(c, group);
+        this.$super(c,  group == null ? new pkg.Group() : group);
     }
 ]);
 
 /**
  * Splitter panel UI component class. The component splits its area horizontally or vertically into two areas.
- * Every area hosts an UI component. A size of the parts can be controlled by mouse cursor dragging. Gripper
+ * Every area hosts an UI component. A size of the parts can be controlled by pointer cursor dragging. Gripper
  * element is children UI component that can be customized. For instance:
 
       // create split panel
@@ -2559,7 +1564,7 @@ pkg.SplitPan = Class(pkg.Panel, [
     function $clazz() {
         this.Bar = Class(pkg.EvStatePan, [
             function $prototype() {
-                this.mouseDragged = function(e){
+                this.pointerDragged = function(e){
                     var x = this.x + e.x, y = this.y + e.y;
                     if (this.target.orientation == L.VERTICAL){
                         if (this.prevLoc != x){
@@ -2571,7 +1576,7 @@ pkg.SplitPan = Class(pkg.Panel, [
                         }
                     }
                     else {
-                        if (this.prevLoc != y){
+                        if (this.prevLoc != y) {
                             y = this.target.normalizeBarLoc(y);
                             if (y > 0){
                                 this.prevLoc = y;
@@ -2581,9 +1586,9 @@ pkg.SplitPan = Class(pkg.Panel, [
                     }
                 };
 
-                this.mouseDragStarted = function (e){
+                this.pointerDragStarted = function (e){
                     var x = this.x + e.x, y = this.y + e.y;
-                    if (e.isActionMask()) {
+                    if (e.isAction()) {
                         if (this.target.orientation == L.VERTICAL){
                             x = this.target.normalizeBarLoc(x);
                             if (x > 0) this.prevLoc = x;
@@ -2595,7 +1600,7 @@ pkg.SplitPan = Class(pkg.Panel, [
                     }
                 };
 
-                this.mouseDragEnded = function(e){
+                this.pointerDragEnded = function(e){
                     var xy = this.target.normalizeBarLoc(this.target.orientation == L.VERTICAL ? this.x + e.x
                                                                                                : this.y + e.y);
                     if (xy > 0) this.target.setGripperLoc(xy);
@@ -2687,7 +1692,7 @@ pkg.SplitPan = Class(pkg.Panel, [
                 this.orientation = o;
                 this.vrp();
             }
-        }
+        };
 
         /**
          * Set gripper element location
@@ -2706,7 +1711,7 @@ pkg.SplitPan = Class(pkg.Panel, [
                 sSize = pkg.$getPS(this.rightComp),
                 bSize = pkg.$getPS(this.gripper);
 
-            if (this.orientation == L.HORIZONTAL){
+            if (this.orientation === L.HORIZONTAL){
                 bSize.width = Math.max(((fSize.width > sSize.width) ? fSize.width : sSize.width), bSize.width);
                 bSize.height = fSize.height + sSize.height + bSize.height + 2 * this.gap;
             }
@@ -2735,27 +1740,24 @@ pkg.SplitPan = Class(pkg.Panel, [
 
                 if (this.gripper != null){
                     if (this.isMoveable){
-                        this.gripper.setLocation(left, this.barLocation);
-                        this.gripper.setSize(w, bSize.height);
+                        this.gripper.setBounds(left, this.barLocation, w, bSize.height);
                     }
                     else {
-                        this.gripper.setSize(bSize.width, bSize.height);
                         this.gripper.toPreferredSize();
                         this.gripper.setLocation(Math.floor((w - bSize.width) / 2), this.barLocation);
                     }
                 }
-                if(this.leftComp != null){
-                    this.leftComp.setLocation(left, top);
-                    this.leftComp.setSize(w, this.barLocation - this.gap - top);
+                if (this.leftComp != null){
+                    this.leftComp.setBounds(left, top, w, this.barLocation - this.gap - top);
                 }
-                if(this.rightComp != null){
+                if (this.rightComp != null){
                     this.rightComp.setLocation(left, this.barLocation + bSize.height + this.gap);
                     this.rightComp.setSize(w, this.height - this.rightComp.y - bottom);
                 }
             }
             else {
                 var h = this.height - top - bottom;
-                if(this.barLocation < left) this.barLocation = left;
+                if (this.barLocation < left) this.barLocation = left;
                 else {
                     if (this.barLocation > this.width - right - bSize.width) {
                         this.barLocation = this.width - right - bSize.width;
@@ -2763,22 +1765,20 @@ pkg.SplitPan = Class(pkg.Panel, [
                 }
 
                 if (this.gripper != null){
-                    if(this.isMoveable){
-                        this.gripper.setLocation(this.barLocation, top);
-                        this.gripper.setSize(bSize.width, h);
+                    if(this.isMoveable === true){
+                        this.gripper.setBounds(this.barLocation, top, bSize.width, h);
                     }
                     else{
-                        this.gripper.setSize(bSize.width, bSize.height);
-                        this.gripper.setLocation(this.barLocation, Math.floor((h - bSize.height) / 2));
+                        this.gripper.setBounds(this.barLocation, Math.floor((h - bSize.height) / 2),
+                                               bSize.width, bSize.height);
                     }
                 }
 
                 if (this.leftComp != null){
-                    this.leftComp.setLocation(left, top);
-                    this.leftComp.setSize(this.barLocation - left - this.gap, h);
+                    this.leftComp.setBounds(left, top, this.barLocation - left - this.gap, h);
                 }
 
-                if(this.rightComp != null){
+                if (this.rightComp != null){
                     this.rightComp.setLocation(this.barLocation + bSize.width + this.gap, top);
                     this.rightComp.setSize(this.width - this.rightComp.x - right, h);
                 }
@@ -2834,21 +1834,17 @@ pkg.SplitPan = Class(pkg.Panel, [
         };
     },
 
-    function ()   {
-        this.$this(null, null, L.VERTICAL);
-    },
-
-    function (f,s) {
-        this.$this(f, s, L.VERTICAL);
-    },
-
     function (f,s,o){
+        if (o == null) o = L.VERTICAL;
+
         this.minXY = this.maxXY = 0;
         this.barLocation = 70;
         this.leftComp = this.rightComp = this.gripper = null;
         this.setOrientation(o);
 
         this.$super();
+
+        console.log("ADD LEFT " + f.constructor);
 
         if (f != null) this.add(L.LEFT, f);
         if (s != null) this.add(L.RIGHT, s);
@@ -2865,7 +1861,7 @@ pkg.SplitPan = Class(pkg.Panel, [
             if ((ctr == null && this.rightComp == null) || L.RIGHT == ctr) this.rightComp = c;
             else {
                 if (L.CENTER == ctr) this.gripper = c;
-                else throw new Error($invalidC);
+                else throw new Error("" + ctr);
             }
         }
     },
@@ -3044,7 +2040,7 @@ pkg.Progress = Class(pkg.Panel, [
     function setOrientation(o){
         o = L.$constraints(o);
         if (o != L.HORIZONTAL && o != L.VERTICAL) {
-            throw new Error($invalidO);
+            throw new Error("" + o);
         }
         if (o != this.orientation){
             this.orientation = o;
@@ -3058,7 +2054,7 @@ pkg.Progress = Class(pkg.Panel, [
      * @method setMaxValue
      */
     function setMaxValue(m){
-        if(m != this.maxValue) {
+        if (m != this.maxValue) {
             this.maxValue = m;
             this.setValue(this.value);
             this.vrp();
@@ -3129,45 +2125,69 @@ pkg.Progress = Class(pkg.Panel, [
 pkg.Link = Class(pkg.Button, [
     function $prototype() {
         this.cursorType = Cursor.HAND;
-    },
 
-    function(s){
-        // do it before super
-        this.view = new pkg.TextRender(s);
-        this.colors = ["gray"];
-        this.$super(null);
-        this.stateUpdated(this.state, this.state);
-    },
+        /**
+         * Set link font
+         * @param {zebra.ui.Font} f a font
+         * @method setFont
+         */
+        this.setFont = function(f) {
+            if (this.view.setFont(f) === true) {
+                this.vrp();
+            }
+        };
 
-    /**
-     * Set link font
-     * @param {zebra.ui.Font} f a font
-     * @method setFont
-     */
-    function setFont(f) {
-        this.view.setFont(f);
-    },
+        /**
+         * Set the link text color for the specified link state
+         * @param {String} state a link state
+         * @param {String} c a link text color
+         * @method  setColor
+         */
+        this.setColor = function(state,c){
+            if (this.colors[state] != c){
+                this.colors[state] = c;
+                this.syncState();
+            }
+        };
 
-    /**
-     * Set the link text color for the specified link state
-     * @param {Integer} state a link state
-     * @param {String} c a link text color
-     * @method  setColor
-     */
-    function setColor(state,c){
-        if (this.colors[state] != c){
-            this.colors[state] = c;
-            this.stateUpdated(state, state);
-        }
+        this.setColors = function(colors) {
+            this.colors = zebra.clone(colors);
+            this.syncState();
+        };
+
+        this.setValue = function(s) {
+            this.view.setValue(s.toString());
+            this.repaint();
+        };
     },
 
     function stateUpdated(o,n){
         this.$super(o, n);
-        var r = this.view;
-        if (r != null && r.color != this.colors[n] && this.colors[n] != null){
-            r.setColor(this.colors[n]);
+
+        var k = this.toViewId(n);
+        if (this.view != null && this.view.color != this.colors[k] && this.colors[k] != null) {
+            this.view.setColor(this.colors[k]);
+            if (this.overDecoration != null &&  this.isEnabled === true) {
+                if (n === OVER) {
+                    this.view.setDecoration(this.overDecoration, this.colors[k]);
+                }
+            }
             this.repaint();
         }
+
+        if (n !== OVER && this.overDecoration != null && this.view.decorations[this.overDecoration] != null) {
+            this.view.setDecoration(this.overDecoration, null);
+            this.repaint();
+        }
+    },
+
+    function(s){
+        // do it before super
+        this.view = new pkg.DecoratedTextRender(s);
+        this.colors = [ "gray" ];
+        this.overDecoration = "underline";
+        this.$super(null);
+        this.stateUpdated(this.state, this.state);
     }
 ]);
 
@@ -3229,8 +2249,8 @@ pkg.ExtendablePan = Class(pkg.Panel, [
 
         this.TogglePan = Class(pkg.StatePan, [
             function $prototype() {
-                this.mousePressed = function(e){
-                    if (e.isActionMask()) {
+                this.pointerPressed = function(e){
+                    if (e.isAction()) {
                         this.parent.parent.toggle();
                     }
                 };
@@ -3299,8 +2319,6 @@ pkg.ExtendablePan = Class(pkg.Panel, [
     }
 ]);
 
-var ScrollManagerListeners = zebra.util.ListenersClass("scrolled");
-
 /**
  * Scroll manager class.
  * @param {zebra.ui.Panel} t a target component to be scrolled
@@ -3320,7 +2338,6 @@ var ScrollManagerListeners = zebra.util.ListenersClass("scrolled");
   * @param  {Integer} py a previous y location target component scroll location
   */
 
-
  /**
   * Fired when a scroll state has been updated
 
@@ -3335,6 +2352,10 @@ var ScrollManagerListeners = zebra.util.ListenersClass("scrolled");
   * @param  {Integer} py a previous y location target component scroll location
   */
 pkg.ScrollManager = Class([
+    function $clazz() {
+        this.Listeners = zebra.util.ListenersClass("scrolled");
+    },
+
     function $prototype() {
         /**
          * Get current target component x scroll location
@@ -3412,7 +2433,7 @@ pkg.ScrollManager = Class([
 
     function (c){
         this.sx = this.sy = 0;
-        this._ = new ScrollManagerListeners();
+        this._  = new this.$clazz.Listeners();
 
         /**
          * Target UI component for that the scroll manager has been instantiated
@@ -3437,10 +2458,12 @@ pkg.ScrollManager = Class([
  */
 pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
     function $clazz() {
-        var SB = Class(pkg.Button, [
+        this.isDragable = true;
+
+        var SB = Class(pkg.ArrowButton, [
             function $prototype() {
-                this.isDragable  = this.isFireByPress  = true;
-                this.firePeriod  = 20;
+                this.isFireByPress  = true;
+                this.firePeriod     = 20;
             }
         ]);
 
@@ -3501,21 +2524,21 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
         };
 
         this.amount = function(){
-            var db = this.decBt, ib = this.incBt;
-            return (this.type == L.VERTICAL) ? ib.y - db.y - db.height
-                                             : ib.x - db.x - db.width;
+            var db = this.decBt;
+            return (this.type === L.VERTICAL) ? this.incBt.y - db.y - db.height
+                                              : this.incBt.x - db.x - db.width;
         };
 
         this.pixel2value = function(p) {
             var db = this.decBt;
-            return (this.type == L.VERTICAL) ? Math.floor((this.max * (p - db.y - db.height)) / (this.amount() - this.bundle.height))
-                                             : Math.floor((this.max * (p - db.x - db.width )) / (this.amount() - this.bundle.width));
+            return (this.type === L.VERTICAL) ? Math.floor((this.max * (p - db.y - db.height)) / (this.amount() - this.bundle.height))
+                                              : Math.floor((this.max * (p - db.x - db.width )) / (this.amount() - this.bundle.width));
         };
 
         this.value2pixel = function(){
             var db = this.decBt, bn = this.bundle, off = this.position.offset;
-            return (this.type == L.VERTICAL) ? db.y + db.height +  Math.floor(((this.amount() - bn.height) * off) / this.max)
-                                             : db.x + db.width  +  Math.floor(((this.amount() - bn.width) * off) / this.max);
+            return (this.type === L.VERTICAL) ? db.y + db.height +  Math.floor(((this.amount() - bn.height) * off) / this.max)
+                                              : db.x + db.width  +  Math.floor(((this.amount() - bn.width) * off) / this.max);
         };
 
 
@@ -3532,8 +2555,12 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
 
         this.posChanged = function(target,po,pl,pc){
             if (this.bundle != null) {
-                if (this.type == L.HORIZONTAL) this.bundle.setLocation(this.value2pixel(), this.getTop());
-                else this.bundle.setLocation(this.getLeft(), this.value2pixel());
+                if (this.type == L.HORIZONTAL) {
+                    this.bundle.setLocation(this.value2pixel(), this.getTop());
+                }
+                else {
+                    this.bundle.setLocation(this.getLeft(), this.value2pixel());
+                }
             }
         };
 
@@ -3542,16 +2569,16 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
         this.getMaxOffset = function (){ return this.max; };
 
         this.fired = function(src){
-            this.position.setOffset(this.position.offset + ((src == this.incBt) ? this.unitIncrement
-                                                                                : -this.unitIncrement));
+            this.position.setOffset(this.position.offset + ((src === this.incBt) ? this.unitIncrement
+                                                                                 : -this.unitIncrement));
         };
 
         /**
-         * Define mouse dragged events handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragged
+         * Define pointer dragged events handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerDragged
          */
-        this.mouseDragged = function(e){
+        this.pointerDragged = function(e){
             if (Number.MAX_VALUE != this.startDragLoc) {
                 this.position.setOffset(this.pixel2value(this.bundleLoc -
                                                          this.startDragLoc +
@@ -3560,39 +2587,39 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
         };
 
         /**
-         * Define mouse drag started  events handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragStarted
+         * Define pointer drag started  events handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerDragStarted
          */
-        this.mouseDragStarted = function (e){
-           //!!! It is more convenient to  if (this.isDragable || this.isInBundle(e.x, e.y)){
+        this.pointerDragStarted = function (e){
+            if (this.isDragable === true && this.isInBundle(e.x, e.y)) {
                 this.startDragLoc = this.type == L.HORIZONTAL ? e.x : e.y;
-                this.bundleLoc = this.type == L.HORIZONTAL ? this.bundle.x : this.bundle.y;
-            //}
+                this.bundleLoc    = this.type == L.HORIZONTAL ? this.bundle.x : this.bundle.y;
+            }
         };
 
         /**
-         * Define mouse drag ended events handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragEnded
+         * Define pointer drag ended events handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerDragEnded
          */
-        this.mouseDragEnded = function(e) {
+        this.pointerDragEnded = function(e) {
             this.startDragLoc = Number.MAX_VALUE;
         };
 
         /**
-         * Define mouse clicked events handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseClicked
+         * Define pointer clicked events handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerClicked
          */
-        this.mouseClicked = function (e){
-            if (this.isInBundle(e.x, e.y) === false && e.isActionMask()){
+        this.pointerClicked = function (e){
+            if (this.isInBundle(e.x, e.y) === false && e.isAction()){
                 var d = this.pageIncrement;
-                if (this.type == L.VERTICAL){
-                    if(e.y < (this.bundle != null ? this.bundle.y : Math.floor(this.height / 2))) d =  -d;
+                if (this.type === L.VERTICAL){
+                    if (e.y < (this.bundle != null ? this.bundle.y : Math.floor(this.height / 2))) d =  -d;
                 }
                 else {
-                    if(e.x < (this.bundle != null ? this.bundle.x : Math.floor(this.width / 2))) d =  -d;
+                    if (e.x < (this.bundle != null ? this.bundle.x : Math.floor(this.width / 2))) d =  -d;
                 }
                 this.position.setOffset(this.position.offset + d);
             }
@@ -3603,7 +2630,7 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
                 ps2 = pkg.$getPS(this.decBt),
                 ps3 = pkg.$getPS(this.bundle);
 
-            if (this.type == L.HORIZONTAL){
+            if (this.type === L.HORIZONTAL){
                 ps1.width += (ps2.width + ps3.width);
                 ps1.height = Math.max((ps1.height > ps2.height ? ps1.height : ps2.height), ps3.height);
             }
@@ -3621,26 +2648,34 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
                 left   = this.getLeft(),
                 ew     = this.width - left - right,
                 eh     = this.height - top - bottom,
-                b      = (this.type == L.HORIZONTAL),
+                b      = (this.type === L.HORIZONTAL),
                 ps1    = pkg.$getPS(this.decBt),
                 ps2    = pkg.$getPS(this.incBt),
                 minbs  = pkg.Scroll.MIN_BUNDLE_SIZE;
 
-            this.decBt.setSize(b ? ps1.width : ew, b ? eh : ps1.height);
-            this.decBt.setLocation(left, top);
+            this.decBt.setBounds(left, top, b ? ps1.width
+                                              : ew,
+                                            b ? eh
+                                              : ps1.height);
 
-            this.incBt.setSize(b ? ps2.width : ew, b ? eh : ps2.height);
-            this.incBt.setLocation(b ? this.width - right - ps2.width
-                                     : left, b ? top : this.height - bottom - ps2.height);
+
+            this.incBt.setBounds(b ? this.width - right - ps2.width : left,
+                                 b ? top : this.height - bottom - ps2.height,
+                                 b ? ps2.width : ew,
+                                 b ? eh : ps2.height);
 
             if (this.bundle != null && this.bundle.isVisible === true){
                 var am = this.amount();
                 if (am > minbs) {
                     var bsize = Math.max(Math.min(Math.floor((this.extra * am) / this.max), am - minbs), minbs);
-                    this.bundle.setSize(b ? bsize : ew, b ? eh : bsize);
-                    this.bundle.setLocation(b ? this.value2pixel() : left, b ? top : this.value2pixel());
+                    this.bundle.setBounds(b ? this.value2pixel() : left,
+                                          b ? top : this.value2pixel(),
+                                          b ? bsize : ew,
+                                          b ? eh : bsize);
                 }
-                else this.bundle.setSize(0, 0);
+                else {
+                    this.bundle.setSize(0, 0);
+                }
             }
         };
 
@@ -3657,11 +2692,20 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
             }
         };
 
+        /**
+         * Set the scroll bar value.
+         * @param {Integer} v a scroll bar value.
+         * @method setValue
+         */
+        this.setValue = function(v){
+            this.position.setOffset(v);
+        };
+
         this.setPosition = function(p){
             if (p != this.position){
                 if (this.position != null) this.position.unbind(this);
                 this.position = p;
-                if(this.position != null){
+                if (this.position != null){
                     this.position.bind(this);
                     this.position.setMetric(this);
                     this.position.setOffset(0);
@@ -3679,8 +2723,8 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
 
     function(t) {
         t = L.$constraints(t);
-        if (t != L.VERTICAL && t != L.HORIZONTAL) {
-            throw new Error($invalidA);
+        if (t !== L.VERTICAL && t !== L.HORIZONTAL) {
+            throw new Error("" + t + "(alignment)");
         }
 
         /**
@@ -3709,9 +2753,9 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
         this.startDragLoc = Number.MAX_VALUE;
         this.$super(this);
 
-        this.add(L.CENTER, t == L.VERTICAL ? new pkg.Scroll.VBundle()    : new pkg.Scroll.HBundle());
-        this.add(L.TOP   , t == L.VERTICAL ? new pkg.Scroll.VDecButton() : new pkg.Scroll.HDecButton());
-        this.add(L.BOTTOM, t == L.VERTICAL ? new pkg.Scroll.VIncButton() : new pkg.Scroll.HIncButton());
+        this.add(L.CENTER, t === L.VERTICAL ? new pkg.Scroll.VBundle()    : new pkg.Scroll.HBundle());
+        this.add(L.TOP   , t === L.VERTICAL ? new pkg.Scroll.VDecButton() : new pkg.Scroll.HDecButton());
+        this.add(L.BOTTOM, t === L.VERTICAL ? new pkg.Scroll.VIncButton() : new pkg.Scroll.HIncButton());
 
         this.type = t;
         this.setPosition(new zebra.util.SingleColPosition(this));
@@ -3722,18 +2766,18 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
 
         ctr = L.$constraints(ctr);
 
-        if (L.CENTER == ctr) this.bundle = lw;
+        if (L.CENTER === ctr) this.bundle = lw;
         else {
-            if(L.BOTTOM == ctr){
+            if (L.BOTTOM === ctr) {
                 this.incBt = lw;
                 this.incBt.bind(this);
             }
             else {
-                if(L.TOP == ctr){
+                if (L.TOP === ctr) {
                     this.decBt = lw;
                     this.decBt.bind(this);
                 }
-                else throw new Error($invalidC);
+                else throw new Error("Invalid constraints : " + ctr);
             }
         }
     },
@@ -3768,26 +2812,27 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
 
         // scroll vertically  a large picture
         var scrollPan = new zebra.ui.ScrollPan(new zebra.ui.ImagePan("largePicture.jpg"),
-                                               zebra.layout.VERTICAL);
+                                               "vertical");
 
         // scroll horizontally a large picture
         var scrollPan = new zebra.ui.ScrollPan(new zebra.ui.ImagePan("largePicture.jpg"),
-                                               zebra.layout.HORIZONTAL);
+                                               "horizontal");
 
 
 
- * @param {zebra.ui.Panel} [c] an UI component that has to
- * be placed into scroll panel
- * @param {Integer} [barMask] a scroll bars mask that allows
- * developers to control vertical and
- * horizontal scroll bars visibility.
+ * @param {zebra.ui.Panel} [c] an UI component that has to be placed into scroll panel
+ * @param {String} [scrolls] a scroll bars that have to be shown. Use "vertical", "horizontal"
+ * or "both" string value to control scroll bars visibility. By default the value is "both"
  * @constructor
+ * @param {Boolean} [autoHide] a boolean value that says if the scrollbars have to work in
+ * auto hide mode. Pass true to switch scrollbars in auto hide mode. By default the value is
+ * false
  * @class zebra.ui.ScrollPan
  * @extends {zebra.ui.Panel}
  */
 pkg.ScrollPan = Class(pkg.Panel, [
     function $clazz() {
-        var contentPanLayout = new L.Layout([
+        this.ContentPanLayout = Class(L.Layout, [
             function $prototype() {
                 this.calcPreferredSize = function(t) {
                     return t.kids[0].getPreferredSize();
@@ -3799,7 +2844,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
             }
         ]);
 
-        var ContentPanSM = Class(pkg.ScrollManager, [
+        var SM = this.ContentPanScrollManager = Class(pkg.ScrollManager, [
             function $prototype() {
                 this.getSX = function() {
                     return this.target.x;
@@ -3815,10 +2860,11 @@ pkg.ScrollPan = Class(pkg.Panel, [
             }
         ]);
 
+        var contentPanLayout = new this.ContentPanLayout();
         this.ContentPan = Class(pkg.Panel, [
             function(c) {
                 this.$super(contentPanLayout);
-                this.scrollManager = new ContentPanSM(c);
+                this.scrollManager = new SM(c);
                 this.add(c);
             }
         ]);
@@ -3862,23 +2908,50 @@ pkg.ScrollPan = Class(pkg.Panel, [
             }
         };
 
+        /**
+         * Scroll horizontally and vertically to the given positions
+         * @param  {Integer} sx a horizontal position
+         * @param  {Integer} sy a vertical position
+         * @method scrollTo
+         */
+        this.scrollTo = function(sx, sy) {
+            this.scrollObj.scrollManager.scrollTo(sx, sy);
+        };
+
+        /**
+         * Scroll horizontally
+         * @param  {Integer} sx a position
+         * @method scrollXTo
+         */
+        this.scrollXTo = function(sx) {
+            this.scrollObj.scrollManager.scrollXTo(sx);
+        };
+
+        /**
+         * Scroll vertically
+         * @param  {Integer} sy a position
+         * @method scrollYTo
+         */
+        this.scrollYTo = function(sx, sy) {
+            this.scrollObj.scrollManager.scrollYTo(sy);
+        };
+
         this.doScroll = function(dx, dy, source) {
             var b = false;
 
-            if (dy !== 0 && this.vBar != null && this.vBar.isVisible == true) {
+            if (dy !== 0 && this.vBar != null && this.vBar.isVisible === true) {
                 var v =  this.vBar.position.offset + dy;
                 if (v >= 0) this.vBar.position.setOffset(v);
                 else        this.vBar.position.setOffset(0);
                 b = true;
             }
 
-            if (dx !== 0 && this.hBar != null && this.hBar.isVisible == true) {
+            if (dx !== 0 && this.hBar != null && this.hBar.isVisible === true) {
                 var v =  this.hBar.position.offset + dx;
                 if (v >= 0) this.hBar.position.setOffset(v);
                 else        this.hBar.position.setOffset(0);
                 b = true;
             }
-
             return b;
         };
 
@@ -3892,7 +2965,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
         this.scrolled = function (psx,psy){
             try {
                 this.validate();
-                this.isPosChangedLocked = true;
+                this.$isPosChangedLocked = true;
 
                 if (this.hBar != null) {
                     this.hBar.position.setOffset( -this.scrollObj.scrollManager.getSX());
@@ -3905,7 +2978,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
                 if (this.scrollObj.scrollManager == null) this.invalidate();
             }
             catch(e) { throw e; }
-            finally  { this.isPosChangedLocked = false; }
+            finally  { this.$isPosChangedLocked = false; }
         };
 
         this.calcPreferredSize = function (target){
@@ -3954,7 +3027,9 @@ pkg.ScrollPan = Class(pkg.Panel, [
                     }
                     sy = 0;
                 }
-                else this.vBar.setVisible(true);
+                else {
+                    this.vBar.setVisible(true);
+                }
             }
 
             if (this.hBar != null){
@@ -3969,9 +3044,9 @@ pkg.ScrollPan = Class(pkg.Panel, [
             }
 
             if (this.scrollObj.isVisible === true){
-                this.scrollObj.setLocation(left, top);
-                this.scrollObj.setSize(ww - (this.autoHide === false && this.vBar != null && this.vBar.isVisible === true ? vps.width  : 0),
-                                       hh - (this.autoHide === false && this.hBar != null && this.hBar.isVisible === true ? hps.height : 0));
+                this.scrollObj.setBounds(left, top,
+                                         ww - (this.autoHide === false && this.vBar != null && this.vBar.isVisible === true ? vps.width  : 0),
+                                         hh - (this.autoHide === false && this.hBar != null && this.hBar.isVisible === true ? hps.height : 0));
             }
 
             if (this.$interval === 0 && this.autoHide) {
@@ -3979,51 +3054,83 @@ pkg.ScrollPan = Class(pkg.Panel, [
             }
 
             if (this.hBar != null && this.hBar.isVisible === true){
-                this.hBar.setLocation(left, this.height - bottom - hps.height);
-                this.hBar.setSize(ww - (this.vBar != null && this.vBar.isVisible === true ? vps.width : 0), hps.height);
+                this.hBar.setBounds(left, this.height - bottom - hps.height,
+                                    ww - (this.vBar != null && this.vBar.isVisible === true ? vps.width : 0),
+                                    hps.height);
                 this.hBar.setMaximum(maxH);
             }
 
             if (this.vBar != null && this.vBar.isVisible === true){
-                this.vBar.setLocation(this.width - right - vps.width, top);
-                this.vBar.setSize(vps.width, hh -  (this.hBar != null && this.hBar.isVisible === true ? hps.height : 0));
+                this.vBar.setBounds(this.width - right - vps.width, top,
+                                    vps.width,
+                                    hh -  (this.hBar != null && this.hBar.isVisible === true ? hps.height : 0));
                 this.vBar.setMaximum(maxV);
             }
         };
 
         this.posChanged = function (target,prevOffset,prevLine,prevCol){
-            if (this.isPosChangedLocked === false){
+            if (this.$isPosChangedLocked === false) {
 
-                //!!! review the code below
-                if (this.autoHide) {
-                    this.$dontHide = true;
+                //  show if necessary hidden scroll bar(s)
+                if (this.autoHide === true) {
+                    // make sure autohide thread has not been initiated and make sure it makes sense
+                    // to initiate the thread (one of the scroll bar has to be visible)
                     if (this.$interval === 0 && ((this.vBar != null && this.vBar.isVisible === true) ||
                                                  (this.hBar != null && this.hBar.isVisible === true)    ))
                     {
                         var $this = this;
-                        if (this.vBar) this.vBar.toFront();
-                        if (this.hBar) this.hBar.toFront();
+
+                        // show scroll bar(s)
+                        if (this.vBar != null) this.vBar.toFront();
+                        if (this.hBar != null) this.hBar.toFront();
                         this.vrp();
-                        this.$interval = setInterval(function() {
-                            if ($this.$dontHide || ($this.vBar != null && pkg.$mouseMoveOwner == $this.vBar)||
-                                                   ($this.hBar != null && pkg.$mouseMoveOwner == $this.hBar)  )
-                            {
-                                $this.$dontHide = false;
+
+                        // pointer move should keep scroll bars visible and pointer entered exited
+                        // events have to be caught to track if pointer cursor is on a scroll
+                        // bar. add temporary listeners
+                        $this.$hiddingCounter = 2;
+                        $this.$targetBar      = null;
+                        var listener = pkg.events.bind({
+                            pointerMoved: function(e) {
+                                $this.$hiddingCounter = 1;
+                            },
+
+                            pointerExited: function(e) {
+                                $this.$targetBar = null;
+                            },
+
+                            pointerEntered: function(e) {
+                                if (e.source == $this.vBar) {
+                                    $this.$targetBar = $this.vBar;
+                                }
+                                else {
+                                    if (e.source == $this.hBar) {
+                                        $this.$targetBar = $this.hBar;
+                                        return;
+                                    }
+
+                                    $this.$targetBar = null;
+                                }
                             }
-                            else {
+                        });
+
+                        // start thread to autohide shown scroll bar(s)
+                        this.$interval = setInterval(function() {
+                            if ($this.$hiddingCounter-- === 0 && $this.$targetBar == null) {
                                 clearInterval($this.$interval);
                                 $this.$interval = 0;
+                                pkg.events.unbind(listener);
                                 $this.doLayout();
                             }
                         }, 500);
                     }
                 }
 
-                if (this.vBar != null && this.vBar.position == target) {
+                if (this.vBar != null && this.vBar.position === target) {
                     this.scrollObj.scrollManager.scrollYTo(-this.vBar.position.offset);
                 }
                 else {
-                    if (this.hBar != null) {
+                    if (this.hBar != null && this.hBar.position === target) {
                         this.scrollObj.scrollManager.scrollXTo(-this.hBar.position.offset);
                     }
                 }
@@ -4043,15 +3150,9 @@ pkg.ScrollPan = Class(pkg.Panel, [
         };
     },
 
-    function () {
-        this.$this(null, L.HORIZONTAL | L.VERTICAL);
-    },
+    function (c, scrolls, autoHide) {
+        if (scrolls == null)  scrolls = "both";
 
-    function (c) {
-        this.$this(c, L.HORIZONTAL | L.VERTICAL);
-    },
-
-    function (c, barMask){
         /**
          * Vertical scroll bar component
          * @attribute vBar
@@ -4074,24 +3175,28 @@ pkg.ScrollPan = Class(pkg.Panel, [
          */
 
         this.hBar = this.vBar = this.scrollObj = null;
-        this.isPosChangedLocked = false;
+        this.$isPosChangedLocked = false;
         this.$super();
 
-        if ((L.HORIZONTAL & barMask) > 0) {
+        if (scrolls === "both" || scrolls === "horizontal") {
             this.add(L.BOTTOM, new pkg.Scroll(L.HORIZONTAL));
         }
 
-        if ((L.VERTICAL & barMask) > 0) {
+        if (scrolls === "both" || scrolls === "vertical") {
             this.add(L.RIGHT, new pkg.Scroll(L.VERTICAL));
         }
 
         if (c != null) this.add(L.CENTER, c);
+
+        if (autoHide != null) {
+            this.setAutoHide(autoHide);
+        }
     },
 
     function insert(i,ctr,c) {
         ctr = L.$constraints(ctr);
 
-        if (L.CENTER == ctr) {
+        if (L.CENTER === ctr) {
             if (c.scrollManager == null) {
                 c = new this.$clazz.ContentPan(c);
             }
@@ -4100,11 +3205,11 @@ pkg.ScrollPan = Class(pkg.Panel, [
             c.scrollManager.bind(this);
         }
         else {
-            if (L.BOTTOM  == ctr || L.TOP == ctr){
+            if (L.BOTTOM === ctr || L.TOP === ctr){
                 this.hBar = c;
             }
             else {
-                if (L.LEFT == ctr || L.RIGHT == ctr) {
+                if (L.LEFT === ctr || L.RIGHT === ctr) {
                     this.vBar = c;
                 }
                 else  {
@@ -4121,19 +3226,19 @@ pkg.ScrollPan = Class(pkg.Panel, [
         return this.$super(i, ctr, c);
     },
 
-    function kidRemoved(index,comp){
+    function kidRemoved(index, comp){
         this.$super(index, comp);
-        if (comp == this.scrollObj){
+        if (comp === this.scrollObj){
             this.scrollObj.scrollManager.unbind(this);
             this.scrollObj = null;
         }
         else {
-            if (comp == this.hBar){
+            if (comp === this.hBar){
                 this.hBar.position.unbind(this);
                 this.hBar = null;
             }
             else {
-                if (comp == this.vBar){
+                if (comp === this.vBar){
                     this.vBar.position.unbind(this);
                     this.vBar = null;
                 }
@@ -4236,15 +3341,17 @@ pkg.Tabs = Class(pkg.Panel, [
                 ]);
             },
 
-            function() {
-                this.$this("");
-            },
-
-            function(caption) {
-                this.$this(null, caption);
-            },
-
             function(icon, caption) {
+                if (arguments.length === 0) {
+                    caption = "";
+                }
+                else {
+                    if (arguments.length === 1) {
+                        caption = icon;
+                        icon = null;
+                    }
+                }
+
                 var tp = new this.$clazz.TabPan();
                 this.$super(tp);
                 this.owner = null;
@@ -4312,25 +3419,20 @@ pkg.Tabs = Class(pkg.Panel, [
             },
 
             /**
-             * Set the given tab caption. The caption is set for both
-             * tab states: selected and not selected
-             * @param {String} s the tab caption
-             * @method setCaption
-             */
-            function setCaption(s) {
-                this.setCaption(true, s);
-                this.setCaption(false, s);
-            },
-
-            /**
-             * Set the given tab caption for the specified tab state.
-             * @param {Boolean} b the tab state. true means selected state.
+             * Set the given tab caption for the specified tab or both - selected and not selected - states.
+             * @param {Boolean} [b] the tab state. true means selected state.
              * @param {String} s the tab caption
              * @method setCaption
              */
             function setCaption(b, s) {
-                this.getCaptionPan().view.setCaption(this.$toId(b), s);
-                this.vrp();
+                if (arguments.length === 1) {
+                    this.setCaption(true, b);
+                    this.setCaption(false, b);
+                }
+                else {
+                    this.getCaptionPan().view.setCaption(this.$toId(b), s);
+                    this.vrp();
+                }
             },
 
             /**
@@ -4344,48 +3446,42 @@ pkg.Tabs = Class(pkg.Panel, [
             },
 
             /**
-             * Set the caption text color for both selected and not selected states.
-             * @param {String} c the tab caption
-             * @method setColor
-             */
-            function setColor(c) {
-                setColor(true, c);
-                setColor(false, c);
-            },
-
-            /**
-             * Set the given tab caption text color for the specified tab state.
-             * @param {Boolean} b the tab state. true means selected state.
+             * Set the given tab caption text color for the specified tab or both
+             * selected and not selected states.
+             * @param {Boolean} [b] the tab state. true means selected state.
              * @param {String} c the tab caption
              * @method setColor
              */
             function setColor(b, c) {
-                var v = this.getCaptionPan().view.views[this.$toId(b)];
-                if (v != null) {
-                    v.setColor(c);
-                    this.vrp();
+                if (arguments.length === 1) {
+                    this.setColor(true, b);
+                    this.setColor(false, b);
+                }
+                else {
+                    var v = this.getCaptionPan().view.views[this.$toId(b)];
+                    if (v != null) {
+                        v.setColor(c);
+                        this.vrp();
+                    }
                 }
             },
 
             /**
-             * Set the given tab caption text font for both selected and not selected states
-             * @param {zebra.ui.Font} f the tab text font
-             * @method setFont
-             */
-            function setFont(f) {
-                setFont(true, f);
-                setFont(false, f);
-            },
-
-            /**
-             * Set the given tab caption text font for the specified state.
-             * @param {Boolean} b the tab state. true means selected state.
+             * Set the given tab caption text font for the specified or both
+             * selected not slected states.
+             * @param {Boolean} [b] the tab state. true means selected state.
              * @param {zebra.ui.Font} f the tab text font
              * @method setFont
              */
             function setFont(b, f) {
-                this.getCaptionPan().view.setFont(this.$toId(b), f);
-                this.vrp();
+                if (arguments.length === 1) {
+                    this.setFont(true, b);
+                    this.setFont(false, b);
+                }
+                else {
+                    this.getCaptionPan().view.setFont(this.$toId(b), f);
+                    this.vrp();
+                }
             },
 
             function getCaptionPan() {
@@ -4432,11 +3528,11 @@ pkg.Tabs = Class(pkg.Panel, [
         this.canHaveFocus = true;
 
         /**
-         * Define mouse moved event handler
-         * @param  {zebra.ui.MouseEvent} e a key event
-         * @method mouseMoved
+         * Define pointer moved event handler
+         * @param  {zebra.ui.PointerEvent} e a key event
+         * @method pointerMoved
          */
-        this.mouseMoved = function(e) {
+        this.pointerMoved = function(e) {
             var i = this.getTabAt(e.x, e.y);
             if (this.overTab != i) {
                 this.overTab = i;
@@ -4448,11 +3544,11 @@ pkg.Tabs = Class(pkg.Panel, [
         };
 
         /**
-         * Define mouse drag ended event handler
-         * @param  {zebra.ui.MouseEvent} e a key event
-         * @method mouseDragEnded
+         * Define pointer drag ended event handler
+         * @param  {zebra.ui.PointerEvent} e a key event
+         * @method pointerDragEnded
          */
-        this.mouseDragEnded = function(e) {
+        this.pointerDragEnded = function(e) {
             var i = this.getTabAt(e.x, e.y);
             if (this.overTab != i) {
                 this.overTab = i;
@@ -4464,11 +3560,11 @@ pkg.Tabs = Class(pkg.Panel, [
         };
 
         /**
-         * Define mouse exited event handler
-         * @param  {zebra.ui.MouseEvent} e a key event
-         * @method mouseExited
+         * Define pointer exited event handler
+         * @param  {zebra.ui.PointerEvent} e a key event
+         * @method pointerExited
          */
-        this.mouseExited = function(e) {
+        this.pointerExited = function(e) {
             if (this.overTab >= 0) {
                 this.overTab = -1;
                 if (this.views.tabover != null) {
@@ -4495,7 +3591,7 @@ pkg.Tabs = Class(pkg.Panel, [
         };
 
         this.getTitleInfo = function(){
-            var b   = (this.orient == L.LEFT || this.orient == L.RIGHT),
+            var b   = (this.orient === L.LEFT || this.orient === L.RIGHT),
                 res = b ? { x      : this.tabAreaX,
                             y      : 0,
                             width  : this.tabAreaWidth,
@@ -4591,14 +3687,14 @@ pkg.Tabs = Class(pkg.Panel, [
                 v       = this.pages[pageIndex * 2],
                 ps      = v.getPreferredSize();
 
-            if (this.selectedIndex == pageIndex && tabon != null) {
+            if (this.selectedIndex === pageIndex && tabon != null) {
                 tabon.paint(g, b.x, b.y, b.width, b.height, page);
             }
             else {
                 tab.paint(g, b.x, b.y, b.width, b.height, page);
             }
 
-            if (this.overTab >= 0 && this.overTab == pageIndex && tabover != null) {
+            if (this.overTab >= 0 && this.overTab === pageIndex && tabover != null) {
                 tabover.paint(g, b.x, b.y, b.width, b.height, page);
             }
 
@@ -4623,7 +3719,7 @@ pkg.Tabs = Class(pkg.Panel, [
 
         this.calcPreferredSize = function(target){
             var max = L.getMaxPreferredSize(target);
-            if (this.orient == L.BOTTOM || this.orient == L.TOP){
+            if (this.orient === L.BOTTOM || this.orient === L.TOP){
                 max.width = Math.max(max.width, 2 * this.sideSpace + this.tabAreaWidth);
                 max.height += this.tabAreaHeight + this.sideSpace;
             }
@@ -4635,23 +3731,23 @@ pkg.Tabs = Class(pkg.Panel, [
         };
 
         this.doLayout = function(target){
-            var right  = this.orient == L.RIGHT  ? this.right  : this.getRight(),
-                top    = this.orient == L.TOP    ? this.top    : this.getTop(),
-                bottom = this.orient == L.BOTTOM ? this.bottom : this.getBottom(),
-                left   = this.orient == L.LEFT   ? this.left   : this.getLeft(),
-                b      = (this.orient == L.TOP || this.orient == L.BOTTOM);
+            var right  = this.orient === L.RIGHT  ? this.right  : this.getRight(),
+                top    = this.orient === L.TOP    ? this.top    : this.getTop(),
+                bottom = this.orient === L.BOTTOM ? this.bottom : this.getBottom(),
+                left   = this.orient === L.LEFT   ? this.left   : this.getLeft(),
+                b      = (this.orient === L.TOP || this.orient === L.BOTTOM);
 
             if (b) {
                 this.repaintX = this.tabAreaX = left ;
-                this.repaintY = this.tabAreaY = (this.orient == L.TOP) ? top : this.height - bottom - this.tabAreaHeight;
-                if (this.orient == L.BOTTOM) {
+                this.repaintY = this.tabAreaY = (this.orient === L.TOP) ? top : this.height - bottom - this.tabAreaHeight;
+                if (this.orient === L.BOTTOM) {
                     this.repaintY -= (this.border != null ? this.border.getBottom() : 0);
                 }
             }
             else {
                 this.repaintX = this.tabAreaX = (this.orient == L.LEFT ? left : this.width - right - this.tabAreaWidth);
                 this.repaintY = this.tabAreaY = top ;
-                if (this.orient == L.RIGHT) {
+                if (this.orient === L.RIGHT) {
                     this.repaintX -= (this.border != null ? this.border.getRight() : 0);
                 }
             }
@@ -4671,14 +3767,14 @@ pkg.Tabs = Class(pkg.Panel, [
                     xx += r.width;
                     if (i == this.selectedIndex) {
                         xx -= sp;
-                        if (this.orient == L.BOTTOM) r.y -= (this.border != null ? this.border.getBottom() : 0);
+                        if (this.orient === L.BOTTOM) r.y -= (this.border != null ? this.border.getBottom() : 0);
                     }
                 }
                 else {
                     yy += r.height;
                     if (i == this.selectedIndex) {
                         yy -= sp;
-                        if (this.orient == L.RIGHT) r.x -= (this.border != null ? this.border.getRight() : 0);
+                        if (this.orient === L.RIGHT) r.x -= (this.border != null ? this.border.getRight() : 0);
                     }
                 }
             }
@@ -4688,12 +3784,12 @@ pkg.Tabs = Class(pkg.Panel, [
                 var r = this.getTabBounds(this.selectedIndex), dt = 0;
                 if (b) {
                     r.x -= this.sideSpace;
-                    r.y -= ((this.orient == L.TOP) ? this.sideSpace : 0);
+                    r.y -= ((this.orient === L.TOP) ? this.sideSpace : 0);
                     dt = (r.x < left) ? left - r.x
                                       : (r.x + r.width > this.width - right) ? this.width - right - r.x - r.width : 0;
                 }
                 else {
-                    r.x -= (this.orient == L.LEFT) ? this.sideSpace : 0;
+                    r.x -= (this.orient === L.LEFT) ? this.sideSpace : 0;
                     r.y -= this.sideSpace;
                     dt = (r.y < top) ? top - r.y
                                      : (r.y + r.height > this.height - bottom) ? this.height - bottom - r.y - r.height : 0;
@@ -4708,18 +3804,18 @@ pkg.Tabs = Class(pkg.Panel, [
 
             for(var i = 0;i < count; i++){
                 var l = this.kids[i];
-                if (i === this.selectedIndex){
+                if (i === this.selectedIndex) {
                     if (b) {
-                        l.setSize(this.width - left - right - 2 * this.hgap,
-                                  this.height - this.repaintHeight - top - bottom - 2 * this.vgap);
-                        l.setLocation(left + this.hgap,
-                                     ((this.orient == L.TOP) ? top + this.repaintHeight : top) + this.vgap);
+                        l.setBounds(left + this.hgap,
+                                    ((this.orient === L.TOP) ? top + this.repaintHeight : top) + this.vgap,
+                                    this.width - left - right - 2 * this.hgap,
+                                    this.height - this.repaintHeight - top - bottom - 2 * this.vgap);
                     }
                     else {
-                        l.setSize(this.width - this.repaintWidth - left - right - 2 * this.hgap,
-                                  this.height - top - bottom - 2 * this.vgap);
-                        l.setLocation(((this.orient == L.LEFT) ? left + this.repaintWidth : left) + this.hgap,
-                                      top + this.vgap);
+                        l.setBounds(((this.orient === L.LEFT) ? left + this.repaintWidth : left) + this.hgap,
+                                    top + this.vgap,
+                                    this.width - this.repaintWidth - left - right - 2 * this.hgap,
+                                    this.height - top - bottom - 2 * this.vgap);
                     }
                 }
                 else {
@@ -4738,7 +3834,7 @@ pkg.Tabs = Class(pkg.Panel, [
                 this.tabAreaHeight = this.tabAreaWidth = 0;
 
                 var bv   = this.views.tab,
-                    b    = (this.orient == L.LEFT || this.orient == L.RIGHT),
+                    b    = (this.orient === L.LEFT || this.orient === L.RIGHT),
                     max  = 0,
                     hadd = bv.getLeft() + bv.getRight(),
                     vadd = bv.getTop()  + bv.getBottom();
@@ -4771,15 +3867,15 @@ pkg.Tabs = Class(pkg.Panel, [
                     this.tabAreaWidth   = max + this.sideSpace;
                     this.tabAreaHeight += (2 * this.sideSpace);
                     this.repaintHeight  = this.tabAreaHeight;
-                    this.repaintWidth   = this.tabAreaWidth + (this.border != null ? (b == L.LEFT ? this.border.getLeft()
-                                                                                                  : this.border.getRight())
+                    this.repaintWidth   = this.tabAreaWidth + (this.border != null ? (b === L.LEFT ? this.border.getLeft()
+                                                                                                   : this.border.getRight())
                                                                                    : 0);
                 }
                 else {
                     this.tabAreaWidth += (2 * this.sideSpace);
                     this.tabAreaHeight = this.sideSpace + max;
                     this.repaintWidth  = this.tabAreaWidth;
-                    this.repaintHeight = this.tabAreaHeight + (this.border != null ? (b  == L.TOP ? this.border.getTop()
+                    this.repaintHeight = this.tabAreaHeight + (this.border != null ? (b === L.TOP ? this.border.getTop()
                                                                                                   : this.border.getBottom())
                                                                                    : 0);
                 }
@@ -4789,13 +3885,13 @@ pkg.Tabs = Class(pkg.Panel, [
                     var r = this.getTabBounds(this.selectedIndex);
                     if (b) {
                         r.height += 2 * this.sideSpace;
-                        r.width += this.sideSpace +  (this.border != null ? (b == L.LEFT ? this.border.getLeft()
-                                                                                         : this.border.getRight())
+                        r.width += this.sideSpace +  (this.border != null ? (b === L.LEFT ? this.border.getLeft()
+                                                                                          : this.border.getRight())
                                                                           : 0);
                     }
                     else {
-                        r.height += this.sideSpace + (this.border != null ? (b == L.TOP ? this.border.getTop()
-                                                                                        : this.border.getBottom())
+                        r.height += this.sideSpace + (this.border != null ? (b === L.TOP ? this.border.getTop()
+                                                                                         : this.border.getBottom())
                                                                           : 0);
                         r.width  += 2 * this.sideSpace;
                     }
@@ -4826,7 +3922,7 @@ pkg.Tabs = Class(pkg.Panel, [
                     }
                 }
 
-                for(var i = 0; i < Math.floor(this.pages.length / 2); i++ ) {
+                for(var i = 0; i < Math.floor(this.pages.length / 2); i++) {
                     if (this.selectedIndex != i) {
                         var tb = this.getTabBounds(i);
                         if (x >= tb.x && y >= tb.y && x < tb.x + tb.width && y < tb.y + tb.height) {
@@ -4861,12 +3957,12 @@ pkg.Tabs = Class(pkg.Panel, [
         };
 
         /**
-         * Define mouse clicked  event handler
-         * @param  {zebra.ui.MouseEvent} e a key event
-         * @method mouseClicked
+         * Define pointer clicked  event handler
+         * @param  {zebra.ui.PointerEvent} e a key event
+         * @method pointerClicked
          */
-        this.mouseClicked = function(e){
-            if (e.isActionMask()){
+        this.pointerClicked = function(e){
+            if (e.isAction()){
                 var index = this.getTabAt(e.x, e.y);
                 if (index >= 0 && this.isTabEnabled(index)) this.select(index);
             }
@@ -4937,7 +4033,7 @@ pkg.Tabs = Class(pkg.Panel, [
             o = L.$constraints(o);
 
             if (o != L.TOP && o != L.BOTTOM && o != L.LEFT && o != L.RIGHT) {
-                throw new Error($invalidA);
+                throw new Error("" + o);
             }
 
             if (this.orient != o){
@@ -4972,7 +4068,7 @@ pkg.Tabs = Class(pkg.Panel, [
          *
          *      {
          *         "tab"    : <view to render not selected tab page>,
-         *         "tabover": <view to render a tab page when mouse is over>
+         *         "tabover": <view to render a tab page when pointer is over>
          *         "tabon"  : <a view to render selected tab page>
          *         "marker" : <a marker view to be rendered around tab page title>
          *      }
@@ -4982,11 +4078,9 @@ pkg.Tabs = Class(pkg.Panel, [
          */
     },
 
-    function () {
-        this.$this(L.TOP);
-    },
+    function(o) {
+        if (arguments.length === 0) o = L.TOP;
 
-    function (o){
         /**
          * Selected tab page index
          * @attribute selectedIndex
@@ -5094,7 +4188,7 @@ pkg.Tabs = Class(pkg.Panel, [
 
     function setSize(w,h){
         if (this.width != w || this.height != h){
-            if (this.orient == L.RIGHT || this.orient == L.BOTTOM) this.tabAreaX =  -1;
+            if (this.orient === L.RIGHT || this.orient === L.BOTTOM) this.tabAreaX =  -1;
             this.$super(w, h);
         }
     }
@@ -5146,7 +4240,7 @@ pkg.Slider = Class(pkg.Panel, [
                                                   this.getBottom() - bs.height);
         };
 
-        this.mouseDragged = function(e){
+        this.pointerDragged = function(e){
             if(this.dragged) {
                 this.setValue(this.findNearest(e.x + (this.orient == L.HORIZONTAL ? this.correctDt : 0),
                                                e.y + (this.orient == L.HORIZONTAL ? 0 : this.correctDt)));
@@ -5242,7 +4336,7 @@ pkg.Slider = Class(pkg.Panel, [
                 bnv.paint(g, bx, this.getBundleLoc(this.value), bs.width, bs.height, this);
             }
 
-            if (this.hasFocus() && this.views.marker) {
+            if (this.hasFocus() && this.views.marker != null) {
                 this.views.marker.paint(g, left, top, w + 2, h + 2, this);
             }
         };
@@ -5420,8 +4514,8 @@ pkg.Slider = Class(pkg.Panel, [
             }
         };
 
-        this.mousePressed = function (e){
-            if (e.isActionMask()){
+        this.pointerPressed = function (e){
+            if (e.isAction()){
                 var x = e.x, y = e.y, bb = this.getBundleBounds(this.value);
                 if (x < bb.x || y < bb.y || x >= bb.x + bb.width || y >= bb.y + bb.height) {
                     var l = ((this.orient == L.HORIZONTAL) ? x : y), v = this.loc2value(l);
@@ -5435,7 +4529,7 @@ pkg.Slider = Class(pkg.Panel, [
             }
         };
 
-        this.mouseDragStarted = function(e){
+        this.pointerDragStarted = function(e){
             var r = this.getBundleBounds(this.value);
 
             if (e.x >= r.x && e.y >= r.y &&
@@ -5448,7 +4542,7 @@ pkg.Slider = Class(pkg.Panel, [
             }
         };
 
-        this.mouseDragEnded = function(e) {
+        this.pointerDragEnded = function(e) {
             this.dragged = false;
         };
 
@@ -5458,11 +4552,8 @@ pkg.Slider = Class(pkg.Panel, [
         };
     },
 
-    function() {
-        this.$this(L.HORIZONTAL);
-    },
-
-    function (o){
+    function (o) {
+        if (o == null) o = L.HORIZONTAL;
         this._ = new Listeners();
         this.views = {};
         this.isShowScale = this.isShowTitle = true;
@@ -5528,16 +4619,17 @@ pkg.Slider = Class(pkg.Panel, [
         }
     },
 
-    function setValues(min,max,intervals,roughStep,exactStep){
-        if(roughStep <= 0 || exactStep < 0 || min >= max ||
-           min + roughStep > max || min + exactStep > max  )
+    function setValues(min,max,intervals,roughStep,exactStep) {
+
+        if (roughStep <= 0 || exactStep < 0 || min >= max ||
+            min + roughStep > max || min + exactStep > max  )
         {
-            throw new Error("Invalid values");
+            throw new Error("[" + min + "," + max + "], " + roughStep + "," + exactStep);
         }
 
         for(var i = 0, start = min;i < intervals.length; i ++ ){
             start += intervals[i];
-            if(start > max || intervals[i] < 0) throw new Error();
+            if (start > max || intervals[i] < 0) throw new Error();
         }
 
         this.min = min;
@@ -5570,9 +4662,8 @@ pkg.Slider.prototype.setViews = pkg.$ViewsSetter;
  * @extends {zebra.ui.Panel}
  */
 pkg.StatusBar = Class(pkg.Panel, [
-    function () { this.$this(2); },
-
     function (gap){
+        if (arguments.length === 0) gap = 2;
         this.setPadding(gap, 0, 0, 0);
         this.$super(new L.PercentLayout(L.HORIZONTAL, gap));
     },
@@ -5778,9 +4869,9 @@ pkg.VideoPan = Class(pkg.Panel,  [
                 this.video.play();
 
                 var $this = this;
-                window.requestAFrame(function anim() {
+                zebkit.web.$task(function anim() {
                     if ($this.isReady === true) $this.repaint();
-                    if ($this.isPlaying === true) window.requestAFrame(anim);
+                    if ($this.isPlaying === true) zebkit.web.$task(anim);
                 });
             }
         };
@@ -5820,144 +4911,6 @@ pkg.VideoPan = Class(pkg.Panel,  [
     }
 ]);
 
-pkg.ArrowView = Class(View, [
-    function $prototype() {
-        this[''] = function (d, col, w) {
-            this.direction = d == null ? L.BOTTOM : L.$constraints(d);
-            this.color = col == null ? "black" : col;
-            this.width = this.height = (w == null ? 6 : w);
-        };
-
-        this.paint = function(g, x, y, w, h, d) {
-            var s = Math.min(w, h);
-
-            x = x + (w-s)/2;
-            y = y + (h-s)/2;
-
-            g.setColor(this.color);
-            g.beginPath();
-            if (L.BOTTOM == this.direction) {
-                g.moveTo(x, y);
-                g.lineTo(x + s, y);
-                g.lineTo(x + s/2, y + s);
-                g.lineTo(x, y);
-            }
-            else {
-                if (L.TOP == this.direction) {
-                    g.moveTo(x, y + s);
-                    g.lineTo(x + s, y + s);
-                    g.lineTo(x + s/2, y);
-                    g.lineTo(x, y + s);
-                }
-                else {
-                    if (L.LEFT == this.direction) {
-                        g.moveTo(x + s, y);
-                        g.lineTo(x + s, y + s);
-                        g.lineTo(x, y + s/2);
-                        g.lineTo(x + s, y);
-                    }
-                    else {
-                        g.moveTo(x, y);
-                        g.lineTo(x, y + s);
-                        g.lineTo(x + s, y + s/2);
-                        g.lineTo(x, y);
-                    }
-                }
-            }
-            g.fill();
-        };
-
-        this.getPreferredSize = function () {
-            return { width:this.width, height:this.height };
-        };
-    }
-]);
-
-pkg.CheckboxView = Class(View, [
-    function $prototype() {
-        this[''] = function(color) {
-            this.color = (color != null ? color : "rgb(65, 131, 255)");
-        };
-
-        this.paint = function(g,x,y,w,h,d){
-            g.beginPath();
-            g.strokeStyle = this.color;
-            g.lineWidth = 2;
-            g.moveTo(x + 1, y + 2);
-            g.lineTo(x + w - 3, y + h - 3);
-            g.stroke();
-            g.beginPath();
-            g.moveTo(x + w - 2, y + 2);
-            g.lineTo(x + 2, y + h - 2);
-            g.stroke();
-            g.lineWidth = 1;
-        };
-    }
-]);
-
-pkg.BunldeView = Class(View, [
-    function $prototype() {
-        this[''] = function(dir, color) {
-            this.color     = (color != null ? color : "#AAAAAA");
-            this.direction = (dir   != null ? L.$constraints(dir) : L.VERTICAL);
-        };
-
-        this.paint =  function(g,x,y,w,h,d) {
-            g.beginPath();
-            if (this.direction == L.VERTICAL) {
-                var r = w/2;
-                g.arc(x + r, y + r, r, Math.PI, 0, false);
-                g.lineTo(x + w, y + h - r);
-                g.arc(x + r, y + h - r, r, 0, Math.PI, false);
-                g.lineTo(x, y + r);
-            }
-            else {
-                var r = h/2;
-                g.arc(x + r, y + r, r, 0.5 * Math.PI, 1.5 * Math.PI, false);
-                g.lineTo(x + w - r, y);
-                g.arc(x + w - r, y + h - r, r, 1.5*Math.PI, 0.5*Math.PI, false);
-                g.lineTo(x + r, y + h);
-            }
-            g.setColor(this.color);
-            g.fill();
-        };
-    }
-]);
-
-/**
- * The radio button ticker view.
- * @class  zebra.ui.RadioView
- * @extends zebra.ui.View
- * @constructor
- * @param {String} [col1] color one to render the outer cycle
- * @param {String} [col2] color tow to render the inner cycle
- */
-pkg.RadioView = Class(View, [
-    function() {
-        this.$this("rgb(15, 81, 205)", "rgb(65, 131, 255)");
-    },
-
-    function(col1, col2) {
-        this.color1 = col1;
-        this.color2 = col2;
-    },
-
-    function $prototype() {
-        this.paint = function(g,x,y,w,h,d){
-            g.beginPath();
-
-            g.fillStyle = this.color1;
-            g.arc(Math.floor(x + w/2), Math.floor(y + h/2) , Math.floor(w/3 - 0.5), 0, 2* Math.PI, 1, false);
-            g.fill();
-
-            g.beginPath();
-            g.fillStyle = this.color2;
-            g.arc(Math.floor(x + w/2), Math.floor(y + h/2) , Math.floor(w/4 - 0.5), 0, 2* Math.PI, 1, false);
-            g.fill();
-        };
-    }
-]);
-
 /**
  * Mobile scroll manager class. Implements inertial scrolling in zebra mobile application.
  * @class zebra.ui.MobileScrollMan
@@ -5971,20 +4924,20 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
         this.identifier = -1;
 
         /**
-         * Define mouse drag started events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragStarted
+         * Define pointer drag started events handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerDragStarted
          */
-        this.mouseDragStarted = function(e) {
-            if (e.touchCounter == 1 && e.touch != null) {
+        this.pointerDragStarted = function(e) {
+            if (e.touchCounter === 1 && e.pointerType === "touch") {
                 this.identifier = e.identifier;  // finger
                 var owner = e.source;
 
-                while(owner != null && instanceOf(owner, pkg.ScrollPan) === false) {
+                while(owner != null && owner.doScroll == null) {
                     owner = owner.parent;
                 }
 
-                if (owner != null && owner.mouseDragged == null) {
+                if (owner != null && owner.pointerDragged == null) {
                     this.target = owner;
                     this.sx = e.x;
                     this.sy = e.y;
@@ -5993,28 +4946,22 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
         };
 
         /**
-         * Define mouse dragged events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragged
+         * Define pointer dragged events handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerDragged
          */
-        this.mouseDragged = function(e) {
-            if (e.touchCounter   == 1 &&
+        this.pointerDragged = function(e) {
+            if (e.touchCounter   === 1 &&
                 this.target      != null &&
-                this.identifier  == e.identifier)
+                this.identifier  === e.identifier)
             {
-                var d = e.touch.direction;
-                if (d == L.BOTTOM || d == L.TOP) {
-                    if (this.target.vBar != null && this.target.vBar.isVisible === true) {
-                        var bar = this.target.vBar;
-                        bar.position.setOffset(bar.position.offset - e.y + this.sy);
-                    }
+                var d = e.direction;
+                if (d === "bottom" || d === "top") {
+                    this.target.doScroll(0, this.sy - e.y, "touch");
                 }
                 else {
-                    if (d == L.LEFT || d == L.RIGHT) {
-                        if (this.target.hBar != null && this.target.hBar.isVisible === true) {
-                            var bar = this.target.hBar;
-                            bar.position.setOffset(bar.position.offset - e.x + this.sx);
-                        }
+                    if (d === "left" || d === "right") {
+                        this.target.doScroll(this.sx - e.x, 0, "touch");
                     }
                 }
 
@@ -6024,30 +4971,31 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
         };
 
         /**
-         * Define mouse drag ended events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragEnded
+         * Define pointer drag ended events handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerDragEnded
          */
-        this.mouseDragEnded = function(e) {
+        this.pointerDragEnded = function(e) {
             if (this.target != null &&
                 this.timer  == null &&
-                this.identifier == e.identifier &&
-                (e.touch.direction == L.BOTTOM || e.touch.direction == L.TOP) &&
+                this.identifier === e.identifier &&
+                (e.direction === "bottom" || e.direction === "top") &&
                 this.target.vBar != null &&
                 this.target.vBar.isVisible === true &&
-                e.touch.dy !== 0)
+                e.touch.dy !== 0)  // TODO: what is it ?
             {
-                this.$dt = 2 * e.touch.dy;
+                this.$dt = 2 * e.touch.dy;   // TODO: what is it ?
                 var $this = this, bar = this.target.vBar, k = 0;
 
                 this.timer = setInterval(function() {
                     var o = bar.position.offset;
 
                     bar.position.setOffset(o - $this.$dt);
-                    if (++k%5 === 0) {
+                    if (++k % 5 === 0) {
                         $this.$dt = Math.floor($this.$dt/2);
                     }
-                    if (o == bar.position.offset || ($this.$dt >= -1  &&  $this.$dt <= 1)) {
+
+                    if (o === bar.position.offset || ($this.$dt >= -1  &&  $this.$dt <= 1)) {
                         clearInterval($this.timer);
                         $this.timer = $this.target = null;
                     }
@@ -6056,11 +5004,11 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
         };
 
         /**
-         * Define mouse pressed events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mousePressed
+         * Define pointer pressed events handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerPressed
          */
-        this.mousePressed = function(e) {
+        this.pointerPressed = function(e) {
             if (this.timer != null) {
                 clearInterval(this.timer);
                 this.timer = null;
@@ -6069,6 +5017,7 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
         };
     }
 ]);
+
 
 /**
  * @for

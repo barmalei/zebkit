@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html>
 	<head>
-  <title>Tutorial</title> 
-  
+  <title>Tutorial</title>
+
   <script src='../zebra.min.js' type='text/javascript'></script>
 
   <script type='text/javascript'>
 
   var u = "images/";
-  var gmail   = zebra.ui.loadImage(u + "gmail.png");
-  var yelp    = zebra.ui.loadImage(u + "yelp.png");
-  var android = zebra.ui.loadImage(u + "android.png") ;
-  var gmail16 = zebra.ui.loadImage(u + "gmail_16.png");
+  var gmail   = zebra.web.$loadImage(u + "gmail.png");
+  var yelp    = zebra.web.$loadImage(u + "yelp.png");
+  var android = zebra.web.$loadImage(u + "android.png") ;
+  var gmail16 = zebra.web.$loadImage(u + "gmail_16.png");
 
 zebra.ready(
     function() {
@@ -28,7 +28,7 @@ zebra.ready(
       }
 
       if (document.getElementById("doc.model2") != null) {
-        var l = new zebra.ui.List([ 
+        var l = new zebra.ui.List([
           new zebra.ui.Picture(gmail),
           new zebra.ui.Picture(yelp),
           new zebra.ui.Picture(android)
@@ -45,7 +45,7 @@ zebra.ready(
       var ItemRender = zebra.Class(zebra.ui.View, [
           function(icon, text) {
               this.icon = icon;
-              this.font = zebra.ui.boldFont; 
+              this.font = zebra.ui.boldFont;
               this.text = text;
           },
 
@@ -54,19 +54,19 @@ zebra.ready(
               x += this.icon.width + 4;
               g.setColor("orange");
               g.setFont(this.font);
-              g.fillText(this.text, x, (this.icon.height - this.font.height)/2 + y); 
+              g.fillText(this.text, x, (this.icon.height - this.font.height)/2 + y);
           },
 
           function getPreferredSize() {
-              return { 
-                  width : this.icon.width + 4 + this.font.stringWidth(this.text), 
-                  height: Math.max(this.font.height, this.icon.height) 
+              return {
+                  width : this.icon.width + 4 + this.font.stringWidth(this.text),
+                  height: Math.max(this.font.height, this.icon.height)
               };
           }
       ]);
 
       if (document.getElementById("doc.model3") != null) {
-        var l = new zebra.ui.List([ 
+        var l = new zebra.ui.List([
           "Item 1",
           "Item 2",
           "Item 3"
@@ -77,7 +77,7 @@ zebra.ready(
                 return new ItemRender(gmail, item);
             }
         ]));
-        
+
         new zebra.ui.zCanvas("doc.model3").root.properties({
            layout : new zebra.layout.BorderLayout(),
            padding: 4,
@@ -85,20 +85,20 @@ zebra.ready(
         });
       }
 
-         
+
       if (document.getElementById("doc.model4") != null) {
-        var t = new zebra.ui.tree.Tree({ 
+        var t = new zebra.ui.tree.Tree({
           value: "Item 1",
           kids: [
             "Item 2",
-            { 
+            {
               value: "Item 3",
               kids:  [
                  "Item 4",
                  "Item 5"
-              ] 
-            }   
-          ]    
+              ]
+            }
+          ]
         });
 
         new zebra.ui.zCanvas("doc.model4").root.properties({
@@ -110,18 +110,18 @@ zebra.ready(
       }
 
       if (document.getElementById("doc.model5") != null) {
-        var t = new zebra.ui.tree.Tree({ 
+        var t = new zebra.ui.tree.Tree({
           value: new zebra.ui.Picture(gmail),
           kids: [
             "Item 2",
-            { 
+            {
               value: "Item 3",
               kids:  [
                  "Item 4",
                  "Item 5"
-              ] 
-            }   
-          ]    
+              ]
+            }
+          ]
         });
 
         new zebra.ui.zCanvas("doc.model5").root.properties({
@@ -133,18 +133,18 @@ zebra.ready(
       }
 
       if (document.getElementById("doc.model6") != null) {
-        var t = new zebra.ui.tree.Tree({ 
+        var t = new zebra.ui.tree.Tree({
           value: "Item 1",
           kids: [
             "Item 2",
-            { 
+            {
               value: "Item 3",
               kids:  [
                  "Item 4",
                  "Item 5"
-              ] 
-            }   
-          ]    
+              ]
+            }
+          ]
         });
 
 
@@ -187,7 +187,7 @@ zebra.ready(
             ["Cell 2,1", p, "Cell 2,3"],
             ["Cell 3,1", "Cell 3,2", p]
         ]);
-        
+
         new zebra.ui.zCanvas("doc.model8").root.properties({
            layout : new zebra.layout.FlowLayout(zebra.layout.CENTER, zebra.layout.CENTER),
            padding: 4,
@@ -211,7 +211,7 @@ zebra.ready(
              return new ItemRender(gmail16, data);
           },
 
-          function getCellColor(target,row,col){ 
+          function getCellColor(target,row,col){
               if (row == col) {
                   return "#DADADA";
               }
@@ -226,7 +226,7 @@ zebra.ready(
           layout : new zebra.layout.FlowLayout(zebra.layout.CENTER, zebra.layout.CENTER),
           padding: 4,
           border: "plain",
-          kids : g 
+          kids : g
         });
       }
 
@@ -238,7 +238,7 @@ zebra.ready(
         l1.setBorder("plain");
         l2.setPadding(4);
         l2.setBorder("plain");
-        
+
         new zebra.ui.zCanvas("doc.model10").root.properties({
            layout : new zebra.layout.ListLayout(4),
            padding: 4,
@@ -269,9 +269,9 @@ zebra.ready(
           ]);
 
           var sh = new SynRender(zebra.io.GET("visdatamodels.java"));
-          sh.words= { 
-                      "class"   : "orange", "public" : "blue", 
-                     "extends" : "orange", "static" : "orange", 
+          sh.words= {
+                      "class"   : "orange", "public" : "blue",
+                     "extends" : "orange", "static" : "orange",
                      "if"      : "red", "==":"green"            };
 
           new zebra.ui.zCanvas("doc.model11").root.properties({
@@ -281,7 +281,7 @@ zebra.ready(
               background: "white",
               kids : { CENTER: new zebra.ui.Label(sh) }
           });
-      }   
+      }
 });
 
 </script>
@@ -302,15 +302,15 @@ zebra.ready(
                 <canvas width="200" height="200" id="doc.model3"></canvas><div>List model,<br/>custom item render</div>
             </td>
             <td>
-                <canvas width="200" height="200" id="doc.model4"></canvas><div>Tree model</div>        
+                <canvas width="200" height="200" id="doc.model4"></canvas><div>Tree model</div>
             </td>
         </tr>
         <tr>
             <td>
-                <canvas width="200" height="200" id="doc.model5"></canvas><div>Tree model,<br/>custom item render</div>    
+                <canvas width="200" height="200" id="doc.model5"></canvas><div>Tree model,<br/>custom item render</div>
             </td>
             <td>
-                <canvas width="200" height="200" id="doc.model6"></canvas><div>Tree model,<br/>custom item render</div>        
+                <canvas width="200" height="200" id="doc.model6"></canvas><div>Tree model,<br/>custom item render</div>
             </td>
             <td colspan="2">
                 <canvas width="300" height="200" id="doc.model7"></canvas><div>Grid model</div>
@@ -336,8 +336,8 @@ zebra.ready(
             </td>
         </tr>
     </table>
-        
-        
+
+
 
    </body>
 </html>

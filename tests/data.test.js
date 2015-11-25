@@ -10,7 +10,7 @@ var assert = zebra.assert, Class = zebra.Class, TreeModel = zebra.data.TreeModel
     assertException = zebra.assertException, Matrix = zebra.data.Matrix,
     ListModel = zebra.data.ListModel, Text = zebra.data.Text, SingleLineTxt = zebra.data.SingleLineTxt;
 
-zebra.runTests("Zebra util objects bag",
+zebra.runTests("Util objects bag",
     function test_treemodel() {
         function test (t) {
             assert(t.root.value, "Root");
@@ -183,8 +183,10 @@ zebra.runTests("Zebra util objects bag",
         assert(m.get(0,0), 1);
         assert(m.get(0,1), 2);
         assert(m.get(0,2), 3);
-        assertException(function () { m.get(1, 0) }, Error);
-        assertException(function () { m.get(0,-1) }, Error);
+
+
+        assertException(function () { m.get(1, 0) }, RangeError);
+        assertException(function () { m.get(0,-1) }, RangeError);
 
         m.put(1,0, 10);
         assert(m.rows, 2);
@@ -195,8 +197,6 @@ zebra.runTests("Zebra util objects bag",
         assert(m.get(1,0), 10);
         assert(m.get(1,1), undefined);
         assert(m.get(1,2), undefined);
-        assertException(function () { m.get(1,3) }, Error);
-        assertException(function () { m.get(-1,2) }, Error);
 
         var m = new Matrix(3,2);
         assert(m.rows, 3);
@@ -435,8 +435,10 @@ zebra.runTests("Zebra util objects bag",
         assert(l.get(0), 1);
         assert(l.get(1), 2);
         assert(l.get(2), 3);
-        assertException(function () { l.get(4) }, Error);
-        assertException(function () { l.get(-1) }, Error);
+        assertException(function () { l.get(4) }, RangeError);
+        assertException(function () { l.get(-1) }, RangeError);
+        assertException(function () { l.setAt(-1, "") }, RangeError);
+        assertException(function () { l.setAt(3, "") }, RangeError);
 
         l.add(4);
         assert(l.count(), 4);
@@ -444,6 +446,12 @@ zebra.runTests("Zebra util objects bag",
         assert(l.get(1), 2);
         assert(l.get(2), 3);
         assert(l.get(3), 4);
+        assert(l.indexOf(2), 1);
+        assert(l.indexOf("2"), -1);
+        assert(l.indexOf(20), -1);
+        assert(l.contains(2), true);
+        assert(l.contains("2"), false);
+        assert(l.contains(10), false);
 
         l.remove(3);
         assert(l.count(), 3);
@@ -458,27 +466,143 @@ zebra.runTests("Zebra util objects bag",
 
         l.removeAll();
         assert(l.count(), 0);
-        assertException(function () { l.insert(100, 1) }, Error);
+        assert(l.indexOf(1), -1);
+        assert(l.contains(), false);
+        assertException(function () { l.insert(100, 1) }, RangeError);
+
+        l.insert(0, 101);
+        assert(l.count(), 1);
+        assert(l.indexOf(101), 0);
+
+        l.insert(1, 102);
+        assert(l.count(), 2);
+        assert(l.indexOf(101), 0);
+        assert(l.indexOf(102), 1);
+
+        l.insert(0, 103);
+        assert(l.count(), 3);
+        assert(l.indexOf(101), 1);
+        assert(l.indexOf(102), 2);
+        assert(l.indexOf(103), 0);
+
+
+        l = new ListModel([1,2,3,4,5]);
+        assert(l.count(), 5);
+
+        var lastRemoved = null,
+            lastRemovedIndex = -1,
+            removedCounter = 0,
+            lastAdded = null,
+            addedCounter = 0,
+            lastAddedIndex = -1,
+            lastSet = null,
+            lastSetPrev = null,
+            lastSetIndex = -1,
+            setCounter = 0,
+            ccc = 0;
+
+        l.bind({
+            elementRemoved: function(src, e, i) {
+                assert(src, l);
+                lastRemoved = e;
+                lastRemovedIndex = i;
+                removedCounter++;
+            },
+
+            elementInserted: function(src, e, i) {
+                assert(src, l);
+                lastAdded = e;
+                lastAddedIndex = i;
+                addedCounter++;
+            },
+
+            elementSet: function(src, e, p, i) {
+                assert(src, l);
+                lastSet = e;
+                lastSetPrev  = p;
+                lastSetIndex = i;
+                setCounter++;
+            }
+        });
+
+
+        l.bind(function(src) {
+            ccc++;
+            assert(src, l);
+        });
+
+        l.add(6);
+        assert(l.count(), 6);
+        assert(lastAdded, 6);
+        assert(lastAddedIndex, 5);
+        assert(addedCounter, 1);
+        assert(removedCounter, 0);
+        assert(setCounter, 0);
+        assert(l.get(5), 6);
+
+        l.setAt(5, 77);
+        assert(addedCounter, 1);
+        assert(removedCounter, 0);
+        assert(setCounter, 1);
+        assert(lastAdded, 6);
+        assert(lastAddedIndex, 5);
+        assert(l.count(), 6);
+        assert(lastSet, 77);
+        assert(lastSetPrev, 6);
+        assert(lastSetIndex, 5);
+        assert(l.get(5), 77);
+
+        l.removeAt(0);
+
+        assert(lastAdded, 6);
+        assert(lastAddedIndex, 5);
+        assert(lastSet, 77);
+        assert(lastSetPrev, 6);
+        assert(lastSetIndex, 5);
+        assert(lastRemoved, 1);
+        assert(lastRemovedIndex, 0);
+        assert(l.count(), 5);
+        assert(removedCounter, 1);
+        assert(addedCounter, 1);
+        assert(setCounter, 1);
+        assert(ccc, 3);
+
+        ccc = 0;
+        removedCounter = 0;
+        l.removeAll();
+        assert(lastAdded, 6);
+        assert(lastAddedIndex, 5);
+        assert(lastSet, 77);
+        assert(lastSetPrev, 6);
+        assert(lastSetIndex, 5);
+        assert(lastRemoved, 2);
+        assert(lastRemovedIndex, 0);
+        assert(removedCounter, 5);
+        assert(addedCounter, 1);
+        assert(setCounter, 1);
+
+        assert(l.count(), 0);
+        assert(ccc, 5);
     },
 
     function test_text() {
         var t = new Text("");
         assert(t.getLines(), 1);
         assert(t.getLine(0), "");
-        assertException(function() { t.getLine(1); }, Error);
+        assertException(function() { t.getLine(1); }, RangeError);
         assert(t.getTextLength(), 0);
 
         t.write("One\nTwo", 0);
         assert(t.getLines(), 2);
         assert(t.getLine(0), "One");
         assert(t.getLine(1), "Two");
-        assertException(function() { t.getLine(2); }, Error);
+        assertException(function() { t.getLine(2); }, RangeError);
         assert(t.getTextLength(), 7);
 
         t.remove(3,1);
         assert(t.getLines(), 1);
         assert(t.getLine(0), "OneTwo");
-        assertException(function() { t.getLine(1); }, Error);
+        assertException(function() { t.getLine(1); }, RangeError);
         assert(t.getTextLength(), 6);
     },
 
@@ -486,19 +610,181 @@ zebra.runTests("Zebra util objects bag",
         var t = new SingleLineTxt("");
         assert(t.getLines(), 1);
         assert(t.getLine(0), "");
-        assertException(function() { t.getLine(1); }, Error);
+        assertException(function() { t.getLine(1); }, RangeError);
         assert(t.getTextLength(), 0);
 
         t.write("One\nTwo", 0);
         assert(t.getLines(), 1);
         assert(t.getLine(0), "One");
-        assertException(function() { t.getLine(1); }, Error);
+        assertException(function() { t.getLine(1); }, RangeError);
         assert(t.getTextLength(), 3);
 
         t.remove(1,2);
         assert(t.getLines(), 1);
         assert(t.getLine(0), "O");
-        assertException(function() { t.getLine(1); }, Error);
+        assertException(function() { t.getLine(1); }, RangeError);
         assert(t.getTextLength(), 1);
+    },
+
+    function test_com_listmodel() {
+        if (typeof zebra.ui !== "undefined" && typeof zebra.ui.CompList !== "undefined") {
+
+            var cb = this.assertCallback(function() {
+                var l = new zebra.ui.CompList(["1","2","3"]);
+
+                assert(l.count(), 3);
+                assert(l.get(0).getValue(), "1");
+                assert(l.get(1).getValue(), "2");
+                assert(l.get(2).getValue(), "3");
+
+                assertException(function () { l.get(4) }, RangeError);
+                assertException(function () { l.get(-1) }, RangeError);
+                assertException(function () { l.setAt( -1, "") }, RangeError);
+                assertException(function () { l.setAt(3, "") }, RangeError);
+
+
+                assert(l.indexOf(l.get(1)), 1);
+                assert(l.indexOf("2"), -1);
+                assert(l.indexOf(20), -1);
+                assert(l.contains(l.get(1)), true);
+                assert(l.contains("2"), false);
+                assert(l.contains(10), false);
+
+
+                l.add("4");
+                assert(l.count(), 4);
+                assert(l.get(0).getValue(), "1");
+                assert(l.get(1).getValue(), "2");
+                assert(l.get(2).getValue(), "3");
+                assert(l.get(3).getValue(), "4");
+
+                l.remove(l.get(2));
+                assert(l.count(), 3);
+                assert(l.get(0).getValue(), "1");
+                assert(l.get(1).getValue(), "2");
+                assert(l.get(2).getValue(), "4");
+
+                l.removeAt(1);
+                assert(l.count(), 2);
+                assert(l.get(0).getValue(), "1");
+                assert(l.get(1).getValue(), "4");
+                l.removeAll();
+
+                assert(l.count(), 0);
+                assertException(function () {
+                    l.insert(1, "2");
+                }, Error);
+
+
+                l = new zebra.ui.CompList(["1","2","3","4","5"]);
+                assert(l.count(), 5);
+                var lastRemoved = null,
+                    lastRemovedIndex = -1,
+                    removedCounter = 0,
+                    lastAdded = null,
+                    addedCounter = 0,
+                    lastAddedIndex = -1,
+                    lastSet = null,
+                    lastSetPrev = null,
+                    lastSetIndex = -1,
+                    setCounter = 0,
+                    ccc = 0;
+
+                l.bind({
+                    elementRemoved: function(src, e, i) {
+                        assert(src, l);
+                        lastRemoved = e;
+                        lastRemovedIndex = i;
+                        removedCounter++;
+                    },
+
+                    elementInserted: function(src, e, i) {
+                        assert(src, l);
+                        lastAdded = e;
+                        lastAddedIndex = i;
+                        addedCounter++;
+                    },
+
+                    elementSet: function(src, e, p, i) {
+                        assert(src, l);
+                        lastSet = e;
+                        lastSetPrev  = p;
+                        lastSetIndex = i;
+                        setCounter++;
+                    }
+                });
+
+
+                l.bind(function(src) {
+                    ccc++;
+                    assert(src, l);
+                });
+
+                l.add(6);
+                assert(l.count(), 6);
+                assert(lastAdded.getValue(), "6");
+                assert(lastAddedIndex, 5);
+                assert(addedCounter, 1);
+                assert(removedCounter, 0);
+                assert(setCounter, 0);
+                assert(l.get(5).getValue(), "6");
+
+                l.removeAt(0);
+                assert(lastAdded.getValue(), "6");
+                assert(lastAddedIndex, 5);
+                assert(lastSet, null);
+                assert(lastSetPrev, null);
+                assert(lastSetIndex, -1);
+                assert(lastRemoved.getValue(), "1");
+                assert(lastRemovedIndex, 0);
+                assert(l.count(), 5);
+                assert(removedCounter, 1);
+                assert(addedCounter, 1);
+                assert(setCounter, 0);
+                assert(ccc, 2);
+
+
+                ccc = 0;
+                removedCounter = 0;
+                l.removeAll();
+                assert(lastAdded.getValue(), "6");
+                assert(lastAddedIndex, 5);
+                assert(lastSet, null);
+                assert(lastSetPrev, null);
+                assert(lastSetIndex, -1);
+                assert(lastRemoved.getValue(), "2");
+                assert(lastRemovedIndex, 0);
+                assert(removedCounter, 5);
+                assert(addedCounter, 1);
+                assert(setCounter, 0);
+
+                assert(l.count(), 0);
+                assert(ccc, 5);
+
+                // test set that is done as remove/insert combination
+                l.add("1");
+                addedCounter = 0;
+                removedCounter = 0;
+                ccc = 0;
+                l.setAt(0, "5");
+                assert(l.count(), 1);
+                assert(l.get(0).getValue(), "5");
+                assert(lastAdded.getValue(), "5");
+                assert(lastRemoved.getValue(), "1");
+                assert(lastRemovedIndex, 0);
+                assert(lastAddedIndex, 0);
+                assert(addedCounter, 1);
+                assert(removedCounter, 1);
+                assert(setCounter, 0);
+                assert(ccc, 2);
+            });
+
+            zebra.ready(function() {
+                cb();
+            });
+        }
+        else {
+            console.log("Skip UI test ");
+        }
     }
 );

@@ -75,7 +75,7 @@ zebra.package("ui.demo", function(pkg, Class) {
 
             p1.setPreferredSize(270, 240);
             p1.setBorder(zebra.ui.borders.plain);
-            var p2 = new ScrollPan(new ImagePan(pkg.cosmo1), VERTICAL);
+            var p2 = new ScrollPan(new ImagePan(pkg.cosmo1), "vertical");
             p2.setPreferredSize(270, 240);
             p2.setBorder(zebra.ui.borders.plain);
 

@@ -8,21 +8,7 @@
 <meta name="msapplication-tap-highlight" content="no" />
 
 
-<script src='../../src/easyoop.js'    type='text/javascript'></script>
-<script src='../../src/util.js' type='text/javascript'></script>
-<script src='../../src/io.js'    type='text/javascript'></script>
-<script src='../../src/data.js' type='text/javascript'></script>
-<script src='../../src/layout.js' type='text/javascript'></script>
-<script src='../../src/ui.webstuff.js' type='text/javascript'></script>
-<script src='../../src/canvas.js' type='text/javascript'></script>
-<script src='../../src/ui.js' type='text/javascript'></script>
-
-
-<script src='../../src/ui.TextField.js' type='text/javascript'></script>
-<script src='../../src/ui.list.js' type='text/javascript'></script>
-<script src='../../src/ui.window.js' type='text/javascript'></script>
-<script src='../../src/ui.tree.js' type='text/javascript'></script>
-<script src='../../src/ui.grid.js' type='text/javascript'></script>
+<script src='../../zebra.min.js'    type='text/javascript'></script>
 <script src='ui.excel.js' type='text/javascript'></script>
 
 
@@ -30,12 +16,11 @@
 
 zebra.ready(function() {
     var canvas = new zebra.ui.zCanvas();
-    canvas.root.load("mainLayout.json");
+    canvas.load("mainLayout.json");
 
     var tabs         = canvas.find(".zebra.ui.Tabs"),
         cellLocation = canvas.find("#cellLocation"),
         cellContent  = canvas.find("#cellContent");
-
 
     new zebra.ui.excel.Application(canvas.root, [
         function sheetCellMarked(sheet, row, col, value) {

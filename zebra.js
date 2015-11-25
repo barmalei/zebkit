@@ -8,7 +8,6 @@
 //  Faster match operation analogues:
 //  Math.floor(f)  =>  ~~(a)
 //  Math.round(f)  =>  (f + 0.5) | 0
-//
 function isString(o)  {
     return typeof o !== "undefined" && o !== null &&
           (typeof o === "string" || o.constructor === String);
@@ -169,13 +168,14 @@ var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
     };
 
     f.Import = function() {
-        var ns = "=" + nsname + ".", code = [],
+        var ns   = "=" + nsname + ".",
+            code = [],
             packages = arguments.length === 0 ? null
                                               : Array.prototype.slice.call(arguments, 0);
         f(function(n, p) {
             if (packages == null || packages.indexOf(n) >= 0) {
                 for (var k in p) {
-                    if (k[0] != '$' && k[0] != '_' && (p[k] instanceof Package) === false && p.hasOwnProperty(k)) {
+                    if (k[0] !== '$' && k[0] !== '_' && (p[k] instanceof Package) === false && p.hasOwnProperty(k)) {
                         code.push(k + ns + n + "." + k);
                     }
                 }
@@ -197,9 +197,9 @@ var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
 
 var pkg = zebkit = zebra = namespace('zebra'),
     CNAME = pkg.CNAME = '$', CDNAME = '',
-    FN = pkg.$FN = (typeof namespace.name === "undefined") ? (function(f) {
+    FN = pkg.$FN = (typeof namespace.name === "undefined") ? (function(f) {     // IE stuff
                                                                 var mt = f.toString().match(/^function\s+([^\s(]+)/);
-                                                                return (mt == null) ? CNAME : mt[1];
+                                                                return (mt == null) ? CDNAME : mt[1];
                                                              })
                                                            : (function(f) { return f.name; });
 
@@ -209,16 +209,68 @@ pkg.$global    = (typeof window !== "undefined" && window != null) ? window : th
 pkg.isString   = isString;
 pkg.isNumber   = isNumber;
 pkg.isBoolean  = isBoolean;
-pkg.version    = "10.2014";
 pkg.$caller    = null; // current method which is called
 
-function mnf(name, params) {
-    var cln = this.$clazz && this.$clazz.$name ? this.$clazz.$name + "." : "";
-    throw new ReferenceError("Method '" + cln + (name === CNAME ? "constructor"
-                                                                : name) + "(" + params + ")" + "' not found");
-}
 
-function $toString() { return this.$hash$; }
+pkg.clone = function (obj) {
+    // clone atomic type
+    if (obj == null || zebra.isString(obj) || zebra.isBoolean(obj) || zebra.isNumber(obj)) {
+        return obj;
+    }
+
+    // clone with provided custom "clone" method
+    if (typeof obj.$clone !== "undefined") {
+        return obj.$clone();
+    }
+
+    // clone array
+    if (Array.isArray(obj)) {
+        var nobj = [];
+        for(var i = 0; i < obj.length; i++) {
+            nobj[i] = pkg.clone(obj[i]);
+        }
+        return nobj;
+    }
+
+    // function cannot be cloned
+    if (typeof obj === 'function' || obj.constructor !==  Object) {
+        return obj;
+    }
+
+    var nobj = {};
+    // clone object fields
+    for(var k in obj) {
+        if (obj.hasOwnProperty(k) === true) {
+            nobj[k] = pkg.clone(obj[k]);
+        }
+    }
+
+    return nobj;
+};
+
+/**
+ * Instantiate a new class instance by the given class name with the specified constructor
+ * arguments.
+ * @param  {Function} clazz a class
+ * @param  {Array} [args] an arguments list
+ * @return {Object}  a new instance of the given class initialized with the specified arguments
+ * @api  zebra.util.newInstance()
+ * @method newInstance
+ */
+pkg.newInstance = function(clazz, args) {
+    if (args && args.length > 0) {
+        function f() {}
+        f.prototype = clazz.prototype;
+        var o = new f();
+        clazz.apply(o, args);
+        return o;
+    }
+    return new clazz();
+};
+
+function $toString() {
+    return this.$hash$;
+}
 
 // return function that is meta class
 //  pt - parent template function (can be null)
@@ -245,7 +297,7 @@ function make_template(pt, tf, p) {
             }
 
             tf.$parents[l] = true;
-            if (l.$parents) {
+            if (l.$parents != null) {
                 var pp = l.$parents;
                 for(var k in pp) {
                     if (pp.hasOwnProperty(k)) tf.$parents[k] = true;
@@ -275,7 +327,7 @@ pkg.getPropertySetter = function(obj, name) {
 pkg.properties = function(target, p) {
     for(var k in p) {
         // skip private properties( properties that start from "$")
-        if (k[0] != '$' && p.hasOwnProperty(k) && typeof p[k] !== 'function') {
+        if (k[0] !== '$' && p.hasOwnProperty(k) && typeof p[k] !== 'function') {
             var v = p[k],
                 m = zebra.getPropertySetter(target, k);
 
@@ -303,7 +355,7 @@ pkg.Singleton = function(clazz) {
 
     var clz = Class(clazz, [
         function() {
-            // make sure this constructor is mot
+            // make sure this constructor is not
             // called from a successor class
             if (this.$clazz === clz) {
                 if (clz.$instance != null) {
@@ -353,13 +405,17 @@ pkg.Interface = make_template(null, function() {
 });
 
 // single method proxy
-function sProxyMethod(name, f) {
+function ProxyMethod(name, f, clazz) {
+    if (typeof f.methodBody !== "undefined") {
+        throw new Error("Proxy method '" + name + "' cannot be wrapped");
+    }
+
     var a = function() {
         var cm = pkg.$caller;
-        pkg.$caller = a.f;
+        pkg.$caller = a;
         // don't use finally section it slower than try-catch
         try {
-            var r = a.f.apply(this, arguments);
+            var r = a.methodBody.apply(this, arguments);
             pkg.$caller = cm;
             return r;
         }
@@ -370,52 +426,9 @@ function sProxyMethod(name, f) {
         }
     };
 
-    a.f = f;
+    a.methodBody = f;
     a.methodName = name;
-
-    a.$clone$ = function() {
-        return sProxyMethod(a.methodName, a.f);
-    };
-
-    return a;
-}
-
-// multiple methods proxy
-function nProxyMethod(name) {
-    var a = function() {
-        var nm = a.methods[arguments.length];
-        if (nm != null) {
-            var cm = pkg.$caller;
-            pkg.$caller = nm;
-            // don't use finally section it slower than try-catch
-            try {
-                var r = nm.apply(this, arguments);
-                pkg.$caller = cm;
-                return r;
-            }
-            catch(e) {
-                pkg.$caller = cm;
-                console.log("" + (e.stack ? e.stack : e));
-                throw e;
-            }
-        }
-        mnf.call(this, a.methodName, arguments.length);
-    };
-
-    a.methods = {};
-    a.methodName = name;
-
-    a.$clone$ = function() {
-        // multiple methods, so overloading is possible
-        var m = nProxyMethod(a.methodName);
-        for(var k in a.methods) {
-            if (a.methods.hasOwnProperty(k)) {
-                m.methods[k] = a.methods[k];
-            }
-        }
-        return m;
-    };
-
+    a.boundTo    = clazz;
     return a;
 }
 
@@ -449,28 +462,6 @@ function nProxyMethod(name) {
         var B = zebra.Class(A, [
             function a() { ... }
         ]);
-
-    __Class method overloading.__ You can declare methods with the same names but
-    different parameter list. The methods are considered as different methods
-
-        // declare class "A" that with one method "a"
-        var A = zebra.Class([
-            function a() { ... }
-        ]);
-
-        // declare class "B" that inherits class "A"
-        // and overloads method "a" with another number of
-        // parameters
-        var B = zebra.Class(A, [
-            function a(param1) { ... }
-        ]);
-
-        // instantiate class B and call two different
-        // methods "a()" and "a(param1)"
-        var b = new B();
-        b.a();      // call method defined in "A" class
-        b.a(100);   // call overloaded method defined in "B" class
-
 
     __Constructors.__ Constructor is a method with empty name
 
@@ -564,7 +555,7 @@ pkg.Class = make_template(null, function() {
         args[i] = arguments[i];
     }
 
-    if (args.length > 0 && (args[0] == null || args[0].$clazz == pkg.Class)) {
+    if (args.length > 0 && (args[0] == null || args[0].$clazz === pkg.Class)) {
         $parent = args[0];
     }
 
@@ -604,7 +595,7 @@ pkg.Class = make_template(null, function() {
                 // call constructor
                 // use array copy instead of cloning with slice for performance reason
                 // (Array.prototype.slice.call(arguments, 0, k + 1))
-                var args = [];
+                args = [];
                 for(var i=0; i < k + 1; i++) args[i] = arguments[i];
                 cl.apply(o, args);
 
@@ -622,20 +613,23 @@ pkg.Class = make_template(null, function() {
     // prepare fields that caches the class properties
     $template.$propertyInfo = {};
 
+    function copyProtoMethod(targetClazz, parentClazz, cb) {
+        for (var k in parentClazz.prototype) {
+            if (parentClazz.prototype.hasOwnProperty(k) === true) {
+                var f = parentClazz.prototype[k];
+                targetClazz.prototype[k] = (f != null && f.methodBody != null) ? ProxyMethod(f.methodName, f.methodBody, f.boundTo)
+                                                                               : f;
+
+                if (cb != null) cb(targetClazz, parentClazz, targetClazz.prototype[k], f);
+            }
+        }
+    }
+
     // copy parents prototype methods and fields into
     // new class template
     $template.$parent = $parent;
     if ($parent != null) {
-        for (var k in $parent.prototype) {
-            if ($parent.prototype.hasOwnProperty(k)) {
-                var f = $parent.prototype[k];
-
-                // constructor should not be copied
-                if (k != CNAME) {
-                    $template.prototype[k] = (f != null && f.$clone$ != null) ? f.$clone$() : f;
-                }
-            }
-        }
+        copyProtoMethod($template, $parent);
     }
 
     // extend method cannot be overridden
@@ -649,39 +643,31 @@ pkg.Class = make_template(null, function() {
         // $super method calls.
         if (this.$extended !== true) {
             c = Class(c,[]);
-            this.$extended = true;               // mark the instance as extended to avoid double extending.
+            this.$extended = true;         // mark the instance as extended to avoid double extending.
             c.$name = this.$clazz.$name;
             this.$clazz = c;
         }
 
         if (Array.isArray(f)) {
-            for(var i=0; i < f.length; i++) {
+            var init = null;
+            for(var i = 0; i < f.length; i++) {
                 var n = FN(f[i]);
-
-                // map user defined constructor to internal constructor name
-                if (n == CDNAME) n = CNAME;
-
-                if (n === CNAME) {
-                    f[i].call(this);   // call constructor as an initializer
-                    continue;
+                if (n === CDNAME) {
+                    init = f[i];  // postpone calling initializer before all methods will be defined
                 }
                 else {
-                    // clone method and put it in class instance
-                    // if the method is not directly defined in
-                    // the class instance
-                    var pv = this[n];
-                    if (pv != null && this.hasOwnProperty(n) === false)  {
-                        this[n] = (pv.$clone$ != null ? pv.$clone$() : sProxyMethod(n, pv));
+                    if (typeof this[n] !== 'undefined' && typeof this[n] !== 'function') {
+                        throw new Error("Method '" + n + "' clash with a property");
                     }
-
-                    this[n] = createMethod(n, f[i], this, c);
+                    this[n] = ProxyMethod(n, f[i], c);
                 }
             }
+            if (init != null) init.call(this);
             l--;
         }
 
-        // add new interfaces if they
-        for(var i=0; i < l; i++) {
+        // add new interfaces if they has been passed
+        for(var i = 0; i < l; i++) {
             if (pkg.instanceOf(arguments[i], pkg.Interface) === false) {
                 throw new Error("Invalid argument: " + arguments[i]);
             }
@@ -691,7 +677,7 @@ pkg.Class = make_template(null, function() {
     };
 
     $template.prototype.$super = function() {
-        if (pkg.$caller) {
+       if (pkg.$caller != null) {
             var name = pkg.$caller.methodName,
                 $s   = pkg.$caller.boundTo.$parent,
                 args = arguments;
@@ -706,26 +692,38 @@ pkg.Class = make_template(null, function() {
 
             while ($s != null) {
                 var m = $s.prototype[name];
-
                 // if the method found and the method is
                 //     not proxy method       <or>
                 //     single proxy method    <or>
                 //     multiple proxy method that contains a method with the required arity
-                if (m != null && (typeof m.methods === "undefined" || m.methods[args.length] != null)) {
+                if (m != null) {
                     return m.apply(this, args);
                 }
                 $s = $s.$parent;
             }
-            mnf.call(this, name, args.length);
+
+            var cln = this.$clazz && this.$clazz.$name ? this.$clazz.$name + "." : "";
+            throw new ReferenceError("Method '" + cln + (name === CNAME ? "constructor"
+                                                                        : name) + "(" + args.length + ")" + "' not found");
         }
         throw new Error("$super is called outside of class context");
     };
 
-    $template.prototype.$clazz = $template;
+    $template.prototype.$clone = function() {
+        var f = function() {};
+        f.prototype = this.constructor.prototype;
+        var nobj = new f();
+        for(var k in this) {
+            if (this.hasOwnProperty(k)) nobj[k] = zebra.clone(this[k]);
+        }
 
-    $template.prototype.$this = function() {
-        return pkg.$caller.boundTo.prototype[CNAME].apply(this, arguments);
+        nobj.constructor = this.constructor;
+        nobj.$hash$ = "$zObj_" + ($$$++);
+        nobj.$clazz = this.$clazz;
+        return nobj;
     };
+
+    $template.prototype.$clazz = $template;
 
     // check if the method has been already defined in the class
     if (typeof $template.prototype.properties === 'undefined') {
@@ -754,89 +752,6 @@ pkg.Class = make_template(null, function() {
             }
             this._.remove.apply(this._, arguments);
         };
-    }
-
-    /**
-     * Create method
-     * @param  {String} n     a method name
-     * @param  {Function} f   a method to be added
-     * @param  {Object} obj   an object where all declared method sits
-     * @param  {Class} clazz  a class
-     * @return {Function}     a method
-     */
-    function createMethod(n, f, obj, clazz) {
-        var arity = f.length, vv = obj[n];
-
-        // if passed method has been already bound to
-        // create wrapper function as a clone function
-        if (f.boundTo != null) {
-            // clone method if it is bound to a class
-            f = (function(f) {
-                return function() { return f.apply(this, arguments); };
-            })(f, arity, n);
-        }
-
-        f.boundTo    = clazz;
-        f.methodName = n;
-
-        if (typeof vv === 'undefined') {
-            // declare new class method
-            return sProxyMethod(n, f); // no parent or previously declared method exists,
-                                       // create new proxy single method
-
-            // Pay attention we cannot avoid of proxy creation since we
-            // cannot say in advance if the declared method will call
-            // super. For instance class can declare method "b" and which
-            // doesn't have an implementation on the level of parent class
-            // but it can call super method "a" method !
-        }
-
-        if (typeof vv === 'function') {
-            if (vv.$clone$ != null) {  // a proxy  method has been already defined
-
-                if (typeof vv.methods === "undefined") {  // single method proxy detected
-
-                    if (vv.f.boundTo != clazz || arity == vv.f.length) {
-                                    // single method has been defined in a parent class or the single
-                                    // method arity is the same to the new method arity than override
-                                    // the single method with a new one
-
-                        vv.f = f; // new single proxy method
-                        return vv;
-                    }
-
-                    // single method has been defined in this class and arity of
-                    // the single method differs from arity of the new method
-                    // than overload the old method with new one method
-                    var sw = nProxyMethod(n);
-                    sw.methods[vv.f.length] = vv.f;
-                    sw.methods[arity] = f;
-                    return sw;
-                }
-
-                // multiple methods proxy detected
-                vv.methods[arity] = f;
-                return vv;
-            }
-
-            // old method has been defined directly in class prototype field
-            if (arity == vv.length) {  // the new method arity is the same to old method
-                                       // arity than override it with single method proxy
-
-                return sProxyMethod(n, f);  // new single proxy method
-            }
-
-            // the new method arity is not the same to new one
-            // than overload it with new one ()
-            var sw = nProxyMethod(n);
-            vv.methodName = n;
-            vv.boundTo    = clazz;
-            sw.methods[vv.length] = vv;
-            sw.methods[arity] = f;
-            return sw;
-        }
-
-        throw new Error("Method '" + n + "' clash with a property");
     }
 
     /**
@@ -877,91 +792,105 @@ pkg.Class = make_template(null, function() {
      * extended with
      * @method extend
      */
-    function extend(df) {
+    function extend(clazz, df, isMixing) {
+        if (arguments.length === 1) {
+            df    = clazz;
+            clazz = this;
+        }
+
+        if (isMixing == null) {
+            isMixing = false;
+        }
+
         if (Array.isArray(df) === false) {
             throw new Error("Invalid class definition '" + df + "', array is expected");
         }
 
-        for(var i=0; i < df.length; i++) {
-            var f     = df[i],
-                n     = FN(f),
-                arity = f.length;
+        for(var i = 0; i < df.length; i++) {
+            var f  = df[i],
+                n  = FN(f);
 
             // map user defined constructor to internal constructor name
-            if (n == CDNAME) n = CNAME;
-
-            if (n[0] === "$") {
-                // populate prototype fields if a special method has been defined
-                if (n === "$prototype") {
-                    var protoFields = {};
-                    f.call(protoFields, this);  // call $prototype to populate methods in protoFields
-                                                     // dictionary
-
-                    // add "boundTo" and "methodName" fields to the prototype methods
-                    // and add the new method to class prototype
-                    for(var k in protoFields) {
-                        if (protoFields.hasOwnProperty(k)) {
-                            var protoFieldVal = protoFields[k];
-                            // map user defined constructor to internal constructor name
-                            if (k == CDNAME) k = CNAME;
-
-                            this.prototype[k] = protoFieldVal;
-                            if (protoFieldVal && typeof protoFieldVal === "function") {
-                                protoFieldVal.methodName = k;
-                                protoFieldVal.boundTo = this;
-                            }
+            if (n === CDNAME) {
+                n = CNAME;
+            }
+            else {
+                if (n[0] === "$") {
+                    // populate prototype fields if a special method has been defined
+                    if (n === "$prototype") {
+                        f.call(clazz.prototype, clazz);
+                        if (clazz.prototype[CDNAME]) {
+                            clazz.prototype[CNAME] = clazz.prototype[CDNAME];
+                            delete clazz.prototype[CDNAME];
                         }
+                        continue;
                     }
-                    continue;
-                }
 
-                // populate class level fields if a special method has been defined
-                if (n === "$clazz") {
-                    f.call(this);
-                    continue;
+                    // populate class level fields if a special method has been defined
+                    if (n === "$clazz") {
+                        f.call(clazz);
+                        continue;
+                    }
+
+                    if (n === "$mixing") {
+                        extend(clazz, f.call(clazz));
+                        continue;
+                    }
                 }
             }
 
-            this.prototype[n] = createMethod(n, f, this.prototype, this);
+            var v = clazz.prototype[n];
+
+            if (typeof v !== 'undefined') {
+                if (typeof v !== 'function') throw new Error("Method '" + n + "' clash with a property");
+
+                if (isMixing === false && v.boundTo === clazz) {
+                    throw new Error("Method ('" + n + "') overloading is not allowed");
+                }
+            }
+
+            clazz.prototype[n] = ProxyMethod(n, f, clazz);
         }
     }
 
-    extend.call($template, df);
+    extend($template, df);
 
     // populate static fields
     // TODO: exclude the basic static methods and static constant
     // static inheritance
     if ($parent != null) {
         for (var k in $parent) {
-            if (k[0] != '$' && $parent.hasOwnProperty(k) && $template.hasOwnProperty(k) === false) {
-                var val = $parent[k];
-
-                // clone direct JS Object
-                if (val != null && val.constructor === Object) {
-                    var nval = {};
-                    for (var vk in val) {
-                        if (val.hasOwnProperty(vk)) nval[vk] = val[vk];
-                    }
-                    $template[k] = nval;
-                }
-                else {
-                    $template[k] = $parent[k];
-                }
+            if (k[0] !== '$' &&
+                $parent.hasOwnProperty(k) === true &&
+                $template.hasOwnProperty(k) === false)
+            {
+                $template[k] = pkg.clone($parent[k]);
             }
         }
     }
 
      // add extend later to avoid the method be inherited as a class static field
-    $template.extend = extend;
+    $template.extend = function() {
+        // inject class
+        if (arguments[1] !== false && this.$isInjected !== true) {
+            // create intermediate class
+            var A = this.$parent != null ? Class(this.$parent, []) : Class([]);
 
-    // add parent class constructor(s) if the class doesn't declare own
-    // constructors
-    if ($template.$parent != null &&
-        $template.$parent.prototype[CNAME] != null &&
-        $template.prototype[CNAME] == null)
-    {
-        $template.prototype[CNAME] = $template.$parent.prototype[CNAME];
-    }
+            // copy this class prototypes methods to intermediate class A and re-define
+            // boundTo to the intermediate class A if they were bound to this class
+            copyProtoMethod(A, this, function(targetClazz, srcClazz, addedMethod, sourceMethod) {
+                if (addedMethod != sourceMethod && addedMethod.boundTo === srcClazz) {
+                    addedMethod.boundTo = A;
+                    if (sourceMethod.boundTo === srcClazz) sourceMethod.boundTo = A;
+                }
+            });
+
+            this.$parent = A;
+            this.$isInjected = true;
+        }
+
+        extend.call(this, this, arguments[0], true);
+    };
 
     return $template;
 });
@@ -1029,7 +958,7 @@ pkg.$cache = function(key) {
         return ctx;
     }
 
-    throw new Error("Class '" + key + "' cannot be found");
+    throw new Error("Reference '" + key + "' not found");
 };
 
 /**
@@ -1038,10 +967,15 @@ pkg.$cache = function(key) {
  * @return {Function} a class. Throws exception if the class cannot be
  * resolved by the given class name
  * @method forName
+ * @throws Error
  * @api  zebra.forName()
  */
 Class.forName = function(name) {
     return pkg.$cache(name);
+};
+
+Class.newInstance = function() {
+    return pkg.newInstance(this, arguments);
 };
 
 /**
@@ -1091,7 +1025,7 @@ pkg.ready = function() {
         if ($busy > 0) $busy--;
     }
     else {
-        if (arguments.length == 1 &&
+        if (arguments.length === 1 &&
             $busy === 0 &&
             $readyCallbacks.length === 0)
         {
@@ -1156,7 +1090,7 @@ pkg.$resolveClassNames = function() {
     pkg(function(n, p) {
         function collect(pp, p) {
             for(var k in p) {
-                if (k[0] != "$" &&  p[k] != null && p[k].$name == null && p.hasOwnProperty(k) && zebra.instanceOf(p[k], Class)) {
+                if (k[0] !== "$" && p[k] != null && p[k].$name == null && p.hasOwnProperty(k) && zebra.instanceOf(p[k], Class)) {
                     p[k].$name = pp != null ? pp + "." + k : k;
                     collect(p[k].$name, p[k]);
                 }
@@ -1206,7 +1140,7 @@ if (pkg.isInBrowser) {
         if (m == null) {
             m = purl.exec(window.location);
             if (m == null) {
-                throw Error("Cannot resolve '" + url + "' url");
+                throw new Error("Cannot resolve '" + url + "' url");
             }
             a.href = m[1] + "//" + m[2] + m[3].substring(0, p.lastIndexOf("/") + 1) + url;
             m = purl.exec(a.href);
@@ -1285,12 +1219,12 @@ if (pkg.isInBrowser) {
             throw new Error("Absolute URL '" + p + "' cannot be joined");
         }
 
-        return p[0] == '/' ? this.protocol + "//" + this.host + p
-                           : this.protocol + "//" + this.host + this.path + (this.path[this.path.length-1] == '/' ? '' : '/') + p;
+        return p[0] === '/' ? this.protocol + "//" + this.host + p
+                            : this.protocol + "//" + this.host + this.path + (this.path[this.path.length-1] === '/' ? '' : '/') + p;
     };
 
     var $interval = setInterval(function () {
-        if (document.readyState == "complete") {
+        if (document.readyState === "complete") {
             clearInterval($interval);
             complete();
         }
@@ -1303,7 +1237,6 @@ else {
 /**
  * @for
  */
-
 })();
 
 (function(pkg, Class) {
@@ -1385,8 +1318,8 @@ pkg.$constraints = function(v) {
   * @method getDirectChild
   * @for zebra.layout
   */
-pkg.getDirectChild = function(parent,child){
-    for(; child != null && child.parent != parent; child = child.parent) {}
+pkg.getDirectChild = function(parent, child){
+    for(; child != null && child.parent !== parent; child = child.parent) {}
     return child;
 };
 
@@ -1456,7 +1389,7 @@ pkg.getTopParent = function(c){
  * @api zebra.layout.toParentOrigin()
  */
 pkg.toParentOrigin = function(x,y,c,p){
-    if (arguments.length == 1) {
+    if (arguments.length === 1) {
         c = x;
         x = y = 0;
         p = null;
@@ -1465,7 +1398,7 @@ pkg.toParentOrigin = function(x,y,c,p){
         if (arguments.length < 4) p = null;
     }
 
-    while (c != p) {
+    while (c !== p) {
         x += c.x;
         y += c.y;
         c = c.parent;
@@ -1490,7 +1423,7 @@ pkg.toParentOrigin = function(x,y,c,p){
  * @api zebra.layout.toChildOrigin()
  */
 pkg.toChildOrigin = function(x, y, p, c){
-    while(c != p){
+    while(c !== p){
         x -= c.x;
         y -= c.y;
         c = c.parent;
@@ -1522,8 +1455,8 @@ pkg.getMaxPreferredSize = function(target) {
     return { width:maxWidth, height:maxHeight };
 };
 
-pkg.isAncestorOf = function(p,c){
-    for(; c != null && c != p; c = c.parent);
+pkg.isAncestorOf = function(p, c){
+    for(; c != null && c !== p; c = c.parent);
     return c != null;
 };
 
@@ -1615,9 +1548,9 @@ pkg.Layoutable = Class(L, [
 
         function $normPath(p) {
             p = p.trim();
-            if (p[0] == '/') return p;
-            if (p[0] == '#') return "//*[@id='" + p.substring(1).trim() + "']";
-            return "//" + (p[0] == '.' ? p.substring(1).trim() : p);
+            if (p[0] === '/') return p;
+            if (p[0] === '#') return "//*[@id='" + p.substring(1).trim() + "']";
+            return "//" + (p[0] === '.' ? p.substring(1).trim() : p);
         }
 
         /**
@@ -1817,8 +1750,9 @@ pkg.Layoutable = Class(L, [
          * Force validation of the component metrics and layout if it is not valid
          * @method validate
          */
-        this.validate = function(){
-            this.validateMetric();
+        this.validate = function() {
+            if (this.isValid === false) this.validateMetric();
+
             if (this.width > 0 && this.height > 0 &&
                 this.isLayoutValid === false &&
                 this.isVisible === true)
@@ -1851,7 +1785,8 @@ pkg.Layoutable = Class(L, [
          */
         this.getPreferredSize = function(){
             this.validateMetric();
-            if (this.cachedWidth < 0){
+
+            if (this.cachedWidth < 0) {
                 var ps = (this.psWidth < 0 || this.psHeight < 0) ? this.layout.calcPreferredSize(this)
                                                                  : { width:0, height:0 };
 
@@ -1981,7 +1916,7 @@ pkg.Layoutable = Class(L, [
             if (d.constraints != null) constr = d.constraints;
             else                       d.constraints = constr;
 
-            if (i == this.kids.length) this.kids.push(d);
+            if (i === this.kids.length) this.kids.push(d);
             else this.kids.splice(i, 0, d);
 
             d.setParent(this);
@@ -2076,7 +2011,7 @@ pkg.Layoutable = Class(L, [
             if (this.kids.length > 0){
                 for(var i = 0;i < this.kids.length; i++ ){
                     var l = this.kids[i];
-                    if (c == l.constraints) return l;
+                    if (c === l.constraints) return l;
                 }
             }
             return null;
@@ -2101,7 +2036,7 @@ pkg.Layoutable = Class(L, [
         this.removeAt = function (i){
             var obj = this.kids[i];
             obj.setParent(null);
-            if (obj.constraints) obj.constraints = null;
+            if (obj.constraints != null) obj.constraints = null;
             this.kids.splice(i, 1);
             if (this.kidRemoved != null) this.kidRemoved(i, obj);
             this.invalidate();
@@ -2160,7 +2095,8 @@ pkg.Layoutable = Class(L, [
          * @method setAt
          */
         this.setAt = function(i, d) {
-            var pd = this.removeAt(i);
+            var constr = this.kids[i].constraints,
+                pd     = this.removeAt(i);
             if (d != null) this.insert(i, constr, d);
             return pd;
         };
@@ -2174,8 +2110,8 @@ pkg.Layoutable = Class(L, [
          * @return {zebra.layout.Layoutable} added layoutable component
          */
         this.add = function(constr,d) {
-            return (arguments.length == 1) ? this.insert(this.kids.length, null, constr)
-                                           : this.insert(this.kids.length, constr, d);
+            return (arguments.length === 1) ? this.insert(this.kids.length, null, constr)
+                                            : this.insert(this.kids.length, constr, d);
         };
 
         // speedup constructor execution
@@ -2226,15 +2162,14 @@ pkg.StackLayout = Class(L, [
                     var ctr = l.constraints == null ? null
                                                     : pkg.$constraints(l.constraints);
 
-                    if (ctr == pkg.USE_PS_SIZE) {
+                    if (ctr === pkg.USE_PS_SIZE) {
                         var ps = l.getPreferredSize();
-                        l.setSize(ps.width, ps.height);
-                        l.setLocation(left + ~~((ww - ps.width )/2),
-                                      top  + ~~((hh - ps.height)/2) );
+                        l.setBounds(left + Math.floor((ww - ps.width )/2),
+                                    top  + Math.floor((hh - ps.height)/2),
+                                    ps.width, ps.height);
                     }
                     else {
-                        l.setSize(ww, hh);
-                        l.setLocation(left, top);
+                        l.setBounds(left, top, ww, hh);
                     }
                 }
             }
@@ -2358,14 +2293,12 @@ pkg.BorderLayout = Class(L, [
                         case pkg.CENTER: center = l; break;
                         case pkg.TOP :
                             var ps = l.getPreferredSize();
-                            l.setLocation(left, top);
-                            l.setSize(right - left, ps.height);
+                            l.setBounds(left, top, right - left, ps.height);
                             top += ps.height + this.vgap;
                             break;
                         case pkg.BOTTOM:
                             var ps = l.getPreferredSize();
-                            l.setLocation(left, bottom - ps.height);
-                            l.setSize(right - left, ps.height);
+                            l.setBounds(left, bottom - ps.height, right - left, ps.height);
                             bottom -= ps.height + this.vgap;
                             break;
                         case pkg.LEFT: west = l; break;
@@ -2377,21 +2310,18 @@ pkg.BorderLayout = Class(L, [
 
             if (east != null){
                 var d = east.getPreferredSize();
-                east.setLocation(right - d.width, top);
-                east.setSize(d.width, bottom - top);
+                east.setBounds(right - d.width, top, d.width, bottom - top);
                 right -= d.width + this.hgap;
             }
 
             if (west != null){
                 var d = west.getPreferredSize();
-                west.setLocation(left, top);
-                west.setSize(d.width, bottom - top);
+                west.setBounds(left, top, d.width, bottom - top);
                 left += d.width + this.hgap;
             }
 
             if (center != null){
-                center.setLocation(left, top);
-                center.setSize(right - left, bottom - top);
+                center.setBounds(left, top, right - left, bottom - top);
             }
         };
     }
@@ -2418,14 +2348,14 @@ pkg.RasterLayout = Class(L, [
                 b = (this.flag & pkg.USE_PS_SIZE) > 0;
 
             for(var i = 0;i < c.kids.length; i++ ){
-                var el = c.kids[i];
-                if (el.isVisible === true){
-                    var ps = b ? el.getPreferredSize()
-                               : { width:el.width, height:el.height },
-                        px = el.x + ps.width,
-                        py = el.y + ps.height;
+                var kid = c.kids[i];
+                if (kid.isVisible === true) {
+                    var ps = b ? kid.getPreferredSize()
+                               : { width:kid.width, height:kid.height },
+                        px = kid.x + ps.width,
+                        py = kid.y + ps.height;
 
-                    if (px > m.width) m.width = px;
+                    if (px > m.width)  m.width  = px;
                     if (py > m.height) m.height = py;
                 }
             }
@@ -2441,12 +2371,12 @@ pkg.RasterLayout = Class(L, [
                 var el = c.kids[i], ww = 0, hh = 0;
 
                 if (el.isVisible === true){
-                    if (usePsSize){
+                    if (usePsSize) {
                         var ps = el.getPreferredSize();
                         ww = ps.width;
                         hh = ps.height;
                     }
-                    else{
+                    else {
                         ww = el.width;
                         hh = el.height;
                     }
@@ -2461,20 +2391,21 @@ pkg.RasterLayout = Class(L, [
 
                     if (ctr != null) {
                         var x = el.x, y = el.y;
-                        if (ctr == pkg.CENTER) {
-                            x = (c.width - ww)/2;
-                            y = (c.height - hh)/2;
+                        if (ctr === pkg.CENTER) {
+                            x = Math.floor((c.width  - ww)/2);
+                            y = Math.floor((c.height - hh)/2);
                         }
                         else {
                             if ((ctr & pkg.TOP) > 0)  y = 0;
-                            else
-                            if ((ctr & pkg.BOTTOM) > 0)  y = c.height - hh;
+                            else {
+                                if ((ctr & pkg.BOTTOM) > 0)  y = c.height - hh;
+                            }
 
-                            if ((ctr & pkg.LEFT) > 0)  x = 0;
-                            else
-                            if ((ctr & pkg.RIGHT) > 0)  x = c.width - ww;
+                            if ((ctr & pkg.LEFT) > 0)   x = 0;
+                            else {
+                                if ((ctr & pkg.RIGHT) > 0)  x = c.width - ww;
+                            }
                         }
-
                         el.setLocation(x, y);
                     }
                 }
@@ -2496,7 +2427,7 @@ pkg.RasterLayout = Class(L, [
         // components added to the panel will be placed
         // horizontally aligned at the center of the panel
         var p = new zebra.ui.Panel();
-        p.setLayout(new zebra.layout.FlowLayout(zebra.layout.CENTER, zebra.layout.CENTER));
+        p.setLayout(new zebra.layout.FlowLayout("center", "center"));
 
         // add three buttons into the panel with flow layout
         p.add(new zebra.ui.Button("Button 1"));
@@ -2585,7 +2516,7 @@ pkg.FlowLayout = Class(L, [
         this.stretchLast = false;
 
         this[''] =  function (ax,ay,dir,g){
-            if (arguments.length == 1) this.gap = ax;
+            if (arguments.length === 1) this.gap = ax;
             else {
                 if (arguments.length >= 2) {
                     this.ax = pkg.$constraints(ax);
@@ -2594,7 +2525,7 @@ pkg.FlowLayout = Class(L, [
 
                 if (arguments.length > 2)  {
                     dir = pkg.$constraints(dir);
-                    if (dir != pkg.HORIZONTAL && dir != pkg.VERTICAL) {
+                    if (dir !== pkg.HORIZONTAL && dir !== pkg.VERTICAL) {
                         throw new Error("Invalid direction " + dir);
                     }
                     this.direction = dir;
@@ -2610,7 +2541,7 @@ pkg.FlowLayout = Class(L, [
                 var a = c.kids[i];
                 if (a.isVisible === true){
                     var d = a.getPreferredSize();
-                    if (this.direction == pkg.HORIZONTAL){
+                    if (this.direction === pkg.HORIZONTAL){
                         m.width += d.width;
                         m.height = d.height > m.height ? d.height : m.height;
                     }
@@ -2623,7 +2554,7 @@ pkg.FlowLayout = Class(L, [
             }
 
             var add = this.gap * (cc > 0 ? cc - 1 : 0);
-            if (this.direction == pkg.HORIZONTAL) m.width += add;
+            if (this.direction === pkg.HORIZONTAL) m.width += add;
             else m.height += add;
             return m;
         };
@@ -2635,10 +2566,10 @@ pkg.FlowLayout = Class(L, [
                 lastOne = null,
                 ew      = c.width  - l - c.getRight(),
                 eh      = c.height - t - c.getBottom(),
-                px      = ((this.ax == pkg.RIGHT) ? ew - psSize.width
-                                                  : ((this.ax == pkg.CENTER) ? ~~((ew - psSize.width) / 2) : 0)) + l,
-                py      = ((this.ay == pkg.BOTTOM) ? eh - psSize.height
-                                                  : ((this.ay == pkg.CENTER) ? ~~((eh - psSize.height) / 2) : 0)) + t;
+                px      = ((this.ax === pkg.RIGHT) ? ew - psSize.width
+                                                   : ((this.ax === pkg.CENTER) ? Math.floor((ew - psSize.width) / 2) : 0)) + l,
+                py      = ((this.ay === pkg.BOTTOM) ? eh - psSize.height
+                                                    : ((this.ay === pkg.CENTER) ? Math.floor((eh - psSize.height) / 2): 0)) + t;
 
             for(var i = 0;i < c.kids.length; i++){
                 var a = c.kids[i];
@@ -2647,17 +2578,17 @@ pkg.FlowLayout = Class(L, [
                     var d = a.getPreferredSize(),
                         ctr = a.constraints == null ? null : pkg.$constraints(a.constraints);
 
-                    if (this.direction == pkg.HORIZONTAL){
+                    if (this.direction === pkg.HORIZONTAL){
                         if (ctr === pkg.STRETCH) {
                             d.height = c.height - t - c.getBottom();
                         }
 
-                        a.setLocation(px, ~~((psSize.height - d.height) / 2) + py);
+                        a.setLocation(px, Math.floor((psSize.height - d.height) / 2) + py);
                         px += (d.width + this.gap);
                     }
                     else {
                         if (ctr === pkg.STRETCH) d.width = c.width - l - c.getRight();
-                        a.setLocation(px + ~~((psSize.width - d.width) / 2), py);
+                        a.setLocation(px + Math.floor((psSize.width - d.width) / 2), py);
                         py += d.height + this.gap;
                     }
 
@@ -2667,7 +2598,7 @@ pkg.FlowLayout = Class(L, [
             }
 
             if (lastOne !== null && this.stretchLast === true){
-                if (this.direction == pkg.HORIZONTAL) {
+                if (this.direction === pkg.HORIZONTAL) {
                     lastOne.setSize(c.width - lastOne.x - c.getRight(), lastOne.height);
                 }
                 else {
@@ -2712,7 +2643,7 @@ pkg.FlowLayout = Class(L, [
 pkg.ListLayout = Class(L,[
     function $prototype() {
         this[''] = function (ax, gap) {
-            if (arguments.length == 1) {
+            if (arguments.length === 1) {
                 gap = ax;
             }
 
@@ -2722,8 +2653,8 @@ pkg.ListLayout = Class(L,[
                 gap = 0;
             }
 
-            if (ax != pkg.STRETCH && ax != pkg.LEFT &&
-                ax != pkg.RIGHT && ax != pkg.CENTER)
+            if (ax !== pkg.STRETCH && ax !== pkg.LEFT &&
+                ax !== pkg.RIGHT && ax !== pkg.CENTER)
             {
                 throw new Error("Invalid alignment");
             }
@@ -2769,14 +2700,15 @@ pkg.ListLayout = Class(L,[
 
                 if (cc.isVisible === true){
                     var d      = cc.getPreferredSize(),
-                        constr = cc.constraints == null ? this.ax : pkg.$constraints(cc.constraints);
+                        constr = cc.constraints == null ? this.ax
+                                                        : pkg.$constraints(cc.constraints);
 
-                    cc.setSize    ((constr == pkg.STRETCH) ? psw
-                                                           : d.width, d.height);
-                    cc.setLocation((constr == pkg.STRETCH) ? x
-                                                           : x + ((constr == pkg.RIGHT) ? psw - cc.width
-                                                                                        : ((constr == pkg.CENTER) ? ~~((psw - cc.width) / 2)
-                                                                                                                  : 0)), y);
+                    cc.setSize    ((constr === pkg.STRETCH) ? psw
+                                                            : d.width, d.height);
+                    cc.setLocation((constr === pkg.STRETCH) ? x
+                                                            : x + ((constr === pkg.RIGHT) ? psw - cc.width
+                                                                                          : ((constr === pkg.CENTER) ? Math.floor((psw - cc.width) / 2)
+                                                                                                                     : 0)), y);
                     y += (d.height + this.gap);
                 }
             }
@@ -2842,7 +2774,7 @@ pkg.PercentLayout = Class(L, [
         this[''] = function(dir, gap, stretch) {
             if (arguments.length > 0) {
                 this.direction = pkg.$constraints(dir);
-                if (this.direction != pkg.HORIZONTAL && this.direction != pkg.VERTICAL) {
+                if (this.direction !== pkg.HORIZONTAL && this.direction !== pkg.VERTICAL) {
                     throw new Error("Invalid direction : " + this.direction);
                 }
 
@@ -2861,7 +2793,7 @@ pkg.PercentLayout = Class(L, [
                 loc    = 0,
                 ns     = 0;
 
-            if (this.direction == pkg.HORIZONTAL){
+            if (this.direction === pkg.HORIZONTAL){
                 rs += target.width - left - right;
                 loc = left;
             }
@@ -2871,8 +2803,8 @@ pkg.PercentLayout = Class(L, [
             }
 
             for(var i = 0;i < size; i ++ ){
-                var l = target.kids[i], c = l.constraints, useps = (c == pkg.USE_PS_SIZE);
-                if (this.direction == pkg.HORIZONTAL){
+                var l = target.kids[i], c = l.constraints, useps = (c === pkg.USE_PS_SIZE);
+                if (this.direction === pkg.HORIZONTAL){
                     ns = ((size - 1) == i) ? target.width - right - loc
                                            : (useps ? l.getPreferredSize().width
                                                       : ~~((rs * c) / 100));
@@ -2880,25 +2812,23 @@ pkg.PercentLayout = Class(L, [
                     if (this.stretch === false) {
                         var ph = hh;
                         hh = l.getPreferredSize().height;
-                        yy = top + ~~((ph - hh) / 2);
+                        yy = top + Math.floor((ph - hh) / 2);
                     }
 
-                    l.setLocation(loc, yy);
-                    l.setSize(ns, hh);
+                    l.setBounds(loc, yy, ns, hh);
                 }
                 else {
-                    ns = ((size - 1) == i) ? target.height - bottom - loc
-                                           : (useps ? l.getPreferredSize().height
-                                                    : ~~((rs * c) / 100));
+                    ns = ((size - 1) === i) ? target.height - bottom - loc
+                                            : (useps ? l.getPreferredSize().height
+                                                     : Math.floor((rs * c) / 100));
                     var xx = left, ww = target.width - left - right;
                     if (this.stretch === false) {
                         var pw = ww;
                         ww = l.getPreferredSize().width;
-                        xx = left + ~~((pw - ww) / 2 );
+                        xx = left + Math.floor((pw - ww) / 2);
                     }
 
-                    l.setLocation(xx, loc);
-                    l.setSize(ww, ns);
+                    l.setBounds(xx, loc, ww, ns);
                 }
                 loc += (ns + this.gap);
             }
@@ -2911,8 +2841,8 @@ pkg.PercentLayout = Class(L, [
 
             for(var i = 0;i < size; i++){
                 var d = target.kids[i].getPreferredSize();
-                if (this.direction == pkg.HORIZONTAL){
-                    if(d.height > max) max = d.height;
+                if (this.direction === pkg.HORIZONTAL){
+                    if (d.height > max) max = d.height;
                     as += d.width;
                 }
                 else {
@@ -2920,8 +2850,8 @@ pkg.PercentLayout = Class(L, [
                     as += d.height;
                 }
             }
-            return (this.direction == pkg.HORIZONTAL) ? { width:as, height:max }
-                                                      : { width:max, height:as };
+            return (this.direction === pkg.HORIZONTAL) ? { width:as, height:max }
+                                                       : { width:max, height:as };
         };
     }
 ]);
@@ -3007,8 +2937,8 @@ pkg.Constraints = Class([
          * @method setPadding
          */
         this.setPadding = function(t,l,b,r) {
-            if (arguments.length == 1) {
-                this.bottom = this.left = this.right = t;
+            if (arguments.length === 1) {
+                this.top = this.bottom = this.left = this.right = t;
             }
             else {
                 this.top    = t;
@@ -3059,32 +2989,32 @@ pkg.GridLayout = Class(L, [
         this[''] = function(r,c,m) {
             if (arguments.length < 3) m = 0;
 
-        /**
-         * Number of virtual rows to place children components
-         * @attribute rows
-         * @readOnly
-         * @type {Integer}
-         */
-        this.rows = r;
+            /**
+             * Number of virtual rows to place children components
+             * @attribute rows
+             * @readOnly
+             * @type {Integer}
+             */
+            this.rows = r;
 
-        /**
-         * Number of virtual columns to place children components
-         * @attribute cols
-         * @readOnly
-         * @type {Integer}
-         */
-        this.cols = c;
-        this.mask = m;
-        this.colSizes = Array(c + 1);
-        this.rowSizes = Array(r + 1);
+            /**
+             * Number of virtual columns to place children components
+             * @attribute cols
+             * @readOnly
+             * @type {Integer}
+             */
+            this.cols = c;
+            this.mask = m;
+            this.colSizes = Array(c + 1);
+            this.rowSizes = Array(r + 1);
 
-        /**
-         * Default constraints that is applied for children components
-         * that doesn't define own constraints
-         * @type {zebra.layout.Constraints}
-         * @attribute constraints
-         */
-        this.constraints = new pkg.Constraints();
+            /**
+             * Default constraints that is applied for children components
+             * that doesn't define own constraints
+             * @type {zebra.layout.Constraints}
+             * @attribute constraints
+             */
+            this.constraints = new pkg.Constraints();
         };
 
         /**
@@ -3179,19 +3109,19 @@ pkg.GridLayout = Class(L, [
             if ((this.mask & pkg.HORIZONTAL) > 0) {
                 var dw = c.width - left - c.getRight() - colSizes[cols];
                 for(var i = 0;i < cols; i ++ ) {
-                    colSizes[i] = colSizes[i] + (colSizes[i] !== 0 ? ~~((dw * colSizes[i]) / colSizes[cols]) : 0);
+                    colSizes[i] = colSizes[i] + (colSizes[i] !== 0 ? Math.floor((dw * colSizes[i]) / colSizes[cols]) : 0);
                 }
             }
 
             if ((this.mask & pkg.VERTICAL) > 0) {
                 var dh = c.height - top - c.getBottom() - rowSizes[rows];
                 for(var i = 0;i < rows; i++) {
-                    rowSizes[i] = rowSizes[i] + (rowSizes[i] !== 0 ? ~~((dh * rowSizes[i]) / rowSizes[rows]) : 0);
+                    rowSizes[i] = rowSizes[i] + (rowSizes[i] !== 0 ? Math.floor((dh * rowSizes[i]) / rowSizes[rows]) : 0);
                 }
             }
 
             var cc = 0;
-            for (var i = 0;i < rows && cc < c.kids.length; i++) {
+            for (var i = 0; i < rows && cc < c.kids.length; i++) {
                 var xx = left;
                 for(var j = 0;j < cols && cc < c.kids.length; j++, cc++){
                     var l = c.kids[cc];
@@ -3204,17 +3134,18 @@ pkg.GridLayout = Class(L, [
                         cellW -= (arg.left + arg.right);
                         cellH -= (arg.top  + arg.bottom);
 
-                        if (pkg.STRETCH == arg.ax) d.width  = cellW;
-                        if (pkg.STRETCH == arg.ay) d.height = cellH;
+                        if (pkg.STRETCH === arg.ax) d.width  = cellW;
+                        if (pkg.STRETCH === arg.ay) d.height = cellH;
 
                         l.setSize(d.width, d.height);
                         l.setLocation(
-                            xx  + arg.left + (pkg.STRETCH == arg.ax ? 0 : ((arg.ax == pkg.RIGHT) ? cellW - d.width
-                                                                                                 : ((arg.ax == pkg.CENTER) ? ~~((cellW - d.width) / 2)
-                                                                                                                           : 0))),
-                            top + arg.top  + (pkg.STRETCH == arg.ay ? 0 : ((arg.ay == pkg.TOP  ) ? cellH - d.height
-                                                                                                 : ((arg.ay == pkg.CENTER) ? ~~((cellH - d.height) / 2)
-                                                                                                                           : 0)))
+                            xx  + arg.left + (pkg.STRETCH === arg.ax ? 0
+                                                                     : ((arg.ax === pkg.RIGHT) ? cellW - d.width
+                                                                                               : ((arg.ax === pkg.CENTER) ? Math.floor((cellW - d.width) / 2)
+                                                                                                                             : 0))),
+                            top + arg.top  + (pkg.STRETCH === arg.ay ? 0 : ((arg.ay === pkg.TOP  ) ? cellH - d.height
+                                                                                                   : ((arg.ay === pkg.CENTER) ? Math.floor((cellH - d.height) / 2)
+                                                                                                                              : 0)))
                         );
 
                         xx += colSizes[j];
@@ -3237,27 +3168,53 @@ pkg.GridLayout = Class(L, [
  * @module util
  * @requires zebra
  */
-
 (function(pkg, Class, Interface) {
-/**
- * Instantiate a new class instance by the given class name with the specified constructor
- * arguments.
- * @param  {String} clazz a class name
- * @param  {Array} [args] an arguments list
- * @return {Object}  a new instance of the given class initialized with the specified arguments
- * @api  zebra.util.newInstance()
- * @method newInstance
- */
-pkg.newInstance = function(clazz, args) {
-    if (args && args.length > 0) {
-        var f = function() {};
-        f.prototype = clazz.prototype;
-        var o = new f();
-        o.constructor = clazz;
-        clazz.apply(o, args);
-        return o;
+
+pkg.format = function(s, obj, ph) {
+    if (ph == null) ph = '';
+
+    var rg = /\$\{([0-9]+\s*,)?(.?,)?([a-zA-Z_][a-zA-Z0-9_]*)\}/g,
+        r  = [],
+        i  = 0,
+        j  = 0,
+        m  = null;
+
+    while ((m = rg.exec(s)) !== null) {
+        r[i++] = s.substring(j, m.index);
+        j = m.index + m[0].length;
+
+        var v  = obj[m[3]],
+            mn = "get" + m[3][0].toUpperCase() + m[3].substring(1),
+            f  = obj[mn];
+
+        if (typeof f === "function") {
+            v = f.call(obj);
+        }
+
+        if (m[1] != null) {
+            var ml  = parseInt(m[1].substring(0, m[1].length - 1).trim()),
+                ph2 = m[2] != null ? m[2].substring(0, m[2].length - 1) : ph;
+
+            if (v == null) {
+                ph2 = ph;
+                v = "";
+            }
+            else {
+                v = "" + v;
+            }
+            for(var k = v.length; k < ml; k++) v = ph2 + v;
+        }
+
+        if (v == null) v = ph;
+
+        r[i++] = v;
     }
-    return new clazz();
+
+    if (i > 0) {
+        if (j < s.length) r[i++] = s.substring(j);
+        return pkg.format(r.join(''), obj, ph);
+    }
+    return s;
 };
 
 function hex(v) {
@@ -3366,7 +3323,7 @@ pkg.Runner = function() {
                     $this.$schedule();
                 }
             }
-        }
+        };
     };
 
     this.error = function(callback) {
@@ -3392,7 +3349,6 @@ pkg.Runner = function() {
         }
     };
 };
-
 
 /**
  * Find by xpath-like path an element in a tree-like structure. The method is flexible way to look up
@@ -3459,7 +3415,7 @@ pkg.findInTree = function(root, path, eq, cb) {
             if (r.kids != null) {
                 for (var i = 0; i < r.kids.length; i++) {
                     var kid = r.kids[i];
-                    if (name == '*' || eq(kid, name)) {
+                    if (name === '*' || eq(kid, name)) {
                         if (cb(kid)) return true;
                     }
 
@@ -3474,7 +3430,7 @@ pkg.findInTree = function(root, path, eq, cb) {
         if (ms == null || idx >= ms.length) return cb(root);
 
         var m = ms[idx];
-        return list_child(root, m[2], m[1] == "//", function(child) {
+        return list_child(root, m[2], m[1] === "//", function(child) {
             if (m[3] && child[m[4].substring(1)] != m[5]) return false;
             return _find(child, ms, idx + 1, cb);
         });
@@ -3488,7 +3444,7 @@ pkg.findInTree = function(root, path, eq, cb) {
 
         c += m[0].length;
 
-        if (m[3] && m[5][0] == "'") m[5] = m[5].substring(1, m[5].length - 1);
+        if (m[3] && m[5][0] === "'") m[5] = m[5].substring(1, m[5].length - 1);
         res.push(m);
     }
 
@@ -3554,11 +3510,11 @@ pkg.rgb = function (r, g, b, a) {
 
     /**
      * Indicates if the color is opaque
-     * @attribute isTransparent
+     * @attribute isOpaque
      * @readOnly
      * @type {Boolean}
      */
-    this.isOpaque = false;
+    this.isOpaque = true;
 
     if (arguments.length == 1) {
         if (zebra.isString(r)) {
@@ -3574,7 +3530,7 @@ pkg.rgb = function (r, g, b, a) {
                     this.b = parseInt(p[2].trim(), 10);
                     if (p.length > 3) {
                         this.a = parseInt(p[3].trim(), 10);
-                        this.isOpaque = (this.a != 1);
+                        this.isOpaque = (this.a === 1);
                     }
                     return;
                 }
@@ -3695,14 +3651,21 @@ pkg.isLetter = function (ch) {
  * @param {String} [events]* events types the container has to support
  */
 var $NewListener = function() {
-    if (arguments.length === 0) {
-       arguments = ["fired"];
+    var args = Array.prototype.slice.call(arguments);
+    if (args.length === 0) {
+       args = ["fired"];
     }
 
     var clazz = function() {};
+    clazz.eventNames = args;
+    clazz.ListenersClass = function() {
+        var args = this.eventNames.slice(); // clone
+        for(var i = 0; i < arguments.length; i++) args.push(arguments[i]);
+        return $NewListener.apply(this, args);
+    };
 
-    if (arguments.length == 1) {
-        var name = arguments[0];
+    if (args.length === 1) {
+        var name = args[0];
 
         clazz.prototype.add = function() {
             if (this.v == null) this.v = [];
@@ -3710,13 +3673,12 @@ var $NewListener = function() {
             var ctx = this,
                 l   = arguments[arguments.length - 1]; // last arguments are handler(s)
 
-
             if (typeof l !== 'function') {
                 ctx = l;
                 l   = l[name];
 
                 if (l == null || typeof l !== "function") {
-                    throw new Error("Instance doesn't declare '" + name + "' listener method");
+                    return null;
                 }
             }
 
@@ -3747,15 +3709,18 @@ var $NewListener = function() {
         clazz.prototype[name] = function() {
             if (this.v != null) {
                 for(var i = 0;i < this.v.length; i+=2) {
-                    this.v[i + 1].apply(this.v[i], arguments);
+                    if (this.v[i + 1].apply(this.v[i], arguments) === true) {
+                        return true;
+                    }
                 }
             }
+            return false;
         };
     }
     else {
         var names = {};
-        for(var i=0; i< arguments.length; i++) {
-            names[arguments[i]] = true;
+        for(var i=0; i< args.length; i++) {
+            names[args[i]] = true;
         }
 
         clazz.prototype.add = function(l) {
@@ -3769,8 +3734,7 @@ var $NewListener = function() {
 
             if (typeof l === 'function') {
                 if (n == null) n = zebra.$FN(l);
-
-                if (n != '' && names.hasOwnProperty(n) === false) {
+                if (n !== '' && names.hasOwnProperty(n) === false) {
                     throw new Error("Unknown event type " + n);
                 }
 
@@ -3788,32 +3752,50 @@ var $NewListener = function() {
                 }
 
                 if (b === false) {
-                    throw new Error("No listener methods have been found");
+                    return null;
                 }
             }
             return l;
         };
 
+        clazz.prototype.addEvents = function() {
+            for(var i = 0; i < arguments.length; i++) {
+                var name = arguments[i];
+
+                if (name == null || this[name] != null) {
+                    throw new Error("" + name + " (event name)");
+                }
+
+                this[name] = (function(name) {
+                    return function() {
+                        if (this.methods != null) {
+                            var c = this.methods[name];
+                            if (c != null) {
+                                for(var i = 0; i < c.length; i+=2) {
+                                    if (c[i+1].apply(c[i], arguments) === true) {
+                                        return true;
+                                    }
+                                }
+                            }
+
+                            c = this.methods[''];
+                            if (c != null) {
+                                for(var i = 0; i < c.length; i+=2) {
+                                    if (c[i+1].apply(c[i], arguments) === true) {
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                        return false;
+                    };
+                })(name);
+            }
+        };
+
         // populate methods that has to be called to send appropriate events to
         // registered listeners
-        for(var i=0; i < arguments.length; i++) {
-            var m = arguments[i];
-            (function(m) {
-                clazz.prototype[m] = function() {
-                    if (this.methods != null) {
-                        var c = this.methods[m];
-                        if (c != null) {
-                            for(var i=0; i < c.length; i+=2) c[i+1].apply(c[i], arguments);
-                        }
-
-                        c = this.methods[''];
-                        if (c != null) {
-                            for(var i=0; i < c.length; i+=2) c[i+1].apply(c[i], arguments);
-                        }
-                    }
-                };
-            })(m);
-        }
+        clazz.prototype.addEvents.apply(clazz.prototype, args);
 
         clazz.prototype.remove = function(l) {
             if (this.methods != null) {
@@ -3839,6 +3821,7 @@ var $NewListener = function() {
             }
         };
     }
+
     return clazz;
 };
 
@@ -3870,8 +3853,10 @@ pkg.ListenersClass = $NewListener;
  * @param {Integer} prevLine a previous virtual cursor line
  * @param {Integer} prevCol a previous virtual cursor column in the previous line
  */
-var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = Class([
+var  Position = pkg.Position = Class([
     function $clazz() {
+        this.Listeners = pkg.ListenersClass("posChanged"),
+
         /**
          * Position metric interface. This interface is designed for describing
          * a navigational structure that consists on number of lines where
@@ -3899,11 +3884,6 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
           */
 
         this.Metric = Interface();
-
-        this.DOWN = 1;
-        this.UP   = 2;
-        this.BEG  = 3;
-        this.END  = 4;
     },
 
     function $prototype() {
@@ -3916,7 +3896,7 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
         this.setOffset = function(o){
             if (o < 0) o = 0;
             else {
-                if (o == null) o = -1;
+                if (o === null) o = -1;
                 else {
                     var max = this.metrics.getMaxOffset();
                     if (o >= max) o = max;
@@ -3932,7 +3912,10 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
                 this.offset = o;
                 if (p != null){
                     this.currentLine = p[0];
-                    this.currentCol = p[1];
+                    this.currentCol  = p[1];
+                }
+                else {
+                    this.currentLine = this.currentCol = -1;
                 }
                 this.isValid = true;
                 this._.posChanged(this, prevOffset, prevLine, prevCol);
@@ -3957,7 +3940,7 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
          * @param {Integer} c a column in the line
          * @method setRowCol
          */
-        this.setRowCol = function(r,c) {
+        this.setRowCol = function(r, c) {
             if (r != this.currentLine || c != this.currentCol){
                 var prevOffset = this.offset,
                     prevLine = this.currentLine,
@@ -4003,22 +3986,23 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
                 if (off === 0) return [0, 0];
 
                 var d = 0, sl = 0, so = 0;
-                if (this.isValid && this.offset != -1) {
+                if (this.isValid === true && this.offset != -1) {
                     sl = this.currentLine;
                     so = this.offset - this.currentCol;
                     if (off > this.offset) d = 1;
                     else {
-                        if (off < this.offset) d =  -1;
+                        if (off < this.offset) d = -1;
                         else return [sl, this.currentCol];
                     }
                 }
                 else {
-                    d = (~~(max / off) === 0) ?  -1 : 1;
+                    d = (~~(max / off) === 0) ? -1 : 1;
                     if (d < 0) {
                         sl = m.getLines() - 1;
                         so = max - m.getLineSize(sl);
                     }
                 }
+
                 for(; sl < m.getLines() && sl >= 0; sl += d){
                     var ls = m.getLineSize(sl);
                     if (off >= so && off < so + ls) {
@@ -4027,7 +4011,7 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
                     so += d > 0 ? ls : -m.getLineSize(sl - 1);
                 }
             }
-            return [-1, -1];
+            return null;
         };
 
         /**
@@ -4040,11 +4024,15 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
         this.getOffsetByPoint = function (row, col){
             var startOffset = 0, startLine = 0, m = this.metrics;
 
-            if (row >= m.getLines() || col >= m.getLineSize(row)) {
-                throw new Error();
+            if (row >= m.getLines()) {
+                throw new RangeError(row);
             }
 
-            if (this.isValid && this.offset !=  -1) {
+            if (col >= m.getLineSize(row)) {
+                throw new RangeError(col);
+            }
+
+            if (this.isValid === true && this.offset !=  -1) {
                 startOffset = this.offset - this.currentCol;
                 startLine = this.currentLine;
             }
@@ -4065,10 +4053,10 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
          * Seek virtual cursor to the next position. How the method has to seek to the next position
          * has to be denoted by one of the following constants:
 
-    - **zebra.util.Position.BEG** seek cursor to the begin of the current line
-    - **zebra.util.Position.END** seek cursor to the end of the current line
-    - **zebra.util.Position.UP** seek cursor one line up
-    - **zebra.util.Position.DOWN** seek cursor one line down
+    - **"begin"** seek cursor to the begin of the current line
+    - **"end"** seek cursor to the end of the current line
+    - **"up"** seek cursor one line up
+    - **"down"** seek cursor one line down
 
          * If the current virtual position is not known (-1) the method always sets
          * it to the first line, the first column in the line (offset is zero).
@@ -4081,23 +4069,23 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
                 this.setOffset(0);
             }
             else {
-                if (arguments.length == 1) num = 1;
+                if (arguments.length === 1) num = 1;
 
                 var prevOffset = this.offset, prevLine = this.currentLine, prevCol = this.currentCol;
                 switch(t) {
-                    case Position.BEG:
+                    case "begin":
                         if (this.currentCol > 0){
                             this.offset -= this.currentCol;
                             this.currentCol = 0;
                         } break;
-                    case Position.END:
+                    case "end":
                         var maxCol = this.metrics.getLineSize(this.currentLine);
                         if (this.currentCol < (maxCol - 1)){
                             this.offset += (maxCol - this.currentCol - 1);
                             this.currentCol = maxCol - 1;
                         } break;
-                    case Position.UP:
-                        if (this.currentLine > 0){
+                    case "up":
+                        if (this.currentLine > 0) {
                             this.offset -= (this.currentCol + 1);
                             this.currentLine--;
                             for(var i = 0;this.currentLine > 0 && i < (num - 1); i++, this.currentLine--){
@@ -4107,8 +4095,8 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
                             if (this.currentCol < maxCol) this.offset -= (maxCol - this.currentCol - 1);
                             else this.currentCol = maxCol - 1;
                         } break;
-                    case Position.DOWN:
-                        if (this.currentLine < (this.metrics.getLines() - 1)){
+                    case "down":
+                        if (this.currentLine < (this.metrics.getLines() - 1)) {
                             this.offset += (this.metrics.getLineSize(this.currentLine) - this.currentCol);
                             this.currentLine++;
                             var size = this.metrics.getLines() - 1;
@@ -4122,7 +4110,7 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
                                 this.offset += this.currentCol;
                             }
                         } break;
-                    default: throw new Error();
+                    default: throw new Error("" + t);
                 }
 
                 this._.posChanged(this, prevOffset, prevLine, prevCol);
@@ -4130,7 +4118,7 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
         };
 
         this[''] = function(pi){
-            this._ = new PosListeners();
+            this._ = new this.$clazz.Listeners();
             this.isValid = false;
 
             /**
@@ -4195,8 +4183,7 @@ pkg.SingleColPosition = Class(pkg.Position, [
                     prevLine   = this.currentLine,
                     prevCol    = this.currentCol;
 
-                this.offset = o;
-                this.currentLine = o;
+                this.currentLine = this.offset = o;
                 this.isValid = true;
                 this._.posChanged(this, prevOffset, prevLine, prevCol);
             }
@@ -4209,19 +4196,19 @@ pkg.SingleColPosition = Class(pkg.Position, [
                 this.setOffset(0);
             }
             else {
-                if (arguments.length == 1) num = 1;
+                if (arguments.length === 1) num = 1;
                 switch(t) {
-                    case Position.BEG:
-                    case Position.END: break;
-                    case Position.UP:
+                    case "begin":
+                    case "end": break;
+                    case "up":
                         if (this.offset > 0) {
                             this.setOffset(this.offset - n);
                         } break;
-                    case Position.DOWN:
+                    case "down":
                         if (this.offset < (this.metrics.getLines() - 1)){
                             this.setOffset(this.offset + n);
                         } break;
-                    default: throw new Error();
+                    default: throw new Error("" + t);
                 }
             }
         };
@@ -4344,7 +4331,7 @@ pkg.SingleColPosition = Class(pkg.Position, [
      */
     Task.prototype.pause = function(t) {
         if (this.task == null) {
-            throw new Error();
+            throw new Error("Stopped task cannot be paused");
         }
 
         if (arguments.length === 0) {
@@ -4397,7 +4384,7 @@ pkg.SingleColPosition = Class(pkg.Position, [
         }
 
         if (f == null) {
-            throw new Error();
+            throw new Error("" + f);
         }
 
         // find free and return free task
@@ -4458,7 +4445,7 @@ pkg.SingleColPosition = Class(pkg.Position, [
             // component that inherits properties from BaseComponent,
             // but override background property with own value
            "ExtenderComp": {
-               "$inherit": "BaseComponent",
+               "inherit": [ "BaseComponent" ],
                "background": "green"
            }
         }
@@ -4486,17 +4473,6 @@ pkg.SingleColPosition = Class(pkg.Position, [
 pkg.Bag = zebra.Class([
     function $prototype() {
         /**
-         * The attribute rules how arrays have to be merged if the bag is loaded from few
-         * JSON sources. true means that if a two JSON have the same key that reference to
-         * array values the final value will be a concatenation of the two arrays from the
-         * two JSON sources.
-         * @attribute concatArrays
-         * @type {Boolean}
-         * @default false
-         */
-        this.concatArrays = false;
-
-        /**
          * The property says if the object introspection is required to try find a setter
          * method for the given key. For instance if an object is loaded with the
          * following JSON:
@@ -4515,6 +4491,8 @@ pkg.Bag = zebra.Class([
 
         this.ignoreNonExistentKeys = false;
 
+        this.globalPropertyLookup = false;
+
         /**
          * Get a property value. The property name can point to embedded fields:
          *
@@ -4528,71 +4506,71 @@ pkg.Bag = zebra.Class([
          *
          * @param  {String} key a property key.
          * @return {Object} a property value
+         * @throws Error if property cannot be found and "ignoreNonExistentKeys" is true
          * @method  get
          */
         this.get = function(key) {
-            if (key == null) throw new Error("Null key");
-            var n = key.split('.'), v = this.root;
-            for(var i = 0; i < n.length; i++) {
-                v = v[n[i]];
+            if (key == null) {
+                throw new Error("Null key");
+            }
+
+            var v = this.$get(key.split('.'), this.root);
+            if (this.ignoreNonExistentKeys !== true && v === undefined) {
+                throw new Error("Property '" + key + "' not found");
+            }
+
+            return v;
+        };
+
+        this.$get = function(keys, root) {
+            var v = root;
+            for(var i = 0; i < keys.length; i++) {
+                v = v[keys[i]];
                 if (typeof v === "undefined") {
-                    if (this.ignoreNonExistentKeys === true) return v;
-                    throw new Error("Property '" + key + "' not found");
+                    return undefined;
                 }
             }
             return v != null && v.$new ? v.$new() : v;
         };
 
-        // create, merge to o and return a value by the given
-        // description d that is designed to be assigned to
-        // -- atomic types int string boolean number are returned as is
-        // -- created by the given description array are append to o array
-        // -- structure description (dictionary) are merged to o
-        this.mergeObjWithDesc = function(o, d, callback) {
-            // atomic type should be returned as is
-            if (d === null || zebra.isNumber(d) || zebra.isBoolean(d)) {
+        this.$isAtomic = function(v) {
+            return zebra.isString(v) || zebra.isNumber(v) || zebra.isBoolean(v);
+        };
+
+        this.callMethod = function(name, args) {
+            var vs  = [ this, this.root],
+                m   = null,
+                ctx = null;
+
+            // lookup method
+            for(var i = 0; i < vs.length; i++) {
+                if (vs[i] != null && vs[i][name] != null && typeof vs[i][name] == 'function') {
+                    ctx = vs[i];
+                    m   = vs[i][name];
+                    break;
+                }
+            }
+
+            if (m == null || typeof m != 'function') {
+                throw new Error("Method '" + name + "' cannot be found");
+            }
+
+            return m.apply(ctx, Array.isArray(args) ? args : [ args ]);
+        };
+
+        this.buildValue = function(d) {
+            if (d == null || zebra.isNumber(d) || zebra.isBoolean(d)) {
                 return d;
             }
 
-            // array should be merged (concatenated)
             if (Array.isArray(d)) {
-                var v = [];
-                for(var i = 0; i < d.length; i++) v[i] = this.mergeObjWithDesc(null, d[i]);
-                if (this.concatArrays === false) {
-                    return v;
-                }
-
-                if (o && Array.isArray(o) === false) {
-                    throw new Error("Destination has to be array: " + o);
-                }
-                return (o != null) ? o.concat(v) : v;
+                for(var i = 0; i < d.length; i++) d[i] = this.buildValue(d[i]);
+                return d;
             }
 
-            // string is atomic, but  string can encode type other
-            // than string, decode string (if necessary) by calling
-            // decodeStringValue method
             if (zebra.isString(d)) {
-                if (d[0] == "@") {
-                    // check if the reference point to external JSON
-                    // and load the JSON
-                    if (d[1] == "(" && d[d.length-1] == ")") {
-                        var $this = this,
-                            bag = new (this.$clazz)([
-                                // child bag has to be able resolve variable using parent resolver
-                                function resolveVar(name) {
-                                    try { return this.$super(name); }
-                                    catch(e) {}
-                                    return $this.resolveVar(name);
-                                },
-
-                                function resolveClass(className) {
-                                    var clazz = this.classAliases.hasOwnProperty(className) ? this.$super(className)
-                                                                                            : null;
-                                    return (clazz != null) ? clazz
-                                                           : $this.resolveClass(className);
-                                }
-                            ]);
-
+                if (d[0] === '@') {
+                    if (d[1] === "(" && d[d.length-1] === ")") {
                         // if the referenced path is not absolute path and the bag has been also
                         // loaded by an URL than build the full URL as a relative path from
                         // BAG URL
@@ -4603,44 +4581,57 @@ pkg.Bag = zebra.Class([
                                 path = pURL.join(path);
                             }
                         }
-                        bag.load(path);
-                        return bag.root;
+                        return this.buildValue(JSON.parse(zebra.io.GET(path)));
                     }
-
-                    // resolve variable
                     return this.resolveVar(d.substring(1).trim());
                 }
-
-                return this.decodeStringValue != null ? this.decodeStringValue(d) : d;
+                return d;
             }
 
-            // store and cleanup $inherit synthetic field from description.
-            var inh = null;
-            if (d.hasOwnProperty("$inherit")) {
-                inh = d.$inherit;
-                delete d.$inherit;
+            // save inheritance
+            var inc = d.inherit;
+            if (inc != null) {
+                delete d.inherit;
             }
 
             // test whether we have a class definition
             for (var k in d) {
                 // handle class definition
-                if (k[0] == '$' && d.hasOwnProperty(k)) {
-                    var classname = k.substring(1).trim(), args = d[k];
-                    args = this.mergeObjWithDesc(null, Array.isArray(args) ? args : [ args ]);
+                if (k[0] === '$' && d.hasOwnProperty(k) === true) {
+                    var classname = k.substring(1).trim(),
+                        args      = d[k],
+                        clz       = null;
+
                     delete d[k]; // delete class name
 
-                    if (classname[0] == "*") {
+                    if (classname[0] === "?") {
+                        classname = classname.substring(1).trim();
+                        try {
+                            clz = this.resolveClass(classname[0] === '*' ? classname.substring(1).trim() : classname);
+                        }
+                        catch (e) {
+                            return null;
+                        }
+                    }
+                    else {
+                        clz = this.resolveClass(classname[0] === '*' ? classname.substring(1).trim() : classname);
+                    }
+
+                    args = this.buildValue(Array.isArray(args) ? args : [ args ]);
+                    if (classname[0] === "*") {
                         return (function(clazz, args) {
                             return {
                                 $new : function() {
-                                    return pkg.newInstance(clazz, args);
+                                    return zebra.newInstance(clazz, args);
                                 }
                             };
-                        })(this.resolveClass(classname.substring(1).trim()), args);
+                        })(clz, args);
                     }
 
                     // apply properties to instantiated class
-                    return this.mergeObjWithDesc(pkg.newInstance(this.resolveClass(classname), args), d);
+                    var classInstance = zebra.newInstance(clz, args);
+                    this.populate(classInstance, d);
+                    return classInstance;
                 }
 
                 //!!!!  trust the name of class occurs first what in general
@@ -4650,70 +4641,89 @@ pkg.Bag = zebra.Class([
                 break;
             }
 
-            // the description is not atomic or array type. it can
-            // be either a number of fields that should be merged
-            // with appropriate field of "o" object, or it can define
-            // how to instantiate an instance of a class. There is
-            // one special case: ".name" property says that object
-            // is created by calling "name" method
-            var v = (o == null         || zebra.isNumber(o) ||
-                    zebra.isBoolean(o) || zebra.isString(o) ||
-                    Array.isArray(o)) ? d : o;
-
             for (var k in d) {
                 if (d.hasOwnProperty(k)) {
-                    if (k[0] == '?') {
-                        eval("var xx=" + k.substring(1).trim() + ";");
-                        if (xx) {
-                            o = this.mergeObjWithDesc(o, d[k]);
-                        }
-                        continue;
-                    }
+                    var v = d[k];
 
                     // special field name that says to call method to create a
                     // value by the given description
-                    if (k[0] == ".") {
-                        var vv  = d[k],
-                            mn  = k.substring(1).trim(),
-                            vs  = [ this, this.root],
-                            m   = null,
-                            ctx = null;
-
-                        for(var ij = 0; ij < vs.length; ij++) {
-                            if (vs[ij] != null && vs[ij][mn] != null && typeof vs[ij][mn] == 'function') {
-                                ctx = vs[ij];
-                                m   = vs[ij][mn];
-                                break;
-                            }
-                        }
-
-                        if (m == null || typeof m != 'function') {
-                            throw new Error("Method '" + mn + "' cannot be found");
-                        }
-
-                        return m.apply(ctx, Array.isArray(vv) ? this.mergeObjWithDesc(null, vv)
-                                                              : [this.mergeObjWithDesc(null, vv)]);
-                    }
-
-                    // try to find if the destination object already has the property k
-                    var nv = this.mergeObjWithDesc((o && o.hasOwnProperty(k) ? o[k]
-                                                                             : null), d[k]);
-
-                    if (this.usePropertySetters === true) {
-                        var m  = zebra.getPropertySetter(v, k);
-                        if (m != null) {
-                            if (Array.isArray(nv)) m.apply(v, nv);
-                            else                   m.call(v, nv);
-                            continue;
+                    if (k[0] === ".") {
+                        var mres = this.callMethod(k.substring(1).trim(), this.buildValue(v));
+                        delete d[k];
+                        if (typeof mres !== 'undefined') {
+                            return mres;
                         }
                     }
-                    v[k] = nv;
+                    else {
+                        d[k] = this.buildValue(d[k]);
+                    }
                 }
             }
 
-            if (inh !== null) this.inherit(v, inh);
+            if (inc != null) {
+                this.inherit(d, inc);
+            }
 
-            return v;
+            return d;
+        };
+
+        this.populate = function(obj, desc) {
+            var inc = desc.inherit;
+            if (inc != null) {
+                delete desc.inherit;
+            }
+
+            for(var k in desc) {
+                if (desc.hasOwnProperty(k) === true) {
+                    var v = desc[k];
+                    if (k[0] === '.') {
+                        this.callMethod(k.substring(1).trim(), this.buildValue(v));
+                        continue;
+                    }
+
+                    if (this.usePropertySetters === true) {
+                        var m  = zebra.getPropertySetter(obj, k);
+                        if (m != null) {
+                            if (Array.isArray(v)) m.apply(obj, this.buildValue(v));
+                            else                  m.call (obj, this.buildValue(v));
+                            continue;
+                        }
+                    }
+
+                    // if target object doesn't have a property defined or
+                    // the destination value is atomic or array than
+                    // set it directly
+                    var ov = obj[k];
+                    if (ov == null || this.$isAtomic(ov) || Array.isArray(ov) ||
+                        v == null  || this.$isAtomic(v)  || Array.isArray(v)  ||
+                        this.$isClassDefinition(k, v)                               )
+                    {
+
+                        obj[k] = this.buildValue(v);
+                    }
+                    else {
+                        obj[k] = this.populate(obj[k], v);
+                    }
+                }
+            }
+
+            if (inc != null) {
+                this.inherit(obj, inc);
+            }
+
+            return obj;
+        };
+
+        this.$isClassDefinition = function(kk, v) {
+            if (v != null && v.constructor === Object) {
+                for(var k in v) {
+                    if (k[0] === '$') {
+                        return true;
+                    }
+                    break;
+                }
+            }
+            return false;
         };
 
         /**
@@ -4728,22 +4738,34 @@ pkg.Bag = zebra.Class([
                                                                : zebra.Class.forName(className);
         };
 
-        this.inherit = function(o, pp) {
-            for(var i=0; i < pp.length; i++) {
-                var op = this.root,
-                    nn = pp[i].trim().split("."),
-                    j  = 0;
+        this.addClassAliases = function (aliases) {
+            for(var k in aliases) {
+                this.classAliases[k] = Class.forName(aliases[k].trim());
+            }
+        };
 
-                while (j < nn.length) {
-                    op = op[nn[j++]];
-                    if (op == null) {
-                        throw new Error("Wrong inherit path '" + n + "(" + nn[j-1] + ")'");
-                    }
+        this.addVariables = function(variables) {
+            for(var k in variables) {
+                this.variables[k] = variables[k];
+            }
+        };
+
+        this.inherit = function(o, inc) {
+            if (Array.isArray(inc) === false) inc = [ inc ];
+            for (var i = 0; i < inc.length; i++) {
+                var v = this.resolveVar(inc[i]);
+
+                if (typeof v === 'undefined') {
+                    throw new Error("Reference '" + inc[i] + "' not found");
                 }
 
-                for(var k in op) {
-                    if (k[0] != '$' && op.hasOwnProperty(k) && o.hasOwnProperty(k) === false) {
-                        o[k] = op[k];
+                if (v == null || this.$isAtomic(v) || Array.isArray(v)) {
+                    throw new Error("Invalid type of inheritance '" + inc[i] + "'");
+                }
+
+                for(var kk in v) {
+                    if (kk[0] !== '$' && v.hasOwnProperty(kk) === true && o.hasOwnProperty(kk) === false) {
+                        o[kk] = v[kk];
                     }
                 }
             }
@@ -4769,8 +4791,8 @@ pkg.Bag = zebra.Class([
                     s = s.trim();
 
                     // detect if the passed string is not a JSON
-                    if ((s[0] != '[' || s[s.length - 1] != ']') &&
-                        (s[0] != '{' || s[s.length - 1] != '}')   )
+                    if ((s[0] !== '[' || s[s.length - 1] !== ']') &&
+                        (s[0] !== '{' || s[s.length - 1] !== '}')   )
                     {
                         var p = s.toString();
                         p = p + (p.lastIndexOf("?") > 0 ? "&" : "?") + (new Date()).getTime().toString();
@@ -4796,7 +4818,7 @@ pkg.Bag = zebra.Class([
                 }
                 return s;
             })
-            .
+            . // parse JSON if necessary
             run(function(s) {
                 if (zebra.isString(s)) {
                     try {
@@ -4808,31 +4830,11 @@ pkg.Bag = zebra.Class([
                 }
                 return s;
             })
-            .
+            . // populate JSON content
             run(function(content) {
-                if (content.hasOwnProperty("classAliases")) {
-                    var vars = content.classAliases;
-                    for(var k in vars) {
-                        $this.classAliases[k] = Class.forName(vars[k].trim());
-                    }
-                    delete content.classAliases;
-                }
-
-                if (content.hasOwnProperty("variables")) {
-                    $this.variables = $this.mergeObjWithDesc($this.variables, content.variables);
-                    delete content.variables;
-                }
-
-                return content;
-            })
-            .
-            run(function(content) {
-                return $this.mergeObjWithDesc($this.root, content);
-            })
-            .
-            run(function(root) {
+                $this.content = content;
+                $this.root = ($this.root == null ? $this.buildValue(content) : $this.populate($this.root, content));
                 if (cb != null) cb.call($this);
-                $this.root = root;
             })
             .
             error(function(e) {
@@ -4844,8 +4846,30 @@ pkg.Bag = zebra.Class([
         };
 
         this.resolveVar = function(name) {
-            return this.variables.hasOwnProperty(name) ? this.variables[name]
-                                                       : this.get(name);
+            if (this.variables.hasOwnProperty(name)) {
+                return this.variables[name];
+            }
+
+            var k = name.split("."),
+                v = undefined;
+
+            if (this.root != null) {
+                v = this.$get(k, this.root);
+            }
+
+            if (typeof v === 'undefined') {
+                v = this.$get(k, this.content);
+            }
+
+            if (typeof v === 'undefined' && this.globalPropertyLookup === true) {
+                v = this.$get(k, zebra.$global);
+            }
+
+            if (typeof v === 'undefined') {
+                throw new Error("Invalid reference '" +  name + "'");
+            }
+
+            return v;
         };
 
         this.expr = function(e) {
@@ -4868,7 +4892,7 @@ pkg.Bag = zebra.Class([
              * @type {Object}
              * @default {}
              */
-            this.root = (root == null ? {} : root);
+            this.root = (root != null ? root : null);
 
             /**
              * Map of classes
@@ -5910,7 +5934,7 @@ pkg.JRPC.invoke = function(url, method) {
  * @requires zebra, util
  */
 
-(function(pkg, Class, Interface) {
+(function(pkg, Class) {
 
 pkg.descent = function descent(a, b) {
     if (a == null) return 1;
@@ -5923,9 +5947,9 @@ pkg.ascent = function ascent(a, b) {
 };
 
 /**
- * Text model interface
+ * Text model class
  * @class zebra.data.TextModel
- * @interface
+ * @abstract
 */
 
 /**
@@ -5998,10 +6022,11 @@ pkg.ascent = function ascent(a, b) {
  * @param {Integer}  lines a number of lines that has been affected
  * by the text model update
  */
-pkg.TextModel = Interface();
-
-
-var oobi = "Index is out of bounds: ";
+pkg.TextModel = Class([
+    function $clazz() {
+        this.Listeners = zebra.util.ListenersClass("textUpdated");
+    }
+]);
 
 function Line(s) {
     this.s = s;
@@ -6009,8 +6034,6 @@ function Line(s) {
 
 //  toString for array.join method
 Line.prototype.toString = function() { return this.s; };
-
-pkg.TextModelListeners = zebra.util.ListenersClass("textUpdated");
 
 /**
  * Multi-lines text model implementation
@@ -6039,6 +6062,7 @@ pkg.Text = Class(pkg.TextModel, [
         };
 
         this.getLine = function(line) {
+            if (line < 0 || line >= this.lines.length) throw RangeError(line);
             return this.lines[line].s;
         };
 
@@ -6124,6 +6148,7 @@ pkg.Text = Class(pkg.TextModel, [
             if (text == null) {
                 throw new Error("Invalid null string");
             }
+
             var old = this.getValue();
             if (old !== text) {
                 if (old.length > 0) {
@@ -6144,7 +6169,7 @@ pkg.Text = Class(pkg.TextModel, [
 
         this[''] = function(s){
             this.lines = [ new Line("") ];
-            this._ = new pkg.TextModelListeners();
+            this._ = new this.$clazz.Listeners();
             this.setValue(s == null ? "" : s);
         };
     }
@@ -6193,7 +6218,7 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
 
         this.getLine = function(line){
             if (line !== 0) {
-                throw new Error(oobi + line);
+                throw new RangeError(line);
             }
             return this.buf;
         };
@@ -6239,6 +6264,10 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
                 throw new Error("Invalid null string");
             }
 
+            if (this.validate != null && this.validate(text) == false) {
+                return false;
+            }
+
             // cut to next line
             var i = text.indexOf('\n');
             if (i >= 0) {
@@ -6258,6 +6287,7 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
                 this._.textUpdated(this, true, 0, text.length, 0, 1);
                 return true;
             }
+
             return false;
         };
 
@@ -6287,13 +6317,11 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
             this.maxLen = max == null ? -1 : max;
             this.buf = "";
             this.extra = 0;
-            this._ = new pkg.TextModelListeners();
+            this._ = new this.$clazz.Listeners();
             this.setValue(s == null ? "" : s);
         };
     }
 ]);
-
-pkg.ListModelListeners = zebra.util.ListenersClass("elementInserted", "elementRemoved", "elementSet");
 
 /**
  * List model class
@@ -6336,18 +6364,22 @@ pkg.ListModelListeners = zebra.util.ListenersClass("elementInserted", "elementRe
  /**
   * Fired when an element has been re-set
 
-     list.bind(function elementSet(src, o, pe, i) {
+     list.bind(function elementSet(src, o, p, i) {
          ...
      });
 
   * @event elementSet
   * @param {zebra.data.ListModel} src a list model that triggers the event
   * @param {Object}  o an element that has been set
-  * @param {Object}  pe a previous element
+  * @param {Object}  p a previous element
   * @param {Integer} i an index at that the element has been re-set
   */
 
 pkg.ListModel = Class([
+    function $clazz () {
+        this.Listeners = zebra.util.ListenersClass("elementInserted", "elementRemoved", "elementSet");
+    },
+
     function $prototype() {
         /**
          * Get an item stored at the given location in the list
@@ -6357,7 +6389,7 @@ pkg.ListModel = Class([
          */
         this.get = function(i) {
             if (i < 0 || i >= this.d.length) {
-                throw new Error(oobi + i);
+                throw new RangeError(i);
             }
             return this.d[i];
         };
@@ -6406,12 +6438,12 @@ pkg.ListModel = Class([
         /**
          * Insert the given element into the given position of the list
          * @method insert
-         * @param {Object} o an element to be inserted into the list
          * @param {Integer} i a position at which the element has to be inserted into the list
+         * @param {Object} o an element to be inserted into the list
          */
-        this.insert = function(o,i){
-            if(i < 0 || i >= this.d.length) {
-                throw new Error(oobi + i);
+        this.insert = function(i, o){
+            if (i < 0 || i > this.d.length) {
+                throw new RangeError(i);
             }
             this.d.splice(i, 0, o);
             this._.elementInserted(this, o, i);
@@ -6428,14 +6460,14 @@ pkg.ListModel = Class([
 
         /**
          * Set the new element at the given position
-         * @method set
-         * @param  {Object} o a new element to be set as the list element at the given position
+         * @method setAt
          * @param  {Integer} i a position
+         * @param  {Object} o a new element to be set as the list element at the given position
          * @return {Object}  previous element that was stored at the given position
          */
-        this.set = function (o,i){
+        this.setAt = function(i, o) {
             if (i < 0 || i >= this.d.length) {
-                throw new Error(oobi + i);
+                throw new RangeError(i);
             }
             var pe = this.d[i];
             this.d[i] = o;
@@ -6464,7 +6496,7 @@ pkg.ListModel = Class([
         };
 
         this[''] = function() {
-            this._ = new pkg.ListModelListeners();
+            this._ = new this.$clazz.Listeners();
             this.d = (arguments.length === 0) ? [] : arguments[0];
         };
     }
@@ -6508,10 +6540,6 @@ var Item = pkg.Item = Class([
         };
     }
 ]);
-
-
-pkg.TreeModelListeners = zebra.util.ListenersClass("itemModified", "itemRemoved", "itemInserted");
-
 
 /**
  * Tree model class. The class is simple and handy way to keep hierarchical structure.
@@ -6569,6 +6597,8 @@ pkg.TreeModelListeners = zebra.util.ListenersClass("itemModified", "itemRemoved"
 
 pkg.TreeModel = Class([
     function $clazz() {
+        this.Listeners = zebra.util.ListenersClass("itemModified", "itemRemoved", "itemInserted");
+
         this.create = function(r, p) {
             var item = new Item(r.hasOwnProperty("value")? r.value : r);
             item.parent = p;
@@ -6659,7 +6689,7 @@ pkg.TreeModel = Class([
          * the parent item
          */
         this.insert = function(to,item,i){
-            if (i < 0 || to.kids.length < i) throw new Error(oobi + i);
+            if (i < 0 || to.kids.length < i) throw new RangeError(i);
             if (zebra.isString(item)) {
                 item = new Item(item);
             }
@@ -6724,14 +6754,10 @@ pkg.TreeModel = Class([
              */
             this.root = zebra.instanceOf(r, Item) ? r : pkg.TreeModel.create(r);
             this.root.parent = null;
-            this._ = new pkg.TreeModelListeners();
+            this._ = new this.$clazz.Listeners();
         };
     }
 ]);
-
-pkg.MatrixListeners = zebra.util.ListenersClass("matrixResized", "cellModified",
-                                        "matrixSorted", "matrixRowInserted",
-                                        "matrixColInserted");
 
 /**
  *  Matrix model class.
@@ -6742,6 +6768,12 @@ pkg.MatrixListeners = zebra.util.ListenersClass("matrixResized", "cellModified",
  *  @class zebra.data.Matrix
  */
 pkg.Matrix = Class([
+    function $clazz() {
+        this.Listeners = zebra.util.ListenersClass("matrixResized", "cellModified",
+                                                   "matrixSorted", "matrixRowInserted",
+                                                   "matrixColInserted");
+    },
+
     function $prototype() {
         /**
          * Fired when the matrix model size (number of rows or columns) is changed.
@@ -6798,10 +6830,25 @@ pkg.Matrix = Class([
          * @return {Object}  matrix model cell value
          */
         this.get = function (row,col){
-            if (row < 0 || row >= this.rows || col < 0 || col >= this.cols) {
-                throw new Error("Row or col is out of bounds: " + row + "," + col);
+            if (row < 0 || row >= this.rows) {
+                throw new RangeError(row);
             }
+
+            if (col < 0 || col >= this.cols) {
+                throw new RangeError(col);
+            }
+
             return this.objs[row] == null ? undefined : this.objs[row][col];
+        };
+
+        /**
+         * Get a matrix model cell value by the specified index
+         * @method geti
+         * @param  {Integer} index a cell index
+         * @return {Object}  matrix model cell value
+         */
+        this.geti = function(i) {
+            return this.get(~~(i / this.cols), i % this.cols);
         };
 
         /**
@@ -6825,7 +6872,6 @@ pkg.Matrix = Class([
 
                 // allocate array if no data for the given row exists
                 if (this.objs[row] == null) this.objs[row] = [];
-
                 this.objs[row][col] = obj;
                 this._.cellModified(this, row, col, old);
             }
@@ -6909,7 +6955,7 @@ pkg.Matrix = Class([
             }
 
             if (begrow < 0 || begrow + count > this.rows) {
-                throw new Error("Invalid row " + begrow);
+                throw new RangeError(begrow);
             }
 
             this.objs.splice(begrow, count);
@@ -6930,7 +6976,7 @@ pkg.Matrix = Class([
             }
 
             if (begcol < 0 || begcol + count > this.cols) {
-                throw new Error("Invalid column : " + begcol);
+                throw new RangeError(begcol);
             }
 
             for(var i = 0; i < this.objs.length; i++) {
@@ -7033,7 +7079,7 @@ pkg.Matrix = Class([
              * @readOnly
              */
 
-            this._ = new pkg.MatrixListeners();
+            this._ = new this.$clazz.Listeners();
             if (arguments.length == 1) {
                 this.objs = arguments[0];
                 this.cols = (this.objs.length > 0) ? this.objs[0].length : 0;
@@ -7054,25 +7100,418 @@ pkg.Matrix = Class([
  * @for
  */
 
-})(zebra("data"), zebra.Class, zebra.Interface);
-(function(pkg) {
+})(zebra("data"), zebra.Class);
+(function(pkg, Class) {
+    pkg.$deviceRatio = typeof window.devicePixelRatio !== "undefined"
+                        ? window.devicePixelRatio
+                        : (typeof window.screen.deviceXDPI !== "undefined"
+                            ? window.screen.deviceXDPI / window.screen.logicalXDPI // IE
+                            : 1);
+
+
+    var $taskMethod = window.requestAnimationFrame       ||
+                      window.webkitRequestAnimationFrame ||
+                      window.mozRequestAnimationFrame    ||
+                      function(callback) { return window.setTimeout(callback, 35); };
+
+    pkg.$task = function(f){
+        return $taskMethod.call(window, f);
+    };
+
+    pkg.$windowSize = function() {
+        // iOS retina devices can have a problem with performance
+        // in landscape mode because of a bug (full page size is
+        // just 1 pixels column more than video memory that can keep it)
+        // So, just make width always one pixel less.
+        return { width : window.innerWidth - 1,
+                 height: window.innerHeight   };
+    };
+
+    pkg.$measure = function(e, cssprop) {
+        var value = window.getComputedStyle(e, null).getPropertyValue(cssprop);
+        return (value == null || value === '') ? 0
+                                               : parseInt(/(^[0-9\.]+)([a-z]+)?/.exec(value)[1], 10);
+    };
+
+    // TODO: not sure it is required, probabbly it can be replaced with document.body.contains(e);
+    pkg.$contains = function(element) {
+        return (document.contains != null && document.contains(element)) ||
+               (document.body.contains != null && document.body.contains(element)); // !!! use body for IE
+    };
+
+    pkg.$isInsideElement = function(element, pageX, pageY) {
+        var r = element.getBoundingClientRect();
+        return r != null             &&
+               pageX >= r.left       &&
+               pageY >= r.top        &&
+               pageX <= r.right - 1  &&
+               pageY <= r.bottom - 1   ;
+    };
+
+    var $focusInOutSupported = (function() {
+        var support = false,
+            parent  = document.lastChild,
+            a       = document.createElement('a');
+
+        a.href = '#';
+        a.addEventListener('focusin', function() {
+            support = true;
+        });
+
+        parent.appendChild(a).focus();
+        parent.removeChild(a);
+        return support;
+    })();
+
+    pkg.$focusin = function(element, f, b) {
+        return element.addEventListener($focusInOutSupported ? "focusin" : "focus", f, b);
+    };
+
+    pkg.$focusout = function(element, f, b) {
+        return element.addEventListener($focusInOutSupported ? "focusout" : "blur", f, b);
+    };
+
+
+    /**
+     * Load an image by the given URL.
+     * @param  {String|Image} img an image URL or image object
+     * @param  {Function} ready a call back method to be notified when the
+     * image has been completely loaded or failed. The method gets three parameters
+
+        - an URL to the image
+        - boolean loading result. true means success
+        - an image that has been loaded
+
+                // load image
+                zebra.web.$loadImage("test.png", function(path, result, image) {
+                    if (result === false) {
+                        // handle error
+                        ...
+                    }
+                });
+
+     * @return {Image}  an image
+     * @api  zebra.web.$loadImage()
+     * @method  loadImage
+     */
+    pkg.$loadImage = function(img, ready) {
+        var i = null;
+        if (img instanceof Image) {
+            i = img;
+        }
+        else {
+            i = new Image();
+            i.crossOrigin = '';
+            i.crossOrigin ='anonymous';
+            i.src = img;
+        }
+
+        if (i.complete === true && i.naturalWidth !== 0) {
+            if (arguments.length > 1)  {
+                ready(i.src, true, i);
+            }
+            return i;
+        }
+
+        var pErr  = i.onerror,
+            pLoad = i.onload;
+
+        zebra.busy();
+
+        i.onerror = function(e) {
+            zebra.ready();
+            i.onerror = null;
+            if (ready != null) ready(img, false, i);
+            if (pErr != null) {
+                i.onerror = pErr;
+                pErr.call(this, e);
+            }
+        };
+
+        i.onload  = function(e) {
+            i.onload = null;
+            zebra.ready();
+            if (ready != null) ready(img, true, i);
+            if (pLoad != null) {
+                i.onload = pLoad;
+                pLoad.call(this, e);
+            }
+        };
+
+        return i;
+    };
+
+    function $eventsBlackHole(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    pkg.$createBlockedElement = function() {
+        var be = document.createElement("div");
+        be.style.height = be.style.width  = "100%";
+        be.style.left = be.style.top = "0px";
+        be.style.position = "absolute";
+
+        be.onmouseup   = be.onmousedown = be.onmouseout =
+        be.onmouseover = be.onmousemove = be.onkeydown  =
+        be.onkeypress  = be.onkeyup = $eventsBlackHole;
+
+        var events = [ "touchstart", "touchend", "touchmove",
+                       "pointerdown", "pointerup", "pointermove",
+                       "pointerenter", "pointerleave" ];
+
+        for(var i = 0 ; i < events.length ; i++ ) {
+           be.addEventListener(events[i], $eventsBlackHole, false);
+        }
+
+        // TODO: remove me
+        be.style.background = "rgba(0,0,0,0.3)";
+        return be;
+    };
+
+
+    pkg.$ContextMethods = {
+        setFont : function(f) {
+            f = (f.s != null ? f.s : f.toString());
+            if (f !== this.font) {
+                this.font = f;
+            }
+        },
+
+        setColor : function (c) {
+            if (c == null) throw new Error("Null color");
+            c = (c.s != null ? c.s : c.toString());
+            if (c !== this.fillStyle) this.fillStyle = c;
+            if (c !== this.strokeStyle) this.strokeStyle = c;
+        },
+
+        drawLine : function (x1, y1, x2, y2, w){
+            if (arguments.length < 5) w = 1;
+            var pw = this.lineWidth;
+            this.beginPath();
+            if (this.lineWidth !== w) this.lineWidth = w;
+
+            if (x1 == x2) {
+                x1 += w / 2;
+                x2 = x1;
+            }
+            else {
+                if (y1 == y2) {
+                    y1 += w / 2;
+                    y2 = y1;
+                }
+            }
+
+            this.moveTo(x1, y1);
+            this.lineTo(x2, y2);
+            this.stroke();
+            if (pw !== this.lineWidth) this.lineWidth = pw;
+        },
+
+        ovalPath: function (x,y,w,h){
+            this.beginPath();
+            x += this.lineWidth;
+            y += this.lineWidth;
+            w -= 2 * this.lineWidth;
+            h -= 2 * this.lineWidth;
+
+            var kappa = 0.5522848,
+                ox = (w / 2) * kappa,
+                oy = (h / 2) * kappa,
+                xe = x + w,
+                ye = y + h,
+                xm = x + w / 2,
+                ym = y + h / 2;
+            this.moveTo(x, ym);
+            this.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
+            this.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
+            this.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
+            this.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
+            this.closePath();
+        },
+
+        polylinePath : function(xPoints, yPoints, nPoints){
+            this.beginPath();
+            this.moveTo(xPoints[0], yPoints[0]);
+            for(var i=1; i < nPoints; i++) this.lineTo(xPoints[i], yPoints[i]);
+        },
+
+        drawDottedRect : function(x,y,w,h) {
+            var ctx = this, m = ["moveTo", "lineTo", "moveTo"];
+            function dv(x, y, s) { for(var i=0; i < s; i++) ctx[m[i%3]](x + 0.5, y + i); }
+            function dh(x, y, s) { for(var i=0; i < s; i++) ctx[m[i%3]](x + i, y + 0.5); }
+            ctx.beginPath();
+            dh(x, y, w);
+            dh(x, y + h - 1, w);
+            ctx.stroke();
+            ctx.beginPath();
+            dv(x, y, h);
+            dv(w + x - 1, y, h);
+            ctx.stroke();
+        },
+
+        drawDashLine : function(x,y,x2,y2) {
+            var pattern = [1,2],
+                compute = null,
+                dx      = (x2 - x), dy = (y2 - y),
+                b       = (Math.abs(dx) > Math.abs(dy)),
+                slope   = b ? dy / dx : dx / dy,
+                sign    = b ? (dx < 0 ?-1:1) : (dy < 0?-1:1),
+                dist    = Math.sqrt(dx * dx + dy * dy);
+
+            if (b) {
+                compute = function(step) {
+                    x += step;
+                    y += slope * step;
+                };
+            }
+            else {
+                compute = function(step) {
+                    x += slope * step;
+                    y += step;
+                };
+            }
+
+            this.beginPath();
+            this.moveTo(x, y);
+            for (var i = 0; dist >= 0.1; i++) {
+                var idx  = i % pattern.length;
+                    dl   = dist < pattern[idx] ? dist : pattern[idx],
+                    step = Math.sqrt(dl * dl / (1 + slope * slope)) * sign;
+                compute(step);
+                this[(i % 2 === 0) ? 'lineTo' : 'moveTo'](x + 0.5, y + 0.5);
+                dist -= dl;
+            }
+            this.stroke();
+        }
+    };
+
+    pkg.$extendContext = function(ctx, methods){
+        for(var k in methods) {
+            if (k === "$init") {
+                methods[k].call(ctx);
+            }
+            else {
+                var old = ctx[k];
+                if (old != null) {
+                    var kk = "$" + k;
+                    if (typeof ctx[kk] === 'undefined') {
+                        ctx[kk] = old;
+                    }
+                }
+                ctx[k] = methods[k];
+            }
+        }
+    };
+
+    pkg.$canvas = function(c, w, h, forceResize) {
+        // fetch current CSS size of canvas
+        var cs = window.getComputedStyle(c, null),
+            cw = parseInt(cs.getPropertyValue("width"),  10),
+            ch = parseInt(cs.getPropertyValue("height"), 10),
+            ctx = c.getContext("2d"),
+            updateRatio = false;
+
+        // if CSS width or height has not been set for the canvas
+        // it has to be done, otherwise scaling on hi-DPI screen
+        // will not work
+        if (isNaN(parseInt(c.style.width ))||
+            isNaN(parseInt(c.style.height))  )
+        {
+            c.style.width  = "" + cw + "px";
+            c.style.height = "" + ch + "px";
+            updateRatio = true;
+        }
+
+        // setup new canvas CSS size if appropriate width and height
+        // parameters have been passed and they don't match current CSS
+        // width and height
+        if (arguments.length > 1) {
+            if (cw != w || ch != h) {
+                c.style.width  = "" + w + "px";
+                c.style.height = "" + h + "px";
+                updateRatio = true;
+            }
+            cw = w;
+            ch = h;
+        }
+
+        // canvas 2D context is singleton so check if the
+        // context has already been modified to prevent
+        // redundancy
+        if (typeof ctx.$ratio === "undefined") {
+            ctx.$ratio = (ctx.webkitBackingStorePixelRatio ||   // backing store ratio
+                          ctx.mozBackingStorePixelRatio    ||
+                          ctx.msBackingStorePixelRatio     ||
+                          ctx.backingStorePixelRatio       ||
+                          ctx.backingStorePixelRatio       || 1);
+
+            ctx.$getImageData = ctx.getImageData;
+            ctx.$scale        = ctx.scale;          // save original method if at some stage
+                                                    // it will be overridden (zebkit does it)
+                                                    // only original method has to be used to
+                                                    // adjust canvas to screen DPI
+            if (pkg.$deviceRatio != ctx.$ratio) {
+                var r = pkg.$deviceRatio / ctx.$ratio;
+                ctx.getImageData= function(x, y, w, h) {
+                    return this.$getImageData(x * r, y * r, w, h);
+                };
+            }
+
+            // populate extra method to 2d context
+            pkg.$extendContext(ctx, pkg.$ContextMethods);
+        }
+
+        // take in account that canvas can be visualized on
+        // Retina screen where the size of canvas (backstage)
+        // can be less than it is real screen size. Let's
+        // make it match each other
+        if (ctx.$ratio != pkg.$deviceRatio) {
+            var ratio = pkg.$deviceRatio / ctx.$ratio;
+
+            // calculate canvas with and height taking in account
+            // screen ratio
+            cw = ~~(cw * ratio);
+            ch = ~~(ch * ratio);
+
+            // adjust canvas size if it is necessary
+            if (c.width != cw || c.height != ch || updateRatio === true || forceResize === true) {
+                c.width  = cw;
+                c.height = ch;
+                ctx.$scale(ratio, ratio);
+            }
+        }
+        else {
+            // adjust canvas size if it is necessary
+            if (c.width != cw || c.height != ch || forceResize === true) {
+                c.width  = cw;
+                c.height = ch;
+            }
+        }
+
+        // TODO: top works not good in FF and it is better don't use it
+        // So, ascent has to be taking in account as it was implemented
+        // before
+        if (ctx.textBaseline != "top" ) {
+            ctx.textBaseline = "top";
+        }
+
+        return ctx;
+    };
+
+})(zebra("web"), zebra.Class);
+(function(pkg, Class) {
     pkg.$canvases = [];
 
     zebra.ready(function() {
-        pkg.$deviceRatio = typeof window.devicePixelRatio !== "undefined" ? window.devicePixelRatio
-                                                                          : (typeof window.screen.deviceXDPI !== "undefined" ? // IE
-                                                                             window.screen.deviceXDPI / window.screen.logicalXDPI : 1);
-
-        pkg.$applyRenderExploit = (parseInt(pkg.$deviceRatio) !== pkg.$deviceRatio || zebra.isIE);
-
         // canvases location has to be corrected if document layout is invalid
         pkg.$elBoundsUpdated = function() {
             for(var i = pkg.$canvases.length - 1; i >= 0; i--) {
                 var c = pkg.$canvases[i];
-                if (c.isFullScreen) {
+                if (c.isFullScreen === true) {
                     //c.setLocation(window.pageXOffset, -window.pageYOffset);
 
-                    var ws = pkg.$windowSize();
+                    var ws = zebkit.web.$windowSize();
                     // browser (mobile) can reduce size of browser window by
                     // the area a virtual keyboard occupies. Usually the
                     // content scrolls up to the size the VK occupies, so
@@ -7082,105 +7521,6 @@ pkg.Matrix = Class([
                     c.setSize(ws.width + window.pageXOffset, ws.height + window.pageYOffset);
                 }
                 c.recalcOffset();
-            }
-        };
-
-        window.requestAFrame = (function(){
-            return  window.requestAnimationFrame       ||
-                    window.webkitRequestAnimationFrame ||
-                    window.mozRequestAnimationFrame    ||
-                    function( callback ){ window.setTimeout(callback, 35); };
-        })();
-
-        pkg.$windowSize = function() {
-            // iOS retina devices can have a problem with performance
-            // in landscape mode because of a bug (full page size is
-            // just 1 pixels column more than video memory that can keep it)
-            // So, just make width always one pixel less.
-            return { width : window.innerWidth - 1,
-                     height: window.innerHeight   };
-        };
-
-        pkg.$measure = function(e, cssprop) {
-            var value = window.getComputedStyle ? window.getComputedStyle(e, null).getPropertyValue(cssprop)
-                                                : (e.style ? e.style[cssprop]
-                                                           : e.currentStyle[cssprop]);
-            return (value == null || value == '') ? 0
-                                                  : parseInt(/(^[0-9\.]+)([a-z]+)?/.exec(value)[1], 10);
-        };
-
-        pkg.$contains = function(element) {
-            return (document.contains != null && document.contains(element)) ||
-                   (document.body.contains != null && document.body.contains(element));
-        };
-
-        pkg.$canvas = {
-            size : function(c, w, h) {
-                c.style.width  = "" + w + "px";
-                c.style.height = "" + h + "px";
-
-                var ctx = pkg.$canvas.context(c);
-
-                // take in account that canvas can be visualized on
-                // Retina screen where the size of canvas (backstage)
-                // can be less than it is real screen size. Let's
-                // make it match each other
-                if (ctx.$ratio != pkg.$deviceRatio) {
-                    var ratio = pkg.$deviceRatio / ctx.$ratio;
-                    c.width  = ~~(w * ratio);
-                    c.height = ~~(h * ratio);
-                    ctx.$scale(ratio, ratio);
-                }
-                else {
-                    c.width  = w;
-                    c.height = h;
-                }
-                return ctx;
-            },
-
-            context: function(c) {
-                var ctx = c.getContext("2d");
-
-                // canvas 2d context is singleton so check if the
-                // context has already been modified to prevent
-                // redundancy
-                if (typeof ctx.$ratio == "undefined") {
-                    var ratio = pkg.$canvas.ratio(ctx);
-
-                    ctx.$getImageData = ctx.getImageData;
-                    ctx.$scale = ctx.scale;
-                    ctx.$ratio = ratio;
-                    if (pkg.$deviceRatio != ratio) {
-                        var r = pkg.$deviceRatio / ratio;
-                        ctx.getImageData= function(x, y, w, h) {
-                            return this.$getImageData(x * r, y * r, w, h);
-                        };
-                    }
-                }
-
-                return ctx;
-            },
-
-            create: function(w, h) {
-                var e = document.createElement("canvas");
-                if (arguments.length === 0) {
-                    w = typeof e.width  != "undefined" ? e.width  : 0;
-                    h = typeof e.height != "undefined" ? e.height : 0;
-                }
-                pkg.$canvas.size(e, w, h);
-                return e;
-            },
-
-            ratio : function(ctx) {
-                // backstage buffer can have different size with a real size
-                // what causes the final picture can be zoomed in/out
-                // we need to calculate it to make canvas more crisp
-                // for HDPI screens
-                return (ctx.webkitBackingStorePixelRatio ||   // backing store ratio
-                        ctx.mozBackingStorePixelRatio    ||
-                        ctx.msBackingStorePixelRatio     ||
-                        ctx.backingStorePixelRatio       ||
-                        ctx.backingStorePixelRatio       || 1);
             }
         };
 
@@ -7232,32 +7572,291 @@ pkg.Matrix = Class([
             }
         };
 
+        // TODO: this is depricated events that can have significant impact to
+        // page performance. That means it has to be removed and replace with soemting
+        // else
+        //
         // bunch of handlers to track HTML page metrics update
         // it is necessary since to correct zebra canvases anchor
+        // and track when a canvas has been removed
         document.addEventListener("DOMNodeInserted", function(e) {
             pkg.$elBoundsUpdated();
         }, false);
 
         document.addEventListener("DOMNodeRemoved", function(e) {
-            pkg.$elBoundsUpdated();
-
             // remove canvas from list
             for(var i = pkg.$canvases.length - 1; i >= 0; i--) {
                 var canvas = pkg.$canvases[i];
-                if (e.target == canvas.canvas) {
+                if (zebkit.web.$contains(canvas.element) !== true) {
                     pkg.$canvases.splice(i, 1);
-
                     if (canvas.saveBeforeLeave != null) {
                         canvas.saveBeforeLeave();
                     }
-
-                    break;
                 }
             }
+
+            pkg.$elBoundsUpdated();
         }, false);
     });
 
-    var PI4 = Math.PI/4, PI4_3 = PI4 * 3, $abs = Math.abs, $atan2 = Math.atan2, L = zebra.layout;
+    // TODO: not a good place for clipboard manager
+    pkg.ClipboardSupport = Class([
+        function $clazz() {
+            this.Listeners = zebra.util.ListenersClass("clipCopy", "clipPaste", "clipCut");
+        },
+
+        function $prototype() {
+            this.keyPressed = function (e) {
+                var focusOwner = pkg.focusManager.focusOwner;
+                if (e.code     === this.clipboardTriggerKey &&
+                    focusOwner !=  null                     &&
+                    (focusOwner.clipCopy  != null || focusOwner.clipPaste != null))
+                {
+                    this.$clipboard.style.display = "block";
+                    this.$clipboardCanvas = focusOwner.getCanvas();
+
+                    // value has to be set, otherwise some browsers (Safari) do not generate
+                    // "copy" event
+                    this.$clipboard.value = "1";
+
+                    this.$clipboard.select();
+                    this.$clipboard.focus();
+                }
+            };
+        },
+
+        function(clipboardTriggerKey) {
+            this.clipboardTriggerKey = clipboardTriggerKey;
+
+            function $dupKeyEvent(e, id, target)  {
+                var k = new Event(id);
+                k.keyCode  = e.keyCode;
+                k.key      = e.key;
+                k.target   = target;
+                k.ctrlKey  = e.ctrlKey;
+                k.altKey   = e.altKey;
+                k.shiftKey = e.shiftKey;
+                k.metaKey  = e.metaKey;
+                return k;
+            }
+
+            if (clipboardTriggerKey > 0) {
+                // TODO: why bind instead of being a manager ?
+                pkg.events.bind(this);
+
+                this._ = new this.$clazz.Listeners();
+
+                var $clipboard = this.$clipboard = document.createElement("textarea"),
+                    $this = this;
+
+                $clipboard.setAttribute("style", "display:none;position:fixed;left:-99em;top:-99em;");
+
+                $clipboard.onkeydown = function(ee) {
+                    $this.$clipboardCanvas.$container.dispatchEvent($dupKeyEvent(ee, 'keydown', $this.$clipboardCanvas.$container));
+                    $clipboard.value="1";
+                    $clipboard.select();
+                };
+
+                $clipboard.onkeyup = function(ee) {
+                    if (ee.keyCode === $this.clipboardTriggerKey) {
+                        $clipboard.style.display = "none";
+                        $this.$clipboardCanvas.$container.focus();
+                    }
+
+                    $this.$clipboardCanvas.$container.dispatchEvent($dupKeyEvent(ee, 'keyup', $this.$clipboardCanvas.$container));
+                };
+
+                $clipboard.onblur = function() {
+                    this.value="";
+                    this.style.display="none";
+
+                    //!!! pass focus back to canvas
+                    //    it has to be done for the case when cmd+TAB (switch from browser to
+                    //    another application)
+                    $this.$clipboardCanvas.$container.focus();
+                };
+
+                $clipboard.oncopy = function(ee) {
+                    if (pkg.focusManager.focusOwner          != null &&
+                        pkg.focusManager.focusOwner.clipCopy != null    )
+                    {
+                        var v = pkg.focusManager.focusOwner.clipCopy();
+                        $clipboard.value = (v == null ? "" : v);
+                        $clipboard.select();
+                        $this._.clipCopy(v, $clipboard.value);
+                    }
+                };
+
+                $clipboard.oncut = function(ee) {
+                    if (pkg.focusManager.focusOwner && pkg.focusManager.focusOwner.cut != null) {
+                        $clipboard.value = pkg.focusManager.focusOwner.cut();
+                        $clipboard.select();
+                        $this._.clipCut(pkg.focusManager.focusOwner, $clipboard.value);
+                    }
+                };
+
+                if (zebra.isFF === true) {
+                    $clipboard.addEventListener ("input", function(ee) {
+                        if (pkg.focusManager.focusOwner &&
+                            pkg.focusManager.focusOwner.clipPaste != null)
+                        {
+                            pkg.focusManager.focusOwner.clipPaste($clipboard.value);
+                            $this._.clipPaste(pkg.focusManager.focusOwner, $clipboard.value);
+                        }
+                    }, false);
+                }
+                else {
+                    $clipboard.onpaste = function(ee) {
+                        if (pkg.focusManager.focusOwner != null && pkg.focusManager.focusOwner.clipPaste != null) {
+                            var txt = (typeof ee.clipboardData == "undefined") ? window.clipboardData.getData('Text')  // IE
+                                                                               : ee.clipboardData.getData('text/plain');
+                            pkg.focusManager.focusOwner.clipPaste(txt);
+                            $this._.clipPaste(pkg.focusManager.focusOwner, txt);
+                        }
+                        $clipboard.value = "";
+                    };
+                }
+                document.body.appendChild($clipboard);
+            }
+        }
+    ]);
+
+})(zebra("ui"), zebra.Class);
+// TODO List:
+//    [+] add pressure level field to pointer events
+//    [-] group field
+//    [+] floor for pageX/pageY
+//    [+] double click
+//    [+] check if button field is required or can be removed from pointer event
+//    [+] support global status keeping and updating (ctrl/alt/shift)
+//    [+] "lmouse" and "rmouse" should be constants
+//    [-] list of active touches or pointers have to be available
+//    [-] meX/meY -> (x, y) ?
+
+(function(pkg, Class) {
+    if (pkg.doubleClickDelta == null) {
+        pkg.doubleClickDelta = 180;
+    }
+
+    var PI4                      = Math.PI/4,  // used to calculate touch event gamma (direction
+        PI4_3                    = PI4 * 3,    // in polar coordinate)
+        $enteredElement          = null,
+        $tmpWinMouseMoveListener = null,
+        $lastPointerReleased     = null,
+        $pointerPressedEvents    = {},         // collect all pointer pressed events
+        LMOUSE = "lmouse",
+        RMOUSE = "rmouse";
+
+    /**
+     * Mouse and touch screen input event class. The input event is
+     * triggered by a mouse or touch screen.
+     * @param {zebra.ui.Panel} source a source of the mouse input event
+     * @param {Integer} ax an absolute (relatively to a canvas where the source
+     * UI component is hosted) mouse pointer x coordinate
+     * @param {Integer} ax an absolute (relatively to a canvas where the source
+     * UI component is hosted) mouse pointer y coordinate
+     * @param {Integer} mask a bits mask of pressed mouse buttons:
+
+             zebra.ui.PointerEvent.LEFT_BUTTON
+             zebra.ui.PointerEvent.RIGHT_BUTTON
+
+     * @class  zebra.ui.PointerEvent
+     * @constructor
+     */
+    pkg.PointerEvent = Class([
+        function $prototype() {
+            /**
+             * Pointer type. Can be "mouse", "touch", "pen"
+             * @attribute  poiterType
+             * @type {String}
+             */
+            this.pointerType = "mouse";
+
+            /**
+             * Touch counter
+             * @attribute touchCounter
+             * @type {Integer}
+             * @default 0
+             */
+            this.touchCounter = 0;
+
+            /**
+             * Page x
+             * @attribute pageX
+             * @type {Integer}
+             * @default -1
+             */
+            this.pageX = -1;
+
+            /**
+             * Page y
+             * @attribute pageY
+             * @type {Integer}
+             * @default -1
+             */
+            this.pageY = -1;
+
+            /**
+             * Target DOM element
+             * @attribute target
+             * @type {DOMElement}
+             * @default null
+             */
+            this.target = null;
+
+            /**
+             * Pointer identifier
+             * @attribute identifier
+             * @type {Object}
+             * @default null
+             */
+            this.identifier = null;
+
+            this.shiftKey = this.altKey = this.metaKey = this.ctrlKey = false;
+
+            this.pressure = 0.5;
+
+            // TODO: not completed
+            this.pressGroup = [];
+
+            this.isAction = function() {
+                return this.identifier === LMOUSE && this.touchCounter === 1;
+            };
+
+            this.isContext = function() {
+                return this.identifier === RMOUSE && this.touchCounter === 1;
+            };
+
+            this.$fillWith = function(identifier, e) {
+                this.pageX      = Math.floor(e.pageX);
+                this.pageY      = Math.floor(e.pageY);
+                this.target     = e.target;
+                this.identifier = identifier;
+                this.altKey     = typeof e.altKey   !== 'undefined' ? e.altKey   : false;
+                this.shiftKey   = typeof e.shiftKey !== 'undefined' ? e.shiftKey : false;
+                this.ctrlKey    = typeof e.ctrlKey  !== 'undefined' ? e.ctrlKey  : false;
+                this.metaKey    = typeof e.metaKey  !== 'undefined' ? e.metaKey  : false;
+                this.pressure   = typeof e.pressure !== 'undefined' ? e.pressure : 0.5;
+            };
+        }
+    ]);
+
+    var ME_STUB      = new pkg.PointerEvent(), // instance of mouse event
+        TOUCH_STUB   = new pkg.PointerEvent(), // instance of touch event
+        POINTER_STUB = new pkg.PointerEvent(); // instance of pointer event
+
+
+    TOUCH_STUB.isAction = function() {
+        return this.touchCounter === 1;
+    };
+
+    TOUCH_STUB.isContext = function() {
+        return this.touchCounter === 2;  // TODO: here should be group analyzed (both touch has to be the same group)
+    };
+
+    ME_STUB.pointerType      = "mouse";
+    TOUCH_STUB.pointerType   = "touch";
+    POINTER_STUB.pointerType = "pointer"
 
     /**
      *  Mouse wheel support class. Installs necessary mouse wheel
@@ -7268,56 +7867,12 @@ pkg.Matrix = Class([
      *  @param  {zebra.ui.zCanvas} canvas a zebra zCanvas UI component
      *  @constructor
      */
-    pkg.MouseWheelSupport = zebra.Class([
+    pkg.MouseWheelSupport = Class([
         function $clazz() {
             this.dxZoom = this.dyZoom = 20;
             this.dxNorma = this.dyNorma = 80;
-        },
 
-        function $prototype() {
-            this.naturalDirection = true;
-
-            /**
-             * Mouse wheel handler
-             * @param  {MouseWheelEvent} e DOM mouse event object
-             * @method wheeled
-             */
-            this.wheeled  = function(e){
-                var owner = pkg.$mouseMoveOwner;
-                while (owner != null && owner.doScroll == null) {
-                    owner = owner.parent;
-                }
-
-                if (owner != null) {
-                    var dy = e[this.wheelInfo.dy] != null ? e[this.wheelInfo.dy] * this.wheelInfo.dir : 0,
-                        dx = e[this.wheelInfo.dx] != null ? e[this.wheelInfo.dx] * this.wheelInfo.dir : 0;
-
-                    // some version of FF can generates dx/dy  < 1
-                    if (Math.abs(dy) < 1) {
-                        dy *= this.$clazz.dyZoom;
-                    }
-
-                    if (Math.abs(dx) < 1) {
-                        dx *= this.$clazz.dxZoom;
-                    }
-
-
-                    dy = Math.abs(dy) > this.$clazz.dyNorma ? dy % this.$clazz.dyNorma : dy;
-                    dx = Math.abs(dx) > this.$clazz.dxNorma ? dx % this.$clazz.dxNorma : dx;
-
-                    if (owner.doScroll(dx, dy, "wheel")) {
-                        e.preventDefault();
-                    }
-                }
-            };
-        },
-
-        function(canvas) {
-            if (canvas == null) {
-                throw new Error("Null canvas");
-            }
-
-            var WHEEL = {
+            this.$META = {
                 wheel: {
                     dy  : "deltaY",
                     dx  : "deltaX",
@@ -7342,158 +7897,720 @@ pkg.Matrix = Class([
                     }
                 }
             };
+        },
 
-            for(var k in WHEEL) {
-                var w = WHEEL[k];
-                if (w.test()) {
-                    var $this = this;
-                    canvas.canvas.addEventListener(k,
-                        this.wheeled.bind == null ? function(e) {
-                                                        return $this.wheeled(e);
-                                                    }
-                                                  : this.wheeled.bind(this),
-                    false);
+        function $prototype() {
+            this.naturalDirection = true;
+        },
 
-                    this.wheelInfo = w;
+        function(element, destination) {
+            var META = this.$clazz.$META;
+            for(var k in META) {
+                if (META[k].test()) {
+                    var $wheelMeta = META[k], $clazz = this.$clazz;
+                    element.addEventListener(k,
+                        function(e) {
+                            var dy = e[$wheelMeta.dy] != null ? e[$wheelMeta.dy] * $wheelMeta.dir : 0,
+                                dx = e[$wheelMeta.dx] != null ? e[$wheelMeta.dx] * $wheelMeta.dir : 0;
+
+                            // some version of FF can generates dx/dy  < 1
+                            if (Math.abs(dy) < 1) {
+                                dy *= $clazz.dyZoom;
+                            }
+
+                            if (Math.abs(dx) < 1) {
+                                dx *= $clazz.dxZoom;
+                            }
+
+                            dy = Math.abs(dy) > $clazz.dyNorma ? dy % $clazz.dyNorma : dy;
+                            dx = Math.abs(dx) > $clazz.dxNorma ? dx % $clazz.dxNorma : dx;
+
+
+                            // do floor since some mouse devices can fire float as
+                            if (destination.$doScroll(Math.floor(dx),
+                                                      Math.floor(dy), "wheel"))
+                            {
+                                e.preventDefault();
+                            }
+                        },
+                        false);
                     break;
                 }
             }
         }
     ]);
 
-    pkg.TouchHandler = zebra.Class([
-        function $prototype() {
-            this.touchCounter = 0;
+    // !!!
+    // global mouse move events handler (registered by drag out a canvas surface)
+    // has to be removed every time a mouse button released with the given function
+    function $cleanDragFix() {
+        if ($tmpWinMouseMoveListener != null && $pointerPressedEvents[LMOUSE] == null && $pointerPressedEvents[RMOUSE] == null) {
+            console.log("REMOVE GLOBAL MOUSE MOVE LISTENER ");
+            window.removeEventListener("mousemove", $tmpWinMouseMoveListener, true);
+            $tmpWinMouseMoveListener = null;
+            return true;
+        }
+        return false;
+    };
 
-            function isIn(t, id) {
-                for(var i = 0; i < t.length; i++) {
-                    if (t[i].identifier == id) return true;
+    pkg.PointerEventUnifier = Class([
+        function $clazz() {
+            // !!!!
+            // TODO: this method works only for mouse (constant of mouse event ids is in)
+            // not clear if it is ok
+            //
+            // the document mouse up happens when we drag outside a canvas.
+            // in this case canvas doesn't catch mouse up, so we have to do it
+            // by global mouseup handler
+            document.addEventListener("mouseup", function(e) {
+                // ignore any mouse buttons except left
+                // and right buttons
+                if (e.button === 0 || e.button === 2) {
+                    var id = e.button == 0 ? LMOUSE : RMOUSE,
+                        mp = $pointerPressedEvents[id];
+
+                    // !!!!
+                    // Check if the event target is not the canvas itself
+                    // On desktop  "mouseup" event is generated only if
+                    // you drag mouse outside a canvas and than release a mouse button
+                    // At the same time in Android native browser (and may be other mobile
+                    // browsers) "mouseup" event is fired every time you touch
+                    // canvas or any other element. So check if target is not a canvas
+                    // before doing releasing, otherwise it brings to error on mobile
+                    if (mp != null                       &&
+                        mp.$adapter.element != e.target  &&
+                        mp.$adapter.element.contains(e.target) === false)
+                    {
+                        try {
+                            if ($enteredElement != null) {
+                                $enteredElement = null;
+                                mp.$adapter.destination.$pointerExited(ME_STUB);
+                            }
+                        }
+                        finally {
+                            mp.$adapter.$UP(id, e, ME_STUB);
+                        }
+                    }
+                }
+            },  false); // false is important since if mouseUp  happens on
+                        // canvas the canvas gets the event first and than stops
+                        // propagating to prevent it
+        },
+
+        function $prototype() {
+            this.$timer = null;
+            this.$queue = [];
+
+            this.$touchedAt = function(pageX, pageY, d) {
+                var lx = pageX - d,
+                    ty = pageY - d,
+                    rx = pageX + d,
+                    by = pageY + d;
+
+                for(var k in $pointerPressedEvents) {
+                    if (k !== LMOUSE && k !== RMOUSE) {
+                        var e = $pointerPressedEvents[k];
+                        if (e.pageX >= lx && e.pageY >= ty && e.pageX <= rx && e.pageY <= by) {
+                            return true;
+                        }
+                    }
                 }
                 return false;
+            };
+
+            this.$DRAG = function(id, e, stub) {
+                // get appropriate pointerPressed event that has occurred before
+                var mp = $pointerPressedEvents[id];
+
+                // a pointer touched has been pressed and pressed target zebra component exists
+                // emulate mouse dragging events if mouse has moved on the canvas where mouse
+                // pressed event occurred
+                if (mp != null) {
+                    // ignore moved if there still start events that are waiting for to be fired
+                    if (mp.$adapter.element === this.element) {
+                        // target component exists and mouse cursor moved on the same
+                        // canvas where mouse pressed occurred
+                        if (this.$timer === null) {
+                            stub.$fillWith(id, e);
+
+                            var dx = stub.pageX - mp.pageX,
+                                dy = stub.pageY - mp.pageY,
+                                d  = mp.direction;
+
+                            // accumulate shifting of pointer
+                            mp.$adx += dx;
+                            mp.$ady += dy;
+
+                            // update stored touch coordinates with a new one
+                            mp.pageX  = stub.pageX;
+                            mp.pageY  = stub.pageY;
+
+                            // we can recognize direction only if move was not too small
+                            if (Math.abs(mp.$adx) > 4 || Math.abs(mp.$ady) > 4) {
+                                // compute gamma, this is corner in polar coordinate system
+                                var gamma = Math.atan2(mp.$ady, mp.$adx);
+
+                                // using gamma we can figure out direction
+                                if (gamma > -PI4) {
+                                    d = (gamma < PI4) ? "right" : (gamma < PI4_3 ? "buttom" : "left");
+                                }
+                                else {
+                                    d = (gamma > -PI4_3) ? "top" : "left";
+                                }
+
+                                mp.direction = d;
+
+                                // clear accumulated shift
+                                mp.$ady = mp.$adx = 0;
+
+                                mp.gamma = gamma;
+                            }
+
+                            stub.direction = mp.direction;
+                            stub.dx = dx;
+                            stub.dy = dy;
+
+                            try {
+                                if (mp.isDragged === false) {
+                                    this.destination.$pointerDragStarted(stub);
+                                }
+
+                                if (mp.isDragged === false || dx != 0 || dy != 0) {
+                                    this.destination.$pointerDragged(stub);
+                                }
+                            }
+                            finally {
+                                mp.isDragged = true;
+                            }
+                        }
+                    }
+                    else {
+                        mp.$adapter.$DRAG(id, e, stub);
+                    }
+                }
+            };
+
+            //  Possible cases of mouse up events:
+            //
+            //   a) +-------------+        b) +----------------+       c) +---------------+
+            //      |  E          |           | E +----+       |          | E       +-----|
+            //      |      p--u   |          |    | p--|-u     |          |         |  p--|-u
+            //      |             |           |   +----+       |          |         +-----|
+            //      +-------------+           +----------------+          +---------------+
+            // (out to document/body)      (out from kid to element)   (out from kid to document)
+            //
+            //   d) +--------+--------+    e) +----------+----------+    f) +---------+-------+
+            //      | E      |        |       |  E +-----|-----+    |       | E +-----|       |
+            //      |     p--|--u     |       |    | p---|--u  |    |       |   |  p--|-u     |
+            //      |        |        |       |    +-----|-----+    |       |   +-----|       |
+            //      +--------+--------+       +----------+----------+       +---------+-------+
+            //     (out from element to       (out from kid of element     (out from kid element
+            //      other element)            to kid of another element)    to another element)
+            // Contract:
+            //   -- handle only mouse events whose destination is the passed element
+            //   -- does stop propagation if event has been handled
+            //   -- clear drag  fix ?
+            this.$UP = function(id, e, stub) {
+                // remove timer if it has not been started yet since we already have
+                // got UP event and have to fire pressed events from queue with the
+                // UP handler
+                if (this.$timer != null) {
+                    clearTimeout(this.$timer);
+                    this.$timer = null;
+                }
+
+                // fire collected in queue pressed events
+                this.$firePressedFromQ();
+
+                // get pointer pressed state for the given id
+                var mp = $pointerPressedEvents[id];
+
+                // check if a pointer state is in pressed state
+                if (mp != null) {
+                    // mouse up can happen in another element than
+                    // mouse down occurred. let the original element
+                    // (where mouse down is happened) to handle it
+                    if (this.element !== mp.$adapter.element) {
+                        $enteredElement = null;
+
+                        // wrap with try-catch to prevent inconsistency
+                        try {
+                            stub.$fillWith(id, e);
+                            mp.$adapter.destination.$pointerExited(stub);
+                            $enteredElement = this.element;
+                            this.destination.$pointerEntered(stub);
+                        }
+                        catch(ee) {
+                            // keep it for exceptional cases
+                            $enteredElement = this.element;
+                        }
+                        finally {
+                            mp.$adapter.$UP(id, e, stub);
+                        }
+                    }
+                    else {
+                        try {
+                            // store coordinates and target
+                            stub.$fillWith(id, e);
+
+                            // TODO: uncomment it and replace with sub or so
+                            //if (tt.group != null) tt.group.active = false;
+
+                            // add press coordinates what can help to detect source
+                            // of the event
+                            stub.pressPageX = mp.pressPageX;
+                            stub.pressPageY = mp.pressPageY;
+
+                            // fire dragged or clicked
+                            if (mp.isDragged === true) {
+                                this.destination.$pointerDragEnded(stub);
+                            }
+                            else {
+                                if ($lastPointerReleased != null &&
+                                    $lastPointerReleased.identifier === id &&
+                                    (new Date().getTime() - $lastPointerReleased.time) <= pkg.doubleClickDelta)
+                                {
+                                    this.destination.$pointerDoubleClicked(stub);
+                                }
+                                else {
+                                    this.destination.$pointerClicked(stub);
+                                }
+                            }
+
+                            // always complete pointer pressed with appropriate
+                            // release event
+                            this.destination.$pointerReleased(stub);
+                        }
+                        finally {
+                            // clear handled pressed and dragged state
+                            stub.touchCounter--;
+                            $lastPointerReleased = $pointerPressedEvents[id];
+                            delete $pointerPressedEvents[id];
+
+                            // remove global move listener if necessary
+                            $cleanDragFix();
+                        }
+                    }
+                }
+            };
+
+            this.$indexOfQ = function(id) {
+                for(var i = 0; i < this.$queue.length; i++) {
+                    if (id === this.$queue[i].identifier) return i;
+                }
+                return -1;
+            };
+
+            this.$firePressedFromQ = function() {
+                // fire collected pointer pressed events
+                if (this.$queue.length > 0) {
+                    var l = this.$queue.length;
+                    for(var i = 0; i < l; i++) {
+                        var t = this.$queue[i];
+
+                        try {
+                            // reg the event
+                            $pointerPressedEvents[t.identifier] = t;
+
+                            t.stub.$fillWith(t.identifier, t);
+                            t.stub.group = l; // TODO: temporary solution
+                            this.destination.$pointerPressed(t.stub);
+                        }
+                        catch(ex) {
+                            console.log("PointerEventUnifier.$firePressedFromQ() delete = " + t.identifier);
+
+                            delete $pointerPressedEvents[t.identifier];
+                            console.log(ex.stack);
+                        }
+                    }
+                    this.$queue.length = 0;
+                }
+            };
+
+            this.$DOWN = function(id, e, stub) {
+                $cleanDragFix();
+
+                // remove not fired pointer pressed from queue if necessary
+                var i = this.$indexOfQ(id);
+                if (i >= 0) {
+                    this.$queue.splice(i, 1);
+                }
+
+                // release mouse pressed if it has not happened before
+                var mp = $pointerPressedEvents[id];
+                if (mp != null) {
+                    mp.$adapter.$UP(id, e, mp.stub);
+                }
+
+                // count pointer pressed
+                stub.touchCounter++;
+
+                console.log("PointerEventUnifier.$DOWN() touchCounter = " + stub.touchCounter);
+
+                try {
+                    // put pointer pressed in queue
+                    this.$queue.push({
+                        pageX       : Math.floor(e.pageX),
+                        pageY       : Math.floor(e.pageY),
+                        pressPageX  : Math.floor(e.pageX),
+                        pressPageY  : Math.floor(e.pageY),
+                        target      : e.target,
+                        direction   : null,
+                        identifier  : id,
+                        shiftKey    : e.shiftKey,
+                        altKey      : e.altKey,
+                        metaKey     : e.metaKey,
+                        ctrlKey     : e.ctrlKey,
+                        time        : (new Date()).getTime(),
+                        $adapter    : this,
+                        $adx        : 0,
+                        $ady        : 0,
+                        isDragged   : false,
+                        stub        : stub
+                    });
+
+                    // initiate timer to send collected new touch events
+                    // if any new has appeared. the timer helps to collect
+                    // events in one group
+                    if (this.$queue.length > 0 && this.$timer === null) {
+                        var $this = this;
+                        this.$timer = setTimeout(function() {
+                            $this.$timer = null;
+                            $this.$firePressedFromQ(); // flush queue
+                        }, 25);
+                    }
+                }
+                catch(ee) {
+                    // restore touch counter if an error has happened
+                    stub.touchCounter--;
+                    throw ee;
+                }
+            };
+
+            this.$MMOVE = function(e) {
+                var pageX = Math.floor(e.pageX),
+                    pageY = Math.floor(e.pageY) ;
+
+                // ignore extra mouse moved event that can appear in IE
+                if (this.$mousePageY != pageY || this.$mousePageX != pageX) {
+
+                    this.$mousePageX = pageX;
+                    this.$mousePageY = pageY;
+
+
+                    if ($pointerPressedEvents[LMOUSE] != null || $pointerPressedEvents[RMOUSE] != null) {
+                        if ($pointerPressedEvents[LMOUSE] != null) {
+                            this.$DRAG(LMOUSE, e, ME_STUB);
+                        }
+
+                        if ($pointerPressedEvents[RMOUSE] != null) {
+                            this.$DRAG(RMOUSE, e, ME_STUB);
+                        }
+                    }
+                    else {
+                        // initialize native fields
+                        ME_STUB.$fillWith("mouse", e);
+                        this.destination.$pointerMoved(ME_STUB);
+                    }
+                }
+            };
+        },
+
+        function (element, destination) {
+            this.destination = destination;
+            this.element     = element;
+
+            var $this = this;
+
+            element.onmousedown = function(e) {
+                // ignore any mouse buttons except left
+                // and right buttons or long touch emulates mouse event what causes generations of
+                // mouse down event after touch start event. Let's suppress it
+                if ((e.button !== 0 && e.button !== 2) ||
+                     $this.$touchedAt(e.pageX, e.pageY, 0)  )
+                {
+                    e.preventDefault();
+                }
+                else {
+                    $this.$DOWN(e.button == 0 ? LMOUSE : RMOUSE, e, ME_STUB);
+                    e.stopPropagation();
+                }
+            };
+
+
+            //  Possible cases of mouse up events:
+            //
+            //   a) +-------------+        b) +----------------+       c) +---------------+
+            //      |  E          |           | E +----+       |          | E       +-----|
+            //      |      p--u   |          |    | p--|-u     |          |         |  p--|-u
+            //      |             |           |   +----+       |          |         +-----|
+            //      +-------------+           +----------------+          +---------------+
+            // (out to document/body)      (out from kid to element)   (out from kid to document)
+            //
+            //   d) +--------+--------+    e) +----------+----------+    f) +---------+-------+
+            //      | E      |        |       |  E +-----|-----+    |       | E +-----|       |
+            //      |     p--|--u     |       |    | p---|--u  |    |       |   |  p--|-u     |
+            //      |        |        |       |    +-----|-----+    |       |   +-----|       |
+            //      +--------+--------+       +----------+----------+       +---------+-------+
+            //     (out from element to       (out from kid of element     (out from kid element
+            //      other element)            to kid of another element)    to another element)
+            // Contract:
+            //   -- handle only mouse events whose destination is the passed element
+            //   -- does stop propagation if event has been handled
+            //   -- clear drag  fix ?
+            element.onmouseup = function(e) {
+                // ignore any mouse buttons except left
+                // and right buttons
+                if (e.button !== 0 && e.button !== 2) {
+                    e.preventDefault();
+                }
+                else {
+                    var id = e.button == 0 ? LMOUSE : RMOUSE,
+                        mp = $pointerPressedEvents[id];
+
+                    console.log("PointerEventUnifier.onmouseup() mp = " + mp + ", id = " +  id);
+
+
+                    $this.$UP(id, e, ME_STUB);
+
+                    if (e.stopPropagation != null) e.stopPropagation();
+                }
+            };
+
+            // mouse over has to setup if necessary current over element variable
+            // it requires to detect repeat mouse over event that happens when
+            // for instance we switch between browser and other application, but
+            // mouse cursor stays at the same place
+            element.onmouseover = function(e) {
+                // this code prevent mouse over for first touch on iOS and Android
+                if ($this.$touchedAt(e.pageX, e.pageY, 0)) {
+                    e.preventDefault();
+                }
+                else {
+                    var id = e.button == 0 ? LMOUSE : RMOUSE,
+                        mp = $pointerPressedEvents[id];
+
+                    // if a button has not been pressed handle mouse entered to detect
+                    // zebra component the mouse pointer entered and send appropriate
+                    // mouse entered event to it
+                    if (mp == null) {
+                        // just for the sake of error prevention
+                        // clean global move listeners
+                        $cleanDragFix();
+
+                        // if entered element is null or the target element
+                        // is not a children/element of the entered element than
+                        // fires pointer entered event
+                        if ($enteredElement == null || ($enteredElement.contains(e.target) === false && $enteredElement !== e.target)) {
+                            ME_STUB.$fillWith("mouse", e);
+                            $enteredElement = element;
+                            destination.$pointerEntered(ME_STUB);
+                        }
+                    }
+                    else {
+                        // remove any previously registered listener if
+                        //  -- a mouse button has been pressed
+                        //  -- a mouse button has been pressed on the canvas we have entered
+                        if (element === e.target || element.contains(e.target)) {
+                            $cleanDragFix();
+                        }
+                    }
+                    e.stopPropagation();
+                }
+            };
+
+            //  Possible cases of mouse out events:
+            //
+            //   a) +-------------+        b) +----------------+       c) +---------------+
+            //      |  E          |           | E +----+       |          | E       +-----|
+            //      |        *----|->         |   | *--|->     |          |         |  *--|->
+            //      |             |           |   +----+       |          |         +-----|
+            //      +-------------+           +----------------+          +---------------+
+            // (out to document/body)      (out from kid to element)   (out from kid to document)
+            //
+            //   d) +--------+--------+    e) +----------+----------+    f) +---------+-------+
+            //      | E      |        |       |  E +-----|-----+    |       | E +-----|       |
+            //      |     *--|-->     |       |    | *---|-->  |    |       |   |  *--|->     |
+            //      |        |        |       |    +-----|-----+    |       |   +-----|       |
+            //      +--------+--------+       +----------+----------+       +---------+-------+
+            //     (out from element to       (out from kid of element     (out from kid element
+            //      other element)            to kid of another element)    to another element)
+            //
+            //   1) a mouse button doesn't have to be pressed on any element
+            //   2) e.target always equals to element (E), just because we register event handler
+            //      for element. This guarantees element will get mouse out event only from itself
+            //      and its children elements
+            //   3) mouse out should trigger pointerExited event only if the relatedTarget element
+            //      is not the element (E) or kid of the element (E)
+            //   4) if a mouse button has been pressed than mouse out registers mouse move listener
+            //      to track drag events if the listener has nor been registered yet.
+            //   5) mouse out set to null $enteredElement
+
+            element.onmouseout = function(e) {
+                var id = e.button == 0 ? LMOUSE : RMOUSE,
+                    mp = $pointerPressedEvents[id];
+
+                // no pressed button exists
+                if (mp == null) {
+                    // the target element is the not a kid of the element
+                    if ($enteredElement != null && (e.relatedTarget != null     &&
+                                                    e.relatedTarget !== element &&
+                                                    element.contains(e.relatedTarget) === false))
+                    {
+                        $enteredElement = null;
+                        ME_STUB.$fillWith("mouse", e);
+
+                        if (zebkit.web.$isInsideElement(element, e.pageX, e.pageY) === false) {
+                            destination.$pointerExited(ME_STUB);
+                        }
+                    }
+                }
+                else {
+                    // if a button has been pressed but the mouse cursor is outside of
+                    // the canvas, for a time being start listening mouse moved events
+                    // of Window to emulate mouse moved events in canvas
+                    if ($tmpWinMouseMoveListener == null &&
+                        e.relatedTarget != null &&
+                        element.contains(e.relatedTarget) === false)
+                    {
+                        // !!! ignore touchscreen devices
+                        if (id === LMOUSE || id === RMOUSE) {
+                            $tmpWinMouseMoveListener = function(ee) {
+                                ee.stopPropagation();
+
+                                if ($pointerPressedEvents[LMOUSE] != null) {
+                                    $this.$DRAG(LMOUSE, {
+                                        pageX  : ee.pageX,
+                                        pageY  : ee.pageY,
+                                        target : mp.target,
+                                    }, ME_STUB);
+                                }
+
+                                if ($pointerPressedEvents[RMOUSE] != null) {
+                                    $this.$DRAG(RMOUSE, {
+                                        pageX  : ee.pageX,
+                                        pageY  : ee.pageY,
+                                        target : mp.target,
+                                    }, ME_STUB);
+                                }
+
+                                ee.preventDefault();
+                            };
+
+                            window.addEventListener("mousemove", $tmpWinMouseMoveListener, true);
+                        }
+                    }
+                }
+
+                $this.$mousePageX = $this.$mousePageY = -1;
+                e.stopPropagation();
+            };
+
+            if ("onpointerdown" in window || "onmspointerdown" in window) {
+                var names = "onpointerdown" in window ? [ "pointerdown",
+                                                          "pointerup",
+                                                          "pointermove",
+                                                          "pointerenter",
+                                                          "pointerleave" ]
+                                                      : [ "MSPointerDown",
+                                                          "MSPointerUp",
+                                                          "MSPointerMove",
+                                                          "MSPointerEnter",
+                                                          "MSPointerLeave" ];
+
+                console.log(":: Install pointer listeners");
+
+                element.addEventListener(names[0], function(e) {
+                    if (e.pointerType !== "mouse")  {
+                        POINTER_STUB.touch = e;
+                        $this.$DOWN(e.pointerId, e, POINTER_STUB);
+                    }
+                }, false);
+
+                element.addEventListener(names[1], function(e) {
+                    if (e.pointerType !== "mouse") {
+                        POINTER_STUB.touch = e;
+                        $this.$UP(e.pointerId, e, POINTER_STUB);
+                    }
+                }, false);
+
+                element.addEventListener(names[2], function(e) {
+                    if (e.pointerType !== "mouse") {
+                        POINTER_STUB.touch = e;
+                        $this.$DRAG(e.pointerId, e, POINTER_STUB);
+                    }
+                    else {
+                        $this.$MMOVE(e);
+                    }
+                }, false);
             }
-
-            this.$fixEnd = function(e) {
-                var t = e.touches, ct = e.changedTouches;
-                for (var k in this.touches) {
-
-                    // find out if:
-                    // 1) a stored started touch has appeared as new touch
-                    //    it can happen if touch end has not been fired and
-                    //    the new start touch id matches a stored one
-                    // 2) if no one touch among current touches matches a stored
-                    //    touch. If it is true that means the stored touch has not
-                    //    been released since no appropriate touch end event has
-                    //    been fired
-                    if (isIn(ct, k) === true || isIn(t, k) === false) {
-                        var tt = this.touches[k];
-                        this.touchCounter--;
-                        if (tt.group != null) tt.group.active = false;
-                        this.ended(tt);
-                        delete this.touches[k];
+            else {
+                function isIn(t, id) {
+                    for(var i = 0; i < t.length; i++) {
+                        if (t[i].identifier == id) return true;
                     }
+                    return false;
                 }
-            };
 
-            this.start = function(e) {
-                this.$fixEnd(e);
+                element.addEventListener("touchstart", function(e) {
+                    var allTouches = e.touches,
+                        newTouches = e.changedTouches; // list of touch events that become
+                                               // active with the current touchstart
 
-                // fix android bug: parasite event for multi touch
-                // or stop capturing new touches since it is already fixed
-                if (this.touchCounter > e.touches.length) return;
+                    console.log("1. touchstart() : " + TOUCH_STUB.touchCounter + "," + e.touches.length + ", " + newTouches.length);
 
-                // collect new touches in queue, don't send it immediately
-                var t = e.touches;
-                for(var i = 0; i < t.length; i++) {  // go through all touches
-                    var tt = t[i];
 
-                    // test if the given touch has not been collected in queue yet
-                    if (this.touches.hasOwnProperty(tt.identifier) === false) {
-                        this.touchCounter++;
-                        var nt = {
-                            pageX      : tt.pageX,
-                            pageY      : tt.pageY,
-                            identifier : tt.identifier,
-                            target     : tt.target,
-                            direction  : L.NONE,  // detected movement direction (L.HORIZONTAL or L.VERTICAL)
-                            dx         : 0,       // horizontal shift since last touch movement
-                            dy         : 0,       // vertical shift since last touch movement
-                            dc         : 0,       // internal counter to collect number of the movement
-                                                  // happens in the given direction
-                            group      : null
-                        };
-                        this.touches[tt.identifier] = nt;
-                        this.queue.push(nt);
+                    // fix android bug: parasite event for multi touch
+                    // or stop capturing new touches since it is already fixed
+                    // TODO: have no idea what it is
+                    // if (TOUCH_STUB.touchCounter > e.touches.length) {
+                    //     return;
+                    // }
+
+                    // android devices fire mouse move if touched but not moved
+                    // let save coordinates what should prevent mouse move event
+                    // generation
+                    //
+                    // TODO: not clear if second tap will fire mouse move or if the
+                    // second tap will have any influence to first tap mouse move
+                    // initiation
+                    $this.$mousePageX = Math.floor(e.pageX);
+                    $this.$mousePageY = Math.floor(e.pageY);
+
+                    // fire touches that has not been fired yet
+                    for(var i = 0; i < newTouches.length; i++) {  // go through all touches
+                        var newTouch = newTouches[i];
+                        $this.$DOWN(newTouch.identifier, newTouch, TOUCH_STUB);
                     }
-                }
 
-                // initiate timer to send collected new touch events
-                // if any new has appeared. the timer helps to collect
-                // events in one group
-                if (this.queue.length > 0 && this.timer == null) {
-                    var $this = this;
-                    this.timer = setTimeout(function() {
-                        $this.Q(); // flush queue
-                        $this.timer = null;
-                    }, 25);
-                }
-            };
-
-            this.end = function(e) {
-                //  remove timer if it has not been started yet
-                if (this.timer != null) {
-                    clearTimeout(this.timer);
-                    this.timer = null;
-                }
-
-                //clear queue
-                this.Q();
-
-                // update touches
-                var t = e.changedTouches;
-                for (var i = 0; i < t.length; i++) {
-                    var tt = this.touches[t[i].identifier];
-                    if (tt != null) {
-                        this.touchCounter--;
-                        if (tt.group != null) tt.group.active = false;
-                        this.ended(tt);
-                        delete this.touches[t[i].identifier];
+                    // clear touches that still is not in list of touches
+                    for (var k in $pointerPressedEvents) {
+                        if (isIn(allTouches, k) === false) {
+                            console.log("touchstart()  inactive touch detected");
+                            var tt = $pointerPressedEvents[k];
+                            if (tt.group != null) tt.group.active = false;
+                            $this.$UP(tt.identifier, tt, TOUCH_STUB);
+                        }
                     }
-                }
-            };
 
-            this.Q = function() {
-                if (this.queue.length > 1) {
-                    // marked all collected touches with one group
-                    for(var i = 0; i < this.queue.length; i++) {
-                        var t = this.queue[i];
-                        t.group = {
-                           size  : this.queue.length, // group size
-                           index : i,
-                           active: true  // say it is still touched
-                        };
-                    }
-                }
+                    console.log("2. toucstart() " + TOUCH_STUB.touchCounter);
 
-                if (this.queue.length > 0) {
-                    for(var i = 0; i < this.queue.length; i++) {
-                        this.started(this.queue[i]);
-                    }
-                    this.queue.length = 0;
-                }
-            };
+                    //!!!
+                    //TODO: this calling prevents generation of phantom mouse move event
+                    //but it is not clear if it will stop firing touch end/move events
+                    //for some mobile browsers. Check it !
+                    e.preventDefault();
 
-            this[''] = function(element) {
-                this.touches = {};
-                this.queue   = [];
-                this.timer   = null;
-
-                var $this = this;
-                element.addEventListener("touchstart",  function(e) {
-                    $this.start(e);
                 }, false);
 
                 element.addEventListener("touchend", function(e) {
-                    $this.end(e);
+                    // update touches
+                    var t = e.changedTouches;
+                    for (var i = 0; i < t.length; i++) {
+                        var tt = t[i];
+                        $this.$UP(tt.identifier, tt, TOUCH_STUB);
+                    }
+
                     e.preventDefault();
                 }, false);
 
@@ -7502,69 +8619,184 @@ pkg.Matrix = Class([
 
                     // clear dx, dy for not updated touches
                     for(var k in $this.touches) {
-                        $this.touches[k].dx = $this.touches[k].dy = 0;
+                        $pointerPressedEvents[k].dx = $pointerPressedEvents[k].dy = 0;
                     }
 
                     for(var i=0; i < mt.length; i++) {
                         var nmt = mt[i],
-                            t   = $this.touches[nmt.identifier];
+                            t   = $pointerPressedEvents[nmt.identifier];
 
-                        if (t != null && (t.pageX != nmt.pageX || t.pageY != nmt.pageY)) {
-                                var dx  = nmt.pageX - t.pageX,
-                                    dy  = nmt.pageY - t.pageY,
-                                    d   = t.direction,
-                                    gamma = null,
-                                    dxs = (dx < 0 && t.dx < 0) || (dx > 0 && t.dx > 0),  // test if horizontal move direction has been changed
-                                    dys = (dy < 0 && t.dy < 0) || (dy > 0 && t.dy > 0);  // test if vertical move direction has been changed
-
-                                // update stored touch coordinates with a new one
-                                t.pageX  = nmt.pageX;
-                                t.pageY  = nmt.pageY;
-
-                                // we can recognize direction only if move was not too short
-                                if ($abs(dx) > 2 || $abs(dy) > 2) {
-                                    // compute gamma, this is corner in polar coordinate system
-                                    gamma = $atan2(dy, dx);
-
-                                    // using gamma we can figure out direction
-                                    if (gamma > -PI4) {
-                                        d = (gamma < PI4) ? L.RIGHT : (gamma < PI4_3 ? L.BOTTOM : L.LEFT);
-                                    }
-                                    else {
-                                        d = (gamma > -PI4_3) ? L.TOP : L.LEFT;
-                                    }
-
-                                    // to minimize wrong touch effect let's update
-                                    // direction only if move event sequence
-                                    // with identical direction is less than 3
-                                    if (t.direction != d) {
-                                        if (t.dc < 3) t.direction = d;
-                                        t.dc = 0;
-                                    }
-                                    else {
-                                        t.dc++;
-                                    }
-                                    t.gamma = gamma;
-                                }
-
-                                // ignore moved if there still start events that are waiting for to be fired
-                                if ($this.timer == null) {
-                                    t.dx = dx;
-                                    t.dy = dy;
-                                    if ($this.moved != null) $this.moved(t);
-                                }
-                                else {
-                                    $this.dc = 0;
-                                }
-                            }
+                        if (t != null && (t.pageX != Math.floor(nmt.pageX) || t.pageY != Math.floor(nmt.pageY))) {
+                            $this.$DRAG(t.identifier, t, TOUCH_STUB);
                         }
+                    }
 
                     e.preventDefault();
                 }, false);
+
+
+                element.onmousemove = function(e) {
+                    $this.$MMOVE(e);
+                    e.stopPropagation();
+                };
+            }
+
+            // TODO: not sure it has to be in pointer unifier
+            element.oncontextmenu = function(e) {
+                e.preventDefault();
             };
         }
     ]);
-})(zebra("ui"));
+
+})(zebra("ui"), zebra.Class);
+(function(pkg, Class) {
+
+    /**
+     * Input key event class.
+     * @param {zebra.ui.Panel} source a source of the key input event
+     * @param {Integer} code a code of pressed key
+     * @param {String} ch a character of typed key
+     * @param {Integer} mask a bits mask of pressed meta keys:  zebra.ui.KeyEvent.M_CTRL,
+     * zebra.ui.KeyEvent.M_SHIFT, zebra.ui.KeyEvent.M_ALT, zebra.ui.KeyEvent.M_CMD
+     * @class  zebra.ui.KeyEvent
+     * @extends zebra.ui.InputEvent
+     * @constructor
+     */
+    pkg.KeyEvent = Class([
+        function $clazz() {
+            this.M_CTRL  = 1;
+            this.M_SHIFT = 2;
+            this.M_ALT   = 4;
+            this.M_CMD   = 8;
+        },
+
+        function $prototype() {
+            /**
+             * A code of a pressed key
+             * @attribute code
+             * @readOnly
+             * @type {Integer}
+             */
+            this.code = 0;
+
+            /**
+             * A bits mask of pressed meta keys (CTRL, ALT, etc)
+             * @attribute mask
+             * @readOnly
+             * @type {Integer}
+             */
+            this.mask = 0;
+
+            /**
+             * A character of a typed key
+             * @attribute ch
+             * @readOnly
+             * @type {String}
+             */
+            this.ch = 0;
+
+            this.altKey = this.shiftKey = this.ctrlKey = this.metaKey = false;
+
+            this.$fillWith = function(e) {
+                this.code = (e.which || e.keyCode || 0);
+
+                // FF sets keyCode to zero for some diacritic characters
+                // to fix the problem we have to try get the code from "key" field
+                // of event that stores a character
+                if (this.code === 0 && e.key != null && e.key.length() === 1) {
+                    this.code = e.key.charCodeAt(0);
+                }
+
+                if (this.code === pkg.KeyEvent.ENTER) {
+                    this.ch = "\n";
+                }
+                else {
+                    this.ch = e.charCode > 0 && (this.code >= 47 || this.code === 32) ? String.fromCharCode(e.charCode) : 0;
+                }
+
+                this.altKey   = e.altKey;
+                this.shiftKey = e.shiftKey;
+                this.ctrlKey  = e.ctrlKey;
+                this.metaKey  = e.metaKey;
+
+                this.mask = 0;
+                if (e.altKey)   this.mask += pkg.KeyEvent.M_ALT;
+                if (e.shiftKey) this.mask += pkg.KeyEvent.M_SHIFT;
+                if (e.ctrlKey)  this.mask += pkg.KeyEvent.M_CTRL;
+                if (e.metaKey)  this.mask += pkg.KeyEvent.M_CMD;
+
+                return this;
+            };
+        },
+    ]);
+
+
+    var $keyPressedCode = -1, KEY_EVENT = new pkg.KeyEvent();
+
+    pkg.KeyEventUnifier = Class([
+        function(element, destination) {
+            element.onkeydown = function(e) {
+                KEY_EVENT.$fillWith(e);
+                var code = $keyPressedCode = KEY_EVENT.code, b = destination.$keyPressed(KEY_EVENT);
+
+                console.log("ch = " + KEY_EVENT.ch);
+
+
+                if (KEY_EVENT.ch !== 0) {
+                    b = destination.$keyTyped(KEY_EVENT) || b;
+                }
+
+                //!!!!
+                // TODO: hard coded constants
+                // Since container of zCanvas catch all events from its children DOM
+                // elements don't prevent the event for the children DOM element
+                if (b === true || (code < 47 && code != 32 && e.target === element)) {
+                    e.preventDefault();
+                }
+
+                e.stopPropagation();
+            };
+
+            element.onkeyup = function(e) {
+                $keyPressedCode = -1;
+                if (destination.$keyReleased(KEY_EVENT.$fillWith(e)) === true) {
+                    e.preventDefault();
+                }
+                e.stopPropagation();
+            };
+
+            element.onkeypress = function(e) {
+                KEY_EVENT.$fillWith(e);
+
+                if (KEY_EVENT.ch === 0) {
+                    // warp with try catch to restore variable
+                    try {
+                        if ($keyPressedCode != KEY_EVENT.code) {
+                            if (destination.$keyPressed(KEY_EVENT) === true) {
+                                e.preventDefault();
+                            }
+                        }
+                    }
+                    catch(ee) {
+                        $keyPressedCode = -1;
+                        throw ee;
+                    }
+                    $keyPressedCode = -1;
+                }
+                else {
+                    // Since container of zCanvas catch all events from its children DOM
+                    // elements don't prevent the event for the children DOM element
+                    if (destination.$keyTyped(KEY_EVENT) === true || (e.target === element && KEY_EVENT.code < 47)) {
+                        e.preventDefault();
+                    }
+                }
+
+                e.stopPropagation();
+            };
+        }
+    ]);
+
+})(zebra("ui"), zebra.Class);
 (function(pkg, Class) {
 
 /**
@@ -7609,57 +8841,100 @@ pkg.Matrix = Class([
  * @requires zebra, util, io, data
  */
 
-var instanceOf = zebra.instanceOf, L = zebra.layout, MB = zebra.util,
-    rgb = zebra.util.rgb, temporary = { x:0, y:0, width:0, height:0 },
-    MS = Math.sin, MC = Math.cos, $fmCanvas = null, $fmText = null,
-    $fmImage = null, $clipboard = null, $clipboardCanvas;
+var L = zebra.layout, rgb = zebra.util.rgb, temporary = { x:0, y:0, width:0, height:0 },
+    MS = Math.sin, MC = Math.cos, $fmCanvas = null, $fmText = null, EM = pkg.events = null,
+    $fmImage = null, $bodyFontSize = "14px", COMP_EVENT = {}, FOCUS_EVENT = {}; // TODO: temporary event structure to prove the concept
 
-pkg.clipboardTriggerKey = 0;
+// keep pointer owners (the component where cursor/finger placed in)
+pkg.$pointerOwner = {};
 
-function $meX(e, d) {
-    return d.$context.tX(e.pageX - d.offx, e.pageY - d.offy);
-}
 
-function $meY(e, d) {
-    return d.$context.tY(e.pageX - d.offx, e.pageY - d.offy);
-}
+pkg.PointerEvent.extend([
+    function $prototype() {
+        /**
+         * Absolute mouse pointer x coordinate
+         * @attribute absX
+         * @readOnly
+         * @type {Integer}
+         */
+        this.absX = 0;
 
-pkg.$view = function(v) {
-    if (v == null || v.paint != null) return v;
+        /**
+         * Absolute mouse pointer y coordinate
+         * @attribute absY
+         * @readOnly
+         * @type {Integer}
+         */
+         this.absY = 0;
 
-    if (zebra.isString(v)) {
-        return rgb.hasOwnProperty(v) ? rgb[v]
-                                     : (pkg.borders && pkg.borders.hasOwnProperty(v) ? pkg.borders[v]
-                                                                                     : new rgb(v));
+        /**
+         * Mouse pointer x coordinate (relatively to source UI component)
+         * @attribute x
+         * @readOnly
+         * @type {Integer}
+         */
+        this.x = 0;
+
+        /**
+         * Mouse pointer y coordinate (relatively to source UI component)
+         * @attribute y
+         * @readOnly
+         * @type {Integer}
+         */
+        this.y = 0;
+
+        /**
+         * Reset the event properties with new values
+         * @private
+         * @param  {zebra.ui.Panel} source  a source component that triggers the event
+         * @param  {Integer} ax an absolute (relatively to a canvas where the source
+         * component is hosted) x mouse cursor coordinate
+         * @param  {Integer} ay an absolute (relatively to a canvas where the source
+         * component is hosted) y mouse cursor coordinate
+         * @method  updateCoordinates
+         */
+        this.update = function(source,ax,ay){
+            // this can speed up calculation significantly
+            // check if source zebra component has not been changed, his location and parent
+            // component also has not been changed than we can skip calculation of absolute
+            // location by traversing parent hierarchy
+            if (this.source        === source        &&
+                this.source.parent === source.parent &&
+                source.x           === this.$px      &&
+                source.y           === this.$py         )
+            {
+                this.x += (ax - this.absX);
+                this.y += (ay - this.absY);
+                this.absX = ax;
+                this.absY = ay;
+                this.source = source;
+            }
+            else {
+                this.source = source;
+                this.absX = ax;
+                this.absY = ay;
+
+                // convert absolute location to relative location
+                while (source.parent != null) {
+                    ax -= source.x;
+                    ay -= source.y;
+                    source = source.parent;
+                }
+                this.x = ax;
+                this.y = ay;
+            }
+
+            this.$px = source.x;
+            this.$py = source.y;
+
+            return this;
+        };
     }
+]);
 
-    if (Array.isArray(v)) {
-        return new pkg.CompositeView(v);
-    }
 
-    if (typeof v !== 'function') {
-        return new pkg.ViewSet(v);
-    }
-
-    var vv = new pkg.View();
-    vv.paint = v;
-    return vv;
-};
-
-/**
- * Look up 2D canvas in the list of existent
- * @param  {2DCanvas|String} canvas a canvas
- * @return {zebra.ui.zCanvas} a zebra canvas
- */
-pkg.$detectZCanvas = function(canvas) {
-    if (zebra.isString(canvas)) {
-        canvas = document.getElementById(canvas);
-    }
-
-    for(var i=0; canvas != null && i < pkg.$canvases.length; i++) {
-        if (pkg.$canvases[i].canvas == canvas) return pkg.$canvases[i];
-    }
-    return null;
+pkg.load = function(path, callback) {
+    return new pkg.Bag(pkg).load(path, callback);
 };
 
 /**
@@ -7774,6 +9049,3924 @@ pkg.Render = Class(pkg.View, [
     }
 ]);
 
+pkg.Bag = Class(zebra.util.Bag, [
+    function $prototype() {
+        this.globalPropertyLookup = this.usePropertySetters = true;
+
+        this.loadImage = function(path) {
+            if (this.$url != null && zebra.URL.isAbsolute(path) == false) {
+                var base = (new zebra.URL(this.$url)).getParentURL();
+                path = base.join(path);
+            }
+            return zebkit.web.$loadImage(path);
+        };
+    },
+
+    function load(s, cb) {
+        if (cb != null) {
+            zebra.busy();
+            try {
+                return this.$super(s, function(e) {
+                    // if an error during loading has happened callback method
+                    // gets the error as a single argument. The problem callback itself
+                    // can triggers the error and than be called second time but
+                    // with the error as argument. So we have to recognize the situation
+                    // by analyzing if the callback gets an error as
+                    if (e == null) {
+                        zebra.ready();
+                    }
+                    cb.call(this, e);
+                });
+            }
+            catch(e) {
+                zebra.ready();
+                throw e;
+            }
+        }
+
+        return this.$super(s, null);
+    }
+]);
+
+rgb.prototype.paint = function(g,x,y,w,h,d) {
+    if (this.s != g.fillStyle) {
+        g.fillStyle = this.s;
+    }
+
+    // fix for IE10/11, calculate intersection of clipped area
+    // and the area that has to be filled. IE11/10 have a bug
+    // that triggers filling more space than it is restricted
+    // with clip
+    if (g.$states != null) {
+        var t  = g.$states[g.$curState],
+            rx = x > t.x ? x : t.x,
+            rw = Math.min(x + w, t.x + t.width) - rx;
+
+        if (rw > 0)  {
+            var ry = y > t.y ? y : t.y,
+            rh = Math.min(y + h, t.y + t.height) - ry;
+
+            if (rh > 0) g.fillRect(rx, ry, rw, rh);
+        }
+    }
+    else {
+        g.fillRect(x, y, w, h);
+    }
+};
+
+rgb.prototype.getPreferredSize = function() {
+    return { width:0, height:0 };
+};
+
+pkg.$getPS = function(l) {
+    return l != null && l.isVisible === true ? l.getPreferredSize()
+                                             : { width:0, height:0 };
+};
+
+var $cvp = pkg.$cvp = function(c, r) {
+    if (c.width > 0 && c.height > 0 && c.isVisible === true){
+        var p = c.parent, px = -c.x, py = -c.y;
+        if (r == null) {
+            r = { x:0, y:0, width : c.width, height : c.height };
+        }
+        else {
+            r.x = r.y = 0;
+            r.width  = c.width;
+            r.height = c.height;
+        }
+
+
+        while (p != null && r.width > 0 && r.height > 0) {
+            var xx = r.x > px ? r.x : px,
+                yy = r.y > py ? r.y : py,
+                w1 = r.x + r.width,
+                w2 = px  + p.width,
+                h1 = r.y + r.height,
+                h2 = py + p.height;
+
+            r.width  = (w1 < w2 ? w1 : w2) - xx,
+            r.height = (h1 < h2 ? h1 : h2) - yy;
+            r.x = xx;
+            r.y = yy;
+
+            px -= p.x;
+            py -= p.y;
+            p = p.parent;
+        }
+
+        return r.width > 0 && r.height > 0 ? r : null;
+    }
+    return null;
+};
+
+/**
+ * This class represents a font and provides basic font metrics like
+ * height, ascent. Using the class developers can compute string width.
+
+      // plain font
+      var f = new zebra.ui.Font("Arial", 14);
+
+      // bold font
+      var f = new zebra.ui.Font("Arial", "bold", 14);
+
+      // defining font with CSS font name
+      var f = new zebra.ui.Font("100px Futura, Helvetica, sans-serif");
+
+ * @constructor
+ * @param {String} name a name of the font. If size and style parameters
+ * has not been passed the name is considered as CSS font name that
+ * includes size and style
+ * @param {String} [style] a style of the font: "bold", "italic", etc
+ * @param {Integer} [size] a size of the font
+ * @class zebra.ui.Font
+ */
+pkg.Font = function(name, style, size) {
+    if (arguments.length == 1) {
+        name = name.replace(/[ ]+/, ' ');
+        this.s = name.trim();
+    }
+    else {
+        if (arguments.length == 2) {
+            size  = style;
+            style = '';
+        }
+        style  = style.trim();
+        this.s = style + (style !== '' ? ' ' : '') + size + 'px '+ name;
+        this.name = name;
+    }
+    $fmText.style.font = this.s;
+
+    /**
+     * Height of the font
+     * @attribute height
+     * @readOnly
+     * @type {Integer}
+     */
+    this.height = $fmText.offsetHeight;
+
+    //!!!
+    // Something weird is going sometimes in IE10 !
+    // Sometimes the property offsetHeight is 0 but
+    // second attempt to access to the property gives
+    // proper result
+    if (this.height === 0) {
+        this.height = $fmText.offsetHeight;
+    }
+
+    /**
+     * Ascent of the font
+     * @attribute ascent
+     * @readOnly
+     * @type {Integer}
+     */
+    this.ascent = $fmImage.offsetTop - $fmText.offsetTop + 1;
+};
+
+/**
+ * Calculate the given string width in pixels
+ * @param  {String} s a string whose width has to be computed
+ * @return {Integer} a string size in pixels
+ * @method stringWidth
+ * @for zebra.ui.Font
+ */
+pkg.Font.prototype.stringWidth = function(s) {
+    if (s.length === 0) return 0;
+    if ($fmCanvas.font !== this.s) $fmCanvas.font = this.s;
+    return ($fmCanvas.measureText(s).width + 0.5) | 0;
+};
+
+/**
+ * Calculate the specified substring width
+ * @param  {String} s a string
+ * @param  {Integer} off fist character index
+ * @param  {Integer} len length of substring
+ * @return {Integer} a substring size in pixels
+ * @method charsWidth
+ * @for zebra.ui.Font
+ */
+pkg.Font.prototype.charsWidth = function(s, off, len) {
+    if ($fmCanvas.font !== this.s) $fmCanvas.font = this.s;
+    return ($fmCanvas.measureText(len === 1 ? s[off] : s.substring(off, off + len)).width + 0.5) | 0;
+};
+
+/**
+ * Returns CSS font representation
+ * @return {String} a CSS representation of the given Font
+ * @method toString
+ * @for zebra.ui.Font
+ */
+pkg.Font.prototype.toString = function() { return this.s;  };
+
+pkg.Cursor = {
+    DEFAULT     : "default",
+    MOVE        : "move",
+    WAIT        : "wait",
+    TEXT        : "text",
+    HAND        : "pointer",
+    NE_RESIZE   : "ne-resize",
+    SW_RESIZE   : "sw-resize",
+    SE_RESIZE   : "se-resize",
+    NW_RESIZE   : "nw-resize",
+    S_RESIZE    : "s-resize",
+    W_RESIZE    : "w-resize",
+    N_RESIZE    : "n-resize",
+    E_RESIZE    : "e-resize",
+    COL_RESIZE  : "col-resize",
+    HELP        : "help"
+};
+
+pkg.makeFullyVisible = function(d,c){
+    if (arguments.length === 1) {
+        c = d;
+        d = c.parent;
+    }
+
+    var right  = d.getRight(),
+        top    = d.getTop(),
+        bottom = d.getBottom(),
+        left   = d.getLeft(),
+        xx     = c.x,
+        yy     = c.y;
+
+    if (xx < left) xx = left;
+    if (yy < top)  yy = top;
+    if (xx + c.width > d.width - right) xx = d.width + right - c.width;
+    if (yy + c.height > d.height - bottom) yy = d.height + bottom - c.height;
+    c.setLocation(xx, yy);
+};
+
+pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
+    if (arguments.length < 8) {
+        tt = t.getTop();
+        ll = t.getLeft();
+        bb = t.getBottom();
+        rr = t.getRight();
+    }
+
+    var dw = t.width, dh = t.height;
+    if (dw > 0 && dh > 0){
+        if (dw - ll - rr > w){
+            var xx = x + px;
+            if (xx < ll) px += (ll - xx);
+            else {
+                xx += w;
+                if (xx > dw - rr) px -= (xx - dw + rr);
+            }
+        }
+        if (dh - tt - bb > h){
+            var yy = y + py;
+            if (yy < tt) py += (tt - yy);
+            else {
+                yy += h;
+                if (yy > dh - bb) py -= (yy - dh + bb);
+            }
+        }
+        return [px, py];
+    }
+    return [0, 0];
+};
+
+/**
+ *  This the core UI component class. All other UI components has to be
+ *  successor of panel class.
+
+      // instantiate panel with no arguments
+      var p = new zebra.ui.Panel();
+
+      // instantiate panel with border layout set as its layout manager
+      var p = new zebra.ui.Panel(new zebra.layout.BorderLayout());
+
+      // instantiate panel with the given properties (border
+      // layout manager, blue background and plain border)
+      var p = new zebra.ui.Panel({
+         layout: new zebra.ui.BorderLayout(),
+         background : "blue",
+         border     : "plain"
+      });
+
+ * **Container. **
+ * Panel can contains number of other UI components as its children where
+ * the children components are placed with a defined by the panel layout
+ * manager:
+
+      // add few children component to panel top, center and bottom parts
+      // with help of border layout manager
+      var p = new zebra.ui.Panel();
+      p.setLayout(new zebra.layout.BorderLayout(4)); // set layout manager to
+                                                     // order children components
+
+      p.add(zebra.layout.TOP, new zebra.ui.Label("Top label"));
+      p.add(zebra.layout.CENTER, new zebra.ui.TextArea("Text area"));
+      p.add(zebra.layout.BOTTOM, new zebra.ui.Button("Button"));
+
+ * **Events. **
+ * The class provides possibility to catch various component and input
+ * events by declaring an appropriate event method handler. The most
+ * simple case you just define a method:
+
+      var p = new zebra.ui.Panel();
+      p.pointerPressed = function(e) {
+          // handle event here
+      };
+
+* If you prefer to create an anonymous class instance you can do it as
+* follow:
+
+      var p = new zebra.ui.Panel([
+          function pointerPressed(e) {
+              // handle event here
+          }
+      ]);
+
+* One more way to add the event handler is dynamic extending of an instance
+* class demonstrated below:
+
+      var p = new zebra.ui.Panel("Test");
+      p.extend([
+          function pointerPressed(e) {
+              // handle event here
+          }
+      ]);
+
+ * Pay attention Zebra UI components often declare own event handlers and
+ * in this case you can overwrite the default event handler with a new one.
+ * Preventing the basic event handler execution can cause the component will
+ * work improperly. You should care about the base event handler execution
+ * as follow:
+
+      // button component declares own pointer pressed event handler
+      // we have to call the original handler to keep the button component
+      // properly working
+      var p = new zebra.ui.Button("Test");
+      p.extend([
+          function pointerPressed(e) {
+              this.$super(e); // call parent class event handler implementation
+              // handle event here
+          }
+      ]);
+
+ *  @class zebra.ui.Panel
+ *  @param {Object|zebra.layout.Layout} [l] pass a layout manager or
+ *  number of properties that have to be applied to the instance of
+ *  the panel class.
+ *  @constructor
+ *  @extends zebra.layout.Layoutable
+ */
+
+
+
+/**
+ * Implement the event handler method to catch pointer pressed event.
+ * The event is triggered every time a pointer button has been pressed or
+ * a finger has touched a touch screen.
+
+     var p = new zebra.ui.Panel();
+     p.pointerPressed = function(e) { ... }; // add event handler
+
+ * @event pointerPressed
+ * @param {zebra.ui.PointerEvent} e a pointer event
+*/
+
+/**
+ * Implement the event handler method to catch pointer released event.
+ * The event is triggered every time a pointer button has been released or
+ * a finger has untouched a touch screen.
+
+     var p = new zebra.ui.Panel();
+     p.pointerReleased = function(e) { ... }; // add event handler
+
+ * @event pointerReleased
+ * @param {zebra.ui.PointerEvent} e a pointer event
+ */
+
+/**
+ * Implement the event handler method  to catch pointer moved event.
+ * The event is triggered every time a pointer cursor has been moved with
+ * no a pointer button pressed.
+
+     var p = new zebra.ui.Panel();
+     p.pointerMoved = function(e) { ... }; // add event handler
+
+ * @param {zebra.ui.PointerEvent} e a pointer event
+ * @event  pointerMoved
+ */
+
+/**
+ * Implement the event handler method to catch pointer entered event.
+ * The event is triggered every time a pointer cursor entered the
+ * given component.
+
+     var p = new zebra.ui.Panel();
+     p.pointerEntered = function(e) { ... }; // add event handler
+
+ * @param {zebra.ui.PointerEvent} e a pointer event
+ * @event  pointerEntered
+ */
+
+/**
+ * Implement the event handler method to catch pointer exited event.
+ * The event is triggered every time a pointer cursor exited the given
+ * component.
+
+     var p = new zebra.ui.Panel();
+     p.pointerExited = function(e) { ... }; // add event handler
+
+ * @param {zebra.ui.PointerEvent} e a pointer event
+ * @event  pointerExited
+ */
+
+/**
+ * Implement the event handler method to catch pointer clicked event.
+ * The event is triggered every time a pointer button has been clicked. Click events
+ * are generated only if no one pointer moved or drag events has been generated
+ * in between pointer pressed -> pointer released events sequence.
+
+     var p = new zebra.ui.Panel();
+     p.pointerClicked = function(e) { ... }; // add event handler
+
+ * @param {zebra.ui.PointerEvent} e a pointer event
+ * @event  pointerClicked
+ */
+
+/**
+ * Implement the event handler method to catch pointer dragged event.
+ * The event is triggered every time a pointer cursor has been moved when a pointer button
+ * has been pressed. Or when a finger has been moved over a touch screen.
+
+     var p = new zebra.ui.Panel();
+     p.pointerDragged = function(e) { ... }; // add event handler
+
+ * @param {zebra.ui.PointerEvent} e a pointer event
+ * @event  pointerDragged
+ */
+
+/**
+ * Implement the event handler method to catch pointer drag started event.
+ * The event is triggered every time a pointer cursor has been moved first time when a pointer button
+ * has been pressed. Or when a finger has been moved first time over a touch screen.
+
+     var p = new zebra.ui.Panel();
+     p.pointerDragStarted = function(e) { ... }; // add event handler
+
+ * @param {zebra.ui.PointerEvent} e a pointer event
+ * @event  pointerDragStarted
+*/
+
+/**
+ * Implement the event handler method to catch pointer drag ended event.
+ * The event is triggered every time a pointer cursor has been moved last time when a pointer button
+ * has been pressed. Or when a finger has been moved last time over a touch screen.
+
+     var p = new zebra.ui.Panel();
+     p.pointerDragEnded = function(e) { ... }; // add event handler
+
+ * @param {zebra.ui.PointerEvent} e a pointer event
+ * @event  pointerDragEnded
+*/
+
+/**
+ * Implement the event handler method to catch key pressed event
+ * The event is triggered every time a key has been pressed.
+
+     var p = new zebra.ui.Panel();
+     p.keyPressed = function(e) { ... }; // add event handler
+
+ * @param {zebra.ui.KeyEvent} e a key event
+ * @event  keyPressed
+ */
+
+/**
+ * Implement the event handler method to catch key types event
+ * The event is triggered every time a key has been typed.
+
+     var p = new zebra.ui.Panel();
+     p.keyTyped = function(e) { ... }; // add event handler
+
+ * @param {zebra.ui.KeyEvent} e a key event
+ * @event  keyTyped
+ */
+
+/**
+ * Implement the event handler method to catch key released event
+ * The event is triggered every time a key has been released.
+
+     var p = new zebra.ui.Panel();
+     p.keyReleased = function(e) { ... }; // add event handler
+
+ * @param {zebra.ui.KeyEvent} e a key event
+ * @event  keyReleased
+ */
+
+/**
+ * Implement the event handler method to catch the component sized event
+ * The event is triggered every time the component has been re-sized.
+
+     var p = new zebra.ui.Panel();
+     p.compSized = function(c, pw, ph) { ... }; // add event handler
+
+ * @param {zebra.ui.Panel} c a component that has been sized
+ * @param {Integer} pw a previous width the sized component had
+ * @param {Integer} ph a previous height the sized component had
+ * @event compSized
+ */
+
+/**
+ * Implement the event handler method to catch component moved event
+ * The event is triggered every time the component location has been
+ * updated.
+
+     var p = new zebra.ui.Panel();
+     p.compMoved = function(c, px, py) { ... }; // add event handler
+
+ * @param {zebra.ui.Panel} c a component that has been moved
+ * @param {Integer} px a previous x coordinate the moved component had
+ * @param {Integer} py a previous y coordinate the moved component had
+ * @event compMoved
+ */
+
+/**
+ * Implement the event handler method to catch component enabled event
+ * The event is triggered every time a component enabled state has been
+ * updated.
+
+     var p = new zebra.ui.Panel();
+     p.compEnabled = function(c) { ... }; // add event handler
+
+ * @param {zebra.ui.Panel} c a component whose enabled state has been updated
+ * @event compEnabled
+ */
+
+/**
+ * Implement the event handler method to catch component shown event
+ * The event is triggered every time a component visibility state has
+ * been updated.
+
+     var p = new zebra.ui.Panel();
+     p.compShown = function(c) { ... }; // add event handler
+
+ * @param {zebra.ui.Panel} c a component whose visibility state has been updated
+ * @event compShown
+ */
+
+/**
+ * Implement the event handler method to catch component added event
+ * The event is triggered every time the component has been inserted into
+ * another one.
+
+     var p = new zebra.ui.Panel();
+     p.compAdded = function(p, constr, c) { ... }; // add event handler
+
+ * @param {zebra.ui.Panel} p a parent component of the component has been added
+ * @param {Object} constr a layout constraints
+ * @param {zebra.ui.Panel} c a component that has been added
+ * @event compAdded
+ */
+
+/**
+ * Implement the event handler method to catch component removed event
+ * The event is triggered every time the component has been removed from
+ * its parent UI component.
+
+     var p = new zebra.ui.Panel();
+     p.compRemoved = function(p, i, c) { ... }; // add event handler
+
+ * @param {zebra.ui.Panel} p a parent component of the component that has been removed
+ * @param {Integer} i an index of removed component
+ * @param {zebra.ui.Panel} c a component that has been removed
+ * @event compRemoved
+ */
+
+/**
+ * Implement the event handler method to catch component focus gained event
+ * The event is triggered every time a component has gained focus.
+
+     var p = new zebra.ui.Panel();
+     p.focusGained = function(e) { ... }; // add event handler
+
+ * @param {zebra.ui.InputEvent} e an input event
+ * @event  focusGained
+ */
+
+/**
+ * Implement the event handler method to catch component focus lost event
+ * The event is triggered every time a component has lost focus
+
+     var p = new zebra.ui.Panel();
+     p.focusLost = function(e) { ... }; // add event handler
+
+ * @param {zebra.ui.InputEvent} e an input event
+ * @event  focusLost
+ */
+
+/**
+ * Implement the event handler method to catch children components component events
+ *
+     var p = new zebra.ui.Panel();
+     p.childCompEvent = function(id, src, p1, p2) { ... }; // add event handler
+
+ * @param {Integer} id a component event ID. The id can have one of the following value:
+
+
+ * @param {zebra.ui.Panel} src a component that triggers the event
+ * @param {zebra.ui.Panel|Integer|Object} p1 an event first parameter that depends
+ * on an component event that has happened:
+
+
+   - if id is **zebra.ui.Panel.SIZED** the parameter is previous component width
+   - if id is **zebra.ui.Panel.MOVED** the parameter is previous component x location
+   - if id is **zebra.ui.Panel.ADDED** the parameter is constraints a new component has been added
+   - if id is **zebra.ui.Panel.REMOVED** the parameter is null
+
+ * @param {zebra.ui.Panel|Integer|Object} p2 an event second parameter depends
+ * on an component event that has happened:
+
+
+    - if id is **zebra.ui.Panel.SIZED** the parameter is previous component height
+    - if id is **zebra.ui.Panel.MOVED** the parameter is previous component y location
+    - if id is **zebra.ui.Panel.ADDED** the parameter is reference to the added children component
+    - if id is **zebra.ui.Panel.REMOVED** the parameter is reference to the removed children component
+
+ * @event  childCompEvent
+ */
+
+ /**
+  * The method is called for focusable UI components (components that can hold input focus) to ask
+  * a string to be saved in native clipboard
+  *
+  * @return {String} a string to be copied in native clipboard
+  *
+  * @event clipCopy
+  */
+
+ /**
+  * The method is called to pass string from clipboard to a focusable (a component that can hold
+  * input focus) UI component
+  *
+  * @param {String} s a string from native clipboard
+  *
+  * @event clipPaste
+  */
+
+pkg.Panel = Class(L.Layoutable, [
+    function $prototype() {
+        /**
+         * Request the whole UI component or part of the UI component to be repainted
+         * @param  {Integer} [x] x coordinate of the component area to be repainted
+         * @param  {Integer} [y] y coordinate of the component area to be repainted
+         * @param  {Integer} [w] width of the component area to be repainted
+         * @param  {Integer} [h] height of the component area to be repainted
+         * @method repaint
+         */
+        this.repaint = function(x,y,w,h) {
+            // step I: skip invisible components and components that are not in hierarchy
+            //         don't initiate repainting thread for such sort of the components,
+            //         but don't forget for zCanvas whose parent field is null
+            if (this.isVisible === true && (this.parent != null || this.$context != null)) {
+                //!!! find context buffer that holds the given component
+
+                var canvas = this;
+                for(; canvas.$context == null; canvas = canvas.parent) {
+                    // component either is not in visible state or is not in hierarchy
+                    // than stop repaint procedure
+                    if (canvas.isVisible === false || canvas.parent == null) {
+                        return;
+                    }
+                }
+
+                // no arguments means the whole component has top be repainted
+                if (arguments.length === 0) {
+                    x = y = 0;
+                    w = this.width;
+                    h = this.height;
+                }
+
+                // step II: calculate new current dirty area
+                if (w > 0 && h > 0) {
+                    var r = $cvp(this, temporary);
+                    if (r != null) {
+                        zebkit.util.intersection(r.x, r.y, r.width, r.height, x, y, w, h, r);
+                        if (r.width > 0 && r.height > 0) {
+                            x = r.x;
+                            y = r.y;
+                            w = r.width;
+                            h = r.height;
+
+                            // calculate repainted component absolute location
+                            var cc = this;
+                            while (cc != canvas) {
+                                x += cc.x;
+                                y += cc.y;
+                                cc = cc.parent;
+                            }
+
+                            // normalize repaint area coordinates
+                            if (x < 0) {
+                                w += x;
+                                x = 0;
+                            }
+                            if (y < 0) {
+                                h += y;
+                                y = 0;
+                            }
+                            if (w + x > canvas.width ) w = canvas.width - x;
+                            if (h + y > canvas.height) h = canvas.height - y;
+
+                            // still have what to repaint than calculate new
+                            // dirty area of target canvas element
+                            if (w > 0 && h > 0) {
+                                var da = canvas.$da;
+
+                                // if the target canvas already has a dirty area set than
+                                // unite it with requested
+                                if (da.width > 0) {
+                                    // check if the requested repainted area is not in
+                                    // exiting dirty area
+                                    if (x < da.x                ||
+                                        y < da.y                ||
+                                        x + w > da.x + da.width ||
+                                        y + h > da.y + da.height  )
+                                    {
+                                        // !!!
+                                        // speed up to comment method call
+                                        //MB.unite(da.x, da.y, da.width, da.height, x, y, w, h, da);
+                                        var dax = da.x, day = da.y;
+                                        if (da.x > x) da.x = x;
+                                        if (da.y > y) da.y = y;
+                                        da.width  = Math.max(dax + da.width,  x + w) - da.x;
+                                        da.height = Math.max(day + da.height, y + h) - da.y;
+                                    }
+                                }
+                                else {
+                                    // if the target canvas doesn't have a dirty area set than
+                                    // cut (if necessary) the requested repainting area by the
+                                    // canvas size
+
+                                    // !!!
+                                    // not necessary to call the method since we have already normalized
+                                    // repaint coordinates and sizes
+                                    //!!! MB.intersection(0, 0, canvas.width, canvas.height, x, y, w, h, da);
+
+                                    da.x      = x;
+                                    da.width  = w;
+                                    da.y      = y;
+                                    da.height = h;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // step III: initiate repainting thread
+                if (canvas.$timer == null && (canvas.isValid === false || canvas.$da.width > 0 || canvas.isLayoutValid === false)) {
+                    var $this = this;
+                    canvas.$timer = zebra.web.$task(function() {
+                        // do validation before timer will be set to null to avoid
+                        // unnecessary timer initiating what can be caused by validation
+                        // procedure by calling repaint method
+                        if (canvas.isValid === false || canvas.isLayoutValid === false) {
+                            canvas.validate();
+                        }
+
+                        canvas.$timer = null;
+                        canvas.paintComponent(canvas.$context);
+                    });
+                }
+            }
+        };
+
+        // destination is component itself or one of his composite parent.
+        // composite component is a component that grab control from his
+        // children component. to make a component composite
+        // it has to implement catchInput field or method. If composite component
+        // has catchInput method it will be called
+        // to detect if the composite component takes control for the given kid.
+        // composite components can be embedded (parent composite can take
+        // control on its child composite component)
+        this.getEventDestination = function() {
+            var c = this, p = this;
+            while ((p = p.parent) != null) {
+                if (p.catchInput != null && (p.catchInput === true || (p.catchInput !== false && p.catchInput(c)))) {
+                    c = p;
+                }
+            }
+            return c;
+        };
+
+        this.paintComponent = function(g) {
+            var ts = g.$states[g.$curState];
+            if (ts.width  > 0  &&
+                ts.height > 0  &&
+                this.isVisible === true)
+            {
+                // !!!
+                // calling setSize in the case of raster layout doesn't
+                // cause hierarchy layout invalidation
+                if (this.isLayoutValid === false) {
+                    this.validate();
+                }
+
+                var b = this.bg != null && (this.parent == null || this.bg != this.parent.bg);
+
+                // if component defines shape and has update, [paint?] or background that
+                // differs from parent background try to apply the shape and than build
+                // clip from the applied shape
+                if ( (this.border != null && this.border.outline != null) &&
+                     (b || this.update != null)                           &&
+                     this.border.outline(g, 0, 0, this.width, this.height, this))
+                {
+                    g.save();
+                    g.clip();
+
+                    if (b) this.bg.paint(g, 0, 0, this.width, this.height, this);
+                    if (this.update != null) this.update(g);
+
+                    g.restore();
+                }
+                else {
+                    if (b) {
+                        this.bg.paint(g, 0, 0, this.width, this.height, this);
+                    }
+                    if (this.update != null) this.update(g);
+                }
+
+                if (this.border != null) {
+                    this.border.paint(g, 0, 0, this.width, this.height, this);
+                }
+
+                if (this.paint != null) {
+                    var left   = this.getLeft(),
+                        top    = this.getTop(),
+                        bottom = this.getBottom(),
+                        right  = this.getRight();
+
+                    if (left > 0 || right > 0 || top > 0 || bottom > 0) {
+                        if (ts.width > 0 && ts.height > 0) {
+                            var x1   = (ts.x > left ? ts.x : left),
+                                y1   = (ts.y > top  ? ts.y : top),
+                                cxcw = ts.x + ts.width,
+                                cych = ts.y + ts.height,
+                                cright = this.width - right,
+                                cbottom = this.height - bottom;
+
+                            g.save();
+                            g.clipRect(x1, y1, (cxcw < cright  ? cxcw : cright)  - x1,
+                                               (cych < cbottom ? cych : cbottom) - y1);
+                            this.paint(g);
+                            g.restore();
+                        }
+                    }
+                    else {
+                        this.paint(g);
+                    }
+                }
+
+                var count = this.kids.length;
+                for(var i = 0; i < count; i++) {
+                    var kid = this.kids[i];
+                    if (kid.isVisible === true && kid.$context == null) {
+                        // calculate if the given component area has intersection
+                        // with current clipping area
+                        var kidXW = kid.x + kid.width,
+                            c_xw  = ts.x + ts.width,
+                            kidYH = kid.y + kid.height,
+                            c_yh  = ts.y + ts.height,
+                            iw = (kidXW < c_xw ? kidXW : c_xw) - (kid.x > ts.x ? kid.x : ts.x),
+                            ih = (kidYH < c_yh ? kidYH : c_yh) - (kid.y > ts.y ? kid.y : ts.y);
+
+                        if (iw > 0 && ih > 0) {
+                            g.save();
+                            g.translate(kid.x, kid.y);
+                            g.clipRect(0, 0, kid.width, kid.height);
+                            kid.paintComponent(g);
+                            g.restore();
+                        }
+                    }
+                }
+                if (this.paintOnTop != null) this.paintOnTop(g);
+            }
+        };
+
+        /**
+         * UI component border view
+         * @attribute border
+         * @default null
+         * @readOnly
+         * @type {zebra.ui.View}
+         */
+
+        /**
+         * UI component background view
+         * @attribute bg
+         * @default null
+         * @readOnly
+         * @type {zebra.ui.View}
+        */
+
+        /**
+         * Define and set the property to true if the component has to catch focus
+         * @attribute canHaveFocus
+         * @type {Boolean}
+         * @default undefined
+         */
+
+        this.top = this.left = this.right = this.bottom = 0;
+
+        /**
+         * UI component enabled state
+         * @attribute isEnabled
+         * @default true
+         * @readOnly
+         * @type {Boolean}
+         */
+        this.isEnabled = true;
+
+        /**
+         * Find a zebra.ui.zCanvas where the given UI component is hosted
+         * @return {zebra.ui.zCanvas} a zebra canvas
+         * @method getCanvas
+         */
+        this.getCanvas = function() {
+            var c = this;
+            for(; c != null && c.$isRootCanvas !== true; c = c.parent);
+            return c;
+        };
+
+        this.notifyRender = function(o,n){
+            if (o != null && o.ownerChanged != null) o.ownerChanged(null);
+            if (n != null && n.ownerChanged != null) n.ownerChanged(this);
+        };
+
+        /**
+         * Shortcut method to register the specific to the concrete component
+         * events listener. For instance "zebra.ui.Button" component fires event
+         * when it is pressed:
+
+        var b = new zebra.ui.Button("Test");
+        b.bind(function() {
+            // button has been pressed
+        });
+
+
+         * @param {Function|Object} a listener function or an object that
+         * declares events handler methods
+         * @return {Function|Object} a registered listener
+         * @method bind
+         */
+
+        /**
+         * Shortcut method to remove the register component specific events listener
+         * @param {Function|Object} a listener function to be removed
+         * @method unbind
+         */
+
+
+        /**
+         * Load content of the panel UI components from the specified JSON file.
+         * @param  {String} jsonPath an URL to a JSON file that describes UI
+         * to be loaded into the panel
+         * @chainable
+         * @method load
+         */
+        this.load = function(jsonPath, cb) {
+            new pkg.Bag(this).load(jsonPath, cb);
+            return this;
+        };
+
+        /**
+         * Get a children UI component that embeds the given point.
+         * @param  {Integer} x x coordinate
+         * @param  {Integer} y y coordinate
+         * @return {zebra.ui.Panel} a children UI component
+         * @method getComponentAt
+         */
+        this.getComponentAt = function(x,y){
+            var r = $cvp(this, temporary);
+
+            if (r == null || (x < r.x || y < r.y ||
+                x >= r.x + r.width || y >= r.y + r.height))
+            {
+                return null;
+            }
+
+            if (this.kids.length > 0){
+                for(var i = this.kids.length; --i >= 0; ){
+                    var kid = this.kids[i];
+                    kid = kid.getComponentAt(x - kid.x,
+                                             y - kid.y);
+                    if (kid != null) return kid;
+                }
+            }
+            return this.contains == null || this.contains(x, y) === true ? this : null;
+        };
+
+        /**
+         * Shortcut method to invalidating the component
+         * and initiating the component repainting
+         * @method vrp
+         */
+        this.vrp = function(){
+            this.invalidate();
+
+            // extra condition to save few millisecond on repaint() call
+            if (this.isVisible === true && this.parent != null) {
+                this.repaint();
+            }
+        };
+
+        this.getTop = function() {
+            return this.border != null ? this.top + this.border.getTop()
+                                       : this.top;
+        };
+
+        this.getLeft = function() {
+            return this.border != null ? this.left + this.border.getLeft()
+                                       : this.left;
+        };
+
+        this.getBottom = function() {
+            return this.border != null ? this.bottom + this.border.getBottom()
+                                       : this.bottom;
+        };
+
+        this.getRight  = function() {
+            return this.border != null ? this.right  + this.border.getRight()
+                                       : this.right;
+        };
+
+        //TODO: the method is not used yet
+        this.isInvalidatedByChild = function(c) {
+            return true;
+        };
+
+        /**
+         * The method is implemented to be aware about a children component
+         * insertion.
+         * @param  {Integer} index an index at that a new children component
+         * has been added
+         * @param  {Object} constr a layout constraints of an inserted component
+         * @param  {zebra.ui.Panel} l a children component that has been inserted
+         * @method kidAdded
+         */
+        this.kidAdded = function (index,constr,l){
+            COMP_EVENT.source = this;
+            COMP_EVENT.constraints = constr;
+            COMP_EVENT.kid = l;
+
+            pkg.events.fireEvent("compAdded", COMP_EVENT);
+
+            if (l.width > 0 && l.height > 0) {
+                l.repaint();
+            }
+            else {
+                this.repaint(l.x, l.y, 1, 1);
+            }
+        };
+
+        /**
+         * Set the component layout constraints.
+         * @param {Object} ctr a constraints
+         * @method setConstraints
+         */
+        this.setConstraints = function(ctr) {
+            if (this.constraints != ctr) {
+                this.constraints = ctr;
+                this.vrp();
+            }
+        };
+
+        /**
+         * The method is implemented to be aware about a children component
+         * removal.
+         * @param  {Integer} i an index of a removed component
+         * @param  {zebra.ui.Panel} l a removed children component
+         * @method kidRemoved
+         */
+        this.kidRemoved = function(i,l){
+            COMP_EVENT.source = this;
+            COMP_EVENT.index  = i;
+            COMP_EVENT.kid    = l;
+            pkg.events.fireEvent("compRemoved", COMP_EVENT);
+            if (l.isVisible === true) {
+                this.repaint(l.x, l.y, l.width, l.height);
+            }
+        };
+
+        /**
+         * The method is implemented to be aware the
+         * component location updating
+         * @param  {Integer} px a previous x coordinate of the component
+         * @param  {Integer} py a previous y coordinate of the component
+         * @method relocated
+         */
+        this.relocated = function(px, py) {
+            COMP_EVENT.source = this;
+            COMP_EVENT.prevX  = px;
+            COMP_EVENT.prevY  = py;
+            pkg.events.fireEvent("compMoved", COMP_EVENT);
+
+            var p = this.parent,
+                w = this.width,
+                h = this.height;
+
+            if (p != null && w > 0 && h > 0) {
+                var x = this.x,
+                    y = this.y,
+                    nx = x < px ? x : px,
+                    ny = y < py ? y : py;
+
+                //TODO: some mobile browser has bug: moving a component
+                //      leaves 0.5 sized traces to fix it 1 pixel extra
+                //      has to be added to all sides of repainted rect area
+                // nx--;
+                // ny--;
+
+                if (nx < 0) nx = 0;
+                if (ny < 0) ny = 0;
+
+                var w1 = p.width - nx,
+                    w2 = w + (x > px ? x - px : px - x),
+                    h1 = p.height - ny,
+                    h2 = h + (y > py ? y - py : py - y);
+
+                // TODO: add crappy 2 for mobile (android)
+                p.repaint(nx, ny, (w1 < w2 ? w1 : w2),// + 2,
+                                  (h1 < h2 ? h1 : h2));// + 2);
+            }
+        };
+
+        /**
+         * The method is implemented to be aware the
+         * component size updating
+         * @param  {Integer} pw a previous width of the component
+         * @param  {Integer} ph a previous height of the component
+         * @method resized
+         */
+        this.resized = function(pw,ph) {
+            COMP_EVENT.source = this;
+            COMP_EVENT.prevWidth  = pw;
+            COMP_EVENT.prevHeight = ph;
+            pkg.events.fireEvent("compSized", COMP_EVENT);
+
+            if (this.parent != null) {
+                this.parent.repaint(this.x, this.y,
+                                    ((this.width  > pw) ? this.width  : pw),
+                                    ((this.height > ph) ? this.height : ph));
+            }
+        };
+
+        /**
+         * Checks if the component has a focus
+         * @return {Boolean} true if the component has focus
+         * @method hasFocus
+         */
+        this.hasFocus = function(){
+            return pkg.focusManager.hasFocus(this);
+        };
+
+        /**
+         * Force the given component to catch focus if the component is focusable.
+         * @method requestFocus
+         */
+        this.requestFocus = function(){
+            pkg.focusManager.requestFocus(this);
+        };
+
+        /**
+         * Force the given component to catch focus in the given timeout.
+         * @param {Integer} [timeout] a timeout in milliseconds. The default value is 50
+         * milliseconds
+         * @method requestFocusIn
+         */
+        this.requestFocusIn = function(timeout) {
+            if (arguments.length === 0) {
+                timeout = 50;
+            }
+            var $this = this;
+            setTimeout(function () {
+                $this.requestFocus();
+            }, timeout);
+        };
+
+        /**
+         * Set the UI component visibility
+         * @param  {Boolean} b a visibility state
+         * @method setVisible
+         * @chainable
+         */
+        this.setVisible = function (b){
+            if (this.isVisible != b) {
+                this.isVisible = b;
+                this.invalidate();
+
+                COMP_EVENT.source = this;
+                pkg.events.fireEvent("compShown", COMP_EVENT);
+
+                if (this.parent != null) {
+                    if (b) this.repaint();
+                    else {
+                        this.parent.repaint(this.x, this.y, this.width, this.height);
+                    }
+                }
+            }
+            return this;
+        };
+
+        /**
+         *  Set the UI component enabled state. Using this property
+         *  an UI component can be excluded from getting input events
+         *  @param  {Boolean} b a enabled state
+         *  @method setEnabled
+         *  @chainable
+         */
+        this.setEnabled = function (b){
+            if (this.isEnabled != b){
+                this.isEnabled = b;
+
+                COMP_EVENT.source = this;
+                pkg.events.fireEvent("compEnabled", COMP_EVENT);
+                if (this.kids.length > 0) {
+                    for(var i = 0;i < this.kids.length; i++) {
+                        this.kids[i].setEnabled(b);
+                    }
+                }
+                this.repaint();
+            }
+            return this;
+        };
+
+        /**
+         * Set the UI component top, right, left, bottom paddings to the same given value
+         * @param  {Integer} v the value that will be set as top, right, left, bottom UI
+         * component paddings
+         * @method setPadding
+         * @chainable
+         */
+
+        /**
+         * Set UI component top, left, bottom, right paddings. The paddings are
+         * gaps between component border and painted area.
+         * @param  {Integer} top a top padding
+         * @param  {Integer} left a left padding
+         * @param  {Integer} bottom a bottom padding
+         * @param  {Integer} right a right padding
+         * @method setPadding
+         * @chainable
+         */
+        this.setPadding = function (top,left,bottom,right){
+            if (arguments.length === 1) {
+                left = bottom = right = top;
+            }
+
+            if (this.top    != top    || this.left != left  ||
+                this.bottom != bottom || this.right != right  )
+            {
+                this.top = top;
+                this.left = left;
+                this.bottom = bottom;
+                this.right = right;
+                this.vrp();
+            }
+            return this;
+        },
+
+        /**
+         * Set the border view
+         * @param  {zebra.ui.View|Function|String} v a border view or border "paint(g,x,y,w,h,c)"
+         * rendering function or border type: "plain", "sunken", "raised", "etched"
+         * @method setBorder
+         * @chainable
+         */
+        this.setBorder = function (v) {
+            var old = this.border;
+            v = pkg.$view(v);
+            if (v != old){
+                this.border = v;
+                this.notifyRender(old, v);
+
+                if ( old == null || v == null         ||
+                     old.getTop()    != v.getTop()    ||
+                     old.getLeft()   != v.getLeft()   ||
+                     old.getBottom() != v.getBottom() ||
+                     old.getRight()  != v.getRight()     )
+                {
+                    this.invalidate();
+                }
+
+                if (v != null && v.activate != null) {
+                    v.activate(this.hasFocus() ?  "focuson": "focusoff");
+                }
+
+                this.repaint();
+            }
+            return this;
+        };
+
+        /**
+         * Set the background. Background can be a color string or a zebra.ui.View class
+         * instance, or a function(g,x,y,w,h,c) that paints the background:
+
+            // set background color
+            comp.setBackground("red");
+
+            // set a picture as a component background
+            comp.setBackground(new zebra.ui.Picture(...));
+
+            // set a custom rendered background
+            comp.setBackground(function (g,x,y,w,h,target) {
+                // paint a component background here
+                g.setColor("blue");
+                g.fillRect(x,y,w,h);
+                g.drawLine(...);
+                ...
+            });
+
+
+         * @param  {String|zebra.ui.View|Function} v a background view, color or
+         * background "paint(g,x,y,w,h,c)" rendering function.
+         * @method setBackground
+         * @chainable
+         */
+        this.setBackground = function (v){
+            var old = this.bg;
+            v = pkg.$view(v);
+            if (v != old) {
+                this.bg = v;
+                this.notifyRender(old, v);
+                this.repaint();
+            }
+            return this;
+        };
+
+        /**
+         * Add the given children component or number of components to the given panel.
+         * @protected
+         * @param {zebra.ui.Panel|Array|Object} a children component of number of
+         * components to be added. The parameter can be:
+
+    - Component
+    - Array of components
+    - Dictionary object where every element is a component to be added and the key of
+    the component is stored in the dictionary is considered as the component constraints
+
+         * @method setKids
+         */
+        this.setKids = function(a) {
+            if (arguments.length === 1 && zebkit.instanceOf(a, pkg.Panel)) {
+               this.add(a);
+            }
+            else {
+                // if components list passed as number of arguments
+                if (arguments.length > 1) {
+                    for(var i=0; i < arguments.length; i++) {
+                        var a = arguments[i];
+                        this.add(a.$new != null ? a.$new() : a);
+                    }
+                }
+                else {
+                    if (Array.isArray(a)) {
+                        for(var i=0; i < a.length; i++) {
+                            this.add(a[i]);
+                        }
+                    }
+                    else {
+                        var kids = a;
+                        for(var k in kids) {
+                            if (kids.hasOwnProperty(k)) {
+                                var ctr = L.$constraints(k);
+                                this.add(ctr, kids[k]);
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        /**
+         * Called whenever the UI component gets or looses focus
+         * @method focused
+         */
+        this.focused = function() {
+            // extents of activate method indicates it is
+            if (this.border != null && this.border.activate != null) {
+                var id = this.hasFocus() ? "focuson" : "focusoff" ;
+                if (typeof this.border.views[id] !== 'undefined') {
+                    this.border.activate(id);
+                    this.repaint();
+                }
+            }
+
+            // TODO: think if the background has to be focus dependent
+            // if (this.bg != null && this.bg.activate != null) {
+            //     var id = this.hasFocus() ? "focuson" : "focusoff" ;
+            //     if (this.bg.views[id]) {
+            //         this.bg.activate(id);
+            //         this.repaint();
+            //     }
+            // }
+        };
+
+        /**
+         * Remove all children UI components
+         * @method removeAll
+         */
+        this.removeAll = function (){
+            if (this.kids.length > 0){
+                var size = this.kids.length, mx1 = Number.MAX_VALUE, my1 = mx1, mx2 = 0, my2 = 0;
+                for(; size > 0; size--){
+                    var child = this.kids[size - 1];
+                    if (child.isVisible === true){
+                        var xx = child.x, yy = child.y;
+                        mx1 = mx1 < xx ? mx1 : xx;
+                        my1 = my1 < yy ? my1 : yy;
+                        mx2 = Math.max(mx2, xx + child.width);
+                        my2 = Math.max(my2, yy + child.height);
+                    }
+                    this.removeAt(size - 1);
+                }
+                this.repaint(mx1, my1, mx2 - mx1, my2 - my1);
+            }
+        };
+
+        /**
+         * Bring the UI component to front
+         * @method toFront
+         */
+        this.toFront = function(){
+            if (this.parent != null && this.parent.kids[this.parent.kids.length-1] !== this){
+                var p = this.parent;
+                p.kids.splice(p.indexOf(this), 1);
+                p.kids[p.kids.length] = this;
+                p.vrp();
+            }
+        };
+
+        /**
+         * Send the UI component to back
+         * @method toBack
+         */
+        this.toBack = function(){
+            if (this.parent != null && this.parent.kids[0] !== this){
+                var p = this.parent;
+                p.kids.splice(p.indexOf(this), 1);
+                p.kids.unshift(this);
+                p.vrp();
+            }
+        };
+
+        /**
+         * Set the UI component size to its preferred size
+         * @return {Object} a preferred size applied to the component.
+         * The structure of the returned object is the following:
+
+            { width:{Integer}, height:{Integer} }
+
+         * @method toPreferredSize
+         */
+        this.toPreferredSize = function (){
+            var ps = this.getPreferredSize();
+            this.setSize(ps.width, ps.height);
+            return ps;
+        };
+
+        /**
+         * Build view by this component
+         * @return {zebra.ui.View} a view of the component
+         * @method toView
+         */
+        this.toView = function() {
+            return new pkg.CompRender(this);
+        };
+
+        this[''] = function(l) {
+            // !!! dirty trick to call super, for the sake of few milliseconds back
+            //this.$super();
+            L.Layoutable.prototype[zebra.CNAME].call(this, l);
+
+            // apply default properties
+            this.properties(this.$clazz);
+
+            if (arguments.length > 0) {
+                if (l.constructor === Object) {
+                    this.properties(l);
+                }
+                else {
+                    this.setLayout(l);
+                }
+            }
+        };
+    }
+]);
+
+
+/**
+ * HTML element UI component wrapper class. The class represents
+ * an HTML element as if it is standard UI component. It helps to use
+ * some standard HTML element as zebra UI components and embeds it
+ * in zebra UI application layout.
+ * @class zebra.ui.HtmlElement
+ * @constructor
+ * @param {String|HTMLElement} [element] an HTML element to be represented
+ * as a standard zebra UI component. If the passed parameter is string
+ * it denotes a name of an HTML element. In this case a new HTML element
+ * will be created.
+ * @extends {zebra.ui.Panel}
+ */
+pkg.HtmlElement = Class(pkg.Panel, [
+    function $clazz() {
+        this.CLASS_NAME = null;
+    },
+
+    function $prototype() {
+        this.$container = this.$canvas = null;
+        this.ePsW = this.ePsH = 0;
+        this.isDOMElement = true;    // indication of the DOM element that is used by DOM element manager to track
+                                     // and manage its visibility
+
+        this.$sizeAdjusted = false;
+
+        /**
+         * Set the CSS font of the wrapped HTML element
+         * @param {String|zebra.ui.Font} f a font
+         * @method setFont
+         * @chainable
+         */
+        this.setFont = function(f) {
+            this.setStyle("font", f.toString());
+            this.vrp();
+            return this;
+        };
+
+        /**
+         * Set the CSS color of the wrapped HTML element
+         * @param {String} c a color
+         * @chainable
+         * @method setColor
+         */
+        this.setColor = function(c) {
+            this.setStyle("color", c.toString());
+            return this;
+        };
+
+        /**
+         * Apply the given set of CSS styles to the wrapped HTML element
+         * @param {Object} styles a dictionary of CSS styles
+         * @chainable
+         * @method setStyles
+         */
+        this.setStyles = function(styles) {
+            for(var k in styles) {
+                this.$setStyle(this.element, k, styles[k]);
+            }
+            this.vrp();
+            return this;
+        };
+
+        /**
+         * Apply the given CSS style to the wrapped HTML element
+         * @param {String} a name of the CSS style
+         * @param {String} a value the CSS style has to be set
+         * @chainable
+         * @method setStyle
+         */
+        this.setStyle = function(name, value) {
+            this.$setStyle(this.element, name, value);
+            this.vrp();
+            return this;
+        };
+
+        this.$setStyle = function(element, name, value) {
+            name = name.trim();
+            var i = name.indexOf(':');
+            if (i > 0) {
+                if (zebra[name.substring(0, i)] == null) {
+                    return;
+                }
+                name = name.substring(i + 1);
+            }
+            element.style[name] = value;
+        };
+
+        /**
+         * Set the specified attribute of the wrapped HTML element
+         * @param {String} name  a name of attribute
+         * @param {String} value a value of the attribute
+         * @chainable
+         * @method setAttribute
+         */
+        this.setAttribute = function(name, value) {
+            this.element.setAttribute(name, value);
+            return this;
+        };
+
+        this.paint = function(g) {
+            // this method is used as an indication that the component
+            // is visible and no one of his parent is invisible
+            if (this.$container.style.visibility === "hidden") {
+                this.$container.style.visibility = "visible";
+            }
+
+            // calling paint says that the component in DOM tree
+            // that is time to correct CSS size if necessary
+            if (this.$sizeAdjusted !== true) {
+                this.setSize(this.width, this.height);
+            }
+        };
+
+        this.calcPreferredSize = function(target) {
+            return { width: this.ePsW, height: this.ePsH };
+        };
+
+        var $store = [
+            "paddingTop","paddingLeft","paddingBottom","paddingRight",
+            "border","borderStyle","borderWidth", "borderTopStyle",
+            "borderTopWidth", "borderBottomStyle","borderBottomWidth",
+            "borderLeftStyle","borderLeftWidth", "borderRightStyle",
+            "visibility", "borderRightWidth", "width", "height", "position"
+        ];
+
+        // the method calculates the given HTML element preferred size
+        this.recalc = function() {
+
+            //console.log("HtmlElement.recalc() " + this.element);
+
+            // if component has a layout set it is up to a layout manager to calculate
+            // the component preferred size. In this case the HTML element is a container
+            // whose preferred size is defined by its content
+            if (this.layout === this) {
+                var e    = this.element,
+                    vars = {},
+                    domParent = null,
+                    b    = !zebkit.web.$contains(this.$container);
+
+              //  console.log("HtmlElement.recalc() 2 " + this.element + "," + b);
+
+                // element doesn't have preferred size if it is not a member of
+                // an html page, so add it if for a while
+                if (b) {
+                    // save previous parent node since
+                    // appendChild will overwrite it
+                    domParent = this.$container.parentNode;
+                    document.body.appendChild(this.$container);
+                }
+
+                // save element metrics
+                for(var i = 0; i < $store.length; i++) {
+                    var k = $store[i];
+                    vars[k] = e.style[k];
+                }
+
+                // force metrics to be calculated automatically
+                this.$container.style.visibility = "hidden";
+                e.style.position = "auto";
+                e.style.padding = "0px";
+                e.style.border  = "none";
+                e.style.width   = "auto";
+                e.style.height  = "auto";
+
+                // fetch preferred size
+                this.ePsW = e.offsetWidth;
+                this.ePsH = e.offsetHeight;
+
+                for(var k in vars) {
+                    var v = vars[k];
+                    if (v != null) e.style[k] = v;
+                }
+
+                if (b) {
+                    document.body.removeChild(this.$container);
+                    // restore previous parent node
+                    if (domParent != null) domParent.appendChild(this.$container);
+                }
+            }
+        };
+
+        /**
+         * Set the inner content of the wrapped HTML element
+         * @param {String} an inner content
+         * @method setContent
+         * @chainable
+         */
+        this.setContent = function(content) {
+            this.element.innerHTML = content;
+            this.vrp();
+            return this;
+        };
+
+        // TODO: bad name
+        this.$getFocusHolderElement = function() {
+            return null;
+        };
+
+        this.canHaveFocus = function() {
+            return this.$getFocusHolderElement() != null;
+        };
+
+        // TODO: not very pretty
+        this.$hasNativeFocus = function() {
+            return this.canHaveFocus() && document.activeElement === this.$getFocusHolderElement();
+        };
+
+        this.$focus = function() {
+            if (this.canHaveFocus() && this.$hasNativeFocus() === false) {
+                console.log("HtmlElement.$focus()");
+                this.$getFocusHolderElement().focus();
+            }
+        };
+
+        this.$blur = function() {
+            if (this.canHaveFocus() && this.$hasNativeFocus()) {
+                console.log("HtmlElement.$blur()");
+                this.$getFocusHolderElement().blur();
+            }
+        };
+    },
+
+    function toFront() {
+        this.$super();
+        var pnode = this.$container.parentNode;
+        if (pnode != null && pnode.lastChild !== this.$container) {
+            pnode.removeChild(this.$container);
+            pnode.appendChild(this.$container);
+        }
+    },
+
+    function toBack() {
+        this.$super();
+        var pnode = this.$container.parentNode;
+        if (pnode != null && pnode.firstChild !== this.$container) {
+            pnode.removeChild(this.$container);
+            pnode.insertBefore(this.$container, pnode.firstChild);
+        }
+    },
+
+    function setEnabled(b) {
+        if (this.isEnabled != b) {
+            if (b) {
+                this.$container.removeChild(this.$blockElement);
+            }
+            else {
+                if (this.$blockElement == null) {
+                    var be = this.$blockElement = zebra.web.$createBlockedElement();
+                }
+                this.$container.appendChild(this.$blockElement);
+           }
+        }
+
+        return this.$super(b);
+    },
+
+    function setSize(w, h) {
+        // by the moment the method setSize is called the DOM element can be not a part of
+        // HTML layout. In this case offsetWidth/offsetHeihght are always zero what prevents
+        // us from proper calculation of CSS width and height. Postpone
+        if (zebkit.web.$contains(this.$container)) {
+            var prevVisibility = this.$container.style.visibility;
+            this.$container.style.visibility = "hidden"; // could make sizing smooth
+
+            // HTML element size is calculated as sum of CSS "width"/"height", paddings, border
+            // So the passed width and height has to be corrected (before it will be applied to
+            // an HTML element) by reduction of extra HTML gaps. For this we firstly set the
+            // width and size
+            this.element.style.width  = "" + w + "px";
+            this.element.style.height = "" + h + "px";
+
+            var ww = 2 * w - this.element.offsetWidth,
+                hh = 2 * h - this.element.offsetHeight;
+
+            if (ww != w || hh != h) {
+                // than we know the component metrics and can compute necessary reductions
+                this.element.style.width   = "" + ww + "px";
+                this.element.style.height  = "" + hh + "px";
+            }
+
+            this.$sizeAdjusted = true;
+
+            // visibility correction is done by HTML elements manager
+            this.$container.style.visibility = prevVisibility;
+        }
+        else {
+            this.$sizeAdjusted = false;
+        }
+
+        return this.$super(w, h);
+    },
+
+    function setPadding(t,l,b,r) {
+        if (arguments.length == 1) {
+            l = b = r = t;
+        }
+
+        this.setStyles({
+            paddingTop    : '' + t + "px",
+            paddingLeft   : '' + l + "px",
+            paddingRight  : '' + r + "px",
+            paddingBottom : '' + b + "px"
+        });
+
+        if (this.top != t || this.left != l || this.right != r || this.bottom != b) {
+            // changing padding has influence to CSS size the component has to have
+            // so we have to request CSS size recalculation
+            this.$sizeAdjusted = false;
+        }
+
+        this.$super.apply(this, arguments);
+        return this;
+    },
+
+    function setBorder(b) {
+        b = pkg.$view(b);
+
+        if (b == null) {
+           this.setStyle("border", "none");
+        }
+        else {
+            this.setStyles({
+                //!!!! bloody FF fix, the border can be made transparent
+                //!!!! only via "border" style
+                border : "0px solid transparent",
+
+                //!!! FF understands only decoupled border settings
+                borderTopStyle : "solid",
+                borderTopColor : "transparent",
+                borderTopWidth : "" + b.getTop() + "px",
+
+                borderLeftStyle : "solid",
+                borderLeftColor : "transparent",
+                borderLeftWidth : "" + b.getLeft() + "px",
+
+                borderBottomStyle : "solid",
+                borderBottomColor : "transparent",
+                borderBottomWidth : "" + b.getBottom() + "px",
+
+                borderRightStyle : "solid",
+                borderRightColor : "transparent",
+                borderRightWidth : "" + b.getRight() + "px"
+            });
+        }
+
+        // changing border can have influence to
+        // CSS size, so request recalculation of the CSS
+        // size
+        if (this.border != b) {
+            this.$sizeAdjusted = false;
+        }
+
+        return this.$super(b);
+    },
+
+    function validate() {
+        // lookup root canvas
+        if (this.$canvas == null && this.parent != null) {
+            this.$canvas = this.getCanvas();
+        }
+
+        this.$super();
+    },
+
+    function focused() {
+        this.$super();
+
+        // sync state of native focus and zebkit focus
+        if (this.hasFocus()) {
+            this.$focus();
+        }
+        else {
+            this.$blur();
+        }
+    },
+
+    function(e) {
+        if (e == null) {
+            e = "div";
+        }
+
+        if (zebra.isString(e)) {
+            e = document.createElement(e);
+            if (this.$clazz.CLASS_NAME != null) {
+                e.setAttribute("class", this.$clazz.CLASS_NAME);
+            }
+            e.style.border   = "0px solid transparent"; // clean up border
+            e.style.fontSize = $bodyFontSize;           // DOM element is wrapped with a container that
+                                                        // has zero sized font, so let's set body  font
+                                                        // for the created element
+        }
+
+
+        // sync padding and margin of the DOM element with
+        // what appropriate properties are set
+        e.style.margin = e.style.padding = "0px";
+
+        /**
+         * Reference to HTML element the UI component wraps
+         * @attribute element
+         * @readOnly
+         * @type {HTMLElement}
+         */
+        this.element = e;
+
+        if (e.parentNode != null && e.parentNode.getAttribute("data-zebcont") != null) {
+            throw new Error("DOM element '" + e + "' already has container");
+        }
+
+        // container is a DIV element that is used as a wrapper around original one
+        // it is done to make HtmlElement implementation more universal making
+        // all DOM elements capable to be a container for another one
+        this.$container = document.createElement("div");
+
+        // prevent stretching to a parent container element
+        this.$container.style.display = "inline-block";
+
+        // cut content
+        this.$container.style.overflow = "hidden";
+
+        // coordinates have to be set to initial zero value in CSS
+        // otherwise the DOM layout can be wrong !
+        this.$container.style.left = this.$container.style.top = "0px";
+
+        this.$container.visibility = "hidden";  // before the component will be attached
+                                                // to parent hierarchy the component has to be hidden
+
+        // container div will always few pixel higher than its content
+        // to prevent the bloody effect set font to zero
+        // border and margin also have to be zero
+        this.$container.style.fontSize = this.$container.style.padding = this.$container.style.padding = "0px";
+
+
+        // add id
+        this.$container.setAttribute("id", "container-" + this.toString());
+
+
+        // mark wrapper with a special attribute to recognize it exists later
+        this.$container.setAttribute("data-zebcont", "true");
+
+
+        //  this.$container.style["pointer-events"] = "none";
+
+        // if passed DOM element already has parent
+        // attach it to container first and than
+        // attach the container to the original parent element
+        if (e.parentNode != null) {
+            // !!!
+            // Pay attention container position cannot be set to absolute
+            // since how the element has to be laid out is defined by its
+            // original parent
+            var pn = e.parentNode;
+            e.parentNode.removeChild(e);
+            this.$container.appendChild(e);
+            pn.appendChild(this.$container);
+        }
+        else {
+            // to force all children element be aligned
+            // relatively to the wrapper we have to set
+            // position CSS to absolute or absolute
+            this.$container.style.position = "absolute";
+            this.$container.appendChild(e);
+        }
+
+        // set ID if it has not been already defined
+        if (e.getAttribute("id") == null) {
+            e.setAttribute("id", this.toString());
+        }
+
+        this.$super();
+
+        // attach listeners
+        if (this.$initListeners != null) {
+            this.$initListeners();
+        }
+
+        var fe = this.$getFocusHolderElement();
+
+        // TODO: may be this code should be moved to web place
+        //
+        // reg native focus listeners for HTML element that can hold focus
+        if (fe != null) {
+            var $this = this;
+
+            zebkit.web.$focusin(fe, function(e) {
+                // sync native focus with zebkit focus if necessary
+
+                console.log("HtmlElement.focusin() " + $this.element + ", hasFocus = " + $this.hasFocus());
+                if ($this.hasFocus() === false) {
+                    $this.requestFocus();
+                }
+            }, false);
+
+            zebkit.web.$focusout(fe, function(e) {
+                // sync native focus with zebkit focus if necessary
+                if ($this.hasFocus()) {
+                    pkg.focusManager.requestFocus(null);
+                }
+            }, false);
+        }
+    }
+]);
+
+/**
+ *  zCanvas zebra UI component class. This is one of the key
+ *  class everybody has to use to start building an UI. The class is a wrapper
+ *  for HTML Canvas element. Internally it catches all native HTML Canvas
+ *  events and translates its into Zebra UI events.
+ *
+ *  zCanvas instantiation triggers a new HTML Canvas will be created
+ *  and added to HTML DOM tree.  It happens if developer doesn't pass
+ *  an HTML Canvas element reference or an ID of existing HTML Canvas
+ *  element If developers need to re-use an existent in DOM tree canvas
+ *  element they have to pass id of the canvas that has to be used as basis
+ *  for zebra UI creation or reference to a HTML Canvas element:
+
+        // a new HTML canvas element is created and added into HTML DOM tree
+        var canvas = zebra.ui.zCanvas();
+
+        // a new HTML canvas element is created into HTML DOM tree
+        var canvas = zebra.ui.zCanvas(400,500);  // pass canvas size
+
+        // stick to existent HTML canvas element
+        var canvas = zebra.ui.zCanvas("ExistentCanvasID");
+
+ *  The zCanvas has layered structure. Every layer is responsible for
+ *  showing and controlling a dedicated type of UI elements like windows
+ *  pop-up menus, tool tips and so on. Developers have to build an own UI
+ *  hierarchy on the canvas root layer. The layer is standard UI panel
+ *  that is accessible as zCanvas component instance "root" field.
+
+        // create canvas
+        var canvas = zebra.ui.zCanvas(400,500);
+
+        // save reference to canvas root layer where
+        // hierarchy of UI components have to be hosted
+        var root = canvas.root;
+
+        // fill root with UI components
+        var label = new zebra.ui.Label("Label");
+        label.setBounds(10,10,100,50);
+        root.add(label);
+
+ *  @class zebra.ui.zCanvas
+ *  @extends {zebra.ui.Panel}
+ *  @constructor
+ *  @param {String|Canvas} [element] an ID of a HTML canvas element or
+ *  reference to an HTML Canvas element.
+ *  @param {Integer} [width] a width of an HTML canvas element
+ *  @param {Integer} [height] a height of an HTML canvas element
+ */
+
+/**
+ * Implement the event handler method  to catch canvas initialized event.
+ * The event is triggered once the canvas has been initiated and all properties
+ * listeners of the canvas are set upped. The event can be used to load
+ * saved data.
+
+     var p = new zebra.ui.zCanvas(300, 300, [
+          function canvasInitialized() {
+              // do something
+          }
+     ]);
+
+ * @event  canvasInitialized
+ */
+pkg.HtmlCanvas = Class(pkg.HtmlElement, [
+    function $clazz() {
+        this.$ContextMethods = {
+            reset : function(w, h) {
+                this.$curState = 0;
+                var s = this.$states[0];
+                s.srot = s.rotateVal = s.x = s.y = s.width = s.height = s.dx = s.dy = 0;
+                s.crot = s.sx = s.sy = 1;
+                s.width = w;
+                s.height = h;
+                this.setFont(pkg.font);
+                this.setColor("white");
+            },
+
+            $init : function() {
+                // pre-allocate canvas save $states
+                this.$states = Array(50);
+                for(var i=0; i < this.$states.length; i++) {
+                    var s = {};
+                    s.srot = s.rotateVal = s.x = s.y = s.width = s.height = s.dx = s.dy = 0;
+                    s.crot = s.sx = s.sy = 1;
+                    this.$states[i] = s;
+                }
+            },
+
+            translate : function(dx, dy) {
+                if (dx !== 0 || dy !== 0) {
+                    var c = this.$states[this.$curState];
+                    c.x  -= dx;
+                    c.y  -= dy;
+                    c.dx += dx;
+                    c.dy += dy;
+                    this.$translate(dx, dy);
+                }
+            },
+
+            rotate : function(v) {
+                var c = this.$states[this.$curState];
+                c.rotateVal += v;
+                c.srot = MS(c.rotateVal);
+                c.crot = MC(c.rotateVal);
+                this.$rotate(v);
+            },
+
+            scale : function(sx, sy) {
+                var c = this.$states[this.$curState];
+                c.sx = c.sx * sx;
+                c.sy = c.sy * sy;
+                this.$scale(sx, sy);
+            },
+
+            save : function() {
+                this.$curState++;
+                var c = this.$states[this.$curState], cc = this.$states[this.$curState - 1];
+                c.x = cc.x;
+                c.y = cc.y;
+                c.width = cc.width;
+                c.height = cc.height;
+
+                c.dx = cc.dx;
+                c.dy = cc.dy;
+                c.sx = cc.sx;
+                c.sy = cc.sy;
+                c.srot = cc.srot;
+                c.crot = cc.crot;
+                c.rotateVal = cc.rotateVal;
+
+                this.$save();
+                return this.$curState - 1;
+            },
+
+            restore : function() {
+                if (this.$curState === 0) {
+                    throw new Error("Context restore history is empty");
+                }
+
+                this.$curState--;
+                this.$restore();
+                return this.$curState;
+            },
+
+            clipRect : function(x,y,w,h){
+                var c = this.$states[this.$curState];
+                if (c.x != x || y != c.y || w != c.width || h != c.height) {
+                    var xx = c.x, yy = c.y,
+                        ww = c.width,
+                        hh = c.height,
+                        xw = x + w,
+                        xxww = xx + ww,
+                        yh = y + h,
+                        yyhh = yy + hh;
+
+                    c.x      = x > xx ? x : xx;
+                    c.width  = (xw < xxww ? xw : xxww) - c.x;
+                    c.y      = y > yy ? y : yy;
+                    c.height = (yh < yyhh ? yh : yyhh) - c.y;
+
+                    if (c.x != xx || yy != c.y || ww != c.width || hh != c.height) {
+                        // begin path is very important to have proper clip area
+                        this.beginPath();
+                        this.rect(x, y, w, h);
+                        this.closePath();
+                        this.clip();
+                    }
+                }
+            }
+        };
+    },
+
+    function $prototype(clazz) {
+        this.$rotateValue = 0;
+        this.$scaleX = 1;
+        this.$scaleY = 1;
+
+        // set border for canvas has to be set as zebra border, since canvas
+        // is DOM component designed for rendering, so setting DOM border
+        // doesn't allow us to render zebra border
+        this.setBorder = function(b) {
+            return pkg.Panel.prototype.setBorder.call(this, b);
+        };
+
+        this.rotate = function(r) {
+            this.$rotateValue += r;
+            if (this.$context != null) {
+                this.$context.rotate(r);
+            }
+
+            this.vrp();
+            return this;
+        };
+
+        this.scale = function(sx, sy) {
+            if (this.$context != null) this.$context.scale(sx, sy);
+            this.$scaleX = this.$scaleX * sx;
+            this.$scaleY = this.$scaleY * sy;
+            this.vrp();
+            return this;
+        };
+
+        this.clearTransformations = function() {
+            this.$scaleX = 1;
+            this.$scaleY = 1;
+            this.$rotateValue = 0;
+            if (this.$context != null) {
+                this.$context = zebkit.web.$canvas(this.element, this.width, this.height, true);
+                this.$context.reset(this.width, this.height);
+            }
+            this.vrp();
+            return this;
+        };
+
+        // set passing for canvas has to be set as zebra padding, since canvas
+        // is DOM component designed for rendering, so setting DOM padding
+        // doesn't allow us to hold painting area proper
+        this.setPadding = function() {
+            return pkg.Panel.prototype.setPadding.apply(this, arguments);
+        };
+
+        this.setSize = function(w, h) {
+            if (this.width != w || h != this.height) {
+                var pw  = this.width,
+                    ph  = this.height;
+
+                this.$context = zebkit.web.$canvas(this.element, w, h);
+
+                // canvas has one instance of context, the code below
+                // test if the context has been already full filled
+                // with necessary methods and if it is not true
+                // fill it
+                if (typeof this.$context.$states === "undefined") {
+                    zebkit.web.$extendContext(this.$context, clazz.$ContextMethods);
+                }
+
+                this.$context.reset(w, h);
+
+                // if canvas has been rotated apply the rotation to the context
+                if (this.$rotateValue !== 0) {
+                    this.$context.rotate(this.$rotateValue);
+                }
+
+                // if canvas has been scaled apply it to it
+                if (this.$scaleX !== 1 || this.$scaleY !== 1) {
+                    this.$context.scale(this.$scaleX, this.$scaleY);
+                }
+
+                this.width  = w;
+                this.height = h;
+
+                this.invalidate();
+
+                // TODO: think to replace it with vrp()
+                this.validate();
+                this.repaint();
+
+                if (w != pw || h != ph) {
+                    this.resized(pw, ph);
+                }
+            }
+            return this;
+        };
+    },
+
+    function paintComponent(g) {
+        // prevent double painting, sometimes
+        // width can be -1 what cause clearRect
+        // clean incorrectly
+        if (this.$da.width > 0) {
+            g.save();
+
+            try {
+                //console.log("DA : y = " + this.$da.y);
+
+
+                // check if the given canvas has transparent background
+                // if it is true call clearRect method to clear dirty area
+                // with transparent background, otherwise it will be cleaned
+                // by filling the canvas with background later
+                if (this.bg == null || this.bg.isOpaque !== true) {
+                    g.clearRect(this.$da.x, this.$da.y,
+                                this.$da.width, this.$da.height);
+
+                }
+
+                // !!!
+                // call clipping area later than possible
+                // clearRect since it can bring to error in IE
+                g.clipRect(this.$da.x,
+                           this.$da.y,
+                           this.$da.width,
+                           this.$da.height);
+
+                this.$super(g);
+
+                // no dirty area anymore
+                this.$da.width = -1;
+                g.restore();
+            }
+            catch(e) {
+                g.restore();
+                console.log("" + e.stack);
+                throw e;
+            }
+        }
+    },
+
+    function(e) {
+        if (e != null && (e.tagName == null || e.tagName != "CANVAS")) {
+            throw new Error("Invalid element '" + e + "'");
+        }
+
+        /**
+         * Keeps rectangular "dirty" area of the canvas component
+         * @private
+         * @attribute $da
+         * @type {Object}
+                { x:Integer, y:Integer, width:Integer, height:Integer }
+         */
+        this.$da = { x: 0, y: 0, width: -1, height: 0 };
+
+        this.$super(e == null ? "canvas" : e);
+
+        // add class to canvas if this element has been created
+        if (e == null) {
+            // prevent canvas selection
+            this.element.onselectstart = function() { return false; };
+        }
+    }
+]);
+
+
+/**
+ * Base layer UI component. Layer is special type of UI
+ * components that is used to decouple different logical
+ * UI components types from each other. Zebra Canvas
+ * consists from number of layers where only one can be
+ * active at the given point in time. Layers are stretched
+ * to fill full canvas size. Every time an input event
+ * happens system detects an active layer by asking all
+ * layers from top to bottom. First layer that wants to
+ * catch input gets control. The typical layers examples
+ * are window layer, pop up menus layer and so on.
+ * @param {String} id an unique id to identify the layer
+ * @constructor
+ * @class zebra.ui.BaseLayer
+ * @extends {zebra.ui.Panel}
+ */
+pkg.BaseLayer = Class(pkg.Panel, [
+    function $prototype() {
+        /**
+         *  Define the method to catch pointer pressed event and
+         *  answer if the layer wants to have a control.
+         *  If the method is not defined it is considered as the
+         *  layer is not activated by the pointer event
+         *  @param {zebra.ui.PointerEvent} e a pointer event
+         *  @return {Boolean} return true if the layer wants to
+         *  catch control
+         *  @method layerPointerPressed
+         */
+
+        /**
+         *  Define the method to catch key pressed event and
+         *  answer if the layer wants to have a control.
+         *  If the method is not defined it is considered
+         *  as the key event doesn't activate the layer
+         *  @param {zebra.ui.KeyEvent} e a key code
+         *  @return {Boolean} return true if the layer wants to
+         *  catch control
+         *  @method layerKeyPressed
+         */
+
+        /**
+         *  Ask if the layer is active at the given location.
+         *  If the method is not defined that means the layer
+         *  is active at any location.
+         *  @param {Integer} x a x location
+         *  @param {Integer} y a y location
+         *  @return {Boolean} return true if the layer is active
+         *  at this location
+         *  @method isLayerActiveAt
+         */
+    },
+
+    function(id) {
+        if (id == null) {
+            throw new Error("Invalid layer id: " + id);
+        }
+
+        /**
+         * Id of the layer
+         * @attribute id
+         * @type {String}
+         * @readOnly
+         */
+        this.id = id;
+        this.$super();
+    }
+]);
+
+/**
+ *  Root layer implementation. This is the simplest UI layer implementation
+ *  where the layer always try grabbing all input event
+ *  @class zebra.ui.RootLayer
+ *  @constructor
+ *  @extends {zebra.ui.BaseLayer}
+ */
+pkg.RootLayer = Class(pkg.BaseLayer, [
+    function $prototype() {
+        this.layerPointerPressed = function(e) {
+            return true;
+        };
+
+        this.layerKeyPressed = function(e) {
+            return true;
+        };
+
+        this.getFocusRoot = function() {
+            return this;
+        };
+    }
+]);
+
+/**
+ *  UI component to keep and render the given "zebra.ui.View" class
+ *  instance. The target view defines the component preferred size
+ *  and the component view.
+ *  @class zebra.ui.ViewPan
+ *  @constructor
+ *  @extends {zebra.ui.Panel}
+ */
+pkg.ViewPan = Class(pkg.Panel, [
+    function $prototype() {
+        /**
+         * Reference to a view that the component visualize
+         * @attribute view
+         * @type {zebra.ui.View}
+         * @default null
+         * @readOnly
+         */
+        this.view = null;
+
+        this.paint = function (g){
+            if (this.view != null){
+                var l = this.getLeft(),
+                    t = this.getTop();
+
+                this.view.paint(g, l, t, this.width  - l - this.getRight(),
+                                         this.height - t - this.getBottom(), this);
+            }
+        };
+
+        /**
+         * Set the target view to be wrapped with the UI component
+         * @param  {zebra.ui.View|Function} v a view or a rendering
+         * view "paint(g,x,y,w,h,c)" function
+         * @method setView
+         * @chainable
+         */
+        this.setView = function (v){
+            var old = this.view;
+            v = pkg.$view(v);
+
+            if (v != old) {
+                this.view = v;
+                this.notifyRender(old, v);
+                this.vrp();
+            }
+
+            return this;
+        };
+
+        /**
+         * Override the parent method to calculate preferred size
+         * basing on a target view.
+         * @param  {zebra.ui.Panel} t [description]
+         * @return {Object} return a target view preferred size if it is defined.
+         * The returned structure is the following:
+              { width: {Integer}, height:{Integer} }
+         * @method  calcPreferredSize
+         */
+        this.calcPreferredSize = function (t) {
+            return this.view != null ? this.view.getPreferredSize() : { width:0, height:0 };
+        };
+    }
+]);
+
+/**
+ *  Image panel UI component class. The component renders an image.
+ *  @param {String|Image} [img] a path or direct reference to an image object.
+ *  If the passed parameter is string it considered as path to an image.
+ *  In this case the image will be loaded using the passed path.
+ *  @class zebra.ui.ImagePan
+ *  @constructor
+ *  @extends zebra.ui.ViewPan
+ */
+pkg.ImagePan = Class(pkg.ViewPan, [
+    function(img, w, h) {
+        this.$runner = null;
+        this.setImage(img != null ? img : null);
+        this.$super();
+        if (arguments.length > 2) this.setPreferredSize(w, h);
+    },
+
+    /**
+     * Set image to be rendered in the UI component
+     * @method setImage
+     * @param {String|Image|zebra.ui.Picture} img a path or direct reference to an
+     * image or zebra.ui.Picture render.
+     * If the passed parameter is string it considered as path to an image.
+     * In this case the image will be loaded using the passed path
+     * @chainable
+     */
+    function setImage(img) {
+        if (img != null) {
+            var $this     = this,
+                isPic     = zebkit.instanceOf(img, pkg.Picture),
+                imgToLoad = isPic ? img.target : img ;
+
+            if (this.$runner == null) {
+                this.$runner = new zebra.util.Runner();
+            }
+
+            this.$runner.run(function() {
+                zebkit.web.$loadImage(imgToLoad, this.join());
+            })
+            .
+            run(function(p, b, i) {
+                $this.$runner = null;
+                if (b) {
+                    $this.setView(isPic ? img : new pkg.Picture(i));
+                    $this.vrp();
+                }
+
+                if ($this.imageLoaded != null) {
+                    $this.imageLoaded(p, b, i);
+                }
+            })
+            .
+            error(function() {
+                this.$runner = null;
+                $this.setView(null);
+            });
+        }
+        else {
+            if (this.$runner == null) {
+                this.setView(null);
+            }
+            else {
+                var $this = this;
+                this.$runner.run(function() {
+                    $this.setView(null);
+                });
+            }
+        }
+        return this;
+    }
+]);
+
+/**
+ *  UI manager class. The class is widely used as base for building
+ *  various UI managers like paint, focus, event etc. Manager is
+ *  automatically registered as input and component events listener
+ *  if it implements appropriate events methods handlers
+ *  @class zebra.ui.Manager
+ *  @constructor
+ */
+pkg.Manager = Class([
+    function() {
+        if (pkg.events != null) {
+            pkg.events.bind(this);
+        }
+    }
+]);
+
+/**
+ * Focus manager class defines the strategy of focus traversing among
+ * hierarchy of UI components. It keeps current focus owner component
+ * and provides API to change current focus component
+ * @class zebra.ui.FocusManager
+ * @extends {zebra.ui.Manager}
+ */
+pkg.FocusManager = Class(pkg.Manager, [
+    function $prototype() {
+        /**
+         * Reference to the current focus owner component.
+         * @attribute focusOwner
+         * @readOnly
+         * @type {zebra.ui.Panel}
+         */
+        this.focusOwner = null;
+
+        this.$freeFocus = function(comp) {
+            if ( this.focusOwner != null &&
+                (this.focusOwner === comp || L.isAncestorOf(comp, this.focusOwner)))
+            {
+                this.requestFocus(null);
+            }
+        };
+
+        /**
+         * Component enabled event handler
+         * @param  {zebra.ui.Panel} c a component
+         * @method compEnabled
+         */
+        this.compEnabled = function(e) {
+            var c = e.source;
+            if (c.isVisible === true && c.isEnabled === false && this.focusOwner != null) {
+                this.$freeFocus(c);
+            }
+        };
+
+        /**
+         * Component shown event handler
+         * @param  {zebra.ui.Panel} c a component
+         * @method compShown
+         */
+        this.compShown = function(e) {
+            var c = e.source;
+            if (c.isEnabled === true && c.isVisible === false && this.focusOwner != null) {
+                this.$freeFocus(c);
+            }
+        };
+
+        /**
+         * Component removed event handler
+         * @param  {zebra.ui.Panel} p a parent
+         * @param  {Integer} i      a removed component index
+         * @param  {zebra.ui.Panel} c a removed component
+         * @method compRemoved
+         */
+        this.compRemoved = function(e) {
+            var c = e.kid;
+            if (c.isEnabled === true && c.isVisible === true && this.focusOwner != null) {
+                this.$freeFocus(c);
+            }
+        };
+
+        /**
+         * Test if the given component is a focus owner
+         * @param  {zebra.ui.Panel} c an UI component to be tested
+         * @method hasFocus
+         * @return {Boolean} true if the given component holds focus
+         */
+        this.hasFocus = function(c) {
+            return this.focusOwner === c;
+        };
+
+        /**
+         * Key pressed event handler.
+         * @param  {zebra.ui.KeyEvent} e a key event
+         * @method keyPressed
+         */
+        this.keyPressed = function(e){
+            if (pkg.KeyEvent.TAB === e.code) {
+                var cc = this.ff(e.source, e.shiftKey ?  -1 : 1);
+                if (cc != null) {
+
+                    // TODO: WEB specific code has to be removed moved to another place
+                    if (document.activeElement != cc.getCanvas().$container) {
+                        cc.getCanvas().$container.focus();
+                        this.requestFocus(cc);
+                    }
+                    else {
+                        this.requestFocus(cc);
+                    }
+                }
+
+                return true;
+            }
+        };
+
+        this.findFocusable = function(c) {
+            return (this.isFocusable(c) ? c : this.fd(c, 0, 1));
+        };
+
+        /**
+         * Test if the given component can catch focus
+         * @param  {zebra.ui.Panel} c an UI component to be tested
+         * @method isFocusable
+         * @return {Boolean} true if the given component can catch a focus
+         */
+        this.isFocusable = function(c) {
+            var d = c.getCanvas();
+
+            if (d != null &&
+                   (c.canHaveFocus === true ||
+                     (typeof c.canHaveFocus == "function" && c.canHaveFocus() === true)))
+            {
+                for(;c !== d && c != null; c = c.parent) {
+                    if (c.isVisible === false || c.isEnabled === false) {
+                        return false;
+                    }
+                }
+                return c === d;
+            }
+
+            return false;
+        };
+
+        // looking recursively a focusable component among children components of
+        // the given target  starting from the specified by index kid with the
+        // given direction (forward or backward lookup)
+        this.fd = function(t,index,d) {
+            if (t.kids.length > 0){
+                var isNComposite = t.catchInput == null || t.catchInput == false;
+                for(var i = index; i >= 0 && i < t.kids.length; i += d) {
+                    var cc = t.kids[i];
+
+                    // check if the current children component satisfies
+                    // conditions it can grab focus or any deeper in hierarchy
+                    // component that can grab the focus exist
+                    if (cc.isEnabled === true                                           &&
+                        cc.isVisible === true                                           &&
+                        cc.width      >  0                                              &&
+                        cc.height     >  0                                              &&
+                        (isNComposite || (t.catchInput != true       &&
+                                          t.catchInput(cc) === false)  )                &&
+                        ( (cc.canHaveFocus === true || (cc.canHaveFocus !=  null  &&
+                                                        cc.canHaveFocus !== false &&
+                                                        cc.canHaveFocus())            ) ||
+                          (cc = this.fd(cc, d > 0 ? 0 : cc.kids.length - 1, d)) != null)  )
+                    {
+                        return cc;
+                    }
+                }
+            }
+
+            return null;
+        };
+
+        // find next focusable component
+        // c - component starting from that a next focusable component has to be found
+        // d - a direction of next focusable component lookup: 1 (forward) or -1 (backward)
+        this.ff = function(c, d){
+            var top = c;
+            while (top != null && top.getFocusRoot == null) {
+                top = top.parent;
+            }
+
+            if (top == null) {
+                return null;
+            }
+
+            top = top.getFocusRoot();
+            if (top == null) {
+                return null;
+            }
+
+            if (top.traverseFocus != null) {
+                return top.traverseFocus(c, d);
+            }
+
+            for(var index = (d > 0) ? 0 : c.kids.length - 1; c != top.parent; ){
+                var cc = this.fd(c, index, d);
+                if (cc != null) return cc;
+                cc = c;
+                c = c.parent;
+                if (c != null) index = d + c.indexOf(cc);
+            }
+
+            return this.fd(top, d > 0 ? 0 : top.kids.length - 1, d);
+        };
+
+        /**
+         * Force to pass a focus to the given UI component
+         * @param  {zebra.ui.Panel} c an UI component to pass a focus
+         * @method requestFocus
+         */
+        this.requestFocus = function(c) {
+            if (c != this.focusOwner && (c == null || this.isFocusable(c))) {
+                var oldFocusOwner = this.focusOwner;
+                if (c != null) {
+                    var nf = c.getEventDestination();
+                    if (nf == null || oldFocusOwner == nf) return;
+                    this.focusOwner = nf;
+                }
+                else {
+                    this.focusOwner = c;
+                }
+
+                if (oldFocusOwner != null) {
+                    var ofc = oldFocusOwner.getCanvas();
+                    if (ofc != null) ofc.$lastFocusOwner = oldFocusOwner;
+
+                    FOCUS_EVENT.source  = oldFocusOwner;
+                    FOCUS_EVENT.related = this.focusOwner;
+                    pkg.events.fireEvent("focusLost", FOCUS_EVENT);
+                    oldFocusOwner.focused();
+                }
+
+                if (this.focusOwner != null) {
+                    FOCUS_EVENT.source  = this.focusOwner;
+                    FOCUS_EVENT.related = oldFocusOwner;
+                    pkg.events.fireEvent("focusGained", FOCUS_EVENT);
+                    this.focusOwner.focused();
+                }
+
+                return this.focusOwner;
+            }
+            return null;
+        };
+
+        /**
+         * Pointer pressed event handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerPressed
+         */
+        this.pointerPressed = function(e){
+            console.log("FocusManager.pointerPressed() " + e.isAction());
+
+            if (e.isAction()) {
+                // TODO: WEB specific code that has to be moved to another place
+                // the problem is a target canvas element get mouse pressed
+                // event earlier than it gets focus what is inconsistent behavior
+                // to fix it a timer is used
+                if (document.activeElement !== e.source.getCanvas().$container) {
+                    var $this = this;
+                    setTimeout(function() {
+                        $this.requestFocus(e.source);
+                    }, 50);
+                }
+                else {
+                    this.requestFocus(e.source);
+                }
+            }
+        };
+    }
+]);
+
+/**
+ *  Command manager supports short cut keys definition and listening. The shortcuts have to be defined in
+ *  zebra JSON configuration files. There are two sections:
+
+    - **osx** to keep shortcuts for Mac OS X platform
+    - **common** to keep shortcuts for all other platforms
+
+ *  The JSON configuration entity has simple structure:
+
+
+      {
+        "common": [
+             {
+                "command"   : "undo_command",
+                "args"      : [ true, "test"],
+                "key"       : "Ctrl+z"
+             },
+             {
+                "command" : "redo_command",
+                "key"     : "Ctrl+Shift+z"
+             },
+             ...
+        ],
+        "osx" : [
+             {
+                "command"   : "undo_command",
+                "args"      : [ true, "test"],
+                "key"       : "Cmd+z"
+             },
+             ...
+        ]
+      }
+
+ *  The configuration contains list of shortcuts. Every shortcut is bound to a key combination it is triggered.
+ *  Every shortcut has a name and an optional list of arguments that have to be passed to a shortcut listener method.
+ *  The optional arguments can be used to differentiate two shortcuts that are bound to the same command.
+ *
+ *  On the component level shortcut commands can be listened by implementing method whose name equals to shortcut name.
+ *  Pay attention to catch shortcut command your component has to be focusable and holds focus at the given time.
+ *  For instance, to catch "undo_command"  do the following:
+
+        var pan = new zebra.ui.Panel([
+            function redo_command() {
+                // handle shortcut here
+            },
+
+            // visualize the component gets focus
+            function focused() {
+                this.$super();
+                this.setBackground(this.hasFocus()?"red":null);
+            }
+        ]);
+
+        // let our panel to hold focus by setting appropriate property
+        pan.canHaveFocus = true;
+
+
+ *  @constructor
+ *  @class zebra.ui.CommandManager
+ *  @extends {zebra.ui.Manager}
+ */
+
+/**
+ * Shortcut event is handled by registering a method handler with events manager. The manager is accessed as
+ * "zebra.ui.events" static variable:
+
+        zebra.ui.events.bind(function commandFired(c) {
+            ...
+        });
+
+ * @event shortcut
+ * @param {Object} c shortcut command
+ *         @param {Array} c.args shortcut arguments list
+ *         @param {String} c.command shortcut name
+ */
+pkg.CommandManager = Class(pkg.Manager, [
+    function $prototype() {
+        /**
+         * Key pressed event handler.
+         * @param  {zebra.ui.KeyEvent} e a key event
+         * @method keyPressed
+         */
+        this.keyPressed = function(e) {
+            var fo = pkg.focusManager.focusOwner;
+            if (fo != null && this.keyCommands[e.code]) {
+                var c = this.keyCommands[e.code];
+                if (c && c[e.mask] != null) {
+                    c = c[e.mask];
+                    pkg.events._.commandFired(c);
+                    if (fo[c.command]) {
+                         if (c.args && c.args.length > 0) fo[c.command].apply(fo, c.args);
+                         else fo[c.command]();
+                    }
+                }
+            }
+        };
+
+        this.parseKey = function(k) {
+            var m = 0, c = 0, r = k.split("+");
+            for(var i = 0; i < r.length; i++) {
+                var ch = r[i].trim().toUpperCase();
+                if (pkg.KeyEvent.hasOwnProperty("M_" + ch)) {
+                    m += pkg.KeyEvent["M_" + ch];
+                }
+                else {
+                    if (pkg.KeyEvent.hasOwnProperty(ch)) {
+                        c = pkg.KeyEvent[ch];
+                    }
+                    else {
+                        c = parseInt(ch);
+                        if (c == NaN) {
+                            throw new Error("Invalid key code : " + ch);
+                        }
+                    }
+                }
+            }
+            return [m, c];
+        };
+
+        this.setCommands = function(commands) {
+            for(var i=0; i < commands.length; i++) {
+                var c = commands[i],
+                    p = this.parseKey(c.key),
+                    v = this.keyCommands[p[1]];
+
+                if (v && v[p[0]]) {
+                    throw new Error("Duplicated command: '" + c.command +  "' (" + p +")");
+                }
+
+                if (v == null) {
+                    v = [];
+                }
+
+                v[p[0]] = c;
+                this.keyCommands[p[1]] = v;
+            }
+        };
+    },
+
+    function(commands){
+        this.$super();
+        this.keyCommands = {};
+        if (commands != null) {
+            pkg.events._.addEvents("commandFired");
+            this.setCommands(commands.common);
+            if (zebra.isMacOS === true && commands.osx != null) {
+                this.setCommands(commands.osx);
+            }
+        }
+    }
+]);
+
+/**
+ * Cursor manager class. Allows developers to control pointer cursor type by implementing an own
+ * getCursorType method or by specifying a cursor by cursorType field. Imagine an UI component
+ * needs to change cursor type. It
+ *  can be done by one of the following way:
+
+    - **Implement getCursorType method by the component itself if the cursor type depends on cursor location**
+
+          var p = new zebra.ui.Panel([
+               // implement getCursorType method to set required
+               // pointer cursor type
+               function getCursorType(target, x, y) {
+                   return zebra.ui.Cursor.WAIT;
+               }
+          ]);
+
+    - **Define "cursorType" property in component if the cursor type doesn't depend on cursor location **
+
+          var myPanel = new zebra.ui.Panel();
+          ...
+          myPanel.cursorType = zebra.ui.Cursor.WAIT;
+
+ *  @class zebra.ui.CursorManager
+ *  @constructor
+ *  @extends {zebra.ui.Manager}
+ */
+pkg.CursorManager = Class(pkg.Manager, [
+    function $prototype() {
+        /**
+         * Define pointer moved events handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerMoved
+         */
+        this.pointerMoved = function(e){
+            if (this.$isFunc === true) {
+                this.cursorType = this.source.getCursorType(this.source, e.x, e.y);
+                this.target.style.cursor = (this.cursorType == null) ? "default"
+                                                                     : this.cursorType;
+            }
+        };
+
+        /**
+         * Define pointer entered events handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerEntered
+         */
+        this.pointerEntered = function(e){
+            if (e.source.cursorType != null || e.source.getCursorType != null) {
+                this.$isFunc = (e.source.getCursorType != null);
+                this.target = e.target;
+                this.source = e.source;
+
+                this.cursorType = this.$isFunc === true ? this.source.getCursorType(this.source, e.x, e.y)
+                                                        : this.source.cursorType;
+
+                this.target.style.cursor = (this.cursorType == null) ? "default"
+                                                                     : this.cursorType;
+            }
+        };
+
+        /**
+         * Define pointer exited events handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerExited
+         */
+        this.pointerExited  = function(e){
+            if (this.source != null) {
+                this.cursorType = "default";
+                if (this.target.style.cursor != this.cursorType) {
+                    this.target.style.cursor = this.cursorType;
+                }
+                this.source = this.target = null;
+                this.$isFunc = false;
+            }
+        };
+
+        /**
+         * Define pointer dragged events handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerDragged
+         */
+        this.pointerDragged = function(e) {
+            if (this.$isFunc === true) {
+                this.cursorType = this.source.getCursorType(this.source, e.x, e.y);
+                this.target.style.cursor = (this.cursorType == null) ? "default"
+                                                                      : this.cursorType;
+            }
+        };
+    },
+
+    function(){
+        this.$super();
+
+        /**
+         * Current cursor type
+         * @attribute cursorType
+         * @type {String}
+         * @readOnly
+         * @default "default"
+         */
+        this.cursorType = "default";
+        this.source = this.target = null;
+        this.$isFunc = false;
+    }
+]);
+
+/**
+ * Event manager class. One of the key zebra manager that is responsible for
+ * distributing various events in zebra UI. The manager provides number of
+ * methods to register global events listeners.
+ * @class zebra.ui.EventManager
+ * @constructor
+ * @extends {zebra.ui.Manager}
+ */
+pkg.EventManager = Class(pkg.Manager, [
+    function $clazz(argument) {
+        var eventNames = [
+            'keyTyped',
+            'keyReleased',
+            'keyPressed',
+            'pointerDragged',
+            'pointerDragStarted',
+            'pointerDragEnded',
+            'pointerMoved',
+            'pointerClicked',
+            'pointerDoubleClicked',
+            'pointerPressed',
+            'pointerReleased',
+            'pointerEntered',
+            'pointerExited',
+
+            'focusLost',
+            'focusGained',
+
+            'compSized',
+            'compMoved',
+            'compEnabled',
+            'compShown',
+            'compAdded',
+            'compRemoved'
+        ];
+
+        this.$CHILD_EVENTS_MAP = {};
+
+        // add child<eventName> events names
+        var l = eventNames.length;
+        for(var i = 0; i < l; i++) {
+            var eventName = eventNames[i];
+            eventNames.push("child" + eventName[0].toUpperCase() + eventName.substring(1));
+            this.$CHILD_EVENTS_MAP[eventName] = eventNames[l + i];
+        }
+
+        this.Listerners = zebra.util.ListenersClass.apply(this, eventNames);
+    },
+
+    function $prototype(clazz) {
+        var $CEM = clazz.$CHILD_EVENTS_MAP;
+
+        this.fireEvent = function(id, e){
+            var t = e.source, kk = $CEM[id], b = false;
+
+            // assign id that matches method to be called
+            e.id = id;
+
+            if (t[id] != null) {
+                if (t[id].call(t, e) === true) {
+                    return true;
+                }
+            }
+
+            b = this._[id](e);
+
+            if (b === false) {
+                for (t = t.parent;t != null; t = t.parent){
+                    if (t[kk] != null) {
+                        t[kk].call(t, e);
+                    }
+                }
+            }
+
+            return b;
+        };
+    },
+
+    function() {
+        this._ = new this.$clazz.Listerners();
+        this.$super();
+    }
+]);
+
+pkg.zCanvas = Class(pkg.HtmlCanvas, [
+    function $clazz () {
+        this.CLASS_NAME = "zebcanvas";
+    },
+
+    function $prototype() {
+        this.$isRootCanvas   = true;
+        this.$lastFocusOwner = null;
+        this.$timer          = null;
+
+        this.$toElementX = function(pageX, pageY) {
+            pageX -= this.offx;
+            pageY -= this.offy;
+
+            var c = this.$context.$states[this.$context.$curState];
+            return ((c.sx != 1 || c.sy != 1 || c.rotateVal !== 0) ? Math.round((c.crot * pageX + pageY * c.srot)/c.sx)
+                                                                  : pageX) - c.dx;
+        };
+
+        this.$toElementY = function(pageX, pageY) {
+            pageX -= this.offx;
+            pageY -= this.offy;
+
+            var c = this.$context.$states[this.$context.$curState];
+            return ((c.sx != 1 || c.sy != 1 || c.rotateVal !== 0) ? Math.round((pageY * c.crot - c.srot * pageX)/c.sy)
+                                                                 : pageY) - c.dy;
+        };
+
+        this.load = function(jsonPath, cb){
+            return this.root.load(jsonPath, cb);
+        };
+
+        // TODO: may be rename to dedicated method $doWheelScroll
+        this.$doScroll = function(dx, dy, src) {
+            if (src === "wheel") {
+                var owner = pkg.$pointerOwner["mouse"];
+                while (owner != null && owner.doScroll == null) {
+                    owner = owner.parent;
+                }
+
+                if (owner != null) {
+                    return owner.doScroll(dx, dy, src);
+                }
+            }
+        };
+
+        this.$keyTyped = function(e) {
+            if (pkg.focusManager.focusOwner != null) {
+                e.source = pkg.focusManager.focusOwner;
+                return EM.fireEvent("keyTyped", e);
+            }
+            return false;
+        };
+
+        this.$keyPressed = function(e) {
+            for(var i = this.kids.length - 1;i >= 0; i--){
+                var l = this.kids[i];
+                if (l.layerKeyPressed != null && l.layerKeyPressed(e) === true){
+                    break;
+                }
+            }
+
+            if (pkg.focusManager.focusOwner != null) {
+                e.source = pkg.focusManager.focusOwner;
+                return EM.fireEvent("keyPressed", e);
+            }
+
+            return false;
+        };
+
+        this.$keyReleased = function(e){
+            if (pkg.focusManager.focusOwner != null) {
+                e.source = pkg.focusManager.focusOwner;
+                return EM.fireEvent("keyReleased", e);
+            }
+
+            return false;
+        };
+
+        this.$pointerEntered = function(e) {
+            // TODO: review it quick and dirty fix try to track a situation
+            //       when the canvas has been moved
+            this.recalcOffset();
+
+            var x = this.$toElementX(e.pageX, e.pageY),
+                y = this.$toElementY(e.pageX, e.pageY),
+                d = this.getComponentAt(x, y),
+                o = pkg.$pointerOwner[e.identifier];
+
+            // also correct current component on that  pointer is located
+            if (d !== o) {
+                // if pointer owner is not null but doesn't match new owner
+                // generate pointer exit and clean pointer owner
+                if (o != null) {
+                    pkg.$pointerOwner[e.identifier] = null;
+                    EM.fireEvent("pointerExited", e.update(o, x, y));
+                }
+
+                // if new pointer owner is not null and enabled
+                // generate pointer entered event ans set new pointer owner
+                if (d != null && d.isEnabled === true){
+                    pkg.$pointerOwner[e.identifier] = d;
+                    EM.fireEvent("pointerEntered", e.update(d, x, y));
+                }
+            }
+        };
+
+        this.$pointerExited = function(e) {
+            var o = pkg.$pointerOwner[e.identifier];
+            if (o != null) {
+                pkg.$pointerOwner[e.identifier] = null;
+                return EM.fireEvent("pointerExited", e.update(o,
+                                                     this.$toElementX(e.pageX, e.pageY),
+                                                     this.$toElementY(e.pageX, e.pageY)));
+            }
+        };
+
+        /**
+         * Catch native canvas pointer move events
+         * @param {String} id an touch id (for touchable devices)
+         * @param {String} e a pointer event that has been triggered by canvas element
+         *
+         *         {
+         *             pageX : {Integer},
+         *             pageY : {Integer},
+         *             target: {HTMLElement}
+         *         }
+         * @protected
+         * @method $pointerMoved
+         */
+        this.$pointerMoved = function(e){
+            // if a pointer button has not been pressed handle the normal pointer moved event
+            var x = this.$toElementX(e.pageX, e.pageY),
+                y = this.$toElementY(e.pageX, e.pageY),
+                d = this.getComponentAt(x, y),
+                o = pkg.$pointerOwner[e.identifier],
+                b = false;
+
+            // check if pointer already inside a component
+            if (o != null) {
+                if (d != o) {
+                    pkg.$pointerOwner[e.identifier] = null;
+                    b = EM.fireEvent("pointerExited", e.update(o, x, y));
+
+                    if (d != null && d.isEnabled === true) {
+                        pkg.$pointerOwner[e.identifier] = d;
+                        b = EM.fireEvent("pointerEntered", e.update(d, x, y)) || b;
+                    }
+                }
+                else {
+                    if (d != null && d.isEnabled === true) {
+                        b = EM.fireEvent("pointerMoved", e.update(d, x, y));
+                    }
+                }
+            }
+            else {
+                if (d != null && d.isEnabled === true) {
+                    pkg.$pointerOwner[e.identifier] = d;
+                    b = EM.fireEvent("pointerEntered", e.update(d, x, y));
+                }
+            }
+
+            return b;
+        };
+
+        this.$pointerDragStarted = function(e) {
+            var x = this.$toElementX(e.pageX, e.pageY),
+                y = this.$toElementY(e.pageX, e.pageY),
+                d = this.getComponentAt(x, y);
+
+            // if target component can be detected fire pointer start dragging and
+            // pointer dragged events to the component
+            if (d != null && d.isEnabled === true) {
+                return EM.fireEvent("pointerDragStarted", e.update(d, x, y));
+            }
+
+            return false;
+        };
+
+        this.$pointerDragged = function(e){
+            if (pkg.$pointerOwner[e.identifier] != null) {
+                return EM.fireEvent("pointerDragged", e.update( pkg.$pointerOwner[e.identifier],
+                                                                this.$toElementX(e.pageX, e.pageY),
+                                                                this.$toElementY(e.pageX, e.pageY)));
+            }
+
+            return false;
+        };
+
+        this.$pointerDragEnded = function(e) {
+            if (pkg.$pointerOwner[e.identifier] != null) {
+                return EM.fireEvent("pointerDragEnded", e.update(pkg.$pointerOwner[e.identifier],
+                                                                 this.$toElementX(e.pageX, e.pageY),
+                                                                 this.$toElementY(e.pageX, e.pageY)));
+            }
+
+            return false;
+        };
+
+        this.$pointerClicked = function(e) {
+            var x = this.$toElementX(e.pageX, e.pageY),
+                y = this.$toElementY(e.pageX, e.pageY),
+                d = this.getComponentAt(x, y);
+
+            return d != null ? EM.fireEvent("pointerClicked", e.update(d, x, y))
+                             : false;
+        };
+
+        this.$pointerDoubleClicked = function(e) {
+            var x = this.$toElementX(e.pageX, e.pageY),
+                y = this.$toElementY(e.pageX, e.pageY),
+                d = this.getComponentAt(x, y);
+
+            return d != null ? EM.fireEvent("pointerDoubleClicked", e.update(d, x, y))
+                             : false;
+        };
+
+        this.$pointerReleased = function(e) {
+            var x  = this.$toElementX(e.pageX, e.pageY),
+                y  = this.$toElementY(e.pageX, e.pageY),
+                po = this.getComponentAt(this.$toElementX(e.pressPageX, e.pressPageY),
+                                         this.$toElementY(e.pressPageX, e.pressPageY));
+
+            // mouse pressed has not null target zebra component
+            // send mouse released and mouse clicked (if necessary)
+            // to him
+            if (po != null) {
+                EM.fireEvent("pointerReleased", e.update(po, x, y));
+
+                //  make sure it is originally a touch event
+                if (e.pointerType !== "mouse") {
+                    EM.fireEvent("pointerExited", e.update(po, x, y));
+                }
+            }
+
+            // mouse released can happen at new location, so move owner has to be corrected
+            // and mouse exited entered event has to be generated.
+            // the correction takes effect if we have just completed dragging or mouse pressed
+            // event target doesn't match pkg.$pointerOwner
+            if (e.pointerType === "mouse" && (e.pressPageX != e.pageX || e.pressPageY != e.pageY)) {
+                var nd = this.getComponentAt(x, y);
+                if (nd !== po) {
+                    if (po != null) {
+                        pkg.$pointerOwner[e.identifier] = null;
+                        EM.fireEvent("pointerExited", e.update(po, x, y));
+                    }
+
+                    if (nd != null && nd.isEnabled === true){
+                        pkg.$pointerOwner[e.identifier] = nd;
+                        EM.fireEvent("pointerEntered", e.update(nd, x, y));
+                    }
+                }
+            }
+        };
+
+        this.$pointerPressed = function(e) {
+            var x  = this.$toElementX(e.pageX, e.pageY),
+                y  = this.$toElementY(e.pageX, e.pageY),
+                tl = null;
+
+            // adjust event for passing it to layers
+            e.x = x;
+            e.y = y;
+            e.source = null;
+
+            // send pointer event to a layer and test if it has been activated
+            for(var i = this.kids.length - 1; i >= 0; i--){
+                tl = this.kids[i];
+                if (tl.layerPointerPressed != null && tl.layerPointerPressed(e)) {
+                    break;
+                }
+            }
+
+            var d = this.getComponentAt(x, y);
+            if (d != null && d.isEnabled === true) {
+                if (pkg.$pointerOwner[e.identifier] !== d) {
+                    pkg.$pointerOwner[e.identifier] = d;
+                    EM.fireEvent("pointerEntered",  e.update(d, x, y));
+                }
+
+                EM.fireEvent("pointerPressed", e.update(d, x, y));
+            }
+        };
+
+        this.getComponentAt = function(x, y){
+            for(var i = this.kids.length; --i >= 0; ){
+                var tl = this.kids[i];
+
+                if (tl.isLayerActiveAt == null || tl.isLayerActiveAt(x, y)) {
+                    // !!!
+                    //  since the method is widely used the code below duplicates
+                    //  functionality of EM.getEventDestination(tl.getComponentAt(x, y));
+                    //  method
+                    // !!!
+                    var c = tl.getComponentAt(x, y);
+                    if (c != null)  {
+                        var p = c;
+                        while ((p = p.parent) != null) {
+                            if (p.catchInput != null && (p.catchInput === true || (p.catchInput !== false && p.catchInput(c)))) {
+                                c = p;
+                            }
+                        }
+                    }
+                    return c;
+                }
+            }
+            return null;
+        };
+
+        this.recalcOffset = function() {
+            // calculate the DOM element offset relative to window taking in account
+            // scrolling
+            var poffx = this.offx,
+                poffy = this.offy,
+                ba    = this.$container.getBoundingClientRect();
+
+            this.offx = Math.round(ba.left) + zebkit.web.$measure(this.$container, "border-left-width") +
+                                              zebkit.web.$measure(this.$container, "padding-left") +
+                                              window.pageXOffset;
+            this.offy = Math.round(ba.top) +  zebkit.web.$measure(this.$container, "padding-top" ) +
+                                              zebkit.web.$measure(this.$container, "border-top-width") +
+                                              window.pageYOffset;
+
+            if (this.offx != poffx || this.offy != poffy) {
+                // force to fire component re-located event
+                this.relocated(this, poffx, poffy);
+            }
+        };
+
+        /**
+         * Get the canvas layer by the specified layer ID. Layer is a children component
+         * of the canvas UI component. Every layer has an ID assigned to it the method
+         * actually allows developers to get the canvas children component by its ID
+         * @param  {String} id a layer ID
+         * @return {zebra.ui.Panel} a layer (children) component
+         * @method getLayer
+         */
+        this.getLayer = function(id) {
+            return this[id];
+        };
+
+        // override relocated and resized
+        // to prevent unnecessary repainting
+        this.relocated = function(px,py) {
+            COMP_EVENT.source = this;
+            COMP_EVENT.px     = px;
+            COMP_EVENT.py     = py;
+            pkg.events.fireEvent("compMoved", COMP_EVENT);
+        };
+
+        this.resized = function(pw,ph) {
+            COMP_EVENT.source = this;
+            COMP_EVENT.prevWidth  = pw;
+            COMP_EVENT.prevHeight = ph;
+            pkg.events.fireEvent("compSized", COMP_EVENT);
+            // don't forget repaint it
+            this.repaint();
+        };
+
+        this.$initListeners = function() {
+            // TODO: hard-coded
+            new pkg.PointerEventUnifier(this.$container, this);
+            new pkg.KeyEventUnifier(this.$container, this);
+            new pkg.MouseWheelSupport(this.$container, this);
+        };
+    },
+
+    function(element, w, h) {
+        // no arguments
+        if (arguments.length === 0) {
+            w = 400;
+            h = 400;
+        }
+        else {
+            if (arguments.length === 1) {
+                w = -1;
+                h = -1;
+            }
+            else {
+                if (arguments.length === 2) {
+                    h = w;
+                    w = element;
+                    element = null;
+                }
+            }
+        }
+
+        // if passed element is string than consider it as
+        // an ID of an element that is already in DOM tree
+        if (zebra.isString(element)) {
+            var id = element;
+            element = document.getElementById(id);
+
+            // no canvas can be detected
+            if (element == null) {
+                throw new Error("Canvas id='" + id + "' element cannot be found");
+            }
+        }
+
+        this.$super(element);
+
+        // since zCanvas is top level element it doesn't have to have
+        // absolute position
+        this.$container.style.position = "relative";
+
+        // if canvas is not yet part of HTML let's attach it to
+        // body.
+        if (this.$container.parentNode == null) {
+            document.body.appendChild(this.$container);
+        }
+
+        if (this.$container.getAttribute("tabindex") === null) {
+            this.$container.setAttribute("tabindex", "1");
+        }
+
+        if (w < 0) w = this.element.offsetWidth;
+        if (h < 0) h = this.element.offsetHeight;
+
+        // !!!
+        // save canvas in list of created Zebra canvases
+        // do it before calling setSize(w,h) method
+        pkg.$canvases.push(this);
+
+        this.setSize(w, h);
+
+        // sync canvas visibility with what canvas style says
+        var cvis = (this.element.style.visibility == "hidden" ? false : true);
+        if (this.isVisible != cvis) {
+            this.setVisible(cvis);
+        }
+
+        // call event method if it is defined
+        if (this.canvasInitialized != null) {
+            this.canvasInitialized();
+        }
+
+        var $this = this;
+
+        // this method should clean focus if
+        // one of of a child DOM element gets focus
+        zebkit.web.$focusin(this.$container, function(e) {
+            if (e.target !== $this.$container && e.target.parentNode != null && e.target.parentNode.getAttribute("data-zebcont") == null) {
+                console.log("Clean focus: " + e.target + "," + (e.target === $this.element));
+                pkg.focusManager.requestFocus(null, "zCanvas focusin 1");
+            }
+            else {
+                // clear focus if a focus owner component is placed in another zCanvas
+                if (e.target === $this.$container && pkg.focusManager.focusOwner != null &&  pkg.focusManager.focusOwner.getCanvas() !== $this) {
+                    pkg.focusManager.requestFocus(null, "zCanvas focusin 2");
+                }
+            }
+        }, true);
+    },
+
+    function setSize(w, h) {
+        if (this.width != w || h != this.height) {
+            this.$super(w, h);
+
+            // let know to other zebra canvases that
+            // the size of an element on the page has
+            // been updated and they have to correct
+            // its anchor.
+            pkg.$elBoundsUpdated();
+        }
+        return this;
+    },
+
+    /**
+     * Stretch Canvas to occupy full screen area
+     * @method fullScreen
+     */
+    function fullScreen() {
+        /**
+         * Indicate if the canvas has to be stretched to
+         * fill the whole screen area.
+         * @type {Boolean}
+         * @attribute isFullScreen
+         * @readOnly
+         */
+        this.isFullScreen = true;
+        this.setLocation(0,0);
+
+        var ws = zebkit.web.$windowSize();
+        this.setSize(ws.width, ws.height);
+    },
+
+    function setVisible(b) {
+        var prev = this.isVisible;
+        this.$super(b);
+
+        // Since zCanvas has no parent component calling the super
+        // method above doesn't trigger repainting. So, do it here.
+        if (b != prev) {
+            this.repaint();
+        }
+        return this;
+    },
+
+    function vrp() {
+        this.$super();
+        if (zebkit.web.$contains(this.element) && this.element.style.visibility === "visible") {
+            this.repaint();
+        }
+    },
+
+    function kidAdded(i,constr,c){
+        if (typeof this[c.id] !== "undefined") {
+            throw new Error("Layer '" + c.id + "' already exist");
+        }
+
+        this[c.id] = c;
+        this.$super(i, constr, c);
+    },
+
+    function kidRemoved(i, c){
+        delete this[c.id];
+        this.$super(i, c);
+    },
+
+    function requestFocus2() {
+        console.log("zCanvas.requestFocus() " + (document.activeElement != this.$container));
+        if (document.activeElement != this.$container) {
+            this.$container.focus();
+        }
+    }
+]);
+
+zebra.ready(
+    // dynamic HTML DOM tree has to be placed to separated function
+    // that has to be first in ready list. the function make
+    // the page loading busy before necessary dynamically
+    // inserted elements will be ready.
+    function() {
+        zebra.busy();
+        $fmCanvas = document.createElement("canvas").getContext("2d");
+
+        var e = document.getElementById("zebra.fm");
+        if (e == null) {
+            e = document.createElement("div");
+            e.setAttribute("id", "zebra.fm");
+            e.setAttribute("style", "visibility:hidden;line-height:0;height:1px;vertical-align:baseline;");
+            e.innerHTML = "<span id='zebra.fm.text' style='display:inline;vertical-align:baseline;'>&nbsp;</span>" +
+                          "<img id='zebra.fm.image' style='width:1px;height:1px;display:inline;vertical-align:baseline;' width='1' height='1'/>";
+            document.body.appendChild(e);
+        }
+        $fmText       = document.getElementById("zebra.fm.text");
+        $fmImage      = document.getElementById("zebra.fm.image");
+        $bodyFontSize = window.getComputedStyle(document.body, null).getPropertyValue('font-size');
+
+        // the next function passed to zebra.ready() will be blocked
+        // till the picture is completely loaded
+        $fmImage.onload = function() {
+           zebra.ready();
+        };
+
+        // set 1x1 transparent picture
+        $fmImage.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII%3D';
+    },
+
+    function() {
+        var p = zebra()['zebra.json'];
+        pkg.load(p != null ? p : pkg.$url.join("canvas.json"),
+            function(e) {
+                if (e != null) {
+                    console.log("Config JSON loading failed:" + (e.stack != null ? e.stack : e));
+                }
+            }
+        );
+    },
+
+    function() {
+        try {
+            zebra.busy();
+
+            // store reference to event manager
+            EM = pkg.events;
+
+            //!!!
+            // IE9 has an error: first mouse press formally pass focus to
+            // canvas, but actually it doesn't get key events. To fix it
+            // it is necessary to pass focus explicitly to window
+            if (zebra.isIE) window.focus();
+        }
+        catch(e) {
+            ///!!!!! for some reason throwing exception is not appeared in console.
+            //       but it has side effect to the system, what causes other exception
+            //       that is not relevant to initial one
+            console.log(e.stack ? e.stack : e);
+            throw new Error(e.toString());
+        }
+        finally { zebra.ready(); }
+    }
+);
+
+/**
+ * @for
+ */
+
+})(zebra("ui"), zebra.Class);
+(function(pkg, Class) {
+
+/**
+ * @module  ui
+ */
+var L = zebra.layout;
+
+pkg.$view = function(v) {
+    if (v == null || v.paint != null) return v;
+
+    if (zebra.isString(v)) {
+        return zebra.util.rgb.hasOwnProperty(v) ? zebra.util.rgb[v]
+                                     : (pkg.borders != null && pkg.borders.hasOwnProperty(v) ? pkg.borders[v]
+                                                                                             : new zebra.util.rgb(v));
+    }
+
+    if (Array.isArray(v)) {
+        return new pkg.CompositeView(v);
+    }
+
+    if (typeof v !== 'function') {
+        return new pkg.ViewSet(v);
+    }
+
+    var vv = new pkg.View();
+    vv.paint = v;
+    return vv;
+};
+
+/**
+* Sunken border view
+* @class zebra.ui.Sunken
+* @constructor
+* @param {String} [brightest] a brightest border line color
+* @param {String} [moddle] a middle border line color
+* @param {String} [darkest] a darkest border line color
+* @extends zebra.ui.View
+*/
+pkg.Sunken = Class(pkg.View, [
+    function (brightest,middle,darkest) {
+        /**
+         * Brightest border line color
+         * @attribute brightest
+         * @readOnly
+         * @type {String}
+         * @default "white"
+         */
+
+        /**
+         * Middle border line color
+         * @attribute middle
+         * @readOnly
+         * @type {String}
+         * @default "gray"
+         */
+
+        /**
+         * Darkest border line color
+         * @attribute darkest
+         * @readOnly
+         * @type {String}
+         * @default "black"
+         */
+
+        this.brightest = brightest == null ? "white"  : brightest;
+        this.middle    = middle    == null ? "gray"   : middle;
+        this.darkest   = darkest   == null ? "black"  : darkest;
+    },
+
+    function $prototype() {
+        this.paint = function(g,x1,y1,w,h,d){
+            var x2 = x1 + w - 1, y2 = y1 + h - 1;
+            g.setColor(this.middle);
+            g.drawLine(x1, y1, x2 - 1, y1);
+            g.drawLine(x1, y1, x1, y2 - 1);
+            g.setColor(this.brightest);
+            g.drawLine(x2, y1, x2, y2 + 1);
+            g.drawLine(x1, y2, x2, y2);
+            g.setColor(this.darkest);
+            g.drawLine(x1 + 1, y1 + 1, x1 + 1, y2);
+            g.drawLine(x1 + 1, y1 + 1, x2, y1 + 1);
+        };
+    }
+]);
+
+/**
+* Etched border view
+* @class zebra.ui.Etched
+* @constructor
+* @param {String} [brightest] a brightest border line color
+* @param {String} [moddle] a middle border line color
+* @extends zebra.ui.View
+*/
+pkg.Etched = Class(pkg.View, [
+    function (brightest, middle) {
+        /**
+         * Brightest border line color
+         * @attribute brightest
+         * @readOnly
+         * @type {String}
+         * @default "white"
+         */
+
+        /**
+         * Middle border line color
+         * @attribute middle
+         * @readOnly
+         * @type {String}
+         * @default "gray"
+         */
+
+        this.brightest = brightest == null ? "white" : brightest;
+        this.middle    = middle    == null ? "gray"  : middle;
+    },
+
+    function $prototype() {
+        this.paint = function(g,x1,y1,w,h,d){
+            var x2 = x1 + w - 1, y2 = y1 + h - 1;
+            g.setColor(this.middle);
+            g.drawLine(x1, y1, x1, y2 - 1);
+            g.drawLine(x2 - 1, y1, x2 - 1, y2);
+            g.drawLine(x1, y1, x2, y1);
+            g.drawLine(x1, y2 - 1, x2 - 1, y2 - 1);
+
+            g.setColor(this.brightest);
+            g.drawLine(x2, y1, x2, y2);
+            g.drawLine(x1 + 1, y1 + 1, x1 + 1, y2 - 1);
+            g.drawLine(x1 + 1, y1 + 1, x2 - 1, y1 + 1);
+            g.drawLine(x1, y2, x2 + 1, y2);
+        };
+    }
+]);
+
 /**
 * Raised border view
 * @class zebra.ui.Raised
@@ -7783,9 +12976,7 @@ pkg.Render = Class(pkg.View, [
 * @extends zebra.ui.View
 */
 pkg.Raised = Class(pkg.View, [
-    function() { this.$this(pkg.lightBrColor, pkg.midBrColor); },
-
-    function(brightest,middle) {
+    function(brightest, middle) {
         /**
          * Brightest border line color
          * @attribute brightest
@@ -7820,118 +13011,6 @@ pkg.Raised = Class(pkg.View, [
 ]);
 
 /**
-* Sunken border view
-* @class zebra.ui.Sunken
-* @constructor
-* @param {String} [brightest] a brightest border line color
-* @param {String} [moddle] a middle border line color
-* @param {String} [darkest] a darkest border line color
-* @extends zebra.ui.View
-*/
-pkg.Sunken = Class(pkg.View, [
-    function () {
-        this.$this(pkg.lightBrColor, pkg.midBrColor, pkg.darkBrColor);
-    },
-
-    function (brightest,middle,darkest) {
-        /**
-         * Brightest border line color
-         * @attribute brightest
-         * @readOnly
-         * @type {String}
-         * @default "white"
-         */
-
-        /**
-         * Middle border line color
-         * @attribute middle
-         * @readOnly
-         * @type {String}
-         * @default "gray"
-         */
-
-        /**
-         * Darkest border line color
-         * @attribute darkest
-         * @readOnly
-         * @type {String}
-         * @default "black"
-         */
-
-        this.brightest = brightest == null ? "white" : brightest;
-        this.middle    = middle    == null ? "gray"  : middle;
-        this.darkest   = darkest   == null ? "black" : darkest;
-    },
-
-    function $prototype() {
-        this.paint = function(g,x1,y1,w,h,d){
-            var x2 = x1 + w - 1, y2 = y1 + h - 1;
-            g.setColor(this.middle);
-            g.drawLine(x1, y1, x2 - 1, y1);
-            g.drawLine(x1, y1, x1, y2 - 1);
-            g.setColor(this.brightest);
-            g.drawLine(x2, y1, x2, y2 + 1);
-            g.drawLine(x1, y2, x2, y2);
-            g.setColor(this.darkest);
-            g.drawLine(x1 + 1, y1 + 1, x1 + 1, y2);
-            g.drawLine(x1 + 1, y1 + 1, x2, y1 + 1);
-        };
-    }
-]);
-
-/**
-* Etched border view
-* @class zebra.ui.Etched
-* @constructor
-* @param {String} [brightest] a brightest border line color
-* @param {String} [moddle] a middle border line color
-* @extends zebra.ui.View
-*/
-pkg.Etched = Class(pkg.View, [
-    function () {
-        this.$this(pkg.lightBrColor, pkg.midBrColor);
-    },
-
-    function (brightest,middle) {
-        /**
-         * Brightest border line color
-         * @attribute brightest
-         * @readOnly
-         * @type {String}
-         * @default "white"
-         */
-
-        /**
-         * Middle border line color
-         * @attribute middle
-         * @readOnly
-         * @type {String}
-         * @default "gray"
-         */
-
-        this.brightest = brightest == null ? "white" : brightest;
-        this.middle    = middle    == null ? "gray" : middle;
-    },
-
-    function $prototype() {
-        this.paint = function(g,x1,y1,w,h,d){
-            var x2 = x1 + w - 1, y2 = y1 + h - 1;
-            g.setColor(this.middle);
-            g.drawLine(x1, y1, x1, y2 - 1);
-            g.drawLine(x2 - 1, y1, x2 - 1, y2);
-            g.drawLine(x1, y1, x2, y1);
-            g.drawLine(x1, y2 - 1, x2 - 1, y2 - 1);
-
-            g.setColor(this.brightest);
-            g.drawLine(x2, y1, x2, y2);
-            g.drawLine(x1 + 1, y1 + 1, x1 + 1, y2 - 1);
-            g.drawLine(x1 + 1, y1 + 1, x2 - 1, y1 + 1);
-            g.drawLine(x1, y2, x2 + 1, y2);
-        };
-    }
-]);
-
-/**
 * Dotted border view
 * @class zebra.ui.Dotted
 * @param {String} [c] the dotted border color
@@ -7940,6 +13019,8 @@ pkg.Etched = Class(pkg.View, [
 */
 pkg.Dotted = Class(pkg.View, [
     function $prototype() {
+        this.color = "black";
+
         this.paint = function(g,x,y,w,h,d){
             g.setColor(this.color);
             g.drawDottedRect(x, y, w, h);
@@ -7952,7 +13033,7 @@ pkg.Dotted = Class(pkg.View, [
              * @type {String}
              * @default "black"
              */
-            this.color = (c == null) ? "black" : c;
+            if (c != null) this.color = c;
         };
     }
 ]);
@@ -7976,10 +13057,14 @@ pkg.Dotted = Class(pkg.View, [
  */
 pkg.Border = Class(pkg.View, [
     function $prototype() {
+        this.color  = "gray";
+        this.gap    = this.width = 1;
+        this.radius = 0;
+
         this.paint = function(g,x,y,w,h,d){
             if (this.color != null) {
                 var ps = g.lineWidth;
-                g.lineWidth = this.width;
+                if (g.lineWidth !== this.width) g.lineWidth = this.width;
 
                 if (this.radius > 0) {
                     this.outline(g,x,y,w,h, d);
@@ -7992,7 +13077,7 @@ pkg.Border = Class(pkg.View, [
                 }
                 g.setColor(this.color);
                 g.stroke();
-                g.lineWidth = ps;
+                if (g.lineWidth !== ps) g.lineWidth = ps;
             }
         };
 
@@ -8070,10 +13155,9 @@ pkg.Border = Class(pkg.View, [
              * @default 0
              */
 
-            this.color  = (arguments.length === 0) ? "gray" : c;
-            this.width  = (w == null) ? 1 : w;
-            this.radius = (r == null) ? 0 : r;
-            this.gap    = this.width;
+            if (c != null) this.color = c;
+            if (w != null) this.width = this.gap = w;
+            if (r != null) this.radius = r;
         };
     }
 ]);
@@ -8089,6 +13173,24 @@ pkg.Border = Class(pkg.View, [
  */
 pkg.RoundBorder = Class(pkg.View, [
     function $prototype() {
+        /**
+         * Border width
+         * @attribute width
+         * @readOnly
+         * @type {Integer}
+         * @default 1
+         */
+        this.width = 1;
+
+        /**
+         * Border color
+         * @attribute color
+         * @readOnly
+         * @type {String}
+         * @default null
+         */
+        this.color = null;
+
         this.paint =  function(g,x,y,w,h,d) {
             if (this.color != null && this.width > 0) {
                 this.outline(g,x,y,w,h,d);
@@ -8100,8 +13202,8 @@ pkg.RoundBorder = Class(pkg.View, [
         this.outline = function(g,x,y,w,h,d) {
             g.beginPath();
             g.lineWidth = this.width;
-            g.arc(Math.floor(x + w/2) + (w%2 === 0 ? 0 :0.5),
-                  Math.floor(y + h/2) + (h%2 === 0 ? 0 :0.5),
+            g.arc(Math.floor(x + w/2) + (w % 2 === 0 ? 0 :0.5),
+                  Math.floor(y + h/2) + (h % 2 === 0 ? 0 :0.5),
                   Math.floor((w - g.lineWidth)/2), 0, 2 * Math.PI, false);
             g.closePath();
             return true;
@@ -8115,25 +13217,6 @@ pkg.RoundBorder = Class(pkg.View, [
         };
 
         this[''] = function(col, width) {
-            /**
-             * Border color
-             * @attribute color
-             * @readOnly
-             * @type {String}
-             * @default null
-             */
-
-            /**
-             * Border width
-             * @attribute width
-             * @readOnly
-             * @type {Integer}
-             * @default 1
-             */
-
-            this.color = null;
-            this.width = 1;
-
             if (arguments.length > 0) {
                 if (zebra.isNumber(col)) this.width = col;
                 else {
@@ -8142,6 +13225,57 @@ pkg.RoundBorder = Class(pkg.View, [
                 }
             }
             this.gap = this.width;
+        };
+    }
+]);
+
+/**
+ *  UI component render class. Renders the given target UI component
+ *  on the given surface using the specified 2D context
+ *  @param {zebra.ui.Panel} [target] an UI component to be rendered
+ *  @class zebra.ui.CompRender
+ *  @constructor
+ *  @extends zebra.ui.Render
+ */
+pkg.CompRender = Class(pkg.Render, [
+    function $prototype() {
+        /**
+         * Get preferred size of the render. The method doesn't calculates
+         * preferred size it simply calls the target component "getPreferredSize"
+         * method.
+         * @method getPreferredSize
+         * @return {Object} a preferred size
+         *
+         *      {width:<Integer>, height: <Integer>}
+         */
+        this.getPreferredSize = function(){
+            return this.target == null || this.target.isVisible === false ? { width:0, height:0 }
+                                                                          : this.target.getPreferredSize();
+        };
+
+        this.paint = function(g,x,y,w,h,d){
+            var c = this.target;
+            if (c != null && c.isVisible === true) {
+                var prevW = -1, prevH = 0;
+                if ((w != c.width || h != c.height) && c.getCanvas() == null){
+                    prevW = c.width;
+                    prevH = c.height;
+                    c.setSize(w, h);
+                }
+
+                // validate should be done here since setSize can be called
+                // above
+                c.validate();
+
+                g.translate(x, y);
+                c.paintComponent(g);
+                g.translate(-x, -y);
+
+                if (prevW >= 0){
+                    c.setSize(prevW, prevH);
+                    c.validate();
+                }
+            }
         };
     }
 ]);
@@ -8185,7 +13319,7 @@ pkg.Gradient = Class(pkg.View, [
         };
 
         this.paint = function(g,x,y,w,h,dd){
-            var d = (this.orientation == L.HORIZONTAL? [0,1]: [1,0]),
+            var d = (this.orientation === L.HORIZONTAL? [0,1]: [1,0]),
                 x1 = x * d[1],
                 y1 = y * d[0],
                 x2 = (x + w - 1) * d[1],
@@ -8201,7 +13335,7 @@ pkg.Gradient = Class(pkg.View, [
                 this.gy2 = y2;
 
                 this.gradient = g.createLinearGradient(x1, y1, x2, y2);
-                for(var i=0;i<this.colors.length;i++) {
+                for(var i = 0; i < this.colors.length; i++) {
                     this.gradient.addColorStop(i, this.colors[i].toString());
                 }
             }
@@ -8230,7 +13364,7 @@ pkg.Radial = Class(pkg.View, [
             var cx1 = w/2, cy1 = h/2;
             this.gradient = g.createRadialGradient(cx1, cy1, 10, cx1, cy1, w > h ? w : h);
 
-            for(var i=0;i<this.colors.length;i++) {
+            for(var i=0; i < this.colors.length;i++) {
                 this.gradient.addColorStop(i, this.colors[i].toString());
             }
             g.fillStyle = this.gradient;
@@ -8446,7 +13580,7 @@ pkg.CompositeView = Class(pkg.View, [
             if (ps.width > this.width) this.width = ps.width;
             if (ps.height > this.height) this.height = ps.height;
 
-            if (this.voutline == null && v.outline) {
+            if (this.voutline == null && v.outline != null) {
                 this.voutline = v;
             }
         };
@@ -8474,13 +13608,12 @@ pkg.CompositeView = Class(pkg.View, [
 
         this.paint = function(g,x,y,w,h,d) {
             for(var i=0; i < this.views.length; i++) {
-                var v = this.views[i];
-                v.paint(g, x, y, w, h, d);
+                this.views[i].paint(g, x, y, w, h, d);
             }
         };
 
         this.outline = function(g,x,y,w,h,d) {
-            return this.voutline && this.voutline.outline(g,x,y,w,h,d);
+            return this.voutline != null && this.voutline.outline(g,x,y,w,h,d);
         };
 
         this[''] = function() {
@@ -8516,33 +13649,39 @@ pkg.ViewSet = Class(pkg.CompositeView, [
 
         /**
          * Activate the given view from the given set.
-         * @param  {String} id a key of a view from the set to be activated
+         * @param  {String} id a key of a view from the set to be activated. Pass
+         * null to make current view to undefined state
          * @return {Boolean} true if new view has been activated, false otherwise
          * @method activate
          */
         this.activate = function (id) {
             var old = this.activeView;
-            if (this.views.hasOwnProperty(id)) {
+
+            if (id == null) {
+                return (this.activeView = null) != old;
+            }
+
+            if (typeof this.views[id] !== 'undefined') {
                 return (this.activeView = this.views[id]) != old;
             }
 
-            if (id.length > 1 && id[0] != '*' && id[id.length-1] != '*') {
+            if (id.length > 1 && id[0] !== '*' && id[id.length-1] !== '*') {
                 var i = id.indexOf('.');
                 if (i > 0) {
                     var k = id.substring(0, i + 1) + '*';
-                    if (this.views.hasOwnProperty(k)) {
+                    if (typeof this.views[k] !== 'undefined') {
                         return (this.activeView = this.views[k]) != old;
                     }
 
                     k = "*" + id.substring(i);
-                    if (this.views.hasOwnProperty(k)) {
+                    if (typeof this.views[k] !== 'undefined') {
                         return (this.activeView = this.views[k]) != old;
                     }
                 }
             }
 
-            return this.views.hasOwnProperty("*") ? (this.activeView = this.views["*"]) != old
-                                                  : false;
+            return typeof this.views["*"] !== 'undefined' ? (this.activeView = this.views["*"]) != old
+                                                          : false;
         };
 
         this.iterate = function(f) {
@@ -8553,7 +13692,7 @@ pkg.ViewSet = Class(pkg.CompositeView, [
 
         this[''] = function(args) {
             if (args == null) {
-                throw new Error("Null view set");
+                throw new Error("" + args);
             }
 
             /**
@@ -8576,4846 +13715,144 @@ pkg.ViewSet = Class(pkg.CompositeView, [
 
             for(var k in args) {
                 this.views[k] = pkg.$view(args[k]);
-                if (this.views[k]) this.$recalc(this.views[k]);
+                if (this.views[k] != null) this.$recalc(this.views[k]);
             }
             this.activate("*");
         };
     }
 ]);
 
-pkg.Bag = Class(zebra.util.Bag, [
+
+pkg.LineView = Class(pkg.View, [
     function $prototype() {
-        this.usePropertySetters = true;
-
-        this.loadImage = function(path) {
-            if (this.$url != null && zebra.URL.isAbsolute(path) == false) {
-                var base = (new zebra.URL(this.$url)).getParentURL();
-                path = base.join(path);
-            }
-            return pkg.loadImage(path);
-        };
-    },
-
-    function load(s) {
-        return this.load(s, null);
-    },
-
-    function load(s, cb) {
-        if (cb != null) {
-            zebra.busy();
-            try {
-                if (cb != null) {
-                    return this.$super(s, function() {
-                        zebra.ready();
-                        cb.apply(this, arguments);
-                    });
-                }
-                else {
-                    var r = this.$super(s);
-                    zebra.ready();
-                    return r;
-                }
-            }
-            catch(e) {
-                zebra.ready();
-                throw e;
-            }
-        }
-
-        return this.$super(s, null);
-    }
-]);
-
-rgb.prototype.paint = function(g,x,y,w,h,d) {
-    if (this.s != g.fillStyle) {
-        g.fillStyle = this.s;
-    }
-
-    // fix for IE10/11, calculate intersection of clipped area
-    // and the area that has to be filled. IE11/10 have a bug
-    // that triggers filling more space than it is restricted
-    // with clip
-    if (g.$states != null) {
-        var t  = g.$states[g.$curState],
-            rx = x > t.x ? x : t.x,
-            rw = Math.min(x + w, t.x + t.width) - rx;
-
-        if (rw > 0)  {
-            var ry = y > t.y ? y : t.y,
-            rh = Math.min(y + h, t.y + t.height) - ry;
-
-            if (rh > 0) g.fillRect(rx, ry, rw, rh);
-        }
-    }
-    else {
-        g.fillRect(x, y, w, h);
-    }
-};
-
-rgb.prototype.getPreferredSize = function() {
-    return { width:0, height:0 };
-};
-
-pkg.$getPS = function(l) {
-    return l != null && l.isVisible === true ? l.getPreferredSize()
-                                             : { width:0, height:0 };
-};
-
-var $cvp = pkg.$cvp = function(c, r) {
-    if (c.width > 0 && c.height > 0 && c.isVisible === true){
-        var p = c.parent, px = -c.x, py = -c.y;
-        if (r == null) {
-            r = { x:0, y:0, width:0, height:0 };
-        }
-        else {
-            r.x = r.y = 0;
-        }
-
-        r.width  = c.width;
-        r.height = c.height;
-
-        while (p != null && r.width > 0 && r.height > 0) {
-            var xx = r.x > px ? r.x : px,
-                yy = r.y > py ? r.y : py,
-                w1 = r.x + r.width,
-                w2 = px  + p.width,
-                h1 = r.y + r.height,
-                h2 = py + p.height;
-
-            r.width  = (w1 < w2 ? w1 : w2) - xx,
-            r.height = (h1 < h2 ? h1 : h2) - yy;
-            r.x = xx;
-            r.y = yy;
-
-            px -= p.x;
-            py -= p.y;
-            p = p.parent;
-        }
-
-        return r.width > 0 && r.height > 0 ? r : null;
-    }
-    return null;
-};
-
-/**
- * This class represents a font and provides basic font metrics like
- * height, ascent. Using the class developers can compute string width.
-
-      // plain font
-      var f = new zebra.ui.Font("Arial", 14);
-
-      // bold font
-      var f = new zebra.ui.Font("Arial", "bold", 14);
-
-      // defining font with CSS font name
-      var f = new zebra.ui.Font("100px Futura, Helvetica, sans-serif");
-
- * @constructor
- * @param {String} name a name of the font. If size and style parameters
- * has not been passed the name is considered as CSS font name that
- * includes size and style
- * @param {String} [style] a style of the font: "bold", "italic", etc
- * @param {Integer} [size] a size of the font
- * @class zebra.ui.Font
- */
-pkg.Font = function(name, style, size) {
-    if (arguments.length == 1) {
-        name = name.replace(/[ ]+/, ' ');
-        this.s = name.trim();
-    }
-    else {
-        if (arguments.length == 2) {
-            size = style;
-            style = '';
-        }
-        style = style.trim();
-
-        this.s = [   style, (style !== '' ? ' ' : ''),
-                     size, 'px ',
-                     name
-                 ].join('');
-
-        this.name = name;
-    }
-    $fmText.style.font = this.s;
-
-    /**
-     * Height of the font
-     * @attribute height
-     * @readOnly
-     * @type {Integer}
-     */
-    this.height = $fmText.offsetHeight;
-
-    //!!!
-    // Something weird is going sometimes in IE10 !
-    // Sometimes the property  offsetHeight is 0 but
-    // second attempt to access to the property gives
-    // proper result
-    if (this.height === 0) {
-        this.height = $fmText.offsetHeight;
-    }
-
-    /**
-     * Ascent of the font
-     * @attribute ascent
-     * @readOnly
-     * @type {Integer}
-     */
-    this.ascent = $fmImage.offsetTop - $fmText.offsetTop + 1;
-};
-
-/**
- * Calculate the given string width in pixels
- * @param  {String} s a string whose width has to be computed
- * @return {Integer} a string size in pixels
- * @method stringWidth
- * @for zebra.ui.Font
- */
-pkg.Font.prototype.stringWidth = function(s) {
-    if (s.length === 0) return 0;
-    if ($fmCanvas.font != this.s) $fmCanvas.font = this.s;
-    return ($fmCanvas.measureText(s).width + 0.5) | 0;
-};
-
-/**
- * Calculate the specified substring width
- * @param  {String} s a string
- * @param  {Integer} off fist character index
- * @param  {Integer} len length of substring
- * @return {Integer} a substring size in pixels
- * @method charsWidth
- * @for zebra.ui.Font
- */
-pkg.Font.prototype.charsWidth = function(s, off, len) {
-    if ($fmCanvas.font != this.s) $fmCanvas.font = this.s;
-    return ($fmCanvas.measureText(len == 1 ? s[off] : s.substring(off, off + len)).width + 0.5) | 0;
-};
-
-/**
- * Returns CSS font representation
- * @return {String} a CSS representation of the given Font
- * @method toString
- * @for zebra.ui.Font
- */
-pkg.Font.prototype.toString = function() { return this.s;  };
-
-pkg.Cursor = {
-    DEFAULT     : "default",
-    MOVE        : "move",
-    WAIT        : "wait",
-    TEXT        : "text",
-    HAND        : "pointer",
-    NE_RESIZE   : "ne-resize",
-    SW_RESIZE   : "sw-resize",
-    SE_RESIZE   : "se-resize",
-    NW_RESIZE   : "nw-resize",
-    S_RESIZE    : "s-resize",
-    W_RESIZE    : "w-resize",
-    N_RESIZE    : "n-resize",
-    E_RESIZE    : "e-resize",
-    COL_RESIZE  : "col-resize",
-    HELP        : "help"
-};
-
-/**
- * Interface to express intention to control children UI components event handling by
- * making them events transparent. In the easiest way a component that needs take
- * control on input (mouse, keyboard, etc) events has to implement the
- * composite interface. For instance let's make a composite panel, what causes
- * any added to the panel zebra.ui.Button component will not react on any input
- * event:
-
-        // declare composite panel class that set "catchInput"
-        // property to true
-        var CompositePan = zebra.Class(zebra.ui.Panel, [
-            function $prototype() {
-                this.catchInput = true;
-            }
-        ]);
-
-        // instantiate an instance
-        var cp = new CompositePan(new zebra.layout.FlowLayout());
-
-        // add button that will not react since they are events transparent
-        cp.add(new zebra.ui.Button("Button 1"));
-        cp.add(new zebra.ui.Button("Button 2"));
-
- *
- * If some of the children components have to be made not event transparent
- * you have to implement "catchInput" method as follow:
- *
-
-        // declare composite panel class that inherits standard zebra
-        // panel class and implement catchInput method to make first
-        // kid not event transparent
-        var CompositePan = zebra.Class(zebra.ui.Panel, [
-            function catchInput(kid) {
-                // make first kid not event transparent
-                return this.kids.length === 0 || this.kids[0] == kid;
-            }
-        ]);
-
-        ...
- */
-
-/**
- * Input event class. Input event is everything what is bound to user
- * inputing like keyboard, mouse, touch screen etc. This class often is
- * used as basis for more specialized input event classes.
- * @param {zebra.ui.Panel} target a source of the input event
- * @param {Integer} id an unique ID of the input event, for
- * instance zebra.ui.KeyEvent.PRESSED
- * @param {Integer} uid an unique class id of the input event,
- * for instance zebra.ui.InputEvent.MOUSE_UID
- * @class  zebra.ui.InputEvent
- * @constructor
- */
-var IE = pkg.InputEvent = Class([
-    function $clazz() {
-        this.MOUSE_UID    = 1;
-        this.KEY_UID      = 2;
-        this.FOCUS_UID    = 3;
-
-        //!!! don't change order
-        this.FOCUS_LOST   = 10;
-        this.FOCUS_GAINED = 11;
-    },
-
-    function $prototype() {
-        this[''] = function (target, id, uid) {
-            /**
-             * Source of the input event
-             * @attribute source
-             * @readOnly
-             * @type {zebra.ui.Panel}
-             */
-            this.source = target;
-
-            /**
-             * Unique id of the input event
-             * @attribute ID
-             * @readOnly
-             * @type {Integer}
-             */
-            this.ID = id;
-
-            /**
-             * Class id of the input event. It helps to differentiates
-             * input events by a device it has been generated
-             * @attribute UID
-             * @readOnly
-             * @type {Integer}
-             */
-            this.UID = uid;
-        };
-    }
-]),
-
-/**
- * Input key event class. The input event is triggered by a
- * keyboard and has UID property set to zebra.ui.InputEvent.KEY_UID
- * value
- * @param {zebra.ui.Panel} target a source of the key input event
- * @param {Integer} id an unique ID of the key input event: zebra.ui.KeyEvent.PRESSED,
- * zebra.ui.KeyEvent.TYPED, zebra.ui.KeyEvent.RELEASED
- * @param {Integer} code a code of pressed key
- * @param {String} ch a character of typed key
- * @param {Integer} mask a bits mask of pressed meta keys:  zebra.ui.KeyEvent.M_CTRL,
- * zebra.ui.KeyEvent.M_SHIFT, zebra.ui.KeyEvent.M_ALT, zebra.ui.KeyEvent.M_CMD
- * @class  zebra.ui.KeyEvent
- * @extends zebra.ui.InputEvent
- * @constructor
- */
-KE = pkg.KeyEvent = Class(IE, [
-    function $clazz() {
-        //!!! don't change order
-        this.TYPED    = 15;
-        this.RELEASED = 16;
-        this.PRESSED  = 17;
-
-        this.M_CTRL  = 1;
-        this.M_SHIFT = 2;
-        this.M_ALT   = 4;
-        this.M_CMD   = 8;
-    },
-
-    function $prototype() {
-        this.reset = function(target,id,code,ch,mask){
-            this.source = target;
-            this.ID     = id;
-
-            /**
-             * A code of a pressed key
-             * @attribute code
-             * @readOnly
-             * @type {Integer}
-             */
-            this.code = code;
-
-            /**
-             * A bits mask of pressed meta keys (CTRL, ALT, etc)
-             * @attribute mask
-             * @readOnly
-             * @type {Integer}
-             */
-            this.mask = mask;
-
-            /**
-             * A character of a typed key
-             * @attribute ch
-             * @readOnly
-             * @type {String}
-             */
-            this.ch = ch;
-        };
-
-        /**
-         * Test if CTRL key is held
-         * @return {Boolean} true if CTRL key is held
-         * @method isControlPressed
-         */
-        this.isControlPressed = function(){
-            return (this.mask & KE.M_CTRL) > 0;
-        };
-
-        /**
-         * Test if SHIFT key is held
-         * @return {Boolean} true if SHIFT key is held
-         * @method isShiftPressed
-         */
-        this.isShiftPressed   = function() {
-            return (this.mask & KE.M_SHIFT) > 0;
-        };
-
-        /**
-         * Test if ALT key is held
-         * @return {Boolean} true if ALT key is held
-         * @method isAltPressed
-         */
-        this.isAltPressed  = function(){
-            return (this.mask & KE.M_ALT) > 0;
-        };
-
-        /**
-         * Test if command (windows) key is held
-         * @return {Boolean} true if command key is held
-         * @method isCmdPressed
-         */
-        this.isCmdPressed = function(){
-            return (this.mask & KE.M_CMD) > 0;
-        };
-    },
-
-    function (target,id,code,ch,mask){
-        this.$super(target, id, IE.KEY_UID);
-        this.reset(target, id, code, ch, mask);
-    }
-]),
-
-/**
- * Mouse and touch screen input event class. The input event is
- * triggered by a mouse or touch screen. It has UID property set
- * to zebra.ui.InputEvent.MOUSE_UID value
- * @param {zebra.ui.Panel} target a source of the mouse input event
- * @param {Integer} id an unique ID of the mouse input event:
-
-        zebra.ui.MouseEvent.CLICKED
-        zebra.ui.MouseEvent.PRESSED
-        zebra.ui.MouseEvent.RELEASED
-        zebra.ui.MouseEvent.ENTERED
-        zebra.ui.MouseEvent.EXITED
-        zebra.ui.MouseEvent.DRAGGED
-        zebra.ui.MouseEvent.DRAGSTARTED
-        zebra.ui.MouseEvent.DRAGENDED
-        zebra.ui.MouseEvent.MOVED
-
- * @param {Integer} ax an absolute (relatively to a canvas where the source
- * UI component is hosted) mouse pointer x coordinate
- * @param {Integer} ax an absolute (relatively to a canvas where the source
- * UI component is hosted) mouse pointer y coordinate
- * @param {Integer} mask a bits mask of pressed mouse buttons:
-
-         zebra.ui.MouseEvent.LEFT_BUTTON
-         zebra.ui.MouseEvent.RIGHT_BUTTON
-
- * @param {Integer} clicks number of mouse button clicks
- * @class  zebra.ui.MouseEvent
- * @extends zebra.ui.InputEvent
- * @constructor
- */
-ME = pkg.MouseEvent = Class(IE, [
-    function $clazz() {
-        //!!! don't change order
-        this.CLICKED      = 21;
-        this.PRESSED      = 22;
-        this.RELEASED     = 23;
-        this.ENTERED      = 24;
-        this.EXITED       = 25;
-        this.DRAGGED      = 26;
-        this.DRAGSTARTED  = 27;
-        this.DRAGENDED    = 28;
-        this.MOVED        = 29;
-
-        this.LEFT_BUTTON  = 128;
-        this.RIGHT_BUTTON = 512;
-    },
-
-    function $prototype() {
-        this.touchCounter = 1;
-
-        /**
-         * Absolute mouse pointer x coordinate
-         * @attribute absX
-         * @readOnly
-         * @type {Integer}
-         */
-
-        /**
-         * Absolute mouse pointer y coordinate
-         * @attribute absY
-         * @readOnly
-         * @type {Integer}
-         */
-
-        /**
-         * Mouse pointer x coordinate (relatively to source UI component)
-         * @attribute x
-         * @readOnly
-         * @type {Integer}
-         */
-
-        /**
-         * Mouse pointer y coordinate (relatively to source UI component)
-         * @attribute y
-         * @readOnly
-         * @type {Integer}
-         */
-
-        /**
-         * Number of times a mouse button has been pressed
-         * @attribute clicks
-         * @readOnly
-         * @type {Integer}
-         */
-
-        /**
-         * Number of fingers on a touch screen
-         * @attribute touchCounter
-         * @readOnly
-         * @type {Integer}
-         */
-
-        /**
-         * A bits mask of a pressed mouse button
-         * @attribute mask
-         * @readOnly
-         * @type {Integer}
-         */
-
-        /**
-         * State of modifier keys
-         * @attribute modifiers
-         * @readOnly
-         * @type {Object}
-         */
-
-        /**
-         * Reset the event properties with new values
-         * @private
-         * @param  {zebra.ui.Panel} target  a target component that triggers the event
-         * @param  {Integer} id an unique id of the event
-         * @param  {Integer} ax an absolute (relatively to a canvas where the target
-         * component is hosted) x mouse cursor coordinate
-         * @param  {Integer} ay an absolute (relatively to a canvas where the target
-         * component is hosted) y mouse cursor coordinate
-         * @param  {Integer} mask   a pressed mouse buttons mask
-         * @param  {Integer} clicks number of a button clicks
-         * @method  reset
-         */
-        this.reset = function(target,id,ax,ay,mask,clicks){
-            this.ID     = id;
-            this.mask   = mask;
-            this.clicks = clicks;
-
-            // this can speed up calculation significantly
-            if (this.source == target && this.source.parent == target.parent && target.x == this.$px && target.y == this.$py) {
-                this.x += (ax - this.absX);
-                this.y += (ay - this.absY);
-                this.absX = ax;
-                this.absY = ay;
-                this.source = target;
-            }
-            else
-            {
-                this.source = target;
-                this.absX = ax;
-                this.absY = ay;
-                // convert absolute location to relative location
-                while(target.parent != null){
-                    ax -= target.x;
-                    ay -= target.y;
-                    target = target.parent;
-                }
-                this.x = ax;
-                this.y = ay;
-            }
-
-            this.$px = target.x;
-            this.$py = target.y;
-        };
-
-        this.isActionMask = function(){
-            return this.mask == ME.LEFT_BUTTON;
-        };
-    },
-
-    function (target,id,ax,ay,mask,clicks){
-        this.$super(target, id, IE.MOUSE_UID);
-
-        this.modifiers  = {
-            altKey      : false,
-            ctrlKey     : false,
-            metaKey     : false,
-            shiftKey    : false
-        };
-
-        this.reset(target, id, ax, ay, mask, clicks);
-    }
-]);
-
-var MDRAGGED = ME.DRAGGED, EM = null, MMOVED = ME.MOVED, MEXITED = ME.EXITED,
-    KPRESSED = KE.PRESSED, MENTERED = ME.ENTERED, $temporaryWinListener = null,
-    context = Object.getPrototypeOf(document.createElement('canvas').getContext('2d')),
-    $mousePressedEvents = {}, $keyPressedCode = -1, $keyPressedOwner = null,
-    $keyPressedModifiers = 0, KE_STUB = new KE(null,  KPRESSED, 0, 'x', 0),
-    ME_STUB = new ME("", ME.PRESSED, 0, 0, 0, 1);
-
-pkg.paintManager = pkg.events = pkg.$mouseMoveOwner = null;
-
-// !!!
-// global mouse move events handler (registered by drag out a canvas surface)
-// has to be removed every time a mouse button released with the given function
-function $cleanDragFix() {
-    if ($temporaryWinListener != null) {
-        window.removeEventListener("mousemove", $temporaryWinListener, true);
-        $temporaryWinListener = null;
-    }
-}
-
-// !!!!
-// the document mouse up happens when we drag outside a canvas.
-// in this case canvas doesn't catch mouse up, so we gave to do it
-// by global mouseup handler
-document.addEventListener("mouseup", function(e) {
-    $cleanDragFix();
-
-    for(var k in $mousePressedEvents) {
-        var mp = $mousePressedEvents[k];
-
-        // !!!!
-        // Check if the event target is not the canvas itself
-        // On desktop  "mouseup" event is generated only if
-        // you drag mouse outside a canvas and than release a mouse button
-        // At the same time in Android native browser (and may be other mobile
-        // browsers) "mouseup" event is fired every time you touch
-        // canvas or any other element. So check if target is not a canvas
-        // before doing releasing, otherwise it brings to error on mobile
-        if (mp.canvas != null && mp.canvas.canvas != e.target) {
-            mp.pageX = e.pageX;
-            mp.pageY = e.pageY;
-            mp.canvas.$mouseReleased(k, mp);
-        }
-    }
-},  false); // false is important since if mouseUp  happens on
-            // canvas the canvas gets the event first and than stops
-            // propagating to prevent it
-
-
-// !!!
-// override alert to keep control on event sequence, it is very
-// browser dependent
-var $alert = (function(){ return this.alert; }());
-window.alert = function() {
-    // !!!
-    // some browsers don't complete firing key events
-    // if a key was pressed we have to complete it with
-    // at least key released event
-    if ($keyPressedCode > 0) {
-        KE_STUB.reset($keyPressedOwner, KE.RELEASED,
-                      $keyPressedCode, '', $keyPressedModifiers);
-        EM.fireInputEvent(KE_STUB);
-        $keyPressedCode = -1;
-    }
-
-    // call original alert
-    $alert.apply(window, arguments);
-
-    // !!!
-    // some browsers don't fire mouse released event
-    // we should do it
-    for(var k in $mousePressedEvents) {
-        var mp = $mousePressedEvents[k];
-        if (mp.canvas != null) {
-            mp.canvas.$mouseReleased(k, mp);
-        }
-    }
-};
-
-context.setFont = function(f) {
-    f = (f.s != null ? f.s : f.toString());
-    if (f != this.font) {
-        this.font = f;
-    }
-};
-
-context.setColor = function(c) {
-    if (c == null) throw new Error("Null color");
-    c = (c.s != null ? c.s : c.toString());
-    if (c != this.fillStyle) this.fillStyle = c;
-    if (c != this.strokeStyle) this.strokeStyle = c;
-};
-
-context.drawLine = function(x1, y1, x2, y2, w){
-    if (arguments.length < 5) w = 1;
-    var pw = this.lineWidth;
-    this.beginPath();
-    this.lineWidth = w;
-
-    if (x1 == x2) {
-        x1 += w / 2;
-        x2 = x1;
-    }
-    else
-    if (y1 == y2) {
-        y1 += w / 2;
-        y2 = y1;
-    }
-
-    this.moveTo(x1, y1);
-    this.lineTo(x2, y2);
-    this.stroke();
-    this.lineWidth = pw;
-};
-
-context.ovalPath = function(x,y,w,h){
-    this.beginPath();
-    x += this.lineWidth;
-    y += this.lineWidth;
-    w -= 2 * this.lineWidth;
-    h -= 2 * this.lineWidth;
-
-    var kappa = 0.5522848,
-        ox = (w / 2) * kappa,
-        oy = (h / 2) * kappa,
-        xe = x + w,
-        ye = y + h,
-        xm = x + w / 2,
-        ym = y + h / 2;
-    this.moveTo(x, ym);
-    this.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
-    this.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
-    this.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
-    this.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
-    this.closePath();
-};
-
-context.polylinePath = function(xPoints, yPoints, nPoints){
-    this.beginPath();
-    this.moveTo(xPoints[0], yPoints[0]);
-    for(var i=1; i < nPoints; i++) this.lineTo(xPoints[i], yPoints[i]);
-};
-
-context.drawDottedRect = function(x,y,w,h) {
-    var ctx = this, m = ["moveTo", "lineTo", "moveTo"];
-    function dv(x, y, s) { for(var i=0; i < s; i++) ctx[m[i%3]](x + 0.5, y + i); }
-    function dh(x, y, s) { for(var i=0; i < s; i++) ctx[m[i%3]](x + i, y + 0.5); }
-    ctx.beginPath();
-    dh(x, y, w);
-    dh(x, y + h - 1, w);
-    ctx.stroke();
-    ctx.beginPath();
-    dv(x, y, h);
-    dv(w + x - 1, y, h);
-    ctx.stroke();
-};
-
-context.drawDashLine = function(x,y,x2,y2) {
-    var pattern=[1,2], count = pattern.length, ctx = this, compute = null,
-        dx = (x2 - x), dy = (y2 - y), b = (Math.abs(dx) > Math.abs(dy)),
-        slope = b ? dy / dx : dx / dy, sign = b ? (dx < 0 ?-1:1) : (dy < 0?-1:1);
-
-    if (b) {
-        compute = function(step) {
-            x += step;
-            y += slope * step;
-        };
-    }
-    else {
-        compute = function(step) {
-            x += slope * step;
-            y += step;
-        };
-    }
-
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    var dist = Math.sqrt(dx * dx + dy * dy), i = 0;
-    while (dist >= 0.1) {
-        var idx  = i % count;
-            dl   = dist < pattern[idx] ? dist : pattern[idx],
-            step = Math.sqrt(dl * dl / (1 + slope * slope)) * sign;
-        compute(step);
-        ctx[(i % 2 === 0) ? 'lineTo' : 'moveTo'](x + 0.5, y + 0.5);
-        dist -= dl;
-        i++;
-    }
-    ctx.stroke();
-};
-
-pkg.makeFullyVisible = function(d,c){
-    if (arguments.length === 1) {
-        c = d;
-        d = c.parent;
-    }
-
-    var right  = d.getRight(),
-        top    = d.getTop(),
-        bottom = d.getBottom(),
-        left   = d.getLeft(),
-        xx     = c.x,
-        yy     = c.y,
-        ww     = c.width,
-        hh     = c.height;
-
-    if (xx < left) xx = left;
-    if (yy < top)  yy = top;
-    if (xx + ww > d.width - right) xx = d.width + right - ww;
-    if (yy + hh > d.height - bottom) yy = d.height + bottom - hh;
-    c.setLocation(xx, yy);
-};
-
-pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
-    if (arguments.length < 8) {
-        tt = t.getTop();
-        ll = t.getLeft();
-        bb = t.getBottom();
-        rr = t.getRight();
-    }
-
-    var dw = t.width, dh = t.height;
-    if (dw > 0 && dh > 0){
-        if (dw - ll - rr > w){
-            var xx = x + px;
-            if (xx < ll) px += (ll - xx);
-            else {
-                xx += w;
-                if (xx > dw - rr) px -= (xx - dw + rr);
-            }
-        }
-        if (dh - tt - bb > h){
-            var yy = y + py;
-            if (yy < tt) py += (tt - yy);
-            else {
-                yy += h;
-                if (yy > dh - bb) py -= (yy - dh + bb);
-            }
-        }
-        return [px, py];
-    }
-    return [0, 0];
-};
-
-/**
- * Load an image by the given URL.
- * @param  {String|Image} img an image URL or image object
- * @param  {Function} ready a call back method to be notified when the
- * image has been completely loaded or failed. The method gets three parameters
-
-    - an URL to the image
-    - boolean loading result. true means success
-    - an image that has been loaded
-
-            // load image
-            zebra.ui.loadImage("test.png", function(path, result, image) {
-                if (result === false) {
-                    // handle error
-                    ...
-                }
-            });
-
- * @return {Image}  an image
- * @api  zebra.ui.loadImage()
- * @method  loadImage
- */
-pkg.loadImage = function(img, ready) {
-    var i = null;
-    if (img instanceof Image) {
-        i = img;
-    }
-    else {
-        i = new Image();
-        i.crossOrigin = '';
-        i.crossOrigin ='anonymous';
-        i.src = img;
-    }
-
-    if (i.complete === true && i.naturalWidth !== 0) {
-        if (arguments.length > 1)  {
-            ready(i.src, true, i);
-        }
-        return i;
-    }
-
-    var pErr  = i.onerror,
-        pLoad = i.onload;
-
-    zebra.busy();
-
-    i.onerror = function(e) {
-        zebra.ready();
-        i.onerror = null;
-        if (ready != null) ready(img, false, i);
-        if (pErr != null) {
-            i.onerror = pErr;
-            pErr.call(this, e);
-        }
-    };
-
-    i.onload  = function(e) {
-        i.onload = null;
-        zebra.ready();
-        if (ready != null) ready(img, true, i);
-        if (pLoad != null) {
-            i.onload = pLoad;
-            pLoad.call(this, e);
-        }
-    };
-
-    return i;
-};
-
-/**
- *  This the core UI component class. All other UI components has to be
- *  successor of panel class.
-
-      // instantiate panel with no arguments
-      var p = new zebra.ui.Panel();
-
-      // instantiate panel with border layout set as its layout manager
-      var p = new zebra.ui.Panel(new zebra.layout.BorderLayout());
-
-      // instantiate panel with the given properties (border
-      // layout manager, blue background and plain border)
-      var p = new zebra.ui.Panel({
-         layout: new zebra.ui.BorderLayout(),
-         background : "blue",
-         border     : "plain"
-      });
-
- * **Container. **
- * Panel can contains number of other UI components as its children where
- * the children components are placed with a defined by the panel layout
- * manager:
-
-      // add few children component to panel top, center and bottom parts
-      // with help of border layout manager
-      var p = new zebra.ui.Panel();
-      p.setLayout(new zebra.layout.BorderLayout(4)); // set layout manager to
-                                                     // order children components
-
-      p.add(zebra.layout.TOP, new zebra.ui.Label("Top label"));
-      p.add(zebra.layout.CENTER, new zebra.ui.TextArea("Text area"));
-      p.add(zebra.layout.BOTTOM, new zebra.ui.Button("Button"));
-
- * **Events. **
- * The class provides possibility to catch various component and input
- * events by declaring an appropriate event method handler. The most
- * simple case you just define a method:
-
-      var p = new zebra.ui.Panel();
-      p.mousePressed = function(e) {
-          // handle event here
-      };
-
-* If you prefer to create an anonymous class instance you can do it as
-* follow:
-
-      var p = new zebra.ui.Panel([
-          function mousePressed(e) {
-              // handle event here
-          }
-      ]);
-
-* One more way to add the event handler is dynamic extending of an instance
-* class demonstrated below:
-
-      var p = new zebra.ui.Panel("Test");
-      p.extend([
-          function mousePressed(e) {
-              // handle event here
-          }
-      ]);
-
- * Pay attention Zebra UI components often declare own event handlers and
- * in this case you can overwrite the default event handler with a new one.
- * Preventing the basic event handler execution can cause the component will
- * work improperly. You should care about the base event handler execution
- * as follow:
-
-      // button component declares own mouse pressed event handler
-      // we have to call the original handler to keep the button component
-      // properly working
-      var p = new zebra.ui.Button("Test");
-      p.extend([
-          function mousePressed(e) {
-              this.$super(e); // call parent class event handler implementation
-              // handle event here
-          }
-      ]);
-
- *  @class zebra.ui.Panel
- *  @param {Object|zebra.layout.Layout} [l] pass a layout manager or
- *  number of properties that have to be applied to the instance of
- *  the panel class.
- *  @constructor
- *  @extends zebra.layout.Layoutable
- */
-
-
-
-/**
- * Implement the event handler method to catch mouse pressed event.
- * The event is triggered every time a mouse button has been pressed or
- * a finger has touched a touch screen.
-
-     var p = new zebra.ui.Panel();
-     p.mousePressed = function(e) { ... }; // add event handler
-
- * @event mousePressed
- * @param {zebra.ui.MouseEvent} e a mouse event
-*/
-
-/**
- * Implement the event handler method to catch mouse released event.
- * The event is triggered every time a mouse button has been released or
- * a finger has untouched a touch screen.
-
-     var p = new zebra.ui.Panel();
-     p.mouseReleased = function(e) { ... }; // add event handler
-
- * @event mouseReleased
- * @param {zebra.ui.MouseEvent} e a mouse event
- */
-
-/**
- * Implement the event handler method  to catch mouse moved event.
- * The event is triggered every time a mouse cursor has been moved with
- * no a mouse button pressed.
-
-     var p = new zebra.ui.Panel();
-     p.mouseMoved = function(e) { ... }; // add event handler
-
- * @param {zebra.ui.MouseEvent} e a mouse event
- * @event  mouseMoved
- */
-
-/**
- * Implement the event handler method to catch mouse entered event.
- * The event is triggered every time a mouse cursor entered the
- * given component.
-
-     var p = new zebra.ui.Panel();
-     p.mouseEntered = function(e) { ... }; // add event handler
-
- * @param {zebra.ui.MouseEvent} e a mouse event
- * @event  mouseEntered
- */
-
-/**
- * Implement the event handler method to catch mouse exited event.
- * The event is triggered every time a mouse cursor exited the given
- * component.
-
-     var p = new zebra.ui.Panel();
-     p.mouseExited = function(e) { ... }; // add event handler
-
- * @param {zebra.ui.MouseEvent} e a mouse event
- * @event  mouseExited
- */
-
-/**
- * Implement the event handler method to catch mouse clicked event.
- * The event is triggered every time a mouse button has been clicked. Click events
- * are generated only if no one mouse moved or drag events has been generated
- * in between mouse pressed -> mouse released events sequence.
-
-     var p = new zebra.ui.Panel();
-     p.mouseClicked = function(e) { ... }; // add event handler
-
- * @param {zebra.ui.MouseEvent} e a mouse event
- * @event  mouseClicked
- */
-
-/**
- * Implement the event handler method to catch mouse dragged event.
- * The event is triggered every time a mouse cursor has been moved when a mouse button
- * has been pressed. Or when a finger has been moved over a touch screen.
-
-     var p = new zebra.ui.Panel();
-     p.mouseDragged = function(e) { ... }; // add event handler
-
- * @param {zebra.ui.MouseEvent} e a mouse event
- * @event  mouseDragged
- */
-
-/**
- * Implement the event handler method to catch mouse drag started event.
- * The event is triggered every time a mouse cursor has been moved first time when a mouse button
- * has been pressed. Or when a finger has been moved first time over a touch screen.
-
-     var p = new zebra.ui.Panel();
-     p.mouseDragStarted = function(e) { ... }; // add event handler
-
- * @param {zebra.ui.MouseEvent} e a mouse event
- * @event  mouseDragStarted
-*/
-
-/**
- * Implement the event handler method to catch mouse drag ended event.
- * The event is triggered every time a mouse cursor has been moved last time when a mouse button
- * has been pressed. Or when a finger has been moved last time over a touch screen.
-
-     var p = new zebra.ui.Panel();
-     p.mouseDragEnded = function(e) { ... }; // add event handler
-
- * @param {zebra.ui.MouseEvent} e a mouse event
- * @event  mouseDragEnded
-*/
-
-/**
- * Implement the event handler method to catch key pressed event
- * The event is triggered every time a key has been pressed.
-
-     var p = new zebra.ui.Panel();
-     p.keyPressed = function(e) { ... }; // add event handler
-
- * @param {zebra.ui.KeyEvent} e a key event
- * @event  keyPressed
- */
-
-/**
- * Implement the event handler method to catch key types event
- * The event is triggered every time a key has been typed.
-
-     var p = new zebra.ui.Panel();
-     p.keyTyped = function(e) { ... }; // add event handler
-
- * @param {zebra.ui.KeyEvent} e a key event
- * @event  keyTyped
- */
-
-/**
- * Implement the event handler method to catch key released event
- * The event is triggered every time a key has been released.
-
-     var p = new zebra.ui.Panel();
-     p.keyReleased = function(e) { ... }; // add event handler
-
- * @param {zebra.ui.KeyEvent} e a key event
- * @event  keyReleased
- */
-
-/**
- * Implement the event handler method to catch the component sized event
- * The event is triggered every time the component has been re-sized.
-
-     var p = new zebra.ui.Panel();
-     p.compSized = function(c, pw, ph) { ... }; // add event handler
-
- * @param {zebra.ui.Panel} c a component that has been sized
- * @param {Integer} pw a previous width the sized component had
- * @param {Integer} ph a previous height the sized component had
- * @event compSized
- */
-
-/**
- * Implement the event handler method to catch component moved event
- * The event is triggered every time the component location has been
- * updated.
-
-     var p = new zebra.ui.Panel();
-     p.compMoved = function(c, px, py) { ... }; // add event handler
-
- * @param {zebra.ui.Panel} c a component that has been moved
- * @param {Integer} px a previous x coordinate the moved component had
- * @param {Integer} py a previous y coordinate the moved component had
- * @event compMoved
- */
-
-/**
- * Implement the event handler method to catch component enabled event
- * The event is triggered every time a component enabled state has been
- * updated.
-
-     var p = new zebra.ui.Panel();
-     p.compEnabled = function(c) { ... }; // add event handler
-
- * @param {zebra.ui.Panel} c a component whose enabled state has been updated
- * @event compEnabled
- */
-
-/**
- * Implement the event handler method to catch component shown event
- * The event is triggered every time a component visibility state has
- * been updated.
-
-     var p = new zebra.ui.Panel();
-     p.compShown = function(c) { ... }; // add event handler
-
- * @param {zebra.ui.Panel} c a component whose visibility state has been updated
- * @event compShown
- */
-
-/**
- * Implement the event handler method to catch component added event
- * The event is triggered every time the component has been inserted into
- * another one.
-
-     var p = new zebra.ui.Panel();
-     p.compAdded = function(p, constr, c) { ... }; // add event handler
-
- * @param {zebra.ui.Panel} p a parent component of the component has been added
- * @param {Object} constr a layout constraints
- * @param {zebra.ui.Panel} c a component that has been added
- * @event compAdded
- */
-
-/**
- * Implement the event handler method to catch component removed event
- * The event is triggered every time the component has been removed from
- * its parent UI component.
-
-     var p = new zebra.ui.Panel();
-     p.compRemoved = function(p, i, c) { ... }; // add event handler
-
- * @param {zebra.ui.Panel} p a parent component of the component that has been removed
- * @param {Integer} i an index of removed component
- * @param {zebra.ui.Panel} c a component that has been removed
- * @event compRemoved
- */
-
-/**
- * Implement the event handler method to catch component focus gained event
- * The event is triggered every time a component has gained focus.
-
-     var p = new zebra.ui.Panel();
-     p.focusGained = function(e) { ... }; // add event handler
-
- * @param {zebra.ui.InputEvent} e an input event
- * @event  focusGained
- */
-
-/**
- * Implement the event handler method to catch component focus lost event
- * The event is triggered every time a component has lost focus
-
-     var p = new zebra.ui.Panel();
-     p.focusLost = function(e) { ... }; // add event handler
-
- * @param {zebra.ui.InputEvent} e an input event
- * @event  focusLost
- */
-
-/**
- * Implement the event handler method to catch children components input events
- *
-
-     var p = new zebra.ui.Panel();
-     p.childInputEvent = function(e) { ... }; // add event handler
-
- * @param {zebra.ui.InputEvent} e an input event
- * @event  childInputEvent
- */
-
-/**
- * Implement the event handler method to catch children components component events
- *
-     var p = new zebra.ui.Panel();
-     p.childCompEvent = function(id, src, p1, p2) { ... }; // add event handler
-
- * @param {Integer} id a component event ID. The id can have one of the following value:
-
-
-   - zebra.ui.Panel.ENABLED
-   - zebra.ui.Panel.SHOWN
-   - zebra.ui.Panel.MOVED
-   - zebra.ui.Panel.SIZED
-   - zebra.ui.Panel.ADDED
-   - zebra.ui.Panel.REMOVED
-
- * @param {zebra.ui.Panel} src a component that triggers the event
- * @param {zebra.ui.Panel|Integer|Object} p1 an event first parameter that depends
- * on an component event that has happened:
-
-
-   - if id is **zebra.ui.Panel.SIZED** the parameter is previous component width
-   - if id is **zebra.ui.Panel.MOVED** the parameter is previous component x location
-   - if id is **zebra.ui.Panel.ADDED** the parameter is constraints a new component has been added
-   - if id is **zebra.ui.Panel.REMOVED** the parameter is null
-
- * @param {zebra.ui.Panel|Integer|Object} p2 an event second parameter depends
- * on an component event that has happened:
-
-
-    - if id is **zebra.ui.Panel.SIZED** the parameter is previous component height
-    - if id is **zebra.ui.Panel.MOVED** the parameter is previous component y location
-    - if id is **zebra.ui.Panel.ADDED** the parameter is reference to the added children component
-    - if id is **zebra.ui.Panel.REMOVED** the parameter is reference to the removed children component
-
- * @event  childCompEvent
- */
-
- /**
-  * The method is called for focusable UI components (components that can hold input focus) to ask
-  * a string to be saved in native clipboard
-  *
-  * @return {String} a string to be copied in native clipboard
-  *
-  * @event clipCopy
-  */
-
- /**
-  * The method is called to pass string from clipboard to a focusable (a component that can hold
-  * input focus) UI component
-  *
-  * @param {String} s a string from native clipboard
-  *
-  * @event clipPaste
-  */
-
-
-var CL = pkg.Panel = Class(L.Layoutable, [
-    function $clazz() {
-        this.ENABLED  = 1;
-        this.SHOWN    = 2;
-        this.MOVED    = 3;
-        this.SIZED    = 4;
-        this.ADDED    = 5;
-        this.REMOVED  = 6;
-    },
-
-    function $prototype() {
-        /**
-         * UI component border view
-         * @attribute border
-         * @default null
-         * @readOnly
-         * @type {zebra.ui.View}
-         */
-
-        /**
-         * UI component background view
-         * @attribute bg
-         * @default null
-         * @readOnly
-         * @type {zebra.ui.View}
-        */
-
-        /**
-         * Define and set the property to true if the component has to catch focus
-         * @attribute canHaveFocus
-         * @type {Boolean}
-         * @default undefined
-         */
-
-        this.top = this.left = this.right = this.bottom = 0;
-
-        /**
-         * UI component enabled state
-         * @attribute isEnabled
-         * @default true
-         * @readOnly
-         * @type {Boolean}
-         */
-        this.isEnabled = true;
-
-        /**
-         * Find a zebra.ui.zCanvas where the given UI component is hosted
-         * @return {zebra.ui.zCanvas} a zebra canvas
-         * @method getCanvas
-         */
-        this.getCanvas = function() {
-            var c = this;
-            for(; c != null && c.$isMasterCanvas !== true; c = c.parent);
-            return c;
-        };
-
-        this.notifyRender = function(o,n){
-            if (o != null && o.ownerChanged) o.ownerChanged(null);
-            if (n != null && n.ownerChanged) n.ownerChanged(this);
-        };
-
-        /**
-         * Shortcut method to register the specific to the concrete component
-         * events listener. For instance "zebra.ui.Button" component fires event
-         * when it is pressed:
-
-        var b = new zebra.ui.Button("Test");
-        b.bind(function() {
-            // button has been pressed
-        });
-
-
-         * @param {Function|Object} a listener function or an object that
-         * declares events handler methods
-         * @return {Function|Object} a registered listener
-         * @method bind
-         */
-
-        /**
-         * Shortcut method to remove the register component specific events listener
-         * @param {Function|Object} a listener function to be removed
-         * @method unbind
-         */
-
-
-        /**
-         * Load content of the panel UI components from the specified JSON file.
-         * @param  {String} jsonPath an URL to a JSON file that describes UI
-         * to be loaded into the panel
-         * @chainable
-         * @method load
-         */
-        this.load = function(jsonPath) {
-            new pkg.Bag(this).load(jsonPath);
-            return this;
-        };
-
-        /**
-         * Get a children UI component that embeds the given point.
-         * @param  {Integer} x x coordinate
-         * @param  {Integer} y y coordinate
-         * @return {zebra.ui.Panel} a children UI component
-         * @method getComponentAt
-         */
-        this.getComponentAt = function(x,y){
-            var r = $cvp(this, temporary);
-            if (r == null || (x < r.x || y < r.y ||
-                x >= r.x + r.width || y >= r.y + r.height))
-            {
-                return null;
-            }
-
-            if (this.kids.length > 0){
-                for(var i = this.kids.length; --i >= 0; ){
-                    var d = this.kids[i];
-                    d = d.getComponentAt(x - d.x, y - d.y);
-                    if (d != null) return d;
-                }
-            }
-            return this.contains == null || this.contains(x, y) ? this : null;
-        };
-
-        /**
-         * Shortcut method to invalidating the component
-         * and initiating the component repainting
-         * @method vrp
-         */
-        this.vrp = function(){
-            this.invalidate();
-
-            // extra condition to save few millisecond on repaint() call
-            if (this.isVisible === true && this.parent != null) {
-                this.repaint();
-            }
-        };
-
-        this.getTop = function() {
-            return this.border != null ? this.top + this.border.getTop()
-                                       : this.top;
-        };
-
-        this.getLeft = function() {
-            return this.border != null ? this.left + this.border.getLeft()
-                                       : this.left;
-        };
-
-        this.getBottom = function() {
-            return this.border != null ? this.bottom + this.border.getBottom()
-                                       : this.bottom;
-        };
-
-        this.getRight  = function() {
-            return this.border != null ? this.right  + this.border.getRight()
-                                       : this.right;
-        };
-
-        //TODO: the method is not used yet
-        this.isInvalidatedByChild = function(c) {
-            return true;
-        };
-
-        /**
-         * The method is implemented to be aware about a children component
-         * insertion.
-         * @param  {Integer} index an index at that a new children component
-         * has been added
-         * @param  {Object} constr a layout constraints of an inserted component
-         * @param  {zebra.ui.Panel} l a children component that has been inserted
-         * @method kidAdded
-         */
-        this.kidAdded = function (index,constr,l){
-            pkg.events.fireCompEvent(CL.ADDED, this, constr, l);
-
-            if (l.width > 0 && l.height > 0) {
-                l.repaint();
-            }
-            else {
-                this.repaint(l.x, l.y, 1, 1);
-            }
-        };
-
-        /**
-         * The method is implemented to be aware about a children component
-         * removal.
-         * @param  {Integer} i an index of a removed component
-         * @param  {zebra.ui.Panel} l a removed children component
-         * @method kidRemoved
-         */
-        this.kidRemoved = function(i,l){
-            pkg.events.fireCompEvent(CL.REMOVED, this, i, l);
-            if (l.isVisible === true) {
-                // TODO: some browser requires (IE10-11) one pix wider cleaning
-                if (l.width > 0 && l.height > 0) {
-                    var dt = pkg.$applyRenderExploit === true ? 1 : 0;
-                    this.repaint(l.x - dt, l.y - dt, l.width + 2*dt, l.height + 2*dt);
-                }
-            }
-        };
-
-        /**
-         * The method is implemented to be aware the
-         * component location updating
-         * @param  {Integer} px a previous x coordinate of the component
-         * @param  {Integer} py a previous y coordinate of the component
-         * @method relocated
-         */
-        this.relocated = function(px, py) {
-            pkg.events.fireCompEvent(CL.MOVED, this, px, py);
-
-            var p = this.parent,
-                w = this.width,
-                h = this.height;
-
-            if (p != null && w > 0 && h > 0) {
-                var x = this.x,
-                    y = this.y,
-                    nx = x < px ? x : px,
-                    ny = y < py ? y : py;
-
-                //TODO: some mobile browser has bug: moving a component
-                //      leaves 0.5 sized traces to fix it 1 pixel extra
-                //      has to be added to all sides of repainted rect area
-                nx--;
-                ny--;
-
-                if (nx < 0) nx = 0;
-                if (ny < 0) ny = 0;
-
-                var w1 = p.width - nx,
-                    w2 = w + (x > px ? x - px : px - x),
-                    h1 = p.height - ny,
-                    h2 = h + (y > py ? y - py : py - y);
-
-                // TODO: add crappy 2 for mobile (android)
-                pkg.paintManager.repaint(p, nx, ny, (w1 < w2 ? w1 : w2) + 2,
-                                                    (h1 < h2 ? h1 : h2) + 2);
-            }
-        };
-
-        /**
-         * The method is implemented to be aware the
-         * component size updating
-         * @param  {Integer} pw a previous width of the component
-         * @param  {Integer} ph a previous height of the component
-         * @method resized
-         */
-        this.resized = function(pw,ph) {
-            pkg.events.fireCompEvent(CL.SIZED, this, pw, ph);
-
-            if (this.parent != null) {
-                // TODO: IE10-11 leaves traces at the left and bottom
-                // sides when the component size is decreased,
-                // so it is necessary to repaint one pixel wider
-                var dt = pkg.$applyRenderExploit === true ? 1 : 0;
-
-                pkg.paintManager.repaint(this.parent, this.x - dt, this.y - dt,
-                                        ((this.width  > pw) ? this.width  : pw) + 2*dt,
-                                        ((this.height > ph) ? this.height : ph) + 2*dt );
-            }
-        };
-
-        /**
-         * Checks if the component has a focus
-         * @return {Boolean} true if the component has focus
-         * @method hasFocus
-         */
-        this.hasFocus = function(){
-            return pkg.focusManager.hasFocus(this);
-        };
-
-        /**
-         * Force the given component to catch focus if the component is focusable.
-         * @method requestFocus
-         */
-        this.requestFocus = function(){
-            pkg.focusManager.requestFocus(this);
-        };
-
-        /**
-         * Force the given component to catch focus in the given timeout.
-         * @param {Integer} [timeout] a timeout in milliseconds. The default value is 50
-         * @method requestFocusIn
-         */
-        this.requestFocusIn = function(timeout) {
-            if (arguments.length === 0) {
-                timeout = 50;
-            }
-            var $this = this;
-            setTimeout(function () {
-                $this.requestFocus();
-            }, timeout);
-        };
-
-        /**
-         * Set the UI component visibility
-         * @param  {Boolean} b a visibility state
-         * @method setVisible
-         * @chainable
-         */
-        this.setVisible = function (b){
-            if (this.isVisible != b) {
-                this.isVisible = b;
-                this.invalidate();
-                pkg.events.fireCompEvent(CL.SHOWN, this, -1,  -1);
-
-                if (this.parent != null) {
-                    if (b) this.repaint();
-                    else {
-                        this.parent.repaint(this.x, this.y, this.width, this.height);
-                    }
-                }
-            }
-            return this;
-        };
-
-        /**
-         *  Set the UI component enabled state. Using this property
-         *  an UI component can be excluded from getting input events
-         *  @param  {Boolean} b a enabled state
-         *  @method setEnabled
-         *  @chainable
-         */
-        this.setEnabled = function (b){
-            if (this.isEnabled != b){
-                this.isEnabled = b;
-                pkg.events.fireCompEvent(CL.ENABLED, this, -1,  -1);
-                if (this.kids.length > 0) {
-                    for(var i = 0;i < this.kids.length; i++) {
-                        this.kids[i].setEnabled(b);
-                    }
-                }
-                this.repaint();
-            }
-            return this;
-        };
-
-        /**
-         * Set the UI component top, right, left, bottom paddings to the same given value
-         * @param  {Integer} v the value that will be set as top, right, left, bottom UI
-         * component paddings
-         * @method setPadding
-         * @chainable
-         */
-
-        /**
-         * Set UI component top, left, bottom, right paddings. The paddings are
-         * gaps between component border and painted area.
-         * @param  {Integer} top a top padding
-         * @param  {Integer} left a left padding
-         * @param  {Integer} bottom a bottom padding
-         * @param  {Integer} right a right padding
-         * @method setPadding
-         * @chainable
-         */
-        this.setPadding = function (top,left,bottom,right){
-            if (arguments.length == 1) {
-                left = bottom = right = top;
-            }
-
-            if (this.top    != top    || this.left != left  ||
-                this.bottom != bottom || this.right != right  )
-            {
-                this.top = top;
-                this.left = left;
-                this.bottom = bottom;
-                this.right = right;
-                this.vrp();
-            }
-            return this;
-        },
-
-        /**
-         * Set the border view
-         * @param  {zebra.ui.View|Function|String} v a border view or border "paint(g,x,y,w,h,c)"
-         * rendering function or border type: "plain", "sunken", "raised", "etched"
-         * @method setBorder
-         * @chainable
-         */
-        this.setBorder = function (v) {
-            var old = this.border;
-            v = pkg.$view(v);
-            if (v != old){
-                this.border = v;
-                this.notifyRender(old, v);
-
-                if ( old == null || v == null         ||
-                     old.getTop()    != v.getTop()    ||
-                     old.getLeft()   != v.getLeft()   ||
-                     old.getBottom() != v.getBottom() ||
-                     old.getRight()  != v.getRight())
-                {
-                    this.invalidate();
-                }
-
-                if (v && v.activate) {
-                    v.activate(this.hasFocus() ?  "function": "focusoff");
-                }
-
-                this.repaint();
-            }
-            return this;
-        };
-
-        /**
-         * Set the background. Background can be a color string or a zebra.ui.View class
-         * instance, or a function(g,x,y,w,h,c) that paints the background:
-
-            // set background color
-            comp.setBackground("red");
-
-            // set a picture as a component background
-            comp.setBackground(new zebra.ui.Picture(...));
-
-            // set a custom rendered background
-            comp.setBackground(function (g,x,y,w,h,target) {
-                // paint a component background here
-                g.setColor("blue");
-                g.fillRect(x,y,w,h);
-                g.drawLine(...);
-                ...
-            });
-
-
-         * @param  {String|zebra.ui.View|Function} v a background view, color or
-         * background "paint(g,x,y,w,h,c)" rendering function.
-         * @method setBackground
-         * @chainable
-         */
-        this.setBackground = function (v){
-            var old = this.bg;
-            v = pkg.$view(v);
-            if (v != old) {
-                this.bg = v;
-                this.notifyRender(old, v);
-                this.repaint();
-            }
-            return this;
-        };
-
-        /**
-         * Add the given children component or number of components to the given panel.
-         * @protected
-         * @param {zebra.ui.Panel|Array|Object} a children component of number of
-         * components to be added. The parameter can be:
-
-    - Component
-    - Array of components
-    - Dictionary object where every element is a component to be added and the key of
-    the component is stored in the dictionary is considered as the component constraints
-
-         * @method setKids
-         */
-        this.setKids = function(a) {
-            if (arguments.length == 1 && instanceOf(a, pkg.Panel)) {
-               this.add(a);
-               return;
-            }
-
-            // if components list passed as number of arguments
-            if (arguments.length > 1) {
-                for(var i=0; i < arguments.length; i++) {
-                    var a = arguments[i];
-                    this.add(a.$new != null ? a.$new() : a);
-                }
-                return;
-            }
-
-            if (Array.isArray(a)) {
-                for(var i=0; i < a.length; i++) {
-                    this.add(a[i]);
-                }
-            }
-            else {
-                var kids = a;
-                for(var k in kids) {
-                    if (kids.hasOwnProperty(k)) {
-                        var ctr = L.$constraints(k);
-                        this.add(ctr, kids[k]);
-                    }
-                }
-            }
-        };
-
-        /**
-         * Called whenever the UI component gets or looses focus
-         * @method focused
-         */
-        this.focused = function() {
-            // extents of activate method indicates it is
-            if (this.border && this.border.activate) {
-                var id = this.hasFocus() ? "focuson" : "focusoff" ;
-                if (this.border.views[id]) {
-                    this.border.activate(id);
-                    this.repaint();
-                }
-            }
-        };
-
-        /**
-         * Request the whole UI component or part of the UI component to be repainted
-         * @param  {Integer} [x] x coordinate of the component area to be repainted
-         * @param  {Integer} [y] y coordinate of the component area to be repainted
-         * @param  {Integer} [w] width of the component area to be repainted
-         * @param  {Integer} [h] height of the component area to be repainted
-         * @method repaint
-         */
-        this.repaint = function(x,y,w,h){
-            if (arguments.length === 0) {
-                x = y = 0;
-                w = this.width;
-                h = this.height;
-            }
-
-            if (this.parent != null &&
-                this.isVisible === true &&
-                pkg.paintManager != null)
-            {
-                pkg.paintManager.repaint(this, x, y, w, h);
-            }
-        };
-
-        /**
-         * Remove all children UI components
-         * @method removeAll
-         */
-        this.removeAll = function (){
-            if (this.kids.length > 0){
-                var size = this.kids.length, mx1 = Number.MAX_VALUE, my1 = mx1, mx2 = 0, my2 = 0;
-                for(; size > 0; size--){
-                    var child = this.kids[size - 1];
-                    if (child.isVisible === true){
-                        var xx = child.x, yy = child.y;
-                        mx1 = mx1 < xx ? mx1 : xx;
-                        my1 = my1 < yy ? my1 : yy;
-                        mx2 = Math.max(mx2, xx + child.width);
-                        my2 = Math.max(my2, yy + child.height);
-                    }
-                    this.removeAt(size - 1);
-                }
-                this.repaint(mx1, my1, mx2 - mx1, my2 - my1);
-            }
-        };
-
-        /**
-         * Bring the UI component to front
-         * @method toFront
-         */
-        this.toFront = function(){
-            if (this.parent != null && this.parent.kids[this.parent.kids.length-1] != this){
-                var p = this.parent;
-                p.kids.splice(p.indexOf(this), 1);
-                p.kids[p.kids.length] = this;
-                p.vrp();
-            }
-        };
-
-        /**
-         * Send the UI component to back
-         * @method toBack
-         */
-        this.toBack = function(){
-            if (this.parent != null && this.parent.kids[0] != this){
-                var p = this.parent;
-                p.kids.splice(p.indexOf(this), 1);
-                p.kids.unshift(this);
-                p.vrp();
-            }
-        };
-
-        /**
-         * Set the UI component size to its preferred size
-         * @return {Object} a preferred size applied to the component.
-         * The structure of the returned object is the following:
-
-            { width:{Integer}, height:{Integer} }
-
-         * @method toPreferredSize
-         */
-        this.toPreferredSize = function (){
-            var ps = this.getPreferredSize();
-            this.setSize(ps.width, ps.height);
-            return ps;
-        };
-
-        this[''] = function(l) {
-            // !!! dirty trick to call super, for the sake of few milliseconds back
-            //this.$super();
-            L.Layoutable.prototype[zebra.CNAME].call(this);
-
-            // apply default properties
-            this.properties(this.$clazz);
-
-            //var clazz = this.$clazz;
-            // while (clazz != null) {
-            //     if (clazz.properties != null) {
-            //         this.properties(clazz.properties);
-            //         break;
-            //     }
-            //     clazz = clazz.$parent;
-            // }
-
-            if (arguments.length > 0) {
-                if (instanceOf(l, L.Layout)) {
-                    this.setLayout(l);
-                }
-                else {
-                    this.properties(l);
-                }
-            }
-        };
-    }
-]);
-
-/**
- * Base layer UI component. Layer is special type of UI
- * components that is used to decouple different logical
- * UI components types from each other. Zebra Canvas
- * consists from number of layers where only one can be
- * active at the given point in time. Layers are stretched
- * to fill full canvas size. Every time an input event
- * happens system detects an active layer by asking all
- * layers from top to bottom. First layer that wants to
- * catch input gets control. The typical layers examples
- * are window layer, popup menus layer and so on.
- * @param {String} id an unique id to identify the layer
- * @constructor
- * @class zebra.ui.BaseLayer
- * @extends {zebra.ui.Panel}
- */
-pkg.BaseLayer = Class(pkg.Panel, [
-    function $prototype() {
-        /**
-         *  Define the method to catch mouse pressed event and
-         *  answer if the layer wants to have a control.
-         *  If the method is not defined it is considered as the
-         *  layer is not activated by the mouse event
-         *  @param {Integer} x a x mouse cursor location
-         *  @param {Integer} y a y mouse cursor location
-         *  @param {Integer} m mouse pressed button mask
-         *  @return {Boolean} return true if the layer wants to
-         *  catch control
-         *  @method layerMousePressed
-         */
-
-        /**
-         *  Define the method to catch key pressed event and
-         *  answer if the layer wants to have a control.
-         *  If the method is not defined it is considered
-         *  as the key event doesn't activate the layer
-         *  @param {Integer} code a key code
-         *  @param {Integer} m key modifier mask
-         *  @return {Boolean} return true if the layer wants to
-         *  catch control
-         *  @method layerKeyPressed
-         */
-
-        /**
-         *  Ask if the layer is active at the given location.
-         *  If the method is not defined that means the layer
-         *  is active at any location.
-         *  @param {Integer} x a x location
-         *  @param {Integer} y a y location
-         *  @return {Boolean} return true if the layer is active
-         *  at this location
-         *  @method isLayerActiveAt
-         */
-
-
-        this.getFocusRoot = function(child) {
-            return this;
-        };
-
-        this.activate = function(b){
-            var fo = pkg.focusManager.focusOwner;
-            if (L.isAncestorOf(this, fo) === false) fo = null;
-
-            if (b) pkg.focusManager.requestFocus(fo != null ? fo : this.$pfo);
-            else {
-                this.$pfo = fo;
-                pkg.focusManager.requestFocus(null);
-            }
-        };
-    },
-
-    function(id){
-        if (id == null) {
-            throw new Error("Invalid layer id: " + id);
-        }
-
-        this.$pfo = null;
-        this.$super();
-
-        /**
-         * Id of the layer
-         * @attribute id
-         * @type {String}
-         * @readOnly
-         */
-        this.id = id;
-    }
-]);
-
-/**
- *  Root layer implementation. This is the simplest UI layer implementation
- *  where the layer always try grabbing all input event
- *  @class zebra.ui.RootLayer
- *  @constructor
- *  @extends {zebra.ui.BaseLayer}
- */
-pkg.RootLayer = Class(pkg.BaseLayer, [
-    function $prototype() {
-        this.layerMousePressed = function(x,y,m){
-            return true;
-        };
-
-        this.layerKeyPressed = function(code,m){
-            return true;
-        };
-    }
-]);
-
-/**
- *  UI component to keep and render the given "zebra.ui.View" class
- *  instance. The target view defines the component preferred size
- *  and the component view.
- *  @class zebra.ui.ViewPan
- *  @constructor
- *  @extends {zebra.ui.Panel}
- */
-pkg.ViewPan = Class(pkg.Panel, [
-    function $prototype() {
-        /**
-         * Reference to a view that the component visualize
-         * @attribute view
-         * @type {zebra.ui.View}
-         * @default null
-         * @readOnly
-         */
-        this.view = null;
-
-        this.paint = function (g){
-            if (this.view != null){
-                var l = this.getLeft(), t = this.getTop();
-                this.view.paint(g, l, t, this.width  - l - this.getRight(),
-                                         this.height - t - this.getBottom(), this);
-            }
-        };
-
-        /**
-         * Set the target view to be wrapped with the UI component
-         * @param  {zebra.ui.View|Function} v a view or a rendering
-         * view "paint(g,x,y,w,h,c)" function
-         * @method setView
-         * @chainable
-         */
-        this.setView = function (v){
-            var old = this.view;
-            v = pkg.$view(v);
-
-            if (v != old) {
-                this.view = v;
-                this.notifyRender(old, v);
-                this.vrp();
-            }
-
-            return this;
-        };
-
-        /**
-         * Override the parent method to calculate preferred size
-         * basing on a target view.
-         * @param  {zebra.ui.Panel} t [description]
-         * @return {Object} return a target view preferred size if it is defined.
-         * The returned structure is the following:
-              { width: {Integer}, height:{Integer} }
-         * @method  calcPreferredSize
-         */
-        this.calcPreferredSize = function (t) {
-            return this.view ? this.view.getPreferredSize() : { width:0, height:0 };
-        };
-    }
-]);
-
-/**
- *  Image panel UI component class. The component renders an image.
- *  @param {String|Image} [img] a path or direct reference to an image object.
- *  If the passed parameter is string it considered as path to an image.
- *  In this case the image will be loaded using the passed path.
- *  @class zebra.ui.ImagePan
- *  @constructor
- *  @extends zebra.ui.ViewPan
- */
-pkg.ImagePan = Class(pkg.ViewPan, [
-    function () {
-        this.$this(null);
-    },
-
-    function(img){
-        this.setImage(img);
-        this.$super();
-    },
-
-    function(img, w, h){
-        this.$runner = null;
-        this.setImage(img != null ? img : null);
-        this.$super();
-        this.setPreferredSize(w, h);
-    },
-
-    /**
-     * Set image to be rendered in the UI component
-     * @method setImage
-     * @param {String|Image|zebra.ui.Picture} img a path or direct reference to an
-     * image or zebra.ui.Picture render.
-     * If the passed parameter is string it considered as path to an image.
-     * In this case the image will be loaded using the passed path
-     * @chainable
-     */
-    function setImage(img) {
-        if (img != null) {
-            var $this     = this,
-                isPic     = instanceOf(img, pkg.Picture),
-                imgToLoad = isPic ? img.target : img ;
-
-            if (this.$runner == null) {
-                this.$runner = new zebra.util.Runner();
-            }
-
-            this.$runner.run(function() {
-                pkg.loadImage(imgToLoad, this.join());
-            })
-            .
-            run(function(p, b, i) {
-                $this.$runner = null;
-                if (b) {
-                    $this.setView(isPic ? img : new pkg.Picture(i));
-                    $this.vrp();
-                }
-
-                if ($this.imageLoaded != null) {
-                    $this.imageLoaded(p, b, i);
-                }
-            })
-            .
-            error(function() {
-                this.$runner = null;
-                $this.setView(null);
-            });
-        }
-        else {
-            if (this.$runner == null) {
-                this.setView(null);
-            }
-            else {
-                var $this = this;
-                this.$runner.run(function() {
-                    $this.setView(null);
-                });
-            }
-        }
-        return this;
-    }
-]);
-
-/**
- *  UI manager class. The class is widely used as base for building
- *  various UI managers like paint, focus, event etc. Manager is
- *  automatically registered as input and component events listener
- *  if it implements appropriate events methods handlers
- *  @class zebra.ui.Manager
- *  @constructor
- */
-pkg.Manager = Class([
-    function() {
-        // FIXME: should be removed
-        //!!! sometimes pkg.events is set to descriptor the descriptor
-        //    is used to instantiate new event manager. when we do it
-        //    Manager constructor is called from new phase of event manager
-        //    instantiation what means  event manager is not null (points to descriptor)
-        //    but not assigned yet. So we need check extra condition pkg.events.addListener != null
-        if (pkg.events != null && pkg.events.addListener != null) {
-            pkg.events.addListener(this);
-        }
-    }
-]);
-
-/**
- *  Paint UI manager abstract class. The class has to be used as
- *  basis to introduce an own paint manager implementations. The
- *  simplest implementation has to extend "zebra.ui.PaintManager"
- *  with "paintComponent(g,c)" method. The method defines how the
- *  given component "c" has to be rendered using 2D context "g".
- *  @class zebra.ui.PaintManager
- *  @extends {zebra.ui.Manager}
- */
-pkg.PaintManager = Class(pkg.Manager, [
-    function $prototype() {
-        var $timers = {};
-
-        /**
-         * Ask for repainting of the given rectangular area of the specified UI component. This method
-         * doesn't do repainting immediately. It calculates the dirty area of the whole canvas and then
-         * schedule repainting. Real repainting happens when all repaint method executions are satisfied.
-         * @param  {zebra.ui.Panel} c an UI component that requests repainting
-         * @param  {Integer} [x] x coordinate of top-left corner of a rectangular area to be repainted
-         * @param  {Integer} [y] y coordinate of top-left corner of a rectangular area to be repainted
-         * @param  {Integer} [w] w width of top-left corner of a rectangular area to be repainted
-         * @param  {Integer} [h] h height of top-left corner of a rectangular area to be repainted
-         * @method repaint
-         */
-        this.repaint = function(c,x,y,w,h) {
-
-            // step I: skip invisible components and components that are not in hierarchy
-            //         don't initiate repainting thread for such sort of the components,
-            //         but don't forget for zCanvas whose parent field is null
-            //console.log("PaintManager.repaint() : " + c.$clazz.$name + ", stop? = " + (c.isVisible === false || c.parent == null) + ", w = " + c.width);
-            if ((c.isVisible === false || c.parent == null) && c.$context == null) {
-                return;
-            }
-
-            //!!! find context buffer that hold the given component
-            var canvas = c;
-            for(; canvas != null && canvas.$context == null; canvas = canvas.parent) {
-                if (canvas.isVisible === false) return;
-            }
-
-            if (canvas == null) {
-                return;
-            }
-
-            if (arguments.length == 1) {
-                x = y = 0;
-                w = c.width;
-                h = c.height;
-            }
-
-            // step II: calculate new current dirty area
-            if (w > 0 && h > 0) {
-                var r = $cvp(c, temporary);
-                if (r != null)  {
-                    MB.intersection(r.x, r.y, r.width, r.height, x, y, w, h, r);
-                    if (r.width > 0 && r.height > 0) {
-                        x = r.x;
-                        y = r.y;
-                        w = r.width;
-                        h = r.height;
-
-                        var x2 = canvas.width,
-                            y2 = canvas.height,
-                            cc = c;
-
-                        // calculate abs location
-                        while (cc != canvas) {
-                            x += cc.x;
-                            y += cc.y;
-                            cc = cc.parent;
-                        }
-
-                        if (x < 0) {
-                            w += x;
-                            x = 0;
-                        }
-
-                        if (y < 0) {
-                            h += y;
-                            y = 0;
-                        }
-
-                        if (w + x > x2) w = x2 - x;
-                        if (h + y > y2) h = y2 - y;
-
-                        if (w > 0 && h > 0) {
-                            var da = canvas.$da;
-                            if (da.width > 0) {
-                                if (x < da.x                ||
-                                    y < da.y                ||
-                                    x + w > da.x + da.width ||
-                                    y + h > da.y + da.height  )
-                                {
-                                    MB.unite(da.x, da.y, da.width, da.height, x, y, w, h, da);
-                                }
-                            }
-                            else {
-                                MB.intersection(0, 0, canvas.width, canvas.height, x, y, w, h, da);
-                            }
-                        }
-                    }
-                }
-            }
-
-            // step III: initiate repainting thread
-            if ($timers[canvas] == null && (canvas.isValid === false || canvas.$da.width > 0)) {
-                var $this = this;
-                $timers[canvas] = window.requestAFrame(function() {
-                    $timers[canvas] = null;
-                    canvas.validate();
-
-                    // prevent double painting, sometimes
-                    // width can be -1 what cause clearRect
-                    // clean incorrectly
-                    if (canvas.$da.width > 0) {
-                        var g = canvas.$context;
-                        g.save();
-
-                        try {
-
-                         //   console.log("Paintmanager.repaint() $timer: " +  canvas.$da.x + "," + canvas.$da.y + "," + canvas.$da.width + "," + canvas.$da.height);
-
-                            g.translate(canvas.x, canvas.y);
-                            g.clipRect(canvas.$da.x,
-                                       canvas.$da.y,
-                                       canvas.$da.width,
-                                       canvas.$da.height);
-
-                            if (canvas.bg == null) {
-                                // TODO: make sure it works on bloody android
-                                g.save();
-                                g.setTransform(1 * g.$states[g.$curState].sx * 2, 0, 0, 1 * g.$states[g.$curState].sy * 2, 0, 0);
-                                g.clearRect(canvas.$da.x, canvas.$da.y,
-                                            canvas.$da.width, canvas.$da.height);
-                                g.restore();
-                            }
-
-                            $this.paint(g, canvas);
-                            canvas.$da.width = -1; //!!!
-                            g.restore();
-                        }
-                        catch(e) {
-                            g.restore();
-                            throw e;
-                        }
-                    }
-                });
-            }
-        };
-
-        this.paint = function(g,c){
-            var dw = c.width,
-                dh = c.height,
-                ts = g.$states[g.$curState];
-
-            if (dw !== 0      &&
-                dh !== 0      &&
-                ts.width > 0  &&
-                ts.height > 0 &&
-                c.isVisible === true)
-            {
-                if (c.isValid === false || c.isLayoutValid === false) {
-                    c.validate();
-                }
-
-                g.save();
-                g.translate(c.x, c.y);
-                g.clipRect(0, 0, dw, dh);
-
-                ts = g.$states[g.$curState];
-
-                var c_w = ts.width, c_h = ts.height;
-                if (c_w > 0 && c_h > 0) {
-                    this.paintComponent(g, c);
-
-                    var count = c.kids.length, c_x = ts.x, c_y = ts.y;
-                    for(var i = 0; i < count; i++) {
-                        var kid = c.kids[i];
-                        if (kid.isVisible === true) {
-                            var kidX = kid.x,
-                                kidY = kid.y,
-                                kidXW = kidX + kid.width,
-                                c_xw  = c_x + c_w,
-                                kidYH = kidY + kid.height,
-                                c_yh  = c_y + c_h,
-                                iw = (kidXW < c_xw ? kidXW : c_xw) - (kidX > c_x ? kidX : c_x),
-                                ih = (kidYH < c_yh ? kidYH : c_yh) - (kidY > c_y ? kidY : c_y);
-
-                            if (iw > 0 && ih > 0) {
-                                this.paint(g, kid);
-                            }
-                        }
-                    }
-                    if (c.paintOnTop != null) c.paintOnTop(g);
-                }
-
-                g.restore();
-            }
-        };
-    }
-]);
-
-/**
- * Zebra UI component paint manager implementation class. Zebra
- * implementation expects an UI component can implements:
-
-    - "paint(g)" method to paint its face
-    - "update(g)" method to fill its background
-    - "paintOnTop(g)" method to paint some decorative elements after the
-    component background and face are rendered
-
- * Also the implementation expects an UI component can specify
- * background and border view. Using border view can developers change the
- * component shape by defining "ouline(...)" method
- * @constructor
- * @class  zebra.ui.PaintManImpl
- * @extends zebra.ui.PaintManager
- */
-pkg.PaintManImpl = Class(pkg.PaintManager, [
-    function $prototype() {
-        this.paintComponent = function(g,c) {
-            var b = c.bg != null && (c.parent == null || c.bg != c.parent.bg);
-
-
-            // if component defines shape and has update, [paint?] or background that
-            // differs from parent background try to apply the shape and than build
-            // clip from the applied shape
-            if ( (c.border != null && c.border.outline != null) &&
-                 (b || c.update != null)                        &&
-                 c.border.outline(g, 0, 0, c.width, c.height, c)  )
-            {
-                g.save();
-                g.clip();
-
-                if (b) c.bg.paint(g, 0, 0, c.width, c.height, c);
-                if (c.update != null) c.update(g);
-
-                g.restore();
-            }
-            else {
-                if (b) {
-                    c.bg.paint(g, 0, 0, c.width, c.height, c);
-                }
-                if (c.update != null) c.update(g);
-            }
-
-            if (c.border != null) {
-                c.border.paint(g, 0, 0, c.width, c.height, c);
-            }
-
-            if (c.paint != null) {
-                var left   = c.getLeft(),
-                    top    = c.getTop(),
-                    bottom = c.getBottom(),
-                    right  = c.getRight();
-
-                if (left + right + top + bottom > 0) {
-                    var ts = g.$states[g.$curState];
-
-                    if (ts.width > 0 && ts.height > 0) {
-                        var cx   = ts.x,
-                            cy   = ts.y,
-                            x1   = (cx > left ? cx : left),
-                            y1   = (cy > top  ? cy : top),
-                            cxcw = cx + ts.width,
-                            cych = cy + ts.height,
-                            cright = c.width - right,
-                            cbottom = c.height - bottom;
-
-                        g.save();
-                        g.clipRect(x1, y1, (cxcw < cright  ? cxcw : cright)  - x1,
-                                           (cych < cbottom ? cych : cbottom) - y1);
-                        c.paint(g);
-                        g.restore();
-                    }
-                }
-                else {
-                    c.paint(g);
-                }
-            }
-        };
-    }
-]);
-
-/**
- * Focus manager class defines the strategy of focus traversing among
- * hierarchy of UI components. It keeps current focus owner component
- * and provides API to change current focus component
- * @class zebra.ui.FocusManager
- * @extends {zebra.ui.Manager}
- */
-pkg.FocusManager = Class(pkg.Manager, [
-    function $prototype() {
-        /**
-         * Reference to the current focus owner component.
-         * @attribute focusOwner
-         * @readOnly
-         * @type {zebra.ui.Panel}
-         */
-
-        function freeFocus(ctx, t){
-            if (t == ctx.focusOwner) ctx.requestFocus(null);
-        }
-
-        this.focusOwner = null;
-
-        /**
-         * Component enabled event handler
-         * @param  {zebra.ui.Panel} c a component
-         * @method compEnabled
-         */
-        this.compEnabled = function(c)   {
-            if (c.isEnabled === false) freeFocus(this, c);
-        };
-
-        /**
-         * Component shown event handler
-         * @param  {zebra.ui.Panel} c a component
-         * @method compShown
-         */
-        this.compShown  = function(c)   {
-            if (c.isVisible === false) freeFocus(this, c);
-        };
-
-        /**
-         * Component removed event handler
-         * @param  {zebra.ui.Panel} p a parent
-         * @param  {zebra.ui.Panel} c a component
-         * @method compRemoved
-         */
-        this.compRemoved = function(p, i, c) {
-            freeFocus(this, c);
-        };
-
-        /**
-         * The method is called by a canvas that lost native focus
-         * @param  {zebra.ui.zCanvas} canvas a canvas
-         * @method canvasFocusLost
-         * @protected
-         */
-        this.canvasFocusLost = function(canvas) {
-            if (this.focusOwner != null &&
-                this.focusOwner.getCanvas() == canvas)
-            {
-                this.requestFocus(null);
-            }
-        };
-
-        /**
-         * The method is called by a canvas that gained native focus
-         * @param  {zebra.ui.zCanvas} canvas a canvas
-         * @method canvasFocusGained
-         * @protected
-         */
-        this.canvasFocusGained = function(canvas) {
-            // !!!
-            //  previous focus owner for native HTML element should be ignored
-            // !!!
-            if (canvas.$prevFocusOwner != null &&
-                zebra.instanceOf(canvas.$prevFocusOwner, pkg.HtmlElement) === false)
-            {
-                var d = canvas.$prevFocusOwner.getCanvas();
-                if (d == canvas)  {
-                    this.requestFocus(canvas.$prevFocusOwner);
-                }
-                else {
-                    canvas.$prevFocusOwner = null;
-                }
-            }
-        };
-
-        /**
-         * Test if the given component is a focus owner
-         * @param  {zebra.ui.Panel} c an UI component to be tested
-         * @method hasFocus
-         * @return {Boolean} true if the given component holds focus
-         */
-        this.hasFocus = function(c) {
-            return this.focusOwner == c;
-        };
-
-        /**
-         * Key pressed event handler.
-         * @param  {zebra.ui.KeyEvent} e a mouse event
-         * @method keyPressed
-         */
-        this.keyPressed = function(e){
-            if (KE.TAB == e.code) {
-                var cc = this.ff(e.source, e.isShiftPressed() ?  -1 : 1);
-                if (cc != null) this.requestFocus(cc);
-            }
-        };
-
-        this.findFocusable = function(c) {
-            return (this.isFocusable(c) ? c : this.fd(c, 0, 1));
-        };
-
-        /**
-         * Test if the given component can catch focus
-         * @param  {zebra.ui.Panel} c an UI component to be tested
-         * @method isFocusable
-         * @return {Boolean} true if the given component can catch a focus
-         */
-        this.isFocusable = function(c){
-            var d = c.getCanvas();
-            // TODO:
-            // also we should checks whether parent isFocusable !!!
-            return d != null               &&
-                   c.isEnabled    === true &&
-                   c.isVisible    === true &&
-                   (c.canHaveFocus === true ||
-                   (typeof c.canHaveFocus == "function" && c.canHaveFocus()));
-        };
-
-        // looking recursively a focusable component among children components of
-        // the given target  starting from the specified by index kid with the
-        // given direction (forward or backward lookup)
-        this.fd = function(t,index,d) {
-            if (t.kids.length > 0){
-                var isNComposite = t.catchInput == null || t.catchInput == false;
-                for(var i = index; i >= 0 && i < t.kids.length; i += d) {
-                    var cc = t.kids[i];
-
-                    // check if the current children component satisfies
-                    // conditions it can grab focus or any deeper in hierarchy
-                    // component that can grab the focus exist
-                    if (cc.isEnabled === true                                           &&
-                        cc.isVisible === true                                           &&
-                        cc.width      >  0                                              &&
-                        cc.height     >  0                                              &&
-                        (isNComposite || (t.catchInput != true       &&
-                                          t.catchInput(cc) === false)  )                &&
-                        ( (cc.canHaveFocus === true || (cc.canHaveFocus !=  null  &&
-                                                        cc.canHaveFocus !== false &&
-                                                        cc.canHaveFocus())            ) ||
-                          (cc = this.fd(cc, d > 0 ? 0 : cc.kids.length - 1, d)) != null)  )
-                    {
-                        return cc;
-                    }
-                }
-            }
-
-            return null;
-        };
-
-        // find next focusable component
-        // c - component starting from that a next focusable component has to be found
-        // d - a direction of next focusable component lookup: 1 (forward) or -1 (backward)
-        this.ff = function(c, d){
-            var top = c;
-            while (top && top.getFocusRoot == null) {
-                top = top.parent;
-            }
-
-            top = top.getFocusRoot(c);
-            if (top == null) {
-                return null;
-            }
-
-            if (top.traverseFocus != null) {
-                return top.traverseFocus(c, d);
-            }
-
-            for(var index = (d > 0) ? 0 : c.kids.length - 1; c != top.parent; ){
-                var cc = this.fd(c, index, d);
-                if (cc != null) return cc;
-                cc = c;
-                c = c.parent;
-                if (c != null) index = d + c.indexOf(cc);
-            }
-
-            return this.fd(top, d > 0 ? 0 : top.kids.length - 1, d);
-        };
-
-        /**
-         * Force to pass a focus to the given UI component
-         * @param  {zebra.ui.Panel} c an UI component to pass a focus
-         * @method requestFocus
-         */
-        this.requestFocus = function (c){
-            if (c != this.focusOwner && (c == null || this.isFocusable(c))) {
-
-                // if canvas where a potential focus owner component sits
-                // doesn't  hold native focus than store the potential
-                // focus owner in prevFocusOwner field that will be used
-                // as soon as the canvas gets focus
-                if (c != null) {
-                    var canvas = c.getCanvas();
-                    if (canvas.$focusGainedCounter === 0) {
-                        canvas.$prevFocusOwner = c;
-                        if (zebra.instanceOf(canvas.$prevFocusOwner, pkg.HtmlElement) == false) {
-                            canvas.requestFocus();
-                            return;
-                        }
-                    }
-                }
-
-                var oldFocusOwner = this.focusOwner;
-                if (c != null) {
-                    var nf = EM.getEventDestination(c);
-                    if (nf == null || oldFocusOwner == nf) return;
-                    this.focusOwner = nf;
-                }
-                else {
-                    this.focusOwner = c;
-                }
-
-                if (oldFocusOwner != null) {
-                    var ofc = oldFocusOwner.getCanvas();
-                    if (ofc != null) ofc.$prevFocusOwner = oldFocusOwner;
-                }
-
-                if (oldFocusOwner  != null) {
-                    pkg.events.fireInputEvent(new IE(oldFocusOwner, IE.FOCUS_LOST, IE.FOCUS_UID));
-                }
-
-                if (this.focusOwner != null) {
-                    pkg.events.fireInputEvent(new IE(this.focusOwner, IE.FOCUS_GAINED, IE.FOCUS_UID));
-                }
-
-                return this.focusOwner;
-            }
-            return null;
-        };
-
-        /**
-         * Mouse pressed event handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mousePressed
-         */
-        this.mousePressed = function(e){
-            if (e.isActionMask()) {
-                this.requestFocus(e.source);
-            }
-        };
-    }
-]);
-
-/**
- *  Command manager supports short cut keys definition and listening. The shortcuts have to be defined in
- *  zebra JSON configuration files. There are two sections:
-
-    - **osx** to keep shortcuts for Mac OS X platform
-    - **common** to keep shortcuts for all other platforms
-
- *  The JSON configuration entity has simple structure:
-
-
-      {
-        "common": [
-             {
-                "command"   : "undo_command",
-                "args"      : [ true, "test"],
-                "key"       : "Ctrl+z"
-             },
-             {
-                "command" : "redo_command",
-                "key"     : "Ctrl+Shift+z"
-             },
-             ...
-        ],
-        "osx" : [
-             {
-                "command"   : "undo_command",
-                "args"      : [ true, "test"],
-                "key"       : "Cmd+z"
-             },
-             ...
-        ]
-      }
-
- *  The configuration contains list of shortcuts. Every shortcut is bound to a key combination it is triggered.
- *  Every shortcut has a name and an optional list of arguments that have to be passed to a shortcut listener method.
- *  The optional arguments can be used to differentiate two shortcuts that are bound to the same command.
- *
- *  On the component level shortcut commands can be listened by implementing method whose name equals to shortcut name.
- *  Pay attention to catch shortcut command your component has to be focusable and holds focus at the given time.
- *  For instance, to catch "undo_command"  do the following:
-
-        var pan = new zebra.ui.Panel([
-            function redo_command() {
-                // handle shortcut here
-            },
-
-            // visualize the component gets focus
-            function focused() {
-                this.$super();
-                this.setBackground(this.hasFocus()?"red":null);
-            }
-        ]);
-
-        // let our panel to hold focus by setting appropriate property
-        pan.canHaveFocus = true;
-
-
- *  @constructor
- *  @class zebra.ui.CommandManager
- *  @extends {zebra.ui.Manager}
- */
-
-/**
- * Shortcut event is handled by registering a method handler with shortcut manager. The manager is accessed as
- * "zebra.ui.commandManager" static variable:
-
-        zebra.ui.commandManager.bind(function (e) {
-            ...
-        });
-
- * @event shortcut
- * @param {Object} e shortcut event
- *         @param {Array} e.args shortcut arguments list
- *         @param {String} e.command shortcut name
- */
-pkg.CommandManager = Class(pkg.Manager, [
-    function $prototype() {
-        /**
-         * Key pressed event handler.
-         * @param  {zebra.ui.KeyEvent} e a mouse event
-         * @method keyPressed
-         */
-        this.keyPressed = function(e) {
-            var fo = pkg.focusManager.focusOwner;
-            if (fo != null && this.keyCommands[e.code]) {
-                var c = this.keyCommands[e.code];
-                if (c && c[e.mask] != null) {
-                    c = c[e.mask];
-                    this._.fired(c);
-                    if (fo[c.command]) {
-                         if (c.args && c.args.length > 0) fo[c.command].apply(fo, c.args);
-                         else fo[c.command]();
-                    }
-                }
-            }
-        };
-
-        this.parseKey = function(k) {
-            var m = 0, c = 0, r = k.split("+");
-            for(var i = 0; i < r.length; i++) {
-                var ch = r[i].trim().toUpperCase();
-                if (KE.hasOwnProperty("M_" + ch)) {
-                    m += KE["M_" + ch];
-                    continue;
-                }
-
-                if (KE.hasOwnProperty(ch)) {
-                    c = KE[ch];
-                    continue;
-                }
-
-                if (zebra.isNumber(ch)) {
-                    c = ch;
-                }
-            }
-            return [m, c];
-        };
-
-        this.setCommands = function(commands) {
-            for(var i=0; i < commands.length; i++) {
-                var c = commands[i], p = this.parseKey(c.key), v = this.keyCommands[p[1]];
-
-                if (v && v[p[0]]) {
-                    throw Error("Duplicated command: '" + c + "'");
-                }
-
-                if (v == null) {
-                    v = [];
-                }
-
-                v[p[0]] = c;
-                this.keyCommands[p[1]] = v;
-            }
-        };
-    },
-
-    function(commands){
-        this.$super();
-        this.keyCommands = {};
-        this._ = new zebra.util.Listeners("commandFired");
-
-        if (commands != null) {
-            this.setCommands(commands.common);
-            if (zebra.isMacOS && commands.osx != null) {
-                this.setCommands(commands.osx);
-            }
-        }
-    }
-]);
-
-/**
- * Cursor manager class. Allows developers to control mouse cursor type by implementing an own
- * getCursorType method or by specifying a cursor by cursorType field. Imagine an UI component
- * needs to change cursor type. It
- *  can be done by one of the following way:
-
-    - **Implement getCursorType method by the component itself if the cursor type depends on cursor location**
-
-          var p = new zebra.ui.Panel([
-               // implement getCursorType method to set required
-               // mouse cursor type
-               function getCursorType(target, x, y) {
-                   return zebra.ui.Cursor.WAIT;
-               }
-          ]);
-
-    - **Define "cursorType" property in component if the cursor type doesn't depend on cursor location **
-
-          var myPanel = new zebra.ui.Panel();
-          ...
-          myPanel.cursorType = zebra.ui.Cursor.WAIT;
-
- *  @class zebra.ui.CursorManager
- *  @constructor
- *  @extends {zebra.ui.Manager}
- */
-pkg.CursorManager = Class(pkg.Manager, [
-    function $prototype() {
-        /**
-         * Define mouse moved events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseMoved
-         */
-        this.mouseMoved = function(e){
-            if (this.$isFunc === true) {
-                this.cursorType = this.target.getCursorType(this.target, e.x, e.y);
-                this.canvas.style.cursor = (this.cursorType == null) ? "default"
-                                                                     : this.cursorType;
-            }
-        };
-
-        /**
-         * Define mouse entered events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseEntered
-         */
-        this.mouseEntered = function(e){
-            if (e.source.cursorType != null || e.source.getCursorType != null) {
-                this.$isFunc = (e.source.getCursorType != null);
-                this.target = e.source;
-                this.canvas = this.target.getCanvas().canvas;
-                this.cursorType = this.$isFunc === true ? this.target.getCursorType(this.target, e.x, e.y)
-                                                       : this.target.cursorType;
-
-                this.canvas.style.cursor = (this.cursorType == null) ? "default"
-                                                                     : this.cursorType;
-            }
-        };
-
-        /**
-         * Define mouse exited events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseExited
-         */
-        this.mouseExited  = function(e){
-            if (this.target != null) {
-                this.cursorType = "default";
-                this.canvas.style.cursor = this.cursorType;
-                this.canvas = this.target = null;
-                this.$isFunc = false;
-            }
-        };
-
-        /**
-         * Define mouse dragged events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragged
-         */
-        this.mouseDragged = function(e) {
-            if (this.$isFunc === true) {
-                this.cursorType = this.target.getCursorType(this.target, e.x, e.y);
-                this.canvas.style.cursor = (this.cursorType == null) ? "default"
-                                                                     : this.cursorType;
-            }
-        };
-    },
-
-    function(){
-        this.$super();
-
-        /**
-         * Current cursor type
-         * @attribute cursorType
-         * @type {String}
-         * @readOnly
-         * @default "default"
-         */
-        this.cursorType = "default";
-        this.canvas = this.target = null;
-        this.$isFunc = false;
-    }
-]);
-
-/**
- * Event manager class. One of the key zebra manager that is responsible for
- * distributing various events in zebra UI. The manager provides number of
- * methods to register global events listeners.
- * @class zebra.ui.EventManager
- * @constructor
- * @extends {zebra.ui.Manager}
- */
-pkg.EventManager = Class(pkg.Manager, [
-    function $prototype() {
-        var IEHM = [],
-            MUID = IE.MOUSE_UID,
-            KUID = IE.KEY_UID;
-
-        IEHM[KE.TYPED]          = 'keyTyped';
-        IEHM[KE.RELEASED]       = 'keyReleased';
-        IEHM[KE.PRESSED]        = 'keyPressed';
-
-        IEHM[ME.DRAGGED]        = 'mouseDragged';
-        IEHM[ME.DRAGSTARTED]    = 'mouseDragStarted';
-        IEHM[ME.DRAGENDED]      = 'mouseDragEnded';
-        IEHM[ME.MOVED]          = 'mouseMoved';
-        IEHM[ME.CLICKED]        = 'mouseClicked';
-        IEHM[ME.PRESSED]        = 'mousePressed';
-        IEHM[ME.RELEASED]       = 'mouseReleased';
-        IEHM[ME.ENTERED]        = 'mouseEntered';
-        IEHM[ME.EXITED]         = 'mouseExited';
-
-        IEHM[IE.FOCUS_LOST]     = 'focusLost';
-        IEHM[IE.FOCUS_GAINED]   = 'focusGained';
-
-        IEHM[CL.SIZED]   = 'compSized';
-        IEHM[CL.MOVED]   = 'compMoved';
-        IEHM[CL.ENABLED] = 'compEnabled';
-        IEHM[CL.SHOWN]   = 'compShown';
-        IEHM[CL.ADDED]   = 'compAdded';
-        IEHM[CL.REMOVED] = 'compRemoved';
-
-        this.$hasMethod = function(l, s, e) {
-            for (var i = 0; i <=e ; i++) {
-                var k = IEHM[i];
-                if (typeof l[k] == 'function') {
-                    return  true;
-                }
-            }
-            return false;
-        };
-
-        this.fireCompEvent = function(id, src, p1, p2){
-            var n = IEHM[id];
-
-            if (src[n] != null) {
-                src[n].call(src, src, p1, p2);
-            }
-
-            for(var i = 0;i < this.c_l.length; i++) {
-                var t = this.c_l[i];
-                if (t[n] != null) t[n].call(t, src, p1, p2);
-            }
-
-            for(var t = src.parent;t != null; t = t.parent){
-                if (t.childCompEvent != null) {
-                    t.childCompEvent(id, src, p1, p2);
-                }
-            }
-        };
-
-        // destination is component itself or one of his composite parent.
-        // composite component is a component that grab control from his
-        // children component. to make a component composite
-        // it has to implement catchInput field or method. If composite component
-        // has catchInput method it will be called
-        // to detect if the composite component takes control for the given kid.
-        // composite components can be embedded (parent composite can take
-        // control on its child composite component)
-        this.getEventDestination = function(c) {
-            if (c == null) return null;
-
-            var p = c;
-            while ((p = p.parent) != null) {
-                if (p.catchInput != null && (p.catchInput === true || (p.catchInput !== false && p.catchInput(c)))) {
-                    c = p;
-                }
-            }
-            return c;
-        };
-
-        this.fireInputEvent = function(e){
-            var t = e.source, id = e.ID, it = null, k = IEHM[id], b = false;
-            switch(e.UID) {
-                case MUID:
-                    if (t[k] != null) {
-                        t[k].call(t, e);
-                    }
-
-                    // for efficiency we have to avoid passing mouse
-                    // moved and dragged events to children listener
-                    // so pass it only to global listeners and return
-                    if (id > 25) {
-                        for(var i = 0; i < this.m_l.length; i++) {
-                            var tt = this.m_l[i];
-                            if (tt[k] != null) tt[k].call(tt, e);
-                        }
-                        return b;
-                    }
-                    it = this.m_l;
-                    break;
-                case KUID:
-                    if (t[k] != null) {
-                        b = t[k].call(t, e);
-                    }
-                    it = this.k_l;
-                    break;
-                case IE.FOCUS_UID:
-                    if (t[k] != null) {
-                        t[k].call(t, e);
-                    }
-                    t.focused();
-                    it = this.f_l;
-                    break;
-                default: {
-                    throw new Error("Invalid input event UID: " + e.UID);
-                }
-            }
-
-            // distribute event to globally registered listeners
-            for(var i = 0;i < it.length; i++) {
-                var tt = it[i], m = tt[k];
-                if (m != null) b = m.call(tt, e) || b;
-            }
-
-            for (t = t.parent;t != null; t = t.parent){
-                if (t.childInputEvent != null) {
-                    t.childInputEvent(e);
-                }
-            }
-
-            return b;
-        };
-
-        /**
-         * Register global event listener. The listener will
-         * get events according to event methods handlers it
-         * implements. For instance to listen key and
-         * the passed listener should implements one of
-         * key event handler method:
-
-
-        // implement and register global key and mouse listener
-        zebra.ui.events.addListener({
-
-            // implement necessary events handlers methods
-            keyPressed: function(e) {
-                ...
-            }
-            ...
-        });
-
-         * @param  {Object} l
-         * @method  addListener
-         */
-        this.addListener = function (l) {
-            if (this.$hasMethod(l, CL.ENABLED, CL.REMOVED)) {
-                this.addComponentListener(l);
-            }
-
-            if (this.$hasMethod(l, ME.CLICKED, ME.MOVED))  {
-                this.addMouseListener(l);
-            }
-
-            if (this.$hasMethod(l, KE.TYPED, KE.PRESSED)) {
-                this.addKeyListener(l);
-            }
-
-            if (this.$hasMethod(l, IE.FOCUS_LOST, IE.FOCUS_GAINED)) {
-                this.addFocusListener(l);
-            }
-        };
-
-        /**
-         * Un-register the global listener. The method detects which listener interfaces
-         * the passed listener implements and un-registers its.
-         * @param  {Object} l a listener
-         * @return {Boolean} true if the listener has been removed successfully
-         * @method removeListener
-         */
-        this.removeListener = function (l) {
-            this.removeComponentListener(l);
-            this.removeMouseListener(l);
-            this.removeKeyListener(l);
-            this.removeFocusListener(l);
-        };
-
-        /**
-         * Register global component listener
-         * @param  {Object} l a component listener
-         * @return {Boolean} true if the listener has been successfully
-         * added
-         * @method addComponentListener
-         */
-        this.addComponentListener = function (l) {
-            return this.a_(this.c_l, l);
-        };
-
-        /**
-         * Un-register global component listener
-         * @param  {Object} l a component listener
-         * @return {Boolean} true if the listener has been removed successfully
-         * @method removeFocusListener
-         */
-        this.removeComponentListener = function(l){
-            return this.r_(this.c_l, l);
-        };
-
-        /**
-         * Register global mouse listener
-         * @param  {Object} l a mouse listener
-         * @return {Boolean} true if the listener has been successfully
-         * added
-         * @method addMouseListener
-         */
-        this.addMouseListener = function(l){
-            return this.a_(this.m_l, l);
-        };
-
-        /**
-         * Un-register global mouse listener
-         * @param  {Object} l a mouse listener
-         * @return {Boolean} true if the listener has been removed successfully
-         * @method removeMouseListener
-         */
-        this.removeMouseListener = function(l){
-            return this.r_(this.m_l, l);
-        };
-
-        /**
-         * Register global focus listener
-         * @param  {Object} l a focus listener
-         * @return {Boolean} true if the listener has been successfully
-         * added
-         * @method addFocusListener
-         */
-        this.addFocusListener = function (l){
-            return this.a_(this.f_l, l);
-        };
-
-       /**
-        * Un-register global focus listener
-        * @param  {Object} l a focus listener
-        * @return {Boolean} true if the listener has been removed successfully
-        * @method removeFocusListener
-        */
-        this.removeFocusListener = function (l) {
-            return this.r_(this.f_l, l);
-        };
-
-        /**
-         * Register global key listener
-         * @param  {Object} l a key listener
-         * @return {Boolean} true if the listener has been successfully
-         * added
-         * @method addKeyListener
-         */
-        this.addKeyListener = function(l){
-            return this.a_(this.k_l, l);
-        };
-
-        /**
-         * Un-register global key listener
-         * @param  {Object} l a key listener
-         * @return {Boolean} true if the listener has been removed successfully
-         * @method removeKeyListener
-         */
-        this.removeKeyListener  = function (l){
-            return this.r_(this.k_l, l);
-        };
-
-        this.a_ = function(c, l) {
-            if (c.indexOf(l) >= 0) return false;
-            c.push(l);
-            return true;
-        };
-
-        this.r_ = function(c, l) {
-            var i = c.indexOf(l);
-            if (i < 0) return false;
-            c.splice(i, 1);
-            return true;
-        };
-    },
-
-    function(){
-        this.m_l  = [];
-        this.k_l  = [];
-        this.f_l  = [];
-        this.c_l  = [];
-        this.$super();
-    }
-]);
-
-/**
- *  zCanvas zebra UI component class. This is one of the key
- *  class everybody has to use to start building an UI. The class is a wrapper
- *  for HTML Canvas element. Internally it catches all native HTML Canvas
- *  events and translates its into Zebra UI events.
- *
- *  zCanvas instantiation triggers a new HTML Canvas will be created
- *  and added to HTML DOM tree.  It happens if developer doesn't pass
- *  an HTML Canvas element reference or an ID of existing HTML Canvas
- *  element If developers need to re-use an existent in DOM tree canvas
- *  element they have to pass id of the canvas that has to be used as basis
- *  for zebra UI creation or reference to a HTML Canvas element:
-
-        // a new HTML canvas element is created and added into HTML DOM tree
-        var canvas = zebra.ui.zCanvas();
-
-        // a new HTML canvas element is created into HTML DOM tree
-        var canvas = zebra.ui.zCanvas(400,500);  // pass canvas size
-
-        // stick to existent HTML canvas element
-        var canvas = zebra.ui.zCanvas("ExistentCanvasID");
-
- *  The zCanvas has layered structure. Every layer is responsible for
- *  showing and controlling a dedicated type of UI elements like windows
- *  pop-up menus, tool tips and so on. Developers have to build an own UI
- *  hierarchy on the canvas root layer. The layer is standard UI panel
- *  that is accessible as zCanvas component instance "root" field.
-
-        // create canvas
-        var canvas = zebra.ui.zCanvas(400,500);
-
-        // save reference to canvas root layer where
-        // hierarchy of UI components have to be hosted
-        var root = canvas.root;
-
-        // fill root with UI components
-        var label = new zebra.ui.Label("Label");
-        label.setBounds(10,10,100,50);
-        root.add(label);
-
- *  @class zebra.ui.zCanvas
- *  @extends {zebra.ui.Panel}
- *  @constructor
- *  @param {String|Canvas} [element] an ID of a HTML canvas element or
- *  reference to an HTML Canvas element.
- *  @param {Integer} [width] a width of an HTML canvas element
- *  @param {Integer} [height] a height of an HTML canvas element
- */
-
-/**
- * Implement the event handler method  to catch canvas initialized event.
- * The event is triggered once the canvas has been initiated and all properties
- * listeners of the canvas are set upped. The event can be used to load
- * saved data.
-
-     var p = new zebra.ui.zCanvas(300, 300, [
-          function canvasInitialized() {
-              // do something
-          }
-     ]);
-
- * @event  canvasInitialized
- */
-
-pkg.zCanvas = Class(pkg.Panel, [
-    function $prototype() {
-        this.$isMasterCanvas = true;
-        this.$prevFocusOwner = null;
-
-        //!!! flag to block wrongly coming double on focus
-        //!!! events
-        this.$focusGainedCounter = 0;
-
-        function km(e) {
-            var c = 0;
-            if (e.altKey)   c += KE.M_ALT;
-            if (e.shiftKey) c += KE.M_SHIFT;
-            if (e.ctrlKey)  c += KE.M_CTRL;
-            if (e.metaKey)  c += KE.M_CMD;
-            return c;
-        }
-
-        this.load = function(jsonPath){
-            return this.root.load(jsonPath);
-        };
-
-        this.$keyTyped = function(e){
-            if (e.charCode === 0) {
-                if ($keyPressedCode != e.keyCode) this.$keyPressed(e);
-                $keyPressedCode = -1;
-            }
-            else {
-                if (e.charCode > 0) {
-                    var fo = pkg.focusManager.focusOwner;
-                    if (fo != null) {
-                        KE_STUB.reset(fo, KE.TYPED, e.keyCode, String.fromCharCode(e.charCode), km(e));
-                        if (EM.fireInputEvent(KE_STUB) === true) e.preventDefault();
-                    }
-                }
-
-                if (e.keyCode < 47) e.preventDefault();
-            }
-        };
-
-        this.$keyPressed = function(e){
-            var code = $keyPressedCode = (e.which || e.keyCode || 0), m = km(e), b = false;
-
-            // FF sets keyCode to zero for some diacritic characters
-            // to fix the problem we have to try get the code from "key" field
-            // of event that stores a character
-            if (code === 0 && e.key != null && e.key.length() === 1) {
-                code = e.key.charCodeAt(0);
-            }
-
-            for(var i = this.kids.length - 1;i >= 0; i--){
-                var l = this.kids[i];
-                if (l.layerKeyPressed != null && l.layerKeyPressed(code, m)){
-                    break;
-                }
-            }
-
-            var focusOwner = pkg.focusManager.focusOwner;
-            if (pkg.clipboardTriggerKey > 0          &&
-                code == pkg.clipboardTriggerKey &&
-                focusOwner != null                   &&
-                (focusOwner.clipCopy  != null        ||
-                 focusOwner.clipPaste != null           ))
-            {
-                $clipboardCanvas = this;
-                $clipboard.style.display = "block";
-                this.canvas.onfocus = this.canvas.onblur = null;
-
-                // value has to be set, otherwise some browsers (Safari) do not generate
-                // "copy" event
-                $clipboard.value="1";
-
-                $clipboard.select();
-                $clipboard.focus();
-                return;
-            }
-
-            $keyPressedOwner     = focusOwner;
-            $keyPressedModifiers = m;
-
-            if (focusOwner != null) {
-                KE_STUB.reset(focusOwner, KPRESSED, code, code < 47 ? KE.CHAR_UNDEFINED : '?', m);
-                b = EM.fireInputEvent(KE_STUB);
-
-                if (code == KE.ENTER) {
-                    KE_STUB.reset(focusOwner, KE.TYPED, code, "\n", m);
-                    b = EM.fireInputEvent(KE_STUB) || b;
-                }
-            }
-
-            //!!!!
-            //TODO: hard coded constants
-            if ((code < 47 && code != 32) || b) {
-                e.preventDefault();
-            }
-        };
-
-        this.$keyReleased = function(e){
-            $keyPressedCode = -1;
-
-            var fo = pkg.focusManager.focusOwner;
-            if(fo != null) {
-                KE_STUB.reset(fo, KE.RELEASED, e.keyCode, KE.CHAR_UNDEFINED, km(e));
-                if (EM.fireInputEvent(KE_STUB)) e.preventDefault();
-            }
-        };
-
-        this.$mouseEntered = function(id, e) {
-            var mp = $mousePressedEvents[id];
-
-            // remove any previously registered listener if
-            //  -- a mouse button has been pressed
-            //  -- a mouse button has been pressed on the canvas we have entered
-            if (mp != null && mp.canvas != null && mp.canvas.canvas == e.target) {
-                $cleanDragFix();
-            }
-
-            // TODO: review it
-            // quick and dirty fix
-            // try to track a situation when the canvas has been moved
-            this.recalcOffset();
-
-            // if a button has not been pressed handle mouse entered to detect
-            // zebra component the mouse pointer entered and send appropriate
-            // mouse entered event to it
-            if (mp == null || mp.canvas == null) {
-                var x = $meX(e, this),
-                    y = $meY(e, this),
-                    d = this.getComponentAt(x, y);
-
-                // setup modifiers
-                ME_STUB.modifiers.altKey   = e.altKey;
-                ME_STUB.modifiers.ctrlKey  = e.ctrlKey;
-                ME_STUB.modifiers.metaKey  = e.metaKey;
-                ME_STUB.modifiers.shiftKey = e.shiftKey;
-
-                // also correct current component on that mouse pointer is located
-                if (d != pkg.$mouseMoveOwner) {
-                    // if mouse owner is not null but doesn't match new owner
-                    // generate mouse exit and clean mouse owner
-                    if (pkg.$mouseMoveOwner != null) {
-                        var prev = pkg.$mouseMoveOwner;
-                        pkg.$mouseMoveOwner = null;
-
-                        ME_STUB.reset(prev, MEXITED, x, y, -1, 0);
-                        EM.fireInputEvent(ME_STUB);
-                    }
-
-                    // if new mouse owner is not null and enabled
-                    // generate mouse entered event ans set new mouse owner
-                    if (d != null && d.isEnabled === true){
-                        pkg.$mouseMoveOwner = d;
-                        ME_STUB.reset(d, MENTERED, x, y, -1, 0);
-                        EM.fireInputEvent(ME_STUB);
-                    }
-                }
-            }
-        };
-
-        this.$mouseExited = function (id, e) {
-            var mp = $mousePressedEvents[id];
-
-            // setup modifiers
-            ME_STUB.modifiers.altKey   = e.altKey;
-            ME_STUB.modifiers.ctrlKey  = e.ctrlKey;
-            ME_STUB.modifiers.metaKey  = e.metaKey;
-            ME_STUB.modifiers.shiftKey = e.shiftKey;
-
-            // if a mouse button has not been pressed and current mouse owner
-            // component is not null, flush current mouse owner and send
-            // mouse exited event to him
-            if (mp == null || mp.canvas == null) {
-                if (pkg.$mouseMoveOwner != null) {
-                    var p = pkg.$mouseMoveOwner;
-                    pkg.$mouseMoveOwner = null;
-
-                    ME_STUB.reset(p, MEXITED, $meX(e, this), $meY(e, this), -1, 0);
-                    EM.fireInputEvent(ME_STUB);
-                }
-            }
-            else {
-                // if a button has been pressed but the mouse cursor is outside of
-                // the canvas, for a time being start listening mouse moved events
-                // of Window to emulate mouse moved events in canvas
-                if ($temporaryWinListener == null && ME_STUB.touch == null) {  // !!! ignore touchscreen devices
-                    var $this = this;
-                    $temporaryWinListener = function(ee) {
-                        ee.stopPropagation();
-                        $this.$mouseMoved(id, {
-                            pageX : ee.pageX,
-                            pageY : ee.pageY,
-                            target: e.target,
-                            modifiers: ME_STUB.modifiers,
-                        });
-                        ee.preventDefault();
-                    };
-                    window.addEventListener("mousemove", $temporaryWinListener, true);
-                }
-            }
-        };
-
-        /**
-         * Catch native canvas mouse move events
-         * @param {String} id an touch id (for touchable devices)
-         * @param {String} e a mouse event that has been triggered by canvas element
-         *
-         *         {
-         *             pageX : {Integer},
-         *             pageY : {Integer},
-         *             target: {HTMLElement}
-         *         }
-         * @protected
-         * @method $mouseMoved
-         */
-        this.$mouseMoved = function(id, e){
-            // get appropriate mousePressed event by event id
-            var mp = $mousePressedEvents[id];
-
-            // mouse button has been pressed and pressed target zebra component exists
-            // emulate mouse dragging events if mouse has moved on the canvas where mouse
-            // pressed event occurred
-            if (mp != null && mp.canvas != null) {
-                // target component exits and mouse cursor moved on the same
-                // canvas where mouse pressed occurred
-                if (mp.component != null && mp.canvas.canvas == e.target) {
-                    // !!!!
-                    // for the sake of performance $meX(e, this) and $meY(e, this)
-                    // methods calls are replaced with direct code
-                    //
-                    var x = Math.floor(this.$context.tX(e.pageX - this.offx, e.pageY - this.offy)),
-                        y = Math.floor(this.$context.tY(e.pageX - this.offx, e.pageY - this.offy)),
-                        m = mp.button;
-
-                        // setup modifiers
-                        ME_STUB.modifiers.altKey   = e.altKey;
-                        ME_STUB.modifiers.ctrlKey  = e.ctrlKey;
-                        ME_STUB.modifiers.metaKey  = e.metaKey;
-                        ME_STUB.modifiers.shiftKey = e.shiftKey;
-
-                    // if drag events has not been initiated yet generate mouse
-                    // start dragging event
-                    if (mp.draggedComponent == null) {
-
-                        // check if zebra mouse moved event has already occurred
-                        // if it is true set mouse dragged target component to
-                        // the mouse moved target component otherwise compute
-                        // the target component basing on mouse moved event location
-
-                        // !!!!
-                        // for the sake of performance $meX(e, this) and $meY(e, this)
-                        // methods calls are replaced with direct code
-                        var xx = Math.floor(this.$context.tX(mp.pageX - this.offx, mp.pageY - this.offy)),
-                            yy = Math.floor(this.$context.tY(mp.pageX - this.offx, mp.pageY - this.offy)),
-                            d  = (pkg.$mouseMoveOwner == null) ? this.getComponentAt(xx, yy)
-                                                               : pkg.$mouseMoveOwner;
-
-                        // if target component can be detected fire mouse start dragging and
-                        // mouse dragged events to the component
-                        if (d != null && d.isEnabled === true) {
-                            mp.draggedComponent = d;
-
-                            // setup modifiers
-                            ME_STUB.modifiers.altKey   = mp.altKey;
-                            ME_STUB.modifiers.ctrlKey  = mp.ctrlKey;
-                            ME_STUB.modifiers.metaKey  = mp.metaKey;
-                            ME_STUB.modifiers.shiftKey = mp.shiftKey;
-
-                            ME_STUB.reset(d, ME.DRAGSTARTED, xx, yy, m, 0);
-                            EM.fireInputEvent(ME_STUB);
-
-                            // if mouse cursor has been moved mouse dragged
-                            // event has to be generated
-                            if (xx != x || yy != y) {
-                                ME_STUB.reset(d, MDRAGGED, x, y, m, 0);
-                                EM.fireInputEvent(ME_STUB);
-                            }
-                        }
-                    }
-                    else {
-                        // the drag event has already occurred before, just send
-                        // next dragged event to target zebra component
-                        ME_STUB.reset(mp.draggedComponent, MDRAGGED, x, y, m, 0);
-                        EM.fireInputEvent(ME_STUB);
-                    }
-                }
-            }
-            else {
-
-                // if a mouse button has not been pressed handle the normal mouse moved event
-
-                // !!!!
-                // for the sake of performance $meX(e, this) and $meY(e, this)
-                // methods calls are replaced with direct code
-                var x = this.$context.tX(e.pageX - this.offx, e.pageY - this.offy),
-                    y = this.$context.tY(e.pageX - this.offx, e.pageY - this.offy),
-                    d = this.getComponentAt(x, y);
-
-                // setup modifiers
-                ME_STUB.modifiers.altKey   = e.altKey;
-                ME_STUB.modifiers.ctrlKey  = e.ctrlKey;
-                ME_STUB.modifiers.metaKey  = e.metaKey;
-                ME_STUB.modifiers.shiftKey = e.shiftKey;
-
-                if (pkg.$mouseMoveOwner != null) {
-                    if (d != pkg.$mouseMoveOwner) {
-                        var old = pkg.$mouseMoveOwner;
-
-                        pkg.$mouseMoveOwner = null;
-
-                        ME_STUB.reset(old, MEXITED, x, y, -1, 0);
-                        EM.fireInputEvent(ME_STUB);
-
-                        if (d != null && d.isEnabled === true) {
-                            pkg.$mouseMoveOwner = d;
-                            ME_STUB.reset(pkg.$mouseMoveOwner, MENTERED, x, y, -1, 0);
-                            EM.fireInputEvent(ME_STUB);
-                        }
-                    }
-                    else {
-                        if (d != null && d.isEnabled === true) {
-                            ME_STUB.reset(d, MMOVED, x, y, -1, 0);
-                            EM.fireInputEvent(ME_STUB);
-                        }
-                    }
-                }
-                else {
-                    if (d != null && d.isEnabled === true) {
-                        pkg.$mouseMoveOwner = d;
-                        ME_STUB.reset(d, MENTERED, x, y, -1, 0);
-                        EM.fireInputEvent(ME_STUB);
-                    }
-                }
-            }
-        };
-
-        this.$mouseReleased = function(id, e){
-            var mp = $mousePressedEvents[id];
-
-            // handle it only if appropriate mouse pressed has occurred
-            if (mp != null && mp.canvas != null) {
-                var x = $meX(e, this), y = $meY(e, this), po = mp.component;
-
-                // setup modifiers
-                ME_STUB.modifiers.altKey   = e.altKey;
-                ME_STUB.modifiers.ctrlKey  = e.ctrlKey;
-                ME_STUB.modifiers.metaKey  = e.metaKey;
-                ME_STUB.modifiers.shiftKey = e.shiftKey;
-
-                // if a component has been dragged send end dragged event to it to
-                // complete dragging
-                if (mp.draggedComponent != null){
-                    ME_STUB.reset(mp.draggedComponent, ME.DRAGENDED, x, y, mp.button, 0);
-                    EM.fireInputEvent(ME_STUB);
-                }
-
-                // mouse pressed has not null target zebra component
-                // send mouse released and mouse clicked (if necessary)
-                // to him
-                if (po != null) {
-                    // generate mouse click if no mouse drag event has been generated
-                    if (mp.draggedComponent == null && (e.touch == null || e.touch.group == null)) {
-                        ME_STUB.reset(po, ME.CLICKED, x, y, mp.button, mp.clicks);
-                        EM.fireInputEvent(ME_STUB);
-                    }
-
-                    // send mouse released to zebra target component
-                    ME_STUB.reset(po, ME.RELEASED, x, y, mp.button, mp.clicks);
-                    EM.fireInputEvent(ME_STUB);
-
-                    //  make sure it is originally a touch event
-                    if (ME_STUB.touch != null) {
-                        ME_STUB.reset(po, ME.EXITED, x, y, mp.button, mp.clicks);
-                        EM.fireInputEvent(ME_STUB);
-                    }
-                }
-
-                // mouse released can happen at new location, so move owner has to be corrected
-                // and mouse exited entered event has to be generated.
-                // the correction takes effect if we have just completed dragging or mouse pressed
-                // event target doesn't match pkg.$mouseMoveOwner
-                if (ME_STUB.touch == null) {
-                    var mo = pkg.$mouseMoveOwner;
-                    if (mp.draggedComponent != null || (po != null && po != mo)) {
-                        var nd = this.getComponentAt(x, y);
-
-                        if (nd != mo) {
-                            if (mo != null) {
-                                pkg.$mouseMoveOwner = null;
-                                ME_STUB.reset(mo, MEXITED, x, y, -1, 0);
-                                EM.fireInputEvent(ME_STUB);
-                            }
-
-                            if (nd != null && nd.isEnabled === true){
-                                pkg.$mouseMoveOwner = nd;
-                                ME_STUB.reset(nd, MENTERED, x, y, -1, 0);
-                                EM.fireInputEvent(ME_STUB);
-                            }
-                        }
-                    }
-                }
-
-                // release mouse pressed event without removal the event from object
-                // keeping event in object is used to handle double click
-                mp.canvas = null;
-            }
-        };
-
-        this.$mousePressed = function(id, e, button) {
-            // release mouse pressed if it has not happened before but was not released
-            var mp = $mousePressedEvents[id];
-            if (mp != null && mp.canvas != null) {
-                this.$mouseReleased(id, mp);
-            }
-
-            // store mouse pressed event
-            var clicks = mp != null && (new Date().getTime() - mp.time) <= pkg.doubleClickDelta ? 2 : 1 ;
-
-            mp = $mousePressedEvents[id] = {
-                pageX       : e.pageX,
-                pageY       : e.pageY,
-                identifier  : id,
-                target      : e.target,
-                canvas      : this,
-                button      : button,
-                component   : null,
-                mouseDragged: null,
-                time        : (new Date()).getTime(),
-                clicks      : clicks,
-                modifiers   : {
-                    altKey      : e.altKey,
-                    ctrlKey     : e.ctrlKey,
-                    metaKey     : e.metaKey,
-                    shiftKey    : e.shiftKey
-                }
-            };
-
-            var x = $meX(e, this), y = $meY(e, this), tl = null;
-            mp.x = x;
-            mp.y = y;
-
-            // send mouse event to a layer and test if it has been activated
-            for(var i = this.kids.length - 1; i >= 0; i--){
-                tl = this.kids[i];
-                if (tl.layerMousePressed != null && tl.layerMousePressed(x, y, button)) {
-                    break;
-                }
-            }
-
-            var d = this.getComponentAt(x, y);
-            if (d != null && d.isEnabled === true) {
-                mp.component = d;
-
-                // setup modifiers
-                ME_STUB.modifiers.altKey   = mp.altKey;
-                ME_STUB.modifiers.ctrlKey  = mp.ctrlKey;
-                ME_STUB.modifiers.metaKey  = mp.metaKey;
-                ME_STUB.modifiers.shiftKey = mp.shiftKey;
-
-                // make sure it was touch event to emulate mouse entered event
-                if (ME_STUB.touch != null) {
-                    ME_STUB.reset(d, ME.ENTERED, x, y, button, clicks);
-                    EM.fireInputEvent(ME_STUB);
-                }
-                else {
-                    // for mouse pointer, check if pressing also should
-                    // update current move owner component and generate
-                    // approriate event
-                    if (pkg.$mouseMoveOwner != d) {
-                        pkg.$mouseMoveOwner = d;
-                        ME_STUB.reset(d, MENTERED, x, y, button, clicks);
-                        EM.fireInputEvent(ME_STUB);
-                    }
-                }
-
-                ME_STUB.reset(d, ME.PRESSED, x, y, button, clicks);
-                EM.fireInputEvent(ME_STUB);
-            }
-
-            //!!! this prevent DOM elements selection on the page
-            //!!! this code should be still double checked
-            //!!!! THIS CODE BRINGS SOME PROBLEM TO IE. IF CURSOR IN ADDRESS TAB PRESSING ON CANVAS
-            //!!!! GIVES FOCUS TO CANVAS BUT KEY EVENT GOES TO ADDRESS BAR
-            //e.preventDefault();
-
-            // on mobile devices this force to leave edit component by grabbing focus from
-            // the editor component (input text field)
-            if (document.activeElement != this.canvas) {
-                this.canvas.focus();
-            }
-        };
-
-        this.getComponentAt = function(x,y){
-            for(var i = this.kids.length; --i >= 0; ){
-                var tl = this.kids[i];
-                if (tl.isLayerActiveAt == null || tl.isLayerActiveAt(x, y)) {
-
-                    // !!!
-                    //  since the method is widely used the code below duplicates
-                    //  functionality of EM.getEventDestination(tl.getComponentAt(x, y));
-                    //  method
-                    // !!!
-                    var c = tl.getComponentAt(x, y);
-                    if (c != null)  {
-                        var p = c;
-                        while ((p = p.parent) != null) {
-                            if (p.catchInput != null && (p.catchInput === true || (p.catchInput !== false && p.catchInput(c)))) {
-                                c = p;
-                            }
-                        }
-                    }
-                    return c;
-                }
-            }
-            return null;
-        };
-
-        this.recalcOffset = function() {
-            // calculate offset relative to window taking in account
-            // scrolling
-            var poffx = this.offx,
-                poffy = this.offy,
-                ba    = this.canvas.getBoundingClientRect();
-
-            this.offx = Math.round(ba.left) + pkg.$measure(this.canvas, "padding-left") + window.pageXOffset;
-            this.offy = Math.round(ba.top) + pkg.$measure(this.canvas, "padding-top" ) + window.pageYOffset;
-
-            if (this.offx != poffx || this.offy != poffy) {
-                // force to fire component re-located event
-                this.relocated(this, poffx, poffy);
-            }
-        };
-
-        /**
-         * Get the canvas layer by the specified layer ID. Layer is a children component
-         * of the canvas UI component. Every layer has an ID assigned to it the method
-         * actually allows developers to get the canvas children component by its ID
-         * @param  {String} id a layer ID
-         * @return {zebra.ui.Panel} a layer (children) component
-         * @method getLayer
-         */
-        this.getLayer = function(id) {
-            return this[id];
-        };
-
-        /**
-         * Set HTML canvas element hosted by the UI component CSS styles
-         * @protected
-         * @method setStyles
-         * @param {Object} styles styles to be applied to the HTML canvas component
-         */
-        this.setStyles = function(styles) {
-            for(var k in styles) {
-                this.canvas.style[k] = styles[k];
-            }
-        };
-
-        /**
-         * Set HTML Canvas element hosted by the UI component attribute
-         * @protected
-         * @method setAttribute
-         * @param {String} name an attribute name
-         * @param {String} value an attribute value
-         */
-        this.setAttribute = function(name, value) {
-            this.canvas.setAttribute(name, value);
-        };
-
-        // override relocated and resized
-        // to prevent unnecessary repainting
-        this.relocated = function(px,py) {
-            pkg.events.fireCompEvent(CL.MOVED, this, px, py);
-        };
-
-        this.resized = function(pw,ph) {
-            pkg.events.fireCompEvent(CL.SIZED, this, pw, ph);
-            // don't forget repaint it
-            this.repaint();
-        };
-
-        // override parent class repaint() method since the necessity
-        // of the canvas element repainting should not be analyzed
-        // basing on DOM
-        this.repaint = function(x,y,w,h) {
-            // if the canvas element has no parent nothing
-            // should be redrawn
-            if (pkg.$contains(this.canvas) &&
-                this.canvas.style.visibility != "hidden")
-            {
-                if (arguments.length === 0) {
-                    x = y = 0;
-                    w = this.width;
-                    h =  this.height;
-                }
-
-                if (pkg.paintManager != null) {
-                    pkg.paintManager.repaint(this, x,y,w,h);
-                }
-            }
-        };
-
-        this.setFeatures = function() {
-           for (var i=0; i < arguments.length; i++) {
-               new (Class.forName(arguments[i]))(this);
-           }
-        };
-    },
-
-    function() {
-        this.$this(400, 400);
-    },
-
-    function(w, h) {
-        var e = document.createElement("canvas");
-        e.setAttribute("class", "zebcanvas");
-        e.setAttribute("id", this.toString());
-        e.onselectstart = function() { return false; };
-        this.$this(e, w, h);
-    },
-
-    function(element) {
-        this.$this(element, -1, -1);
-    },
-
-    function(element, w, h) {
-        var $this = this;
-
-        //  TODO:
-        //  touch event listeners have to be taking also
-        //  in account
-        this.$nativeListeners = {
-            "onmousemove": null,
-            "onmousedown": null,
-            "onmouseup": null,
-            "onmouseover": null,
-            "onmouseout": null,
-            "onkeydown": null,
-            "onkeyup": null,
-            "onkeypress": null
-        };
-
-        /**
-         * Reference to HTML Canvas element  where the zebra canvas UI
-         * components are hosted
-         * @protected
-         * @readOnly
-         * @attribute canvas
-         * @type {Canvas}
-         */
-
-        //!!! canvas field  has to be set before super
-        if (zebra.isString(element)) {
-            this.canvas = document.getElementById(element);
-
-            if (this.canvas == null) {
-                throw new Error("Canvas element cannot be found");
-            }
-
-            if (pkg.$detectZCanvas(this.canvas) != null) {
-                throw new Error("Canvas id = '" + element + "'' is already in use");
-            }
-        }
-        else {
-            this.canvas = element;
-            if (!pkg.$contains(this.canvas)) {
-                document.body.appendChild(this.canvas);
-            }
-        }
-
-        if (w < 0) w = this.canvas.offsetWidth;
-        if (h < 0) h = this.canvas.offsetHeight;
-
-        //!!! Pay attention IE9 handles padding incorrectly
-        //!!! the padding has to be set to 0px by appropriate
-        //!!! style sheet getPropertySetter
-        if (this.canvas.getAttribute("tabindex") === null) {
-            this.canvas.setAttribute("tabindex", "1");
-        }
-
-        /**
-         * Keeps rectangular "dirty" area of the canvas component
-         * @private
-         * @attribute $da
-         * @type {Object}
-                { x:Integer, y:Integer, width:Integer, height:Integer }
-         */
-        this.$da = { x: 0, y: 0, width: -1, height: 0 };
-
-
-        var oldPX = -1, oldPY = -1, touchHandler = null;
-        if ("onpointerdown" in window || "onmspointerdown" in window) {
-            var names = "onpointerdown" in window ? [ "pointerdown", "pointerup", "pointermove", "pointerenter", "pointerleave" ]
-                                                  : [ "MSPointerDown", "MSPointerUp", "MSPointerMove", "MSPointerEnter", "MSPointerLeave" ];
-
-            this.canvas.addEventListener(names[0], function(e) {
-                if (e.pointerType == "touch") ME_STUB.touch = e;
-                $this.$mousePressed(e.pointerId, e,  e.button === 0 ? ME.LEFT_BUTTON
-                                                                    : (e.button == 2 ? ME.RIGHT_BUTTON : 0));
-            }, false);
-
-            this.canvas.addEventListener(names[1], function(e) {
-                if (e.pointerType == "touch") ME_STUB.touch = e;
-                $this.$mouseReleased(e.pointerId, e);
-            }, false);
-
-            this.canvas.addEventListener(names[2], function(e) {
-                if (e.pointerType == "touch") ME_STUB.touch = e;
-                $this.$mouseMoved(e.pointerId, e);
-            }, false);
-
-            this.canvas.addEventListener(names[3], function(e) {
-                if (e.pointerType == "touch") ME_STUB.touch = e;
-                $this.$mouseEntered(e.pointerId, e);
-            }, false);
-
-            this.canvas.addEventListener(names[4], function(e) {
-                if (e.pointerType == "touch") ME_STUB.touch = e;
-                $this.$mouseExited(e.pointerId, e);
-            }, false);
-        }
-        else {
-            if ('ontouchstart' in window) {
-                touchHandler = new pkg.TouchHandler(this.canvas, [
-                    function $prototype() {
-                        this.started = function(e) {
-                            ME_STUB.touch          = e;
-                            ME_STUB.touches        = this.touches;
-                            ME_STUB.touchCounter   = this.touchCounter;
-                            $this.$mousePressed(e.identifier, e,
-                                               this.touchCounter == 1 ? ME.LEFT_BUTTON
-                                                                      : (e.group != null && e.group.size == 2 && e.group.index == 1 ? ME.RIGHT_BUTTON : 0));
-                        };
-
-                        this.ended = function(e) {
-                            ME_STUB.touch          = e;
-                            ME_STUB.touches        = this.touches;
-                            ME_STUB.touchCounter   = this.touchCounter;
-                            $this.$mouseReleased(e.identifier, e);
-                        };
-
-                        this.moved = function(e) {
-                            ME_STUB.touch          = e;
-                            ME_STUB.touches        = this.touches;
-                            ME_STUB.touchCounter   = this.touchCounter;
-                            $this.$mouseMoved(e.identifier, e);
-                        };
-                    }
-                ]);
-            }
-
-            this.canvas.onmousemove = function(e) {
-                // ignore extra mouse moved event appearing in IE
-                if (oldPY != e.pageY || oldPX != e.pageX) {
-                    oldPX = e.pageX;
-                    oldPY = e.pageY;
-                    $this.$mouseMoved(1, e);
-                }
-                e.stopPropagation();
-            };
-
-            this.canvas.onmousedown = function(e) {
-                // long touch generates mouse down event. Let's supress it
-                if (touchHandler != null && touchHandler.touchCounter > 0) {
-                    e.preventDefault();
-                }
-                else {
-                    $this.$mousePressed(1, e, e.button === 0 ? ME.LEFT_BUTTON
-                                                            : (e.button == 2 ? ME.RIGHT_BUTTON : 0));
-                    e.stopPropagation();
-                }
-            };
-
-            this.canvas.onmouseup = function(e) {
-                $cleanDragFix();
-                $this.$mouseReleased(1, e);
-                e.stopPropagation();
-            };
-
-            this.canvas.onmouseover = function(e) {
-                if (touchHandler != null && touchHandler.touchCounter > 0) {
-                    e.preventDefault();
-                }
-                else {
-                    $this.$mouseEntered(1, e);
-                    e.stopPropagation();
-                }
-            };
-
-            this.canvas.onmouseout = function(e) {
-                if (touchHandler != null && touchHandler.touchCounter > 0) {
-                    e.preventDefault();
-                }
-                else {
-                    $this.$mouseExited(1, e);
-                    oldPX = oldPY = -1;
-                    e.stopPropagation();
-                }
-            };
-        }
-
-        this.canvas.oncontextmenu = function(e) {
-            e.preventDefault();
-        };
-
-        this.canvas.onkeydown = function(e) {
-            $this.$keyPressed(e);
-            e.stopPropagation();
-        };
-
-        this.canvas.onkeyup = function(e) {
-            $this.$keyReleased(e);
-            e.stopPropagation();
-        };
-
-        this.canvas.onkeypress = function(e) {
-            $this.$keyTyped(e);
-            e.stopPropagation();
-        };
-
-        this.canvas.onfocus = function(e) {
-            if ($this.$focusGainedCounter++ > 0) {
-                e.preventDefault();
-                return;
-            }
-
-            if (pkg.focusManager.canvasFocusGained) {
-                pkg.focusManager.canvasFocusGained($this);
-            }
-        };
-
-        this.canvas.onblur = function(e) {
-            //!!! sometimes focus lost comes incorrectly
-            //    ignore focus lost if canvas still holds focus
-            if (document.activeElement == $this.canvas) {
-                e.preventDefault();
-                return;
-            }
-
-            if ($this.$focusGainedCounter !== 0) {
-                $this.$focusGainedCounter = 0;
-
-                if (pkg.focusManager.canvasFocusLost != null) {
-                    pkg.focusManager.canvasFocusLost($this);
-                }
-            }
-        };
-
-        this.$super();
-
-        // !!!
-        // save canvas in list of created Zebra canvases
-        // do it before calling setSize(w,h) method
-        pkg.$canvases.push(this);
-
-        this.setSize(w, h);
-
-        // sync canvas visibility with what canvas style says
-        var cvis = (this.canvas.style.visibility == "hidden" ? false : true);
-        if (this.isVisible != cvis) {
-            this.setVisible(cvis);
-        }
-
-        if (this.canvasInitialized != null) {
-            this.canvasInitialized();
-        }
-    },
-
-    function setLocation(x, y) {
-        // since zCanvas is root his x, y coordinates have to be 0,0
-        // so don't call super
-        this.canvas.style.top  = y + "px";
-        this.canvas.style.left = x + "px";
-        this.canvas.style.position = "fixed";
-        this.recalcOffset();
-        return this;
-    },
-
-    function initContext(w, h) {
-        var ctx = pkg.$canvas.size(this.canvas, w, h);
-
-        // TODO: top works not good in FF and it is better don't use it
-        // So, ascent has to be taking in account as it was implemented
-        // before
-        if (ctx.textBaseline != "top" ) {
-            ctx.textBaseline = "top";
-        }
-
-        // canvas has one instance of context, the code below
-        // test if the context has been already full filled
-        // with necessary methods and if it is true reset and
-        // returns canvas
-        if (typeof ctx.tX !== "undefined") {
-            ctx.reset(w, h);
-        }
-        else {
-            // customize context with number of new methods
-            //var proto = ctx.constructor.prototype;
-            var $scale     = ctx.scale,
-                $translate = ctx.translate,
-                $rotate    = ctx.rotate,
-                $save      = ctx.save,
-                $restore   = ctx.restore;
-
-            ctx.reset = function(w, h) {
-                this.$curState = 0;
-                var s = this.$states[0];
-                s.srot = s.rotateVal = s.x = s.y = s.width = s.height = s.dx = s.dy = 0;
-                s.crot = s.sx = s.sy = 1;
-                s.width = w;
-                s.height = h;
-                this.setFont(pkg.font);
-                this.setColor("white");
-            };
-
-            // pre-allocate canvas save $states
-            ctx.$states = Array(50);
-            for(var i=0; i < ctx.$states.length; i++) {
-                var s = {};
-                s.srot = s.rotateVal = s.x = s.y = s.width = s.height = s.dx = s.dy = 0;
-                s.crot = s.sx = s.sy = 1;
-                ctx.$states[i] = s;
-            }
-            ctx.reset(w, h);
-
-            ctx.tX = function(x, y) {
-                var c = this.$states[this.$curState],
-                    b = (c.sx != 1 || c.sy != 1 || c.rotateVal !== 0);
-                return (b ? Math.round((c.crot * x + y * c.srot) / c.sx) : x) - c.dx;
-            };
-
-            ctx.tY = function(x, y) {
-                var c = this.$states[this.$curState],
-                    b = (c.sx != 1 || c.sy != 1 || c.rotateVal !== 0);
-                return (b ? Math.round((y * c.crot - c.srot * x) / c.sy) : y) - c.dy;
-            };
-
-            ctx.translate = function(dx, dy) {
-                if (dx !== 0 || dy !== 0) {
-                    var c = this.$states[this.$curState];
-                    c.x  -= dx;
-                    c.y  -= dy;
-                    c.dx += dx;
-                    c.dy += dy;
-                    $translate.call(this, dx, dy);
-                }
-            };
-
-            ctx.rotate = function(v) {
-                var c = this.$states[this.$curState];
-                c.rotateVal += v;
-                c.srot = MS(c.rotateVal);
-                c.crot = MC(c.rotateVal);
-                $rotate.call(this, v);
-            };
-
-            ctx.scale = function(sx, sy) {
-                var c = this.$states[this.$curState];
-                c.sx = c.sx * sx;
-                c.sy = c.sy * sy;
-                $scale.call(this, sx, sy);
-            };
-
-            ctx.save = function() {
-                this.$curState++;
-                var c = this.$states[this.$curState], cc = this.$states[this.$curState - 1];
-                c.x = cc.x;
-                c.y = cc.y;
-                c.width = cc.width;
-                c.height = cc.height;
-
-                c.dx = cc.dx;
-                c.dy = cc.dy;
-                c.sx = cc.sx;
-                c.sy = cc.sy;
-                c.srot = cc.srot;
-                c.crot = cc.crot;
-                c.rotateVal = cc.rotateVal;
-
-                $save.call(this);
-                return this.$curState - 1;
-            };
-
-            ctx.restore = function() {
-                if (this.$curState === 0) {
-                    throw new Error("Context restore history is empty");
-                }
-
-                this.$curState--;
-                $restore.call(this);
-                return this.$curState;
-            };
-
-            ctx.clipRect = function(x,y,w,h){
-                var c = this.$states[this.$curState];
-                if (c.x != x || y != c.y || w != c.width || h != c.height) {
-                    var xx = c.x, yy = c.y,
-                        ww = c.width,
-                        hh = c.height,
-                        xw = x + w,
-                        xxww = xx + ww,
-                        yh = y + h,
-                        yyhh = yy + hh;
-
-                    c.x      = x > xx ? x : xx;
-                    c.width  = (xw < xxww ? xw : xxww) - c.x;
-                    c.y      = y > yy ? y : yy;
-                    c.height = (yh < yyhh ? yh : yyhh) - c.y;
-
-                    if (c.x != xx || yy != c.y || ww != c.width || hh != c.height) {
-                        // begin path is very important to have proper clip area
-                        this.beginPath();
-                        this.rect(x, y, w, h);
-                        this.closePath();
-                        this.clip();
-                    }
-                }
-            };
-        }
-        return ctx;
-    },
-
-    function setSize(w, h) {
-        if (this.width != w || h != this.height) {
-            var pw  = this.width,
-                ph  = this.height;
-
-            this.$context = this.initContext(w, h);
-
-            this.width  = w;
-            this.height = h;
-
-           // if (zebra.isTouchable) {
-           //      // the strange fix for Android native browser
-           //      // that can render text blurry before you click
-           //      // it happens because the browser auto-fit option
-           //      var $this = this;
-           //      setTimeout(function() {
-           //          $this.invalidate();
-           //          $this.validate();
-           //          $this.repaint();
-           //      }, 200);
-           //  }
-           //  else {
-                this.invalidate();
-                this.validate();
-                this.repaint();
-            // }
-
-            if (w != pw || h != ph) {
-                this.resized(pw, ph);
-            }
-
-            // let know to other zebra canvases that
-            // the size of an element on the page has
-            // been updated and they have to correct
-            // its anchor.
-            pkg.$elBoundsUpdated();
-
-            // sometimes changing size can bring to changing canvas location
-            // it is required to recalculate offsets
-//            this.recalcOffset();
-        }
-
-        return this;
-    },
-
-    /**
-     * Stretch Canvas to occupy full screen area
-     * @method fullScreen
-     */
-    function fullScreen() {
-        /**
-         * Indicate if the canvas has to be stretched to
-         * fill the whole screen area.
-         * @type {Boolean}
-         * @attribute isFullScreen
-         * @readOnly
-         */
-        this.isFullScreen = true;
-        this.setLocation(0,0);
-
-        var ws = pkg.$windowSize();
-        this.setSize(ws.width, ws.height);
-    },
-
-    function setEnabled(b) {
-        if (this.isEnabled != b) {
-            // !!!
-            // Since disabled state for Canvas element doesn't work
-            // we have to emulate it via canvas listeners removal
-            //
-            for(var k in this.$nativeListeners) {
-                if (b) {
-                    this.canvas[k] = this.$nativeListeners[k];
-                    this.$nativeListeners[k] = null;
-                }
-                else {
-                    this.$nativeListeners[k] = this.canvas[k];
-                    this.canvas[k] = null;
-                }
-            }
-
-            // have to be decided if super has to be called
-            //this.$super(b);
-
-            this.isEnabled = b;
-        }
-        return this;
-    },
-
-    function setVisible(b) {
-        var prev = this.isVisible;
-        this.canvas.style.visibility = b ? "visible" : "hidden";
-        this.$super(b);
-
-        // Since zCanvas has no parent component calling the super
-        // method above doesn't trigger repainting. So, do it here.
-        if (b != prev) {
-            this.repaint();
-        }
-        return this;
-    },
-
-    function vrp() {
-        this.$super();
-        if (pkg.$contains(this.canvas)) {
-            this.repaint();
-        }
-    },
-
-    function kidAdded(i,constr,c){
-        if (typeof this[c.id] !== "undefined") {
-            throw new Error("Layer '" + c.id + "' already exist");
-        }
-        this[c.id] = c;
-        this.$super(i, constr, c);
-    },
-
-    function kidRemoved(i, c){
-        delete this[c.id];
-        this.$super(i, c);
-    },
-
-    function requestFocus() {
-        if (document.activeElement != this.canvas) {
-            this.canvas.focus();
-        }
-    }
-]);
-
-zebra.ready(
-    // dynamic HTML DOM tree has to be placed to separated function
-    // that has to be first in ready list. the function make
-    // the page loading busy before necessary dynamically
-    // inserted elements will be ready.
-    function() {
-        zebra.busy();
-        $fmCanvas = document.createElement("canvas").getContext("2d");
-
-        var e = document.getElementById("zebra.fm");
-        if (e == null) {
-            e = document.createElement("div");
-            e.setAttribute("id", "zebra.fm");
-            e.setAttribute("style", "visibility:hidden;line-height:0;height:1px;vertical-align:baseline;");
-            e.innerHTML = "<span id='zebra.fm.text' style='display:inline;vertical-align:baseline;'>&nbsp;</span>" +
-                          "<img id='zebra.fm.image' style='width:1px;height:1px;display:inline;vertical-align:baseline;' width='1' height='1'/>";
-            document.body.appendChild(e);
-        }
-        $fmText  = document.getElementById("zebra.fm.text");
-        $fmImage = document.getElementById("zebra.fm.image");
-
-        // the next function passed to zebra.ready() will be blocked
-        // till the picture is completely loaded
-        $fmImage.onload = function() {
-           zebra.ready();
-        };
-
-        // set 1x1 transparent picture
-        $fmImage.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII%3D';
-    },
-
-    function() {
-        var p = zebra()['zebra.json'];
-        new pkg.Bag(pkg).load(p != null ? p : pkg.$url.join("canvas.json"),
-            function(result, e) {
-                if (e != null) throw e;
-            }
-        );
-    },
-
-    function() {
-        try {
-            zebra.busy();
-
-            // store reference to event manager
-            EM = pkg.events;
-
-            if (pkg.clipboardTriggerKey > 0) {
-                // create hidden text area to support clipboard
-                $clipboard = document.createElement("textarea");
-                $clipboard.setAttribute("style", "display:none; position: fixed; left: -99em; top:-99em;");
-
-                $clipboard.onkeydown = function(ee) {
-                    $clipboardCanvas.$keyPressed(ee);
-                    $clipboard.value="1";
-                    $clipboard.select();
-                };
-
-                $clipboard.onkeyup = function(ee) {
-                    if (ee.keyCode == pkg.clipboardTriggerKey) {
-                        $clipboard.style.display = "none";
-                        $clipboardCanvas.canvas.focus();
-                        $clipboardCanvas.canvas.onblur  = $clipboardCanvas.focusLost;
-                        $clipboardCanvas.canvas.onfocus = $clipboardCanvas.focusGained;
-                    }
-                    $clipboardCanvas.$keyReleased(ee);
-                };
-
-                $clipboard.onblur = function() {
-                    this.value="";
-                    this.style.display="none";
-
-                    //!!! pass focus back to canvas
-                    //    it has to be done for the case when cmd+TAB (switch from browser to
-                    //    another application)
-                    $clipboardCanvas.canvas.focus();
-                };
-
-                $clipboard.oncopy = function(ee) {
-                    if (pkg.focusManager.focusOwner && pkg.focusManager.focusOwner.clipCopy != null) {
-                        var v = pkg.focusManager.focusOwner.clipCopy();
-                        $clipboard.value = (v == null ? "" : v);
-                        $clipboard.select();
-                    }
-                };
-
-                $clipboard.oncut = function(ee) {
-                    if (pkg.focusManager.focusOwner && pkg.focusManager.focusOwner.cut) {
-                        $clipboard.value = pkg.focusManager.focusOwner.cut();
-                        $clipboard.select();
-                    }
-                };
-
-                if (zebra.isFF) {
-                    $clipboard.addEventListener ("input", function(ee) {
-                        if (pkg.focusManager.focusOwner &&
-                            pkg.focusManager.focusOwner.clipPaste != null)
-                        {
-                            pkg.focusManager.focusOwner.clipPaste($clipboard.value);
-                        }
-                    }, false);
-                }
-                else {
-                    $clipboard.onpaste = function(ee) {
-                        if (pkg.focusManager.focusOwner && pkg.focusManager.focusOwner.clipPaste != null) {
-                            var txt = (typeof ee.clipboardData == "undefined") ? window.clipboardData.getData('Text')  // IE
-                                                                               : ee.clipboardData.getData('text/plain');
-                            pkg.focusManager.focusOwner.clipPaste(txt);
-                        }
-                        $clipboard.value = "";
-                    };
-                }
-                document.body.appendChild($clipboard);
-            }
-
-            //!!!
-            // IE9 has an error: first mouse press formally pass focus to
-            // canvas, but actually it doesn't get key events. To fix it
-            // it is necessary to pass focus explicitly to window
-            if (zebra.isIE) window.focus();
-        }
-        catch(e) {
-            ///!!!!! for some reason throwing exception is not appeared in console.
-            //       but it has side effect to the system, what causes other exception
-            //       that is not relevant to initial one
-            console.log(e.stack ? e.stack : e);
-            throw new Error(e.toString());
-        }
-        finally { zebra.ready(); }
-    }
-);
-
-/**
- * @for
- */
-
-})(zebra("ui"), zebra.Class);
-(function(pkg, Class) {
-
-// redefine configuration
-zebra()["zebra.json"] = pkg.$url.join("zebra.json");
-
-/**
- * @module  ui
- */
-
-var MB = zebra.util, ME = pkg.MouseEvent, Cursor = pkg.Cursor, View = pkg.View,
-    Listeners = zebra.util.Listeners, KE = pkg.KeyEvent, L = zebra.layout,
-    task = zebra.util.task, instanceOf = zebra.instanceOf,
-    $invalidA = "Invalid alignment",
-    $invalidO = "Invalid orientation",
-    $invalidC = "Invalid constraints";
-
-pkg.$ViewsSetter = function (v){
-    this.views = {};
-    for(var k in v) {
-        if (v.hasOwnProperty(k)) this.views[k] = pkg.$view(v[k]);
-    }
-    this.vrp();
-};
-
-/**
- *  UI component render class. Renders the given target UI component
- *  on the given surface using the specified 2D context
- *  @param {zebra.ui.Panel} [target] an UI component to be rendered
- *  @class zebra.ui.CompRender
- *  @constructor
- *  @extends zebra.ui.Render
- */
-pkg.CompRender = Class(pkg.Render, [
-    function $prototype() {
-        /**
-         * Get preferred size of the render. The method doesn't calculates
-         * preferred size it simply calls the target component "getPreferredSize"
-         * method.
-         * @method getPreferredSize
-         * @return {Object} a preferred size
-         *
-         *      {width:<Integer>, height: <Integer>}
-         */
-        this.getPreferredSize = function(){
-            return this.target == null || this.target.isVisible === false ? { width:0, height:0 }
-                                                                          : this.target.getPreferredSize();
-        };
-
-        this.paint = function(g,x,y,w,h,d){
-            var c = this.target;
-            if (c != null && c.isVisible === true) {
-                c.validate();
-                var prevW =  -1, prevH = 0, cx = x - c.x, cy = y - c.y;
-                if (c.getCanvas() == null){
-                    prevW = c.width;
-                    prevH = c.height;
-                    c.setSize(w, h);
-                }
-
-                g.translate(cx, cy);
-                pkg.paintManager.paint(g, c);
-                g.translate(-cx,  -cy);
-                if (prevW >= 0){
-                    c.setSize(prevW, prevH);
-                    c.validate();
-                }
-            }
-        };
-    }
-]);
-
-/**
- * Line UI component class. Draw series of vertical or horizontal lines of using
- * the given line width and color. Vertical or horizontal line rendering s selected
- * depending on the line component size: if height is greater than width than vertical
- * line will be rendered.
- * @constructor
- * @class zebra.ui.Line
- * @extends {zebra.ui.Panel}
- */
-pkg.Line = Class(pkg.Panel, [
-    function() {
-        /**
-         * Line colors
-         * @attribute lineColors
-         * @type {Array}
-         * @readOnly
-         * @default [ "gray" ]
-         */
-        this.lineColors = ["gray"];
-        this.$super();
-    },
-
-    function $prototype() {
-        /**
-         * Line width
-         * @attribute lineWidth
-         * @type {Integer}
-         * @default 1
-         */
+        this.side      = L.TOP;
+        this.color     = "black";
         this.lineWidth = 1;
 
-        /**
-         * Set set of colors to be used to paint the line. Number of colors defines the number of
-         * lines to be painted.
-         * @param {String} colors* colors
-         * @method setLineColors
-         */
-        this.setLineColors = function() {
-            this.lineColors = (arguments.length === 1) ? (Array.isArray(arguments[0]) ? arguments[0].slice(0)
-                                                                                      : [ arguments[0] ] )
-                                                       : Array.prototype.slice.call(arguments);
-            this.repaint();
+        this[''] = function(side, color, lineWidth) {
+            if (side != null)      this.side      = L.$constraints(side);
+            if (color != null)     this.color     = color;
+            if (lineWidth != null) this.lineWidth = lineWidth;
         };
 
-        this.paint = function(g) {
-            var isHor  = this.width > this.height,
-                left   = this.getLeft(),
-                right  = this.getRight(),
-                top    = this.getTop(),
-                bottom = this.getBottom(),
-                xy     = isHor ? top : left;
+        this.paint = function(g,x,y,w,h,d) {
+            g.setColor(this.color);
+            g.beginPath();
+            g.lineWidth = this.lineWidth;
 
-            for(var i=0; i < this.lineColors.length; i++) {
-                if (this.lineColors[i] != null) {
-                    g.setColor(this.lineColors[i]);
-                    if (isHor === true) {
-                        g.drawLine(this.left, xy, this.width - right - left, xy, this.lineWidth);
-                    }
-                    else {
-                        g.drawLine(xy, top, xy, this.height - top - bottom, this.lineWidth);
-                    }
-                }
-                xy += this.lineWidth;
+            var d = this.lineWidth / 2;
+            if (this.side === L.TOP) {
+                g.moveTo(x, y + d);
+                g.lineTo(x + w - 1, y + d);
             }
+            else {
+                if (this.side === L.BOTTOM) {
+                    g.moveTo(x, y + h - d);
+                    g.lineTo(x + w - 1, y + h - d);
+                }
+            }
+            g.stroke();
         };
 
-        this.calcPreferredSize = function(target) {
-            var s = this.lineColors.length * this.lineWidth;
-            return { width: s, height:s};
+        this.getPreferredSize = function() {
+            return {
+                width  : this.lineWidth,
+                height : this.lineWidth
+            };
         };
     }
 ]);
 
-/**
- * Lightweight implementation of single line string render. The render requires
- * a simple string as a target object.
- * @param {String} str a string to be rendered
- * @param {zebra.ui.Font} [font] a text font
- * @param {String} [color] a text color
- * @constructor
- * @extends {zebra.ui.Render}
- * @class zebra.ui.StringRender
- */
-pkg.StringRender = Class(pkg.Render, [
+pkg.ArrowView = Class(pkg.View, [
     function $prototype() {
-        this.stringWidth = -1;
-        this.owner = null;
+        this.lineWidth = 1;
+        this.fill = true;
+        this.gap  = 0;
 
-        this[''] = function(txt, font, color) {
-            this.setTarget(txt);
-
-            /**
-             * Font to be used to render the target string
-             * @attribute font
-             * @readOnly
-             * @type {zebra.ui.Font}
-             */
-            this.font = font != null ? font : this.$clazz.font;
-
-
-            /**
-             * Color to be used to render the target string
-             * @readOnly
-             * @attribute color
-             * @type {String}
-             */
-            this.color = color != null ? color : this.$clazz.color;
+        this[''] = function (d, col, w) {
+            this.direction = d == null ? L.BOTTOM : L.$constraints(d);
+            this.color     = col == null ? "black" : col;
+            this.width     = this.height = (w == null ? 6 : w);
         };
 
-        this.ownerChanged  = function(v) {
-            this.owner = v;
-        };
+        this.outline  = function(g, x, y, w, h, d) {
+            x += this.gap;
+            y += this.gap;
+            w -= this.gap * 2;
+            h -= this.gap * 2;
 
-        this.getLineHeight = function() {
-            return this.font.height;
-        };
+            var dt = this.lineWidth / 2,
+                w2 = Math.round(w / 2) - (w % 2 === 0 ? 0 : dt),
+                h2 = Math.round(h / 2) - (h % 2 === 0 ? 0 : dt);
 
-        this.lineWidth = function() {
-            if (this.stringWidth < 0) {
-                this.stringWidth = this.font.stringWidth(this.target);
+            g.beginPath();
+
+            if (L.BOTTOM === this.direction) {
+                g.moveTo(x, y + dt);
+                g.lineTo(x + w - 1, y + dt);
+                g.lineTo(x + w2, y + h - dt);
+                g.lineTo(x + dt, y + dt);
             }
-            return this.stringWidth;
+            else {
+                if (L.TOP === this.direction) {
+                    g.moveTo(x, y + h - dt);
+                    g.lineTo(x + w - 1, y + h - dt);
+                    g.lineTo(x + w2, y);
+                    g.lineTo(x + dt, y + h - dt);
+                }
+                else {
+                    if (L.LEFT === this.direction) {
+                        g.moveTo(x + w - dt, y);
+                        g.lineTo(x + w - dt, y + h - 1);
+                        g.lineTo(x, y + h2);
+                        g.lineTo(x + w + dt, y);
+                    }
+                    else {
+                        if (L.RIGHT === this.direction) {
+                            g.moveTo(x + dt, y);
+                            g.lineTo(x + dt, y + h - 1);
+                            g.lineTo(x + w, y + h2);
+                            g.lineTo(x - dt, y);
+                        }
+                        else {
+                            throw new Error("" + this.direction);
+                        }
+                    }
+                }
+            }
+            return true;
         };
+
+        this.paint = function(g, x, y, w, h, d) {
+            this.outline(g, x, y, w, h, d);
+            g.setColor(this.color);
+            g.lineWidth = this.lineWidth;
+
+            if (this.fill === true) {
+                g.fill();
+            }
+            else {
+                g.stroke();
+            }
+        };
+
+        this.getPreferredSize = function () {
+            return { width:this.width, height:this.height };
+        };
+    }
+]);
+
+pkg.TextRenderMix = [
+    function $prototype() {
+        /**
+         * UI component that holds the text render
+         * @attribute owner
+         * @default null
+         * @readOnly
+         * @protected
+         * @type {zebra.ui.Panel}
+         */
+        this.owner = null;
 
         /**
          * Set the rendered text font.
@@ -13427,43 +13864,32 @@ pkg.StringRender = Class(pkg.Render, [
         this.setFont = function(f){
             var old = this.font;
             if (f != null && zebra.isString(f)) f = new pkg.Font(f);
-            if (f != old) {
+
+            if (f !== old && (f == null || old == null || f.toString() !== old.toString())) {
                 this.font = f;
-                if (this.owner != null && this.owner.isValid === false) {
+
+                if (this.owner != null && this.owner.isValid === true) {
                     this.owner.invalidate();
                 }
-                this.stringWidth = -1;
+
+                if (this.invalidate != null) this.invalidate();
                 return true;
             }
             return false;
         };
 
-        this.paint = function(g,x,y,w,h,d) {
-            if (this.font.s != g.font) g.setFont(this.font);
-            if (this.color != g.fillStyle) g.fillStyle = this.color;
-
-            if (d != null && d.isEnabled === false) {
-                g.fillStyle = d != null && d.disabledColor != null ? d.disabledColor
-                                                                   : this.$clazz.disabledColor;
-            }
-
-            g.fillText(this.target, x, y);
-        };
-
-        this.getPreferredSize = function() {
-            if (this.stringWidth < 0) {
-                this.stringWidth = this.font.stringWidth(this.target);
-            }
-            return { width: this.stringWidth, height: this.font.height };
+        this.getLineHeight = function() {
+            return this.font.height;
         };
 
         /**
-         * Return a string that is rendered by this class
-         * @return  {String} a string
-         * @method getValue
+         * Get a line indent
+         * @default 1
+         * @return {Integer} line indent
+         * @method getLineIndent
          */
-        this.getValue = function(){
-            return this.target;
+        this.getLineIndent = function() {
+            return 1;
         };
 
         /**
@@ -13481,12 +13907,104 @@ pkg.StringRender = Class(pkg.Render, [
         };
 
         /**
+         * Called whenever an owner UI component has been changed
+         * @param  {zebra.ui.Panel} v a new owner UI component
+         * @method ownerChanged
+         */
+        this.ownerChanged = function(v) {
+            this.owner = v;
+        };
+    }
+];
+
+/**
+ * Lightweight implementation of single line string render. The render requires
+ * a simple string as a target object.
+ * @param {String} str a string to be rendered
+ * @param {zebra.ui.Font} [font] a text font
+ * @param {String} [color] a text color
+ * @constructor
+ * @extends {zebra.ui.Render}
+ * @class zebra.ui.StringRender
+ */
+pkg.StringRender = Class(pkg.Render, [
+    function $mixing() {
+        return pkg.TextRenderMix;
+    },
+
+    function $prototype() {
+        this.stringWidth = -1;
+
+        this[''] = function(txt, font, color) {
+            this.setTarget(txt);
+
+            /**
+             * Font to be used to render the target string
+             * @attribute font
+             * @readOnly
+             * @type {zebra.ui.Font}
+             */
+            this.font = font != null ? font : this.$clazz.font;
+
+            /**
+             * Color to be used to render the target string
+             * @readOnly
+             * @attribute color
+             * @type {String}
+             */
+            this.color = color != null ? color : this.$clazz.color;
+        };
+
+        this.calcLineWidth = function() {
+            if (this.stringWidth < 0) {
+                this.stringWidth = this.font.stringWidth(this.target);
+            }
+            return this.stringWidth;
+        };
+
+        this.invalidate = function() {
+            this.stringWidth = -1;
+        };
+
+        this.paint = function(g,x,y,w,h,d) {
+            if (this.font.s !== g.font) g.setFont(this.font);
+            if (this.color  !== g.fillStyle) g.fillStyle = this.color;
+
+            if (d != null && d.isEnabled === false) {
+                g.fillStyle = d != null && d.disabledColor != null ? d.disabledColor
+                                                                   : this.$clazz.disabledColor;
+            }
+
+            g.fillText(this.target, x, y);
+        };
+
+        /**
+         * Return a string that is rendered by this class
+         * @return  {String} a string
+         * @method getValue
+         */
+        this.getValue = function(){
+            return this.target;
+        };
+
+        /**
          * Set the string to be rendered
          * @param  {String} s a string
          * @method setValue
          */
         this.setValue = function(s) {
             this.setTarget(s);
+        };
+
+        this.getLines = function() {
+            return 1;
+        };
+
+        this.getPreferredSize = function() {
+            if (this.stringWidth < 0) {
+                this.stringWidth = this.font.stringWidth(this.target);
+            }
+            return { width: this.stringWidth, height: this.font.height };
         };
 
         this.targetWasChanged = function(o, n) {
@@ -13504,27 +14022,11 @@ pkg.StringRender = Class(pkg.Render, [
  * @param  {String|zebra.data.TextModel} text a text as string or text model object
  */
 pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
+    function $mixing() {
+        return pkg.TextRenderMix;
+    },
+
     function $prototype() {
-        /**
-         * UI component that holds the text render
-         * @attribute owner
-         * @default null
-         * @readOnly
-         * @protected
-         * @type {zebra.ui.Panel}
-         */
-        this.owner = null;
-
-        /**
-         * Get a line indent
-         * @default 1
-         * @return {Integer} line indent
-         * @method getLineIndent
-         */
-        this.getLineIndent = function() {
-            return 1;
-        };
-
         /**
          * Get number of lines of target text
          * @return   {Integer} a number of line in the target text
@@ -13538,27 +14040,8 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
             return this.target.getLine(l).length + 1;
         };
 
-        /**
-         * Get the given line height in pixels
-         * @param {Integer} l a line number
-         * @return {Integer} a line height in pixels
-         * @method getLineHeight
-         */
-        this.getLineHeight = function(l) {
-            return this.font.height;
-        };
-
         this.getMaxOffset = function() {
             return this.target.getTextLength();
-        };
-
-        /**
-         * Called whenever an owner UI component has been changed
-         * @param  {zebra.ui.Panel} v a new owner UI component
-         * @method ownerChanged
-         */
-        this.ownerChanged  = function(v) {
-            this.owner = v;
         };
 
         /**
@@ -13596,12 +14079,21 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
         };
 
         /**
-         * Get the rendered target text as string object
-         * @return {String} rendered text
+         * Return a string that is rendered by this class
+         * @return  {String} a string
          * @method getValue
          */
         this.getValue = function(){
             return this.target == null ? null : this.target.getValue();
+        };
+
+        /**
+         * Set the text model content
+         * @param  {String} s a text as string object
+         * @method setValue
+         */
+        this.setValue = function (s) {
+            this.target.setValue(s);
         };
 
         /**
@@ -13610,7 +14102,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
          * @return {Integer} a text line width in pixels
          * @method lineWidth
          */
-        this.lineWidth = function(line){
+        this.calcLineWidth = function(line){
             if (this.invLines > 0) this.recalc();
             return this.target.$lineTags(line).$lineWidth;
         };
@@ -13632,7 +14124,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
 
                     this.textWidth = 0;
                     var size = text.getLines();
-                    for(var i = 0;i < size; i++){
+                    for(var i = 0; i < size; i++){
                         var len = text.$lineTags(i).$lineWidth;
                         if (len > this.textWidth) {
                             this.textWidth = len;
@@ -13688,7 +14180,12 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
          * @method invalidate
          * @private
          */
-        this.invalidate = function(start,size){
+        this.invalidate = function(start,size) {
+            if (arguments.length === 0) {
+                start = 0;
+                size  = this.getLines();
+            }
+
             if (size > 0 && (this.startInvLine != start || size != this.invLines)) {
                 if (this.invLines === 0){
                     this.startInvLine = start;
@@ -13757,14 +14254,14 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
                                 var line = i + startInvLine;
                                 if (line >= p1[0] && line <= p2[0]){
                                     var s  = this.getLine(line),
-                                        lw = this.lineWidth(line),
+                                        lw = this.calcLineWidth(line),
                                         xx = x;
 
-                                    if (line == p1[0]) {
+                                    if (line === p1[0]) {
                                         var ww = this.font.charsWidth(s, 0, p1[1]);
                                         xx += ww;
                                         lw -= ww;
-                                        if (p1[0] == p2[0]) {
+                                        if (p1[0] === p2[0]) {
                                             lw -= this.font.charsWidth(s, p2[1], s.length - p2[1]);
                                         }
                                     }
@@ -13817,48 +14314,6 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
             g.fillRect(x, y, w, h);
         };
 
-        /**
-         * Set the text model content
-         * @param  {String} s a text as string object
-         * @method setValue
-         */
-        this.setValue = function (s) {
-            this.target.setValue(s);
-        };
-
-        /**
-         * Set the rendered text font.
-         * @param  {String|zebra.ui.Font} f a font as CSS string or
-         * zebra.ui.Font class instance
-         * @return {Boolean} return true if a text font has been updated
-         * @method setFont
-         */
-        this.setFont = function(f){
-            var old = this.font;
-
-            if (f && zebra.isString(f)) f = new pkg.Font(f);
-            if (f != old) {
-                this.font = f;
-                this.invalidate(0, this.getLines());
-                return true;
-            }
-            return false;
-        };
-
-        /**
-         * Set rendered text color
-         * @param  {String} c a text color
-         * @return {Boolean} return true if a text color has been updated
-         * @method setColor
-         */
-        this.setColor = function(c){
-            if (c != this.color) {
-                this.color = c.toString();
-                return true;
-            }
-            return false;
-        };
-
         // speed up constructor by avoiding super execution since
         // text render is one of the most used class
         this[''] = function(text) {
@@ -13880,6 +14335,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
              */
             this.font = this.$clazz.font;
 
+
             this.textWidth = this.textHeight = this.startInvLine = this.invLines = 0;
 
             //!!!
@@ -13890,6 +14346,45 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
         };
     }
 ]);
+
+
+pkg.DecoratedTextRender = zebra.Class(pkg.TextRender, [
+    function setDecoration(id, color) {
+        if (id == null) throw new Error();
+        this.decorations[id] = color;
+    },
+
+    function setDecorations(d) {
+        this.decorations = zebra.clone(d);
+    },
+
+    function paintLine(g,x,y,line,d) {
+        this.$super(g,x,y,line,d);
+
+        var lw = this.calcLineWidth(line),
+            lh = this.getLineHeight(line);
+
+        if (this.decorations.underline != null) {
+            g.lineWidth = this.lineWidth;
+            g.setColor(this.decorations.underline);
+            g.drawLine(x, y + lh - 1, x + lw, y  + lh - 1);
+        }
+
+        if (this.decorations.strike != null) {
+            var yy = y + Math.round(lh / 2) - 1;
+            g.setColor(this.decorations.strike);
+            g.lineWidth = this.lineWidth;
+            g.drawLine(x, yy, x + lw, yy);
+        }
+    },
+
+    function(text) {
+        this.decorations = {};
+        this.lineWidth = 1;
+        this.$super(text);
+    }
+]);
+
 
 pkg.BoldTextRender = Class(pkg.TextRender, [
     function(t) {
@@ -13906,11 +14401,9 @@ pkg.BoldTextRender = Class(pkg.TextRender, [
  * @extends zebra.ui.TextRender
  */
 pkg.PasswordText = Class(pkg.TextRender, [
-    function() {
-        this.$this(new zebra.data.SingleLineTxt(""));
-    },
-
     function(text){
+        if (arguments.length === 0) text = new zebra.data.SingleLineTxt("");
+
         /**
          * Echo character that will replace characters of hidden text
          * @attribute echo
@@ -13951,12 +14444,10 @@ pkg.PasswordText = Class(pkg.TextRender, [
     }
 ]);
 
-pkg.TabBorder = Class(View, [
-    function(t) {
-        this.$this(t, 1);
-    },
+pkg.TabBorder = Class(pkg.View, [
+    function(t, w) {
+        if (arguments.length === 1) w = 1;
 
-    function(t, w){
         this.type  = t;
         this.left = this.top = this.bottom = this.right = 6 + w;
         this.width = w;
@@ -13991,11 +14482,11 @@ pkg.TabBorder = Class(View, [
                     g.lineTo(xx + 1, yy + dt);
 
                     if (d.isEnabled === true){
-                        g.setColor(t == 2 ? this.fillColor1 : this.fillColor2);
+                        g.setColor(t === 2 ? this.fillColor1 : this.fillColor2);
                         g.fill();
                     }
 
-                    g.setColor((t === 0 || t == 2) ? this.onColor1 : this.offColor);
+                    g.setColor((t === 0 || t === 2) ? this.onColor1 : this.offColor);
                     g.stroke();
 
                     if (d.isEnabled === true) {
@@ -14004,7 +14495,7 @@ pkg.TabBorder = Class(View, [
                         g.fillRect(xx - ww + 1, y + s, ww, h - s - 1);
                     }
 
-                    if (t == 1) {
+                    if (t === 1) {
                         g.setColor(this.onColor2);
                         g.drawLine(x + 2*s + 1, yy - s, xx + 1, yy - s, s);
                     }
@@ -14026,7 +14517,7 @@ pkg.TabBorder = Class(View, [
                         g.fill();
                     }
 
-                    g.setColor((t === 0 || t == 2) ? this.onColor1 : this.offColor);
+                    g.setColor((t === 0 || t === 2) ? this.onColor1 : this.offColor);
                     g.stroke();
 
                     if (d.isEnabled === true) {
@@ -14035,7 +14526,7 @@ pkg.TabBorder = Class(View, [
                         g.fillRect(x, y + s, ww, h - s - 1);
                     }
 
-                    if (t == 1) {
+                    if (t === 1) {
                         g.setColor(this.onColor2);
                         g.drawLine(x, yy - s, xx - s - 1, yy - s, s);
                     }
@@ -14049,11 +14540,11 @@ pkg.TabBorder = Class(View, [
                     g.lineTo(xx + dt, yy + 1);
 
                     if (d.isEnabled === true){
-                        g.setColor(t == 2 ? this.fillColor1 : this.fillColor2);
+                        g.setColor(t === 2 ? this.fillColor1 : this.fillColor2);
                         g.fill();
                     }
 
-                    g.setColor((t === 0 || t == 2) ? this.onColor1 : this.offColor);
+                    g.setColor((t === 0 || t === 2) ? this.onColor1 : this.offColor);
                     g.stroke();
 
                     if (d.isEnabled === true){
@@ -14082,11 +14573,11 @@ pkg.TabBorder = Class(View, [
                     g.lineTo(xx + dt, y);
 
                     if (d.isEnabled === true){
-                        g.setColor(t == 2 ? this.fillColor1 : this.fillColor2);
+                        g.setColor(t === 2 ? this.fillColor1 : this.fillColor2);
                         g.fill();
                     }
 
-                    g.setColor((t === 0 || t == 2) ? this.onColor1 : this.offColor);
+                    g.setColor((t === 0 || t === 2) ? this.onColor1 : this.offColor);
                     g.stroke();
 
                     if (d.isEnabled === true){
@@ -14225,12 +14716,11 @@ pkg.TitledBorder = Class(pkg.Render, [
                 ry = clip.y > y ? clip.y : y,
                 rw = Math.min(clip.x + clip.width, x + w) - rx,
                 rh = Math.min(clip.y + clip.height, y + h) - ry;
-            return (clip.x == rx && clip.y == ry && clip.width == rw && clip.height == rh);
+            return (clip.x === rx && clip.y === ry && clip.width === rw && clip.height === rh);
         };
 
         this.paint = function(g,x,y,w,h,d){
             if (d.getTitleInfo != null){
-
                 var r = d.getTitleInfo();
                 if (r != null) {
                     var xx = x + w, yy = y + h, t = g.$states[g.$curState];
@@ -14378,9 +14868,266 @@ pkg.TitledBorder = Class(pkg.Render, [
                              this.lineAlignment != L.TOP &&
                              this.lineAlignment != L.CENTER)
             {
-                throw new Error($invalidA);
+                throw new Error("" + this.lineAlignment);
             }
             this.setTarget(b);
+        };
+    }
+]);
+
+pkg.CheckboxView = Class(pkg.View, [
+    function $prototype() {
+        this[''] = function(color) {
+            this.color = (color != null ? color : "rgb(65, 131, 255)");
+        };
+
+        this.paint = function(g,x,y,w,h,d){
+            g.beginPath();
+            g.strokeStyle = this.color;
+            g.lineWidth = 2;
+            g.moveTo(x + 1, y + 2);
+            g.lineTo(x + w - 3, y + h - 3);
+            g.stroke();
+            g.beginPath();
+            g.moveTo(x + w - 2, y + 2);
+            g.lineTo(x + 2, y + h - 2);
+            g.stroke();
+            g.lineWidth = 1;
+        };
+    }
+]);
+
+pkg.BunldeView = Class(pkg.View, [
+    function $prototype() {
+        this[''] = function(dir, color) {
+            this.color     = (color != null ? color : "#AAAAAA");
+            this.direction = (dir   != null ? L.$constraints(dir) : L.VERTICAL);
+        };
+
+        this.paint =  function(g,x,y,w,h,d) {
+            g.beginPath();
+            if (this.direction === L.VERTICAL) {
+                var r = w/2;
+                g.arc(x + r, y + r, r, Math.PI, 0, false);
+                g.lineTo(x + w, y + h - r);
+                g.arc(x + r, y + h - r, r, 0, Math.PI, false);
+                g.lineTo(x, y + r);
+            }
+            else {
+                var r = h/2;
+                g.arc(x + r, y + r, r, 0.5 * Math.PI, 1.5 * Math.PI, false);
+                g.lineTo(x + w - r, y);
+                g.arc(x + w - r, y + h - r, r, 1.5*Math.PI, 0.5*Math.PI, false);
+                g.lineTo(x + r, y + h);
+            }
+            g.setColor(this.color);
+            g.fill();
+        };
+    }
+]);
+
+/**
+ * The radio button ticker view.
+ * @class  zebra.ui.RadioView
+ * @extends zebra.ui.View
+ * @constructor
+ * @param {String} [col1] color one to render the outer cycle
+ * @param {String} [col2] color tow to render the inner cycle
+ */
+pkg.RadioView = Class(pkg.View, [
+    function(col1, col2) {
+        this.color1 = col1 == null ? "rgb(15, 81, 205)" : col1;
+        this.color2 = col2 == null ? "rgb(65, 131, 255)" : col2;
+    },
+
+    function $prototype() {
+        this.paint = function(g,x,y,w,h,d){
+            g.beginPath();
+
+            g.fillStyle = this.color1;
+            g.arc(Math.floor(x + w/2), Math.floor(y + h/2) , Math.floor(w/3 - 0.5), 0, 2* Math.PI, 1, false);
+            g.fill();
+
+            g.beginPath();
+            g.fillStyle = this.color2;
+            g.arc(Math.floor(x + w/2), Math.floor(y + h/2) , Math.floor(w/4 - 0.5), 0, 2* Math.PI, 1, false);
+            g.fill();
+        };
+    }
+]);
+
+/**
+ * Toggle view element class
+ * @class  zebra.ui.ToggleView
+ * @extends {zebra.ui.View}
+ * @constructor
+ * @param  {Boolean} plus indicates the sign type plus (true) or minus (false)
+ * @param  {String} color a color
+ * @param  {String} bg a background
+ */
+pkg.ToggleView = Class(pkg.View, [
+    function $prototype() {
+        this[''] = function(plus, color, bg) {
+            this.color = color == null ? "white" : color;
+            this.bg    = bg    == null ? "lightGray" : bg ;
+            this.plus  = plus  == null ? false : plus;
+            this.br    = new pkg.Border("rgb(65, 131, 215)", 1, 3);
+            this.width = this.height = 12;
+        };
+
+        this.paint = function(g, x, y, w, h, d) {
+            this.br.outline(g, x, y, w, h, d);
+
+            g.setColor(this.bg);
+            g.fill();
+            this.br.paint(g, x, y, w, h, d);
+
+            g.setColor(this.color);
+            g.lineWidth = 2;
+            x+=2;
+            w-=4;
+            h-=4;
+            y+=2;
+            g.beginPath();
+            g.moveTo(x, y + h / 2);
+            g.lineTo(x + w, y + h / 2);
+            if (this.plus) {
+                g.moveTo(x + w / 2, y);
+                g.lineTo(x + w / 2, y + h);
+            }
+
+            g.stroke();
+            g.lineWidth = 1;
+        };
+
+        this.getPreferredSize = function() {
+            return { width:this.width, height:this.height};
+        };
+    }
+]);
+
+pkg.CaptionBgView = Class(pkg.View, [
+    function $prototype() {
+        this[''] = function(bg) {
+            this.gap = this.radius = 6;
+            this.bg  = bg != null ? bg : "#66CCFF";
+        };
+
+        this.paint = function(g,x,y,w,h,d) {
+            this.outline(g,x,y,w,h,d);
+            g.setColor(this.bg);
+            g.fill();
+        };
+
+        this.outline = function (g,x,y,w,h,d) {
+            g.beginPath();
+            g.moveTo(x + this.radius, y);
+            g.lineTo(x + w - this.radius*2, y);
+            g.quadraticCurveTo(x + w, y, x + w, y + this.radius);
+            g.lineTo(x + w, y + h);
+            g.lineTo(x, y + h);
+            g.lineTo(x, y + this.radius);
+            g.quadraticCurveTo(x, y, x + this.radius, y);
+            return true;
+        };
+    }
+]);
+
+/**
+ * @for
+ */
+
+})(zebra("ui"), zebra.Class);
+
+(function(pkg, Class) {
+
+// redefine configuration
+zebra()["zebra.json"] = pkg.$url.join("zebra.json");
+
+/**
+ * @module  ui
+ */
+
+var Cursor = pkg.Cursor, Listeners = zebra.util.Listeners, KE = pkg.KeyEvent,
+    L = zebra.layout, instanceOf = zebra.instanceOf;
+
+pkg.$ViewsSetter = function (v){
+    this.views = {};
+    for(var k in v) {
+        if (v.hasOwnProperty(k)) this.views[k] = pkg.$view(v[k]);
+    }
+    this.vrp();
+};
+
+/**
+ * Line UI component class. Draw series of vertical or horizontal lines of using
+ * the given line width and color. Vertical or horizontal line rendering s selected
+ * depending on the line component size: if height is greater than width than vertical
+ * line will be rendered.
+ * @constructor
+ * @class zebra.ui.Line
+ * @extends {zebra.ui.Panel}
+ */
+pkg.Line = Class(pkg.Panel, [
+    function() {
+        /**
+         * Line colors
+         * @attribute colors
+         * @type {Array}
+         * @readOnly
+         * @default [ "gray" ]
+         */
+        this.colors = [ "gray" ];
+        this.$super();
+    },
+
+    function $prototype() {
+        /**
+         * Line width
+         * @attribute lineWidth
+         * @type {Integer}
+         * @default 1
+         */
+        this.lineWidth = 1;
+
+        /**
+         * Set set of colors to be used to paint the line. Number of colors defines the number of
+         * lines to be painted.
+         * @param {String} colors* colors
+         * @method setLineColors
+         */
+        this.setLineColors = function() {
+            this.colors = (arguments.length === 1) ? (Array.isArray(arguments[0]) ? arguments[0].slice(0)
+                                                                                  : [ arguments[0] ] )
+                                                    : Array.prototype.slice.call(arguments);
+            this.repaint();
+        };
+
+        this.paint = function(g) {
+            var isHor  = this.width > this.height,
+                left   = this.getLeft(),
+                right  = this.getRight(),
+                top    = this.getTop(),
+                bottom = this.getBottom(),
+                xy     = isHor ? top : left;
+
+            for(var i=0; i < this.colors.length; i++) {
+                if (this.colors[i] != null) {
+                    g.setColor(this.colors[i]);
+                    if (isHor === true) {
+                        g.drawLine(this.left, xy, this.width - right - left, xy, this.lineWidth);
+                    }
+                    else {
+                        g.drawLine(xy, top, xy, this.height - top - bottom, this.lineWidth);
+                    }
+                }
+                xy += this.lineWidth;
+            }
+        };
+
+        this.calcPreferredSize = function(target) {
+            var s = this.colors.length * this.lineWidth;
+            return { width: s, height:s};
         };
     }
 ]);
@@ -14456,8 +15203,13 @@ pkg.Label = Class(pkg.ViewPan, [
          */
         this.setValue = function(s){
             if (s == null) s = "";
-            this.view.setValue(s);
-            this.repaint();
+
+            var old = this.view.getValue();
+            if (old !== s) {
+                this.view.setValue(s);
+                this.repaint();
+            }
+
             return this;
         };
 
@@ -14468,7 +15220,9 @@ pkg.Label = Class(pkg.ViewPan, [
          * @chainable
          */
         this.setColor = function(c){
-            if (this.view.setColor(c)) this.repaint();
+            if (this.view.setColor(c)) {
+                this.repaint();
+            }
             return this;
         };
 
@@ -14486,17 +15240,10 @@ pkg.Label = Class(pkg.ViewPan, [
         };
     },
 
-    function () {
-        this.$this("");
-    },
-
     function (r) {
-        if (instanceOf(r, pkg.Render)) {
-            this.setView(r);
-        }
-        else {
-            this.setModel(r);
-        }
+        this.setView(arguments.length === 0 ||
+                     zebra.isString(r)       ? new pkg.StringRender(r)
+                                             : (instanceOf(r, zebra.data.TextModel) ? new pkg.TextRender(r) : r));
         this.$super();
     }
 ]);
@@ -14509,9 +15256,8 @@ pkg.Label = Class(pkg.ViewPan, [
  * @extends zebra.ui.Label
  */
 pkg.MLabel = Class(pkg.Label, [
-    function () { this.$this(""); },
     function(t){
-        this.$super(new zebra.data.Text(t));
+        this.$super(new zebra.data.Text(t == null ? "" : t));
     }
 ]);
 
@@ -14537,7 +15283,7 @@ pkg.BoldLabel = Class(pkg.Label, []);
  */
 pkg.ImageLabel = Class(pkg.Panel, [
     function(txt, img) {
-        this.$super(new L.FlowLayout(L.LEFT, L.CENTER, L.HORIZONTAL, 6));
+        this.$super(new L.FlowLayout("left", "center", "horizontal", 6));
         this.add(new pkg.ImagePan(null));
         this.add(instanceOf(txt, pkg.Panel) ? txt : new pkg.Label(txt));
         this.kids[1].setVisible(txt != null);
@@ -14642,29 +15388,27 @@ pkg.StatePan = Class(pkg.ViewPan, [
         this.stateUpdated = function(o,n){
             var b = false, id = (this.toViewId != null ? this.toViewId(n) : n);
 
-            if (id == null) {
-                return;
-            }
-
-            for(var i=0; i < this.kids.length; i++) {
-                if (this.kids[i].parentStateUpdated != null) {
-                    this.kids[i].parentStateUpdated(o, n, id);
+            if (id != null) {
+                for(var i=0; i < this.kids.length; i++) {
+                    if (this.kids[i].parentStateUpdated != null) {
+                        this.kids[i].parentStateUpdated(o, n, id);
+                    }
                 }
-            }
 
-            if (this.border != null && this.border.activate != null) {
-                b = this.border.activate(id) || b;
-            }
+                if (this.border != null && this.border.activate != null) {
+                    b = this.border.activate(id) || b;
+                }
 
-            if (this.view != null && this.view.activate != null) {
-                b = this.view.activate(id) || b;
-            }
+                if (this.view != null && this.view.activate != null) {
+                    b = this.view.activate(id) || b;
+                }
 
-            if (this.bg != null && this.bg.activate != null) {
-                b = this.bg.activate(id) || b;
-            }
+                if (this.bg != null && this.bg.activate != null) {
+                    b = this.bg.activate(id) || b;
+                }
 
-            if (b) this.repaint();
+                if (b) this.repaint();
+            }
         };
 
         /**
@@ -14680,7 +15424,9 @@ pkg.StatePan = Class(pkg.ViewPan, [
     function setView(v){
         if (v != this.view){
             this.$super(v);
-            this.syncState(this.state, this.state);
+            // check if the method called after constructor execution
+            // othrwise sync is not possible
+            if (this.kids != null) this.syncState(this.state, this.state);
         }
         return this;
     },
@@ -14707,11 +15453,11 @@ pkg.StatePan = Class(pkg.ViewPan, [
  * background view depends on its input events state. The component is good basis
  * for creation  dynamic view UI components.The state the component can be is:
 
-    - **over** the mouse cursor is inside the component
-    - **out** the mouse cursor is outside the component
-    - **pressed over** the mouse cursor is inside the component and an action mouse
+    - **over** the pointer cursor is inside the component
+    - **out** the pointer cursor is outside the component
+    - **pressed over** the pointer cursor is inside the component and an action pointer
       button or key is pressed
-    - **pressed out** the mouse cursor is outside the component and an action mouse
+    - **pressed out** the pointer cursor is outside the component and an action pointer
       button or key is pressed
     - **disabled** the component is disabled
 
@@ -14719,7 +15465,7 @@ pkg.StatePan = Class(pkg.ViewPan, [
  * for the given component state view is identified by an id. By default corresponding to
  * component states views IDs are the following: "over", "pressed.over", "out", "pressed.out",
  * "disabled".  Imagine for example we have two colors and we need to change between the colors
- * every time mouse cursor is over/out of the component:
+ * every time pointer cursor is over/out of the component:
 
      // create state panel
      var statePan = new zebra.ui.EvStatePan();
@@ -14761,7 +15507,6 @@ pkg.StatePan = Class(pkg.ViewPan, [
  */
 var OVER = 0, PRESSED_OVER = 1, OUT = 2, PRESSED_OUT = 3, DISABLED = 4;
 
-
 pkg.EvStatePan = Class(pkg.StatePan,  [
     function $prototype() {
         this.state = OUT;
@@ -14776,37 +15521,40 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
         this._keyPressed = function(e) {
             if (this.state !== PRESSED_OVER &&
                 this.state !== PRESSED_OUT  &&
-                (e.code == KE.ENTER || e.code == KE.SPACE))
+                (e.code === KE.ENTER || e.code === KE.SPACE))
             {
                 this.setState(PRESSED_OVER);
             }
         };
 
         this._keyReleased = function(e) {
-            if (this.state == PRESSED_OVER || this.state == PRESSED_OUT){
+            if (this.state === PRESSED_OVER || this.state === PRESSED_OUT){
                 var prev = this.state;
                 this.setState(OVER);
                 if (this.$isIn === false) this.setState(OUT);
             }
         };
 
-        this._mouseEntered = function(e) {
+        this._pointerEntered = function(e) {
+            console.log("EvStatePan._pointerEntered() ");
             if (this.isEnabled === true) {
-                this.setState(this.state == PRESSED_OUT ? PRESSED_OVER : OVER);
+                this.setState(this.state === PRESSED_OUT ? PRESSED_OVER : OVER);
                 this.$isIn = true;
             }
         };
 
-        this._mousePressed = function(e) {
-            if (this.state != PRESSED_OVER && this.state != PRESSED_OUT && e.isActionMask()){
+        this._pointerPressed = function(e) {
+            if (this.state !== PRESSED_OVER && this.state !== PRESSED_OUT && e.isAction()){
                 this.setState(PRESSED_OVER);
             }
         };
 
-        this._mouseReleased = function(e) {
-            if ((this.state === PRESSED_OVER || this.state === PRESSED_OUT) && e.isActionMask()){
-                if (e.source == this) {
-                    this.setState(e.x >= 0 && e.y >= 0 && e.x < this.width && e.y < this.height ? OVER : OUT);
+        this._pointerReleased = function(e) {
+            console.log("EvStatePan._pointerReleased() " + e.isAction());
+            if ((this.state === PRESSED_OVER || this.state === PRESSED_OUT) && e.isAction()){
+                if (e.source === this) {
+                    this.setState(e.x >= 0 && e.y >= 0 && e.x < this.width && e.y < this.height ? OVER
+                                                                                                : OUT);
                 }
                 else {
                     var p = L.toParentOrigin(e.x, e.y, e.source, this);
@@ -14816,42 +15564,40 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
             }
         };
 
-        /**
-         * Define children components events handler
-         * @param  {zebra.ui.InputEvent|zebra.ui.MouseEvent|zebra.ui.KeyEvent} e an input event
-         * @method childInputEvent
-         */
-        this.childInputEvent = function(e){
-            if (e.UID == pkg.InputEvent.MOUSE_UID) {
-                switch(e.ID) {
-                    case ME.ENTERED : this._mouseEntered(e); break;
-                    case ME.PRESSED : this._mousePressed(e); break;
-                    case ME.RELEASED: this._mouseReleased(e);break;
-                    case ME.EXITED:
-                        // check if the mouse cursor is in of the source component
-                        // that means another layer has grabbed control
-                        if (e.x >= 0 && e.y >= 0 && e.x < e.source.width && e.y < e.source.height) {
-                            this.$isIn = false;
-                        }
-                        else {
-                            var p = L.toParentOrigin(e.x, e.y, e.source, this);
-                            this.$isIn = p.x >= 0 && p.y >= 0 && p.x < this.width && p.y < this.height;
-                        }
+        this.childKeyPressed = function(e) {
+            this._keyPressed(e);
+        };
 
-                        if (this.$isIn === false) {
-                            this.setState(this.state === PRESSED_OVER ? PRESSED_OUT : OUT);
-                        }
-                        break;
-                }
+
+        this.childKeyReleased = function(e) {
+            this._keyReleased(e);
+        };
+
+        this.childPointerEntered = function(e) {
+            this._pointerEntered(e);
+        };
+
+        this.childPointerPressed = function(e) {
+            this._pointerPressed(e);
+        };
+
+        this.childPointerReleased = function(e) {
+            this._pointerReleased(e);
+        };
+
+        this.childPointerExited = function(e) {
+            // check if the pointer cursor is in of the source component
+            // that means another layer has grabbed control
+            if (e.x >= 0 && e.y >= 0 && e.x < e.source.width && e.y < e.source.height) {
+                this.$isIn = false;
             }
             else {
-                if (e.UID == pkg.InputEvent.KEY_UID) {
-                    if (e.ID == KE.PRESSED) this._keyPressed(e);
-                    else {
-                        if (e.ID == KE.RELEASED) this._keyReleased(e);
-                    }
+                var p = L.toParentOrigin(e.x, e.y, e.source, this);
+                this.$isIn = p.x >= 0 && p.y >= 0 && p.x < this.width && p.y < this.height;
+            }
 
-                }
+            if (this.$isIn === false) {
+                this.setState(this.state === PRESSED_OVER ? PRESSED_OUT : OUT);
             }
         };
 
@@ -14874,20 +15620,22 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
         };
 
         /**
-         * Define mouse entered events handler
-         * @param  {zebra.ui.MouseEvent} e a key event
-         * @method mouseEntered
+         * Define pointer entered events handler
+         * @param  {zebra.ui.PointerEvent} e a key event
+         * @method pointerEntered
          */
-        this.mouseEntered = function (e){
-            this._mouseEntered();
+        this.pointerEntered = function (e){
+            this._pointerEntered();
         };
 
         /**
-         * Define mouse exited events handler
-         * @param  {zebra.ui.MouseEvent} e a key event
-         * @method mouseExited
+         * Define pointer exited events handler
+         * @param  {zebra.ui.PointerEvent} e a key event
+         * @method pointerExited
          */
-        this.mouseExited = function(e){
+        this.pointerExited = function(e){
+
+            console.log("EvStatePan.pointerExited() " + e + "," + (this.state == PRESSED_OVER ? PRESSED_OUT : OUT) );
             if (this.isEnabled === true) {
                 this.setState(this.state == PRESSED_OVER ? PRESSED_OUT : OUT);
                 this.$isIn = false;
@@ -14895,31 +15643,31 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
         };
 
         /**
-         * Define mouse pressed events handler
-         * @param  {zebra.ui.MouseEvent} e a key event
-         * @method mousePressed
+         * Define pointer pressed events handler
+         * @param  {zebra.ui.PointerEvent} e a key event
+         * @method pointerPressed
          */
-        this.mousePressed = function(e){
-            this._mousePressed(e);
+        this.pointerPressed = function(e){
+            this._pointerPressed(e);
         };
 
         /**
-         * Define mouse released events handler
-         * @param  {zebra.ui.MouseEvent} e a key event
-         * @method mouseReleased
+         * Define pointer released events handler
+         * @param  {zebra.ui.PointerEvent} e a key event
+         * @method pointerReleased
          */
-        this.mouseReleased = function(e){
-            this._mouseReleased(e);
+        this.pointerReleased = function(e){
+            this._pointerReleased(e);
         };
 
         /**
-         * Define mouse dragged events handler
-         * @param  {zebra.ui.MouseEvent} e a key event
-         * @method mouseDragged
+         * Define pointer dragged events handler
+         * @param  {zebra.ui.PointerEvent} e a key event
+         * @method pointerDragged
          */
-        this.mouseDragged = function(e){
-            if (e.isActionMask()) {
-                var pressed = (this.state == PRESSED_OUT || this.state == PRESSED_OVER);
+        this.pointerDragged = function(e){
+            if (e.isAction()) {
+                var pressed = (this.state === PRESSED_OUT || this.state === PRESSED_OVER);
                 if (e.x > 0 && e.y > 0 && e.x < this.width && e.y < this.height) {
                     this.setState(pressed ? PRESSED_OVER : OVER);
                 }
@@ -14997,7 +15745,7 @@ pkg.CompositeEvStatePan = Class(pkg.EvStatePan, [
         this.setCanHaveFocus = function(b){
             if (this.canHaveFocus != b){
                 var fm = pkg.focusManager;
-                if (b === false && fm.focusOwner == this) {
+                if (b === false && fm.focusOwner === this) {
                     fm.requestFocus(null);
                 }
                 this.canHaveFocus = b;
@@ -15015,7 +15763,7 @@ pkg.CompositeEvStatePan = Class(pkg.EvStatePan, [
         this.setFocusAnchorComponent = function(c) {
             if (this.focusComponent != c) {
                 if (c != null && this.kids.indexOf(c) < 0) {
-                    throw Error("Focus component doesn't exist");
+                    throw new Error("Focus component doesn't exist");
                 }
                 this.focusComponent = c;
                 this.repaint();
@@ -15034,6 +15782,155 @@ pkg.CompositeEvStatePan = Class(pkg.EvStatePan, [
     }
 ]);
 
+pkg.ButtonRepeatMix = [
+    function $prototype () {
+        /**
+         * Indicate if the button should
+         * fire event by pressed event
+         * @attribute isFireByPress
+         * @type {Boolean}
+         * @default false
+         * @readOnly
+         */
+        this.isFireByPress = false;
+
+        /**
+         * Fire button event repeating period. -1 means
+         * the button event repeating is disabled.
+         * @attribute firePeriod
+         * @type {Integer}
+         * @default -1
+         * @readOnly
+         */
+        this.firePeriod = -1;
+
+        this.startIn = 400;
+
+        /**
+         * The method is executed for a button that is configured
+         * to repeat fire events.
+         * @method run
+         * @protected
+         */
+        this.run = function() {
+            if (this.state === PRESSED_OVER) this.fire();
+        };
+
+        /**
+         * Set the mode the button has to fire events. Button can fire
+         * event after it has been unpressed or immediately when it has
+         * been pressed. Also button can start firing events periodically
+         * when it has been pressed and held in the pressed state.
+         * @param  {Boolean} b  true if the button has to fire event by
+         * pressed event
+         * @param  {Integer} firePeriod the period of time the button
+         * has to repeat firing events if it has been pressed and
+         * held in pressed state. -1 means event doesn't have
+         * repeated
+         * @param  {Integer} [startIn] the timeout when repeat events
+         * has to be initiated
+         * @method setFireParams
+         */
+        this.setFireParams = function (b, firePeriod, startIn){
+            if (this.repeatTask != null) this.repeatTask.shutdown();
+            this.isFireByPress = b;
+            this.firePeriod = firePeriod;
+            if (arguments.length > 2) this.startIn = startIn;
+        };
+
+        this.fire = function() {
+            this._.fired(this);
+            if (this.catchFired != null) this.catchFired();
+        };
+    },
+
+    function stateUpdated(o,n){
+        this.$super(o, n);
+        if (n === PRESSED_OVER){
+            if (this.isFireByPress === true){
+                this.fire();
+                if (this.firePeriod > 0) {
+                    this.repeatTask = zebra.util.task(this.run, this).run(this.startIn, this.firePeriod);
+                }
+            }
+        }
+        else {
+            if (this.firePeriod > 0 && this.repeatTask != null) {
+                this.repeatTask.shutdown();
+            }
+
+            if (n === OVER && (o === PRESSED_OVER && this.isFireByPress === false)) {
+                this.fire();
+            }
+        }
+    }
+];
+
+pkg.ArrowButton = Class(pkg.EvStatePan, [
+    function $clazz() {
+        this.ArrowView = Class(pkg.ArrowView, []);
+    },
+
+    function $prototype() {
+        this.setArrowDirection = function(d) {
+            d = L.$constraints(d);
+            this.iterateArrowViews(function(k, v) {
+                if (v != null) v.direction = d;
+            });
+            this.repaint();
+        };
+
+        this.setArrowSize = function(w, h) {
+            if (h == null) h = w;
+            this.iterateArrowViews(function(k, v) {
+                if (v != null) {
+                    v.width  = w;
+                    v.height = h;
+                }
+            });
+            this.vrp();
+        };
+
+        this.setArrowColors = function(pressedColor, overColor, outColor) {
+            var views = this.view.views;
+            if (views.out != null) views.out.color  = outColor;
+            if (views.over.color != null) views.over.color = overColor;
+            if (views["pressed.over"] != null) views["pressed.over"].color = pressedColor;
+            this.repaint();
+        };
+
+        this.iterateArrowViews = function(callback) {
+            var views = this.view.views;
+            for(var k in views) {
+                if (views.hasOwnProperty(k)) {
+                    callback.call(this, k, views[k]);
+                }
+            }
+        };
+    },
+
+    function $mixing() {
+        return pkg.ButtonRepeatMix;
+    },
+
+    function(direction) {
+        this._ = new Listeners();
+        this.cursorType = Cursor.HAND;
+
+        if (direction == null) direction = "left";
+
+        this.setView({
+            "out"          : new this.$clazz.ArrowView(direction, "black"),
+            "over"         : new this.$clazz.ArrowView(direction, "red"),
+            "pressed.over" : new this.$clazz.ArrowView(direction, "black"),
+            "disabled"     : new this.$clazz.ArrowView(direction, "lightGray")
+        });
+        this.$super();
+        this.syncState(this.state, this.state);
+    }
+]);
+
+
 /**
  *  Button UI component. Button is composite component whose look and feel can
  *  be easily customized:
@@ -15050,7 +15947,7 @@ pkg.CompositeEvStatePan = Class(pkg.EvStatePan, [
 
  *  @class  zebra.ui.Button
  *  @constructor
- *  @param {String|zebra.ui.Panel} [t] a button label.
+ *  @param {String|zebra.ui.Panel|zebra.ui.View} [t] a button label.
  *  The label can be a simple text or an UI component.
  *  @extends zebra.ui.CompositeEvStatePan
  */
@@ -15072,106 +15969,48 @@ pkg.CompositeEvStatePan = Class(pkg.EvStatePan, [
 pkg.Button = Class(pkg.CompositeEvStatePan, [
     function $clazz() {
         this.Label = Class(pkg.Label, []);
+
+        this.ViewPan = Class(pkg.ViewPan, [
+            function $prototype() {
+                this.parentStateUpdated = function(o, n, id) {
+                    if (instanceOf(this.view, pkg.ViewSet)) {
+                        this.activate(id);
+                    }
+                };
+            },
+
+            function(v) {
+                this.$super();
+                this.setView(v);
+            }
+        ]);
     },
 
     function $prototype() {
         this.canHaveFocus = true;
-
-        /**
-         * Indicate if the button should
-         * fire event by pressed event
-         * @attribute isFireByPress
-         * @type {Boolean}
-         * @default false
-         * @readOnly
-         */
-        this.isFireByPress = false;
-
-        /**
-         * Fire button event repeating period. -1 means
-         * the button event repeating is disabled.
-         * @attribute firePeriod
-         * @type {Integer}
-         * @default -1
-         * @readOnly
-         */
-        this.firePeriod = -1;
-
-
-        this.startIn = 400;
-
-        this.fire = function() {
-            this._.fired(this);
-            if (this.catchFired != null) this.catchFired();
-        };
-
-        /**
-         * The method is executed for a button that is configured
-         * to repeat fire events.
-         * @method run
-         * @protected
-         */
-        this.run  = function() {
-            if (this.state === PRESSED_OVER) this.fire();
-        };
-
-        /**
-         * Set the mode the button has to fire events.
-         * Button can fire event after it has been unpressed
-         * or immediately when it has been pressed. Also button
-         * can start firing events periodically when it has been
-         * pressed and held in the pressed state.
-         * @param  {Boolean} b   true if the button has to fire
-         * event by pressed event
-         * @param  {Integer} time the period of time the button
-         * has to repeat firing events if it has been pressed and
-         * held in pressed state. -1 means event doesn't have
-         * repeated
-         * @method setFireParams
-         */
-        this.setFireParams = function (b, firePeriod, startIn){
-            if (this.repeatTask != null) this.repeatTask.shutdown();
-            this.isFireByPress = b;
-            this.firePeriod = firePeriod;
-            if (arguments.length > 2) this.startIn = startIn;
-        };
     },
 
-    function() {
-        this.$this(null);
+    function $mixing() {
+        return pkg.ButtonRepeatMix;
     },
 
-    function (t){
+    function(t) {
         this._ = new Listeners();
         if (zebra.isString(t)) t = new this.$clazz.Label(t);
         else {
-            if (t instanceof Image) t = new pkg.ImagePan(t);
+            if (t instanceof Image) {
+                t = new pkg.ImagePan(t);
+            }
+            else {
+                if (t != null && instanceOf(t, pkg.Panel) === false) {
+                    t = new this.$clazz.ViewPan(t);
+                }
+            }
         }
         this.$super();
         if (t != null) {
             this.add(t);
             this.setFocusAnchorComponent(t);
-        }
-    },
-
-    function stateUpdated(o,n){
-        this.$super(o, n);
-        if (n === PRESSED_OVER){
-            if(this.isFireByPress){
-                this.fire();
-                if (this.firePeriod > 0) {
-                    this.repeatTask = task(this.run, this).run(this.startIn, this.firePeriod);
-                }
-            }
-        }
-        else {
-            if (this.firePeriod > 0 && this.repeatTask != null) {
-                this.repeatTask.shutdown();
-            }
-
-            if (n === OVER && (o === PRESSED_OVER && this.isFireByPress === false)) {
-                this.fire();
-            }
         }
     }
 ]);
@@ -15277,24 +16116,24 @@ pkg.BorderPan = Class(pkg.Panel, [
                 left   = this.getLeft(),
                 xa     = this.label != null ? this.label.constraints & (L.LEFT | L.CENTER | L.RIGHT): 0,
                 ya     = this.label != null ? this.label.constraints & (L.BOTTOM | L.TOP) : 0,
-                top    = ya == L.TOP ? this.top : this.getTop(),
-                bottom = ya == L.BOTTOM ? this.bottom : this.getBottom();
+                top    = ya === L.TOP    ? this.top    : this.getTop(),
+                bottom = ya === L.BOTTOM ? this.bottom : this.getBottom();
 
             if (this.label != null && this.label.isVisible === true){
                 var ps = this.label.getPreferredSize();
                 h = ps.height;
-                this.label.setSize(ps.width, h);
-                this.label.setLocation((xa == L.LEFT) ? left + this.indent
-                                                      : ((xa == L.RIGHT) ? this.width - right - ps.width - this.indent
-                                                                         : Math.floor((this.width - ps.width) / 2)),
-                                        (ya == L.BOTTOM) ? (this.height - bottom - ps.height) : top);
+                this.label.setBounds((xa === L.LEFT) ? left + this.indent
+                                                     : ((xa === L.RIGHT) ? this.width - right - ps.width - this.indent
+                                                                        : Math.floor((this.width - ps.width) / 2)),
+                                     (ya === L.BOTTOM) ? (this.height - bottom - ps.height) : top,
+                                     ps.width, h);
             }
 
             if (this.content != null && this.content.isVisible === true){
-                this.content.setLocation(left + this.hGap,
-                                         (ya == L.BOTTOM ? top : top + h) + this.vGap);
-                this.content.setSize(this.width - right - left - 2 * this.hGap,
-                                     this.height - top - bottom - h - 2 * this.vGap);
+                this.content.setBounds(left + this.hGap,
+                                       (ya === L.BOTTOM ? top : top + h) + this.vGap,
+                                        this.width - right - left - 2 * this.hGap,
+                                        this.height - top - bottom - h - 2 * this.vGap);
             }
         };
 
@@ -15317,20 +16156,13 @@ pkg.BorderPan = Class(pkg.Panel, [
         };
     },
 
-    function(title) {
-        this.$this(title, null);
-    },
-
-    function() {
-        this.$this(null);
-    },
-
-    function(title, center) {
-        this.$this(title, center, L.TOP | L.LEFT);
-    },
-
     function(title, center, ctr){
-        if (zebra.isString(title)) title = new this.$clazz.Label(title);
+
+        if (ctr == null) ctr = L.TOP | L.LEFT;
+
+        if (zebra.isString(title)) {
+            title = new this.$clazz.Label(title);
+        }
 
         /**
          * Border panel label component
@@ -15363,13 +16195,13 @@ pkg.BorderPan = Class(pkg.Panel, [
     function kidAdded(index,ctr,lw) {
         this.$super(index, ctr, lw);
         ctr = L.$constraints(ctr);
-        if ((ctr == null && this.content == null) || L.CENTER == ctr) this.content = lw;
+        if ((ctr == null && this.content == null) || L.CENTER === ctr) this.content = lw;
         else this.label = lw;
     },
 
     function kidRemoved(index,lw){
         this.$super(index, lw);
-        if (lw == this.label) this.label = null;
+        if (lw === this.label) this.label = null;
         else this.content = null;
     }
 ]);
@@ -15478,10 +16310,10 @@ pkg.Group = Class(pkg.SwitchManager, [
 
     function $prototype() {
         this.getValue = function(o) {
-            return o == this.state;
+            return o === this.state;
         };
 
-        this.setValue = function(o,b){
+        this.setValue = function(o, b){
             if (this.getValue(o) != b){
                 this.clearSelected();
                 this.state = o;
@@ -15512,12 +16344,12 @@ pkg.Group = Class(pkg.SwitchManager, [
  * the box or label components, etc. The check box extends state
  * panel component and re-map states  to own views IDs:
 
-    - "on.out" - checked and mouse cursor is out
-    - "off.out" - un-checked and mouse cursor is out
+    - "on.out" - checked and pointer cursor is out
+    - "off.out" - un-checked and pointer cursor is out
     - "don" - disabled and checked,
     - "doff" - disabled and un-checked ,
-    - "on.over" - checked and mouse cursor is over
-    - "off.over" - un-checked and mouse cursor is out
+    - "on.over" - checked and pointer cursor is over
+    - "off.over" - un-checked and pointer cursor is out
 
  *
  * Customize is quite similar to what explained for zebra.ui.EvStatePan:
@@ -15632,15 +16464,9 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
         };
     },
 
-    function () {
-        this.$this(null);
-    },
-
-    function (c){
-        this.$this(c, new pkg.SwitchManager());
-    },
-
     function (c, m) {
+        if (m == null) m = new pkg.SwitchManager();
+
         if (zebra.isString(c)) {
             c = new this.$clazz.Label(c);
         }
@@ -15667,9 +16493,9 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
     function keyPressed(e){
         if (instanceOf(this.manager, pkg.Group) && this.getValue()){
             var code = e.code, d = 0;
-            if (code == KE.LEFT || code == KE.UP) d = -1;
+            if (code === KE.LEFT || code === KE.UP) d = -1;
             else {
-                if (code == KE.RIGHT || code == KE.DOWN) d = 1;
+                if (code === KE.RIGHT || code === KE.DOWN) d = 1;
             }
 
             if (d !== 0) {
@@ -15679,7 +16505,7 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
                     if (l.isVisible === true &&
                         l.isEnabled === true &&
                         instanceOf(l, pkg.Checkbox) &&
-                        l.manager == this.manager      )
+                        l.manager === this.manager      )
                     {
                         l.requestFocus();
                         l.setValue(true);
@@ -15717,14 +16543,14 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
     },
 
     function stateUpdated(o, n) {
-        if (o == PRESSED_OVER && n == OVER) {
+        if (o === PRESSED_OVER && n === OVER) {
             this.setValue(!this.getValue());
         }
         this.$super(o, n);
     },
 
     function kidRemoved(index,c) {
-        if (this.box == c) {
+        if (this.box === c) {
             this.box = null;
         }
         this.$super(index,c);
@@ -15746,18 +16572,14 @@ pkg.Radiobox = Class(pkg.Checkbox, [
         this.Label = Class(pkg.Checkbox.Label, []);
     },
 
-    function(c) {
-        this.$this(c, new pkg.Group());
-    },
-
     function(c, group) {
-        this.$super(c, group);
+        this.$super(c,  group == null ? new pkg.Group() : group);
     }
 ]);
 
 /**
  * Splitter panel UI component class. The component splits its area horizontally or vertically into two areas.
- * Every area hosts an UI component. A size of the parts can be controlled by mouse cursor dragging. Gripper
+ * Every area hosts an UI component. A size of the parts can be controlled by pointer cursor dragging. Gripper
  * element is children UI component that can be customized. For instance:
 
       // create split panel
@@ -15783,7 +16605,7 @@ pkg.SplitPan = Class(pkg.Panel, [
     function $clazz() {
         this.Bar = Class(pkg.EvStatePan, [
             function $prototype() {
-                this.mouseDragged = function(e){
+                this.pointerDragged = function(e){
                     var x = this.x + e.x, y = this.y + e.y;
                     if (this.target.orientation == L.VERTICAL){
                         if (this.prevLoc != x){
@@ -15795,7 +16617,7 @@ pkg.SplitPan = Class(pkg.Panel, [
                         }
                     }
                     else {
-                        if (this.prevLoc != y){
+                        if (this.prevLoc != y) {
                             y = this.target.normalizeBarLoc(y);
                             if (y > 0){
                                 this.prevLoc = y;
@@ -15805,9 +16627,9 @@ pkg.SplitPan = Class(pkg.Panel, [
                     }
                 };
 
-                this.mouseDragStarted = function (e){
+                this.pointerDragStarted = function (e){
                     var x = this.x + e.x, y = this.y + e.y;
-                    if (e.isActionMask()) {
+                    if (e.isAction()) {
                         if (this.target.orientation == L.VERTICAL){
                             x = this.target.normalizeBarLoc(x);
                             if (x > 0) this.prevLoc = x;
@@ -15819,7 +16641,7 @@ pkg.SplitPan = Class(pkg.Panel, [
                     }
                 };
 
-                this.mouseDragEnded = function(e){
+                this.pointerDragEnded = function(e){
                     var xy = this.target.normalizeBarLoc(this.target.orientation == L.VERTICAL ? this.x + e.x
                                                                                                : this.y + e.y);
                     if (xy > 0) this.target.setGripperLoc(xy);
@@ -15911,7 +16733,7 @@ pkg.SplitPan = Class(pkg.Panel, [
                 this.orientation = o;
                 this.vrp();
             }
-        }
+        };
 
         /**
          * Set gripper element location
@@ -15930,7 +16752,7 @@ pkg.SplitPan = Class(pkg.Panel, [
                 sSize = pkg.$getPS(this.rightComp),
                 bSize = pkg.$getPS(this.gripper);
 
-            if (this.orientation == L.HORIZONTAL){
+            if (this.orientation === L.HORIZONTAL){
                 bSize.width = Math.max(((fSize.width > sSize.width) ? fSize.width : sSize.width), bSize.width);
                 bSize.height = fSize.height + sSize.height + bSize.height + 2 * this.gap;
             }
@@ -15959,27 +16781,24 @@ pkg.SplitPan = Class(pkg.Panel, [
 
                 if (this.gripper != null){
                     if (this.isMoveable){
-                        this.gripper.setLocation(left, this.barLocation);
-                        this.gripper.setSize(w, bSize.height);
+                        this.gripper.setBounds(left, this.barLocation, w, bSize.height);
                     }
                     else {
-                        this.gripper.setSize(bSize.width, bSize.height);
                         this.gripper.toPreferredSize();
                         this.gripper.setLocation(Math.floor((w - bSize.width) / 2), this.barLocation);
                     }
                 }
-                if(this.leftComp != null){
-                    this.leftComp.setLocation(left, top);
-                    this.leftComp.setSize(w, this.barLocation - this.gap - top);
+                if (this.leftComp != null){
+                    this.leftComp.setBounds(left, top, w, this.barLocation - this.gap - top);
                 }
-                if(this.rightComp != null){
+                if (this.rightComp != null){
                     this.rightComp.setLocation(left, this.barLocation + bSize.height + this.gap);
                     this.rightComp.setSize(w, this.height - this.rightComp.y - bottom);
                 }
             }
             else {
                 var h = this.height - top - bottom;
-                if(this.barLocation < left) this.barLocation = left;
+                if (this.barLocation < left) this.barLocation = left;
                 else {
                     if (this.barLocation > this.width - right - bSize.width) {
                         this.barLocation = this.width - right - bSize.width;
@@ -15987,22 +16806,20 @@ pkg.SplitPan = Class(pkg.Panel, [
                 }
 
                 if (this.gripper != null){
-                    if(this.isMoveable){
-                        this.gripper.setLocation(this.barLocation, top);
-                        this.gripper.setSize(bSize.width, h);
+                    if(this.isMoveable === true){
+                        this.gripper.setBounds(this.barLocation, top, bSize.width, h);
                     }
                     else{
-                        this.gripper.setSize(bSize.width, bSize.height);
-                        this.gripper.setLocation(this.barLocation, Math.floor((h - bSize.height) / 2));
+                        this.gripper.setBounds(this.barLocation, Math.floor((h - bSize.height) / 2),
+                                               bSize.width, bSize.height);
                     }
                 }
 
                 if (this.leftComp != null){
-                    this.leftComp.setLocation(left, top);
-                    this.leftComp.setSize(this.barLocation - left - this.gap, h);
+                    this.leftComp.setBounds(left, top, this.barLocation - left - this.gap, h);
                 }
 
-                if(this.rightComp != null){
+                if (this.rightComp != null){
                     this.rightComp.setLocation(this.barLocation + bSize.width + this.gap, top);
                     this.rightComp.setSize(this.width - this.rightComp.x - right, h);
                 }
@@ -16058,21 +16875,17 @@ pkg.SplitPan = Class(pkg.Panel, [
         };
     },
 
-    function ()   {
-        this.$this(null, null, L.VERTICAL);
-    },
-
-    function (f,s) {
-        this.$this(f, s, L.VERTICAL);
-    },
-
     function (f,s,o){
+        if (o == null) o = L.VERTICAL;
+
         this.minXY = this.maxXY = 0;
         this.barLocation = 70;
         this.leftComp = this.rightComp = this.gripper = null;
         this.setOrientation(o);
 
         this.$super();
+
+        console.log("ADD LEFT " + f.constructor);
 
         if (f != null) this.add(L.LEFT, f);
         if (s != null) this.add(L.RIGHT, s);
@@ -16089,7 +16902,7 @@ pkg.SplitPan = Class(pkg.Panel, [
             if ((ctr == null && this.rightComp == null) || L.RIGHT == ctr) this.rightComp = c;
             else {
                 if (L.CENTER == ctr) this.gripper = c;
-                else throw new Error($invalidC);
+                else throw new Error("" + ctr);
             }
         }
     },
@@ -16268,7 +17081,7 @@ pkg.Progress = Class(pkg.Panel, [
     function setOrientation(o){
         o = L.$constraints(o);
         if (o != L.HORIZONTAL && o != L.VERTICAL) {
-            throw new Error($invalidO);
+            throw new Error("" + o);
         }
         if (o != this.orientation){
             this.orientation = o;
@@ -16282,7 +17095,7 @@ pkg.Progress = Class(pkg.Panel, [
      * @method setMaxValue
      */
     function setMaxValue(m){
-        if(m != this.maxValue) {
+        if (m != this.maxValue) {
             this.maxValue = m;
             this.setValue(this.value);
             this.vrp();
@@ -16353,45 +17166,69 @@ pkg.Progress = Class(pkg.Panel, [
 pkg.Link = Class(pkg.Button, [
     function $prototype() {
         this.cursorType = Cursor.HAND;
-    },
 
-    function(s){
-        // do it before super
-        this.view = new pkg.TextRender(s);
-        this.colors = ["gray"];
-        this.$super(null);
-        this.stateUpdated(this.state, this.state);
-    },
+        /**
+         * Set link font
+         * @param {zebra.ui.Font} f a font
+         * @method setFont
+         */
+        this.setFont = function(f) {
+            if (this.view.setFont(f) === true) {
+                this.vrp();
+            }
+        };
 
-    /**
-     * Set link font
-     * @param {zebra.ui.Font} f a font
-     * @method setFont
-     */
-    function setFont(f) {
-        this.view.setFont(f);
-    },
+        /**
+         * Set the link text color for the specified link state
+         * @param {String} state a link state
+         * @param {String} c a link text color
+         * @method  setColor
+         */
+        this.setColor = function(state,c){
+            if (this.colors[state] != c){
+                this.colors[state] = c;
+                this.syncState();
+            }
+        };
 
-    /**
-     * Set the link text color for the specified link state
-     * @param {Integer} state a link state
-     * @param {String} c a link text color
-     * @method  setColor
-     */
-    function setColor(state,c){
-        if (this.colors[state] != c){
-            this.colors[state] = c;
-            this.stateUpdated(state, state);
-        }
+        this.setColors = function(colors) {
+            this.colors = zebra.clone(colors);
+            this.syncState();
+        };
+
+        this.setValue = function(s) {
+            this.view.setValue(s.toString());
+            this.repaint();
+        };
     },
 
     function stateUpdated(o,n){
         this.$super(o, n);
-        var r = this.view;
-        if (r != null && r.color != this.colors[n] && this.colors[n] != null){
-            r.setColor(this.colors[n]);
+
+        var k = this.toViewId(n);
+        if (this.view != null && this.view.color != this.colors[k] && this.colors[k] != null) {
+            this.view.setColor(this.colors[k]);
+            if (this.overDecoration != null &&  this.isEnabled === true) {
+                if (n === OVER) {
+                    this.view.setDecoration(this.overDecoration, this.colors[k]);
+                }
+            }
             this.repaint();
         }
+
+        if (n !== OVER && this.overDecoration != null && this.view.decorations[this.overDecoration] != null) {
+            this.view.setDecoration(this.overDecoration, null);
+            this.repaint();
+        }
+    },
+
+    function(s){
+        // do it before super
+        this.view = new pkg.DecoratedTextRender(s);
+        this.colors = [ "gray" ];
+        this.overDecoration = "underline";
+        this.$super(null);
+        this.stateUpdated(this.state, this.state);
     }
 ]);
 
@@ -16453,8 +17290,8 @@ pkg.ExtendablePan = Class(pkg.Panel, [
 
         this.TogglePan = Class(pkg.StatePan, [
             function $prototype() {
-                this.mousePressed = function(e){
-                    if (e.isActionMask()) {
+                this.pointerPressed = function(e){
+                    if (e.isAction()) {
                         this.parent.parent.toggle();
                     }
                 };
@@ -16523,8 +17360,6 @@ pkg.ExtendablePan = Class(pkg.Panel, [
     }
 ]);
 
-var ScrollManagerListeners = zebra.util.ListenersClass("scrolled");
-
 /**
  * Scroll manager class.
  * @param {zebra.ui.Panel} t a target component to be scrolled
@@ -16544,7 +17379,6 @@ var ScrollManagerListeners = zebra.util.ListenersClass("scrolled");
   * @param  {Integer} py a previous y location target component scroll location
   */
 
-
  /**
   * Fired when a scroll state has been updated
 
@@ -16559,6 +17393,10 @@ var ScrollManagerListeners = zebra.util.ListenersClass("scrolled");
   * @param  {Integer} py a previous y location target component scroll location
   */
 pkg.ScrollManager = Class([
+    function $clazz() {
+        this.Listeners = zebra.util.ListenersClass("scrolled");
+    },
+
     function $prototype() {
         /**
          * Get current target component x scroll location
@@ -16636,7 +17474,7 @@ pkg.ScrollManager = Class([
 
     function (c){
         this.sx = this.sy = 0;
-        this._ = new ScrollManagerListeners();
+        this._  = new this.$clazz.Listeners();
 
         /**
          * Target UI component for that the scroll manager has been instantiated
@@ -16661,10 +17499,12 @@ pkg.ScrollManager = Class([
  */
 pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
     function $clazz() {
-        var SB = Class(pkg.Button, [
+        this.isDragable = true;
+
+        var SB = Class(pkg.ArrowButton, [
             function $prototype() {
-                this.isDragable  = this.isFireByPress  = true;
-                this.firePeriod  = 20;
+                this.isFireByPress  = true;
+                this.firePeriod     = 20;
             }
         ]);
 
@@ -16725,21 +17565,21 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
         };
 
         this.amount = function(){
-            var db = this.decBt, ib = this.incBt;
-            return (this.type == L.VERTICAL) ? ib.y - db.y - db.height
-                                             : ib.x - db.x - db.width;
+            var db = this.decBt;
+            return (this.type === L.VERTICAL) ? this.incBt.y - db.y - db.height
+                                              : this.incBt.x - db.x - db.width;
         };
 
         this.pixel2value = function(p) {
             var db = this.decBt;
-            return (this.type == L.VERTICAL) ? Math.floor((this.max * (p - db.y - db.height)) / (this.amount() - this.bundle.height))
-                                             : Math.floor((this.max * (p - db.x - db.width )) / (this.amount() - this.bundle.width));
+            return (this.type === L.VERTICAL) ? Math.floor((this.max * (p - db.y - db.height)) / (this.amount() - this.bundle.height))
+                                              : Math.floor((this.max * (p - db.x - db.width )) / (this.amount() - this.bundle.width));
         };
 
         this.value2pixel = function(){
             var db = this.decBt, bn = this.bundle, off = this.position.offset;
-            return (this.type == L.VERTICAL) ? db.y + db.height +  Math.floor(((this.amount() - bn.height) * off) / this.max)
-                                             : db.x + db.width  +  Math.floor(((this.amount() - bn.width) * off) / this.max);
+            return (this.type === L.VERTICAL) ? db.y + db.height +  Math.floor(((this.amount() - bn.height) * off) / this.max)
+                                              : db.x + db.width  +  Math.floor(((this.amount() - bn.width) * off) / this.max);
         };
 
 
@@ -16756,8 +17596,12 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
 
         this.posChanged = function(target,po,pl,pc){
             if (this.bundle != null) {
-                if (this.type == L.HORIZONTAL) this.bundle.setLocation(this.value2pixel(), this.getTop());
-                else this.bundle.setLocation(this.getLeft(), this.value2pixel());
+                if (this.type == L.HORIZONTAL) {
+                    this.bundle.setLocation(this.value2pixel(), this.getTop());
+                }
+                else {
+                    this.bundle.setLocation(this.getLeft(), this.value2pixel());
+                }
             }
         };
 
@@ -16766,16 +17610,16 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
         this.getMaxOffset = function (){ return this.max; };
 
         this.fired = function(src){
-            this.position.setOffset(this.position.offset + ((src == this.incBt) ? this.unitIncrement
-                                                                                : -this.unitIncrement));
+            this.position.setOffset(this.position.offset + ((src === this.incBt) ? this.unitIncrement
+                                                                                 : -this.unitIncrement));
         };
 
         /**
-         * Define mouse dragged events handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragged
+         * Define pointer dragged events handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerDragged
          */
-        this.mouseDragged = function(e){
+        this.pointerDragged = function(e){
             if (Number.MAX_VALUE != this.startDragLoc) {
                 this.position.setOffset(this.pixel2value(this.bundleLoc -
                                                          this.startDragLoc +
@@ -16784,39 +17628,39 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
         };
 
         /**
-         * Define mouse drag started  events handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragStarted
+         * Define pointer drag started  events handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerDragStarted
          */
-        this.mouseDragStarted = function (e){
-           //!!! It is more convenient to  if (this.isDragable || this.isInBundle(e.x, e.y)){
+        this.pointerDragStarted = function (e){
+            if (this.isDragable === true && this.isInBundle(e.x, e.y)) {
                 this.startDragLoc = this.type == L.HORIZONTAL ? e.x : e.y;
-                this.bundleLoc = this.type == L.HORIZONTAL ? this.bundle.x : this.bundle.y;
-            //}
+                this.bundleLoc    = this.type == L.HORIZONTAL ? this.bundle.x : this.bundle.y;
+            }
         };
 
         /**
-         * Define mouse drag ended events handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragEnded
+         * Define pointer drag ended events handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerDragEnded
          */
-        this.mouseDragEnded = function(e) {
+        this.pointerDragEnded = function(e) {
             this.startDragLoc = Number.MAX_VALUE;
         };
 
         /**
-         * Define mouse clicked events handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseClicked
+         * Define pointer clicked events handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerClicked
          */
-        this.mouseClicked = function (e){
-            if (this.isInBundle(e.x, e.y) === false && e.isActionMask()){
+        this.pointerClicked = function (e){
+            if (this.isInBundle(e.x, e.y) === false && e.isAction()){
                 var d = this.pageIncrement;
-                if (this.type == L.VERTICAL){
-                    if(e.y < (this.bundle != null ? this.bundle.y : Math.floor(this.height / 2))) d =  -d;
+                if (this.type === L.VERTICAL){
+                    if (e.y < (this.bundle != null ? this.bundle.y : Math.floor(this.height / 2))) d =  -d;
                 }
                 else {
-                    if(e.x < (this.bundle != null ? this.bundle.x : Math.floor(this.width / 2))) d =  -d;
+                    if (e.x < (this.bundle != null ? this.bundle.x : Math.floor(this.width / 2))) d =  -d;
                 }
                 this.position.setOffset(this.position.offset + d);
             }
@@ -16827,7 +17671,7 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
                 ps2 = pkg.$getPS(this.decBt),
                 ps3 = pkg.$getPS(this.bundle);
 
-            if (this.type == L.HORIZONTAL){
+            if (this.type === L.HORIZONTAL){
                 ps1.width += (ps2.width + ps3.width);
                 ps1.height = Math.max((ps1.height > ps2.height ? ps1.height : ps2.height), ps3.height);
             }
@@ -16845,26 +17689,34 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
                 left   = this.getLeft(),
                 ew     = this.width - left - right,
                 eh     = this.height - top - bottom,
-                b      = (this.type == L.HORIZONTAL),
+                b      = (this.type === L.HORIZONTAL),
                 ps1    = pkg.$getPS(this.decBt),
                 ps2    = pkg.$getPS(this.incBt),
                 minbs  = pkg.Scroll.MIN_BUNDLE_SIZE;
 
-            this.decBt.setSize(b ? ps1.width : ew, b ? eh : ps1.height);
-            this.decBt.setLocation(left, top);
+            this.decBt.setBounds(left, top, b ? ps1.width
+                                              : ew,
+                                            b ? eh
+                                              : ps1.height);
 
-            this.incBt.setSize(b ? ps2.width : ew, b ? eh : ps2.height);
-            this.incBt.setLocation(b ? this.width - right - ps2.width
-                                     : left, b ? top : this.height - bottom - ps2.height);
+
+            this.incBt.setBounds(b ? this.width - right - ps2.width : left,
+                                 b ? top : this.height - bottom - ps2.height,
+                                 b ? ps2.width : ew,
+                                 b ? eh : ps2.height);
 
             if (this.bundle != null && this.bundle.isVisible === true){
                 var am = this.amount();
                 if (am > minbs) {
                     var bsize = Math.max(Math.min(Math.floor((this.extra * am) / this.max), am - minbs), minbs);
-                    this.bundle.setSize(b ? bsize : ew, b ? eh : bsize);
-                    this.bundle.setLocation(b ? this.value2pixel() : left, b ? top : this.value2pixel());
+                    this.bundle.setBounds(b ? this.value2pixel() : left,
+                                          b ? top : this.value2pixel(),
+                                          b ? bsize : ew,
+                                          b ? eh : bsize);
                 }
-                else this.bundle.setSize(0, 0);
+                else {
+                    this.bundle.setSize(0, 0);
+                }
             }
         };
 
@@ -16881,11 +17733,20 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
             }
         };
 
+        /**
+         * Set the scroll bar value.
+         * @param {Integer} v a scroll bar value.
+         * @method setValue
+         */
+        this.setValue = function(v){
+            this.position.setOffset(v);
+        };
+
         this.setPosition = function(p){
             if (p != this.position){
                 if (this.position != null) this.position.unbind(this);
                 this.position = p;
-                if(this.position != null){
+                if (this.position != null){
                     this.position.bind(this);
                     this.position.setMetric(this);
                     this.position.setOffset(0);
@@ -16903,8 +17764,8 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
 
     function(t) {
         t = L.$constraints(t);
-        if (t != L.VERTICAL && t != L.HORIZONTAL) {
-            throw new Error($invalidA);
+        if (t !== L.VERTICAL && t !== L.HORIZONTAL) {
+            throw new Error("" + t + "(alignment)");
         }
 
         /**
@@ -16933,9 +17794,9 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
         this.startDragLoc = Number.MAX_VALUE;
         this.$super(this);
 
-        this.add(L.CENTER, t == L.VERTICAL ? new pkg.Scroll.VBundle()    : new pkg.Scroll.HBundle());
-        this.add(L.TOP   , t == L.VERTICAL ? new pkg.Scroll.VDecButton() : new pkg.Scroll.HDecButton());
-        this.add(L.BOTTOM, t == L.VERTICAL ? new pkg.Scroll.VIncButton() : new pkg.Scroll.HIncButton());
+        this.add(L.CENTER, t === L.VERTICAL ? new pkg.Scroll.VBundle()    : new pkg.Scroll.HBundle());
+        this.add(L.TOP   , t === L.VERTICAL ? new pkg.Scroll.VDecButton() : new pkg.Scroll.HDecButton());
+        this.add(L.BOTTOM, t === L.VERTICAL ? new pkg.Scroll.VIncButton() : new pkg.Scroll.HIncButton());
 
         this.type = t;
         this.setPosition(new zebra.util.SingleColPosition(this));
@@ -16946,18 +17807,18 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
 
         ctr = L.$constraints(ctr);
 
-        if (L.CENTER == ctr) this.bundle = lw;
+        if (L.CENTER === ctr) this.bundle = lw;
         else {
-            if(L.BOTTOM == ctr){
+            if (L.BOTTOM === ctr) {
                 this.incBt = lw;
                 this.incBt.bind(this);
             }
             else {
-                if(L.TOP == ctr){
+                if (L.TOP === ctr) {
                     this.decBt = lw;
                     this.decBt.bind(this);
                 }
-                else throw new Error($invalidC);
+                else throw new Error("Invalid constraints : " + ctr);
             }
         }
     },
@@ -16992,26 +17853,27 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
 
         // scroll vertically  a large picture
         var scrollPan = new zebra.ui.ScrollPan(new zebra.ui.ImagePan("largePicture.jpg"),
-                                               zebra.layout.VERTICAL);
+                                               "vertical");
 
         // scroll horizontally a large picture
         var scrollPan = new zebra.ui.ScrollPan(new zebra.ui.ImagePan("largePicture.jpg"),
-                                               zebra.layout.HORIZONTAL);
+                                               "horizontal");
 
 
 
- * @param {zebra.ui.Panel} [c] an UI component that has to
- * be placed into scroll panel
- * @param {Integer} [barMask] a scroll bars mask that allows
- * developers to control vertical and
- * horizontal scroll bars visibility.
+ * @param {zebra.ui.Panel} [c] an UI component that has to be placed into scroll panel
+ * @param {String} [scrolls] a scroll bars that have to be shown. Use "vertical", "horizontal"
+ * or "both" string value to control scroll bars visibility. By default the value is "both"
  * @constructor
+ * @param {Boolean} [autoHide] a boolean value that says if the scrollbars have to work in
+ * auto hide mode. Pass true to switch scrollbars in auto hide mode. By default the value is
+ * false
  * @class zebra.ui.ScrollPan
  * @extends {zebra.ui.Panel}
  */
 pkg.ScrollPan = Class(pkg.Panel, [
     function $clazz() {
-        var contentPanLayout = new L.Layout([
+        this.ContentPanLayout = Class(L.Layout, [
             function $prototype() {
                 this.calcPreferredSize = function(t) {
                     return t.kids[0].getPreferredSize();
@@ -17023,7 +17885,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
             }
         ]);
 
-        var ContentPanSM = Class(pkg.ScrollManager, [
+        var SM = this.ContentPanScrollManager = Class(pkg.ScrollManager, [
             function $prototype() {
                 this.getSX = function() {
                     return this.target.x;
@@ -17039,10 +17901,11 @@ pkg.ScrollPan = Class(pkg.Panel, [
             }
         ]);
 
+        var contentPanLayout = new this.ContentPanLayout();
         this.ContentPan = Class(pkg.Panel, [
             function(c) {
                 this.$super(contentPanLayout);
-                this.scrollManager = new ContentPanSM(c);
+                this.scrollManager = new SM(c);
                 this.add(c);
             }
         ]);
@@ -17086,23 +17949,50 @@ pkg.ScrollPan = Class(pkg.Panel, [
             }
         };
 
+        /**
+         * Scroll horizontally and vertically to the given positions
+         * @param  {Integer} sx a horizontal position
+         * @param  {Integer} sy a vertical position
+         * @method scrollTo
+         */
+        this.scrollTo = function(sx, sy) {
+            this.scrollObj.scrollManager.scrollTo(sx, sy);
+        };
+
+        /**
+         * Scroll horizontally
+         * @param  {Integer} sx a position
+         * @method scrollXTo
+         */
+        this.scrollXTo = function(sx) {
+            this.scrollObj.scrollManager.scrollXTo(sx);
+        };
+
+        /**
+         * Scroll vertically
+         * @param  {Integer} sy a position
+         * @method scrollYTo
+         */
+        this.scrollYTo = function(sx, sy) {
+            this.scrollObj.scrollManager.scrollYTo(sy);
+        };
+
         this.doScroll = function(dx, dy, source) {
             var b = false;
 
-            if (dy !== 0 && this.vBar != null && this.vBar.isVisible == true) {
+            if (dy !== 0 && this.vBar != null && this.vBar.isVisible === true) {
                 var v =  this.vBar.position.offset + dy;
                 if (v >= 0) this.vBar.position.setOffset(v);
                 else        this.vBar.position.setOffset(0);
                 b = true;
             }
 
-            if (dx !== 0 && this.hBar != null && this.hBar.isVisible == true) {
+            if (dx !== 0 && this.hBar != null && this.hBar.isVisible === true) {
                 var v =  this.hBar.position.offset + dx;
                 if (v >= 0) this.hBar.position.setOffset(v);
                 else        this.hBar.position.setOffset(0);
                 b = true;
             }
-
             return b;
         };
 
@@ -17116,7 +18006,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
         this.scrolled = function (psx,psy){
             try {
                 this.validate();
-                this.isPosChangedLocked = true;
+                this.$isPosChangedLocked = true;
 
                 if (this.hBar != null) {
                     this.hBar.position.setOffset( -this.scrollObj.scrollManager.getSX());
@@ -17129,7 +18019,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
                 if (this.scrollObj.scrollManager == null) this.invalidate();
             }
             catch(e) { throw e; }
-            finally  { this.isPosChangedLocked = false; }
+            finally  { this.$isPosChangedLocked = false; }
         };
 
         this.calcPreferredSize = function (target){
@@ -17178,7 +18068,9 @@ pkg.ScrollPan = Class(pkg.Panel, [
                     }
                     sy = 0;
                 }
-                else this.vBar.setVisible(true);
+                else {
+                    this.vBar.setVisible(true);
+                }
             }
 
             if (this.hBar != null){
@@ -17193,9 +18085,9 @@ pkg.ScrollPan = Class(pkg.Panel, [
             }
 
             if (this.scrollObj.isVisible === true){
-                this.scrollObj.setLocation(left, top);
-                this.scrollObj.setSize(ww - (this.autoHide === false && this.vBar != null && this.vBar.isVisible === true ? vps.width  : 0),
-                                       hh - (this.autoHide === false && this.hBar != null && this.hBar.isVisible === true ? hps.height : 0));
+                this.scrollObj.setBounds(left, top,
+                                         ww - (this.autoHide === false && this.vBar != null && this.vBar.isVisible === true ? vps.width  : 0),
+                                         hh - (this.autoHide === false && this.hBar != null && this.hBar.isVisible === true ? hps.height : 0));
             }
 
             if (this.$interval === 0 && this.autoHide) {
@@ -17203,51 +18095,83 @@ pkg.ScrollPan = Class(pkg.Panel, [
             }
 
             if (this.hBar != null && this.hBar.isVisible === true){
-                this.hBar.setLocation(left, this.height - bottom - hps.height);
-                this.hBar.setSize(ww - (this.vBar != null && this.vBar.isVisible === true ? vps.width : 0), hps.height);
+                this.hBar.setBounds(left, this.height - bottom - hps.height,
+                                    ww - (this.vBar != null && this.vBar.isVisible === true ? vps.width : 0),
+                                    hps.height);
                 this.hBar.setMaximum(maxH);
             }
 
             if (this.vBar != null && this.vBar.isVisible === true){
-                this.vBar.setLocation(this.width - right - vps.width, top);
-                this.vBar.setSize(vps.width, hh -  (this.hBar != null && this.hBar.isVisible === true ? hps.height : 0));
+                this.vBar.setBounds(this.width - right - vps.width, top,
+                                    vps.width,
+                                    hh -  (this.hBar != null && this.hBar.isVisible === true ? hps.height : 0));
                 this.vBar.setMaximum(maxV);
             }
         };
 
         this.posChanged = function (target,prevOffset,prevLine,prevCol){
-            if (this.isPosChangedLocked === false){
+            if (this.$isPosChangedLocked === false) {
 
-                //!!! review the code below
-                if (this.autoHide) {
-                    this.$dontHide = true;
+                //  show if necessary hidden scroll bar(s)
+                if (this.autoHide === true) {
+                    // make sure autohide thread has not been initiated and make sure it makes sense
+                    // to initiate the thread (one of the scroll bar has to be visible)
                     if (this.$interval === 0 && ((this.vBar != null && this.vBar.isVisible === true) ||
                                                  (this.hBar != null && this.hBar.isVisible === true)    ))
                     {
                         var $this = this;
-                        if (this.vBar) this.vBar.toFront();
-                        if (this.hBar) this.hBar.toFront();
+
+                        // show scroll bar(s)
+                        if (this.vBar != null) this.vBar.toFront();
+                        if (this.hBar != null) this.hBar.toFront();
                         this.vrp();
-                        this.$interval = setInterval(function() {
-                            if ($this.$dontHide || ($this.vBar != null && pkg.$mouseMoveOwner == $this.vBar)||
-                                                   ($this.hBar != null && pkg.$mouseMoveOwner == $this.hBar)  )
-                            {
-                                $this.$dontHide = false;
+
+                        // pointer move should keep scroll bars visible and pointer entered exited
+                        // events have to be caught to track if pointer cursor is on a scroll
+                        // bar. add temporary listeners
+                        $this.$hiddingCounter = 2;
+                        $this.$targetBar      = null;
+                        var listener = pkg.events.bind({
+                            pointerMoved: function(e) {
+                                $this.$hiddingCounter = 1;
+                            },
+
+                            pointerExited: function(e) {
+                                $this.$targetBar = null;
+                            },
+
+                            pointerEntered: function(e) {
+                                if (e.source == $this.vBar) {
+                                    $this.$targetBar = $this.vBar;
+                                }
+                                else {
+                                    if (e.source == $this.hBar) {
+                                        $this.$targetBar = $this.hBar;
+                                        return;
+                                    }
+
+                                    $this.$targetBar = null;
+                                }
                             }
-                            else {
+                        });
+
+                        // start thread to autohide shown scroll bar(s)
+                        this.$interval = setInterval(function() {
+                            if ($this.$hiddingCounter-- === 0 && $this.$targetBar == null) {
                                 clearInterval($this.$interval);
                                 $this.$interval = 0;
+                                pkg.events.unbind(listener);
                                 $this.doLayout();
                             }
                         }, 500);
                     }
                 }
 
-                if (this.vBar != null && this.vBar.position == target) {
+                if (this.vBar != null && this.vBar.position === target) {
                     this.scrollObj.scrollManager.scrollYTo(-this.vBar.position.offset);
                 }
                 else {
-                    if (this.hBar != null) {
+                    if (this.hBar != null && this.hBar.position === target) {
                         this.scrollObj.scrollManager.scrollXTo(-this.hBar.position.offset);
                     }
                 }
@@ -17267,15 +18191,9 @@ pkg.ScrollPan = Class(pkg.Panel, [
         };
     },
 
-    function () {
-        this.$this(null, L.HORIZONTAL | L.VERTICAL);
-    },
+    function (c, scrolls, autoHide) {
+        if (scrolls == null)  scrolls = "both";
 
-    function (c) {
-        this.$this(c, L.HORIZONTAL | L.VERTICAL);
-    },
-
-    function (c, barMask){
         /**
          * Vertical scroll bar component
          * @attribute vBar
@@ -17298,24 +18216,28 @@ pkg.ScrollPan = Class(pkg.Panel, [
          */
 
         this.hBar = this.vBar = this.scrollObj = null;
-        this.isPosChangedLocked = false;
+        this.$isPosChangedLocked = false;
         this.$super();
 
-        if ((L.HORIZONTAL & barMask) > 0) {
+        if (scrolls === "both" || scrolls === "horizontal") {
             this.add(L.BOTTOM, new pkg.Scroll(L.HORIZONTAL));
         }
 
-        if ((L.VERTICAL & barMask) > 0) {
+        if (scrolls === "both" || scrolls === "vertical") {
             this.add(L.RIGHT, new pkg.Scroll(L.VERTICAL));
         }
 
         if (c != null) this.add(L.CENTER, c);
+
+        if (autoHide != null) {
+            this.setAutoHide(autoHide);
+        }
     },
 
     function insert(i,ctr,c) {
         ctr = L.$constraints(ctr);
 
-        if (L.CENTER == ctr) {
+        if (L.CENTER === ctr) {
             if (c.scrollManager == null) {
                 c = new this.$clazz.ContentPan(c);
             }
@@ -17324,11 +18246,11 @@ pkg.ScrollPan = Class(pkg.Panel, [
             c.scrollManager.bind(this);
         }
         else {
-            if (L.BOTTOM  == ctr || L.TOP == ctr){
+            if (L.BOTTOM === ctr || L.TOP === ctr){
                 this.hBar = c;
             }
             else {
-                if (L.LEFT == ctr || L.RIGHT == ctr) {
+                if (L.LEFT === ctr || L.RIGHT === ctr) {
                     this.vBar = c;
                 }
                 else  {
@@ -17345,19 +18267,19 @@ pkg.ScrollPan = Class(pkg.Panel, [
         return this.$super(i, ctr, c);
     },
 
-    function kidRemoved(index,comp){
+    function kidRemoved(index, comp){
         this.$super(index, comp);
-        if (comp == this.scrollObj){
+        if (comp === this.scrollObj){
             this.scrollObj.scrollManager.unbind(this);
             this.scrollObj = null;
         }
         else {
-            if (comp == this.hBar){
+            if (comp === this.hBar){
                 this.hBar.position.unbind(this);
                 this.hBar = null;
             }
             else {
-                if (comp == this.vBar){
+                if (comp === this.vBar){
                     this.vBar.position.unbind(this);
                     this.vBar = null;
                 }
@@ -17460,15 +18382,17 @@ pkg.Tabs = Class(pkg.Panel, [
                 ]);
             },
 
-            function() {
-                this.$this("");
-            },
-
-            function(caption) {
-                this.$this(null, caption);
-            },
-
             function(icon, caption) {
+                if (arguments.length === 0) {
+                    caption = "";
+                }
+                else {
+                    if (arguments.length === 1) {
+                        caption = icon;
+                        icon = null;
+                    }
+                }
+
                 var tp = new this.$clazz.TabPan();
                 this.$super(tp);
                 this.owner = null;
@@ -17536,25 +18460,20 @@ pkg.Tabs = Class(pkg.Panel, [
             },
 
             /**
-             * Set the given tab caption. The caption is set for both
-             * tab states: selected and not selected
-             * @param {String} s the tab caption
-             * @method setCaption
-             */
-            function setCaption(s) {
-                this.setCaption(true, s);
-                this.setCaption(false, s);
-            },
-
-            /**
-             * Set the given tab caption for the specified tab state.
-             * @param {Boolean} b the tab state. true means selected state.
+             * Set the given tab caption for the specified tab or both - selected and not selected - states.
+             * @param {Boolean} [b] the tab state. true means selected state.
              * @param {String} s the tab caption
              * @method setCaption
              */
             function setCaption(b, s) {
-                this.getCaptionPan().view.setCaption(this.$toId(b), s);
-                this.vrp();
+                if (arguments.length === 1) {
+                    this.setCaption(true, b);
+                    this.setCaption(false, b);
+                }
+                else {
+                    this.getCaptionPan().view.setCaption(this.$toId(b), s);
+                    this.vrp();
+                }
             },
 
             /**
@@ -17568,48 +18487,42 @@ pkg.Tabs = Class(pkg.Panel, [
             },
 
             /**
-             * Set the caption text color for both selected and not selected states.
-             * @param {String} c the tab caption
-             * @method setColor
-             */
-            function setColor(c) {
-                setColor(true, c);
-                setColor(false, c);
-            },
-
-            /**
-             * Set the given tab caption text color for the specified tab state.
-             * @param {Boolean} b the tab state. true means selected state.
+             * Set the given tab caption text color for the specified tab or both
+             * selected and not selected states.
+             * @param {Boolean} [b] the tab state. true means selected state.
              * @param {String} c the tab caption
              * @method setColor
              */
             function setColor(b, c) {
-                var v = this.getCaptionPan().view.views[this.$toId(b)];
-                if (v != null) {
-                    v.setColor(c);
-                    this.vrp();
+                if (arguments.length === 1) {
+                    this.setColor(true, b);
+                    this.setColor(false, b);
+                }
+                else {
+                    var v = this.getCaptionPan().view.views[this.$toId(b)];
+                    if (v != null) {
+                        v.setColor(c);
+                        this.vrp();
+                    }
                 }
             },
 
             /**
-             * Set the given tab caption text font for both selected and not selected states
-             * @param {zebra.ui.Font} f the tab text font
-             * @method setFont
-             */
-            function setFont(f) {
-                setFont(true, f);
-                setFont(false, f);
-            },
-
-            /**
-             * Set the given tab caption text font for the specified state.
-             * @param {Boolean} b the tab state. true means selected state.
+             * Set the given tab caption text font for the specified or both
+             * selected not slected states.
+             * @param {Boolean} [b] the tab state. true means selected state.
              * @param {zebra.ui.Font} f the tab text font
              * @method setFont
              */
             function setFont(b, f) {
-                this.getCaptionPan().view.setFont(this.$toId(b), f);
-                this.vrp();
+                if (arguments.length === 1) {
+                    this.setFont(true, b);
+                    this.setFont(false, b);
+                }
+                else {
+                    this.getCaptionPan().view.setFont(this.$toId(b), f);
+                    this.vrp();
+                }
             },
 
             function getCaptionPan() {
@@ -17656,11 +18569,11 @@ pkg.Tabs = Class(pkg.Panel, [
         this.canHaveFocus = true;
 
         /**
-         * Define mouse moved event handler
-         * @param  {zebra.ui.MouseEvent} e a key event
-         * @method mouseMoved
+         * Define pointer moved event handler
+         * @param  {zebra.ui.PointerEvent} e a key event
+         * @method pointerMoved
          */
-        this.mouseMoved = function(e) {
+        this.pointerMoved = function(e) {
             var i = this.getTabAt(e.x, e.y);
             if (this.overTab != i) {
                 this.overTab = i;
@@ -17672,11 +18585,11 @@ pkg.Tabs = Class(pkg.Panel, [
         };
 
         /**
-         * Define mouse drag ended event handler
-         * @param  {zebra.ui.MouseEvent} e a key event
-         * @method mouseDragEnded
+         * Define pointer drag ended event handler
+         * @param  {zebra.ui.PointerEvent} e a key event
+         * @method pointerDragEnded
          */
-        this.mouseDragEnded = function(e) {
+        this.pointerDragEnded = function(e) {
             var i = this.getTabAt(e.x, e.y);
             if (this.overTab != i) {
                 this.overTab = i;
@@ -17688,11 +18601,11 @@ pkg.Tabs = Class(pkg.Panel, [
         };
 
         /**
-         * Define mouse exited event handler
-         * @param  {zebra.ui.MouseEvent} e a key event
-         * @method mouseExited
+         * Define pointer exited event handler
+         * @param  {zebra.ui.PointerEvent} e a key event
+         * @method pointerExited
          */
-        this.mouseExited = function(e) {
+        this.pointerExited = function(e) {
             if (this.overTab >= 0) {
                 this.overTab = -1;
                 if (this.views.tabover != null) {
@@ -17719,7 +18632,7 @@ pkg.Tabs = Class(pkg.Panel, [
         };
 
         this.getTitleInfo = function(){
-            var b   = (this.orient == L.LEFT || this.orient == L.RIGHT),
+            var b   = (this.orient === L.LEFT || this.orient === L.RIGHT),
                 res = b ? { x      : this.tabAreaX,
                             y      : 0,
                             width  : this.tabAreaWidth,
@@ -17815,14 +18728,14 @@ pkg.Tabs = Class(pkg.Panel, [
                 v       = this.pages[pageIndex * 2],
                 ps      = v.getPreferredSize();
 
-            if (this.selectedIndex == pageIndex && tabon != null) {
+            if (this.selectedIndex === pageIndex && tabon != null) {
                 tabon.paint(g, b.x, b.y, b.width, b.height, page);
             }
             else {
                 tab.paint(g, b.x, b.y, b.width, b.height, page);
             }
 
-            if (this.overTab >= 0 && this.overTab == pageIndex && tabover != null) {
+            if (this.overTab >= 0 && this.overTab === pageIndex && tabover != null) {
                 tabover.paint(g, b.x, b.y, b.width, b.height, page);
             }
 
@@ -17847,7 +18760,7 @@ pkg.Tabs = Class(pkg.Panel, [
 
         this.calcPreferredSize = function(target){
             var max = L.getMaxPreferredSize(target);
-            if (this.orient == L.BOTTOM || this.orient == L.TOP){
+            if (this.orient === L.BOTTOM || this.orient === L.TOP){
                 max.width = Math.max(max.width, 2 * this.sideSpace + this.tabAreaWidth);
                 max.height += this.tabAreaHeight + this.sideSpace;
             }
@@ -17859,23 +18772,23 @@ pkg.Tabs = Class(pkg.Panel, [
         };
 
         this.doLayout = function(target){
-            var right  = this.orient == L.RIGHT  ? this.right  : this.getRight(),
-                top    = this.orient == L.TOP    ? this.top    : this.getTop(),
-                bottom = this.orient == L.BOTTOM ? this.bottom : this.getBottom(),
-                left   = this.orient == L.LEFT   ? this.left   : this.getLeft(),
-                b      = (this.orient == L.TOP || this.orient == L.BOTTOM);
+            var right  = this.orient === L.RIGHT  ? this.right  : this.getRight(),
+                top    = this.orient === L.TOP    ? this.top    : this.getTop(),
+                bottom = this.orient === L.BOTTOM ? this.bottom : this.getBottom(),
+                left   = this.orient === L.LEFT   ? this.left   : this.getLeft(),
+                b      = (this.orient === L.TOP || this.orient === L.BOTTOM);
 
             if (b) {
                 this.repaintX = this.tabAreaX = left ;
-                this.repaintY = this.tabAreaY = (this.orient == L.TOP) ? top : this.height - bottom - this.tabAreaHeight;
-                if (this.orient == L.BOTTOM) {
+                this.repaintY = this.tabAreaY = (this.orient === L.TOP) ? top : this.height - bottom - this.tabAreaHeight;
+                if (this.orient === L.BOTTOM) {
                     this.repaintY -= (this.border != null ? this.border.getBottom() : 0);
                 }
             }
             else {
                 this.repaintX = this.tabAreaX = (this.orient == L.LEFT ? left : this.width - right - this.tabAreaWidth);
                 this.repaintY = this.tabAreaY = top ;
-                if (this.orient == L.RIGHT) {
+                if (this.orient === L.RIGHT) {
                     this.repaintX -= (this.border != null ? this.border.getRight() : 0);
                 }
             }
@@ -17895,14 +18808,14 @@ pkg.Tabs = Class(pkg.Panel, [
                     xx += r.width;
                     if (i == this.selectedIndex) {
                         xx -= sp;
-                        if (this.orient == L.BOTTOM) r.y -= (this.border != null ? this.border.getBottom() : 0);
+                        if (this.orient === L.BOTTOM) r.y -= (this.border != null ? this.border.getBottom() : 0);
                     }
                 }
                 else {
                     yy += r.height;
                     if (i == this.selectedIndex) {
                         yy -= sp;
-                        if (this.orient == L.RIGHT) r.x -= (this.border != null ? this.border.getRight() : 0);
+                        if (this.orient === L.RIGHT) r.x -= (this.border != null ? this.border.getRight() : 0);
                     }
                 }
             }
@@ -17912,12 +18825,12 @@ pkg.Tabs = Class(pkg.Panel, [
                 var r = this.getTabBounds(this.selectedIndex), dt = 0;
                 if (b) {
                     r.x -= this.sideSpace;
-                    r.y -= ((this.orient == L.TOP) ? this.sideSpace : 0);
+                    r.y -= ((this.orient === L.TOP) ? this.sideSpace : 0);
                     dt = (r.x < left) ? left - r.x
                                       : (r.x + r.width > this.width - right) ? this.width - right - r.x - r.width : 0;
                 }
                 else {
-                    r.x -= (this.orient == L.LEFT) ? this.sideSpace : 0;
+                    r.x -= (this.orient === L.LEFT) ? this.sideSpace : 0;
                     r.y -= this.sideSpace;
                     dt = (r.y < top) ? top - r.y
                                      : (r.y + r.height > this.height - bottom) ? this.height - bottom - r.y - r.height : 0;
@@ -17932,18 +18845,18 @@ pkg.Tabs = Class(pkg.Panel, [
 
             for(var i = 0;i < count; i++){
                 var l = this.kids[i];
-                if (i === this.selectedIndex){
+                if (i === this.selectedIndex) {
                     if (b) {
-                        l.setSize(this.width - left - right - 2 * this.hgap,
-                                  this.height - this.repaintHeight - top - bottom - 2 * this.vgap);
-                        l.setLocation(left + this.hgap,
-                                     ((this.orient == L.TOP) ? top + this.repaintHeight : top) + this.vgap);
+                        l.setBounds(left + this.hgap,
+                                    ((this.orient === L.TOP) ? top + this.repaintHeight : top) + this.vgap,
+                                    this.width - left - right - 2 * this.hgap,
+                                    this.height - this.repaintHeight - top - bottom - 2 * this.vgap);
                     }
                     else {
-                        l.setSize(this.width - this.repaintWidth - left - right - 2 * this.hgap,
-                                  this.height - top - bottom - 2 * this.vgap);
-                        l.setLocation(((this.orient == L.LEFT) ? left + this.repaintWidth : left) + this.hgap,
-                                      top + this.vgap);
+                        l.setBounds(((this.orient === L.LEFT) ? left + this.repaintWidth : left) + this.hgap,
+                                    top + this.vgap,
+                                    this.width - this.repaintWidth - left - right - 2 * this.hgap,
+                                    this.height - top - bottom - 2 * this.vgap);
                     }
                 }
                 else {
@@ -17962,7 +18875,7 @@ pkg.Tabs = Class(pkg.Panel, [
                 this.tabAreaHeight = this.tabAreaWidth = 0;
 
                 var bv   = this.views.tab,
-                    b    = (this.orient == L.LEFT || this.orient == L.RIGHT),
+                    b    = (this.orient === L.LEFT || this.orient === L.RIGHT),
                     max  = 0,
                     hadd = bv.getLeft() + bv.getRight(),
                     vadd = bv.getTop()  + bv.getBottom();
@@ -17995,15 +18908,15 @@ pkg.Tabs = Class(pkg.Panel, [
                     this.tabAreaWidth   = max + this.sideSpace;
                     this.tabAreaHeight += (2 * this.sideSpace);
                     this.repaintHeight  = this.tabAreaHeight;
-                    this.repaintWidth   = this.tabAreaWidth + (this.border != null ? (b == L.LEFT ? this.border.getLeft()
-                                                                                                  : this.border.getRight())
+                    this.repaintWidth   = this.tabAreaWidth + (this.border != null ? (b === L.LEFT ? this.border.getLeft()
+                                                                                                   : this.border.getRight())
                                                                                    : 0);
                 }
                 else {
                     this.tabAreaWidth += (2 * this.sideSpace);
                     this.tabAreaHeight = this.sideSpace + max;
                     this.repaintWidth  = this.tabAreaWidth;
-                    this.repaintHeight = this.tabAreaHeight + (this.border != null ? (b  == L.TOP ? this.border.getTop()
+                    this.repaintHeight = this.tabAreaHeight + (this.border != null ? (b === L.TOP ? this.border.getTop()
                                                                                                   : this.border.getBottom())
                                                                                    : 0);
                 }
@@ -18013,13 +18926,13 @@ pkg.Tabs = Class(pkg.Panel, [
                     var r = this.getTabBounds(this.selectedIndex);
                     if (b) {
                         r.height += 2 * this.sideSpace;
-                        r.width += this.sideSpace +  (this.border != null ? (b == L.LEFT ? this.border.getLeft()
-                                                                                         : this.border.getRight())
+                        r.width += this.sideSpace +  (this.border != null ? (b === L.LEFT ? this.border.getLeft()
+                                                                                          : this.border.getRight())
                                                                           : 0);
                     }
                     else {
-                        r.height += this.sideSpace + (this.border != null ? (b == L.TOP ? this.border.getTop()
-                                                                                        : this.border.getBottom())
+                        r.height += this.sideSpace + (this.border != null ? (b === L.TOP ? this.border.getTop()
+                                                                                         : this.border.getBottom())
                                                                           : 0);
                         r.width  += 2 * this.sideSpace;
                     }
@@ -18050,7 +18963,7 @@ pkg.Tabs = Class(pkg.Panel, [
                     }
                 }
 
-                for(var i = 0; i < Math.floor(this.pages.length / 2); i++ ) {
+                for(var i = 0; i < Math.floor(this.pages.length / 2); i++) {
                     if (this.selectedIndex != i) {
                         var tb = this.getTabBounds(i);
                         if (x >= tb.x && y >= tb.y && x < tb.x + tb.width && y < tb.y + tb.height) {
@@ -18085,12 +18998,12 @@ pkg.Tabs = Class(pkg.Panel, [
         };
 
         /**
-         * Define mouse clicked  event handler
-         * @param  {zebra.ui.MouseEvent} e a key event
-         * @method mouseClicked
+         * Define pointer clicked  event handler
+         * @param  {zebra.ui.PointerEvent} e a key event
+         * @method pointerClicked
          */
-        this.mouseClicked = function(e){
-            if (e.isActionMask()){
+        this.pointerClicked = function(e){
+            if (e.isAction()){
                 var index = this.getTabAt(e.x, e.y);
                 if (index >= 0 && this.isTabEnabled(index)) this.select(index);
             }
@@ -18161,7 +19074,7 @@ pkg.Tabs = Class(pkg.Panel, [
             o = L.$constraints(o);
 
             if (o != L.TOP && o != L.BOTTOM && o != L.LEFT && o != L.RIGHT) {
-                throw new Error($invalidA);
+                throw new Error("" + o);
             }
 
             if (this.orient != o){
@@ -18196,7 +19109,7 @@ pkg.Tabs = Class(pkg.Panel, [
          *
          *      {
          *         "tab"    : <view to render not selected tab page>,
-         *         "tabover": <view to render a tab page when mouse is over>
+         *         "tabover": <view to render a tab page when pointer is over>
          *         "tabon"  : <a view to render selected tab page>
          *         "marker" : <a marker view to be rendered around tab page title>
          *      }
@@ -18206,11 +19119,9 @@ pkg.Tabs = Class(pkg.Panel, [
          */
     },
 
-    function () {
-        this.$this(L.TOP);
-    },
+    function(o) {
+        if (arguments.length === 0) o = L.TOP;
 
-    function (o){
         /**
          * Selected tab page index
          * @attribute selectedIndex
@@ -18318,7 +19229,7 @@ pkg.Tabs = Class(pkg.Panel, [
 
     function setSize(w,h){
         if (this.width != w || this.height != h){
-            if (this.orient == L.RIGHT || this.orient == L.BOTTOM) this.tabAreaX =  -1;
+            if (this.orient === L.RIGHT || this.orient === L.BOTTOM) this.tabAreaX =  -1;
             this.$super(w, h);
         }
     }
@@ -18370,7 +19281,7 @@ pkg.Slider = Class(pkg.Panel, [
                                                   this.getBottom() - bs.height);
         };
 
-        this.mouseDragged = function(e){
+        this.pointerDragged = function(e){
             if(this.dragged) {
                 this.setValue(this.findNearest(e.x + (this.orient == L.HORIZONTAL ? this.correctDt : 0),
                                                e.y + (this.orient == L.HORIZONTAL ? 0 : this.correctDt)));
@@ -18466,7 +19377,7 @@ pkg.Slider = Class(pkg.Panel, [
                 bnv.paint(g, bx, this.getBundleLoc(this.value), bs.width, bs.height, this);
             }
 
-            if (this.hasFocus() && this.views.marker) {
+            if (this.hasFocus() && this.views.marker != null) {
                 this.views.marker.paint(g, left, top, w + 2, h + 2, this);
             }
         };
@@ -18644,8 +19555,8 @@ pkg.Slider = Class(pkg.Panel, [
             }
         };
 
-        this.mousePressed = function (e){
-            if (e.isActionMask()){
+        this.pointerPressed = function (e){
+            if (e.isAction()){
                 var x = e.x, y = e.y, bb = this.getBundleBounds(this.value);
                 if (x < bb.x || y < bb.y || x >= bb.x + bb.width || y >= bb.y + bb.height) {
                     var l = ((this.orient == L.HORIZONTAL) ? x : y), v = this.loc2value(l);
@@ -18659,7 +19570,7 @@ pkg.Slider = Class(pkg.Panel, [
             }
         };
 
-        this.mouseDragStarted = function(e){
+        this.pointerDragStarted = function(e){
             var r = this.getBundleBounds(this.value);
 
             if (e.x >= r.x && e.y >= r.y &&
@@ -18672,7 +19583,7 @@ pkg.Slider = Class(pkg.Panel, [
             }
         };
 
-        this.mouseDragEnded = function(e) {
+        this.pointerDragEnded = function(e) {
             this.dragged = false;
         };
 
@@ -18682,11 +19593,8 @@ pkg.Slider = Class(pkg.Panel, [
         };
     },
 
-    function() {
-        this.$this(L.HORIZONTAL);
-    },
-
-    function (o){
+    function (o) {
+        if (o == null) o = L.HORIZONTAL;
         this._ = new Listeners();
         this.views = {};
         this.isShowScale = this.isShowTitle = true;
@@ -18752,16 +19660,17 @@ pkg.Slider = Class(pkg.Panel, [
         }
     },
 
-    function setValues(min,max,intervals,roughStep,exactStep){
-        if(roughStep <= 0 || exactStep < 0 || min >= max ||
-           min + roughStep > max || min + exactStep > max  )
+    function setValues(min,max,intervals,roughStep,exactStep) {
+
+        if (roughStep <= 0 || exactStep < 0 || min >= max ||
+            min + roughStep > max || min + exactStep > max  )
         {
-            throw new Error("Invalid values");
+            throw new Error("[" + min + "," + max + "], " + roughStep + "," + exactStep);
         }
 
         for(var i = 0, start = min;i < intervals.length; i ++ ){
             start += intervals[i];
-            if(start > max || intervals[i] < 0) throw new Error();
+            if (start > max || intervals[i] < 0) throw new Error();
         }
 
         this.min = min;
@@ -18794,9 +19703,8 @@ pkg.Slider.prototype.setViews = pkg.$ViewsSetter;
  * @extends {zebra.ui.Panel}
  */
 pkg.StatusBar = Class(pkg.Panel, [
-    function () { this.$this(2); },
-
     function (gap){
+        if (arguments.length === 0) gap = 2;
         this.setPadding(gap, 0, 0, 0);
         this.$super(new L.PercentLayout(L.HORIZONTAL, gap));
     },
@@ -19002,9 +19910,9 @@ pkg.VideoPan = Class(pkg.Panel,  [
                 this.video.play();
 
                 var $this = this;
-                window.requestAFrame(function anim() {
+                zebkit.web.$task(function anim() {
                     if ($this.isReady === true) $this.repaint();
-                    if ($this.isPlaying === true) window.requestAFrame(anim);
+                    if ($this.isPlaying === true) zebkit.web.$task(anim);
                 });
             }
         };
@@ -19044,144 +19952,6 @@ pkg.VideoPan = Class(pkg.Panel,  [
     }
 ]);
 
-pkg.ArrowView = Class(View, [
-    function $prototype() {
-        this[''] = function (d, col, w) {
-            this.direction = d == null ? L.BOTTOM : L.$constraints(d);
-            this.color = col == null ? "black" : col;
-            this.width = this.height = (w == null ? 6 : w);
-        };
-
-        this.paint = function(g, x, y, w, h, d) {
-            var s = Math.min(w, h);
-
-            x = x + (w-s)/2;
-            y = y + (h-s)/2;
-
-            g.setColor(this.color);
-            g.beginPath();
-            if (L.BOTTOM == this.direction) {
-                g.moveTo(x, y);
-                g.lineTo(x + s, y);
-                g.lineTo(x + s/2, y + s);
-                g.lineTo(x, y);
-            }
-            else {
-                if (L.TOP == this.direction) {
-                    g.moveTo(x, y + s);
-                    g.lineTo(x + s, y + s);
-                    g.lineTo(x + s/2, y);
-                    g.lineTo(x, y + s);
-                }
-                else {
-                    if (L.LEFT == this.direction) {
-                        g.moveTo(x + s, y);
-                        g.lineTo(x + s, y + s);
-                        g.lineTo(x, y + s/2);
-                        g.lineTo(x + s, y);
-                    }
-                    else {
-                        g.moveTo(x, y);
-                        g.lineTo(x, y + s);
-                        g.lineTo(x + s, y + s/2);
-                        g.lineTo(x, y);
-                    }
-                }
-            }
-            g.fill();
-        };
-
-        this.getPreferredSize = function () {
-            return { width:this.width, height:this.height };
-        };
-    }
-]);
-
-pkg.CheckboxView = Class(View, [
-    function $prototype() {
-        this[''] = function(color) {
-            this.color = (color != null ? color : "rgb(65, 131, 255)");
-        };
-
-        this.paint = function(g,x,y,w,h,d){
-            g.beginPath();
-            g.strokeStyle = this.color;
-            g.lineWidth = 2;
-            g.moveTo(x + 1, y + 2);
-            g.lineTo(x + w - 3, y + h - 3);
-            g.stroke();
-            g.beginPath();
-            g.moveTo(x + w - 2, y + 2);
-            g.lineTo(x + 2, y + h - 2);
-            g.stroke();
-            g.lineWidth = 1;
-        };
-    }
-]);
-
-pkg.BunldeView = Class(View, [
-    function $prototype() {
-        this[''] = function(dir, color) {
-            this.color     = (color != null ? color : "#AAAAAA");
-            this.direction = (dir   != null ? L.$constraints(dir) : L.VERTICAL);
-        };
-
-        this.paint =  function(g,x,y,w,h,d) {
-            g.beginPath();
-            if (this.direction == L.VERTICAL) {
-                var r = w/2;
-                g.arc(x + r, y + r, r, Math.PI, 0, false);
-                g.lineTo(x + w, y + h - r);
-                g.arc(x + r, y + h - r, r, 0, Math.PI, false);
-                g.lineTo(x, y + r);
-            }
-            else {
-                var r = h/2;
-                g.arc(x + r, y + r, r, 0.5 * Math.PI, 1.5 * Math.PI, false);
-                g.lineTo(x + w - r, y);
-                g.arc(x + w - r, y + h - r, r, 1.5*Math.PI, 0.5*Math.PI, false);
-                g.lineTo(x + r, y + h);
-            }
-            g.setColor(this.color);
-            g.fill();
-        };
-    }
-]);
-
-/**
- * The radio button ticker view.
- * @class  zebra.ui.RadioView
- * @extends zebra.ui.View
- * @constructor
- * @param {String} [col1] color one to render the outer cycle
- * @param {String} [col2] color tow to render the inner cycle
- */
-pkg.RadioView = Class(View, [
-    function() {
-        this.$this("rgb(15, 81, 205)", "rgb(65, 131, 255)");
-    },
-
-    function(col1, col2) {
-        this.color1 = col1;
-        this.color2 = col2;
-    },
-
-    function $prototype() {
-        this.paint = function(g,x,y,w,h,d){
-            g.beginPath();
-
-            g.fillStyle = this.color1;
-            g.arc(Math.floor(x + w/2), Math.floor(y + h/2) , Math.floor(w/3 - 0.5), 0, 2* Math.PI, 1, false);
-            g.fill();
-
-            g.beginPath();
-            g.fillStyle = this.color2;
-            g.arc(Math.floor(x + w/2), Math.floor(y + h/2) , Math.floor(w/4 - 0.5), 0, 2* Math.PI, 1, false);
-            g.fill();
-        };
-    }
-]);
-
 /**
  * Mobile scroll manager class. Implements inertial scrolling in zebra mobile application.
  * @class zebra.ui.MobileScrollMan
@@ -19195,20 +19965,20 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
         this.identifier = -1;
 
         /**
-         * Define mouse drag started events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragStarted
+         * Define pointer drag started events handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerDragStarted
          */
-        this.mouseDragStarted = function(e) {
-            if (e.touchCounter == 1 && e.touch != null) {
+        this.pointerDragStarted = function(e) {
+            if (e.touchCounter === 1 && e.pointerType === "touch") {
                 this.identifier = e.identifier;  // finger
                 var owner = e.source;
 
-                while(owner != null && instanceOf(owner, pkg.ScrollPan) === false) {
+                while(owner != null && owner.doScroll == null) {
                     owner = owner.parent;
                 }
 
-                if (owner != null && owner.mouseDragged == null) {
+                if (owner != null && owner.pointerDragged == null) {
                     this.target = owner;
                     this.sx = e.x;
                     this.sy = e.y;
@@ -19217,28 +19987,22 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
         };
 
         /**
-         * Define mouse dragged events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragged
+         * Define pointer dragged events handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerDragged
          */
-        this.mouseDragged = function(e) {
-            if (e.touchCounter   == 1 &&
+        this.pointerDragged = function(e) {
+            if (e.touchCounter   === 1 &&
                 this.target      != null &&
-                this.identifier  == e.identifier)
+                this.identifier  === e.identifier)
             {
-                var d = e.touch.direction;
-                if (d == L.BOTTOM || d == L.TOP) {
-                    if (this.target.vBar != null && this.target.vBar.isVisible === true) {
-                        var bar = this.target.vBar;
-                        bar.position.setOffset(bar.position.offset - e.y + this.sy);
-                    }
+                var d = e.direction;
+                if (d === "bottom" || d === "top") {
+                    this.target.doScroll(0, this.sy - e.y, "touch");
                 }
                 else {
-                    if (d == L.LEFT || d == L.RIGHT) {
-                        if (this.target.hBar != null && this.target.hBar.isVisible === true) {
-                            var bar = this.target.hBar;
-                            bar.position.setOffset(bar.position.offset - e.x + this.sx);
-                        }
+                    if (d === "left" || d === "right") {
+                        this.target.doScroll(this.sx - e.x, 0, "touch");
                     }
                 }
 
@@ -19248,30 +20012,31 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
         };
 
         /**
-         * Define mouse drag ended events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragEnded
+         * Define pointer drag ended events handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerDragEnded
          */
-        this.mouseDragEnded = function(e) {
+        this.pointerDragEnded = function(e) {
             if (this.target != null &&
                 this.timer  == null &&
-                this.identifier == e.identifier &&
-                (e.touch.direction == L.BOTTOM || e.touch.direction == L.TOP) &&
+                this.identifier === e.identifier &&
+                (e.direction === "bottom" || e.direction === "top") &&
                 this.target.vBar != null &&
                 this.target.vBar.isVisible === true &&
-                e.touch.dy !== 0)
+                e.touch.dy !== 0)  // TODO: what is it ?
             {
-                this.$dt = 2 * e.touch.dy;
+                this.$dt = 2 * e.touch.dy;   // TODO: what is it ?
                 var $this = this, bar = this.target.vBar, k = 0;
 
                 this.timer = setInterval(function() {
                     var o = bar.position.offset;
 
                     bar.position.setOffset(o - $this.$dt);
-                    if (++k%5 === 0) {
+                    if (++k % 5 === 0) {
                         $this.$dt = Math.floor($this.$dt/2);
                     }
-                    if (o == bar.position.offset || ($this.$dt >= -1  &&  $this.$dt <= 1)) {
+
+                    if (o === bar.position.offset || ($this.$dt >= -1  &&  $this.$dt <= 1)) {
                         clearInterval($this.timer);
                         $this.timer = $this.target = null;
                     }
@@ -19280,11 +20045,11 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
         };
 
         /**
-         * Define mouse pressed events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mousePressed
+         * Define pointer pressed events handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerPressed
          */
-        this.mousePressed = function(e) {
+        this.pointerPressed = function(e) {
             if (this.timer != null) {
                 clearInterval(this.timer);
                 this.timer = null;
@@ -19293,6 +20058,7 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
         };
     }
 ]);
+
 
 /**
  * @for
@@ -19305,7 +20071,7 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
 /**
  * @module ui
  */
-var ME = pkg.MouseEvent, KE = pkg.KeyEvent, PO = zebra.util.Position;
+var KE = pkg.KeyEvent;
 
 /**
  * Text field UI component. The component is designed to enter single line, multi lines or password text.
@@ -19331,6 +20097,9 @@ pkg.TextField = Class(pkg.Label, [
     },
 
     function $prototype() {
+        this.startLine = this.startCol = this.endLine = this.endCol = this.curX = 0;
+        this.startOff = this.endOff = -1;
+
         /**
          * Selection color
          * @attribute  selectionColor
@@ -19352,7 +20121,6 @@ pkg.TextField = Class(pkg.Label, [
         this.blinkMeCounter = 0;
 
         this.cursorType = pkg.Cursor.TEXT;
-
 
         /**
          * Text alignment
@@ -19397,7 +20165,7 @@ pkg.TextField = Class(pkg.Label, [
         };
 
         this.setTextAlign = function(a) {
-            a = zebra.layout.$constraints(a)
+            a = zebra.layout.$constraints(a);
             if (this.textAlign != a) {
                 this.textAlign = a;
                 this.vrp();
@@ -19471,14 +20239,14 @@ pkg.TextField = Class(pkg.Label, [
             if (x >= 0 && y >= 0 && lines > 0) {
                 var lh = this.view.getLineHeight(),
                     li = this.view.getLineIndent(),
-                    row = (y < 0) ? 0 : ~~((y + li) / (lh + li)) + ((y + li) % (lh + li) > li ? 1 : 0) -1;
+                    row = (y < 0) ? 0 : Math.floor((y + li) / (lh + li)) + ((y + li) % (lh + li) > li ? 1 : 0) -1;
 
                 if (row < lines && row >= 0) {
                     var s    = this.view.getLine(row),
                         pdt  = 1000000,
                         pcol = -1;
 
-                    for(var col = ~~((x / this.view.lineWidth(row)) * s.length); col >= 0 && col <= s.length;) {
+                    for(var col = Math.floor((x / this.view.calcLineWidth(row)) * s.length); col >= 0 && col <= s.length;) {
                         var l  = this.view.font.charsWidth(s, 0, col),
                             dt = Math.abs(l - x);
 
@@ -19503,30 +20271,30 @@ pkg.TextField = Class(pkg.Label, [
             var ln = t.getLine(line);
             col += d;
             if (col < 0 && line > 0) {
-                return [line - 1, t.getLine(line - 1).length];
+                return { row: line - 1, col : t.getLine(line - 1).length };
             }
             else {
-                if (col > ln.length && line < t.getLines() - 1) return [line + 1, 0];
+                if (col > ln.length && line < t.getLines() - 1) return { row : line + 1, col : 0 };
             }
 
             var b = false;
             for(; col >= 0 && col < ln.length; col += d){
                 if (b) {
                     if (d > 0) {
-                        if (zebra.util.isLetter(ln[col])) return [line, col];
+                        if (zebra.util.isLetter(ln[col])) return { row:line, col:col };
                     }
                     else {
-                        if (!zebra.util.isLetter(ln[col])) return [line, col + 1];
+                        if (!zebra.util.isLetter(ln[col])) return { row : line, col: col + 1 };
                     }
                 }
                 else  {
                     b = d > 0 ? !zebra.util.isLetter(ln[col]) : zebra.util.isLetter(ln[col]);
                 }
             }
-            return (d > 0 ? [line, ln.length ]: [line, 0]);
+            return (d > 0 ? { row: line, col : ln.length }: { row : line, col : 0 } );
         };
 
-        // accumulate text model lines into string by the given start and end offsets
+        // collect text model lines into string by the given start and end offsets
         // r     - text view
         // start - start offset
         // end   - end offset
@@ -19564,13 +20332,17 @@ pkg.TextField = Class(pkg.Label, [
         };
 
         this.keyTyped = function(e) {
-            if (this.isEditable === true && e.isControlPressed() == false && e.isCmdPressed() == false) {
+            if (this.isEditable === true && e.ctrlKey === false && e.metaKey === false) {
                 this.write(this.position.offset, e.ch);
             }
         };
 
-        this.selectAll_command = function() {
+        this.selectAll = function() {
             this.select(0, this.getMaxOffset());
+        };
+
+        this.selectAll_command = function() {
+            this.selectAll();
         };
 
         this.nextWord_command = function(b, d) {
@@ -19578,20 +20350,20 @@ pkg.TextField = Class(pkg.Label, [
             var p = this.findNextWord(this.view.target, this.position.currentLine,
                                                         this.position.currentCol, d);
             if (p != null) {
-                this.position.setRowCol(p[0], p[1]);
+                this.position.setRowCol(p.row, p.col);
             }
         };
 
         this.nextPage_command = function(b, d) {
             if (b) this.startSelection();
-            this.position.seekLineTo(d == 1 ? PO.DOWN : PO.UP, this.pageSize());
+            this.position.seekLineTo(d == 1 ? "down" : "up", this.pageSize());
         };
 
         this.keyPressed = function(e) {
             if (this.isFiltered(e) === false)  {
                 var position    = this.position,
                     col         = position.currentCol,
-                    isShiftDown = e.isShiftPressed(),
+                    isShiftDown = e.shiftKey,
                     line        = position.currentLine,
                     foff        = 1;
 
@@ -19600,23 +20372,23 @@ pkg.TextField = Class(pkg.Label, [
                 }
 
                 switch(e.code) {
-                    case KE.DOWN : position.seekLineTo(PO.DOWN);break;
-                    case KE.UP   : position.seekLineTo(PO.UP);break;
+                    case KE.DOWN : position.seekLineTo("down");break;
+                    case KE.UP   : position.seekLineTo("up");break;
                     case KE.LEFT : foff *= -1;
                     case KE.RIGHT:
-                        if (e.isControlPressed() === false && e.isCmdPressed() === false) {
+                        if (e.ctrlKey === false && e.metaKey === false) {
                             position.seek(foff);
                         }
                         break;
                     case KE.END:
-                        if (e.isControlPressed()) {
-                            position.seekLineTo(PO.DOWN, this.getLines() - line - 1);
+                        if (e.ctrlKey) {
+                            position.seekLineTo("down", this.getLines() - line - 1);
                         }
-                        else position.seekLineTo(PO.END);
+                        else position.seekLineTo("end");
                         break;
                     case KE.HOME:
-                        if (e.isControlPressed()) position.seekLineTo(PO.UP, line);
-                        else position.seekLineTo(PO.BEG);
+                        if (e.ctrlKey) position.seekLineTo("up", line);
+                        else position.seekLineTo("begin");
                         break;
                     case KE.DELETE:
                         if (this.hasSelection() && this.isEditable === true) {
@@ -19656,7 +20428,7 @@ pkg.TextField = Class(pkg.Label, [
             var code = e.code;
             return code == KE.SHIFT || code == KE.CTRL ||
                    code == KE.TAB   || code == KE.ALT  ||
-                   (e.mask & KE.M_ALT) > 0;
+                   e.altKey;
         };
 
         /**
@@ -19740,7 +20512,7 @@ pkg.TextField = Class(pkg.Label, [
             if (this.position.offset >= 0 &&
                 this.curView != null      &&
                 this.blinkMe              &&
-                (this.hasFocus() || this.$forceToShow == true)) // TODO: $forceToShow is awkward solution sdesigned for VK
+                (this.hasFocus() || this.$forceToShow === true)) // TODO: $forceToShow is awkward solution sdesigned for VK
             {
                 if (this.textAlign === zebra.layout.LEFT)
                     this.curView.paint(g, this.curX, this.curY,
@@ -19751,20 +20523,20 @@ pkg.TextField = Class(pkg.Label, [
             }
         };
 
-        this.mouseDragStarted = function (e){
-            if (e.mask == ME.LEFT_BUTTON && this.getMaxOffset() > 0) {
+        this.pointerDragStarted = function (e){
+            if (e.isAction() && this.getMaxOffset() > 0) {
                 this.startSelection();
             }
         };
 
-        this.mouseDragEnded =function (e){
-            if (e.mask == ME.LEFT_BUTTON && this.hasSelection() === false) {
+        this.pointerDragEnded =function (e){
+            if (e.isAction() && this.hasSelection() === false) {
                 this.clearSelection();
             }
         };
 
-        this.mouseDragged = function (e){
-            if (e.mask == ME.LEFT_BUTTON){
+        this.pointerDragged = function (e){
+            if (e.isAction()){
                 var p = this.getTextRowColAt(e.x, e.y);
                 if (p != null) this.position.setRowCol(p.row, p.col);
             }
@@ -19860,7 +20632,7 @@ pkg.TextField = Class(pkg.Label, [
         };
 
         this.paintOnTop = function(g) {
-            if (this.hint != null && this.getMaxOffset() == 0) {
+            if (this.hint != null && this.getMaxOffset() === 0) {
                 var ps = this.hint.getPreferredSize(),
                     yy = Math.floor((this.height - ps.height)/2),
                     xx = (zebra.layout.LEFT === this.textAlign) ? this.getLeft() + this.curW
@@ -19963,9 +20735,7 @@ pkg.TextField = Class(pkg.Label, [
             else {
                 if (this.hint != null) this.repaint();
                 else {
-                    if (this.isEditable === true) {
-                        this.repaintCursor();
-                    }
+                    this.repaintCursor();
                 }
             }
 
@@ -19977,12 +20747,11 @@ pkg.TextField = Class(pkg.Label, [
             }
         };
 
-        this.focusLost = function(e){
+        this.focusLost = function(e) {
+
+            this.repaintCursor();
             if (this.isEditable === true) {
                 if (this.hint) this.repaint();
-                else {
-                    this.repaintCursor();
-                }
 
                 if (this.blinkingPeriod > 0) {
                     if (this.blinkTask != null) {
@@ -20113,22 +20882,28 @@ pkg.TextField = Class(pkg.Label, [
             }
         };
 
-        this.mousePressed = function(e){
-            if (e.isActionMask()) {
-                if (e.clicks > 1) {
-                    this.select(0, this.getMaxOffset());
+
+        this.pointerDoubleClicked = function(e){
+            if (e.isAction()) {
+                this.select(0, this.getMaxOffset());
+            }
+        };
+
+        this.pointerPressed = function(e){
+            console.log("!!!!!!!!!!!!!");
+            if (e.isAction()) {
+
+                console.log("IS SHIFT : " + e.shiftKey);
+
+                if (e.shiftKey) {
+                    this.startSelection();
                 }
                 else {
-                    if ((e.mask & KE.M_SHIFT) > 0) {
-                        this.startSelection();
-                    }
-                    else {
-                        this.clearSelection();
-                    }
-
-                    var p = this.getTextRowColAt(e.x, e.y);
-                    if (p != null) this.position.setRowCol(p.row, p.col);
+                    this.clearSelection();
                 }
+
+                var p = this.getTextRowColAt(e.x, e.y);
+                if (p != null) this.position.setRowCol(p.row, p.col);
             }
         };
 
@@ -20182,34 +20957,33 @@ pkg.TextField = Class(pkg.Label, [
         };
     },
 
-    function () {
-        this.$this("");
-    },
-
-    function(s, maxCol){
-        var b = zebra.isNumber(maxCol);
-        this.$this(b ? new zebra.data.SingleLineTxt(s, maxCol)
-                     : (maxCol ? new zebra.data.Text(s) : s));
-        if (b && maxCol > 0) this.setPSByRowsCols(-1, maxCol);
-    },
-
-    function (render){
-        if (zebra.isString(render)) {
-            render = new pkg.TextRender(new zebra.data.SingleLineTxt(render));
-        }
-        else {
-            if (zebra.instanceOf(render, zebra.data.TextModel)) {
-                render = new pkg.TextRender(render);
-            }
-        }
-        this.startLine = this.startCol = this.endLine = this.endCol = this.curX = 0;
-        this.startOff = this.endOff = -1;
+    function (render, maxCol){
         this.history = Array(100);
         this.historyPos = -1;
         this.redoCounter = this.undoCounter = this.curY = this.curW = this.curH = 0;
-
-        this.$super(render);
         this.scrollManager = new pkg.ScrollManager(this);
+
+        if (arguments.length === 1) {
+            if (zebra.isNumber(render)) {
+                maxCol = render;
+                this.$super(new pkg.TextRender(new zebra.data.SingleLineTxt("", maxCol)));
+            }
+            else {
+                maxCol = -1;
+                this.$super(zebra.isString(render) ? new pkg.TextRender(new zebra.data.SingleLineTxt(render))
+                                                   : (zebra.instanceOf(render, zebra.data.TextModel) ?  new pkg.TextRender(render)
+                                                                                                     : render));
+            }
+        }
+        else {
+            // 2 arguments or zero arguments
+            if (arguments.length === 0) {
+                maxCol = -1;
+            }
+            this.$super(new pkg.TextRender(new zebra.data.SingleLineTxt(render, maxCol)));
+        }
+
+        if (maxCol > 0) this.setPSByRowsCols(-1, maxCol);
     },
 
     function setView(v){
@@ -20220,7 +20994,7 @@ pkg.TextField = Class(pkg.Label, [
 
             this.$super(v);
             if (this.position == null) {
-                this.setPosition(new PO(this.view));
+                this.setPosition(new zebra.util.Position(this.view));
             }
             else {
                 this.position.setMetric(this.view);
@@ -20262,11 +21036,8 @@ pkg.TextField = Class(pkg.Label, [
  * @extends zebra.ui.TextField
  */
 pkg.TextArea = Class(pkg.TextField, [
-    function() {
-        this.$this("");
-    },
-
     function(txt) {
+        if (arguments.length === 0) txt = "";
         this.$super(new zebra.data.Text(txt));
     }
 ]);
@@ -20281,15 +21052,15 @@ pkg.TextArea = Class(pkg.TextField, [
  * @extends zebra.ui.TextField
  */
 pkg.PassTextField = Class(pkg.TextField, [
-    function(txt) {
-        this.$this(txt, -1);
-    },
-
-    function(txt, size) {
-        this.$this(txt, size, false);
-    },
-
     function(txt, size, showLast) {
+        if (arguments.length < 2) {
+            size = -1;
+        }
+
+        if (arguments.length < 3) {
+            showLast = false;
+        }
+
         var pt = new pkg.PasswordText(new zebra.data.SingleLineTxt(txt, size));
         pt.showLast = showLast;
         this.$super(pt);
@@ -20323,7 +21094,7 @@ var L = zebra.layout, Position = zebra.util.Position, KE = pkg.KeyEvent;
 /**
  * Fire when a list item has been selected:
 
-        list.bind(function (src, prev) {
+        list.bind(function selected(src, prev) {
             ...
         });
 
@@ -20332,6 +21103,10 @@ var L = zebra.layout, Position = zebra.util.Position, KE = pkg.KeyEvent;
  * @param {Integer|Object} prev a previous selected index, return null if the selected item has been re-selected
  */
 pkg.BaseList = Class(pkg.Panel, Position.Metric, [
+    function $clazz() {
+        this.Listeners = zebra.util.ListenersClass("selected");
+    },
+
     function $prototype() {
         this.canHaveFocus = true;
 
@@ -20421,15 +21196,15 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         };
 
         /**
-         * Called when a pointer (mouse or finger on touch screen) is moved
+         * Called when a pointer (pointer or finger on touch screen) is moved
          * to a new location
          * @param  {Integer} x a pointer x coordinate
          * @param  {Integer} y a pointer y coordinate
-         * @method pointerMoved
+         * @method $pointerMoved
          * @protected
          */
-        this.pointerMoved = function(x,y){
-            if (this.isComboMode && this.model != null) {
+        this.$pointerMoved = function(x, y){
+            if (this.isComboMode === true && this.model != null) {
                 var index = this.getItemIdxAt(x, y);
                 if (index != this.position.offset && (index < 0 || this.isItemSelectable(index) === true)) {
                     this.$triggeredByPointer = true;
@@ -20600,8 +21375,12 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
          * @method select
          */
         this.select = function(index){
+            if (index == null) {
+                throw new Error("Null index");
+            }
+
             if (this.model != null && index >= this.model.count()){
-                throw new Error("index=" + index + ",max=" + this.model.count());
+                throw new RangeError(index);
             }
 
             if (this.selectedIndex != index) {
@@ -20626,43 +21405,43 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
          * @protected
          */
         this.fireSelected = function(prev) {
-            this._.fired(this, prev);
+            this._.selected(this, prev);
         };
 
-        this.mouseClicked = function(e) {
-            if (this.model != null && e.isActionMask() && this.model.count() > 0) {
+        this.pointerClicked = function(e) {
+            if (this.model != null && e.isAction() && this.model.count() > 0) {
                 this.$select(this.position.offset < 0 ? 0 : this.position.offset);
             }
         };
 
-        this.mouseReleased = function(e){
+        this.pointerReleased = function(e){
             if (this.model != null     &&
                 this.model.count() > 0 &&
-                e.isActionMask()       &&
+                e.isAction()       &&
                 this.position.offset != this.selectedIndex)
             {
                 this.position.setOffset(this.selectedIndex);
             }
         };
 
-        this.mousePressed = function(e){
-            if (e.isActionMask() && this.model != null && this.model.count() > 0) {
+        this.pointerPressed = function(e){
+            if (e.isAction() && this.model != null && this.model.count() > 0) {
                 var index = this.getItemIdxAt(e.x, e.y);
-                if (index >= 0 && this.position.offset != index) {
+                if (index >= 0 && this.position.offset != index && this.isItemSelectable(index)) {
                     this.position.setOffset(index);
                 }
             }
         };
 
-        this.mouseDragged = this.mouseMoved = this.mouseEntered = function(e){
-            this.pointerMoved(e.x, e.y);
+        this.pointerDragged = this.pointerMoved = this.pointerEntered = function(e){
+            this.$pointerMoved(e.x, e.y);
         };
 
-        this.mouseExited  = function(e){
-            this.pointerMoved(-10, -10);
+        this.pointerExited  = function(e){
+            this.$pointerMoved(-10, -10);
         };
 
-        this.mouseDragEnded = function(e){
+        this.pointerDragEnded = function(e){
             if (this.model != null && this.model.count() > 0 && this.position.offset >= 0) {
                 this.select(this.position.offset < 0 ? 0 : this.position.offset);
             }
@@ -20673,21 +21452,21 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
                 var po = this.position.offset;
                 switch(e.code) {
                     case KE.END:
-                        if (e.isControlPressed()) {
+                        if (e.ctrlKey) {
                             this.position.setOffset(this.position.metrics.getMaxOffset());
                         }
                         else {
-                            this.position.seekLineTo(Position.END);
+                            this.position.seekLineTo("end");
                         }
                         break;
                     case KE.HOME:
-                        if (e.isControlPressed()) this.position.setOffset(0);
-                        else this.position.seekLineTo(Position.BEG);
+                        if (e.ctrlKey) this.position.setOffset(0);
+                        else this.position.seekLineTo("begin");
                         break;
                     case KE.RIGHT    : this.position.seek(1); break;
-                    case KE.DOWN     : this.position.seekLineTo(Position.DOWN); break;
+                    case KE.DOWN     : this.position.seekLineTo("down"); break;
                     case KE.LEFT     : this.position.seek(-1);break;
-                    case KE.UP       : this.position.seekLineTo(Position.UP);break;
+                    case KE.UP       : this.position.seekLineTo("up");break;
                     case KE.PAGEUP   : this.position.seek(this.pageSize(-1));break;
                     case KE.PAGEDOWN : this.position.seek(this.pageSize(1));break;
                     case KE.SPACE    :
@@ -20698,7 +21477,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
 
         /**
          * Select the given list item. The method is called when an item
-         * selection is triggered by a user interaction: key board, or mouse
+         * selection is triggered by a user interaction: key board, or pointer
          * @param  {Integer} o an item index
          * @method $select
          * @protected
@@ -20777,14 +21556,14 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
                 }
             }
 
-            if (this.isComboMode) {
+            if (this.isComboMode === true) {
                 this.notifyScrollMan(off);
             }
             else {
                 this.select(off);
             }
 
-          //  this.notifyScrollMan(off);
+            // this.notifyScrollMan(off);
             this.repaintByOffsets(prevOffset, off);
         };
 
@@ -20885,7 +21664,16 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         };
     },
 
-    function (m, b){
+    function (m, b) {
+        if (b == null) b = false;
+        if (m == null) m = [];
+        else {
+            if (zebra.isBoolean(m)) {
+                b = m;
+                m = [];
+            }
+        }
+
         /**
          * Currently selected list item index
          * @type {Integer}
@@ -20895,7 +21683,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
          */
         this.selectedIndex = -1;
 
-        this._ = new zebra.util.Listeners();
+        this._ = new this.$clazz.Listeners();
 
         /**
          * Indicate the current mode the list items selection has to work
@@ -20928,7 +21716,6 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         this.setModel(m);
     },
 
-
     /**
      * Sets the views for the list visual elements. The following elements are
      * supported:
@@ -20941,13 +21728,13 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
      * @method setViews
      */
 
-
     function focused(){
         this.$super();
         this.repaint();
     }
 ]);
 pkg.BaseList.prototype.setViews = pkg.$ViewsSetter;
+
 
 /**
  * The class is list component implementation that visualizes zebra.data.ListModel.
@@ -20999,7 +21786,7 @@ pkg.BaseList.prototype.setViews = pkg.$ViewsSetter;
  * @param {zebra.data.ListModel|Array} [model] a list model that should be passed as an instance
  * of zebra.data.ListModel or as an array.
  * @param {Boolean} [isComboMode] true if the list navigation has to be triggered by
- * mouse cursor moving
+ * pointer cursor moving
  */
 pkg.List = Class(pkg.BaseList, [
     function $clazz() {
@@ -21131,7 +21918,7 @@ pkg.List = Class(pkg.BaseList, [
                 }
 
                 if (this.widths  == null || this.widths.length  != count) {
-                    this.widths  = Array(count);
+                    this.widths = Array(count);
                 }
 
                 var provider = this.provider;
@@ -21238,15 +22025,6 @@ pkg.List = Class(pkg.BaseList, [
         };
     },
 
-    function() {
-        this.$this(false);
-    },
-
-    function (m) {
-        if (zebra.isBoolean(m)) this.$this([], m);
-        else this.$this(m, false);
-    },
-
     function (m, b){
         /**
          * Index of the first visible list item
@@ -21314,39 +22092,32 @@ pkg.List = Class(pkg.BaseList, [
  * @param {zebra.data.ListModel|Array} [model] a list model that should be passed as an instance
  * of zebra.data.ListModel or as an array.
  * @param {Boolean} [isComboMode] true if the list navigation has to be triggered by
- * mouse cursor moving
+ * pointer cursor moving
  */
 pkg.CompList = Class(pkg.BaseList, [
     function $clazz() {
         this.Label      = Class(pkg.Label, []);
         this.ImageLabel = Class(pkg.ImageLabel, []);
-        var CompListModelListeners = zebra.util.ListenersClass("elementInserted", "elementRemoved");
-
-        this.CompListModel = Class([
-            function $prototype() {
-                this.get = function (i) { return this.src.kids[i]; };
-
-                this.set = function(item,i){
-                    this.src.removeAt(i);
-                    this.src.insert(i, null, item);
-                };
-
-                this.add       = function(o)       { this.src.add(o); };
-                this.removeAt  = function (i)      { this.src.removeAt(i);};
-                this.insert    = function (item,i) { this.src.insert(i, null, item); };
-                this.count     = function ()       { return this.src.kids.length; };
-                this.removeAll = function ()       { this.src.removeAll(); };
-            },
-
-            function(src) {
-                this.src = src;
-                this._ = new CompListModelListeners();
-            }
-        ]);
+        this.Listeners  = this.$parent.Listeners.ListenersClass("elementInserted", "elementRemoved", "elementSet");
     },
 
     function $prototype() {
-        this.catchScrolled = function(px,py) {};
+        this.get = function(i) {
+            if (i < 0 || i >= this.kids.length) {
+                throw new RangeError(i);
+            }
+            return this.kids[i];
+        };
+
+        this.contains = function (c) {
+            return this.indexOf(c) >= 0;
+        };
+
+        this.count = function () {
+            return this.kids.length;
+        };
+
+        this.catchScrolled = function(px, py) {};
 
         this.getItemLocation = function(i) {
             return { x:this.kids[i].x, y:this.kids[i].y };
@@ -21376,55 +22147,24 @@ pkg.CompList = Class(pkg.BaseList, [
         };
 
         this.catchInput = function (child){
-            if (this.isComboMode) {
-                return true;
-            }
-
-            var p = child;
-            while (p != this) {
-                if (p.stopCatchInput === true) return false;
-                p = p.parent;
+            if (this.isComboMode !== true) {
+                var p = child;
+                while (p != this) {
+                    if (p.stopCatchInput === true) return false;
+                    p = p.parent;
+                }
             }
             return true;
         };
-    },
 
-    function () {
-        this.$this([], false);
-    },
-
-    function (b){
-        if (zebra.isBoolean(b)) {
-            this.$this([], b);
-        }
-        else {
-            this.$this(b, false);
-        }
-    },
-
-    function (d, b){
-        this.max = null;
-        this.setViewProvider(new zebra.Dummy([
-            function getView(target,obj,i) {
-                return new pkg.CompRender(obj);
+        this.setModel = function(m){
+            if (Array.isArray(m)) {
+                for(var i=0; i < m.length; i++) this.add(m[i]);
             }
-        ]));
-        this.$super(d, b);
-    },
-
-    function setModel(m){
-        var a = [];
-        if (Array.isArray(m)) {
-            a = m;
-            m = new this.$clazz.CompListModel(this);
-        }
-
-        if (zebra.instanceOf(m, this.$clazz.CompListModel) === false) {
-            throw new Error("Invalid model");
-        }
-
-        this.$super(m);
-        for(var i=0; i < a.length; i++) this.add(a[i]);
+            else {
+                throw new Error("Invalid comp list model");
+            }
+        };
     },
 
     function setPosition(c){
@@ -21470,8 +22210,23 @@ pkg.CompList = Class(pkg.BaseList, [
         return this;
     },
 
-    function insert(index,constr,e) {
-        return this.$super(index, constr, zebra.isString(e) ? new this.$clazz.Label(e) : e);
+    function setAt(i, item) {
+        if (i < 0 || i >= this.kids.length) {
+            throw new RangeError(i);
+        }
+        return this.$super(i, item);
+    },
+
+    function insert(i, constr, e) {
+        if (arguments.length == 2) {
+            e = constr;
+            constr = null;
+        }
+
+        if (i < 0 || i > this.kids.length) {
+            throw new RangeError(i);
+        }
+        return this.$super(i, constr, zebra.instanceOf(e, pkg.Panel) ? e : new this.$clazz.Label("" + e));
     },
 
     function kidAdded(index,constr,e){
@@ -21482,10 +22237,19 @@ pkg.CompList = Class(pkg.BaseList, [
     function kidRemoved(index,e) {
         this.$super(index,e);
         this.model._.elementRemoved(this, e, index);
+    },
+
+    function (m, b) {
+        this.model = this;
+        this.max   = null;
+        this.setViewProvider(new zebra.Dummy([
+            function getView(target,obj,i) {
+                return new pkg.CompRender(obj);
+            }
+        ]));
+        this.$super(m, b);
     }
 ]);
-
-var ContentListeners = zebra.util.ListenersClass("contentUpdated");
 
 /**
  * Combo box UI component class. Combo uses a list component to show in drop down window.
@@ -21523,7 +22287,7 @@ var ContentListeners = zebra.util.ListenersClass("contentUpdated");
 /**
  * Fired when a new value in a combo box component has been selected
 
-     combo.bind(function(combo, value) {
+     combo.bind(function selected(combo, value) {
          ...
      });
 
@@ -21547,6 +22311,8 @@ var ContentListeners = zebra.util.ListenersClass("contentUpdated");
 */
 pkg.Combo = Class(pkg.Panel, [
     function $clazz() {
+        this.Listeners = zebra.util.ListenersClass("selected");
+
         /**
          * UI panel class that is used to implement combo box content area
          * @class  zebra.ui.Combo.ContentPan
@@ -21596,6 +22362,8 @@ pkg.Combo = Class(pkg.Panel, [
             function $prototype() {
                 this.$closeTime = 0;
 
+                this.adjustToComboSize = true;
+
                 /**
                  * A reference to combo that uses the list pad component
                  * @attribute owner
@@ -21603,9 +22371,10 @@ pkg.Combo = Class(pkg.Panel, [
                  * @readOnly
                  */
 
-                this.childInputEvent = function(e){
-                    if (e.ID == KE.PRESSED && e.code == KE.ESCAPE && this.parent != null){
+                this.childKeyPressed = function(e){
+                    if (e.code === KE.ESCAPE && this.parent != null){
                         this.removeMe();
+                        if (this.owner != null) this.owner.requestFocus();
                     }
                 };
             },
@@ -21627,23 +22396,52 @@ pkg.Combo = Class(pkg.Panel, [
          */
         this.ReadonlyContentPan = Class(this.ContentPan, [
             function $prototype() {
-                this.calcPreferredSize = function(l){
-                    var p = this.getCombo();
-                    return p ? p.list.calcMaxItemSize() : { width:0, height:0 };
+                this.calcPsByContent = false;
+
+                this.getCurrentView = function() {
+                    var list = this.getCombo().list,
+                        selected = list.getSelected();
+
+                    return selected != null ? list.provider.getView(list, selected, list.selectedIndex)
+                                            : null;
                 };
 
                 this.paintOnTop = function(g){
-                    var list = this.getCombo().list,
-                        selected = list.getSelected(),
-                        v = selected != null ? list.provider.getView(list, selected, list.selectedIndex) : null;
+                    var v = this.getCurrentView();
 
                     if (v != null) {
                         var ps = v.getPreferredSize();
-                        v.paint(g, this.getLeft(), this.getTop() + ~~((this.height - this.getTop() - this.getBottom() - ps.height) / 2),
+
+                        console.log("Paint combo view : " + v.target.x + "," + v.target.y);
+
+
+                        v.paint(g, this.getLeft(),
+                                   this.getTop() + Math.floor((this.height - this.getTop() - this.getBottom() - ps.height) / 2),
                                    this.width, ps.height, this);
                     }
                 };
+
+                this.setCalcPsByContent = function(b) {
+                    if (this.calcPsByContent != b) {
+                        this.calcPsByContent = b;
+                        this.vrp();
+                    }
+                };
+
+                this.calcPreferredSize = function(l) {
+                    var p = this.getCombo();
+                    if (p != null && this.calcPsByContent !== true) {
+                        return p.list.calcMaxItemSize();
+                    }
+                    var cv = this.getCurrentView();
+                    return cv == null ? { width: 0, height: 0} : cv.getPreferredSize();
+                };
+
+                this.comboValueUpdated = function(combo, value) {
+                    if (this.calcPsByContent === true) this.invalidate();
+                };
             }
+
         ]);
 
         /**
@@ -21668,32 +22466,7 @@ pkg.Combo = Class(pkg.Panel, [
         this.EditableContentPan = Class(this.ContentPan, [
             function $clazz() {
                 this.TextField = Class(pkg.TextField, []);
-            },
-
-            function (){
-                this.$super(new L.BorderLayout());
-                this._ = new ContentListeners();
-
-                this.isEditable = true;
-
-                this.dontGenerateUpdateEvent = false;
-
-                /**
-                 * A reference to a text field component the content panel uses as a
-                 * value editor
-                 * @attribute textField
-                 * @readOnly
-                 * @private
-                 * @type {zebra.ui.TextField}
-                 */
-                this.textField = new this.$clazz.TextField("",  -1);
-                this.textField.view.target.bind(this);
-                this.add(L.CENTER, this.textField);
-            },
-
-            function focused(){
-                this.$super();
-                this.textField.requestFocus();
+                this.Listeners = zebra.util.ListenersClass("contentUpdated");
             },
 
             function $prototype() {
@@ -21722,13 +22495,39 @@ pkg.Combo = Class(pkg.Panel, [
                         this.dontGenerateUpdateEvent = false;
                     }
                 };
+            },
+
+            function focused(){
+                this.$super();
+                this.textField.requestFocus();
+            },
+
+            function (){
+                this.$super();
+                this._ = new this.$clazz.Listeners();
+
+                this.isEditable = true;
+
+                this.dontGenerateUpdateEvent = false;
+
+                /**
+                 * A reference to a text field component the content panel uses as a
+                 * value editor
+                 * @attribute textField
+                 * @readOnly
+                 * @private
+                 * @type {zebra.ui.TextField}
+                 */
+                this.textField = new this.$clazz.TextField("",  -1);
+                this.textField.view.target.bind(this);
+                this.add(L.CENTER, this.textField);
             }
         ]);
+
 
         this.Button = Class(pkg.Button, [
             function() {
                 this.setFireParams(true,  -1);
-                this.setCanHaveFocus(false);
                 this.$super();
             }
         ]);
@@ -21754,15 +22553,15 @@ pkg.Combo = Class(pkg.Panel, [
         };
 
         this.catchInput = function (child) {
-            return child != this.button && (this.content == null || !this.content.isEditable);
+            return child != this.button && (this.content == null || this.content.isEditable !== true);
         };
 
         this.canHaveFocus = function() {
-            return this.winpad.parent == null && (this.content != null || !this.content.isEditable);
+            return this.winpad.parent == null && (this.content != null && this.content.isEditable !== true);
         };
 
         this.contentUpdated = function(src, text){
-            if (src == this.content){
+            if (src == this.content) {
                 try {
                     this.$lockListSelEvent = true;
                     if (text == null) this.list.select(-1);
@@ -21778,7 +22577,7 @@ pkg.Combo = Class(pkg.Panel, [
                     }
                 }
                 finally { this.$lockListSelEvent = false; }
-                this._.fired(this, text);
+                this._.selected(this, text);
             }
         };
 
@@ -21792,6 +22591,8 @@ pkg.Combo = Class(pkg.Panel, [
             this.list.select(i);
         };
 
+        // !!!
+        // this method has been added to support selectedIndex property setter
         this.setSelectedIndex = function(i) {
             this.select(i);
         };
@@ -21815,23 +22616,28 @@ pkg.Combo = Class(pkg.Panel, [
         };
 
         /**
-         * Define mouse pressed events handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mousePressed
+         * Define pointer pressed events handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerPressed
          */
-        this.mousePressed = function (e) {
-            if (e.isActionMask() && this.content != null             &&
+        this.pointerPressed = function (e) {
+            if (e.isAction() && this.content != null              &&
                 (new Date().getTime() - this.winpad.$closeTime) > 100 &&
-                e.x > this.content.x && e.y > this.content.y         &&
-                e.x < this.content.x + this.content.width            &&
+                e.x > this.content.x && e.y > this.content.y          &&
+                e.x < this.content.x + this.content.width             &&
                 e.y < this.content.y + this.content.height              )
             {
                 this.showPad();
             }
         };
 
+        /**
+         * Test if the combo window pad is shown
+         * @return {Boolean} true if the combo window pad is shown
+         * @method isPadShown
+         */
         this.isPadShown = function() {
-            return this.winpad != null && this.winpad.parent != null;
+            return this.winpad != null && this.winpad.parent != null && this.winpad.isVisible === true;
         };
 
         /**
@@ -21853,15 +22659,13 @@ pkg.Combo = Class(pkg.Panel, [
         this.showPad = function(){
             var canvas = this.getCanvas();
             if (canvas != null) {
-                var winlayer = canvas.getLayer(pkg.PopupLayer.ID),
-                    ps       = this.winpad.getPreferredSize(),
+                var ps       = this.winpad.getPreferredSize(),
                     p        = L.toParentOrigin(0, 0, this),
-                    px       = p.x,
                     py       = p.y;
 
-                if (this.winpad.hbar && ps.width > this.width) {
-                    ps.height += this.winpad.hbar.getPreferredSize().height;
-                }
+                // if (this.winpad.hbar && ps.width > this.width) {
+                //     ps.height += this.winpad.hbar.getPreferredSize().height;
+                // }
 
                 if (this.maxPadHeight > 0 && ps.height > this.maxPadHeight) {
                     ps.height = this.maxPadHeight;
@@ -21879,11 +22683,14 @@ pkg.Combo = Class(pkg.Panel, [
                     }
                 }
 
-                this.winpad.setSize(this.width, ps.height);
-                this.winpad.setLocation(px, py + this.height);
+                this.winpad.setBounds(p.x, py + this.height,
+                                      this.winpad.adjustToComboSize === true ? this.width : ps.width,
+                                      ps.height);
+
                 this.list.notifyScrollMan(this.list.selectedIndex);
-                winlayer.add(this, this.winpad);
+                canvas.getLayer(pkg.PopupLayer.ID).add(this, this.winpad);
                 this.list.requestFocus();
+                if (this.padShown != null) this.padShown(true);
             }
         };
 
@@ -21941,7 +22748,9 @@ pkg.Combo = Class(pkg.Panel, [
          * @param  {zebra.ui.KeyEvent} e a key event
          * @method keyTyped
          */
-        this.keyTyped = function(e) { this.list.keyTyped(e); };
+        this.keyTyped = function(e) {
+            this.list.keyTyped(e);
+        };
 
         /**
          * Set the given combo box selection view
@@ -21949,7 +22758,7 @@ pkg.Combo = Class(pkg.Panel, [
          * @method setSelectionView
          */
         this.setSelectionView = function (c){
-            if (c != this.selectionView){
+            if (c != this.selectionView) {
                 this.selectionView = pkg.$view(c);
                 this.repaint();
             }
@@ -21961,23 +22770,65 @@ pkg.Combo = Class(pkg.Panel, [
          * @method setMaxPadHeight
          */
         this.setMaxPadHeight = function(h){
-            if(this.maxPadHeight != h){
+            if (this.maxPadHeight != h) {
                 this.hidePad();
                 this.maxPadHeight = h;
             }
         };
+
+        this.setEditable = function(b) {
+            if (this.content == null || this.content.isEditable != b) {
+                var ctr = "center";
+                if (this.content != null) {
+                    ctr = this.content.constraints;
+                    this.content.removeMe();
+                }
+                this.add(ctr, b ? new this.$clazz.EditableContentPan()
+                                : new this.$clazz.ReadonlyContentPan());
+            }
+        };
+
+        /**
+         * Combo box button listener method. The method triggers showing
+         * combo box pad window when the combo button has been pressed
+         * @param  {zebra.ui.Button} src a button that has been pressed
+         * @method fired
+         */
+        this.fired = function(src) {
+            if ((new Date().getTime() - this.winpad.$closeTime) > 100) {
+                this.showPad();
+            }
+        };
+
+        this.selected = function(src, data) {
+            if (this.$lockListSelEvent === false){
+                this.hidePad();
+                if (this.content != null) {
+                    this.content.comboValueUpdated(this, this.list.getSelected());
+                    if (this.content.isEditable === true) {
+                        pkg.focusManager.requestFocus(this.content);
+                    }
+                    this.repaint();
+                }
+                this._.selected(this, data);
+            }
+        };
     },
 
-    function() {
-        this.$this(new this.$clazz.List(true));
-    },
+    function(list, editable) {
+        if (list != null && zebra.isBoolean(list)) {
+            editable = list;
+            list = null;
+        }
 
-    function(list){
-        if (zebra.isBoolean(list)) this.$this(new this.$clazz.List(true), list);
-        else this.$this(list, false);
-    },
+        if (editable == null) {
+            editable = false;
+        }
 
-    function(list, editable){
+        if (list == null) {
+            list = new this.$clazz.List(true);
+        }
+
         /**
          * Reference to combo box list component
          * @attribute list
@@ -22027,8 +22878,9 @@ pkg.Combo = Class(pkg.Panel, [
         this.maxPadHeight = 0;
 
         this.$lockListSelEvent = false;
-        this._ = new zebra.util.Listeners();
+        this._ = new this.$clazz.Listeners();
         this.setList(list);
+
         this.$super();
 
         this.add(L.CENTER, editable ? new this.$clazz.EditableContentPan()
@@ -22075,32 +22927,6 @@ pkg.Combo = Class(pkg.Panel, [
         }
     },
 
-    /**
-     * Combo box button listener method. The method triggers showing
-     * combo box pad window when the combo button has been pressed
-     * @param  {zebra.ui.Button} src a button that has been pressed
-     * @method fired
-     */
-    function fired(src) {
-        if ((new Date().getTime() - this.winpad.$closeTime) > 100) {
-            this.showPad();
-        }
-    },
-
-    function fired(src, data) {
-        if (this.$lockListSelEvent === false){
-            this.hidePad();
-            if (this.content != null) {
-                this.content.comboValueUpdated(this, this.list.getSelected());
-                if (this.content.isEditable) {
-                    pkg.focusManager.requestFocus(this.content);
-                }
-                this.repaint();
-            }
-            this._.fired(this, data);
-        }
-    },
-
     function setVisible(b) {
         if (b === false) this.hidePad();
         this.$super(b);
@@ -22113,85 +22939,6 @@ pkg.Combo = Class(pkg.Panel, [
 ]);
 
 /**
- * Combo box arrow view. The view is used to render combo box arrow element
- * in pressed  and unpressed state.
- * @class zebra.ui.ComboArrowView
- * @constructor
- * @param {String} [col] a color of arrow element
- * @param {Boolean} [state] a state of arrow element. true means pressed state.
- * @extends zebra.ui.View
- */
-pkg.ComboArrowView = Class(pkg.View, [
-    function $prototype() {
-        this[''] = function(col, state) {
-            /**
-             * Arrow color
-             * @type {String}
-             * @readOnly
-             * @default "black"
-             * @attribute color
-             */
-
-            /**
-             * Arrow state to be rendered
-             * @type {Boolean}
-             * @readOnly
-             * @default false
-             * @attribute state
-             */
-
-            /**
-             * Top, left, right and bottom gap value
-             * @type {Integer}
-             * @readOnly
-             * @default 4
-             * @attribute gap
-             */
-
-            this.color = col == null ? "black" : col;
-            this.state = state == null ? false : state;
-            this.gap   = 4;
-        };
-
-        this.paint = function(g, x, y, w, h, d) {
-            if (this.state) {
-                g.setColor("#CCCCCC");
-                g.drawLine(x, y, x, y + h);
-                g.setColor("gray");
-                g.drawLine(x + 1, y, x + 1, y + h);
-            }
-            else {
-                g.setColor("#CCCCCC");
-                g.drawLine(x, y, x, y + h);
-                g.setColor("#EEEEEE");
-                g.drawLine(x + 1, y, x + 1, y + h);
-            }
-
-            x += this.gap + 1;
-            y += this.gap + 1;
-            w -= this.gap * 2;
-            h -= this.gap * 2;
-
-            var s = Math.min(w, h);
-            x = x + (w - s)/2 + 1;
-            y = y + (h - s)/2;
-
-            g.setColor(this.color);
-            g.beginPath();
-            g.moveTo(x, y);
-            g.lineTo(x + s, y);
-            g.lineTo(x + s/2, y + s);
-            g.lineTo(x, y);
-            g.fill();
-        };
-
-        this.getPreferredSize = function() {
-            return { width: 2 * this.gap + 6, height:2 * this.gap + 6 };
-        };
-    }
-]);
-
-/**
  * @for
  */
 
@@ -22199,8 +22946,7 @@ pkg.ComboArrowView = Class(pkg.View, [
 (function(pkg, Class) {
 
 var KE = pkg.KeyEvent, task = zebra.util.task, L = zebra.layout,
-    WIN_OPENED = 1, WIN_CLOSED = 2, WIN_ACTIVATED = 3, WIN_DEACTIVATED = 4,
-    WinListeners = zebra.util.ListenersClass("winOpened", "winActivated");
+    WIN_OPENED = 1, WIN_CLOSED = 2, WIN_ACTIVATED = 3, WIN_DEACTIVATED = 4;
 
 /**
  * Show the given UI component as a modal window
@@ -22260,7 +23006,7 @@ pkg.showPopupMenu = function(context, menu) {
 
 /**
  * Activate the given window or a window the specified component belongs
- * @param  {zebra.ui.Panel} win [description]
+ * @param  {zebra.ui.Panel} win an UI component to be activated
  * @api zebra.ui.activateWindow()
  * @method activateWindow
  */
@@ -22314,9 +23060,10 @@ pkg.activateWindow = function(win) {
  * @constructor
  * @extends {zebra.ui.BaseLayer}
  */
-pkg.WinLayer = Class(pkg.BaseLayer, [
+pkg.WinLayer = Class(pkg.HtmlCanvas, [
     function $clazz() {
         this.ID = "win";
+        this.Listeners = zebra.util.ListenersClass("winOpened", "winActivated");
     },
 
     function $prototype() {
@@ -22324,10 +23071,10 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
             return this.activeWin != null;
         };
 
-        this.layerMousePressed = function(x,y,mask){
-            var cnt = this.kids.length;
+        this.layerPointerPressed = function(e){
+            var cnt = this.kids.length, x = e.x, y = e.y;
             if (cnt > 0) {
-                // check if mouse pressed has occurred in the topest window since
+                // check if pointer pressed has occurred in the topest window since
                 // this is the most probable case
                 if (this.activeWin != null && this.indexOf(this.activeWin) == cnt - 1) {
                     var x1 = this.activeWin.x,
@@ -22366,10 +23113,10 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
             return false;
         };
 
-        this.layerKeyPressed = function(keyCode,mask){
-            if (this.kids.length > 0    &&
-                keyCode == KE.TAB       &&
-                (mask & KE.M_SHIFT) > 0   )
+        this.layerKeyPressed = function(e){
+            if (this.kids.length > 0  &&
+                e.code === KE.TAB     &&
+                e.shiftKey              )
             {
                 if (this.activeWin == null) {
                     this.activate(this.kids[this.kids.length - 1]);
@@ -22387,24 +23134,41 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
             return false;
         };
 
-        /**
-         * Define children components input events handler.
-         * @param  {zebra.ui.InputEvent|zebra.ui.KeyEvent|zebra.ui.MouseEvent} e an input event
-         * @method childInputEvent
-         */
-        this.childInputEvent = function (e) {
-            if (e.ID == pkg.InputEvent.FOCUS_GAINED) {
-                this.activate(L.getDirectChild(this, e.source));
+        // TODO: the method never called since focus has been re-worked
+        this.elementFocusLost = function(src) {
+            if (this.activeWin != null && this.getWinType(this.activeWin) === "mdi") {
+                this.$prevActiveWin = this.activeWin;
+                this.activate(null);
             }
         };
 
-        this.getComponentAt = function(x,y){
+        // TODO: the method never called since focus has been re-worked
+        this.elementFocusGained = function(src) {
+            if (this.$prevActiveWin != null &&
+                this.$prevActiveWin.isVisible === true &&
+                this.$prevActiveWin.parent === this)
+            {
+                this.activate(this.$prevActiveWin);
+            }
+            this.$prevActiveWin = null;
+        };
+
+        /**
+         * Define children components input events handler.
+         * @param  {zebra.ui.InputEvent|zebra.ui.KeyEvent|zebra.ui.PointerEvent} e an input event
+         * @method childFocusGained
+         */
+        this.childFocusGained = function (e) {
+            this.activate(L.getDirectChild(this, e.source));
+        };
+
+        this.getComponentAt = function(x,y) {
             return (this.activeWin == null) ? null
                                             : this.activeWin.getComponentAt(x - this.activeWin.x,
                                                                             y - this.activeWin.y);
         };
 
-        this.getFocusRoot = function(child) {
+        this.getFocusRoot = function() {
             return this.activeWin;
         };
 
@@ -22418,9 +23182,8 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
          * @method activate
          */
         this.activate = function(c){
-
             if (c != null && (this.kids.indexOf(c) < 0 ||
-                              this.winsTypes[c] == "info"))
+                              this.winsTypes[c] === "info"))
             {
                 throw new Error("Window cannot be activated");
             }
@@ -22428,8 +23191,8 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
             if (c != this.activeWin) {
                 var old = this.activeWin;
                 if (c == null) {
-                    if (this.winsTypes[this.activeWin] == "modal") {
-                        throw new Error();
+                    if (this.winsTypes[this.activeWin] === "modal") {
+                        throw new Error("Modal window cannot be de-activated");
                     }
 
                     this.activeWin = null;
@@ -22476,7 +23239,7 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
 
         /**
          * Add the given window with the given type and the listener to the layer.
-         * @param {String} type   a type of the window: "modal",
+         * @param {String} [type]   a type of the window: "modal",
          * "mdi" or "info"
          * @param {zebra.ui.Panel} win an UI component to be shown as window
          * @param {Object} [listener] an optional the window listener
@@ -22494,13 +23257,21 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
          * @method addWin
          */
         this.addWin = function(type, win, listener) {
-            this.winsTypes[win] = type;
+            // check if window type argument has been passed
+            if (zebra.instanceOf(type, pkg.Panel) ) {
+                listener = win;
+                win      = type;
+            }
+            else {
+                this.winsTypes[win] = type;
+            }
+
             this.winsListeners[win] = listener;
             this.add(win);
         };
     },
 
-    function () {
+    function() {
         /**
          * Currently activated as a window children component
          * @attribute activeWin
@@ -22514,49 +23285,57 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
         this.winsListeners = {};
         this.winsTypes     = {};
 
-        this._ = new WinListeners();
-        this.$super(pkg.WinLayer.ID);
+        this._ = new this.$clazz.Listeners();
+        this.id = this.$clazz.ID;
+        this.$super();
     },
 
     function insert(index, constr, lw) {
         var type = this.winsTypes[lw];
 
         if (typeof type === 'undefined') {
-            type = "mdi";
-            this.winsTypes[lw] = type;
+            type = lw.winType != null ? lw.winType : "mdi";
         }
 
         if (type != "mdi" && type != "modal" && type != "info") {
             throw new Error("Invalid window type: " + type);
         }
 
+        this.winsTypes[lw] = type;
         return this.$super(index, constr, lw);
     },
 
-    function kidAdded(index,constr,lw){
+    function kidAdded(index, constr, lw){
         this.$super(index, constr, lw);
 
         var type = this.winsTypes[lw];
         this.winsStack.push(lw);
-        if (type == "modal") {
+        if (type === "modal") {
             this.topModalIndex = this.winsStack.length - 1;
+            this.fire(WIN_OPENED, lw);
+            this.activate(lw);
         }
-
-        this.fire(WIN_OPENED, lw);
-        if (type == "modal") this.activate(lw);
+        else {
+            this.fire(WIN_OPENED, lw);
+        }
     },
 
     function kidRemoved(index,lw){
         try {
             this.$super(this.kidRemoved,index, lw);
-            if (this.activeWin == lw){
+
+            var l = this.winsListeners[lw];
+            if (this.activeWin == lw) {
                 this.activeWin = null;
+
+                // TODO:  deactivated event can be used
+                // as a trigger of a window closing so
+                // it is better don't fire it here
+                // this.fire(WIN_DEACTIVATED, lw, l);
                 pkg.focusManager.requestFocus(null);
             }
 
-            var ci = this.winsStack.indexOf(lw),
-                l  = this.winsListeners[lw];
-
+            var ci = this.winsStack.indexOf(lw);
             this.winsStack.splice(this.winsStack.indexOf(lw), 1);
 
             if (ci < this.topModalIndex) {
@@ -22565,7 +23344,9 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
             else {
                 if (this.topModalIndex == ci){
                     for(this.topModalIndex = this.kids.length - 1;this.topModalIndex >= 0; this.topModalIndex--){
-                        if (this.winsTypes[this.winsStack[this.topModalIndex]] == "modal") break;
+                        if (this.winsTypes[this.winsStack[this.topModalIndex]] == "modal") {
+                            break;
+                        }
                     }
                 }
             }
@@ -22611,7 +23392,6 @@ pkg.WinLayer = Class(pkg.BaseLayer, [
  * @extends {zebra.ui.Panel}
  */
 pkg.Window = Class(pkg.StatePan, [
-
     function $prototype() {
         var MOVE_ACTION = 1, SIZE_ACTION = 2;
 
@@ -22645,7 +23425,7 @@ pkg.Window = Class(pkg.StatePan, [
             return c != null && c.getLayer("win").activeWin == this;
         };
 
-        this.mouseDragStarted = function(e){
+        this.pointerDragStarted = function(e){
             this.px = e.x;
             this.py = e.y;
             this.psw = this.width;
@@ -22655,7 +23435,7 @@ pkg.Window = Class(pkg.StatePan, [
             if (this.action > 0) this.dy = this.dx = 0;
         };
 
-        this.mouseDragged = function(e){
+        this.pointerDragged = function(e){
             if (this.action > 0) {
                 if (this.action != MOVE_ACTION){
                     var nw = this.psw + this.dx,
@@ -22675,7 +23455,7 @@ pkg.Window = Class(pkg.StatePan, [
             }
         };
 
-        this.mouseDragEnded = function(e){
+        this.pointerDragEnded = function(e){
             if (this.action > 0){
                 if (this.action == MOVE_ACTION){
                     this.invalidate();
@@ -22686,11 +23466,11 @@ pkg.Window = Class(pkg.StatePan, [
         };
 
         /**
-         * Test if the mouse cursor is inside the window corner component
+         * Test if the pointer cursor is inside the window corner component
          * @protected
-         * @param  {Integer} px a x coordinate of the mouse cursor
-         * @param  {Integer} py a y coordinate of the mouse cursor
-         * @return {Boolean}  true if the mouse cursor is inside window
+         * @param  {Integer} px a x coordinate of the pointer cursor
+         * @param  {Integer} py a y coordinate of the pointer cursor
+         * @return {Boolean}  true if the pointer cursor is inside window
          * corner component
          * @method insideCorner
          */
@@ -22723,9 +23503,9 @@ pkg.Window = Class(pkg.StatePan, [
             this.winOpened(winLayer, target,b);
         };
 
-        this.mouseClicked= function (e){
+        this.pointerDoubleClicked = function (e){
             var x = e.x, y = e.y, cc = this.caption;
-            if (e.clicks == 2 && this.isSizeable && x > cc.x &&
+            if (this.isSizeable === true && x > cc.x &&
                 x < cc.y + cc.width && y > cc.y && y < cc.y + cc.height)
             {
                 if (this.prevW < 0) this.maximize();
@@ -22778,14 +23558,6 @@ pkg.Window = Class(pkg.StatePan, [
         this.Button     = Class(pkg.Button, []);
     },
 
-    function () {
-        this.$this(null, null);
-    },
-
-    function (s) {
-        if (s != null && zebra.isString(s)) this.$this(s, null);
-        else                                this.$this(null, s);
-    },
 
     function (s, c) {
         //!!! for some reason state has to be set beforehand
@@ -22855,7 +23627,9 @@ pkg.Window = Class(pkg.StatePan, [
 
         this.setSizeable(true);
 
-        this.$super(new L.BorderLayout(2,2));
+        this.$super();
+        this.setLayout(new L.BorderLayout(2,2));
+
 
         this.add(L.CENTER, this.root);
         this.add(L.TOP, this.caption);
@@ -22901,9 +23675,9 @@ pkg.Window = Class(pkg.StatePan, [
             this.prevY = this.y;
             this.prevW = this.width;
             this.prevH = this.height;
-            this.setLocation(left, top);
-            this.setSize(d.width - left - d.getRight(),
-                         d.height - top - d.getBottom());
+            this.setBounds(left, top,
+                           d.width - left - d.getRight(),
+                           d.height - top - d.getBottom());
         }
     },
 
@@ -22913,8 +23687,8 @@ pkg.Window = Class(pkg.StatePan, [
      */
     function restore(){
         if (this.prevW >= 0){
-            this.setLocation(this.prevX, this.prevY);
-            this.setSize(this.prevW, this.prevH);
+            this.setBounds(this.prevX, this.prevY,
+                           this.prevW, this.prevH);
             this.prevW = -1;
         }
     },
@@ -23163,7 +23937,6 @@ pkg.MenuItem = Class(pkg.Panel, [
          * @method getCheckState
          */
         this.getCheckState = function() {
-            if (this.manager == null) throw new Error();
             return this.manager.getValue(this);
         };
 
@@ -23326,25 +24099,18 @@ pkg.Menu = Class(pkg.CompList, [
 
         /**
          * Define component events handler.
-         * @param  {Integer} id  a component event id
-         * @param  {zebra.ui,Panel} src a component that triggers the event
-         * @param  {Object} p1  a first event parameter.
-         * @param  {Object} p2  a second event parameter
-         * @method  childCompEvent
+         * @param  {zebkit.ui.CompEvent} e  a component event
+         * @method  childCompEnabled
          */
-        this.childCompEvent = function(id, src, p1, p2){
-            // support dynamic disabling/enabling showing/hiding menu items
-            if (id == pkg.Panel.SHOWN ||
-                id == pkg.Panel.ENABLED)
-            {
-                for(var i = 0;i < this.kids.length; i++){
-                    if (this.kids[i] == src) {
-                        // clear selection if an item becomes not selectable
-                        if (this.isItemSelectable(i) === false) {
-                            if (i == this.selectedIndex) this.select(-1);
-                        }
-                        break;
+        this.childCompEnabled = this.childCompShown = function(e) {
+            var src = e.source;
+            for(var i = 0;i < this.kids.length; i++){
+                if (this.kids[i] == src) {
+                    // clear selection if an item becomes not selectable
+                    if (this.isItemSelectable(i) === false) {
+                        if (i == this.selectedIndex) this.select(-1);
                     }
+                    break;
                 }
             }
         };
@@ -23380,11 +24146,11 @@ pkg.Menu = Class(pkg.CompList, [
         };
 
         /**
-         * Define mouse exited events handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseExited
+         * Define pointer exited events handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerExited
          */
-        this.mouseExited = function(e){
+        this.pointerExited = function(e){
             this.position.setOffset(null);
         };
 
@@ -23429,7 +24195,7 @@ pkg.Menu = Class(pkg.CompList, [
             }
 
             // if the menu is shown and the menu item is selected
-            if (this.parent != null && i == this.selectedIndex) {
+            if (this.parent != null && i === this.selectedIndex) {
                 this.select(-1);
             }
 
@@ -23473,10 +24239,25 @@ pkg.Menu = Class(pkg.CompList, [
         this.$topMenu = function() {
             if (this.parent != null) {
                 var t = this;
+
                 while ((p = t.$parentMenu) != null) t = p;
                 return t;
             }
             return null;
+        };
+
+        this.doScroll = function(dx, dy, source) {
+            var sy = this.scrollManager.getSY(),
+                ps = this.layout.calcPreferredSize(this),
+                eh = this.height - this.getTop() - this.getBottom();
+
+            if (this.height < ps.height && sy + ps.height >= eh && sy - dy <= 0) {
+                var nsy = sy - dy;
+                if (nsy + ps.height < eh) {
+                    nsy = eh - ps.height;
+                }
+                if (sy != nsy) this.scrollManager.scrollYTo(nsy);
+            }
         };
 
         /**
@@ -23489,7 +24270,10 @@ pkg.Menu = Class(pkg.CompList, [
         this.$hideMenu = function(triggeredBy) {
             if (this.parent != null) {
                 var ch = this.$childMenu();
-                if (ch != null) ch.$hideMenu(triggeredBy);
+                if (ch != null) {
+                    ch.$hideMenu(triggeredBy);
+                }
+
                 this.removeMe();
             }
         };
@@ -23532,7 +24316,7 @@ pkg.Menu = Class(pkg.CompList, [
         };
     },
 
-    function () {
+    function (d) {
         this.menus = {};
 
         /**
@@ -23548,11 +24332,9 @@ pkg.Menu = Class(pkg.CompList, [
          * @private
          */
         this.decoratives = {};
-        this.$super(true);
-    },
 
-    function (d){
-        this.$this();
+        this.$super([], zebra.isBoolean(d) ? d : true);
+
         if (Array.isArray(d)) {
             for(var i = 0; i < d.length; i++) {
                 this.add(d[i]);
@@ -23578,7 +24360,7 @@ pkg.Menu = Class(pkg.CompList, [
      * @method keyPressed
      */
     function keyPressed(e){
-        if (e.code == KE.ESCAPE) {
+        if (e.code === KE.ESCAPE) {
             if (this.parent != null) {
                 var p = this.$parentMenu;
                 this.$canceled(this);
@@ -23643,7 +24425,7 @@ pkg.Menu = Class(pkg.CompList, [
                 var sub = this.getMenuAt(this.selectedIndex);
                 if (sub != null) {
                     sub.$hideMenu(this);
-                    rs = -1; // ask to clear selection
+                    rs = -1; // request to clear selection
                 }
             }
 
@@ -23795,7 +24577,7 @@ pkg.Menubar = Class(pkg.Menu, [
         this.$super(i);
     },
 
-    // called when an item is selected by user with mouse click or key
+    // called when an item is selected by user with pointer click or key
     function $select(i) {
         this.$isActive = !this.$isActive;
         if (this.$isActive === false) {
@@ -23812,7 +24594,7 @@ pkg.Menubar = Class(pkg.Menu, [
  * @constructor
  * @extends {zebra.ui.BaseLayer}
  */
-pkg.PopupLayer = Class(pkg.BaseLayer, [
+pkg.PopupLayer = Class(pkg.HtmlCanvas, [
     function $clazz() {
         this.ID = "pop";
     },
@@ -23820,19 +24602,19 @@ pkg.PopupLayer = Class(pkg.BaseLayer, [
     function $prototype() {
         this.mTop = this.mLeft = this.mBottom = this.mRight = 0;
 
-        this.layerMousePressed = function(x,y,mask) {
-            // if x,y is in extent active menu bar let
+        this.layerPointerPressed = function(e) {
+            // if x,y is inside active menu bar let
             // the menu bar handle it
             if (this.activeMenubar != null  &&
-                y <= this.mBottom           &&
-                y >= this.mTop              &&
-                x >= this.mLeft             &&
-                x <= this.mRight              )
+                e.y <= this.mBottom         &&
+                e.y >= this.mTop            &&
+                e.x >= this.mLeft           &&
+                e.x <= this.mRight            )
             {
                 return false;
             }
 
-            if (this.getComponentAt(x, y) == this){
+            if (this.getComponentAt(e.x, e.y) == this){
                 if (this.activeMenubar != null) {
                     this.activeMenubar.select(-1);
                 }
@@ -23856,33 +24638,35 @@ pkg.PopupLayer = Class(pkg.BaseLayer, [
                      x > this.mRight      );
         };
 
+        this.getFocusRoot = function() {
+            return this;
+        };
+
         /**
          * Define children components input events handler.
-         * @param  {zebra.ui.MouseEvent|zebra.ui.KeyEvent|zebra.ui.InputEvent} e an input event
-         * @method childInputEvent
+         * @param  {zebra.ui.KeyEvent} e an input event
+         * @method childKeyPressed
          */
-        this.childInputEvent = function(e){
-            if (e.UID == pkg.InputEvent.KEY_UID && e.ID == KE.PRESSED){
-                var dc = L.getDirectChild(this, e.source);
+        this.childKeyPressed = function(e){
+            var dc = L.getDirectChild(this, e.source);
 
-                if (zebra.instanceOf(dc, pkg.Menu) && this.activeMenubar != null) {
-                    var s = this.activeMenubar.selectedIndex;
-                    switch(e.code) {
-                        case KE.RIGHT :
-                            if (s < this.activeMenubar.model.count()-1) {
-                                //this.removeAll();
-                                this.activeMenubar.requestFocus();
-                                this.activeMenubar.position.seekLineTo(zebra.util.Position.DOWN);
-                            }
-                            break;
-                        case KE.LEFT :
-                            if (s > 0) {
-                               // this.removeAll();
-                                this.activeMenubar.requestFocus();
-                                this.activeMenubar.position.seekLineTo(zebra.util.Position.UP);
-                            }
-                            break;
-                    }
+            if (zebra.instanceOf(dc, pkg.Menu) && this.activeMenubar != null) {
+                var s = this.activeMenubar.selectedIndex;
+                switch(e.code) {
+                    case KE.RIGHT :
+                        if (s < this.activeMenubar.model.count()-1) {
+                            //this.removeAll();
+                            this.activeMenubar.requestFocus();
+                            this.activeMenubar.position.seekLineTo("down");
+                        }
+                        break;
+                    case KE.LEFT :
+                        if (s > 0) {
+                           // this.removeAll();
+                            this.activeMenubar.requestFocus();
+                            this.activeMenubar.position.seekLineTo("up");
+                        }
+                        break;
                 }
             }
         };
@@ -23929,7 +24713,8 @@ pkg.PopupLayer = Class(pkg.BaseLayer, [
 
     function () {
         this.activeMenubar = null;
-        this.$super(pkg.PopupLayer.ID);
+        this.id = this.$clazz.ID;
+        this.$super();
     }
 ]);
 
@@ -24013,22 +24798,22 @@ pkg.Tooltip = Class(pkg.Panel, [
         return this.$super() + this.$contentPs.height;
     },
 
-    function getTop () {
+    function getTop() {
         return this.$super() + ((this.$contentPs.height/6 + 0.5) | 0);
     },
 
-    function getLeft () {
+    function getLeft() {
         return this.$super() + ((this.$contentPs.height/6 + 0.5) | 0);
     },
 
-    function getRight () {
+    function getRight() {
         return this.$super() + ((this.$contentPs.height/6 + 0.5) | 0);
     }
 ]);
 
 /**
  * Popup window manager class. The manager registering and triggers showing context popup menu
- * and tooltips. Menu appearing is triggered by right mouse click or double fingers touch event.
+ * and tooltips. Menu appearing is triggered by right pointer click or double fingers touch event.
  * To bind a popup menu to an UI component you can either set "tooltip" property of the component
  * with a popup menu instance:
 
@@ -24064,10 +24849,10 @@ pkg.Tooltip = Class(pkg.Panel, [
         m.add("Menu Item 3");
 
         // implement "getPopup" method that shows popup menu only
-        // if mouse cursor located at red rectangular area of the
+        // if pointer cursor located at red rectangular area of the
         // component
         canvas.root.getPopup = function(target, x, y) {
-            // test if mouse cursor position is in red spot area
+            // test if pointer cursor position is in red spot area
             // and return context menu if it is true
             if (x > 50 && y > 50 && x < 100 && y <  100)  {
                 return m;
@@ -24092,7 +24877,7 @@ pkg.Tooltip = Class(pkg.Panel, [
          canvas.root.popup = t;
 
 *  Or you can implement "getTooltip(target,x,y)" method if the tooltip showing depends on
-*  the mouse cursor location:
+*  the pointer cursor location:
 
 
         // create canvas
@@ -24130,15 +24915,38 @@ pkg.Tooltip = Class(pkg.Panel, [
 pkg.PopupManager = Class(pkg.Manager, [
     function $prototype() {
         /**
-         * Define mouse clicked event handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseClicked
+         * Indicates if a shown tooltip has to disappear by pointer pressed event
+         * @attribute hideTooltipByPress
+         * @type {Boolean}
+         * @default true
          */
-        this.mouseClicked = function (e){
+        this.hideTooltipByPress = true;
+
+        /**
+         * Define interval (in milliseconds) between entering a component and showing
+         * a tooltip for the entered component
+         * @attribute showTooltipIn
+         * @type {Integer}
+         * @default 400
+         */
+        this.showTooltipIn = 400;
+
+        this.syncTooltipPosition = false;
+
+        /**
+         * Define pointer clicked event handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerClicked
+         */
+        this.pointerClicked = function (e){
             this.$popupMenuX = e.absX;
             this.$popupMenuY = e.absY;
 
-            if ((e.mask & pkg.MouseEvent.RIGHT_BUTTON) > 0) {
+
+
+            // Right button
+            // TODO: check if it is ok and compatiable with touch
+            if (e.isContext()) {
                 var popup = null;
 
                 if (e.source.popup != null) {
@@ -24159,22 +24967,14 @@ pkg.PopupManager = Class(pkg.Manager, [
         };
 
         /**
-         * Indicates if a shown tooltip has to disappear by mouse pressed event
-         * @attribute hideTooltipByPress
-         * @type {Boolean}
-         * @default true
+         * Define pointer entered event handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerEntered
          */
-        this.hideTooltipByPress = true;
-
-        /**
-         * Define mouse entered event handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseEntered
-         */
-        this.mouseEntered = function(e){
-            var c = e.source;
-            if (c.getTooltip != null || c.tooltip != null){
-                this.target = c;
+        this.pointerEntered = function(e) {
+            if (this.$target == null && (e.source.tooltip != null || e.source.getTooltip != null)) {
+                var c = e.source;
+                this.$target = c;
                 this.$targetTooltipLayer = c.getCanvas().getLayer(pkg.WinLayer.ID);
                 this.$tooltipX = e.x;
                 this.$tooltipY = e.y;
@@ -24183,36 +24983,35 @@ pkg.PopupManager = Class(pkg.Manager, [
         };
 
         /**
-         * Define mouse exited event handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseExited
+         * Define pointer exited event handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerExited
          */
-        this.mouseExited = function(e){
-            if (this.target != null){
-                if (this.$toolTask != null) {
-                    this.$toolTask.shutdown();
-                }
-
-                this.target = null;
-                this.hideTooltip();
+        this.pointerExited = function(e) {
+            // exited triggers tooltip hiding only for "info" tooltips
+            if (this.$target != null && (this.$tooltip == null || this.$tooltip.winType === "info")) {
+                this.stopShowingTooltip();
             }
         };
 
         /**
-         * Define mouse moved event handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseMoved
+         * Define pointer moved event handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerMoved
          */
-        this.mouseMoved = function(e){
-            if (this.target != null){
-                if (this.$toolTask != null) {
-                    this.$toolTask.run(this.$toolTask.ri);
-                }
-
+        this.pointerMoved = function(e) {
+            // to prevent handling pointer moved from component of mdi
+            // tooltip we have to check if target equals to source
+            // instead of just checking if target is not a null
+            if (this.$target === e.source) {
+                // store a new location for a tooltip
                 this.$tooltipX = e.x;
                 this.$tooltipY = e.y;
-                if (this.tooltip != null) {
-                    this.hideTooltip();
+
+                // wake up task try showing a tooltip
+                // at the new location
+                if (this.$toolTask != null) {
+                    this.$toolTask.run(this.showTooltipIn);
                 }
             }
         };
@@ -24223,31 +25022,90 @@ pkg.PopupManager = Class(pkg.Manager, [
          * @param  {Task} t a task context
          * @method run
          */
-        this.run = function(t){
-            if (this.tooltip == null){
-                this.tooltip = this.target.tooltip != null ? this.target.tooltip
-                                                           : this.target.getTooltip(this.target,
-                                                                                    this.$tooltipX,
-                                                                                    this.$tooltipY);
-                if (this.tooltip != null) {
-                    var p = L.toParentOrigin(this.$tooltipX, this.$tooltipY, this.target);
-                    this.tooltip.toPreferredSize();
-                    var tx = p.x,
-                        ty = p.y - this.tooltip.height,
-                        dw = this.$targetTooltipLayer.width;
-
-                    if (tx + this.tooltip.width > dw) {
-                        tx = dw - this.tooltip.width - 1;
+        this.run = function(t) {
+            if (this.$target != null) {
+                var ntooltip = this.$target.tooltip != null ? this.$target.tooltip
+                                                            : this.$target.getTooltip(this.$target,
+                                                                                      this.$tooltipX,
+                                                                                      this.$tooltipY);
+                if (this.$tooltip != ntooltip) {
+                    // hide previously shown tooltip
+                    if (this.$tooltip != null) {
+                        this.hideTooltip();
                     }
 
-                    this.tooltip.setLocation(tx < 0 ? 0 : tx, ty < 0 ? 0 : ty);
+                    // set new tooltip
+                    this.$tooltip = ntooltip;
 
-                    this.tooltip.winType = "info";
-                    this.$targetTooltipLayer.add(this.tooltip);
+                    // if new tooltip exists than show it
+                    if (ntooltip != null) {
+                        var p = L.toParentOrigin(this.$tooltipX, this.$tooltipY, this.$target);
+
+                        this.$tooltip.toPreferredSize();
+                        var tx = p.x,
+                            ty = p.y - this.$tooltip.height,
+                            dw = this.$targetTooltipLayer.width;
+
+                        if (tx + this.$tooltip.width > dw) {
+                            tx = dw - this.$tooltip.width - 1;
+                        }
+
+                        this.$tooltip.setLocation(tx < 0 ? 0 : tx, ty < 0 ? 0 : ty);
+
+                        if (this.$tooltip.winType == null) {
+                            this.$tooltip.winType = "info";
+                        }
+
+                        this.$targetTooltipLayer.addWin(this.$tooltip, this);
+
+                        if (this.$tooltip.winType !== "info") {
+                            pkg.activateWindow(this.$tooltip);
+                        }
+                    }
+                }
+                else {
+                    if (this.$tooltip != null && this.syncTooltipPosition === true) {
+                        var p  = L.toParentOrigin(this.$tooltipX, this.$tooltipY, this.$target),
+                            tx = p.x,
+                            ty = p.y - this.$tooltip.height;
+
+                        this.$tooltip.setLocation(tx < 0 ? 0 : tx, ty < 0 ? 0 : ty);
+                    }
                 }
             }
-
             t.pause();
+        };
+
+        this.winActivated = function(layer, win, b) {
+            // this method is called for only for mdi window
+            // consider every deactivation of a mdi window as
+            // a signal to stop showing tooltip
+            if (b === false && this.$tooltip != null)  {
+                this.$tooltip.removeMe();
+            }
+        };
+
+        this.winOpened = function(layer, win, b) {
+            if (b === false) {
+                // cleanup tooltip reference
+                this.$tooltip = null;
+
+                if (win.winType !== "info") {
+                    this.stopShowingTooltip();
+                }
+            }
+        };
+
+        this.stopShowingTooltip = function () {
+            if (this.$target != null) {
+                this.$target = null;
+            }
+
+            if (this.$toolTask != null) {
+                this.$toolTask.shutdown();
+            }
+
+            this.hideTooltip();
         };
 
         /**
@@ -24255,37 +25113,33 @@ pkg.PopupManager = Class(pkg.Manager, [
          * @method hideTooltip
          */
         this.hideTooltip = function(){
-            if (this.tooltip != null) {
-                this.$targetTooltipLayer.remove(this.tooltip);
-                this.tooltip = null;
+            if (this.$tooltip != null) {
+                this.$tooltip.removeMe();
+                this.$tooltip = null;
             }
         };
 
         /**
-         * Define mouse pressed event handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mousePressed
+         * Define pointer pressed event handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerPressed
          */
-        this.mousePressed = function(e){
-            if (this.hideTooltipByPress && this.target != null) {
-                if (this.$toolTask != null) {
-                    this.$toolTask.shutdown();
-                }
-                this.target = null;
-                this.hideTooltip();
+        this.pointerPressed = function(e){
+            if (this.hideTooltipByPress === true && this.$target != null &&
+                (this.$tooltip == null || this.$tooltip.winType === "info"))
+            {
+                this.stopShowingTooltip();
             }
         };
 
         /**
-         * Define mouse released event handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseReleased
+         * Define pointer released event handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerReleased
          */
-        this.mouseReleased = function(e){
-            if (this.hideTooltipByPress && this.target != null){
-                this.x = e.x;
-                this.y = e.y;
-                this.$toolTask = task(this).run(this.showTooltipIn, this.showTooltipIn);
+        this.pointerReleased = function(e) {
+            if (this.hideTooltipByPress === false && this.$target != null && (this.$tooltip == null || this.$tooltip.winType === "info")) {
+                this.stopShowingTooltip();
             }
         };
     },
@@ -24294,47 +25148,10 @@ pkg.PopupManager = Class(pkg.Manager, [
         this.$super();
         this.$popupMenuX = this.$popupMenuY = 0;
         this.$tooltipX = this.$tooltipY = 0;
-        this.$targetTooltipLayer = this.tooltip = this.target = null;
+        this.$targetTooltipLayer = this.$tooltip = this.$target = null;
 
         var LClass = zebra.util.ListenersClass("menuItemSelected");
         this._ = new LClass();
-
-        /**
-         * Define interval (in milliseconds) between entering a component and showing
-         * a tooltip for the entered component
-         * @attribute showTooltipIn
-         * @type {Integer}
-         * @default 400
-         */
-        this.showTooltipIn = 400;
-    }
-]);
-
-pkg.WindowTitleView = Class(pkg.View, [
-    function $prototype() {
-        this[''] = function(bg) {
-            this.radius = 6;
-            this.gap = this.radius;
-            this.bg = bg != null ? bg : "#66CCFF";
-        };
-
-        this.paint = function(g,x,y,w,h,d) {
-            this.outline(g,x,y,w,h,d);
-            g.setColor(this.bg);
-            g.fill();
-        };
-
-        this.outline = function (g,x,y,w,h,d) {
-            g.beginPath();
-            g.moveTo(x + this.radius, y);
-            g.lineTo(x + w - this.radius*2, y);
-            g.quadraticCurveTo(x + w, y, x + w, y + this.radius);
-            g.lineTo(x + w, y + h);
-            g.lineTo(x, y + h);
-            g.lineTo(x, y + this.radius);
-            g.quadraticCurveTo(x, y, x + this.radius, y);
-            return true;
-        };
     }
 ]);
 
@@ -24529,9 +25346,10 @@ pkg.DefViews = Class([
          * paint the given cell model value
          * @method  getView
          */
-        this.getView = function(target, row,col,obj){
-            if (obj != null){
-                if (obj && obj.paint) return obj;
+        this.getView = function(target, row, col, obj){
+            if (obj != null) {
+                if (obj.toView != null) return obj.toView();
+                if (obj.paint != null) return obj;
                 this.render.setValue(obj.toString());
                 return this.render;
             }
@@ -24638,14 +25456,14 @@ pkg.DefEditors = Class([
                 this.toString = function() {
                     return this.selectedIndex < 0 ? ""
                                                   : this.items[this.selectedIndex];
-                }
-            },
-
-            function(items) {
-                this.$this(items, -1);
+                };
             },
 
             function(items, selectedIndex) {
+                if (arguments.length < 2) {
+                    selectedIndex = -1;
+                }
+
                 this.items = items;
                 this.selectedIndex = selectedIndex;
             }
@@ -24674,7 +25492,7 @@ pkg.DefEditors = Class([
          * @method  fetchEditedValue
          */
         this.fetchEditedValue = function(grid,row,col,data,editor) {
-            if (editor == this.selectorEditor) {
+            if (editor === this.selectorEditor) {
                 data.selectedIndex = editor.list.selectedIndex;
                 return data;
             }
@@ -24700,7 +25518,7 @@ pkg.DefEditors = Class([
             editor = zebra.isBoolean(v) ? this.boolEditor
                                         : (zebra.instanceOf(v, this.$clazz.Items) ? this.selectorEditor : this.textEditor);
 
-            if (editor == this.selectorEditor) {
+            if (editor === this.selectorEditor) {
                 editor.list.setModel(v.items);
                 editor.list.select(v.selectedIndex);
             }
@@ -24724,7 +25542,7 @@ pkg.DefEditors = Class([
          * @method shouldStart
          */
         this.shouldStart = function(grid,row,col,e){
-            return e.ID == ui.MouseEvent.CLICKED && e.clicks == 1;
+            return e.id === "pointerClicked";
         };
 
         /**
@@ -24738,7 +25556,7 @@ pkg.DefEditors = Class([
          * @method shouldCancel
          */
         this.shouldCancel = function(grid,row,col,e){
-            return e.ID == KE.PRESSED && KE.ESCAPE == e.code;
+            return e.id === "keyPressed" && KE.ESCAPE === e.code;
         };
 
         /**
@@ -24751,12 +25569,10 @@ pkg.DefEditors = Class([
          * @method shouldFinish
          */
         this.shouldFinish = function(grid,row,col,e){
-            return e.ID == KE.PRESSED && KE.ENTER  == e.code;
+            return e.id === "keyPressed" && KE.ENTER === e.code;
         };
     }
 ]);
-
-pkg.CaptionListeners = new zebra.util.ListenersClass("captionResized");
 
 /**
  * Grid caption base UI component class. This class has to be used
@@ -24781,6 +25597,10 @@ pkg.CaptionListeners = new zebra.util.ListenersClass("captionResized");
  */
 
 pkg.BaseCaption = Class(ui.Panel, [
+    function $clazz() {
+        this.Listeners = new zebra.util.ListenersClass("captionResized");
+    },
+
     function $prototype() {
         /**
          * Minimal possible grid cell size
@@ -24791,7 +25611,7 @@ pkg.BaseCaption = Class(ui.Panel, [
         this.minSize = 10;
 
         /**
-         * Size of the active area where cells size can be changed by mouse dragging event
+         * Size of the active area where cells size can be changed by pointer dragging event
          * @attribute activeAreaSize
          * @type {Number}
          * @default 5
@@ -24808,7 +25628,7 @@ pkg.BaseCaption = Class(ui.Panel, [
 
         /**
          * Indicate if the grid cell size has to be adjusted according
-         * to the cell preferred size by mouse double click event.
+         * to the cell preferred size by pointer double click event.
          * @attribute isAutoFit
          * @default true
          * @type {Boolean}
@@ -24816,7 +25636,7 @@ pkg.BaseCaption = Class(ui.Panel, [
 
         /**
          * Indicate if the grid cells are resize-able.
-         * to the cell preferred size by mouse double click event.
+         * to the cell preferred size by pointer double click event.
          * @attribute isResizable
          * @default true
          * @type {Boolean}
@@ -24827,19 +25647,19 @@ pkg.BaseCaption = Class(ui.Panel, [
             return this.metrics != null     &&
                    this.selectedColRow >= 0 &&
                    this.isResizable         &&
-                   this.metrics.isUsePsMetric === false ? ((this.orient == L.HORIZONTAL) ? Cursor.W_RESIZE
-                                                                                         : Cursor.S_RESIZE)
+                   this.metrics.isUsePsMetric === false ? ((this.orient === L.HORIZONTAL) ? Cursor.W_RESIZE
+                                                                                          : Cursor.S_RESIZE)
                                                         : null;
         };
 
         /**
-         * Define mouse dragged events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragged
+         * Define pointer dragged events handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerDragged
          */
-        this.mouseDragged = function(e){
+        this.pointerDragged = function(e){
             if (this.pxy != null) {
-                var b  = (this.orient == L.HORIZONTAL),
+                var b  = (this.orient === L.HORIZONTAL),
                     rc = this.selectedColRow,
                     ns = (b ? this.metrics.getColWidth(rc) + e.x
                             : this.metrics.getRowHeight(rc) + e.y) - this.pxy;
@@ -24853,11 +25673,11 @@ pkg.BaseCaption = Class(ui.Panel, [
         };
 
         /**
-         * Define mouse drag started events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragStarted
+         * Define pointer drag started events handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerDragStarted
          */
-        this.mouseDragStarted = function(e){
+        this.pointerDragStarted = function(e){
             if (this.metrics != null &&
                 this.isResizable     &&
                 this.metrics.isUsePsMetric === false)
@@ -24865,18 +25685,18 @@ pkg.BaseCaption = Class(ui.Panel, [
                 this.calcRowColAt(e.x, e.y);
 
                 if (this.selectedColRow >= 0) {
-                    this.pxy = (this.orient == L.HORIZONTAL) ? e.x
-                                                             : e.y;
+                    this.pxy = (this.orient === L.HORIZONTAL) ? e.x
+                                                              : e.y;
                 }
             }
         };
 
         /**
-         * Define mouse drag ended events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragEnded
+         * Define pointer drag ended events handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerDragEnded
          */
-        this.mouseDragEnded = function (e){
+        this.pointerDragEnded = function (e){
             if (this.pxy != null) {
                 this.pxy = null;
             }
@@ -24887,30 +25707,29 @@ pkg.BaseCaption = Class(ui.Panel, [
         };
 
         /**
-         * Define mouse moved events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseMoved
+         * Define pointer moved events handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerMoved
          */
-        this.mouseMoved = function(e) {
+        this.pointerMoved = function(e) {
             if (this.metrics != null) {
                 this.calcRowColAt(e.x, e.y);
             }
         };
 
         /**
-         * Define mouse clicked events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseClicked
+         * Define pointer clicked events handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerClicked
          */
-        this.mouseClicked = function (e){
+        this.pointerDoubleClicked = function (e){
             if (this.pxy     == null     &&
                 this.metrics != null     &&
-                e.clicks > 1             &&
                 this.selectedColRow >= 0 &&
                 this.isAutoFit === true     )
             {
                 var size = this.getCaptionPS(this.selectedColRow);
-                if (this.orient == L.HORIZONTAL) {
+                if (this.orient === L.HORIZONTAL) {
                     this.metrics.setColWidth (this.selectedColRow, size);
                 }
                 else {
@@ -24927,13 +25746,12 @@ pkg.BaseCaption = Class(ui.Panel, [
          * @method getCaptionPS
          */
         this.getCaptionPS = function(rowcol) {
-            return (this.orient == L.HORIZONTAL) ? this.metrics.getColPSWidth(this.selectedColRow)
-                                                 : this.metrics.getRowPSHeight(this.selectedColRow);
+            return 0;
         };
 
         this.captionResized = function(rowcol, ns) {
             if (ns > this.minSize) {
-                if (this.orient == L.HORIZONTAL) {
+                if (this.orient === L.HORIZONTAL) {
                     var pw = this.metrics.getColWidth(rowcol);
                     this.metrics.setColWidth(rowcol, ns);
                     this._.captionResized(this, rowcol, pw);
@@ -24979,7 +25797,7 @@ pkg.BaseCaption = Class(ui.Panel, [
             {
                 var m     = this.metrics,
                     cv    = m.getCellsVisibility(),
-                    isHor = (this.orient == L.HORIZONTAL);
+                    isHor = (this.orient === L.HORIZONTAL);
 
                 if ((isHor && cv.fc != null) || (isHor === false && cv.fr != null)) {
                     var gap  = m.lineSize,
@@ -25004,7 +25822,7 @@ pkg.BaseCaption = Class(ui.Panel, [
                 var v = this.metrics.getCellsVisibility();
                 if (v != null) {
                     var m       = this.metrics,
-                        b       = this.orient == L.HORIZONTAL,
+                        b       = this.orient === L.HORIZONTAL,
                         startRC = b ? v.fc[0] : v.fr[0],
                         endRC   = b ? v.lc[0] : v.lr[0],
                         xy      = b ? v.fc[1] - this.x - m.lineSize + m.getXOrigin()
@@ -25041,7 +25859,7 @@ pkg.BaseCaption = Class(ui.Panel, [
     },
 
     function(titles) {
-        this._ = new pkg.CaptionListeners();
+        this._ = new this.$clazz.Listeners();
         this.orient = this.metrics = this.pxy = null;
         this.selectedColRow = -1;
         this.$super();
@@ -25059,9 +25877,9 @@ pkg.BaseCaption = Class(ui.Panel, [
         if (p == null || zebra.instanceOf(p, pkg.Metrics)) {
             this.metrics = p;
             if (this.constraints != null) {
-                this.orient = (this.constraints == L.TOP    || this.constraints == "top"   ||
-                               this.constraints == L.BOTTOM || this.constraints == "bottom"  ) ? L.HORIZONTAL
-                                                                                               : L.VERTICAL;
+                this.orient = (this.constraints === L.TOP    || this.constraints === "top"   ||
+                               this.constraints === L.BOTTOM || this.constraints === "bottom"  ) ? L.HORIZONTAL
+                                                                                                 : L.VERTICAL;
             }
         }
     }
@@ -25102,11 +25920,19 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
             return { width:this.psW, height:this.psH };
         };
 
+        this.setFont = function(f) {
+            this.render.setFont(f);
+        };
+
+        this.setColor = function(c) {
+            this.render.setColor(c);
+        };
+
         this.recalc = function(){
             this.psW = this.psH = 0;
             if (this.metrics != null){
                 var m     = this.metrics,
-                    isHor = (this.orient == L.HORIZONTAL),
+                    isHor = (this.orient === L.HORIZONTAL),
                     size  = isHor ? m.getGridCols() : m.getGridRows();
 
                 for(var i = 0;i < size; i++) {
@@ -25137,16 +25963,20 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
         /**
          * Put the given title for the given caption cell.
          * @param  {Integer} rowcol a grid caption cell index
-         * @param  {String|zebra.ui.View} title a title of the given grid caption cell.
-         * Can be a string or zebra.ui.View class instance
+         * @param  {String|zebra.ui.View|zebra.ui.Panel} title a title of the given grid caption cell.
+         * Can be a string or zebra.ui.View or zebra.ui.Panel class instance
          * @method putTitle
          */
         this.putTitle = function(rowcol, title){
             var prev = this.titles[rowcol] != null ? this.titles[rowcol] : {};
             if (prev.title != title) {
+                if (title != null && zebra.instanceOf(title, ui.Panel)) {
+                    title = new ui.CompRender(title);
+                }
+
                 prev.title = title;
                 this.titles[rowcol] = prev;
-                this.vrp;
+                this.vrp();
             }
         };
 
@@ -25171,29 +26001,24 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
             this.titles[i] = t;
             this.repaint();
         };
-    },
 
-    function getCaptionPS(rowcol) {
-        var size = this.$super(rowcol),
-            v    = this.getTitleView(this.selectedColRow);
-
-        if (v != null) {
-            size = Math.max(size, (this.orient == L.HORIZONTAL) ? v.getPreferredSize().width
-                                                                : v.getPreferredSize().height);
-        }
-
-        return size;
+        this.getCaptionPS = function(rowcol) {
+            var  v = this.getTitleView(rowcol);
+            return (v != null) ? (this.orient === L.HORIZONTAL ? v.getPreferredSize().width
+                                                               : v.getPreferredSize().height)
+                               : 0;
+        };
     },
 
     function paintOnTop(g) {
         if (this.metrics != null){
             var cv = this.metrics.getCellsVisibility();
 
-            if ((cv.fc != null && cv.lc != null && this.orient == L.HORIZONTAL)||
-                (cv.fr != null && cv.lr != null && this.orient == L.VERTICAL  )   )
+            if ((cv.fc != null && cv.lc != null && this.orient === L.HORIZONTAL)||
+                (cv.fr != null && cv.lr != null && this.orient === L.VERTICAL  )   )
             {
                 var m      = this.metrics,
-                    isHor  = (this.orient == L.HORIZONTAL),
+                    isHor  = (this.orient === L.HORIZONTAL),
                     gap    = m.lineSize,
                     top    = this.getTop(),
                     left   = this.getLeft(),
@@ -25237,11 +26062,11 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
                             bg = t == null ? null : t.bg,
                             ps = v.getPreferredSize(),
                             vx = xa == L.CENTER ? Math.floor((ww - ps.width)/2)
-                                                : (xa == L.RIGHT ? ww - ps.width - ((i==size-1) ? right : 0)
-                                                                 : (i === 0 ? left: 0)),
+                                                : (xa === L.RIGHT ? ww - ps.width - ((i==size-1) ? right : 0)
+                                                                  : (i === 0 ? left: 0)),
                             vy = ya == L.CENTER ? Math.floor((hh - ps.height)/2)
-                                                : (ya == L.BOTTOM ? hh - ps.height - ((i==size-1) ? bottom : 0)
-                                                                  :  (i === 0 ? top: 0));
+                                                : (ya === L.BOTTOM ? hh - ps.height - ((i==size-1) ? bottom : 0)
+                                                                   :  (i === 0 ? top: 0));
 
 
                         if (bg != null) {
@@ -25264,15 +26089,11 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
         }
     },
 
-    function() {
-        this.$this(null);
-    },
-
-    function(titles) {
-        this.$this(titles, new ui.StringRender(""));
-    },
-
     function(titles, render) {
+        if (arguments.length < 2) {
+            render = new ui.StringRender("");
+        }
+
         this.psW = this.psH = 0;
         this.titles = [];
         this.render = render;
@@ -25298,7 +26119,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
             function $prototype() {
                 this.doLayout = function (target) {
                     var m    = target.metrics,
-                        b    = target.orient == L.HORIZONTAL,
+                        b    = target.orient === L.HORIZONTAL,
                         top  = target.getTop(),
                         left = target.getLeft(),
                         wh   = (b ? target.height - top  - target.getBottom()
@@ -25316,12 +26137,10 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
 
                         if (kid.isVisible === true) {
                             if (b) {
-                                kid.setLocation(xy, top);
-                                kid.setSize(cwh, wh);
+                                kid.setBounds(xy, top, cwh, wh);
                             }
                             else {
-                                kid.setLocation(left, xy);
-                                kid.setSize(wh, cwh);
+                                kid.setBounds(left, xy, wh, cwh);
                             }
                         }
 
@@ -25400,7 +26219,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
                 if (this.isSortable) {
                     var col = this.parent.indexOf(this);
                     if (info.col == col) {
-                        this.sortState = info.name == 'descent' ? 1 : -1;
+                        this.sortState = info.name === 'descent' ? 1 : -1;
                         this.statusPan.setState(info.name);
                     }
                     else {
@@ -25427,12 +26246,11 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
             },
 
             function fired(target) {
-                if (this.isSortable) {
+                if (this.isSortable === true) {
                     var f = this.sortState == 1 ? zebra.data.ascent
                                                 : zebra.data.descent,
                         model = this.getGridCaption().metrics.model,
                         col   = this.parent.indexOf(this);
-
                     model.sortCol(col, f);
                 }
             },
@@ -25471,20 +26289,33 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
         /**
          * Put the given title component for the given caption cell.
          * @param  {Integer} rowcol a grid caption cell index
-         * @param  {String|zebra.ui.Panel} title a title of the given grid caption cell.
-         * Can be a string or zebra.ui.Panel class instance
+         * @param  {String|zebra.ui.Panel|zebra.ui.View} title a title of the given grid caption cell.
+         * Can be a string or zebra.ui.View or zebra.ui.Panel class instance
          * @method putTitle
          */
         this.putTitle = function(rowcol, t) {
-            for(var i = this.kids.length - 1; i < rowcol; i++) {
-                this.add(t);
+            // add empty titles
+            for(var i = this.kids.length - 1;  i >= 0 && i < rowcol; i++) {
+                this.add(new this.$clazz.TitlePan(""));
+            }
+
+            if (zebra.isString(t)) {
+                t = new this.$clazz.TitlePan("");
+            }
+            else {
+                if (zebra.instanceOf(t, ui.View)) {
+                    var p = new ui.ViewPan();
+                    p.setView(t);
+                    t = p;
+                }
             }
 
             if (rowcol < this.kids.length) {
-                this.removeAt(rowcol);
+                this.setAt(rowcol, t);
             }
-
-            this.insert(rowcol, null, t);
+            else {
+                this.add(t);
+            }
         };
 
         /**
@@ -25510,21 +26341,19 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
         };
 
         this.matrixResized = function(target,prevRows,prevCols){
-            for(var i=0; i < this.kids.length; i++) {
+            for(var i = 0; i < this.kids.length; i++) {
                 if (this.kids[i].matrixResized) {
                     this.kids[i].matrixResized(target,prevRows,prevCols);
                 }
             }
         };
-    },
 
-    function() {
-        this.$this(null);
-    },
-
-    function(titles) {
-        this.$super(titles);
-        this.setLayout(new this.$clazz.Layout());
+        this.getCaptionPS = function(rowcol) {
+            var  c = this.kids[rowcol];
+            return (c != null) ? (this.orient == L.HORIZONTAL ? c.getPreferredSize().width
+                                                              : c.getPreferredSize().height)
+                               : 0;
+        };
     },
 
     function captionResized(rowcol, ns) {
@@ -25549,6 +26378,59 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
             c = new this.$clazz.TitlePan(c);
         }
         this.$super(i,constr, c);
+    },
+
+    function(titles) {
+        if (arguments === 0) titles = null;
+
+        this.$super(titles);
+        this.setLayout(new this.$clazz.Layout());
+    }
+]);
+
+// TODO: this is the future thoughts regarding
+// grid cell selection customization
+pkg.RowSelMode = Class([
+    function $prototype() {
+        this.selectedIndex = 0;
+        this.$blocked = false;
+
+        this.isSelected = function(row, col) {
+            return row >= 0 && this.selectedIndex === row;
+        };
+
+        this.select = function(row, col, b) {
+            if (arguments.length === 1 || (arguments.length === 2 && zebra.isNumber(col))) {
+                b = true;
+            }
+
+            if (this.isSelected(row, col) != b){
+                if (this.selectedIndex >= 0) this.clearSelect();
+                if (b === true) {
+                    this.selectedIndex = row;
+                    this.target._.rowSelected();
+                }
+            }
+        };
+
+        this.clearSelect = function() {
+            if (this.selectedIndex >= 0) {
+                this.selectedIndex = -1;
+                this.target._.rowSelected();
+            }
+        };
+
+        this.posChanged = function(src) {
+            if ($blocked === false) {
+                $blocked = true;
+                try {
+
+                }
+                finally {
+                    $blocked = false;
+                }
+            }
+        };
     }
 ]);
 
@@ -25603,12 +26485,23 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
  */
 pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
         function $clazz() {
+            this.Listeners = zebra.util.ListenersClass("rowSelected");
+
             this.DEF_COLWIDTH  = 80;
             this.DEF_ROWHEIGHT = 25;
             this.CornerPan = Class(ui.Panel, []);
         },
 
         function $prototype() {
+            /**
+             * Grid navigation mode
+             * @attribute navigationMode
+             * @default "row"
+             * @type {String}
+             */
+            this.navigationMode = "row";
+
+
             /**
              * Grid line size
              * @attribute lineSize
@@ -25684,6 +26577,16 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
             this.drawVerLines = this.drawHorLines = true;
 
             /**
+             * Indicates if left and right grid net vertical lines
+             * have to be rendered or not.
+             * @attribute drawSideLines
+             * @type {Boolean}
+             * @readOnly
+             * @default true
+             */
+            this.drawSideLines = true;
+
+            /**
              * Line color
              * @attribute lineColor
              * @type {String}
@@ -25702,6 +26605,14 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
              */
             this.isUsePsMetric = false;
 
+            /**
+             * Defines if the pos narker has to be renederd over rendered data
+             * @attribute paintPosMarkerOver
+             * @type {Boolean}
+             * @default true
+             */
+            this.paintPosMarkerOver = true;
+
             this.$topY = function() {
                 // grid without top caption renders line at the top, so we have to take in account
                 // the place for the line
@@ -25718,6 +26629,22 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                                                                         : this.getLeftCaptionWidth());
             };
 
+            this.setDefCellXAlignment = function(ax) {
+                this.setDefCellAlignments(ax, this.defYAlignment);
+            };
+
+            this.setDefCellYAlignment = function(ay) {
+                this.setDefCellAlignments(this.defXAlignment, ay);
+            };
+
+            this.setDefCellAlignments = function(ax, ay) {
+                if (this.defXAlignment != ax || this.defYAlignment != ay) {
+                    this.defXAlignment = L.$constraints(ax);
+                    this.defYAlignment = L.$constraints(ay);
+                    this.repaint();
+                }
+            };
+
             this.colVisibility = function(col,x,d,b){
                 var cols = this.getGridCols();
                 if (cols === 0) return null;
@@ -25730,7 +26657,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                     this.getLeftCaptionWidth());
 
                 for(; col < cols && col >= 0; col += d) {
-                    if (x + dx < xx1 && (x + this.colWidths[col] + dx) > xx2){
+                    if (x + dx < xx1 && (x + this.colWidths[col] + dx) > xx2) {
                         if (b) return [col, x];
                     }
                     else {
@@ -25751,12 +26678,18 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 var rows = this.getGridRows();
                 if (rows === 0) return null;
 
+
+
                 var top = this.getTop(),
                     dy  = this.scrollManager.getSY(),
                     yy1 = Math.min(this.visibleArea.y + this.visibleArea.height,
                                    this.height - this.getBottom()),
                     yy2 = Math.max(this.visibleArea.y,
                                    top + this.getTopCaptionHeight());
+
+
+                console.log("Grid.rowVisibility() : " + yy1 + ","+ yy2 + "," + dy);
+
 
                 for(; row < rows && row >= 0; row += d){
                     if (y + dy < yy1 && (y + this.rowHeights[row] + dy) > yy2){
@@ -26018,7 +26951,9 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 return y;
             };
 
-            this.childInputEvent = function(e){
+            this.childPointerEntered  = this.childPointerExited   =
+            this.childPointerReleased = this.childPointerReleased = this.childPointerPressed =
+            this.childKeyReleased     = this.childKeyTyped        = this.childKeyPressed     = function(e){
                 if (this.editingRow >= 0) {
                     if (this.editors.shouldCancel(this,
                                                   this.editingRow,
@@ -26084,20 +27019,31 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                             g.clipRect(tw - dx, th - dy, this.width  - tw, this.height - th);
                         }
 
-                        this.paintSelection(g);
-                        this.paintData(g);
+                        if (this.paintPosMarkerOver !== true) {
+                            this.paintPosMarker(g);
+                        }
 
-                        if (this.drawHorLines || this.drawVerLines) {
+                        this.paintData(g);
+                        if (this.paintNetOnCaption !== true && (this.drawHorLines === true || this.drawVerLines === true)) {
                             this.paintNet(g);
                         }
 
-                        this.paintPosMarker(g);
+                        if (this.paintPosMarkerOver === true) {
+                            this.paintPosMarker(g);
+                        }
+
                         g.restore();
                     }
                     catch(e) {
                         g.restore();
                         throw e;
                     }
+                }
+            };
+
+            this.paintOnTop = function(g) {
+                if (this.paintNetOnCaption === true && (this.drawHorLines === true || this.drawVerLines === true)) {
+                    this.paintNet(g);
                 }
             };
 
@@ -26175,8 +27121,17 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 }
             };
 
-            this.setPosMarkerMode = function(mode) {
-                if (mode == "row") {
+            /**
+             * Set navigation mode. It is possible to use "row" or "cell" navigation mode.
+             * In first case navigation happens over row, in the second
+             * case navigation happens over cell.
+             * @param {String} mode a navigation mode ("row" pr "cell")
+             * @method setNavigationMode
+             */
+            this.setNavigationMode = function(mode) {
+                if (mode.toLowerCase() === "row") {
+                    this.navigationMode = "row";
+
                     this.getLineSize = function(row) {
                         return 1;
                     };
@@ -26186,7 +27141,9 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                     };
                 }
                 else {
-                    if (mode == "cell") {
+                    this.navigationMode = "cell";
+
+                    if (mode.toLowerCase() === "cell") {
                         this.getLineSize = function(row) {
                             return this.getGridCols();
                         };
@@ -26218,7 +27175,10 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 if (row >= 0) {
                     this.makeVisible(row, this.position.currentCol);
                     this.select(row, true);
-                    this.repaintRows(prevOffset, row);
+                    this.repaintRows(prevLine, row);
+                }
+                else {
+                    this.repaintRows(prevLine, prevLine);
                 }
             };
 
@@ -26239,13 +27199,13 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 if (this.position != null){
                     switch(e.code) {
                         case KE.LEFT    : this.position.seek(-1); break;
-                        case KE.UP      : this.position.seekLineTo(Position.UP); break;
+                        case KE.UP      : this.position.seekLineTo("up"); break;
                         case KE.RIGHT   : this.position.seek(1); break;
-                        case KE.DOWN    : this.position.seekLineTo(Position.DOWN);break;
-                        case KE.PAGEUP  : this.position.seekLineTo(Position.UP, this.pageSize(-1));break;
-                        case KE.PAGEDOWN: this.position.seekLineTo(Position.DOWN, this.pageSize(1));break;
-                        case KE.END     : if (e.isControlPressed()) this.position.setOffset(this.getLines() - 1);break;
-                        case KE.HOME    : if (e.isControlPressed()) this.position.setOffset(0);break;
+                        case KE.DOWN    : this.position.seekLineTo("down");break;
+                        case KE.PAGEUP  : this.position.seekLineTo("up", this.pageSize(-1));break;
+                        case KE.PAGEDOWN: this.position.seekLineTo("down", this.pageSize(1));break;
+                        case KE.END     : if (e.ctrlKey) this.position.setOffset(this.getLines() - 1);break;
+                        case KE.HOME    : if (e.ctrlKey) this.position.setOffset(0);break;
                     }
 
                     this.$se(this.position.currentLine, this.position.currentCol, e);
@@ -26253,14 +27213,14 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
             };
 
             /**
-             * Checks if the given grid row is selected
+             * Checks if the given grid cell is selected
              * @param  {Integer}  row a grid row
+             * @param  {Integer}  col a grid col
              * @return {Boolean}  true if the given row is selected
              * @method isSelected
              */
-            this.isSelected = function(row){
-                return (this.selected == null) ? row == this.selectedIndex
-                                               : this.selected[row] > 0;
+            this.isSelected = function(row, col) {
+                return row == this.selectedIndex;
             };
 
             /**
@@ -26282,7 +27242,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 if (r1 < rows) {
                     if (r2 >= rows) r2 = rows - 1;
                     var y1 = this.getRowY(r1),
-                        y2 = ((r1 == r2) ? y1 : this.getRowY(r2)) + this.rowHeights[r2];
+                        y2 = ((r1 == r2) ? y1 + 1  : this.getRowY(r2)) + this.rowHeights[r2];
 
                     this.repaint(0, y1 + this.scrollManager.getSY(), this.width, y2 - y1);
                 }
@@ -26292,14 +27252,14 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
              * Detect a cell by the given location
              * @param  {Integer} x a x coordinate relatively the grid component
              * @param  {Integer} y a y coordinate relatively the grid component
-             * @return {Array} an array that contains detected grid cell row as
-             * the first element and a grid column as the second element. The
-             * row and column values are set to -1 if no grid cell can be found
-             * at the given location
+             * @return {Object} an object that contains detected grid cell row as
+             * "row" field and a grid column as "col" field. null is returned if
+             * no cell can be detected.
              * @method cellByLocation
              */
             this.cellByLocation = function(x,y){
                 this.validate();
+
                 var dx  = this.scrollManager.getSX(),
                     dy  = this.scrollManager.getSY(),
                     v   = this.visibility,
@@ -26326,7 +27286,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                         }
                     }
                 }
-                return (col >= 0 && row >= 0) ? [row, col] : null;
+                return (col >= 0 && row >= 0) ? { row:row, col:col } : null;
             };
 
             this.doLayout = function(target) {
@@ -26336,17 +27296,18 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                  this.leftCaption.isVisible === true) ? this.leftCaption.getPreferredSize().width : 0;
 
                 if (this.topCaption != null){
-                    this.topCaption.setLocation(this.getLeft() + leftWidth, this.getTop());
-                    this.topCaption.setSize(Math.min(target.width - this.getLeft() - this.getRight() - leftWidth,
-                                                     this.psWidth_),
-                                            topHeight);
+                    this.topCaption.setBounds(this.getLeft() + leftWidth, this.getTop(),
+                                              Math.min(target.width - this.getLeft() - this.getRight() - leftWidth,
+                                                       this.psWidth_),
+                                              topHeight);
                 }
 
                 if (this.leftCaption != null){
-                    this.leftCaption.setLocation(this.getLeft(), this.getTop() + topHeight);
-                    this.leftCaption.setSize(leftWidth,
-                                             Math.min(target.height - this.getTop() - this.getBottom() - topHeight,
-                                                      this.psHeight_));
+                    this.leftCaption.setBounds(this.getLeft(),
+                                               this.getTop() + topHeight,
+                                               leftWidth,
+                                               Math.min(target.height - this.getTop() - this.getBottom() - topHeight,
+                                                        this.psHeight_));
                 }
 
                 if (this.stub != null && this.stub.isVisible === true)
@@ -26354,9 +27315,9 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                     if (this.topCaption  != null && this.topCaption.isVisible === true &&
                         this.leftCaption != null && this.leftCaption.isVisible === true  )
                     {
-                        this.stub.setLocation(this.getLeft(), this.getTop());
-                        this.stub.setSize(this.topCaption.x - this.stub.x,
-                                          this.leftCaption.y - this.stub.y);
+                        this.stub.setBounds(this.getLeft(), this.getTop(),
+                                            this.topCaption.x - this.stub.x,
+                                            this.leftCaption.y - this.stub.y);
                     }
                     else {
                         this.stub.setSize(0, 0);
@@ -26380,9 +27341,8 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                         h -= (this.cellInsetsTop + this.cellInsetsBottom);
                     }
 
-                    this.editor.setLocation(x + this.scrollManager.getSX(),
-                                            y + this.scrollManager.getSY());
-                    this.editor.setSize(w, h);
+                    this.editor.setBounds(x + this.scrollManager.getSX(),
+                                          y + this.scrollManager.getSY(), w, h);
                 }
             };
 
@@ -26398,14 +27358,15 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 if (this.selectedIndex >= 0) {
                     var prev = this.selectedIndex;
                     this.selectedIndex = -1;
-                    this._.fired(this, -1, 0, false);
+                    this._.rowSelected(this, -1, 0, false);
                     this.repaintRows(-1, prev);
                 }
             };
 
             /**
-             * Mark as selected or unselected the given grid row.
+             * Mark as selected or unselected the given grid cell
              * @param  {Integer} row a grid row
+             * @param  {Integer} col a grid row,
              * @param  {boolean} [b] a selection status. true if the parameter
              * has not been specified
              * @method select
@@ -26417,7 +27378,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                     if (this.selectedIndex >= 0) this.clearSelect();
                     if (b) {
                         this.selectedIndex = row;
-                        this._.fired(this, row, 1, b);
+                        this._.rowSelected(this, row, 1, b);
                     }
                 }
             };
@@ -26426,43 +27387,48 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 this.vVisibility();
             };
 
-            this.mouseClicked  = function(e) {
+            this.pointerClicked  = function(e) {
                 if (this.visibility.hasVisibleCells()){
                     this.stopEditing(true);
 
-                    if (e.isActionMask()){
+                    console.log("Grid.pointerClicked() " + e.isAction() );
+
+
+                    if (e.isAction()){
+
+
                         var p = this.cellByLocation(e.x, e.y);
                         if (p != null) {
                             if (this.position != null){
                                 var row = this.position.currentLine,
                                     col = this.position.currentCol,
-                                    ls  =  this.getLineSize(p[0]);
+                                    ls  =  this.getLineSize(p.row);
 
                                 // normalize column depending on marker mode: row or cell
                                 // in row mode marker can select only the whole row, so
                                 // column can be only 1  (this.getLineSize returns 1)
-                                if (row == p[0] && col == p[1] % ls) {
+                                if (row === p.row && col === p.col % ls) {
                                     this.makeVisible(row, col);
                                 }
                                 else {
                                     this.clearSelect();
-                                    this.position.setRowCol(p[0], p[1] % ls);
+                                    this.position.setRowCol(p.row, p.col % ls);
                                 }
                             }
 
-                            if (this.$se(p[0], p[1], e)) {
-                                // TODO: initiated editor has get mouse clicked event
+                            if (this.$se(p.row, p.col, e)) {
+                                // TODO: initiated editor has get pointer clicked event
                             }
                         }
                     }
                 }
             };
 
-            this.calcPreferredSize = function (target){
+            this.calcPreferredSize = function(target) {
                 return {
                     width : this.psWidth_  +
                            ((this.leftCaption != null  &&
-                             this.leftCaption.isVisible === true ) ? this.leftCaption.getPreferredSize().width : 0),
+                             this.leftCaption.isVisible === true) ? this.leftCaption.getPreferredSize().width : 0),
                     height: this.psHeight_ +
                            ((this.topCaption != null  &&
                              this.topCaption.isVisible === true) ? this.topCaption.getPreferredSize().height : 0)
@@ -26471,12 +27437,12 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
 
             /**
              * Paint vertical and horizontal grid component lines
-             * @param  {2DContext} g a HTML5 canvas 2d context
+             * @param  {2DContext} g a HTML5 canvas 2D context
              * @method paintNet
              * @protected
              */
-            this.paintNet = function(g){
-                var v = this.visibility,
+            this.paintNet = function(g) {
+                var v    = this.visibility,
                     topX = v.fc[1] - this.lineSize,
                     topY = v.fr[1] - this.lineSize,
                     botX = v.lc[1] + this.colWidths[v.lc[0]],
@@ -26487,27 +27453,37 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 g.lineWidth = this.lineSize;
                 g.beginPath();
 
-                if (this.drawHorLines) {
-                    var y = topY + this.lineSize/2, i = v.fr[0];
+                if (this.drawHorLines === true) {
+                    var y  = topY + this.lineSize/2,
+                        i  = v.fr[0],
+                        tx = (this.paintNetOnCaption === true) ? this.getLeft() : topX;
 
                     for(;i <= v.lr[0]; i++){
-                        g.moveTo(topX, y);
+                        g.moveTo(tx, y);
                         g.lineTo(botX, y);
                         y += this.rowHeights[i] + this.lineSize;
                     }
-                    g.moveTo(topX, y);
+                    g.moveTo(tx, y);
                     g.lineTo(botX, y);
                 }
 
-                if (this.drawVerLines) {
-                    var x = topX + this.lineSize/2, i = v.fc[0];
+                if (this.drawVerLines === true) {
+                    var i = v.fc[0];
+                    if (this.drawSideLines !== true && v.fc[0] === 0) {
+                        i++;
+                        topX = v.fc[1] + this.colWidths[0];
+                    }
 
-                    for(;i <= v.lc[0]; i++ ){
-                        g.moveTo(x , topY);
+                    var x    = topX + this.lineSize/2,
+                        cols = this.getGridCols() - 1,
+                        ty   = (this.paintNetOnCaption === true) ? this.getTop() : topY;
+
+                    for(;i <= v.lc[0] &&  (this.drawSideLines === true || i < cols); i++){
+                        g.moveTo(x , ty);
                         g.lineTo(x, botY);
                         x += this.colWidths[i] + this.lineSize;
                     }
-                    g.moveTo(x, topY);
+                    g.moveTo(x, ty);
                     g.lineTo(x, botY);
                 }
                 g.stroke();
@@ -26533,14 +27509,16 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
 
                 for(var i = this.visibility.fr[0];i <= this.visibility.lr[0] && y < cy + ch; i++){
                     if (y + this.rowHeights[i] > cy) {
-                        var x = this.visibility.fc[1] + this.cellInsetsLeft,
-                            notSelectedRow = this.isSelected(i) === false;
+                        var x = this.visibility.fc[1] + this.cellInsetsLeft;
 
-                        for(var j = this.visibility.fc[0];j <= this.visibility.lc[0]; j++ ){
-                            if (notSelectedRow){
+                        for(var j = this.visibility.fc[0];j <= this.visibility.lc[0]; j++) {
+                            if (this.isSelected(i, j) === true) {
+                                this.paintCellSelection(g, i, j, x - this.cellInsetsLeft, y - this.cellInsetsTop);
+                            }
+                            else {
                                 var bg = this.provider.getCellColor != null ? this.provider.getCellColor(this, i, j)
                                                                             : this.defCellColor;
-                                if (bg != null){
+                                if (bg != null) {
                                     g.setColor(bg);
                                     g.fillRect(x - this.cellInsetsLeft,
                                                y - this.cellInsetsTop,
@@ -26548,10 +27526,10 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                 }
                             }
 
-                            var v = (i == this.editingRow &&
-                                     j == this.editingCol   ) ? null
-                                                              : this.provider.getView(this, i, j,
-                                                                                      this.model.get(i, j));
+                            var v = (i === this.editingRow &&
+                                     j === this.editingCol   ) ? null
+                                                               : this.provider.getView(this, i, j,
+                                                                                       this.model.get(i, j));
                             if (v != null) {
                                 var w = this.colWidths[j]  - addW,
                                     h = this.rowHeights[i] - addH;
@@ -26562,11 +27540,11 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                 res.height = Math.min(y + h, cy + ch) - res.y;
 
                                 if (res.width > 0 && res.height > 0) {
-                                    if (this.isUsePsMetric) {
-                                        v.paint(g, x, y, w, h, this);
-                                    }
-                                    else
-                                    {
+                                    // TODO: most likely the commented section should be removed
+                                    // if (this.isUsePsMetric !== true) {
+                                    //     v.paint(g, x, y, w, h, this);
+                                    // }
+                                    //else {
                                         var ax = this.provider.getXAlignment != null ? this.provider.getXAlignment(this, i, j)
                                                                                      : this.defXAlignment,
                                             ay = this.provider.getYAlignment != null ? this.provider.getYAlignment(this, i, j)
@@ -26576,18 +27554,18 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                             xx = x,
                                             yy = y,
                                             id = -1,
-                                            ps = (ax != L.NONE || ay != L.NONE) ? v.getPreferredSize()
-                                                                                : null;
+                                            ps = (ax !== L.NONE || ay !== L.NONE) ? v.getPreferredSize()
+                                                                                  : null;
 
-                                        if (ax != L.NONE){
-                                            xx = x + ((ax == L.CENTER) ? ~~((w - ps.width) / 2)
-                                                                       : ((ax == L.RIGHT) ? w - ps.width : 0));
+                                        if (ax !== L.NONE){
+                                            xx = x + ((ax === L.CENTER) ? ~~((w - ps.width) / 2)
+                                                                        : ((ax === L.RIGHT) ? w - ps.width : 0));
                                             vw = ps.width;
                                         }
 
-                                        if (ay != L.NONE){
-                                            yy = y + ((ay == L.CENTER) ? ~~((h - ps.height) / 2)
-                                                                       : ((ay == L.BOTTOM) ? h - ps.height : 0));
+                                        if (ay !== L.NONE){
+                                            yy = y + ((ay === L.CENTER) ? ~~((h - ps.height) / 2)
+                                                                        : ((ay === L.BOTTOM) ? h - ps.height : 0));
                                             vh = ps.height;
                                         }
 
@@ -26601,7 +27579,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                         if (id >= 0) {
                                            g.restore();
                                         }
-                                    }
+                                   // }
                                 }
                             }
                             x += (this.colWidths[j] + this.lineSize);
@@ -26611,22 +27589,24 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 }
             };
 
-            this.paintPosMarker = function(g){
-                var markerView = this.hasFocus() ? this.views.marker : this.views.offmarker;
+            this.$getPosMarker = function() {
+                return this.hasFocus() ? this.views.marker : this.views.offmarker;
+            };
 
-                if (markerView          != null &&
-                    this.position       != null &&
+            this.paintPosMarker = function(g) {
+                if (this.position       != null &&
                     this.position.offset >= 0     )
                 {
-                    var row        = this.position.currentLine,
+                    var view       = this.$getPosMarker(),
+                        row        = this.position.currentLine,
                         col        = this.position.currentCol,
-                        rowPosMode = this.position.metrics.getLineSize(row) == 1,
+                        rowPosMode = this.navigationMode === "row",
                         v          = this.visibility;
 
-                    // depending om position changing mode (cell or row) analyze
+                    // depending on position changing mode (cell or row) analyze
                     // whether the current position is in visible area
-                    if (row >= v.fr[0] && row <= v.lr[0] &&
-                        (rowPosMode || (col >= v.fc[0] && col <= v.lc[0])))
+                    if (view != null && row >= v.fr[0] && row <= v.lr[0] &&
+                        (rowPosMode === true || (col >= v.fc[0] && col <= v.lc[0])))
                     {
                         // TODO: remove the clip, think it is redundant code
                         // g.clipRect(this.getLeftCaptionWidth() - this.scrollManager.getSX(),
@@ -26634,62 +27614,52 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                         //            this.width, this.height);
 
                         // detect if grid marker position works in row selection mode
-                        if (rowPosMode) {
+                        if (rowPosMode === true) {
                             // row selection mode
-                            markerView.paint(g, v.fc[1],
-                                                this.getRowY(row),
-                                                v.lc[1] - v.fc[1] + this.colWidths[v.lc[0]],
-                                                this.rowHeights[row], this);
+                            view.paint(g,   v.fc[1],
+                                            this.getRowY(row),
+                                            v.lc[1] - v.fc[1] + this.colWidths[v.lc[0]],
+                                            this.rowHeights[row], this);
                         }
                         else {
                             // cell selection mode
-                            markerView.paint(g, this.getColX(col),
-                                                this.getRowY(row),
-                                                this.colWidths[col],
-                                                this.rowHeights[row], this);
+                            view.paint(g,   this.getColX(col),
+                                            this.getRowY(row),
+                                            this.colWidths[col],
+                                            this.rowHeights[row], this);
                         }
                     }
                 }
             };
 
-            this.paintSelection = function(g) {
+            this.paintCellSelection = function(g, row, col, x, y) {
                 if (this.editingRow < 0) {
-                    var v = this.views[this.hasFocus() ? "onselection" : "offselection"];
+                    var v = ui.focusManager.focusOwner === this ? this.views.onselection : this.views.offselection;
                     if (v != null)  {
-                        for(var j = this.visibility.fr[0]; j <= this.visibility.lr[0]; j++) {
-                            if (this.isSelected(j)) {
-                                var x = this.visibility.fc[1], y = this.getRowY(j), h = this.rowHeights[j];
-                                //!!! this code below can be used to implement cell oriented selection
-                                for(var i = this.visibility.fc[0]; i <= this.visibility.lc[0]; i ++ ){
-                                    v.paint(g, x, y, this.colWidths[i], h, this);
-                                    x += (this.colWidths[i] + this.lineSize);
-                                }
-                            }
-                        }
+                        v.paint(g, x, y, this.colWidths[col], this.rowHeights[row], this);
                     }
                 }
             };
 
             this.rPsMetric = function(){
                 var cols = this.getGridCols(),
-                    rows = this.getGridRows();
+                    rows = this.getGridRows(),
+                    addW = this.cellInsetsLeft + this.cellInsetsRight,
+                    addH = this.cellInsetsTop  + this.cellInsetsBottom;
 
                 if (this.colWidths == null || this.colWidths.length != cols) {
                     this.colWidths = arr(cols, 0);
                 }
                 else {
-                    for(var i = 0;i < cols; i++ ) this.colWidths [i] = 0;
+                    for(var i = 0;i < cols; i++) this.colWidths[i] = 0;
                 }
 
                 if (this.rowHeights == null || this.rowHeights.length != rows) {
                     this.rowHeights = arr(rows, 0);
                 }
                 else {
-                    for(var i = 0;i < rows; i++ ) this.rowHeights[i] = 0;
+                    for(var i = 0;i < rows; i++) this.rowHeights[i] = 0;
                 }
-
-                var addW = this.cellInsetsLeft + this.cellInsetsRight,
-                    addH = this.cellInsetsTop  + this.cellInsetsBottom;
 
                 for(var i = 0;i < cols; i++ ){
                     for(var j = 0;j < rows; j++ ){
@@ -26710,6 +27680,20 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                 this.rowHeights[j] = pkg.Grid.DEF_ROWHEIGHT;
                             }
                         }
+                    }
+                }
+
+                if (this.topCaption != null && this.topCaption.isVisible === true) {
+                    for(var i = 0;i < cols; i++ ) {
+                        var capPS = this.topCaption.getCaptionPS(i);
+                        if (capPS  > this.colWidths[i]) this.colWidths[i] = capPS;
+                    }
+                }
+
+                if (this.leftCaption != null && this.leftCaption.isVisible === true) {
+                    for(var i = 0;i < rows; i++ ) {
+                        var capPS = this.leftCaption.getCaptionPS(i);
+                        if (capPS  > this.rowHeights[i]) this.rowHeights[i] = capPS;
                     }
                 }
             };
@@ -26821,7 +27805,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                         len = this.getGridRows();
                     }
 
-                    if (len ===0) return;
+                    if (len === 0) return;
 
                     this.validateMetric();
                     var b = false;
@@ -26898,9 +27882,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
 
             this.matrixResized = function(target, prevRows, prevCols){
                 this.clearSelect();
-                if (this.selected != null) {
-                    this.selected = arr(this.model.rows, false);
-                }
+
                 this.vrp();
                 if (this.position != null) {
                     this.position.setOffset(null);
@@ -27020,10 +28002,6 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
 
                     if (this.position != null) {
                         this.position.setOffset(null);
-                    }
-
-                    if (this.model != null && this.selected != null) {
-                        this.selected = arr(this.model.rows, false);
                     }
 
                     this.vrp();
@@ -27155,15 +28133,16 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
             };
         },
 
-        function (rows, cols){
-            this.$this(new Matrix(rows, cols));
-        },
+        function(model) {
+            if (arguments.length === 0) {
+                model = new Matrix(5, 5);
+            }
+            else {
+                if (arguments.length === 2) {
+                    model = new Matrix(arguments[0], arguments[1]);
+                }
+            }
 
-        function (){
-            this.$this(new Matrix(5, 5));
-        },
-
-        function (model){
             /**
              * Default cell background color
              * @type {String}
@@ -27172,10 +28151,10 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
              */
             this.defCellColor = pkg.DefViews.cellBackground;
 
-            this.psWidth_ = this.psHeight_ = this.colOffset = 0;
-            this.rowOffset = this.pressedCol = this.selectedIndex = 0;
-            this.visibleArea = this.selected = null;
-            this._ = new Listeners();
+            this.psWidth_    = this.psHeight_  = this.colOffset = 0;
+            this.rowOffset   = this.pressedCol = this.selectedIndex = 0;
+            this.visibleArea = null;
+            this._ = new this.$clazz.Listeners();
             this.views = {};
 
             /**
@@ -27240,13 +28219,13 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
             ctr = L.$constraints(ctr);
             this.$super(index, ctr, c);
 
-            if ((ctr == null && this.topCaption == null) || L.TOP == ctr){
+            if ((ctr == null && this.topCaption == null) || L.TOP === ctr){
                 this.topCaption = c;
             }
             else {
-                if (L.TEMPORARY == ctr) this.editor = c;
+                if (L.TEMPORARY === ctr) this.editor = c;
                 else {
-                    if ((ctr == null && this.leftCaption == null) || L.LEFT == ctr) {
+                    if ((ctr == null && this.leftCaption == null) || L.LEFT === ctr) {
                         this.leftCaption = c;
                     }
                     else {
@@ -27260,17 +28239,17 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
 
         function kidRemoved(index,c){
             this.$super(index, c);
-            if(c == this.editor) this.editor = null;
+            if (c === this.editor) this.editor = null;
             else {
-                if (c == this.topCaption){
+                if (c === this.topCaption){
                     this.topCaption = null;
                 }
                 else {
-                    if (c == this.leftCaption){
+                    if (c === this.leftCaption){
                         this.leftCaption = null;
                     }
                     else {
-                        if (c == this.stub) this.stub = null;
+                        if (c === this.stub) this.stub = null;
                     }
                 }
             }
@@ -27333,9 +28312,9 @@ pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
                     top = target.getTop();
 
                 if (grid.isVisible === true) {
-                    grid.setLocation(left, top);
-                    grid.setSize(target.width  - left - target.getRight(),
-                                 target.height - top  - target.getBottom());
+                    grid.setBounds(left, top,
+                                   target.width  - left - target.getRight(),
+                                   target.height - top  - target.getBottom());
 
                     for(var i = 0; i < this.$widths.length; i++) {
                         grid.setColWidth(i, this.$widths[i]);
@@ -27556,8 +28535,6 @@ pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
 //   |
 //   |-- <-gapx-> {icon} -- <-gapx-> {view}
 //
-//
-
 
 var KE = ui.KeyEvent;
 
@@ -27616,8 +28593,6 @@ pkg.$IM = function(b) {
     this.isOpen = b;
 };
 
-pkg.TreeListeners = zebra.util.ListenersClass("toggled", "selected");
-
 /**
  * Abstract tree component that can used as basement for building own tree components.
  * The component is responsible for rendering tree, calculating tree nodes metrics,
@@ -27661,24 +28636,57 @@ pkg.TreeListeners = zebra.util.ListenersClass("toggled", "selected");
         });
 
   * @event toggled
-  * @param  {zebra.ui.tree.BaseTree} src an tree component that triggers the event
+  * @param  {zebra.ui.tree.BaseTree} src a tree component that triggers the event
   * @param  {zebra.data.Item} item an tree item that has been toggled
   */
 
  /**
   * Fired when a tree item has been selected
 
-      tree.bind(function selected(src, item) {
+      tree.bind(function selected(src, prevItem) {
          ...
       });
 
   * @event selected
+  * @param  {zebra.ui.tree.BaseTree} src a tree component that triggers the event
+  * @param  {zebra.data.Item} prevItem a previously selected tree item
+  */
+
+
+/**
+  * Fired when a tree item editing has been started
+
+      tree.bind(function editingStarted(src, item, editor) {
+         ...
+      });
+
+  * @event editingStarted
   * @param  {zebra.ui.tree.BaseTree} src an tree component that triggers the event
-  * @param  {zebra.data.Item} item an tree item that has been toggled
+  * @param  {zebra.data.Item} item a tree item to be edited
+  * @param  {zebra.ui.Panel} editor an editor to be used to edit the given item
+  */
+
+/**
+  * Fired when a tree item editing has been stopped
+
+      tree.bind(function editingStopped(src, item, oldValue, editor, isApplied) {
+         ...
+      });
+
+  * @event editingStopped
+  * @param  {zebra.ui.tree.BaseTree} src a tree component that triggers the event
+  * @param  {zebra.data.Item} item a tree item that has been edited
+  * @param  {Object} oldValue an old value of the edited tree item
+  * @param  {zebra.ui.Panel} editor an editor to be used to edit the given item
+  * @param  {Boolean} isApplied flag that indicates if the edited value has been
+  * applied to the given tree item
   */
 pkg.BaseTree = Class(ui.Panel, [
-    function $prototype() {
+    function  $clazz() {
+        this.Listeners = zebra.util.ListenersClass("toggled", "selected", "editingStarted", "editingStopped");
+    },
 
+    function $prototype() {
         /**
          * Horizontal gap between a node elements: toggle, icons and tree item view
          * @attribute gapx
@@ -27728,8 +28736,8 @@ pkg.BaseTree = Class(ui.Panel, [
             this.select(root);
         };
 
-        this.mousePressed = function(e){
-            if (this.firstVisible != null && e.isActionMask()) {
+        this.pointerPressed = function(e){
+            if (this.firstVisible != null && e.isAction()) {
                 var x = e.x,
                     y = e.y,
                     root = this.getItemAt(this.firstVisible, x, y);
@@ -27769,8 +28777,8 @@ pkg.BaseTree = Class(ui.Panel, [
                                                                                           : this.prevVisible(this.firstVisible);
                         }
                         else {
-                            this.firstVisible = (-this.scrollManager.getSY() > ~~(this.maxh / 2)) ? this.prevVisible(this.findLast(this.model.root))
-                                                                                                  : this.nextVisible(this.model.root);
+                            this.firstVisible = (-this.scrollManager.getSY() > Math.floor(this.maxh / 2)) ? this.prevVisible(this.findLast(this.model.root))
+                                                                                                          : this.nextVisible(this.model.root);
                         }
                     }
                 }
@@ -27809,7 +28817,7 @@ pkg.BaseTree = Class(ui.Panel, [
                 image   = this.getIconBounds(root);
 
             toggle.x = image.x + image.width + (image.width > 0 || toggle.width > 0 ? this.gapx : 0);
-            toggle.y = metrics.y + ~~((metrics.height - metrics.viewHeight) / 2);
+            toggle.y = metrics.y + Math.floor((metrics.height - metrics.viewHeight) / 2);
             toggle.width = metrics.viewWidth;
             toggle.height = metrics.viewHeight;
             return toggle;
@@ -27833,7 +28841,10 @@ pkg.BaseTree = Class(ui.Panel, [
          */
         this.getToggleBounds = function(root){
             var node = this.getIM(root), d = this.getToggleSize(root);
-            return { x:node.x, y:node.y + ~~((node.height - d.height) / 2), width:d.width, height:d.height };
+            return { x     : node.x,
+                     y     : node.y + Math.floor((node.height - d.height) / 2),
+                     width : d.width,
+                     height: d.height };
         };
 
         /**
@@ -27892,7 +28903,7 @@ pkg.BaseTree = Class(ui.Panel, [
                 var imageSize = this.getIconSize(root), toggleSize = this.getToggleSize(root);
                 if (parent != null){
                     var pImg = this.getIconBounds(parent);
-                    x = pImg.x + ~~((pImg.width - toggleSize.width) / 2);
+                    x = pImg.x + Math.floor((pImg.width - toggleSize.width) / 2);
                 }
 
                 node.x = x;
@@ -28033,7 +29044,7 @@ pkg.BaseTree = Class(ui.Panel, [
                 id   = this.getIconSize(root),
                 td   = this.getToggleSize(root);
             return { x:node.x + td.width + (td.width > 0 ? this.gapx : 0),
-                     y:node.y + ~~((node.height - id.height) / 2),
+                     y:node.y + Math.floor((node.height - id.height) / 2),
                      width:id.width, height:id.height };
         };
 
@@ -28166,7 +29177,7 @@ pkg.BaseTree = Class(ui.Panel, [
                     toggleView = this.getToggleView(root),
                     image      = this.getIconBounds(root),
                     vx         = image.x + image.width + this.gapx,
-                    vy         = node.y + ~~((node.height - node.viewHeight) / 2);
+                    vy         = node.y + Math.floor((node.height - node.viewHeight) / 2);
 
                 if (toggleView != null) {
                     toggleView.paint(g, toggle.x, toggle.y, toggle.width, toggle.height, this);
@@ -28187,10 +29198,11 @@ pkg.BaseTree = Class(ui.Panel, [
 
                 if (this.lnColor != null){
                     g.setColor(this.lnColor);
-                    var yy = toggle.y + ~~(toggle.height / 2) + 0.5;
+                    var yy = toggle.y + Math.floor(toggle.height / 2) + 0.5;
 
                     g.beginPath();
-                    g.moveTo(toggle.x + (toggleView == null ? ~~(toggle.width / 2) : toggle.width - 1), yy);
+                    g.moveTo(toggle.x + (toggleView == null ? Math.floor(toggle.width / 2)
+                                                            : toggle.width - 1), yy);
                     g.lineTo(image.x, yy);
                     g.stroke();
                 }
@@ -28208,9 +29220,10 @@ pkg.BaseTree = Class(ui.Panel, [
         this.y_ = function (item, isStart){
             var node = this.getIM(item),
                 th = this.getToggleSize(item).height,
-                ty = node.y + ~~((node.height - th) / 2),
+                ty = node.y + Math.floor((node.height - th) / 2),
                 dy = this.scrollManager.getSY(),
-                y  = (item.kids.length > 0) ? (isStart ? ty + th : ty - 1) : ty + ~~(th / 2);
+                y  = (item.kids.length > 0) ? (isStart ? ty + th : ty - 1)
+                                            : ty + Math.floor(th / 2);
 
             return (y + dy < 0) ?  -dy - 1
                                 : ((y + dy > this.height) ? this.height - dy : y);
@@ -28227,10 +29240,10 @@ pkg.BaseTree = Class(ui.Panel, [
          */
         this.paintChild = function (g, root, index){
             var b = this.isOpen_(root);
-            if (root == this.firstVisible && this.lnColor != null){
+            if (root == this.firstVisible && this.lnColor != null) {
                 g.setColor(this.lnColor);
-                var xx = this.getIM(root).x + ~~((b ? this.viewSizes.on.width
-                                                    : this.viewSizes.off.width) / 2);
+                var xx = this.getIM(root).x + Math.floor((b ? this.viewSizes.on.width
+                                                            : this.viewSizes.off.width) / 2);
                 g.beginPath();
                 g.moveTo(xx + 0.5, this.getTop());
                 g.lineTo(xx + 0.5, this.y_(root, false));
@@ -28240,13 +29253,13 @@ pkg.BaseTree = Class(ui.Panel, [
                 var firstChild = root.kids[0];
                 if (firstChild == null) return true;
 
-                var x = this.getIM(firstChild).x + ~~((this.isOpen_(firstChild) ? this.viewSizes.on.width
-                                                                                : this.viewSizes.off.width) / 2),
+                var x = this.getIM(firstChild).x + Math.floor((this.isOpen_(firstChild) ? this.viewSizes.on.width
+                                                                                        : this.viewSizes.off.width) / 2),
                 count = root.kids.length;
                 if (index < count) {
                     var  node = this.getIM(root),
                          y    = (index > 0) ? this.y_(root.kids[index - 1], true)
-                                            : node.y + ~~((node.height + this.getIconSize(root).height) / 2);
+                                            : node.y + Math.floor((node.height + this.getIconSize(root).height) / 2);
 
                     for(var i = index;i < count; i ++ ){
                         var child = root.kids[i];
@@ -28289,7 +29302,7 @@ pkg.BaseTree = Class(ui.Panel, [
                 this.vVisibility();
                 if (this.firstVisible != null){
                     var sx = this.scrollManager.getSX(), sy = this.scrollManager.getSY();
-                    try{
+                    try {
                         g.translate(sx, sy);
                         this.paintTree(g, this.firstVisible);
                         g.translate(-sx,  -sy);
@@ -28308,25 +29321,24 @@ pkg.BaseTree = Class(ui.Panel, [
          * @method  select
          */
         this.select = function(item){
-            if (this.isSelectable === true && item != this.selected){
+            if (this.isSelectable === true){
                 var old = this.selected;
 
                 this.selected = item;
-
                 if (this.selected != null) {
                     this.makeVisible(this.selected);
                 }
 
-                this._.selected(this, this.selected);
+                this._.selected(this, old);
 
-                if (old != null && this.isVerVisible(old)){
+                if (old != null && this.isVerVisible(old)) {
                     var m = this.getItemMetrics(old);
                     this.repaint(m.x + this.scrollManager.getSX(),
                                  m.y + this.scrollManager.getSY(),
                                  m.width, m.height);
                 }
 
-                if (this.selected != null && this.isVerVisible(this.selected)){
+                if (this.selected != null && this.isVerVisible(this.selected)) {
                     var m = this.getItemMetrics(this.selected);
                     this.repaint(m.x + this.scrollManager.getSX(),
                                  m.y + this.scrollManager.getSY(),
@@ -28359,7 +29371,7 @@ pkg.BaseTree = Class(ui.Panel, [
             var model = this.model;
             if (root.kids.length > 0){
                 if (this.getItemMetrics(root).isOpen != b) this.toggle(root);
-                for(var i = 0;i < root.kids.length; i++ ){
+                for(var i = 0; i < root.kids.length; i++ ){
                     this.toggleAll(root.kids[i], b);
                 }
             }
@@ -28412,10 +29424,11 @@ pkg.BaseTree = Class(ui.Panel, [
         };
     },
 
-    function () { this.$this(null); },
-    function (d){ this.$this(d, true);},
+    function (d, b){
+        if (arguments.length < 2) {
+            b = true;
+        }
 
-    function (d,b){
          /**
           * Selected tree model item
           * @attribute selected
@@ -28441,7 +29454,7 @@ pkg.BaseTree = Class(ui.Panel, [
 
         this._isVal = false;
         this.nodes = {};
-        this._ = new pkg.TreeListeners();
+        this._ = new this.$clazz.Listeners();
         this.setLineColor("gray");
 
         this.isOpenVal = b;
@@ -28622,13 +29635,13 @@ pkg.DefEditors = Class([
         /**
          * The method is called to ask if the given input event should trigger an tree component item
          * @param  {zebra.ui.tree.Tree} src a tree UI component
-         * @param  {zebra.ui.MouseEvent|zebra.ui.KeyEvent} e   an input event: mouse or key event
+         * @param  {zebra.ui.PointerEvent|zebra.ui.KeyEvent} e   an input event: pointer or key event
          * @return {Boolean} true if the event should trigger edition of a tree component item
          * @method @shouldStartEdit
          */
         this.shouldStartEdit = function(src,e){
-            return (e.ID == ui.MouseEvent.CLICKED && e.clicks > 1) ||
-                   (e.ID == KE.PRESSED && e.code == KE.ENTER);
+            return  e.id === "pointerDoubleClicked" ||
+                   (e.id === "keyPressed" && e.code === KE.ENTER);
         };
     }
 ]);
@@ -28726,18 +29739,18 @@ pkg.Tree = Class(pkg.BaseTree, [
         this.itemGapY = 2;
         this.itemGapX = 4;
 
-        this.childInputEvent = function(e){
-            if (e.ID == KE.PRESSED){
-                if (e.code == KE.ESCAPE) {
-                    this.stopEditing(false);
-                }
-                else {
-                    if (e.code == KE.ENTER) {
-                        if ((zebra.instanceOf(e.source, ui.TextField) === false) ||
-                            (zebra.instanceOf(e.source.view.target, zebra.data.SingleLineTxt)))
-                        {
-                            this.stopEditing(true);
-                        }
+        this.childKeyPressed = function(e){
+            console.log("childKeyPressed : " + e.code);
+
+            if (e.code === KE.ESCAPE) {
+                this.stopEditing(false);
+            }
+            else {
+                if (e.code === KE.ENTER) {
+                    if ((zebra.instanceOf(e.source, ui.TextField) === false) ||
+                        (zebra.instanceOf(e.source.view.target, zebra.data.SingleLineTxt)))
+                    {
+                        this.stopEditing(true);
                     }
                 }
             }
@@ -28783,7 +29796,7 @@ pkg.Tree = Class(pkg.BaseTree, [
         this.se = function (item,e ){
             if (item != null){
                 this.stopEditing(true);
-                if (this.editors != null && this.editors.shouldStartEdit(item, e)){
+                if (this.editors != null && this.editors.shouldStartEdit(item, e)) {
                     this.startEditing(item);
                     return true;
                 }
@@ -28791,21 +29804,26 @@ pkg.Tree = Class(pkg.BaseTree, [
             return false;
         };
 
-        this.mouseClicked = function(e){
+        this.pointerClicked = function(e){
+            if (this.se(this.pressedItem, e)) {
+                this.pressedItem = null;
+            }
+        };
+
+        this.pointerDoubleClicked = function(e) {
             if (this.se(this.pressedItem, e)) {
                 this.pressedItem = null;
             }
             else {
                 if (this.selected != null &&
-                    e.clicks > 1 && e.isActionMask() &&
-                   this.getItemAt(this.firstVisible, e.x, e.y) == this.selected)
+                    this.getItemAt(this.firstVisible, e.x, e.y) == this.selected)
                 {
                     this.toggle(this.selected);
                 }
             }
         };
 
-        this.mouseReleased = function(e){
+        this.pointerReleased = function(e){
             if (this.se(this.pressedItem, e)) this.pressedItem = null;
         };
 
@@ -28829,8 +29847,8 @@ pkg.Tree = Class(pkg.BaseTree, [
                 case KE.RIGHT   : newSelection = this.findNext(this.selected);break;
                 case KE.UP      :
                 case KE.LEFT    : newSelection = this.findPrev(this.selected);break;
-                case KE.HOME    : if (e.isControlPressed()) this.select(this.model.root);break;
-                case KE.END     : if (e.isControlPressed()) this.select(this.findLast(this.model.root));break;
+                case KE.HOME    : if (e.ctrlKey) this.select(this.model.root);break;
+                case KE.END     : if (e.ctrlKey) this.select(this.findLast(this.model.root));break;
                 case KE.PAGEDOWN: if (this.selected != null) this.select(this.nextPage(this.selected, 1));break;
                 case KE.PAGEUP  : if (this.selected != null) this.select(this.nextPage(this.selected,  -1));break;
                 //!!!!case KE.ENTER: if(this.selected != null) this.toggle(this.selected);break;
@@ -28849,18 +29867,19 @@ pkg.Tree = Class(pkg.BaseTree, [
             this.stopEditing(true);
             if (this.editors != null){
                 var editor = this.editors.getEditor(this, item);
-                if (editor != null){
+                if (editor != null) {
                     this.editedItem = item;
                     var b  = this.getItemBounds(this.editedItem),
                         ps = editor.getPreferredSize();
 
-                    editor.setLocation(b.x + this.scrollManager.getSX() + this.itemGapX,
-                                       b.y - ~~((ps.height - b.height + 2 * this.itemGapY) / 2) +
-                                      this.scrollManager.getSY() + this.itemGapY);
+                    editor.setBounds(b.x + this.scrollManager.getSX() + this.itemGapX,
+                                     b.y - Math.floor((ps.height - b.height + 2 * this.itemGapY) / 2) +
+                                     this.scrollManager.getSY() + this.itemGapY,
+                                     ps.width, ps.height);
 
-                    editor.setSize(ps.width, ps.height);
                     this.add(editor);
                     ui.focusManager.requestFocus(editor);
+                    this._.editingStarted(this, item, editor);
                 }
             }
         };
@@ -28873,26 +29892,32 @@ pkg.Tree = Class(pkg.BaseTree, [
          * @protected
          */
         this.stopEditing = function(applyData){
-            if (this.editors != null && this.editedItem != null){
+            if (this.editors != null && this.editedItem != null) {
+                var item     = this.editedItem,
+                    oldValue = item.value,
+                    editor   = this.kids[0];
+
                 try {
                     if (applyData)  {
                         this.model.setValue(this.editedItem,
                                             this.editors.fetchEditedValue(this.editedItem, this.kids[0]));
                     }
                 }
-                finally{
+                finally {
                     this.editedItem = null;
                     this.removeAt(0);
                     this.requestFocus();
+                    this._.editingStopped(this, item, oldValue, editor, applyData);
                 }
             }
         };
     },
 
-    function () { this.$this(null); },
-    function (d){ this.$this(d, true);},
+    function (d, b){
+        if (arguments.length < 2) {
+            b  = true;
+        }
 
-    function (d,b){
         this.provider = this.editedItem = this.pressedItem = null;
 
         /**
@@ -28916,9 +29941,9 @@ pkg.Tree = Class(pkg.BaseTree, [
         this.$super(d, b);
     },
 
-    function toggle() {
+    function toggle(item) {
         this.stopEditing(false);
-        this.$super();
+        this.$super(item);
     },
 
     function itemInserted(target,item){
@@ -28982,7 +30007,7 @@ pkg.Tree = Class(pkg.BaseTree, [
         if (this.se(root, e) === false) this.pressedItem = root;
     },
 
-    function mousePressed(e){
+    function pointerPressed(e){
         this.pressedItem = null;
         this.stopEditing(true);
         this.$super(e);
@@ -28990,8 +30015,8 @@ pkg.Tree = Class(pkg.BaseTree, [
 ]);
 
 /**
- * Component tree component that expects other UI components to be a tree model values. 
- * In general the implementation lays out passed via tree model UI components as tree 
+ * Component tree component that expects other UI components to be a tree model values.
+ * In general the implementation lays out passed via tree model UI components as tree
  * component nodes. For instance:
 
      var tree = new zebra.ui.tree.Tree({
@@ -29003,8 +30028,8 @@ pkg.Tree = Class(pkg.BaseTree, [
          ]
      });
 
- * But to prevent unexpected navigation it is better to use number of predefined 
- * with component tree UI components: 
+ * But to prevent unexpected navigation it is better to use number of predefined
+ * with component tree UI components:
 
    - zebra.ui.tree.CompTree.Label
    - zebra.ui.tree.CompTree.Checkbox
@@ -29042,55 +30067,64 @@ pkg.CompTree = Class(pkg.BaseTree, [
 
         this.Combo = Class(ui.Combo, [
             function keyPressed(e) {
-                if (e.code != KE.UP && e.code != KE.DOWN) this.$super(e);
+                if (e.code != KE.UP && e.code != KE.DOWN) {
+                    this.$super(e);
+                }
             }
         ]);
     },
 
     function $prototype() {
+        this.$blockCIE = false;
         this.canHaveFocus = false;
 
         this.getItemPreferredSize = function(root) {
             return root.value.getPreferredSize();
         };
 
-        this.childInputEvent = function(e) {
-            if (this.isSelectable) {
-                if (e.ID == ui.InputEvent.FOCUS_LOST) {
-                    this.select(null);
-                    return;
-                }
 
-                if (e.ID == ui.InputEvent.FOCUS_GAINED || e.ID == ui.MouseEvent.PRESSED) {
-                    var $this = this;
-                    zebra.data.find(this.model.root, zebra.layout.getDirectChild(this, e.source), function(item) {
-                        $this.select(item);
-                        return true;
-                    });
-                    return;
+        this.childKeyTyped = function(e) {
+            if (this.selected != null){
+                switch(e.ch) {
+                    case '+': if (this.isOpen(this.selected) === false) {
+                        this.toggle(this.selected);
+                    } break;
+                    case '-': if (this.isOpen(this.selected)) {
+                        this.toggle(this.selected);
+                    } break;
                 }
-
-                if (e.ID  == KE.PRESSED) {
-                    var newSelection = (e.code == KE.DOWN) ? this.findNext(this.selected) 
-                                                           : (e.code == KE.UP) ? this.findPrev(this.selected): null;
-                    if (newSelection != null) {
-                        this.select(newSelection);
-                    }
-                    return;
-                }      
             }
+        };
 
-            if (e.ID == KE.TYPED) {
-                if (this.selected != null){
-                    switch(e.ch) {
-                        case '+': if (this.isOpen(this.selected) === false) {
-                            this.toggle(this.selected);
-                        } break;
-                        case '-': if (this.isOpen(this.selected)) {
-                            this.toggle(this.selected);
-                        } break;
-                    }
+        this.childKeyPressed = function(e) {
+            if (this.isSelectable === true){
+                var newSelection = (e.code == KE.DOWN) ? this.findNext(this.selected)
+                                                       : (e.code == KE.UP) ? this.findPrev(this.selected)
+                                                                           : null;
+                if (newSelection != null) {
+                    this.select(newSelection);
                 }
+            }
+        };
+
+        this.childPointerPressed = this.childFocusGained = function(e) {
+            if (this.isSelectable === true && this.$blockCIE !== true) {
+                this.$blockCIE = true;
+                try {
+                    var item = zebra.data.TreeModel.findOne(this.model.root,
+                                                            zebra.layout.getDirectChild(this,
+                                                                                        e.source));
+                    if (item != null) this.select(item);
+                }
+                finally {
+                    this.$blockCIE = false;
+                }
+            }
+        }
+
+        this.childFocusLost = function(e) {
+            if (this.isSelectable === true) {
+                this.select(null);
             }
         };
 
@@ -29110,7 +30144,8 @@ pkg.CompTree = Class(pkg.BaseTree, [
                 var $this = this, fvNode = this.getIM(this.firstVisible), started = 0;
 
                 this.model.iterate(this.model.root, function(item) {
-                    var node = $this.nodes[item];  // slightly improve performance (instead of calling $this.getIM(...))
+                    var node = $this.nodes[item];  // slightly improve performance
+                                                   // (instead of calling $this.getIM(...))
 
                     if (started === 0 && item == $this.firstVisible) {
                         started = 1;
@@ -29122,8 +30157,10 @@ pkg.CompTree = Class(pkg.BaseTree, [
                         if (node.y + sy < $this.height) {
                             var image = $this.getIconBounds(item);
 
-                            item.value.x = image.x + image.width + (image.width > 0 || $this.getToggleSize().width > 0 ? $this.gapx : 0) + $this.scrollManager.getSX();
-                            item.value.y = node.y + ~~((node.height - node.viewHeight) / 2) + sy;
+                            item.value.x = image.x + image.width +
+                                           (image.width > 0 || $this.getToggleSize().width > 0 ? $this.gapx : 0) +
+                                           $this.scrollManager.getSX();
+                            item.value.y = node.y + Math.floor((node.height - node.viewHeight) / 2) + sy;
                             item.value.isVisible = true;
                             item.value.width  = node.viewWidth;
                             item.value.height = node.viewHeight;
@@ -29133,7 +30170,7 @@ pkg.CompTree = Class(pkg.BaseTree, [
                         }
                     }
 
-                    return (started === 2) ? 2 :  (node.isOpen === false ? 1 : 0);
+                    return (started === 2) ? 2 : (node.isOpen === false ? 1 : 0);
                 });
             }
         };
@@ -29187,7 +30224,7 @@ pkg.CompTree = Class(pkg.BaseTree, [
     },
 
     function select(item) {
-        if (this.isSelectable && item != this.selected) {
+        if (this.isSelectable === true) {
             var old = this.selected;
 
             if (old != null && old.value.hasFocus()) {
@@ -29210,56 +30247,6 @@ pkg.CompTree = Class(pkg.BaseTree, [
 ]);
 
 /**
- * Toggle view element class
- * @class  zebra.ui.tree.TreeSignView
- * @extends {zebra.ui.View}
- * @constructor
- * @param  {Boolean} plus indicates the sign type plus (true) or minus (false)
- * @param  {String} color a color
- * @param  {String} bg a background
- */
-pkg.TreeSignView = Class(ui.View, [
-    function $prototype() {
-        this[''] = function(plus, color, bg) {
-            this.color = color == null ? "white" : color;
-            this.bg    = bg   == null ? "lightGray" : bg ;
-            this.plus  = plus == null ? false : plus;
-            this.br = new ui.Border("rgb(65, 131, 215)", 1, 3);
-            this.width = this.height = 12;
-        };
-
-        this.paint = function(g, x, y, w, h, d) {
-            this.br.outline(g, x, y, w, h, d);
-
-            g.setColor(this.bg);
-            g.fill();
-            this.br.paint(g, x, y, w, h, d);
-
-            g.setColor(this.color);
-            g.lineWidth = 2;
-            x+=2;
-            w-=4;
-            h-=4;
-            y+=2;
-            g.beginPath();
-            g.moveTo(x, y + h/2);
-            g.lineTo(x + w, y + h/2);
-            if (this.plus) {
-                g.moveTo(x + w/2, y);
-                g.lineTo(x + w/2, y + h);
-            }
-
-            g.stroke();
-            g.lineWidth = 1;
-        };
-
-        this.getPreferredSize = function() {
-            return { width:this.width, height:this.height};
-        };
-    }
-]);
-
-/**
  * @for
  */
 
@@ -29270,544 +30257,355 @@ pkg.TreeSignView = Class(ui.View, [
  * @module  ui
  */
 
-/**
- * HTML element UI component wrapper class. The class represents
- * an HTML element as if it is standard UI component. It helps to use
- * some standard HTML element as zebra UI components and embeds it
- * in zebra UI application layout.
- * @class zebra.ui.HtmlElement
- * @constructor
- * @param {String|HTMLElement} [element] an HTML element to be represented
- * as a standard zebra UI component. If the passed parameter is string
- * it denotes a name of an HTML element. In this case a new HTML element
- * will be created.
- * @extends {zebra.ui.Panel}
- */
-pkg.HtmlElement = Class(pkg.Panel, [
+pkg.HtmlElementMan = Class(pkg.Manager, [
+//
+// HTML element integrated into Zebra layout has to be tracked regarding:
+//    1) DOM hierarchy. New added into zebra layout DOM element has to be
+//       attached to the first found parent DOM element
+//    2) Visibility. If a zebra UI component change its visibility state
+//       it has to have side effect to all children HTML elements on any
+//       subsequent hierarchy level
+//    3) Moving a zebra UI component has to correct location of children
+//       HTML element on any subsequent hierarchy level.
+//
+//  The implementation of HTML element component has the following specific:
+//    1) Every original HTML is wrapped with "div" element. It is necessary since
+//       not all HTML element has been designed to be a container for another
+//       HTML element. By adding extra div we can consider the wrapper as container.
+//       The wrapper element is used to control visibility, location, enabled state
+//    2) HTML element has "isDOMElement" property set to true
+//    3) HTML element visibility depends on an ancestor component visibility.
+//       HTML element is visible if:
+//          -- the element isVisible property is true
+//          -- the element has a parent DOM element set
+//          -- all his ancestors are visible
+//          -- size of element is more than zero
+//          -- getCanvas() != null
+//       The visibility state is controlled with "e.style.visibility"
+//
+//   To support effective DOM hierarchy tracking a zebra UI component can
+//   host "$domKid" property that contains direct DOM element the UI component
+//   hosts and other UI components that host DOM element. So it is sort of tree.
+//   For instance:
+//
+//    +---------------------------------------------------------
+//    |  p1 (zebra component)
+//    |   +--------------------------------------------------
+//    |   |  p2 (zebra component)
+//    |   |    +---------+      +-----------------------+
+//    |   |    |   h1    |      | p3 zebra component    |
+//    |   |    +---------+      |  +---------------+    |
+//    |   |                     |  |    h3         |    |
+//    |   |    +---------+      |  |  +---------+  |    |
+//    |   |    |   h2    |      |  |  |   p4    |  |    |
+//    |   |    +---------+      |  |  +---------+  |    |
+//    |   |                     |  +---------------+    |
+//    |   |                     +-----------------------+
+//
+//     p1.$domKids : {
+//         p2.$domKids : {
+//             h1,   // leaf elements are always DOM element
+//             h2,
+//             p3.$domKids : {
+//                h3
+//             }
+//         }
+//     }
     function $prototype() {
-        this.isLocAdjusted = false;
-        this.canvas = null;
-        this.ePsW = this.ePsH = 0;
-
-        /**
-         * Set the CSS font of the wrapped HTML element
-         * @param {String|zebra.ui.Font} f a font
-         * @method setFont
-         */
-        this.setFont = function(f) {
-            this.element.style.font = f.toString();
-            this.vrp();
-        };
-
-        /**
-         * Set the CSS color of the wrapped HTML element
-         * @param {String} c a color
-         * @method setColor
-         */
-        this.setColor = function(c) {
-            this.element.style.color = c.toString();
-        };
-
-        this.adjustLocation = function() {
-            if (this.isLocAdjusted === false && this.canvas != null) {
-
-                // hidden DOM component before move
-                // makes moving more smooth
-                var visibility = this.element.style.visibility;
-                this.element.style.visibility = "hidden";
-
-                if (zebra.instanceOf(this.parent, pkg.HtmlElement)) {
-                    this.element.style.top  = this.y + "px";
-                    this.element.style.left = this.x + "px";
-                }
-                else {
-                    var a = zebra.layout.toParentOrigin(0,0,this);
-                    this.element.style.top  = (this.canvas.offy + a.y) + "px";
-                    this.element.style.left = (this.canvas.offx + a.x) + "px";
-
-                    // TODO: this is really strange fix for Chrome browser: Chrome
-                    // doesn't move input field content together with the input field
-                    // itself.
-                    if (/Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)) {
-                        var e = this.element, pa = e.style.height;
-                        e.style.height  = "auto";
-                        e.offsetHeight // always access the property to trigger the fix
-                        e.style.height  = pa;
-                    }
-                }
-                this.isLocAdjusted = true;
-                this.element.style.visibility = visibility;
-            }
-        };
-
-        this.calcPreferredSize = function(target) {
-            return { width: this.ePsW, height: this.ePsH };
-        };
-
-        var $store = [
-            "visibility",
-            "paddingTop","paddingLeft","paddingBottom","paddingRight",
-            "border","borderStyle","borderWidth",
-            "borderTopStyle","borderTopWidth",
-            "borderBottomStyle","borderBottomWidth",
-            "borderLeftStyle","borderLeftWidth",
-            "borderRightStyle","borderRightWidth",
-            "width", "height"
-        ];
-
-        this.recalc = function() {
-            // save element metrics
-            var e    = this.element,
-                vars = {};
-
-            for(var i = 0; i < $store.length; i++) {
-                var k = $store[i];
-                vars[k] = e.style[k];
-            }
-
-            // force metrics to be calculated automatically
-            e.style.visibility = "hidden";
-            e.style.padding = "0px";
-            e.style.border  = "none";
-            e.style.width   = "auto";
-            e.style.height  = "auto";
-
-            // fetch preferred size
-            this.ePsW = e.offsetWidth;
-            this.ePsH = e.offsetHeight;
-
-            for(var k in vars) {
-                var v = vars[k];
-                if (v != null) e.style[k] = v;
-            }
-
-            this.setSize(this.width, this.height);
-        };
-
-        /**
-         * Set the inner content of the wrapped HTML element
-         * @param {String} an inner content
-         * @method setContent
-         */
-        this.setContent = function(content) {
-            this.element.innerHTML = content;
-            this.vrp();
-        };
-
-        /**
-         * Apply the given set of CSS styles to the wrapped HTML element
-         * @param {Object} styles a dictionary of CSS styles
-         * @method setStyles
-         */
-        this.setStyles = function(styles) {
-            for(var k in styles) {
-                this.setStyle(k, styles[k]);
-            }
-        };
-
-        /**
-         * Apply the given CSS style to the wrapped HTML element
-         * @param {String} a name of the CSS style
-         * @param {String} a value the CSS style has to be set
-         * @method setStyle
-         */
-        this.setStyle = function(name, value) {
-            name = name.trim();
-            var i = name.indexOf(':');
-            if (i > 0) {
-                if (zebra[name.substring(0, i)] == null) {
-                    return;
-                }
-                name = name.substring(i + 1);
-            }
-
-            this.element.style[name] = value;
-            this.vrp();
-        };
-
-        /**
-         * Set the specified attribute of the wrapped HTML element
-         * @param {String} name  a name of attribute
-         * @param {String} value a value of the attribute
-         * @method setAttribute
-         */
-        this.setAttribute = function(name, value) {
-            this.element.setAttribute(name, value);
-        };
-
-        this.isInInvisibleState = function() {
-            if (this.width       <= 0    ||
-                this.height      <= 0    ||
-                this.parent      == null ||
-                this.getCanvas() == null   )
+        function $isInInvisibleState(c) {
+            if (c.isVisible === false           ||
+                c.$container.parentNode == null ||
+                c.width       <= 0              ||
+                c.height      <= 0              ||
+                c.parent      == null           ||
+                zebkit.web.$contains(c.$container) === false)
             {
                 return true;
             }
 
-            var p = this.parent;
+            var p = c.parent;
             while (p != null && p.isVisible === true && p.width > 0 && p.height > 0) {
                 p = p.parent;
             }
 
-            return p != null || pkg.$cvp(this) == null;
-            // canvas means the component is not
-                              // in hierarchy yet, that means it
-                              // has to be hidden
-        };
-
-        this.paint = function(g) {
-            // this method is used as an indication that the component
-            // is visible and no one of his parent is invisible
-            if (this.element.style.visibility == "hidden") {
-                this.element.style.visibility = "visible";
-            }
-        };
-    },
-
-    function(e) {
-        /**
-         * Reference to HTML element the UI component wraps
-         * @attribute element
-         * @readOnly
-         * @type {HTMLElement}
-         */
-        e = this.element = zebra.isString(e) ? document.createElement(e) : e;
-        e.setAttribute("id", this.toString());
-        e.style.visibility = "hidden";  // before the component will be attached
-                                        // to parent hierarchy of components that is
-                                        // attached to a canvas the component has to be hidden
-
-        this.$super();
-
-        var $this = this;
-
-        // TODO:
-        // It is not a very good idea to register global component listener per
-        // HTML component. Has to be re-designed, but at this moment this is the
-        // only way to understand when the HTML component parent hierarchy has got
-        // visibility updates
-        this.globalCompListener = {
-            compShown :function(c) {
-                if (c != $this && c.isVisible === false && zebra.layout.isAncestorOf(c, $this)) {
-                    $this.element.style.visibility = "hidden";
-                }
-            },
-
-            compMoved : function(c, px, py) {
-                if (zebra.layout.isAncestorOf(c, $this)) {
-                    // force location adjustment when the component
-                    // parent HTML canvas has been moved
-                   $this.isLocAdjusted = false;
-                   $this.adjustLocation();
-                }
-
-                if (c != $this && $this.isInInvisibleState()) {
-                    $this.element.style.visibility = "hidden";
-                }
-            },
-
-            compRemoved : function(p, i, c) {
-                // if an ancestor parent has been removed the HTML element
-                // has to be hidden
-                if (c != $this && zebra.layout.isAncestorOf(c, $this)) {
-                    $this.element.style.visibility = "hidden";
-                }
-            },
-
-            compSized : function(c, pw, ph) {
-                if (c != $this && zebra.layout.isAncestorOf(c, $this) && $this.isInInvisibleState()) {
-                    $this.element.style.visibility = "hidden";
-                }
-            }
-        };
-
-        this.globalWinListener = {
-            winActivated : function(layer, win, isActive) {
-                if (zebra.layout.isAncestorOf(win, $this) == false) {
-                    $this.element.style.visibility;
-                }
-            }
-        };
-
-        // it is important to avoid mouse event since for some html element
-        // it can cause unexpected event generation. for instance text input
-        // element can generate mouse moved on mobile devices whenever it gets
-        // focus
-        if (zebra.isTouchable === false) {
-            e.onmousemove = function(ee) {
-                if ($this.canvas != null) {
-                    $this.canvas.$mouseMoved(1, {
-                        target: $this.canvas.canvas,
-                        pageX : ee.pageX,
-                        pageY : ee.pageY
-                    });
-                }
-            };
-
-            e.onmousedown = function(ee) {
-                if ($this.canvas != null) {
-                    $this.canvas.$mousePressed(1, {
-                        target: $this.canvas.canvas,
-                        pageX : ee.pageX,
-                        pageY : ee.pageY
-                    });
-                }
-            };
-
-            e.onmouseup = function(ee) {
-                if ($this.canvas != null) {
-                    $this.canvas.$mouseReleased(1, {
-                        target: $this.canvas.canvas,
-                        pageX : ee.pageX,
-                        pageY : ee.pageY
-                    },
-
-                    ee.button === 0 ? pkg.MouseEvent.LEFT_BUTTON
-                                    : (ee.button == 2 ? pkg.MouseEvent.RIGHT_BUTTON : 0));
-                }
-            };
+            return p != null || pkg.$cvp(c) == null;
         }
 
-        e.addEventListener("focus", function(ee) {
-            // mark the element  has focus on the given canvas
-            $this.element.canvas = $this.canvas;
+        // attach to appropriate DOM parent if necessary
+        // c parameter has to be DOM element
+        function $resolveDOMParent(c) {
+            // try to find an HTML element in zebra (pay attention, in zebra hierarchy !)
+            // hierarchy that has to be a DOM parent for the given component
+            var parentElement = null;
+            for(var p = c.parent; p != null; p = p.parent) {
+                if (p.isDOMElement === true) {
+                    parentElement = p.$container;
+                    break;
+                }
+            }
 
-            // notify focus manager the given component has got focus
-            zebra.ui.focusManager.requestFocus($this);
-        }, false);
+            // parentElement is null means the component has
+            // not been inserted into DOM hierarchy
+            if (parentElement != null && c.$container.parentNode == null) {
+                // parent DOM element of the component is null, but a DOM container
+                // for the element has been detected. We need to add it to DOM
+                // than we have to add the DOM to the found DOM parent element
+                parentElement.appendChild(c.$container);
 
-        e.addEventListener("blur", function(ee) {
-            // flush the native element canvas field to say the component doesn't
-            // have focus anymore
-            $this.element.canvas = null;
+                // adjust location of just attached DOM component
+                $adjustLocation(c);
 
-            if ($this.canvas != null) {
-                // run timer that checks if the native web component has lost focus because of
-                // leaving the canvas where it hosts:
-                //  -- the focus doesn't belong to the canvas where the native component sits
-                //    AND
-                //  -- the focus doesn't belong to another native component that sits on the
-                //     canvas
-                setTimeout(function() {
-                    var fo = zebra.ui.focusManager.focusOwner;
-                    if (($this.canvas != null && document.activeElement != $this.canvas.canvas) &&
-                        (document.activeElement != null && $this.canvas != document.activeElement.canvas))
-                    {
-                       zebra.ui.focusManager.requestFocus(null);
+                // if a new DOM element appears in hierarchy we have to correct
+                // z-order of disabled DOM elements that are the parents of the
+                // inserted element
+                var pp = c.parent;
+                while(pp != null) {
+                    if (pp.isEnabled === false && pp.isDOMElement === true) {
+                        pp.$container.removeChild(pp.$blockElement);
+                        pp.$container.appendChild(pp.$blockElement);
                     }
-                }, 100);
-            }
-        }, false);
-
-        e.onkeydown = function(ee) {
-            if ($this.canvas != null) {
-                // store current focus owner to analyze if the event triggered focus owner changing
-                var pfo = zebra.ui.focusManager.focusOwner;
-
-                // re-define key event since preventDefault has to be disabled,
-                // otherwise navigation key will not work
-                $this.canvas.$keyPressed({
-                    keyCode       : ee.keyCode,
-                    target        : ee.target,
-                    altKey        : ee.altKey,
-                    shiftKey      : ee.shiftKey,
-                    ctrlKey       : ee.ctrlKey,
-                    metaKey       : ee.metaKey,
-                    preventDefault: function() {}
-                });
-
-                var nfo = zebra.ui.focusManager.focusOwner;
-
-                // if focus owner has been updated
-                if (nfo != pfo) {
-                    ee.preventDefault();
-                    // if focus owner has been moved to another HTML component we have to pass focus to it
-                    if (nfo != null && zebra.instanceOf(nfo, pkg.HtmlElement) && document.activeElement != nfo.element) {
-                        nfo.element.focus();
-                    }
-                    else {
-                        // otherwise return focus back to canvas
-                        $this.canvas.canvas.focus();
-                    }
+                    pp = pp.parent;
                 }
-            }
-        };
-
-        e.onkeyup  = function(ee) {
-            if ($this.canvas != null) {
-                $this.canvas.$keyReleased(ee);
-            }
-        };
-
-        e.onkeypress = function(ee) {
-            if ($this.canvas != null) {
-                $this.canvas.$keyTyped({
-                    keyCode       : ee.keyCode,
-                    target        : ee.target,
-                    altKey        : ee.altKey,
-                    shiftKey      : ee.shiftKey,
-                    ctrlKey       : ee.ctrlKey,
-                    metaKey       : ee.metaKey,
-                    preventDefault: function() {}
-                });
-            }
-        };
-    },
-
-    function focused() {
-        if (this.hasFocus()) {
-            // if the component has focus that has came from Zebra component we should
-            // set focus to native component that hosted by Zebra component
-
-            var canvas = this.getCanvas(),
-                pfo    = canvas.$prevFocusOwner;
-
-            if (pfo == null || zebra.instanceOf(pfo, pkg.HtmlElement) === false) {
-                this.element.focus();
-            }
-        }
-
-        this.$super();
-    },
-
-    function setBorder(b) {
-        b = pkg.$view(b);
-
-        if (b == null) {
-            this.element.style.border = "none";
-        }
-        else {
-            var e = this.element;
-
-            //!!!! Bloody FF fix, the border can be made transparent
-            //!!!! only via "border" style
-            e.style.border = "0px solid transparent";
-
-            //!!! FF understands only decoupled border settings
-            e.style.borderTopStyle = "solid";
-            e.style.borderTopColor = "transparent";
-            e.style.borderTopWidth = "" + b.getTop() + "px";
-
-            e.style.borderLeftStyle = "solid";
-            e.style.borderLeftColor = "transparent";
-            e.style.borderLeftWidth = "" + b.getLeft() + "px";
-
-            e.style.borderBottomStyle = "solid";
-            e.style.borderBottomColor = "transparent";
-            e.style.borderBottomWidth = "" + b.getBottom() + "px";
-
-
-            e.style.borderRightStyle = "solid";
-            e.style.borderRightColor = "transparent";
-            e.style.borderRightWidth = "" + b.getRight() + "px";
-        }
-        this.$super(b);
-    },
-
-    function setPadding(t,l,b,r) {
-        if (arguments.length == 1) {
-            l = b = r = t;
-        }
-
-        var e = this.element;
-        e.style.paddingTop    = '' + t + "px";
-        e.style.paddingLeft   = '' + l + "px";
-        e.style.paddingRight  = '' + r + "px";
-        e.style.paddingBottom = '' + b + "px";
-
-        this.$super.apply(this, arguments);
-    },
-
-    function setVisible(b) {
-        if (this.isInInvisibleState()) {
-            this.element.style.visibility = "hidden";
-        }
-        else {
-            this.element.style.visibility = b ? "visible" : "hidden";
-        }
-        this.$super(b);
-    },
-
-    function setEnabled(b) {
-        this.$super(b);
-        this.element.disabled = !b;
-    },
-
-    function setSize(w, h) {
-        this.$super(w, h);
-        var visibility = this.element.style.visibility;
-        this.element.style.visibility = "hidden"; // could make sizing smooth
-
-        // HTML element size is calculated as sum of "width"/"height", paddings, border
-        // So the passed width and height has to be corrected (before it will be applied to
-        // an HTML element) by reduction of extra HTML gaps. For this we firstly set the
-        // width and size
-        this.element.style.width  = "" + w + "px";
-        this.element.style.height = "" + h + "px";
-
-        // than we know the component metrics and can compute necessary reductions
-        var dx = this.element.offsetWidth  - w,
-            dy = this.element.offsetHeight - h;
-        this.element.style.width   = "" + (w - dx) + "px";
-        this.element.style.height  = "" + (h - dy) + "px";
-
-        if (this.isInInvisibleState()) {
-            this.element.style.visibility = "hidden";
-        }
-        else {
-            this.element.style.visibility = visibility;
-        }
-    },
-
-    function setLocation(x, y) {
-        this.$super(x, y);
-        this.isLocAdjusted = false;
-    },
-
-    function validate() {
-        if (this.canvas == null && this.parent != null) {
-            this.canvas = this.getCanvas();
-        }
-
-        if (this.canvas != null && this.isLocAdjusted === false) {
-            this.adjustLocation();
-        }
-
-        this.$super();
-    },
-
-    function setParent(p) {
-        this.$super(p);
-
-        if (p == null) {
-            if (this.element.parentNode != null) {
-                this.element.parentNode.removeChild(this.element);
-            }
-
-            this.element.style.visibility = "hidden";
-            pkg.events.removeComponentListener(this.globalCompListener);
-        }
-        else {
-            if (zebra.instanceOf(p, pkg.HtmlElement)) {
-                p.element.appendChild(this.element);
             }
             else {
-                document.body.appendChild(this.element);
+                // test consistency whether the DOM element already has
+                // parent node that doesn't match the discovered
+                if (parentElement           != null &&
+                    c.$container.parentNode != null &&
+                    c.$container.parentNode !== parentElement)
+                {
+                    throw new Error("DOM parent inconsistent state");
+                }
             }
-
-            if (this.isInInvisibleState()) {
-                this.element.style.visibility = "hidden";
-            }
-            else {
-                this.element.style.visibility = this.isVisible ? "visible" : "hidden";
-            }
-
-            pkg.events.addComponentListener(this.globalCompListener);
         }
 
-        this.isLocAdjusted = false;
+        //    +----------------------------------------
+        //    |             ^      DOM1
+        //    |             .
+        //    |             .  (x,y) -> (xx,yy) than correct left
+        //                  .  and top of DOM2 relatively to DOM1
+        //    |    +--------.--------------------------
+        //    |    |        .       Zebra1
+        //    |    |        .
+        //    |    |  (left, top)
+        //    |<............+-------------------------
+        //    |    |        |           DOM2
+        //    |    |        |
+        //    |    |        |
+        //
+        //  Convert DOM (x, y) zebra coordinates into appropriate CSS top and left
+        //  locations relatively to its immediate DOM element. For instance if a
+        //  zebra component contains DOM component every movement of zebra component
+        //  has to bring to correction of the embedded DOM element
+        function $adjustLocation(c) {
+            if (c.$container.parentNode != null &&
+                zebkit.web.$contains(c.$container))
+            {
+                // hide DOM component before move
+                // makes moving more smooth
+                var prevVisibility = c.$container.style.visibility;
+                c.$container.style.visibility = "hidden";
 
-        this.canvas = p != null ? this.getCanvas() : null;
+                // find a location relatively to the first parent HTML element
+                var p = c, xx = c.x, yy = c.y;
+                while (((p = p.parent) != null) && p.isDOMElement !== true) {
+                    xx += p.x;
+                    yy += p.y;
+                }
+
+                c.$container.style.left = "" + xx + "px";
+                c.$container.style.top  = "" + yy + "px";
+                c.$container.style.visibility = prevVisibility;
+            }
+        }
+
+        // iterate over all found children HTML elements
+        // !!! pay attention you have to check existence
+        // of "$domKids" field before the method calling
+        function $domElements(c, callback) {
+            for (var k in c.$domKids) {
+                var e = c.$domKids[k];
+                if (e.isDOMElement === true) {
+                    callback.call(this, e);
+                }
+                else {
+                    // prevent unnecessary method call by condition
+                    if (e.$domKids != null) {
+                        $domElements(e, callback);
+                    }
+                }
+            }
+        }
+
+        this.compShown = function(e) {
+            // 1) if c is DOM element than we have make it is visible if
+            //      -- c.isVisible == true : the component visible  AND
+            //      -- all elements in parent chain is visible      AND
+            //      -- the component is in visible area
+            //
+            // 2) if c is not a DOM component his visibility state can have
+            //    side effect to his children HTML elements (on any level)
+            //    In this case we have to do the following:
+            //      -- go through all children HTML elements
+            //      -- if c.isVisible == false: make invisible every children element
+            //      -- if c.isVisible != false: make visible every children element whose
+            //         visibility state satisfies the following conditions:
+            //          -- kid.isVisible == true
+            //          -- all parent to c are in visible state
+            //          -- the kid component is in visible area
+
+            var c = e.source;
+            if (c.isDOMElement === true) {
+                c.$container.style.visibility = c.isVisible === false || $isInInvisibleState(c) ? "hidden"
+                                                                                               : "visible";
+            }
+            else {
+                if (c.$domKids != null) {
+                    $domElements(c, function(e) {
+                        e.$container.style.visibility = e.isVisible === false || $isInInvisibleState(e) ? "hidden" : "visible";
+                    });
+                }
+            }
+        };
+
+        this.compMoved = function(e) {
+            var c = e.source, px = e.prevX, py = e.prevY;
+
+            // if we move a zebra component that contains
+            // DOM element(s) we have to correct the DOM elements
+            // locations relatively to its parent DOM
+            if (c.isDOMElement === true) {
+                // root canvas location cannot be adjusted since it is up to DOM tree to do it
+                if (c.$isRootCanvas !== true) {
+                    var dx   = px - c.x,
+                        dy   = py - c.y,
+                        cont = c.$container;
+
+                    cont.style.left = ((parseInt(cont.style.left, 10) || 0) - dx) + "px";
+                    cont.style.top  = ((parseInt(cont.style.top,  10) || 0) - dy) + "px";
+                }
+            }
+            else {
+                if (c.$domKids != null) {
+                    $domElements(c, function(e) {
+                        $adjustLocation(e);
+                    });
+                }
+            }
+        };
+
+        function detachFromParent(p, c) {
+            // DOM parent means the detached element doesn't
+            // have upper parents since it is relative to the
+            // DOM element
+            if (p.isDOMElement !== true && p.$domKids != null) {
+                // delete from parent
+                delete p.$domKids[c];
+
+                // parent is not DOM and doesn't have kids anymore
+                // what means the parent has to be also detached
+                if (isLeaf(p)) {
+                    // parent of parent is not null and is not a DOM element
+                    if (p.parent != null && p.parent.isDOMElement !== true) {
+                        detachFromParent(p.parent, p);
+                    }
+
+                    // remove $domKids from parent since the parent is leaf
+                    delete p.$domKids;
+                }
+            }
+        }
+
+        function isLeaf(c) {
+            if (c.$domKids != null) {
+                for(var k in c.$domKids) {
+                    if (c.$domKids.hasOwnProperty(k)) return false;
+                }
+            }
+            return true;
+        }
+
+        function removeDOMChildren(c) {
+            // DOM element cannot have children dependency tree
+            if (c.isDOMElement !== true && c.$domKids != null) {
+                for(var k in c.$domKids) {
+                    if (c.$domKids.hasOwnProperty(k)) {
+                        var kid = c.$domKids[k];
+
+                        // DOM element
+                        if (kid.isDOMElement === true) {
+                            kid.$container.parentNode.removeChild(kid.$container);
+                            kid.$container.parentNode = null;
+                        }
+                        else {
+                            removeDOMChildren(kid);
+                        }
+                    }
+                }
+                delete c.$domKids;
+            }
+        }
+
+        this.compRemoved = function(e) {
+            var p = e.source, i = e.index, c = e.kid;
+
+            // if detached element is DOM element we have to
+            // remove it from DOM tree
+            if (c.isDOMElement === true) {
+                c.$container.parentNode.removeChild(c.$container);
+                c.$container.parentNode = null;
+            }
+            else {
+                removeDOMChildren(c);
+            }
+            detachFromParent(p, c);
+        };
+
+        this.compAdded = function(e) {
+            var p = e.source, c = e.kid, constr = e.constraints;
+
+            if (c.isDOMElement === true) {
+                $resolveDOMParent(c);
+            }
+            else {
+                if (c.$domKids != null) {
+                    $domElements(c, function(e) {
+                        $resolveDOMParent(e);
+                    });
+                }
+                else {
+                    return;
+                }
+            }
+
+            if (p.isDOMElement !== true) {
+                // we come here if parent is not a DOM element and
+                // inserted children is DOM element or an element that
+                // embeds DOM elements
+                while (p != null && p.isDOMElement !== true) {
+                    if (p.$domKids == null) {
+                        p.$domKids = {};
+                    }
+
+                    if (p.$domKids.hasOwnProperty(c)) {
+                        throw new Error("Inconsistent state ");
+                    }
+
+                    p.$domKids[c] = c;
+
+                    c = p;
+                    p = p.parent;
+                }
+            }
+        };
+    }
+]);
+
+pkg.HtmlFocusableElement = Class(pkg.HtmlElement, [
+    function $prototype() {
+        this.$getFocusHolderElement = function() {
+            return this.element;
+        };
     }
 ]);
 
@@ -29820,9 +30618,9 @@ pkg.HtmlElement = Class(pkg.Panel, [
  * @class zebra.ui.HtmlTextInput
  * @extends zebra.ui.HtmlElement
  */
-pkg.HtmlTextInput = Class(pkg.HtmlElement, [
+pkg.HtmlTextInput = Class(pkg.HtmlFocusableElement, [
     function $prototype() {
-        this.canHaveFocus = true;
+        this.cursorType = pkg.Cursor.TEXT;
 
         /**
          * Get a text of the text input element
@@ -29846,28 +30644,13 @@ pkg.HtmlTextInput = Class(pkg.HtmlElement, [
         };
     },
 
-    function(text, elementName) {
+    function(text, e) {
         if (text == null) text = "";
-        this.$super(elementName);
-        this.element.setAttribute("tabindex", 0);
+        this.$super(e);
+        this.setAttribute("tabindex", 0);
         this.setValue(text);
     }
 ]);
-
-
-pkg.HtmlContent = Class(pkg.HtmlElement, [
-    function() {
-        this.$super("div");
-        this.setStyle("overflow", "hidden");
-    },
-
-    function loadContent(url) {
-        var c = zebra.io.GET(url);
-        this.setContent(c);
-        this.vrp();
-    }
-]);
-
 
 /**
  * HTML input text element wrapper class. The class wraps standard HTML text field
@@ -29904,6 +30687,7 @@ pkg.HtmlTextArea = Class(pkg.HtmlTextInput, [
     }
 ]);
 
+
 /**
  * @for
  */
@@ -29912,10 +30696,10 @@ pkg.HtmlTextArea = Class(pkg.HtmlTextInput, [
 (function(pkg, Class, ui) {
 
 /**
- * The package contains number of UI components that can be helful to 
+ * The package contains number of UI components that can be helful to
  * make visiual control of an UI component size and location
  * @module  ui.designer
- * @main 
+ * @main
  */
 
 var L = zebra.layout, Cursor = ui.Cursor, KeyEvent = ui.KeyEvent, CURSORS = [];
@@ -29941,39 +30725,64 @@ pkg.ShaperBorder = Class(ui.View, [
         }
 
         this.paint = function(g,x,y,w,h,d){
-            var cx = ~~((w - this.gap)/2),
-                cy = ~~((h - this.gap)/2);
+            var cx = Math.floor((w - this.gap)/2),
+                cy = Math.floor((h - this.gap)/2);
+
+            //x += 0.5;
+           // y += 0.5;
+            // w -= 1;
+            // h -= 1;
+
 
             g.setColor(this.color);
             g.beginPath();
             g.rect(x, y, this.gap, this.gap);
             g.rect(x + cx, y, this.gap, this.gap);
             g.rect(x, y + cy, this.gap, this.gap);
-            g.rect(x + w - this.gap, y, this.gap, this.gap);
-            g.rect(x, y + h - this.gap, this.gap, this.gap);
+            g.rect(x + w - this.gap - 1, y, this.gap, this.gap);
+            g.rect(x, y + h - this.gap - 1, this.gap, this.gap);
             g.rect(x + cx, y + h - this.gap, this.gap, this.gap);
-            g.rect(x + w - this.gap, y + cy, this.gap, this.gap);
-            g.rect(x + w - this.gap, y + h - this.gap, this.gap, this.gap);
+            g.rect(x + w - this.gap - 1, y + cy, this.gap, this.gap);
+            g.rect(x + w - this.gap - 1, y + h - this.gap - 1, this.gap, this.gap);
             g.fill();
             g.beginPath();
-            g.rect(x + ~~(this.gap / 2), y + ~~(this.gap / 2), w - this.gap, h - this.gap);
+
+
+            var po = zebra.layout.toParentOrigin(x + Math.floor(this.gap / 2), y + Math.floor(this.gap / 2), d);
+
+            console.log("rect() :  y = " + po.y);
+            g.rect(x + Math.floor(this.gap / 2),
+                   y + Math.floor(this.gap / 2),
+                   w - this.gap ,
+                   h - this.gap );
             g.stroke();
         };
 
         this.detectAt = function(target,x,y){
-            var gap = this.gap, gap2 = gap*2, w = target.width, h = target.height;
+            var gap  = this.gap,
+                gap2 = gap * 2,
+                w    = target.width,
+                h    = target.height;
+
 
             if (contains(x, y, gap, gap, w - gap2, h - gap2)) return L.CENTER;
             if (contains(x, y, 0, 0, gap, gap))               return L.TopLeft;
             if (contains(x, y, 0, h - gap, gap, gap))         return L.BottomLeft;
-            if (contains(x, y, w - gap, 0, gap, gap))         return L.TopRight;
+
+            console.log("x = " + x + ", y = " + y  + "is in [" + (w - gap) + ", 0, " + gap + "," + gap + "] " + target);
+
+            if (contains(x, y, w - gap, 0, gap, gap))         {
+                console.log("TOPRIGHT");
+                return L.TopRight;
+            }
+
             if (contains(x, y, w - gap, h - gap, gap, gap))   return L.BottomRight;
 
-            var mx = ~~((w-gap)/2);
+            var mx = Math.floor((w - gap)/2);
             if (contains(x, y, mx, 0, gap, gap))        return L.TOP;
             if (contains(x, y, mx, h - gap, gap, gap))  return L.BOTTOM;
 
-            var my = ~~((h-gap)/2);
+            var my = Math.floor((h - gap)/2);
             if (contains(x, y, 0, my, gap, gap)) return L.LEFT;
             return contains(x, y, w - gap, my, gap, gap) ? L.RIGHT : L.NONE;
         };
@@ -29983,8 +30792,8 @@ pkg.ShaperBorder = Class(ui.View, [
 /**
  * This is UI component class that implements possibility to embeds another
  * UI components to control the component size and location visually.
- 
-        // create canvas 
+
+        // create canvas
         var canvas = new zebra.ui.zCanvas(300,300);
 
         // create two UI components
@@ -29992,13 +30801,13 @@ pkg.ShaperBorder = Class(ui.View, [
         var but = new zebra.ui.Button("Button");
 
         // add created before label component as target of the shaper
-        // component and than add the shaper component into root panel 
+        // component and than add the shaper component into root panel
         canvas.root.add(new zebra.ui.designer.ShaperPan(lab).properties({
             bounds: [ 30,30,100,40]
         }));
 
         // add created before button component as target of the shaper
-        // component and than add the shaper component into root panel 
+        // component and than add the shaper component into root panel
         canvas.root.add(new zebra.ui.designer.ShaperPan(but).properties({
             bounds: [ 130,130,100,50]
         }));
@@ -30026,14 +30835,15 @@ pkg.ShaperPan = Class(ui.Panel, [
         */
 
         /**
-         * Minimal possible height or controlled component 
+         * Minimal possible height or controlled component
          * @attribute minHeight
          * @type {Integer}
          * @default 12
          */
 
+
         /**
-         * Minimal possible width or controlled component 
+         * Minimal possible width or controlled component
          * @attribute minWidth
          * @type {Integer}
          * @default 12
@@ -30045,6 +30855,8 @@ pkg.ShaperPan = Class(ui.Panel, [
         this.catchInput = true;
 
         this.getCursorType = function (t, x ,y) {
+            console.log("DETECT: " + CURSORS[this.shaperBr.detectAt(t, x, y)]);
+
             return this.kids.length > 0 ? CURSORS[this.shaperBr.detectAt(t, x, y)] : null;
         };
 
@@ -30055,22 +30867,22 @@ pkg.ShaperPan = Class(ui.Panel, [
          */
         this.keyPressed = function(e) {
             if (this.kids.length > 0){
-                var b  = (e.mask & KeyEvent.M_SHIFT) > 0, 
+                var b  = e.shiftKey,
                     c  = e.code,
                     dx = (c == KeyEvent.LEFT ?  -1 : (c == KeyEvent.RIGHT ? 1 : 0)),
                     dy = (c == KeyEvent.UP   ?  -1 : (c == KeyEvent.DOWN  ? 1 : 0)),
-                    w  = this.width  + dx, 
+                    w  = this.width  + dx,
                     h  = this.height + dy,
-                    x  = this.x + dx, 
+                    x  = this.x + dx,
                     y  = this.y + dy;
 
                 if (b) {
-                    if (this.isResizeEnabled && w > this.shaperBr.gap * 2 && h > this.shaperBr.gap * 2) {
+                    if (this.isResizeEnabled === true && w > this.shaperBr.gap * 2 && h > this.shaperBr.gap * 2) {
                         this.setSize(w, h);
                     }
                 }
                 else {
-                    if (this.isMoveEnabled) {
+                    if (this.isMoveEnabled === true) {
                         var ww = this.width, hh = this.height, p = this.parent;
                         if (x + ww/2 > 0 && y + hh/2 > 0 && x < p.width - ww/2 && y < p.height - hh/2) {
                             this.setLocation(x, y);
@@ -30081,11 +30893,11 @@ pkg.ShaperPan = Class(ui.Panel, [
         };
 
         /**
-         * Define mouse drag started events handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragStarted
+         * Define pointer drag started events handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerDragStarted
          */
-        this.mouseDragStarted = function(e){
+        this.pointerDragStarted = function(e){
             this.state = null;
             if (this.isResizeEnabled || this.isMoveEnabled) {
                 var t = this.shaperBr.detectAt(this, e.x, e.y);
@@ -30106,14 +30918,14 @@ pkg.ShaperPan = Class(ui.Panel, [
         };
 
         /**
-         * Define mouse dragged events handler
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragged
+         * Define pointer dragged events handler
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerDragged
          */
-        this.mouseDragged = function(e){
+        this.pointerDragged = function(e){
             if (this.state != null) {
-                var dy = (e.absY - this.py), 
-                    dx = (e.absX - this.px), 
+                var dy = (e.absY - this.py),
+                    dx = (e.absX - this.px),
                     s  = this.state,
                     nw = this.width  - dx * s.left + dx * s.right,
                     nh = this.height - dy * s.top  + dy * s.bottom;
@@ -30124,9 +30936,10 @@ pkg.ShaperPan = Class(ui.Panel, [
                     if ((s.top + s.right + s.bottom + s.left) === 0) {
                         this.setLocation(this.x + dx, this.y + dy);
                     }
-                    else {                    
-                        this.setSize(nw, nh);
-                        this.setLocation(this.x + dx * s.left, this.y + dy * s.top);
+                    else {
+                        console.log("ShaperPan.pointerDragged() setBounds " + nw);
+                        this.setBounds(this.x + dx * s.left, this.y + dy * s.top, nw, nh);
+                 //       this.invalidateLayout();
                     }
                 }
             }
@@ -30156,9 +30969,9 @@ pkg.ShaperPan = Class(ui.Panel, [
 
         var top = this.getTop(), left = this.getLeft();
         if (d.width === 0 || d.height === 0) d.toPreferredSize();
-        this.setLocation(d.x - left, d.y - top);
-        this.setSize(d.width + left + this.getRight(),
-                     d.height + top + this.getBottom());
+        this.setBounds(d.x - left, d.y - top,
+                       d.width + left + this.getRight(),
+                       d.height + top + this.getBottom());
         this.$super(i, L.CENTER, d);
     },
 

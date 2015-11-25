@@ -14,7 +14,7 @@
 
 		    	var data = [ "images/035.png;Test1", "images/058.png;Test2", "images/058.png;Test3" ];
 		    	for(var i=0; i < 1000; i++) {
-		    	 	data[i] = "images/060.png;" + " Item  [ " + i + " ]"; 
+		    	 	data[i] = "images/060.png;" + " Item  [ " + i + " ]";
 		    	}
 
 
@@ -25,13 +25,13 @@
 			    var z = new zebra.ui.zCanvas("test");
 			    z.fullScreen();
 
-				var sp = new ScrollPan(list, VERTICAL);
-				sp.setAutoHide(true);				
+				var sp = new ScrollPan(list, "vertical");
+				sp.setAutoHide(true);
 
 
 				list.setViewProvider(new zebra.Dummy([
 					function $prototype() {
-					
+
 						this.getView = function(target, value, i) {
 							var v = value.split(";");
 

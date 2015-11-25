@@ -5,7 +5,7 @@
  * @requires zebra, util
  */
 
-(function(pkg, Class, Interface) {
+(function(pkg, Class) {
 
 pkg.descent = function descent(a, b) {
     if (a == null) return 1;
@@ -18,9 +18,9 @@ pkg.ascent = function ascent(a, b) {
 };
 
 /**
- * Text model interface
+ * Text model class
  * @class zebra.data.TextModel
- * @interface
+ * @abstract
 */
 
 /**
@@ -93,10 +93,11 @@ pkg.ascent = function ascent(a, b) {
  * @param {Integer}  lines a number of lines that has been affected
  * by the text model update
  */
-pkg.TextModel = Interface();
-
-
-var oobi = "Index is out of bounds: ";
+pkg.TextModel = Class([
+    function $clazz() {
+        this.Listeners = zebra.util.ListenersClass("textUpdated");
+    }
+]);
 
 function Line(s) {
     this.s = s;
@@ -104,8 +105,6 @@ function Line(s) {
 
 //  toString for array.join method
 Line.prototype.toString = function() { return this.s; };
-
-pkg.TextModelListeners = zebra.util.ListenersClass("textUpdated");
 
 /**
  * Multi-lines text model implementation
@@ -134,6 +133,7 @@ pkg.Text = Class(pkg.TextModel, [
         };
 
         this.getLine = function(line) {
+            if (line < 0 || line >= this.lines.length) throw RangeError(line);
             return this.lines[line].s;
         };
 
@@ -219,6 +219,7 @@ pkg.Text = Class(pkg.TextModel, [
             if (text == null) {
                 throw new Error("Invalid null string");
             }
+
             var old = this.getValue();
             if (old !== text) {
                 if (old.length > 0) {
@@ -239,7 +240,7 @@ pkg.Text = Class(pkg.TextModel, [
 
         this[''] = function(s){
             this.lines = [ new Line("") ];
-            this._ = new pkg.TextModelListeners();
+            this._ = new this.$clazz.Listeners();
             this.setValue(s == null ? "" : s);
         };
     }
@@ -288,7 +289,7 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
 
         this.getLine = function(line){
             if (line !== 0) {
-                throw new Error(oobi + line);
+                throw new RangeError(line);
             }
             return this.buf;
         };
@@ -334,6 +335,10 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
                 throw new Error("Invalid null string");
             }
 
+            if (this.validate != null && this.validate(text) == false) {
+                return false;
+            }
+
             // cut to next line
             var i = text.indexOf('\n');
             if (i >= 0) {
@@ -353,6 +358,7 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
                 this._.textUpdated(this, true, 0, text.length, 0, 1);
                 return true;
             }
+
             return false;
         };
 
@@ -382,13 +388,11 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
             this.maxLen = max == null ? -1 : max;
             this.buf = "";
             this.extra = 0;
-            this._ = new pkg.TextModelListeners();
+            this._ = new this.$clazz.Listeners();
             this.setValue(s == null ? "" : s);
         };
     }
 ]);
-
-pkg.ListModelListeners = zebra.util.ListenersClass("elementInserted", "elementRemoved", "elementSet");
 
 /**
  * List model class
@@ -431,18 +435,22 @@ pkg.ListModelListeners = zebra.util.ListenersClass("elementInserted", "elementRe
  /**
   * Fired when an element has been re-set
 
-     list.bind(function elementSet(src, o, pe, i) {
+     list.bind(function elementSet(src, o, p, i) {
          ...
      });
 
   * @event elementSet
   * @param {zebra.data.ListModel} src a list model that triggers the event
   * @param {Object}  o an element that has been set
-  * @param {Object}  pe a previous element
+  * @param {Object}  p a previous element
   * @param {Integer} i an index at that the element has been re-set
   */
 
 pkg.ListModel = Class([
+    function $clazz () {
+        this.Listeners = zebra.util.ListenersClass("elementInserted", "elementRemoved", "elementSet");
+    },
+
     function $prototype() {
         /**
          * Get an item stored at the given location in the list
@@ -452,7 +460,7 @@ pkg.ListModel = Class([
          */
         this.get = function(i) {
             if (i < 0 || i >= this.d.length) {
-                throw new Error(oobi + i);
+                throw new RangeError(i);
             }
             return this.d[i];
         };
@@ -501,12 +509,12 @@ pkg.ListModel = Class([
         /**
          * Insert the given element into the given position of the list
          * @method insert
-         * @param {Object} o an element to be inserted into the list
          * @param {Integer} i a position at which the element has to be inserted into the list
+         * @param {Object} o an element to be inserted into the list
          */
-        this.insert = function(o,i){
-            if(i < 0 || i >= this.d.length) {
-                throw new Error(oobi + i);
+        this.insert = function(i, o){
+            if (i < 0 || i > this.d.length) {
+                throw new RangeError(i);
             }
             this.d.splice(i, 0, o);
             this._.elementInserted(this, o, i);
@@ -523,14 +531,14 @@ pkg.ListModel = Class([
 
         /**
          * Set the new element at the given position
-         * @method set
-         * @param  {Object} o a new element to be set as the list element at the given position
+         * @method setAt
          * @param  {Integer} i a position
+         * @param  {Object} o a new element to be set as the list element at the given position
          * @return {Object}  previous element that was stored at the given position
          */
-        this.set = function (o,i){
+        this.setAt = function(i, o) {
             if (i < 0 || i >= this.d.length) {
-                throw new Error(oobi + i);
+                throw new RangeError(i);
             }
             var pe = this.d[i];
             this.d[i] = o;
@@ -559,7 +567,7 @@ pkg.ListModel = Class([
         };
 
         this[''] = function() {
-            this._ = new pkg.ListModelListeners();
+            this._ = new this.$clazz.Listeners();
             this.d = (arguments.length === 0) ? [] : arguments[0];
         };
     }
@@ -603,10 +611,6 @@ var Item = pkg.Item = Class([
         };
     }
 ]);
-
-
-pkg.TreeModelListeners = zebra.util.ListenersClass("itemModified", "itemRemoved", "itemInserted");
-
 
 /**
  * Tree model class. The class is simple and handy way to keep hierarchical structure.
@@ -664,6 +668,8 @@ pkg.TreeModelListeners = zebra.util.ListenersClass("itemModified", "itemRemoved"
 
 pkg.TreeModel = Class([
     function $clazz() {
+        this.Listeners = zebra.util.ListenersClass("itemModified", "itemRemoved", "itemInserted");
+
         this.create = function(r, p) {
             var item = new Item(r.hasOwnProperty("value")? r.value : r);
             item.parent = p;
@@ -754,7 +760,7 @@ pkg.TreeModel = Class([
          * the parent item
          */
         this.insert = function(to,item,i){
-            if (i < 0 || to.kids.length < i) throw new Error(oobi + i);
+            if (i < 0 || to.kids.length < i) throw new RangeError(i);
             if (zebra.isString(item)) {
                 item = new Item(item);
             }
@@ -819,14 +825,10 @@ pkg.TreeModel = Class([
              */
             this.root = zebra.instanceOf(r, Item) ? r : pkg.TreeModel.create(r);
             this.root.parent = null;
-            this._ = new pkg.TreeModelListeners();
+            this._ = new this.$clazz.Listeners();
         };
     }
 ]);
-
-pkg.MatrixListeners = zebra.util.ListenersClass("matrixResized", "cellModified",
-                                        "matrixSorted", "matrixRowInserted",
-                                        "matrixColInserted");
 
 /**
  *  Matrix model class.
@@ -837,6 +839,12 @@ pkg.MatrixListeners = zebra.util.ListenersClass("matrixResized", "cellModified",
  *  @class zebra.data.Matrix
  */
 pkg.Matrix = Class([
+    function $clazz() {
+        this.Listeners = zebra.util.ListenersClass("matrixResized", "cellModified",
+                                                   "matrixSorted", "matrixRowInserted",
+                                                   "matrixColInserted");
+    },
+
     function $prototype() {
         /**
          * Fired when the matrix model size (number of rows or columns) is changed.
@@ -893,10 +901,25 @@ pkg.Matrix = Class([
          * @return {Object}  matrix model cell value
          */
         this.get = function (row,col){
-            if (row < 0 || row >= this.rows || col < 0 || col >= this.cols) {
-                throw new Error("Row or col is out of bounds: " + row + "," + col);
+            if (row < 0 || row >= this.rows) {
+                throw new RangeError(row);
             }
+
+            if (col < 0 || col >= this.cols) {
+                throw new RangeError(col);
+            }
+
             return this.objs[row] == null ? undefined : this.objs[row][col];
+        };
+
+        /**
+         * Get a matrix model cell value by the specified index
+         * @method geti
+         * @param  {Integer} index a cell index
+         * @return {Object}  matrix model cell value
+         */
+        this.geti = function(i) {
+            return this.get(~~(i / this.cols), i % this.cols);
         };
 
         /**
@@ -920,7 +943,6 @@ pkg.Matrix = Class([
 
                 // allocate array if no data for the given row exists
                 if (this.objs[row] == null) this.objs[row] = [];
-
                 this.objs[row][col] = obj;
                 this._.cellModified(this, row, col, old);
             }
@@ -1004,7 +1026,7 @@ pkg.Matrix = Class([
             }
 
             if (begrow < 0 || begrow + count > this.rows) {
-                throw new Error("Invalid row " + begrow);
+                throw new RangeError(begrow);
             }
 
             this.objs.splice(begrow, count);
@@ -1025,7 +1047,7 @@ pkg.Matrix = Class([
             }
 
             if (begcol < 0 || begcol + count > this.cols) {
-                throw new Error("Invalid column : " + begcol);
+                throw new RangeError(begcol);
             }
 
             for(var i = 0; i < this.objs.length; i++) {
@@ -1128,7 +1150,7 @@ pkg.Matrix = Class([
              * @readOnly
              */
 
-            this._ = new pkg.MatrixListeners();
+            this._ = new this.$clazz.Listeners();
             if (arguments.length == 1) {
                 this.objs = arguments[0];
                 this.cols = (this.objs.length > 0) ? this.objs[0].length : 0;
@@ -1149,4 +1171,4 @@ pkg.Matrix = Class([
  * @for
  */
 
-})(zebra("data"), zebra.Class, zebra.Interface);
+})(zebra("data"), zebra.Class);

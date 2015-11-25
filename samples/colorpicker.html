@@ -7,7 +7,7 @@
         <script>
             var myimg = null;
             zebra.ready(function() {
-                myimg = zebra.ui.loadImage("images/image.jpg");
+                myimg = zebra.web.$loadImage("images/image.jpg");
             });
         </script>
 
@@ -29,14 +29,14 @@
                                         background: "white",
                                         padding   : 8,
                                         border    : new Border("black", 1, 6),
-                                        kids      : [ 
-                                            new Panel({  
+                                        kids      : [
+                                            new Panel({
                                                 preferredSize: [ 20, 16 ],
                                                 background   : color,
                                             }),
-                                            new Label(color) 
+                                            new Label(color)
                                         ]
-                                    }); 
+                                    });
                                 return label;
                             }
                         ])
@@ -60,13 +60,13 @@
                                 for(var i=0; i<max; i++) p.kids[i].setBackground(null);
                                 counter=0;
                             }
-                        ]),                     
+                        ]),
                         BOTTOM: new Panel({
                             layout : new GridLayout(2, 8, HORIZONTAL),
                             id     : "palette"
                         }),
                         CENTER: new ImagePan(myimg, [
-                            function mousePressed(e) {
+                            function pointerPressed(e) {
                                 var i = this.getCanvas().$context.getImageData(e.absX, e.absY, 1, 1).data,
                                     c = "rgb("+ i[0] + "," + i[1] + "," + i[2] +")";
                                 p.kids[counter++%max].setBackground(c);
@@ -94,8 +94,8 @@
                     kids   : {
                         BOTTOM: new TextField(),
                         CENTER: new ImagePan(myimg, [
-                            function mousePressed(e) {
-                                var ctx = this.getCanvas().$context, 
+                            function pointerPressed(e) {
+                                var ctx = this.getCanvas().$context,
                                     i = ctx.getImageData(e.absX, e.absY, 1, 1).data,
                                     c = "rgb("+ i[0] + "," + i[1] + "," + i[2] +")";
                                 this.parent.find("//zebra.ui.TextField").setValue(c);
@@ -120,21 +120,21 @@
                     <canvas id="picker2"></canvas>
                 </td>
                 <td><canvas id="picker3"></canvas></td>
-            </tr>   
+            </tr>
             <tr>
                 <td>
                     <div>
-                        Move mouse cursor on picture to see color 
+                        Move pointer cursor on picture to see color
                     </div>
                 </td>
                 <td>
                     <div>
-                        Press mouse on the picture to grab color in palette
+                        Press pointer on the picture to grab color in palette
                     </div>
                 </td>
                 <td>
                     <div>
-                        Press mouse on the picture to grab color in text field
+                        Press pointer on the picture to grab color in text field
                     </div>
                 </td>
             </tr>

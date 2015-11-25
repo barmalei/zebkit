@@ -49,12 +49,12 @@ zebra.package("ui.excel", function(pkg) {
 
     pkg.EditorProvider = Class(ui.grid.DefEditors, [
         function shouldFinish(grid, row, col, e) {
-            return e.ID == ui.KeyEvent.PRESSED && e.code == ui.KeyEvent.ENTER;
+            return e.id == "keyPresssed" && e.code == ui.KeyEvent.ENTER;
         },
 
         function shouldStart(grid, row, col, e) {
-            return e.ID === ui.KeyEvent.TYPED ||
-                   e.ID === ui.MouseEvent.CLICKED && e.clicks > 1;
+            return e.id === "keyTyped" ||
+                   e.id === "pointerDoubleClicked";
         },
 
         function getEditor(grid, row, col, v) {

@@ -6,7 +6,7 @@
 
 		<script type='text/javascript'>
 		    zebra.ready(function() {
-				// import all classes, functions and cosntans from 
+				// import all classes, functions and cosntans from
 				// zebra.ui, zebra.layout packages
 				eval(zebra.Import("ui", "layout"));
 
@@ -17,7 +17,7 @@
 			    	border : new Border(),
 			    	padding: 8,
 			    	kids: {
-			    		CENTER: new TextField("Hi ...\n", true),
+			    		CENTER: new TextArea("Hi ...\n", true),
 			    		BOTTOM: new Button("Clear").properties({ canHaveFocus: false })
 			    	}
 			    });

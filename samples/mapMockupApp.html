@@ -69,9 +69,9 @@
                             var d = parseInt(data);
                             var c = new Panel(new BorderLayout(10));
                             c.setPadding(0,0,0,10);
-                            
+
                             c.add(LEFT, new BoldLabel(data));
-                            
+
                             var dc = new Panel({preferredSize:[30,-1]});
                             if (d < 100) {
                                 dc.setBackground(new Gradient("green", "#00A000", HORIZONTAL));
@@ -94,31 +94,33 @@
                 ]));
 
                 var Map = zebra.Class(Panel, [
-                    function() {
-                        this.$this(0,0);
-                        this.catchInput = true;
-                    },
-
                     function(lat, lon) {
+
+                        if (arguments.length == null) {
+                            lat = lon = 0;
+                        }
+
+                        this.catchInput = true;
+
                         this.$super({
                             layout : new BorderLayout(),
                             kids   : {
                                 CENTER: new ImagePan()
                             }
                         });
-                    
+
                         this.lon = lon;
                         this.lat = lat;
-                        this.showDensity = false; 
+                        this.showDensity = false;
                         this.selected = null;
                         this._ = new zebra.util.Listeners();
-                    }, 
+                    },
 
                     function resized(pw, ph) {
                         this.$super(pw, ph);
                         this.getByConstraints(CENTER).setImage(
                             "http://maps.google.com/maps/api/staticmap?sensor=false&center=52.234949,5.164554&scale=2&zoom=13&size="+ this.width + "x" + this.height);
-                    }, 
+                    },
 
                     function getRectAt(xx, yy) {
                         var y = 0;
@@ -136,7 +138,7 @@
                         return null;
                     },
 
-                    function mouseMoved(e) {
+                    function pointerMoved(e) {
                         var p = this.selected;
                         this.selected = this.getRectAt(e.x,e.y);
 
@@ -148,7 +150,7 @@
 
                     function paintOnTop(g) {
                         g.setColor("rgba(180,180,180, 0.9)");
-                        
+
                         for (var i=0; i < this.width/100; i++) {
                             g.drawLine(i*100, 0, i*100, this.height);
                         }
@@ -179,7 +181,7 @@
                                         pr = "rgba(0,0,255,";
                                     }
                                     else {
-                                        pr = "rgba(255,0,0,"; 
+                                        pr = "rgba(255,0,0,";
                                     }
                                 }
 
@@ -190,18 +192,18 @@
                             }
                             y+=100;
                         }
-                    }   
+                    }
                 ]);
 
                 var Timeline = zebra.Class(Panel, [
                     function(props) {
                         this.$super(props);
-                        this.chart = new zebra.ui.samples.SimpleChart(function(x) { 
-                            return Math.sin(x) * Math.sin(x) - Math.cos(x); 
+                        this.chart = new zebra.ui.samples.SimpleChart(function(x) {
+                            return Math.sin(x) * Math.sin(x) - Math.cos(x);
                         }, -10,0, 0.1, "red" );
 
-                        this.chart2 = new zebra.ui.samples.SimpleChart(function(x) { 
-                            return Math.sin(x)  - Math.cos(x)* Math.sin(x); 
+                        this.chart2 = new zebra.ui.samples.SimpleChart(function(x) {
+                            return Math.sin(x)  - Math.cos(x)* Math.sin(x);
                         }, -10,0, 0.1, "blue" );
 
 
@@ -210,9 +212,9 @@
                     },
 
                     function paint(g) {
-                        var x = 20, dx = (this.width-2*x)/24, 
+                        var x = 20, dx = (this.width-2*x)/24,
                             font = new Font(11, "bold", "Helvetica"),
-                            arrowSize = 12, 
+                            arrowSize = 12,
                             bottom = this.height - font.height*3/2 - arrowSize;
 
                         g.setColor("black");
@@ -237,10 +239,10 @@
 
                         for (var i=1; i < 25; i++) {
                             g.setColor("black");
-                            g.drawLine(x, bottom, x, bottom + 8);    
+                            g.drawLine(x, bottom, x, bottom + 8);
                             g.setFont(font);
                             g.fillText("" + i + "h", x, bottom + 8 + font.height);
-                            
+
                             if (i == 12) {
                                 var a = new ArrowView(BOTTOM,"red");
                                 a.paint(g, x - arrowSize/2, bottom - arrowSize ,arrowSize, arrowSize, this)
@@ -251,12 +253,12 @@
                             }
 
                             x += dx;
-                        }   
+                        }
                     }
                 ]);
 
 
-                var canvas = new zCanvas(1100, 800), 
+                var canvas = new zCanvas(1100, 800),
                     ch     = new Checkbox("Visualize users density"),
                     tl     = new Timeline({ id : "time", preferredSize: [-1, 150] }),
                     map    = new Map();
@@ -269,7 +271,7 @@
 		 		 	kids: {
 		 		 		RIGHT: new BorderPan("Quadrants",
                                              new ScrollPan(new GridStretchPan(qGrid)).properties({autoHide:true})).properties( { preferredSize:[350,-1] }),
-                        CENTER: new BorderPan("Map", 
+                        CENTER: new BorderPan("Map",
                                               new Panel({
                                                   layout: new BorderLayout(4),
                                                   kids: {
@@ -292,12 +294,12 @@
                                         new BoldLabel("15-12-2014"),
                                         new ImagePan("images/calendar.png?" + (new Date().getTime()))
                                     ]
-                                }) 
+                                })
                             }
                         })).properties({padding:8, background:  "#FAFADC" })
-		 		 	} 
+		 		 	}
 		 		});
-        
+
                 ch.manager.bind(function(t) {
                     map.showDensity = ch.getValue();
                     map.repaint();
@@ -307,7 +309,7 @@
                     if (map.selected != null) {
                         s = map.selected;
                         tl.chart2.x1 = 2*s.row ;
-                        tl.chart2.x2 = 2*s.row + 3*s.col + 2; 
+                        tl.chart2.x2 = 2*s.row + 3*s.col + 2;
                         tl.chart2.invalidate();
                     }
                     tl.repaint();

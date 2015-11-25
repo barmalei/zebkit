@@ -184,9 +184,10 @@ pkg.DefViews = Class([
          * paint the given cell model value
          * @method  getView
          */
-        this.getView = function(target, row,col,obj){
-            if (obj != null){
-                if (obj && obj.paint) return obj;
+        this.getView = function(target, row, col, obj){
+            if (obj != null) {
+                if (obj.toView != null) return obj.toView();
+                if (obj.paint != null) return obj;
                 this.render.setValue(obj.toString());
                 return this.render;
             }
@@ -293,14 +294,14 @@ pkg.DefEditors = Class([
                 this.toString = function() {
                     return this.selectedIndex < 0 ? ""
                                                   : this.items[this.selectedIndex];
-                }
-            },
-
-            function(items) {
-                this.$this(items, -1);
+                };
             },
 
             function(items, selectedIndex) {
+                if (arguments.length < 2) {
+                    selectedIndex = -1;
+                }
+
                 this.items = items;
                 this.selectedIndex = selectedIndex;
             }
@@ -329,7 +330,7 @@ pkg.DefEditors = Class([
          * @method  fetchEditedValue
          */
         this.fetchEditedValue = function(grid,row,col,data,editor) {
-            if (editor == this.selectorEditor) {
+            if (editor === this.selectorEditor) {
                 data.selectedIndex = editor.list.selectedIndex;
                 return data;
             }
@@ -355,7 +356,7 @@ pkg.DefEditors = Class([
             editor = zebra.isBoolean(v) ? this.boolEditor
                                         : (zebra.instanceOf(v, this.$clazz.Items) ? this.selectorEditor : this.textEditor);
 
-            if (editor == this.selectorEditor) {
+            if (editor === this.selectorEditor) {
                 editor.list.setModel(v.items);
                 editor.list.select(v.selectedIndex);
             }
@@ -379,7 +380,7 @@ pkg.DefEditors = Class([
          * @method shouldStart
          */
         this.shouldStart = function(grid,row,col,e){
-            return e.ID == ui.MouseEvent.CLICKED && e.clicks == 1;
+            return e.id === "pointerClicked";
         };
 
         /**
@@ -393,7 +394,7 @@ pkg.DefEditors = Class([
          * @method shouldCancel
          */
         this.shouldCancel = function(grid,row,col,e){
-            return e.ID == KE.PRESSED && KE.ESCAPE == e.code;
+            return e.id === "keyPressed" && KE.ESCAPE === e.code;
         };
 
         /**
@@ -406,12 +407,10 @@ pkg.DefEditors = Class([
          * @method shouldFinish
          */
         this.shouldFinish = function(grid,row,col,e){
-            return e.ID == KE.PRESSED && KE.ENTER  == e.code;
+            return e.id === "keyPressed" && KE.ENTER === e.code;
         };
     }
 ]);
-
-pkg.CaptionListeners = new zebra.util.ListenersClass("captionResized");
 
 /**
  * Grid caption base UI component class. This class has to be used
@@ -436,6 +435,10 @@ pkg.CaptionListeners = new zebra.util.ListenersClass("captionResized");
  */
 
 pkg.BaseCaption = Class(ui.Panel, [
+    function $clazz() {
+        this.Listeners = new zebra.util.ListenersClass("captionResized");
+    },
+
     function $prototype() {
         /**
          * Minimal possible grid cell size
@@ -446,7 +449,7 @@ pkg.BaseCaption = Class(ui.Panel, [
         this.minSize = 10;
 
         /**
-         * Size of the active area where cells size can be changed by mouse dragging event
+         * Size of the active area where cells size can be changed by pointer dragging event
          * @attribute activeAreaSize
          * @type {Number}
          * @default 5
@@ -463,7 +466,7 @@ pkg.BaseCaption = Class(ui.Panel, [
 
         /**
          * Indicate if the grid cell size has to be adjusted according
-         * to the cell preferred size by mouse double click event.
+         * to the cell preferred size by pointer double click event.
          * @attribute isAutoFit
          * @default true
          * @type {Boolean}
@@ -471,7 +474,7 @@ pkg.BaseCaption = Class(ui.Panel, [
 
         /**
          * Indicate if the grid cells are resize-able.
-         * to the cell preferred size by mouse double click event.
+         * to the cell preferred size by pointer double click event.
          * @attribute isResizable
          * @default true
          * @type {Boolean}
@@ -482,19 +485,19 @@ pkg.BaseCaption = Class(ui.Panel, [
             return this.metrics != null     &&
                    this.selectedColRow >= 0 &&
                    this.isResizable         &&
-                   this.metrics.isUsePsMetric === false ? ((this.orient == L.HORIZONTAL) ? Cursor.W_RESIZE
-                                                                                         : Cursor.S_RESIZE)
+                   this.metrics.isUsePsMetric === false ? ((this.orient === L.HORIZONTAL) ? Cursor.W_RESIZE
+                                                                                          : Cursor.S_RESIZE)
                                                         : null;
         };
 
         /**
-         * Define mouse dragged events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragged
+         * Define pointer dragged events handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerDragged
          */
-        this.mouseDragged = function(e){
+        this.pointerDragged = function(e){
             if (this.pxy != null) {
-                var b  = (this.orient == L.HORIZONTAL),
+                var b  = (this.orient === L.HORIZONTAL),
                     rc = this.selectedColRow,
                     ns = (b ? this.metrics.getColWidth(rc) + e.x
                             : this.metrics.getRowHeight(rc) + e.y) - this.pxy;
@@ -508,11 +511,11 @@ pkg.BaseCaption = Class(ui.Panel, [
         };
 
         /**
-         * Define mouse drag started events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragStarted
+         * Define pointer drag started events handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerDragStarted
          */
-        this.mouseDragStarted = function(e){
+        this.pointerDragStarted = function(e){
             if (this.metrics != null &&
                 this.isResizable     &&
                 this.metrics.isUsePsMetric === false)
@@ -520,18 +523,18 @@ pkg.BaseCaption = Class(ui.Panel, [
                 this.calcRowColAt(e.x, e.y);
 
                 if (this.selectedColRow >= 0) {
-                    this.pxy = (this.orient == L.HORIZONTAL) ? e.x
-                                                             : e.y;
+                    this.pxy = (this.orient === L.HORIZONTAL) ? e.x
+                                                              : e.y;
                 }
             }
         };
 
         /**
-         * Define mouse drag ended events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseDragEnded
+         * Define pointer drag ended events handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerDragEnded
          */
-        this.mouseDragEnded = function (e){
+        this.pointerDragEnded = function (e){
             if (this.pxy != null) {
                 this.pxy = null;
             }
@@ -542,30 +545,29 @@ pkg.BaseCaption = Class(ui.Panel, [
         };
 
         /**
-         * Define mouse moved events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseMoved
+         * Define pointer moved events handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerMoved
          */
-        this.mouseMoved = function(e) {
+        this.pointerMoved = function(e) {
             if (this.metrics != null) {
                 this.calcRowColAt(e.x, e.y);
             }
         };
 
         /**
-         * Define mouse clicked events handler.
-         * @param  {zebra.ui.MouseEvent} e a mouse event
-         * @method mouseClicked
+         * Define pointer clicked events handler.
+         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @method pointerClicked
          */
-        this.mouseClicked = function (e){
+        this.pointerDoubleClicked = function (e){
             if (this.pxy     == null     &&
                 this.metrics != null     &&
-                e.clicks > 1             &&
                 this.selectedColRow >= 0 &&
                 this.isAutoFit === true     )
             {
                 var size = this.getCaptionPS(this.selectedColRow);
-                if (this.orient == L.HORIZONTAL) {
+                if (this.orient === L.HORIZONTAL) {
                     this.metrics.setColWidth (this.selectedColRow, size);
                 }
                 else {
@@ -582,13 +584,12 @@ pkg.BaseCaption = Class(ui.Panel, [
          * @method getCaptionPS
          */
         this.getCaptionPS = function(rowcol) {
-            return (this.orient == L.HORIZONTAL) ? this.metrics.getColPSWidth(this.selectedColRow)
-                                                 : this.metrics.getRowPSHeight(this.selectedColRow);
+            return 0;
         };
 
         this.captionResized = function(rowcol, ns) {
             if (ns > this.minSize) {
-                if (this.orient == L.HORIZONTAL) {
+                if (this.orient === L.HORIZONTAL) {
                     var pw = this.metrics.getColWidth(rowcol);
                     this.metrics.setColWidth(rowcol, ns);
                     this._.captionResized(this, rowcol, pw);
@@ -634,7 +635,7 @@ pkg.BaseCaption = Class(ui.Panel, [
             {
                 var m     = this.metrics,
                     cv    = m.getCellsVisibility(),
-                    isHor = (this.orient == L.HORIZONTAL);
+                    isHor = (this.orient === L.HORIZONTAL);
 
                 if ((isHor && cv.fc != null) || (isHor === false && cv.fr != null)) {
                     var gap  = m.lineSize,
@@ -659,7 +660,7 @@ pkg.BaseCaption = Class(ui.Panel, [
                 var v = this.metrics.getCellsVisibility();
                 if (v != null) {
                     var m       = this.metrics,
-                        b       = this.orient == L.HORIZONTAL,
+                        b       = this.orient === L.HORIZONTAL,
                         startRC = b ? v.fc[0] : v.fr[0],
                         endRC   = b ? v.lc[0] : v.lr[0],
                         xy      = b ? v.fc[1] - this.x - m.lineSize + m.getXOrigin()
@@ -696,7 +697,7 @@ pkg.BaseCaption = Class(ui.Panel, [
     },
 
     function(titles) {
-        this._ = new pkg.CaptionListeners();
+        this._ = new this.$clazz.Listeners();
         this.orient = this.metrics = this.pxy = null;
         this.selectedColRow = -1;
         this.$super();
@@ -714,9 +715,9 @@ pkg.BaseCaption = Class(ui.Panel, [
         if (p == null || zebra.instanceOf(p, pkg.Metrics)) {
             this.metrics = p;
             if (this.constraints != null) {
-                this.orient = (this.constraints == L.TOP    || this.constraints == "top"   ||
-                               this.constraints == L.BOTTOM || this.constraints == "bottom"  ) ? L.HORIZONTAL
-                                                                                               : L.VERTICAL;
+                this.orient = (this.constraints === L.TOP    || this.constraints === "top"   ||
+                               this.constraints === L.BOTTOM || this.constraints === "bottom"  ) ? L.HORIZONTAL
+                                                                                                 : L.VERTICAL;
             }
         }
     }
@@ -757,11 +758,19 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
             return { width:this.psW, height:this.psH };
         };
 
+        this.setFont = function(f) {
+            this.render.setFont(f);
+        };
+
+        this.setColor = function(c) {
+            this.render.setColor(c);
+        };
+
         this.recalc = function(){
             this.psW = this.psH = 0;
             if (this.metrics != null){
                 var m     = this.metrics,
-                    isHor = (this.orient == L.HORIZONTAL),
+                    isHor = (this.orient === L.HORIZONTAL),
                     size  = isHor ? m.getGridCols() : m.getGridRows();
 
                 for(var i = 0;i < size; i++) {
@@ -792,16 +801,20 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
         /**
          * Put the given title for the given caption cell.
          * @param  {Integer} rowcol a grid caption cell index
-         * @param  {String|zebra.ui.View} title a title of the given grid caption cell.
-         * Can be a string or zebra.ui.View class instance
+         * @param  {String|zebra.ui.View|zebra.ui.Panel} title a title of the given grid caption cell.
+         * Can be a string or zebra.ui.View or zebra.ui.Panel class instance
          * @method putTitle
          */
         this.putTitle = function(rowcol, title){
             var prev = this.titles[rowcol] != null ? this.titles[rowcol] : {};
             if (prev.title != title) {
+                if (title != null && zebra.instanceOf(title, ui.Panel)) {
+                    title = new ui.CompRender(title);
+                }
+
                 prev.title = title;
                 this.titles[rowcol] = prev;
-                this.vrp;
+                this.vrp();
             }
         };
 
@@ -826,29 +839,24 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
             this.titles[i] = t;
             this.repaint();
         };
-    },
 
-    function getCaptionPS(rowcol) {
-        var size = this.$super(rowcol),
-            v    = this.getTitleView(this.selectedColRow);
-
-        if (v != null) {
-            size = Math.max(size, (this.orient == L.HORIZONTAL) ? v.getPreferredSize().width
-                                                                : v.getPreferredSize().height);
-        }
-
-        return size;
+        this.getCaptionPS = function(rowcol) {
+            var  v = this.getTitleView(rowcol);
+            return (v != null) ? (this.orient === L.HORIZONTAL ? v.getPreferredSize().width
+                                                               : v.getPreferredSize().height)
+                               : 0;
+        };
     },
 
     function paintOnTop(g) {
         if (this.metrics != null){
             var cv = this.metrics.getCellsVisibility();
 
-            if ((cv.fc != null && cv.lc != null && this.orient == L.HORIZONTAL)||
-                (cv.fr != null && cv.lr != null && this.orient == L.VERTICAL  )   )
+            if ((cv.fc != null && cv.lc != null && this.orient === L.HORIZONTAL)||
+                (cv.fr != null && cv.lr != null && this.orient === L.VERTICAL  )   )
             {
                 var m      = this.metrics,
-                    isHor  = (this.orient == L.HORIZONTAL),
+                    isHor  = (this.orient === L.HORIZONTAL),
                     gap    = m.lineSize,
                     top    = this.getTop(),
                     left   = this.getLeft(),
@@ -892,11 +900,11 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
                             bg = t == null ? null : t.bg,
                             ps = v.getPreferredSize(),
                             vx = xa == L.CENTER ? Math.floor((ww - ps.width)/2)
-                                                : (xa == L.RIGHT ? ww - ps.width - ((i==size-1) ? right : 0)
-                                                                 : (i === 0 ? left: 0)),
+                                                : (xa === L.RIGHT ? ww - ps.width - ((i==size-1) ? right : 0)
+                                                                  : (i === 0 ? left: 0)),
                             vy = ya == L.CENTER ? Math.floor((hh - ps.height)/2)
-                                                : (ya == L.BOTTOM ? hh - ps.height - ((i==size-1) ? bottom : 0)
-                                                                  :  (i === 0 ? top: 0));
+                                                : (ya === L.BOTTOM ? hh - ps.height - ((i==size-1) ? bottom : 0)
+                                                                   :  (i === 0 ? top: 0));
 
 
                         if (bg != null) {
@@ -919,15 +927,11 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
         }
     },
 
-    function() {
-        this.$this(null);
-    },
-
-    function(titles) {
-        this.$this(titles, new ui.StringRender(""));
-    },
-
     function(titles, render) {
+        if (arguments.length < 2) {
+            render = new ui.StringRender("");
+        }
+
         this.psW = this.psH = 0;
         this.titles = [];
         this.render = render;
@@ -953,7 +957,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
             function $prototype() {
                 this.doLayout = function (target) {
                     var m    = target.metrics,
-                        b    = target.orient == L.HORIZONTAL,
+                        b    = target.orient === L.HORIZONTAL,
                         top  = target.getTop(),
                         left = target.getLeft(),
                         wh   = (b ? target.height - top  - target.getBottom()
@@ -971,12 +975,10 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
 
                         if (kid.isVisible === true) {
                             if (b) {
-                                kid.setLocation(xy, top);
-                                kid.setSize(cwh, wh);
+                                kid.setBounds(xy, top, cwh, wh);
                             }
                             else {
-                                kid.setLocation(left, xy);
-                                kid.setSize(wh, cwh);
+                                kid.setBounds(left, xy, wh, cwh);
                             }
                         }
 
@@ -1055,7 +1057,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
                 if (this.isSortable) {
                     var col = this.parent.indexOf(this);
                     if (info.col == col) {
-                        this.sortState = info.name == 'descent' ? 1 : -1;
+                        this.sortState = info.name === 'descent' ? 1 : -1;
                         this.statusPan.setState(info.name);
                     }
                     else {
@@ -1082,12 +1084,11 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
             },
 
             function fired(target) {
-                if (this.isSortable) {
+                if (this.isSortable === true) {
                     var f = this.sortState == 1 ? zebra.data.ascent
                                                 : zebra.data.descent,
                         model = this.getGridCaption().metrics.model,
                         col   = this.parent.indexOf(this);
-
                     model.sortCol(col, f);
                 }
             },
@@ -1126,20 +1127,33 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
         /**
          * Put the given title component for the given caption cell.
          * @param  {Integer} rowcol a grid caption cell index
-         * @param  {String|zebra.ui.Panel} title a title of the given grid caption cell.
-         * Can be a string or zebra.ui.Panel class instance
+         * @param  {String|zebra.ui.Panel|zebra.ui.View} title a title of the given grid caption cell.
+         * Can be a string or zebra.ui.View or zebra.ui.Panel class instance
          * @method putTitle
          */
         this.putTitle = function(rowcol, t) {
-            for(var i = this.kids.length - 1; i < rowcol; i++) {
-                this.add(t);
+            // add empty titles
+            for(var i = this.kids.length - 1;  i >= 0 && i < rowcol; i++) {
+                this.add(new this.$clazz.TitlePan(""));
+            }
+
+            if (zebra.isString(t)) {
+                t = new this.$clazz.TitlePan("");
+            }
+            else {
+                if (zebra.instanceOf(t, ui.View)) {
+                    var p = new ui.ViewPan();
+                    p.setView(t);
+                    t = p;
+                }
             }
 
             if (rowcol < this.kids.length) {
-                this.removeAt(rowcol);
+                this.setAt(rowcol, t);
             }
-
-            this.insert(rowcol, null, t);
+            else {
+                this.add(t);
+            }
         };
 
         /**
@@ -1165,21 +1179,19 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
         };
 
         this.matrixResized = function(target,prevRows,prevCols){
-            for(var i=0; i < this.kids.length; i++) {
+            for(var i = 0; i < this.kids.length; i++) {
                 if (this.kids[i].matrixResized) {
                     this.kids[i].matrixResized(target,prevRows,prevCols);
                 }
             }
         };
-    },
 
-    function() {
-        this.$this(null);
-    },
-
-    function(titles) {
-        this.$super(titles);
-        this.setLayout(new this.$clazz.Layout());
+        this.getCaptionPS = function(rowcol) {
+            var  c = this.kids[rowcol];
+            return (c != null) ? (this.orient == L.HORIZONTAL ? c.getPreferredSize().width
+                                                              : c.getPreferredSize().height)
+                               : 0;
+        };
     },
 
     function captionResized(rowcol, ns) {
@@ -1204,6 +1216,59 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
             c = new this.$clazz.TitlePan(c);
         }
         this.$super(i,constr, c);
+    },
+
+    function(titles) {
+        if (arguments === 0) titles = null;
+
+        this.$super(titles);
+        this.setLayout(new this.$clazz.Layout());
+    }
+]);
+
+// TODO: this is the future thoughts regarding
+// grid cell selection customization
+pkg.RowSelMode = Class([
+    function $prototype() {
+        this.selectedIndex = 0;
+        this.$blocked = false;
+
+        this.isSelected = function(row, col) {
+            return row >= 0 && this.selectedIndex === row;
+        };
+
+        this.select = function(row, col, b) {
+            if (arguments.length === 1 || (arguments.length === 2 && zebra.isNumber(col))) {
+                b = true;
+            }
+
+            if (this.isSelected(row, col) != b){
+                if (this.selectedIndex >= 0) this.clearSelect();
+                if (b === true) {
+                    this.selectedIndex = row;
+                    this.target._.rowSelected();
+                }
+            }
+        };
+
+        this.clearSelect = function() {
+            if (this.selectedIndex >= 0) {
+                this.selectedIndex = -1;
+                this.target._.rowSelected();
+            }
+        };
+
+        this.posChanged = function(src) {
+            if ($blocked === false) {
+                $blocked = true;
+                try {
+
+                }
+                finally {
+                    $blocked = false;
+                }
+            }
+        };
     }
 ]);
 
@@ -1258,12 +1323,23 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
  */
 pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
         function $clazz() {
+            this.Listeners = zebra.util.ListenersClass("rowSelected");
+
             this.DEF_COLWIDTH  = 80;
             this.DEF_ROWHEIGHT = 25;
             this.CornerPan = Class(ui.Panel, []);
         },
 
         function $prototype() {
+            /**
+             * Grid navigation mode
+             * @attribute navigationMode
+             * @default "row"
+             * @type {String}
+             */
+            this.navigationMode = "row";
+
+
             /**
              * Grid line size
              * @attribute lineSize
@@ -1339,6 +1415,16 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
             this.drawVerLines = this.drawHorLines = true;
 
             /**
+             * Indicates if left and right grid net vertical lines
+             * have to be rendered or not.
+             * @attribute drawSideLines
+             * @type {Boolean}
+             * @readOnly
+             * @default true
+             */
+            this.drawSideLines = true;
+
+            /**
              * Line color
              * @attribute lineColor
              * @type {String}
@@ -1357,6 +1443,14 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
              */
             this.isUsePsMetric = false;
 
+            /**
+             * Defines if the pos narker has to be renederd over rendered data
+             * @attribute paintPosMarkerOver
+             * @type {Boolean}
+             * @default true
+             */
+            this.paintPosMarkerOver = true;
+
             this.$topY = function() {
                 // grid without top caption renders line at the top, so we have to take in account
                 // the place for the line
@@ -1373,6 +1467,22 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                                                                         : this.getLeftCaptionWidth());
             };
 
+            this.setDefCellXAlignment = function(ax) {
+                this.setDefCellAlignments(ax, this.defYAlignment);
+            };
+
+            this.setDefCellYAlignment = function(ay) {
+                this.setDefCellAlignments(this.defXAlignment, ay);
+            };
+
+            this.setDefCellAlignments = function(ax, ay) {
+                if (this.defXAlignment != ax || this.defYAlignment != ay) {
+                    this.defXAlignment = L.$constraints(ax);
+                    this.defYAlignment = L.$constraints(ay);
+                    this.repaint();
+                }
+            };
+
             this.colVisibility = function(col,x,d,b){
                 var cols = this.getGridCols();
                 if (cols === 0) return null;
@@ -1385,7 +1495,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                     this.getLeftCaptionWidth());
 
                 for(; col < cols && col >= 0; col += d) {
-                    if (x + dx < xx1 && (x + this.colWidths[col] + dx) > xx2){
+                    if (x + dx < xx1 && (x + this.colWidths[col] + dx) > xx2) {
                         if (b) return [col, x];
                     }
                     else {
@@ -1406,12 +1516,18 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 var rows = this.getGridRows();
                 if (rows === 0) return null;
 
+
+
                 var top = this.getTop(),
                     dy  = this.scrollManager.getSY(),
                     yy1 = Math.min(this.visibleArea.y + this.visibleArea.height,
                                    this.height - this.getBottom()),
                     yy2 = Math.max(this.visibleArea.y,
                                    top + this.getTopCaptionHeight());
+
+
+                console.log("Grid.rowVisibility() : " + yy1 + ","+ yy2 + "," + dy);
+
 
                 for(; row < rows && row >= 0; row += d){
                     if (y + dy < yy1 && (y + this.rowHeights[row] + dy) > yy2){
@@ -1673,7 +1789,9 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 return y;
             };
 
-            this.childInputEvent = function(e){
+            this.childPointerEntered  = this.childPointerExited   =
+            this.childPointerReleased = this.childPointerReleased = this.childPointerPressed =
+            this.childKeyReleased     = this.childKeyTyped        = this.childKeyPressed     = function(e){
                 if (this.editingRow >= 0) {
                     if (this.editors.shouldCancel(this,
                                                   this.editingRow,
@@ -1739,20 +1857,31 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                             g.clipRect(tw - dx, th - dy, this.width  - tw, this.height - th);
                         }
 
-                        this.paintSelection(g);
-                        this.paintData(g);
+                        if (this.paintPosMarkerOver !== true) {
+                            this.paintPosMarker(g);
+                        }
 
-                        if (this.drawHorLines || this.drawVerLines) {
+                        this.paintData(g);
+                        if (this.paintNetOnCaption !== true && (this.drawHorLines === true || this.drawVerLines === true)) {
                             this.paintNet(g);
                         }
 
-                        this.paintPosMarker(g);
+                        if (this.paintPosMarkerOver === true) {
+                            this.paintPosMarker(g);
+                        }
+
                         g.restore();
                     }
                     catch(e) {
                         g.restore();
                         throw e;
                     }
+                }
+            };
+
+            this.paintOnTop = function(g) {
+                if (this.paintNetOnCaption === true && (this.drawHorLines === true || this.drawVerLines === true)) {
+                    this.paintNet(g);
                 }
             };
 
@@ -1830,8 +1959,17 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 }
             };
 
-            this.setPosMarkerMode = function(mode) {
-                if (mode == "row") {
+            /**
+             * Set navigation mode. It is possible to use "row" or "cell" navigation mode.
+             * In first case navigation happens over row, in the second
+             * case navigation happens over cell.
+             * @param {String} mode a navigation mode ("row" pr "cell")
+             * @method setNavigationMode
+             */
+            this.setNavigationMode = function(mode) {
+                if (mode.toLowerCase() === "row") {
+                    this.navigationMode = "row";
+
                     this.getLineSize = function(row) {
                         return 1;
                     };
@@ -1841,7 +1979,9 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                     };
                 }
                 else {
-                    if (mode == "cell") {
+                    this.navigationMode = "cell";
+
+                    if (mode.toLowerCase() === "cell") {
                         this.getLineSize = function(row) {
                             return this.getGridCols();
                         };
@@ -1873,7 +2013,10 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 if (row >= 0) {
                     this.makeVisible(row, this.position.currentCol);
                     this.select(row, true);
-                    this.repaintRows(prevOffset, row);
+                    this.repaintRows(prevLine, row);
+                }
+                else {
+                    this.repaintRows(prevLine, prevLine);
                 }
             };
 
@@ -1894,13 +2037,13 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 if (this.position != null){
                     switch(e.code) {
                         case KE.LEFT    : this.position.seek(-1); break;
-                        case KE.UP      : this.position.seekLineTo(Position.UP); break;
+                        case KE.UP      : this.position.seekLineTo("up"); break;
                         case KE.RIGHT   : this.position.seek(1); break;
-                        case KE.DOWN    : this.position.seekLineTo(Position.DOWN);break;
-                        case KE.PAGEUP  : this.position.seekLineTo(Position.UP, this.pageSize(-1));break;
-                        case KE.PAGEDOWN: this.position.seekLineTo(Position.DOWN, this.pageSize(1));break;
-                        case KE.END     : if (e.isControlPressed()) this.position.setOffset(this.getLines() - 1);break;
-                        case KE.HOME    : if (e.isControlPressed()) this.position.setOffset(0);break;
+                        case KE.DOWN    : this.position.seekLineTo("down");break;
+                        case KE.PAGEUP  : this.position.seekLineTo("up", this.pageSize(-1));break;
+                        case KE.PAGEDOWN: this.position.seekLineTo("down", this.pageSize(1));break;
+                        case KE.END     : if (e.ctrlKey) this.position.setOffset(this.getLines() - 1);break;
+                        case KE.HOME    : if (e.ctrlKey) this.position.setOffset(0);break;
                     }
 
                     this.$se(this.position.currentLine, this.position.currentCol, e);
@@ -1908,14 +2051,14 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
             };
 
             /**
-             * Checks if the given grid row is selected
+             * Checks if the given grid cell is selected
              * @param  {Integer}  row a grid row
+             * @param  {Integer}  col a grid col
              * @return {Boolean}  true if the given row is selected
              * @method isSelected
              */
-            this.isSelected = function(row){
-                return (this.selected == null) ? row == this.selectedIndex
-                                               : this.selected[row] > 0;
+            this.isSelected = function(row, col) {
+                return row == this.selectedIndex;
             };
 
             /**
@@ -1937,7 +2080,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 if (r1 < rows) {
                     if (r2 >= rows) r2 = rows - 1;
                     var y1 = this.getRowY(r1),
-                        y2 = ((r1 == r2) ? y1 : this.getRowY(r2)) + this.rowHeights[r2];
+                        y2 = ((r1 == r2) ? y1 + 1  : this.getRowY(r2)) + this.rowHeights[r2];
 
                     this.repaint(0, y1 + this.scrollManager.getSY(), this.width, y2 - y1);
                 }
@@ -1947,14 +2090,14 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
              * Detect a cell by the given location
              * @param  {Integer} x a x coordinate relatively the grid component
              * @param  {Integer} y a y coordinate relatively the grid component
-             * @return {Array} an array that contains detected grid cell row as
-             * the first element and a grid column as the second element. The
-             * row and column values are set to -1 if no grid cell can be found
-             * at the given location
+             * @return {Object} an object that contains detected grid cell row as
+             * "row" field and a grid column as "col" field. null is returned if
+             * no cell can be detected.
              * @method cellByLocation
              */
             this.cellByLocation = function(x,y){
                 this.validate();
+
                 var dx  = this.scrollManager.getSX(),
                     dy  = this.scrollManager.getSY(),
                     v   = this.visibility,
@@ -1981,7 +2124,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                         }
                     }
                 }
-                return (col >= 0 && row >= 0) ? [row, col] : null;
+                return (col >= 0 && row >= 0) ? { row:row, col:col } : null;
             };
 
             this.doLayout = function(target) {
@@ -1991,17 +2134,18 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                  this.leftCaption.isVisible === true) ? this.leftCaption.getPreferredSize().width : 0;
 
                 if (this.topCaption != null){
-                    this.topCaption.setLocation(this.getLeft() + leftWidth, this.getTop());
-                    this.topCaption.setSize(Math.min(target.width - this.getLeft() - this.getRight() - leftWidth,
-                                                     this.psWidth_),
-                                            topHeight);
+                    this.topCaption.setBounds(this.getLeft() + leftWidth, this.getTop(),
+                                              Math.min(target.width - this.getLeft() - this.getRight() - leftWidth,
+                                                       this.psWidth_),
+                                              topHeight);
                 }
 
                 if (this.leftCaption != null){
-                    this.leftCaption.setLocation(this.getLeft(), this.getTop() + topHeight);
-                    this.leftCaption.setSize(leftWidth,
-                                             Math.min(target.height - this.getTop() - this.getBottom() - topHeight,
-                                                      this.psHeight_));
+                    this.leftCaption.setBounds(this.getLeft(),
+                                               this.getTop() + topHeight,
+                                               leftWidth,
+                                               Math.min(target.height - this.getTop() - this.getBottom() - topHeight,
+                                                        this.psHeight_));
                 }
 
                 if (this.stub != null && this.stub.isVisible === true)
@@ -2009,9 +2153,9 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                     if (this.topCaption  != null && this.topCaption.isVisible === true &&
                         this.leftCaption != null && this.leftCaption.isVisible === true  )
                     {
-                        this.stub.setLocation(this.getLeft(), this.getTop());
-                        this.stub.setSize(this.topCaption.x - this.stub.x,
-                                          this.leftCaption.y - this.stub.y);
+                        this.stub.setBounds(this.getLeft(), this.getTop(),
+                                            this.topCaption.x - this.stub.x,
+                                            this.leftCaption.y - this.stub.y);
                     }
                     else {
                         this.stub.setSize(0, 0);
@@ -2035,9 +2179,8 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                         h -= (this.cellInsetsTop + this.cellInsetsBottom);
                     }
 
-                    this.editor.setLocation(x + this.scrollManager.getSX(),
-                                            y + this.scrollManager.getSY());
-                    this.editor.setSize(w, h);
+                    this.editor.setBounds(x + this.scrollManager.getSX(),
+                                          y + this.scrollManager.getSY(), w, h);
                 }
             };
 
@@ -2053,14 +2196,15 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 if (this.selectedIndex >= 0) {
                     var prev = this.selectedIndex;
                     this.selectedIndex = -1;
-                    this._.fired(this, -1, 0, false);
+                    this._.rowSelected(this, -1, 0, false);
                     this.repaintRows(-1, prev);
                 }
             };
 
             /**
-             * Mark as selected or unselected the given grid row.
+             * Mark as selected or unselected the given grid cell
              * @param  {Integer} row a grid row
+             * @param  {Integer} col a grid row,
              * @param  {boolean} [b] a selection status. true if the parameter
              * has not been specified
              * @method select
@@ -2072,7 +2216,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                     if (this.selectedIndex >= 0) this.clearSelect();
                     if (b) {
                         this.selectedIndex = row;
-                        this._.fired(this, row, 1, b);
+                        this._.rowSelected(this, row, 1, b);
                     }
                 }
             };
@@ -2081,43 +2225,48 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 this.vVisibility();
             };
 
-            this.mouseClicked  = function(e) {
+            this.pointerClicked  = function(e) {
                 if (this.visibility.hasVisibleCells()){
                     this.stopEditing(true);
 
-                    if (e.isActionMask()){
+                    console.log("Grid.pointerClicked() " + e.isAction() );
+
+
+                    if (e.isAction()){
+
+
                         var p = this.cellByLocation(e.x, e.y);
                         if (p != null) {
                             if (this.position != null){
                                 var row = this.position.currentLine,
                                     col = this.position.currentCol,
-                                    ls  =  this.getLineSize(p[0]);
+                                    ls  =  this.getLineSize(p.row);
 
                                 // normalize column depending on marker mode: row or cell
                                 // in row mode marker can select only the whole row, so
                                 // column can be only 1  (this.getLineSize returns 1)
-                                if (row == p[0] && col == p[1] % ls) {
+                                if (row === p.row && col === p.col % ls) {
                                     this.makeVisible(row, col);
                                 }
                                 else {
                                     this.clearSelect();
-                                    this.position.setRowCol(p[0], p[1] % ls);
+                                    this.position.setRowCol(p.row, p.col % ls);
                                 }
                             }
 
-                            if (this.$se(p[0], p[1], e)) {
-                                // TODO: initiated editor has get mouse clicked event
+                            if (this.$se(p.row, p.col, e)) {
+                                // TODO: initiated editor has get pointer clicked event
                             }
                         }
                     }
                 }
             };
 
-            this.calcPreferredSize = function (target){
+            this.calcPreferredSize = function(target) {
                 return {
                     width : this.psWidth_  +
                            ((this.leftCaption != null  &&
-                             this.leftCaption.isVisible === true ) ? this.leftCaption.getPreferredSize().width : 0),
+                             this.leftCaption.isVisible === true) ? this.leftCaption.getPreferredSize().width : 0),
                     height: this.psHeight_ +
                            ((this.topCaption != null  &&
                              this.topCaption.isVisible === true) ? this.topCaption.getPreferredSize().height : 0)
@@ -2126,12 +2275,12 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
 
             /**
              * Paint vertical and horizontal grid component lines
-             * @param  {2DContext} g a HTML5 canvas 2d context
+             * @param  {2DContext} g a HTML5 canvas 2D context
              * @method paintNet
              * @protected
              */
-            this.paintNet = function(g){
-                var v = this.visibility,
+            this.paintNet = function(g) {
+                var v    = this.visibility,
                     topX = v.fc[1] - this.lineSize,
                     topY = v.fr[1] - this.lineSize,
                     botX = v.lc[1] + this.colWidths[v.lc[0]],
@@ -2142,27 +2291,37 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 g.lineWidth = this.lineSize;
                 g.beginPath();
 
-                if (this.drawHorLines) {
-                    var y = topY + this.lineSize/2, i = v.fr[0];
+                if (this.drawHorLines === true) {
+                    var y  = topY + this.lineSize/2,
+                        i  = v.fr[0],
+                        tx = (this.paintNetOnCaption === true) ? this.getLeft() : topX;
 
                     for(;i <= v.lr[0]; i++){
-                        g.moveTo(topX, y);
+                        g.moveTo(tx, y);
                         g.lineTo(botX, y);
                         y += this.rowHeights[i] + this.lineSize;
                     }
-                    g.moveTo(topX, y);
+                    g.moveTo(tx, y);
                     g.lineTo(botX, y);
                 }
 
-                if (this.drawVerLines) {
-                    var x = topX + this.lineSize/2, i = v.fc[0];
+                if (this.drawVerLines === true) {
+                    var i = v.fc[0];
+                    if (this.drawSideLines !== true && v.fc[0] === 0) {
+                        i++;
+                        topX = v.fc[1] + this.colWidths[0];
+                    }
 
-                    for(;i <= v.lc[0]; i++ ){
-                        g.moveTo(x , topY);
+                    var x    = topX + this.lineSize/2,
+                        cols = this.getGridCols() - 1,
+                        ty   = (this.paintNetOnCaption === true) ? this.getTop() : topY;
+
+                    for(;i <= v.lc[0] &&  (this.drawSideLines === true || i < cols); i++){
+                        g.moveTo(x , ty);
                         g.lineTo(x, botY);
                         x += this.colWidths[i] + this.lineSize;
                     }
-                    g.moveTo(x, topY);
+                    g.moveTo(x, ty);
                     g.lineTo(x, botY);
                 }
                 g.stroke();
@@ -2188,14 +2347,16 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
 
                 for(var i = this.visibility.fr[0];i <= this.visibility.lr[0] && y < cy + ch; i++){
                     if (y + this.rowHeights[i] > cy) {
-                        var x = this.visibility.fc[1] + this.cellInsetsLeft,
-                            notSelectedRow = this.isSelected(i) === false;
+                        var x = this.visibility.fc[1] + this.cellInsetsLeft;
 
-                        for(var j = this.visibility.fc[0];j <= this.visibility.lc[0]; j++ ){
-                            if (notSelectedRow){
+                        for(var j = this.visibility.fc[0];j <= this.visibility.lc[0]; j++) {
+                            if (this.isSelected(i, j) === true) {
+                                this.paintCellSelection(g, i, j, x - this.cellInsetsLeft, y - this.cellInsetsTop);
+                            }
+                            else {
                                 var bg = this.provider.getCellColor != null ? this.provider.getCellColor(this, i, j)
                                                                             : this.defCellColor;
-                                if (bg != null){
+                                if (bg != null) {
                                     g.setColor(bg);
                                     g.fillRect(x - this.cellInsetsLeft,
                                                y - this.cellInsetsTop,
@@ -2203,10 +2364,10 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                 }
                             }
 
-                            var v = (i == this.editingRow &&
-                                     j == this.editingCol   ) ? null
-                                                              : this.provider.getView(this, i, j,
-                                                                                      this.model.get(i, j));
+                            var v = (i === this.editingRow &&
+                                     j === this.editingCol   ) ? null
+                                                               : this.provider.getView(this, i, j,
+                                                                                       this.model.get(i, j));
                             if (v != null) {
                                 var w = this.colWidths[j]  - addW,
                                     h = this.rowHeights[i] - addH;
@@ -2217,11 +2378,11 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                 res.height = Math.min(y + h, cy + ch) - res.y;
 
                                 if (res.width > 0 && res.height > 0) {
-                                    if (this.isUsePsMetric) {
-                                        v.paint(g, x, y, w, h, this);
-                                    }
-                                    else
-                                    {
+                                    // TODO: most likely the commented section should be removed
+                                    // if (this.isUsePsMetric !== true) {
+                                    //     v.paint(g, x, y, w, h, this);
+                                    // }
+                                    //else {
                                         var ax = this.provider.getXAlignment != null ? this.provider.getXAlignment(this, i, j)
                                                                                      : this.defXAlignment,
                                             ay = this.provider.getYAlignment != null ? this.provider.getYAlignment(this, i, j)
@@ -2231,18 +2392,18 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                             xx = x,
                                             yy = y,
                                             id = -1,
-                                            ps = (ax != L.NONE || ay != L.NONE) ? v.getPreferredSize()
-                                                                                : null;
+                                            ps = (ax !== L.NONE || ay !== L.NONE) ? v.getPreferredSize()
+                                                                                  : null;
 
-                                        if (ax != L.NONE){
-                                            xx = x + ((ax == L.CENTER) ? ~~((w - ps.width) / 2)
-                                                                       : ((ax == L.RIGHT) ? w - ps.width : 0));
+                                        if (ax !== L.NONE){
+                                            xx = x + ((ax === L.CENTER) ? ~~((w - ps.width) / 2)
+                                                                        : ((ax === L.RIGHT) ? w - ps.width : 0));
                                             vw = ps.width;
                                         }
 
-                                        if (ay != L.NONE){
-                                            yy = y + ((ay == L.CENTER) ? ~~((h - ps.height) / 2)
-                                                                       : ((ay == L.BOTTOM) ? h - ps.height : 0));
+                                        if (ay !== L.NONE){
+                                            yy = y + ((ay === L.CENTER) ? ~~((h - ps.height) / 2)
+                                                                        : ((ay === L.BOTTOM) ? h - ps.height : 0));
                                             vh = ps.height;
                                         }
 
@@ -2256,7 +2417,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                         if (id >= 0) {
                                            g.restore();
                                         }
-                                    }
+                                   // }
                                 }
                             }
                             x += (this.colWidths[j] + this.lineSize);
@@ -2266,22 +2427,24 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 }
             };
 
-            this.paintPosMarker = function(g){
-                var markerView = this.hasFocus() ? this.views.marker : this.views.offmarker;
+            this.$getPosMarker = function() {
+                return this.hasFocus() ? this.views.marker : this.views.offmarker;
+            };
 
-                if (markerView          != null &&
-                    this.position       != null &&
+            this.paintPosMarker = function(g) {
+                if (this.position       != null &&
                     this.position.offset >= 0     )
                 {
-                    var row        = this.position.currentLine,
+                    var view       = this.$getPosMarker(),
+                        row        = this.position.currentLine,
                         col        = this.position.currentCol,
-                        rowPosMode = this.position.metrics.getLineSize(row) == 1,
+                        rowPosMode = this.navigationMode === "row",
                         v          = this.visibility;
 
-                    // depending om position changing mode (cell or row) analyze
+                    // depending on position changing mode (cell or row) analyze
                     // whether the current position is in visible area
-                    if (row >= v.fr[0] && row <= v.lr[0] &&
-                        (rowPosMode || (col >= v.fc[0] && col <= v.lc[0])))
+                    if (view != null && row >= v.fr[0] && row <= v.lr[0] &&
+                        (rowPosMode === true || (col >= v.fc[0] && col <= v.lc[0])))
                     {
                         // TODO: remove the clip, think it is redundant code
                         // g.clipRect(this.getLeftCaptionWidth() - this.scrollManager.getSX(),
@@ -2289,62 +2452,52 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                         //            this.width, this.height);
 
                         // detect if grid marker position works in row selection mode
-                        if (rowPosMode) {
+                        if (rowPosMode === true) {
                             // row selection mode
-                            markerView.paint(g, v.fc[1],
-                                                this.getRowY(row),
-                                                v.lc[1] - v.fc[1] + this.colWidths[v.lc[0]],
-                                                this.rowHeights[row], this);
+                            view.paint(g,   v.fc[1],
+                                            this.getRowY(row),
+                                            v.lc[1] - v.fc[1] + this.colWidths[v.lc[0]],
+                                            this.rowHeights[row], this);
                         }
                         else {
                             // cell selection mode
-                            markerView.paint(g, this.getColX(col),
-                                                this.getRowY(row),
-                                                this.colWidths[col],
-                                                this.rowHeights[row], this);
+                            view.paint(g,   this.getColX(col),
+                                            this.getRowY(row),
+                                            this.colWidths[col],
+                                            this.rowHeights[row], this);
                         }
                     }
                 }
             };
 
-            this.paintSelection = function(g) {
+            this.paintCellSelection = function(g, row, col, x, y) {
                 if (this.editingRow < 0) {
-                    var v = this.views[this.hasFocus() ? "onselection" : "offselection"];
+                    var v = ui.focusManager.focusOwner === this ? this.views.onselection : this.views.offselection;
                     if (v != null)  {
-                        for(var j = this.visibility.fr[0]; j <= this.visibility.lr[0]; j++) {
-                            if (this.isSelected(j)) {
-                                var x = this.visibility.fc[1], y = this.getRowY(j), h = this.rowHeights[j];
-                                //!!! this code below can be used to implement cell oriented selection
-                                for(var i = this.visibility.fc[0]; i <= this.visibility.lc[0]; i ++ ){
-                                    v.paint(g, x, y, this.colWidths[i], h, this);
-                                    x += (this.colWidths[i] + this.lineSize);
-                                }
-                            }
-                        }
+                        v.paint(g, x, y, this.colWidths[col], this.rowHeights[row], this);
                     }
                 }
             };
 
             this.rPsMetric = function(){
                 var cols = this.getGridCols(),
-                    rows = this.getGridRows();
+                    rows = this.getGridRows(),
+                    addW = this.cellInsetsLeft + this.cellInsetsRight,
+                    addH = this.cellInsetsTop  + this.cellInsetsBottom;
 
                 if (this.colWidths == null || this.colWidths.length != cols) {
                     this.colWidths = arr(cols, 0);
                 }
                 else {
-                    for(var i = 0;i < cols; i++ ) this.colWidths [i] = 0;
+                    for(var i = 0;i < cols; i++) this.colWidths[i] = 0;
                 }
 
                 if (this.rowHeights == null || this.rowHeights.length != rows) {
                     this.rowHeights = arr(rows, 0);
                 }
                 else {
-                    for(var i = 0;i < rows; i++ ) this.rowHeights[i] = 0;
+                    for(var i = 0;i < rows; i++) this.rowHeights[i] = 0;
                 }
-
-                var addW = this.cellInsetsLeft + this.cellInsetsRight,
-                    addH = this.cellInsetsTop  + this.cellInsetsBottom;
 
                 for(var i = 0;i < cols; i++ ){
                     for(var j = 0;j < rows; j++ ){
@@ -2365,6 +2518,20 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                 this.rowHeights[j] = pkg.Grid.DEF_ROWHEIGHT;
                             }
                         }
+                    }
+                }
+
+                if (this.topCaption != null && this.topCaption.isVisible === true) {
+                    for(var i = 0;i < cols; i++ ) {
+                        var capPS = this.topCaption.getCaptionPS(i);
+                        if (capPS  > this.colWidths[i]) this.colWidths[i] = capPS;
+                    }
+                }
+
+                if (this.leftCaption != null && this.leftCaption.isVisible === true) {
+                    for(var i = 0;i < rows; i++ ) {
+                        var capPS = this.leftCaption.getCaptionPS(i);
+                        if (capPS  > this.rowHeights[i]) this.rowHeights[i] = capPS;
                     }
                 }
             };
@@ -2476,7 +2643,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                         len = this.getGridRows();
                     }
 
-                    if (len ===0) return;
+                    if (len === 0) return;
 
                     this.validateMetric();
                     var b = false;
@@ -2553,9 +2720,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
 
             this.matrixResized = function(target, prevRows, prevCols){
                 this.clearSelect();
-                if (this.selected != null) {
-                    this.selected = arr(this.model.rows, false);
-                }
+
                 this.vrp();
                 if (this.position != null) {
                     this.position.setOffset(null);
@@ -2675,10 +2840,6 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
 
                     if (this.position != null) {
                         this.position.setOffset(null);
-                    }
-
-                    if (this.model != null && this.selected != null) {
-                        this.selected = arr(this.model.rows, false);
                     }
 
                     this.vrp();
@@ -2810,15 +2971,16 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
             };
         },
 
-        function (rows, cols){
-            this.$this(new Matrix(rows, cols));
-        },
+        function(model) {
+            if (arguments.length === 0) {
+                model = new Matrix(5, 5);
+            }
+            else {
+                if (arguments.length === 2) {
+                    model = new Matrix(arguments[0], arguments[1]);
+                }
+            }
 
-        function (){
-            this.$this(new Matrix(5, 5));
-        },
-
-        function (model){
             /**
              * Default cell background color
              * @type {String}
@@ -2827,10 +2989,10 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
              */
             this.defCellColor = pkg.DefViews.cellBackground;
 
-            this.psWidth_ = this.psHeight_ = this.colOffset = 0;
-            this.rowOffset = this.pressedCol = this.selectedIndex = 0;
-            this.visibleArea = this.selected = null;
-            this._ = new Listeners();
+            this.psWidth_    = this.psHeight_  = this.colOffset = 0;
+            this.rowOffset   = this.pressedCol = this.selectedIndex = 0;
+            this.visibleArea = null;
+            this._ = new this.$clazz.Listeners();
             this.views = {};
 
             /**
@@ -2895,13 +3057,13 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
             ctr = L.$constraints(ctr);
             this.$super(index, ctr, c);
 
-            if ((ctr == null && this.topCaption == null) || L.TOP == ctr){
+            if ((ctr == null && this.topCaption == null) || L.TOP === ctr){
                 this.topCaption = c;
             }
             else {
-                if (L.TEMPORARY == ctr) this.editor = c;
+                if (L.TEMPORARY === ctr) this.editor = c;
                 else {
-                    if ((ctr == null && this.leftCaption == null) || L.LEFT == ctr) {
+                    if ((ctr == null && this.leftCaption == null) || L.LEFT === ctr) {
                         this.leftCaption = c;
                     }
                     else {
@@ -2915,17 +3077,17 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
 
         function kidRemoved(index,c){
             this.$super(index, c);
-            if(c == this.editor) this.editor = null;
+            if (c === this.editor) this.editor = null;
             else {
-                if (c == this.topCaption){
+                if (c === this.topCaption){
                     this.topCaption = null;
                 }
                 else {
-                    if (c == this.leftCaption){
+                    if (c === this.leftCaption){
                         this.leftCaption = null;
                     }
                     else {
-                        if (c == this.stub) this.stub = null;
+                        if (c === this.stub) this.stub = null;
                     }
                 }
             }
@@ -2988,9 +3150,9 @@ pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
                     top = target.getTop();
 
                 if (grid.isVisible === true) {
-                    grid.setLocation(left, top);
-                    grid.setSize(target.width  - left - target.getRight(),
-                                 target.height - top  - target.getBottom());
+                    grid.setBounds(left, top,
+                                   target.width  - left - target.getRight(),
+                                   target.height - top  - target.getBottom());
 
                     for(var i = 0; i < this.$widths.length; i++) {
                         grid.setColWidth(i, this.$widths[i]);

@@ -10,7 +10,7 @@ if (typeof(zebra) === "undefined") {
 
 (function () {
     var assertException = zebra.assertException, assert = zebra.assert, assume = zebra.assume,
-        Class = zebra.Class, Interface = zebra.Interface;
+        Class = zebra.Class, Interface = zebra.Interface, assertObjEqual = zebra.assertObjEqual;
 
     zebra.runTests("Zebra easy OOP",
 
@@ -328,7 +328,6 @@ if (typeof(zebra) === "undefined") {
         },
 
         function test_zebra() {
-            assert(typeof zebra.version !== 'undefined', true);
             assert(typeof zebra.$FN === 'function', true);
         },
 
@@ -343,28 +342,46 @@ if (typeof(zebra) === "undefined") {
 
             assert((new A(2,2)).toString(), '*',  "Test toString overriding possibility");
 
-
             // test method proxy
             var A = Class([
                 function toString(a) { return a; }
             ]);
             // assert(typeof zebra.getMethod(A, "toString", 1).modifier !== "undefined", true, "Proxy method correct wrap existent method");
-            assert(typeof zebra.getMethod(A, "toString", 1).methodName !== "undefined", true, "Proxy method correct wrap existent method 1");
-            assert(typeof zebra.getMethod(A, "toString", 1).boundTo !== "undefined", true, "Proxy method correct wrap existent method 2");
+            assert(typeof zebra.getMethod(A, "toString").methodName !== "undefined", true, "Proxy method correct wrap existent method 1");
+            assert(typeof zebra.getMethod(A, "toString").boundTo !== "undefined ", true, "Proxy method correct wrap existent method 2");
+
+
             // assert(zebra.getMethod(A, "toString", 1).modifier === 0, true, "Proxy method correct wrap existent method");
-            assert(zebra.getMethod(A, "toString", 1).methodName === "toString", true, "Proxy method correct wrap existent method 3");
-            assert(zebra.getMethod(A, "toString", 1).boundTo == A, true, "Proxy method correct wrap existent method 4");
+            assert(zebra.getMethod(A, "toString").methodName === "toString", true, "Proxy method correct wrap existent method 3");
+            assert(zebra.getMethod(A, "toString").boundTo == A, true, "Proxy method correct wrap existent method 4");
 
             // assert(typeof zebra.getMethod(A, "toString", 0).modifier !== "undefined", true, "Proxy method correct wrap existent method");
-            assert(typeof zebra.getMethod(A, "toString", 0).methodName !== "undefined", true, "Proxy method correct wrap existent method 5");
-            assert(typeof zebra.getMethod(A, "toString", 0).boundTo !== "undefined", true, "Proxy method correct wrap existent method 6");
-            // assert(zebra.getMethod(A, "toString", 0).modifier === 0, true, "Proxy method correct wrap existent method");
-            assert(zebra.getMethod(A, "toString", 0).methodName == "toString", true, "Proxy method correct wrap existent method 7");
-            assert(zebra.getMethod(A, "toString", 0).boundTo == A, true, "Proxy method correct wrap existent method 8");
+            assert(typeof zebra.getMethod(A, "toString").methodName !== "undefined", true, "Proxy method correct wrap existent method 5");
+            assert(typeof zebra.getMethod(A, "toString").boundTo !== "undefined", true, "Proxy method correct wrap existent method 6");
+            // assert(zebra.getMethod(A, "toString").modifier === 0, true, "Proxy method correct wrap existent method");
+            assert(zebra.getMethod(A, "toString").methodName == "toString", true, "Proxy method correct wrap existent method 7");
+            assert(zebra.getMethod(A, "toString").boundTo == A, true, "Proxy method correct wrap existent method 8");
 
             var a = new A();
-            assert(a.toString("11") == "11", true);
+            assert(a.toString("11") === "11", true);
             assert(a.toString() != a.toString("11"), true);
+
+            assertException(function() {
+                var A = new Class([
+                    function a() { return "1"; },
+                    function a(b) {
+                        return "*";
+                    }
+                ]);
+            }, Error);
+
+            assertException(function() {
+                var A = new Class([
+                    function () { },
+                    function (b) {
+                    }
+                ]);
+            }, Error);
         },
 
         function test_class() {
@@ -385,17 +402,16 @@ if (typeof(zebra) === "undefined") {
             assert(zebra.getMethod(A, 'blablabla'), null, "test_class 10");
 
             // this should be not a class instance methods
-            assert(zebra.getMethod(A, 'getMethod', 2), null, "test_class 11");
-            assert(zebra.getMethod(A, 'getMethods', 0), null, "test_class 12");
+            assert(zebra.getMethod(A, 'getMethod'), null, "test_class 11");
+            assert(zebra.getMethod(A, 'getMethods'), null, "test_class 12");
 
             var B = new Class([
                 function a() {},
-                function a(p) {}
+                function b(p) {}
             ]);
 
-            assert(zebra.getMethod(B, 'a', 0) !== null, true, "test_class 14");
-            assert(zebra.getMethod(B, 'a', 1) !== null, true, "test_class 15");
-            assert(zebra.getMethod(B, 'a', 2), null, "test_class 16");
+            assert(zebra.getMethod(B, 'a') !== null, true, "test_class 14");
+            assert(zebra.getMethod(B, 'b') !== null, true, "test_class 15");
 
             assertException(function() { Class("", []); }, ReferenceError, "test_class 171");
             assertException(function() { Class(null, []); }, ReferenceError, "test_class 172");
@@ -413,34 +429,23 @@ if (typeof(zebra) === "undefined") {
 
             var A = new Class([
                 function(p1, p2) {},
-                function(p1) {}
             ]);
 
-            assert(zebra.getMethod(A, '', 0), null, "test_class 20");
-            assert(zebra.getMethod(A, '', 3), null, "test_class 21");
             assert(A.$clazz == Class, true, "test_class 22");
-            assert(zebra.getMethod(A, '', 1) !== null, true, "test_class 222");
-            assert(zebra.getMethod(A, '', 2) !== null, true, "test_class 23");
+            assert(zebra.getMethod(A, '') !== null, true, "test_class 222");
 
             var B = new Class(A, [
                 function(p1, p2) {},
-                function() {}
             ]);
 
-            assert(zebra.getMethod(B, '', 1), null, "test_class 24");
-            assert(zebra.getMethod(B, '', 3), null, "test_class 25");
-
             assert(B.$clazz == Class, true, "test_class 26");
-            assert(zebra.getMethod(B, '', 0) !== null, true, "test_class 26");
-            assert(zebra.getMethod(B, '', 2) !== null, true, "test_class 27");
+            assert(zebra.getMethod(B, '') !== null, true, "test_class 26");
 
             assert(B.$parent == A, true, "test_class 33");
             assert(A.$parent === null, true, "test_class 34");
 
-            assert(zebra.getMethod(B, '', 2).boundTo == B, true, "test_class 35");
-            assert(zebra.getMethod(B, '', 0).boundTo == B, true, "test_class 36");
-            assert(zebra.getMethod(A, '', 2).boundTo == A, true, "test_class 37");
-            assert(zebra.getMethod(A, '', 1).boundTo == A, true, "test_class 38");
+            assert(zebra.getMethod(B, '').boundTo == B, true, "test_class 35");
+            assert(zebra.getMethod(A, '').boundTo == A, true, "test_class 37");
 
             if (!zebra.isIE) {
                 assertException(function() { Class(DHJ); }, ReferenceError, "test_class 20");
@@ -460,10 +465,10 @@ if (typeof(zebra) === "undefined") {
             assert(i2.$clazz == I2, true, "test_class 386");
             assert(i2.$clazz != i.$clazz, true, "test_class 387");
 
-            assert(typeof a.toString == 'function' && typeof a.toString.$clone$ == 'undefined', true, 'toString in class instance');
-            assert(typeof a.$this == 'function' && typeof a.$this.$clone$ == 'undefined', true, 'toString in class instance');
-            assert(typeof a.$super == 'function'  && typeof a.$super.$clone$ == 'undefined', true, 'equals in class instance');
-            assert(typeof i.toString == 'function' && typeof i.toString.$clone$ == 'undefined', true, 'toString in interface instance');
+
+            assert(typeof a.toString == 'function' && typeof a.toString.methofBody == 'undefined', true, 'toString in class instance1');
+            assert(typeof a.$super == 'function'  && typeof a.$super.methofBody == 'undefined', true, 'equals in class instance3');
+            assert(typeof i.toString == 'function' && typeof i.toString.methofBody == 'undefined', true, 'toString in interface instance4');
 
             var a = new A(1), b = new B();
             assert(A, a.constructor, "test_class 389");
@@ -481,17 +486,17 @@ if (typeof(zebra) === "undefined") {
                     return 1;
                 },
 
-                function a(b) {
+                function b(b) {
                     b = this.a() + b;
                     return b;
                 }
             ]);
 
             var a = new A();
-            assert(zebra.getMethod(A, "a", 0) !== null, true);
-            assert(zebra.getMethod(A, "a", 1) !== null, true);
+            assert(zebra.getMethod(A, "a") !== null, true);
+            assert(zebra.getMethod(A, "b") !== null, true);
             assert(a.a(), 1);
-            assert(a.a(1), 2);
+            assert(a.b(1), 2);
         },
 
         function test_unique() {
@@ -552,28 +557,42 @@ if (typeof(zebra) === "undefined") {
         },
 
         function test_constructor() {
-            var A = new Class([
-                function(a) { this.v = a; },
-                function(a, b) { this.v = a + b; },
-                function(a, b, c) { this.v = a + b + c; },
-                function(a, b, c, d, e) { this.v = a + b + c + d + e; }
+            var K = Class([ function c() { return 10; } ]);
+            var k = new K();    // no exception;
+            assert(k.c(), 10);
+
+            var A = Class([
+                function(a, b, c, d, e) {
+                    this.v = a + (b==null?0:b) + (c==null?0:c) + (d==null?0:d) + (e==null?0:e);
+                }
             ]);
 
-            var B = new Class(A, [
-                function(a) { this.v = 2*a; },
+            var B = Class(A, [
+                function(a, b, c, d, e) {
+                    if (arguments.length == 1)  {
+                        this.v = 2 * a;
+                        return;
+                    }
+                    else {
+                        if (arguments.length === 2) {
+                            this.v = 2 * a;
+                            this.k = 2*(a + b);
+                            return;
+                        }
+                        else {
+                            if (arguments.length === 5) {
+                                this.$super(a, b, c, d, e);
+                                return;
+                            }
+                        }
+                    }
 
-                function(a, b) {
-                    this.$this(1);
-                    this.k = 2*(a + b);
-                },
-
-                function(a, b, c) {
                     this.$super(a, b, c);
                     this.k = this.v * 2;
                 }
             ]);
 
-            var C = new Class(B, [
+            var C = Class(B, [
                 function(a) {
                     this.c = 2*a;
                     this.$super(a, 1, 2, 3, 4);
@@ -584,12 +603,7 @@ if (typeof(zebra) === "undefined") {
                 }
             ]);
 
-            var a;
-
-            assertException(function() { new A();}, ReferenceError, "test_constructor 1");
-            assertException(function() { new A(1,2,3,4);}, ReferenceError, "test_constructor 2");
-
-            a = new A(10);
+            var a = new A(10);
             assert(a.v, 10, "test_constructor 3");
             a = new A(10, 10);
             assert(a.v, 20, "test_constructor 4");
@@ -598,19 +612,12 @@ if (typeof(zebra) === "undefined") {
             a = new A(10, 10, 10, 10, 10);
             assert(a.v, 50, "test_constructor 6");
 
-
-            var b;
-            assertException(function() { new B(); }, ReferenceError, "test_constructor 7");
-            assertException(function() { new B(1,2,3,4); }, ReferenceError,  "test_constructor 8");
-            assertException(function() { new B(1,2,3,4, 5); }, ReferenceError, "test_constructor 9");
-
-
-            b = new B(10);
+            var b = new B(10);
             assert(b.v, 20, "test_constructor 10");
 
             b = new B(10, 10);
             assert(b.k, 40, "test_constructor 11");
-            assert(b.v, 2, "test_constructor 12");
+            assert(b.v, 20, "test_constructor 12");
 
             b = new B(10, 10, 10);
             assert(b.k, 60, "test_constructor 13");
@@ -622,7 +629,6 @@ if (typeof(zebra) === "undefined") {
             assert(c.l, 12, "test_constructor 151");
             assert(c.ll, 1, "test_constructor 161");
 
-
             c = new C();
             assert(c.l, 0, "test_constructor 151");
             assert(c.ll, 0, "test_constructor 161");
@@ -631,16 +637,9 @@ if (typeof(zebra) === "undefined") {
             assert(c.l, 10, "test_constructor 151");
             assert(c.ll, 4, "test_constructor 161");
 
-            zebra.assertNoException(function() { new C(); }, ReferenceError, "test_constructor 17");
-            zebra.assertNoException(function() { new C(1,2,3,4); }, ReferenceError, "test_constructor 18");
-            zebra.assertNoException(function() { new C(1,2); }, ReferenceError, "test_constructor 19");
-            zebra.assertNoException(function() { new C(1,2,2,2,2); }, ReferenceError, "test_constructor 20");
-
             var D = new Class([
                 function() { this.d = 134; }
             ]);
-
-//            assertException(function() { new Class(D, []); }, Error, "test_constructor 21");
 
             var E = new Class(D, [
                 function(a) { this.e = a; }
@@ -659,19 +658,14 @@ if (typeof(zebra) === "undefined") {
             assert(e.e, 133, "test_constructor 25");
 
             var A = new Class([
-                function() { this.$this(1); },
-                function(a) { this.a = a; }
+                function(a) {
+                    this.a = (a == null ? 1 : a);
+                }
             ]);
 
             var B = new Class(A, [
-                function() {
-                    this.a = 11;
-                    this.$super();
-                },
-
                 function(a) {
-                    this.$super();
-                    this.a = a;
+                    this.$super(a == null ? 11 : a);
                 }
             ]);
 
@@ -680,36 +674,22 @@ if (typeof(zebra) === "undefined") {
             assert(a.a, 1, "test_constructor 26");
             assert(aa.a, 100, "test_constructor 27");
             var b = new B(), bb = new B(100);
-            assert(b.a, 1, "test_constructor 271");
+            assert(b.a, 11, "test_constructor 271");
             assert(bb.a, 100, "test_constructor 272");
 
             var AA = Class([ function() { this.aa = 999; } ]);
 
             var A = Class(AA, [
-                function() {
-                    this.$this(1);
-                },
-
-                function(a) {
-                    this.$this(a, 2);
-                },
-
                 function(a, b) {
                     this.$super();
-                    this.a = a;
-                    this.b = b;
+                    this.a = a == null ? 1 : a;
+                    this.b = b == null ? 2 : b;
                 }
             ]);
 
             var B = Class(A, []);
             var C = Class(A, [ function() { this.$super(10, 200); } ]);
             var D = Class(B, [ function() { this.$super(100, 2000); } ]);
-
-            assert(zebra.getMethods(AA, '').length, 1, "test_constructor 28");
-            assert(zebra.getMethods(A, '').length, 3, "test_constructor 29");
-            assert(zebra.getMethods(B, '').length, 3, "test_constructor 30");
-            assert(zebra.getMethods(C, '').length, 1, "test_constructor 31");
-            assert(zebra.getMethods(D, '').length, 1, "test_constructor 32");
 
             var a1 = new A(), a2 = new A(22), a3 = new A(33, 44);
             var b1 = new B(), b2 = new B(222), b3 = new B(333, 444);
@@ -748,12 +728,10 @@ if (typeof(zebra) === "undefined") {
 
             var A = Class([
                 function $prototype() {
-
                     this[''] = function(test) {
                         this.a = 100;
                         this.test = test;
                     };
-
                 }
             ]);
 
@@ -776,12 +754,8 @@ if (typeof(zebra) === "undefined") {
 
 
             var C =  Class(A, []), D = Class(C, [
-                function() {
-                    this.$super(300);
-                },
-
                 function(a) {
-                    this.$super(a);
+                    this.$super(a == null ? 300 : a);
                 }
             ]), c = new C(), d = new D(), dd = new D(11);
 
@@ -889,9 +863,11 @@ if (typeof(zebra) === "undefined") {
             }]);
             var a = new A();
 
-            assert(zebra.getMethod(A, "b") != null, true);
-            assert(a.a, 10);
-            assert(a.b(), 10);
+            assert(zebra.getMethod(A, "b") != null, true, "test proto  method 1");
+            assert(a.a, 10), "test proto  method 2";
+            assert(a.b.boundTo == null, true, "test proto  method 3");
+            assert(a.b.methodName == null, true, "test proto  method 4");
+            assert(a.b(), 10), "test proto  method 5";
 
             var B = Class(A, [function $prototype() {
                 this.b = function() {
@@ -900,35 +876,26 @@ if (typeof(zebra) === "undefined") {
             }]);
             var b = new B();
 
-            assert(zebra.getMethod(B, "b") != null, true);
-            assert(b.a, 10);
-            assert(b.b(), 100);
+            assert(zebra.getMethod(B, "b") != null, true, "test proto  method 6");
+            assert(b.a, 10), "test proto  method 7";
+            assert(b.b(), 100, "test proto  method 8");
 
             var C = Class(A, [
-                function b() {
-                    return 100 + this.$super();
-                },
-
                 function b(p1) {
-                    return this.b() + p1 + this.$super();
+                    return (p1 == null ? 100 : p1) + this.$super();
                 }
             ]);
             var c = new C();
 
-
             assert(zebra.getMethod(C, "b") != null, true);
             assert(c.a, 10);
             assert(c.b(), 110);
-            assert(c.b(1), 121);
+            assert(c.b(1), 11);
 
             var B = Class(A, []);
             var C = Class(B, [
-                function b() {
-                    return 100 + this.$super();
-                },
-
                 function b(p1) {
-                    return this.b() + p1 + this.$super();
+                    return (p1==null?100:p1) + this.$super();
                 }
             ]);
             var c = new C();
@@ -936,8 +903,7 @@ if (typeof(zebra) === "undefined") {
             assert(zebra.getMethod(C, "b") != null, true);
             assert(c.a, 10);
             assert(c.b(), 110);
-            assert(c.b(1), 121);
-
+            assert(c.b(1), 11);
 
             // test if a standard method defined in Class.prototype can be overridden
             var C = Class([
@@ -954,30 +920,30 @@ if (typeof(zebra) === "undefined") {
             var CC = Class(C, [
             ]), cc = new CC();
 
-
             assert(cc.properties(), 10);
         },
 
-
         function test_public_methods() {
             var A = new Class([
-                function a() {  return 1;  },
-                function a(p1) { return p1; },
-                function a(p1, p2) { return p1 + p2; },
+                function a(p1, p2) {
+                    return (p1 == null ? 1 : p1) + (p2 == null ? 0 : p2);
+                },
+
                 function aa(p1, p2, p3) { return p1 + p2 + p3; }
             ]);
 
             var a = new A();
-            assert(a.a(), 1);
-            assert(a.a(2), 2);
-            assert(a.a(3), 3);
-            assert(a.a(3, 3), 6);
-            assert(a.a(3, 4), 7);
-            assert(a.aa(0, 0, 0), 0);
+            assert(a.a(), 1, "test_public_methods 1");
+            assert(a.a(2), 2, "test_public_methods 2");
+            assert(a.a(3), 3, "test_public_methods 3");
 
-            assertException(function() { a.b(); }, TypeError);
-            assertException(function() { a.a(1,2,3,4); }, ReferenceError);
-            zebra.assertNoException(function() { a.aa(1,2,3, 4); }, ReferenceError);
+            assert(a.a(3, 3), 6, "test_public_methods 4");
+            assert(a.a(3, 4), 7, "test_public_methods 5");
+            assert(a.aa(0, 0, 0), 0, "test_public_methods 6");
+
+            assertException(function() { a.b(); }, TypeError, "test_public_methods 7");
+            zebra.assertNoException(function() { a.a(1,2,3,4); }, ReferenceError, "test_public_methods 8");
+            zebra.assertNoException(function() { a.aa(1,2,3, 4); }, ReferenceError, "test_public_methods 9");
         },
 
         function test_inteface() {
@@ -1264,9 +1230,12 @@ if (typeof(zebra) === "undefined") {
                     this.ms = function() { return 100; };
                 },
 
-                function ma() {  return 2;  },
-                function ma(p1) { return 2*p1; },
-                function ma(p1, p2) { return 2*(p1 + p2); },
+                function ma(p1, p2) {
+                    if (arguments.length == 0) return 2;
+                    if (arguments.length == 1) return 2*p1;
+                    return 2* (p1 + p2);
+                },
+
                 function maa(p1, p2, p3) { return 2*(p1 + p2 + p3); }
             ]);
 
@@ -1338,9 +1307,12 @@ if (typeof(zebra) === "undefined") {
 
         function test_overriding() {
             var A = new Class([
-                function a() { return 22; },
-                function a(p) { return p; },
-                function a(p1, p2) { return p1 + p2; },
+                function a(p1, p2) {
+                    if (arguments.length == 0) return 22;
+                    if (arguments.length == 1) return p1;
+                    return p1 + p2;
+                },
+
                 function $clazz() {
                    this.a = function() { return 1; };
                 }
@@ -1354,53 +1326,50 @@ if (typeof(zebra) === "undefined") {
             ]);
 
             var C = new Class(B, [
-                function a() {
-                    return 222;
-                },
-
                 function a(p1, p2) {
-                     var d = this.$super(p1, p2);
-                     return d + 10;
+                    if (arguments.length === 0) return 222;
+                    var d = this.$super(p1, p2);
+                    return d + 10;
                 },
 
                 function c(p1, p2) {
-                     return this.$super(this.a, p1, p2) + 1;
+                    return this.$super(this.a, p1, p2) + 1;
                 }
             ]);
 
             var a = new A(), b = new B(), c = new C();
 
-            assert(a.a(), 22);
-            assert(a.a(12), 12);
-            assert(a.a(12, 12), 24);
+            assert(a.a(), 22, "test overriding 1");
+            assert(a.a(12), 12, "test overriding 2");
+            assert(a.a(12, 12), 24, "test overriding 3");
 
-            assert(b.a(), 111);
-
-            assert(b.a(33), 33);
-            assert(b.a(2, 1), 3);
-            assert(b.b(), 22);
+            assert(b.a(), 111, "test overriding 4");
 
 
-            assert(c.c(6, 6), 13);
-            assert(c.a(), 222);
-            assert(c.a(18), 18);
+            assert(b.a(33), 111, "test overriding 5");
+            assert(b.a(2, 1), 111, "test overriding 6");
+            assert(b.b(), 22, "test overriding 7");
 
 
-            assert(c.b(), 22);
-            assert(c.a(3,3), 16);
+            assert(c.c(6, 6), 112, "test overriding 8");
+            assert(c.a(), 222, "test overriding 9");
+            assert(c.a(18), 121, "test overriding 10");
 
-            assert(A.a(), 1);
+            assert(c.b(), 22, "test overriding 11");
+            assert(c.a(3,3), 121, "test overriding 12");
+
+            assert(A.a(), 1, "test overriding 13");
 
             // check the subsequent class definition and instantiation has no influence to parent class
             var a = new A(), b = new B();
-            assert(a.a(), 22);
-            assert(a.a(12), 12);
-            assert(a.a(12, 12), 24);
+            assert(a.a(), 22, "test overriding 14");
+            assert(a.a(12), 12, "test overriding 15");
+            assert(a.a(12, 12), 24, "test overriding 16");
 
-            assert(b.a(), 111);
-            assert(b.a(33), 33);
-            assert(b.a(2, 1), 3);
-            assert(b.b(), 22);
+            assert(b.a(), 111, "test overriding 17");
+            assert(b.a(33), 111, "test overriding 18");
+            assert(b.a(2, 1), 111, "test overriding 19");
+            assert(b.b(), 22, "test overriding 20");
 
             // test double super
             var A = new zebra.Class([
@@ -1415,10 +1384,9 @@ if (typeof(zebra) === "undefined") {
                 function b() { return this.$super() + 2; }
             ]);
 
-            assert((new C()).b(), 1003);
-            assert((new B()).b(), 1001);
-            assert((new A()).b(), 1000);
-
+            assert((new C()).b(), 1003, "test overriding 21");
+            assert((new B()).b(), 1001, "test overriding 22");
+            assert((new A()).b(), 1000, "test overriding 23");
 
             // one method with the given name means it will be always called
             // nevertheless number of parameters it gets
@@ -1427,16 +1395,16 @@ if (typeof(zebra) === "undefined") {
                     return 10;
                 }
             ]), a = new A();
-            assert(a.a(), 10);
-            assert(a.a(1), 10);
-            assert(a.a(1, 2), 10);
-            assert(typeof a.a.f == 'function', true);
+            assert(a.a(), 10, "test overriding 24");
+            assert(a.a(1), 10, "test overriding 25");
+            assert(a.a(1, 2), 10, "test overriding 26");
+            assert(typeof a.a.methodBody == 'function', true, "test overriding 27");
 
             var B = Class(A,[]), b = new B();
-            assert(b.a(), 10);
-            assert(b.a(1), 10);
-            assert(b.a(1, 2), 10);
-            assert(typeof b.a.f == 'function', true);
+            assert(b.a(), 10, "test overriding 28");
+            assert(b.a(1), 10, "test overriding 29");
+            assert(b.a(1, 2), 10, "test overriding 30");
+            assert(typeof b.a.methodBody == 'function', true, "test overriding 31");
 
 
             var C = Class(B,[
@@ -1444,10 +1412,10 @@ if (typeof(zebra) === "undefined") {
                     return 22;
                 }
             ]), c = new C();
-            assert(c.a(), 22);
-            assert(c.a(1), 22);
-            assert(c.a(1, 2), 22);
-            assert(typeof c.a.f == 'function', true);
+            assert(c.a(), 22, "test overriding 32");
+            assert(c.a(1), 22, "test overriding 33");
+            assert(c.a(1, 2), 22, "test overriding 34");
+            assert(typeof c.a.methodBody == 'function', true, "test overriding 35");
 
             c.extend([
                 function a() {
@@ -1455,34 +1423,271 @@ if (typeof(zebra) === "undefined") {
                 }
             ]);
 
-            assert(c.a(), 100);
-            assert(c.a(1), 100);
-            assert(c.a(1, 2), 100);
-            assert(typeof c.a.f == 'function', true);
+            assert(c.a(), 100, "test overriding 36");
+            assert(c.a(1), 100, "test overriding 37");
+            assert(c.a(1, 2), 100, "test overriding 38");
+            assert(typeof c.a.methodBody == 'function', true, "test overriding 39");
 
             var D = Class(C, [
-                function a() {
-                    return 200 + this.$super();
-                },
-
                 function a(a1, a2) {
-                    return 1000 + this.$super(2,2);
+                    if (arguments.length === 0) return 200 + this.$super();
+                    if (arguments.length === 1) return 1000 + this.$super(a1);
+                    return 1000 + this.$super(a1, a2);
+
                 }
             ]), d = new D();
 
-            assert(d.a(), 222);
-            assert(d.a(1, 2), 1022);
-            assertException(function() {
+            assert(d.a(), 222, "test overriding 40");
+            assert(d.a(1, 2), 1022, "test overriding 41");
+            zebra.assertNoException(function() {
                 d.a(1);
-            }, Error);
-            assert(typeof d.a.f == 'undefined', true);
+            }, Error, "test overriding 42");
+
+            zebra.assertException(function() {
+                var A = Class([
+                    function $prototype() {
+                        this.a = 100;
+                    },
+
+                    function a () {
+                    }
+                ]);
+            }, Error, "test overriding 43");
+        },
+
+        function test_class_extending() {
+            var A = Class([
+                function a() {
+                    return 1;
+                },
+
+                function aa() {
+                    return 2;
+                },
+
+                function $prototype() {
+                    this.aaa = function() {
+                        return 22;
+                    };
+                }
+            ]);
+
+            var B = Class(A, [
+                function b() {
+                    return 4;
+                },
+
+                function aa() {
+                    return 3;
+                },
+
+                function $prototype() {
+                    this.bb = function() {
+                        return 222;
+                    };
+                }
+            ]);
+
+            var C = Class(B, [
+                function c() {
+                    return 123;
+                },
+
+                function aa() {
+                    return this.$super() + 11;
+                }
+            ]);
+
+            var ob = new B(), oc = new C();
+
+            assert(ob.a(), 1);
+            assert(ob.b(), 4);
+            assert(ob.aa(), 3);
+            assert(ob.bb(), 222);
+            assert(ob.aaa(), 22);
+
+            assert(oc.a(), 1);
+            assert(oc.b(), 4);
+            assert(oc.aa(), 14);
+            assert(oc.c(), 123);
+            assert(oc.bb(), 222);
+            assert(oc.aaa(), 22);
+
+            assert(B.$parent, A);
+            assert(B.prototype.b.boundTo, B);
+            assert(B.prototype.aa.boundTo, B);
+            assert(B.prototype.aaa.boundTo, undefined);
+            assert(B.prototype.bb.boundTo, undefined);
+            assert(B.prototype.a.boundTo, A);
+            assert(A.prototype.a.boundTo, A);
+            assert(A.prototype.aa.boundTo, A);
+            assert(A.prototype.aaa.boundTo, undefined);
+
+            assert(C.prototype.a.boundTo, A);
+            assert(C.prototype.aa.boundTo, C);
+            assert(C.prototype.aaa.boundTo, undefined);
+            assert(C.prototype.b.boundTo, B);
+            assert(C.prototype.bb.boundTo, undefined);
+            assert(C.prototype.c.boundTo, C);
+
+            assert(A.prototype.aa != B.prototype.aa, true);
+            assert(A.prototype.a != B.prototype.a, true);
+
+            var Mix = [
+                function aa() {
+                    return 10 + this.$super();
+                }
+            ];
+
+            B.extend(Mix);
+            assert(B.$isInjected, true);
+            assert(B.$parent != A, true);
+            assert(A.$parent, null);
+            assert(B.$parent.$parent, A);
+
+            assert(B.$parent.prototype.a.boundTo, A);
+            assert(B.$parent.prototype.aa.boundTo, B.$parent);
+            assert(B.$parent.prototype.b.boundTo, B.$parent);
+
+            assert(B.prototype.a.boundTo, A);
+            assert(B.prototype.aa.boundTo, B);
+            assert(B.prototype.b.boundTo, B.$parent);
+            assert(B.prototype.bb.boundTo, undefined);
+            assert(B.prototype.aaa.boundTo, undefined);
+
+            assert(C.prototype.a.boundTo, A);
+            assert(C.prototype.aa.boundTo, C);
+            assert(C.prototype.aaa.boundTo, undefined);
+            assert(C.prototype.b.boundTo, B);
+            assert(C.prototype.bb.boundTo, undefined);
+            assert(C.prototype.c.boundTo, C);
+
+            assert(A.prototype.a.boundTo, A);
+            assert(A.prototype.aa.boundTo, A);
+            assert(A.prototype.aaa.boundTo, undefined);
+
+            var b = new B(), c = new C();
+            assert(b.a(), 1);
+            assert(b.b(), 4);
+            assert(b.aa(), 13);
+            assert(b.bb(), 222);
+            assert(b.aaa(), 22);
+
+            assert(c.a(), 1);
+            assert(c.b(), 4);
+            assert(c.aa(), 24);
+            assert(c.c(), 123);
+            assert(c.bb(), 222);
+            assert(c.aaa(), 22);
+
+            assert(ob.a(), 1);
+            assert(ob.b(), 4);
+            assert(ob.aa(), 13);
+            assert(ob.bb(), 222);
+            assert(ob.aaa(), 22);
+
+            assert(oc.a(), 1);
+            assert(oc.b(), 4);
+            assert(oc.aa(), 24);
+            assert(oc.c(), 123);
+            assert(oc.bb(), 222);
+            assert(oc.aaa(), 22);
+
+            var Mix = [
+                function aa() {
+                    return 12 + this.$super();
+                }
+            ];
+
+            var B_parent = B.$parent;
+            assert(B_parent != null, true);
+            B.extend(Mix);
+
+            assert(B_parent, B.$parent);
+            assert(b.a(), 1);
+            assert(b.b(), 4);
+            assert(b.aa(), 15);
+            assert(b.bb(), 222);
+            assert(b.aaa(), 22);
+
+            assert(c.a(), 1);
+            assert(c.b(), 4);
+            assert(c.aa(), 26);
+            assert(c.c(), 123);
+            assert(c.bb(), 222);
+            assert(c.aaa(), 22);
+
+
+            C.extend([
+                function c() {
+                    return 89;
+                }
+            ], false);
+
+            assert(C.isInjected, undefined);
+            assert(C.prototype.c.boundTo, C);
+            assert(C.$parent, B);
+            assert(c.a(), 1);
+            assert(c.b(), 4);
+            assert(c.aa(), 26);
+            assert(c.c(), 89);
+            assert(c.bb(), 222);
+            assert(c.aaa(), 22);
+        },
+
+        function test_mixing_definition () {
+            var Mix = [
+                function a() {
+                    return 10 + this.$super();
+                },
+
+                function aa() {
+                    return 123;
+                },
+
+                function $prototype() {
+                    this.af = 330;
+                    this.aaa = function() {
+                        return 890;
+                    }
+                }
+            ]
+
+            var A = Class([
+                function   a() {
+                    return 10;
+                }
+            ]);
+
+            var B = Class(A, [
+                function  b() {
+                    return 11;
+                },
+
+                function $mixing() {
+                    return Mix;
+                }
+            ]);
+
+            var a = new A(), b = new B();
+
+            assert(a.a(), 10);
+            assert(b.b(), 11);
+            assert(b.aa(), 123);
+            assert(b.a(), 20);
+            assert(b.aaa(), 890);
+            assert(B.prototype.aaa.boundTo == null, true);
+            assert(b.af, 330);
         },
 
         function test_dynamic() {
             var A = new Class([
-                function a() { return 100; },
-                function a(p) { return p; },
-                function a(p1, p2) { return p1 + p2; },
+                function a(p1, p2) {
+                    if (arguments.length === 0) return 100;
+                    if (arguments.length === 1) return p1;
+                    return p1 + p2;
+                },
+
                 function $prototype() { this.m = 33; }
             ]);
 
@@ -1494,19 +1699,15 @@ if (typeof(zebra) === "undefined") {
             assert(a.m, 33);
 
             a.extend([
-                function a() {
-                    return 200;
-                },
-
                 function a(p) {
+                    if (arguments.length === 0) return 200;
                     return 10;
                 }
             ]);
 
             assert(a.a(), 200);
             assert(a.a(1), 10);
-            assert(a.a(3,3), 6);
-
+            assert(a.a(3,3), 10);
 
             a.m = 150;
             assert(a.m, 150);
@@ -1530,7 +1731,7 @@ if (typeof(zebra) === "undefined") {
                 },
 
                 function m1() {
-
+                    return 11;
                 }
             ]);
 
@@ -1547,7 +1748,11 @@ if (typeof(zebra) === "undefined") {
 
             var M = [
                 function a()  { return 502; },
-                function m1() { return 500; },
+
+                function m1() {
+                    return 500;
+                },
+
                 function m2() { return 501; }
             ];
 
@@ -1568,7 +1773,13 @@ if (typeof(zebra) === "undefined") {
             assert(a.m2(), 501);
             assert(a.a(), 502);
 
-            var B = Class([]);
+
+            var B = Class([
+                function m1 () {
+                    return 12;
+                }
+            ]);
+
             B.extend(M);
             a = new B();
 
@@ -1584,8 +1795,10 @@ if (typeof(zebra) === "undefined") {
 
         function test_anonymous() {
             var A = new Class([
-                function a() { return 1; },
-                function a(p) { return p; }
+                function a(p) {
+                    if (arguments.length === 0) return 1;
+                    return p;
+                }
             ]);
 
             var a = new A();
@@ -1593,8 +1806,12 @@ if (typeof(zebra) === "undefined") {
             assert(a.a(11), 11, "Class defined method a(1)");
 
             a = new A([
-                function a() { return 2; },
-                function a(p1, p2) { return p1 + p2; },
+                function a(p1, p2) {
+                    if (arguments.length === 0) return 2;
+                    if (arguments.length === 1) return this.$super(p1);
+                    return p1 + p2;
+                },
+
                 function b () {
                     return 777;
                 }
@@ -1614,7 +1831,6 @@ if (typeof(zebra) === "undefined") {
             a = new A();
             assert(a.a(), 1, "anonymous didn't touch method a() of initial class");
             assert(a.a(12), 12, "anonymous didn't touch method a(1) of initial class");
-            assertException(function() { a.a(12, 12); }, ReferenceError, "anonymous didn't add method a(2) to initial class");
             assert(this['a'], undefined, "anonymous didn't update current scope");
             assert(zebra.$global['a'], undefined, "anonymous didn't update global scope");
 
@@ -1896,15 +2112,11 @@ if (typeof(zebra) === "undefined") {
             assert(typeof bb.f === "function" , true);
             assert(bb.f(), 12345);
 
-
-
             var C = Class(A, [
                 function f(a) {
                     return 555;
                 }
             ]);
-
-            assert(zebra.getMethods(C, "f").length, 2);
 
             var c = new C();
             assert(c.a, 20);
@@ -1915,15 +2127,14 @@ if (typeof(zebra) === "undefined") {
             assert(c.b.length, 3);
             assert(c.a, 20);
             assert(typeof c.f === "function" , true);
-            assert(c.f(), 333);
+            assert(c.f(), 555);
             assert(c.f(1), 555);
 
             var D = Class(A, [
-                function f() {
-                    return 1 + this.$super();
-                },
-
                 function f(a) {
+                    if (arguments.length === 0) {
+                        return 1 + this.$super();
+                    }
                    return a + this.$super();
                 }
             ]);
@@ -1937,13 +2148,13 @@ if (typeof(zebra) === "undefined") {
         function test_caller() {
             var A = new zebra.Class([
                 function() {
-                    assert(zebra.$caller == zebra.getMethod(A, '', 0), true, "test_caller 1");
+                    assert(zebra.$caller == zebra.getMethod(A, ''), true, "test_caller 1");
                     this.toM();
-                    assert(zebra.$caller == zebra.getMethod(A, '', 0), true, "test_caller 2");
+                    assert(zebra.$caller == zebra.getMethod(A, ''), true, "test_caller 2");
                 },
 
                 function toM() {
-                    assert(zebra.$caller.toString() == toM.toString(), true, "test_caller 3");
+                    assert(zebra.$caller.methodBody.toString() == toM.toString(), true, "test_caller 3");
                     return "M";
                 }
             ]);
@@ -1952,11 +2163,8 @@ if (typeof(zebra) === "undefined") {
 
         function test_mixing() {
             var A = Class([
-                function a() {
-                    return 10;
-                },
-
                 function a(p1) {
+                    if (arguments.length === 0) return 10;
                     return p1;
                 }
             ]), I = Interface();
@@ -1970,13 +2178,11 @@ if (typeof(zebra) === "undefined") {
             a.extend([
                 function() {
                     this.ff = 333;
-                },
-
-                function a() {
-                    return 200;
+                    this.dd = this.a();
                 },
 
                 function a(p1) {
+                    if (arguments.length === 0) return 200;
                     return this.$super(p1 + 10);
                 }
             ]);
@@ -1985,6 +2191,7 @@ if (typeof(zebra) === "undefined") {
             assert(a.a(), 200);
             assert(a.a(123), 133);
             assert(a.ff, 333);
+            assert(a.dd, 200);
             assert(mclz != clz, true);
             assert(a.$extended, true, "Anonymous is extended ");
 
@@ -1994,15 +2201,15 @@ if (typeof(zebra) === "undefined") {
                     this.fff = 333;
                 },
 
-                function a() {
-                    return this.a(111, 200);
-                },
-
-                function a(p1) {
-                    return this.$super(p1 + 20);
-                },
-
                 function a(p1, p2) {
+                    if (arguments.length === 0) {
+                        return 311;
+                    }
+
+                    if (arguments.length === 1) {
+                        return this.$super(p1 + 20);
+                    }
+
                     return p1 + p2;
                 }
             ]);
@@ -2070,6 +2277,89 @@ if (typeof(zebra) === "undefined") {
             ]);
             assert(a.a(), 201);
 
+            var mix = [
+                function  aa() {
+                    this.ssValue = this.$super();
+                    this.aaValue = 123;
+                },
+
+                function  bb() {
+                    this.bbValue = 223;
+                }
+            ];
+            var A = Class([
+                function aa () {
+                    this.aaValue = 321;
+                    return 77;
+                },
+
+                function cc () {
+                    this.ccValue = 11321;
+                }
+            ]);
+
+            var a1 = new A(), a2 = new A();
+            a1.aa();
+            a2.aa();
+            assert(a1.aaValue, 321);
+            assert(a2.aaValue, 321);
+            assert(a2.aa, a1.aa);
+            assert(a2.$clazz, a1.$clazz);
+            assert(a2.$clazz, A);
+
+            a1.extend(mix);
+            a1.aa();
+            a2.aa();
+            assert(a1.aaValue, 123);
+            assert(a2.aaValue, 321);
+            assert(a1.bb != null, true);
+            assert(a2.bb  == null, true);
+            assert(a2.aa != a1.aa, true);
+            assert(a1.$clazz != a2.$clazz, true);
+            assert(a2.$clazz, A);
+            assert(a1.$clazz.$parent, A);
+            assert(mix[0].boundTo == null, true);
+            assert(mix[0].methodName == null, true);
+            assert(mix[1].boundTo == null, true);
+            assert(mix[1].methodName == null, true);
+
+            a2.extend(mix);
+            a1.aa();
+            a2.aa();
+            assert(a1.aaValue, 123);
+            assert(a2.aaValue, 123);
+            assert(a1.$clazz != a2.$clazz, true);
+            assert(a1.$clazz.$parent, A);
+            assert(a2.$clazz.$parent, A);
+            assert(a1.bb != null, true);
+            assert(a2.bb != null, true);
+            assert(a2.bb != a1.bb, true);
+            assert(a2.aa != a1.aa, true);
+
+            assert(a1.bb.boundTo, a1.$clazz);
+            assert(a1.aa.boundTo, a1.$clazz);
+            assert(a2.bb.boundTo, a2.$clazz);
+            assert(a2.aa.boundTo, a2.$clazz);
+            assert(a1.cc.boundTo, A);
+            assert(a2.cc.boundTo, A);
+
+            assert(mix[0].boundTo == null, true);
+            assert(mix[0].methodName == null, true);
+            assert(mix[1].boundTo == null, true);
+            assert(mix[1].methodName == null, true);
+
+            var clazz = a1.$clazz, aa = a1.aa, bb = a1.bb;
+            a1.extend(mix);
+            assert(a1.$clazz, clazz);
+            assert(a1.$clazz.$parent, A);
+            assert(a1.aa != aa, true);
+            assert(a1.bb != bb, true);
+            assert(a1.aa.boundTo, a1.$clazz);
+            assert(a1.bb.boundTo, a1.$clazz);
+            assert(a1.cc.boundTo, A);
+
+            a1.aa();
+            assert(a1.ssValue, 77);
         },
 
         function test_singletone() {
@@ -2082,7 +2372,6 @@ if (typeof(zebra) === "undefined") {
                     return 1;
                 }
             ]);
-
 
             assert(A.$instance == null, true);
 
@@ -2209,6 +2498,114 @@ if (typeof(zebra) === "undefined") {
                 assert(zebra.test.AA.B.$name, "A.B");
                 assert(zebra.test.AA.B.A.$name, "A.B.A");
             });
+        },
+
+        function test_clone() {
+            assert(zebra.clone(null), null);
+            assert(zebra.clone(undefined), undefined);
+            assert(zebra.clone(true), true);
+            assert(zebra.clone(1), 1);
+            assert(zebra.clone("abc"), "abc");
+
+            var arr = [1,2,3, ["A", "B" ] ], carr = zebra.clone(arr);
+            assert(arr != carr, true);
+            assert(arr.length, carr.length);
+            assert(arr[arr.length-1] != carr[carr.length-1], true);
+            assertObjEqual(arr, carr);
+            assertObjEqual(arr[arr.length-1], carr[carr.length-1]);
+            assertObjEqual(arr[arr.length-1].length, carr[carr.length-1].length);
+
+            var o = { a: "1", b: true, c : [ 3,4,5] }, co = zebra.clone(o);
+            assert(o != co, true);
+            assert(o.c != co.c, true);
+            assertObjEqual(o, co);
+            assertObjEqual(o.c, co.c);
+
+            var A = Class([
+                function $clazz() {
+                    this.AA = "300";
+                },
+
+                function $prototype() {
+                    this.aa = 300;
+                },
+
+                function() {
+                    this.a = 100;
+                    this.b = [1, 2, 3];
+                    this.c = {
+                        c1 : 1,
+                        c2 : [
+                            9,9,9
+                        ]
+                    }
+                },
+
+                function test1(a) {
+                    return a;
+                },
+
+                function test2(a) {
+                    if (arguments.length === 0) {
+                        return 1;
+                    }
+
+                    return a;
+                }
+            ]), a = new A(), aa = zebra.clone(a);
+
+            assert(a != aa, true);
+            assert(a.$hash$ != null, true);
+            assert(aa.$hash$ != null, true);
+            assert(a.$hash$ != aa.$hash$, true);
+            a.$hash$ = aa.$hash$
+            assertObjEqual(a, aa);
+
+
+            assert(a.b != aa.b, true);
+            assert(a.c != aa.c, true);
+            assert(a.test1, aa.test1);
+            assert(a.test2, aa.test2);
+            assert(a.test1(10), aa.test1(10));
+            assert(a.test2(), aa.test2());
+            assert(a.test2(), 1);
+            assert(a.test2(10), 10);
+            assert(a.test2(10), aa.test2(10));
+
+            var B = Class(A, [
+                function $prototype() {
+                    this.bb = 321;
+                },
+
+                function() {
+                    this.$super();
+                    this.kk = 12;
+                },
+
+                function test2() {
+                    return this.$super() + 2;
+                }
+            ]), b = new B(), bb = zebra.clone(b);
+
+            assert(b != bb, true);
+            assert(b.$hash$ != null, true);
+            assert(bb.$hash$ != null, true);
+            assert(b.$hash$ != bb.$hash$, true);
+
+            assert(b.b != bb.b, true);
+            assert(b.c != bb.c, true);
+
+            b.$hash$ = bb.$hash$;
+            assertObjEqual(b, bb);
+
+            assert(b.test2, bb.test2);
+            assert(b.test2(), bb.test2());
+            assert(b.test2(12), bb.test2(12));
+            assert(b.test1, bb.test1);
+            assert(b.test1(11), bb.test1(11));
+
+            var f1 = function() {}, f2 = zebra.clone(f1);
+            assert(f1, f2);
         }
     );
 })();

@@ -3,7 +3,7 @@
 	<head>
     <title>Tutorial</title>
     <script src='../zebra.min.js' type='text/javascript'></script>
-        
+
 	<script type='text/javascript'>
         zebra.ready(function() {
 
@@ -12,14 +12,12 @@
             if (document.getElementById("doc.event.kids")!=null) {
                 var MyComponent = zebra.Class(Panel,
                 [
-                    function childInputEvent(e) {
-                        if (e.ID == MouseEvent.ENTERED) {
-                            e.source.setBackground("orange");
-                        }   
-                        else
-                        if (e.ID == MouseEvent.EXITED) {
-                            e.source.setBackground(null);
-                        }   
+                    function childPointerEntered(e) {
+                        e.source.setBackground("orange");
+                    },
+
+                    function childPointerExited(e) {
+                        e.source.setBackground(null);
                     }
                 ]);
 
@@ -41,14 +39,14 @@
 
             if (document.getElementById("doc.event.mpressed")!=null) {
                 var p = new zebra.ui.BoldLabel("Press ME!",[
-                    // implement mouse pressed event handler
-                    function mousePressed(e) {
+                    // implement pointer pressed event handler
+                    function pointerPressed(e) {
                         this.setBorder(new Sunken());
                     },
 
-                    // implement mouse released event handler
-                    function mouseReleased(e) { 
-                        this.setBorder(new Raised()); 
+                    // implement pointer released event handler
+                    function pointerReleased(e) {
+                        this.setBorder(new Raised());
                     }
                 ]);
 
@@ -68,24 +66,24 @@
             if (document.getElementById("doc.event.composite")!=null) {
 
                 var p = new Panel([
-                    function mouseEntered(e) {
+                    function pointerEntered(e) {
                        this.setBackground("orange");
                     },
 
-                    function mouseExited(e) {
+                    function pointerExited(e) {
                        this.setBackground(null);
                     }
-                ]); 
+                ]);
 
                 var composite = new Panel([
-                    function mouseEntered(e) {
+                    function pointerEntered(e) {
                        this.setBackground("orange");
                     },
 
-                    function mouseExited(e) {
+                    function pointerExited(e) {
                        this.setBackground(null);
                     }
-                ]); 
+                ]);
                 composite.catchInput = true;
 
                 var c = new zCanvas("doc.event.composite");
@@ -94,7 +92,7 @@
                 p.setBorder(new Border("red", 2));
                 var l = new Label(new zebra.data.Text("Usual, not event transparent\nchildren component"));
                 l.setPadding(12);
-                l.setBorder(new Border("red")); 
+                l.setBorder(new Border("red"));
                 l.setLocation(20,20);
                 l.toPreferredSize();
                 p.add(l);
@@ -104,7 +102,7 @@
                 composite.setBorder(new Border("orange", 2));
                 var l = new Label(new zebra.data.Text("Event transparent\nchildren component"));
                 l.setPadding(12);
-                l.setBorder(new Border("red")); 
+                l.setBorder(new Border("red"));
                 l.setLocation(20,20);
                 l.toPreferredSize();
                 composite.add(l);
@@ -115,13 +113,13 @@
             if (document.getElementById("doc.event.composite2")!=null) {
 
                 var composite = new Panel([
-                    function mouseEntered(e) { this.setBackground("orange"); },
-                    function mouseExited(e)  { this.setBackground(null); },
+                    function pointerEntered(e) { this.setBackground("orange"); },
+                    function pointerExited(e)  { this.setBackground(null); },
 
                     function catchInput(c) {
                         return this.indexOf(c) === 0;
                     }
-                ]); 
+                ]);
 
                 var c = new zCanvas("doc.event.composite2");
                 c.root.setBorder(new Border("black"));
@@ -139,14 +137,14 @@
                 composite.add(p1);
                 composite.add(p2);
             }
-        
+
         });
 		</script>
 	</head>
 
 	<body bgcolor="#EEEEEE" align="center" style="padding:15px;">
         <h1>Handling input events</h1>
-        
+
         <table cellpadding="4">
             <tr>
                 <td><canvas width="350" height="250" id="doc.event.kids"></canvas></td>
@@ -161,6 +159,6 @@
                 <td>Input events transparency</td>
             </tr>
         </table>
-	    
+
 	</body>
 </html>

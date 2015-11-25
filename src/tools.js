@@ -1,4 +1,11 @@
 (function(pkg, Class) {
+    if (typeof document === "undefined" && typeof console === "undefined" ) {
+        console = {
+            log  : function() {
+                return print.apply(this, arguments);
+            }
+        };
+    }
 
     pkg.Output = Class([
         function $prototype() {
@@ -36,9 +43,9 @@
     ]);
 
     pkg.HtmlOutput = Class(pkg.Output, [
-        function() { this.$this(null); },
-
         function(element) {
+            if (arguments.length === 0) element = null;
+
             element = element || "zebra.out";
             if (pkg.isString(element)) {
                 this.el = document.getElementById(element);
@@ -199,14 +206,14 @@
     };
 
     pkg.assertObjEqual = function(obj1, obj2, lab) {
-        function cmp(obj1, obj2) {
+        function cmp(obj1, obj2, path) {
             function isNumeric(n) {
               return !isNaN(parseFloat(n)) && isFinite(n);
             }
 
             if (obj1 === obj2) return true;
 
-            if (obj1 === null || obj2 === null) {
+            if (obj1 == null || obj2 == null) {
                 throw new AssertionError("One of the compared object is null");
             }
 
@@ -216,7 +223,7 @@
                 }
 
                 for(var i=0; i < obj1.length; i++) {
-                    cmp(obj1[i], obj2[i]);
+                    if (!cmp(obj1[i], obj2[i], path)) return false;
                 }
                 return true;
             }
@@ -227,15 +234,17 @@
             }
 
             for(var k in obj1) {
+                var pp =  path == "" ? k : path + "." + k;
+
                 if (typeof obj2[k] === "undefined") {
-                    throw new AssertionError("Object field '"  + k + "' is undefined" );
+                    throw new AssertionError("Object field '"  + pp + "' is undefined" );
                 }
-                cmp(obj1[k], obj2[k]);
+                if (!cmp(obj1[k], obj2[k], pp)) return false;
             }
             return true;
         }
 
-        pkg.assert(cmp(obj1, obj2), true, lab, "AssertObjectEqual");
+        pkg.assert(cmp(obj1, obj2, "") && cmp(obj2, obj1, ""), true, lab, "AssertObjectEqual");
     };
 
     pkg.assert = function(c, er, lab, assertLab) {
@@ -255,7 +264,7 @@
 
         try { f(); }
         catch(e) {
-            if ((e.instanceOf && e.instanceOf(et)) || (e instanceof et)) return;
+            if (e instanceof et) return;
             throw e;
         }
         throw new AssertionError((lab ? "'" + lab + "'":"") + " in\n" + f + "\n" + "method. '" + et.name + "' exception is expected");
@@ -292,7 +301,9 @@
 
         var s = [shift, "{"];
         for(var k in v) {
-            s.push("\n  " + shift + k + " = " + pkg.obj2str(v[k], shift + "  "));
+            if (v.hasOwnProperty(k) && k[0] != '$') {
+                s.push("\n  " + shift + k + " = " + pkg.obj2str(v[k], shift + "  "));
+            }
         }
         s.push("\n", shift, "}");
         return s.join('');
@@ -325,6 +336,13 @@
             for(var i = 0; i < args.length; i++) {
                 var f = args[i], k = pkg.$FN(f);
 
+                // if some of usea cases already genereated error
+                // we should not start new test cases since it
+                // will override faieled test case name
+                if (runner.$error != null) {
+                    break;
+                }
+
                 if (k.indexOf("_") === 0) {
                     out.warn("? " + k + " (remove leading '_' to enable '" + k + "' test case)");
                     sk++;
@@ -333,6 +351,9 @@
                     (function(f, k) {
                         runner.$currentTestCase = k;
 
+                        // put call back function in context of runner
+                        // async test cases has to perfrom testing
+                        // with the function
                         runner.assertCallback = function(f) {
                             var notify = this.join(), $this = this;
                             return function() {

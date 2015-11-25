@@ -1,21 +1,15 @@
-(function(pkg) {
+(function(pkg, Class) {
     pkg.$canvases = [];
 
     zebra.ready(function() {
-        pkg.$deviceRatio = typeof window.devicePixelRatio !== "undefined" ? window.devicePixelRatio
-                                                                          : (typeof window.screen.deviceXDPI !== "undefined" ? // IE
-                                                                             window.screen.deviceXDPI / window.screen.logicalXDPI : 1);
-
-        pkg.$applyRenderExploit = (parseInt(pkg.$deviceRatio) !== pkg.$deviceRatio || zebra.isIE);
-
         // canvases location has to be corrected if document layout is invalid
         pkg.$elBoundsUpdated = function() {
             for(var i = pkg.$canvases.length - 1; i >= 0; i--) {
                 var c = pkg.$canvases[i];
-                if (c.isFullScreen) {
+                if (c.isFullScreen === true) {
                     //c.setLocation(window.pageXOffset, -window.pageYOffset);
 
-                    var ws = pkg.$windowSize();
+                    var ws = zebkit.web.$windowSize();
                     // browser (mobile) can reduce size of browser window by
                     // the area a virtual keyboard occupies. Usually the
                     // content scrolls up to the size the VK occupies, so
@@ -25,105 +19,6 @@
                     c.setSize(ws.width + window.pageXOffset, ws.height + window.pageYOffset);
                 }
                 c.recalcOffset();
-            }
-        };
-
-        window.requestAFrame = (function(){
-            return  window.requestAnimationFrame       ||
-                    window.webkitRequestAnimationFrame ||
-                    window.mozRequestAnimationFrame    ||
-                    function( callback ){ window.setTimeout(callback, 35); };
-        })();
-
-        pkg.$windowSize = function() {
-            // iOS retina devices can have a problem with performance
-            // in landscape mode because of a bug (full page size is
-            // just 1 pixels column more than video memory that can keep it)
-            // So, just make width always one pixel less.
-            return { width : window.innerWidth - 1,
-                     height: window.innerHeight   };
-        };
-
-        pkg.$measure = function(e, cssprop) {
-            var value = window.getComputedStyle ? window.getComputedStyle(e, null).getPropertyValue(cssprop)
-                                                : (e.style ? e.style[cssprop]
-                                                           : e.currentStyle[cssprop]);
-            return (value == null || value == '') ? 0
-                                                  : parseInt(/(^[0-9\.]+)([a-z]+)?/.exec(value)[1], 10);
-        };
-
-        pkg.$contains = function(element) {
-            return (document.contains != null && document.contains(element)) ||
-                   (document.body.contains != null && document.body.contains(element));
-        };
-
-        pkg.$canvas = {
-            size : function(c, w, h) {
-                c.style.width  = "" + w + "px";
-                c.style.height = "" + h + "px";
-
-                var ctx = pkg.$canvas.context(c);
-
-                // take in account that canvas can be visualized on
-                // Retina screen where the size of canvas (backstage)
-                // can be less than it is real screen size. Let's
-                // make it match each other
-                if (ctx.$ratio != pkg.$deviceRatio) {
-                    var ratio = pkg.$deviceRatio / ctx.$ratio;
-                    c.width  = ~~(w * ratio);
-                    c.height = ~~(h * ratio);
-                    ctx.$scale(ratio, ratio);
-                }
-                else {
-                    c.width  = w;
-                    c.height = h;
-                }
-                return ctx;
-            },
-
-            context: function(c) {
-                var ctx = c.getContext("2d");
-
-                // canvas 2d context is singleton so check if the
-                // context has already been modified to prevent
-                // redundancy
-                if (typeof ctx.$ratio == "undefined") {
-                    var ratio = pkg.$canvas.ratio(ctx);
-
-                    ctx.$getImageData = ctx.getImageData;
-                    ctx.$scale = ctx.scale;
-                    ctx.$ratio = ratio;
-                    if (pkg.$deviceRatio != ratio) {
-                        var r = pkg.$deviceRatio / ratio;
-                        ctx.getImageData= function(x, y, w, h) {
-                            return this.$getImageData(x * r, y * r, w, h);
-                        };
-                    }
-                }
-
-                return ctx;
-            },
-
-            create: function(w, h) {
-                var e = document.createElement("canvas");
-                if (arguments.length === 0) {
-                    w = typeof e.width  != "undefined" ? e.width  : 0;
-                    h = typeof e.height != "undefined" ? e.height : 0;
-                }
-                pkg.$canvas.size(e, w, h);
-                return e;
-            },
-
-            ratio : function(ctx) {
-                // backstage buffer can have different size with a real size
-                // what causes the final picture can be zoomed in/out
-                // we need to calculate it to make canvas more crisp
-                // for HDPI screens
-                return (ctx.webkitBackingStorePixelRatio ||   // backing store ratio
-                        ctx.mozBackingStorePixelRatio    ||
-                        ctx.msBackingStorePixelRatio     ||
-                        ctx.backingStorePixelRatio       ||
-                        ctx.backingStorePixelRatio       || 1);
             }
         };
 
@@ -175,336 +70,153 @@
             }
         };
 
+        // TODO: this is depricated events that can have significant impact to
+        // page performance. That means it has to be removed and replace with soemting
+        // else
+        //
         // bunch of handlers to track HTML page metrics update
         // it is necessary since to correct zebra canvases anchor
+        // and track when a canvas has been removed
         document.addEventListener("DOMNodeInserted", function(e) {
             pkg.$elBoundsUpdated();
         }, false);
 
         document.addEventListener("DOMNodeRemoved", function(e) {
-            pkg.$elBoundsUpdated();
-
             // remove canvas from list
             for(var i = pkg.$canvases.length - 1; i >= 0; i--) {
                 var canvas = pkg.$canvases[i];
-                if (e.target == canvas.canvas) {
+                if (zebkit.web.$contains(canvas.element) !== true) {
                     pkg.$canvases.splice(i, 1);
-
                     if (canvas.saveBeforeLeave != null) {
                         canvas.saveBeforeLeave();
                     }
-
-                    break;
                 }
             }
+
+            pkg.$elBoundsUpdated();
         }, false);
     });
 
-    var PI4 = Math.PI/4, PI4_3 = PI4 * 3, $abs = Math.abs, $atan2 = Math.atan2, L = zebra.layout;
-
-    /**
-     *  Mouse wheel support class. Installs necessary mouse wheel
-     *  listeners and handles mouse wheel events in zebra UI. The
-     *  mouse wheel support is plugging that is configured by a
-     *  JSON configuration.
-     *  @class zebra.ui.MouseWheelSupport
-     *  @param  {zebra.ui.zCanvas} canvas a zebra zCanvas UI component
-     *  @constructor
-     */
-    pkg.MouseWheelSupport = zebra.Class([
+    // TODO: not a good place for clipboard manager
+    pkg.ClipboardSupport = Class([
         function $clazz() {
-            this.dxZoom = this.dyZoom = 20;
-            this.dxNorma = this.dyNorma = 80;
+            this.Listeners = zebra.util.ListenersClass("clipCopy", "clipPaste", "clipCut");
         },
 
         function $prototype() {
-            this.naturalDirection = true;
+            this.keyPressed = function (e) {
+                var focusOwner = pkg.focusManager.focusOwner;
+                if (e.code     === this.clipboardTriggerKey &&
+                    focusOwner !=  null                     &&
+                    (focusOwner.clipCopy  != null || focusOwner.clipPaste != null))
+                {
+                    this.$clipboard.style.display = "block";
+                    this.$clipboardCanvas = focusOwner.getCanvas();
 
-            /**
-             * Mouse wheel handler
-             * @param  {MouseWheelEvent} e DOM mouse event object
-             * @method wheeled
-             */
-            this.wheeled  = function(e){
-                var owner = pkg.$mouseMoveOwner;
-                while (owner != null && owner.doScroll == null) {
-                    owner = owner.parent;
-                }
+                    // value has to be set, otherwise some browsers (Safari) do not generate
+                    // "copy" event
+                    this.$clipboard.value = "1";
 
-                if (owner != null) {
-                    var dy = e[this.wheelInfo.dy] != null ? e[this.wheelInfo.dy] * this.wheelInfo.dir : 0,
-                        dx = e[this.wheelInfo.dx] != null ? e[this.wheelInfo.dx] * this.wheelInfo.dir : 0;
-
-                    // some version of FF can generates dx/dy  < 1
-                    if (Math.abs(dy) < 1) {
-                        dy *= this.$clazz.dyZoom;
-                    }
-
-                    if (Math.abs(dx) < 1) {
-                        dx *= this.$clazz.dxZoom;
-                    }
-
-
-                    dy = Math.abs(dy) > this.$clazz.dyNorma ? dy % this.$clazz.dyNorma : dy;
-                    dx = Math.abs(dx) > this.$clazz.dxNorma ? dx % this.$clazz.dxNorma : dx;
-
-                    if (owner.doScroll(dx, dy, "wheel")) {
-                        e.preventDefault();
-                    }
+                    this.$clipboard.select();
+                    this.$clipboard.focus();
                 }
             };
         },
 
-        function(canvas) {
-            if (canvas == null) {
-                throw new Error("Null canvas");
+        function(clipboardTriggerKey) {
+            this.clipboardTriggerKey = clipboardTriggerKey;
+
+            function $dupKeyEvent(e, id, target)  {
+                var k = new Event(id);
+                k.keyCode  = e.keyCode;
+                k.key      = e.key;
+                k.target   = target;
+                k.ctrlKey  = e.ctrlKey;
+                k.altKey   = e.altKey;
+                k.shiftKey = e.shiftKey;
+                k.metaKey  = e.metaKey;
+                return k;
             }
 
-            var WHEEL = {
-                wheel: {
-                    dy  : "deltaY",
-                    dx  : "deltaX",
-                    dir : 1,
-                    test: function() {
-                        return "WheelEvent" in window;
-                    }
-                },
-                mousewheel: {
-                    dy  : "wheelDelta",
-                    dx  : "wheelDeltaX",
-                    dir : -1,
-                    test: function() {
-                        return document.onmousewheel !== undefined;
-                    }
-                },
-                DOMMouseScroll: {
-                    dy  : "detail",
-                    dir : 1,
-                    test: function() {
-                        return true;
-                    }
-                }
-            };
+            if (clipboardTriggerKey > 0) {
+                // TODO: why bind instead of being a manager ?
+                pkg.events.bind(this);
 
-            for(var k in WHEEL) {
-                var w = WHEEL[k];
-                if (w.test()) {
-                    var $this = this;
-                    canvas.canvas.addEventListener(k,
-                        this.wheeled.bind == null ? function(e) {
-                                                        return $this.wheeled(e);
-                                                    }
-                                                  : this.wheeled.bind(this),
-                    false);
+                this._ = new this.$clazz.Listeners();
 
-                    this.wheelInfo = w;
-                    break;
-                }
-            }
-        }
-    ]);
+                var $clipboard = this.$clipboard = document.createElement("textarea"),
+                    $this = this;
 
-    pkg.TouchHandler = zebra.Class([
-        function $prototype() {
-            this.touchCounter = 0;
+                $clipboard.setAttribute("style", "display:none;position:fixed;left:-99em;top:-99em;");
 
-            function isIn(t, id) {
-                for(var i = 0; i < t.length; i++) {
-                    if (t[i].identifier == id) return true;
-                }
-                return false;
-            }
+                $clipboard.onkeydown = function(ee) {
+                    $this.$clipboardCanvas.$container.dispatchEvent($dupKeyEvent(ee, 'keydown', $this.$clipboardCanvas.$container));
+                    $clipboard.value="1";
+                    $clipboard.select();
+                };
 
-            this.$fixEnd = function(e) {
-                var t = e.touches, ct = e.changedTouches;
-                for (var k in this.touches) {
-
-                    // find out if:
-                    // 1) a stored started touch has appeared as new touch
-                    //    it can happen if touch end has not been fired and
-                    //    the new start touch id matches a stored one
-                    // 2) if no one touch among current touches matches a stored
-                    //    touch. If it is true that means the stored touch has not
-                    //    been released since no appropriate touch end event has
-                    //    been fired
-                    if (isIn(ct, k) === true || isIn(t, k) === false) {
-                        var tt = this.touches[k];
-                        this.touchCounter--;
-                        if (tt.group != null) tt.group.active = false;
-                        this.ended(tt);
-                        delete this.touches[k];
-                    }
-                }
-            };
-
-            this.start = function(e) {
-                this.$fixEnd(e);
-
-                // fix android bug: parasite event for multi touch
-                // or stop capturing new touches since it is already fixed
-                if (this.touchCounter > e.touches.length) return;
-
-                // collect new touches in queue, don't send it immediately
-                var t = e.touches;
-                for(var i = 0; i < t.length; i++) {  // go through all touches
-                    var tt = t[i];
-
-                    // test if the given touch has not been collected in queue yet
-                    if (this.touches.hasOwnProperty(tt.identifier) === false) {
-                        this.touchCounter++;
-                        var nt = {
-                            pageX      : tt.pageX,
-                            pageY      : tt.pageY,
-                            identifier : tt.identifier,
-                            target     : tt.target,
-                            direction  : L.NONE,  // detected movement direction (L.HORIZONTAL or L.VERTICAL)
-                            dx         : 0,       // horizontal shift since last touch movement
-                            dy         : 0,       // vertical shift since last touch movement
-                            dc         : 0,       // internal counter to collect number of the movement
-                                                  // happens in the given direction
-                            group      : null
-                        };
-                        this.touches[tt.identifier] = nt;
-                        this.queue.push(nt);
-                    }
-                }
-
-                // initiate timer to send collected new touch events
-                // if any new has appeared. the timer helps to collect
-                // events in one group
-                if (this.queue.length > 0 && this.timer == null) {
-                    var $this = this;
-                    this.timer = setTimeout(function() {
-                        $this.Q(); // flush queue
-                        $this.timer = null;
-                    }, 25);
-                }
-            };
-
-            this.end = function(e) {
-                //  remove timer if it has not been started yet
-                if (this.timer != null) {
-                    clearTimeout(this.timer);
-                    this.timer = null;
-                }
-
-                //clear queue
-                this.Q();
-
-                // update touches
-                var t = e.changedTouches;
-                for (var i = 0; i < t.length; i++) {
-                    var tt = this.touches[t[i].identifier];
-                    if (tt != null) {
-                        this.touchCounter--;
-                        if (tt.group != null) tt.group.active = false;
-                        this.ended(tt);
-                        delete this.touches[t[i].identifier];
-                    }
-                }
-            };
-
-            this.Q = function() {
-                if (this.queue.length > 1) {
-                    // marked all collected touches with one group
-                    for(var i = 0; i < this.queue.length; i++) {
-                        var t = this.queue[i];
-                        t.group = {
-                           size  : this.queue.length, // group size
-                           index : i,
-                           active: true  // say it is still touched
-                        };
-                    }
-                }
-
-                if (this.queue.length > 0) {
-                    for(var i = 0; i < this.queue.length; i++) {
-                        this.started(this.queue[i]);
-                    }
-                    this.queue.length = 0;
-                }
-            };
-
-            this[''] = function(element) {
-                this.touches = {};
-                this.queue   = [];
-                this.timer   = null;
-
-                var $this = this;
-                element.addEventListener("touchstart",  function(e) {
-                    $this.start(e);
-                }, false);
-
-                element.addEventListener("touchend", function(e) {
-                    $this.end(e);
-                    e.preventDefault();
-                }, false);
-
-                element.addEventListener("touchmove", function(e) {
-                    var mt = e.changedTouches;
-
-                    // clear dx, dy for not updated touches
-                    for(var k in $this.touches) {
-                        $this.touches[k].dx = $this.touches[k].dy = 0;
+                $clipboard.onkeyup = function(ee) {
+                    if (ee.keyCode === $this.clipboardTriggerKey) {
+                        $clipboard.style.display = "none";
+                        $this.$clipboardCanvas.$container.focus();
                     }
 
-                    for(var i=0; i < mt.length; i++) {
-                        var nmt = mt[i],
-                            t   = $this.touches[nmt.identifier];
+                    $this.$clipboardCanvas.$container.dispatchEvent($dupKeyEvent(ee, 'keyup', $this.$clipboardCanvas.$container));
+                };
 
-                        if (t != null && (t.pageX != nmt.pageX || t.pageY != nmt.pageY)) {
-                                var dx  = nmt.pageX - t.pageX,
-                                    dy  = nmt.pageY - t.pageY,
-                                    d   = t.direction,
-                                    gamma = null,
-                                    dxs = (dx < 0 && t.dx < 0) || (dx > 0 && t.dx > 0),  // test if horizontal move direction has been changed
-                                    dys = (dy < 0 && t.dy < 0) || (dy > 0 && t.dy > 0);  // test if vertical move direction has been changed
+                $clipboard.onblur = function() {
+                    this.value="";
+                    this.style.display="none";
 
-                                // update stored touch coordinates with a new one
-                                t.pageX  = nmt.pageX;
-                                t.pageY  = nmt.pageY;
+                    //!!! pass focus back to canvas
+                    //    it has to be done for the case when cmd+TAB (switch from browser to
+                    //    another application)
+                    $this.$clipboardCanvas.$container.focus();
+                };
 
-                                // we can recognize direction only if move was not too short
-                                if ($abs(dx) > 2 || $abs(dy) > 2) {
-                                    // compute gamma, this is corner in polar coordinate system
-                                    gamma = $atan2(dy, dx);
+                $clipboard.oncopy = function(ee) {
+                    if (pkg.focusManager.focusOwner          != null &&
+                        pkg.focusManager.focusOwner.clipCopy != null    )
+                    {
+                        var v = pkg.focusManager.focusOwner.clipCopy();
+                        $clipboard.value = (v == null ? "" : v);
+                        $clipboard.select();
+                        $this._.clipCopy(v, $clipboard.value);
+                    }
+                };
 
-                                    // using gamma we can figure out direction
-                                    if (gamma > -PI4) {
-                                        d = (gamma < PI4) ? L.RIGHT : (gamma < PI4_3 ? L.BOTTOM : L.LEFT);
-                                    }
-                                    else {
-                                        d = (gamma > -PI4_3) ? L.TOP : L.LEFT;
-                                    }
+                $clipboard.oncut = function(ee) {
+                    if (pkg.focusManager.focusOwner && pkg.focusManager.focusOwner.cut != null) {
+                        $clipboard.value = pkg.focusManager.focusOwner.cut();
+                        $clipboard.select();
+                        $this._.clipCut(pkg.focusManager.focusOwner, $clipboard.value);
+                    }
+                };
 
-                                    // to minimize wrong touch effect let's update
-                                    // direction only if move event sequence
-                                    // with identical direction is less than 3
-                                    if (t.direction != d) {
-                                        if (t.dc < 3) t.direction = d;
-                                        t.dc = 0;
-                                    }
-                                    else {
-                                        t.dc++;
-                                    }
-                                    t.gamma = gamma;
-                                }
-
-                                // ignore moved if there still start events that are waiting for to be fired
-                                if ($this.timer == null) {
-                                    t.dx = dx;
-                                    t.dy = dy;
-                                    if ($this.moved != null) $this.moved(t);
-                                }
-                                else {
-                                    $this.dc = 0;
-                                }
-                            }
+                if (zebra.isFF === true) {
+                    $clipboard.addEventListener ("input", function(ee) {
+                        if (pkg.focusManager.focusOwner &&
+                            pkg.focusManager.focusOwner.clipPaste != null)
+                        {
+                            pkg.focusManager.focusOwner.clipPaste($clipboard.value);
+                            $this._.clipPaste(pkg.focusManager.focusOwner, $clipboard.value);
                         }
-
-                    e.preventDefault();
-                }, false);
-            };
+                    }, false);
+                }
+                else {
+                    $clipboard.onpaste = function(ee) {
+                        if (pkg.focusManager.focusOwner != null && pkg.focusManager.focusOwner.clipPaste != null) {
+                            var txt = (typeof ee.clipboardData == "undefined") ? window.clipboardData.getData('Text')  // IE
+                                                                               : ee.clipboardData.getData('text/plain');
+                            pkg.focusManager.focusOwner.clipPaste(txt);
+                            $this._.clipPaste(pkg.focusManager.focusOwner, txt);
+                        }
+                        $clipboard.value = "";
+                    };
+                }
+                document.body.appendChild($clipboard);
+            }
         }
     ]);
-})(zebra("ui"));
+
+})(zebra("ui"), zebra.Class);

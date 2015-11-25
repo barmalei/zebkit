@@ -4,544 +4,355 @@
  * @module  ui
  */
 
-/**
- * HTML element UI component wrapper class. The class represents
- * an HTML element as if it is standard UI component. It helps to use
- * some standard HTML element as zebra UI components and embeds it
- * in zebra UI application layout.
- * @class zebra.ui.HtmlElement
- * @constructor
- * @param {String|HTMLElement} [element] an HTML element to be represented
- * as a standard zebra UI component. If the passed parameter is string
- * it denotes a name of an HTML element. In this case a new HTML element
- * will be created.
- * @extends {zebra.ui.Panel}
- */
-pkg.HtmlElement = Class(pkg.Panel, [
+pkg.HtmlElementMan = Class(pkg.Manager, [
+//
+// HTML element integrated into Zebra layout has to be tracked regarding:
+//    1) DOM hierarchy. New added into zebra layout DOM element has to be
+//       attached to the first found parent DOM element
+//    2) Visibility. If a zebra UI component change its visibility state
+//       it has to have side effect to all children HTML elements on any
+//       subsequent hierarchy level
+//    3) Moving a zebra UI component has to correct location of children
+//       HTML element on any subsequent hierarchy level.
+//
+//  The implementation of HTML element component has the following specific:
+//    1) Every original HTML is wrapped with "div" element. It is necessary since
+//       not all HTML element has been designed to be a container for another
+//       HTML element. By adding extra div we can consider the wrapper as container.
+//       The wrapper element is used to control visibility, location, enabled state
+//    2) HTML element has "isDOMElement" property set to true
+//    3) HTML element visibility depends on an ancestor component visibility.
+//       HTML element is visible if:
+//          -- the element isVisible property is true
+//          -- the element has a parent DOM element set
+//          -- all his ancestors are visible
+//          -- size of element is more than zero
+//          -- getCanvas() != null
+//       The visibility state is controlled with "e.style.visibility"
+//
+//   To support effective DOM hierarchy tracking a zebra UI component can
+//   host "$domKid" property that contains direct DOM element the UI component
+//   hosts and other UI components that host DOM element. So it is sort of tree.
+//   For instance:
+//
+//    +---------------------------------------------------------
+//    |  p1 (zebra component)
+//    |   +--------------------------------------------------
+//    |   |  p2 (zebra component)
+//    |   |    +---------+      +-----------------------+
+//    |   |    |   h1    |      | p3 zebra component    |
+//    |   |    +---------+      |  +---------------+    |
+//    |   |                     |  |    h3         |    |
+//    |   |    +---------+      |  |  +---------+  |    |
+//    |   |    |   h2    |      |  |  |   p4    |  |    |
+//    |   |    +---------+      |  |  +---------+  |    |
+//    |   |                     |  +---------------+    |
+//    |   |                     +-----------------------+
+//
+//     p1.$domKids : {
+//         p2.$domKids : {
+//             h1,   // leaf elements are always DOM element
+//             h2,
+//             p3.$domKids : {
+//                h3
+//             }
+//         }
+//     }
     function $prototype() {
-        this.isLocAdjusted = false;
-        this.canvas = null;
-        this.ePsW = this.ePsH = 0;
-
-        /**
-         * Set the CSS font of the wrapped HTML element
-         * @param {String|zebra.ui.Font} f a font
-         * @method setFont
-         */
-        this.setFont = function(f) {
-            this.element.style.font = f.toString();
-            this.vrp();
-        };
-
-        /**
-         * Set the CSS color of the wrapped HTML element
-         * @param {String} c a color
-         * @method setColor
-         */
-        this.setColor = function(c) {
-            this.element.style.color = c.toString();
-        };
-
-        this.adjustLocation = function() {
-            if (this.isLocAdjusted === false && this.canvas != null) {
-
-                // hidden DOM component before move
-                // makes moving more smooth
-                var visibility = this.element.style.visibility;
-                this.element.style.visibility = "hidden";
-
-                if (zebra.instanceOf(this.parent, pkg.HtmlElement)) {
-                    this.element.style.top  = this.y + "px";
-                    this.element.style.left = this.x + "px";
-                }
-                else {
-                    var a = zebra.layout.toParentOrigin(0,0,this);
-                    this.element.style.top  = (this.canvas.offy + a.y) + "px";
-                    this.element.style.left = (this.canvas.offx + a.x) + "px";
-
-                    // TODO: this is really strange fix for Chrome browser: Chrome
-                    // doesn't move input field content together with the input field
-                    // itself.
-                    if (/Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)) {
-                        var e = this.element, pa = e.style.height;
-                        e.style.height  = "auto";
-                        e.offsetHeight // always access the property to trigger the fix
-                        e.style.height  = pa;
-                    }
-                }
-                this.isLocAdjusted = true;
-                this.element.style.visibility = visibility;
-            }
-        };
-
-        this.calcPreferredSize = function(target) {
-            return { width: this.ePsW, height: this.ePsH };
-        };
-
-        var $store = [
-            "visibility",
-            "paddingTop","paddingLeft","paddingBottom","paddingRight",
-            "border","borderStyle","borderWidth",
-            "borderTopStyle","borderTopWidth",
-            "borderBottomStyle","borderBottomWidth",
-            "borderLeftStyle","borderLeftWidth",
-            "borderRightStyle","borderRightWidth",
-            "width", "height"
-        ];
-
-        this.recalc = function() {
-            // save element metrics
-            var e    = this.element,
-                vars = {};
-
-            for(var i = 0; i < $store.length; i++) {
-                var k = $store[i];
-                vars[k] = e.style[k];
-            }
-
-            // force metrics to be calculated automatically
-            e.style.visibility = "hidden";
-            e.style.padding = "0px";
-            e.style.border  = "none";
-            e.style.width   = "auto";
-            e.style.height  = "auto";
-
-            // fetch preferred size
-            this.ePsW = e.offsetWidth;
-            this.ePsH = e.offsetHeight;
-
-            for(var k in vars) {
-                var v = vars[k];
-                if (v != null) e.style[k] = v;
-            }
-
-            this.setSize(this.width, this.height);
-        };
-
-        /**
-         * Set the inner content of the wrapped HTML element
-         * @param {String} an inner content
-         * @method setContent
-         */
-        this.setContent = function(content) {
-            this.element.innerHTML = content;
-            this.vrp();
-        };
-
-        /**
-         * Apply the given set of CSS styles to the wrapped HTML element
-         * @param {Object} styles a dictionary of CSS styles
-         * @method setStyles
-         */
-        this.setStyles = function(styles) {
-            for(var k in styles) {
-                this.setStyle(k, styles[k]);
-            }
-        };
-
-        /**
-         * Apply the given CSS style to the wrapped HTML element
-         * @param {String} a name of the CSS style
-         * @param {String} a value the CSS style has to be set
-         * @method setStyle
-         */
-        this.setStyle = function(name, value) {
-            name = name.trim();
-            var i = name.indexOf(':');
-            if (i > 0) {
-                if (zebra[name.substring(0, i)] == null) {
-                    return;
-                }
-                name = name.substring(i + 1);
-            }
-
-            this.element.style[name] = value;
-            this.vrp();
-        };
-
-        /**
-         * Set the specified attribute of the wrapped HTML element
-         * @param {String} name  a name of attribute
-         * @param {String} value a value of the attribute
-         * @method setAttribute
-         */
-        this.setAttribute = function(name, value) {
-            this.element.setAttribute(name, value);
-        };
-
-        this.isInInvisibleState = function() {
-            if (this.width       <= 0    ||
-                this.height      <= 0    ||
-                this.parent      == null ||
-                this.getCanvas() == null   )
+        function $isInInvisibleState(c) {
+            if (c.isVisible === false           ||
+                c.$container.parentNode == null ||
+                c.width       <= 0              ||
+                c.height      <= 0              ||
+                c.parent      == null           ||
+                zebkit.web.$contains(c.$container) === false)
             {
                 return true;
             }
 
-            var p = this.parent;
+            var p = c.parent;
             while (p != null && p.isVisible === true && p.width > 0 && p.height > 0) {
                 p = p.parent;
             }
 
-            return p != null || pkg.$cvp(this) == null;
-            // canvas means the component is not
-                              // in hierarchy yet, that means it
-                              // has to be hidden
-        };
-
-        this.paint = function(g) {
-            // this method is used as an indication that the component
-            // is visible and no one of his parent is invisible
-            if (this.element.style.visibility == "hidden") {
-                this.element.style.visibility = "visible";
-            }
-        };
-    },
-
-    function(e) {
-        /**
-         * Reference to HTML element the UI component wraps
-         * @attribute element
-         * @readOnly
-         * @type {HTMLElement}
-         */
-        e = this.element = zebra.isString(e) ? document.createElement(e) : e;
-        e.setAttribute("id", this.toString());
-        e.style.visibility = "hidden";  // before the component will be attached
-                                        // to parent hierarchy of components that is
-                                        // attached to a canvas the component has to be hidden
-
-        this.$super();
-
-        var $this = this;
-
-        // TODO:
-        // It is not a very good idea to register global component listener per
-        // HTML component. Has to be re-designed, but at this moment this is the
-        // only way to understand when the HTML component parent hierarchy has got
-        // visibility updates
-        this.globalCompListener = {
-            compShown :function(c) {
-                if (c != $this && c.isVisible === false && zebra.layout.isAncestorOf(c, $this)) {
-                    $this.element.style.visibility = "hidden";
-                }
-            },
-
-            compMoved : function(c, px, py) {
-                if (zebra.layout.isAncestorOf(c, $this)) {
-                    // force location adjustment when the component
-                    // parent HTML canvas has been moved
-                   $this.isLocAdjusted = false;
-                   $this.adjustLocation();
-                }
-
-                if (c != $this && $this.isInInvisibleState()) {
-                    $this.element.style.visibility = "hidden";
-                }
-            },
-
-            compRemoved : function(p, i, c) {
-                // if an ancestor parent has been removed the HTML element
-                // has to be hidden
-                if (c != $this && zebra.layout.isAncestorOf(c, $this)) {
-                    $this.element.style.visibility = "hidden";
-                }
-            },
-
-            compSized : function(c, pw, ph) {
-                if (c != $this && zebra.layout.isAncestorOf(c, $this) && $this.isInInvisibleState()) {
-                    $this.element.style.visibility = "hidden";
-                }
-            }
-        };
-
-        this.globalWinListener = {
-            winActivated : function(layer, win, isActive) {
-                if (zebra.layout.isAncestorOf(win, $this) == false) {
-                    $this.element.style.visibility;
-                }
-            }
-        };
-
-        // it is important to avoid mouse event since for some html element
-        // it can cause unexpected event generation. for instance text input
-        // element can generate mouse moved on mobile devices whenever it gets
-        // focus
-        if (zebra.isTouchable === false) {
-            e.onmousemove = function(ee) {
-                if ($this.canvas != null) {
-                    $this.canvas.$mouseMoved(1, {
-                        target: $this.canvas.canvas,
-                        pageX : ee.pageX,
-                        pageY : ee.pageY
-                    });
-                }
-            };
-
-            e.onmousedown = function(ee) {
-                if ($this.canvas != null) {
-                    $this.canvas.$mousePressed(1, {
-                        target: $this.canvas.canvas,
-                        pageX : ee.pageX,
-                        pageY : ee.pageY
-                    });
-                }
-            };
-
-            e.onmouseup = function(ee) {
-                if ($this.canvas != null) {
-                    $this.canvas.$mouseReleased(1, {
-                        target: $this.canvas.canvas,
-                        pageX : ee.pageX,
-                        pageY : ee.pageY
-                    },
-
-                    ee.button === 0 ? pkg.MouseEvent.LEFT_BUTTON
-                                    : (ee.button == 2 ? pkg.MouseEvent.RIGHT_BUTTON : 0));
-                }
-            };
+            return p != null || pkg.$cvp(c) == null;
         }
 
-        e.addEventListener("focus", function(ee) {
-            // mark the element  has focus on the given canvas
-            $this.element.canvas = $this.canvas;
+        // attach to appropriate DOM parent if necessary
+        // c parameter has to be DOM element
+        function $resolveDOMParent(c) {
+            // try to find an HTML element in zebra (pay attention, in zebra hierarchy !)
+            // hierarchy that has to be a DOM parent for the given component
+            var parentElement = null;
+            for(var p = c.parent; p != null; p = p.parent) {
+                if (p.isDOMElement === true) {
+                    parentElement = p.$container;
+                    break;
+                }
+            }
 
-            // notify focus manager the given component has got focus
-            zebra.ui.focusManager.requestFocus($this);
-        }, false);
+            // parentElement is null means the component has
+            // not been inserted into DOM hierarchy
+            if (parentElement != null && c.$container.parentNode == null) {
+                // parent DOM element of the component is null, but a DOM container
+                // for the element has been detected. We need to add it to DOM
+                // than we have to add the DOM to the found DOM parent element
+                parentElement.appendChild(c.$container);
 
-        e.addEventListener("blur", function(ee) {
-            // flush the native element canvas field to say the component doesn't
-            // have focus anymore
-            $this.element.canvas = null;
+                // adjust location of just attached DOM component
+                $adjustLocation(c);
 
-            if ($this.canvas != null) {
-                // run timer that checks if the native web component has lost focus because of
-                // leaving the canvas where it hosts:
-                //  -- the focus doesn't belong to the canvas where the native component sits
-                //    AND
-                //  -- the focus doesn't belong to another native component that sits on the
-                //     canvas
-                setTimeout(function() {
-                    var fo = zebra.ui.focusManager.focusOwner;
-                    if (($this.canvas != null && document.activeElement != $this.canvas.canvas) &&
-                        (document.activeElement != null && $this.canvas != document.activeElement.canvas))
-                    {
-                       zebra.ui.focusManager.requestFocus(null);
+                // if a new DOM element appears in hierarchy we have to correct
+                // z-order of disabled DOM elements that are the parents of the
+                // inserted element
+                var pp = c.parent;
+                while(pp != null) {
+                    if (pp.isEnabled === false && pp.isDOMElement === true) {
+                        pp.$container.removeChild(pp.$blockElement);
+                        pp.$container.appendChild(pp.$blockElement);
                     }
-                }, 100);
-            }
-        }, false);
-
-        e.onkeydown = function(ee) {
-            if ($this.canvas != null) {
-                // store current focus owner to analyze if the event triggered focus owner changing
-                var pfo = zebra.ui.focusManager.focusOwner;
-
-                // re-define key event since preventDefault has to be disabled,
-                // otherwise navigation key will not work
-                $this.canvas.$keyPressed({
-                    keyCode       : ee.keyCode,
-                    target        : ee.target,
-                    altKey        : ee.altKey,
-                    shiftKey      : ee.shiftKey,
-                    ctrlKey       : ee.ctrlKey,
-                    metaKey       : ee.metaKey,
-                    preventDefault: function() {}
-                });
-
-                var nfo = zebra.ui.focusManager.focusOwner;
-
-                // if focus owner has been updated
-                if (nfo != pfo) {
-                    ee.preventDefault();
-                    // if focus owner has been moved to another HTML component we have to pass focus to it
-                    if (nfo != null && zebra.instanceOf(nfo, pkg.HtmlElement) && document.activeElement != nfo.element) {
-                        nfo.element.focus();
-                    }
-                    else {
-                        // otherwise return focus back to canvas
-                        $this.canvas.canvas.focus();
-                    }
+                    pp = pp.parent;
                 }
-            }
-        };
-
-        e.onkeyup  = function(ee) {
-            if ($this.canvas != null) {
-                $this.canvas.$keyReleased(ee);
-            }
-        };
-
-        e.onkeypress = function(ee) {
-            if ($this.canvas != null) {
-                $this.canvas.$keyTyped({
-                    keyCode       : ee.keyCode,
-                    target        : ee.target,
-                    altKey        : ee.altKey,
-                    shiftKey      : ee.shiftKey,
-                    ctrlKey       : ee.ctrlKey,
-                    metaKey       : ee.metaKey,
-                    preventDefault: function() {}
-                });
-            }
-        };
-    },
-
-    function focused() {
-        if (this.hasFocus()) {
-            // if the component has focus that has came from Zebra component we should
-            // set focus to native component that hosted by Zebra component
-
-            var canvas = this.getCanvas(),
-                pfo    = canvas.$prevFocusOwner;
-
-            if (pfo == null || zebra.instanceOf(pfo, pkg.HtmlElement) === false) {
-                this.element.focus();
-            }
-        }
-
-        this.$super();
-    },
-
-    function setBorder(b) {
-        b = pkg.$view(b);
-
-        if (b == null) {
-            this.element.style.border = "none";
-        }
-        else {
-            var e = this.element;
-
-            //!!!! Bloody FF fix, the border can be made transparent
-            //!!!! only via "border" style
-            e.style.border = "0px solid transparent";
-
-            //!!! FF understands only decoupled border settings
-            e.style.borderTopStyle = "solid";
-            e.style.borderTopColor = "transparent";
-            e.style.borderTopWidth = "" + b.getTop() + "px";
-
-            e.style.borderLeftStyle = "solid";
-            e.style.borderLeftColor = "transparent";
-            e.style.borderLeftWidth = "" + b.getLeft() + "px";
-
-            e.style.borderBottomStyle = "solid";
-            e.style.borderBottomColor = "transparent";
-            e.style.borderBottomWidth = "" + b.getBottom() + "px";
-
-
-            e.style.borderRightStyle = "solid";
-            e.style.borderRightColor = "transparent";
-            e.style.borderRightWidth = "" + b.getRight() + "px";
-        }
-        this.$super(b);
-    },
-
-    function setPadding(t,l,b,r) {
-        if (arguments.length == 1) {
-            l = b = r = t;
-        }
-
-        var e = this.element;
-        e.style.paddingTop    = '' + t + "px";
-        e.style.paddingLeft   = '' + l + "px";
-        e.style.paddingRight  = '' + r + "px";
-        e.style.paddingBottom = '' + b + "px";
-
-        this.$super.apply(this, arguments);
-    },
-
-    function setVisible(b) {
-        if (this.isInInvisibleState()) {
-            this.element.style.visibility = "hidden";
-        }
-        else {
-            this.element.style.visibility = b ? "visible" : "hidden";
-        }
-        this.$super(b);
-    },
-
-    function setEnabled(b) {
-        this.$super(b);
-        this.element.disabled = !b;
-    },
-
-    function setSize(w, h) {
-        this.$super(w, h);
-        var visibility = this.element.style.visibility;
-        this.element.style.visibility = "hidden"; // could make sizing smooth
-
-        // HTML element size is calculated as sum of "width"/"height", paddings, border
-        // So the passed width and height has to be corrected (before it will be applied to
-        // an HTML element) by reduction of extra HTML gaps. For this we firstly set the
-        // width and size
-        this.element.style.width  = "" + w + "px";
-        this.element.style.height = "" + h + "px";
-
-        // than we know the component metrics and can compute necessary reductions
-        var dx = this.element.offsetWidth  - w,
-            dy = this.element.offsetHeight - h;
-        this.element.style.width   = "" + (w - dx) + "px";
-        this.element.style.height  = "" + (h - dy) + "px";
-
-        if (this.isInInvisibleState()) {
-            this.element.style.visibility = "hidden";
-        }
-        else {
-            this.element.style.visibility = visibility;
-        }
-    },
-
-    function setLocation(x, y) {
-        this.$super(x, y);
-        this.isLocAdjusted = false;
-    },
-
-    function validate() {
-        if (this.canvas == null && this.parent != null) {
-            this.canvas = this.getCanvas();
-        }
-
-        if (this.canvas != null && this.isLocAdjusted === false) {
-            this.adjustLocation();
-        }
-
-        this.$super();
-    },
-
-    function setParent(p) {
-        this.$super(p);
-
-        if (p == null) {
-            if (this.element.parentNode != null) {
-                this.element.parentNode.removeChild(this.element);
-            }
-
-            this.element.style.visibility = "hidden";
-            pkg.events.removeComponentListener(this.globalCompListener);
-        }
-        else {
-            if (zebra.instanceOf(p, pkg.HtmlElement)) {
-                p.element.appendChild(this.element);
             }
             else {
-                document.body.appendChild(this.element);
+                // test consistency whether the DOM element already has
+                // parent node that doesn't match the discovered
+                if (parentElement           != null &&
+                    c.$container.parentNode != null &&
+                    c.$container.parentNode !== parentElement)
+                {
+                    throw new Error("DOM parent inconsistent state");
+                }
             }
-
-            if (this.isInInvisibleState()) {
-                this.element.style.visibility = "hidden";
-            }
-            else {
-                this.element.style.visibility = this.isVisible ? "visible" : "hidden";
-            }
-
-            pkg.events.addComponentListener(this.globalCompListener);
         }
 
-        this.isLocAdjusted = false;
+        //    +----------------------------------------
+        //    |             ^      DOM1
+        //    |             .
+        //    |             .  (x,y) -> (xx,yy) than correct left
+        //                  .  and top of DOM2 relatively to DOM1
+        //    |    +--------.--------------------------
+        //    |    |        .       Zebra1
+        //    |    |        .
+        //    |    |  (left, top)
+        //    |<............+-------------------------
+        //    |    |        |           DOM2
+        //    |    |        |
+        //    |    |        |
+        //
+        //  Convert DOM (x, y) zebra coordinates into appropriate CSS top and left
+        //  locations relatively to its immediate DOM element. For instance if a
+        //  zebra component contains DOM component every movement of zebra component
+        //  has to bring to correction of the embedded DOM element
+        function $adjustLocation(c) {
+            if (c.$container.parentNode != null &&
+                zebkit.web.$contains(c.$container))
+            {
+                // hide DOM component before move
+                // makes moving more smooth
+                var prevVisibility = c.$container.style.visibility;
+                c.$container.style.visibility = "hidden";
 
-        this.canvas = p != null ? this.getCanvas() : null;
+                // find a location relatively to the first parent HTML element
+                var p = c, xx = c.x, yy = c.y;
+                while (((p = p.parent) != null) && p.isDOMElement !== true) {
+                    xx += p.x;
+                    yy += p.y;
+                }
+
+                c.$container.style.left = "" + xx + "px";
+                c.$container.style.top  = "" + yy + "px";
+                c.$container.style.visibility = prevVisibility;
+            }
+        }
+
+        // iterate over all found children HTML elements
+        // !!! pay attention you have to check existence
+        // of "$domKids" field before the method calling
+        function $domElements(c, callback) {
+            for (var k in c.$domKids) {
+                var e = c.$domKids[k];
+                if (e.isDOMElement === true) {
+                    callback.call(this, e);
+                }
+                else {
+                    // prevent unnecessary method call by condition
+                    if (e.$domKids != null) {
+                        $domElements(e, callback);
+                    }
+                }
+            }
+        }
+
+        this.compShown = function(e) {
+            // 1) if c is DOM element than we have make it is visible if
+            //      -- c.isVisible == true : the component visible  AND
+            //      -- all elements in parent chain is visible      AND
+            //      -- the component is in visible area
+            //
+            // 2) if c is not a DOM component his visibility state can have
+            //    side effect to his children HTML elements (on any level)
+            //    In this case we have to do the following:
+            //      -- go through all children HTML elements
+            //      -- if c.isVisible == false: make invisible every children element
+            //      -- if c.isVisible != false: make visible every children element whose
+            //         visibility state satisfies the following conditions:
+            //          -- kid.isVisible == true
+            //          -- all parent to c are in visible state
+            //          -- the kid component is in visible area
+
+            var c = e.source;
+            if (c.isDOMElement === true) {
+                c.$container.style.visibility = c.isVisible === false || $isInInvisibleState(c) ? "hidden"
+                                                                                               : "visible";
+            }
+            else {
+                if (c.$domKids != null) {
+                    $domElements(c, function(e) {
+                        e.$container.style.visibility = e.isVisible === false || $isInInvisibleState(e) ? "hidden" : "visible";
+                    });
+                }
+            }
+        };
+
+        this.compMoved = function(e) {
+            var c = e.source, px = e.prevX, py = e.prevY;
+
+            // if we move a zebra component that contains
+            // DOM element(s) we have to correct the DOM elements
+            // locations relatively to its parent DOM
+            if (c.isDOMElement === true) {
+                // root canvas location cannot be adjusted since it is up to DOM tree to do it
+                if (c.$isRootCanvas !== true) {
+                    var dx   = px - c.x,
+                        dy   = py - c.y,
+                        cont = c.$container;
+
+                    cont.style.left = ((parseInt(cont.style.left, 10) || 0) - dx) + "px";
+                    cont.style.top  = ((parseInt(cont.style.top,  10) || 0) - dy) + "px";
+                }
+            }
+            else {
+                if (c.$domKids != null) {
+                    $domElements(c, function(e) {
+                        $adjustLocation(e);
+                    });
+                }
+            }
+        };
+
+        function detachFromParent(p, c) {
+            // DOM parent means the detached element doesn't
+            // have upper parents since it is relative to the
+            // DOM element
+            if (p.isDOMElement !== true && p.$domKids != null) {
+                // delete from parent
+                delete p.$domKids[c];
+
+                // parent is not DOM and doesn't have kids anymore
+                // what means the parent has to be also detached
+                if (isLeaf(p)) {
+                    // parent of parent is not null and is not a DOM element
+                    if (p.parent != null && p.parent.isDOMElement !== true) {
+                        detachFromParent(p.parent, p);
+                    }
+
+                    // remove $domKids from parent since the parent is leaf
+                    delete p.$domKids;
+                }
+            }
+        }
+
+        function isLeaf(c) {
+            if (c.$domKids != null) {
+                for(var k in c.$domKids) {
+                    if (c.$domKids.hasOwnProperty(k)) return false;
+                }
+            }
+            return true;
+        }
+
+        function removeDOMChildren(c) {
+            // DOM element cannot have children dependency tree
+            if (c.isDOMElement !== true && c.$domKids != null) {
+                for(var k in c.$domKids) {
+                    if (c.$domKids.hasOwnProperty(k)) {
+                        var kid = c.$domKids[k];
+
+                        // DOM element
+                        if (kid.isDOMElement === true) {
+                            kid.$container.parentNode.removeChild(kid.$container);
+                            kid.$container.parentNode = null;
+                        }
+                        else {
+                            removeDOMChildren(kid);
+                        }
+                    }
+                }
+                delete c.$domKids;
+            }
+        }
+
+        this.compRemoved = function(e) {
+            var p = e.source, i = e.index, c = e.kid;
+
+            // if detached element is DOM element we have to
+            // remove it from DOM tree
+            if (c.isDOMElement === true) {
+                c.$container.parentNode.removeChild(c.$container);
+                c.$container.parentNode = null;
+            }
+            else {
+                removeDOMChildren(c);
+            }
+            detachFromParent(p, c);
+        };
+
+        this.compAdded = function(e) {
+            var p = e.source, c = e.kid, constr = e.constraints;
+
+            if (c.isDOMElement === true) {
+                $resolveDOMParent(c);
+            }
+            else {
+                if (c.$domKids != null) {
+                    $domElements(c, function(e) {
+                        $resolveDOMParent(e);
+                    });
+                }
+                else {
+                    return;
+                }
+            }
+
+            if (p.isDOMElement !== true) {
+                // we come here if parent is not a DOM element and
+                // inserted children is DOM element or an element that
+                // embeds DOM elements
+                while (p != null && p.isDOMElement !== true) {
+                    if (p.$domKids == null) {
+                        p.$domKids = {};
+                    }
+
+                    if (p.$domKids.hasOwnProperty(c)) {
+                        throw new Error("Inconsistent state ");
+                    }
+
+                    p.$domKids[c] = c;
+
+                    c = p;
+                    p = p.parent;
+                }
+            }
+        };
+    }
+]);
+
+pkg.HtmlFocusableElement = Class(pkg.HtmlElement, [
+    function $prototype() {
+        this.$getFocusHolderElement = function() {
+            return this.element;
+        };
     }
 ]);
 
@@ -554,9 +365,9 @@ pkg.HtmlElement = Class(pkg.Panel, [
  * @class zebra.ui.HtmlTextInput
  * @extends zebra.ui.HtmlElement
  */
-pkg.HtmlTextInput = Class(pkg.HtmlElement, [
+pkg.HtmlTextInput = Class(pkg.HtmlFocusableElement, [
     function $prototype() {
-        this.canHaveFocus = true;
+        this.cursorType = pkg.Cursor.TEXT;
 
         /**
          * Get a text of the text input element
@@ -580,28 +391,13 @@ pkg.HtmlTextInput = Class(pkg.HtmlElement, [
         };
     },
 
-    function(text, elementName) {
+    function(text, e) {
         if (text == null) text = "";
-        this.$super(elementName);
-        this.element.setAttribute("tabindex", 0);
+        this.$super(e);
+        this.setAttribute("tabindex", 0);
         this.setValue(text);
     }
 ]);
-
-
-pkg.HtmlContent = Class(pkg.HtmlElement, [
-    function() {
-        this.$super("div");
-        this.setStyle("overflow", "hidden");
-    },
-
-    function loadContent(url) {
-        var c = zebra.io.GET(url);
-        this.setContent(c);
-        this.vrp();
-    }
-]);
-
 
 /**
  * HTML input text element wrapper class. The class wraps standard HTML text field
@@ -637,6 +433,7 @@ pkg.HtmlTextArea = Class(pkg.HtmlTextInput, [
         this.element.setAttribute("rows", 10);
     }
 ]);
+
 
 /**
  * @for

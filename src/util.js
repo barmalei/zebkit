@@ -3,27 +3,53 @@
  * @module util
  * @requires zebra
  */
-
 (function(pkg, Class, Interface) {
-/**
- * Instantiate a new class instance by the given class name with the specified constructor
- * arguments.
- * @param  {String} clazz a class name
- * @param  {Array} [args] an arguments list
- * @return {Object}  a new instance of the given class initialized with the specified arguments
- * @api  zebra.util.newInstance()
- * @method newInstance
- */
-pkg.newInstance = function(clazz, args) {
-    if (args && args.length > 0) {
-        var f = function() {};
-        f.prototype = clazz.prototype;
-        var o = new f();
-        o.constructor = clazz;
-        clazz.apply(o, args);
-        return o;
+
+pkg.format = function(s, obj, ph) {
+    if (ph == null) ph = '';
+
+    var rg = /\$\{([0-9]+\s*,)?(.?,)?([a-zA-Z_][a-zA-Z0-9_]*)\}/g,
+        r  = [],
+        i  = 0,
+        j  = 0,
+        m  = null;
+
+    while ((m = rg.exec(s)) !== null) {
+        r[i++] = s.substring(j, m.index);
+        j = m.index + m[0].length;
+
+        var v  = obj[m[3]],
+            mn = "get" + m[3][0].toUpperCase() + m[3].substring(1),
+            f  = obj[mn];
+
+        if (typeof f === "function") {
+            v = f.call(obj);
+        }
+
+        if (m[1] != null) {
+            var ml  = parseInt(m[1].substring(0, m[1].length - 1).trim()),
+                ph2 = m[2] != null ? m[2].substring(0, m[2].length - 1) : ph;
+
+            if (v == null) {
+                ph2 = ph;
+                v = "";
+            }
+            else {
+                v = "" + v;
+            }
+            for(var k = v.length; k < ml; k++) v = ph2 + v;
+        }
+
+        if (v == null) v = ph;
+
+        r[i++] = v;
     }
-    return new clazz();
+
+    if (i > 0) {
+        if (j < s.length) r[i++] = s.substring(j);
+        return pkg.format(r.join(''), obj, ph);
+    }
+    return s;
 };
 
 function hex(v) {
@@ -132,7 +158,7 @@ pkg.Runner = function() {
                     $this.$schedule();
                 }
             }
-        }
+        };
     };
 
     this.error = function(callback) {
@@ -158,7 +184,6 @@ pkg.Runner = function() {
         }
     };
 };
-
 
 /**
  * Find by xpath-like path an element in a tree-like structure. The method is flexible way to look up
@@ -225,7 +250,7 @@ pkg.findInTree = function(root, path, eq, cb) {
             if (r.kids != null) {
                 for (var i = 0; i < r.kids.length; i++) {
                     var kid = r.kids[i];
-                    if (name == '*' || eq(kid, name)) {
+                    if (name === '*' || eq(kid, name)) {
                         if (cb(kid)) return true;
                     }
 
@@ -240,7 +265,7 @@ pkg.findInTree = function(root, path, eq, cb) {
         if (ms == null || idx >= ms.length) return cb(root);
 
         var m = ms[idx];
-        return list_child(root, m[2], m[1] == "//", function(child) {
+        return list_child(root, m[2], m[1] === "//", function(child) {
             if (m[3] && child[m[4].substring(1)] != m[5]) return false;
             return _find(child, ms, idx + 1, cb);
         });
@@ -254,7 +279,7 @@ pkg.findInTree = function(root, path, eq, cb) {
 
         c += m[0].length;
 
-        if (m[3] && m[5][0] == "'") m[5] = m[5].substring(1, m[5].length - 1);
+        if (m[3] && m[5][0] === "'") m[5] = m[5].substring(1, m[5].length - 1);
         res.push(m);
     }
 
@@ -320,11 +345,11 @@ pkg.rgb = function (r, g, b, a) {
 
     /**
      * Indicates if the color is opaque
-     * @attribute isTransparent
+     * @attribute isOpaque
      * @readOnly
      * @type {Boolean}
      */
-    this.isOpaque = false;
+    this.isOpaque = true;
 
     if (arguments.length == 1) {
         if (zebra.isString(r)) {
@@ -340,7 +365,7 @@ pkg.rgb = function (r, g, b, a) {
                     this.b = parseInt(p[2].trim(), 10);
                     if (p.length > 3) {
                         this.a = parseInt(p[3].trim(), 10);
-                        this.isOpaque = (this.a != 1);
+                        this.isOpaque = (this.a === 1);
                     }
                     return;
                 }
@@ -461,14 +486,21 @@ pkg.isLetter = function (ch) {
  * @param {String} [events]* events types the container has to support
  */
 var $NewListener = function() {
-    if (arguments.length === 0) {
-       arguments = ["fired"];
+    var args = Array.prototype.slice.call(arguments);
+    if (args.length === 0) {
+       args = ["fired"];
     }
 
     var clazz = function() {};
+    clazz.eventNames = args;
+    clazz.ListenersClass = function() {
+        var args = this.eventNames.slice(); // clone
+        for(var i = 0; i < arguments.length; i++) args.push(arguments[i]);
+        return $NewListener.apply(this, args);
+    };
 
-    if (arguments.length == 1) {
-        var name = arguments[0];
+    if (args.length === 1) {
+        var name = args[0];
 
         clazz.prototype.add = function() {
             if (this.v == null) this.v = [];
@@ -476,13 +508,12 @@ var $NewListener = function() {
             var ctx = this,
                 l   = arguments[arguments.length - 1]; // last arguments are handler(s)
 
-
             if (typeof l !== 'function') {
                 ctx = l;
                 l   = l[name];
 
                 if (l == null || typeof l !== "function") {
-                    throw new Error("Instance doesn't declare '" + name + "' listener method");
+                    return null;
                 }
             }
 
@@ -513,15 +544,18 @@ var $NewListener = function() {
         clazz.prototype[name] = function() {
             if (this.v != null) {
                 for(var i = 0;i < this.v.length; i+=2) {
-                    this.v[i + 1].apply(this.v[i], arguments);
+                    if (this.v[i + 1].apply(this.v[i], arguments) === true) {
+                        return true;
+                    }
                 }
             }
+            return false;
         };
     }
     else {
         var names = {};
-        for(var i=0; i< arguments.length; i++) {
-            names[arguments[i]] = true;
+        for(var i=0; i< args.length; i++) {
+            names[args[i]] = true;
         }
 
         clazz.prototype.add = function(l) {
@@ -535,8 +569,7 @@ var $NewListener = function() {
 
             if (typeof l === 'function') {
                 if (n == null) n = zebra.$FN(l);
-
-                if (n != '' && names.hasOwnProperty(n) === false) {
+                if (n !== '' && names.hasOwnProperty(n) === false) {
                     throw new Error("Unknown event type " + n);
                 }
 
@@ -554,32 +587,50 @@ var $NewListener = function() {
                 }
 
                 if (b === false) {
-                    throw new Error("No listener methods have been found");
+                    return null;
                 }
             }
             return l;
         };
 
+        clazz.prototype.addEvents = function() {
+            for(var i = 0; i < arguments.length; i++) {
+                var name = arguments[i];
+
+                if (name == null || this[name] != null) {
+                    throw new Error("" + name + " (event name)");
+                }
+
+                this[name] = (function(name) {
+                    return function() {
+                        if (this.methods != null) {
+                            var c = this.methods[name];
+                            if (c != null) {
+                                for(var i = 0; i < c.length; i+=2) {
+                                    if (c[i+1].apply(c[i], arguments) === true) {
+                                        return true;
+                                    }
+                                }
+                            }
+
+                            c = this.methods[''];
+                            if (c != null) {
+                                for(var i = 0; i < c.length; i+=2) {
+                                    if (c[i+1].apply(c[i], arguments) === true) {
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                        return false;
+                    };
+                })(name);
+            }
+        };
+
         // populate methods that has to be called to send appropriate events to
         // registered listeners
-        for(var i=0; i < arguments.length; i++) {
-            var m = arguments[i];
-            (function(m) {
-                clazz.prototype[m] = function() {
-                    if (this.methods != null) {
-                        var c = this.methods[m];
-                        if (c != null) {
-                            for(var i=0; i < c.length; i+=2) c[i+1].apply(c[i], arguments);
-                        }
-
-                        c = this.methods[''];
-                        if (c != null) {
-                            for(var i=0; i < c.length; i+=2) c[i+1].apply(c[i], arguments);
-                        }
-                    }
-                };
-            })(m);
-        }
+        clazz.prototype.addEvents.apply(clazz.prototype, args);
 
         clazz.prototype.remove = function(l) {
             if (this.methods != null) {
@@ -605,6 +656,7 @@ var $NewListener = function() {
             }
         };
     }
+
     return clazz;
 };
 
@@ -636,8 +688,10 @@ pkg.ListenersClass = $NewListener;
  * @param {Integer} prevLine a previous virtual cursor line
  * @param {Integer} prevCol a previous virtual cursor column in the previous line
  */
-var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = Class([
+var  Position = pkg.Position = Class([
     function $clazz() {
+        this.Listeners = pkg.ListenersClass("posChanged"),
+
         /**
          * Position metric interface. This interface is designed for describing
          * a navigational structure that consists on number of lines where
@@ -665,11 +719,6 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
           */
 
         this.Metric = Interface();
-
-        this.DOWN = 1;
-        this.UP   = 2;
-        this.BEG  = 3;
-        this.END  = 4;
     },
 
     function $prototype() {
@@ -682,7 +731,7 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
         this.setOffset = function(o){
             if (o < 0) o = 0;
             else {
-                if (o == null) o = -1;
+                if (o === null) o = -1;
                 else {
                     var max = this.metrics.getMaxOffset();
                     if (o >= max) o = max;
@@ -698,7 +747,10 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
                 this.offset = o;
                 if (p != null){
                     this.currentLine = p[0];
-                    this.currentCol = p[1];
+                    this.currentCol  = p[1];
+                }
+                else {
+                    this.currentLine = this.currentCol = -1;
                 }
                 this.isValid = true;
                 this._.posChanged(this, prevOffset, prevLine, prevCol);
@@ -723,7 +775,7 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
          * @param {Integer} c a column in the line
          * @method setRowCol
          */
-        this.setRowCol = function(r,c) {
+        this.setRowCol = function(r, c) {
             if (r != this.currentLine || c != this.currentCol){
                 var prevOffset = this.offset,
                     prevLine = this.currentLine,
@@ -769,22 +821,23 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
                 if (off === 0) return [0, 0];
 
                 var d = 0, sl = 0, so = 0;
-                if (this.isValid && this.offset != -1) {
+                if (this.isValid === true && this.offset != -1) {
                     sl = this.currentLine;
                     so = this.offset - this.currentCol;
                     if (off > this.offset) d = 1;
                     else {
-                        if (off < this.offset) d =  -1;
+                        if (off < this.offset) d = -1;
                         else return [sl, this.currentCol];
                     }
                 }
                 else {
-                    d = (~~(max / off) === 0) ?  -1 : 1;
+                    d = (~~(max / off) === 0) ? -1 : 1;
                     if (d < 0) {
                         sl = m.getLines() - 1;
                         so = max - m.getLineSize(sl);
                     }
                 }
+
                 for(; sl < m.getLines() && sl >= 0; sl += d){
                     var ls = m.getLineSize(sl);
                     if (off >= so && off < so + ls) {
@@ -793,7 +846,7 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
                     so += d > 0 ? ls : -m.getLineSize(sl - 1);
                 }
             }
-            return [-1, -1];
+            return null;
         };
 
         /**
@@ -806,11 +859,15 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
         this.getOffsetByPoint = function (row, col){
             var startOffset = 0, startLine = 0, m = this.metrics;
 
-            if (row >= m.getLines() || col >= m.getLineSize(row)) {
-                throw new Error();
+            if (row >= m.getLines()) {
+                throw new RangeError(row);
             }
 
-            if (this.isValid && this.offset !=  -1) {
+            if (col >= m.getLineSize(row)) {
+                throw new RangeError(col);
+            }
+
+            if (this.isValid === true && this.offset !=  -1) {
                 startOffset = this.offset - this.currentCol;
                 startLine = this.currentLine;
             }
@@ -831,10 +888,10 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
          * Seek virtual cursor to the next position. How the method has to seek to the next position
          * has to be denoted by one of the following constants:
 
-    - **zebra.util.Position.BEG** seek cursor to the begin of the current line
-    - **zebra.util.Position.END** seek cursor to the end of the current line
-    - **zebra.util.Position.UP** seek cursor one line up
-    - **zebra.util.Position.DOWN** seek cursor one line down
+    - **"begin"** seek cursor to the begin of the current line
+    - **"end"** seek cursor to the end of the current line
+    - **"up"** seek cursor one line up
+    - **"down"** seek cursor one line down
 
          * If the current virtual position is not known (-1) the method always sets
          * it to the first line, the first column in the line (offset is zero).
@@ -847,23 +904,23 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
                 this.setOffset(0);
             }
             else {
-                if (arguments.length == 1) num = 1;
+                if (arguments.length === 1) num = 1;
 
                 var prevOffset = this.offset, prevLine = this.currentLine, prevCol = this.currentCol;
                 switch(t) {
-                    case Position.BEG:
+                    case "begin":
                         if (this.currentCol > 0){
                             this.offset -= this.currentCol;
                             this.currentCol = 0;
                         } break;
-                    case Position.END:
+                    case "end":
                         var maxCol = this.metrics.getLineSize(this.currentLine);
                         if (this.currentCol < (maxCol - 1)){
                             this.offset += (maxCol - this.currentCol - 1);
                             this.currentCol = maxCol - 1;
                         } break;
-                    case Position.UP:
-                        if (this.currentLine > 0){
+                    case "up":
+                        if (this.currentLine > 0) {
                             this.offset -= (this.currentCol + 1);
                             this.currentLine--;
                             for(var i = 0;this.currentLine > 0 && i < (num - 1); i++, this.currentLine--){
@@ -873,8 +930,8 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
                             if (this.currentCol < maxCol) this.offset -= (maxCol - this.currentCol - 1);
                             else this.currentCol = maxCol - 1;
                         } break;
-                    case Position.DOWN:
-                        if (this.currentLine < (this.metrics.getLines() - 1)){
+                    case "down":
+                        if (this.currentLine < (this.metrics.getLines() - 1)) {
                             this.offset += (this.metrics.getLineSize(this.currentLine) - this.currentCol);
                             this.currentLine++;
                             var size = this.metrics.getLines() - 1;
@@ -888,7 +945,7 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
                                 this.offset += this.currentCol;
                             }
                         } break;
-                    default: throw new Error();
+                    default: throw new Error("" + t);
                 }
 
                 this._.posChanged(this, prevOffset, prevLine, prevCol);
@@ -896,7 +953,7 @@ var PosListeners = pkg.ListenersClass("posChanged"), Position = pkg.Position = C
         };
 
         this[''] = function(pi){
-            this._ = new PosListeners();
+            this._ = new this.$clazz.Listeners();
             this.isValid = false;
 
             /**
@@ -961,8 +1018,7 @@ pkg.SingleColPosition = Class(pkg.Position, [
                     prevLine   = this.currentLine,
                     prevCol    = this.currentCol;
 
-                this.offset = o;
-                this.currentLine = o;
+                this.currentLine = this.offset = o;
                 this.isValid = true;
                 this._.posChanged(this, prevOffset, prevLine, prevCol);
             }
@@ -975,19 +1031,19 @@ pkg.SingleColPosition = Class(pkg.Position, [
                 this.setOffset(0);
             }
             else {
-                if (arguments.length == 1) num = 1;
+                if (arguments.length === 1) num = 1;
                 switch(t) {
-                    case Position.BEG:
-                    case Position.END: break;
-                    case Position.UP:
+                    case "begin":
+                    case "end": break;
+                    case "up":
                         if (this.offset > 0) {
                             this.setOffset(this.offset - n);
                         } break;
-                    case Position.DOWN:
+                    case "down":
                         if (this.offset < (this.metrics.getLines() - 1)){
                             this.setOffset(this.offset + n);
                         } break;
-                    default: throw new Error();
+                    default: throw new Error("" + t);
                 }
             }
         };
@@ -1110,7 +1166,7 @@ pkg.SingleColPosition = Class(pkg.Position, [
      */
     Task.prototype.pause = function(t) {
         if (this.task == null) {
-            throw new Error();
+            throw new Error("Stopped task cannot be paused");
         }
 
         if (arguments.length === 0) {
@@ -1163,7 +1219,7 @@ pkg.SingleColPosition = Class(pkg.Position, [
         }
 
         if (f == null) {
-            throw new Error();
+            throw new Error("" + f);
         }
 
         // find free and return free task
@@ -1224,7 +1280,7 @@ pkg.SingleColPosition = Class(pkg.Position, [
             // component that inherits properties from BaseComponent,
             // but override background property with own value
            "ExtenderComp": {
-               "$inherit": "BaseComponent",
+               "inherit": [ "BaseComponent" ],
                "background": "green"
            }
         }
@@ -1252,17 +1308,6 @@ pkg.SingleColPosition = Class(pkg.Position, [
 pkg.Bag = zebra.Class([
     function $prototype() {
         /**
-         * The attribute rules how arrays have to be merged if the bag is loaded from few
-         * JSON sources. true means that if a two JSON have the same key that reference to
-         * array values the final value will be a concatenation of the two arrays from the
-         * two JSON sources.
-         * @attribute concatArrays
-         * @type {Boolean}
-         * @default false
-         */
-        this.concatArrays = false;
-
-        /**
          * The property says if the object introspection is required to try find a setter
          * method for the given key. For instance if an object is loaded with the
          * following JSON:
@@ -1281,6 +1326,8 @@ pkg.Bag = zebra.Class([
 
         this.ignoreNonExistentKeys = false;
 
+        this.globalPropertyLookup = false;
+
         /**
          * Get a property value. The property name can point to embedded fields:
          *
@@ -1294,71 +1341,71 @@ pkg.Bag = zebra.Class([
          *
          * @param  {String} key a property key.
          * @return {Object} a property value
+         * @throws Error if property cannot be found and "ignoreNonExistentKeys" is true
          * @method  get
          */
         this.get = function(key) {
-            if (key == null) throw new Error("Null key");
-            var n = key.split('.'), v = this.root;
-            for(var i = 0; i < n.length; i++) {
-                v = v[n[i]];
+            if (key == null) {
+                throw new Error("Null key");
+            }
+
+            var v = this.$get(key.split('.'), this.root);
+            if (this.ignoreNonExistentKeys !== true && v === undefined) {
+                throw new Error("Property '" + key + "' not found");
+            }
+
+            return v;
+        };
+
+        this.$get = function(keys, root) {
+            var v = root;
+            for(var i = 0; i < keys.length; i++) {
+                v = v[keys[i]];
                 if (typeof v === "undefined") {
-                    if (this.ignoreNonExistentKeys === true) return v;
-                    throw new Error("Property '" + key + "' not found");
+                    return undefined;
                 }
             }
             return v != null && v.$new ? v.$new() : v;
         };
 
-        // create, merge to o and return a value by the given
-        // description d that is designed to be assigned to
-        // -- atomic types int string boolean number are returned as is
-        // -- created by the given description array are append to o array
-        // -- structure description (dictionary) are merged to o
-        this.mergeObjWithDesc = function(o, d, callback) {
-            // atomic type should be returned as is
-            if (d === null || zebra.isNumber(d) || zebra.isBoolean(d)) {
+        this.$isAtomic = function(v) {
+            return zebra.isString(v) || zebra.isNumber(v) || zebra.isBoolean(v);
+        };
+
+        this.callMethod = function(name, args) {
+            var vs  = [ this, this.root],
+                m   = null,
+                ctx = null;
+
+            // lookup method
+            for(var i = 0; i < vs.length; i++) {
+                if (vs[i] != null && vs[i][name] != null && typeof vs[i][name] == 'function') {
+                    ctx = vs[i];
+                    m   = vs[i][name];
+                    break;
+                }
+            }
+
+            if (m == null || typeof m != 'function') {
+                throw new Error("Method '" + name + "' cannot be found");
+            }
+
+            return m.apply(ctx, Array.isArray(args) ? args : [ args ]);
+        };
+
+        this.buildValue = function(d) {
+            if (d == null || zebra.isNumber(d) || zebra.isBoolean(d)) {
                 return d;
             }
 
-            // array should be merged (concatenated)
             if (Array.isArray(d)) {
-                var v = [];
-                for(var i = 0; i < d.length; i++) v[i] = this.mergeObjWithDesc(null, d[i]);
-                if (this.concatArrays === false) {
-                    return v;
-                }
-
-                if (o && Array.isArray(o) === false) {
-                    throw new Error("Destination has to be array: " + o);
-                }
-                return (o != null) ? o.concat(v) : v;
+                for(var i = 0; i < d.length; i++) d[i] = this.buildValue(d[i]);
+                return d;
             }
 
-            // string is atomic, but  string can encode type other
-            // than string, decode string (if necessary) by calling
-            // decodeStringValue method
             if (zebra.isString(d)) {
-                if (d[0] == "@") {
-                    // check if the reference point to external JSON
-                    // and load the JSON
-                    if (d[1] == "(" && d[d.length-1] == ")") {
-                        var $this = this,
-                            bag = new (this.$clazz)([
-                                // child bag has to be able resolve variable using parent resolver
-                                function resolveVar(name) {
-                                    try { return this.$super(name); }
-                                    catch(e) {}
-                                    return $this.resolveVar(name);
-                                },
-
-                                function resolveClass(className) {
-                                    var clazz = this.classAliases.hasOwnProperty(className) ? this.$super(className)
-                                                                                            : null;
-                                    return (clazz != null) ? clazz
-                                                           : $this.resolveClass(className);
-                                }
-                            ]);
-
+                if (d[0] === '@') {
+                    if (d[1] === "(" && d[d.length-1] === ")") {
                         // if the referenced path is not absolute path and the bag has been also
                         // loaded by an URL than build the full URL as a relative path from
                         // BAG URL
@@ -1369,44 +1416,57 @@ pkg.Bag = zebra.Class([
                                 path = pURL.join(path);
                             }
                         }
-                        bag.load(path);
-                        return bag.root;
+                        return this.buildValue(JSON.parse(zebra.io.GET(path)));
                     }
-
-                    // resolve variable
                     return this.resolveVar(d.substring(1).trim());
                 }
-
-                return this.decodeStringValue != null ? this.decodeStringValue(d) : d;
+                return d;
             }
 
-            // store and cleanup $inherit synthetic field from description.
-            var inh = null;
-            if (d.hasOwnProperty("$inherit")) {
-                inh = d.$inherit;
-                delete d.$inherit;
+            // save inheritance
+            var inc = d.inherit;
+            if (inc != null) {
+                delete d.inherit;
             }
 
             // test whether we have a class definition
             for (var k in d) {
                 // handle class definition
-                if (k[0] == '$' && d.hasOwnProperty(k)) {
-                    var classname = k.substring(1).trim(), args = d[k];
-                    args = this.mergeObjWithDesc(null, Array.isArray(args) ? args : [ args ]);
+                if (k[0] === '$' && d.hasOwnProperty(k) === true) {
+                    var classname = k.substring(1).trim(),
+                        args      = d[k],
+                        clz       = null;
+
                     delete d[k]; // delete class name
 
-                    if (classname[0] == "*") {
+                    if (classname[0] === "?") {
+                        classname = classname.substring(1).trim();
+                        try {
+                            clz = this.resolveClass(classname[0] === '*' ? classname.substring(1).trim() : classname);
+                        }
+                        catch (e) {
+                            return null;
+                        }
+                    }
+                    else {
+                        clz = this.resolveClass(classname[0] === '*' ? classname.substring(1).trim() : classname);
+                    }
+
+                    args = this.buildValue(Array.isArray(args) ? args : [ args ]);
+                    if (classname[0] === "*") {
                         return (function(clazz, args) {
                             return {
                                 $new : function() {
-                                    return pkg.newInstance(clazz, args);
+                                    return zebra.newInstance(clazz, args);
                                 }
                             };
-                        })(this.resolveClass(classname.substring(1).trim()), args);
+                        })(clz, args);
                     }
 
                     // apply properties to instantiated class
-                    return this.mergeObjWithDesc(pkg.newInstance(this.resolveClass(classname), args), d);
+                    var classInstance = zebra.newInstance(clz, args);
+                    this.populate(classInstance, d);
+                    return classInstance;
                 }
 
                 //!!!!  trust the name of class occurs first what in general
@@ -1416,70 +1476,89 @@ pkg.Bag = zebra.Class([
                 break;
             }
 
-            // the description is not atomic or array type. it can
-            // be either a number of fields that should be merged
-            // with appropriate field of "o" object, or it can define
-            // how to instantiate an instance of a class. There is
-            // one special case: ".name" property says that object
-            // is created by calling "name" method
-            var v = (o == null         || zebra.isNumber(o) ||
-                    zebra.isBoolean(o) || zebra.isString(o) ||
-                    Array.isArray(o)) ? d : o;
-
             for (var k in d) {
                 if (d.hasOwnProperty(k)) {
-                    if (k[0] == '?') {
-                        eval("var xx=" + k.substring(1).trim() + ";");
-                        if (xx) {
-                            o = this.mergeObjWithDesc(o, d[k]);
-                        }
-                        continue;
-                    }
+                    var v = d[k];
 
                     // special field name that says to call method to create a
                     // value by the given description
-                    if (k[0] == ".") {
-                        var vv  = d[k],
-                            mn  = k.substring(1).trim(),
-                            vs  = [ this, this.root],
-                            m   = null,
-                            ctx = null;
-
-                        for(var ij = 0; ij < vs.length; ij++) {
-                            if (vs[ij] != null && vs[ij][mn] != null && typeof vs[ij][mn] == 'function') {
-                                ctx = vs[ij];
-                                m   = vs[ij][mn];
-                                break;
-                            }
-                        }
-
-                        if (m == null || typeof m != 'function') {
-                            throw new Error("Method '" + mn + "' cannot be found");
-                        }
-
-                        return m.apply(ctx, Array.isArray(vv) ? this.mergeObjWithDesc(null, vv)
-                                                              : [this.mergeObjWithDesc(null, vv)]);
-                    }
-
-                    // try to find if the destination object already has the property k
-                    var nv = this.mergeObjWithDesc((o && o.hasOwnProperty(k) ? o[k]
-                                                                             : null), d[k]);
-
-                    if (this.usePropertySetters === true) {
-                        var m  = zebra.getPropertySetter(v, k);
-                        if (m != null) {
-                            if (Array.isArray(nv)) m.apply(v, nv);
-                            else                   m.call(v, nv);
-                            continue;
+                    if (k[0] === ".") {
+                        var mres = this.callMethod(k.substring(1).trim(), this.buildValue(v));
+                        delete d[k];
+                        if (typeof mres !== 'undefined') {
+                            return mres;
                         }
                     }
-                    v[k] = nv;
+                    else {
+                        d[k] = this.buildValue(d[k]);
+                    }
                 }
             }
 
-            if (inh !== null) this.inherit(v, inh);
+            if (inc != null) {
+                this.inherit(d, inc);
+            }
 
-            return v;
+            return d;
+        };
+
+        this.populate = function(obj, desc) {
+            var inc = desc.inherit;
+            if (inc != null) {
+                delete desc.inherit;
+            }
+
+            for(var k in desc) {
+                if (desc.hasOwnProperty(k) === true) {
+                    var v = desc[k];
+                    if (k[0] === '.') {
+                        this.callMethod(k.substring(1).trim(), this.buildValue(v));
+                        continue;
+                    }
+
+                    if (this.usePropertySetters === true) {
+                        var m  = zebra.getPropertySetter(obj, k);
+                        if (m != null) {
+                            if (Array.isArray(v)) m.apply(obj, this.buildValue(v));
+                            else                  m.call (obj, this.buildValue(v));
+                            continue;
+                        }
+                    }
+
+                    // if target object doesn't have a property defined or
+                    // the destination value is atomic or array than
+                    // set it directly
+                    var ov = obj[k];
+                    if (ov == null || this.$isAtomic(ov) || Array.isArray(ov) ||
+                        v == null  || this.$isAtomic(v)  || Array.isArray(v)  ||
+                        this.$isClassDefinition(k, v)                               )
+                    {
+
+                        obj[k] = this.buildValue(v);
+                    }
+                    else {
+                        obj[k] = this.populate(obj[k], v);
+                    }
+                }
+            }
+
+            if (inc != null) {
+                this.inherit(obj, inc);
+            }
+
+            return obj;
+        };
+
+        this.$isClassDefinition = function(kk, v) {
+            if (v != null && v.constructor === Object) {
+                for(var k in v) {
+                    if (k[0] === '$') {
+                        return true;
+                    }
+                    break;
+                }
+            }
+            return false;
         };
 
         /**
@@ -1494,22 +1573,34 @@ pkg.Bag = zebra.Class([
                                                                : zebra.Class.forName(className);
         };
 
-        this.inherit = function(o, pp) {
-            for(var i=0; i < pp.length; i++) {
-                var op = this.root,
-                    nn = pp[i].trim().split("."),
-                    j  = 0;
+        this.addClassAliases = function (aliases) {
+            for(var k in aliases) {
+                this.classAliases[k] = Class.forName(aliases[k].trim());
+            }
+        };
 
-                while (j < nn.length) {
-                    op = op[nn[j++]];
-                    if (op == null) {
-                        throw new Error("Wrong inherit path '" + n + "(" + nn[j-1] + ")'");
-                    }
+        this.addVariables = function(variables) {
+            for(var k in variables) {
+                this.variables[k] = variables[k];
+            }
+        };
+
+        this.inherit = function(o, inc) {
+            if (Array.isArray(inc) === false) inc = [ inc ];
+            for (var i = 0; i < inc.length; i++) {
+                var v = this.resolveVar(inc[i]);
+
+                if (typeof v === 'undefined') {
+                    throw new Error("Reference '" + inc[i] + "' not found");
                 }
 
-                for(var k in op) {
-                    if (k[0] != '$' && op.hasOwnProperty(k) && o.hasOwnProperty(k) === false) {
-                        o[k] = op[k];
+                if (v == null || this.$isAtomic(v) || Array.isArray(v)) {
+                    throw new Error("Invalid type of inheritance '" + inc[i] + "'");
+                }
+
+                for(var kk in v) {
+                    if (kk[0] !== '$' && v.hasOwnProperty(kk) === true && o.hasOwnProperty(kk) === false) {
+                        o[kk] = v[kk];
                     }
                 }
             }
@@ -1535,8 +1626,8 @@ pkg.Bag = zebra.Class([
                     s = s.trim();
 
                     // detect if the passed string is not a JSON
-                    if ((s[0] != '[' || s[s.length - 1] != ']') &&
-                        (s[0] != '{' || s[s.length - 1] != '}')   )
+                    if ((s[0] !== '[' || s[s.length - 1] !== ']') &&
+                        (s[0] !== '{' || s[s.length - 1] !== '}')   )
                     {
                         var p = s.toString();
                         p = p + (p.lastIndexOf("?") > 0 ? "&" : "?") + (new Date()).getTime().toString();
@@ -1562,7 +1653,7 @@ pkg.Bag = zebra.Class([
                 }
                 return s;
             })
-            .
+            . // parse JSON if necessary
             run(function(s) {
                 if (zebra.isString(s)) {
                     try {
@@ -1574,31 +1665,11 @@ pkg.Bag = zebra.Class([
                 }
                 return s;
             })
-            .
+            . // populate JSON content
             run(function(content) {
-                if (content.hasOwnProperty("classAliases")) {
-                    var vars = content.classAliases;
-                    for(var k in vars) {
-                        $this.classAliases[k] = Class.forName(vars[k].trim());
-                    }
-                    delete content.classAliases;
-                }
-
-                if (content.hasOwnProperty("variables")) {
-                    $this.variables = $this.mergeObjWithDesc($this.variables, content.variables);
-                    delete content.variables;
-                }
-
-                return content;
-            })
-            .
-            run(function(content) {
-                return $this.mergeObjWithDesc($this.root, content);
-            })
-            .
-            run(function(root) {
+                $this.content = content;
+                $this.root = ($this.root == null ? $this.buildValue(content) : $this.populate($this.root, content));
                 if (cb != null) cb.call($this);
-                $this.root = root;
             })
             .
             error(function(e) {
@@ -1610,8 +1681,30 @@ pkg.Bag = zebra.Class([
         };
 
         this.resolveVar = function(name) {
-            return this.variables.hasOwnProperty(name) ? this.variables[name]
-                                                       : this.get(name);
+            if (this.variables.hasOwnProperty(name)) {
+                return this.variables[name];
+            }
+
+            var k = name.split("."),
+                v = undefined;
+
+            if (this.root != null) {
+                v = this.$get(k, this.root);
+            }
+
+            if (typeof v === 'undefined') {
+                v = this.$get(k, this.content);
+            }
+
+            if (typeof v === 'undefined' && this.globalPropertyLookup === true) {
+                v = this.$get(k, zebra.$global);
+            }
+
+            if (typeof v === 'undefined') {
+                throw new Error("Invalid reference '" +  name + "'");
+            }
+
+            return v;
         };
 
         this.expr = function(e) {
@@ -1634,7 +1727,7 @@ pkg.Bag = zebra.Class([
              * @type {Object}
              * @default {}
              */
-            this.root = (root == null ? {} : root);
+            this.root = (root != null ? root : null);
 
             /**
              * Map of classes

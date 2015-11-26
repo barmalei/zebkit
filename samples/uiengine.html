@@ -43,7 +43,7 @@
 		    	eval(zebra.Import("ui", "layout", "ui.samples"));
 
 				//create canvas
-			    var root = (new zebra.ui.zCanvas("mouseEventDemo")).root;
+			    var root = (new zebra.ui.zCanvas("pointerEventDemo")).root;
 				root.properties({
 					layout: new zebra.layout.BorderLayout(),
 					kids  : {
@@ -100,7 +100,7 @@
 					}
 				});
 
-			    root = (new zebra.ui.zCanvas("mouseCursorDemo")).root;
+			    root = (new zebra.ui.zCanvas("pointerCursorDemo")).root;
 				root.properties({
 					layout: new StackLayout(),
 					kids: [
@@ -132,7 +132,7 @@
 						new SimpleChart(function(x) { return Math.cos(x)*Math.sin(x) - 2 * Math.sin(x*x); }, -2, 3, 0.01, "#CCFF77"),
 
 						new Panel([
-							function mouseMoved(e) {
+							function pointerMoved(e) {
 								for(var i=0; i<this.parent.kids.length-1; i++) {
 									var kid = this.parent.kids[i];
 										j   = kid.isInside(e.x, e.y);
@@ -151,12 +151,12 @@
 
 							},
 
-							function mouseDragStarted(e) {
+							function pointerDragStarted(e) {
 								this.dx = e.x;
 								this.dy = e.y;
 							},
 
-							function mouseDragged(e) {
+							function pointerDragged(e) {
 								if (this.selected) {
 									for (var i=0; i < this.selected.gx.length; i++) {
 										this.selected.gx[i] += (e.x - this.dx);
@@ -217,18 +217,18 @@
 				});
 
 				root.extend([
-					function mousePressed(e) {
+					function pointerPressed(e) {
 						this.kids[0].requestFocus();
 					}
 				]);
 
 				var Draggable = [
-					function mouseDragStarted(e) {
+					function pointerDragStarted(e) {
 						this.dx = e.x;
 						this.dy = e.y;
 					},
 
-					function mouseDragged(e) {
+					function pointerDragged(e) {
 						this.setLocation(this.x + e.x - this.dx, this.y + e.y - this.dy);
 					},
 
@@ -272,7 +272,7 @@
 		<table border="0" width="1200">
 			<tr>
 				<td align="center" valign="bottom">
-					<canvas width="300" height="300" id="mouseEventDemo"> </canvas>
+					<canvas width="300" height="300" id="pointerEventDemo"> </canvas>
 				</td>
 				<td align="center" valign="bottom">
 					<canvas width="300" height="300" id="inputDemo"> </canvas>
@@ -285,7 +285,7 @@
 			<tr>
 				<td class="description" align="center">Mouse event handling by changing radial gradient background</td>
 				<td class="description" align="center">
-					Focus and key event handling. Navigate between shaped UI component using tab or mouse and
+					Focus and key event handling. Navigate between shaped UI component using tab or pointer and
 					type a character in
 				</td>
 				<td class="description" align="center">
@@ -297,7 +297,7 @@
 					<canvas width="300" height="300" id="shapedComponentDemo"> </canvas>
 				</td>
 				<td align="center" valign="bottom">
-					<canvas width="300" height="300" id="mouseCursorDemo"> </canvas>
+					<canvas width="300" height="300" id="pointerCursorDemo"> </canvas>
 				</td>
 				<td align="center" valign="bottom">
 					<canvas width="400" height="250" id="chartDemo"> </canvas>

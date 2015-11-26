@@ -19,7 +19,7 @@
 			    	padding: 8,
 			    	kids  : {
 			    		BOTTOM: new TextField("dsdsd", [
-			    			function mouseReleased(e) {
+			    			function pointerReleased(e) {
 			    				//this.$super(e);
 			    			}
 			    		]).properties({ font: new Font("Arial", "bold", 24), padding:8 }),
@@ -53,7 +53,7 @@
 			    				}
 			    			},
 
-			    			function mousePressed(e) {
+			    			function pointerPressed(e) {
 			    				this.catchIt = e.touchCounter >= 1;
 
 			    				if (e.touchCounter == 2 && zebra.instanceOf(focusManager.focusOwner, ShaperPan)) {
@@ -79,14 +79,14 @@
 			    				}
 			    			},
 
-			    			function mouseReleased(e) {
+			    			function pointerReleased(e) {
 			    				this.catchIt = false;
 			    				if (this.target != null) {
 			    					this.target.setColor(true, "blue");
 			    				}
 			    			},
 
-			    			function mouseDragged(e) {
+			    			function pointerDragged(e) {
 			    				if (this.target != null && e.touchCounter == 2) {
 			    					var touches = [];
 			    					for(var k in e.touches) touches.push(e.touches[k]);

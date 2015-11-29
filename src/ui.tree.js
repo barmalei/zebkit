@@ -1089,8 +1089,8 @@ pkg.BaseTree = Class(ui.Panel, [
     function invalidate(){
         if (this.isValid === true){
             this._isVal = false;
-            this.$super();
         }
+            this.$super();
     }
 ]);
 
@@ -1643,11 +1643,13 @@ pkg.CompTree = Class(pkg.BaseTree, [
 
             // hide all components
             for(var i=0; i < this.kids.length; i++) {
-                this.kids[i].isVisible = false;
+                this.kids[i].setVisible(false);
             }
+
 
             if (this.firstVisible != null) {
                 var $this = this, fvNode = this.getIM(this.firstVisible), started = 0;
+
 
                 this.model.iterate(this.model.root, function(item) {
                     var node = $this.nodes[item];  // slightly improve performance
@@ -1661,13 +1663,14 @@ pkg.CompTree = Class(pkg.BaseTree, [
                         var sy = $this.scrollManager.getSY();
 
                         if (node.y + sy < $this.height) {
-                            var image = $this.getIconBounds(item);
-
-                            item.value.x = image.x + image.width +
+                            var image = $this.getIconBounds(item),
+                                x = image.x + image.width +
                                            (image.width > 0 || $this.getToggleSize().width > 0 ? $this.gapx : 0) +
-                                           $this.scrollManager.getSX();
-                            item.value.y = node.y + Math.floor((node.height - node.viewHeight) / 2) + sy;
-                            item.value.isVisible = true;
+                                           $this.scrollManager.getSX(),
+                                y = node.y + Math.floor((node.height - node.viewHeight) / 2) + sy;
+
+                            item.value.setVisible(true);
+                            item.value.setLocation(x, y);
                             item.value.width  = node.viewWidth;
                             item.value.height = node.viewHeight;
                         }

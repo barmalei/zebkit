@@ -2976,9 +2976,10 @@ pkg.ScrollPan = Class(pkg.Panel, [
                 }
 
                 if (this.scrollObj.scrollManager == null) this.invalidate();
+
+                this.$isPosChangedLocked = false;
             }
-            catch(e) { throw e; }
-            finally  { this.$isPosChangedLocked = false; }
+            catch(e) { this.$isPosChangedLocked = false; throw e; }
         };
 
         this.calcPreferredSize = function (target){

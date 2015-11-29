@@ -33,33 +33,33 @@ pkg.ShaperBorder = Class(ui.View, [
             var cx = Math.floor((w - this.gap)/2),
                 cy = Math.floor((h - this.gap)/2);
 
-            //x += 0.5;
-           // y += 0.5;
-            // w -= 1;
-            // h -= 1;
-
-
             g.setColor(this.color);
             g.beginPath();
             g.rect(x, y, this.gap, this.gap);
             g.rect(x + cx, y, this.gap, this.gap);
             g.rect(x, y + cy, this.gap, this.gap);
-            g.rect(x + w - this.gap - 1, y, this.gap, this.gap);
-            g.rect(x, y + h - this.gap - 1, this.gap, this.gap);
+            g.rect(x + w - this.gap, y, this.gap, this.gap);
+            g.rect(x, y + h - this.gap, this.gap, this.gap);
             g.rect(x + cx, y + h - this.gap, this.gap, this.gap);
-            g.rect(x + w - this.gap - 1, y + cy, this.gap, this.gap);
-            g.rect(x + w - this.gap - 1, y + h - this.gap - 1, this.gap, this.gap);
+            g.rect(x + w - this.gap, y + cy, this.gap, this.gap);
+            g.rect(x + w - this.gap, y + h - this.gap, this.gap, this.gap);
             g.fill();
-            g.beginPath();
 
+            g.beginPath();
 
             var po = zebra.layout.toParentOrigin(x + Math.floor(this.gap / 2), y + Math.floor(this.gap / 2), d);
 
-            console.log("rect() :  y = " + po.y);
-            g.rect(x + Math.floor(this.gap / 2),
-                   y + Math.floor(this.gap / 2),
-                   w - this.gap ,
+            // very strange thing with rect() method if it called with w or h
+            // without decreasing with gap it is ok, otherwise moving   a
+            // component with the border outside parent component area leaves
+            // traces !
+            //
+            // adding 0.5 (to center line) solves the problem with traces
+            g.rect(x + Math.floor(this.gap / 2) + 0.5,
+                   y + Math.floor(this.gap / 2) + 0.5,
+                   w - this.gap,
                    h - this.gap );
+
             g.stroke();
         };
 
@@ -69,19 +69,15 @@ pkg.ShaperBorder = Class(ui.View, [
                 w    = target.width,
                 h    = target.height;
 
-
             if (contains(x, y, gap, gap, w - gap2, h - gap2)) return L.CENTER;
             if (contains(x, y, 0, 0, gap, gap))               return L.TopLeft;
             if (contains(x, y, 0, h - gap, gap, gap))         return L.BottomLeft;
 
-            console.log("x = " + x + ", y = " + y  + "is in [" + (w - gap) + ", 0, " + gap + "," + gap + "] " + target);
-
-            if (contains(x, y, w - gap, 0, gap, gap))         {
-                console.log("TOPRIGHT");
+            if (contains(x, y, w - gap, 0, gap, gap)) {
                 return L.TopRight;
             }
 
-            if (contains(x, y, w - gap, h - gap, gap, gap))   return L.BottomRight;
+            if (contains(x, y, w - gap, h - gap, gap, gap)) return L.BottomRight;
 
             var mx = Math.floor((w - gap)/2);
             if (contains(x, y, mx, 0, gap, gap))        return L.TOP;

@@ -921,7 +921,7 @@ pkg.Panel = Class(L.Layoutable, [
         this.repaint = function(x,y,w,h) {
             // step I: skip invisible components and components that are not in hierarchy
             //         don't initiate repainting thread for such sort of the components,
-            //         but don't forget for zCanvas whose parent field is null
+            //         but don't forget for zCanvas whose parent field is null, but it has $context
             if (this.isVisible === true && (this.parent != null || this.$context != null)) {
                 //!!! find context buffer that holds the given component
 
@@ -1017,19 +1017,56 @@ pkg.Panel = Class(L.Layoutable, [
                     }
                 }
 
+
                 // step III: initiate repainting thread
-                if (canvas.$timer == null && (canvas.isValid === false || canvas.$da.width > 0 || canvas.isLayoutValid === false)) {
+                if (canvas.$timer === null && (canvas.isValid === false || canvas.$da.width > 0 || canvas.isLayoutValid === false)) {
                     var $this = this;
                     canvas.$timer = zebra.web.$task(function() {
-                        // do validation before timer will be set to null to avoid
-                        // unnecessary timer initiating what can be caused by validation
-                        // procedure by calling repaint method
-                        if (canvas.isValid === false || canvas.isLayoutValid === false) {
-                            canvas.validate();
-                        }
+                        try {
+                            var g = null;
 
-                        canvas.$timer = null;
-                        canvas.paintComponent(canvas.$context);
+                            // do validation before timer will be set to null to avoid
+                            // unnecessary timer initiating what can be caused by validation
+                            // procedure by calling repaint method
+                            if (canvas.isValid === false || canvas.isLayoutValid === false) {
+                                canvas.validate();
+                            }
+
+                            if (canvas.$da.width > 0) {
+                                g = canvas.$context;
+                                g.save();
+
+                                // check if the given canvas has transparent background
+                                // if it is true call clearRect method to clear dirty area
+                                // with transparent background, otherwise it will be cleaned
+                                // by filling the canvas with background later
+                                if (canvas.bg == null || canvas.bg.isOpaque !== true) {
+                                    g.clearRect(canvas.$da.x, canvas.$da.y,
+                                                canvas.$da.width, canvas.$da.height);
+
+                                }
+                                // !!!
+                                // call clipping area later than possible
+                                // clearRect since it can bring to error in IE
+                                g.clipRect(canvas.$da.x,
+                                           canvas.$da.y,
+                                           canvas.$da.width,
+                                           canvas.$da.height);
+
+                                canvas.paintComponent(g);
+                            }
+
+                            canvas.$timer = null;
+                            // no dirty area anymore
+                            canvas.$da.width = -1;
+                            if (g !== null) g.restore();
+                        }
+                        catch(ee) {
+                            canvas.$timer = null;
+                            canvas.$da.width = -1;
+                            if (g !== null) g.restore();
+                            throw ee;
+                        }
                     });
                 }
             }
@@ -1143,6 +1180,7 @@ pkg.Panel = Class(L.Layoutable, [
                         }
                     }
                 }
+
                 if (this.paintOnTop != null) this.paintOnTop(g);
             }
         };
@@ -2526,49 +2564,6 @@ pkg.HtmlCanvas = Class(pkg.HtmlElement, [
             }
             return this;
         };
-    },
-
-    function paintComponent(g) {
-        // prevent double painting, sometimes
-        // width can be -1 what cause clearRect
-        // clean incorrectly
-        if (this.$da.width > 0) {
-            g.save();
-
-            try {
-                //console.log("DA : y = " + this.$da.y);
-
-
-                // check if the given canvas has transparent background
-                // if it is true call clearRect method to clear dirty area
-                // with transparent background, otherwise it will be cleaned
-                // by filling the canvas with background later
-                if (this.bg == null || this.bg.isOpaque !== true) {
-                    g.clearRect(this.$da.x, this.$da.y,
-                                this.$da.width, this.$da.height);
-
-                }
-
-                // !!!
-                // call clipping area later than possible
-                // clearRect since it can bring to error in IE
-                g.clipRect(this.$da.x,
-                           this.$da.y,
-                           this.$da.width,
-                           this.$da.height);
-
-                this.$super(g);
-
-                // no dirty area anymore
-                this.$da.width = -1;
-                g.restore();
-            }
-            catch(e) {
-                g.restore();
-                console.log("" + e.stack);
-                throw e;
-            }
-        }
     },
 
     function(e) {

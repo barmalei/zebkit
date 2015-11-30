@@ -112,7 +112,7 @@
                 r.onreadystatechange = function() {
                     if (r.readyState == 4) {
                         if (r.status != 200)  throw new Error(url);
-                        zebra.getMethod($this.$clazz.$parent, '', 1).call($this, isBA ? r.response : r.responseText); // $this.$super(res);
+                        zebra.getMethod($this.clazz.$parent, '', 1).call($this, isBA ? r.response : r.responseText); // $this.$super(res);
                         f($this.data, r);
                     }
                 };

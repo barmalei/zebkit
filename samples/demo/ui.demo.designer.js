@@ -56,7 +56,7 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
         pp.add(new ShaperPan(b));
 
 
-        pp.setBorder(new Border("black"));
+        //pp.setBorder(new Border("black"));
 
         var t = new zebra.ui.tree.Tree(new FormTreeModel(pp, [
             function exclude(c) { return zebra.instanceOf(c, ShaperPan); }

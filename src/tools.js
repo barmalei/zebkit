@@ -35,7 +35,7 @@
                 if (o === null) return "<null>";
                 if (typeof o === "undefined") return "<undefined>";
                 if (pkg.isString(o) || pkg.isNumber(o) || pkg.isBoolean(o)) return o;
-                var d = [o.toString() + " " + (o.$clazz ? o.$clazz.$name:"") , "{"];
+                var d = [o.toString() + " " + (o.clazz ? o.clazz.$name:"") , "{"];
                 for(var k in o) if (o.hasOwnProperty(k)) d.push("    " + k + " = " + o[k]);
                 return d.join('\n') + "\n}";
             };

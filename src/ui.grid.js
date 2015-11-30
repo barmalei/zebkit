@@ -153,7 +153,7 @@ pkg.DefViews = Class([
              * @protected
              */
             this.render = (render == null ? new ui.StringRender("") : render);
-            zebra.properties(this, this.$clazz);
+            zebra.properties(this, this.clazz);
         };
 
         /**
@@ -310,9 +310,9 @@ pkg.DefEditors = Class([
 
     function $prototype() {
         this[''] = function() {
-            this.textEditor     = new this.$clazz.TextField("", 150);
-            this.boolEditor     = new this.$clazz.Checkbox(null);
-            this.selectorEditor = new this.$clazz.Combo();
+            this.textEditor     = new this.clazz.TextField("", 150);
+            this.boolEditor     = new this.clazz.Checkbox(null);
+            this.selectorEditor = new this.clazz.Combo();
 
             this.editors    = {};
         };
@@ -354,7 +354,7 @@ pkg.DefEditors = Class([
             }
 
             editor = zebra.isBoolean(v) ? this.boolEditor
-                                        : (zebra.instanceOf(v, this.$clazz.Items) ? this.selectorEditor : this.textEditor);
+                                        : (zebra.instanceOf(v, this.clazz.Items) ? this.selectorEditor : this.textEditor);
 
             if (editor === this.selectorEditor) {
                 editor.list.setModel(v.items);
@@ -697,7 +697,7 @@ pkg.BaseCaption = Class(ui.Panel, [
     },
 
     function(titles) {
-        this._ = new this.$clazz.Listeners();
+        this._ = new this.clazz.Listeners();
         this.orient = this.metrics = this.pxy = null;
         this.selectedColRow = -1;
         this.$super();
@@ -1134,11 +1134,11 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
         this.putTitle = function(rowcol, t) {
             // add empty titles
             for(var i = this.kids.length - 1;  i >= 0 && i < rowcol; i++) {
-                this.add(new this.$clazz.TitlePan(""));
+                this.add(new this.clazz.TitlePan(""));
             }
 
             if (zebra.isString(t)) {
-                t = new this.$clazz.TitlePan("");
+                t = new this.clazz.TitlePan("");
             }
             else {
                 if (zebra.instanceOf(t, ui.View)) {
@@ -1213,7 +1213,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
 
     function insert(i,constr, c) {
         if (zebra.isString(c)) {
-            c = new this.$clazz.TitlePan(c);
+            c = new this.clazz.TitlePan(c);
         }
         this.$super(i,constr, c);
     },
@@ -1222,7 +1222,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
         if (arguments === 0) titles = null;
 
         this.$super(titles);
-        this.setLayout(new this.$clazz.Layout());
+        this.setLayout(new this.clazz.Layout());
     }
 ]);
 
@@ -2992,7 +2992,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
             this.psWidth_    = this.psHeight_  = this.colOffset = 0;
             this.rowOffset   = this.pressedCol = this.selectedIndex = 0;
             this.visibleArea = null;
-            this._ = new this.$clazz.Listeners();
+            this._ = new this.clazz.Listeners();
             this.views = {};
 
             /**
@@ -3035,7 +3035,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
 
             this.$super();
 
-            this.add(L.NONE, new this.$clazz.CornerPan());
+            this.add(L.NONE, new this.clazz.CornerPan());
             this.setModel(model);
             this.setViewProvider(new pkg.DefViews());
             this.setPosition(new Position(this));

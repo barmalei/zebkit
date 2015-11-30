@@ -606,7 +606,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
          */
         this.selectedIndex = -1;
 
-        this._ = new this.$clazz.Listeners();
+        this._ = new this.clazz.Listeners();
 
         /**
          * Indicate the current mode the list items selection has to work
@@ -733,7 +733,7 @@ pkg.List = Class(pkg.BaseList, [
                      */
 
                     this.text = new pkg.StringRender("");
-                    zebra.properties(this, this.$clazz);
+                    zebra.properties(this, this.clazz);
                     if (f != null) this.text.setFont(f);
                     if (c != null) this.text.setColor(c);
                 };
@@ -976,7 +976,7 @@ pkg.List = Class(pkg.BaseList, [
          * @private
          */
         this.visValid = false;
-        this.setViewProvider(new this.$clazz.ViewProvider());
+        this.setViewProvider(new this.clazz.ViewProvider());
         this.$super(m, b);
     },
 
@@ -1149,7 +1149,7 @@ pkg.CompList = Class(pkg.BaseList, [
         if (i < 0 || i > this.kids.length) {
             throw new RangeError(i);
         }
-        return this.$super(i, constr, zebra.instanceOf(e, pkg.Panel) ? e : new this.$clazz.Label("" + e));
+        return this.$super(i, constr, zebra.instanceOf(e, pkg.Panel) ? e : new this.clazz.Label("" + e));
     },
 
     function kidAdded(index,constr,e){
@@ -1427,7 +1427,7 @@ pkg.Combo = Class(pkg.Panel, [
 
             function (){
                 this.$super();
-                this._ = new this.$clazz.Listeners();
+                this._ = new this.clazz.Listeners();
 
                 this.isEditable = true;
 
@@ -1441,7 +1441,7 @@ pkg.Combo = Class(pkg.Panel, [
                  * @private
                  * @type {zebra.ui.TextField}
                  */
-                this.textField = new this.$clazz.TextField("",  -1);
+                this.textField = new this.clazz.TextField("",  -1);
                 this.textField.view.target.bind(this);
                 this.add(L.CENTER, this.textField);
             }
@@ -1631,7 +1631,7 @@ pkg.Combo = Class(pkg.Panel, [
                 if (this.list._) this.list.bind(this);
 
                 var $this = this;
-                this.winpad = new this.$clazz.ComboPadPan(this.list, [
+                this.winpad = new this.clazz.ComboPadPan(this.list, [
                     function setParent(p) {
                         this.$super(p);
                         if ($this.padShown != null) {
@@ -1706,8 +1706,8 @@ pkg.Combo = Class(pkg.Panel, [
                     ctr = this.content.constraints;
                     this.content.removeMe();
                 }
-                this.add(ctr, b ? new this.$clazz.EditableContentPan()
-                                : new this.$clazz.ReadonlyContentPan());
+                this.add(ctr, b ? new this.clazz.EditableContentPan()
+                                : new this.clazz.ReadonlyContentPan());
             }
         };
 
@@ -1749,7 +1749,7 @@ pkg.Combo = Class(pkg.Panel, [
         }
 
         if (list == null) {
-            list = new this.$clazz.List(true);
+            list = new this.clazz.List(true);
         }
 
         /**
@@ -1759,7 +1759,7 @@ pkg.Combo = Class(pkg.Panel, [
          * @type {zebra.ui.BaseList}
          */
         if (zebra.instanceOf(list, pkg.BaseList) === false) {
-            list = new this.$clazz.List(list, true);
+            list = new this.clazz.List(list, true);
         }
 
         /**
@@ -1801,14 +1801,14 @@ pkg.Combo = Class(pkg.Panel, [
         this.maxPadHeight = 0;
 
         this.$lockListSelEvent = false;
-        this._ = new this.$clazz.Listeners();
+        this._ = new this.clazz.Listeners();
         this.setList(list);
 
         this.$super();
 
-        this.add(L.CENTER, editable ? new this.$clazz.EditableContentPan()
-                                    : new this.$clazz.ReadonlyContentPan());
-        this.add(L.RIGHT, new this.$clazz.Button());
+        this.add(L.CENTER, editable ? new this.clazz.EditableContentPan()
+                                    : new this.clazz.ReadonlyContentPan());
+        this.add(L.RIGHT, new this.clazz.Button());
     },
 
     function focused(){
@@ -1817,7 +1817,7 @@ pkg.Combo = Class(pkg.Panel, [
     },
 
     function kidAdded(index,s,c){
-        if (zebra.instanceOf(c, this.$clazz.ContentPan)) {
+        if (zebra.instanceOf(c, this.clazz.ContentPan)) {
             if (this.content != null) {
                 throw new Error("Content panel is set");
             }

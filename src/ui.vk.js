@@ -272,7 +272,7 @@ zebra.package("ui.vk", function(pkg, Class) {
 
         function() {
             this.$super();
-            this.add(new this.$clazz.Label(""));
+            this.add(new this.clazz.Label(""));
         },
 
         function setValue(v) {
@@ -605,7 +605,7 @@ zebra.package("ui.vk", function(pkg, Class) {
 
         function (v, options) {
             this.$super(v);
-            this.menu = new this.$clazz.Menu(options);
+            this.menu = new this.clazz.Menu(options);
             this.menu.toPreferredSize();
             this.menu.$isVkElement = true;
 
@@ -763,12 +763,12 @@ zebra.package("ui.vk", function(pkg, Class) {
 
             this.$super( {
                 ch    : chars[0],
-                label : new this.$clazz.KeysLabelPan(chars)
+                label : new this.clazz.KeysLabelPan(chars)
             });
 
             this.keysPopupPan = null;
             if (chars.length > 2) {
-                this.keysPopupPan = new this.$clazz.KeysPopupPan();
+                this.keysPopupPan = new this.clazz.KeysPopupPan();
 
                 var $this = this;
                 for(var i = 1; i < chars.length; i++) {
@@ -1020,7 +1020,7 @@ zebra.package("ui.vk", function(pkg, Class) {
 
         function() {
             this.$super();
-            this._ = new this.$clazz.Listeners();
+            this._ = new this.clazz.Listeners();
         }
     ]);
 

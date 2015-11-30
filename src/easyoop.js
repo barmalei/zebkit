@@ -281,10 +281,10 @@ function make_template(pt, tf, p) {
     tf.toString = $toString;
 
     if (pt != null) {
-        tf.prototype.$clazz = tf;
+        tf.prototype.clazz = tf;
     }
 
-    tf.$clazz = pt;
+    tf.clazz = pt;
     tf.prototype.toString = $toString;
     tf.prototype.constructor = tf;
 
@@ -357,7 +357,7 @@ pkg.Singleton = function(clazz) {
         function() {
             // make sure this constructor is not
             // called from a successor class
-            if (this.$clazz === clz) {
+            if (this.clazz === clz) {
                 if (clz.$instance != null) {
                     return clz.$instance;
                 }
@@ -555,7 +555,7 @@ pkg.Class = make_template(null, function() {
         args[i] = arguments[i];
     }
 
-    if (args.length > 0 && (args[0] == null || args[0].$clazz === pkg.Class)) {
+    if (args.length > 0 && (args[0] == null || args[0].clazz === pkg.Class)) {
         $parent = args[0];
     }
 
@@ -634,7 +634,7 @@ pkg.Class = make_template(null, function() {
 
     // extend method cannot be overridden
     $template.prototype.extend = function() {
-        var c = this.$clazz,
+        var c = this.clazz,
             l = arguments.length,
             f = arguments[l-1];
 
@@ -644,8 +644,8 @@ pkg.Class = make_template(null, function() {
         if (this.$extended !== true) {
             c = Class(c,[]);
             this.$extended = true;         // mark the instance as extended to avoid double extending.
-            c.$name = this.$clazz.$name;
-            this.$clazz = c;
+            c.$name = this.clazz.$name;
+            this.clazz = c;
         }
 
         if (Array.isArray(f)) {
@@ -702,7 +702,7 @@ pkg.Class = make_template(null, function() {
                 $s = $s.$parent;
             }
 
-            var cln = this.$clazz && this.$clazz.$name ? this.$clazz.$name + "." : "";
+            var cln = this.clazz && this.clazz.$name ? this.clazz.$name + "." : "";
             throw new ReferenceError("Method '" + cln + (name === CNAME ? "constructor"
                                                                         : name) + "(" + args.length + ")" + "' not found");
         }
@@ -719,11 +719,11 @@ pkg.Class = make_template(null, function() {
 
         nobj.constructor = this.constructor;
         nobj.$hash$ = "$zObj_" + ($$$++);
-        nobj.$clazz = this.$clazz;
+        nobj.clazz = this.clazz;
         return nobj;
     };
 
-    $template.prototype.$clazz = $template;
+    $template.prototype.clazz = $template;
 
     // check if the method has been already defined in the class
     if (typeof $template.prototype.properties === 'undefined') {
@@ -990,11 +990,11 @@ Class.newInstance = function() {
  */
 pkg.instanceOf = function(obj, clazz) {
     if (clazz != null) {
-        if (obj == null || typeof obj.$clazz === 'undefined') {
+        if (obj == null || typeof obj.clazz === 'undefined') {
             return false;
         }
 
-        var c = obj.$clazz;
+        var c = obj.clazz;
         return c != null && (c === clazz ||
                (typeof c.$parents !== 'undefined' && c.$parents.hasOwnProperty(clazz)));
     }

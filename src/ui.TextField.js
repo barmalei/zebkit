@@ -583,7 +583,7 @@ pkg.TextField = Class(pkg.Label, [
          * @method setHint
          */
         this.setHint = function(hint) {
-            this.hint = zebra.isString(hint) ? new this.$clazz.HintRender(hint) : pkg.$view(hint);
+            this.hint = zebra.isString(hint) ? new this.clazz.HintRender(hint) : pkg.$view(hint);
             this.repaint();
             return this.hint;
         };

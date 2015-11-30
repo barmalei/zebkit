@@ -83,9 +83,9 @@ zebra.package("ui", function(pkg, Class) {
             this.editor   = null;
             this.isLooped = true;
 
-            this.layoutComponents(new this.$clazz.TextField(this, this.min, this.max),
-                                  new this.$clazz.IncButton(),
-                                  new this.$clazz.DecButton());
+            this.layoutComponents(new this.clazz.TextField(this, this.min, this.max),
+                                  new this.clazz.IncButton(),
+                                  new this.clazz.DecButton());
 
             this._ = new zebra.util.Listeners();
         },
@@ -122,7 +122,7 @@ zebra.package("ui", function(pkg, Class) {
 
         function  $install(child) {
 
-            console.log("$intsall : " + child.$clazz.$name);
+            console.log("$intsall : " + child.clazz.$name);
 
             if (zebra.instanceOf(child, pkg.Button)) {
                 child.bind(this);

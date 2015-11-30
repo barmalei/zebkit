@@ -222,7 +222,7 @@ zebra.package("ui.date", function(pkg, Class) {
                 function $prototype() {
                     this.setNamesOfWeekDays = function(daysOfWeek) {
                         for(var i = 0; i < daysOfWeek.length; i++) {
-                            this.putTitle(i, new this.$clazz.Label().properties(daysOfWeek[i]));
+                            this.putTitle(i, new this.clazz.Label().properties(daysOfWeek[i]));
                         }
                     };
                 }
@@ -336,7 +336,7 @@ zebra.package("ui.date", function(pkg, Class) {
             };
 
             this.getViewComponent = function(item) {
-                this.itemPan.properties(this.itemPan.$clazz);
+                this.itemPan.properties(this.itemPan.clazz);
 
                 if (item.tags.length > 0) {
                     for(var i = 0; i < item.tags.length; i++) {
@@ -493,17 +493,17 @@ zebra.package("ui.date", function(pkg, Class) {
             this.tags    = {};
             this.tagger  = null;
             this.view    = new ui.CompRender(null);
-            this.itemPan = new this.$clazz.ItemPan();
+            this.itemPan = new this.clazz.ItemPan();
 
             this.$super(6, 7);
 
             //  pre-fill model with data
             for(var i = 0; i < this.model.rows * this.model.cols; i++) {
-                this.model.puti(i, new this.$clazz.Item());
+                this.model.puti(i, new this.clazz.Item());
             }
 
             this.setViewProvider(this);
-            this.caption = new this.$clazz.GridCaption();
+            this.caption = new this.clazz.GridCaption();
             this.add("top", this.caption);
         }
     ]);
@@ -538,7 +538,7 @@ zebra.package("ui.date", function(pkg, Class) {
                 function $prototype() {
                     this.setMonths = function(months) {
                         for(var i = 0; i < months.length; i++) {
-                            this.list.model.add(new this.$clazz.Label(months[i].name));
+                            this.list.model.add(new this.clazz.Label(months[i].name));
                         }
                     };
 
@@ -550,7 +550,7 @@ zebra.package("ui.date", function(pkg, Class) {
                 },
 
                 function() {
-                    this.$super(new this.$clazz.CompList(true));
+                    this.$super(new this.clazz.CompList(true));
                     this.button.removeMe();
                 }
             ]);
@@ -758,16 +758,16 @@ zebra.package("ui.date", function(pkg, Class) {
             ]);
             this.monthDaysGrid.bind(this);
 
-            this._ = new this.$clazz.Listeners();
+            this._ = new this.clazz.Listeners();
 
-            this.comboMonth = new this.$clazz.MonthsCombo();
+            this.comboMonth = new this.clazz.MonthsCombo();
             this.comboMonth.content.setCalcPsByContent(true);
             this.comboMonth.winpad.adjustToComboSize = false;
             this.comboMonth.bind(function(src) {
                 $this.showMonth(src.list.selectedIndex, $this.monthDaysGrid.year);
             });
 
-            this.yearText = new this.$clazz.YearField("", [
+            this.yearText = new this.clazz.YearField("", [
                 function fireNextYear() {
                     $this.showNextYear();
                 },
@@ -777,7 +777,7 @@ zebra.package("ui.date", function(pkg, Class) {
                 }
             ]);
 
-            var topPan = new this.$clazz.InfoPan({
+            var topPan = new this.clazz.InfoPan({
                 layout: new L.BorderLayout(),
                 kids  : {
                     center: new ui.Panel({
@@ -791,8 +791,8 @@ zebra.package("ui.date", function(pkg, Class) {
                                     right  : new ui.Panel({
                                         layout: new L.FlowLayout("center", "center", "vertical", 1),
                                         kids  : [
-                                            new this.$clazz.TopArrowButton(),
-                                            new this.$clazz.BottomArrowButton()
+                                            new this.clazz.TopArrowButton(),
+                                            new this.clazz.BottomArrowButton()
                                         ]
                                     })
                                 }
@@ -803,15 +803,15 @@ zebra.package("ui.date", function(pkg, Class) {
                     left: new ui.Panel({
                         layout : new L.FlowLayout("center", "center", "horizontal", 3),
                         kids   : [
-                            new this.$clazz.LeftArrowButton(),
-                            new this.$clazz.DotButton(),
-                            new this.$clazz.RightArrowButton()
+                            new this.clazz.LeftArrowButton(),
+                            new this.clazz.DotButton(),
+                            new this.clazz.RightArrowButton()
                         ]
                     }),
 
                     right: new ui.Panel({
                         layout : new L.FlowLayout("center", "bottom"),
-                        kids   : new this.$clazz.Link("today"),
+                        kids   : new this.clazz.Link("today"),
                         padding: [0,8,4,0]
                     })
                 }
@@ -1029,9 +1029,9 @@ zebra.package("ui.date", function(pkg, Class) {
             this.$super(new L.FlowLayout());
 
             var $this = this;
-            this.dateField = new this.$clazz.DateTextField(format);
+            this.dateField = new this.clazz.DateTextField(format);
             this.add(this.dateField);
-            this.add(new this.$clazz.Button("..."));
+            this.add(new this.clazz.Button("..."));
 
             // sync calendar and input field dates
             this.dateField.setValue(this.getValue());
@@ -1113,13 +1113,13 @@ zebra.package("ui.date", function(pkg, Class) {
             this.$super();
 
             var $this = this,
-                la    = new this.$clazz.LeftArrowButton(),
-                ra    = new this.$clazz.RightArrowButton(),
+                la    = new this.clazz.LeftArrowButton(),
+                ra    = new this.clazz.RightArrowButton(),
                 cal   = this.getCalendar();
 
             this._ = new zebra.util.Listeners();
 
-            this.minDateField = new this.$clazz.MinDateTextField([
+            this.minDateField = new this.clazz.MinDateTextField([
                 function keyPressed(e) {
                     if (e.code === ui.KeyEvent.RIGHT && this.position.offset === this.getMaxOffset()) {
                         $this.maxDateField.position.setOffset(0);
@@ -1129,7 +1129,7 @@ zebra.package("ui.date", function(pkg, Class) {
                 }
             ]);
 
-            this.maxDateField = new this.$clazz.MaxDateTextField([
+            this.maxDateField = new this.clazz.MaxDateTextField([
                 function keyPressed(e) {
                     if (e.code === ui.KeyEvent.LEFT && this.position.offset === 0) {
                         $this.minDateField.requestFocus();
@@ -1151,13 +1151,13 @@ zebra.package("ui.date", function(pkg, Class) {
                 }
             });
 
-            if (this.$clazz.tags != null) {
-                cal.monthDaysGrid.addTags(this.$clazz.tags);
+            if (this.clazz.tags != null) {
+                cal.monthDaysGrid.addTags(this.clazz.tags);
             }
 
-            this.add(new this.$clazz.DateInputPan(la, this.minDateField));
-            this.add(new this.$clazz.Line());
-            this.add(new this.$clazz.DateInputPan(this.maxDateField, ra));
+            this.add(new this.clazz.DateInputPan(la, this.minDateField));
+            this.add(new this.clazz.Line());
+            this.add(new this.clazz.DateInputPan(this.maxDateField, ra));
 
             la.bind(function () {
                 $this.getCalendar().setMaxValue($this.maxDateField.date);

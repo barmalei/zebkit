@@ -335,7 +335,7 @@ pkg.Layoutable = Class(L, [
             var res = null;
             zebra.util.findInTree(this, $normPath(path),
                 function(node, name) {
-                    return node.$clazz != null && zebra.instanceOf(node, zebra.Class.forName(name));
+                    return node.clazz != null && zebra.instanceOf(node, zebra.Class.forName(name));
                 },
 
                 function(kid) {
@@ -376,7 +376,7 @@ pkg.Layoutable = Class(L, [
 
             zebra.util.findInTree(this, $normPath(path),
                 function(node, name) {
-                    return node.$clazz != null && zebra.instanceOf(node, zebra.Class.forName(name));
+                    return node.clazz != null && zebra.instanceOf(node, zebra.Class.forName(name));
                 }, callback);
             return res;
         };

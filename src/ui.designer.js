@@ -1,8 +1,8 @@
 (function(pkg, Class, ui) {
 
 /**
- * The package contains number of UI components that can be helful to
- * make visiual control of an UI component size and location
+ * The package contains number of UI components that can be helpful to
+ * make visual control of an UI component size and location
  * @module  ui.designer
  * @main
  */
@@ -310,7 +310,7 @@ pkg.FormTreeModel = Class(zebra.data.TreeModel, [
         };
 
         this.createItem = function(comp){
-            var name = comp.$clazz.$name;
+            var name = comp.clazz.$name;
             if (name == null) name = comp.toString();
             var index = name.lastIndexOf('.'),
                 item = new zebra.data.Item(index > 0 ? name.substring(index + 1) : name);

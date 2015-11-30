@@ -240,7 +240,7 @@ pkg.Text = Class(pkg.TextModel, [
 
         this[''] = function(s){
             this.lines = [ new Line("") ];
-            this._ = new this.$clazz.Listeners();
+            this._ = new this.clazz.Listeners();
             this.setValue(s == null ? "" : s);
         };
     }
@@ -388,7 +388,7 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
             this.maxLen = max == null ? -1 : max;
             this.buf = "";
             this.extra = 0;
-            this._ = new this.$clazz.Listeners();
+            this._ = new this.clazz.Listeners();
             this.setValue(s == null ? "" : s);
         };
     }
@@ -567,7 +567,7 @@ pkg.ListModel = Class([
         };
 
         this[''] = function() {
-            this._ = new this.$clazz.Listeners();
+            this._ = new this.clazz.Listeners();
             this.d = (arguments.length === 0) ? [] : arguments[0];
         };
     }
@@ -825,7 +825,7 @@ pkg.TreeModel = Class([
              */
             this.root = zebra.instanceOf(r, Item) ? r : pkg.TreeModel.create(r);
             this.root.parent = null;
-            this._ = new this.$clazz.Listeners();
+            this._ = new this.clazz.Listeners();
         };
     }
 ]);
@@ -1150,7 +1150,7 @@ pkg.Matrix = Class([
              * @readOnly
              */
 
-            this._ = new this.$clazz.Listeners();
+            this._ = new this.clazz.Listeners();
             if (arguments.length == 1) {
                 this.objs = arguments[0];
                 this.cols = (this.objs.length > 0) ? this.objs[0].length : 0;

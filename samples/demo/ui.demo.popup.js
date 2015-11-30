@@ -65,7 +65,7 @@ function createToolbar() {
 
 
     t.bind(function(src) {
-        console.log("::: " + src.$clazz.$name + ", src = " + (imgPan1 == src));
+        console.log("::: " + src.clazz.$name + ", src = " + (imgPan1 == src));
     });
 
 

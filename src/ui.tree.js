@@ -960,7 +960,7 @@ pkg.BaseTree = Class(ui.Panel, [
 
         this._isVal = false;
         this.nodes = {};
-        this._ = new this.$clazz.Listeners();
+        this._ = new this.clazz.Listeners();
         this.setLineColor("gray");
 
         this.isOpenVal = b;
@@ -1090,7 +1090,7 @@ pkg.BaseTree = Class(ui.Panel, [
         if (this.isValid === true){
             this._isVal = false;
         }
-            this.$super();
+        this.$super();
     }
 ]);
 
@@ -1203,7 +1203,7 @@ pkg.DefViews = Class([
              */
             this.render = new ui.StringRender("");
 
-            zebra.properties(this, this.$clazz);
+            zebra.properties(this, this.clazz);
 
             if (color != null) this.setColor(color);
             if (font  != null) this.setFont(font);
@@ -1713,16 +1713,16 @@ pkg.CompTree = Class(pkg.BaseTree, [
                         var m = item.value.match(/\[\s*(.*)\s*\](.*)/);
 
                         if (m != null) {
-                            item.value = new $this.$clazz.Checkbox(m[2]);
+                            item.value = new $this.clazz.Checkbox(m[2]);
                             item.value.setValue(m[1].trim().length > 0);
                         }
                         else {
-                            item.value = new $this.$clazz.Label(item.value);
+                            item.value = new $this.clazz.Label(item.value);
                         }
                     }
                     else {
                         if (Array.isArray(item.value)) {
-                            item.value = new $this.$clazz.Combo(item.value);
+                            item.value = new $this.clazz.Combo(item.value);
                         }
                     }
 

@@ -953,7 +953,7 @@ var  Position = pkg.Position = Class([
         };
 
         this[''] = function(pi){
-            this._ = new this.$clazz.Listeners();
+            this._ = new this.clazz.Listeners();
             this.isValid = false;
 
             /**

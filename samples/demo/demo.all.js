@@ -644,7 +644,7 @@ function createToolbar() {
 
 
     t.bind(function(src) {
-        console.log("::: " + src.$clazz.$name + ", src = " + (imgPan1 == src));
+        console.log("::: " + src.clazz.$name + ", src = " + (imgPan1 == src));
     });
 
 
@@ -1024,7 +1024,7 @@ var CustomGridEditor = new Class(zebra.ui.grid.DefEditors, [
 
         this.editors["0"] = new Checkbox(null);
         this.editors["0"].setLayout(new FlowLayout(CENTER, CENTER));
-        this.editors["1"] = new this.$clazz.Combo();
+        this.editors["1"] = new this.clazz.Combo();
         this.editors["1"].setBorder(null);
         var list = this.editors["1"].list;
         list.model.add("Item 1");
@@ -1369,7 +1369,7 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
         pp.add(new ShaperPan(b));
 
 
-        pp.setBorder(new Border("black"));
+        //pp.setBorder(new Border("black"));
 
         var t = new zebra.ui.tree.Tree(new FormTreeModel(pp, [
             function exclude(c) { return zebra.instanceOf(c, ShaperPan); }

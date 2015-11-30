@@ -142,7 +142,7 @@
                 // TODO: why bind instead of being a manager ?
                 pkg.events.bind(this);
 
-                this._ = new this.$clazz.Listeners();
+                this._ = new this.clazz.Listeners();
 
                 var $clipboard = this.$clipboard = document.createElement("textarea"),
                     $this = this;

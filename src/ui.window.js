@@ -340,8 +340,8 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
         this.winsListeners = {};
         this.winsTypes     = {};
 
-        this._ = new this.$clazz.Listeners();
-        this.id = this.$clazz.ID;
+        this._ = new this.clazz.Listeners();
+        this.id = this.clazz.ID;
         this.$super();
     },
 
@@ -477,47 +477,54 @@ pkg.Window = Class(pkg.StatePan, [
          */
         this.isActive = function() {
             var c = this.getCanvas();
-            return c != null && c.getLayer("win").activeWin == this;
+            return c != null && c.getLayer("win").activeWin === this.getWinContainer();
         };
 
         this.pointerDragStarted = function(e){
-            this.px = e.x;
-            this.py = e.y;
+            this.px = e.absX;
+            this.py = e.absY;
             this.psw = this.width;
             this.psh = this.height;
-            this.action = this.insideCorner(this.px, this.py) ? (this.isSizeable ? SIZE_ACTION : -1)
-                                                              : MOVE_ACTION;
+            this.action = this.insideCorner(e.x, e.y) ? (this.isSizeable ? SIZE_ACTION : -1)
+                                                      : MOVE_ACTION;
             if (this.action > 0) this.dy = this.dx = 0;
         };
 
         this.pointerDragged = function(e){
             if (this.action > 0) {
-                if (this.action != MOVE_ACTION){
+                if (this.action !== MOVE_ACTION){
                     var nw = this.psw + this.dx,
                         nh = this.psh + this.dy;
 
                     if (nw > this.minSize && nh > this.minSize) {
-                        this.setSize(nw, nh);
+                        var container = this.getWinContainer();
+                        container.setSize(this.dx + container.width, this.dy + container.height);
                     }
                 }
 
-                this.dx = (e.x - this.px);
-                this.dy = (e.y - this.py);
-                if (this.action == MOVE_ACTION){
-                    this.invalidate();
-                    this.setLocation(this.x + this.dx, this.y + this.dy);
+                this.dx = (e.absX - this.px);
+                this.dy = (e.absY - this.py);
+                this.px = e.absX;
+                this.py = e.absY;
+                if (this.action === MOVE_ACTION){
+                    var container = this.getWinContainer();
+                    container.setLocation(this.dx + container.x, this.dy + container.y);
                 }
             }
         };
 
         this.pointerDragEnded = function(e){
             if (this.action > 0){
-                if (this.action == MOVE_ACTION){
-                    this.invalidate();
-                    this.setLocation(this.x + this.dx, this.y + this.dy);
+                if (this.action === MOVE_ACTION){
+                    var container = this.getWinContainer();
+                    container.setLocation(this.dx + container.x, this.dy + container.y);
                 }
                 this.action = -1;
             }
+        };
+
+        this.getWinContainer = function() {
+            return this;
         };
 
         /**
@@ -530,7 +537,7 @@ pkg.Window = Class(pkg.StatePan, [
          * @method insideCorner
          */
         this.insideCorner = function(px,py){
-            return this.getComponentAt(px, py) == this.sizer;
+            return this.getComponentAt(px, py) === this.sizer;
         };
 
         this.getCursorType = function(target,x,y){
@@ -540,15 +547,15 @@ pkg.Window = Class(pkg.StatePan, [
 
         this.catchInput = function(c){
             var tp = this.caption;
-            return c == tp || (L.isAncestorOf(tp, c)          &&
+            return c === tp || (L.isAncestorOf(tp, c)         &&
                    zebra.instanceOf(c, pkg.Button) === false) ||
-                   this.sizer == c;
+                   this.sizer === c;
         };
 
         this.winOpened = function(winLayer,target,b) {
             var state = this.isActive() ? "active" : "inactive";
 
-            if (this.caption != null && this.caption.setState) {
+            if (this.caption != null && this.caption.setState != null) {
                 this.caption.setState(state);
             }
             this.setState(state);
@@ -579,15 +586,15 @@ pkg.Window = Class(pkg.StatePan, [
         };
 
         this.createCaptionPan = function() {
-            return new this.$clazz.CaptionPan();
+            return new this.clazz.CaptionPan();
         };
 
         this.createContentPan = function() {
-            return new this.$clazz.ContentPan();
+            return new this.clazz.ContentPan();
         };
 
         this.createTitle = function() {
-            return new this.$clazz.TitleLab();
+            return new this.clazz.TitleLab();
         };
 
         this.setIcon = function(i, icon) {
@@ -656,7 +663,7 @@ pkg.Window = Class(pkg.StatePan, [
          * @readOnly
          */
         this.icons = new pkg.Panel(new L.FlowLayout(L.LEFT, L.CENTER, L.HORIZONTAL, 2));
-        this.icons.add(new this.$clazz.Icon());
+        this.icons.add(new this.clazz.Icon());
 
         /**
          * Window buttons panel. The panel can contain number of window buttons
@@ -676,8 +683,8 @@ pkg.Window = Class(pkg.StatePan, [
          * @readOnly
          * @type {zebra.ui.Panel}
          */
-        this.status = new this.$clazz.StatusPan();
-        this.sizer  = new this.$clazz.SizerIcon();
+        this.status = new this.clazz.StatusPan();
+        this.sizer  = new this.clazz.SizerIcon();
         this.status.add(this.sizer);
 
         this.setSizeable(true);
@@ -692,7 +699,7 @@ pkg.Window = Class(pkg.StatePan, [
     },
 
     function fired(src) {
-        this.removeMe();
+        this.close();
     },
 
     function focused(){
@@ -723,15 +730,17 @@ pkg.Window = Class(pkg.StatePan, [
     function maximize(){
         if(this.prevW < 0){
             var d    = this.getCanvas(),
+                cont = this.getWinContainer(),
                 left = d.getLeft(),
                 top  = d.getTop();
 
-            this.prevX = this.x;
-            this.prevY = this.y;
-            this.prevW = this.width;
-            this.prevH = this.height;
-            this.setBounds(left, top,
-                           d.width - left - d.getRight(),
+            this.prevX = cont.x;
+            this.prevY = cont.y;
+            this.prevW = cont.width;
+            this.prevH = cont.height;
+
+            cont.setBounds(left, top,
+                           d.width  - left - d.getRight(),
                            d.height - top - d.getBottom());
         }
     },
@@ -742,8 +751,8 @@ pkg.Window = Class(pkg.StatePan, [
      */
     function restore(){
         if (this.prevW >= 0){
-            this.setBounds(this.prevX, this.prevY,
-                           this.prevW, this.prevH);
+            this.getWinContainer().setBounds(this.prevX, this.prevY,
+                                             this.prevW, this.prevH);
             this.prevW = -1;
         }
     },
@@ -753,7 +762,7 @@ pkg.Window = Class(pkg.StatePan, [
      * @method close
      */
     function close() {
-        this.removeMe();
+        this.getWinContainer().removeMe();
     },
 
     /**
@@ -775,7 +784,7 @@ pkg.Window = Class(pkg.StatePan, [
         // add new buttons set
         for(var k in buttons) {
             if (buttons.hasOwnProperty(k)) {
-                var b = new this.$clazz.Button();
+                var b = new this.clazz.Button();
                 b.setView(buttons[k]);
                 this.buttons.add(b);
                 (function(t, f) {
@@ -783,6 +792,33 @@ pkg.Window = Class(pkg.StatePan, [
                 })(this, this[k]);
             }
         }
+    }
+]);
+
+
+pkg.HtmlWinCanvas = Class(pkg.HtmlCanvas, [
+    function $prototype() {
+        this.winOpened = function(winLayer,target,b) {
+            this.target.winOpened(winLayer,target,b);
+        };
+
+        this.winActivated = function(winLayer, target,b){
+            this.target.winActivated(winLayer,target,b);
+        };
+    },
+
+    function(target) {
+        this.$super();
+
+        this.target = target;
+
+        var $this = this;
+        target.getWinContainer = function() {
+            return $this;
+        };
+
+        this.setLayout(new L.BorderLayout());
+        this.add("center", target);
     }
 ]);
 
@@ -1026,7 +1062,7 @@ pkg.MenuItem = Class(pkg.Panel, [
 
     function (c) {
         this.$super();
-        this.add(new this.$clazz.CheckStatePan());
+        this.add(new this.clazz.CheckStatePan());
 
         if (zebra.isString(c)) {
             var m = c.match(/(\s*\@\(.*\)\s*)?(\s*\[\s*\]|\s*\[\s*x\s*\]|\s*\(\s*x\s*\)|\s*\(\s*\))?\s*(.*)/);
@@ -1068,14 +1104,14 @@ pkg.MenuItem = Class(pkg.Panel, [
                 this.id = c.toLowerCase().replace(/[ ]+/, '_');
             }
 
-            c = new pkg.ImageLabel(new this.$clazz.Label(c), img);
+            c = new pkg.ImageLabel(new this.clazz.Label(c), img);
         }
         else {
             this.getCheck().setVisible(false);
         }
 
         this.add(c);
-        this.add(new this.$clazz.SubImage());
+        this.add(new this.clazz.SubImage());
 
         this.setEnabled(c.isEnabled);
         this.setVisible(c.isVisible);
@@ -1430,8 +1466,8 @@ pkg.Menu = Class(pkg.CompList, [
 
     function insert(i, ctr, c) {
         if (zebra.isString(c)) {
-            return this.$super(i, ctr, (c.match(/^\-+$/) != null) ? new this.$clazz.Line()
-                                                                  : new this.$clazz.MenuItem(c));
+            return this.$super(i, ctr, (c.match(/^\-+$/) != null) ? new this.clazz.Line()
+                                                                  : new this.clazz.MenuItem(c));
         }
         return this.$super(i, ctr, c);
     },
@@ -1768,7 +1804,7 @@ pkg.PopupLayer = Class(pkg.HtmlCanvas, [
 
     function () {
         this.activeMenubar = null;
-        this.id = this.$clazz.ID;
+        this.id = this.clazz.ID;
         this.$super();
     }
 ]);
@@ -1837,10 +1873,10 @@ pkg.Tooltip = Class(pkg.Panel, [
 
     function(content) {
         this.$super();
-        this.setBorder(new this.$clazz.TooltipBorder(pkg.Tooltip.borderColor,
+        this.setBorder(new this.clazz.TooltipBorder(pkg.Tooltip.borderColor,
                                                      pkg.Tooltip.borderWidth));
         this.add(zebra.instanceOf(content, pkg.Panel) ? content
-                                                      : new this.$clazz.Label(content));
+                                                      : new this.clazz.Label(content));
         this.toPreferredSize();
     },
 

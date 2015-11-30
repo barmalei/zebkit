@@ -6,6 +6,29 @@
 
 		<script src='../zebra.js' type='text/javascript'></script>
 
+			<script src='../src/easyoop.js'  type='text/javascript'></script>
+		    <script src='../src/util.js' 	   type='text/javascript'></script>
+		    <script src='../src/io.js'       type='text/javascript'></script>
+		    <script src='../src/data.js'     type='text/javascript'></script>
+		    <script src='../src/layout.js'   type='text/javascript'></script>
+
+		    <script src='../src/web.js' type='text/javascript'></script>
+		    <script src='../src/ui.webstuff.js' type='text/javascript'></script>
+		    <script src='../src/ui.webpointer.js' type='text/javascript'></script>
+		    <script src='../src/ui.webkey.js' type='text/javascript'></script>
+		    <script src='../src/ui.core.js'      type='text/javascript'></script>
+		    <script src='../src/ui.views.js'      type='text/javascript'></script>
+		    <script src='../src/ui.js' 	      type='text/javascript'></script>
+
+		    <script src='../src/ui.TextField.js' type='text/javascript'></script>
+		    <script src='../src/ui.list.js' type='text/javascript'></script>
+		    <script src='../src/ui.window.js' type='text/javascript'></script>
+
+		    <script src='../src/ui.tree.js' type='text/javascript'></script>
+		    <script src='../src/ui.grid.js' type='text/javascript'></script>
+		    <script src='../src/ui.html.js' type='text/javascript'></script>
+
+
 
 		<script type='text/javascript'>
 		    zebra.ready(function() {
@@ -16,6 +39,11 @@
 				// create canvas
 			    var root = (new zCanvas(800, 400)).root;
 				root.setLayout(new BorderLayout(8,8));
+				root.setPadding(8);
+				root.setBorder("plain");
+
+
+				var html = new HtmlTextField("TextField");
 
 
 				var t = new CompTree({
@@ -27,7 +55,7 @@
 							kids  : [
 								{ value: "[ ] Checkbox 1" },
 								{ value: new TextField("TextField") },
-								{ value: new HtmlTextField("TextField") },
+								{ value: html },
 								{ value: "[x] Test" },
 								{ value: new Button("Button") },
 								{ value: "[] Checkbox 4" },
@@ -107,7 +135,7 @@
 
 				var tt = new Tree(t.model);
 
-
+				html.setVisible(false);
 
 
                 t.bind("selected", function(tree) {

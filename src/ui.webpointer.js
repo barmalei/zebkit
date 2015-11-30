@@ -180,10 +180,10 @@
         },
 
         function(element, destination) {
-            var META = this.$clazz.$META;
+            var META = this.clazz.$META;
             for(var k in META) {
                 if (META[k].test()) {
-                    var $wheelMeta = META[k], $clazz = this.$clazz;
+                    var $wheelMeta = META[k], $clazz = this.clazz;
                     element.addEventListener(k,
                         function(e) {
                             var dy = e[$wheelMeta.dy] != null ? e[$wheelMeta.dy] * $wheelMeta.dir : 0,

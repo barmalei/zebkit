@@ -1108,7 +1108,7 @@ pkg.StringRender = Class(pkg.Render, [
              * @readOnly
              * @type {zebra.ui.Font}
              */
-            this.font = font != null ? font : this.$clazz.font;
+            this.font = font != null ? font : this.clazz.font;
 
             /**
              * Color to be used to render the target string
@@ -1116,7 +1116,7 @@ pkg.StringRender = Class(pkg.Render, [
              * @attribute color
              * @type {String}
              */
-            this.color = color != null ? color : this.$clazz.color;
+            this.color = color != null ? color : this.clazz.color;
         };
 
         this.calcLineWidth = function() {
@@ -1136,7 +1136,7 @@ pkg.StringRender = Class(pkg.Render, [
 
             if (d != null && d.isEnabled === false) {
                 g.fillStyle = d != null && d.disabledColor != null ? d.disabledColor
-                                                                   : this.$clazz.disabledColor;
+                                                                   : this.clazz.disabledColor;
             }
 
             g.fillText(this.target, x, y);
@@ -1488,7 +1488,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
              * @default zebra.ui.TextRender.color
              * @readOnly
              */
-            this.color = this.$clazz.color;
+            this.color = this.clazz.color;
 
             /**
              * Text font
@@ -1497,7 +1497,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
              * @default zebra.ui.TextRender.font
              * @readOnly
              */
-            this.font = this.$clazz.font;
+            this.font = this.clazz.font;
 
 
             this.textWidth = this.textHeight = this.startInvLine = this.invLines = 0;

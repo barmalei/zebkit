@@ -879,10 +879,10 @@ pkg.ArrowButton = Class(pkg.EvStatePan, [
         if (direction == null) direction = "left";
 
         this.setView({
-            "out"          : new this.$clazz.ArrowView(direction, "black"),
-            "over"         : new this.$clazz.ArrowView(direction, "red"),
-            "pressed.over" : new this.$clazz.ArrowView(direction, "black"),
-            "disabled"     : new this.$clazz.ArrowView(direction, "lightGray")
+            "out"          : new this.clazz.ArrowView(direction, "black"),
+            "over"         : new this.clazz.ArrowView(direction, "red"),
+            "pressed.over" : new this.clazz.ArrowView(direction, "black"),
+            "disabled"     : new this.clazz.ArrowView(direction, "lightGray")
         });
         this.$super();
         this.syncState(this.state, this.state);
@@ -955,14 +955,14 @@ pkg.Button = Class(pkg.CompositeEvStatePan, [
 
     function(t) {
         this._ = new Listeners();
-        if (zebra.isString(t)) t = new this.$clazz.Label(t);
+        if (zebra.isString(t)) t = new this.clazz.Label(t);
         else {
             if (t instanceof Image) {
                 t = new pkg.ImagePan(t);
             }
             else {
                 if (t != null && instanceOf(t, pkg.Panel) === false) {
-                    t = new this.$clazz.ViewPan(t);
+                    t = new this.clazz.ViewPan(t);
                 }
             }
         }
@@ -1120,7 +1120,7 @@ pkg.BorderPan = Class(pkg.Panel, [
         if (ctr == null) ctr = L.TOP | L.LEFT;
 
         if (zebra.isString(title)) {
-            title = new this.$clazz.Label(title);
+            title = new this.clazz.Label(title);
         }
 
         /**
@@ -1427,7 +1427,7 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
         if (m == null) m = new pkg.SwitchManager();
 
         if (zebra.isString(c)) {
-            c = new this.$clazz.Label(c);
+            c = new this.clazz.Label(c);
         }
 
         this.$super();
@@ -1438,7 +1438,7 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
          * @type {zebra.ui.Panel}
          * @readOnly
          */
-        this.box = new this.$clazz.Box();
+        this.box = new this.clazz.Box();
         this.add(this.box);
 
         if (c != null) {
@@ -1848,7 +1848,7 @@ pkg.SplitPan = Class(pkg.Panel, [
 
         if (f != null) this.add(L.LEFT, f);
         if (s != null) this.add(L.RIGHT, s);
-        this.add(L.CENTER, new this.$clazz.Bar(this));
+        this.add(L.CENTER, new this.clazz.Bar(this));
     },
 
     function kidAdded(index,ctr,c){
@@ -2273,7 +2273,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
         this.$super();
 
         if (zebra.isString(lab)) {
-            lab = new this.$clazz.Label(lab);
+            lab = new this.clazz.Label(lab);
         }
 
         /**
@@ -2290,7 +2290,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
          * @attribute titlePan
          * @readOnly
          */
-        this.titlePan = new this.$clazz.TitlePan();
+        this.titlePan = new this.clazz.TitlePan();
         this.add(L.TOP, this.titlePan);
 
         /**
@@ -2299,7 +2299,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
          * @attribute togglePan
          * @readOnly
          */
-        this.togglePan = new this.$clazz.TogglePan();
+        this.togglePan = new this.clazz.TogglePan();
         this.titlePan.add(this.togglePan);
         this.titlePan.add(this.label);
 
@@ -2433,7 +2433,7 @@ pkg.ScrollManager = Class([
 
     function (c){
         this.sx = this.sy = 0;
-        this._  = new this.$clazz.Listeners();
+        this._  = new this.clazz.Listeners();
 
         /**
          * Target UI component for that the scroll manager has been instantiated
@@ -3199,7 +3199,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
 
         if (L.CENTER === ctr) {
             if (c.scrollManager == null) {
-                c = new this.$clazz.ContentPan(c);
+                c = new this.clazz.ContentPan(c);
             }
 
             this.scrollObj = c;
@@ -3353,7 +3353,7 @@ pkg.Tabs = Class(pkg.Panel, [
                     }
                 }
 
-                var tp = new this.$clazz.TabPan();
+                var tp = new this.clazz.TabPan();
                 this.$super(tp);
                 this.owner = null;
 
@@ -3369,13 +3369,13 @@ pkg.Tabs = Class(pkg.Panel, [
                     }
                 };
 
-                var r1 = new this.$clazz.captionRender(caption),
-                    r2 = new this.$clazz.captionRender(caption);
+                var r1 = new this.clazz.captionRender(caption),
+                    r2 = new this.clazz.captionRender(caption);
 
-                r2.setColor(this.$clazz.fontColor);
-                r1.setColor(this.$clazz.selectedFontColor);
-                r2.setFont (this.$clazz.font);
-                r1.setFont (this.$clazz.selectedFont);
+                r2.setColor(this.clazz.fontColor);
+                r1.setColor(this.clazz.selectedFontColor);
+                r2.setFont (this.clazz.font);
+                r1.setFont (this.clazz.selectedFont);
 
                 this.getCaptionPan().setView(
                     new pkg.ViewSet(
@@ -4154,11 +4154,11 @@ pkg.Tabs = Class(pkg.Panel, [
 
     function insert(index,constr,c) {
         var render = null;
-        if (instanceOf(constr, this.$clazz.TabView)) {
+        if (instanceOf(constr, this.clazz.TabView)) {
             render = constr;
         }
         else {
-            render = new this.$clazz.TabView((constr == null ? "Page " + index
+            render = new this.clazz.TabView((constr == null ? "Page " + index
                                                              : constr ));
             render.ownerChanged(this); // TODO: a little bit ugly but setting an owner is required to
                                        // keep tabs component informed when an icon has been updated
@@ -4770,7 +4770,7 @@ pkg.Toolbar = Class(pkg.Panel, [
      * @method addRadio
      */
     function addRadio(g,c) {
-        var cbox = new this.$clazz.Radiobox(c, g);
+        var cbox = new this.clazz.Radiobox(c, g);
         cbox.setCanHaveFocus(false);
         return this.add(cbox);
     },
@@ -4783,7 +4783,7 @@ pkg.Toolbar = Class(pkg.Panel, [
      * @method addSwitcher
      */
     function addSwitcher(c){
-        return this.add(new this.$clazz.Checkbox(c));
+        return this.add(new this.clazz.Checkbox(c));
     },
 
     /**
@@ -4794,7 +4794,7 @@ pkg.Toolbar = Class(pkg.Panel, [
      */
     function addImage(img) {
         this.validateMetric();
-        return this.add(new this.$clazz.ImagePan(img));
+        return this.add(new this.clazz.ImagePan(img));
     },
 
     /**
@@ -4805,7 +4805,7 @@ pkg.Toolbar = Class(pkg.Panel, [
      * @method addLine
      */
     function addLine(){
-        var line = new this.$clazz.Line();
+        var line = new this.clazz.Line();
         line.constraints = L.STRETCH;
         return this.addDecorative(line);
     },
@@ -4822,7 +4822,7 @@ pkg.Toolbar = Class(pkg.Panel, [
     },
 
     function insert(i,id,d){
-        return this.$super(i, id, new this.$clazz.ToolPan(d));
+        return this.$super(i, id, new this.clazz.ToolPan(d));
     }
 ]);
 

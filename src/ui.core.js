@@ -1017,11 +1017,13 @@ pkg.Panel = Class(L.Layoutable, [
                     }
                 }
 
-
                 // step III: initiate repainting thread
-                if (canvas.$timer === null && (canvas.isValid === false || canvas.$da.width > 0 || canvas.isLayoutValid === false)) {
+                if (canvas.$paintTask === null && (canvas.isValid === false || canvas.$da.width > 0 || canvas.isLayoutValid === false)) {
                     var $this = this;
-                    canvas.$timer = zebra.web.$task(function() {
+
+                    console.log("$painttask for " + canvas.clazz.$name);
+
+                    canvas.$paintTask = zebra.web.$task(function() {
                         try {
                             var g = null;
 
@@ -1056,13 +1058,13 @@ pkg.Panel = Class(L.Layoutable, [
                                 canvas.paintComponent(g);
                             }
 
-                            canvas.$timer = null;
+                            canvas.$paintTask = null;
                             // no dirty area anymore
                             canvas.$da.width = -1;
                             if (g !== null) g.restore();
                         }
                         catch(ee) {
-                            canvas.$timer = null;
+                            canvas.$paintTask = null;
                             canvas.$da.width = -1;
                             if (g !== null) g.restore();
                             throw ee;
@@ -1782,7 +1784,7 @@ pkg.Panel = Class(L.Layoutable, [
             L.Layoutable.prototype[zebra.CNAME].call(this, l);
 
             // apply default properties
-            this.properties(this.$clazz);
+            this.properties(this.clazz);
 
             if (arguments.length > 0) {
                 if (l.constructor === Object) {
@@ -2181,8 +2183,8 @@ pkg.HtmlElement = Class(pkg.Panel, [
 
         if (zebra.isString(e)) {
             e = document.createElement(e);
-            if (this.$clazz.CLASS_NAME != null) {
-                e.setAttribute("class", this.$clazz.CLASS_NAME);
+            if (this.clazz.CLASS_NAME != null) {
+                e.setAttribute("class", this.clazz.CLASS_NAME);
             }
             e.style.border   = "0px solid transparent"; // clean up border
             e.style.fontSize = $bodyFontSize;           // DOM element is wrapped with a container that
@@ -2478,6 +2480,8 @@ pkg.HtmlCanvas = Class(pkg.HtmlElement, [
         this.$scaleX = 1;
         this.$scaleY = 1;
 
+        this.$paintTask = null;
+
         // set border for canvas has to be set as zebra border, since canvas
         // is DOM component designed for rendering, so setting DOM border
         // doesn't allow us to render zebra border
@@ -2607,7 +2611,7 @@ pkg.HtmlCanvas = Class(pkg.HtmlElement, [
  * @class zebra.ui.BaseLayer
  * @extends {zebra.ui.Panel}
  */
-pkg.BaseLayer = Class(pkg.Panel, [
+pkg.BaseLayer = Class(pkg.HtmlCanvas, [
     function $prototype() {
         /**
          *  Define the method to catch pointer pressed event and
@@ -3426,7 +3430,7 @@ pkg.EventManager = Class(pkg.Manager, [
     },
 
     function() {
-        this._ = new this.$clazz.Listerners();
+        this._ = new this.clazz.Listerners();
         this.$super();
     }
 ]);
@@ -3439,7 +3443,6 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
     function $prototype() {
         this.$isRootCanvas   = true;
         this.$lastFocusOwner = null;
-        this.$timer          = null;
 
         this.$toElementX = function(pageX, pageY) {
             pageX -= this.offx;

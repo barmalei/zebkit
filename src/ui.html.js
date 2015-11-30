@@ -143,11 +143,9 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
         //  Convert DOM (x, y) zebra coordinates into appropriate CSS top and left
         //  locations relatively to its immediate DOM element. For instance if a
         //  zebra component contains DOM component every movement of zebra component
-        //  has to bring to correction of the embedded DOM element
+        //  has to bring to correction of the embedded DOM elements
         function $adjustLocation(c) {
-            if (c.$container.parentNode != null &&
-                zebkit.web.$contains(c.$container))
-            {
+            if (c.$container.parentNode != null) {
                 // hide DOM component before move
                 // makes moving more smooth
                 var prevVisibility = c.$container.style.visibility;
@@ -204,7 +202,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
             var c = e.source;
             if (c.isDOMElement === true) {
                 c.$container.style.visibility = c.isVisible === false || $isInInvisibleState(c) ? "hidden"
-                                                                                               : "visible";
+                                                                                                : "visible";
             }
             else {
                 if (c.$domKids != null) {
@@ -309,8 +307,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
         };
 
         this.compAdded = function(e) {
-            var p = e.source, c = e.kid, constr = e.constraints;
-
+            var p = e.source,  c = e.kid;
             if (c.isDOMElement === true) {
                 $resolveDOMParent(c);
             }
@@ -331,17 +328,21 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
                 // embeds DOM elements
                 while (p != null && p.isDOMElement !== true) {
                     if (p.$domKids == null) {
+                        // if reference to kid DOM element or kid DOM elements holder
+                        // has bot been created we have to continue go up to parent of
+                        // the parent to register the whole chain of DOM and DOM holders
                         p.$domKids = {};
+                        p.$domKids[c] = c;
+                        c = p;
+                        p = p.parent;
                     }
-
-                    if (p.$domKids.hasOwnProperty(c)) {
-                        throw new Error("Inconsistent state ");
+                    else {
+                        if (p.$domKids.hasOwnProperty(c)) {
+                            throw new Error("Inconsistent state for " + c + ", " + c.clazz.$name);
+                        }
+                        p.$domKids[c] = c;
+                        break;
                     }
-
-                    p.$domKids[c] = c;
-
-                    c = p;
-                    p = p.parent;
                 }
             }
         };

@@ -281,10 +281,10 @@ function make_template(pt, tf, p) {
     tf.toString = $toString;
 
     if (pt != null) {
-        tf.prototype.$clazz = tf;
+        tf.prototype.clazz = tf;
     }
 
-    tf.$clazz = pt;
+    tf.clazz = pt;
     tf.prototype.toString = $toString;
     tf.prototype.constructor = tf;
 
@@ -357,7 +357,7 @@ pkg.Singleton = function(clazz) {
         function() {
             // make sure this constructor is not
             // called from a successor class
-            if (this.$clazz === clz) {
+            if (this.clazz === clz) {
                 if (clz.$instance != null) {
                     return clz.$instance;
                 }
@@ -555,7 +555,7 @@ pkg.Class = make_template(null, function() {
         args[i] = arguments[i];
     }
 
-    if (args.length > 0 && (args[0] == null || args[0].$clazz === pkg.Class)) {
+    if (args.length > 0 && (args[0] == null || args[0].clazz === pkg.Class)) {
         $parent = args[0];
     }
 
@@ -634,7 +634,7 @@ pkg.Class = make_template(null, function() {
 
     // extend method cannot be overridden
     $template.prototype.extend = function() {
-        var c = this.$clazz,
+        var c = this.clazz,
             l = arguments.length,
             f = arguments[l-1];
 
@@ -644,8 +644,8 @@ pkg.Class = make_template(null, function() {
         if (this.$extended !== true) {
             c = Class(c,[]);
             this.$extended = true;         // mark the instance as extended to avoid double extending.
-            c.$name = this.$clazz.$name;
-            this.$clazz = c;
+            c.$name = this.clazz.$name;
+            this.clazz = c;
         }
 
         if (Array.isArray(f)) {
@@ -702,7 +702,7 @@ pkg.Class = make_template(null, function() {
                 $s = $s.$parent;
             }
 
-            var cln = this.$clazz && this.$clazz.$name ? this.$clazz.$name + "." : "";
+            var cln = this.clazz && this.clazz.$name ? this.clazz.$name + "." : "";
             throw new ReferenceError("Method '" + cln + (name === CNAME ? "constructor"
                                                                         : name) + "(" + args.length + ")" + "' not found");
         }
@@ -719,11 +719,11 @@ pkg.Class = make_template(null, function() {
 
         nobj.constructor = this.constructor;
         nobj.$hash$ = "$zObj_" + ($$$++);
-        nobj.$clazz = this.$clazz;
+        nobj.clazz = this.clazz;
         return nobj;
     };
 
-    $template.prototype.$clazz = $template;
+    $template.prototype.clazz = $template;
 
     // check if the method has been already defined in the class
     if (typeof $template.prototype.properties === 'undefined') {
@@ -990,11 +990,11 @@ Class.newInstance = function() {
  */
 pkg.instanceOf = function(obj, clazz) {
     if (clazz != null) {
-        if (obj == null || typeof obj.$clazz === 'undefined') {
+        if (obj == null || typeof obj.clazz === 'undefined') {
             return false;
         }
 
-        var c = obj.$clazz;
+        var c = obj.clazz;
         return c != null && (c === clazz ||
                (typeof c.$parents !== 'undefined' && c.$parents.hasOwnProperty(clazz)));
     }
@@ -1576,7 +1576,7 @@ pkg.Layoutable = Class(L, [
             var res = null;
             zebra.util.findInTree(this, $normPath(path),
                 function(node, name) {
-                    return node.$clazz != null && zebra.instanceOf(node, zebra.Class.forName(name));
+                    return node.clazz != null && zebra.instanceOf(node, zebra.Class.forName(name));
                 },
 
                 function(kid) {
@@ -1617,7 +1617,7 @@ pkg.Layoutable = Class(L, [
 
             zebra.util.findInTree(this, $normPath(path),
                 function(node, name) {
-                    return node.$clazz != null && zebra.instanceOf(node, zebra.Class.forName(name));
+                    return node.clazz != null && zebra.instanceOf(node, zebra.Class.forName(name));
                 }, callback);
             return res;
         };
@@ -4118,7 +4118,7 @@ var  Position = pkg.Position = Class([
         };
 
         this[''] = function(pi){
-            this._ = new this.$clazz.Listeners();
+            this._ = new this.clazz.Listeners();
             this.isValid = false;
 
             /**
@@ -6169,7 +6169,7 @@ pkg.Text = Class(pkg.TextModel, [
 
         this[''] = function(s){
             this.lines = [ new Line("") ];
-            this._ = new this.$clazz.Listeners();
+            this._ = new this.clazz.Listeners();
             this.setValue(s == null ? "" : s);
         };
     }
@@ -6317,7 +6317,7 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
             this.maxLen = max == null ? -1 : max;
             this.buf = "";
             this.extra = 0;
-            this._ = new this.$clazz.Listeners();
+            this._ = new this.clazz.Listeners();
             this.setValue(s == null ? "" : s);
         };
     }
@@ -6496,7 +6496,7 @@ pkg.ListModel = Class([
         };
 
         this[''] = function() {
-            this._ = new this.$clazz.Listeners();
+            this._ = new this.clazz.Listeners();
             this.d = (arguments.length === 0) ? [] : arguments[0];
         };
     }
@@ -6754,7 +6754,7 @@ pkg.TreeModel = Class([
              */
             this.root = zebra.instanceOf(r, Item) ? r : pkg.TreeModel.create(r);
             this.root.parent = null;
-            this._ = new this.$clazz.Listeners();
+            this._ = new this.clazz.Listeners();
         };
     }
 ]);
@@ -7079,7 +7079,7 @@ pkg.Matrix = Class([
              * @readOnly
              */
 
-            this._ = new this.$clazz.Listeners();
+            this._ = new this.clazz.Listeners();
             if (arguments.length == 1) {
                 this.objs = arguments[0];
                 this.cols = (this.objs.length > 0) ? this.objs[0].length : 0;
@@ -7644,7 +7644,7 @@ pkg.Matrix = Class([
                 // TODO: why bind instead of being a manager ?
                 pkg.events.bind(this);
 
-                this._ = new this.$clazz.Listeners();
+                this._ = new this.clazz.Listeners();
 
                 var $clipboard = this.$clipboard = document.createElement("textarea"),
                     $this = this;
@@ -7904,10 +7904,10 @@ pkg.Matrix = Class([
         },
 
         function(element, destination) {
-            var META = this.$clazz.$META;
+            var META = this.clazz.$META;
             for(var k in META) {
                 if (META[k].test()) {
-                    var $wheelMeta = META[k], $clazz = this.$clazz;
+                    var $wheelMeta = META[k], $clazz = this.clazz;
                     element.addEventListener(k,
                         function(e) {
                             var dy = e[$wheelMeta.dy] != null ? e[$wheelMeta.dy] * $wheelMeta.dir : 0,
@@ -9816,11 +9816,13 @@ pkg.Panel = Class(L.Layoutable, [
                     }
                 }
 
-
                 // step III: initiate repainting thread
-                if (canvas.$timer === null && (canvas.isValid === false || canvas.$da.width > 0 || canvas.isLayoutValid === false)) {
+                if (canvas.$paintTask === null && (canvas.isValid === false || canvas.$da.width > 0 || canvas.isLayoutValid === false)) {
                     var $this = this;
-                    canvas.$timer = zebra.web.$task(function() {
+
+                    console.log("$painttask for " + canvas.clazz.$name);
+
+                    canvas.$paintTask = zebra.web.$task(function() {
                         try {
                             var g = null;
 
@@ -9855,13 +9857,13 @@ pkg.Panel = Class(L.Layoutable, [
                                 canvas.paintComponent(g);
                             }
 
-                            canvas.$timer = null;
+                            canvas.$paintTask = null;
                             // no dirty area anymore
                             canvas.$da.width = -1;
                             if (g !== null) g.restore();
                         }
                         catch(ee) {
-                            canvas.$timer = null;
+                            canvas.$paintTask = null;
                             canvas.$da.width = -1;
                             if (g !== null) g.restore();
                             throw ee;
@@ -10581,7 +10583,7 @@ pkg.Panel = Class(L.Layoutable, [
             L.Layoutable.prototype[zebra.CNAME].call(this, l);
 
             // apply default properties
-            this.properties(this.$clazz);
+            this.properties(this.clazz);
 
             if (arguments.length > 0) {
                 if (l.constructor === Object) {
@@ -10980,8 +10982,8 @@ pkg.HtmlElement = Class(pkg.Panel, [
 
         if (zebra.isString(e)) {
             e = document.createElement(e);
-            if (this.$clazz.CLASS_NAME != null) {
-                e.setAttribute("class", this.$clazz.CLASS_NAME);
+            if (this.clazz.CLASS_NAME != null) {
+                e.setAttribute("class", this.clazz.CLASS_NAME);
             }
             e.style.border   = "0px solid transparent"; // clean up border
             e.style.fontSize = $bodyFontSize;           // DOM element is wrapped with a container that
@@ -11277,6 +11279,8 @@ pkg.HtmlCanvas = Class(pkg.HtmlElement, [
         this.$scaleX = 1;
         this.$scaleY = 1;
 
+        this.$paintTask = null;
+
         // set border for canvas has to be set as zebra border, since canvas
         // is DOM component designed for rendering, so setting DOM border
         // doesn't allow us to render zebra border
@@ -11406,7 +11410,7 @@ pkg.HtmlCanvas = Class(pkg.HtmlElement, [
  * @class zebra.ui.BaseLayer
  * @extends {zebra.ui.Panel}
  */
-pkg.BaseLayer = Class(pkg.Panel, [
+pkg.BaseLayer = Class(pkg.HtmlCanvas, [
     function $prototype() {
         /**
          *  Define the method to catch pointer pressed event and
@@ -12225,7 +12229,7 @@ pkg.EventManager = Class(pkg.Manager, [
     },
 
     function() {
-        this._ = new this.$clazz.Listerners();
+        this._ = new this.clazz.Listerners();
         this.$super();
     }
 ]);
@@ -12238,7 +12242,6 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
     function $prototype() {
         this.$isRootCanvas   = true;
         this.$lastFocusOwner = null;
-        this.$timer          = null;
 
         this.$toElementX = function(pageX, pageY) {
             pageX -= this.offx;
@@ -13939,7 +13942,7 @@ pkg.StringRender = Class(pkg.Render, [
              * @readOnly
              * @type {zebra.ui.Font}
              */
-            this.font = font != null ? font : this.$clazz.font;
+            this.font = font != null ? font : this.clazz.font;
 
             /**
              * Color to be used to render the target string
@@ -13947,7 +13950,7 @@ pkg.StringRender = Class(pkg.Render, [
              * @attribute color
              * @type {String}
              */
-            this.color = color != null ? color : this.$clazz.color;
+            this.color = color != null ? color : this.clazz.color;
         };
 
         this.calcLineWidth = function() {
@@ -13967,7 +13970,7 @@ pkg.StringRender = Class(pkg.Render, [
 
             if (d != null && d.isEnabled === false) {
                 g.fillStyle = d != null && d.disabledColor != null ? d.disabledColor
-                                                                   : this.$clazz.disabledColor;
+                                                                   : this.clazz.disabledColor;
             }
 
             g.fillText(this.target, x, y);
@@ -14319,7 +14322,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
              * @default zebra.ui.TextRender.color
              * @readOnly
              */
-            this.color = this.$clazz.color;
+            this.color = this.clazz.color;
 
             /**
              * Text font
@@ -14328,7 +14331,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
              * @default zebra.ui.TextRender.font
              * @readOnly
              */
-            this.font = this.$clazz.font;
+            this.font = this.clazz.font;
 
 
             this.textWidth = this.textHeight = this.startInvLine = this.invLines = 0;
@@ -15915,10 +15918,10 @@ pkg.ArrowButton = Class(pkg.EvStatePan, [
         if (direction == null) direction = "left";
 
         this.setView({
-            "out"          : new this.$clazz.ArrowView(direction, "black"),
-            "over"         : new this.$clazz.ArrowView(direction, "red"),
-            "pressed.over" : new this.$clazz.ArrowView(direction, "black"),
-            "disabled"     : new this.$clazz.ArrowView(direction, "lightGray")
+            "out"          : new this.clazz.ArrowView(direction, "black"),
+            "over"         : new this.clazz.ArrowView(direction, "red"),
+            "pressed.over" : new this.clazz.ArrowView(direction, "black"),
+            "disabled"     : new this.clazz.ArrowView(direction, "lightGray")
         });
         this.$super();
         this.syncState(this.state, this.state);
@@ -15991,14 +15994,14 @@ pkg.Button = Class(pkg.CompositeEvStatePan, [
 
     function(t) {
         this._ = new Listeners();
-        if (zebra.isString(t)) t = new this.$clazz.Label(t);
+        if (zebra.isString(t)) t = new this.clazz.Label(t);
         else {
             if (t instanceof Image) {
                 t = new pkg.ImagePan(t);
             }
             else {
                 if (t != null && instanceOf(t, pkg.Panel) === false) {
-                    t = new this.$clazz.ViewPan(t);
+                    t = new this.clazz.ViewPan(t);
                 }
             }
         }
@@ -16156,7 +16159,7 @@ pkg.BorderPan = Class(pkg.Panel, [
         if (ctr == null) ctr = L.TOP | L.LEFT;
 
         if (zebra.isString(title)) {
-            title = new this.$clazz.Label(title);
+            title = new this.clazz.Label(title);
         }
 
         /**
@@ -16463,7 +16466,7 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
         if (m == null) m = new pkg.SwitchManager();
 
         if (zebra.isString(c)) {
-            c = new this.$clazz.Label(c);
+            c = new this.clazz.Label(c);
         }
 
         this.$super();
@@ -16474,7 +16477,7 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
          * @type {zebra.ui.Panel}
          * @readOnly
          */
-        this.box = new this.$clazz.Box();
+        this.box = new this.clazz.Box();
         this.add(this.box);
 
         if (c != null) {
@@ -16884,7 +16887,7 @@ pkg.SplitPan = Class(pkg.Panel, [
 
         if (f != null) this.add(L.LEFT, f);
         if (s != null) this.add(L.RIGHT, s);
-        this.add(L.CENTER, new this.$clazz.Bar(this));
+        this.add(L.CENTER, new this.clazz.Bar(this));
     },
 
     function kidAdded(index,ctr,c){
@@ -17309,7 +17312,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
         this.$super();
 
         if (zebra.isString(lab)) {
-            lab = new this.$clazz.Label(lab);
+            lab = new this.clazz.Label(lab);
         }
 
         /**
@@ -17326,7 +17329,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
          * @attribute titlePan
          * @readOnly
          */
-        this.titlePan = new this.$clazz.TitlePan();
+        this.titlePan = new this.clazz.TitlePan();
         this.add(L.TOP, this.titlePan);
 
         /**
@@ -17335,7 +17338,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
          * @attribute togglePan
          * @readOnly
          */
-        this.togglePan = new this.$clazz.TogglePan();
+        this.togglePan = new this.clazz.TogglePan();
         this.titlePan.add(this.togglePan);
         this.titlePan.add(this.label);
 
@@ -17469,7 +17472,7 @@ pkg.ScrollManager = Class([
 
     function (c){
         this.sx = this.sy = 0;
-        this._  = new this.$clazz.Listeners();
+        this._  = new this.clazz.Listeners();
 
         /**
          * Target UI component for that the scroll manager has been instantiated
@@ -18235,7 +18238,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
 
         if (L.CENTER === ctr) {
             if (c.scrollManager == null) {
-                c = new this.$clazz.ContentPan(c);
+                c = new this.clazz.ContentPan(c);
             }
 
             this.scrollObj = c;
@@ -18389,7 +18392,7 @@ pkg.Tabs = Class(pkg.Panel, [
                     }
                 }
 
-                var tp = new this.$clazz.TabPan();
+                var tp = new this.clazz.TabPan();
                 this.$super(tp);
                 this.owner = null;
 
@@ -18405,13 +18408,13 @@ pkg.Tabs = Class(pkg.Panel, [
                     }
                 };
 
-                var r1 = new this.$clazz.captionRender(caption),
-                    r2 = new this.$clazz.captionRender(caption);
+                var r1 = new this.clazz.captionRender(caption),
+                    r2 = new this.clazz.captionRender(caption);
 
-                r2.setColor(this.$clazz.fontColor);
-                r1.setColor(this.$clazz.selectedFontColor);
-                r2.setFont (this.$clazz.font);
-                r1.setFont (this.$clazz.selectedFont);
+                r2.setColor(this.clazz.fontColor);
+                r1.setColor(this.clazz.selectedFontColor);
+                r2.setFont (this.clazz.font);
+                r1.setFont (this.clazz.selectedFont);
 
                 this.getCaptionPan().setView(
                     new pkg.ViewSet(
@@ -19190,11 +19193,11 @@ pkg.Tabs = Class(pkg.Panel, [
 
     function insert(index,constr,c) {
         var render = null;
-        if (instanceOf(constr, this.$clazz.TabView)) {
+        if (instanceOf(constr, this.clazz.TabView)) {
             render = constr;
         }
         else {
-            render = new this.$clazz.TabView((constr == null ? "Page " + index
+            render = new this.clazz.TabView((constr == null ? "Page " + index
                                                              : constr ));
             render.ownerChanged(this); // TODO: a little bit ugly but setting an owner is required to
                                        // keep tabs component informed when an icon has been updated
@@ -19806,7 +19809,7 @@ pkg.Toolbar = Class(pkg.Panel, [
      * @method addRadio
      */
     function addRadio(g,c) {
-        var cbox = new this.$clazz.Radiobox(c, g);
+        var cbox = new this.clazz.Radiobox(c, g);
         cbox.setCanHaveFocus(false);
         return this.add(cbox);
     },
@@ -19819,7 +19822,7 @@ pkg.Toolbar = Class(pkg.Panel, [
      * @method addSwitcher
      */
     function addSwitcher(c){
-        return this.add(new this.$clazz.Checkbox(c));
+        return this.add(new this.clazz.Checkbox(c));
     },
 
     /**
@@ -19830,7 +19833,7 @@ pkg.Toolbar = Class(pkg.Panel, [
      */
     function addImage(img) {
         this.validateMetric();
-        return this.add(new this.$clazz.ImagePan(img));
+        return this.add(new this.clazz.ImagePan(img));
     },
 
     /**
@@ -19841,7 +19844,7 @@ pkg.Toolbar = Class(pkg.Panel, [
      * @method addLine
      */
     function addLine(){
-        var line = new this.$clazz.Line();
+        var line = new this.clazz.Line();
         line.constraints = L.STRETCH;
         return this.addDecorative(line);
     },
@@ -19858,7 +19861,7 @@ pkg.Toolbar = Class(pkg.Panel, [
     },
 
     function insert(i,id,d){
-        return this.$super(i, id, new this.$clazz.ToolPan(d));
+        return this.$super(i, id, new this.clazz.ToolPan(d));
     }
 ]);
 
@@ -20647,7 +20650,7 @@ pkg.TextField = Class(pkg.Label, [
          * @method setHint
          */
         this.setHint = function(hint) {
-            this.hint = zebra.isString(hint) ? new this.$clazz.HintRender(hint) : pkg.$view(hint);
+            this.hint = zebra.isString(hint) ? new this.clazz.HintRender(hint) : pkg.$view(hint);
             this.repaint();
             return this.hint;
         };
@@ -21679,7 +21682,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
          */
         this.selectedIndex = -1;
 
-        this._ = new this.$clazz.Listeners();
+        this._ = new this.clazz.Listeners();
 
         /**
          * Indicate the current mode the list items selection has to work
@@ -21806,7 +21809,7 @@ pkg.List = Class(pkg.BaseList, [
                      */
 
                     this.text = new pkg.StringRender("");
-                    zebra.properties(this, this.$clazz);
+                    zebra.properties(this, this.clazz);
                     if (f != null) this.text.setFont(f);
                     if (c != null) this.text.setColor(c);
                 };
@@ -22049,7 +22052,7 @@ pkg.List = Class(pkg.BaseList, [
          * @private
          */
         this.visValid = false;
-        this.setViewProvider(new this.$clazz.ViewProvider());
+        this.setViewProvider(new this.clazz.ViewProvider());
         this.$super(m, b);
     },
 
@@ -22222,7 +22225,7 @@ pkg.CompList = Class(pkg.BaseList, [
         if (i < 0 || i > this.kids.length) {
             throw new RangeError(i);
         }
-        return this.$super(i, constr, zebra.instanceOf(e, pkg.Panel) ? e : new this.$clazz.Label("" + e));
+        return this.$super(i, constr, zebra.instanceOf(e, pkg.Panel) ? e : new this.clazz.Label("" + e));
     },
 
     function kidAdded(index,constr,e){
@@ -22500,7 +22503,7 @@ pkg.Combo = Class(pkg.Panel, [
 
             function (){
                 this.$super();
-                this._ = new this.$clazz.Listeners();
+                this._ = new this.clazz.Listeners();
 
                 this.isEditable = true;
 
@@ -22514,7 +22517,7 @@ pkg.Combo = Class(pkg.Panel, [
                  * @private
                  * @type {zebra.ui.TextField}
                  */
-                this.textField = new this.$clazz.TextField("",  -1);
+                this.textField = new this.clazz.TextField("",  -1);
                 this.textField.view.target.bind(this);
                 this.add(L.CENTER, this.textField);
             }
@@ -22704,7 +22707,7 @@ pkg.Combo = Class(pkg.Panel, [
                 if (this.list._) this.list.bind(this);
 
                 var $this = this;
-                this.winpad = new this.$clazz.ComboPadPan(this.list, [
+                this.winpad = new this.clazz.ComboPadPan(this.list, [
                     function setParent(p) {
                         this.$super(p);
                         if ($this.padShown != null) {
@@ -22779,8 +22782,8 @@ pkg.Combo = Class(pkg.Panel, [
                     ctr = this.content.constraints;
                     this.content.removeMe();
                 }
-                this.add(ctr, b ? new this.$clazz.EditableContentPan()
-                                : new this.$clazz.ReadonlyContentPan());
+                this.add(ctr, b ? new this.clazz.EditableContentPan()
+                                : new this.clazz.ReadonlyContentPan());
             }
         };
 
@@ -22822,7 +22825,7 @@ pkg.Combo = Class(pkg.Panel, [
         }
 
         if (list == null) {
-            list = new this.$clazz.List(true);
+            list = new this.clazz.List(true);
         }
 
         /**
@@ -22832,7 +22835,7 @@ pkg.Combo = Class(pkg.Panel, [
          * @type {zebra.ui.BaseList}
          */
         if (zebra.instanceOf(list, pkg.BaseList) === false) {
-            list = new this.$clazz.List(list, true);
+            list = new this.clazz.List(list, true);
         }
 
         /**
@@ -22874,14 +22877,14 @@ pkg.Combo = Class(pkg.Panel, [
         this.maxPadHeight = 0;
 
         this.$lockListSelEvent = false;
-        this._ = new this.$clazz.Listeners();
+        this._ = new this.clazz.Listeners();
         this.setList(list);
 
         this.$super();
 
-        this.add(L.CENTER, editable ? new this.$clazz.EditableContentPan()
-                                    : new this.$clazz.ReadonlyContentPan());
-        this.add(L.RIGHT, new this.$clazz.Button());
+        this.add(L.CENTER, editable ? new this.clazz.EditableContentPan()
+                                    : new this.clazz.ReadonlyContentPan());
+        this.add(L.RIGHT, new this.clazz.Button());
     },
 
     function focused(){
@@ -22890,7 +22893,7 @@ pkg.Combo = Class(pkg.Panel, [
     },
 
     function kidAdded(index,s,c){
-        if (zebra.instanceOf(c, this.$clazz.ContentPan)) {
+        if (zebra.instanceOf(c, this.clazz.ContentPan)) {
             if (this.content != null) {
                 throw new Error("Content panel is set");
             }
@@ -23281,8 +23284,8 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
         this.winsListeners = {};
         this.winsTypes     = {};
 
-        this._ = new this.$clazz.Listeners();
-        this.id = this.$clazz.ID;
+        this._ = new this.clazz.Listeners();
+        this.id = this.clazz.ID;
         this.$super();
     },
 
@@ -23418,47 +23421,54 @@ pkg.Window = Class(pkg.StatePan, [
          */
         this.isActive = function() {
             var c = this.getCanvas();
-            return c != null && c.getLayer("win").activeWin == this;
+            return c != null && c.getLayer("win").activeWin === this.getWinContainer();
         };
 
         this.pointerDragStarted = function(e){
-            this.px = e.x;
-            this.py = e.y;
+            this.px = e.absX;
+            this.py = e.absY;
             this.psw = this.width;
             this.psh = this.height;
-            this.action = this.insideCorner(this.px, this.py) ? (this.isSizeable ? SIZE_ACTION : -1)
-                                                              : MOVE_ACTION;
+            this.action = this.insideCorner(e.x, e.y) ? (this.isSizeable ? SIZE_ACTION : -1)
+                                                      : MOVE_ACTION;
             if (this.action > 0) this.dy = this.dx = 0;
         };
 
         this.pointerDragged = function(e){
             if (this.action > 0) {
-                if (this.action != MOVE_ACTION){
+                if (this.action !== MOVE_ACTION){
                     var nw = this.psw + this.dx,
                         nh = this.psh + this.dy;
 
                     if (nw > this.minSize && nh > this.minSize) {
-                        this.setSize(nw, nh);
+                        var container = this.getWinContainer();
+                        container.setSize(this.dx + container.width, this.dy + container.height);
                     }
                 }
 
-                this.dx = (e.x - this.px);
-                this.dy = (e.y - this.py);
-                if (this.action == MOVE_ACTION){
-                    this.invalidate();
-                    this.setLocation(this.x + this.dx, this.y + this.dy);
+                this.dx = (e.absX - this.px);
+                this.dy = (e.absY - this.py);
+                this.px = e.absX;
+                this.py = e.absY;
+                if (this.action === MOVE_ACTION){
+                    var container = this.getWinContainer();
+                    container.setLocation(this.dx + container.x, this.dy + container.y);
                 }
             }
         };
 
         this.pointerDragEnded = function(e){
             if (this.action > 0){
-                if (this.action == MOVE_ACTION){
-                    this.invalidate();
-                    this.setLocation(this.x + this.dx, this.y + this.dy);
+                if (this.action === MOVE_ACTION){
+                    var container = this.getWinContainer();
+                    container.setLocation(this.dx + container.x, this.dy + container.y);
                 }
                 this.action = -1;
             }
+        };
+
+        this.getWinContainer = function() {
+            return this;
         };
 
         /**
@@ -23471,7 +23481,7 @@ pkg.Window = Class(pkg.StatePan, [
          * @method insideCorner
          */
         this.insideCorner = function(px,py){
-            return this.getComponentAt(px, py) == this.sizer;
+            return this.getComponentAt(px, py) === this.sizer;
         };
 
         this.getCursorType = function(target,x,y){
@@ -23481,15 +23491,15 @@ pkg.Window = Class(pkg.StatePan, [
 
         this.catchInput = function(c){
             var tp = this.caption;
-            return c == tp || (L.isAncestorOf(tp, c)          &&
+            return c === tp || (L.isAncestorOf(tp, c)         &&
                    zebra.instanceOf(c, pkg.Button) === false) ||
-                   this.sizer == c;
+                   this.sizer === c;
         };
 
         this.winOpened = function(winLayer,target,b) {
             var state = this.isActive() ? "active" : "inactive";
 
-            if (this.caption != null && this.caption.setState) {
+            if (this.caption != null && this.caption.setState != null) {
                 this.caption.setState(state);
             }
             this.setState(state);
@@ -23520,15 +23530,15 @@ pkg.Window = Class(pkg.StatePan, [
         };
 
         this.createCaptionPan = function() {
-            return new this.$clazz.CaptionPan();
+            return new this.clazz.CaptionPan();
         };
 
         this.createContentPan = function() {
-            return new this.$clazz.ContentPan();
+            return new this.clazz.ContentPan();
         };
 
         this.createTitle = function() {
-            return new this.$clazz.TitleLab();
+            return new this.clazz.TitleLab();
         };
 
         this.setIcon = function(i, icon) {
@@ -23597,7 +23607,7 @@ pkg.Window = Class(pkg.StatePan, [
          * @readOnly
          */
         this.icons = new pkg.Panel(new L.FlowLayout(L.LEFT, L.CENTER, L.HORIZONTAL, 2));
-        this.icons.add(new this.$clazz.Icon());
+        this.icons.add(new this.clazz.Icon());
 
         /**
          * Window buttons panel. The panel can contain number of window buttons
@@ -23617,8 +23627,8 @@ pkg.Window = Class(pkg.StatePan, [
          * @readOnly
          * @type {zebra.ui.Panel}
          */
-        this.status = new this.$clazz.StatusPan();
-        this.sizer  = new this.$clazz.SizerIcon();
+        this.status = new this.clazz.StatusPan();
+        this.sizer  = new this.clazz.SizerIcon();
         this.status.add(this.sizer);
 
         this.setSizeable(true);
@@ -23633,7 +23643,7 @@ pkg.Window = Class(pkg.StatePan, [
     },
 
     function fired(src) {
-        this.removeMe();
+        this.close();
     },
 
     function focused(){
@@ -23664,15 +23674,17 @@ pkg.Window = Class(pkg.StatePan, [
     function maximize(){
         if(this.prevW < 0){
             var d    = this.getCanvas(),
+                cont = this.getWinContainer(),
                 left = d.getLeft(),
                 top  = d.getTop();
 
-            this.prevX = this.x;
-            this.prevY = this.y;
-            this.prevW = this.width;
-            this.prevH = this.height;
-            this.setBounds(left, top,
-                           d.width - left - d.getRight(),
+            this.prevX = cont.x;
+            this.prevY = cont.y;
+            this.prevW = cont.width;
+            this.prevH = cont.height;
+
+            cont.setBounds(left, top,
+                           d.width  - left - d.getRight(),
                            d.height - top - d.getBottom());
         }
     },
@@ -23683,8 +23695,8 @@ pkg.Window = Class(pkg.StatePan, [
      */
     function restore(){
         if (this.prevW >= 0){
-            this.setBounds(this.prevX, this.prevY,
-                           this.prevW, this.prevH);
+            this.getWinContainer().setBounds(this.prevX, this.prevY,
+                                             this.prevW, this.prevH);
             this.prevW = -1;
         }
     },
@@ -23694,7 +23706,7 @@ pkg.Window = Class(pkg.StatePan, [
      * @method close
      */
     function close() {
-        this.removeMe();
+        this.getWinContainer().removeMe();
     },
 
     /**
@@ -23716,7 +23728,7 @@ pkg.Window = Class(pkg.StatePan, [
         // add new buttons set
         for(var k in buttons) {
             if (buttons.hasOwnProperty(k)) {
-                var b = new this.$clazz.Button();
+                var b = new this.clazz.Button();
                 b.setView(buttons[k]);
                 this.buttons.add(b);
                 (function(t, f) {
@@ -23724,6 +23736,33 @@ pkg.Window = Class(pkg.StatePan, [
                 })(this, this[k]);
             }
         }
+    }
+]);
+
+
+pkg.HtmlWinCanvas = Class(pkg.HtmlCanvas, [
+    function $prototype() {
+        this.winOpened = function(winLayer,target,b) {
+            this.target.winOpened(winLayer,target,b);
+        };
+
+        this.winActivated = function(winLayer, target,b){
+            this.target.winActivated(winLayer,target,b);
+        };
+    },
+
+    function(target) {
+        this.$super();
+
+        this.target = target;
+
+        var $this = this;
+        target.getWinContainer = function() {
+            return $this;
+        };
+
+        this.setLayout(new L.BorderLayout());
+        this.add("center", target);
     }
 ]);
 
@@ -23967,7 +24006,7 @@ pkg.MenuItem = Class(pkg.Panel, [
 
     function (c) {
         this.$super();
-        this.add(new this.$clazz.CheckStatePan());
+        this.add(new this.clazz.CheckStatePan());
 
         if (zebra.isString(c)) {
             var m = c.match(/(\s*\@\(.*\)\s*)?(\s*\[\s*\]|\s*\[\s*x\s*\]|\s*\(\s*x\s*\)|\s*\(\s*\))?\s*(.*)/);
@@ -24009,14 +24048,14 @@ pkg.MenuItem = Class(pkg.Panel, [
                 this.id = c.toLowerCase().replace(/[ ]+/, '_');
             }
 
-            c = new pkg.ImageLabel(new this.$clazz.Label(c), img);
+            c = new pkg.ImageLabel(new this.clazz.Label(c), img);
         }
         else {
             this.getCheck().setVisible(false);
         }
 
         this.add(c);
-        this.add(new this.$clazz.SubImage());
+        this.add(new this.clazz.SubImage());
 
         this.setEnabled(c.isEnabled);
         this.setVisible(c.isVisible);
@@ -24371,8 +24410,8 @@ pkg.Menu = Class(pkg.CompList, [
 
     function insert(i, ctr, c) {
         if (zebra.isString(c)) {
-            return this.$super(i, ctr, (c.match(/^\-+$/) != null) ? new this.$clazz.Line()
-                                                                  : new this.$clazz.MenuItem(c));
+            return this.$super(i, ctr, (c.match(/^\-+$/) != null) ? new this.clazz.Line()
+                                                                  : new this.clazz.MenuItem(c));
         }
         return this.$super(i, ctr, c);
     },
@@ -24709,7 +24748,7 @@ pkg.PopupLayer = Class(pkg.HtmlCanvas, [
 
     function () {
         this.activeMenubar = null;
-        this.id = this.$clazz.ID;
+        this.id = this.clazz.ID;
         this.$super();
     }
 ]);
@@ -24778,10 +24817,10 @@ pkg.Tooltip = Class(pkg.Panel, [
 
     function(content) {
         this.$super();
-        this.setBorder(new this.$clazz.TooltipBorder(pkg.Tooltip.borderColor,
+        this.setBorder(new this.clazz.TooltipBorder(pkg.Tooltip.borderColor,
                                                      pkg.Tooltip.borderWidth));
         this.add(zebra.instanceOf(content, pkg.Panel) ? content
-                                                      : new this.$clazz.Label(content));
+                                                      : new this.clazz.Label(content));
         this.toPreferredSize();
     },
 
@@ -25311,7 +25350,7 @@ pkg.DefViews = Class([
              * @protected
              */
             this.render = (render == null ? new ui.StringRender("") : render);
-            zebra.properties(this, this.$clazz);
+            zebra.properties(this, this.clazz);
         };
 
         /**
@@ -25468,9 +25507,9 @@ pkg.DefEditors = Class([
 
     function $prototype() {
         this[''] = function() {
-            this.textEditor     = new this.$clazz.TextField("", 150);
-            this.boolEditor     = new this.$clazz.Checkbox(null);
-            this.selectorEditor = new this.$clazz.Combo();
+            this.textEditor     = new this.clazz.TextField("", 150);
+            this.boolEditor     = new this.clazz.Checkbox(null);
+            this.selectorEditor = new this.clazz.Combo();
 
             this.editors    = {};
         };
@@ -25512,7 +25551,7 @@ pkg.DefEditors = Class([
             }
 
             editor = zebra.isBoolean(v) ? this.boolEditor
-                                        : (zebra.instanceOf(v, this.$clazz.Items) ? this.selectorEditor : this.textEditor);
+                                        : (zebra.instanceOf(v, this.clazz.Items) ? this.selectorEditor : this.textEditor);
 
             if (editor === this.selectorEditor) {
                 editor.list.setModel(v.items);
@@ -25855,7 +25894,7 @@ pkg.BaseCaption = Class(ui.Panel, [
     },
 
     function(titles) {
-        this._ = new this.$clazz.Listeners();
+        this._ = new this.clazz.Listeners();
         this.orient = this.metrics = this.pxy = null;
         this.selectedColRow = -1;
         this.$super();
@@ -26292,11 +26331,11 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
         this.putTitle = function(rowcol, t) {
             // add empty titles
             for(var i = this.kids.length - 1;  i >= 0 && i < rowcol; i++) {
-                this.add(new this.$clazz.TitlePan(""));
+                this.add(new this.clazz.TitlePan(""));
             }
 
             if (zebra.isString(t)) {
-                t = new this.$clazz.TitlePan("");
+                t = new this.clazz.TitlePan("");
             }
             else {
                 if (zebra.instanceOf(t, ui.View)) {
@@ -26371,7 +26410,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
 
     function insert(i,constr, c) {
         if (zebra.isString(c)) {
-            c = new this.$clazz.TitlePan(c);
+            c = new this.clazz.TitlePan(c);
         }
         this.$super(i,constr, c);
     },
@@ -26380,7 +26419,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
         if (arguments === 0) titles = null;
 
         this.$super(titles);
-        this.setLayout(new this.$clazz.Layout());
+        this.setLayout(new this.clazz.Layout());
     }
 ]);
 
@@ -28150,7 +28189,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
             this.psWidth_    = this.psHeight_  = this.colOffset = 0;
             this.rowOffset   = this.pressedCol = this.selectedIndex = 0;
             this.visibleArea = null;
-            this._ = new this.$clazz.Listeners();
+            this._ = new this.clazz.Listeners();
             this.views = {};
 
             /**
@@ -28193,7 +28232,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
 
             this.$super();
 
-            this.add(L.NONE, new this.$clazz.CornerPan());
+            this.add(L.NONE, new this.clazz.CornerPan());
             this.setModel(model);
             this.setViewProvider(new pkg.DefViews());
             this.setPosition(new Position(this));
@@ -29450,7 +29489,7 @@ pkg.BaseTree = Class(ui.Panel, [
 
         this._isVal = false;
         this.nodes = {};
-        this._ = new this.$clazz.Listeners();
+        this._ = new this.clazz.Listeners();
         this.setLineColor("gray");
 
         this.isOpenVal = b;
@@ -29580,7 +29619,7 @@ pkg.BaseTree = Class(ui.Panel, [
         if (this.isValid === true){
             this._isVal = false;
         }
-            this.$super();
+        this.$super();
     }
 ]);
 
@@ -29693,7 +29732,7 @@ pkg.DefViews = Class([
              */
             this.render = new ui.StringRender("");
 
-            zebra.properties(this, this.$clazz);
+            zebra.properties(this, this.clazz);
 
             if (color != null) this.setColor(color);
             if (font  != null) this.setFont(font);
@@ -30203,16 +30242,16 @@ pkg.CompTree = Class(pkg.BaseTree, [
                         var m = item.value.match(/\[\s*(.*)\s*\](.*)/);
 
                         if (m != null) {
-                            item.value = new $this.$clazz.Checkbox(m[2]);
+                            item.value = new $this.clazz.Checkbox(m[2]);
                             item.value.setValue(m[1].trim().length > 0);
                         }
                         else {
-                            item.value = new $this.$clazz.Label(item.value);
+                            item.value = new $this.clazz.Label(item.value);
                         }
                     }
                     else {
                         if (Array.isArray(item.value)) {
-                            item.value = new $this.$clazz.Combo(item.value);
+                            item.value = new $this.clazz.Combo(item.value);
                         }
                     }
 
@@ -30395,11 +30434,9 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
         //  Convert DOM (x, y) zebra coordinates into appropriate CSS top and left
         //  locations relatively to its immediate DOM element. For instance if a
         //  zebra component contains DOM component every movement of zebra component
-        //  has to bring to correction of the embedded DOM element
+        //  has to bring to correction of the embedded DOM elements
         function $adjustLocation(c) {
-            if (c.$container.parentNode != null &&
-                zebkit.web.$contains(c.$container))
-            {
+            if (c.$container.parentNode != null) {
                 // hide DOM component before move
                 // makes moving more smooth
                 var prevVisibility = c.$container.style.visibility;
@@ -30456,7 +30493,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
             var c = e.source;
             if (c.isDOMElement === true) {
                 c.$container.style.visibility = c.isVisible === false || $isInInvisibleState(c) ? "hidden"
-                                                                                               : "visible";
+                                                                                                : "visible";
             }
             else {
                 if (c.$domKids != null) {
@@ -30561,8 +30598,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
         };
 
         this.compAdded = function(e) {
-            var p = e.source, c = e.kid, constr = e.constraints;
-
+            var p = e.source,  c = e.kid;
             if (c.isDOMElement === true) {
                 $resolveDOMParent(c);
             }
@@ -30583,17 +30619,21 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
                 // embeds DOM elements
                 while (p != null && p.isDOMElement !== true) {
                     if (p.$domKids == null) {
+                        // if reference to kid DOM element or kid DOM elements holder
+                        // has bot been created we have to continue go up to parent of
+                        // the parent to register the whole chain of DOM and DOM holders
                         p.$domKids = {};
+                        p.$domKids[c] = c;
+                        c = p;
+                        p = p.parent;
                     }
-
-                    if (p.$domKids.hasOwnProperty(c)) {
-                        throw new Error("Inconsistent state ");
+                    else {
+                        if (p.$domKids.hasOwnProperty(c)) {
+                            throw new Error("Inconsistent state for " + c + ", " + c.clazz.$name);
+                        }
+                        p.$domKids[c] = c;
+                        break;
                     }
-
-                    p.$domKids[c] = c;
-
-                    c = p;
-                    p = p.parent;
                 }
             }
         };
@@ -30695,8 +30735,8 @@ pkg.HtmlTextArea = Class(pkg.HtmlTextInput, [
 (function(pkg, Class, ui) {
 
 /**
- * The package contains number of UI components that can be helful to
- * make visiual control of an UI component size and location
+ * The package contains number of UI components that can be helpful to
+ * make visual control of an UI component size and location
  * @module  ui.designer
  * @main
  */
@@ -31004,7 +31044,7 @@ pkg.FormTreeModel = Class(zebra.data.TreeModel, [
         };
 
         this.createItem = function(comp){
-            var name = comp.$clazz.$name;
+            var name = comp.clazz.$name;
             if (name == null) name = comp.toString();
             var index = name.lastIndexOf('.'),
                 item = new zebra.data.Item(index > 0 ? name.substring(index + 1) : name);

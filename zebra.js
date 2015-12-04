@@ -845,7 +845,7 @@ pkg.Class = make_template(null, function() {
                 if (typeof v !== 'function') throw new Error("Method '" + n + "' clash with a property");
 
                 if (isMixing === false && v.boundTo === clazz) {
-                    throw new Error("Method ('" + n + "') overloading is not allowed");
+                    throw new Error("Method '" + n + "' overriding is not allowed");
                 }
             }
 
@@ -8217,13 +8217,14 @@ pkg.Matrix = Class([
                             this.destination.$pointerPressed(t.stub);
                         }
                         catch(ex) {
-                            console.log("PointerEventUnifier.$firePressedFromQ() delete = " + t.identifier);
-
+                            // don't forget to descrese counter
+                            if (t.stub != null && t.stub.touchCounter > 0) t.stub.touchCounter--;
                             delete $pointerPressedEvents[t.identifier];
                             console.log(ex.stack);
                         }
                     }
                     this.$queue.length = 0;
+
                 }
             };
 
@@ -8415,6 +8416,7 @@ pkg.Matrix = Class([
                             $cleanDragFix();
                         }
                     }
+
                     e.stopPropagation();
                 }
             };
@@ -8738,9 +8740,6 @@ pkg.Matrix = Class([
             element.onkeydown = function(e) {
                 KEY_EVENT.$fillWith(e);
                 var code = $keyPressedCode = KEY_EVENT.code, b = destination.$keyPressed(KEY_EVENT);
-
-                console.log("ch = " + KEY_EVENT.ch);
-
 
                 if (KEY_EVENT.ch !== 0) {
                     b = destination.$keyTyped(KEY_EVENT) || b;
@@ -9819,9 +9818,6 @@ pkg.Panel = Class(L.Layoutable, [
                 // step III: initiate repainting thread
                 if (canvas.$paintTask === null && (canvas.isValid === false || canvas.$da.width > 0 || canvas.isLayoutValid === false)) {
                     var $this = this;
-
-                    console.log("$painttask for " + canvas.clazz.$name);
-
                     canvas.$paintTask = zebra.web.$task(function() {
                         try {
                             var g = null;
@@ -10597,7 +10593,6 @@ pkg.Panel = Class(L.Layoutable, [
     }
 ]);
 
-
 /**
  * HTML element UI component wrapper class. The class represents
  * an HTML element as if it is standard UI component. It helps to use
@@ -10619,8 +10614,8 @@ pkg.HtmlElement = Class(pkg.Panel, [
     function $prototype() {
         this.$container = this.$canvas = null;
         this.ePsW = this.ePsH = 0;
-        this.isDOMElement = true;    // indication of the DOM element that is used by DOM element manager to track
-                                     // and manage its visibility
+        this.isDOMElement = true;   // indication of the DOM element that is used by DOM element manager to track
+                                    // and manage its visibility
 
         this.$sizeAdjusted = false;
 
@@ -10726,19 +10721,14 @@ pkg.HtmlElement = Class(pkg.Panel, [
 
         // the method calculates the given HTML element preferred size
         this.recalc = function() {
-
-            //console.log("HtmlElement.recalc() " + this.element);
-
             // if component has a layout set it is up to a layout manager to calculate
             // the component preferred size. In this case the HTML element is a container
             // whose preferred size is defined by its content
             if (this.layout === this) {
-                var e    = this.element,
-                    vars = {},
+                var e         = this.element,
+                    vars      = {},
                     domParent = null,
-                    b    = !zebkit.web.$contains(this.$container);
-
-              //  console.log("HtmlElement.recalc() 2 " + this.element + "," + b);
+                    b         = !zebkit.web.$contains(this.$container);
 
                 // element doesn't have preferred size if it is not a member of
                 // an html page, so add it if for a while
@@ -10757,11 +10747,9 @@ pkg.HtmlElement = Class(pkg.Panel, [
 
                 // force metrics to be calculated automatically
                 this.$container.style.visibility = "hidden";
-                e.style.position = "auto";
-                e.style.padding = "0px";
-                e.style.border  = "none";
-                e.style.width   = "auto";
-                e.style.height  = "auto";
+                e.style.padding  = "0px";
+                e.style.border   = "none";
+                e.style.position = e.style.height = e.style.width = "auto";
 
                 // fetch preferred size
                 this.ePsW = e.offsetWidth;
@@ -11031,6 +11019,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
         // border and margin also have to be zero
         this.$container.style.fontSize = this.$container.style.padding = this.$container.style.padding = "0px";
 
+        this.$container.style["z-index"] = "0";
 
         // add id
         this.$container.setAttribute("id", "container-" + this.toString());
@@ -11040,7 +11029,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
         this.$container.setAttribute("data-zebcont", "true");
 
 
-        //  this.$container.style["pointer-events"] = "none";
+       // this.$container.style["pointer-events"] = "none";
 
         // if passed DOM element already has parent
         // attach it to container first and than
@@ -11393,7 +11382,6 @@ pkg.HtmlCanvas = Class(pkg.HtmlElement, [
     }
 ]);
 
-
 /**
  * Base layer UI component. Layer is special type of UI
  * components that is used to decouple different logical
@@ -11407,10 +11395,10 @@ pkg.HtmlCanvas = Class(pkg.HtmlElement, [
  * are window layer, pop up menus layer and so on.
  * @param {String} id an unique id to identify the layer
  * @constructor
- * @class zebra.ui.BaseLayer
+ * @class zebra.ui.CanvasLayer
  * @extends {zebra.ui.Panel}
  */
-pkg.BaseLayer = Class(pkg.HtmlCanvas, [
+pkg.CanvasLayer = Class(pkg.HtmlCanvas, [
     function $prototype() {
         /**
          *  Define the method to catch pointer pressed event and
@@ -11459,6 +11447,8 @@ pkg.BaseLayer = Class(pkg.HtmlCanvas, [
          */
         this.id = id;
         this.$super();
+
+     //   this.$container.style["pointer-events"] = "none";
     }
 ]);
 
@@ -11467,9 +11457,9 @@ pkg.BaseLayer = Class(pkg.HtmlCanvas, [
  *  where the layer always try grabbing all input event
  *  @class zebra.ui.RootLayer
  *  @constructor
- *  @extends {zebra.ui.BaseLayer}
+ *  @extends {zebra.ui.CanvasLayer}
  */
-pkg.RootLayer = Class(pkg.BaseLayer, [
+pkg.RootLayer = Class(pkg.CanvasLayer, [
     function $prototype() {
         this.layerPointerPressed = function(e) {
             return true;
@@ -12752,6 +12742,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
         this.$super(i, c);
     },
 
+    // TODO: should it renamed back ?
     function requestFocus2() {
         console.log("zCanvas.requestFocus() " + (document.activeElement != this.$container));
         if (document.activeElement != this.$container) {
@@ -15534,7 +15525,6 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
         };
 
         this._pointerEntered = function(e) {
-            console.log("EvStatePan._pointerEntered() ");
             if (this.isEnabled === true) {
                 this.setState(this.state === PRESSED_OUT ? PRESSED_OVER : OVER);
                 this.$isIn = true;
@@ -15548,7 +15538,6 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
         };
 
         this._pointerReleased = function(e) {
-            console.log("EvStatePan._pointerReleased() " + e.isAction());
             if ((this.state === PRESSED_OVER || this.state === PRESSED_OUT) && e.isAction()){
                 if (e.source === this) {
                     this.setState(e.x >= 0 && e.y >= 0 && e.x < this.width && e.y < this.height ? OVER
@@ -15565,7 +15554,6 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
         this.childKeyPressed = function(e) {
             this._keyPressed(e);
         };
-
 
         this.childKeyReleased = function(e) {
             this._keyReleased(e);
@@ -15632,8 +15620,6 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
          * @method pointerExited
          */
         this.pointerExited = function(e){
-
-            console.log("EvStatePan.pointerExited() " + e + "," + (this.state == PRESSED_OVER ? PRESSED_OUT : OUT) );
             if (this.isEnabled === true) {
                 this.setState(this.state == PRESSED_OVER ? PRESSED_OUT : OUT);
                 this.$isIn = false;
@@ -16883,8 +16869,6 @@ pkg.SplitPan = Class(pkg.Panel, [
 
         this.$super();
 
-        console.log("ADD LEFT " + f.constructor);
-
         if (f != null) this.add(L.LEFT, f);
         if (s != null) this.add(L.RIGHT, s);
         this.add(L.CENTER, new this.clazz.Bar(this));
@@ -16895,11 +16879,15 @@ pkg.SplitPan = Class(pkg.Panel, [
 
         ctr = L.$constraints(ctr);
 
-        if ((ctr == null && this.leftComp == null) || L.LEFT == ctr) this.leftComp = c;
+        if ((ctr == null && this.leftComp == null) || L.LEFT === ctr) {
+            this.leftComp = c;
+        }
         else {
-            if ((ctr == null && this.rightComp == null) || L.RIGHT == ctr) this.rightComp = c;
+            if ((ctr == null && this.rightComp == null) || L.RIGHT === ctr) {
+                this.rightComp = c;
+            }
             else {
-                if (L.CENTER == ctr) this.gripper = c;
+                if (L.CENTER === ctr) this.gripper = c;
                 else throw new Error("" + ctr);
             }
         }
@@ -22410,10 +22398,6 @@ pkg.Combo = Class(pkg.Panel, [
 
                     if (v != null) {
                         var ps = v.getPreferredSize();
-
-                        console.log("Paint combo view : " + v.target.x + "," + v.target.y);
-
-
                         v.paint(g, this.getLeft(),
                                    this.getTop() + Math.floor((this.height - this.getTop() - this.getBottom() - ps.height) / 2),
                                    this.width, ps.height, this);
@@ -23057,7 +23041,7 @@ pkg.activateWindow = function(win) {
 
  * @class zebra.ui.WinLayer
  * @constructor
- * @extends {zebra.ui.BaseLayer}
+ * @extends {zebra.ui.CanvasLayer}
  */
 pkg.WinLayer = Class(pkg.HtmlCanvas, [
     function $clazz() {
@@ -23287,6 +23271,9 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
         this._ = new this.clazz.Listeners();
         this.id = this.clazz.ID;
         this.$super();
+
+        // TODO: prove of concept
+        this.$container.style["pointer-events"] = "none";
     },
 
     function insert(index, constr, lw) {
@@ -24627,7 +24614,7 @@ pkg.Menubar = Class(pkg.Menu, [
  * context menu. Normally the layer is not used directly.
  * @class zebra.ui.PopupLayer
  * @constructor
- * @extends {zebra.ui.BaseLayer}
+ * @extends {zebra.ui.CanvasLayer}
  */
 pkg.PopupLayer = Class(pkg.HtmlCanvas, [
     function $clazz() {
@@ -24750,6 +24737,9 @@ pkg.PopupLayer = Class(pkg.HtmlCanvas, [
         this.activeMenubar = null;
         this.id = this.clazz.ID;
         this.$super();
+
+        // TODO: prove of concept
+        this.$container.style["pointer-events"] = "none";
     }
 ]);
 
@@ -30412,7 +30402,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
                     c.$container.parentNode != null &&
                     c.$container.parentNode !== parentElement)
                 {
-                    throw new Error("DOM parent inconsistent state");
+                    throw new Error("DOM parent inconsistent state ");
                 }
             }
         }
@@ -30423,7 +30413,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
         //    |             .  (x,y) -> (xx,yy) than correct left
         //                  .  and top of DOM2 relatively to DOM1
         //    |    +--------.--------------------------
-        //    |    |        .       Zebra1
+        //    |    |        .       zebra1
         //    |    |        .
         //    |    |  (left, top)
         //    |<............+-------------------------
@@ -30583,7 +30573,9 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
         }
 
         this.compRemoved = function(e) {
-            var p = e.source, i = e.index, c = e.kid;
+            var p = e.source,
+                i = e.index,
+                c = e.kid;
 
             // if detached element is DOM element we have to
             // remove it from DOM tree
@@ -30594,6 +30586,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
             else {
                 removeDOMChildren(c);
             }
+
             detachFromParent(p, c);
         };
 
@@ -30726,6 +30719,24 @@ pkg.HtmlTextArea = Class(pkg.HtmlTextInput, [
     }
 ]);
 
+/**
+ * [description]
+ * @param  {[type]} text  [description]
+ * @param  {zebra}  href)
+ * @return {[type]}       [description]
+ */
+pkg.HtmlLink = Class(pkg.HtmlElement, [
+    function(text, href) {
+        this.$super("a");
+        this.setContent(text);
+        this.setAttribute("href", href);
+        this._ = new zebra.util.Listeners();
+        var $this = this;
+        this.element.onclick = function(e) {
+            $this._.fired($this);
+        };
+    }
+]);
 
 /**
  * @for
@@ -30890,8 +30901,6 @@ pkg.ShaperPan = Class(ui.Panel, [
         this.catchInput = true;
 
         this.getCursorType = function (t, x ,y) {
-            console.log("DETECT: " + CURSORS[this.shaperBr.detectAt(t, x, y)]);
-
             return this.kids.length > 0 ? CURSORS[this.shaperBr.detectAt(t, x, y)] : null;
         };
 
@@ -30904,8 +30913,8 @@ pkg.ShaperPan = Class(ui.Panel, [
             if (this.kids.length > 0){
                 var b  = e.shiftKey,
                     c  = e.code,
-                    dx = (c == KeyEvent.LEFT ?  -1 : (c == KeyEvent.RIGHT ? 1 : 0)),
-                    dy = (c == KeyEvent.UP   ?  -1 : (c == KeyEvent.DOWN  ? 1 : 0)),
+                    dx = (c == KeyEvent.LEFT ? -1 : (c == KeyEvent.RIGHT ? 1 : 0)),
+                    dy = (c == KeyEvent.UP   ? -1 : (c == KeyEvent.DOWN  ? 1 : 0)),
                     w  = this.width  + dx,
                     h  = this.height + dy,
                     x  = this.x + dx,
@@ -30918,8 +30927,15 @@ pkg.ShaperPan = Class(ui.Panel, [
                 }
                 else {
                     if (this.isMoveEnabled === true) {
-                        var ww = this.width, hh = this.height, p = this.parent;
-                        if (x + ww/2 > 0 && y + hh/2 > 0 && x < p.width - ww/2 && y < p.height - hh/2) {
+                        var ww = this.width,
+                            hh = this.height,
+                            p  = this.parent;
+
+                        if (x + ww/2 > 0 &&
+                            y + hh/2 > 0 &&
+                            x < p.width - ww/2 &&
+                            y < p.height - hh/2)
+                        {
                             this.setLocation(x, y);
                         }
                     }

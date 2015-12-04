@@ -88,9 +88,6 @@
                 KEY_EVENT.$fillWith(e);
                 var code = $keyPressedCode = KEY_EVENT.code, b = destination.$keyPressed(KEY_EVENT);
 
-                console.log("ch = " + KEY_EVENT.ch);
-
-
                 if (KEY_EVENT.ch !== 0) {
                     b = destination.$keyTyped(KEY_EVENT) || b;
                 }

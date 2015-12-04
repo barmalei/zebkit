@@ -71,13 +71,13 @@
         "dot"    : { "$Dotted" : []  }
     },
 
-    "BaseLayer": {
+    "CanvasLayer": {
         "layout"     : { "$zebra.layout.RasterLayout":[] },
         "background" : null
     },
 
     "RootLayer": {
-        "inherit": [ "BaseLayer" ]
+        "inherit": [ "CanvasLayer" ]
     },
 
     "zCanvas": {

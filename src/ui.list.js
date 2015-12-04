@@ -1334,10 +1334,6 @@ pkg.Combo = Class(pkg.Panel, [
 
                     if (v != null) {
                         var ps = v.getPreferredSize();
-
-                        console.log("Paint combo view : " + v.target.x + "," + v.target.y);
-
-
                         v.paint(g, this.getLeft(),
                                    this.getTop() + Math.floor((this.height - this.getTop() - this.getBottom() - ps.height) / 2),
                                    this.width, ps.height, this);

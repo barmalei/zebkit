@@ -113,7 +113,7 @@ pkg.activateWindow = function(win) {
 
  * @class zebra.ui.WinLayer
  * @constructor
- * @extends {zebra.ui.BaseLayer}
+ * @extends {zebra.ui.CanvasLayer}
  */
 pkg.WinLayer = Class(pkg.HtmlCanvas, [
     function $clazz() {
@@ -343,6 +343,9 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
         this._ = new this.clazz.Listeners();
         this.id = this.clazz.ID;
         this.$super();
+
+        // TODO: prove of concept
+        this.$container.style["pointer-events"] = "none";
     },
 
     function insert(index, constr, lw) {
@@ -1683,7 +1686,7 @@ pkg.Menubar = Class(pkg.Menu, [
  * context menu. Normally the layer is not used directly.
  * @class zebra.ui.PopupLayer
  * @constructor
- * @extends {zebra.ui.BaseLayer}
+ * @extends {zebra.ui.CanvasLayer}
  */
 pkg.PopupLayer = Class(pkg.HtmlCanvas, [
     function $clazz() {
@@ -1806,6 +1809,9 @@ pkg.PopupLayer = Class(pkg.HtmlCanvas, [
         this.activeMenubar = null;
         this.id = this.clazz.ID;
         this.$super();
+
+        // TODO: prove of concept
+        this.$container.style["pointer-events"] = "none";
     }
 ]);
 

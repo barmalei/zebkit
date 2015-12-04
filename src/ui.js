@@ -495,7 +495,6 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
         };
 
         this._pointerEntered = function(e) {
-            console.log("EvStatePan._pointerEntered() ");
             if (this.isEnabled === true) {
                 this.setState(this.state === PRESSED_OUT ? PRESSED_OVER : OVER);
                 this.$isIn = true;
@@ -509,7 +508,6 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
         };
 
         this._pointerReleased = function(e) {
-            console.log("EvStatePan._pointerReleased() " + e.isAction());
             if ((this.state === PRESSED_OVER || this.state === PRESSED_OUT) && e.isAction()){
                 if (e.source === this) {
                     this.setState(e.x >= 0 && e.y >= 0 && e.x < this.width && e.y < this.height ? OVER
@@ -526,7 +524,6 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
         this.childKeyPressed = function(e) {
             this._keyPressed(e);
         };
-
 
         this.childKeyReleased = function(e) {
             this._keyReleased(e);
@@ -593,8 +590,6 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
          * @method pointerExited
          */
         this.pointerExited = function(e){
-
-            console.log("EvStatePan.pointerExited() " + e + "," + (this.state == PRESSED_OVER ? PRESSED_OUT : OUT) );
             if (this.isEnabled === true) {
                 this.setState(this.state == PRESSED_OVER ? PRESSED_OUT : OUT);
                 this.$isIn = false;
@@ -1844,8 +1839,6 @@ pkg.SplitPan = Class(pkg.Panel, [
 
         this.$super();
 
-        console.log("ADD LEFT " + f.constructor);
-
         if (f != null) this.add(L.LEFT, f);
         if (s != null) this.add(L.RIGHT, s);
         this.add(L.CENTER, new this.clazz.Bar(this));
@@ -1856,11 +1849,15 @@ pkg.SplitPan = Class(pkg.Panel, [
 
         ctr = L.$constraints(ctr);
 
-        if ((ctr == null && this.leftComp == null) || L.LEFT == ctr) this.leftComp = c;
+        if ((ctr == null && this.leftComp == null) || L.LEFT === ctr) {
+            this.leftComp = c;
+        }
         else {
-            if ((ctr == null && this.rightComp == null) || L.RIGHT == ctr) this.rightComp = c;
+            if ((ctr == null && this.rightComp == null) || L.RIGHT === ctr) {
+                this.rightComp = c;
+            }
             else {
-                if (L.CENTER == ctr) this.gripper = c;
+                if (L.CENTER === ctr) this.gripper = c;
                 else throw new Error("" + ctr);
             }
         }

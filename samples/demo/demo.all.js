@@ -1398,16 +1398,16 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
 
         var prev = null, prevCol = null;
         t.bind(function selected(src, data) {
-                var c = lookup(pp, data.comp);
-                if (prev != null) {
-                    prev.setBackground(null);
-                }
+            var c = lookup(pp, src.selected);
+            if (prev != null) {
+                prev.setBackground(null);
+            }
 
-                prev = c;
-                if (c != null) {
-                    c.setBackground(new Gradient("#F0F0F0", "#E0E0E0"));
-                }
-            });
+            prev = c;
+            if (c != null) {
+                c.setBackground(new Gradient("#F0F0F0", "#E0E0E0"));
+            }
+        });
 
         var l = new Label(new zebra.data.Text("This page represents number of Zebra components to control UI components size and location"));
         l.setPadding(6);

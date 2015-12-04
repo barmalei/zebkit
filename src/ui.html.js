@@ -121,7 +121,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
                     c.$container.parentNode != null &&
                     c.$container.parentNode !== parentElement)
                 {
-                    throw new Error("DOM parent inconsistent state");
+                    throw new Error("DOM parent inconsistent state ");
                 }
             }
         }
@@ -132,7 +132,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
         //    |             .  (x,y) -> (xx,yy) than correct left
         //                  .  and top of DOM2 relatively to DOM1
         //    |    +--------.--------------------------
-        //    |    |        .       Zebra1
+        //    |    |        .       zebra1
         //    |    |        .
         //    |    |  (left, top)
         //    |<............+-------------------------
@@ -292,7 +292,9 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
         }
 
         this.compRemoved = function(e) {
-            var p = e.source, i = e.index, c = e.kid;
+            var p = e.source,
+                i = e.index,
+                c = e.kid;
 
             // if detached element is DOM element we have to
             // remove it from DOM tree
@@ -303,6 +305,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
             else {
                 removeDOMChildren(c);
             }
+
             detachFromParent(p, c);
         };
 
@@ -435,6 +438,24 @@ pkg.HtmlTextArea = Class(pkg.HtmlTextInput, [
     }
 ]);
 
+/**
+ * [description]
+ * @param  {[type]} text  [description]
+ * @param  {zebra}  href)
+ * @return {[type]}       [description]
+ */
+pkg.HtmlLink = Class(pkg.HtmlElement, [
+    function(text, href) {
+        this.$super("a");
+        this.setContent(text);
+        this.setAttribute("href", href);
+        this._ = new zebra.util.Listeners();
+        var $this = this;
+        this.element.onclick = function(e) {
+            $this._.fired($this);
+        };
+    }
+]);
 
 /**
  * @for

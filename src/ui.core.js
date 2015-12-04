@@ -1020,9 +1020,6 @@ pkg.Panel = Class(L.Layoutable, [
                 // step III: initiate repainting thread
                 if (canvas.$paintTask === null && (canvas.isValid === false || canvas.$da.width > 0 || canvas.isLayoutValid === false)) {
                     var $this = this;
-
-                    console.log("$painttask for " + canvas.clazz.$name);
-
                     canvas.$paintTask = zebra.web.$task(function() {
                         try {
                             var g = null;
@@ -1798,7 +1795,6 @@ pkg.Panel = Class(L.Layoutable, [
     }
 ]);
 
-
 /**
  * HTML element UI component wrapper class. The class represents
  * an HTML element as if it is standard UI component. It helps to use
@@ -1820,8 +1816,8 @@ pkg.HtmlElement = Class(pkg.Panel, [
     function $prototype() {
         this.$container = this.$canvas = null;
         this.ePsW = this.ePsH = 0;
-        this.isDOMElement = true;    // indication of the DOM element that is used by DOM element manager to track
-                                     // and manage its visibility
+        this.isDOMElement = true;   // indication of the DOM element that is used by DOM element manager to track
+                                    // and manage its visibility
 
         this.$sizeAdjusted = false;
 
@@ -1927,19 +1923,14 @@ pkg.HtmlElement = Class(pkg.Panel, [
 
         // the method calculates the given HTML element preferred size
         this.recalc = function() {
-
-            //console.log("HtmlElement.recalc() " + this.element);
-
             // if component has a layout set it is up to a layout manager to calculate
             // the component preferred size. In this case the HTML element is a container
             // whose preferred size is defined by its content
             if (this.layout === this) {
-                var e    = this.element,
-                    vars = {},
+                var e         = this.element,
+                    vars      = {},
                     domParent = null,
-                    b    = !zebkit.web.$contains(this.$container);
-
-              //  console.log("HtmlElement.recalc() 2 " + this.element + "," + b);
+                    b         = !zebkit.web.$contains(this.$container);
 
                 // element doesn't have preferred size if it is not a member of
                 // an html page, so add it if for a while
@@ -1958,11 +1949,9 @@ pkg.HtmlElement = Class(pkg.Panel, [
 
                 // force metrics to be calculated automatically
                 this.$container.style.visibility = "hidden";
-                e.style.position = "auto";
-                e.style.padding = "0px";
-                e.style.border  = "none";
-                e.style.width   = "auto";
-                e.style.height  = "auto";
+                e.style.padding  = "0px";
+                e.style.border   = "none";
+                e.style.position = e.style.height = e.style.width = "auto";
 
                 // fetch preferred size
                 this.ePsW = e.offsetWidth;
@@ -2232,6 +2221,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
         // border and margin also have to be zero
         this.$container.style.fontSize = this.$container.style.padding = this.$container.style.padding = "0px";
 
+        this.$container.style["z-index"] = "0";
 
         // add id
         this.$container.setAttribute("id", "container-" + this.toString());
@@ -2241,7 +2231,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
         this.$container.setAttribute("data-zebcont", "true");
 
 
-        //  this.$container.style["pointer-events"] = "none";
+       // this.$container.style["pointer-events"] = "none";
 
         // if passed DOM element already has parent
         // attach it to container first and than
@@ -2594,7 +2584,6 @@ pkg.HtmlCanvas = Class(pkg.HtmlElement, [
     }
 ]);
 
-
 /**
  * Base layer UI component. Layer is special type of UI
  * components that is used to decouple different logical
@@ -2608,10 +2597,10 @@ pkg.HtmlCanvas = Class(pkg.HtmlElement, [
  * are window layer, pop up menus layer and so on.
  * @param {String} id an unique id to identify the layer
  * @constructor
- * @class zebra.ui.BaseLayer
+ * @class zebra.ui.CanvasLayer
  * @extends {zebra.ui.Panel}
  */
-pkg.BaseLayer = Class(pkg.HtmlCanvas, [
+pkg.CanvasLayer = Class(pkg.HtmlCanvas, [
     function $prototype() {
         /**
          *  Define the method to catch pointer pressed event and
@@ -2660,6 +2649,8 @@ pkg.BaseLayer = Class(pkg.HtmlCanvas, [
          */
         this.id = id;
         this.$super();
+
+     //   this.$container.style["pointer-events"] = "none";
     }
 ]);
 
@@ -2668,9 +2659,9 @@ pkg.BaseLayer = Class(pkg.HtmlCanvas, [
  *  where the layer always try grabbing all input event
  *  @class zebra.ui.RootLayer
  *  @constructor
- *  @extends {zebra.ui.BaseLayer}
+ *  @extends {zebra.ui.CanvasLayer}
  */
-pkg.RootLayer = Class(pkg.BaseLayer, [
+pkg.RootLayer = Class(pkg.CanvasLayer, [
     function $prototype() {
         this.layerPointerPressed = function(e) {
             return true;
@@ -3953,6 +3944,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
         this.$super(i, c);
     },
 
+    // TODO: should it renamed back ?
     function requestFocus2() {
         console.log("zCanvas.requestFocus() " + (document.activeElement != this.$container));
         if (document.activeElement != this.$container) {

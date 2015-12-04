@@ -845,7 +845,7 @@ pkg.Class = make_template(null, function() {
                 if (typeof v !== 'function') throw new Error("Method '" + n + "' clash with a property");
 
                 if (isMixing === false && v.boundTo === clazz) {
-                    throw new Error("Method ('" + n + "') overloading is not allowed");
+                    throw new Error("Method '" + n + "' overriding is not allowed");
                 }
             }
 

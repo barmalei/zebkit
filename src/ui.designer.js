@@ -156,8 +156,6 @@ pkg.ShaperPan = Class(ui.Panel, [
         this.catchInput = true;
 
         this.getCursorType = function (t, x ,y) {
-            console.log("DETECT: " + CURSORS[this.shaperBr.detectAt(t, x, y)]);
-
             return this.kids.length > 0 ? CURSORS[this.shaperBr.detectAt(t, x, y)] : null;
         };
 
@@ -170,8 +168,8 @@ pkg.ShaperPan = Class(ui.Panel, [
             if (this.kids.length > 0){
                 var b  = e.shiftKey,
                     c  = e.code,
-                    dx = (c == KeyEvent.LEFT ?  -1 : (c == KeyEvent.RIGHT ? 1 : 0)),
-                    dy = (c == KeyEvent.UP   ?  -1 : (c == KeyEvent.DOWN  ? 1 : 0)),
+                    dx = (c == KeyEvent.LEFT ? -1 : (c == KeyEvent.RIGHT ? 1 : 0)),
+                    dy = (c == KeyEvent.UP   ? -1 : (c == KeyEvent.DOWN  ? 1 : 0)),
                     w  = this.width  + dx,
                     h  = this.height + dy,
                     x  = this.x + dx,
@@ -184,8 +182,15 @@ pkg.ShaperPan = Class(ui.Panel, [
                 }
                 else {
                     if (this.isMoveEnabled === true) {
-                        var ww = this.width, hh = this.height, p = this.parent;
-                        if (x + ww/2 > 0 && y + hh/2 > 0 && x < p.width - ww/2 && y < p.height - hh/2) {
+                        var ww = this.width,
+                            hh = this.height,
+                            p  = this.parent;
+
+                        if (x + ww/2 > 0 &&
+                            y + hh/2 > 0 &&
+                            x < p.width - ww/2 &&
+                            y < p.height - hh/2)
+                        {
                             this.setLocation(x, y);
                         }
                     }

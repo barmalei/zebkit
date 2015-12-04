@@ -164,17 +164,17 @@
         "dot"    : { "$Dotted" : []  }
     },
 
-    "BaseLayer": {
+    "CanvasLayer": {
         "layout"     : { "$zebra.layout.RasterLayout":[] },
         "background" : null
     },
 
     "RootLayer" : {
-        "inherit":  "BaseLayer"
+        "inherit":  "CanvasLayer"
     },
 
     "WinLayer" : {
-        "inherit":  "BaseLayer"
+        "inherit":  "CanvasLayer"
     },
 
     "zCanvas": {
@@ -892,6 +892,7 @@
 
     "HtmlElement": {
         "styles": {
+            "pointer-events"  : "auto",
             "margin"          : "0px",
             "border"          : "none",
             "borderWidth"     : "0px",
@@ -900,8 +901,6 @@
             "display"         : "block",
             "backgroundImage" : "none",
             "backgroundColor" : "transparent",
-            "positio2n"        : "absolute",
-            "zIndex"          : 1,
             "boxShadow"       : "none",
             "-moz-box-shadow" : "none",
             "isIE:overflow"   : "hidden",

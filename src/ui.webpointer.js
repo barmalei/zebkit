@@ -493,13 +493,14 @@
                             this.destination.$pointerPressed(t.stub);
                         }
                         catch(ex) {
-                            console.log("PointerEventUnifier.$firePressedFromQ() delete = " + t.identifier);
-
+                            // don't forget to descrese counter
+                            if (t.stub != null && t.stub.touchCounter > 0) t.stub.touchCounter--;
                             delete $pointerPressedEvents[t.identifier];
                             console.log(ex.stack);
                         }
                     }
                     this.$queue.length = 0;
+
                 }
             };
 
@@ -691,6 +692,7 @@
                             $cleanDragFix();
                         }
                     }
+
                     e.stopPropagation();
                 }
             };

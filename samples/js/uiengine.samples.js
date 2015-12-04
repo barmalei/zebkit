@@ -399,7 +399,7 @@ pkg.SimpleChart = Class(Panel, [
     }
 ]);
 
-pkg.CustomLayer = Class(BaseLayer, [
+pkg.CustomLayer = Class(CanvasLayer, [
     function() {
         this.$super("CUSTOM");
         this.setLayout(new StackLayout());

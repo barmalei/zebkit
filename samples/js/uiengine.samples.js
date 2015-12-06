@@ -399,9 +399,10 @@ pkg.SimpleChart = Class(Panel, [
     }
 ]);
 
-pkg.CustomLayer = Class(CanvasLayer, [
+pkg.CustomLayer = Class(HtmlCanvas, [
     function() {
-        this.$super("CUSTOM");
+        this.$super();
+        this.id = "CUSTOM";
         this.setLayout(new StackLayout());
 
         var $this = this, font = new Font("Arial", "bold", 24);

@@ -1678,6 +1678,8 @@ if (typeof(zebra) === "undefined") {
             assert(b.aaa(), 890);
             assert(B.prototype.aaa.boundTo == null, true);
             assert(b.af, 330);
+
+
         },
 
         function test_dynamic() {

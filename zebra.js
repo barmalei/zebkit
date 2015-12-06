@@ -7251,6 +7251,7 @@ pkg.Matrix = Class([
         be.style.height = be.style.width  = "100%";
         be.style.left = be.style.top = "0px";
         be.style.position = "absolute";
+        be.style["z-index"] = "100000";
 
         be.onmouseup   = be.onmousedown = be.onmouseout =
         be.onmouseover = be.onmousemove = be.onkeydown  =
@@ -7264,8 +7265,6 @@ pkg.Matrix = Class([
            be.addEventListener(events[i], $eventsBlackHole, false);
         }
 
-        // TODO: remove me
-        be.style.background = "rgba(0,0,0,0.3)";
         return be;
     };
 
@@ -8149,6 +8148,20 @@ pkg.Matrix = Class([
                         }
                     }
                     else {
+                        var $this = this;
+                        // TODO:
+                        //   timeout before generating release event is necessary to let
+                        //   painting changing state between press and release. Otherwise
+                        //   both events can happen in the same thread  what causes only
+                        //   last state (released will be visualized)  The code below has to
+                        //   be optimized:
+                        //      - may be it makes sense to keep Q
+                        //      - timer is required only if pressed was in Q
+
+                        setTimeout(
+
+                        function() {
+
                         try {
                             // store coordinates and target
                             stub.$fillWith(id, e);
@@ -8163,23 +8176,23 @@ pkg.Matrix = Class([
 
                             // fire dragged or clicked
                             if (mp.isDragged === true) {
-                                this.destination.$pointerDragEnded(stub);
+                                $this.destination.$pointerDragEnded(stub);
                             }
                             else {
                                 if ($lastPointerReleased != null &&
                                     $lastPointerReleased.identifier === id &&
                                     (new Date().getTime() - $lastPointerReleased.time) <= pkg.doubleClickDelta)
                                 {
-                                    this.destination.$pointerDoubleClicked(stub);
+                                    $this.destination.$pointerDoubleClicked(stub);
                                 }
                                 else {
-                                    this.destination.$pointerClicked(stub);
+                                    $this.destination.$pointerClicked(stub);
                                 }
                             }
 
                             // always complete pointer pressed with appropriate
                             // release event
-                            this.destination.$pointerReleased(stub);
+                            $this.destination.$pointerReleased(stub);
                         }
                         finally {
                             // clear handled pressed and dragged state
@@ -8190,6 +8203,9 @@ pkg.Matrix = Class([
                             // remove global move listener if necessary
                             $cleanDragFix();
                         }
+
+                        },
+                        50);
                     }
                 }
             };
@@ -10992,6 +11008,10 @@ pkg.HtmlElement = Class(pkg.Panel, [
          */
         this.element = e;
 
+        // this is set to make possible to use set z-index for HTML element
+        this.element.style.position = "relative";
+
+
         if (e.parentNode != null && e.parentNode.getAttribute("data-zebcont") != null) {
             throw new Error("DOM element '" + e + "' already has container");
         }
@@ -11019,7 +11039,8 @@ pkg.HtmlElement = Class(pkg.Panel, [
         // border and margin also have to be zero
         this.$container.style.fontSize = this.$container.style.padding = this.$container.style.padding = "0px";
 
-        this.$container.style["z-index"] = "0";
+        //
+        //this.$container.style["z-index"] = "0";
 
         // add id
         this.$container.setAttribute("id", "container-" + this.toString());
@@ -11028,8 +11049,8 @@ pkg.HtmlElement = Class(pkg.Panel, [
         // mark wrapper with a special attribute to recognize it exists later
         this.$container.setAttribute("data-zebcont", "true");
 
-
-       // this.$container.style["pointer-events"] = "none";
+        // let html element interact
+        this.$container.style["pointer-events"] = "auto";
 
         // if passed DOM element already has parent
         // attach it to container first and than
@@ -11270,6 +11291,7 @@ pkg.HtmlCanvas = Class(pkg.HtmlElement, [
 
         this.$paintTask = null;
 
+
         // set border for canvas has to be set as zebra border, since canvas
         // is DOM component designed for rendering, so setting DOM border
         // doesn't allow us to render zebra border
@@ -11374,6 +11396,9 @@ pkg.HtmlCanvas = Class(pkg.HtmlElement, [
 
         this.$super(e == null ? "canvas" : e);
 
+        // let HTML Canvas be WEB event transparent
+        this.$container.style["pointer-events"] = "none";
+
         // add class to canvas if this element has been created
         if (e == null) {
             // prevent canvas selection
@@ -11432,23 +11457,6 @@ pkg.CanvasLayer = Class(pkg.HtmlCanvas, [
          *  at this location
          *  @method isLayerActiveAt
          */
-    },
-
-    function(id) {
-        if (id == null) {
-            throw new Error("Invalid layer id: " + id);
-        }
-
-        /**
-         * Id of the layer
-         * @attribute id
-         * @type {String}
-         * @readOnly
-         */
-        this.id = id;
-        this.$super();
-
-     //   this.$container.style["pointer-events"] = "none";
     }
 ]);
 
@@ -11459,7 +11467,11 @@ pkg.CanvasLayer = Class(pkg.HtmlCanvas, [
  *  @constructor
  *  @extends {zebra.ui.CanvasLayer}
  */
-pkg.RootLayer = Class(pkg.CanvasLayer, [
+pkg.RootLayer = Class(pkg.HtmlCanvas, [
+    function $clazz() {
+        this.ID = "root";
+    },
+
     function $prototype() {
         this.layerPointerPressed = function(e) {
             return true;
@@ -11472,6 +11484,11 @@ pkg.RootLayer = Class(pkg.CanvasLayer, [
         this.getFocusRoot = function() {
             return this;
         };
+    },
+
+    function() {
+        this.$super();
+        this.id = this.clazz.ID;
     }
 ]);
 
@@ -12627,6 +12644,9 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
         // since zCanvas is top level element it doesn't have to have
         // absolute position
         this.$container.style.position = "relative";
+
+        // let canvas zCanvas listen WEB event
+        this.$container.style["pointer-events"] = "auto";
 
         // if canvas is not yet part of HTML let's attach it to
         // body.
@@ -23041,7 +23061,7 @@ pkg.activateWindow = function(win) {
 
  * @class zebra.ui.WinLayer
  * @constructor
- * @extends {zebra.ui.CanvasLayer}
+ * @extends {zebra.ui.HtmlCanvas}
  */
 pkg.WinLayer = Class(pkg.HtmlCanvas, [
     function $clazz() {
@@ -23272,8 +23292,10 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
         this.id = this.clazz.ID;
         this.$super();
 
-        // TODO: prove of concept
-        this.$container.style["pointer-events"] = "none";
+        // TODO: why 1000 and how to avoid z-index manipulation
+        // the layer has to be placed above other elements that are virtually
+        // inserted in the layer
+        this.element.style["z-index"] = "10000";
     },
 
     function insert(index, constr, lw) {
@@ -24614,7 +24636,7 @@ pkg.Menubar = Class(pkg.Menu, [
  * context menu. Normally the layer is not used directly.
  * @class zebra.ui.PopupLayer
  * @constructor
- * @extends {zebra.ui.CanvasLayer}
+ * @extends {zebra.ui.HtmlCanvas}
  */
 pkg.PopupLayer = Class(pkg.HtmlCanvas, [
     function $clazz() {
@@ -24717,6 +24739,17 @@ pkg.PopupLayer = Class(pkg.HtmlCanvas, [
 
         this.doLayout = function (target){
             var cnt = this.kids.length;
+
+            // TODO:
+            // prove of concept. if layer is active don't allow WEB events comes to upper layer
+            // since there can be another HtmlElement that should not be part of interaction
+            if (cnt > 0) {
+                this.$container.style["pointer-events"] = "auto";
+            }
+            else {
+                this.$container.style["pointer-events"] = "none";
+            }
+
             for(var i = 0; i < cnt; i++){
                 var m = this.kids[i];
                 if (zebra.instanceOf(m, pkg.Menu)) {
@@ -24737,9 +24770,6 @@ pkg.PopupLayer = Class(pkg.HtmlCanvas, [
         this.activeMenubar = null;
         this.id = this.clazz.ID;
         this.$super();
-
-        // TODO: prove of concept
-        this.$container.style["pointer-events"] = "none";
     }
 ]);
 
@@ -24945,7 +24975,7 @@ pkg.PopupManager = Class(pkg.Manager, [
          * @type {Boolean}
          * @default true
          */
-        this.hideTooltipByPress = true;
+        this.hideTooltipByPress = false;
 
         /**
          * Define interval (in milliseconds) between entering a component and showing
@@ -24956,7 +24986,7 @@ pkg.PopupManager = Class(pkg.Manager, [
          */
         this.showTooltipIn = 400;
 
-        this.syncTooltipPosition = false;
+        this.syncTooltipPosition = true;
 
         /**
          * Define pointer clicked event handler
@@ -24967,10 +24997,8 @@ pkg.PopupManager = Class(pkg.Manager, [
             this.$popupMenuX = e.absX;
             this.$popupMenuY = e.absY;
 
-
-
             // Right button
-            // TODO: check if it is ok and compatiable with touch
+            // TODO: check if it is ok and compatible with touch
             if (e.isContext()) {
                 var popup = null;
 
@@ -24997,6 +25025,9 @@ pkg.PopupManager = Class(pkg.Manager, [
          * @method pointerEntered
          */
         this.pointerEntered = function(e) {
+
+            console.log("PopupManager.pointerEntered() src = " + e.source.clazz.$name);
+
             if (this.$target == null && (e.source.tooltip != null || e.source.getTooltip != null)) {
                 var c = e.source;
                 this.$target = c;
@@ -25053,6 +25084,9 @@ pkg.PopupManager = Class(pkg.Manager, [
                                                             : this.$target.getTooltip(this.$target,
                                                                                       this.$tooltipX,
                                                                                       this.$tooltipY);
+
+                console.log("PopupManager.run() " + this.$tooltip + "," + ntooltip);
+
                 if (this.$tooltip != ntooltip) {
                     // hide previously shown tooltip
                     if (this.$tooltip != null) {
@@ -25081,6 +25115,7 @@ pkg.PopupManager = Class(pkg.Manager, [
                             this.$tooltip.winType = "info";
                         }
 
+                        console.log("PopupManager.run() add tooltip ");
                         this.$targetTooltipLayer.addWin(this.$tooltip, this);
 
                         if (this.$tooltip.winType !== "info") {
@@ -30382,18 +30417,6 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
 
                 // adjust location of just attached DOM component
                 $adjustLocation(c);
-
-                // if a new DOM element appears in hierarchy we have to correct
-                // z-order of disabled DOM elements that are the parents of the
-                // inserted element
-                var pp = c.parent;
-                while(pp != null) {
-                    if (pp.isEnabled === false && pp.isDOMElement === true) {
-                        pp.$container.removeChild(pp.$blockElement);
-                        pp.$container.appendChild(pp.$blockElement);
-                    }
-                    pp = pp.parent;
-                }
             }
             else {
                 // test consistency whether the DOM element already has

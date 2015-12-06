@@ -425,6 +425,20 @@
                         }
                     }
                     else {
+                        var $this = this;
+                        // TODO:
+                        //   timeout before generating release event is necessary to let
+                        //   painting changing state between press and release. Otherwise
+                        //   both events can happen in the same thread  what causes only
+                        //   last state (released will be visualized)  The code below has to
+                        //   be optimized:
+                        //      - may be it makes sense to keep Q
+                        //      - timer is required only if pressed was in Q
+
+                        setTimeout(
+
+                        function() {
+
                         try {
                             // store coordinates and target
                             stub.$fillWith(id, e);
@@ -439,23 +453,23 @@
 
                             // fire dragged or clicked
                             if (mp.isDragged === true) {
-                                this.destination.$pointerDragEnded(stub);
+                                $this.destination.$pointerDragEnded(stub);
                             }
                             else {
                                 if ($lastPointerReleased != null &&
                                     $lastPointerReleased.identifier === id &&
                                     (new Date().getTime() - $lastPointerReleased.time) <= pkg.doubleClickDelta)
                                 {
-                                    this.destination.$pointerDoubleClicked(stub);
+                                    $this.destination.$pointerDoubleClicked(stub);
                                 }
                                 else {
-                                    this.destination.$pointerClicked(stub);
+                                    $this.destination.$pointerClicked(stub);
                                 }
                             }
 
                             // always complete pointer pressed with appropriate
                             // release event
-                            this.destination.$pointerReleased(stub);
+                            $this.destination.$pointerReleased(stub);
                         }
                         finally {
                             // clear handled pressed and dragged state
@@ -466,6 +480,9 @@
                             // remove global move listener if necessary
                             $cleanDragFix();
                         }
+
+                        },
+                        50);
                     }
                 }
             };

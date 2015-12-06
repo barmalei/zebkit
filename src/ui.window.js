@@ -113,7 +113,7 @@ pkg.activateWindow = function(win) {
 
  * @class zebra.ui.WinLayer
  * @constructor
- * @extends {zebra.ui.CanvasLayer}
+ * @extends {zebra.ui.HtmlCanvas}
  */
 pkg.WinLayer = Class(pkg.HtmlCanvas, [
     function $clazz() {
@@ -344,8 +344,10 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
         this.id = this.clazz.ID;
         this.$super();
 
-        // TODO: prove of concept
-        this.$container.style["pointer-events"] = "none";
+        // TODO: why 1000 and how to avoid z-index manipulation
+        // the layer has to be placed above other elements that are virtually
+        // inserted in the layer
+        this.element.style["z-index"] = "10000";
     },
 
     function insert(index, constr, lw) {
@@ -1686,7 +1688,7 @@ pkg.Menubar = Class(pkg.Menu, [
  * context menu. Normally the layer is not used directly.
  * @class zebra.ui.PopupLayer
  * @constructor
- * @extends {zebra.ui.CanvasLayer}
+ * @extends {zebra.ui.HtmlCanvas}
  */
 pkg.PopupLayer = Class(pkg.HtmlCanvas, [
     function $clazz() {
@@ -1789,6 +1791,17 @@ pkg.PopupLayer = Class(pkg.HtmlCanvas, [
 
         this.doLayout = function (target){
             var cnt = this.kids.length;
+
+            // TODO:
+            // prove of concept. if layer is active don't allow WEB events comes to upper layer
+            // since there can be another HtmlElement that should not be part of interaction
+            if (cnt > 0) {
+                this.$container.style["pointer-events"] = "auto";
+            }
+            else {
+                this.$container.style["pointer-events"] = "none";
+            }
+
             for(var i = 0; i < cnt; i++){
                 var m = this.kids[i];
                 if (zebra.instanceOf(m, pkg.Menu)) {
@@ -1809,9 +1822,6 @@ pkg.PopupLayer = Class(pkg.HtmlCanvas, [
         this.activeMenubar = null;
         this.id = this.clazz.ID;
         this.$super();
-
-        // TODO: prove of concept
-        this.$container.style["pointer-events"] = "none";
     }
 ]);
 
@@ -2017,7 +2027,7 @@ pkg.PopupManager = Class(pkg.Manager, [
          * @type {Boolean}
          * @default true
          */
-        this.hideTooltipByPress = true;
+        this.hideTooltipByPress = false;
 
         /**
          * Define interval (in milliseconds) between entering a component and showing
@@ -2028,7 +2038,7 @@ pkg.PopupManager = Class(pkg.Manager, [
          */
         this.showTooltipIn = 400;
 
-        this.syncTooltipPosition = false;
+        this.syncTooltipPosition = true;
 
         /**
          * Define pointer clicked event handler
@@ -2039,10 +2049,8 @@ pkg.PopupManager = Class(pkg.Manager, [
             this.$popupMenuX = e.absX;
             this.$popupMenuY = e.absY;
 
-
-
             // Right button
-            // TODO: check if it is ok and compatiable with touch
+            // TODO: check if it is ok and compatible with touch
             if (e.isContext()) {
                 var popup = null;
 
@@ -2069,6 +2077,9 @@ pkg.PopupManager = Class(pkg.Manager, [
          * @method pointerEntered
          */
         this.pointerEntered = function(e) {
+
+            console.log("PopupManager.pointerEntered() src = " + e.source.clazz.$name);
+
             if (this.$target == null && (e.source.tooltip != null || e.source.getTooltip != null)) {
                 var c = e.source;
                 this.$target = c;
@@ -2125,6 +2136,9 @@ pkg.PopupManager = Class(pkg.Manager, [
                                                             : this.$target.getTooltip(this.$target,
                                                                                       this.$tooltipX,
                                                                                       this.$tooltipY);
+
+                console.log("PopupManager.run() " + this.$tooltip + "," + ntooltip);
+
                 if (this.$tooltip != ntooltip) {
                     // hide previously shown tooltip
                     if (this.$tooltip != null) {
@@ -2153,6 +2167,7 @@ pkg.PopupManager = Class(pkg.Manager, [
                             this.$tooltip.winType = "info";
                         }
 
+                        console.log("PopupManager.run() add tooltip ");
                         this.$targetTooltipLayer.addWin(this.$tooltip, this);
 
                         if (this.$tooltip.winType !== "info") {

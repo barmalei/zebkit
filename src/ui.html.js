@@ -101,18 +101,6 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
 
                 // adjust location of just attached DOM component
                 $adjustLocation(c);
-
-                // if a new DOM element appears in hierarchy we have to correct
-                // z-order of disabled DOM elements that are the parents of the
-                // inserted element
-                var pp = c.parent;
-                while(pp != null) {
-                    if (pp.isEnabled === false && pp.isDOMElement === true) {
-                        pp.$container.removeChild(pp.$blockElement);
-                        pp.$container.appendChild(pp.$blockElement);
-                    }
-                    pp = pp.parent;
-                }
             }
             else {
                 // test consistency whether the DOM element already has

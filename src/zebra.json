@@ -892,7 +892,6 @@
 
     "HtmlElement": {
         "styles": {
-            "pointer-events"  : "auto",
             "margin"          : "0px",
             "border"          : "none",
             "borderWidth"     : "0px",

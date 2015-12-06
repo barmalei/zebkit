@@ -2194,6 +2194,10 @@ pkg.HtmlElement = Class(pkg.Panel, [
          */
         this.element = e;
 
+        // this is set to make possible to use set z-index for HTML element
+        this.element.style.position = "relative";
+
+
         if (e.parentNode != null && e.parentNode.getAttribute("data-zebcont") != null) {
             throw new Error("DOM element '" + e + "' already has container");
         }
@@ -2221,7 +2225,8 @@ pkg.HtmlElement = Class(pkg.Panel, [
         // border and margin also have to be zero
         this.$container.style.fontSize = this.$container.style.padding = this.$container.style.padding = "0px";
 
-        this.$container.style["z-index"] = "0";
+        //
+        //this.$container.style["z-index"] = "0";
 
         // add id
         this.$container.setAttribute("id", "container-" + this.toString());
@@ -2230,8 +2235,8 @@ pkg.HtmlElement = Class(pkg.Panel, [
         // mark wrapper with a special attribute to recognize it exists later
         this.$container.setAttribute("data-zebcont", "true");
 
-
-       // this.$container.style["pointer-events"] = "none";
+        // let html element interact
+        this.$container.style["pointer-events"] = "auto";
 
         // if passed DOM element already has parent
         // attach it to container first and than
@@ -2472,6 +2477,7 @@ pkg.HtmlCanvas = Class(pkg.HtmlElement, [
 
         this.$paintTask = null;
 
+
         // set border for canvas has to be set as zebra border, since canvas
         // is DOM component designed for rendering, so setting DOM border
         // doesn't allow us to render zebra border
@@ -2576,6 +2582,9 @@ pkg.HtmlCanvas = Class(pkg.HtmlElement, [
 
         this.$super(e == null ? "canvas" : e);
 
+        // let HTML Canvas be WEB event transparent
+        this.$container.style["pointer-events"] = "none";
+
         // add class to canvas if this element has been created
         if (e == null) {
             // prevent canvas selection
@@ -2634,23 +2643,6 @@ pkg.CanvasLayer = Class(pkg.HtmlCanvas, [
          *  at this location
          *  @method isLayerActiveAt
          */
-    },
-
-    function(id) {
-        if (id == null) {
-            throw new Error("Invalid layer id: " + id);
-        }
-
-        /**
-         * Id of the layer
-         * @attribute id
-         * @type {String}
-         * @readOnly
-         */
-        this.id = id;
-        this.$super();
-
-     //   this.$container.style["pointer-events"] = "none";
     }
 ]);
 
@@ -2661,7 +2653,11 @@ pkg.CanvasLayer = Class(pkg.HtmlCanvas, [
  *  @constructor
  *  @extends {zebra.ui.CanvasLayer}
  */
-pkg.RootLayer = Class(pkg.CanvasLayer, [
+pkg.RootLayer = Class(pkg.HtmlCanvas, [
+    function $clazz() {
+        this.ID = "root";
+    },
+
     function $prototype() {
         this.layerPointerPressed = function(e) {
             return true;
@@ -2674,6 +2670,11 @@ pkg.RootLayer = Class(pkg.CanvasLayer, [
         this.getFocusRoot = function() {
             return this;
         };
+    },
+
+    function() {
+        this.$super();
+        this.id = this.clazz.ID;
     }
 ]);
 
@@ -3829,6 +3830,9 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
         // since zCanvas is top level element it doesn't have to have
         // absolute position
         this.$container.style.position = "relative";
+
+        // let canvas zCanvas listen WEB event
+        this.$container.style["pointer-events"] = "auto";
 
         // if canvas is not yet part of HTML let's attach it to
         // body.

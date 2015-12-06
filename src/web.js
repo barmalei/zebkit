@@ -148,6 +148,7 @@
         be.style.height = be.style.width  = "100%";
         be.style.left = be.style.top = "0px";
         be.style.position = "absolute";
+        be.style["z-index"] = "100000";
 
         be.onmouseup   = be.onmousedown = be.onmouseout =
         be.onmouseover = be.onmousemove = be.onkeydown  =
@@ -161,8 +162,6 @@
            be.addEventListener(events[i], $eventsBlackHole, false);
         }
 
-        // TODO: remove me
-        be.style.background = "rgba(0,0,0,0.3)";
         return be;
     };
 

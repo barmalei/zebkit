@@ -197,7 +197,7 @@ var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
 
 var pkg = zebkit = zebra = namespace('zebra'),
     CNAME = pkg.CNAME = '$', CDNAME = '',
-    FN = pkg.$FN = (typeof namespace.name === "undefined") ? (function(f) {
+    FN = pkg.$FN = (typeof namespace.name === "undefined" || namespace.name == "") ? (function(f) {
                                                                 var mt = f.toString().match(/^function\s+([^\s(]+)/);
                                                                 return (mt == null) ? CNAME : mt[1];
                                                              })

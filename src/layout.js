@@ -1339,16 +1339,29 @@ pkg.FlowLayout = Class(L, [
                         ctr = a.constraints == null ? null : pkg.$constraints(a.constraints);
 
                     if (this.direction === pkg.HORIZONTAL){
+                        ctr = ctr || this.ay;
                         if (ctr === pkg.STRETCH) {
                             d.height = c.height - t - c.getBottom();
                         }
 
-                        a.setLocation(px, Math.floor((psSize.height - d.height) / 2) + py);
+                        a.setLocation(px, ctr === pkg.STRETCH ? t :
+                            (ctr === pkg.TOP ? py :
+                                (ctr === pkg.BOTTOM ?
+                                    Math.floor(psSize.height - d.height) + py :
+                                    Math.floor((psSize.height - d.height) / 2) + py)));
                         px += (d.width + this.gap);
                     }
                     else {
-                        if (ctr === pkg.STRETCH) d.width = c.width - l - c.getRight();
-                        a.setLocation(px + Math.floor((psSize.width - d.width) / 2), py);
+                        ctr = ctr || this.ax;
+                        if (ctr === pkg.STRETCH) {
+                            d.width = c.width - l - c.getRight();
+                        }
+                        a.setLocation(ctr === pkg.STRETCH ? l :
+                            (ctr === pkg.LEFT ? px :
+                                (ctr === pkg.RIGHT ?
+                                    px + Math.floor(psSize.width - d.width) :
+                                    px + Math.floor((psSize.width - d.width) / 2))),
+                            py);
                         py += d.height + this.gap;
                     }
 

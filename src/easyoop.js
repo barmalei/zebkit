@@ -212,7 +212,14 @@ pkg.isBoolean  = isBoolean;
 pkg.$caller    = null; // current method which is called
 
 
-pkg.clone = function (obj) {
+pkg.clone = function (obj, map) {
+    map = map || new Map();
+
+    var t = map.get(obj);
+    if (t !== undefined) {
+        return t;
+    }
+
     // clone atomic type
     if (obj == null || zebra.isString(obj) || zebra.isBoolean(obj) || zebra.isNumber(obj)) {
         return obj;
@@ -220,14 +227,15 @@ pkg.clone = function (obj) {
 
     // clone with provided custom "clone" method
     if (typeof obj.$clone !== "undefined") {
-        return obj.$clone();
+        return obj.$clone(map);
     }
 
     // clone array
     if (Array.isArray(obj)) {
         var nobj = [];
+        map.set(obj, nobj);
         for(var i = 0; i < obj.length; i++) {
-            nobj[i] = pkg.clone(obj[i]);
+            nobj[i] = pkg.clone(obj[i], map);
         }
         return nobj;
     }
@@ -238,10 +246,11 @@ pkg.clone = function (obj) {
     }
 
     var nobj = {};
+    map.set(obj, nobj);
     // clone object fields
     for(var k in obj) {
         if (obj.hasOwnProperty(k) === true) {
-            nobj[k] = pkg.clone(obj[k]);
+            nobj[k] = pkg.clone(obj[k], map);
         }
     }
 
@@ -709,12 +718,24 @@ pkg.Class = make_template(null, function() {
         throw new Error("$super is called outside of class context");
     };
 
-    $template.prototype.$clone = function() {
+    $template.prototype.$clone = function(map) {
+        map = map || new Map();
+
         var f = function() {};
         f.prototype = this.constructor.prototype;
         var nobj = new f();
+        map.set(this, nobj);
+
         for(var k in this) {
-            if (this.hasOwnProperty(k)) nobj[k] = zebra.clone(this[k]);
+            if (this.hasOwnProperty(k)) {
+                // obj's layout is obj itself
+                var t = map.get(this[k]);
+                if (t !== undefined) {
+                    nobj[k] = t;
+                } else {
+                    nobj[k] = zebra.clone(this[k], map);
+                }
+            }
         }
 
         nobj.constructor = this.constructor;

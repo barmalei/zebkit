@@ -1,0 +1,8 @@
+{
+    "AllPanel": {
+        "border": {
+            "$zebra.ui.Border":["#33AAFF", 0.001, 4],
+            "gap":0
+        }
+    }
+}

@@ -247,6 +247,62 @@ pkg.Text = Class(pkg.TextModel, [
 ]);
 
 /**
+ * Auto wrap multi-line text model implementation, use it together with zebra.ui.AutoWrapLabel
+ * @class zebra.data.AutoWrapText
+ * @param  {String}  [s] the specified text the model has to be filled
+ * @constructor
+ * @extends zebra.data.Text
+ */
+pkg.AutoWrapText = Class(pkg.Text, [
+    function (text, font, maxWidth) {
+        this.origText = text;
+        this.font = font ? font : null;
+        this.maxWidth = maxWidth ? maxWidth : 0;
+        return this.$super(text);
+    },
+    function setValue(text) {
+        if (this.maxWidth > 0 && this.font != null) {
+            var lines = [];
+            var s = '';
+            for (var i in text) {
+                var c = text[i];
+                var old = s;
+                s += c;
+
+                if (c == '\n') {
+                    lines.push(old);
+                    s = '';
+                } else {
+                    var width = this.font.stringWidth(s);
+                    if (width > this.maxWidth) {
+                        if (old.length == 0) {
+                            old = s;
+                        }
+                        lines.push(old);
+                        s = c;
+                    }
+                }
+            }
+            lines.push(s);
+            text = lines.join('\n');
+        }
+        return this.$super(text);
+    },
+    function setFont(font) {
+        if (this.font != font) {
+            this.font = font;
+            this.setValue(this.origText);
+        }
+    },
+    function setMaxWidth(maxWidth) {
+        if (this.maxWidth != maxWidth) {
+            this.maxWidth = maxWidth;
+            this.setValue(this.origText);
+        }
+    }
+]);
+
+/**
  * Single line text model implementation
  * @param  {String}  [s] the specified text the model has to be filled
  * @param  {Integer} [max] the specified maximal text length

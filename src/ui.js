@@ -129,7 +129,7 @@ pkg.Label = Class(pkg.ViewPan, [
          */
         this.setModel = function(m) {
             this.setView(zebra.isString(m) ? new pkg.StringRender(m)
-                                           : new pkg.TextRender(m));
+                : (instanceOf(m, zebra.data.TextModel) ? new pkg.TextRender(m) : m));
         };
 
         this.getModel = function() {
@@ -200,10 +200,57 @@ pkg.Label = Class(pkg.ViewPan, [
     },
 
     function (r) {
-        this.setView(arguments.length === 0 ||
-                     zebra.isString(r)       ? new pkg.StringRender(r)
-                                             : (instanceOf(r, zebra.data.TextModel) ? new pkg.TextRender(r) : r));
+        if (arguments.length > 0) {
+            this.setModel(r);
+        }
         this.$super();
+    }
+]);
+
+/**
+ * Label UI component class. The label can be used to visualize simple string which will be
+ * auto wrapped if the string length exceeds parent container width
+
+     // render simple string auto wrap
+     var l = new zebra.ui.Label("Auto wrap simple string");
+
+     // render multi lines auto wrap text
+     var l = new zebra.ui.Label(new zebra.data.AutoWrapText("Auto wrap\nmultiline\ntext"));
+
+ * @param  {String|zebra.data.AutoWrapText} [r] a text to be shown with the label.
+ * You can pass a simple string or an instance of a AutoWrapText.
+ * @constructor
+ * @class zebra.ui.AutoWrapLabel
+ * @extends zebra.ui.Label
+ */
+pkg.AutoWrapLabel = Class(pkg.Label, [
+    function setModel(m) {
+        var render = m;
+        if (zebra.isString(m)) {
+            var text = new zebra.data.AutoWrapText(m);
+            var render = new pkg.TextRender(text);
+            text.setFont(render.font);
+        } else if (zebra.instanceOf(m, zebra.data.AutoWrapText)) {
+            render = new pkg.TextRender(m);
+        } else {
+            throw new Error("Invalid argument type, only string or AutoWrapText are supported");
+        }
+        this.setView(render);
+    },
+    function setFont(f) {
+        var model = this.getModel();
+        if (model != null && zebra.instanceOf(model, zebra.data.AutoWrapText)) {
+            model.setFont(f);
+        }
+        return this.$super(f);
+    },
+    function resized(prevWidth, prevHeight) {
+        var model = this.getModel();
+        if (model != null && zebra.instanceOf(model, zebra.data.AutoWrapText)) {
+            // this will invalidate all
+            model.setMaxWidth(this.width);
+        }
+        this.$super(prevWidth, prevHeight);
     }
 ]);
 

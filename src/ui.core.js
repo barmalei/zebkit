@@ -200,6 +200,17 @@ pkg.View = Class([
         * @method paint
         */
         this.paint = function(g,x,y,w,h,c) {};
+
+        this.invalidate = function() {
+            if (this.parent != null)
+                this.parent.invalidate();
+            this.repaint();
+        };
+
+        this.repaint = function() {
+            if (this.parent != null)
+                this.parent.repaint();
+        }
     }
 ]);
 
@@ -2727,6 +2738,9 @@ pkg.ViewPan = Class(pkg.Panel, [
 
             if (v != old) {
                 this.view = v;
+                if (this.view != null) {
+                    this.view.parent = this;
+                }
                 this.notifyRender(old, v);
                 this.vrp();
             }

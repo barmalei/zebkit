@@ -421,7 +421,7 @@ pkg.CompRender = Class(pkg.Render, [
             var c = this.target;
             if (c != null && c.isVisible === true) {
                 var prevW = -1, prevH = 0;
-                if ((w != c.width || h != c.height) && c.getCanvas() == null){
+                if ((w != c.width || h != c.height) /*&& c.getCanvas() == null*/){
                     prevW = c.width;
                     prevH = c.height;
                     c.setSize(w, h);
@@ -441,6 +441,11 @@ pkg.CompRender = Class(pkg.Render, [
                 }
             }
         };
+    },
+
+    function setTarget(target) {
+        this.$super(target);
+        target.parent = this;
     }
 ]);
 
@@ -654,16 +659,7 @@ pkg.Pattern = Class(pkg.Render, [
     }
 ]);
 
-/**
-* Composite view. The view allows developers to combine number of
-* views and renders its together.
-* @class zebra.ui.CompositeView
-* @param {Arrayt|Object} [views] array of dictionary of views
-* to be composed together
-* @constructor
-* @extends zebra.ui.View
-*/
-pkg.CompositeView = Class(pkg.View, [
+pkg.CompositeViewBase = Class(pkg.View, [
     function $prototype() {
         /**
          * Left padding
@@ -779,15 +775,34 @@ pkg.CompositeView = Class(pkg.View, [
         this.outline = function(g,x,y,w,h,d) {
             return this.voutline != null && this.voutline.outline(g,x,y,w,h,d);
         };
+    },
 
-        this[''] = function() {
-            this.views = [];
-            var args = arguments.length == 1 ? arguments[0] : arguments;
-            for(var i = 0; i < args.length; i++) {
-                this.views[i] = pkg.$view(args[i]);
+    function() {
+
+    }
+]);
+
+/**
+ * Composite view. The view allows developers to combine number of
+ * views and renders its together.
+ * @class zebra.ui.CompositeView
+ * @param {Arrayt|Object} [views] array of dictionary of views
+ * to be composed together
+ * @constructor
+ * @extends zebra.ui.View
+ */
+pkg.CompositeView = Class(pkg.CompositeViewBase, [
+    function() {
+        this.$super();
+        this.views = [];
+        var args = arguments.length == 1 ? arguments[0] : arguments;
+        for(var i = 0; i < args.length; i++) {
+            this.views[i] = pkg.$view(args[i]);
+            if (this.views[i] != null) {
+                this.views[i].parent = this;
                 this.$recalc(this.views[i]);
             }
-        };
+        }
     }
 ]);
 
@@ -803,7 +818,7 @@ pkg.CompositeView = Class(pkg.View, [
 * @class zebra.ui.ViewSet
 * @extends zebra.ui.CompositeView
 */
-pkg.ViewSet = Class(pkg.CompositeView, [
+pkg.ViewSet = Class(pkg.CompositeViewBase, [
     function $prototype() {
         this.paint = function(g,x,y,w,h,d) {
             if (this.activeView != null) {
@@ -854,35 +869,40 @@ pkg.ViewSet = Class(pkg.CompositeView, [
             }
         };
 
-        this[''] = function(args) {
-            if (args == null) {
-                throw new Error("" + args);
+    },
+    function(args) {
+        this.$super();
+
+        if (args == null) {
+            throw new Error("" + args);
+        }
+
+        /**
+         * Views set
+         * @attribute views
+         * @type Object
+         * @default {}
+         * @readOnly
+         */
+        this.views = {};
+
+        /**
+         * Active in the set view
+         * @attribute activeView
+         * @type View
+         * @default null
+         * @readOnly
+         */
+        this.activeView = null;
+
+        for(var k in args) {
+            this.views[k] = pkg.$view(args[k]);
+            if (this.views[k] != null) {
+                this.views[k].parent = this;
+                this.$recalc(this.views[k]);
             }
-
-            /**
-             * Views set
-             * @attribute views
-             * @type Object
-             * @default {}
-             * @readOnly
-            */
-            this.views = {};
-
-            /**
-             * Active in the set view
-             * @attribute activeView
-             * @type View
-             * @default null
-             * @readOnly
-            */
-            this.activeView = null;
-
-            for(var k in args) {
-                this.views[k] = pkg.$view(args[k]);
-                if (this.views[k] != null) this.$recalc(this.views[k]);
-            }
-            this.activate("*");
-        };
+        }
+        this.activate("*");
     }
 ]);
 

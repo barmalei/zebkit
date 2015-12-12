@@ -445,7 +445,7 @@ pkg.CompRender = Class(pkg.Render, [
 
     function setTarget(target) {
         this.$super(target);
-        target.parent = this;
+        this.target.parent = this;
     }
 ]);
 

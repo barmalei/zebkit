@@ -210,7 +210,11 @@ pkg.View = Class([
         this.repaint = function() {
             if (this.parent != null)
                 this.parent.repaint();
-        }
+        };
+
+        this.setId = function(id) {
+            this.id = id;
+        };
     }
 ]);
 

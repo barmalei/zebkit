@@ -259,6 +259,22 @@ pkg.findInTree = function(root, path, eq, cb) {
                     }
                 }
             }
+            if (zebra.instanceOf(r, zebra.ui.ViewPan)) {
+                if (r.view != null) {
+                    var views = [r.view];
+                    if (zebra.instanceOf(r.view, zebra.ui.CompositeViewBase)) {
+                        r.view.iterate(function(k, v) {
+                            views.push(v);
+                        });
+                    }
+                    return list_child({kids: views}, name, deep, cb);
+                }
+            }
+            if (zebra.instanceOf(r, zebra.ui.CompRender)) {
+                if (r.target != null && zebra.instanceOf(r.target, zebra.ui.Panel)) {
+                    return list_child({kids: [r.target]}, name, deep, cb);
+                }
+            }
             return false;
         }
 

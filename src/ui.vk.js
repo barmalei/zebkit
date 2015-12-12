@@ -45,7 +45,7 @@ zebra.package("ui.vk", function(pkg, Class) {
 
                     // check if key proportion is good, otherwise again correct fixed key size
                     if (m.fixKeyWidth / m.rowHeight > this.ratio) {
-                        m.fixKeyWidth = ~~(m.rowHeight * this.ratio);
+                        m.fixKeyWidth = Math.floor(m.rowHeight * this.ratio);
                     }
 
                     // re-calculate keyboard width
@@ -63,11 +63,11 @@ zebra.package("ui.vk", function(pkg, Class) {
                         var aw = r.fixKeys * m.fixKeyWidth + r.occupiedHorSpace + (r.keys > 0 ? r.keys - 1 : 0) * this.gap;
 
                         if (r.stretchedKeys === 0) {
-                            x = left + ~~((ew - aw) / 2);
+                            x = left + Math.floor((ew - aw) / 2);
                         }
                         else {
-                            x  = left + ~~((ew - m.width) / 2)
-                            extra = ~~ ((m.width - aw) / r.stretchedKeys);
+                            x  = left + Math.floor((ew - m.width) / 2)
+                            extra = Math.floor((m.width - aw) / r.stretchedKeys);
                         }
                     }
 
@@ -77,7 +77,7 @@ zebra.package("ui.vk", function(pkg, Class) {
                         }
                         else {
                             var ps = k.getPreferredSize();
-                            if (ctr.size == "stretched") {
+                            if (ctr.size === "stretched") {
                                 k.setSize(ps.width + extra, m.rowHeight);
                             }
                             else {
@@ -126,7 +126,7 @@ zebra.package("ui.vk", function(pkg, Class) {
 
                 // check if key proportion is good, otherwise again correct fixed key size
                 if (fixKeyWidth / rowHeight > this.ratio) {
-                    fixKeyWidth = ~~(rowHeight * this.ratio);
+                    fixKeyWidth = Math.floor(rowHeight * this.ratio);
                 }
 
                 return {
@@ -166,7 +166,7 @@ zebra.package("ui.vk", function(pkg, Class) {
                             fixKeys ++;
                         }
                         else {
-                            if (ctr.size == "ps") {
+                            if (ctr.size === "ps") {
                                 prefKeys++;
                             }
                             else {
@@ -201,10 +201,10 @@ zebra.package("ui.vk", function(pkg, Class) {
 
     pkg.ShiftKeyArrow = zebra.Class(ui.View, [
         function $prototype() {
-            //       /\A
-            //      /  \
-            //     /    \
-            //    / C  F \
+            //       / \A
+            //      /   \
+            //     /     \
+            //    / C  F  \
             // B ^^^|  |^^^ G
             //      |__|
             //     D    E
@@ -219,9 +219,9 @@ zebra.package("ui.vk", function(pkg, Class) {
                 w -= 8;
                 h -= 8;
 
-                var cx = x + ~~(w / 2),
-                    ww = ~~(h / 2),
-                    dw = ~~(h / 4),
+                var cx = x + Math.floor(w / 2),
+                    ww = Math.floor(h / 2),
+                    dw = Math.floor(h / 4),
                     dt = g.lineWidth/2;
 
                 g.beginPath();
@@ -418,6 +418,7 @@ zebra.package("ui.vk", function(pkg, Class) {
                         this.repeatTask != null &&
                         this.repeatTask.isStarted === true)
                     {
+
                         this.fireVkPressed(this.code, this.ch, this.mask);
                     }
                 }
@@ -512,6 +513,14 @@ zebra.package("ui.vk", function(pkg, Class) {
         }
     ]);
 
+    pkg.ArrowView = Class(ui.ArrowView, [
+        function $prototype() {
+            this.gap = 0;
+            this.color = "white";
+            this.height = this.width = 8;
+        }
+    ]);
+
     pkg.PredefinedVKey = {
         shift : {
             view: {
@@ -523,14 +532,26 @@ zebra.package("ui.vk", function(pkg, Class) {
         },
 
         left: {
-            code : zebra.ui.KeyEvent.LEFT,
-            view : new zebra.ui.ArrowView("left"),
-            period: 150
+            code : ui.KeyEvent.LEFT,
+            view : new pkg.ArrowView("left"),
+            firePeriod: 150
         },
 
         right: {
-            code : zebra.ui.KeyEvent.RIGHT,
-            view : new zebra.ui.ArrowView("right"),
+            code : ui.KeyEvent.RIGHT,
+            view : new pkg.ArrowView("right"),
+            period: 150
+        },
+
+        up: {
+            code : ui.KeyEvent.UP,
+            view : new pkg.ArrowView("top"),
+            period: 150
+        },
+
+        down: {
+            code : ui.KeyEvent.DOWN,
+            view : new pkg.ArrowView("bottom"),
             period: 150
         },
 
@@ -586,18 +607,26 @@ zebra.package("ui.vk", function(pkg, Class) {
 
     pkg.VKeyOption = Class(pkg.VKeyBase, [
         function $clazz() {
-            this.Menu = Class(ui.Menu, []);
+            this.Menu = Class(ui.Menu, [
+                function $prototype() {
+                    this.canHaveFocus = false;
+                }
+            ]);
         },
 
         function $prototype() {
             this.catchFired = function() {
                 if (this.menu.parent != null) {
+                    console.log("remove popup");
                     this.menu.removeMe();
                 }
                 else {
                     var o = L.toParentOrigin(this);
                     this.menu.select(-1);
+                    this.menu.toPreferredSize();
                     this.menu.setLocation(o.x, o.y - this.menu.height);
+
+                    console.log("Show popup menu " + this.menu.y);
                     ui.showPopupMenu(this, this.menu);
                 }
             };
@@ -638,7 +667,9 @@ zebra.package("ui.vk", function(pkg, Class) {
                 return { width: w, height: h };
             }
         ]),
-        KE = new ui.KeyEvent(null, ui.KeyEvent.PRESSED, 1, 1, 0);
+        KE = new ui.KeyEvent();
+
+    KE.type = "vkb";
 
 
     pkg.VKeys = Class(pkg.VKey, [
@@ -646,7 +677,7 @@ zebra.package("ui.vk", function(pkg, Class) {
             this.layout = new L.BorderLayout();
 
             this.SmallLabel = Class(ui.Label, []);
-            this.SmallLabel.font = new ui.Font(pkg.VKey.Label.font.name, ~~((2*pkg.VKey.Label.font.height)/3));
+            this.SmallLabel.font = new ui.Font(pkg.VKey.Label.font.name, Math.floor((2*pkg.VKey.Label.font.height)/3));
 
             this.KeysPopupPan = Class(ui.Panel, [
                 function $clazz() {
@@ -657,7 +688,7 @@ zebra.package("ui.vk", function(pkg, Class) {
                 },
 
                 function $prototype() {
-                    this.$isVkElement = true;
+                    this.$dontGrabFocus = this.$isVkElement = true;
                 },
 
                 function() {
@@ -722,6 +753,8 @@ zebra.package("ui.vk", function(pkg, Class) {
                     });
                     ui.makeFullyVisible(this.keysPopupPan);
                     ui.activateWindow(this.keysPopupPan);
+
+                    this.setState("out");
                 }
             };
 
@@ -732,10 +765,10 @@ zebra.package("ui.vk", function(pkg, Class) {
             };
         },
 
-        function fireVkPressed(code, ch, mask) {
+        function fireVkPressed(e) {
             this.$counter = 0;
             this.hideKeysPopupPan();
-            this.$super(code, ch, mask);
+            this.$super(e);
             this.$pressed = zebra.util.task(this.showKeysPopupPan, this).run(700, 700);
         },
 
@@ -824,11 +857,13 @@ zebra.package("ui.vk", function(pkg, Class) {
 
     pkg.VK = Class(ui.Panel, [
         function $clazz() {
-            this.Listeners = zebra.util.ListenersClass("vkPressed", "vkTyped", "vkReleased", "vkMaskUpdated", "vkOptionSelected");
+            this.Listeners = zebra.util.ListenersClass("vkMaskUpdated", "vkOptionSelected");
         },
 
         function $prototype() {
             this.mask = 0;
+
+            this.$dontGrabFocus = true;
 
             this.eachGroupKey = function(g, f) {
                 var g = this.getGroupPan(g);
@@ -847,31 +882,29 @@ zebra.package("ui.vk", function(pkg, Class) {
             };
 
             this.show = function(d) {
-                if (d != this.input) {
-                    this.removeMe();
+                console.log("VK.show() d = " + d);
 
-                    if (this.input != null) {
-                        this.input.$forceToShow = false;
+
+                this.removeMe();
+
+                if (d != null) {
+                    if (d.hasFocus() === false) {
+                        d.requestFocus();
                     }
 
-                    this.input = d;
+                    this.constraints = L.HORIZONTAL | L.BOTTOM;
+                    this.toPreferredSize();
 
-                    if (d != null) {
-                        d.$forceToShow = true;
-                        this.constraints = L.HORIZONTAL | L.BOTTOM;
-                        this.toPreferredSize();
+                    if (pkg.makeEditorVisible === true) {
+                        var p  = L.toParentOrigin(d);
 
-                        if (pkg.makeEditorVisible === true) {
-                            var p  = L.toParentOrigin(this.input);
-
-                            if (p.y + this.input.height > this.height) {
-                                this.constraints = L.HORIZONTAL | L.TOP;
-                            }
+                        if (p.y + d.height > this.height) {
+                            this.constraints = L.HORIZONTAL | L.TOP;
                         }
-
-                        ui.showWindow(d, "mdi", this);
-                        ui.activateWindow(this);
                     }
+
+                    ui.showWindow(d, "mdi", this);
+                    ui.activateWindow(this);
                 }
             };
 
@@ -926,27 +959,28 @@ zebra.package("ui.vk", function(pkg, Class) {
                     this.onMask(mask, vk);
                 }
 
-                this._.vkPressed(vk, code, ch, mask);
-
-                KE.reset(this.input, ui.KeyEvent.PRESSED, code, ch, this.mask);
-                ui.events.fireEvent(KE);
+                KE.ch = ch;
+                KE.code = code;
+                KE.$setMask(mask);
+                this.getCanvas().$keyPressed(KE);
             };
 
             this.vkTyped = function (vk, code, ch, mask) {
                 var ch = this.isShiftOn() ? ch.toUpperCase() : ch;
-                this._.vkTyped(vk, code, ch, mask);
-                KE.reset(this.input, ui.KeyEvent.TYPED, code, ch, this.mask);
-                ui.events.fireEvent("keyTyped", KE);
+                KE.ch = ch;
+                KE.code = code;
+                KE.$setMask(mask);
+                this.getCanvas().$keyTyped(KE);
             };
 
             this.vkReleased = function(vk, code, ch, mask) {
                 if (mask != 0) {
                     this.offMask(mask, vk);
                 }
-
-                this._.vkReleased(vk, code, ch, mask);
-                KE.reset(this.input, ui.KeyEvent.RELEASED, code, ch, this.mask);
-                ui.events.fireEvent(KE);
+                KE.ch = ch;
+                KE.code = code;
+                KE.$setMask(mask);
+                this.getCanvas().$keyReleased(KE);
             };
 
             this.setActiveGroup = function(name) {
@@ -1037,20 +1071,20 @@ zebra.package("ui.vk", function(pkg, Class) {
 
     ui.events.bind({
         focusGained : function (e) {
-            if ($vk != null && $isVkElement(e.source) == false) {
+            if ($vk != null && $isVkElement(e.source) === false && e.source.vkMode != null) {
                 pkg.showVK(zebra.instanceOf(e.source, ui.TextField) ? e.source : null);
             }
         },
 
         pointerPressed : function(e) {
             if ($vk != null) {
-                if ($vk.input != null && $vk.input != e.source && $isVkElement(e.source) == false && L.isAncestorOf($vk, e.source) == false) {
+                if ($vk.parent != null && $isVkElement(e.source) === false && L.isAncestorOf($vk, e.source) === false) {
                     pkg.showVK(null);
                 }
 
                 // if input component holds focus, virtual keyboard is
                 // hidden and we press on the input component
-                if ($vk.parent == null && zebra.instanceOf(e.source, ui.TextField)) {
+                if ($vk.parent == null && e.source.vkMode != null) {
                     pkg.showVK(e.source);
                 }
             }

@@ -29,6 +29,7 @@ pkg.TextField = Class(pkg.Label, [
     },
 
     function $prototype() {
+        this.vkMode = "indirect";
         this.startLine = this.startCol = this.endLine = this.endCol = this.curX = 0;
         this.startOff = this.endOff = -1;
 
@@ -444,7 +445,7 @@ pkg.TextField = Class(pkg.Label, [
             if (this.position.offset >= 0 &&
                 this.curView != null      &&
                 this.blinkMe              &&
-                (this.hasFocus() || this.$forceToShow === true)) // TODO: $forceToShow is awkward solution sdesigned for VK
+                this.hasFocus()              )
             {
                 if (this.textAlign === zebra.layout.LEFT)
                     this.curView.paint(g, this.curX, this.curY,

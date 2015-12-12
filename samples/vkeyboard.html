@@ -7,15 +7,16 @@
 <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1, minimal-ui">
 <meta name="msapplication-tap-highlight" content="no" />
 
-
-
 <script src='../src/easyoop.js'    type='text/javascript'></script>
 <script src='../src/util.js' type='text/javascript'></script>
 <script src='../src/io.js'    type='text/javascript'></script>
 <script src='../src/data.js' type='text/javascript'></script>
 <script src='../src/layout.js' type='text/javascript'></script>
+<script src='../src/web.js' type='text/javascript'></script>
 <script src='../src/ui.webstuff.js' type='text/javascript'></script>
-<script src='../src/canvas.js' type='text/javascript'></script>
+<script src='../src/ui.webpointer.js' type='text/javascript'></script>
+<script src='../src/ui.webkey.js' type='text/javascript'></script>
+<script src='../src/ui.core.js' type='text/javascript'></script>
 <script src='../src/ui.views.js' type='text/javascript'></script>
 <script src='../src/ui.js' type='text/javascript'></script>
 
@@ -25,6 +26,8 @@
 <script src='../src/ui.window.js' type='text/javascript'></script>
 <script src='../src/ui.tree.js' type='text/javascript'></script>
 <script src='../src/ui.grid.js' type='text/javascript'></script>
+<script src='../src/ui.html.js' type='text/javascript'></script>
+
 <script src='../src/ui.vk.js' type='text/javascript'></script>
 
 
@@ -32,11 +35,16 @@
 
 
 zebra.ready(function() {
+
+    console.log("ready");
+
     var canvas = new zebra.ui.zCanvas(600,400);
 
     canvas.root.setLayout(new zebra.layout.BorderLayout(8));
     canvas.root.setPadding(16);
     canvas.root.setBorder("plain");
+
+    console.log("root: " + canvas.root.clazz.$name );
 
     //TODO: remove test code
     zebra.ui.vk.activateVK();
@@ -59,10 +67,26 @@ zebra.ready(function() {
         vk.setActiveGroup(o);
     });
 
-    canvas.root.add("top", new zebra.ui.TextField());
-    canvas.root.add("bottom", new zebra.ui.TextField());
+    canvas.root.add("top", new zebra.ui.TextField("sdas"));
+    canvas.root.add("bottom", new zebra.ui.Button("showWin").setId("showWin"));
+
+    canvas.find("#showWin").bind(function() {
+        var w = new zebra.ui.Window();
+        w.root.setLayout(new zebra.layout.BorderLayout());
+        w.root.add("top", new zebra.ui.TextField(""));
+        w.root.add("bottom", new zebra.ui.Button("Test").properties({
+            canUseVK : true
+        }));
+        var ww = new zebra.ui.HtmlWinCanvas(w);
+        ww.setSize(200, 200);
+        zebra.ui.showWindow(canvas, "mdi", ww);
+
+    });
+
+
+//    canvas.root.add("center", new zebra.ui.Button("dsds"));
   //  canvas.root.add("center", new zebra.ui.TextArea());
-    canvas.fullScreen();
+  //  canvas.fullScreen();
 });
 
 </script>

@@ -67,7 +67,7 @@
                 [ "q", "w", "e", "r", "t",  "y", "u", "i", "o", "p" ],
                 [ "a", "s", "d", "f", "g", "h", "j", "k", "l", ["ab", [ "cd" ], [ "kl" ]  ]  ],
                 [ "shift", "z", "x", "c", "v", "b", "n", "m", "backSpace" ],
-                [ { "vkey": { "$zebra.ui.vk.VKeyOption": ["Lang", [ "rus","hindi" ]] }, "size": "ps" }, "/-+=", "space",  ".,:;", "enter" ]
+                [ { "vkey": { "$zebra.ui.vk.VKeyOption": ["Lang", [ "rus","hindi", "arrow" ]] }, "size": "ps" }, "/-+=", "space",  ".,:;", "enter" ]
             ],
 
             "rus" : [
@@ -75,7 +75,13 @@
                 [ "й", "ц", "у", "к", "е", "н", "г", "ш", "щ", "з" ],
                 [ "ф", "ы", "в", "а", "п", "р", "о", "л", "джэ"  ],
                 [ "shift", "я", "ч", "с", "м", "и", "т", "ь", "б", "ю", "backSpace"  ],
-                [ { "vkey": { "$zebra.ui.vk.VKeyOption" : [ "Lang", [ "latin", "hindi" ]] }, "size": "ps" }, "/-+=", "space",  ".,:;", "enter" ]
+                [ { "vkey": { "$zebra.ui.vk.VKeyOption" : [ "Lang", [ "latin", "hindi", "arrow" ]] }, "size": "ps" }, "/-+=", "space",  ".,:;", "enter" ]
+            ],
+
+            "arrow": [
+               [ "up"],
+               [ "left", "right"],
+               [ "down"]
             ],
 
             "hindi": "@(vk.hindi.json)"

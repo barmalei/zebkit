@@ -1293,13 +1293,13 @@ pkg.Tree = Class(pkg.BaseTree, [
         /**
          * Initiate the given item editing if the specified event matches condition
          * @param  {zebra.data.Item} item an item to be edited
-         * @param  {zebra.ui.InputEvent} e an even that may trigger the item editing
+         * @param  {zebra.util.Event} e an even that may trigger the item editing
          * @return {Boolean}  return true if an item editing process has been started,
          * false otherwise
          * @method  se
          * @private
          */
-        this.se = function (item,e ){
+        this.se = function (item, e){
             if (item != null){
                 this.stopEditing(true);
                 if (this.editors != null && this.editors.shouldStartEdit(item, e)) {

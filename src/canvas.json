@@ -41,7 +41,7 @@
         },
 
         "cursorManager"  : { "$zebra.ui.CursorManager"  :[] },
-        "commandManager" : { "$zebra.ui.CommandManager" :[] }
+        "commandManager" : { "$zebra.ui.ShortcutManager" :[] }
     },
 
     "font"          : { "$Font" : ["Arial", 14] },

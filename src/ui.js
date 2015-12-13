@@ -70,7 +70,7 @@ pkg.Line = Class(pkg.Panel, [
                 bottom = this.getBottom(),
                 xy     = isHor ? top : left;
 
-            for(var i=0; i < this.colors.length; i++) {
+            for(var i = 0; i < this.colors.length; i++) {
                 if (this.colors[i] != null) {
                     g.setColor(this.colors[i]);
                     if (isHor === true) {
@@ -464,17 +464,15 @@ pkg.StatePan = Class(pkg.ViewPan, [
  * @constructor
  * @extends zebra.ui.StatePan
  */
-var OVER = 0, PRESSED_OVER = 1, OUT = 2, PRESSED_OUT = 3, DISABLED = 4;
+var OVER = "over", PRESSED_OVER = "pressed.over", OUT = "out", PRESSED_OUT = "pressed.out", DISABLED = "disabled";
 
 pkg.EvStatePan = Class(pkg.StatePan,  [
     function $prototype() {
         this.state = OUT;
-
         this.$isIn = false;
 
-        var IDS = ["over", "pressed.over", "out", "pressed.out", "disabled"];
         this.toViewId = function(state) {
-            return IDS[state];
+            return state;
         };
 
         this._keyPressed = function(e) {
@@ -1111,7 +1109,6 @@ pkg.BorderPan = Class(pkg.Panel, [
     },
 
     function(title, center, ctr){
-
         if (ctr == null) ctr = L.TOP | L.LEFT;
 
         if (zebra.isString(title)) {
@@ -1410,9 +1407,9 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
         this.toViewId = function(state){
             if (this.isEnabled === true) {
                 if (this.getValue()) {
-                    return (this.state == OVER) ? "on.over" : "on.out";
+                    return (this.state === OVER) ? "on.over" : "on.out";
                 }
-                return (this.state == OVER) ? "off.over" : "off.out";
+                return (this.state === OVER) ? "off.over" : "off.out";
             }
             return this.getValue() ? "don" : "doff";
         };

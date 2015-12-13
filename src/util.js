@@ -56,6 +56,12 @@ function hex(v) {
     return (v < 16) ? "0" + v.toString(16) : v.toString(16);
 }
 
+pkg.Event = Class([
+    function $prototype() {
+        this.source = null;
+    }
+]);
+
 /**
  * Sequential tasks runner. Allows developers to execute number of tasks (async and sync) in the
  * the order they have been called by runner:

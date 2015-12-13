@@ -375,7 +375,7 @@ pkg.DefEditors = Class([
          * @param  {zebra.ui.grid.Grid} grid a grid
          * @param  {Integer} row  a grid cell row
          * @param  {Integer} col  a grid cell column
-         * @param  {zebra.ui.InputEvent} e  an event to be evaluated
+         * @param  {zebra.util.Event} e  an event to be evaluated
          * @return {Boolean} true if the given input event triggers the given cell editing
          * @method shouldStart
          */
@@ -388,7 +388,7 @@ pkg.DefEditors = Class([
          * @param  {zebra.ui.grid.Grid} grid a grid
          * @param  {Integer} row  a grid cell row
          * @param  {Integer} col  a grid cell column
-         * @param  {zebra.ui.InputEvent} e  an event to be evaluated
+         * @param  {zebra.util.Event} e  an event to be evaluated
          * @return {Boolean} true if the given input event triggers the given cell editing
          * cancellation
          * @method shouldCancel
@@ -402,7 +402,7 @@ pkg.DefEditors = Class([
          * @param  {zebra.ui.grid.Grid} grid [description]
          * @param  {Integer} row  a grid cell row
          * @param  {Integer} col  a grid cell column
-         * @param  {zebra.ui.InputEvent} e  an event to be evaluated
+         * @param  {zebra.util.Event} e  an event to be evaluated
          * @return {Boolean} true if the given input event triggers finishing the given cell editing
          * @method shouldFinish
          */

@@ -1763,7 +1763,7 @@ pkg.GridLayout = Class(L, [
              * @type {Integer}
              */
             this.cols = c;
-            this.mask = m;
+            this.stretchCols = this.stretchRows = false;
             this.colSizes = Array(c + 1);
             this.rowSizes = Array(r + 1);
 
@@ -1865,14 +1865,14 @@ pkg.GridLayout = Class(L, [
                 top      = c.getTop(),
                 left     = c.getLeft();
 
-            if ((this.mask & pkg.HORIZONTAL) > 0) {
+            if (this.stretchCols) {
                 var dw = c.width - left - c.getRight() - colSizes[cols];
                 for(var i = 0;i < cols; i ++ ) {
                     colSizes[i] = colSizes[i] + (colSizes[i] !== 0 ? Math.floor((dw * colSizes[i]) / colSizes[cols]) : 0);
                 }
             }
 
-            if ((this.mask & pkg.VERTICAL) > 0) {
+            if (this.stretchRows) {
                 var dh = c.height - top - c.getBottom() - rowSizes[rows];
                 for(var i = 0;i < rows; i++) {
                     rowSizes[i] = rowSizes[i] + (rowSizes[i] !== 0 ? Math.floor((dh * rowSizes[i]) / rowSizes[rows]) : 0);

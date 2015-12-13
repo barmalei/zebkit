@@ -436,7 +436,7 @@ pkg.HtmlLink = Class(pkg.HtmlElement, [
     function(text, href) {
         this.$super("a");
         this.setContent(text);
-        this.setAttribute("href", href);
+        this.setAttribute("href", href == null ? "#": href);
         this._ = new zebra.util.Listeners();
         var $this = this;
         this.element.onclick = function(e) {
@@ -444,6 +444,7 @@ pkg.HtmlLink = Class(pkg.HtmlElement, [
         };
     }
 ]);
+
 
 /**
  * @for

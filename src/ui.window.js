@@ -210,7 +210,7 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
 
         /**
          * Define children components input events handler.
-         * @param  {zebra.ui.InputEvent|zebra.ui.KeyEvent|zebra.ui.PointerEvent} e an input event
+         * @param  {zebra.ui.FocusEvent} e a focus event
          * @method childFocusGained
          */
         this.childFocusGained = function (e) {
@@ -246,13 +246,20 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
             if (c != this.activeWin) {
                 var old = this.activeWin;
                 if (c == null) {
-                    if (this.winsTypes[this.activeWin] === "modal") {
+                    var type = this.winsTypes[this.activeWin];
+                    if (type === "modal") {
                         throw new Error("Modal window cannot be de-activated");
                     }
 
                     this.activeWin = null;
                     this.fire(WIN_DEACTIVATED, old);
-                    pkg.focusManager.requestFocus(null);
+
+                    // TODO: special flag $dontGrabFocus is not very elegant
+                    if (type === "mdi" && old.$dontGrabFocus !== true) {
+
+                        console.log("!!!!!!!!!!!!!!!??");
+                        pkg.focusManager.requestFocus(null);
+                    }
                 }
                 else {
                     if (this.winsStack.indexOf(c) < this.topModalIndex) {
@@ -268,7 +275,13 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
 
                     this.fire(WIN_ACTIVATED, this.activeWin);
                     this.activeWin.validate();
-                    pkg.focusManager.requestFocus(pkg.focusManager.findFocusable(this.activeWin));
+
+                    var type = this.winsTypes[this.activeWin];
+                    // TODO: special flag $dontGrabFocus is not very elegant
+                    if (type === "mdi" && this.activeWin.$dontGrabFocus !== true) {
+                        var newFocusable = pkg.focusManager.findFocusable(this.activeWin);
+                        pkg.focusManager.requestFocus(newFocusable);
+                    }
                 }
             }
         };
@@ -357,7 +370,7 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
             type = lw.winType != null ? lw.winType : "mdi";
         }
 
-        if (type != "mdi" && type != "modal" && type != "info") {
+        if (type !== "mdi" && type !== "modal" && type !== "info") {
             throw new Error("Invalid window type: " + type);
         }
 
@@ -385,14 +398,16 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
             this.$super(this.kidRemoved,index, lw);
 
             var l = this.winsListeners[lw];
-            if (this.activeWin == lw) {
+            if (this.activeWin === lw) {
                 this.activeWin = null;
 
                 // TODO:  deactivated event can be used
                 // as a trigger of a window closing so
                 // it is better don't fire it here
                 // this.fire(WIN_DEACTIVATED, lw, l);
-                pkg.focusManager.requestFocus(null);
+                if (this.winsTypes[lw] === "mdi" && lw.$dontGrabFocus !== true) {
+                    pkg.focusManager.requestFocus(null);
+                }
             }
 
             var ci = this.winsStack.indexOf(lw);
@@ -404,7 +419,7 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
             else {
                 if (this.topModalIndex == ci){
                     for(this.topModalIndex = this.kids.length - 1;this.topModalIndex >= 0; this.topModalIndex--){
-                        if (this.winsTypes[this.winsStack[this.topModalIndex]] == "modal") {
+                        if (this.winsTypes[this.winsStack[this.topModalIndex]] === "modal") {
                             break;
                         }
                     }
@@ -415,7 +430,7 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
 
             if (this.topModalIndex >= 0){
                 var aindex = this.winsStack.length - 1;
-                while(this.winsTypes[this.winsStack[aindex]] == "info") {
+                while(this.winsTypes[this.winsStack[aindex]] === "info") {
                     aindex--;
                 }
                 this.activate(this.winsStack[aindex]);

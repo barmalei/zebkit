@@ -1,5 +1,4 @@
 (function(pkg, Class) {
-
     /**
      * Input key event class.
      * @param {zebra.ui.Panel} source a source of the key input event
@@ -8,10 +7,10 @@
      * @param {Integer} mask a bits mask of pressed meta keys:  zebra.ui.KeyEvent.M_CTRL,
      * zebra.ui.KeyEvent.M_SHIFT, zebra.ui.KeyEvent.M_ALT, zebra.ui.KeyEvent.M_CMD
      * @class  zebra.ui.KeyEvent
-     * @extends zebra.ui.InputEvent
+     * @extends zebra.util.Event
      * @constructor
      */
-    pkg.KeyEvent = Class([
+    pkg.KeyEvent = Class(zebkit.util.Event, [
         function $clazz() {
             this.M_CTRL  = 1;
             this.M_SHIFT = 2;
@@ -44,7 +43,25 @@
              */
             this.ch = 0;
 
+            this.type = "kb";
+
             this.altKey = this.shiftKey = this.ctrlKey = this.metaKey = false;
+
+            this.$fillWithParams = function(source, code, ch, mask) {
+                this.$setMask(mask);
+                this.code   = code;
+                this.ch     = ch;
+                this.source = source;
+            };
+
+            this.$setMask = function(m) {
+                m = (m & pkg.KeyEvent.M_ALT & pkg.KeyEvent.M_SHIFT & pkg.KeyEvent.M_CTRL & pkg.KeyEvent.M_CMD)
+                this.mask = m;
+                this.altKey   = ((m & pkg.KeyEvent.M_ALT  ) > 0);
+                this.shiftKey = ((m & pkg.KeyEvent.M_SHIFT) > 0);
+                this.ctrlKey  = ((m & pkg.KeyEvent.M_CTRL ) > 0);
+                this.metaKey  = ((m & pkg.KeyEvent.M_CMD  ) > 0);
+            };
 
             this.$fillWith = function(e) {
                 this.code = (e.which || e.keyCode || 0);

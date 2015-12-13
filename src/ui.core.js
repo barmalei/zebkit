@@ -44,11 +44,28 @@
 
 var L = zebra.layout, rgb = zebra.util.rgb, temporary = { x:0, y:0, width:0, height:0 },
     MS = Math.sin, MC = Math.cos, $fmCanvas = null, $fmText = null, EM = pkg.events = null,
-    $fmImage = null, $bodyFontSize = "14px", COMP_EVENT = {}, FOCUS_EVENT = {}; // TODO: temporary event structure to prove the concept
+    $fmImage = null, $bodyFontSize = "14px", COMP_EVENT, FOCUS_EVENT;
 
 // keep pointer owners (the component where cursor/finger placed in)
 pkg.$pointerOwner = {};
 
+
+pkg.FocusEvent = Class(zebkit.util.Event, [
+    function $prototype() {
+        this.related = null;
+    }
+]);
+
+pkg.CompEvent = Class(zebkit.util.Event, [
+    function $prototype() {
+        this.kid = this.constraints = null;
+        this.prevX = this.prevY = this.index = -1;
+        this.prevWidth = this.prevHeight = -1;
+    }
+]);
+
+COMP_EVENT  = new pkg.CompEvent();
+FOCUS_EVENT = new pkg.FocusEvent();
 
 pkg.PointerEvent.extend([
     function $prototype() {
@@ -95,10 +112,10 @@ pkg.PointerEvent.extend([
          * @method  updateCoordinates
          */
         this.update = function(source,ax,ay){
-            // this can speed up calculation significantly
-            // check if source zebra component has not been changed, his location and parent
-            // component also has not been changed than we can skip calculation of absolute
-            // location by traversing parent hierarchy
+            // this can speed up calculation significantly check if source zebra component
+            // has not been changed, his location and parent component also has not been
+            // changed than we can skip calculation of absolute location by traversing
+            // parent hierarchy
             if (this.source        === source        &&
                 this.source.parent === source.parent &&
                 source.x           === this.$px      &&
@@ -844,7 +861,7 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
      var p = new zebra.ui.Panel();
      p.focusGained = function(e) { ... }; // add event handler
 
- * @param {zebra.ui.InputEvent} e an input event
+ * @param {zebra.ui.FocusEvent} e an input event
  * @event  focusGained
  */
 
@@ -855,7 +872,7 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
      var p = new zebra.ui.Panel();
      p.focusLost = function(e) { ... }; // add event handler
 
- * @param {zebra.ui.InputEvent} e an input event
+ * @param {zebra.ui.FocusEvent} e an input event
  * @event  focusLost
  */
 
@@ -1982,31 +1999,23 @@ pkg.HtmlElement = Class(pkg.Panel, [
             return this;
         };
 
-        // TODO: bad name
-        this.$getFocusHolderElement = function() {
+        this.$getElementRootFocus = function() {
             return null;
         };
 
         this.canHaveFocus = function() {
-            return this.$getFocusHolderElement() != null;
-        };
-
-        // TODO: not very pretty
-        this.$hasNativeFocus = function() {
-            return this.canHaveFocus() && document.activeElement === this.$getFocusHolderElement();
+            return this.$getElementRootFocus() != null;
         };
 
         this.$focus = function() {
-            if (this.canHaveFocus() && this.$hasNativeFocus() === false) {
-                console.log("HtmlElement.$focus()");
-                this.$getFocusHolderElement().focus();
+            if (this.canHaveFocus() && document.activeElement !== this.$getElementRootFocus()) {
+                this.$getElementRootFocus().focus();
             }
         };
 
         this.$blur = function() {
-            if (this.canHaveFocus() && this.$hasNativeFocus()) {
-                console.log("HtmlElement.$blur()");
-                this.$getFocusHolderElement().blur();
+            if (this.canHaveFocus() && document.activeElement === this.$getElementRootFocus()) {
+                this.$getElementRootFocus().blur();
             }
         };
     },
@@ -2181,7 +2190,6 @@ pkg.HtmlElement = Class(pkg.Panel, [
                                                         // for the created element
         }
 
-
         // sync padding and margin of the DOM element with
         // what appropriate properties are set
         e.style.margin = e.style.padding = "0px";
@@ -2213,6 +2221,11 @@ pkg.HtmlElement = Class(pkg.Panel, [
         // cut content
         this.$container.style.overflow = "hidden";
 
+        // it fixes problem with adding, for instance, DOM element as window what can prevent
+        // showing components added to popup layer
+        this.$container.style["z-index"] = "0";
+
+
         // coordinates have to be set to initial zero value in CSS
         // otherwise the DOM layout can be wrong !
         this.$container.style.left = this.$container.style.top = "0px";
@@ -2225,12 +2238,8 @@ pkg.HtmlElement = Class(pkg.Panel, [
         // border and margin also have to be zero
         this.$container.style.fontSize = this.$container.style.padding = this.$container.style.padding = "0px";
 
-        //
-        //this.$container.style["z-index"] = "0";
-
         // add id
         this.$container.setAttribute("id", "container-" + this.toString());
-
 
         // mark wrapper with a special attribute to recognize it exists later
         this.$container.setAttribute("data-zebcont", "true");
@@ -2271,7 +2280,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
             this.$initListeners();
         }
 
-        var fe = this.$getFocusHolderElement();
+        var fe = this.$getElementRootFocus();
 
         // TODO: may be this code should be moved to web place
         //
@@ -2281,8 +2290,6 @@ pkg.HtmlElement = Class(pkg.Panel, [
 
             zebkit.web.$focusin(fe, function(e) {
                 // sync native focus with zebkit focus if necessary
-
-                console.log("HtmlElement.focusin() " + $this.element + ", hasFocus = " + $this.hasFocus());
                 if ($this.hasFocus() === false) {
                     $this.requestFocus();
                 }
@@ -2851,6 +2858,8 @@ pkg.FocusManager = Class(pkg.Manager, [
             if ( this.focusOwner != null &&
                 (this.focusOwner === comp || L.isAncestorOf(comp, this.focusOwner)))
             {
+                console.log("comp removed : " + comp.clazz.$name);
+                console.log(comp);
                 this.requestFocus(null);
             }
         };
@@ -3042,15 +3051,15 @@ pkg.FocusManager = Class(pkg.Manager, [
 
                     FOCUS_EVENT.source  = oldFocusOwner;
                     FOCUS_EVENT.related = this.focusOwner;
-                    pkg.events.fireEvent("focusLost", FOCUS_EVENT);
                     oldFocusOwner.focused();
+                    pkg.events.fireEvent("focusLost", FOCUS_EVENT);
                 }
 
                 if (this.focusOwner != null) {
                     FOCUS_EVENT.source  = this.focusOwner;
                     FOCUS_EVENT.related = oldFocusOwner;
-                    pkg.events.fireEvent("focusGained", FOCUS_EVENT);
                     this.focusOwner.focused();
+                    pkg.events.fireEvent("focusGained", FOCUS_EVENT);
                 }
 
                 return this.focusOwner;
@@ -3143,7 +3152,7 @@ pkg.FocusManager = Class(pkg.Manager, [
 
 
  *  @constructor
- *  @class zebra.ui.CommandManager
+ *  @class zebra.ui.ShortcutManager
  *  @extends {zebra.ui.Manager}
  */
 
@@ -3160,7 +3169,7 @@ pkg.FocusManager = Class(pkg.Manager, [
  *         @param {Array} c.args shortcut arguments list
  *         @param {String} c.command shortcut name
  */
-pkg.CommandManager = Class(pkg.Manager, [
+pkg.ShortcutManager = Class(pkg.Manager, [
     function $prototype() {
         /**
          * Key pressed event handler.
@@ -3182,7 +3191,7 @@ pkg.CommandManager = Class(pkg.Manager, [
             }
         };
 
-        this.parseKey = function(k) {
+        this.$parseKey = function(k) {
             var m = 0, c = 0, r = k.split("+");
             for(var i = 0; i < r.length; i++) {
                 var ch = r[i].trim().toUpperCase();
@@ -3207,7 +3216,7 @@ pkg.CommandManager = Class(pkg.Manager, [
         this.setCommands = function(commands) {
             for(var i=0; i < commands.length; i++) {
                 var c = commands[i],
-                    p = this.parseKey(c.key),
+                    p = this.$parseKey(c.key),
                     v = this.keyCommands[p[1]];
 
                 if (v && v[p[0]]) {
@@ -3401,14 +3410,17 @@ pkg.EventManager = Class(pkg.Manager, [
             // assign id that matches method to be called
             e.id = id;
 
+            // call target component listener
             if (t[id] != null) {
                 if (t[id].call(t, e) === true) {
                     return true;
                 }
             }
 
+            // call global listeners
             b = this._[id](e);
 
+            // call parent listeners
             if (b === false) {
                 for (t = t.parent;t != null; t = t.parent){
                     if (t[kk] != null) {
@@ -3871,13 +3883,12 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
         // one of of a child DOM element gets focus
         zebkit.web.$focusin(this.$container, function(e) {
             if (e.target !== $this.$container && e.target.parentNode != null && e.target.parentNode.getAttribute("data-zebcont") == null) {
-                console.log("Clean focus: " + e.target + "," + (e.target === $this.element));
-                pkg.focusManager.requestFocus(null, "zCanvas focusin 1");
+                pkg.focusManager.requestFocus(null);
             }
             else {
                 // clear focus if a focus owner component is placed in another zCanvas
                 if (e.target === $this.$container && pkg.focusManager.focusOwner != null &&  pkg.focusManager.focusOwner.getCanvas() !== $this) {
-                    pkg.focusManager.requestFocus(null, "zCanvas focusin 2");
+                    pkg.focusManager.requestFocus(null);
                 }
             }
         }, true);
@@ -3950,7 +3961,6 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
 
     // TODO: should it renamed back ?
     function requestFocus2() {
-        console.log("zCanvas.requestFocus() " + (document.activeElement != this.$container));
         if (document.activeElement != this.$container) {
             this.$container.focus();
         }

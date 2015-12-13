@@ -39,7 +39,7 @@
      * @class  zebra.ui.PointerEvent
      * @constructor
      */
-    pkg.PointerEvent = Class([
+    pkg.PointerEvent = Class(zebkit.util.Event, [
         function $prototype() {
             /**
              * Pointer type. Can be "mouse", "touch", "pen"
@@ -221,7 +221,6 @@
     // has to be removed every time a mouse button released with the given function
     function $cleanDragFix() {
         if ($tmpWinMouseMoveListener != null && $pointerPressedEvents[LMOUSE] == null && $pointerPressedEvents[RMOUSE] == null) {
-            console.log("REMOVE GLOBAL MOUSE MOVE LISTENER ");
             window.removeEventListener("mousemove", $tmpWinMouseMoveListener, true);
             $tmpWinMouseMoveListener = null;
             return true;
@@ -395,6 +394,15 @@
                     this.$timer = null;
                 }
 
+                // test if the pressed event for the given id has not been fired yet
+                var isPressedInQ = false;
+                for(var i = 0; i < this.$queue.length; i++) {
+                    if (this.$queue[i].identifier === id) {
+                        isPressedInQ = true;
+                        break;
+                    }
+                }
+
                 // fire collected in queue pressed events
                 this.$firePressedFromQ();
 
@@ -425,64 +433,59 @@
                         }
                     }
                     else {
-                        var $this = this;
-                        // TODO:
-                        //   timeout before generating release event is necessary to let
-                        //   painting changing state between press and release. Otherwise
-                        //   both events can happen in the same thread  what causes only
-                        //   last state (released will be visualized)  The code below has to
-                        //   be optimized:
-                        //      - may be it makes sense to keep Q
-                        //      - timer is required only if pressed was in Q
+                        function $fireUP(id, e, mp, stub, destination) {
+                            try {
+                                // store coordinates and target
+                                stub.$fillWith(id, e);
 
-                        setTimeout(
+                                // TODO: uncomment it and replace with sub or so
+                                //if (tt.group != null) tt.group.active = false;
 
-                        function() {
+                                // add press coordinates what can help to detect source
+                                // of the event
+                                stub.pressPageX = mp.pressPageX;
+                                stub.pressPageY = mp.pressPageY;
 
-                        try {
-                            // store coordinates and target
-                            stub.$fillWith(id, e);
-
-                            // TODO: uncomment it and replace with sub or so
-                            //if (tt.group != null) tt.group.active = false;
-
-                            // add press coordinates what can help to detect source
-                            // of the event
-                            stub.pressPageX = mp.pressPageX;
-                            stub.pressPageY = mp.pressPageY;
-
-                            // fire dragged or clicked
-                            if (mp.isDragged === true) {
-                                $this.destination.$pointerDragEnded(stub);
-                            }
-                            else {
-                                if ($lastPointerReleased != null &&
-                                    $lastPointerReleased.identifier === id &&
-                                    (new Date().getTime() - $lastPointerReleased.time) <= pkg.doubleClickDelta)
-                                {
-                                    $this.destination.$pointerDoubleClicked(stub);
+                                // fire dragged or clicked
+                                if (mp.isDragged === true) {
+                                    destination.$pointerDragEnded(stub);
                                 }
                                 else {
-                                    $this.destination.$pointerClicked(stub);
+                                    if ($lastPointerReleased != null &&
+                                        $lastPointerReleased.identifier === id &&
+                                        (new Date().getTime() - $lastPointerReleased.time) <= pkg.doubleClickDelta)
+                                    {
+                                        destination.$pointerDoubleClicked(stub);
+                                    }
+                                    else {
+                                        destination.$pointerClicked(stub);
+                                    }
                                 }
+
+                                // always complete pointer pressed with appropriate
+                                // release event
+                                destination.$pointerReleased(stub);
                             }
+                            finally {
+                                // clear handled pressed and dragged state
+                                if (stub.touchCounter > 0) stub.touchCounter--;
+                                $lastPointerReleased = $pointerPressedEvents[id];
+                                delete $pointerPressedEvents[id];
 
-                            // always complete pointer pressed with appropriate
-                            // release event
-                            $this.destination.$pointerReleased(stub);
-                        }
-                        finally {
-                            // clear handled pressed and dragged state
-                            stub.touchCounter--;
-                            $lastPointerReleased = $pointerPressedEvents[id];
-                            delete $pointerPressedEvents[id];
-
-                            // remove global move listener if necessary
-                            $cleanDragFix();
+                                // remove global move listener if necessary
+                                $cleanDragFix();
+                            }
                         }
 
-                        },
-                        50);
+                        if (isPressedInQ) {
+                            var $this = this;
+                            setTimeout(function() {
+                                $fireUP(id, e, mp, stub, $this.destination);
+                            }, 50);
+                        }
+                        else {
+                            $fireUP(id, e, mp, stub, this.destination);
+                        }
                     }
                 }
             };
@@ -510,7 +513,7 @@
                             this.destination.$pointerPressed(t.stub);
                         }
                         catch(ex) {
-                            // don't forget to descrese counter
+                            // don't forget to decrease counter
                             if (t.stub != null && t.stub.touchCounter > 0) t.stub.touchCounter--;
                             delete $pointerPressedEvents[t.identifier];
                             console.log(ex.stack);
@@ -538,8 +541,6 @@
 
                 // count pointer pressed
                 stub.touchCounter++;
-
-                console.log("PointerEventUnifier.$DOWN() touchCounter = " + stub.touchCounter);
 
                 try {
                     // put pointer pressed in queue
@@ -576,7 +577,7 @@
                 }
                 catch(ee) {
                     // restore touch counter if an error has happened
-                    stub.touchCounter--;
+                    if (stub.touchCounter > 0) stub.touchCounter--;
                     throw ee;
                 }
             };
@@ -852,8 +853,6 @@
                         newTouches = e.changedTouches; // list of touch events that become
                                                // active with the current touchstart
 
-                    console.log("1. touchstart() : " + TOUCH_STUB.touchCounter + "," + e.touches.length + ", " + newTouches.length);
-
 
                     // fix android bug: parasite event for multi touch
                     // or stop capturing new touches since it is already fixed
@@ -921,7 +920,9 @@
                         var nmt = mt[i],
                             t   = $pointerPressedEvents[nmt.identifier];
 
-                        if (t != null && (t.pageX != Math.floor(nmt.pageX) || t.pageY != Math.floor(nmt.pageY))) {
+                        if (t != null && (t.pageX != Math.floor(nmt.pageX) ||
+                                          t.pageY != Math.floor(nmt.pageY))  )
+                        {
                             $this.$DRAG(t.identifier, t, TOUCH_STUB);
                         }
                     }

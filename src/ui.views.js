@@ -932,11 +932,13 @@ pkg.ArrowView = Class(pkg.View, [
         this.lineWidth = 1;
         this.fill = true;
         this.gap  = 0;
+        this.color  = "black";
+        this.width = this.height = 6;
 
         this[''] = function (d, col, w) {
             this.direction = d == null ? L.BOTTOM : L.$constraints(d);
-            this.color     = col == null ? "black" : col;
-            this.width     = this.height = (w == null ? 6 : w);
+            if (col != null) this.color = col;
+            if (w   != null) this.width = this.height = w;
         };
 
         this.outline  = function(g, x, y, w, h, d) {
@@ -1001,7 +1003,8 @@ pkg.ArrowView = Class(pkg.View, [
         };
 
         this.getPreferredSize = function () {
-            return { width:this.width, height:this.height };
+            return { width  : this.width  + this.gap * 2,
+                     height : this.height + this.gap * 2 };
         };
     }
 ]);

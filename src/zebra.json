@@ -36,7 +36,7 @@
 
     "cursorManager"  : { "$zebra.ui.CursorManager"  :[] },
     "commandManager" : {
-        "$zebra.ui.CommandManager" :[{
+        "$zebra.ui.ShortcutManager" :[{
             "common": [
                 {
                     "command" : "undo_command",

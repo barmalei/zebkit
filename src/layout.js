@@ -1151,20 +1151,20 @@ pkg.RasterLayout = Class(L, [
 
                     if (ctr != null) {
                         var x = el.x, y = el.y;
-                        if (ctr === pkg.CENTER) {
-                            x = Math.floor((c.width  - ww)/2);
-                            y = Math.floor((c.height - hh)/2);
+                        if ((ctr & pkg.TOP) > 0) {
+                            y = 0;
+                        } else if ((ctr & pkg.BOTTOM) > 0) {
+                            y = c.height - hh;
+                        } else if ((ctr & pkg.CENTER) > 0) {
+                            y = (c.height - hh) / 2;
                         }
-                        else {
-                            if ((ctr & pkg.TOP) > 0)  y = 0;
-                            else {
-                                if ((ctr & pkg.BOTTOM) > 0)  y = c.height - hh;
-                            }
 
-                            if ((ctr & pkg.LEFT) > 0)   x = 0;
-                            else {
-                                if ((ctr & pkg.RIGHT) > 0)  x = c.width - ww;
-                            }
+                        if ((ctr & pkg.LEFT) > 0) {
+                            x = 0;
+                        } else if ((ctr & pkg.RIGHT) > 0) {
+                            x = c.width - ww;
+                        } else if ((ctr & pkg.CENTER) > 0) {
+                            x = (c.width - ww) / 2;
                         }
                         el.setLocation(x, y);
                     }

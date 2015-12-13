@@ -197,7 +197,7 @@ var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
 
 var pkg = zebkit = zebra = namespace('zebra'),
     CNAME = pkg.CNAME = '$', CDNAME = '',
-    FN = pkg.$FN = (typeof namespace.name === "undefined") ? (function(f) {     // IE stuff
+    FN = pkg.$FN = (typeof namespace.name === "undefined" || namespace.name == "") ? (function(f) {     // IE stuff
                                                                 var mt = f.toString().match(/^function\s+([^\s(]+)/);
                                                                 return (mt == null) ? CDNAME : mt[1];
                                                              })
@@ -3004,7 +3004,7 @@ pkg.GridLayout = Class(L, [
              * @type {Integer}
              */
             this.cols = c;
-            this.mask = m;
+            this.stretchCols = this.stretchRows = false;
             this.colSizes = Array(c + 1);
             this.rowSizes = Array(r + 1);
 
@@ -3106,14 +3106,14 @@ pkg.GridLayout = Class(L, [
                 top      = c.getTop(),
                 left     = c.getLeft();
 
-            if ((this.mask & pkg.HORIZONTAL) > 0) {
+            if (this.stretchCols) {
                 var dw = c.width - left - c.getRight() - colSizes[cols];
                 for(var i = 0;i < cols; i ++ ) {
                     colSizes[i] = colSizes[i] + (colSizes[i] !== 0 ? Math.floor((dw * colSizes[i]) / colSizes[cols]) : 0);
                 }
             }
 
-            if ((this.mask & pkg.VERTICAL) > 0) {
+            if (this.stretchRows) {
                 var dh = c.height - top - c.getBottom() - rowSizes[rows];
                 for(var i = 0;i < rows; i++) {
                     rowSizes[i] = rowSizes[i] + (rowSizes[i] !== 0 ? Math.floor((dh * rowSizes[i]) / rowSizes[rows]) : 0);
@@ -3220,6 +3220,12 @@ pkg.format = function(s, obj, ph) {
 function hex(v) {
     return (v < 16) ? "0" + v.toString(16) : v.toString(16);
 }
+
+pkg.Event = Class([
+    function $prototype() {
+        this.source = null;
+    }
+]);
 
 /**
  * Sequential tasks runner. Allows developers to execute number of tasks (async and sync) in the
@@ -7762,7 +7768,7 @@ pkg.Matrix = Class([
      * @class  zebra.ui.PointerEvent
      * @constructor
      */
-    pkg.PointerEvent = Class([
+    pkg.PointerEvent = Class(zebkit.util.Event, [
         function $prototype() {
             /**
              * Pointer type. Can be "mouse", "touch", "pen"
@@ -7944,7 +7950,6 @@ pkg.Matrix = Class([
     // has to be removed every time a mouse button released with the given function
     function $cleanDragFix() {
         if ($tmpWinMouseMoveListener != null && $pointerPressedEvents[LMOUSE] == null && $pointerPressedEvents[RMOUSE] == null) {
-            console.log("REMOVE GLOBAL MOUSE MOVE LISTENER ");
             window.removeEventListener("mousemove", $tmpWinMouseMoveListener, true);
             $tmpWinMouseMoveListener = null;
             return true;
@@ -8118,6 +8123,15 @@ pkg.Matrix = Class([
                     this.$timer = null;
                 }
 
+                // test if the pressed event for the given id has not been fired yet
+                var isPressedInQ = false;
+                for(var i = 0; i < this.$queue.length; i++) {
+                    if (this.$queue[i].identifier === id) {
+                        isPressedInQ = true;
+                        break;
+                    }
+                }
+
                 // fire collected in queue pressed events
                 this.$firePressedFromQ();
 
@@ -8148,64 +8162,59 @@ pkg.Matrix = Class([
                         }
                     }
                     else {
-                        var $this = this;
-                        // TODO:
-                        //   timeout before generating release event is necessary to let
-                        //   painting changing state between press and release. Otherwise
-                        //   both events can happen in the same thread  what causes only
-                        //   last state (released will be visualized)  The code below has to
-                        //   be optimized:
-                        //      - may be it makes sense to keep Q
-                        //      - timer is required only if pressed was in Q
+                        function $fireUP(id, e, mp, stub, destination) {
+                            try {
+                                // store coordinates and target
+                                stub.$fillWith(id, e);
 
-                        setTimeout(
+                                // TODO: uncomment it and replace with sub or so
+                                //if (tt.group != null) tt.group.active = false;
 
-                        function() {
+                                // add press coordinates what can help to detect source
+                                // of the event
+                                stub.pressPageX = mp.pressPageX;
+                                stub.pressPageY = mp.pressPageY;
 
-                        try {
-                            // store coordinates and target
-                            stub.$fillWith(id, e);
-
-                            // TODO: uncomment it and replace with sub or so
-                            //if (tt.group != null) tt.group.active = false;
-
-                            // add press coordinates what can help to detect source
-                            // of the event
-                            stub.pressPageX = mp.pressPageX;
-                            stub.pressPageY = mp.pressPageY;
-
-                            // fire dragged or clicked
-                            if (mp.isDragged === true) {
-                                $this.destination.$pointerDragEnded(stub);
-                            }
-                            else {
-                                if ($lastPointerReleased != null &&
-                                    $lastPointerReleased.identifier === id &&
-                                    (new Date().getTime() - $lastPointerReleased.time) <= pkg.doubleClickDelta)
-                                {
-                                    $this.destination.$pointerDoubleClicked(stub);
+                                // fire dragged or clicked
+                                if (mp.isDragged === true) {
+                                    destination.$pointerDragEnded(stub);
                                 }
                                 else {
-                                    $this.destination.$pointerClicked(stub);
+                                    if ($lastPointerReleased != null &&
+                                        $lastPointerReleased.identifier === id &&
+                                        (new Date().getTime() - $lastPointerReleased.time) <= pkg.doubleClickDelta)
+                                    {
+                                        destination.$pointerDoubleClicked(stub);
+                                    }
+                                    else {
+                                        destination.$pointerClicked(stub);
+                                    }
                                 }
+
+                                // always complete pointer pressed with appropriate
+                                // release event
+                                destination.$pointerReleased(stub);
                             }
+                            finally {
+                                // clear handled pressed and dragged state
+                                if (stub.touchCounter > 0) stub.touchCounter--;
+                                $lastPointerReleased = $pointerPressedEvents[id];
+                                delete $pointerPressedEvents[id];
 
-                            // always complete pointer pressed with appropriate
-                            // release event
-                            $this.destination.$pointerReleased(stub);
-                        }
-                        finally {
-                            // clear handled pressed and dragged state
-                            stub.touchCounter--;
-                            $lastPointerReleased = $pointerPressedEvents[id];
-                            delete $pointerPressedEvents[id];
-
-                            // remove global move listener if necessary
-                            $cleanDragFix();
+                                // remove global move listener if necessary
+                                $cleanDragFix();
+                            }
                         }
 
-                        },
-                        50);
+                        if (isPressedInQ) {
+                            var $this = this;
+                            setTimeout(function() {
+                                $fireUP(id, e, mp, stub, $this.destination);
+                            }, 50);
+                        }
+                        else {
+                            $fireUP(id, e, mp, stub, this.destination);
+                        }
                     }
                 }
             };
@@ -8233,7 +8242,7 @@ pkg.Matrix = Class([
                             this.destination.$pointerPressed(t.stub);
                         }
                         catch(ex) {
-                            // don't forget to descrese counter
+                            // don't forget to decrease counter
                             if (t.stub != null && t.stub.touchCounter > 0) t.stub.touchCounter--;
                             delete $pointerPressedEvents[t.identifier];
                             console.log(ex.stack);
@@ -8261,8 +8270,6 @@ pkg.Matrix = Class([
 
                 // count pointer pressed
                 stub.touchCounter++;
-
-                console.log("PointerEventUnifier.$DOWN() touchCounter = " + stub.touchCounter);
 
                 try {
                     // put pointer pressed in queue
@@ -8299,7 +8306,7 @@ pkg.Matrix = Class([
                 }
                 catch(ee) {
                     // restore touch counter if an error has happened
-                    stub.touchCounter--;
+                    if (stub.touchCounter > 0) stub.touchCounter--;
                     throw ee;
                 }
             };
@@ -8575,8 +8582,6 @@ pkg.Matrix = Class([
                         newTouches = e.changedTouches; // list of touch events that become
                                                // active with the current touchstart
 
-                    console.log("1. touchstart() : " + TOUCH_STUB.touchCounter + "," + e.touches.length + ", " + newTouches.length);
-
 
                     // fix android bug: parasite event for multi touch
                     // or stop capturing new touches since it is already fixed
@@ -8644,7 +8649,9 @@ pkg.Matrix = Class([
                         var nmt = mt[i],
                             t   = $pointerPressedEvents[nmt.identifier];
 
-                        if (t != null && (t.pageX != Math.floor(nmt.pageX) || t.pageY != Math.floor(nmt.pageY))) {
+                        if (t != null && (t.pageX != Math.floor(nmt.pageX) ||
+                                          t.pageY != Math.floor(nmt.pageY))  )
+                        {
                             $this.$DRAG(t.identifier, t, TOUCH_STUB);
                         }
                     }
@@ -8668,7 +8675,6 @@ pkg.Matrix = Class([
 
 })(zebra("ui"), zebra.Class);
 (function(pkg, Class) {
-
     /**
      * Input key event class.
      * @param {zebra.ui.Panel} source a source of the key input event
@@ -8677,10 +8683,10 @@ pkg.Matrix = Class([
      * @param {Integer} mask a bits mask of pressed meta keys:  zebra.ui.KeyEvent.M_CTRL,
      * zebra.ui.KeyEvent.M_SHIFT, zebra.ui.KeyEvent.M_ALT, zebra.ui.KeyEvent.M_CMD
      * @class  zebra.ui.KeyEvent
-     * @extends zebra.ui.InputEvent
+     * @extends zebra.util.Event
      * @constructor
      */
-    pkg.KeyEvent = Class([
+    pkg.KeyEvent = Class(zebkit.util.Event, [
         function $clazz() {
             this.M_CTRL  = 1;
             this.M_SHIFT = 2;
@@ -8713,7 +8719,25 @@ pkg.Matrix = Class([
              */
             this.ch = 0;
 
+            this.type = "kb";
+
             this.altKey = this.shiftKey = this.ctrlKey = this.metaKey = false;
+
+            this.$fillWithParams = function(source, code, ch, mask) {
+                this.$setMask(mask);
+                this.code   = code;
+                this.ch     = ch;
+                this.source = source;
+            };
+
+            this.$setMask = function(m) {
+                m = (m & pkg.KeyEvent.M_ALT & pkg.KeyEvent.M_SHIFT & pkg.KeyEvent.M_CTRL & pkg.KeyEvent.M_CMD)
+                this.mask = m;
+                this.altKey   = ((m & pkg.KeyEvent.M_ALT  ) > 0);
+                this.shiftKey = ((m & pkg.KeyEvent.M_SHIFT) > 0);
+                this.ctrlKey  = ((m & pkg.KeyEvent.M_CTRL ) > 0);
+                this.metaKey  = ((m & pkg.KeyEvent.M_CMD  ) > 0);
+            };
 
             this.$fillWith = function(e) {
                 this.code = (e.which || e.keyCode || 0);
@@ -8858,11 +8882,28 @@ pkg.Matrix = Class([
 
 var L = zebra.layout, rgb = zebra.util.rgb, temporary = { x:0, y:0, width:0, height:0 },
     MS = Math.sin, MC = Math.cos, $fmCanvas = null, $fmText = null, EM = pkg.events = null,
-    $fmImage = null, $bodyFontSize = "14px", COMP_EVENT = {}, FOCUS_EVENT = {}; // TODO: temporary event structure to prove the concept
+    $fmImage = null, $bodyFontSize = "14px", COMP_EVENT, FOCUS_EVENT;
 
 // keep pointer owners (the component where cursor/finger placed in)
 pkg.$pointerOwner = {};
 
+
+pkg.FocusEvent = Class(zebkit.util.Event, [
+    function $prototype() {
+        this.related = null;
+    }
+]);
+
+pkg.CompEvent = Class(zebkit.util.Event, [
+    function $prototype() {
+        this.kid = this.constraints = null;
+        this.prevX = this.prevY = this.index = -1;
+        this.prevWidth = this.prevHeight = -1;
+    }
+]);
+
+COMP_EVENT  = new pkg.CompEvent();
+FOCUS_EVENT = new pkg.FocusEvent();
 
 pkg.PointerEvent.extend([
     function $prototype() {
@@ -8909,10 +8950,10 @@ pkg.PointerEvent.extend([
          * @method  updateCoordinates
          */
         this.update = function(source,ax,ay){
-            // this can speed up calculation significantly
-            // check if source zebra component has not been changed, his location and parent
-            // component also has not been changed than we can skip calculation of absolute
-            // location by traversing parent hierarchy
+            // this can speed up calculation significantly check if source zebra component
+            // has not been changed, his location and parent component also has not been
+            // changed than we can skip calculation of absolute location by traversing
+            // parent hierarchy
             if (this.source        === source        &&
                 this.source.parent === source.parent &&
                 source.x           === this.$px      &&
@@ -9658,7 +9699,7 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
      var p = new zebra.ui.Panel();
      p.focusGained = function(e) { ... }; // add event handler
 
- * @param {zebra.ui.InputEvent} e an input event
+ * @param {zebra.ui.FocusEvent} e an input event
  * @event  focusGained
  */
 
@@ -9669,7 +9710,7 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
      var p = new zebra.ui.Panel();
      p.focusLost = function(e) { ... }; // add event handler
 
- * @param {zebra.ui.InputEvent} e an input event
+ * @param {zebra.ui.FocusEvent} e an input event
  * @event  focusLost
  */
 
@@ -10796,31 +10837,23 @@ pkg.HtmlElement = Class(pkg.Panel, [
             return this;
         };
 
-        // TODO: bad name
-        this.$getFocusHolderElement = function() {
+        this.$getElementRootFocus = function() {
             return null;
         };
 
         this.canHaveFocus = function() {
-            return this.$getFocusHolderElement() != null;
-        };
-
-        // TODO: not very pretty
-        this.$hasNativeFocus = function() {
-            return this.canHaveFocus() && document.activeElement === this.$getFocusHolderElement();
+            return this.$getElementRootFocus() != null;
         };
 
         this.$focus = function() {
-            if (this.canHaveFocus() && this.$hasNativeFocus() === false) {
-                console.log("HtmlElement.$focus()");
-                this.$getFocusHolderElement().focus();
+            if (this.canHaveFocus() && document.activeElement !== this.$getElementRootFocus()) {
+                this.$getElementRootFocus().focus();
             }
         };
 
         this.$blur = function() {
-            if (this.canHaveFocus() && this.$hasNativeFocus()) {
-                console.log("HtmlElement.$blur()");
-                this.$getFocusHolderElement().blur();
+            if (this.canHaveFocus() && document.activeElement === this.$getElementRootFocus()) {
+                this.$getElementRootFocus().blur();
             }
         };
     },
@@ -10995,7 +11028,6 @@ pkg.HtmlElement = Class(pkg.Panel, [
                                                         // for the created element
         }
 
-
         // sync padding and margin of the DOM element with
         // what appropriate properties are set
         e.style.margin = e.style.padding = "0px";
@@ -11027,6 +11059,11 @@ pkg.HtmlElement = Class(pkg.Panel, [
         // cut content
         this.$container.style.overflow = "hidden";
 
+        // it fixes problem with adding, for instance, DOM element as window what can prevent
+        // showing components added to popup layer
+        this.$container.style["z-index"] = "0";
+
+
         // coordinates have to be set to initial zero value in CSS
         // otherwise the DOM layout can be wrong !
         this.$container.style.left = this.$container.style.top = "0px";
@@ -11039,12 +11076,8 @@ pkg.HtmlElement = Class(pkg.Panel, [
         // border and margin also have to be zero
         this.$container.style.fontSize = this.$container.style.padding = this.$container.style.padding = "0px";
 
-        //
-        //this.$container.style["z-index"] = "0";
-
         // add id
         this.$container.setAttribute("id", "container-" + this.toString());
-
 
         // mark wrapper with a special attribute to recognize it exists later
         this.$container.setAttribute("data-zebcont", "true");
@@ -11085,7 +11118,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
             this.$initListeners();
         }
 
-        var fe = this.$getFocusHolderElement();
+        var fe = this.$getElementRootFocus();
 
         // TODO: may be this code should be moved to web place
         //
@@ -11095,8 +11128,6 @@ pkg.HtmlElement = Class(pkg.Panel, [
 
             zebkit.web.$focusin(fe, function(e) {
                 // sync native focus with zebkit focus if necessary
-
-                console.log("HtmlElement.focusin() " + $this.element + ", hasFocus = " + $this.hasFocus());
                 if ($this.hasFocus() === false) {
                     $this.requestFocus();
                 }
@@ -11665,6 +11696,8 @@ pkg.FocusManager = Class(pkg.Manager, [
             if ( this.focusOwner != null &&
                 (this.focusOwner === comp || L.isAncestorOf(comp, this.focusOwner)))
             {
+                console.log("comp removed : " + comp.clazz.$name);
+                console.log(comp);
                 this.requestFocus(null);
             }
         };
@@ -11856,15 +11889,15 @@ pkg.FocusManager = Class(pkg.Manager, [
 
                     FOCUS_EVENT.source  = oldFocusOwner;
                     FOCUS_EVENT.related = this.focusOwner;
-                    pkg.events.fireEvent("focusLost", FOCUS_EVENT);
                     oldFocusOwner.focused();
+                    pkg.events.fireEvent("focusLost", FOCUS_EVENT);
                 }
 
                 if (this.focusOwner != null) {
                     FOCUS_EVENT.source  = this.focusOwner;
                     FOCUS_EVENT.related = oldFocusOwner;
-                    pkg.events.fireEvent("focusGained", FOCUS_EVENT);
                     this.focusOwner.focused();
+                    pkg.events.fireEvent("focusGained", FOCUS_EVENT);
                 }
 
                 return this.focusOwner;
@@ -11957,7 +11990,7 @@ pkg.FocusManager = Class(pkg.Manager, [
 
 
  *  @constructor
- *  @class zebra.ui.CommandManager
+ *  @class zebra.ui.ShortcutManager
  *  @extends {zebra.ui.Manager}
  */
 
@@ -11974,7 +12007,7 @@ pkg.FocusManager = Class(pkg.Manager, [
  *         @param {Array} c.args shortcut arguments list
  *         @param {String} c.command shortcut name
  */
-pkg.CommandManager = Class(pkg.Manager, [
+pkg.ShortcutManager = Class(pkg.Manager, [
     function $prototype() {
         /**
          * Key pressed event handler.
@@ -11996,7 +12029,7 @@ pkg.CommandManager = Class(pkg.Manager, [
             }
         };
 
-        this.parseKey = function(k) {
+        this.$parseKey = function(k) {
             var m = 0, c = 0, r = k.split("+");
             for(var i = 0; i < r.length; i++) {
                 var ch = r[i].trim().toUpperCase();
@@ -12021,7 +12054,7 @@ pkg.CommandManager = Class(pkg.Manager, [
         this.setCommands = function(commands) {
             for(var i=0; i < commands.length; i++) {
                 var c = commands[i],
-                    p = this.parseKey(c.key),
+                    p = this.$parseKey(c.key),
                     v = this.keyCommands[p[1]];
 
                 if (v && v[p[0]]) {
@@ -12215,14 +12248,17 @@ pkg.EventManager = Class(pkg.Manager, [
             // assign id that matches method to be called
             e.id = id;
 
+            // call target component listener
             if (t[id] != null) {
                 if (t[id].call(t, e) === true) {
                     return true;
                 }
             }
 
+            // call global listeners
             b = this._[id](e);
 
+            // call parent listeners
             if (b === false) {
                 for (t = t.parent;t != null; t = t.parent){
                     if (t[kk] != null) {
@@ -12685,13 +12721,12 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
         // one of of a child DOM element gets focus
         zebkit.web.$focusin(this.$container, function(e) {
             if (e.target !== $this.$container && e.target.parentNode != null && e.target.parentNode.getAttribute("data-zebcont") == null) {
-                console.log("Clean focus: " + e.target + "," + (e.target === $this.element));
-                pkg.focusManager.requestFocus(null, "zCanvas focusin 1");
+                pkg.focusManager.requestFocus(null);
             }
             else {
                 // clear focus if a focus owner component is placed in another zCanvas
                 if (e.target === $this.$container && pkg.focusManager.focusOwner != null &&  pkg.focusManager.focusOwner.getCanvas() !== $this) {
-                    pkg.focusManager.requestFocus(null, "zCanvas focusin 2");
+                    pkg.focusManager.requestFocus(null);
                 }
             }
         }, true);
@@ -12764,7 +12799,6 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
 
     // TODO: should it renamed back ?
     function requestFocus2() {
-        console.log("zCanvas.requestFocus() " + (document.activeElement != this.$container));
         if (document.activeElement != this.$container) {
             this.$container.focus();
         }
@@ -13777,11 +13811,13 @@ pkg.ArrowView = Class(pkg.View, [
         this.lineWidth = 1;
         this.fill = true;
         this.gap  = 0;
+        this.color  = "black";
+        this.width = this.height = 6;
 
         this[''] = function (d, col, w) {
             this.direction = d == null ? L.BOTTOM : L.$constraints(d);
-            this.color     = col == null ? "black" : col;
-            this.width     = this.height = (w == null ? 6 : w);
+            if (col != null) this.color = col;
+            if (w   != null) this.width = this.height = w;
         };
 
         this.outline  = function(g, x, y, w, h, d) {
@@ -13846,7 +13882,8 @@ pkg.ArrowView = Class(pkg.View, [
         };
 
         this.getPreferredSize = function () {
-            return { width:this.width, height:this.height };
+            return { width  : this.width  + this.gap * 2,
+                     height : this.height + this.gap * 2 };
         };
     }
 ]);
@@ -15120,7 +15157,7 @@ pkg.Line = Class(pkg.Panel, [
                 bottom = this.getBottom(),
                 xy     = isHor ? top : left;
 
-            for(var i=0; i < this.colors.length; i++) {
+            for(var i = 0; i < this.colors.length; i++) {
                 if (this.colors[i] != null) {
                     g.setColor(this.colors[i]);
                     if (isHor === true) {
@@ -15514,17 +15551,15 @@ pkg.StatePan = Class(pkg.ViewPan, [
  * @constructor
  * @extends zebra.ui.StatePan
  */
-var OVER = 0, PRESSED_OVER = 1, OUT = 2, PRESSED_OUT = 3, DISABLED = 4;
+var OVER = "over", PRESSED_OVER = "pressed.over", OUT = "out", PRESSED_OUT = "pressed.out", DISABLED = "disabled";
 
 pkg.EvStatePan = Class(pkg.StatePan,  [
     function $prototype() {
         this.state = OUT;
-
         this.$isIn = false;
 
-        var IDS = ["over", "pressed.over", "out", "pressed.out", "disabled"];
         this.toViewId = function(state) {
-            return IDS[state];
+            return state;
         };
 
         this._keyPressed = function(e) {
@@ -16161,7 +16196,6 @@ pkg.BorderPan = Class(pkg.Panel, [
     },
 
     function(title, center, ctr){
-
         if (ctr == null) ctr = L.TOP | L.LEFT;
 
         if (zebra.isString(title)) {
@@ -16460,9 +16494,9 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
         this.toViewId = function(state){
             if (this.isEnabled === true) {
                 if (this.getValue()) {
-                    return (this.state == OVER) ? "on.over" : "on.out";
+                    return (this.state === OVER) ? "on.over" : "on.out";
                 }
-                return (this.state == OVER) ? "off.over" : "off.out";
+                return (this.state === OVER) ? "off.over" : "off.out";
             }
             return this.getValue() ? "don" : "doff";
         };
@@ -20104,6 +20138,7 @@ pkg.TextField = Class(pkg.Label, [
     },
 
     function $prototype() {
+        this.vkMode = "indirect";
         this.startLine = this.startCol = this.endLine = this.endCol = this.curX = 0;
         this.startOff = this.endOff = -1;
 
@@ -20519,7 +20554,7 @@ pkg.TextField = Class(pkg.Label, [
             if (this.position.offset >= 0 &&
                 this.curView != null      &&
                 this.blinkMe              &&
-                (this.hasFocus() || this.$forceToShow === true)) // TODO: $forceToShow is awkward solution sdesigned for VK
+                this.hasFocus()              )
             {
                 if (this.textAlign === zebra.layout.LEFT)
                     this.curView.paint(g, this.curX, this.curY,
@@ -23158,7 +23193,7 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
 
         /**
          * Define children components input events handler.
-         * @param  {zebra.ui.InputEvent|zebra.ui.KeyEvent|zebra.ui.PointerEvent} e an input event
+         * @param  {zebra.ui.FocusEvent} e a focus event
          * @method childFocusGained
          */
         this.childFocusGained = function (e) {
@@ -23194,13 +23229,20 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
             if (c != this.activeWin) {
                 var old = this.activeWin;
                 if (c == null) {
-                    if (this.winsTypes[this.activeWin] === "modal") {
+                    var type = this.winsTypes[this.activeWin];
+                    if (type === "modal") {
                         throw new Error("Modal window cannot be de-activated");
                     }
 
                     this.activeWin = null;
                     this.fire(WIN_DEACTIVATED, old);
-                    pkg.focusManager.requestFocus(null);
+
+                    // TODO: special flag $dontGrabFocus is not very elegant
+                    if (type === "mdi" && old.$dontGrabFocus !== true) {
+
+                        console.log("!!!!!!!!!!!!!!!??");
+                        pkg.focusManager.requestFocus(null);
+                    }
                 }
                 else {
                     if (this.winsStack.indexOf(c) < this.topModalIndex) {
@@ -23216,7 +23258,13 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
 
                     this.fire(WIN_ACTIVATED, this.activeWin);
                     this.activeWin.validate();
-                    pkg.focusManager.requestFocus(pkg.focusManager.findFocusable(this.activeWin));
+
+                    var type = this.winsTypes[this.activeWin];
+                    // TODO: special flag $dontGrabFocus is not very elegant
+                    if (type === "mdi" && this.activeWin.$dontGrabFocus !== true) {
+                        var newFocusable = pkg.focusManager.findFocusable(this.activeWin);
+                        pkg.focusManager.requestFocus(newFocusable);
+                    }
                 }
             }
         };
@@ -23305,7 +23353,7 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
             type = lw.winType != null ? lw.winType : "mdi";
         }
 
-        if (type != "mdi" && type != "modal" && type != "info") {
+        if (type !== "mdi" && type !== "modal" && type !== "info") {
             throw new Error("Invalid window type: " + type);
         }
 
@@ -23333,14 +23381,16 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
             this.$super(this.kidRemoved,index, lw);
 
             var l = this.winsListeners[lw];
-            if (this.activeWin == lw) {
+            if (this.activeWin === lw) {
                 this.activeWin = null;
 
                 // TODO:  deactivated event can be used
                 // as a trigger of a window closing so
                 // it is better don't fire it here
                 // this.fire(WIN_DEACTIVATED, lw, l);
-                pkg.focusManager.requestFocus(null);
+                if (this.winsTypes[lw] === "mdi" && lw.$dontGrabFocus !== true) {
+                    pkg.focusManager.requestFocus(null);
+                }
             }
 
             var ci = this.winsStack.indexOf(lw);
@@ -23352,7 +23402,7 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
             else {
                 if (this.topModalIndex == ci){
                     for(this.topModalIndex = this.kids.length - 1;this.topModalIndex >= 0; this.topModalIndex--){
-                        if (this.winsTypes[this.winsStack[this.topModalIndex]] == "modal") {
+                        if (this.winsTypes[this.winsStack[this.topModalIndex]] === "modal") {
                             break;
                         }
                     }
@@ -23363,7 +23413,7 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
 
             if (this.topModalIndex >= 0){
                 var aindex = this.winsStack.length - 1;
-                while(this.winsTypes[this.winsStack[aindex]] == "info") {
+                while(this.winsTypes[this.winsStack[aindex]] === "info") {
                     aindex--;
                 }
                 this.activate(this.winsStack[aindex]);
@@ -25597,7 +25647,7 @@ pkg.DefEditors = Class([
          * @param  {zebra.ui.grid.Grid} grid a grid
          * @param  {Integer} row  a grid cell row
          * @param  {Integer} col  a grid cell column
-         * @param  {zebra.ui.InputEvent} e  an event to be evaluated
+         * @param  {zebra.util.Event} e  an event to be evaluated
          * @return {Boolean} true if the given input event triggers the given cell editing
          * @method shouldStart
          */
@@ -25610,7 +25660,7 @@ pkg.DefEditors = Class([
          * @param  {zebra.ui.grid.Grid} grid a grid
          * @param  {Integer} row  a grid cell row
          * @param  {Integer} col  a grid cell column
-         * @param  {zebra.ui.InputEvent} e  an event to be evaluated
+         * @param  {zebra.util.Event} e  an event to be evaluated
          * @return {Boolean} true if the given input event triggers the given cell editing
          * cancellation
          * @method shouldCancel
@@ -25624,7 +25674,7 @@ pkg.DefEditors = Class([
          * @param  {zebra.ui.grid.Grid} grid [description]
          * @param  {Integer} row  a grid cell row
          * @param  {Integer} col  a grid cell column
-         * @param  {zebra.ui.InputEvent} e  an event to be evaluated
+         * @param  {zebra.util.Event} e  an event to be evaluated
          * @return {Boolean} true if the given input event triggers finishing the given cell editing
          * @method shouldFinish
          */
@@ -29847,13 +29897,13 @@ pkg.Tree = Class(pkg.BaseTree, [
         /**
          * Initiate the given item editing if the specified event matches condition
          * @param  {zebra.data.Item} item an item to be edited
-         * @param  {zebra.ui.InputEvent} e an even that may trigger the item editing
+         * @param  {zebra.util.Event} e an even that may trigger the item editing
          * @return {Boolean}  return true if an item editing process has been started,
          * false otherwise
          * @method  se
          * @private
          */
-        this.se = function (item,e ){
+        this.se = function (item, e){
             if (item != null){
                 this.stopEditing(true);
                 if (this.editors != null && this.editors.shouldStartEdit(item, e)) {
@@ -30752,7 +30802,7 @@ pkg.HtmlLink = Class(pkg.HtmlElement, [
     function(text, href) {
         this.$super("a");
         this.setContent(text);
-        this.setAttribute("href", href);
+        this.setAttribute("href", href == null ? "#": href);
         this._ = new zebra.util.Listeners();
         var $this = this;
         this.element.onclick = function(e) {
@@ -30760,6 +30810,7 @@ pkg.HtmlLink = Class(pkg.HtmlElement, [
         };
     }
 ]);
+
 
 /**
  * @for

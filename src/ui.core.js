@@ -145,6 +145,7 @@ pkg.load = function(path, callback) {
  */
 pkg.View = Class([
     function $prototype() {
+        this.id = null;
         this.gap = 2;
 
         /**
@@ -2718,6 +2719,7 @@ pkg.ViewPan = Class(pkg.Panel, [
          * @readOnly
          */
         this.view = null;
+        this.scale = 1;
 
         this.paint = function (g){
             if (this.view != null){
@@ -2762,7 +2764,15 @@ pkg.ViewPan = Class(pkg.Panel, [
          * @method  calcPreferredSize
          */
         this.calcPreferredSize = function (t) {
-            return this.view != null ? this.view.getPreferredSize() : { width:0, height:0 };
+            if (this.view != null) {
+                var ps = this.view.getPreferredSize();
+                if (this.scale && this.scale > 0) {
+                    ps.width = ps.width * this.scale;
+                    ps.height = ps.height * this.scale;
+                }
+                return ps;
+            }
+            return { width:0, height:0 };
         };
     }
 ]);

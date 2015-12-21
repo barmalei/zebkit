@@ -429,7 +429,6 @@ pkg.CustomLayer = Class(HtmlCanvas, [
         };
 
         this.layerKeyPressed = function(e){
-            // TODO: mask can be changed to event method call
             if (e.code == 68 && e.altKey) {
                 if (this.bg == null ) this.setBackground("rgba(255, 255, 255, 0.5)");
                 else                  this.setBackground(null);

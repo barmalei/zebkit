@@ -52,6 +52,7 @@
                 this.code   = code;
                 this.ch     = ch;
                 this.source = source;
+                return this;
             };
 
             this.$setMask = function(m) {
@@ -61,6 +62,7 @@
                 this.shiftKey = ((m & pkg.KeyEvent.M_SHIFT) > 0);
                 this.ctrlKey  = ((m & pkg.KeyEvent.M_CTRL ) > 0);
                 this.metaKey  = ((m & pkg.KeyEvent.M_CMD  ) > 0);
+                return this;
             };
 
             this.$fillWith = function(e) {

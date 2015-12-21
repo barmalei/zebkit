@@ -815,7 +815,6 @@ pkg.Window = Class(pkg.StatePan, [
     }
 ]);
 
-
 pkg.HtmlWinCanvas = Class(pkg.HtmlCanvas, [
     function $prototype() {
         this.winOpened = function(winLayer,target,b) {
@@ -830,7 +829,7 @@ pkg.HtmlWinCanvas = Class(pkg.HtmlCanvas, [
     function(target) {
         this.$super();
 
-        this.target = target;
+        this.target = (target == null ? new pkg.Window() : target);
 
         var $this = this;
         target.getWinContainer = function() {

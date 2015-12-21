@@ -197,7 +197,7 @@ var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
 
 var pkg = zebkit = zebra = namespace('zebra'),
     CNAME = pkg.CNAME = '$', CDNAME = '',
-    FN = pkg.$FN = (typeof namespace.name === "undefined" || namespace.name == "") ? (function(f) {     // IE stuff
+    FN = pkg.$FN = (typeof isString.name === "undefined" || isString.name == "") ? (function(f) {     // IE stuff
                                                                 var mt = f.toString().match(/^function\s+([^\s(]+)/);
                                                                 return (mt == null) ? CDNAME : mt[1];
                                                              })
@@ -8728,6 +8728,7 @@ pkg.Matrix = Class([
                 this.code   = code;
                 this.ch     = ch;
                 this.source = source;
+                return this;
             };
 
             this.$setMask = function(m) {
@@ -8737,6 +8738,7 @@ pkg.Matrix = Class([
                 this.shiftKey = ((m & pkg.KeyEvent.M_SHIFT) > 0);
                 this.ctrlKey  = ((m & pkg.KeyEvent.M_CTRL ) > 0);
                 this.metaKey  = ((m & pkg.KeyEvent.M_CMD  ) > 0);
+                return this;
             };
 
             this.$fillWith = function(e) {
@@ -23798,7 +23800,6 @@ pkg.Window = Class(pkg.StatePan, [
     }
 ]);
 
-
 pkg.HtmlWinCanvas = Class(pkg.HtmlCanvas, [
     function $prototype() {
         this.winOpened = function(winLayer,target,b) {
@@ -23813,7 +23814,7 @@ pkg.HtmlWinCanvas = Class(pkg.HtmlCanvas, [
     function(target) {
         this.$super();
 
-        this.target = target;
+        this.target = (target == null ? new pkg.Window() : target);
 
         var $this = this;
         target.getWinContainer = function() {

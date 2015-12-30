@@ -3123,7 +3123,7 @@ pkg.Grid.prototype.setViews = ui.$ViewsSetter;
         var pan  = new zebra.ui.grid.GridStretchPan(grid);
 
         canvas.root.setLayout(new zebra.layout.BorderLayout());
-        canvas.root.add(zebra.layout.CENTER, pan);
+        canvas.root.add("center", pan);
 
         ...
 

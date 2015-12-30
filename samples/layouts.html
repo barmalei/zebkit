@@ -4,7 +4,7 @@
     <title>Tutorial</title>
 
 <script src='../zebra.min.js' type='text/javascript'></script>
-        
+
 <script type='text/javascript'>
       zebra.ready(function() {
 
@@ -29,12 +29,12 @@
                      var kid = target.kids[i];
                      if (kid.isVisible) {
                          var ps = kid.getPreferredSize();
-                         kid.setBounds(x, y, ps.width, ps.height);               
+                         kid.setBounds(x, y, ps.width, ps.height);
                          x += ps.width;
                          y += ps.height;
                      }
                  }
-              } 
+              }
           ]);
 
           var c = new zebra.ui.zCanvas("doc.layout.diag");
@@ -46,7 +46,7 @@
           r.add(new zebra.ui.Button("Two"));
           r.add(new zebra.ui.Button("Three"));
 
-          c.setSize(r.getPreferredSize().width, r.getPreferredSize().height); 
+          c.setSize(r.getPreferredSize().width, r.getPreferredSize().height);
     }
 
 
@@ -57,11 +57,11 @@
         r.setLayout(new zebra.layout.BorderLayout());
 
 
-        r.add(zebra.layout.CENTER, new zebra.ui.Button("CENTER"));
-        r.add(zebra.layout.LEFT,   new zebra.ui.Button("LEFT"));
-        r.add(zebra.layout.RIGHT,  new zebra.ui.Button("RIGHT"));
-        r.add(zebra.layout.TOP,    new zebra.ui.Button("TOP"));
-        r.add(zebra.layout.BOTTOM, new zebra.ui.Button("BOTTOM"));
+        r.add("center", new zebra.ui.Button("CENTER"));
+        r.add("left",   new zebra.ui.Button("LEFT"));
+        r.add("right",  new zebra.ui.Button("RIGHT"));
+        r.add("top",    new zebra.ui.Button("TOP"));
+        r.add("bottom", new zebra.ui.Button("BOTTOM"));
     }
 
 
@@ -83,7 +83,7 @@
         var c = new zebra.ui.zCanvas("doc.layout.list2");
         var r = c.root;
         r.setBorder(zebra.ui.borders.plain);
-        r.setLayout(new zebra.layout.ListLayout(zebra.layout.CENTER, 2));
+        r.setLayout(new zebra.layout.ListLayout("center", 2));
 
 
         r.add(new zebra.ui.Button("Item1"));
@@ -96,7 +96,7 @@
         var c = new zebra.ui.zCanvas("doc.layout.list3");
         var r = c.root;
         r.setBorder(zebra.ui.borders.plain);
-        r.setLayout(new zebra.layout.ListLayout(zebra.layout.LEFT, 2));
+        r.setLayout(new zebra.layout.ListLayout("left", 2));
 
 
         r.add(new zebra.ui.Button("Item1"));
@@ -159,7 +159,7 @@
         var c = new zebra.ui.zCanvas("doc.layout.flow1");
         var r = c.root;
         r.setBorder(zebra.ui.borders.plain);
-        r.setLayout(new zebra.layout.FlowLayout(zebra.layout.CENTER, zebra.layout.CENTER, zebra.layout.VERTICAL, 2));
+        r.setLayout(new zebra.layout.FlowLayout("center", "center", zebra.layout.VERTICAL, 2));
 
         r.add(new zebra.ui.Button("VCentered"));
         r.add(new zebra.ui.Button("VCentered"));
@@ -171,7 +171,7 @@
         var c = new zebra.ui.zCanvas("doc.layout.flow2");
         var r = c.root;
         r.setBorder(zebra.ui.borders.plain);
-        r.setLayout(new zebra.layout.FlowLayout(zebra.layout.CENTER, zebra.layout.CENTER, zebra.layout.HORIZONTAL, 2));
+        r.setLayout(new zebra.layout.FlowLayout("center", "center", zebra.layout.HORIZONTAL, 2));
 
 
         r.add(new zebra.ui.Button("HCentered"));
@@ -184,7 +184,7 @@
         var c = new zebra.ui.zCanvas("doc.layout.flow3");
         var r = c.root;
         r.setBorder(zebra.ui.borders.plain);
-        r.setLayout(new zebra.layout.FlowLayout(zebra.layout.LEFT, zebra.layout.CENTER, zebra.layout.HORIZONTAL, 2));
+        r.setLayout(new zebra.layout.FlowLayout("left", "center", zebra.layout.HORIZONTAL, 2));
 
 
         r.add(new zebra.ui.Button("Left-Center-Hor"));
@@ -197,7 +197,7 @@
         var c = new zebra.ui.zCanvas("doc.layout.flow4");
         var r = c.root;
         r.setBorder(zebra.ui.borders.plain);
-        r.setLayout(new zebra.layout.FlowLayout(zebra.layout.RIGHT, zebra.layout.CENTER, zebra.layout.HORIZONTAL, 2));
+        r.setLayout(new zebra.layout.FlowLayout("right", "center", zebra.layout.HORIZONTAL, 2));
 
 
         r.add(new zebra.ui.Button("Right-Center-Hor"));
@@ -211,7 +211,7 @@
         var c = new zebra.ui.zCanvas("doc.layout.flow5");
         var r = c.root;
         r.setBorder(zebra.ui.borders.plain);
-        r.setLayout(new zebra.layout.FlowLayout(zebra.layout.RIGHT, zebra.layout.TOP, zebra.layout.HORIZONTAL, 2));
+        r.setLayout(new zebra.layout.FlowLayout("right", "top", zebra.layout.HORIZONTAL, 2));
 
 
         r.add(new zebra.ui.Button("Right-Top-Hor"));
@@ -224,7 +224,7 @@
         var c = new zebra.ui.zCanvas("doc.layout.flow6");
         var r = c.root;
         r.setBorder(zebra.ui.borders.plain);
-        r.setLayout(new zebra.layout.FlowLayout(zebra.layout.LEFT, zebra.layout.TOP, zebra.layout.HORIZONTAL, 2));
+        r.setLayout(new zebra.layout.FlowLayout("left", "top", zebra.layout.HORIZONTAL, 2));
 
 
         r.add(new zebra.ui.Button("Left-Top-Hor"));
@@ -237,7 +237,7 @@
         var c = new zebra.ui.zCanvas("doc.layout.flow7");
         var r = c.root;
         r.setBorder(zebra.ui.borders.plain);
-        r.setLayout(new zebra.layout.FlowLayout(zebra.layout.LEFT, zebra.layout.TOP, zebra.layout.VERTICAL, 2));
+        r.setLayout(new zebra.layout.FlowLayout("left", "top", zebra.layout.VERTICAL, 2));
 
 
         r.add(new zebra.ui.Button("Left-Top-Ver"));
@@ -250,7 +250,7 @@
         var c = new zebra.ui.zCanvas("doc.layout.flow8");
         var r = c.root;
         r.setBorder(zebra.ui.borders.plain);
-        r.setLayout(new zebra.layout.FlowLayout(zebra.layout.RIGHT, zebra.layout.TOP, zebra.layout.VERTICAL, 2));
+        r.setLayout(new zebra.layout.FlowLayout("right", "top", zebra.layout.VERTICAL, 2));
 
 
         r.add(new zebra.ui.Button("Right-Top-Ver"));
@@ -263,7 +263,7 @@
         var c = new zebra.ui.zCanvas("doc.layout.flow9");
         var r = c.root;
         r.setBorder(zebra.ui.borders.plain);
-        r.setLayout(new zebra.layout.FlowLayout(zebra.layout.RIGHT, zebra.layout.BOTTOM, zebra.layout.VERTICAL, 2));
+        r.setLayout(new zebra.layout.FlowLayout("right", "bottom", zebra.layout.VERTICAL, 2));
 
 
         r.add(new zebra.ui.Button("Right-Bottom-Ver"));
@@ -329,13 +329,13 @@
         r.add(b);
 
         var b = new zebra.ui.Button(new zebra.ui.Label(new zebra.data.Text("(Left,Bottom)\nPreferred sized")));
-        r.add(zebra.layout.LEFT | zebra.layout.BOTTOM, b);
+        r.add("left" | "bottom", b);
 
         var b = new zebra.ui.Button(new zebra.ui.Label(new zebra.data.Text("(Center)\nPreferred sized")));
-        r.add(zebra.layout.CENTER, b);
+        r.add("center", b);
 
         var b = new zebra.ui.Button(new zebra.ui.Label(new zebra.data.Text("(Center)\nPreferred sized")));
-        r.add(zebra.layout.RIGHT, b);
+        r.add("right", b);
     }
 
     if (document.getElementById("doc.layout.grid1") != null) {
@@ -373,12 +373,12 @@
         r.setBorder(zebra.ui.borders.plain);
         r.setLayout(new zebra.layout.GridLayout(2,2));
 
-        var ctr2 = new zebra.layout.Constraints(zebra.layout.CENTER, zebra.layout.BOTTOM);
+        var ctr2 = new zebra.layout.Constraints("center", "bottom");
         ctr2.setPadding(8);
         r.add(ctr2,new zebra.ui.Button("1x1 bottom component"));
 
         r.add(ctr,new zebra.ui.Button(new zebra.ui.MLabel("1x2\nnew line\nnew line")));
-        r.add(new zebra.layout.Constraints(zebra.layout.CENTER, zebra.layout.CENTER), new zebra.ui.Button("Centered"));
+        r.add(new zebra.layout.Constraints("center", "center"), new zebra.ui.Button("Centered"));
         r.add(ctr, new zebra.ui.Button(new zebra.ui.MLabel("2x2\n2x2\n2x2")));
     }
 
@@ -387,7 +387,7 @@
         var r = new zebra.ui.zCanvas("doc.layout.grid4").root,
             ctr = new zebra.layout.Constraints();
             ctr.ax = ctr.ay = 0;
-        
+
         //ctr.setPadding(8);
 
         r.setBorder(zebra.ui.borders.plain);
@@ -403,7 +403,7 @@
 
         var r = new zebra.ui.zCanvas("doc.layout.grid5").root,
             ctr = new zebra.layout.Constraints();
-        
+
         //ctr.setPadding(8);
 
         r.setBorder(zebra.ui.borders.plain);
@@ -460,11 +460,11 @@
                     <div>Percentage layout manager,<br/>vertical alignment,<br/>don't stretch elements horizontally</div>
                 </td>
                 <td>
-                    <canvas width="200" height="150" id="doc.layout.percent4"></canvas>         
+                    <canvas width="200" height="150" id="doc.layout.percent4"></canvas>
                     <div>Percentage layout manager,<br/>vertical alignment,<br/>stretch elements horizontally</div>
                 </td>
                 <td>
-                    <canvas width="200" height="150" id="doc.layout.flow1"></canvas>                
+                    <canvas width="200" height="150" id="doc.layout.flow1"></canvas>
                     <div>Flow layout manager,<br/>center vertically arranged elements</div>
                 </td>
             </tr>
@@ -486,21 +486,21 @@
             <tr>
 
                 <td colspan="2">
-                    <canvas width="450" height="150" id="doc.layout.flow2"></canvas>        
+                    <canvas width="450" height="150" id="doc.layout.flow2"></canvas>
                     <div>Flow layout manager, centered, horizontally arranged elements</div>
                 </td>
 
                 <td colspan="3">
-                    <canvas width="650" height="150" id="doc.layout.flow4"></canvas>        
+                    <canvas width="650" height="150" id="doc.layout.flow4"></canvas>
                     <div>Flow layout manager, right aligned, horizontally arranged elements centered vertically</div>
-                </td>                
+                </td>
 
             </tr>
 
 
             <tr>
                 <td colspan="2">
-                    <canvas width="450" height="150" id="doc.layout.flow5"></canvas>        
+                    <canvas width="450" height="150" id="doc.layout.flow5"></canvas>
                     <div>Flow layout manager, top-right aligned, horizontally arranged elements</div>
                 </td>
                 <td colspan="3">
@@ -511,9 +511,9 @@
 
             <tr>
                 <td colspan="2">
-                    <canvas width="450" height="150" id="doc.layout.flow7"></canvas>        
+                    <canvas width="450" height="150" id="doc.layout.flow7"></canvas>
                     <div>Flow layout manager, top-left aligned, vertically arranged elements</div>
-                </td>                
+                </td>
                 <td>
                     <canvas width="200" height="200" id="doc.layout.flow8"></canvas>
                     <div>Flow layout manager,<br/>top-right aligned,<br/>vertically arranged elements</div>
@@ -545,7 +545,7 @@
             </tr>
 
             <tr>
-                <td colspan="2">                    
+                <td colspan="2">
                     <canvas width="350" height="200" id="doc.layout.grid3"></canvas>
                     <div>Grid layout manager</div>
                 </td>
@@ -559,11 +559,11 @@
                 </td>
             </tr>
     </table>
-    
+
     <table>
 
 
 
-        </table>        
+        </table>
 	</body>
 </html>

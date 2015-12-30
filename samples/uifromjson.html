@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
 	<head>
-        <title>Tutorial</title> 
+        <title>Tutorial</title>
         <script src='../zebra.min.js' type='text/javascript'></script>
 
     <script type='text/javascript'>
     zebra.ready(function() {
-    
+
     if (document.getElementById("doc.json1") != null) {
 
         var r = new zebra.ui.zCanvas("doc.json1").root;
@@ -17,9 +17,9 @@
         var l = new zebra.ui.BoldLabel("Simple application");
         l.setPadding(4);
         l.setBackground("lightGray");
-        r.add(zebra.layout.TOP, l);
-        r.add(zebra.layout.CENTER, new zebra.ui.TextArea(""));
-        r.add(zebra.layout.BOTTOM, new zebra.ui.Button("Clear"));
+        r.add("top", l);
+        r.add("center", new zebra.ui.TextArea(""));
+        r.add("bottom", new zebra.ui.Button("Clear"));
     }
 
     if (document.getElementById("doc.json2") != null) {
@@ -46,12 +46,12 @@
 
         var r = new zebra.ui.zCanvas("doc.json4").root;
         r.setLayout(new zebra.layout.GridLayout(2,2));
-        var url = "uifromjson1.json";  
+        var url = "uifromjson1.json";
         r.load(url);
         r.load(url);
         r.load(url);
         r.load(url);
-    }   
+    }
 });
 
 </script>

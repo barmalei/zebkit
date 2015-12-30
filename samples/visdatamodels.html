@@ -173,7 +173,7 @@ zebra.ready(
         g.setCellPadding(8);
 
         new zebra.ui.zCanvas("doc.model7").root.properties({
-           layout : new zebra.layout.FlowLayout(zebra.layout.CENTER, zebra.layout.CENTER),
+           layout : new zebra.layout.FlowLayout("center", "center"),
            padding: 4,
            border: "plain",
            kids : g
@@ -189,7 +189,7 @@ zebra.ready(
         ]);
 
         new zebra.ui.zCanvas("doc.model8").root.properties({
-           layout : new zebra.layout.FlowLayout(zebra.layout.CENTER, zebra.layout.CENTER),
+           layout : new zebra.layout.FlowLayout("center", "center"),
            padding: 4,
            border: "plain",
            kids : g
@@ -223,7 +223,7 @@ zebra.ready(
         g.setViewProvider(new GridViewProvider());
 
         new zebra.ui.zCanvas("doc.model9").root.properties({
-          layout : new zebra.layout.FlowLayout(zebra.layout.CENTER, zebra.layout.CENTER),
+          layout : new zebra.layout.FlowLayout("center", "center"),
           padding: 4,
           border: "plain",
           kids : g

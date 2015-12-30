@@ -10,19 +10,19 @@
 	<body bgcolor="#EEEEEE" align="center" style="padding:15px;">
         <script>
 
-            $.getScript('../zebra.min.js', function (script, textStatus, jqXHR) {                
+            $.getScript('../zebra.js', function (script, textStatus, jqXHR) {
                 zebra()["zebra.json"] = "http://localhost:8090/zebra.json";
 
                 zebra.ready(function() {
                     var root = new zebra.ui.zCanvas();
                     root.root.setLayout(new zebra.layout.BorderLayout());
-                    root.root.add(zebra.layout.CENTER, new zebra.ui.Button("Test"));
+                    root.root.add("center", new zebra.ui.Button("Test"));
                 });
             });
 
 
              console.log("::: " +  document.readyState);
         </script>
-	    
+
 	</body>
 </html>

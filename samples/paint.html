@@ -4,11 +4,11 @@
     <title>Tutorial</title>
 
     <script src='../zebra.min.js' type='text/javascript'></script>
-        
+
 	<script type='text/javascript'>
 		zebra.ready(function() {
 		    eval(zebra.Import("ui", "layout"));
- 
+
         var PaintComponent=zebra.Class(zebra.ui.Panel,[
             function paint(g) {
                g.setColor("lightGray");
@@ -38,33 +38,33 @@
         var FocusMarkerComponent = zebra.Class(zebra.ui.ViewPan,[
              // say the component can have focus
              function canHaveFocus() { return true; },
-          
+
              // override "focused()" method that is called every time
-             // the component gained or lost focus  
+             // the component gained or lost focus
              function focused() {
                  this.$super(); // don't forget call super "focused()" method
                  this.repaint();// trigger the component repaint
              },
-         
+
              // "markerColor" property value setter
              function setMarkerColor(c) {
                  this.markerColor = c;
                  this.repaint();
              },
-         
+
              // implement "paint(...)" method to draw focus marker rectangle
              // whenever the component captures the focus
              function paint(g) {
                  if (this.hasFocus()) {
-                     // set "red" as default color if "markerColor" has not 
+                     // set "red" as default color if "markerColor" has not
                      // been defined yet
                      g.setColor(this.markerColor==null?"red":this.markerColor);
                      g.rect(3,3, this.width-6, this.height-6);
                      g.stroke();
                  }
-             }  
-        ]);   
- 
+             }
+        ]);
+
 
 		if (document.getElementById("doc.paint") != null) {
     		var c = new zCanvas("doc.paint");
@@ -89,7 +89,7 @@
 			c.root.setLayout(new BorderLayout());
 			var fc = new FocusMarkerComponent();
 			fc.setView(new TextRender("Click on the\ncomponent\nto pass focus\nhere"));
-			c.root.add(zebra.layout.CENTER, fc);
+			c.root.add("center", fc);
 	    }
 
 
@@ -105,7 +105,7 @@
                 <td><canvas width="250" height="250" id="doc.update"></canvas><div>Implement paint(g) and update(g)</div></td>
                 <td><canvas width="250" height="250" id="doc.paintOnTop"></canvas><div>Implement paint(g), update(g) and<br/> paintOnTop(g)</div></td>
             </tr>
-    	    
+
 	    </table>
     </body>
 </html>

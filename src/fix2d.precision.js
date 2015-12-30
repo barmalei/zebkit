@@ -63,7 +63,7 @@
 
     ctx.createLinearGradient = function(x0, y0, x1, y1) {
         var c = this.$states[this.$curState];
-        return thus.$createLinearGradient(x0 + c.dx, y0 + c.dy, x1 + c.dx, y1 + c.dy);
+        return this.$createLinearGradient(x0 + c.dx, y0 + c.dy, x1 + c.dx, y1 + c.dy);
     };
 
     ctx.createRadialGradient = function(x0, y0, r0, x1, y1, r1) {

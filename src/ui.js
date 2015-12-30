@@ -454,7 +454,7 @@ pkg.StatePan = Class(pkg.ViewPan, [
      lab.setPadding(6);
      statePan.setPadding(6);
      statePan.setLayout(new zebra.layout.BorderLayout());
-     statePan.add(zebra.layout.CENTER, lab);
+     statePan.add("center", lab);
 
      // set label as an anchor for focus border indicator
      statePan.setFocusAnchorComponent(lab);

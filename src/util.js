@@ -16,6 +16,8 @@ pkg.format = function(s, obj, ph) {
 
     while ((m = rg.exec(s)) !== null) {
         r[i++] = s.substring(j, m.index);
+
+
         j = m.index + m[0].length;
 
         var v  = obj[m[3]],

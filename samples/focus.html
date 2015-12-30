@@ -11,7 +11,7 @@
 
             var r = new zebra.ui.zCanvas("doc.focus1").root;
             r.setLayout(new zebra.layout.BorderLayout());
-            r.add(zebra.layout.CENTER, new zebra.ui.Button("Center", [
+            r.add("center", new zebra.ui.Button("Center", [
                 function focused() {
                    this.$super();
                    if (this.hasFocus()) {
@@ -30,7 +30,7 @@
 
             var r = new zebra.ui.zCanvas("doc.focus2").root;
             r.setLayout(new zebra.layout.BorderLayout());
-            r.add(zebra.layout.CENTER, new zebra.ui.Button("Center", [
+            r.add("center", new zebra.ui.Button("Center", [
                 function focusGained(e) {
                     this.focusComponent.setColor("orange");
                 },
@@ -61,9 +61,9 @@
                 }
             });
 
-            r.add(zebra.layout.BOTTOM, new zebra.ui.Button("Bottom"));
-            r.add(zebra.layout.CENTER, new zebra.ui.Button("Center"));
-            r.add(zebra.layout.TOP, new zebra.ui.Button("Top"));
+            r.add("bottom", new zebra.ui.Button("Bottom"));
+            r.add("center", new zebra.ui.Button("Center"));
+            r.add("top", new zebra.ui.Button("Top"));
         }
 
         if (document.getElementById("doc.focus4") != null) {
@@ -94,8 +94,8 @@
                }
             ]);
             p.setBackground("lightGray");
-            r.add(zebra.layout.CENTER, p);
-            r.add(zebra.layout.TOP, new zebra.ui.Button("TOP"));
+            r.add("center", p);
+            r.add("top", new zebra.ui.Button("TOP"));
         }
 
         if (document.getElementById("doc.focus5") != null) {
@@ -118,8 +118,8 @@
             }));
 
             p.setBackground("lightGray");
-            r.add(zebra.layout.CENTER, p);
-            r.add(zebra.layout.TOP, new zebra.ui.Button("TOP"));
+            r.add("center", p);
+            r.add("top", new zebra.ui.Button("TOP"));
         }
 
     });

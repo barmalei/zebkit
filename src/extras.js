@@ -5,13 +5,13 @@
         // map user defined constructor to internal constructor name
         if (name == CDNAME) name = zebra.CNAME;
         var m = clazz.prototype[name];
-        if (typeof m === 'function') return m;
-        return null;
+        return (typeof m === 'function') ?  m : null;
     };
 
     var isBA = typeof(ArrayBuffer) !== 'undefined';
+
     io.InputStream = Class([
-        function(container) {
+        function (container) {
             if (isBA && container instanceof ArrayBuffer) this.data = new Uint8Array(container);
             else {
                 if (zebra.isString(container)) {

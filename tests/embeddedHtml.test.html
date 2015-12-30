@@ -5,24 +5,8 @@
 	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
 	<meta name="msapplication-tap-highlight" content="no" />
 
-	<script src='../src/easyoop.js'    type='text/javascript'></script>
-	<script src='../src/util.js' type='text/javascript'></script>
-	<script src='../src/io.js'    type='text/javascript'></script>
-	<script src='../src/data.js' type='text/javascript'></script>
-	<script src='../src/layout.js' type='text/javascript'></script>
-	<script src='../src/ui.webstuff.js' type='text/javascript'></script>
-	<script src='../src/canvas.js' type='text/javascript'></script>
-	<script src='../src/ui.views.js' type='text/javascript'></script>
-	<script src='../src/ui.js' type='text/javascript'></script>
-
-
-	<script src='../src/ui.TextField.js' type='text/javascript'></script>
-	<script src='../src/ui.list.js' type='text/javascript'></script>
-	<script src='../src/ui.window.js' type='text/javascript'></script>
-	<script src='../src/ui.tree.js' type='text/javascript'></script>
-	<script src='../src/ui.grid.js' type='text/javascript'></script>
+	<script src='../zebra.js'    type='text/javascript'></script>
 	<script src='../src/ui.vk.js' type='text/javascript'></script>
-	<script src='../src/ui.html.js' type='text/javascript'></script>
 
 		<script type='text/javascript'>
 		    zebra.ready(function() {
@@ -48,9 +32,9 @@
 		 			yy += 20;
 		 		});
 
-				var cont = new HtmlContent();
+				var cont = new HtmlElement();
 				tabs.add("Load", cont);
-				cont.loadContent("embeddedHtml.test.content");
+				cont.setContent(zebkit.io.GET("embeddedHtml.test.content"));
 				cont.setPadding(8);
 
 

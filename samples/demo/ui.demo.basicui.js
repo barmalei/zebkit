@@ -6,7 +6,7 @@ eval(zebra.Import("ui", "layout"));
 pkg.BasicUIDemo = new Class(pkg.DemoPan, [
     function() {
         this.$super();
-        this.setLayout(new FlowLayout(CENTER, CENTER));
+        this.setLayout(new FlowLayout("center", "center"));
         var r = new Panel(new BorderLayout(8,4));
 
         var p = new Panel(new GridLayout(3, 2)), ctr = new Constraints();
@@ -21,15 +21,15 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         p.add(ctr, this.createSliderPan());
 
         var p_c = new Panel(new BorderLayout(4, 4));
-        p_c.add(CENTER, p);
-        p_c.add(BOTTOM, this.createButtonPan());
+        p_c.add("center", p);
+        p_c.add("bottom", this.createButtonPan());
 
         var p_w = new Panel(new ListLayout(8));
         p_w.add(this.createComboPan());
         p_w.add(this.createListPan());
 
-        r.add(LEFT, p_w);
-        r.add(CENTER, p_c);
+        r.add("left", p_w);
+        r.add("center", p_c);
 
         this.add(r);
     },
@@ -67,7 +67,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         var tf = new TextArea("Multiline\ntext field\ncomponents");
         tf.setBlinking();
         tf.setPreferredSize(180, 80);
-        p.add(CENTER, tf);
+        p.add("center", tf);
         return pkg.createBorderPan("Multilines text field", p);
     },
 
@@ -75,12 +75,12 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         var p = new Panel(new BorderLayout());
         var sl = new Slider();
         sl.setPreferredSize(90, -1);
-        p.add(CENTER, sl);
+        p.add("center", sl);
         return pkg.createBorderPan("Slider", p);
     },
 
     function createProgressPan() {
-        var p = new Panel(new FlowLayout(CENTER, CENTER, VERTICAL, 16));
+        var p = new Panel(new FlowLayout("center", "center", "vertical", 16));
         var pr1 = new Progress();
         pr1.setPreferredSize(130, -1);
         pr1.setMaxValue(10);
@@ -88,7 +88,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         var pr2 = new Progress();
         pr2.setMaxValue(4);
         pr2.setValue(1);
-        pr2.setBundleView(new Gradient("lightGray", "gray", HORIZONTAL));
+        pr2.setBundleView(new Gradient("lightGray", "gray", "horizontal"));
         pr2.setPreferredSize(130, 12);
         pr2.setBundleSize(70, pr2.bundleHeight);
         p.add(pr1);
@@ -97,7 +97,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
     },
 
     function createButtonPan() {
-        var p = new Panel(new FlowLayout(CENTER, CENTER, HORIZONTAL, 8));
+        var p = new Panel(new FlowLayout("center", "center", "horizontal", 8));
         p.add(new Button("Button"));
         var bt = new Button(new ImagePan(ui.demo.butterfly));
         bt.setFocusMarkerView(null);
@@ -139,7 +139,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
     },
 
     function createCheckboxPan(n, t) {
-        var p = new Panel(new FlowLayout(CENTER, CENTER, VERTICAL, 4)),
+        var p = new Panel(new FlowLayout("center", "center", "vertical", 4)),
             s = t ? "Radio button " : "Checkbox button ", g = t ? new Group() : null;
 
         for(var i=0; i < n;  i++) {

@@ -24,11 +24,11 @@
         //set layout manager
         c.root.setLayout(new zebra.layout.BorderLayout());
         //add label to top
-        c.root.add(zebra.layout.TOP,new zebra.ui.Label("Top label"));
+        c.root.add("top",new zebra.ui.Label("Top label"));
         //add text area to center
-        c.root.add(zebra.layout.CENTER,new zebra.ui.TextArea(""));
+        c.root.add("center",new zebra.ui.TextArea(""));
         //add button area to bottom
-        c.root.add(zebra.layout.BOTTOM,new zebra.ui.Button("Button"));
+        c.root.add("bottom",new zebra.ui.Button("Button"));
         ...
      });
 
@@ -573,9 +573,9 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
       p.setLayout(new zebra.layout.BorderLayout(4)); // set layout manager to
                                                      // order children components
 
-      p.add(zebra.layout.TOP, new zebra.ui.Label("Top label"));
-      p.add(zebra.layout.CENTER, new zebra.ui.TextArea("Text area"));
-      p.add(zebra.layout.BOTTOM, new zebra.ui.Button("Button"));
+      p.add("top", new zebra.ui.Label("Top label"));
+      p.add("center", new zebra.ui.TextArea("Text area"));
+      p.add("bottom", new zebra.ui.Button("Button"));
 
  * **Events. **
  * The class provides possibility to catch various component and input
@@ -927,6 +927,22 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
 
 pkg.Panel = Class(L.Layoutable, [
     function $prototype() {
+        // TODO: not stable api, probably it should be moved to static
+        this.wrapWithCanvas = function() {
+            var c = new pkg.HtmlCanvas();
+            c.setLayout(new zebkit.layout.StackLayout());
+            c.add(this);
+            return c;
+        };
+
+        // TODO: not stable api, probably it should be moved to static
+        this.wrapWithHtmlElement = function() {
+            var c = new pkg.HtmlElement();
+            c.setLayout(new zebkit.layout.StackLayout());
+            c.add(this);
+            return c;
+        };
+
         /**
          * Request the whole UI component or part of the UI component to be repainted
          * @param  {Integer} [x] x coordinate of the component area to be repainted
@@ -2045,12 +2061,11 @@ pkg.HtmlElement = Class(pkg.Panel, [
             }
             else {
                 if (this.$blockElement == null) {
-                    var be = this.$blockElement = zebra.web.$createBlockedElement();
+                    this.$blockElement = zebra.web.$createBlockedElement();
                 }
                 this.$container.appendChild(this.$blockElement);
            }
         }
-
         return this.$super(b);
     },
 
@@ -2858,8 +2873,6 @@ pkg.FocusManager = Class(pkg.Manager, [
             if ( this.focusOwner != null &&
                 (this.focusOwner === comp || L.isAncestorOf(comp, this.focusOwner)))
             {
-                console.log("comp removed : " + comp.clazz.$name);
-                console.log(comp);
                 this.requestFocus(null);
             }
         };
@@ -3073,8 +3086,6 @@ pkg.FocusManager = Class(pkg.Manager, [
          * @method pointerPressed
          */
         this.pointerPressed = function(e){
-            console.log("FocusManager.pointerPressed() " + e.isAction());
-
             if (e.isAction()) {
                 // TODO: WEB specific code that has to be moved to another place
                 // the problem is a target canvas element get mouse pressed

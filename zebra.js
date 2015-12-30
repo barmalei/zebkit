@@ -197,7 +197,7 @@ var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
 
 var pkg = zebkit = zebra = namespace('zebra'),
     CNAME = pkg.CNAME = '$', CDNAME = '',
-    FN = pkg.$FN = (typeof isString.name === "undefined" || isString.name == "") ? (function(f) {     // IE stuff
+    FN = pkg.$FN = (isString.name !== "isString") ? (function(f) {     // IE stuff
                                                                 var mt = f.toString().match(/^function\s+([^\s(]+)/);
                                                                 return (mt == null) ? CDNAME : mt[1];
                                                              })
@@ -209,7 +209,7 @@ pkg.$global    = (typeof window !== "undefined" && window != null) ? window : th
 pkg.isString   = isString;
 pkg.isNumber   = isNumber;
 pkg.isBoolean  = isBoolean;
-pkg.$caller    = null; // current method which is called
+pkg.$caller    = null; // currently called method reference
 
 
 pkg.clone = function (obj) {
@@ -2187,9 +2187,9 @@ pkg.StackLayout = Class(L, [
        var p = new zebra.ui.Panel(new zebra.layout.BorderLayout());
 
        // add children UI components with top, center and left constraints
-       p.add(zebra.layout.TOP,    new zebra.ui.Label("Top"));
-       p.add(zebra.layout.CENTER, new zebra.ui.Label("Center"));
-       p.add(zebra.layout.LEFT,   new zebra.ui.Label("Left"));
+       p.add("top",    new zebra.ui.Label("Top"));
+       p.add("center", new zebra.ui.Label("Center"));
+       p.add("left",   new zebra.ui.Label("Left"));
 
  * Construct the layout with the given vertical and horizontal gaps.
  * @param  {Integer} [hgap] horizontal gap. The gap is a horizontal distance between laid out components
@@ -3181,6 +3181,8 @@ pkg.format = function(s, obj, ph) {
 
     while ((m = rg.exec(s)) !== null) {
         r[i++] = s.substring(j, m.index);
+
+
         j = m.index + m[0].length;
 
         var v  = obj[m[3]],
@@ -7258,6 +7260,7 @@ pkg.Matrix = Class([
         be.style.left = be.style.top = "0px";
         be.style.position = "absolute";
         be.style["z-index"] = "100000";
+        be.setAttribute("zebkit", "blockedElement");
 
         be.onmouseup   = be.onmousedown = be.onmouseout =
         be.onmouseover = be.onmousemove = be.onkeydown  =
@@ -8351,7 +8354,7 @@ pkg.Matrix = Class([
                 // and right buttons or long touch emulates mouse event what causes generations of
                 // mouse down event after touch start event. Let's suppress it
                 if ((e.button !== 0 && e.button !== 2) ||
-                     $this.$touchedAt(e.pageX, e.pageY, 0)  )
+                     $this.$touchedAt(e.pageX, e.pageY, 0))
                 {
                     e.preventDefault();
                 }
@@ -8391,9 +8394,6 @@ pkg.Matrix = Class([
                 else {
                     var id = e.button == 0 ? LMOUSE : RMOUSE,
                         mp = $pointerPressedEvents[id];
-
-                    console.log("PointerEventUnifier.onmouseup() mp = " + mp + ", id = " +  id);
-
 
                     $this.$UP(id, e, ME_STUB);
 
@@ -8543,8 +8543,6 @@ pkg.Matrix = Class([
                                                           "MSPointerEnter",
                                                           "MSPointerLeave" ];
 
-                console.log(":: Install pointer listeners");
-
                 element.addEventListener(names[0], function(e) {
                     if (e.pointerType !== "mouse")  {
                         POINTER_STUB.touch = e;
@@ -8609,14 +8607,11 @@ pkg.Matrix = Class([
                     // clear touches that still is not in list of touches
                     for (var k in $pointerPressedEvents) {
                         if (isIn(allTouches, k) === false) {
-                            console.log("touchstart()  inactive touch detected");
                             var tt = $pointerPressedEvents[k];
                             if (tt.group != null) tt.group.active = false;
                             $this.$UP(tt.identifier, tt, TOUCH_STUB);
                         }
                     }
-
-                    console.log("2. toucstart() " + TOUCH_STUB.touchCounter);
 
                     //!!!
                     //TODO: this calling prevents generation of phantom mouse move event
@@ -8864,11 +8859,11 @@ pkg.Matrix = Class([
         //set layout manager
         c.root.setLayout(new zebra.layout.BorderLayout());
         //add label to top
-        c.root.add(zebra.layout.TOP,new zebra.ui.Label("Top label"));
+        c.root.add("top",new zebra.ui.Label("Top label"));
         //add text area to center
-        c.root.add(zebra.layout.CENTER,new zebra.ui.TextArea(""));
+        c.root.add("center",new zebra.ui.TextArea(""));
         //add button area to bottom
-        c.root.add(zebra.layout.BOTTOM,new zebra.ui.Button("Button"));
+        c.root.add("bottom",new zebra.ui.Button("Button"));
         ...
      });
 
@@ -9413,9 +9408,9 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
       p.setLayout(new zebra.layout.BorderLayout(4)); // set layout manager to
                                                      // order children components
 
-      p.add(zebra.layout.TOP, new zebra.ui.Label("Top label"));
-      p.add(zebra.layout.CENTER, new zebra.ui.TextArea("Text area"));
-      p.add(zebra.layout.BOTTOM, new zebra.ui.Button("Button"));
+      p.add("top", new zebra.ui.Label("Top label"));
+      p.add("center", new zebra.ui.TextArea("Text area"));
+      p.add("bottom", new zebra.ui.Button("Button"));
 
  * **Events. **
  * The class provides possibility to catch various component and input
@@ -9767,6 +9762,22 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
 
 pkg.Panel = Class(L.Layoutable, [
     function $prototype() {
+        // TODO: not stable api, probably it should be moved to static
+        this.wrapWithCanvas = function() {
+            var c = new pkg.HtmlCanvas();
+            c.setLayout(new zebkit.layout.StackLayout());
+            c.add(this);
+            return c;
+        };
+
+        // TODO: not stable api, probably it should be moved to static
+        this.wrapWithHtmlElement = function() {
+            var c = new pkg.HtmlElement();
+            c.setLayout(new zebkit.layout.StackLayout());
+            c.add(this);
+            return c;
+        };
+
         /**
          * Request the whole UI component or part of the UI component to be repainted
          * @param  {Integer} [x] x coordinate of the component area to be repainted
@@ -10885,12 +10896,11 @@ pkg.HtmlElement = Class(pkg.Panel, [
             }
             else {
                 if (this.$blockElement == null) {
-                    var be = this.$blockElement = zebra.web.$createBlockedElement();
+                    this.$blockElement = zebra.web.$createBlockedElement();
                 }
                 this.$container.appendChild(this.$blockElement);
            }
         }
-
         return this.$super(b);
     },
 
@@ -11698,8 +11708,6 @@ pkg.FocusManager = Class(pkg.Manager, [
             if ( this.focusOwner != null &&
                 (this.focusOwner === comp || L.isAncestorOf(comp, this.focusOwner)))
             {
-                console.log("comp removed : " + comp.clazz.$name);
-                console.log(comp);
                 this.requestFocus(null);
             }
         };
@@ -11913,8 +11921,6 @@ pkg.FocusManager = Class(pkg.Manager, [
          * @method pointerPressed
          */
         this.pointerPressed = function(e){
-            console.log("FocusManager.pointerPressed() " + e.isAction());
-
             if (e.isAction()) {
                 // TODO: WEB specific code that has to be moved to another place
                 // the problem is a target canvas element get mouse pressed
@@ -15543,7 +15549,7 @@ pkg.StatePan = Class(pkg.ViewPan, [
      lab.setPadding(6);
      statePan.setPadding(6);
      statePan.setLayout(new zebra.layout.BorderLayout());
-     statePan.add(zebra.layout.CENTER, lab);
+     statePan.add("center", lab);
 
      // set label as an anchor for focus border indicator
      statePan.setFocusAnchorComponent(lab);
@@ -25019,6 +25025,10 @@ pkg.Tooltip = Class(pkg.Panel, [
   * @param {zebra.ui.Panel} item a menu item component that has been selected
   */
 pkg.PopupManager = Class(pkg.Manager, [
+    function $clazz() {
+        this.Listeners = zebra.util.ListenersClass("menuItemSelected");
+    },
+
     function $prototype() {
         /**
          * Indicates if a shown tooltip has to disappear by pointer pressed event
@@ -25076,9 +25086,6 @@ pkg.PopupManager = Class(pkg.Manager, [
          * @method pointerEntered
          */
         this.pointerEntered = function(e) {
-
-            console.log("PopupManager.pointerEntered() src = " + e.source.clazz.$name);
-
             if (this.$target == null && (e.source.tooltip != null || e.source.getTooltip != null)) {
                 var c = e.source;
                 this.$target = c;
@@ -25135,9 +25142,6 @@ pkg.PopupManager = Class(pkg.Manager, [
                                                             : this.$target.getTooltip(this.$target,
                                                                                       this.$tooltipX,
                                                                                       this.$tooltipY);
-
-                console.log("PopupManager.run() " + this.$tooltip + "," + ntooltip);
-
                 if (this.$tooltip != ntooltip) {
                     // hide previously shown tooltip
                     if (this.$tooltip != null) {
@@ -25166,7 +25170,6 @@ pkg.PopupManager = Class(pkg.Manager, [
                             this.$tooltip.winType = "info";
                         }
 
-                        console.log("PopupManager.run() add tooltip ");
                         this.$targetTooltipLayer.addWin(this.$tooltip, this);
 
                         if (this.$tooltip.winType !== "info") {
@@ -25260,9 +25263,7 @@ pkg.PopupManager = Class(pkg.Manager, [
         this.$popupMenuX = this.$popupMenuY = 0;
         this.$tooltipX = this.$tooltipY = 0;
         this.$targetTooltipLayer = this.$tooltip = this.$target = null;
-
-        var LClass = zebra.util.ListenersClass("menuItemSelected");
-        this._ = new LClass();
+        this._ = new this.clazz.Listeners();
     }
 ]);
 
@@ -28396,7 +28397,7 @@ pkg.Grid.prototype.setViews = ui.$ViewsSetter;
         var pan  = new zebra.ui.grid.GridStretchPan(grid);
 
         canvas.root.setLayout(new zebra.layout.BorderLayout());
-        canvas.root.add(zebra.layout.CENTER, pan);
+        canvas.root.add("center", pan);
 
         ...
 

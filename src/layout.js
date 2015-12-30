@@ -946,9 +946,9 @@ pkg.StackLayout = Class(L, [
        var p = new zebra.ui.Panel(new zebra.layout.BorderLayout());
 
        // add children UI components with top, center and left constraints
-       p.add(zebra.layout.TOP,    new zebra.ui.Label("Top"));
-       p.add(zebra.layout.CENTER, new zebra.ui.Label("Center"));
-       p.add(zebra.layout.LEFT,   new zebra.ui.Label("Left"));
+       p.add("top",    new zebra.ui.Label("Top"));
+       p.add("center", new zebra.ui.Label("Center"));
+       p.add("left",   new zebra.ui.Label("Left"));
 
  * Construct the layout with the given vertical and horizontal gaps.
  * @param  {Integer} [hgap] horizontal gap. The gap is a horizontal distance between laid out components

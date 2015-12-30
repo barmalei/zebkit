@@ -22,7 +22,7 @@
                     kids  : {
                         CENTER: new ImagePan(myimg, [
                             function getTooltip(target, x, y) {
-                                var imgData = this.getCanvas().$context.getImageData(x, y, 1, 1).data,
+                                var imgData = this.getCanvas().root.$context.getImageData(x, y, 1, 1).data,
                                     color   = "rgb("+ imgData[0] + "," + imgData[1] + "," + imgData[2] +")",
                                     label   = new Panel({
                                         layout    : new FlowLayout(8),
@@ -67,8 +67,13 @@
                         }),
                         CENTER: new ImagePan(myimg, [
                             function pointerPressed(e) {
-                                var i = this.getCanvas().$context.getImageData(e.absX, e.absY, 1, 1).data,
+                                console.log("absX " + e.absX + "," + e.absY);
+
+
+                                var i = this.getCanvas().root.$context.getImageData(e.absX, e.absY, 1, 1).data,
                                     c = "rgb("+ i[0] + "," + i[1] + "," + i[2] +")";
+
+                                console.log(" " + c);
                                 p.kids[counter++%max].setBackground(c);
                             }
                         ])
@@ -95,7 +100,7 @@
                         BOTTOM: new TextField(),
                         CENTER: new ImagePan(myimg, [
                             function pointerPressed(e) {
-                                var ctx = this.getCanvas().$context,
+                                var ctx = this.getCanvas().root.$context,
                                     i = ctx.getImageData(e.absX, e.absY, 1, 1).data,
                                     c = "rgb("+ i[0] + "," + i[1] + "," + i[2] +")";
                                 this.parent.find("//zebra.ui.TextField").setValue(c);

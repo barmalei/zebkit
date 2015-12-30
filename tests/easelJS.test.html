@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script src="../zebra.min.js" type="text/javascript"></script>
+        <script src="../zebra.js" type="text/javascript"></script>
         <script src="easeljs-0.7.1.min.js" type="text/javascript"></script>
     </head>
-    <body> 
+    <body>
         <script type="text/javascript">
 
-                
+
                 zebra.ready(
                     function() {
 
-                        var stage = new createjs.Stage("t");
+                        var sc = document.createElement("canvas");
+
+                        var stage = new createjs.Stage(sc);
                         var circle = new createjs.Shape();
                         circle.graphics.beginFill("red").drawCircle(0, 0, 40);
                         circle.x = circle.y = 50;
@@ -33,16 +35,14 @@
                             kids: {
                                 BOTTOM: new zebra.ui.Button("Test"),
                                 TOP   : new zebra.ui.TextField("Test"),
-                                CENTER: new zebra.ui.HtmlElement(document.getElementById("t"))             
+                                CENTER: new zebra.ui.HtmlElement(sc)
                             }
                         });
                     }
-                ); 
+                );
 
         </script>
 
-
-        <canvas id="t" width="200" height="200"> </canvas>
 
     </body>
 </html>

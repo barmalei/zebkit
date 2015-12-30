@@ -2034,6 +2034,10 @@ pkg.Tooltip = Class(pkg.Panel, [
   * @param {zebra.ui.Panel} item a menu item component that has been selected
   */
 pkg.PopupManager = Class(pkg.Manager, [
+    function $clazz() {
+        this.Listeners = zebra.util.ListenersClass("menuItemSelected");
+    },
+
     function $prototype() {
         /**
          * Indicates if a shown tooltip has to disappear by pointer pressed event
@@ -2091,9 +2095,6 @@ pkg.PopupManager = Class(pkg.Manager, [
          * @method pointerEntered
          */
         this.pointerEntered = function(e) {
-
-            console.log("PopupManager.pointerEntered() src = " + e.source.clazz.$name);
-
             if (this.$target == null && (e.source.tooltip != null || e.source.getTooltip != null)) {
                 var c = e.source;
                 this.$target = c;
@@ -2150,9 +2151,6 @@ pkg.PopupManager = Class(pkg.Manager, [
                                                             : this.$target.getTooltip(this.$target,
                                                                                       this.$tooltipX,
                                                                                       this.$tooltipY);
-
-                console.log("PopupManager.run() " + this.$tooltip + "," + ntooltip);
-
                 if (this.$tooltip != ntooltip) {
                     // hide previously shown tooltip
                     if (this.$tooltip != null) {
@@ -2181,7 +2179,6 @@ pkg.PopupManager = Class(pkg.Manager, [
                             this.$tooltip.winType = "info";
                         }
 
-                        console.log("PopupManager.run() add tooltip ");
                         this.$targetTooltipLayer.addWin(this.$tooltip, this);
 
                         if (this.$tooltip.winType !== "info") {
@@ -2275,9 +2272,7 @@ pkg.PopupManager = Class(pkg.Manager, [
         this.$popupMenuX = this.$popupMenuY = 0;
         this.$tooltipX = this.$tooltipY = 0;
         this.$targetTooltipLayer = this.$tooltip = this.$target = null;
-
-        var LClass = zebra.util.ListenersClass("menuItemSelected");
-        this._ = new LClass();
+        this._ = new this.clazz.Listeners();
     }
 ]);
 

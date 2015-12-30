@@ -149,6 +149,7 @@
         be.style.left = be.style.top = "0px";
         be.style.position = "absolute";
         be.style["z-index"] = "100000";
+        be.setAttribute("zebkit", "blockedElement");
 
         be.onmouseup   = be.onmousedown = be.onmouseout =
         be.onmouseover = be.onmousemove = be.onkeydown  =

@@ -16,7 +16,7 @@ zebra.package("ui.demo", function(pkg, Class) {
         },
 
         function createTitledPan() {
-            var r = new Panel(new FlowLayout(CENTER, CENTER)),
+            var r = new Panel(new FlowLayout("center", "center")),
                 p = new Panel(new GridLayout(4, 3)),
                 p1 = new BorderPan("Default title", new Label(""));
             p1.setPreferredSize(130, 130);
@@ -59,16 +59,16 @@ zebra.package("ui.demo", function(pkg, Class) {
         function createSplitPan() {
             var p = new Panel(new BorderLayout());
             var s1_1 = new SplitPan(new ImagePan(pkg.cosmo1), new ImagePan(pkg.cosmo2));
-            var s1 = new SplitPan(new ImagePan(pkg.cosmo3), s1_1, HORIZONTAL);
+            var s1 = new SplitPan(new ImagePan(pkg.cosmo3), s1_1, "horizontal");
             p.setPadding(4);
             s1.setGripperLoc(180);
             s1_1.setGripperLoc(220);
-            p.add(CENTER, s1);
+            p.add("center", s1);
             return p;
         },
 
         function createScrollPan() {
-            var rt = new Panel(new FlowLayout(CENTER, CENTER)),
+            var rt = new Panel(new FlowLayout("center", "center")),
                 p = new Panel(new GridLayout(2,2)),
                 img = new ImagePan(pkg.cosmo1),
                 p1 = new ScrollPan(img);
@@ -82,7 +82,7 @@ zebra.package("ui.demo", function(pkg, Class) {
             var p3_1 = new Panel(new zebra.layout.ListLayout(2));
             for(var i=0; i<20; i++) {
                 var ch = new Checkbox("Checkbox " + i);
-                ch.setLayout(new FlowLayout(LEFT, CENTER, HORIZONTAL, 4));
+                ch.setLayout(new FlowLayout("left", "center", "horizontal", 4));
                 p3_1.add(ch);
             }
 

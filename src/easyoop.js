@@ -197,7 +197,7 @@ var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
 
 var pkg = zebkit = zebra = namespace('zebra'),
     CNAME = pkg.CNAME = '$', CDNAME = '',
-    FN = pkg.$FN = (typeof isString.name === "undefined" || isString.name == "") ? (function(f) {     // IE stuff
+    FN = pkg.$FN = (isString.name !== "isString") ? (function(f) {     // IE stuff
                                                                 var mt = f.toString().match(/^function\s+([^\s(]+)/);
                                                                 return (mt == null) ? CDNAME : mt[1];
                                                              })
@@ -209,7 +209,7 @@ pkg.$global    = (typeof window !== "undefined" && window != null) ? window : th
 pkg.isString   = isString;
 pkg.isNumber   = isNumber;
 pkg.isBoolean  = isBoolean;
-pkg.$caller    = null; // current method which is called
+pkg.$caller    = null; // currently called method reference
 
 
 pkg.clone = function (obj) {

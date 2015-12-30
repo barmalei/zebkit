@@ -622,7 +622,7 @@
                 // and right buttons or long touch emulates mouse event what causes generations of
                 // mouse down event after touch start event. Let's suppress it
                 if ((e.button !== 0 && e.button !== 2) ||
-                     $this.$touchedAt(e.pageX, e.pageY, 0)  )
+                     $this.$touchedAt(e.pageX, e.pageY, 0))
                 {
                     e.preventDefault();
                 }
@@ -662,9 +662,6 @@
                 else {
                     var id = e.button == 0 ? LMOUSE : RMOUSE,
                         mp = $pointerPressedEvents[id];
-
-                    console.log("PointerEventUnifier.onmouseup() mp = " + mp + ", id = " +  id);
-
 
                     $this.$UP(id, e, ME_STUB);
 
@@ -814,8 +811,6 @@
                                                           "MSPointerEnter",
                                                           "MSPointerLeave" ];
 
-                console.log(":: Install pointer listeners");
-
                 element.addEventListener(names[0], function(e) {
                     if (e.pointerType !== "mouse")  {
                         POINTER_STUB.touch = e;
@@ -880,14 +875,11 @@
                     // clear touches that still is not in list of touches
                     for (var k in $pointerPressedEvents) {
                         if (isIn(allTouches, k) === false) {
-                            console.log("touchstart()  inactive touch detected");
                             var tt = $pointerPressedEvents[k];
                             if (tt.group != null) tt.group.active = false;
                             $this.$UP(tt.identifier, tt, TOUCH_STUB);
                         }
                     }
-
-                    console.log("2. toucstart() " + TOUCH_STUB.touchCounter);
 
                     //!!!
                     //TODO: this calling prevents generation of phantom mouse move event

@@ -3,25 +3,25 @@
     <head>
         <script src="require.js" type="text/javascript"></script>
     </head>
-    <body> 
+    <body>
         <script type="text/javascript">
 
-            require(["http://repo.zebkit.org/dev/zebra.js"], function() {
-                zebra()["zebra.json"] = "http://repo.zebkit.org/dev/zebra.json";
-                
-                zebra.ready(
+            require(["http://repo.zebkit.org/dev/zebkit.js"], function() {
+                zebkit()["zebkit.json"] = "http://repo.zebkit.org/dev/zebkit.json";
+
+                zebkit.ready(
                     function() {
-                        var z = new zebra.ui.zCanvas(400, 400);
+                        var z = new zebkit.ui.zCanvas(400, 400);
                         z.root.properties({
-                            layout: new zebra.layout.BorderLayout(),
+                            layout: new zebkit.layout.BorderLayout(),
                             kids: {
-                                CENTER: new zebra.ui.tree.Tree({
+                                CENTER: new zebkit.ui.tree.Tree({
                                     "Root": [ "1", "2", "3"]
                                 })
                             }
                         });
                     }
-                ); 
+                );
 
             });
         </script>

@@ -1,41 +1,41 @@
 {
-	"layout" : { "$zebra.layout.StackLayout" : [] },
+	"layout" : { "$zebkit.layout.StackLayout" : [] },
 	"kids" : [
 		{
-			"$zebra.ui.Panel" : [],
+			"$zebkit.ui.Panel" : [],
 			"id" : "login",
-			"layout" : { "$zebra.layout.FlowLayout" : [ 16, 16, 64, 8 ] },
+			"layout" : { "$zebkit.layout.FlowLayout" : [ 16, 16, 64, 8 ] },
 			"background" : null,
 			"visible" : true,
 			"kids" : [
 				{
-					"$zebra.ui.Panel" : [],
-					"layout" : { "$zebra.layout.FlowLayout" : [ 16, 16, 64, 8 ] },
+					"$zebkit.ui.Panel" : [],
+					"layout" : { "$zebkit.layout.FlowLayout" : [ 16, 16, 64, 8 ] },
 					"background" : "lightgrey",
 					"padding" : 8,
 					"kids" : [
 						{
-							"$zebra.ui.BoldLabel" : "Login"
+							"$zebkit.ui.BoldLabel" : "Login"
 						},
 						{
-							"$zebra.ui.Label" : [ "Username" ]
+							"$zebkit.ui.Label" : [ "Username" ]
 						},
 						{
-							"$zebra.ui.TextField" : [ "", 20 ],
+							"$zebkit.ui.TextField" : [ "", 20 ],
 							"id" : "Login/Username"
 						},
 						{
-							"$zebra.ui.Label" : [ "Password" ]
+							"$zebkit.ui.Label" : [ "Password" ]
 						},
 						{
-							"$zebra.ui.TextField" : [ "", 20 ],
+							"$zebkit.ui.TextField" : [ "", 20 ],
 							"id" : "Login/Password",
 							"view" : {
-								"$zebra.ui.PasswordText" : []
+								"$zebkit.ui.PasswordText" : []
 							}
 						},
 						{
-							"$zebra.ui.Button" : [ "Login" ],
+							"$zebkit.ui.Button" : [ "Login" ],
 							"id" : "Login/Login"
 						}
 					]
@@ -43,87 +43,87 @@
 			]
 		},
 		{
-			"$zebra.ui.Panel" : [],
+			"$zebkit.ui.Panel" : [],
 			"id" : "welcome",
-			"layout" : { "$zebra.layout.FlowLayout" : [ 16, 16, 64, 4 ] },
+			"layout" : { "$zebkit.layout.FlowLayout" : [ 16, 16, 64, 4 ] },
 			"background" : null,
 			"visible" : false,
 			"kids" : [
 				{
-					"$zebra.ui.BoldLabel" : "Tempest"
+					"$zebkit.ui.BoldLabel" : "Tempest"
 				},
 				{
-					"$zebra.ui.Button" : [ "Introduction" ],
+					"$zebkit.ui.Button" : [ "Introduction" ],
 					"id" : "Welcome/Introduction"
 				},
 				{
-					"$zebra.ui.Button" : [ "Create a Character" ],
+					"$zebkit.ui.Button" : [ "Create a Character" ],
 					"id" : "Welcome/CreateCharacter"
 				},
 				{
-					"$zebra.ui.Button" : [ "Journey Onward" ],
+					"$zebkit.ui.Button" : [ "Journey Onward" ],
 					"id" : "Welcome/JourneyOnward"
 				},
 				{
-					"$zebra.ui.Button" : [ "Acknowledgements" ],
+					"$zebkit.ui.Button" : [ "Acknowledgements" ],
 					"id" : "Welcome/Acknowledgements"
 				}
 			]
 		},
 		{
-			"$zebra.ui.Panel" : [],
+			"$zebkit.ui.Panel" : [],
 			"id" : "newAccount",
-			"layout" : { "$zebra.layout.FlowLayout" : [ 16, 16, 64, 8 ] },
+			"layout" : { "$zebkit.layout.FlowLayout" : [ 16, 16, 64, 8 ] },
 			"background" : null,
 			"visible" : false,
 			"kids" : [
 				{
-					"$zebra.ui.Panel" : [],
-					"layout" : { "$zebra.layout.FlowLayout" : [ 16, 16, 64, 8 ] },
+					"$zebkit.ui.Panel" : [],
+					"layout" : { "$zebkit.layout.FlowLayout" : [ 16, 16, 64, 8 ] },
 					"background" : "lightgrey",
 					"padding" : 8,
 					"kids" : [
 						{
-							"$zebra.ui.BoldLabel" : "New Account"
+							"$zebkit.ui.BoldLabel" : "New Account"
 						},
 						{
-							"$zebra.ui.Label" : [ "Email Address" ]
+							"$zebkit.ui.Label" : [ "Email Address" ]
 						},
 
 						{
-							"$zebra.ui.HtmlElement" : [ "div" ],
-							"layout": { "$zebra.layout.FlowLayout":[] },
+							"$zebkit.ui.HtmlElement" : [ "div" ],
+							"layout": { "$zebkit.layout.FlowLayout":[] },
 							"kids": [
 								{
-									"$zebra.ui.HtmlTextField" : [ "" ],
+									"$zebkit.ui.HtmlTextField" : [ "" ],
 									"id" : "NewAccount/EmailAddress"
 								},
 
 								{
-									"$zebra.ui.HtmlTextField" : [ "" ],
+									"$zebkit.ui.HtmlTextField" : [ "" ],
 									"id" : "NewAccount/EmailAddress"
 								}
 
 							]
 						},
 						{
-							"$zebra.ui.Label" : [ "Confirm Email" ]
+							"$zebkit.ui.Label" : [ "Confirm Email" ]
 						},
 						{
-							"$zebra.ui.HtmlTextField" : [ "" ],
+							"$zebkit.ui.HtmlTextField" : [ "" ],
 							"id" : "NewAccount/EmailAddressConfirm"
 						},
 						{
-							"$zebra.ui.Label" : [ "" ],
+							"$zebkit.ui.Label" : [ "" ],
 							"id" : "NewAccount/Output"
 						},
 						{
-							"$zebra.ui.Button" : [ "Confirm" ],
+							"$zebkit.ui.Button" : [ "Confirm" ],
 							"id" : "NewAccount/Confirm"
 						}
 					]
 				}
 			]
-		}		
+		}
 	]
 }

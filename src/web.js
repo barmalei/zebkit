@@ -80,7 +80,7 @@
         - an image that has been loaded
 
                 // load image
-                zebra.web.$loadImage("test.png", function(path, result, image) {
+                zebkit.web.$loadImage("test.png", function(path, result, image) {
                     if (result === false) {
                         // handle error
                         ...
@@ -88,7 +88,7 @@
                 });
 
      * @return {Image}  an image
-     * @api  zebra.web.$loadImage()
+     * @api  zebkit.web.$loadImage()
      * @method  loadImage
      */
     pkg.$loadImage = function(img, ready) {
@@ -113,10 +113,10 @@
         var pErr  = i.onerror,
             pLoad = i.onload;
 
-        zebra.busy();
+        zebkit.busy();
 
         i.onerror = function(e) {
-            zebra.ready();
+            zebkit.ready();
             i.onerror = null;
             if (ready != null) ready(img, false, i);
             if (pErr != null) {
@@ -127,7 +127,7 @@
 
         i.onload  = function(e) {
             i.onload = null;
-            zebra.ready();
+            zebkit.ready();
             if (ready != null) ready(img, true, i);
             if (pLoad != null) {
                 i.onload = pLoad;
@@ -396,4 +396,4 @@
         return ctx;
     };
 
-})(zebra("web"), zebra.Class);
+})(zebkit("web"), zebkit.Class);

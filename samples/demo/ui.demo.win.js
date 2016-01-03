@@ -1,8 +1,8 @@
 
-zebra.package("ui.demo", function(pkg, Class) {
+zebkit.package("ui.demo", function(pkg, Class) {
 
-var ui = zebra.ui;
-eval(zebra.Import("ui", "layout", "ui.grid"));
+var ui = zebkit.ui;
+eval(zebkit.Import("ui", "layout", "ui.grid"));
 
 var CardLayout = new Class(Layout, [
     function doLayout(target){
@@ -40,12 +40,12 @@ function createTooltipDemo() {
 
     var pp = new Panel(new FlowLayout(CENTER, CENTER, HORIZONTAL, 2));
     var img = new ImagePan(ui.demo.bmw);
-    var ll = new Label(new zebra.data.Text("BMW is the best.\nAudi looks similar.\nBeware of imitation :)"));
+    var ll = new Label(new zebkit.data.Text("BMW is the best.\nAudi looks similar.\nBeware of imitation :)"));
     ll.setColor("#3366CC");
     ll.setFont(new Font("Helvetica", 14));
     pp.add(img);
     pp.add(ll);
-    l2.tooltip = new zebra.ui.Tooltip(pp);
+    l2.tooltip = new zebkit.ui.Tooltip(pp);
     l2.tooltip.setBackground("#E0F4FF");
 
     var grid = new Grid([
@@ -58,7 +58,7 @@ function createTooltipDemo() {
     grid.setViewProvider(new DefViews([
         function getView(target, row, col, data) {
             if (col == 0 || col == 2) {
-                var r = new BoldTextRender(new zebra.data.Text(data));
+                var r = new BoldTextRender(new zebkit.data.Text(data));
                 r.setFont(new Font("Helvetica", "bold", 16));
                 if (col==2) r.setColor("red");
                 return r;
@@ -82,7 +82,7 @@ function createWindowComp(target) {
     w.setSize(350, 300);
     w.root.setLayout(new BorderLayout(4,4));
 
-    var tf = new TextField(new zebra.data.Text(""));
+    var tf = new TextField(new zebkit.data.Text(""));
     tf.setFont(new Font("Arial","bold", 18));
     tf.setEditable(false);
     tf.setValue("Drag and drop window\nby its title.\n\nResize window by\ndrag its right-bottom corner");
@@ -99,7 +99,7 @@ function createWindowComp(target) {
     var b = new Button("Close");
     b.setPadding(4,16,4,16);
 
-    b.tooltip = new zebra.ui.Tooltip("Button");
+    b.tooltip = new zebkit.ui.Tooltip("Button");
 
 
     // b.tooltip = new Label("Button");

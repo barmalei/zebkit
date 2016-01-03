@@ -1,20 +1,20 @@
 
-if (typeof(zebra) === "undefined") {
+if (typeof(zebkit) === "undefined") {
     load(arguments[0] + '/src/easyoop.js');
     load(arguments[0] + '/src/tools.js');
     load(arguments[0] + '/src/util.js');
     load(arguments[0] + '/src/io.js');
 }
 
-var assert = zebra.assert, Class = zebra.Class,
-    assertException = zebra.assertException,
-    assertFDefined = zebra.assertFDefined,
-    Runner = zebra.util.Runner;
+var assert = zebkit.assert, Class = zebkit.Class,
+    assertException = zebkit.assertException,
+    assertFDefined = zebkit.assertFDefined,
+    Runner = zebkit.util.Runner;
 
 
-zebra.$useSyncTest = true;
+zebkit.$useSyncTest = true;
 
-zebra.runTests("Runner tests",
+zebkit.runTests("Runner tests",
     function test_runner_state() {
         var runner = new Runner();
         assert(runner.$tasks.length, 0);
@@ -503,15 +503,15 @@ zebra.runTests("Runner tests",
     },
 
     function asyn_run_test() {
-        if (zebra.isInBrowser) {
+        if (zebkit.isInBrowser) {
 
             var runCounter = 0,
                 runner     = new Runner(),
                 err        = [];
 
             runner.run(function() {
-                zebra.io.GET("t1.txt", this.join());
-                zebra.io.GET("t2.txt", this.join());
+                zebkit.io.GET("t1.txt", this.join());
+                zebkit.io.GET("t2.txt", this.join());
                 runCounter++;
             })
             .
@@ -550,7 +550,7 @@ zebra.runTests("Runner tests",
             runner22._err = [];
 
             runner.run(function() {
-                zebra.io.GET("t1.txt", this.join());
+                zebkit.io.GET("t1.txt", this.join());
                 runCounter++;
             })
             .
@@ -574,8 +574,8 @@ zebra.runTests("Runner tests",
 
             runner2.run(function() {
                 err = [];
-                zebra.io.GET("t1.txt", this.join());
-                zebra.io.GET("t22.txt", this.join());
+                zebkit.io.GET("t1.txt", this.join());
+                zebkit.io.GET("t22.txt", this.join());
                 runner2._counter++
             })
             .
@@ -632,8 +632,8 @@ zebra.runTests("Runner tests",
 
             runner3.run(function() {
                 err = [];
-                zebra.io.GET("t1.txt", this.join());
-                zebra.io.GET("t2.txt", this.join());
+                zebkit.io.GET("t1.txt", this.join());
+                zebkit.io.GET("t2.txt", this.join());
                 runner3._counter++
             })
             .
@@ -650,7 +650,7 @@ zebra.runTests("Runner tests",
                     throw e;
                 }
 
-                zebra.io.GET("t3.txt", this.join());
+                zebkit.io.GET("t3.txt", this.join());
                 runner3._counter++;
             })
             .

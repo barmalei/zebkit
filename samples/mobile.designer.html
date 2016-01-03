@@ -4,13 +4,13 @@
 		<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
 		<meta name="msapplication-tap-highlight" content="no" />
 
-		<script src='../zebra.min.js' type='text/javascript'></script>
+		<script src='../zebkit.min.js' type='text/javascript'></script>
 
 		<script type='text/javascript'>
-		    zebra.ready(function() {
-		    	eval(zebra.Import("ui", "layout", "ui.designer"));
+		    zebkit.ready(function() {
+		    	eval(zebkit.Import("ui", "layout", "ui.designer"));
 
-		        var z = new zebra.ui.zCanvas("test");
+		        var z = new zebkit.ui.zCanvas("test");
 			    z.fullScreen();
 
 			    var root = z.root.properties({
@@ -36,7 +36,7 @@
 			    			},
 
 			    			function childFocusGained(e) {
-			    				if (zebra.instanceOf(e.source, ShaperPan)) {
+			    				if (zebkit.instanceOf(e.source, ShaperPan)) {
 			    					this.hideWindow();
 			    				}
 			    			},
@@ -56,7 +56,7 @@
 			    			function pointerPressed(e) {
 			    				this.catchIt = e.touchCounter >= 1;
 
-			    				if (e.touchCounter == 2 && zebra.instanceOf(focusManager.focusOwner, ShaperPan)) {
+			    				if (e.touchCounter == 2 && zebkit.instanceOf(focusManager.focusOwner, ShaperPan)) {
 			    					this.hideWindow();
 			    					this.target = focusManager.focusOwner;
 			    					this.target.setColor(true, "red");
@@ -68,7 +68,7 @@
 			    							$this.timer = null;
 			    							$this.infoWin.removeMe();
 			    						}, 4000);
-			    						this.label.setValue(zebra.instanceOf(focusManager.focusOwner, ShaperPan) ? "Size and move with two fingers"
+			    						this.label.setValue(zebkit.instanceOf(focusManager.focusOwner, ShaperPan) ? "Size and move with two fingers"
 			    											 											         : "Select a component");
 			    						this.infoWin.toPreferredSize();
 			    						showWindow(this, this.infoWin);

@@ -1,16 +1,16 @@
 
-zebra.package("zebra.ui", function(pkg, Class) {
+zebkit.package("zebkit.ui", function(pkg, Class) {
 
-    var Panel = zebra.ui.Panel;
-    var rgb = zebra.util.rgb;
-    var Label = zebra.ui.Label;
-    var TextField = zebra.ui.TextField;
-    var GridLayout = zebra.layout.GridLayout;
-    var BorderPan = zebra.ui.BorderPan;
-    var ScrollPan = zebra.ui.ScrollPan;
-    var Border = zebra.ui.Border;
-    var Tree = zebra.ui.tree.Tree;
-    var Constraints = zebra.layout.Constraints;
+    var Panel = zebkit.ui.Panel;
+    var rgb = zebkit.util.rgb;
+    var Label = zebkit.ui.Label;
+    var TextField = zebkit.ui.TextField;
+    var GridLayout = zebkit.layout.GridLayout;
+    var BorderPan = zebkit.ui.BorderPan;
+    var ScrollPan = zebkit.ui.ScrollPan;
+    var Border = zebkit.ui.Border;
+    var Tree = zebkit.ui.tree.Tree;
+    var Constraints = zebkit.layout.Constraints;
 
     pkg.MiscDemo = new Class(pkg.DemoPan,[
         function() {
@@ -22,7 +22,7 @@ zebra.package("zebra.ui", function(pkg, Class) {
         function createExtenderpan() {
             var p = new Panel();
 
-            var extPan = new Panel(new zebra.layout.ListLayout());
+            var extPan = new Panel(new zebkit.layout.ListLayout());
             var ext1Content = new Panel();
             ext1Content.setPreferredSize(-1, 80);
             ext1Content.setBackground(rgb.darkGray);
@@ -36,9 +36,9 @@ zebra.package("zebra.ui", function(pkg, Class) {
             ext3Content.setBorder(new Border());
             ext3Content.setBackground(rgb.lightGray);
 
-            var ext1 = new zebra.ui.ExtendablePan(ext1Content, "Panel 1");
-            var ext2 = new zebra.ui.ExtendablePan(ext2Content, "Panel 2");
-            var ext3 = new zebra.ui.ExtendablePan(ext3Content, "Panel 3");
+            var ext1 = new zebkit.ui.ExtendablePan(ext1Content, "Panel 1");
+            var ext2 = new zebkit.ui.ExtendablePan(ext2Content, "Panel 2");
+            var ext3 = new zebkit.ui.ExtendablePan(ext3Content, "Panel 3");
             extPan.add(ext1);
             extPan.add(ext2);
             extPan.add(ext3);

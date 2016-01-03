@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script src='../zebra.min.js' type='text/javascript'></script>
+        <script src='../zebkit.min.js' type='text/javascript'></script>
 
 
         <script>
             var myimg = null;
-            zebra.ready(function() {
-                myimg = zebra.web.$loadImage("images/image.jpg");
+            zebkit.ready(function() {
+                myimg = zebkit.web.$loadImage("images/image.jpg");
             });
         </script>
 
 
         <script type='text/javascript'>
-            zebra.ready(function() {
-                eval(zebra.Import("ui", "layout"));
-                zebra.ui.popup.hideTooltipByPress = false;
+            zebkit.ready(function() {
+                eval(zebkit.Import("ui", "layout"));
+                zebkit.ui.popup.hideTooltipByPress = false;
 
-                (new zebra.ui.zCanvas("picker1", 400, 350)).root.properties({
+                (new zebkit.ui.zCanvas("picker1", 400, 350)).root.properties({
                     layout: new BorderLayout(),
                     kids  : {
                         CENTER: new ImagePan(myimg, [
@@ -46,11 +46,11 @@
         </script>
 
         <script type='text/javascript'>
-            zebra.ready(function() {
-                eval(zebra.Import("ui", "layout"));
+            zebkit.ready(function() {
+                eval(zebkit.Import("ui", "layout"));
 
                 var p = null, counter = 0, max = 16, c = new Constraints();
-                    root = new zebra.ui.zCanvas("picker2",400, 400).root.properties({
+                    root = new zebkit.ui.zCanvas("picker2",400, 400).root.properties({
                     layout: new BorderLayout(6, 6),
                     padding:6,
                     kids  : {
@@ -80,7 +80,7 @@
                     }
                 });
 
-                p = root.find("//zebra.ui.Panel[@id='palette']");
+                p = root.find("//zebkit.ui.Panel[@id='palette']");
                 c.setPadding(2);
                 for(var i=0; i<max; i++) {
                     p.add(c, new Panel({ preferredSize:[16,16], border: new Border() }));
@@ -89,10 +89,10 @@
         </script>
 
         <script type='text/javascript'>
-            zebra.ready(function() {
-                eval(zebra.Import("ui", "layout"));
+            zebkit.ready(function() {
+                eval(zebkit.Import("ui", "layout"));
 
-                (new zebra.ui.zCanvas("picker3",400, 370)).root.properties({
+                (new zebkit.ui.zCanvas("picker3",400, 370)).root.properties({
                     padding: 6,
                     border : borders.plain,
                     layout : new BorderLayout(6,6),
@@ -103,7 +103,7 @@
                                 var ctx = this.getCanvas().root.$context,
                                     i = ctx.getImageData(e.absX, e.absY, 1, 1).data,
                                     c = "rgb("+ i[0] + "," + i[1] + "," + i[2] +")";
-                                this.parent.find("//zebra.ui.TextField").setValue(c);
+                                this.parent.find("//zebkit.ui.TextField").setValue(c);
                             }
                         ])
                     }

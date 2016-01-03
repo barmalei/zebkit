@@ -1,7 +1,7 @@
-zebra.package("ui.demo", function(pkg, Class) {
+zebkit.package("ui.demo", function(pkg, Class) {
 
-eval(zebra.Import("ui", "layout"));
-var rgb = zebra.util.rgb, ui = zebra.ui;
+eval(zebkit.Import("ui", "layout"));
+var rgb = zebkit.util.rgb, ui = zebkit.ui;
 
 function createColorPicker() {
     var m = new Menu(), i = 0;
@@ -21,17 +21,17 @@ function createColorPicker() {
 }
 
 function formMenuArray() {
-    var mbar = {"@(zebra.ui.demo.butterfly) Cars":
+    var mbar = {"@(zebkit.ui.demo.butterfly) Cars":
                     {
-                     "@(zebra.ui.demo.ind1) I prefer bike": null,
-                     "@(zebra.ui.demo.ind2) Car options":
+                     "@(zebkit.ui.demo.ind1) I prefer bike": null,
+                     "@(zebkit.ui.demo.ind2) Car options":
                         ["[x]Climate control", "[]Start and stop", "-", "[x]Winter tyre"]
                     },
                 "Car color": createColorPicker(),
                 "Car brand":
-                    [ new ImagePan(zebra.ui.demo.bmw).properties({ padding: 8}),
-                      new ImagePan(zebra.ui.demo.saab).properties({ padding: 8}),
-                      new ImagePan(zebra.ui.demo.alpha).properties({ padding: 8}) ]
+                    [ new ImagePan(zebkit.ui.demo.bmw).properties({ padding: 8}),
+                      new ImagePan(zebkit.ui.demo.saab).properties({ padding: 8}),
+                      new ImagePan(zebkit.ui.demo.alpha).properties({ padding: 8}) ]
                 };
     return mbar;
 }
@@ -47,7 +47,7 @@ function $get(i, o) {
 
 
 function createToolbar() {
-    var t = new zebra.ui.Toolbar();
+    var t = new zebkit.ui.Toolbar();
 
     var img = ui.demo.home;
     var imgPan1 = t.addImage(img);
@@ -58,7 +58,7 @@ function createToolbar() {
     var s = t.addSwitcher("ON/OFF");
     t.addLine();
 
-    var g = new zebra.ui.Group();
+    var g = new zebkit.ui.Group();
     var c1 = t.addRadio(g,"Radio 1");
     var c2 = t.addRadio(g,"Radio 2");
     var c3 = t.addRadio(g,"Radio 3");
@@ -69,11 +69,11 @@ function createToolbar() {
     });
 
 
-    // var m = new zebra.data.ListModel();
+    // var m = new zebkit.data.ListModel();
     // m.addElement("Item 1");
     // m.addElement("Item 2");
     // m.addElement("Item 3");
-    // t.addComboElement(new zebra.ui.List(m));
+    // t.addComboElement(new zebkit.ui.List(m));
 
     return t;
 }

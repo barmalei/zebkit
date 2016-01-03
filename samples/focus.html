@@ -3,15 +3,15 @@
 	<head>
         <title>Tutorial</title>
 
-    <script src='../zebra.min.js' type='text/javascript'></script>
+    <script src='../zebkit.min.js' type='text/javascript'></script>
 
 <script type='text/javascript'>
-    zebra.ready(function() {
+    zebkit.ready(function() {
         if (document.getElementById("doc.focus1") != null) {
 
-            var r = new zebra.ui.zCanvas("doc.focus1").root;
-            r.setLayout(new zebra.layout.BorderLayout());
-            r.add("center", new zebra.ui.Button("Center", [
+            var r = new zebkit.ui.zCanvas("doc.focus1").root;
+            r.setLayout(new zebkit.layout.BorderLayout());
+            r.add("center", new zebkit.ui.Button("Center", [
                 function focused() {
                    this.$super();
                    if (this.hasFocus()) {
@@ -23,14 +23,14 @@
                 }
             ]));
 
-            r.add(zebra.layout.BOTTOM, new zebra.ui.Button("Bottom"));
+            r.add(zebkit.layout.BOTTOM, new zebkit.ui.Button("Bottom"));
         }
 
         if (document.getElementById("doc.focus2") != null) {
 
-            var r = new zebra.ui.zCanvas("doc.focus2").root;
-            r.setLayout(new zebra.layout.BorderLayout());
-            r.add("center", new zebra.ui.Button("Center", [
+            var r = new zebkit.ui.zCanvas("doc.focus2").root;
+            r.setLayout(new zebkit.layout.BorderLayout());
+            r.add("center", new zebkit.ui.Button("Center", [
                 function focusGained(e) {
                     this.focusComponent.setColor("orange");
                 },
@@ -40,14 +40,14 @@
                 }
             ]));
 
-            r.add(zebra.layout.BOTTOM, new zebra.ui.Button("Bottom"));
+            r.add(zebkit.layout.BOTTOM, new zebkit.ui.Button("Bottom"));
         }
 
         if (document.getElementById("doc.focus3") != null) {
 
-            var r = new zebra.ui.zCanvas("doc.focus3").root;
-            r.setLayout(new zebra.layout.BorderLayout());
-            zebra.ui.events.bind({
+            var r = new zebkit.ui.zCanvas("doc.focus3").root;
+            r.setLayout(new zebkit.layout.BorderLayout());
+            zebkit.ui.events.bind({
                 focusGained : function (e) {
                     if (e.source.focusComponent) {
                         e.source.focusComponent.setColor("orange");
@@ -61,20 +61,20 @@
                 }
             });
 
-            r.add("bottom", new zebra.ui.Button("Bottom"));
-            r.add("center", new zebra.ui.Button("Center"));
-            r.add("top", new zebra.ui.Button("Top"));
+            r.add("bottom", new zebkit.ui.Button("Bottom"));
+            r.add("center", new zebkit.ui.Button("Center"));
+            r.add("top", new zebkit.ui.Button("Top"));
         }
 
         if (document.getElementById("doc.focus4") != null) {
 
-            var r = new zebra.ui.zCanvas("doc.focus4").root;
-            r.setLayout(new zebra.layout.BorderLayout(4,4));
+            var r = new zebkit.ui.zCanvas("doc.focus4").root;
+            r.setLayout(new zebkit.layout.BorderLayout(4,4));
             r.setPadding(8);
-            r.setBorder(zebra.ui.borders.plain);
+            r.setBorder(zebkit.ui.borders.plain);
 
 
-            var p = new zebra.ui.Panel([
+            var p = new zebkit.ui.Panel([
                function canHaveFocus() {
                    return true;
                },
@@ -95,31 +95,31 @@
             ]);
             p.setBackground("lightGray");
             r.add("center", p);
-            r.add("top", new zebra.ui.Button("TOP"));
+            r.add("top", new zebkit.ui.Button("TOP"));
         }
 
         if (document.getElementById("doc.focus5") != null) {
 
-            var r = new zebra.ui.zCanvas("doc.focus5").root;
-            r.setLayout(new zebra.layout.BorderLayout(4,4));
+            var r = new zebkit.ui.zCanvas("doc.focus5").root;
+            r.setLayout(new zebkit.layout.BorderLayout(4,4));
             r.setPadding(8);
-            r.setBorder(zebra.ui.borders.plain);
+            r.setBorder(zebkit.ui.borders.plain);
 
 
-            var p = new zebra.ui.Panel([
+            var p = new zebkit.ui.Panel([
                function canHaveFocus() {
                    return true;
                }
             ]);
 
-            p.setBorder(new zebra.ui.ViewSet({
-                focuson : new zebra.ui.Border("red", 2, 8),
-                focusoff: new zebra.ui.Border("gray", 2, 8)
+            p.setBorder(new zebkit.ui.ViewSet({
+                focuson : new zebkit.ui.Border("red", 2, 8),
+                focusoff: new zebkit.ui.Border("gray", 2, 8)
             }));
 
             p.setBackground("lightGray");
             r.add("center", p);
-            r.add("top", new zebra.ui.Button("TOP"));
+            r.add("top", new zebkit.ui.Button("TOP"));
         }
 
     });

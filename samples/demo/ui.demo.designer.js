@@ -1,7 +1,7 @@
-zebra.package("ui.demo", function(pkg, Class) {
+zebkit.package("ui.demo", function(pkg, Class) {
 
-var ui = zebra.ui;
-eval(zebra.Import("ui", "ui.designer", "layout"));
+var ui = zebkit.ui;
+eval(zebkit.Import("ui", "ui.designer", "layout"));
 
 pkg.DesignerDemo = new Class(pkg.DemoPan, [
     function() {
@@ -58,8 +58,8 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
 
         //pp.setBorder(new Border("black"));
 
-        var t = new zebra.ui.tree.Tree(new FormTreeModel(pp, [
-            function exclude(c) { return zebra.instanceOf(c, ShaperPan); }
+        var t = new zebkit.ui.tree.Tree(new FormTreeModel(pp, [
+            function exclude(c) { return zebkit.instanceOf(c, ShaperPan); }
         ]));
 
         var s = new SplitPan(new ScrollPan(t), pp);
@@ -70,7 +70,7 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
             var i = p.indexOf(c);
             if (i >= 0) {
                 while (p != null && typeof(p) != "undefined") {
-                    if (zebra.instanceOf(p, ShaperPan)) return p;
+                    if (zebkit.instanceOf(p, ShaperPan)) return p;
                     p = p.parent;
                 }
             }
@@ -96,7 +96,7 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
             }
         });
 
-        var l = new Label(new zebra.data.Text("This page represents number of Zebra components to control UI components size and location"));
+        var l = new Label(new zebkit.data.Text("This page represents number of Zebkit components to control UI components size and location"));
         l.setPadding(6);
         l.setFont(ui.boldFont);
         this.add(TOP, l);

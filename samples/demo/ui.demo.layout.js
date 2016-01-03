@@ -1,6 +1,6 @@
-zebra.package("ui.demo", function(pkg, Class) {
+zebkit.package("ui.demo", function(pkg, Class) {
 
-eval(zebra.Import("ui", "layout"))
+eval(zebkit.Import("ui", "layout"))
 
 pkg.LayoutDemo = new Class(pkg.DemoPan, [
     function() {

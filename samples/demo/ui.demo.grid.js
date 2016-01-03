@@ -1,7 +1,7 @@
-zebra.package("ui.demo", function(pkg, Class) {
+zebkit.package("ui.demo", function(pkg, Class) {
 
-var ui = zebra.ui;
-eval(zebra.Import("ui", "layout", "ui.grid", "data", "ui.tree"));
+var ui = zebkit.ui;
+eval(zebkit.Import("ui", "layout", "ui.grid", "data", "ui.tree"));
 
 function wrapWithPan() {
     var p = new Panel(new FlowLayout(CENTER, TOP, VERTICAL, 16));
@@ -14,7 +14,7 @@ var colors = [ ["white", "lightGray", "white"],
                ["orange", "black", "orange"],
                ["white", "lightGray", "white"] ];
 
-var ColumnsAlignmentProvider = Class(zebra.ui.grid.DefViews, [
+var ColumnsAlignmentProvider = Class(zebkit.ui.grid.DefViews, [
     function getView(target,row,col,data){
         var tf = new BoldTextRender(data);
         tf.setFont(new Font("Helvetica", 16));
@@ -51,7 +51,7 @@ var ColumnsAlignmentProvider = Class(zebra.ui.grid.DefViews, [
 ]);
 
 var IMAGES = [ "android", "google", "yelp", "gmail" ];
-var CustomGridEditor = new Class(zebra.ui.grid.DefEditors, [
+var CustomGridEditor = new Class(zebkit.ui.grid.DefEditors, [
     function() {
         this.$super();
 
@@ -84,7 +84,7 @@ var CustomGridEditor = new Class(zebra.ui.grid.DefEditors, [
                     $this.removeMe();
                 });
 
-                this.setBorder(new zebra.ui.Border("#7297BA", 2, 6));
+                this.setBorder(new zebkit.ui.Border("#7297BA", 2, 6));
                 this.setBackground("#E0F4FF");
 
                 this.add(BOTTOM, controls);
@@ -100,7 +100,7 @@ var CustomGridEditor = new Class(zebra.ui.grid.DefEditors, [
 
         this.extWin = new ExtEditor();
         for(var i = 0; i < IMAGES.length; i++) {
-            var im = new ImagePan(zebra.ui.demo[IMAGES[i]]);
+            var im = new ImagePan(zebkit.ui.demo[IMAGES[i]]);
             im.setPadding(2);
             this.extWin.list.add(im);
         }
@@ -135,13 +135,13 @@ var CustomGridEditor = new Class(zebra.ui.grid.DefEditors, [
     }
 ]);
 
-var CompViewProvider = new Class(zebra.ui.grid.DefViews,[
+var CompViewProvider = new Class(zebkit.ui.grid.DefViews,[
     function getView(target,row,col,o){
         return row == 2 ? new CompRender(o) : this.$super(target, row, col, o);
     }
 ]);
 
-var CompEditorProvider = new Class(zebra.ui.grid.DefEditors, [
+var CompEditorProvider = new Class(zebkit.ui.grid.DefEditors, [
     function getEditor(t,r,c,v){
         if(r == 2) return v;
         else {
@@ -162,17 +162,17 @@ var CompEditorProvider = new Class(zebra.ui.grid.DefEditors, [
 ]);
 
 function longGrid() {
-    var m = new zebra.data.Matrix(100,10);
+    var m = new zebkit.data.Matrix(100,10);
 	for(var i=0; i < m.rows*m.cols; i++) { m.puti(i, "Cell [" + i +"]");  }
 
 	var g = new Grid(m);
-    g.setViewProvider(new zebra.ui.grid.DefViews([
+    g.setViewProvider(new zebkit.ui.grid.DefViews([
         function getCellColor(target, row,col) {
             return (row % 2 === 0) ? ui.cellbg1 : ui.cellbg2 ;
         },
 
         function getXAlignment(target, row,col) {
-            return zebra.layout.CENTER;
+            return zebkit.layout.CENTER;
         }
     ]));
 
@@ -254,7 +254,7 @@ function editableGrid() {
         return grid;
     }
 
-    var onView = new Picture(zebra.ui.demo.on), offView = new Picture(zebra.ui.demo.off);
+    var onView = new Picture(zebkit.ui.demo.on), offView = new Picture(zebkit.ui.demo.off);
     var d = [ ["on", "Item 1", "text 1", "0"],
               ["off", "Item 1", "text 2", "0"],
               ["off", "Item 2", "text 3", "1"],
@@ -265,11 +265,11 @@ function editableGrid() {
 
 	var g = new Grid();
     g.defXAlignment = CENTER;
-    g.setViewProvider(new zebra.ui.grid.DefViews([
+    g.setViewProvider(new zebkit.ui.grid.DefViews([
         function getView(target, row, col, data) {
             if (col === 0) return (data == "on") ? onView : offView;
             else {
-                if (col == 3) return new Picture(zebra.ui.demo["s" + IMAGES[data]]);
+                if (col == 3) return new Picture(zebkit.ui.demo["s" + IMAGES[data]]);
             }
             return this.$super(target, row, col, data);
         }
@@ -313,7 +313,7 @@ function customCellAlignmentGrid() {
     var d = [ "Top-Left\nAlignment", "Top-Center\nAlignment", "Top-Right\nAlignment",
               "Center-Left\nAlignment", "Center-Center\nAlignment", "Center-Right\nAlignment",
               "Bottom-Left\nAlignment", "Bottom-Center\nAlignment", "Bottom-Right\nAlignment"];
-    var titles = [ "Left Aligned", new CompRender(new zebra.ui.ImageLabel("Center", zebra.ui.demo.ringtone)), "Right Aligned"];
+    var titles = [ "Left Aligned", new CompRender(new zebkit.ui.ImageLabel("Center", zebkit.ui.demo.ringtone)), "Right Aligned"];
 
     var root = new Panel(new RasterLayout(USE_PS_SIZE)),
         data = new Matrix(3, 3);

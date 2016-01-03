@@ -1,14 +1,14 @@
 (function(pkg, Class) {
 
 // redefine configuration
-zebra()["zebra.json"] = pkg.$url.join("zebra.json");
+zebkit()["zebkit.json"] = pkg.$url.join("zebkit.json");
 
 /**
  * @module  ui
  */
 
-var Cursor = pkg.Cursor, Listeners = zebra.util.Listeners, KE = pkg.KeyEvent,
-    L = zebra.layout, instanceOf = zebra.instanceOf;
+var Cursor = pkg.Cursor, Listeners = zebkit.util.Listeners, KE = pkg.KeyEvent,
+    L = zebkit.layout, instanceOf = zebkit.instanceOf;
 
 pkg.$ViewsSetter = function (v){
     this.views = {};
@@ -24,8 +24,8 @@ pkg.$ViewsSetter = function (v){
  * depending on the line component size: if height is greater than width than vertical
  * line will be rendered.
  * @constructor
- * @class zebra.ui.Line
- * @extends {zebra.ui.Panel}
+ * @class zebkit.ui.Line
+ * @extends {zebkit.ui.Panel}
  */
 pkg.Line = Class(pkg.Panel, [
     function() {
@@ -96,26 +96,26 @@ pkg.Line = Class(pkg.Panel, [
  * the given text render implementation:
 
         // render simple string
-        var l = new zebra.ui.Label("Simple string");
+        var l = new zebkit.ui.Label("Simple string");
 
         // render multi lines text
-        var l = new zebra.ui.Label(new zebra.data.Text("Multiline\ntext"));
+        var l = new zebkit.ui.Label(new zebkit.data.Text("Multiline\ntext"));
 
         // render password text
-        var l = new zebra.ui.Label(new zebra.ui.PasswordText("password"));
+        var l = new zebkit.ui.Label(new zebkit.ui.PasswordText("password"));
 
- * @param  {String|zebra.data.TextModel|zebra.ui.TextRender} [r] a text to be shown with the label.
+ * @param  {String|zebkit.data.TextModel|zebkit.ui.TextRender} [r] a text to be shown with the label.
  * You can pass a simple string or an instance of a text model or an instance of text render as the
  * text value.
- * @class zebra.ui.Label
+ * @class zebkit.ui.Label
  * @constructor
- * @extends zebra.ui.ViewPan
+ * @extends zebkit.ui.ViewPan
  */
 pkg.Label = Class(pkg.ViewPan, [
     function $prototype() {
         /**
          * Get the label text
-         * @return {String} a zebra label text
+         * @return {String} a zebkit label text
          * @method getValue
          */
         this.getValue = function() {
@@ -124,11 +124,11 @@ pkg.Label = Class(pkg.ViewPan, [
 
         /**
          * Set the text field text model
-         * @param  {zebra.data.TextModel|String} m a text model to be set
+         * @param  {zebkit.data.TextModel|String} m a text model to be set
          * @method setModel
          */
         this.setModel = function(m) {
-            this.setView(zebra.isString(m) ? new pkg.StringRender(m)
+            this.setView(zebkit.isString(m) ? new pkg.StringRender(m)
                                            : new pkg.TextRender(m));
         };
 
@@ -138,7 +138,7 @@ pkg.Label = Class(pkg.ViewPan, [
 
         /**
          * Get the label text color
-         * @return {String} a zebra label color
+         * @return {String} a zebkit label color
          * @method getColor
          */
         this.getColor = function (){
@@ -147,7 +147,7 @@ pkg.Label = Class(pkg.ViewPan, [
 
         /**
          * Get the label text font
-         * @return {zebra.ui.Font} a zebra label font
+         * @return {zebkit.ui.Font} a zebkit label font
          * @method getFont
          */
         this.getFont = function (){
@@ -187,7 +187,7 @@ pkg.Label = Class(pkg.ViewPan, [
 
         /**
          * Set the label text font
-         * @param  {zebra.ui.Font} f a text font
+         * @param  {zebkit.ui.Font} f a text font
          * @method setFont
          * @chainable
          */
@@ -201,8 +201,8 @@ pkg.Label = Class(pkg.ViewPan, [
 
     function (r) {
         this.setView(arguments.length === 0 ||
-                     zebra.isString(r)       ? new pkg.StringRender(r)
-                                             : (instanceOf(r, zebra.data.TextModel) ? new pkg.TextRender(r) : r));
+                     zebkit.isString(r)       ? new pkg.StringRender(r)
+                                             : (instanceOf(r, zebkit.data.TextModel) ? new pkg.TextRender(r) : r));
         this.$super();
     }
 ]);
@@ -211,22 +211,22 @@ pkg.Label = Class(pkg.ViewPan, [
  * Shortcut class to render multi lines text without necessity to create multi line model
  * @param {String} [t] a text string
  * @constructor
- * @class zebra.ui.MLabel
- * @extends zebra.ui.Label
+ * @class zebkit.ui.MLabel
+ * @extends zebkit.ui.Label
  */
 pkg.MLabel = Class(pkg.Label, [
     function(t){
-        this.$super(new zebra.data.Text(t == null ? "" : t));
+        this.$super(new zebkit.data.Text(t == null ? "" : t));
     }
 ]);
 
 /**
  * Shortcut class to render bold text in Label
- * @param {String|zebra.ui.TextRender|zebra.data.TextModel} [t] a text string,
+ * @param {String|zebkit.ui.TextRender|zebkit.data.TextModel} [t] a text string,
  * text model or text render instance
  * @constructor
- * @class zebra.ui.BoldLabel
- * @extends zebra.ui.Label
+ * @class zebkit.ui.BoldLabel
+ * @extends zebkit.ui.Label
  */
 pkg.BoldLabel = Class(pkg.Label, []);
 
@@ -234,11 +234,11 @@ pkg.BoldLabel = Class(pkg.Label, []);
  * Image label UI component. This is UI container that consists from an image
  * component and an label component.Image is located at the left size of text.
  * @param {Image|String} img an image or path to the image
- * @param {String|zebra.ui.TextRender|zebra.data.TextModel} txt a text string,
+ * @param {String|zebkit.ui.TextRender|zebkit.data.TextModel} txt a text string,
  * text model or text render instance
  * @constructor
- * @class zebra.ui.ImageLabel
- * @extends {zebra.ui.Panel}
+ * @class zebkit.ui.ImageLabel
+ * @extends {zebkit.ui.Panel}
  */
 pkg.ImageLabel = Class(pkg.Panel, [
     function(txt, img) {
@@ -274,17 +274,17 @@ pkg.ImageLabel = Class(pkg.Panel, [
  * State panel class. The class is UI component that allows to customize
  * the component  face, background and border depending on the component
  * state. Number and names of states the component can have is defined
- * by developers. To bind a view to the specified state use zebra.ui.ViewSet
+ * by developers. To bind a view to the specified state use zebkit.ui.ViewSet
  * class. For instance if a component has to support two states : "state1" and
  * "state2" you can do it as following:
 
         // create state component
-        var p = new zebra.ui.StatePan();
+        var p = new zebkit.ui.StatePan();
 
         // define border view that contains views for "state1" and "state2"
         p.setBorder({
-            "state1": new zebra.ui.Border("red", 1),
-            "state1": new zebra.ui.Border("blue", 2)
+            "state1": new zebkit.ui.Border("red", 1),
+            "state1": new zebkit.ui.Border("blue", 2)
 
         });
 
@@ -302,9 +302,9 @@ pkg.ImageLabel = Class(pkg.Panel, [
  * state, new state and a view id that is mapped to the new state.  The feature is
  * useful if we are developing a composite components whose children component also
  * should react to a state changing.
- * @class  zebra.ui.StatePan
+ * @class  zebkit.ui.StatePan
  * @constructor
- * @extends {zebra.ui.ViewPan}
+ * @extends {zebkit.ui.ViewPan}
  */
 pkg.StatePan = Class(pkg.ViewPan, [
     function $prototype() {
@@ -420,17 +420,17 @@ pkg.StatePan = Class(pkg.ViewPan, [
       button or key is pressed
     - **disabled** the component is disabled
 
- * The view border, background or face should be set as "zebra.ui.ViewSet" where an required
+ * The view border, background or face should be set as "zebkit.ui.ViewSet" where an required
  * for the given component state view is identified by an id. By default corresponding to
  * component states views IDs are the following: "over", "pressed.over", "out", "pressed.out",
  * "disabled".  Imagine for example we have two colors and we need to change between the colors
  * every time pointer cursor is over/out of the component:
 
      // create state panel
-     var statePan = new zebra.ui.EvStatePan();
+     var statePan = new zebkit.ui.EvStatePan();
 
      // add dynamically updated background
-     statePan.setBackground(new zebra.ui.ViewSet({
+     statePan.setBackground(new zebkit.ui.ViewSet({
         "over": "red",
         "out": "blue"
      }));
@@ -438,8 +438,8 @@ pkg.StatePan = Class(pkg.ViewPan, [
  * Alone with background border view can be done also dynamic
 
      // add dynamically updated border
-     statePan.setBorder(new zebra.ui.ViewSet({
-        "over": new zebra.ui.Border("green", 4, 8),
+     statePan.setBorder(new zebkit.ui.ViewSet({
+        "over": new zebkit.ui.Border("green", 4, 8),
         "out": null
      }));
 
@@ -449,20 +449,20 @@ pkg.StatePan = Class(pkg.ViewPan, [
  * a border. So border will be rendered around the focus marker component:
 
      // create state panel that contains one label component
-     var statePan = new zebra.ui.EvStatePan();
-     var lab      = new zebra.ui.Label("Focus marker label");
+     var statePan = new zebkit.ui.EvStatePan();
+     var lab      = new zebkit.ui.Label("Focus marker label");
      lab.setPadding(6);
      statePan.setPadding(6);
-     statePan.setLayout(new zebra.layout.BorderLayout());
+     statePan.setLayout(new zebkit.layout.BorderLayout());
      statePan.add("center", lab);
 
      // set label as an anchor for focus border indicator
      statePan.setFocusAnchorComponent(lab);
      statePan.setFocusMarkerView("plain");
 
- * @class zebra.ui.EvStatePan
+ * @class zebkit.ui.EvStatePan
  * @constructor
- * @extends zebra.ui.StatePan
+ * @extends zebkit.ui.StatePan
  */
 var OVER = "over", PRESSED_OVER = "pressed.over", OUT = "out", PRESSED_OUT = "pressed.out", DISABLED = "disabled";
 
@@ -557,7 +557,7 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
 
         /**
          * Define key pressed events handler
-         * @param  {zebra.ui.KeyEvent} e a key event
+         * @param  {zebkit.ui.KeyEvent} e a key event
          * @method keyPressed
          */
         this.keyPressed = function(e){
@@ -566,7 +566,7 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
 
         /**
          * Define key released events handler
-         * @param  {zebra.ui.KeyEvent} e a key event
+         * @param  {zebkit.ui.KeyEvent} e a key event
          * @method keyReleased
          */
         this.keyReleased = function(e){
@@ -575,7 +575,7 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
 
         /**
          * Define pointer entered events handler
-         * @param  {zebra.ui.PointerEvent} e a key event
+         * @param  {zebkit.ui.PointerEvent} e a key event
          * @method pointerEntered
          */
         this.pointerEntered = function (e){
@@ -584,7 +584,7 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
 
         /**
          * Define pointer exited events handler
-         * @param  {zebra.ui.PointerEvent} e a key event
+         * @param  {zebkit.ui.PointerEvent} e a key event
          * @method pointerExited
          */
         this.pointerExited = function(e){
@@ -596,7 +596,7 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
 
         /**
          * Define pointer pressed events handler
-         * @param  {zebra.ui.PointerEvent} e a key event
+         * @param  {zebkit.ui.PointerEvent} e a key event
          * @method pointerPressed
          */
         this.pointerPressed = function(e){
@@ -605,7 +605,7 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
 
         /**
          * Define pointer released events handler
-         * @param  {zebra.ui.PointerEvent} e a key event
+         * @param  {zebkit.ui.PointerEvent} e a key event
          * @method pointerReleased
          */
         this.pointerReleased = function(e){
@@ -614,7 +614,7 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
 
         /**
          * Define pointer dragged events handler
-         * @param  {zebra.ui.PointerEvent} e a key event
+         * @param  {zebkit.ui.PointerEvent} e a key event
          * @method pointerDragged
          */
         this.pointerDragged = function(e){
@@ -639,8 +639,8 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
 /**
  * Composite event state panel
  * @constructor
- * @extends {zebra.ui.EvStatePan}
- * @class  zebra.ui.CompositeEvStatePan
+ * @extends {zebkit.ui.EvStatePan}
+ * @class  zebkit.ui.CompositeEvStatePan
  */
 pkg.CompositeEvStatePan = Class(pkg.EvStatePan, [
     function $prototype() {
@@ -662,7 +662,7 @@ pkg.CompositeEvStatePan = Class(pkg.EvStatePan, [
          * Reference to an anchor focus marker component
          * @attribute focusMarkerView
          * @readOnly
-         * @type {zebra.ui.Panel}
+         * @type {zebkit.ui.Panel}
          */
         this.focusMarkerView = null;
 
@@ -676,9 +676,9 @@ pkg.CompositeEvStatePan = Class(pkg.EvStatePan, [
         /**
          * Set the view that has to be rendered as focus marker
          * when the component gains focus.
-         * @param  {String|zebra.ui.View|Function} c a view.
+         * @param  {String|zebkit.ui.View|Function} c a view.
          * The view can be a color or border string code or view
-         * or an implementation of zebra.ui.View "paint(g,x,y,w,h,t)"
+         * or an implementation of zebkit.ui.View "paint(g,x,y,w,h,t)"
          * method.
          * @method setFocusMarkerView
          */
@@ -709,7 +709,7 @@ pkg.CompositeEvStatePan = Class(pkg.EvStatePan, [
          * focus marker view anchor component. Anchor component
          * is a component over that the focus marker view is
          * painted.
-         * @param  {zebra.ui.Panel} c  an anchor component
+         * @param  {zebkit.ui.Panel} c  an anchor component
          * @method setFocusAnchorComponent
          */
         this.setFocusAnchorComponent = function(c) {
@@ -802,7 +802,7 @@ pkg.ButtonRepeatMix = [
             if (this.isFireByPress === true){
                 this.fire();
                 if (this.firePeriod > 0) {
-                    this.repeatTask = zebra.util.task(this.run, this).run(this.startIn, this.firePeriod);
+                    this.repeatTask = zebkit.util.task(this.run, this).run(this.startIn, this.firePeriod);
                 }
             }
         }
@@ -888,26 +888,26 @@ pkg.ArrowButton = Class(pkg.EvStatePan, [
  *  be easily customized:
 
         // create image button
-        var button = new zebra.ui.Button(new zebra.ui.ImagePan("icon1.gif"));
+        var button = new zebkit.ui.Button(new zebkit.ui.ImagePan("icon1.gif"));
 
         // create image + caption button
-        var button = new zebra.ui.Button(new zebra.ui.ImageLabel("Caption", "icon1.gif"));
+        var button = new zebkit.ui.Button(new zebkit.ui.ImageLabel("Caption", "icon1.gif"));
 
         // create multilines caption button
-        var button = new zebra.ui.Button(new zebra.ui.MLabel("Line1\nLine2"));
+        var button = new zebkit.ui.Button(new zebkit.ui.MLabel("Line1\nLine2"));
 
 
- *  @class  zebra.ui.Button
+ *  @class  zebkit.ui.Button
  *  @constructor
- *  @param {String|zebra.ui.Panel|zebra.ui.View} [t] a button label.
+ *  @param {String|zebkit.ui.Panel|zebkit.ui.View} [t] a button label.
  *  The label can be a simple text or an UI component.
- *  @extends zebra.ui.CompositeEvStatePan
+ *  @extends zebkit.ui.CompositeEvStatePan
  */
 
 /**
  * Fired when a button has been pressed
 
-        var b = new zebra.ui.Button("Test");
+        var b = new zebkit.ui.Button("Test");
         b.bind(function (src) {
             ...
         });
@@ -916,7 +916,7 @@ pkg.ArrowButton = Class(pkg.EvStatePan, [
  * triggered by pressed or clicked even. Also event can be generated periodically if
  * the button is kept in pressed state.
  * @event buttonPressed
- * @param {zebra.ui.Button} src a button that has been pressed
+ * @param {zebkit.ui.Button} src a button that has been pressed
  */
 pkg.Button = Class(pkg.CompositeEvStatePan, [
     function $clazz() {
@@ -948,7 +948,7 @@ pkg.Button = Class(pkg.CompositeEvStatePan, [
 
     function(t) {
         this._ = new Listeners();
-        if (zebra.isString(t)) t = new this.clazz.Label(t);
+        if (zebkit.isString(t)) t = new this.clazz.Label(t);
         else {
             if (t instanceof Image) {
                 t = new pkg.ImagePan(t);
@@ -971,10 +971,10 @@ pkg.Button = Class(pkg.CompositeEvStatePan, [
  *  Border panel UI component class. The component renders titled border around the
  *  given  content UI component. Border title can be placed on top or
  *  bottom border line and aligned horizontally (left, center, right). Every
- *  zebra UI component can be used as a border title element.
- *  @param {zebra.ui.Panel|String} [title] a border panel title. Can be a
+ *  zebkit UI component can be used as a border title element.
+ *  @param {zebkit.ui.Panel|String} [title] a border panel title. Can be a
  *  string or any other UI component can be used as the border panel title
- *  @param {zebra.ui.Panel} [content] a content UI component of the border
+ *  @param {zebkit.ui.Panel} [content] a content UI component of the border
  *  panel
  *  @param {Integer} [constraints] a title constraints. The constraints gives
  *  a possibility to place border panel title in different places. Generally
@@ -983,14 +983,14 @@ pkg.Button = Class(pkg.CompositeEvStatePan, [
 
          // create border panel with a title located at the
          // top and aligned at the canter
-         var bp = new zebra.ui.BorderPan("Title",
-                                         new zebra.ui.Panel(),
-                                         zebra.layout.TOP | zebra.layout.CENTER);
+         var bp = new zebkit.ui.BorderPan("Title",
+                                         new zebkit.ui.Panel(),
+                                         zebkit.layout.TOP | zebkit.layout.CENTER);
 
 
  *  @constructor
- *  @class zebra.ui.BorderPan
- *  @extends {zebra.ui.Panel}
+ *  @class zebkit.ui.BorderPan
+ *  @extends {zebkit.ui.Panel}
  */
 pkg.BorderPan = Class(pkg.Panel, [
     function $clazz() {
@@ -1111,21 +1111,21 @@ pkg.BorderPan = Class(pkg.Panel, [
     function(title, center, ctr){
         if (ctr == null) ctr = L.TOP | L.LEFT;
 
-        if (zebra.isString(title)) {
+        if (zebkit.isString(title)) {
             title = new this.clazz.Label(title);
         }
 
         /**
          * Border panel label component
          * @attribute label
-         * @type {zebra.ui.Panel}
+         * @type {zebkit.ui.Panel}
          * @readOnly
          */
 
         /**
          * Border panel label content component
          * @attribute content
-         * @type {zebra.ui.Panel}
+         * @type {zebkit.ui.Panel}
          * @readOnly
          */
         this.label = this.content = null;
@@ -1165,26 +1165,26 @@ pkg.BorderPan = Class(pkg.Panel, [
  * one UI, but customize it with appropriate switch manager. That is the main idea of
  * having the class.
  * @constructor
- * @class  zebra.ui.SwitchManager
+ * @class  zebkit.ui.SwitchManager
  */
 
 /**
  * Fired when a state has been updated
 
-        var ch = new zebra.ui.Checkbox("Test");
+        var ch = new zebkit.ui.Checkbox("Test");
         ch.manager.bind(function (src, ui) {
             ...
         });
 
  * @event stateUpdated
- * @param {zebra.ui.SwitchManager} src a switch manager that controls and tracks the event
- * @param {zebra.ui.Checkbox} ui  an UI component that triggers the event
+ * @param {zebkit.ui.SwitchManager} src a switch manager that controls and tracks the event
+ * @param {zebkit.ui.Checkbox} ui  an UI component that triggers the event
  */
 pkg.SwitchManager = Class([
     function $prototype() {
         /**
          * Get current state of the given UI component
-         * @param  {zebra.ui.Checkbox} o an ui component
+         * @param  {zebkit.ui.Checkbox} o an ui component
          * @return {Boolean}  a boolean state
          * @method getValue
          */
@@ -1192,7 +1192,7 @@ pkg.SwitchManager = Class([
 
         /**
          * Set the state for the given UI component
-         * @param  {zebra.ui.Checkbox} o an ui component
+         * @param  {zebkit.ui.Checkbox} o an ui component
          * @param  {Boolean} b  a boolean state
          * @method setValue
          */
@@ -1205,7 +1205,7 @@ pkg.SwitchManager = Class([
 
         /**
          * Called every time a state has been updated.
-         * @param  {zebra.ui.Checkbox} o an ui component for which the state has been updated
+         * @param  {zebkit.ui.Checkbox} o an ui component for which the state has been updated
          * @param  {Boolean} b  a new boolean state of the UI component
          * @method stateUpdated
          */
@@ -1217,7 +1217,7 @@ pkg.SwitchManager = Class([
         /**
          * Call when the manager has been installed for the given UI component
          * @protected
-         * @param  {zebra.ui.Checkbox} o an UI component the switch manager is designated
+         * @param  {zebkit.ui.Checkbox} o an UI component the switch manager is designated
          * @method install
          */
         this.install = function(o) {
@@ -1227,7 +1227,7 @@ pkg.SwitchManager = Class([
         /**
          * Call when the manager has been uninstalled for the given UI component
          * @protected
-         * @param  {zebra.ui.Checkbox} o an UI component the switch manager is not anymore used
+         * @param  {zebkit.ui.Checkbox} o an UI component the switch manager is not anymore used
          * @method uninstall
          */
         this.uninstall = function(o) {};
@@ -1240,18 +1240,18 @@ pkg.SwitchManager = Class([
 ]);
 
 /**
- * Radio group switch manager implementation. This is an extension of "zebra.ui.SwicthManager" to
+ * Radio group switch manager implementation. This is an extension of "zebkit.ui.SwicthManager" to
  * support radio group switching behavior. You can use it event with normal checkbox:
 
        // create group of check boxes that will work as a radio group
-       var gr = new zebra.ui.Group();
-       var ch1 = new zebra.ui.Checkbox("Test 1", gr);
-       var ch2 = new zebra.ui.Checkbox("Test 2", gr);
-       var ch3 = new zebra.ui.Checkbox("Test 3", gr);
+       var gr = new zebkit.ui.Group();
+       var ch1 = new zebkit.ui.Checkbox("Test 1", gr);
+       var ch2 = new zebkit.ui.Checkbox("Test 2", gr);
+       var ch3 = new zebkit.ui.Checkbox("Test 3", gr);
 
- * @class  zebra.ui.Group
+ * @class  zebkit.ui.Group
  * @constructor
- * @extends zebra.ui.SwitchManager
+ * @extends zebkit.ui.SwitchManager
  */
 pkg.Group = Class(pkg.SwitchManager, [
     function (){
@@ -1303,22 +1303,22 @@ pkg.Group = Class(pkg.SwitchManager, [
     - "off.over" - un-checked and pointer cursor is out
 
  *
- * Customize is quite similar to what explained for zebra.ui.EvStatePan:
+ * Customize is quite similar to what explained for zebkit.ui.EvStatePan:
  *
 
         // create checkbox component
-        var ch = new zebra.ui.Checkbox("Checkbox");
+        var ch = new zebkit.ui.Checkbox("Checkbox");
 
         // change border when the component checked to green
         // otherwise set it to red
-        ch.setBorder(new zebra.ui.ViewSet({
-            "off.*": new zebra.ui.Border("red"),
-            "on.*": new zebra.ui.Border("green")
+        ch.setBorder(new zebkit.ui.ViewSet({
+            "off.*": new zebkit.ui.Border("red"),
+            "on.*": new zebkit.ui.Border("green")
         }));
 
         // customize checker box children UI component to show
         // green for checked and red for un-cheked states
-        ch.kids[0].setView(new zebra.ui.ViewSet({
+        ch.kids[0].setView(new zebkit.ui.ViewSet({
             "off.*": "red",
             "on.*": "green"
         }));
@@ -1329,7 +1329,7 @@ pkg.Group = Class(pkg.SwitchManager, [
  * listener in the check box switch manager as follow:
 
         // create checkbox component
-        var ch = new zebra.ui.Checkbox("Checkbox");
+        var ch = new zebkit.ui.Checkbox("Checkbox");
 
         // register a checkbox listener
         ch.manager.bind(function(sm) {
@@ -1337,11 +1337,11 @@ pkg.Group = Class(pkg.SwitchManager, [
             ...
         });
 
- * @class  zebra.ui.Checkbox
- * @extends zebra.ui.CompositeEvStatePan
+ * @class  zebkit.ui.Checkbox
+ * @extends zebkit.ui.CompositeEvStatePan
  * @constructor
- * @param {String|zebra.ui.Panel} [label] a label
- * @param {zebra.ui.SwitchManager} [m] a switch manager
+ * @param {String|zebkit.ui.Panel} [label] a label
+ * @param {zebkit.ui.SwitchManager} [m] a switch manager
  */
 pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
     function $clazz() {
@@ -1349,8 +1349,8 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
          * The box UI component class that is used by default with
          * the check box component.
          * @constructor
-         * @class zebra.ui.Checkbox.Box
-         * @extends zebra.ui.ViewPan
+         * @class zebkit.ui.Checkbox.Box
+         * @extends zebkit.ui.ViewPan
          */
         this.Box = Class(pkg.StatePan, [
             function $prototype() {
@@ -1361,7 +1361,7 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
         ]);
 
         /**
-         * @for zebra.ui.Checkbox
+         * @for zebkit.ui.Checkbox
          */
         this.Label = Class(pkg.Label, []);
     },
@@ -1418,7 +1418,7 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
     function (c, m) {
         if (m == null) m = new pkg.SwitchManager();
 
-        if (zebra.isString(c)) {
+        if (zebkit.isString(c)) {
             c = new this.clazz.Label(c);
         }
 
@@ -1427,7 +1427,7 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
         /**
          * Reference to box component
          * @attribute box
-         * @type {zebra.ui.Panel}
+         * @type {zebkit.ui.Panel}
          * @readOnly
          */
         this.box = new this.clazz.Box();
@@ -1471,7 +1471,7 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
 
     /**
      * Set the specified switch manager
-     * @param {zebra.ui.SwicthManager} m a switch manager
+     * @param {zebkit.ui.SwicthManager} m a switch manager
      * @method setSwicthManager
      */
     function setSwitchManager(m){
@@ -1479,7 +1479,7 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
          * A switch manager
          * @attribute manager
          * @readOnly
-         * @type {zebra.ui.SwitchManager}
+         * @type {zebkit.ui.SwitchManager}
          */
 
         if (m == null) {
@@ -1509,13 +1509,13 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
 ]);
 
 /**
- * Radio-box UI component class. This class is extension of "zebra.ui.Checkbox" class that sets group
+ * Radio-box UI component class. This class is extension of "zebkit.ui.Checkbox" class that sets group
  * as a default switch manager. The other functionality id identical to checkbox component. Generally
  * speaking this class is a shortcut for radio box creation.
- * @class  zebra.ui.Radiobox
+ * @class  zebkit.ui.Radiobox
  * @constructor
- * @param {String|zebra.ui.Panel} [label] a label
- * @param {zebra.ui.Group} [m] a switch manager
+ * @param {String|zebkit.ui.Panel} [label] a label
+ * @param {zebkit.ui.Group} [m] a switch manager
  */
 pkg.Radiobox = Class(pkg.Checkbox, [
     function $clazz() {
@@ -1534,23 +1534,23 @@ pkg.Radiobox = Class(pkg.Checkbox, [
  * element is children UI component that can be customized. For instance:
 
       // create split panel
-      var sp = new zebra.ui.SplitPan(new zebra.ui.Label("Left panel"),
-                                    new zebra.ui.Label("Right panel"));
+      var sp = new zebkit.ui.SplitPan(new zebkit.ui.Label("Left panel"),
+                                    new zebkit.ui.Label("Right panel"));
 
       // customize gripper background color depending on its state
-      sp.gripper.setBackground(new zebra.ui.ViewSet({
+      sp.gripper.setBackground(new zebkit.ui.ViewSet({
            "over" : "yellow"
            "out" : null,
            "pressed.over" : "red"
       }));
 
 
- * @param {zebra.ui.Panel} [first] a first UI component in splitter panel
- * @param {zebra.ui.Panel} [second] a second UI component in splitter panel
- * @param {Integer} [o] an orientation of splitter element: zebra.layout.VERTICAL or zebra.layout.HORIZONTAL
- * @class zebra.ui.SplitPan
+ * @param {zebkit.ui.Panel} [first] a first UI component in splitter panel
+ * @param {zebkit.ui.Panel} [second] a second UI component in splitter panel
+ * @param {Integer} [o] an orientation of splitter element: zebkit.layout.VERTICAL or zebkit.layout.HORIZONTAL
+ * @class zebkit.ui.SplitPan
  * @constructor
- * @extends {zebra.ui.Panel}
+ * @extends {zebkit.ui.Panel}
  */
 pkg.SplitPan = Class(pkg.Panel, [
     function $clazz() {
@@ -1648,21 +1648,21 @@ pkg.SplitPan = Class(pkg.Panel, [
         /**
          * A reference to gripper UI component
          * @attribute gripper
-         * @type {zebra.ui.Panel}
+         * @type {zebkit.ui.Panel}
          * @readOnly
          */
 
         /**
          * A reference to left (top) sizable UI component
          * @attribute leftComp
-         * @type {zebra.ui.Panel}
+         * @type {zebkit.ui.Panel}
          * @readOnly
          */
 
         /**
          * A reference to right (bottom) sizable UI component
          * @attribute rightComp
-         * @type {zebra.ui.Panel}
+         * @type {zebkit.ui.Panel}
          * @readOnly
          */
 
@@ -1889,9 +1889,9 @@ pkg.SplitPan = Class(pkg.Panel, [
 
 /**
  * Progress bar UI component class.                                                                                                                                                                                                                           y -= (bundleSize + this.gap   [description]
- * @class zebra.ui.Progress
+ * @class zebkit.ui.Progress
  * @constructor
- * @extends {zebra.ui.Panel}
+ * @extends {zebkit.ui.Panel}
  */
 
 /**
@@ -1902,7 +1902,7 @@ pkg.SplitPan = Class(pkg.Panel, [
         });
 
  *  @event fired
- *  @param {zebra.ui.Progress} src a progress bar that triggers
+ *  @param {zebkit.ui.Progress} src a progress bar that triggers
  *  the event
  *  @param {Integer} oldValue a progress bar previous value
  */
@@ -1920,7 +1920,7 @@ pkg.Progress = Class(pkg.Panel, [
 
         /**
          * Progress bar orientation
-         * @default zebra.layout.HORIZONTAL
+         * @default zebkit.layout.HORIZONTAL
          * @attribute orientation
          * @type {Integer}
          * @readOnly
@@ -2028,7 +2028,7 @@ pkg.Progress = Class(pkg.Panel, [
 
     /**
      * Set the progress bar orientation
-     * @param {Integer | String} o an orientation: zebra.layout.VERTICAL or zebra.layout.HORIZONTAL
+     * @param {Integer | String} o an orientation: zebkit.layout.VERTICAL or zebkit.layout.HORIZONTAL
      * @method setOrientation
      */
     function setOrientation(o){
@@ -2084,7 +2084,7 @@ pkg.Progress = Class(pkg.Panel, [
 
     /**
      * Set the progress bar bundle element view
-     * @param {zebra.ui.View} v a progress bar bundle view
+     * @param {zebkit.ui.View} v a progress bar bundle view
      * @method setBundleView
      */
     function setBundleView(v){
@@ -2111,10 +2111,10 @@ pkg.Progress = Class(pkg.Panel, [
 
 /**
  * UI link component class.
- * @class zebra.ui.Link
+ * @class zebkit.ui.Link
  * @param {String} s a link text
  * @constructor
- * @extends zebra.ui.Button
+ * @extends zebkit.ui.Button
  */
 pkg.Link = Class(pkg.Button, [
     function $prototype() {
@@ -2122,7 +2122,7 @@ pkg.Link = Class(pkg.Button, [
 
         /**
          * Set link font
-         * @param {zebra.ui.Font} f a font
+         * @param {zebkit.ui.Font} f a font
          * @method setFont
          */
         this.setFont = function(f) {
@@ -2145,7 +2145,7 @@ pkg.Link = Class(pkg.Button, [
         };
 
         this.setColors = function(colors) {
-            this.colors = zebra.clone(colors);
+            this.colors = zebkit.clone(colors);
             this.syncState();
         };
 
@@ -2191,7 +2191,7 @@ pkg.Link = Class(pkg.Button, [
  * element:
 
         // create extendable panel that contains list as its content
-        var ext = zebra.ui.ExtendablePan(new zebra.ui.List([
+        var ext = zebkit.ui.ExtendablePan(new zebkit.ui.List([
             "Item 1",
             "Item 2",
             "Item 3"
@@ -2199,23 +2199,23 @@ pkg.Link = Class(pkg.Button, [
 
 
  * @constructor
- * @class zebra.ui.ExtendablePan
- * @extends {zebra.ui.Panel}
- * @param {zebra.ui.Panel} c a content of the extender panel
- * @param {zebra.ui.Panel|String} l a title label text or
+ * @class zebkit.ui.ExtendablePan
+ * @extends {zebkit.ui.Panel}
+ * @param {zebkit.ui.Panel} c a content of the extender panel
+ * @param {zebkit.ui.Panel|String} l a title label text or
  * component
  */
 
  /**
   * Fired when extender is collapsed or extended
 
-         var ex = new zebra.ui.ExtendablePan(pan, "Title");
+         var ex = new zebkit.ui.ExtendablePan(pan, "Title");
          ex.bind(function (src, isCollapsed) {
              ...
          });
 
   * @event fired
-  * @param {zebra.ui.ExtendablePan} src an extender UI component that generates the event
+  * @param {zebkit.ui.ExtendablePan} src an extender UI component that generates the event
   * @param {Boolean} isCollapsed a state of the extender UI component
   */
 
@@ -2266,21 +2266,21 @@ pkg.ExtendablePan = Class(pkg.Panel, [
 
         this.$super();
 
-        if (zebra.isString(lab)) {
+        if (zebkit.isString(lab)) {
             lab = new this.clazz.Label(lab);
         }
 
         /**
          * Label component
          * @attribute label
-         * @type {zebra.ui.Panel}
+         * @type {zebkit.ui.Panel}
          * @readOnly
          */
         this.label = lab;
 
         /**
          * Title panel
-         * @type {zebra.ui.Panel}
+         * @type {zebkit.ui.Panel}
          * @attribute titlePan
          * @readOnly
          */
@@ -2289,7 +2289,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
 
         /**
          * Toggle panel
-         * @type {zebra.ui.Panel}
+         * @type {zebkit.ui.Panel}
          * @attribute togglePan
          * @readOnly
          */
@@ -2299,7 +2299,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
 
         /**
          * Content panel
-         * @type {zebra.ui.Panel}
+         * @type {zebkit.ui.Panel}
          * @readOnly
          * @attribute contentPan
          */
@@ -2315,9 +2315,9 @@ pkg.ExtendablePan = Class(pkg.Panel, [
 
 /**
  * Scroll manager class.
- * @param {zebra.ui.Panel} t a target component to be scrolled
+ * @param {zebkit.ui.Panel} t a target component to be scrolled
  * @constructor
- * @class zebra.ui.ScrollManager
+ * @class zebkit.ui.ScrollManager
  */
 
  /**
@@ -2347,7 +2347,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
   */
 pkg.ScrollManager = Class([
     function $clazz() {
-        this.Listeners = zebra.util.ListenersClass("scrolled");
+        this.Listeners = zebkit.util.ListenersClass("scrolled");
     },
 
     function $prototype() {
@@ -2432,7 +2432,7 @@ pkg.ScrollManager = Class([
         /**
          * Target UI component for that the scroll manager has been instantiated
          * @attribute target
-         * @type {zebra.ui.Panel}
+         * @type {zebkit.ui.Panel}
          * @readOnly
          */
         this.target = c;
@@ -2443,14 +2443,14 @@ pkg.ScrollManager = Class([
  * Scroll bar UI component
  * @param {Integer|String} t type of the scroll bar components:
 
-        zebra.layout.VERTICAL or "vertical" - vertical scroll bar
-        zebra.layout.HORIZONTAL or "horizontal"- horizontal scroll bar
+        zebkit.layout.VERTICAL or "vertical" - vertical scroll bar
+        zebkit.layout.HORIZONTAL or "horizontal"- horizontal scroll bar
 
- * @class zebra.ui.Scroll
+ * @class zebkit.ui.Scroll
  * @constructor
- * @extends {zebra.ui.Panel}
+ * @extends {zebkit.ui.Panel}
  */
-pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
+pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
     function $clazz() {
         this.isDragable = true;
 
@@ -2538,7 +2538,7 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
 
         /**
          * Define composite component catch input method
-         * @param  {zebra.ui.Panel} child a children component
+         * @param  {zebkit.ui.Panel} child a children component
          * @return {Boolean} true if the given children component has to be input events transparent
          * @method catchInput
          */
@@ -2569,7 +2569,7 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
 
         /**
          * Define pointer dragged events handler
-         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
          * @method pointerDragged
          */
         this.pointerDragged = function(e){
@@ -2582,7 +2582,7 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
 
         /**
          * Define pointer drag started  events handler
-         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
          * @method pointerDragStarted
          */
         this.pointerDragStarted = function (e){
@@ -2594,7 +2594,7 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
 
         /**
          * Define pointer drag ended events handler
-         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
          * @method pointerDragEnded
          */
         this.pointerDragEnded = function(e) {
@@ -2603,7 +2603,7 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
 
         /**
          * Define pointer clicked events handler
-         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
          * @method pointerClicked
          */
         this.pointerClicked = function (e){
@@ -2724,21 +2724,21 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
         /**
          * Increment button
          * @attribute incBt
-         * @type {zebra.ui.Button}
+         * @type {zebkit.ui.Button}
          * @readOnly
          */
 
         /**
          * Decrement button
          * @attribute decBt
-         * @type {zebra.ui.Button}
+         * @type {zebkit.ui.Button}
          * @readOnly
          */
 
         /**
          * Scroll bar bundle component
          * @attribute bundle
-         * @type {zebra.ui.Panel}
+         * @type {zebkit.ui.Panel}
          * @readOnly
          */
 
@@ -2752,7 +2752,7 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
         this.add(L.BOTTOM, t === L.VERTICAL ? new pkg.Scroll.VIncButton() : new pkg.Scroll.HIncButton());
 
         this.type = t;
-        this.setPosition(new zebra.util.SingleColPosition(this));
+        this.setPosition(new zebkit.util.SingleColPosition(this));
     },
 
     function kidAdded(index,ctr,lw){
@@ -2802,27 +2802,27 @@ pkg.Scroll = Class(pkg.Panel, zebra.util.Position.Metric, [
  * panel:
 
         // scroll vertically and horizontally a large picture
-        var scrollPan = new zebra.ui.ScrollPan(new zebra.ui.ImagePan("largePicture.jpg"));
+        var scrollPan = new zebkit.ui.ScrollPan(new zebkit.ui.ImagePan("largePicture.jpg"));
 
         // scroll vertically  a large picture
-        var scrollPan = new zebra.ui.ScrollPan(new zebra.ui.ImagePan("largePicture.jpg"),
+        var scrollPan = new zebkit.ui.ScrollPan(new zebkit.ui.ImagePan("largePicture.jpg"),
                                                "vertical");
 
         // scroll horizontally a large picture
-        var scrollPan = new zebra.ui.ScrollPan(new zebra.ui.ImagePan("largePicture.jpg"),
+        var scrollPan = new zebkit.ui.ScrollPan(new zebkit.ui.ImagePan("largePicture.jpg"),
                                                "horizontal");
 
 
 
- * @param {zebra.ui.Panel} [c] an UI component that has to be placed into scroll panel
+ * @param {zebkit.ui.Panel} [c] an UI component that has to be placed into scroll panel
  * @param {String} [scrolls] a scroll bars that have to be shown. Use "vertical", "horizontal"
  * or "both" string value to control scroll bars visibility. By default the value is "both"
  * @constructor
  * @param {Boolean} [autoHide] a boolean value that says if the scrollbars have to work in
  * auto hide mode. Pass true to switch scrollbars in auto hide mode. By default the value is
  * false
- * @class zebra.ui.ScrollPan
- * @extends {zebra.ui.Panel}
+ * @class zebkit.ui.ScrollPan
+ * @extends {zebkit.ui.Panel}
  */
 pkg.ScrollPan = Class(pkg.Panel, [
     function $clazz() {
@@ -3151,21 +3151,21 @@ pkg.ScrollPan = Class(pkg.Panel, [
         /**
          * Vertical scroll bar component
          * @attribute vBar
-         * @type {zebra.ui.Scroll}
+         * @type {zebkit.ui.Scroll}
          * @readOnly
          */
 
         /**
          * Horizontal scroll bar component
          * @attribute hBar
-         * @type {zebra.ui.Scroll}
+         * @type {zebkit.ui.Scroll}
          * @readOnly
          */
 
         /**
          * Scrollable target component
          * @attribute scrollObj
-         * @type {zebra.ui.Panel}
+         * @type {zebkit.ui.Panel}
          * @readOnly
          */
 
@@ -3250,10 +3250,10 @@ pkg.ScrollPan = Class(pkg.Panel, [
  *  an UI component to a panel. For instance in the example below
  *  three pages with "Titl1", "Title2", "Title3" are added:
 
-      var tabs = new zebra.ui.Tabs();
-      tabs.add("Title1", new zebra.ui.Label("Label as a page"));
-      tabs.add("Title2", new zebra.ui.Button("Button as a page"));
-      tabs.add("Title3", new zebra.ui.TextArea("Text area as a page"));
+      var tabs = new zebkit.ui.Tabs();
+      tabs.add("Title1", new zebkit.ui.Label("Label as a page"));
+      tabs.add("Title2", new zebkit.ui.Button("Button as a page"));
+      tabs.add("Title3", new zebkit.ui.TextArea("Text area as a page"));
 
  *  You can access tabs pages UI component the same way like you
  *  access a panel children components
@@ -3279,21 +3279,21 @@ pkg.ScrollPan = Class(pkg.Panel, [
 
         // set a particular font and color for the tab in selected state
         tabs.getTab(0).setColor(true, "blue");
-        tabs.getTab(0).setFont(true, new zebra.ui.Font("Arial", "bold", 16));
+        tabs.getTab(0).setFont(true, new zebkit.ui.Font("Arial", "bold", 16));
 
         // set other caption for the tab in not selected state
         tabs.getTab(0).setCaption(false, "Test");
 
  * @param {Integer|String} [o] the tab panel orientation:
 
-      zebra.layout.TOP   or "top"
-      zebra.layout.BOTTOM or "bottom"
-      zebra.layout.LEFT or "left"
-      zebra.layout.RIGHT or "right"
+      zebkit.layout.TOP   or "top"
+      zebkit.layout.BOTTOM or "bottom"
+      zebkit.layout.LEFT or "left"
+      zebkit.layout.RIGHT or "right"
 
- * @class zebra.ui.Tabs
+ * @class zebkit.ui.Tabs
  * @constructor
- * @extends {zebra.ui.Panel}
+ * @extends {zebkit.ui.Panel}
  */
 
 /**
@@ -3304,7 +3304,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
       });
 
  * @event selected
- * @param {zebra.ui.Tabs} src a tabs component that triggers the event
+ * @param {zebkit.ui.Tabs} src a tabs component that triggers the event
  * @param {Integer} selectedIndex a tab page index that has been selected
  */
 pkg.Tabs = Class(pkg.Panel, [
@@ -3313,8 +3313,8 @@ pkg.Tabs = Class(pkg.Panel, [
          * Tab view class that defines the tab page title and icon
          * @param {String|Image} [icon]  an path to an image or image object
          * @param {String} [caption] a tab caption
-         * @class zebra.ui.Tabs.TabView
-         * @extends {zebra.ui.CompRender}
+         * @class zebkit.ui.Tabs.TabView
+         * @extends {zebkit.ui.CompRender}
          * @constructor
          */
         this.TabView = Class(pkg.CompRender, [
@@ -3465,7 +3465,7 @@ pkg.Tabs = Class(pkg.Panel, [
              * Set the given tab caption text font for the specified or both
              * selected not slected states.
              * @param {Boolean} [b] the tab state. true means selected state.
-             * @param {zebra.ui.Font} f the tab text font
+             * @param {zebkit.ui.Font} f the tab text font
              * @method setFont
              */
             function setFont(b, f) {
@@ -3495,7 +3495,7 @@ pkg.Tabs = Class(pkg.Panel, [
 
             /**
              * The method is invoked every time the tab selection state has been updated
-             * @param {zebra.ui.Tabs} tabs the tabs component the tab belongs
+             * @param {zebkit.ui.Tabs} tabs the tabs component the tab belongs
              * @param {Integer} i an index of the tab
              * @param {Boolean} b a new state of the tab
              * @method selected
@@ -3511,7 +3511,7 @@ pkg.Tabs = Class(pkg.Panel, [
     },
 
     /**
-     * @for zebra.ui.Tabs
+     * @for zebkit.ui.Tabs
      */
     function $prototype() {
         /**
@@ -3524,7 +3524,7 @@ pkg.Tabs = Class(pkg.Panel, [
 
         /**
          * Define pointer moved event handler
-         * @param  {zebra.ui.PointerEvent} e a key event
+         * @param  {zebkit.ui.PointerEvent} e a key event
          * @method pointerMoved
          */
         this.pointerMoved = function(e) {
@@ -3540,7 +3540,7 @@ pkg.Tabs = Class(pkg.Panel, [
 
         /**
          * Define pointer drag ended event handler
-         * @param  {zebra.ui.PointerEvent} e a key event
+         * @param  {zebkit.ui.PointerEvent} e a key event
          * @method pointerDragEnded
          */
         this.pointerDragEnded = function(e) {
@@ -3556,7 +3556,7 @@ pkg.Tabs = Class(pkg.Panel, [
 
         /**
          * Define pointer exited event handler
-         * @param  {zebra.ui.PointerEvent} e a key event
+         * @param  {zebkit.ui.PointerEvent} e a key event
          * @method pointerExited
          */
         this.pointerExited = function(e) {
@@ -3625,7 +3625,7 @@ pkg.Tabs = Class(pkg.Panel, [
         this.paintOnTop = function(g){
             var ts = g.$states[g.$curState];
             // stop painting if the tab area is outside of clip area
-            if (zebra.util.isIntersect(this.repaintX, this.repaintY,
+            if (zebkit.util.isIntersect(this.repaintX, this.repaintY,
                                        this.repaintWidth, this.repaintHeight,
                                        ts.x, ts.y, ts.width, ts.height))
             {
@@ -3931,7 +3931,7 @@ pkg.Tabs = Class(pkg.Panel, [
 
         /**
          * Define key pressed event handler
-         * @param  {zebra.ui.KeyEvent} e a key event
+         * @param  {zebkit.ui.KeyEvent} e a key event
          * @method keyPressed
          */
         this.keyPressed = function(e){
@@ -3953,7 +3953,7 @@ pkg.Tabs = Class(pkg.Panel, [
 
         /**
          * Define pointer clicked  event handler
-         * @param  {zebra.ui.PointerEvent} e a key event
+         * @param  {zebkit.ui.PointerEvent} e a key event
          * @method pointerClicked
          */
         this.pointerClicked = function(e){
@@ -3990,7 +3990,7 @@ pkg.Tabs = Class(pkg.Panel, [
          * Get the given tab. Using the tab you can control tab caption,
          * icon.
          * @param {Integer} pageIndex a tab page index
-         * @return  {zebra.ui.Tabs.TabView}
+         * @return  {zebkit.ui.Tabs.TabView}
          * @method getTab
          */
         this.getTab = function(pageIndex){
@@ -4020,7 +4020,7 @@ pkg.Tabs = Class(pkg.Panel, [
         /**
          * Set the tab page element alignments
          * @param {Integer|String} o an alignment. The valid value is one of the following:
-         * zebra.layout.LEFT, zebra.layout.RIGHT, zebra.layout.TOP, zebra.layout.BOTTOM or
+         * zebkit.layout.LEFT, zebkit.layout.RIGHT, zebkit.layout.TOP, zebkit.layout.BOTTOM or
          * "left", "right", "top", bottom
          * @method  setAlignment
          */
@@ -4192,8 +4192,8 @@ pkg.Tabs.prototype.setViews = pkg.$ViewsSetter;
 
 /**
  * Slider UI component class.
- * @class  zebra.ui.Slider
- * @extends {zebra.ui.Panel}
+ * @class  zebkit.ui.Slider
+ * @extends {zebkit.ui.Panel}
  */
 pkg.Slider = Class(pkg.Panel, [
     function $prototype() {
@@ -4652,9 +4652,9 @@ pkg.Slider.prototype.setViews = pkg.$ViewsSetter;
 
 /**
  * Status bar UI component class
- * @class zebra.ui.StatusBar
+ * @class zebkit.ui.StatusBar
  * @param {Integer} [gap] a gap between status bar children elements
- * @extends {zebra.ui.Panel}
+ * @extends {zebkit.ui.Panel}
  */
 pkg.StatusBar = Class(pkg.Panel, [
     function (gap){
@@ -4665,7 +4665,7 @@ pkg.StatusBar = Class(pkg.Panel, [
 
     /**
      * Set the specified border to be applied for status bar children components
-     * @param {zebra.ui.View} v a border
+     * @param {zebkit.ui.View} v a border
      * @method setBorderView
      */
     function setBorderView(v){
@@ -4686,14 +4686,14 @@ pkg.StatusBar = Class(pkg.Panel, [
 
 /**
  * Toolbar UI component. Handy way to place number of click able elements
- * @class zebra.ui.Toolbar
- * @extends {zebra.ui.Panel}
+ * @class zebkit.ui.Toolbar
+ * @extends {zebkit.ui.Panel}
  */
 
 /**
  * Fired when a toolbar element has been pressed
 
-        var t = new zebra.ui.Toolbar();
+        var t = new zebkit.ui.Toolbar();
 
         // add three pressable icons
         t.addImage("icon1.jpg");
@@ -4707,7 +4707,7 @@ pkg.StatusBar = Class(pkg.Panel, [
         });
 
  * @event pressed
- * @param {zebra.ui.Panel} src a toolbar element that has been pressed
+ * @param {zebkit.ui.Panel} src a toolbar element that has been pressed
  */
 pkg.Toolbar = Class(pkg.Panel, [
     function $clazz() {
@@ -4739,7 +4739,7 @@ pkg.Toolbar = Class(pkg.Panel, [
         /**
          * Test if the given component is a decorative element
          * in the toolbar
-         * @param  {zebra.ui.Panel}  c a component
+         * @param  {zebkit.ui.Panel}  c a component
          * @return {Boolean} return true if the component is
          * decorative element of the toolbar
          * @method isDecorative
@@ -4758,9 +4758,9 @@ pkg.Toolbar = Class(pkg.Panel, [
     /**
      * Add a radio box as the toolbar element that belongs to the
      * given group and has the specified content component
-     * @param {zebra.ui.Group} g a radio group the radio box belongs
-     * @param {zebra.ui.Panel} c a content
-     * @return {zebra.ui.Panel} a component that has been added
+     * @param {zebkit.ui.Group} g a radio group the radio box belongs
+     * @param {zebkit.ui.Panel} c a content
+     * @return {zebkit.ui.Panel} a component that has been added
      * @method addRadio
      */
     function addRadio(g,c) {
@@ -4772,8 +4772,8 @@ pkg.Toolbar = Class(pkg.Panel, [
     /**
      * Add a check box as the toolbar element with the specified content
      * component
-     * @param {zebra.ui.Panel} c a content
-     * @return {zebra.ui.Panel} a component that has been added
+     * @param {zebkit.ui.Panel} c a content
+     * @return {zebkit.ui.Panel} a component that has been added
      * @method addSwitcher
      */
     function addSwitcher(c){
@@ -4783,7 +4783,7 @@ pkg.Toolbar = Class(pkg.Panel, [
     /**
      * Add an image as the toolbar element
      * @param {String|Image} img an image or a path to the image
-     * @return {zebra.ui.Panel} a component that has been added
+     * @return {zebkit.ui.Panel} a component that has been added
      * @method addImage
      */
     function addImage(img) {
@@ -4795,7 +4795,7 @@ pkg.Toolbar = Class(pkg.Panel, [
      * Add line to the toolbar component. Line is a decorative ]
      * element that logically splits toolbar elements. Line as any
      * other decorative element doesn't fire event
-     * @return {zebra.ui.Panel} a component that has been added
+     * @return {zebkit.ui.Panel} a component that has been added
      * @method addLine
      */
     function addLine(){
@@ -4807,8 +4807,8 @@ pkg.Toolbar = Class(pkg.Panel, [
     /**
      * Add the given component as decorative element of the toolbar.
      * Decorative elements don't fire event and cannot be pressed
-     * @param {zebra.ui.Panel} c a component
-     * @return {zebra.ui.Panel} a component that has been added
+     * @param {zebkit.ui.Panel} c a component
+     * @return {zebkit.ui.Panel} a component that has been added
      * @method addDecorative
      */
     function addDecorative(c){
@@ -4826,15 +4826,15 @@ pkg.Toolbar = Class(pkg.Panel, [
 
         // create canvas, add video panel to the center and
         // play video
-        var canvas = zebra.ui.zCanvas(500,500).root.properties({
-            layout: new zebra.layout.BorderLayout(),
-            zebra.layout.CENTER: new zebra.ui.VideoPan("trailer.mpg")
+        var canvas = zebkit.ui.zCanvas(500,500).root.properties({
+            layout: new zebkit.layout.BorderLayout(),
+            zebkit.layout.CENTER: new zebkit.ui.VideoPan("trailer.mpg")
         });
 
  *
  * @param {String} url an URL to a video
- * @class zebra.ui.VideoPan
- * @extends {zebra.ui.Panel}
+ * @class zebkit.ui.VideoPan
+ * @extends {zebkit.ui.Panel}
  * @constructor
  */
 pkg.VideoPan = Class(pkg.Panel,  [
@@ -4907,9 +4907,9 @@ pkg.VideoPan = Class(pkg.Panel,  [
 ]);
 
 /**
- * Mobile scroll manager class. Implements inertial scrolling in zebra mobile application.
- * @class zebra.ui.MobileScrollMan
- * @extends zebra.ui.Manager
+ * Mobile scroll manager class. Implements inertial scrolling in zebkit mobile application.
+ * @class zebkit.ui.MobileScrollMan
+ * @extends zebkit.ui.Manager
  * @constructor
  */
 pkg.MobileScrollMan = Class(pkg.Manager, [
@@ -4920,7 +4920,7 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
 
         /**
          * Define pointer drag started events handler.
-         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
          * @method pointerDragStarted
          */
         this.pointerDragStarted = function(e) {
@@ -4942,7 +4942,7 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
 
         /**
          * Define pointer dragged events handler.
-         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
          * @method pointerDragged
          */
         this.pointerDragged = function(e) {
@@ -4967,7 +4967,7 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
 
         /**
          * Define pointer drag ended events handler.
-         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
          * @method pointerDragEnded
          */
         this.pointerDragEnded = function(e) {
@@ -5000,7 +5000,7 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
 
         /**
          * Define pointer pressed events handler.
-         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
          * @method pointerPressed
          */
         this.pointerPressed = function(e) {
@@ -5018,4 +5018,4 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
  * @for
  */
 
-})(zebra("ui"), zebra.Class);
+})(zebkit("ui"), zebkit.Class);

@@ -1,5 +1,5 @@
-zebra.package("ui.date", function(pkg, Class) {
-    var ui = zebra("ui"), L = zebra.layout;
+zebkit.package("ui.date", function(pkg, Class) {
+    var ui = zebkit("ui"), L = zebkit.layout;
 
     pkg.compareDates = function(d1, d2) {
         if (arguments.length === 2 && d1 === d2) {
@@ -112,8 +112,8 @@ zebra.package("ui.date", function(pkg, Class) {
     /**
      *  Shows the given month and year days.
      *  @constructor
-     *  @class zebra.ui.date.DaysGrid
-     *  @extends {zebra.ui.grid.Grid}
+     *  @class zebkit.ui.date.DaysGrid
+     *  @extends {zebkit.ui.grid.Grid}
      */
     pkg.DaysGrid = Class(ui.grid.Grid, [
         function $clazz() {
@@ -412,20 +412,20 @@ zebra.package("ui.date", function(pkg, Class) {
             };
 
             this.setTags = function(tags) {
-                this.tags = zebra.clone(tags);
+                this.tags = zebkit.clone(tags);
                 this.vrp();
 
             };
 
             this.addTags = function(tags) {
                 for(var k in tags) {
-                    this.tags[k] = zebra.clone(tags[k]);
+                    this.tags[k] = zebkit.clone(tags[k]);
                 }
                 this.vrp();
             };
 
             this.setTag = function(tag, p) {
-                this.tags[tag] = zebra.clone(p);
+                this.tags[tag] = zebkit.clone(p);
                 this.vrp();
             };
 
@@ -510,7 +510,7 @@ zebra.package("ui.date", function(pkg, Class) {
 
     pkg.Calendar = new Class(ui.Panel, [
         function $clazz() {
-            this.Listeners = zebra.util.ListenersClass("dateSet");
+            this.Listeners = zebkit.util.ListenersClass("dateSet");
 
             this.LeftArrowButton   = Class(ui.ArrowButton, []);
             this.TopArrowButton    = Class(ui.ArrowButton, []);
@@ -524,7 +524,7 @@ zebra.package("ui.date", function(pkg, Class) {
                 },
 
                 function() {
-                    this._ = new zebra.util.Listeners();
+                    this._ = new zebkit.util.Listeners();
                     this.$super();
                 }
             ]);
@@ -853,7 +853,7 @@ zebra.package("ui.date", function(pkg, Class) {
             this.date = null;
 
             this.$format = function(d) {
-                return zebra.util.format(this.format, d != null ? d :{}, this.notDefined);
+                return zebkit.util.format(this.format, d != null ? d :{}, this.notDefined);
             };
         },
 
@@ -1036,7 +1036,7 @@ zebra.package("ui.date", function(pkg, Class) {
             // sync calendar and input field dates
             this.dateField.setValue(this.getValue());
 
-            this.find(".zebra.ui.Button").bind(function(src) {
+            this.find(".zebkit.ui.Button").bind(function(src) {
                 $this.showCalendar($this.dateField);
             });
         }
@@ -1117,7 +1117,7 @@ zebra.package("ui.date", function(pkg, Class) {
                 ra    = new this.clazz.RightArrowButton(),
                 cal   = this.getCalendar();
 
-            this._ = new zebra.util.Listeners();
+            this._ = new zebkit.util.Listeners();
 
             this.minDateField = new this.clazz.MinDateTextField([
                 function keyPressed(e) {

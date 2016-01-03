@@ -2,41 +2,41 @@
 <html>
 	<head>
 		<title>Tutorial</title>
-        
-        <script src='../../zebra.min.js' type='text/javascript'></script>
-        
+
+        <script src='../../zebkit.min.js' type='text/javascript'></script>
+
 		<script type='text/javascript'>
-		    zebra.ready(function() {
-				// build Zebra canvas component that adds new 
-				// Canvas DOM element into page with the given size  
-				var zCanvas = new zebra.ui.zCanvas("uihierarchy");
+		    zebkit.ready(function() {
+				// build zebkit canvas component that adds new
+				// Canvas DOM element into page with the given size
+				var zCanvas = new zebkit.ui.zCanvas("uihierarchy");
 				var root    = zCanvas.root; // save reference to root UI component
 				root.setBackground("green");
-				 
+
 				// build the following UI Components hierarchy:
 				// root
-				//   +--zebra.ui.Panel
-				//        +-- zebra.ui.Label
-				//        +-- zebra.ui.Button
-				//        +-- zebra.ui.Panel
-				//              +--- zebra.ui.TextField  
-				var p = new zebra.ui.Panel();
+				//   +--zebkit.ui.Panel
+				//        +-- zebkit.ui.Label
+				//        +-- zebkit.ui.Button
+				//        +-- zebkit.ui.Panel
+				//              +--- zebkit.ui.TextField
+				var p = new zebkit.ui.Panel();
 				p.setBounds(10,10, 380, 280);
 				p.setBackground("yellow");
 				root.add(p);
-				var l = new zebra.ui.Label("Test Label");
+				var l = new zebkit.ui.Label("Test Label");
 				l.setBounds(10, 10, 360, 50);
 				p.add(l);
-				var b = new zebra.ui.Button("Test Button");
+				var b = new zebkit.ui.Button("Test Button");
 				b.setBounds(10, 60, 360, 50);
 				p.add(b);
-				var pp = new zebra.ui.Panel();
+				var pp = new zebkit.ui.Panel();
 				pp.setBounds(10, 120, 360, 150);
 				pp.setBackground("orange");
 				p.add(pp);
-				var tf = new zebra.ui.TextField("Test Text Field");
+				var tf = new zebkit.ui.TextField("Test Text Field");
 				tf.setBounds(10, 10, 200, 30);
-				pp.add(tf);       
+				pp.add(tf);
 			});
 		</script>
 	</head>

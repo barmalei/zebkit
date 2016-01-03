@@ -1,16 +1,16 @@
-zebra.package("ui.demo", function(pkg, Class) {
-    var Panel     = zebra.ui.Panel,
-        Label     = zebra.ui.Label,
-        Border    = zebra.ui.Border,
-        BorderPan = zebra.ui.BorderPan;
+zebkit.package("ui.demo", function(pkg, Class) {
+    var Panel     = zebkit.ui.Panel,
+        Label     = zebkit.ui.Label,
+        Border    = zebkit.ui.Border,
+        BorderPan = zebkit.ui.BorderPan;
 
     pkg.createLabel = function (txt, color, font) {
-        color = color || zebra.ui.palette.gray1;
-        var l = new Label(txt.indexOf("\n") >= 0 ? new zebra.data.Text(txt) : txt);
+        color = color || zebkit.ui.palette.gray1;
+        var l = new Label(txt.indexOf("\n") >= 0 ? new zebkit.data.Text(txt) : txt);
         l.setColor(color);
         if (font) l.setFont(font);
-        else l.setFont(zebra.ui.boldFont);
-        l.setBorder(new Border(zebra.util.rgb.gray));
+        else l.setFont(zebkit.ui.boldFont);
+        l.setBorder(new Border(zebkit.util.rgb.gray));
         l.setPadding(4);
         return l;
     };
@@ -34,11 +34,11 @@ zebra.package("ui.demo", function(pkg, Class) {
         function activated(b) {}
     ]);
 
-    new zebra.ui.Bag(zebra.ui).load(pkg.$url.join("demo.json"));
+    new zebkit.ui.Bag(zebkit.ui).load(pkg.$url.join("demo.json"));
 });
-zebra.package("ui.demo", function(pkg, Class) {
+zebkit.package("ui.demo", function(pkg, Class) {
 
-eval(zebra.Import("ui", "layout"))
+eval(zebkit.Import("ui", "layout"))
 
 pkg.LayoutDemo = new Class(pkg.DemoPan, [
     function() {
@@ -186,10 +186,10 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, [
 ]);
 
 });
-zebra.package("ui.demo", function(pkg, Class) {
+zebkit.package("ui.demo", function(pkg, Class) {
 
-var ui = zebra.ui;
-eval(zebra.Import("ui", "layout"));
+var ui = zebkit.ui;
+eval(zebkit.Import("ui", "layout"));
 
 pkg.BasicUIDemo = new Class(pkg.DemoPan, [
     function() {
@@ -237,7 +237,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
 
 
 
-        tf = new TextField(new zebra.data.SingleLineTxt("dsd", 5));
+        tf = new TextField(new zebkit.data.SingleLineTxt("dsd", 5));
         tf.setPreferredSize(150, -1);
         p.add(ctr, new BoldLabel("Fixed size(5):"));
         p.add(ctr, tf);
@@ -302,7 +302,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
 
     function createListPan() {
         var p = new Panel(new ListLayout(8));
-        var m = new zebra.data.ListModel();
+        var m = new zebkit.data.ListModel();
         m.add("Item 1");
         m.add("Item 2");
         m.add("Item 3");
@@ -374,10 +374,10 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
 
 });
 
-zebra.package("ui.demo", function(pkg, Class) {
+zebkit.package("ui.demo", function(pkg, Class) {
 
-    var ui = zebra.ui;
-    eval(zebra.Import("ui", "layout"));
+    var ui = zebkit.ui;
+    eval(zebkit.Import("ui", "layout"));
 
     pkg.PanelsDemo = new Class(pkg.DemoPan, [
         function() {
@@ -449,12 +449,12 @@ zebra.package("ui.demo", function(pkg, Class) {
                 p1 = new ScrollPan(img);
 
             p1.setPreferredSize(270, 240);
-            p1.setBorder(zebra.ui.borders.plain);
+            p1.setBorder(zebkit.ui.borders.plain);
             var p2 = new ScrollPan(new ImagePan(pkg.cosmo1), "vertical");
             p2.setPreferredSize(270, 240);
-            p2.setBorder(zebra.ui.borders.plain);
+            p2.setBorder(zebkit.ui.borders.plain);
 
-            var p3_1 = new Panel(new zebra.layout.ListLayout(2));
+            var p3_1 = new Panel(new zebkit.layout.ListLayout(2));
             for(var i=0; i<20; i++) {
                 var ch = new Checkbox("Checkbox " + i);
                 ch.setLayout(new FlowLayout("left", "center", "horizontal", 4));
@@ -465,14 +465,14 @@ zebra.package("ui.demo", function(pkg, Class) {
             p3.setAutoHide(true);
 
             p3.setPreferredSize(270, 190);
-            p3.setBorder(zebra.ui.borders.plain);
+            p3.setBorder(zebkit.ui.borders.plain);
 
-            var p4_1 = new TextField(new zebra.data.Text(zebra.io.GET("demo/test.txt")));
+            var p4_1 = new TextField(new zebkit.data.Text(zebkit.io.GET("demo/test.txt")));
             p4_1.setBorder(null);
 
             var p4 = new ScrollPan(p4_1);
             p4.setPreferredSize(270, 190);
-            p4.setBorder(zebra.ui.borders.plain);
+            p4.setBorder(zebkit.ui.borders.plain);
 
             var ctr = new Constraints();
             ctr.setPadding(6);
@@ -487,26 +487,26 @@ zebra.package("ui.demo", function(pkg, Class) {
 
 });
 
-zebra.package("ui.demo", function(pkg, Class) {
+zebkit.package("ui.demo", function(pkg, Class) {
 
-    var ui = zebra.ui;
-    eval(zebra.Import("ui", "ui.tree", "layout"));
+    var ui = zebkit.ui;
+    eval(zebkit.Import("ui", "ui.tree", "layout"));
 
     function makeTreeModel() {
-        var tm = new zebra.data.TreeModel(new zebra.data.Item("Root"));
-        tm.add(tm.root, new zebra.data.Item("Item 1"));
-        tm.add(tm.root, new zebra.data.Item("Item 2"));
-        var ch = new zebra.data.Item("Item 3");
+        var tm = new zebkit.data.TreeModel(new zebkit.data.Item("Root"));
+        tm.add(tm.root, new zebkit.data.Item("Item 1"));
+        tm.add(tm.root, new zebkit.data.Item("Item 2"));
+        var ch = new zebkit.data.Item("Item 3");
         tm.add(tm.root, ch);
-        tm.add(ch, new zebra.data.Item("Item 3.1"));
-        tm.add(ch, new zebra.data.Item("Item 3.2"));
+        tm.add(ch, new zebkit.data.Item("Item 3.1"));
+        tm.add(ch, new zebkit.data.Item("Item 3.2"));
         return tm;
     }
 
     function makeTreeModel2(items, deepness) {
         function makeBranch(tm, r, items) {
             for(var i=0; i < deepness; i++) {
-                var kid = new zebra.data.Item("Long tree item : " + items);
+                var kid = new zebkit.data.Item("Long tree item : " + items);
                 tm.add(r, kid);
                 if (i%2 > 0) r = kid;
                 items--;
@@ -515,7 +515,7 @@ zebra.package("ui.demo", function(pkg, Class) {
             return items;
         }
 
-        var tm = new zebra.data.TreeModel(new zebra.data.Item("Root")), r = tm.root;
+        var tm = new zebkit.data.TreeModel(new zebkit.data.Item("Root")), r = tm.root;
         while((items = makeBranch(tm, r, items)) > 0);
         return tm;
     }
@@ -534,7 +534,7 @@ zebra.package("ui.demo", function(pkg, Class) {
 
             var t2 = new Tree(makeTreeModel()), p2 = new BorderPan("Custom view tree", t2);
             var fn = new Font("Arial", "bold", 14);
-            t2.setViewProvider(new zebra.Dummy([
+            t2.setViewProvider(new zebkit.Dummy([
                   function getView(c, i) {
                         var tr = new TextRender(i.value);
                         if (i.value.indexOf("1") > 0) {
@@ -577,10 +577,10 @@ zebra.package("ui.demo", function(pkg, Class) {
     ]);
 
 });
-zebra.package("ui.demo", function(pkg, Class) {
+zebkit.package("ui.demo", function(pkg, Class) {
 
-eval(zebra.Import("ui", "layout"));
-var rgb = zebra.util.rgb, ui = zebra.ui;
+eval(zebkit.Import("ui", "layout"));
+var rgb = zebkit.util.rgb, ui = zebkit.ui;
 
 function createColorPicker() {
     var m = new Menu(), i = 0;
@@ -600,17 +600,17 @@ function createColorPicker() {
 }
 
 function formMenuArray() {
-    var mbar = {"@(zebra.ui.demo.butterfly) Cars":
+    var mbar = {"@(zebkit.ui.demo.butterfly) Cars":
                     {
-                     "@(zebra.ui.demo.ind1) I prefer bike": null,
-                     "@(zebra.ui.demo.ind2) Car options":
+                     "@(zebkit.ui.demo.ind1) I prefer bike": null,
+                     "@(zebkit.ui.demo.ind2) Car options":
                         ["[x]Climate control", "[]Start and stop", "-", "[x]Winter tyre"]
                     },
                 "Car color": createColorPicker(),
                 "Car brand":
-                    [ new ImagePan(zebra.ui.demo.bmw).properties({ padding: 8}),
-                      new ImagePan(zebra.ui.demo.saab).properties({ padding: 8}),
-                      new ImagePan(zebra.ui.demo.alpha).properties({ padding: 8}) ]
+                    [ new ImagePan(zebkit.ui.demo.bmw).properties({ padding: 8}),
+                      new ImagePan(zebkit.ui.demo.saab).properties({ padding: 8}),
+                      new ImagePan(zebkit.ui.demo.alpha).properties({ padding: 8}) ]
                 };
     return mbar;
 }
@@ -626,7 +626,7 @@ function $get(i, o) {
 
 
 function createToolbar() {
-    var t = new zebra.ui.Toolbar();
+    var t = new zebkit.ui.Toolbar();
 
     var img = ui.demo.home;
     var imgPan1 = t.addImage(img);
@@ -637,7 +637,7 @@ function createToolbar() {
     var s = t.addSwitcher("ON/OFF");
     t.addLine();
 
-    var g = new zebra.ui.Group();
+    var g = new zebkit.ui.Group();
     var c1 = t.addRadio(g,"Radio 1");
     var c2 = t.addRadio(g,"Radio 2");
     var c3 = t.addRadio(g,"Radio 3");
@@ -648,11 +648,11 @@ function createToolbar() {
     });
 
 
-    // var m = new zebra.data.ListModel();
+    // var m = new zebkit.data.ListModel();
     // m.addElement("Item 1");
     // m.addElement("Item 2");
     // m.addElement("Item 3");
-    // t.addComboElement(new zebra.ui.List(m));
+    // t.addComboElement(new zebkit.ui.List(m));
 
     return t;
 }
@@ -729,10 +729,10 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
 
 });
 
-zebra.package("ui.demo", function(pkg, Class) {
+zebkit.package("ui.demo", function(pkg, Class) {
 
-var ui = zebra.ui;
-eval(zebra.Import("ui", "layout", "ui.grid"));
+var ui = zebkit.ui;
+eval(zebkit.Import("ui", "layout", "ui.grid"));
 
 var CardLayout = new Class(Layout, [
     function doLayout(target){
@@ -770,12 +770,12 @@ function createTooltipDemo() {
 
     var pp = new Panel(new FlowLayout(CENTER, CENTER, HORIZONTAL, 2));
     var img = new ImagePan(ui.demo.bmw);
-    var ll = new Label(new zebra.data.Text("BMW is the best.\nAudi looks similar.\nBeware of imitation :)"));
+    var ll = new Label(new zebkit.data.Text("BMW is the best.\nAudi looks similar.\nBeware of imitation :)"));
     ll.setColor("#3366CC");
     ll.setFont(new Font("Helvetica", 14));
     pp.add(img);
     pp.add(ll);
-    l2.tooltip = new zebra.ui.Tooltip(pp);
+    l2.tooltip = new zebkit.ui.Tooltip(pp);
     l2.tooltip.setBackground("#E0F4FF");
 
     var grid = new Grid([
@@ -788,7 +788,7 @@ function createTooltipDemo() {
     grid.setViewProvider(new DefViews([
         function getView(target, row, col, data) {
             if (col == 0 || col == 2) {
-                var r = new BoldTextRender(new zebra.data.Text(data));
+                var r = new BoldTextRender(new zebkit.data.Text(data));
                 r.setFont(new Font("Helvetica", "bold", 16));
                 if (col==2) r.setColor("red");
                 return r;
@@ -812,7 +812,7 @@ function createWindowComp(target) {
     w.setSize(350, 300);
     w.root.setLayout(new BorderLayout(4,4));
 
-    var tf = new TextField(new zebra.data.Text(""));
+    var tf = new TextField(new zebkit.data.Text(""));
     tf.setFont(new Font("Arial","bold", 18));
     tf.setEditable(false);
     tf.setValue("Drag and drop window\nby its title.\n\nResize window by\ndrag its right-bottom corner");
@@ -829,7 +829,7 @@ function createWindowComp(target) {
     var b = new Button("Close");
     b.setPadding(4,16,4,16);
 
-    b.tooltip = new zebra.ui.Tooltip("Button");
+    b.tooltip = new zebkit.ui.Tooltip("Button");
 
 
     // b.tooltip = new Label("Button");
@@ -914,10 +914,10 @@ pkg.WinDemo = new Class(pkg.DemoPan,  [
 ]);
 
 });
-zebra.package("ui.demo", function(pkg, Class) {
+zebkit.package("ui.demo", function(pkg, Class) {
 
-var ui = zebra.ui;
-eval(zebra.Import("ui", "layout", "ui.grid", "data", "ui.tree"));
+var ui = zebkit.ui;
+eval(zebkit.Import("ui", "layout", "ui.grid", "data", "ui.tree"));
 
 function wrapWithPan() {
     var p = new Panel(new FlowLayout(CENTER, TOP, VERTICAL, 16));
@@ -930,7 +930,7 @@ var colors = [ ["white", "lightGray", "white"],
                ["orange", "black", "orange"],
                ["white", "lightGray", "white"] ];
 
-var ColumnsAlignmentProvider = Class(zebra.ui.grid.DefViews, [
+var ColumnsAlignmentProvider = Class(zebkit.ui.grid.DefViews, [
     function getView(target,row,col,data){
         var tf = new BoldTextRender(data);
         tf.setFont(new Font("Helvetica", 16));
@@ -967,7 +967,7 @@ var ColumnsAlignmentProvider = Class(zebra.ui.grid.DefViews, [
 ]);
 
 var IMAGES = [ "android", "google", "yelp", "gmail" ];
-var CustomGridEditor = new Class(zebra.ui.grid.DefEditors, [
+var CustomGridEditor = new Class(zebkit.ui.grid.DefEditors, [
     function() {
         this.$super();
 
@@ -1000,7 +1000,7 @@ var CustomGridEditor = new Class(zebra.ui.grid.DefEditors, [
                     $this.removeMe();
                 });
 
-                this.setBorder(new zebra.ui.Border("#7297BA", 2, 6));
+                this.setBorder(new zebkit.ui.Border("#7297BA", 2, 6));
                 this.setBackground("#E0F4FF");
 
                 this.add(BOTTOM, controls);
@@ -1016,7 +1016,7 @@ var CustomGridEditor = new Class(zebra.ui.grid.DefEditors, [
 
         this.extWin = new ExtEditor();
         for(var i = 0; i < IMAGES.length; i++) {
-            var im = new ImagePan(zebra.ui.demo[IMAGES[i]]);
+            var im = new ImagePan(zebkit.ui.demo[IMAGES[i]]);
             im.setPadding(2);
             this.extWin.list.add(im);
         }
@@ -1051,13 +1051,13 @@ var CustomGridEditor = new Class(zebra.ui.grid.DefEditors, [
     }
 ]);
 
-var CompViewProvider = new Class(zebra.ui.grid.DefViews,[
+var CompViewProvider = new Class(zebkit.ui.grid.DefViews,[
     function getView(target,row,col,o){
         return row == 2 ? new CompRender(o) : this.$super(target, row, col, o);
     }
 ]);
 
-var CompEditorProvider = new Class(zebra.ui.grid.DefEditors, [
+var CompEditorProvider = new Class(zebkit.ui.grid.DefEditors, [
     function getEditor(t,r,c,v){
         if(r == 2) return v;
         else {
@@ -1078,17 +1078,17 @@ var CompEditorProvider = new Class(zebra.ui.grid.DefEditors, [
 ]);
 
 function longGrid() {
-    var m = new zebra.data.Matrix(100,10);
+    var m = new zebkit.data.Matrix(100,10);
 	for(var i=0; i < m.rows*m.cols; i++) { m.puti(i, "Cell [" + i +"]");  }
 
 	var g = new Grid(m);
-    g.setViewProvider(new zebra.ui.grid.DefViews([
+    g.setViewProvider(new zebkit.ui.grid.DefViews([
         function getCellColor(target, row,col) {
             return (row % 2 === 0) ? ui.cellbg1 : ui.cellbg2 ;
         },
 
         function getXAlignment(target, row,col) {
-            return zebra.layout.CENTER;
+            return zebkit.layout.CENTER;
         }
     ]));
 
@@ -1170,7 +1170,7 @@ function editableGrid() {
         return grid;
     }
 
-    var onView = new Picture(zebra.ui.demo.on), offView = new Picture(zebra.ui.demo.off);
+    var onView = new Picture(zebkit.ui.demo.on), offView = new Picture(zebkit.ui.demo.off);
     var d = [ ["on", "Item 1", "text 1", "0"],
               ["off", "Item 1", "text 2", "0"],
               ["off", "Item 2", "text 3", "1"],
@@ -1181,11 +1181,11 @@ function editableGrid() {
 
 	var g = new Grid();
     g.defXAlignment = CENTER;
-    g.setViewProvider(new zebra.ui.grid.DefViews([
+    g.setViewProvider(new zebkit.ui.grid.DefViews([
         function getView(target, row, col, data) {
             if (col === 0) return (data == "on") ? onView : offView;
             else {
-                if (col == 3) return new Picture(zebra.ui.demo["s" + IMAGES[data]]);
+                if (col == 3) return new Picture(zebkit.ui.demo["s" + IMAGES[data]]);
             }
             return this.$super(target, row, col, data);
         }
@@ -1229,7 +1229,7 @@ function customCellAlignmentGrid() {
     var d = [ "Top-Left\nAlignment", "Top-Center\nAlignment", "Top-Right\nAlignment",
               "Center-Left\nAlignment", "Center-Center\nAlignment", "Center-Right\nAlignment",
               "Bottom-Left\nAlignment", "Bottom-Center\nAlignment", "Bottom-Right\nAlignment"];
-    var titles = [ "Left Aligned", new CompRender(new zebra.ui.ImageLabel("Center", zebra.ui.demo.ringtone)), "Right Aligned"];
+    var titles = [ "Left Aligned", new CompRender(new zebkit.ui.ImageLabel("Center", zebkit.ui.demo.ringtone)), "Right Aligned"];
 
     var root = new Panel(new RasterLayout(USE_PS_SIZE)),
         data = new Matrix(3, 3);
@@ -1311,10 +1311,10 @@ pkg.GridDemo = new Class(pkg.DemoPan, [
 ]);
 
 });
-zebra.package("ui.demo", function(pkg, Class) {
+zebkit.package("ui.demo", function(pkg, Class) {
 
-var ui = zebra.ui;
-eval(zebra.Import("ui", "ui.designer", "layout"));
+var ui = zebkit.ui;
+eval(zebkit.Import("ui", "ui.designer", "layout"));
 
 pkg.DesignerDemo = new Class(pkg.DemoPan, [
     function() {
@@ -1371,8 +1371,8 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
 
         //pp.setBorder(new Border("black"));
 
-        var t = new zebra.ui.tree.Tree(new FormTreeModel(pp, [
-            function exclude(c) { return zebra.instanceOf(c, ShaperPan); }
+        var t = new zebkit.ui.tree.Tree(new FormTreeModel(pp, [
+            function exclude(c) { return zebkit.instanceOf(c, ShaperPan); }
         ]));
 
         var s = new SplitPan(new ScrollPan(t), pp);
@@ -1383,7 +1383,7 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
             var i = p.indexOf(c);
             if (i >= 0) {
                 while (p != null && typeof(p) != "undefined") {
-                    if (zebra.instanceOf(p, ShaperPan)) return p;
+                    if (zebkit.instanceOf(p, ShaperPan)) return p;
                     p = p.parent;
                 }
             }
@@ -1409,7 +1409,7 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
             }
         });
 
-        var l = new Label(new zebra.data.Text("This page represents number of Zebra components to control UI components size and location"));
+        var l = new Label(new zebkit.data.Text("This page represents number of Zebkit components to control UI components size and location"));
         l.setPadding(6);
         l.setFont(ui.boldFont);
         this.add(TOP, l);

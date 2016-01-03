@@ -2,24 +2,24 @@
  * Collection of variouse data models.
  * @module data
  * @main
- * @requires zebra, util
+ * @requires zebkit, util
  */
 
 (function(pkg, Class) {
 
 pkg.descent = function descent(a, b) {
     if (a == null) return 1;
-    return (zebra.isString(a)) ? a.localeCompare(b) : a - b;
+    return (zebkit.isString(a)) ? a.localeCompare(b) : a - b;
 };
 
 pkg.ascent = function ascent(a, b) {
     if (b == null) return 1;
-    return (zebra.isString(b)) ? b.localeCompare(a) : b - a;
+    return (zebkit.isString(b)) ? b.localeCompare(a) : b - a;
 };
 
 /**
  * Text model class
- * @class zebra.data.TextModel
+ * @class zebkit.data.TextModel
  * @abstract
 */
 
@@ -81,7 +81,7 @@ pkg.ascent = function ascent(a, b) {
 
  *
  * @event textUpdated
- * @param {zebra.data.Text} src a text model that triggers the event
+ * @param {zebkit.data.Text} src a text model that triggers the event
  * @param {Boolean}  b a flag that is true if a string has been written
  * in the text model, false if the model substring has been removed
  * @param {Integer}  off an offset starting form that the text update
@@ -95,7 +95,7 @@ pkg.ascent = function ascent(a, b) {
  */
 pkg.TextModel = Class([
     function $clazz() {
-        this.Listeners = zebra.util.ListenersClass("textUpdated");
+        this.Listeners = zebkit.util.ListenersClass("textUpdated");
     }
 ]);
 
@@ -108,10 +108,10 @@ Line.prototype.toString = function() { return this.s; };
 
 /**
  * Multi-lines text model implementation
- * @class zebra.data.Text
+ * @class zebkit.data.Text
  * @param  {String}  [s] the specified text the model has to be filled
  * @constructor
- * @extends zebra.data.TextModel
+ * @extends zebkit.data.TextModel
  */
 pkg.Text = Class(pkg.TextModel, [
     function $prototype() {
@@ -251,8 +251,8 @@ pkg.Text = Class(pkg.TextModel, [
  * @param  {String}  [s] the specified text the model has to be filled
  * @param  {Integer} [max] the specified maximal text length
  * @constructor
- * @class zebra.data.SingleLineTxt
- * @extends zebra.data.TextModel
+ * @class zebkit.data.SingleLineTxt
+ * @extends zebkit.data.TextModel
  */
 pkg.SingleLineTxt = Class(pkg.TextModel, [
     function $prototype() {
@@ -400,10 +400,10 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
  * @example
 
       // create list model that contains three integer elements
-      var l = new zebra.data.ListModel([1,2,3]);
+      var l = new zebkit.data.ListModel([1,2,3]);
 
  * @constructor
- * @class zebra.data.ListModel
+ * @class zebkit.data.ListModel
  */
 
  /**
@@ -414,7 +414,7 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
      });
 
   * @event elementInserted
-  * @param {zebra.data.ListModel} src a list model that triggers the event
+  * @param {zebkit.data.ListModel} src a list model that triggers the event
   * @param {Object}  o an element that has been added
   * @param {Integer} i an index at that the new element has been added
   */
@@ -427,7 +427,7 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
      });
 
   * @event elementRemoved
-  * @param {zebra.data.ListModel} src a list model that triggers the event
+  * @param {zebkit.data.ListModel} src a list model that triggers the event
   * @param {Object}  o an element that has been removed
   * @param {Integer} i an index at that the element has been removed
   */
@@ -440,7 +440,7 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
      });
 
   * @event elementSet
-  * @param {zebra.data.ListModel} src a list model that triggers the event
+  * @param {zebkit.data.ListModel} src a list model that triggers the event
   * @param {Object}  o an element that has been set
   * @param {Object}  p a previous element
   * @param {Integer} i an index at that the element has been re-set
@@ -448,7 +448,7 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
 
 pkg.ListModel = Class([
     function $clazz () {
-        this.Listeners = zebra.util.ListenersClass("elementInserted", "elementRemoved", "elementSet");
+        this.Listeners = zebkit.util.ListenersClass("elementInserted", "elementRemoved", "elementSet");
     },
 
     function $prototype() {
@@ -576,7 +576,7 @@ pkg.ListModel = Class([
 /**
  * Tree model item class. The structure is used by tree model to store
  * tree items values, parent and children item references.
- * @class zebra.data.Item
+ * @class zebkit.data.Item
  * @param  {Object} [v] the item value
  * @constructor
  */
@@ -604,7 +604,7 @@ var Item = pkg.Item = Class([
             /**
              * Reference to a parent item
              * @attribute parent
-             * @type {zebra.data.Item}
+             * @type {zebkit.data.Item}
              * @default undefined
              * @readOnly
              */
@@ -615,12 +615,12 @@ var Item = pkg.Item = Class([
 /**
  * Tree model class. The class is simple and handy way to keep hierarchical structure.
  * @constructor
- * @param  {zebra.data.Item|Object} [r] a root item. As the argument you can pass "zebra.data.Item" or
+ * @param  {zebkit.data.Item|Object} [r] a root item. As the argument you can pass "zebkit.data.Item" or
  * a JavaType object. In the second case you can describe the tree as follow:
 
      // create tree model initialized with tree structure passed as
      // special formated JavaScript object
-     var tree = new zebra.data.TreeModel({ value:"Root",
+     var tree = new zebkit.data.TreeModel({ value:"Root",
                                           kids: [
                                               "Root kid 1",
                                               {
@@ -629,7 +629,7 @@ var Item = pkg.Item = Class([
                                               }
                                           ]});
 
- * @class zebra.data.TreeModel
+ * @class zebkit.data.TreeModel
  */
 
 /**
@@ -640,8 +640,8 @@ var Item = pkg.Item = Class([
     });
 
  * @event itemModified
- * @param {zebra.data.TreeModel} src a tree model that triggers the event
- * @param {zebra.data.Item}  item an item whose value has been updated
+ * @param {zebkit.data.TreeModel} src a tree model that triggers the event
+ * @param {zebkit.data.Item}  item an item whose value has been updated
  */
 
 /**
@@ -652,8 +652,8 @@ var Item = pkg.Item = Class([
     });
 
  * @event itemRemoved
- * @param {zebra.data.TreeModel} src a tree model that triggers the event
- * @param {zebra.data.Item}  item an item that has been removed from the tree model
+ * @param {zebkit.data.TreeModel} src a tree model that triggers the event
+ * @param {zebkit.data.Item}  item an item that has been removed from the tree model
  */
 
 /**
@@ -662,13 +662,13 @@ var Item = pkg.Item = Class([
     });
 
  * @event itemInserted
- * @param {zebra.data.TreeModel} src a tree model that triggers the event
- * @param {zebra.data.Item}  item an item that has been inserted into the tree model
+ * @param {zebkit.data.TreeModel} src a tree model that triggers the event
+ * @param {zebkit.data.Item}  item an item that has been inserted into the tree model
  */
 
 pkg.TreeModel = Class([
     function $clazz() {
-        this.Listeners = zebra.util.ListenersClass("itemModified", "itemRemoved", "itemInserted");
+        this.Listeners = zebkit.util.ListenersClass("itemModified", "itemRemoved", "itemInserted");
 
         this.create = function(r, p) {
             var item = new Item(r.hasOwnProperty("value")? r.value : r);
@@ -729,7 +729,7 @@ pkg.TreeModel = Class([
         /**
          * Update a value of the given tree model item with the new one
          * @method setValue
-         * @param  {zebra.data.Item} item an item whose value has to be updated
+         * @param  {zebkit.data.Item} item an item whose value has to be updated
          * @param  {[type]} v   a new item value
          */
         this.setValue = function(item, v){
@@ -740,8 +740,8 @@ pkg.TreeModel = Class([
         /**
          * Add the new item to the tree model as a children element of the given parent item
          * @method add
-         * @param  {zebra.data.Item} to a parent item to which the new item has to be added
-         * @param  {Object|zebra.data.Item} an item or value of the item to be
+         * @param  {zebkit.data.Item} to a parent item to which the new item has to be added
+         * @param  {Object|zebkit.data.Item} an item or value of the item to be
          * added to the parent item of the tree model
          */
         this.add = function(to,item){
@@ -752,16 +752,16 @@ pkg.TreeModel = Class([
          * Insert the new item to the tree model as a children element at the
          * given position of the parent element
          * @method insert
-         * @param  {zebra.data.Item} to a parent item to which the new item
+         * @param  {zebkit.data.Item} to a parent item to which the new item
          * has to be inserted
-         * @param  {Object|zebra.data.Item} an item or value of the item to be
+         * @param  {Object|zebkit.data.Item} an item or value of the item to be
          * inserted to the parent item
          * @param  {Integer} i a position the new item has to be inserted into
          * the parent item
          */
         this.insert = function(to,item,i){
             if (i < 0 || to.kids.length < i) throw new RangeError(i);
-            if (zebra.isString(item)) {
+            if (zebkit.isString(item)) {
                 item = new Item(item);
             }
             to.kids.splice(i, 0, item);
@@ -776,7 +776,7 @@ pkg.TreeModel = Class([
         /**
          * Remove the given item from the tree model
          * @method remove
-         * @param  {zebra.data.Item} item an item to be removed from the tree model
+         * @param  {zebkit.data.Item} item an item to be removed from the tree model
          */
         this.remove = function(item){
             if (item == this.root) {
@@ -806,7 +806,7 @@ pkg.TreeModel = Class([
         /**
          * Remove all children items from the given item of the tree model
          * @method removeKids
-         * @param  {zebra.data.Item} item an item from that all children items have to be removed
+         * @param  {zebkit.data.Item} item an item from that all children items have to be removed
          */
         this.removeKids = function(item) {
             for(var i = item.kids.length - 1; i >= 0; i--) {
@@ -820,10 +820,10 @@ pkg.TreeModel = Class([
             /**
              * Reference to the tree model root item
              * @attribute root
-             * @type {zebra.data.Item}
+             * @type {zebkit.data.Item}
              * @readOnly
              */
-            this.root = zebra.instanceOf(r, Item) ? r : pkg.TreeModel.create(r);
+            this.root = zebkit.instanceOf(r, Item) ? r : pkg.TreeModel.create(r);
             this.root.parent = null;
             this._ = new this.clazz.Listeners();
         };
@@ -836,11 +836,11 @@ pkg.TreeModel = Class([
  *  @param  {Array of Array} [data] the given data
  *  @param  {Integer} [rows] a number of rows
  *  @param  {Integer} [cols] a number of columns
- *  @class zebra.data.Matrix
+ *  @class zebkit.data.Matrix
  */
 pkg.Matrix = Class([
     function $clazz() {
-        this.Listeners = zebra.util.ListenersClass("matrixResized", "cellModified",
+        this.Listeners = zebkit.util.ListenersClass("matrixResized", "cellModified",
                                                    "matrixSorted", "matrixRowInserted",
                                                    "matrixColInserted");
     },
@@ -854,7 +854,7 @@ pkg.Matrix = Class([
          });
 
          * @event matrixResized
-         * @param {zebra.data.Matrix} src a matrix that triggers the event
+         * @param {zebkit.data.Matrix} src a matrix that triggers the event
          * @param {Integer}  pr a previous number of rows
          * @param {Integer}  pc a previous number of columns
          */
@@ -867,7 +867,7 @@ pkg.Matrix = Class([
           });
 
           * @event cellModified
-          * @param {zebra.data.Matrix} src a matrix that triggers the event
+          * @param {zebkit.data.Matrix} src a matrix that triggers the event
           * @param {Integer}  row an updated row
           * @param {Integer}  col an updated column
           * @param {Object}  old a previous cell value
@@ -881,7 +881,7 @@ pkg.Matrix = Class([
            });
 
            * @event matrixSorted
-           * @param {zebra.data.Matrix} src a matrix that triggers the event
+           * @param {zebkit.data.Matrix} src a matrix that triggers the event
            * @param {Object}  sortInfo a new data order info. The information
            * contains:
            *
@@ -1132,7 +1132,7 @@ pkg.Matrix = Class([
 
             this._.matrixSorted(this, { col : col,
                                         func: f,
-                                        name: zebra.$FN(f).toLowerCase() });
+                                        name: zebkit.$FN(f).toLowerCase() });
         };
 
         this[''] = function() {
@@ -1171,4 +1171,4 @@ pkg.Matrix = Class([
  * @for
  */
 
-})(zebra("data"), zebra.Class);
+})(zebkit("data"), zebkit.Class);

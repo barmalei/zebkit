@@ -1,4 +1,4 @@
-zebra.package("ui", function(pkg, Class) {
+zebkit.package("ui", function(pkg, Class) {
 
     pkg.Spin = new Class(pkg.Panel, [
         function $clazz() {
@@ -53,7 +53,7 @@ zebra.package("ui", function(pkg, Class) {
                     this.max = max;
 
                     var $this = this;
-                    this.$super(new zebra.data.SingleLineTxt([
+                    this.$super(new zebkit.data.SingleLineTxt([
                         function () {
                             this.$super("" + min);
                         },
@@ -87,14 +87,14 @@ zebra.package("ui", function(pkg, Class) {
                                   new this.clazz.IncButton(),
                                   new this.clazz.DecButton());
 
-            this._ = new zebra.util.Listeners();
+            this._ = new zebkit.util.Listeners();
         },
 
         function layoutComponents(text, inc, dec) {
-            var buttons = new pkg.Panel(new zebra.layout.PercentLayout("vertical"));
-            this.setLayout(new zebra.layout.BorderLayout());
+            var buttons = new pkg.Panel(new zebkit.layout.PercentLayout("vertical"));
+            this.setLayout(new zebkit.layout.BorderLayout());
 
-            var tfPan = new pkg.Panel(new zebra.layout.FlowLayout("left", "center"));
+            var tfPan = new pkg.Panel(new zebkit.layout.FlowLayout("left", "center"));
             tfPan.layout.stretchLast = true;
 
             tfPan.add(text);
@@ -105,16 +105,16 @@ zebra.package("ui", function(pkg, Class) {
             buttons.add(50, dec);
 
 
-            // this.setLayout(new zebra.layout.BorderLayout());
+            // this.setLayout(new zebkit.layout.BorderLayout());
             // this.add("center", text);
 
-            // var buttons = new pkg.Panel(new zebra.layout.BorderLayout());
+            // var buttons = new pkg.Panel(new zebkit.layout.BorderLayout());
             // buttons.add("top", inc);
             // buttons.add("bottom", dec);
             // this.add("right", buttons);
 
 
-            // this.setLayout(new zebra.layout.BorderLayout());
+            // this.setLayout(new zebkit.layout.BorderLayout());
             // this.add("center", text );
             // this.add("left", dec);
             // this.add("right", inc);
@@ -124,22 +124,22 @@ zebra.package("ui", function(pkg, Class) {
 
             console.log("$intsall : " + child.clazz.$name);
 
-            if (zebra.instanceOf(child, pkg.Button)) {
+            if (zebkit.instanceOf(child, pkg.Button)) {
                 child.bind(this);
             }
             else {
-                if (zebra.instanceOf(child, pkg.TextField)) {
+                if (zebkit.instanceOf(child, pkg.TextField)) {
                     this.editor = child;
                 }
             }
         },
 
         function $uninstall(child) {
-            if (zebra.instanceOf(child, pkg.Button)) {
+            if (zebkit.instanceOf(child, pkg.Button)) {
                 child.unbind(this);
             }
             else {
-                if (zebra.instanceOf(child, pkg.TextField)) {
+                if (zebkit.instanceOf(child, pkg.TextField)) {
                     this.editor = null;
                 }
             }

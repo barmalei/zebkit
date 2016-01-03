@@ -21,39 +21,39 @@
 		</style>
 
 
-		<script src='../zebra.min.js' type='text/javascript'></script>
+		<script src='../zebkit.min.js' type='text/javascript'></script>
 		<script src='js/uiengine.samples.js' 	type='text/javascript'></script>
 
 
 		<script type='text/javascript'>
 			var bg = null, bg5 = null, bg6 = null, bg9 = null, bg11 = null, cursors=null;
 
-		    zebra.ready(
+		    zebkit.ready(
 
 		    function() {
-		    	bg   	= zebra.web.$loadImage("images/wood.png");
-				bg5  	= zebra.web.$loadImage("images/bg5.png");
-				bg6 	= zebra.web.$loadImage("images/bg6.png");
-				bg9  	= zebra.web.$loadImage("images/19original.jpg");
-				bg11 	= zebra.web.$loadImage("images/25original.gif");
-				cursors = zebra.web.$loadImage("images/cursors.png");
+		    	bg   	= zebkit.web.$loadImage("images/wood.png");
+				bg5  	= zebkit.web.$loadImage("images/bg5.png");
+				bg6 	= zebkit.web.$loadImage("images/bg6.png");
+				bg9  	= zebkit.web.$loadImage("images/19original.jpg");
+				bg11 	= zebkit.web.$loadImage("images/25original.gif");
+				cursors = zebkit.web.$loadImage("images/cursors.png");
 		    },
 
 		    function() {
-		    	eval(zebra.Import("ui", "layout", "ui.samples"));
+		    	eval(zebkit.Import("ui", "layout", "ui.samples"));
 
 				//create canvas
-			    var root = (new zebra.ui.zCanvas("pointerEventDemo")).root;
+			    var root = (new zebkit.ui.zCanvas("pointerEventDemo")).root;
 				root.properties({
-					layout: new zebra.layout.BorderLayout(),
+					layout: new zebkit.layout.BorderLayout(),
 					kids  : {
 						CENTER: new MouseEventHandlerPan().properties({border: new Oval()})
 					}
 				});
 
-			    root = (new zebra.ui.zCanvas("inputDemo")).root;
+			    root = (new zebkit.ui.zCanvas("inputDemo")).root;
 				root.properties({
-					layout    : new zebra.layout.BorderLayout(6,6),
+					layout    : new zebkit.layout.BorderLayout(6,6),
 					background: "black",
 					padding   : 4,
 					kids	  : {
@@ -79,9 +79,9 @@
 					}
 				});
 
-			    root = (new zebra.ui.zCanvas("layoutDemo")).root;
+			    root = (new zebkit.ui.zCanvas("layoutDemo")).root;
 				root.properties({
-					layout     : new zebra.layout.BorderLayout(4,4),
+					layout     : new zebkit.layout.BorderLayout(4,4),
 					background : new Pattern(bg9),
 					background2: "#AACACA",
 					padding    : 8,
@@ -90,7 +90,7 @@
 					}
 				});
 
-			    root = (new zebra.ui.zCanvas("shapedComponentDemo")).root;
+			    root = (new zebkit.ui.zCanvas("shapedComponentDemo")).root;
 				root.properties({
 					layout: new StackLayout(),
 					background: new Pattern(bg11),
@@ -100,12 +100,12 @@
 					}
 				});
 
-			    root = (new zebra.ui.zCanvas("pointerCursorDemo")).root;
+			    root = (new zebkit.ui.zCanvas("pointerCursorDemo")).root;
 				root.properties({
 					layout: new StackLayout(),
 					kids: [
 						new Panel().properties({
-							layout: new zebra.layout.GridLayout(2, 2, HORIZONTAL | VERTICAL),
+							layout: new zebkit.layout.GridLayout(2, 2, HORIZONTAL | VERTICAL),
 							kids: [
 								new CursorPan(Cursor.HAND, "red", new Picture(cursors, 180, 110, 60, 60)),
 								new CursorPan(Cursor.WAIT, "blue", new Picture(cursors, 180, 50, 60, 60)),
@@ -122,9 +122,9 @@
 					]
 				});
 
-			    root = (new zebra.ui.zCanvas("chartDemo")).root;
+			    root = (new zebkit.ui.zCanvas("chartDemo")).root;
 				root.properties({
-					layout: new zebra.layout.StackLayout(),
+					layout: new zebkit.layout.StackLayout(),
 					background: "black",
 					kids:[
 						new SimpleChart(function(x) { return -x*Math.sin(x); }, -0.4, 0.4, 0.01, "#33ddCC"),
@@ -173,9 +173,9 @@
 				});
 
 
-			    root = (new zebra.ui.zCanvas("chartDemo2")).root;
+			    root = (new zebkit.ui.zCanvas("chartDemo2")).root;
 				root.properties({
-					layout: new zebra.layout.BorderLayout(),
+					layout: new zebkit.layout.BorderLayout(),
 					background: "black",
 					kids:{
 						TOP:    new SimpleChart(function(x) {
@@ -192,7 +192,7 @@
 
 
 
-				var zc = new zebra.ui.zCanvas("layerDemo"), root = zc.root;
+				var zc = new zebkit.ui.zCanvas("layerDemo"), root = zc.root;
 				zc.add(new CustomLayer());
 				root.properties({
 					layout: new FlowLayout(CENTER, CENTER, VERTICAL, 8),
@@ -232,10 +232,10 @@
 						this.setLocation(this.x + e.x - this.dx, this.y + e.y - this.dy);
 					},
 
-					function getCursorType(t, x, y) { return zebra.ui.Cursor.HAND; }
+					function getCursorType(t, x, y) { return zebkit.ui.Cursor.HAND; }
 				];
 
-				var zc = new zebra.ui.zCanvas("dragDemo"), root = zc.root;
+				var zc = new zebkit.ui.zCanvas("dragDemo"), root = zc.root;
 				root.properties({
 					layout: new RasterLayout(),
 					background: new Pattern(bg6),
@@ -266,7 +266,7 @@
 
 	<body>
 
-		<h1>Zebra UI Engine samples</h1>
+		<h1>Zebkit UI Engine samples</h1>
 
 
 		<table border="0" width="1200">

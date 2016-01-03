@@ -1,5 +1,5 @@
-zebra.package("ui.vk", function(pkg, Class) {
-    var L = zebra.layout, ui = zebra("ui"), $vk = null;
+zebkit.package("ui.vk", function(pkg, Class) {
+    var L = zebkit.layout, ui = zebkit("ui"), $vk = null;
 
     pkg.makeEditorVisible = true;
 
@@ -199,7 +199,7 @@ zebra.package("ui.vk", function(pkg, Class) {
         }
     ]);
 
-    pkg.ShiftKeyArrow = zebra.Class(ui.View, [
+    pkg.ShiftKeyArrow = zebkit.Class(ui.View, [
         function $prototype() {
             //       / \A
             //      /   \
@@ -324,13 +324,13 @@ zebra.package("ui.vk", function(pkg, Class) {
             };
 
             this.setLabel = function(l) {
-                if (zebra.instanceOf(this.kids[0], ui.Label)) {
+                if (zebkit.instanceOf(this.kids[0], ui.Label)) {
                     this.kids[0].setValue(l);
                 }
             };
 
             this.getLabel = function() {
-                return zebra.instanceOf(this.kids[0], ui.Label) ? this.kids[0].getValue() : null;
+                return zebkit.instanceOf(this.kids[0], ui.Label) ? this.kids[0].getValue() : null;
             };
 
             this.nextStatusView = function() {
@@ -343,13 +343,13 @@ zebra.package("ui.vk", function(pkg, Class) {
         },
 
         function(v) {
-            if (zebra.isString(v) == false &&
-                zebra.instanceOf(v, ui.Panel) == false &&
+            if (zebkit.isString(v) == false &&
+                zebkit.instanceOf(v, ui.Panel) == false &&
                 (v instanceof Image) == false)
             {
                 v = ui.$view(v);
 
-                if (zebra.instanceOf(v, ui.ViewSet)) {
+                if (zebkit.instanceOf(v, ui.ViewSet)) {
                     this.statusViews    = v;
                     this.statusViewKeys = [];
                     this.statusKeyIndex = 0;
@@ -471,7 +471,7 @@ zebra.package("ui.vk", function(pkg, Class) {
         },
 
         function(t) {
-            if (zebra.isString(t)) {
+            if (zebkit.isString(t)) {
                 t = { ch : t };
             }
 
@@ -769,7 +769,7 @@ zebra.package("ui.vk", function(pkg, Class) {
             this.$counter = 0;
             this.hideKeysPopupPan();
             this.$super(e);
-            this.$pressed = zebra.util.task(this.showKeysPopupPan, this).run(700, 700);
+            this.$pressed = zebkit.util.task(this.showKeysPopupPan, this).run(700, 700);
         },
 
         function fireVkTyped(code, ch, mask) {
@@ -834,7 +834,7 @@ zebra.package("ui.vk", function(pkg, Class) {
     };
 
     pkg.createVKey = function(d) {
-        if (zebra.isString(d)) {
+        if (zebkit.isString(d)) {
             if (pkg.PredefinedVKey[d.toLowerCase()] != null) {
                 d = pkg.PredefinedVKey[d.toLowerCase()];
             }
@@ -857,7 +857,7 @@ zebra.package("ui.vk", function(pkg, Class) {
 
     pkg.VK = Class(ui.Panel, [
         function $clazz() {
-            this.Listeners = zebra.util.ListenersClass("vkMaskUpdated", "vkOptionSelected");
+            this.Listeners = zebkit.util.ListenersClass("vkMaskUpdated", "vkOptionSelected");
         },
 
         function $prototype() {
@@ -1019,7 +1019,7 @@ zebra.package("ui.vk", function(pkg, Class) {
                     for(var col = 0; col < r.length; col++) {
                         var v = r[col];
 
-                        if (zebra.isString(v)) {
+                        if (zebkit.isString(v)) {
                             if (pkg.PredefinedVKey.hasOwnProperty(v)) {
                                 v = pkg.PredefinedVKey[v];
                             }
@@ -1072,7 +1072,7 @@ zebra.package("ui.vk", function(pkg, Class) {
     ui.events.bind({
         focusGained : function (e) {
             if ($vk != null && $isVkElement(e.source) === false && e.source.vkMode != null) {
-                pkg.showVK(zebra.instanceOf(e.source, ui.TextField) ? e.source : null);
+                pkg.showVK(zebkit.instanceOf(e.source, ui.TextField) ? e.source : null);
             }
         },
 

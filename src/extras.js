@@ -1,9 +1,9 @@
 (function(io, Class) {
     var CDNAME = '';
 
-    zebra.getMethod = function(clazz, name) {
+    zebkit.getMethod = function(clazz, name) {
         // map user defined constructor to internal constructor name
-        if (name == CDNAME) name = zebra.CNAME;
+        if (name == CDNAME) name = zebkit.CNAME;
         var m = clazz.prototype[name];
         return (typeof m === 'function') ?  m : null;
     };
@@ -14,7 +14,7 @@
         function (container) {
             if (isBA && container instanceof ArrayBuffer) this.data = new Uint8Array(container);
             else {
-                if (zebra.isString(container)) {
+                if (zebkit.isString(container)) {
                     this.extend([
                         function read() {
                             return this.available() > 0 ? this.data.charCodeAt(this.pos++) & 0xFF : -1;
@@ -112,7 +112,7 @@
                 r.onreadystatechange = function() {
                     if (r.readyState == 4) {
                         if (r.status != 200)  throw new Error(url);
-                        zebra.getMethod($this.clazz.$parent, '', 1).call($this, isBA ? r.response : r.responseText); // $this.$super(res);
+                        zebkit.getMethod($this.clazz.$parent, '', 1).call($this, isBA ? r.response : r.responseText); // $this.$super(res);
                         f($this.data, r);
                     }
                 };
@@ -136,7 +136,7 @@
 
     // TODO: this is the new code that has to be documented, covered with test cases
     // and most likely the code has  to replace tasks !
-    zebra.Runner = function() {
+    zebkit.Runner = function() {
         this.$tasks   = [];
         this.$results = [];
         this.$head    = -1;
@@ -251,4 +251,4 @@
 
 
 
-})(zebra("io"), zebra.Class);
+})(zebkit("io"), zebkit.Class);

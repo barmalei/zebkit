@@ -1,20 +1,20 @@
 {
     "HintPan" : {
         "Label" : {
-            "font"   : { "$zebra.ui.Font" : [ "Arial", "bold",  28] },
+            "font"   : { "$zebkit.ui.Font" : [ "Arial", "bold",  28] },
             "color"  : "#2222FF"
         },
 
-        "border"    : { "$zebra.ui.Border": [ "#CCCCCC", 1, 16 ] },
+        "border"    : { "$zebkit.ui.Border": [ "#CCCCCC", 1, 16 ] },
         "padding"   : 12,
         "background": "white",
-        "layout"    : { "$zebra.layout.FlowLayout" : [ "center", "top"] }
+        "layout"    : { "$zebkit.layout.FlowLayout" : [ "center", "top"] }
     },
 
     "VKeyBase" : {
     	"Label" : {
-    		"$zebra.ui.Label": [],
-    		"font": {"$zebra.ui.Font": ["Arial", "bold", 14] }
+    		"$zebkit.ui.Label": [],
+    		"font": {"$zebkit.ui.Font": ["Arial", "bold", 14] }
     	 }
     },
 
@@ -24,8 +24,8 @@
         },
 
         "border" : {
-            "out" : { "$zebra.ui.Border": [ "white", 1, 6] },
-            "pressed.over" : { "$zebra.ui.Border" : [ "orange", 1, 6] }
+            "out" : { "$zebkit.ui.Border": [ "white", 1, 6] },
+            "pressed.over" : { "$zebkit.ui.Border" : [ "orange", 1, 6] }
         },
 
         "background" : {
@@ -45,8 +45,8 @@
 
     "VKeys" : {
     	"KeysPopupPan" : {
-    		"border" : { "$zebra.ui.Border" : [ "orange", 10, 10] },
-    		"layout" : { "$zebra.layout.GridLayout" : [ 6, 4 ] }
+    		"border" : { "$zebkit.ui.Border" : [ "orange", 10, 10] },
+    		"layout" : { "$zebkit.layout.GridLayout" : [ 6, 4 ] }
     	},
 
         "SmallLabel" : {
@@ -67,7 +67,7 @@
                 [ "q", "w", "e", "r", "t",  "y", "u", "i", "o", "p" ],
                 [ "a", "s", "d", "f", "g", "h", "j", "k", "l", ["ab", [ "cd" ], [ "kl" ]  ]  ],
                 [ "shift", "z", "x", "c", "v", "b", "n", "m", "backSpace" ],
-                [ { "vkey": { "$zebra.ui.vk.VKeyOption": ["Lang", [ "rus","hindi", "arrow" ]] }, "size": "ps" }, "/-+=", "space",  ".,:;", "enter" ]
+                [ { "vkey": { "$zebkit.ui.vk.VKeyOption": ["Lang", [ "rus","hindi", "arrow" ]] }, "size": "ps" }, "/-+=", "space",  ".,:;", "enter" ]
             ],
 
             "rus" : [
@@ -75,7 +75,7 @@
                 [ "й", "ц", "у", "к", "е", "н", "г", "ш", "щ", "з" ],
                 [ "ф", "ы", "в", "а", "п", "р", "о", "л", "джэ"  ],
                 [ "shift", "я", "ч", "с", "м", "и", "т", "ь", "б", "ю", "backSpace"  ],
-                [ { "vkey": { "$zebra.ui.vk.VKeyOption" : [ "Lang", [ "latin", "hindi", "arrow" ]] }, "size": "ps" }, "/-+=", "space",  ".,:;", "enter" ]
+                [ { "vkey": { "$zebkit.ui.vk.VKeyOption" : [ "Lang", [ "latin", "hindi", "arrow" ]] }, "size": "ps" }, "/-+=", "space",  ".,:;", "enter" ]
             ],
 
             "arrow": [
@@ -89,6 +89,6 @@
         "activeGroup" : "latin",
         "background"  : "lightGray",
         "padding"     : 4,
-        "layout"      : { "$zebra.layout.StackLayout": null }
+        "layout"      : { "$zebkit.layout.StackLayout": null }
     }
 }

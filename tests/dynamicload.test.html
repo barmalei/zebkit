@@ -2,7 +2,7 @@
 <html>
     <head>
     </head>
-    <body> 
+    <body>
         <script type="text/javascript">
 
           function test() {
@@ -12,17 +12,17 @@
           function callback()
           {
               console.log("Yeaah")
-              zebra.ui.$url = new zebra.URL("http://repo.zebkit.org/latest/");
-              zebra.ready(test);
+              zebkit.ui.$url = new zebkit.URL("http://repo.zebkit.org/latest/");
+              zebkit.ready(test);
           }
-        
+
 
           var head = document.getElementsByTagName("head")[0];
           var script = document.createElement("script");
-          script.onload = callback; 
+          script.onload = callback;
           script.type = "text/javascript";
-          script.src = "http://repo.zebkit.org/sandbox/zebra.min.js"
-            
+          script.src = "http://repo.zebkit.org/sandbox/zebkit.min.js"
+
           head.appendChild(script);
         </script>
     </body>

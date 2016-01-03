@@ -1,23 +1,23 @@
-zebra.package("ui.demo", function(pkg, Class) {
+zebkit.package("ui.demo", function(pkg, Class) {
 
-var Panel = zebra.ui.Panel;
-var Label = zebra.ui.Label;
-var TextField = zebra.ui.TextField;
-var BorderLayout = zebra.layout.BorderLayout;
-var FlowLayout = zebra.layout.FlowLayout;
-var GridLayout = zebra.layout.GridLayout;
-var BorderPan = zebra.ui.BorderPan;
-var ScrollPan = zebra.ui.ScrollPan;
-var Border = zebra.ui.Border;
-var L = zebra.layout;
-var Constraints = zebra.layout.Constraints;
+var Panel = zebkit.ui.Panel;
+var Label = zebkit.ui.Label;
+var TextField = zebkit.ui.TextField;
+var BorderLayout = zebkit.layout.BorderLayout;
+var FlowLayout = zebkit.layout.FlowLayout;
+var GridLayout = zebkit.layout.GridLayout;
+var BorderPan = zebkit.ui.BorderPan;
+var ScrollPan = zebkit.ui.ScrollPan;
+var Border = zebkit.ui.Border;
+var L = zebkit.layout;
+var Constraints = zebkit.layout.Constraints;
 
-var SynHighlighterRender = new Class(zebra.ui.TextRender, [
+var SynHighlighterRender = new Class(zebkit.ui.TextRender, [
         function(path){
             this.words = {};
-            this.$super(zebra.io.GET(path));
+            this.$super(zebkit.io.GET(path));
             this.setColor("gray");
-            this.setFont(new zebra.ui.Font("Courier", "bold", 14));
+            this.setFont(new zebkit.ui.Font("Courier", "bold", 14));
         },
 
         function paintLine(g,x,y,line,d){
@@ -34,7 +34,7 @@ var SynHighlighterRender = new Class(zebra.ui.TextRender, [
         function parse(s){
             var v = [], c =  -2, isLetter = false;
             for(var i = 0;i < s.length; i ++ ){
-                var b = zebra.util.isLetter(s[i]);
+                var b = zebkit.util.isLetter(s[i]);
                 if(c ==  -2){
                     isLetter = b;
                     c = 0;

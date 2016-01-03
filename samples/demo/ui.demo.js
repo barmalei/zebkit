@@ -1,16 +1,16 @@
-zebra.package("ui.demo", function(pkg, Class) {
-    var Panel     = zebra.ui.Panel,
-        Label     = zebra.ui.Label,
-        Border    = zebra.ui.Border,
-        BorderPan = zebra.ui.BorderPan;
+zebkit.package("ui.demo", function(pkg, Class) {
+    var Panel     = zebkit.ui.Panel,
+        Label     = zebkit.ui.Label,
+        Border    = zebkit.ui.Border,
+        BorderPan = zebkit.ui.BorderPan;
 
     pkg.createLabel = function (txt, color, font) {
-        color = color || zebra.ui.palette.gray1;
-        var l = new Label(txt.indexOf("\n") >= 0 ? new zebra.data.Text(txt) : txt);
+        color = color || zebkit.ui.palette.gray1;
+        var l = new Label(txt.indexOf("\n") >= 0 ? new zebkit.data.Text(txt) : txt);
         l.setColor(color);
         if (font) l.setFont(font);
-        else l.setFont(zebra.ui.boldFont);
-        l.setBorder(new Border(zebra.util.rgb.gray));
+        else l.setFont(zebkit.ui.boldFont);
+        l.setBorder(new Border(zebkit.util.rgb.gray));
         l.setPadding(4);
         return l;
     };
@@ -34,5 +34,5 @@ zebra.package("ui.demo", function(pkg, Class) {
         function activated(b) {}
     ]);
 
-    new zebra.ui.Bag(zebra.ui).load(pkg.$url.join("demo.json"));
+    new zebkit.ui.Bag(zebkit.ui).load(pkg.$url.join("demo.json"));
 });

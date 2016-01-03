@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html>
 	<head>
-        <script src='../zebra.js' type='text/javascript'></script>
+        <script src='../zebkit.js' type='text/javascript'></script>
         <script src='../src/tools.js' type='text/javascript'></script>
-       
+
 
 		<script type='text/javascript'>
-		    zebra.ready(function() {
-		    	var rc = new zebra.RemoteOutput("http://zebkit.org/cgi-bin/rlog.rb");
-			    eval(zebra.Import("ui", "layout", "ui.grid"));
+		    zebkit.ready(function() {
+		    	var rc = new zebkit.RemoteOutput("http://zebkit.org/cgi-bin/rlog.rb");
+			    eval(zebkit.Import("ui", "layout", "ui.grid"));
 
-		 		var canvas = new zCanvas(1250, 700), grid = new Grid(new zebra.data.Matrix(0,3)), startline = 0, lastUpdated = 0;
+		 		var canvas = new zCanvas(1250, 700), grid = new Grid(new zebkit.data.Matrix(0,3)), startline = 0, lastUpdated = 0;
 		 		grid.setColWidth(0, 2);
 		 		grid.setColWidth(1, 8);
 		 		grid.setColWidth(2, 30);
@@ -24,25 +24,25 @@
 
 		 			function getXAlignment(target, row, col) {
 		 				return col > 1 ? LEFT : CENTER;
-		 			}, 
+		 			},
 
-		 			function getCellColor(target, row,col){ 
+		 			function getCellColor(target, row,col){
 		 				if (col == 0) {
 		 					var v = grid.model.get(row,col);
 		 					if (v == "WARNING") return "orange";
 		 					if (v == "ERROR") return "red";
-		 				} 
+		 				}
 		 				return null;
 		 			},
 
 		 			function getView(target, row,col,obj){
 		 			    if (obj != null) {
 		 			    	if (col == 0) {
-		 			    		this.bold.setValue(obj);	
+		 			    		this.bold.setValue(obj);
 		 			    		return this.bold;
 		 			    	}
 
-		 			    	this.normal.setValue(obj);	
+		 			    	this.normal.setValue(obj);
 
 		 			    	if (grid.model.rows - row <= lastUpdated) {
 		 			    		this.normal.setColor("blue");
@@ -62,18 +62,18 @@
 
 		 			startline += lines.length;
 		 			lastUpdated = lines.length;
-		 			
+
 		 			for(var i=0; i < lines.length;i++) {
-		 				var groups = /^\s*([A-Z]+)\s*\:\s*\[\s*(.*)\s*\]\s*\:\s*(.*)\s*$/.exec(lines[i]), 
+		 				var groups = /^\s*([A-Z]+)\s*\:\s*\[\s*(.*)\s*\]\s*\:\s*(.*)\s*$/.exec(lines[i]),
 		 					row = model.rows;
 
 		 				model.put(row, 0, groups[1]);
 		 				model.put(row, 1, groups[2]);
 		 				model.put(row, 2, groups[3]);
 		 			}
-		 			
-		 			grid.position.setRowCol(model.rows-1, 0);	
-		 			if (b) grid.repaint();	 			
+
+		 			grid.position.setRowCol(model.rows-1, 0);
+		 			if (b) grid.repaint();
 		 		}
 
 		 		canvas.root.properties({
@@ -90,7 +90,7 @@
 					 							this.$super();
 					 							startline = lastUpdated = 0;
 				 								rc.clear();
-				 								grid.setModel(new zebra.data.Matrix(0,3));
+				 								grid.setModel(new zebkit.data.Matrix(0,3));
 				 							}
 	   		 					     	]),
 
@@ -104,7 +104,7 @@
 
 		 				})
 		 			}
-		 		}); 
+		 		});
 	 		});
 		</script>
 	</head>

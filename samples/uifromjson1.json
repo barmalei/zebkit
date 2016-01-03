@@ -1,24 +1,24 @@
  {
-    "kids": [ 
-        { 
+    "kids": [
+        {
 
-        "$zebra.ui.Panel":[],
-        "layout" : { "$zebra.layout.BorderLayout" :[4,4] },
+        "$zebkit.ui.Panel":[],
+        "layout" : { "$zebkit.layout.BorderLayout" :[4,4] },
         "padding": 4,
         "border": "plain",
         "kids": {
             "TOP": {
-               "$zebra.ui.BoldLabel": "Simple application",
+               "$zebkit.ui.BoldLabel": "Simple application",
                "padding":4,
                "background": "lightGray"
             },
-          
+
             "CENTER": {
-               "$zebra.ui.TextField": ""
+               "$zebkit.ui.TextField": ""
             },
-          
+
             "BOTTOM": {
-               "$zebra.ui.Button": "Clear"
+               "$zebkit.ui.Button": "Clear"
             }
         }
     }]

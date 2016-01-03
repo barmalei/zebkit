@@ -2,15 +2,15 @@
 <html>
 	<head>
     <title>Tutorial</title>
-    <script src='../zebra.min.js' type='text/javascript'></script>
+    <script src='../zebkit.min.js' type='text/javascript'></script>
 
 	<script type='text/javascript'>
-        zebra.ready(function() {
+        zebkit.ready(function() {
 
-            eval(zebra.Import("ui", "layout"));
+            eval(zebkit.Import("ui", "layout"));
 
             if (document.getElementById("doc.event.kids")!=null) {
-                var MyComponent = zebra.Class(Panel,
+                var MyComponent = zebkit.Class(Panel,
                 [
                     function childPointerEntered(e) {
                         e.source.setBackground("orange");
@@ -38,7 +38,7 @@
             }
 
             if (document.getElementById("doc.event.mpressed")!=null) {
-                var p = new zebra.ui.BoldLabel("Press ME!",[
+                var p = new zebkit.ui.BoldLabel("Press ME!",[
                     // implement pointer pressed event handler
                     function pointerPressed(e) {
                         this.setBorder(new Sunken());
@@ -90,7 +90,7 @@
                 c.root.setBorder(new Border("black"));
                 p.setBounds(20,20, 250, 110);
                 p.setBorder(new Border("red", 2));
-                var l = new Label(new zebra.data.Text("Usual, not event transparent\nchildren component"));
+                var l = new Label(new zebkit.data.Text("Usual, not event transparent\nchildren component"));
                 l.setPadding(12);
                 l.setBorder(new Border("red"));
                 l.setLocation(20,20);
@@ -100,7 +100,7 @@
 
                 composite.setBounds(280,20, 190, 110);
                 composite.setBorder(new Border("orange", 2));
-                var l = new Label(new zebra.data.Text("Event transparent\nchildren component"));
+                var l = new Label(new zebkit.data.Text("Event transparent\nchildren component"));
                 l.setPadding(12);
                 l.setBorder(new Border("red"));
                 l.setLocation(20,20);

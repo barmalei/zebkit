@@ -10,7 +10,7 @@
     <script src='../../src/tools.js'      type='text/javascript'></script>
 
     <script type='text/javascript'>
-        var assert = zebra.assert, assertException = zebra.assertException;
+        var assert = zebkit.assert, assertException = zebkit.assertException;
 
         function assertByCharCode(v1, ch, str) {
             assert(v1, ch.charCodeAt(0), str);
@@ -50,30 +50,30 @@
 
         function testRPC(rurl, clazz) {
             var x = new clazz(rurl, ["echo", "summ", "fault", "struct", "wrong", "arr"]);
-            zebra.assertFDefined(x, "echo", "echo method defined");
-            zebra.assertFDefined(x, "summ", "summ method defined");
-            zebra.assertFDefined(x, "fault", "fault method defined");
-            zebra.assertFDefined(x, "struct", "struct method defined");
-            zebra.assertFDefined(x, "wrong", "wrong method defined");
-            zebra.assertFDefined(x, "arr", "arr method defined");
+            zebkit.assertFDefined(x, "echo", "echo method defined");
+            zebkit.assertFDefined(x, "summ", "summ method defined");
+            zebkit.assertFDefined(x, "fault", "fault method defined");
+            zebkit.assertFDefined(x, "struct", "struct method defined");
+            zebkit.assertFDefined(x, "wrong", "wrong method defined");
+            zebkit.assertFDefined(x, "arr", "arr method defined");
 
             assert(x.echo("test"), "test");
             assert(x.summ(1, 2), 3);
-            zebra.assertException(function() { x.fault(); }, Error);
-            zebra.assertException(function() { x.wrong(); }, Error);
+            zebkit.assertException(function() { x.fault(); }, Error);
+            zebkit.assertException(function() { x.wrong(); }, Error);
 
             var s1 = { t:100, v:[1,2,3] }, s2 = { k:"sss" };
             var r = x.struct(s1, s2);
-            zebra.assertObjEqual(r.a, s1, "Compare a");
-            zebra.assertObjEqual(r.b[0], s1, "Compare b[0]");
-            zebra.assertObjEqual(r.b[1], s2, "Compare b[1]");
+            zebkit.assertObjEqual(r.a, s1, "Compare a");
+            zebkit.assertObjEqual(r.b[0], s1, "Compare b[0]");
+            zebkit.assertObjEqual(r.b[1], s2, "Compare b[1]");
             assert(r.c, true);
 
-            var is = zebra.isIE ? new zebra.io.InputStream(tb)
-                                : new zebra.io.URLInputStream(url + "1x1.png");
-            var b64e = new zebra.io.Base64(is.data);
+            var is = zebkit.isIE ? new zebkit.io.InputStream(tb)
+                                : new zebkit.io.URLInputStream(url + "1x1.png");
+            var b64e = new zebkit.io.Base64(is.data);
             var res  = x.echo(b64e);
-            var is2  = new zebra.io.InputStream(zebra.io.b64decode(res.encoded));
+            var is2  = new zebkit.io.InputStream(zebkit.io.b64decode(res.encoded));
 
             assert(is.available(), is2.available(), "binary size");
             assert(b64e.encoded, tb64, "base64");
@@ -85,12 +85,12 @@
                 i++;
             }
 
-            if (!zebra.isIE) {
-                var is = new zebra.io.URLInputStream(url + "1x1.png", function(d) {
-                    var r = zebra.io.b64encode(d);
+            if (!zebkit.isIE) {
+                var is = new zebkit.io.URLInputStream(url + "1x1.png", function(d) {
+                    var r = zebkit.io.b64encode(d);
                     assert(r, tb64, "base64");
-                    var rr = zebra.io.b64decode(r);
-                    var is = new zebra.io.InputStream(rr);
+                    var rr = zebkit.io.b64decode(r);
+                    var is = new zebkit.io.InputStream(rr);
                     assert(is.toBase64(), tb64);
                     assert(is.available(), tb.length);
                     var i = 0;
@@ -102,7 +102,7 @@
             }
 
             var d = new Date(), dd = x.echo(d);
-            if (zebra.isString(dd)) dd = zebra.io.ISO8601toDate(dd);
+            if (zebkit.isString(dd)) dd = zebkit.io.ISO8601toDate(dd);
             assert(d.toString(), dd.toString(), "echo date");
 
             var a = x.echo(["A", [], {m:100}]);
@@ -119,28 +119,28 @@
             assert(Array.isArray(a), true, "empty array type");
 
             var a = x.arr(), aa =  [ 1, [2, 3], [ "ABC", [ {"k":"MMM"} ], true ], [] ];
-            zebra.assertObjEqual(a, aa, "compare arrays");
+            zebkit.assertObjEqual(a, aa, "compare arrays");
 
             assert(clazz.invoke(rurl, "echo")("!!!"), "!!!");
             assert(clazz.invoke(rurl, "summ")(1,2), 3);
-            zebra.assertObjEqual(clazz.invoke(rurl, "echo")(aa), aa);
+            zebkit.assertObjEqual(clazz.invoke(rurl, "echo")(aa), aa);
         };
 
 
-        zebra.ready(
+        zebkit.ready(
 			function() {
-                zebra.runTests("Zebra IO",
+                zebkit.runTests("IO",
                     function testRequestConsistency() {
-                        var r = zebra.io.getRequest();
-                        zebra.assertDefined(r, "status", "HTTP status code is not defined");
-                        zebra.assertDefined(r, "responseText", "Response code is not defined");
-                        zebra.assertDefined(r, "statusText", "Status text is not defined");
-                        zebra.assertDefined(r, "readyState", "Ready state is not defined");
-                        zebra.assertFDefined(r, "open", "Open method is not defined");
-                        zebra.assertFDefined(r, "send", "Send method is not defined");
-                        zebra.assertFDefined(r, "getResponseHeader", "getResponseHeader method is not defined");
-                        zebra.assertFDefined(r, "abort", "Abort method is not defined");
-                        zebra.assertFDefined(r, "getAllResponseHeaders", "getAllResponseHeader method is not defined");
+                        var r = zebkit.io.getRequest();
+                        zebkit.assertDefined(r, "status", "HTTP status code is not defined");
+                        zebkit.assertDefined(r, "responseText", "Response code is not defined");
+                        zebkit.assertDefined(r, "statusText", "Status text is not defined");
+                        zebkit.assertDefined(r, "readyState", "Ready state is not defined");
+                        zebkit.assertFDefined(r, "open", "Open method is not defined");
+                        zebkit.assertFDefined(r, "send", "Send method is not defined");
+                        zebkit.assertFDefined(r, "getResponseHeader", "getResponseHeader method is not defined");
+                        zebkit.assertFDefined(r, "abort", "Abort method is not defined");
+                        zebkit.assertFDefined(r, "getAllResponseHeaders", "getAllResponseHeader method is not defined");
                         assert(typeof r.onreadystatechange === "undefined" || r.onreadystatechange == null, true,
                                      "onreadystatechange has been already defined")
 
@@ -151,9 +151,9 @@
                     },
 
                     function testGET() {
-                        assert(zebra.io.GET(furl), txt, "Test sync get");
+                        assert(zebkit.io.GET(furl), txt, "Test sync get");
 
-                        zebra.io.GET(furl, this.assertCallback(function(r) {
+                        zebkit.io.GET(furl, this.assertCallback(function(r) {
                             assert(this.url, furl);
                             assert(r.status, 200);
                             assert(r.readyState, 4);
@@ -162,25 +162,25 @@
                     },
 
                     function testGET404() {
-                        zebra.assertException(function() { zebra.io.GET(wfurl) },  Error);
+                        zebkit.assertException(function() { zebkit.io.GET(wfurl) },  Error);
 
                         try {
-                            zebra.io.GET(wfurl);
+                            zebkit.io.GET(wfurl);
                         }
                         catch(e) {
                             assert(e.request.status != 200, true);
                             assert(e.request.readyState, 4);
                         }
 
-                        zebra.io.GET(wfurl, this.assertCallback(function(r) {
+                        zebkit.io.GET(wfurl, this.assertCallback(function(r) {
                             assert(r.status != 200, true);
                             assert(r.readyState, 4);
                         }));
                     },
 
                     function testPOST() {
-                        assert(zebra.io.POST(furl), txt);
-                        zebra.io.POST(furl, this.assertCallback(function(r)  {
+                        assert(zebkit.io.POST(furl), txt);
+                        zebkit.io.POST(furl, this.assertCallback(function(r)  {
                             assert(r.status, 200);
                             assert(r.readyState, 4);
                             assert(r.responseText, txt);
@@ -189,29 +189,29 @@
                     },
 
                     function testPOST_404() {
-                        zebra.assertException(function() { zebra.io.POST(wfurl) },  Error);
+                        zebkit.assertException(function() { zebkit.io.POST(wfurl) },  Error);
                     },
 
                     function _testEchoPOST() {
                         var data = "echo=!!!!!", txt = "!!!!!";
-                        zebra.assert(zebra.io.POST(eurl, data).trim(), txt);
-                        zebra.io.POST(eurl, data, this.assertCallback(function(r) {
-                            zebra.assert(r.status, 200);
-                            zebra.assert(r.readyState, 4);
-                            zebra.assert(r.responseText.trim(), txt);
-                            zebra.assert(this.url, eurl);
+                        zebkit.assert(zebkit.io.POST(eurl, data).trim(), txt);
+                        zebkit.io.POST(eurl, data, this.assertCallback(function(r) {
+                            zebkit.assert(r.status, 200);
+                            zebkit.assert(r.readyState, 4);
+                            zebkit.assert(r.responseText.trim(), txt);
+                            zebkit.assert(this.url, eurl);
                         }));
 
-                        assert(zebra.io.POST(eurl, {"echo":"test2"}).trim(), "test2");
+                        assert(zebkit.io.POST(eurl, {"echo":"test2"}).trim(), "test2");
                     },
 
                     function test_InputStream() {
-                        var I = zebra.Class(zebra.io.InputStream, [
+                        var I = zebkit.Class(zebkit.io.InputStream, [
                            function() { this.$super([]) },
                            function readByte() {}
                         ]);
 
-                        var i = new zebra.io.InputStream([]);
+                        var i = new zebkit.io.InputStream([]);
                         assert(i.available(), 0);
                         assertException(function() { i.skip(1); }, Error);
                         assertException(function() { i.mark(1); }, Error);
@@ -220,24 +220,24 @@
                     },
 
                     function testURLInputStream() {
-                        if (zebra.isIE) {
-                            zebra.print("Internet explorer doesn't support binary streaming");
+                        if (zebkit.isIE) {
+                            zebkit.print("Internet explorer doesn't support binary streaming");
                         }
                         else {
 //                            url = "http://10.211.55.2:8080/web/test/";
 
 
-                            var is = new zebra.io.URLInputStream(url + "test-utf8.txt");
+                            var is = new zebkit.io.URLInputStream(url + "test-utf8.txt");
                             assert(is.available(), 13);
                             is.close();
                             assert(is.available(), -1);
 
-                            var is = new zebra.io.URLInputStream(url + "test.jar");
+                            var is = new zebkit.io.URLInputStream(url + "test.jar");
                             assert(is.available(), 68897);
                             is.close();
                             assert(is.available(), -1);
 
-                            var is = new zebra.io.URLInputStream(url + "1x1.png");
+                            var is = new zebkit.io.URLInputStream(url + "1x1.png");
                             assert(is.available(), 95);
 
                             var i = 0;
@@ -251,7 +251,7 @@
                             is.close();
                             assert(is.available(), -1);
 
-                            var is = new zebra.io.URLInputStream(url + "1x1.png");
+                            var is = new zebkit.io.URLInputStream(url + "1x1.png");
                             assert(is.available(), 95);
                             var i = 0, b = 0;
                             while((b = is.read()) >= 0) {
@@ -263,7 +263,7 @@
                             assert(is.available(), -1);
 
 
-                            var is = new zebra.io.URLInputStream(url + "1x1.png", function(d, r) {
+                            var is = new zebkit.io.URLInputStream(url + "1x1.png", function(d, r) {
                                 assert(is.available(), 95);
 
                                 for(var i=0; i < is.available(); i++) {
@@ -280,14 +280,14 @@
                                 assert(is.available(), -1);
                             });
 
-                            zebra.assertException(function() {
-                                new zebra.io.URLInputStream(url + "2x2.png");
+                            zebkit.assertException(function() {
+                                new zebkit.io.URLInputStream(url + "2x2.png");
                             }, Error);
                         }
                     },
 
                     function test_InputStream2() {
-                        var b = new zebra.io.InputStream("abcd");
+                        var b = new zebkit.io.InputStream("abcd");
                         assert(b.available(), 4);
                         var d = b.read();
                         assertByCharCode(d, 'a');
@@ -308,7 +308,7 @@
                         assert(b.available(), 0);
                         assert(d, -1);
 
-                        var b = new zebra.io.InputStream([0,1,2,3]);
+                        var b = new zebkit.io.InputStream([0,1,2,3]);
                         assert(b.available(), 4);
                         var d = b.read();
                         assert(d, 0);
@@ -329,7 +329,7 @@
                         assert(b.available(), 0);
                         assert(d, -1);
 
-                        var b = new zebra.io.InputStream("abcd");
+                        var b = new zebkit.io.InputStream("abcd");
                         var buf = new Array(3);
                         var r   = b.read(buf);
                         assert(r, 3);
@@ -347,7 +347,7 @@
                         assert(b.read(), -1);
                         assert(b.read(buf), -1);
 
-                        var b = new zebra.io.InputStream("abcd");
+                        var b = new zebkit.io.InputStream("abcd");
                         var buf = Array(3);
                         var r   = b.read(buf, 1, 2);
                         assert(r, 2);
@@ -360,32 +360,32 @@
                          var url1 = "http://localhost:8080/jsonrpc4j/json";
                          var url2 = "http://10.26.238.20:8080/jsonrpc4j/json";
                          var url3 = "http://www.test.com/path?a=10&1213";
-                         var url4 = "file://localhost/Users/brigadir/projects/zebra/tests/io.test.html";
-                         var url5 = "/Users/brigadir/projects/zebra/tests/io.test.html";
+                         var url4 = "file://localhost/Users/brigadir/projects/zebkit/tests/io.test.html";
+                         var url5 = "/Users/brigadir/projects/zebkit/tests/io.test.html";
 
-                         assert(zebra.io.QS.append(url1, 12345), url1 + "?12345", "1");
-                         assert(zebra.io.QS.append(url2, 12345), url2 + "?12345", "2");
-                         assert(zebra.io.QS.append(url3, 12345), url3 + "&12345", "3");
-                         assert(zebra.io.QS.append(url4, 12345), url4 + "?12345", "4");
-                         assert(zebra.io.QS.append(url5, 12345), url5 + "?12345", "5");
+                         assert(zebkit.io.QS.append(url1, 12345), url1 + "?12345", "1");
+                         assert(zebkit.io.QS.append(url2, 12345), url2 + "?12345", "2");
+                         assert(zebkit.io.QS.append(url3, 12345), url3 + "&12345", "3");
+                         assert(zebkit.io.QS.append(url4, 12345), url4 + "?12345", "4");
+                         assert(zebkit.io.QS.append(url5, 12345), url5 + "?12345", "5");
 
-                         assert(zebra.io.QS.append(url1, {a:10, b:18}), url1 + "?a=10&b=18", "6");
-                         assert(zebra.io.QS.append(url2, {a:10, b:18}), url2 + "?a=10&b=18", "7");
-                         assert(zebra.io.QS.append(url3, {a:10, b:18}), url3 + "&a=10&b=18", "8");
-                         assert(zebra.io.QS.append(url4, {a:10, b:18}), url4 + "?a=10&b=18", "9");
-                         assert(zebra.io.QS.append(url5, {a:10, b:18}), url5 + "?a=10&b=18", "10");
+                         assert(zebkit.io.QS.append(url1, {a:10, b:18}), url1 + "?a=10&b=18", "6");
+                         assert(zebkit.io.QS.append(url2, {a:10, b:18}), url2 + "?a=10&b=18", "7");
+                         assert(zebkit.io.QS.append(url3, {a:10, b:18}), url3 + "&a=10&b=18", "8");
+                         assert(zebkit.io.QS.append(url4, {a:10, b:18}), url4 + "?a=10&b=18", "9");
+                         assert(zebkit.io.QS.append(url5, {a:10, b:18}), url5 + "?a=10&b=18", "10");
                     },
 
                     function _testJSON_RPC() {
                         // var url = "http://repo.gravitysoft.org/test/testjsonserver.php"
-                        //testRPC("http://192.168.1.10:8091/jrpc", zebra.io.JRPC);
-                        testRPC("http://192.168.178.11:8091/jrpc", zebra.io.JRPC);
+                        //testRPC("http://192.168.1.10:8091/jrpc", zebkit.io.JRPC);
+                        testRPC("http://192.168.178.11:8091/jrpc", zebkit.io.JRPC);
                     },
 
                     function _testXML_RPC() {
-                        //testRPC("http://10.26.214.170:8080/xrpc", zebra.io.XRPC);
-                        //testRPC("http://192.168.1.10:8090/xrpc", zebra.io.XRPC);
-                        testRPC("http://192.168.178.11:8090/xrpc", zebra.io.XRPC);
+                        //testRPC("http://10.26.214.170:8080/xrpc", zebkit.io.XRPC);
+                        //testRPC("http://192.168.1.10:8090/xrpc", zebkit.io.XRPC);
+                        testRPC("http://192.168.178.11:8090/xrpc", zebkit.io.XRPC);
                     }
                 );
 			}

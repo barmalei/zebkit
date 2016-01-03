@@ -34,24 +34,24 @@
 <script>
 
 
-zebra.ready(function() {
+zebkit.ready(function() {
 
     console.log("ready");
 
-    var canvas = new zebra.ui.zCanvas(600,400);
+    var canvas = new zebkit.ui.zCanvas(600,400);
 
-    canvas.root.setLayout(new zebra.layout.BorderLayout(8));
+    canvas.root.setLayout(new zebkit.layout.BorderLayout(8));
     canvas.root.setPadding(16);
     canvas.root.setBorder("plain");
 
     console.log("root: " + canvas.root.clazz.$name );
 
     //TODO: remove test code
-    zebra.ui.vk.activateVK();
-    var vk = zebra.ui.vk.getVK();
+    zebkit.ui.vk.activateVK();
+    var vk = zebkit.ui.vk.getVK();
 
     vk.bind(function vkMaskUpdated(vkey, om, nm) {
-        if ((nm & zebra.ui.KeyEvent.M_SHIFT) > 0) {
+        if ((nm & zebkit.ui.KeyEvent.M_SHIFT) > 0) {
             vk.eachKey(function(g, k) {
                 if (k.mask == 0 && k.upperCase) k.upperCase();
             });
@@ -67,25 +67,25 @@ zebra.ready(function() {
         vk.setActiveGroup(o);
     });
 
-    canvas.root.add("top", new zebra.ui.TextField("sdas"));
-    canvas.root.add("bottom", new zebra.ui.Button("showWin").setId("showWin"));
+    canvas.root.add("top", new zebkit.ui.TextField("sdas"));
+    canvas.root.add("bottom", new zebkit.ui.Button("showWin").setId("showWin"));
 
     canvas.find("#showWin").bind(function() {
-        var w = new zebra.ui.Window();
-        w.root.setLayout(new zebra.layout.BorderLayout());
-        w.root.add("top", new zebra.ui.TextField(""));
-        w.root.add("bottom", new zebra.ui.Button("Test").properties({
+        var w = new zebkit.ui.Window();
+        w.root.setLayout(new zebkit.layout.BorderLayout());
+        w.root.add("top", new zebkit.ui.TextField(""));
+        w.root.add("bottom", new zebkit.ui.Button("Test").properties({
             canUseVK : true
         }));
-        var ww = new zebra.ui.HtmlWinCanvas(w);
+        var ww = new zebkit.ui.HtmlWinCanvas(w);
         ww.setSize(200, 200);
-        zebra.ui.showWindow(canvas, "mdi", ww);
+        zebkit.ui.showWindow(canvas, "mdi", ww);
 
     });
 
 
-//    canvas.root.add("center", new zebra.ui.Button("dsds"));
-  //  canvas.root.add("center", new zebra.ui.TextArea());
+//    canvas.root.add("center", new zebkit.ui.Button("dsds"));
+  //  canvas.root.add("center", new zebkit.ui.TextArea());
   //  canvas.fullScreen();
 });
 

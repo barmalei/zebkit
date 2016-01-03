@@ -1,16 +1,16 @@
 
-if (typeof(zebra) === "undefined") {
+if (typeof(zebkit) === "undefined") {
     load(arguments[0] + '/src/easyoop.js');
     load(arguments[0] + '/src/tools.js');
     load(arguments[0] + '/src/util.js');
     load(arguments[0] + '/src/data.js');
 }
 
-var assert = zebra.assert, Class = zebra.Class, TreeModel = zebra.data.TreeModel,
-    assertException = zebra.assertException, Matrix = zebra.data.Matrix,
-    ListModel = zebra.data.ListModel, Text = zebra.data.Text, SingleLineTxt = zebra.data.SingleLineTxt;
+var assert = zebkit.assert, Class = zebkit.Class, TreeModel = zebkit.data.TreeModel,
+    assertException = zebkit.assertException, Matrix = zebkit.data.Matrix,
+    ListModel = zebkit.data.ListModel, Text = zebkit.data.Text, SingleLineTxt = zebkit.data.SingleLineTxt;
 
-zebra.runTests("Util objects bag",
+zebkit.runTests("Util objects bag",
     function test_treemodel() {
         function test (t) {
             assert(t.root.value, "Root");
@@ -45,9 +45,9 @@ zebra.runTests("Util objects bag",
         t.add(t.root, "Item 2");
         test(t);
 
-        var t = new TreeModel(new zebra.data.Item("Root"));
-        t.add(t.root, new zebra.data.Item("Item 1"));
-        t.add(t.root, new zebra.data.Item("Item 2"));
+        var t = new TreeModel(new zebkit.data.Item("Root"));
+        t.add(t.root, new zebkit.data.Item("Item 1"));
+        t.add(t.root, new zebkit.data.Item("Item 2"));
         test(t);
 
         t.add(t.root.kids[0], "Item 1.1");
@@ -627,10 +627,10 @@ zebra.runTests("Util objects bag",
     },
 
     function test_com_listmodel() {
-        if (typeof zebra.ui !== "undefined" && typeof zebra.ui.CompList !== "undefined") {
+        if (typeof zebkit.ui !== "undefined" && typeof zebkit.ui.CompList !== "undefined") {
 
             var cb = this.assertCallback(function() {
-                var l = new zebra.ui.CompList(["1","2","3"]);
+                var l = new zebkit.ui.CompList(["1","2","3"]);
 
                 assert(l.count(), 3);
                 assert(l.get(0).getValue(), "1");
@@ -676,7 +676,7 @@ zebra.runTests("Util objects bag",
                 }, Error);
 
 
-                l = new zebra.ui.CompList(["1","2","3","4","5"]);
+                l = new zebkit.ui.CompList(["1","2","3","4","5"]);
                 assert(l.count(), 5);
                 var lastRemoved = null,
                     lastRemovedIndex = -1,
@@ -779,7 +779,7 @@ zebra.runTests("Util objects bag",
                 assert(ccc, 2);
             });
 
-            zebra.ready(function() {
+            zebkit.ready(function() {
                 cb();
             });
         }

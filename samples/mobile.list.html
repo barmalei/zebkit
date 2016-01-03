@@ -6,11 +6,11 @@
 		<meta name="msapplication-tap-highlight" content="no" />
 
 
-		<script src='../zebra.min.js' type='text/javascript'></script>
+		<script src='../zebkit.min.js' type='text/javascript'></script>
 
 		<script type='text/javascript'>
-		    zebra.ready(function() {
-		    	eval(zebra.Import("ui", "layout"));
+		    zebkit.ready(function() {
+		    	eval(zebkit.Import("ui", "layout"));
 
 		    	var data = [ "images/035.png;Test1", "images/058.png;Test2", "images/058.png;Test3" ];
 		    	for(var i=0; i < 1000; i++) {
@@ -22,14 +22,14 @@
 		    	list.gap = 8;
 
 				// create canvas
-			    var z = new zebra.ui.zCanvas("test");
+			    var z = new zebkit.ui.zCanvas("test");
 			    z.fullScreen();
 
 				var sp = new ScrollPan(list, "vertical");
 				sp.setAutoHide(true);
 
 
-				list.setViewProvider(new zebra.Dummy([
+				list.setViewProvider(new zebkit.Dummy([
 					function $prototype() {
 
 						this.getView = function(target, value, i) {

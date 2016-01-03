@@ -2,18 +2,18 @@
     "version" : "10.2014",
 
     ".addClassAliases": {
-        "Picture"       : "zebra.ui.Picture",
-        "Border"        : "zebra.ui.Border",
-        "Dotted"        : "zebra.ui.Dotted",
-        "ViewSet"       : "zebra.ui.ViewSet",
-        "View"          : "zebra.ui.View",
-        "Gradient"      : "zebra.ui.Gradient",
-        "CompositeView" : "zebra.ui.CompositeView",
-        "rgb"           : "zebra.util.rgb",
-        "Font"          : "zebra.ui.Font",
-        "FlowLayout"    : "zebra.layout.FlowLayout",
-        "BorderLayout"  : "zebra.layout.BorderLayout",
-        "ListLayout"    : "zebra.layout.ListLayout"
+        "Picture"       : "zebkit.ui.Picture",
+        "Border"        : "zebkit.ui.Border",
+        "Dotted"        : "zebkit.ui.Dotted",
+        "ViewSet"       : "zebkit.ui.ViewSet",
+        "View"          : "zebkit.ui.View",
+        "Gradient"      : "zebkit.ui.Gradient",
+        "CompositeView" : "zebkit.ui.CompositeView",
+        "rgb"           : "zebkit.util.rgb",
+        "Font"          : "zebkit.ui.Font",
+        "FlowLayout"    : "zebkit.layout.FlowLayout",
+        "BorderLayout"  : "zebkit.layout.BorderLayout",
+        "ListLayout"    : "zebkit.layout.ListLayout"
     },
 
     "doubleClickDelta":180,
@@ -26,22 +26,22 @@
         "F7":118, "F8":119, "F9":120, "F10":121, "F11" : 122, "F12" : 123, ",":188, ";" : 186, "'" : 222,
         "[":219, "]":221, "\\":220,  "/":191,  "ENTER":13, "ESCAPE" : 27, "SPACE" : 32, "DELETE" : 46,
         "BSPACE":8, "TAB":9, "INSERT":45, "DELETE":46, "LEFT":37, "RIGHT":39, "UP":38, "DOWN":40,
-        "HOME":36,"END":35,"PAGEUP":33,"PAGEDOWN":34, "CMD":{ ".expr":"zebra.isFF?224:91" }, "SHIFT": 16,
+        "HOME":36,"END":35,"PAGEUP":33,"PAGEDOWN":34, "CMD":{ ".expr":"zebkit.isFF?224:91" }, "SHIFT": 16,
         "CTRL" : 17, "ALT":18, "CHAR_UNDEFINED":0
     },
 
-    "events"        : { "$zebra.ui.EventManager":[]  },
-    "paintManager"  : { "$zebra.ui.PaintManImpl":[]  },
-    "focusManager"  : { "$zebra.ui.FocusManager":[]  },
+    "events"        : { "$zebkit.ui.EventManager":[]  },
+    "paintManager"  : { "$zebkit.ui.PaintManImpl":[]  },
+    "focusManager"  : { "$zebkit.ui.FocusManager":[]  },
 
-    "?zebra.isTouchable == false": {
+    "?zebkit.isTouchable == false": {
         "clipboardTriggerKey": "@KeyEvent.CTRL",
-        "?zebra.isMacOS": {
+        "?zebkit.isMacOS": {
             "clipboardTriggerKey": "@KeyEvent.CMD"
         },
 
-        "cursorManager"  : { "$zebra.ui.CursorManager"  :[] },
-        "commandManager" : { "$zebra.ui.ShortcutManager" :[] }
+        "cursorManager"  : { "$zebkit.ui.CursorManager"  :[] },
+        "commandManager" : { "$zebkit.ui.ShortcutManager" :[] }
     },
 
     "font"          : { "$Font" : ["Arial", 14] },
@@ -55,7 +55,7 @@
         "borderColor": "#AAAAAA"
     },
 
-    "?zebra.isTouchable": {
+    "?zebkit.isTouchable": {
         "palette": {
             "background": "#F9F7F7"
         }
@@ -64,15 +64,15 @@
     "fontColor"     : "#808080",
 
     "borders" : {
-        "raised" : { "$zebra.ui.Raised":[] },
-        "sunken" : { "$zebra.ui.Sunken":[] },
-        "etched" : { "$zebra.ui.Etched":[] },
+        "raised" : { "$zebkit.ui.Raised":[] },
+        "sunken" : { "$zebkit.ui.Sunken":[] },
+        "etched" : { "$zebkit.ui.Etched":[] },
         "plain"  : { "$Border" : [ "#C5C5C5", 1, 3 ]  },
         "dot"    : { "$Dotted" : []  }
     },
 
     "CanvasLayer": {
-        "layout"     : { "$zebra.layout.RasterLayout":[] },
+        "layout"     : { "$zebkit.layout.RasterLayout":[] },
         "background" : null
     },
 
@@ -84,8 +84,8 @@
         "addons": [],
         "//"    :  "IT IS IMPORTANT TO HAVE CANVAS CSS PADDING = 0 TO FIX IE9 PROBLEM",
         "background": "white",
-        "layout": { "$zebra.layout.StackLayout":[] },
-        "kids"  : { "$ *zebra.ui.RootLayer": "root" },
+        "layout": { "$zebkit.layout.StackLayout":[] },
+        "kids"  : { "$ *zebkit.ui.RootLayer": "root" },
         "styles": {
             "background-color": "@palette.background",
             "outline"                    : "none",

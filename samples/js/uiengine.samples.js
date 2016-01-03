@@ -1,7 +1,7 @@
 
 (function(pkg, Class) {
 
-eval(zebra.Import("ui", "layout", "util"));
+eval(zebkit.Import("ui", "layout", "util"));
 
 pkg.borderColor = "#FFFFFF";
 pkg.borderSize = 6;
@@ -181,7 +181,7 @@ pkg.CursorPan = Class(Panel, [
 pkg.Components = Class(Panel, [
     function () {
         function makePanel(brColor, txtCol, txt, constr) {
-            if (zebra.isString(txtCol)) {
+            if (zebkit.isString(txtCol)) {
                 constr = txt;
                 txt = txtCol;
                 txtCol = brColor;
@@ -450,4 +450,4 @@ pkg.CustomLayer = Class(HtmlCanvas, [
 ]);
 
 
-})(zebra("ui.samples"), zebra.Class);
+})(zebkit("ui.samples"), zebkit.Class);

@@ -3,19 +3,19 @@
 	<head>
 		<title>Tutorial</title>
 
-        <script src='../zebra.min.js' type='text/javascript'></script>
+        <script src='../zebkit.min.js' type='text/javascript'></script>
 
 		<script type='text/javascript'>
 			var glebImg = null, patternImg;
-			zebra.ready(function() {
-				glebImg    = zebra.web.$loadImage("images/gleb.png");
-				patternImg = zebra.web.$loadImage("images/bg4.png");
+			zebkit.ready(function() {
+				glebImg    = zebkit.web.$loadImage("images/gleb.png");
+				patternImg = zebkit.web.$loadImage("images/bg4.png");
 			});
 
-		    zebra.ready(function() {
-		    	eval(zebra.Import("ui", "layout"));
+		    zebkit.ready(function() {
+		    	eval(zebkit.Import("ui", "layout"));
 
-		    	 var RoundBorder = zebra.Class(zebra.ui.View, [
+		    	 var RoundBorder = zebkit.Class(zebkit.ui.View, [
 		    	    function paint(g, x, y, w, h, c) {
 		    	        g.setColor("gray");
 		    	        this.outline(g, x, y, w, h, c);
@@ -29,13 +29,13 @@
 		    	    }
 		    	]);
 
-		    	var canvas = new zebra.ui.zCanvas("doc.roundborder");
+		    	var canvas = new zebkit.ui.zCanvas("doc.roundborder");
 		    	canvas.root.setBorder(new RoundBorder());
 		    	canvas.root.setBackground("orange");
 
 
 
-		    	 var SideBorder = zebra.Class(zebra.ui.View, [
+		    	 var SideBorder = zebkit.Class(zebkit.ui.View, [
 		    	    function getLeft() {
 		    	       return 8;
 		    	    },
@@ -54,10 +54,10 @@
 		    	    }
 		    	]);
 
-		    	var canvas = new zebra.ui.zCanvas("doc.border");
+		    	var canvas = new zebkit.ui.zCanvas("doc.border");
 		    	canvas.root.setBorder(new SideBorder());
 
-	     	    var MyBg = zebra.Class(zebra.ui.View, [
+	     	    var MyBg = zebkit.Class(zebkit.ui.View, [
 	    	         function paint(g,x,y,w,h,c) {
 	    	            g.setColor("green");
 	    	            for(var i=10; i < w; i+=10) {
@@ -70,11 +70,11 @@
 						g.drawLine(x + w/2 - 1, y + 5, x + w/2 - 1, y + h - 5, 2);
 	    	         }
 	    	    ]);
-		    	var canvas = new zebra.ui.zCanvas("doc.custombg");
+		    	var canvas = new zebkit.ui.zCanvas("doc.custombg");
 		    	canvas.root.setBackground(new MyBg());
 
 
-		    	var CellsView = new zebra.Class(zebra.ui.View, [
+		    	var CellsView = new zebkit.Class(zebkit.ui.View, [
 		    	    function paint(g,x,y,w,h,c) {
 		    	        var step = 10;
 		    	        g.setColor("red");
@@ -89,7 +89,7 @@
 		    	    }
 		    	]);
 
-		    	var canvas = new zebra.ui.zCanvas("doc.view");
+		    	var canvas = new zebkit.ui.zCanvas("doc.view");
 		    	// one of the way to re-use and see implemented view is
 		    	// use it as a component background
 		    	canvas.root.setBackground(new CellsView());
@@ -108,7 +108,7 @@
 
 		    	if (document.getElementById("doc.views.gradient2") != null) {
 			    	var c = new zCanvas("doc.views.gradient2");
-			    	c.root.setBackground(new Gradient("orange", "yellow", zebra.layout.HORIZONTAL));
+			    	c.root.setBackground(new Gradient("orange", "yellow", zebkit.layout.HORIZONTAL));
 			    }
 
 			    if (document.getElementById("doc.views.radial") != null) {
@@ -207,7 +207,7 @@
 				}
 
 			    if (document.getElementById("doc.views.composite") != null) {
-					var Moustache = new zebra.Class(View, [
+					var Moustache = new zebkit.Class(View, [
 						function paint(g,x,y,w,h,c) {
 							g.setColor("rgba(0,0,0,0.3)");
 							g.drawLine(w/2-15,      h - h/4,      w/2 + 25, h - h/4 + 5, 2);
@@ -227,7 +227,7 @@
 
 				if (document.getElementById("doc.views.text") != null) {
 			    	var c = new zCanvas("doc.views.text");
-			    	c.root.setBackground(new BoldTextRender(new zebra.data.Text("Text Render paints\nmulti-lines text.\nIt computes all\nnecessary font\nmetrics automatically.")));
+			    	c.root.setBackground(new BoldTextRender(new zebkit.data.Text("Text Render paints\nmulti-lines text.\nIt computes all\nnecessary font\nmetrics automatically.")));
 				}
 			});
 		</script>

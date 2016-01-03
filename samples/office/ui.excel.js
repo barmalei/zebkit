@@ -1,18 +1,18 @@
-zebra.package("ui.excel", function(pkg) {
+zebkit.package("ui.excel", function(pkg) {
     // TODO: standard component look and feel adjustment
     // has to be moved away from here
 
-    zebra.ui.Menubar.MenuItem.Label.color = "white";
-    zebra.ui.Menubar.MenuItem.Label.font = new zebra.ui.Font("Arial", "bold", 14);
-    zebra.ui.Menu.MenuItem.Label.font = new zebra.ui.Font("Arial", "bold", 14);
-    zebra.ui.Menu.MenuItem.Label.color = "black";
+    zebkit.ui.Menubar.MenuItem.Label.color = "white";
+    zebkit.ui.Menubar.MenuItem.Label.font = new zebkit.ui.Font("Arial", "bold", 14);
+    zebkit.ui.Menu.MenuItem.Label.font = new zebkit.ui.Font("Arial", "bold", 14);
+    zebkit.ui.Menu.MenuItem.Label.color = "black";
 
     var MAX_SHEET_PAGES = 10;
 
 
-    var Class    = zebra.Class,
-        ui       = zebra.ui,
-        L        = zebra.layout,
+    var Class    = zebkit.Class,
+        ui       = zebkit.ui,
+        L        = zebkit.layout,
         rg       = /\=([A-Z]+)([0-9]+)/,
         alphabet = [
                     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",
@@ -27,7 +27,7 @@ zebra.package("ui.excel", function(pkg) {
         }
     };
 
-    pkg.Matrix = Class(zebra.data.Matrix, [
+    pkg.Matrix = Class(zebkit.data.Matrix, [
         function $get(row, col) {
             return this.$super(this.get, row, col);
         },
@@ -193,13 +193,13 @@ zebra.package("ui.excel", function(pkg) {
     pkg.Application = Class([
         function(root) {
             var $this = this,
-                spath = ".zebra.ui.excel.SheetPan",
-                tabs  = root.find(".zebra.ui.Tabs");
+                spath = ".zebkit.ui.excel.SheetPan",
+                tabs  = root.find(".zebkit.ui.Tabs");
 
             tabs.bind(function(src, prev) {
                 // new tab sheet has to be added
                 if (src.selectedIndex == tabs.kids.length - 1) {
-                    var sheet = new zebra.util.Bag().load("sheetLayout.json");
+                    var sheet = new zebkit.util.Bag().load("sheetLayout.json");
                     tabs.insert(tabs.kids.length - 1, "Sheet " + tabs.kids.length, sheet.root);
                     if (tabs.kids.length - 1 == MAX_SHEET_PAGES) tabs.enableTab(tabs.kids.length - 1, false);
                 }

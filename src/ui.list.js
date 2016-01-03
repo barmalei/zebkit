@@ -4,14 +4,14 @@
  * @module ui
 */
 
-var L = zebra.layout, Position = zebra.util.Position, KE = pkg.KeyEvent;
+var L = zebkit.layout, Position = zebkit.util.Position, KE = pkg.KeyEvent;
 
 /**
  * Base UI list component class that has to be extended with a
  * concrete list component implementation. The list component
- * visualizes list data model (zebra.data.ListModel).
- * @class  zebra.ui.BaseList
- * @extends {zebra.ui.Panel}
+ * visualizes list data model (zebkit.data.ListModel).
+ * @class  zebkit.ui.BaseList
+ * @extends {zebkit.ui.Panel}
  */
 
 /**
@@ -22,12 +22,12 @@ var L = zebra.layout, Position = zebra.util.Position, KE = pkg.KeyEvent;
         });
 
  * @event selected
- * @param {zebra.ui.BaseList} src a list that triggers the event
+ * @param {zebkit.ui.BaseList} src a list that triggers the event
  * @param {Integer|Object} prev a previous selected index, return null if the selected item has been re-selected
  */
 pkg.BaseList = Class(pkg.Panel, Position.Metric, [
     function $clazz() {
-        this.Listeners = zebra.util.ListenersClass("selected");
+        this.Listeners = zebkit.util.ListenersClass("selected");
     },
 
     function $prototype() {
@@ -36,7 +36,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         /**
          * List model the component visualizes
          * @attribute model
-         * @type {zebra.data.ListModel}
+         * @type {zebkit.data.ListModel}
          * @readOnly
          */
 
@@ -95,7 +95,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
 
         this.lookupItem = function(ch){
             var count = this.model == null ? 0 : this.model.count();
-            if (zebra.util.isLetter(ch) && count > 0){
+            if (zebkit.util.isLetter(ch) && count > 0){
                 var index = this.selectedIndex < 0 ? 0 : this.selectedIndex + 1;
                 ch = ch.toLowerCase();
                 for(var i = 0;i < count - 1; i++){
@@ -411,7 +411,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
 
         /**
          * Define key typed events handler
-         * @param  {zebra.ui.KeyEvent} e a key event
+         * @param  {zebkit.ui.KeyEvent} e a key event
          * @method keyTyped
          */
         this.keyTyped = function (e){
@@ -493,14 +493,14 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
 
         /**
          * Set the list model to be rendered with the list component
-         * @param {zebra.data.ListModel} m a list model
+         * @param {zebkit.data.ListModel} m a list model
          * @method setModel
          * @chainable
          */
         this.setModel = function (m){
             if (m != this.model){
                 if (m != null && Array.isArray(m)) {
-                    m = new zebra.data.ListModel(m);
+                    m = new zebkit.data.ListModel(m);
                 }
 
                 if (this.model != null && this.model._ != null) this.model.unbind(this);
@@ -514,7 +514,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         /**
          * Set the given position controller. List component uses position to
          * track virtual cursor.
-         * @param {zebra.util.Position} c a position
+         * @param {zebkit.util.Position} c a position
          * @method setPosition
          */
         this.setPosition = function(c){
@@ -540,7 +540,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         this.setViewProvider = function (v){
             if (this.provider != v){
                 if (typeof v  == "function") {
-                    var o = new zebra.Dummy();
+                    var o = new zebkit.Dummy();
                     o.getView = v;
                     v = o;
                 }
@@ -591,7 +591,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         if (b == null) b = false;
         if (m == null) m = [];
         else {
-            if (zebra.isBoolean(m)) {
+            if (zebkit.isBoolean(m)) {
                 b = m;
                 m = [];
             }
@@ -622,7 +622,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
          * @attribute scrollManager
          * @readOnly
          * @protected
-         * @type {zebra.ui.ScrollManager}
+         * @type {zebkit.ui.ScrollManager}
          */
         this.scrollManager = new pkg.ScrollManager(this);
 
@@ -660,14 +660,14 @@ pkg.BaseList.prototype.setViews = pkg.$ViewsSetter;
 
 
 /**
- * The class is list component implementation that visualizes zebra.data.ListModel.
+ * The class is list component implementation that visualizes zebkit.data.ListModel.
  * It is supposed the model can have any type of items. Visualization of the items
  * is customized by defining a view provider.
  *
  * The general use case:
 
         // create list component that contains three item
-        var list = new zebra.ui.List([
+        var list = new zebkit.ui.List([
             "Item 1",
             "Item 2",
             "Item 3"
@@ -687,7 +687,7 @@ pkg.BaseList.prototype.setViews = pkg.$ViewsSetter;
         // suppose every model item is an array that contains two elements,
         // first element points to the item icon and the second element defines
         // the list item text
-        var list = new zebra.ui.List([
+        var list = new zebkit.ui.List([
             [ "icon1.gif", "Caption 1" ],
             [ "icon2.gif", "Caption 1" ],
             [ "icon3.gif", "Caption 1" ]
@@ -695,19 +695,19 @@ pkg.BaseList.prototype.setViews = pkg.$ViewsSetter;
 
         // define new list item views provider that represents every
         // list model item as icon with a caption
-        list.setViewProvider(new zebra.ui.List.ViewProvider([
+        list.setViewProvider(new zebkit.ui.List.ViewProvider([
             function getView(target, value, i) {
                 var caption = value[1];
                 var icon    = value[0];
-                return new zebra.ui.CompRender(new zebra.ui.ImageLabel(caption, icon));
+                return new zebkit.ui.CompRender(new zebkit.ui.ImageLabel(caption, icon));
             }
         ]));
 
- * @class  zebra.ui.List
- * @extends zebra.ui.BaseList
+ * @class  zebkit.ui.List
+ * @extends zebkit.ui.BaseList
  * @constructor
- * @param {zebra.data.ListModel|Array} [model] a list model that should be passed as an instance
- * of zebra.data.ListModel or as an array.
+ * @param {zebkit.data.ListModel|Array} [model] a list model that should be passed as an instance
+ * of zebkit.data.ListModel or as an array.
  * @param {Boolean} [isComboMode] true if the list navigation has to be triggered by
  * pointer cursor moving
  */
@@ -715,11 +715,11 @@ pkg.List = Class(pkg.BaseList, [
     function $clazz() {
         /**
          * List view provider class. This implementation renders list item using string
-         * render. If a list item is an instance of "zebra.ui.View" class than it will
+         * render. If a list item is an instance of "zebkit.ui.View" class than it will
          * be rendered as the view.
-         * @class zebra.ui.List.ViewProvider
+         * @class zebkit.ui.List.ViewProvider
          * @constructor
-         * @param {String|zebra.ui.Font} [f] a font to render list item text
+         * @param {String|zebkit.ui.Font} [f] a font to render list item text
          * @param {String} [c] a color to render list item text
          */
         this.ViewProvider = Class([
@@ -727,13 +727,13 @@ pkg.List = Class(pkg.BaseList, [
                 this[''] = function(f, c) {
                     /**
                      * Reference to text render that is used to paint a list items
-                     * @type {zebra.ui.StringRender}
+                     * @type {zebkit.ui.StringRender}
                      * @attribute text
                      * @readOnly
                      */
 
                     this.text = new pkg.StringRender("");
-                    zebra.properties(this, this.clazz);
+                    zebkit.properties(this, this.clazz);
                     if (f != null) this.text.setFont(f);
                     if (c != null) this.text.setColor(c);
                 };
@@ -750,10 +750,10 @@ pkg.List = Class(pkg.BaseList, [
                 /**
                  * Get a view for the given model data element of the
                  * specified list component
-                 * @param  {zebra.ui.List} target a list component
+                 * @param  {zebkit.ui.List} target a list component
                  * @param  {Object} value  a data model value
                  * @param  {Integer} i  an item index
-                 * @return {zebra.ui.View}  a view to be used to render
+                 * @return {zebkit.ui.View}  a view to be used to render
                  * the given list component item
                  * @method getView
                  */
@@ -766,7 +766,7 @@ pkg.List = Class(pkg.BaseList, [
         ]);
 
         /**
-         * @for zebra.ui.List
+         * @for zebkit.ui.List
          */
     },
 
@@ -1004,16 +1004,16 @@ pkg.List = Class(pkg.BaseList, [
  * other UI components as its elements what makes list item view customization very easy and powerful:
 
         // use image label as the component list items
-        var list = new zebra.ui.CompList();
-        list.add(new zebra.ui.ImageLabel("Caption 1", "icon1.gif"));
-        list.add(new zebra.ui.ImageLabel("Caption 2", "icon2.gif"));
-        list.add(new zebra.ui.ImageLabel("Caption 3", "icon3.gif"));
+        var list = new zebkit.ui.CompList();
+        list.add(new zebkit.ui.ImageLabel("Caption 1", "icon1.gif"));
+        list.add(new zebkit.ui.ImageLabel("Caption 2", "icon2.gif"));
+        list.add(new zebkit.ui.ImageLabel("Caption 3", "icon3.gif"));
 
 
- * @class zebra.ui.CompList
- * @extends zebra.ui.BaseList
- * @param {zebra.data.ListModel|Array} [model] a list model that should be passed as an instance
- * of zebra.data.ListModel or as an array.
+ * @class zebkit.ui.CompList
+ * @extends zebkit.ui.BaseList
+ * @param {zebkit.data.ListModel|Array} [model] a list model that should be passed as an instance
+ * of zebkit.data.ListModel or as an array.
  * @param {Boolean} [isComboMode] true if the list navigation has to be triggered by
  * pointer cursor moving
  */
@@ -1092,7 +1092,7 @@ pkg.CompList = Class(pkg.BaseList, [
 
     function setPosition(c){
         if (c != this.position){
-            if (zebra.instanceOf(this.layout, Position.Metric)) {
+            if (zebkit.instanceOf(this.layout, Position.Metric)) {
                 c.setMetric(this.layout);
             }
             this.$super(c);
@@ -1126,7 +1126,7 @@ pkg.CompList = Class(pkg.BaseList, [
 
             this.$super(this.scrollManager);
             if (this.position != null) {
-                this.position.setMetric(zebra.instanceOf(layout, Position.Metric) ? layout : this);
+                this.position.setMetric(zebkit.instanceOf(layout, Position.Metric) ? layout : this);
             }
         }
 
@@ -1149,7 +1149,7 @@ pkg.CompList = Class(pkg.BaseList, [
         if (i < 0 || i > this.kids.length) {
             throw new RangeError(i);
         }
-        return this.$super(i, constr, zebra.instanceOf(e, pkg.Panel) ? e : new this.clazz.Label("" + e));
+        return this.$super(i, constr, zebkit.instanceOf(e, pkg.Panel) ? e : new this.clazz.Label("" + e));
     },
 
     function kidAdded(index,constr,e){
@@ -1165,7 +1165,7 @@ pkg.CompList = Class(pkg.BaseList, [
     function (m, b) {
         this.model = this;
         this.max   = null;
-        this.setViewProvider(new zebra.Dummy([
+        this.setViewProvider(new zebkit.Dummy([
             function getView(target,obj,i) {
                 return new pkg.CompRender(obj);
             }
@@ -1179,7 +1179,7 @@ pkg.CompList = Class(pkg.BaseList, [
  * You can use any available list component implementation:
 
         // use simple list as combo box drop down window
-        var combo = new zebra.ui.Combo(new zebra.ui.List([
+        var combo = new zebkit.ui.Combo(new zebkit.ui.List([
             "Item 1",
             "Item 2",
             "Item 3"
@@ -1187,7 +1187,7 @@ pkg.CompList = Class(pkg.BaseList, [
 
 
         // use component list as combo box drop down window
-        var combo = new zebra.ui.Combo(new zebra.ui.CompList([
+        var combo = new zebkit.ui.Combo(new zebkit.ui.CompList([
             "Item 1",
             "Item 2",
             "Item 3"
@@ -1195,16 +1195,16 @@ pkg.CompList = Class(pkg.BaseList, [
 
 
         // let combo box decides which list component has to be used
-        var combo = new zebra.ui.Combo([
+        var combo = new zebkit.ui.Combo([
             "Item 1",
             "Item 2",
             "Item 3"
         ]);
 
- * @class zebra.ui.Combo
- * @extends {zebra.ui.Panel}
+ * @class zebkit.ui.Combo
+ * @extends {zebkit.ui.Panel}
  * @constructor
- * @param {Array|zebra.ui.BaseList} data an combo items array or a list component
+ * @param {Array|zebkit.ui.BaseList} data an combo items array or a list component
  */
 
 /**
@@ -1215,7 +1215,7 @@ pkg.CompList = Class(pkg.BaseList, [
      });
 
  * @event selected
- * @param {zebra.ui.Combo} combo a combo box component where a new value
+ * @param {zebkit.ui.Combo} combo a combo box component where a new value
  * has been selected
  * @param {Object} value a previously selected index
  */
@@ -1224,22 +1224,22 @@ pkg.CompList = Class(pkg.BaseList, [
  * Implement the event handler method to detect when a combo pad window
  * is shown or hidden
 
-     var p = new zebra.ui.Combo();
+     var p = new zebkit.ui.Combo();
      p.padShown = function(src, b) { ... }; // add event handler
 
  * @event padShown
- * @param {zebra.ui.Combo} src a combo box component that triggers the event
+ * @param {zebkit.ui.Combo} src a combo box component that triggers the event
  * @param {Boolean} b a flag that indicates if the combo pad window has been
  * shown (true) or hidden (false)
 */
 pkg.Combo = Class(pkg.Panel, [
     function $clazz() {
-        this.Listeners = zebra.util.ListenersClass("selected");
+        this.Listeners = zebkit.util.ListenersClass("selected");
 
         /**
          * UI panel class that is used to implement combo box content area
-         * @class  zebra.ui.Combo.ContentPan
-         * @extends {zebra.ui.Panel}
+         * @class  zebkit.ui.Combo.ContentPan
+         * @extends {zebkit.ui.Panel}
          */
         this.ContentPan = Class(pkg.Panel, [
             function $prototype() {
@@ -1248,7 +1248,7 @@ pkg.Combo = Class(pkg.Panel, [
                  * value. Implement the method to synchronize content panel with updated combo
                  * box value
                  * @method comboValueUpdated
-                 * @param {zebra.ui.Combo} combo a combo box component that has been updated
+                 * @param {zebkit.ui.Combo} combo a combo box component that has been updated
                  * @param {Object} value a value with which the combo box has been updated
                  */
                 this.comboValueUpdated = function(combo, value) {};
@@ -1266,11 +1266,11 @@ pkg.Combo = Class(pkg.Panel, [
                 /**
                  * Get a combo box the content panel belongs
                  * @method getCombo
-                 * @return {zebra.ui.Combo} a combo the content panel belongs
+                 * @return {zebkit.ui.Combo} a combo the content panel belongs
                  */
                 this.getCombo = function() {
                     var p = this;
-                    while((p = p.parent) && zebra.instanceOf(p, pkg.Combo) == false);
+                    while((p = p.parent) && zebkit.instanceOf(p, pkg.Combo) == false);
                     return p;
                 };
             }
@@ -1278,8 +1278,8 @@ pkg.Combo = Class(pkg.Panel, [
 
         /**
          * Combo box list pad component class
-         * @extends zebra.ui.ScrollPan
-         * @class  zebra.ui.Combo.ComboPadPan
+         * @extends zebkit.ui.ScrollPan
+         * @class  zebkit.ui.Combo.ComboPadPan
          */
         this.ComboPadPan = Class(pkg.ScrollPan, [
             function $prototype() {
@@ -1290,7 +1290,7 @@ pkg.Combo = Class(pkg.Panel, [
                 /**
                  * A reference to combo that uses the list pad component
                  * @attribute owner
-                 * @type {zebra.ui.Combo}
+                 * @type {zebkit.ui.Combo}
                  * @readOnly
                  */
 
@@ -1314,8 +1314,8 @@ pkg.Combo = Class(pkg.Panel, [
 
         /**
          * Read-only content area combo box component panel class
-         * @extends zebra.ui.Combo.ContentPan
-         * @class  zebra.ui.Combo.ReadonlyContentPan
+         * @extends zebkit.ui.Combo.ContentPan
+         * @class  zebkit.ui.Combo.ReadonlyContentPan
          */
         this.ReadonlyContentPan = Class(this.ContentPan, [
             function $prototype() {
@@ -1365,8 +1365,8 @@ pkg.Combo = Class(pkg.Panel, [
 
         /**
          * Editable content area combo box component panel class
-         * @class zebra.ui.Combo.EditableContentPan
-         * @extends zebra.ui.Combo.ContentPan
+         * @class zebkit.ui.Combo.EditableContentPan
+         * @extends zebkit.ui.Combo.ContentPan
          */
 
         /**
@@ -1376,7 +1376,7 @@ pkg.Combo = Class(pkg.Panel, [
             ...
         });
 
-         * @param {zebra.ui.Combo.ContentPan} contentPan a content panel that
+         * @param {zebkit.ui.Combo.ContentPan} contentPan a content panel that
          * updated its value
          * @param {Object} newValue a new value the content panel has been set
          * with
@@ -1385,7 +1385,7 @@ pkg.Combo = Class(pkg.Panel, [
         this.EditableContentPan = Class(this.ContentPan, [
             function $clazz() {
                 this.TextField = Class(pkg.TextField, []);
-                this.Listeners = zebra.util.ListenersClass("contentUpdated");
+                this.Listeners = zebkit.util.ListenersClass("contentUpdated");
             },
 
             function $prototype() {
@@ -1399,7 +1399,7 @@ pkg.Combo = Class(pkg.Panel, [
 
                 /**
                  * Called when the combo box content has been updated
-                 * @param {zebra.ui.Combo} combo a combo where the new value has been set
+                 * @param {zebkit.ui.Combo} combo a combo where the new value has been set
                  * @param {Object} v a new combo box value
                  * @method comboValueUpdated
                  */
@@ -1435,7 +1435,7 @@ pkg.Combo = Class(pkg.Panel, [
                  * @attribute textField
                  * @readOnly
                  * @private
-                 * @type {zebra.ui.TextField}
+                 * @type {zebkit.ui.TextField}
                  */
                 this.textField = new this.clazz.TextField("",  -1);
                 this.textField.view.target.bind(this);
@@ -1455,7 +1455,7 @@ pkg.Combo = Class(pkg.Panel, [
     },
 
     /**
-     * @for zebra.ui.Combo
+     * @for zebkit.ui.Combo
      */
     function $prototype() {
         this.paint = function(g){
@@ -1536,7 +1536,7 @@ pkg.Combo = Class(pkg.Panel, [
 
         /**
          * Define pointer pressed events handler
-         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
          * @method pointerPressed
          */
         this.pointerPressed = function (e) {
@@ -1615,7 +1615,7 @@ pkg.Combo = Class(pkg.Panel, [
 
         /**
          * Bind the given list component to the combo box component.
-         * @param {zebra.ui.BaseList} l a list component
+         * @param {zebkit.ui.BaseList} l a list component
          * @method setList
          */
         this.setList = function(l){
@@ -1646,7 +1646,7 @@ pkg.Combo = Class(pkg.Panel, [
 
         /**
          * Define key pressed events handler
-         * @param  {zebra.ui.KeyEvent} e a key event
+         * @param  {zebkit.ui.KeyEvent} e a key event
          * @method keyPressed
          */
         this.keyPressed = function (e){
@@ -1664,7 +1664,7 @@ pkg.Combo = Class(pkg.Panel, [
 
         /**
          * Define key typed  events handler
-         * @param  {zebra.ui.KeyEvent} e a key event
+         * @param  {zebkit.ui.KeyEvent} e a key event
          * @method keyTyped
          */
         this.keyTyped = function(e) {
@@ -1673,7 +1673,7 @@ pkg.Combo = Class(pkg.Panel, [
 
         /**
          * Set the given combo box selection view
-         * @param {zebra.ui.View} c a view
+         * @param {zebkit.ui.View} c a view
          * @method setSelectionView
          */
         this.setSelectionView = function (c){
@@ -1710,7 +1710,7 @@ pkg.Combo = Class(pkg.Panel, [
         /**
          * Combo box button listener method. The method triggers showing
          * combo box pad window when the combo button has been pressed
-         * @param  {zebra.ui.Button} src a button that has been pressed
+         * @param  {zebkit.ui.Button} src a button that has been pressed
          * @method fired
          */
         this.fired = function(src) {
@@ -1735,7 +1735,7 @@ pkg.Combo = Class(pkg.Panel, [
     },
 
     function(list, editable) {
-        if (list != null && zebra.isBoolean(list)) {
+        if (list != null && zebkit.isBoolean(list)) {
             editable = list;
             list = null;
         }
@@ -1752,9 +1752,9 @@ pkg.Combo = Class(pkg.Panel, [
          * Reference to combo box list component
          * @attribute list
          * @readOnly
-         * @type {zebra.ui.BaseList}
+         * @type {zebkit.ui.BaseList}
          */
-        if (zebra.instanceOf(list, pkg.BaseList) === false) {
+        if (zebkit.instanceOf(list, pkg.BaseList) === false) {
             list = new this.clazz.List(list, true);
         }
 
@@ -1762,28 +1762,28 @@ pkg.Combo = Class(pkg.Panel, [
          * Reference to combo box button component
          * @attribute button
          * @readOnly
-         * @type {zebra.ui.Panel}
+         * @type {zebkit.ui.Panel}
          */
 
         /**
          * Reference to combo box content component
          * @attribute content
          * @readOnly
-         * @type {zebra.ui.Panel}
+         * @type {zebkit.ui.Panel}
          */
 
         /**
          * Reference to combo box pad component
          * @attribute winpad
          * @readOnly
-         * @type {zebra.ui.Panel}
+         * @type {zebkit.ui.Panel}
          */
 
         /**
          * Reference to selection view
          * @attribute selectionView
          * @readOnly
-         * @type {zebra.ui.View}
+         * @type {zebkit.ui.View}
          */
 
         this.button = this.content = this.winpad = null;
@@ -1813,7 +1813,7 @@ pkg.Combo = Class(pkg.Panel, [
     },
 
     function kidAdded(index,s,c){
-        if (zebra.instanceOf(c, this.clazz.ContentPan)) {
+        if (zebkit.instanceOf(c, this.clazz.ContentPan)) {
             if (this.content != null) {
                 throw new Error("Content panel is set");
             }
@@ -1861,4 +1861,4 @@ pkg.Combo = Class(pkg.Panel, [
  * @for
  */
 
-})(zebra("ui"), zebra.Class);
+})(zebkit("ui"), zebkit.Class);

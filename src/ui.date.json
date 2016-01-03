@@ -29,7 +29,7 @@
             "GridCaption": {
                 "Label" : {
                     "padding" : [0, 2, 0, 2],
-                    "font"    : "@zebra.ui.boldFont"
+                    "font"    : "@zebkit.ui.boldFont"
                 },
 
                 "border" : null,
@@ -38,7 +38,7 @@
             },
 
             "ItemPan" : {
-                "layout" : { "$zebra.layout.FlowLayout" : [ "right", "center", "horizontal", 2 ] },
+                "layout" : { "$zebkit.layout.FlowLayout" : [ "right", "center", "horizontal", 2 ] },
 
                 "icon" : {
                     "border": null,
@@ -50,7 +50,7 @@
 
                 "label" : {
                     "color" : "#442244",
-                    "font"  : { "$zebra.ui.Font" : [ "Arial", "bold", "14" ] },
+                    "font"  : { "$zebkit.ui.Font" : [ "Arial", "bold", "14" ] },
                     "border":  null,
                     "background": null,
                     "padding" : 0
@@ -74,7 +74,7 @@
                 "today" : {
                     "icon" :  {
                         "view"          : null,
-                        "border"        : { "$zebra.ui.RoundBorder" : []},
+                        "border"        : { "$zebkit.ui.RoundBorder" : []},
                         "background"    : "#65B661",
                         "preferredSize" : [ 8, 8 ]
                     }
@@ -99,7 +99,7 @@
             "views": {
                 "offmarker"           : "rgba(234, 243, 119, 0.5)",
                 "marker"              : "rgba(234, 243, 119, 1.0)",
-                "notSelectableMarker" : { "$zebra.ui.Border": "lightGray" }
+                "notSelectableMarker" : { "$zebkit.ui.Border": "lightGray" }
             },
 
             "selDayBackground" : "#D5F377"
@@ -131,14 +131,14 @@
 
             "Link" : {
                 "id" : "nowLink",
-                "font":  { "$zebra.ui.Font" : ["Arial", 11]},
+                "font":  { "$zebkit.ui.Font" : ["Arial", 11]},
                 "visible" : false
             },
 
             "DotButton" : {
                 "id"         : "dotButton",
                 "enabled"    : false,
-                "border"     : { "$zebra.ui.RoundBorder" : [ null, 0] },
+                "border"     : { "$zebkit.ui.RoundBorder" : [ null, 0] },
                 "background" : {
                     "out"          : "black",
                     "over"         : "red",
@@ -151,7 +151,7 @@
             "MonthsCombo" : {
                 "Label": {
                     "color" : "#276733",
-                    "font" : { "$zebra.ui.Font" : [ "Arial", "bold", "14" ] }
+                    "font" : { "$zebkit.ui.Font" : [ "Arial", "bold", "14" ] }
                 },
 
                 "CompList" : {
@@ -165,20 +165,20 @@
                 "background" : null,
                 "border" : {
                     "focusoff" :  null,
-                    "focuson"  : { "$zebra.ui.LineView" : [ "bottom", "black", 1 ] }
+                    "focuson"  : { "$zebkit.ui.LineView" : [ "bottom", "black", 1 ] }
                 }
             },
 
             "YearField" : {
                 "id"    : "yearField",
-                "font" : { "$zebra.ui.Font" : [ "Arial", "bold", "14" ] },
+                "font" : { "$zebkit.ui.Font" : [ "Arial", "bold", "14" ] },
                 "editable"   : false,
                 "background" : null,
                 "curView" : null,
                 "color" : "#276733",
                 "border" : {
                     "focusoff" :  null,
-                    "focuson"  : { "$zebra.ui.LineView" : [ "bottom", "black", 1 ] }
+                    "focuson"  : { "$zebkit.ui.LineView" : [ "bottom", "black", 1 ] }
                 }
             },
 
@@ -215,13 +215,13 @@
                 "inherit":  "date.Calendar"
             },
 
-            "border" : { "$zebra.ui.Border": "gray" },
+            "border" : { "$zebkit.ui.Border": "gray" },
             "format" : "${date}/${month2}/${fullYear}"
         },
 
         "DateRangeInput" : {
             "DateInputPan" : {
-                "layout" : { "$zebra.layout.FlowLayout": 2 }
+                "layout" : { "$zebkit.layout.FlowLayout": 2 }
             },
 
             "MinDateTextField" : {
@@ -256,16 +256,16 @@
 
             "tags" : {
                 "startDate" : {
-                    "border" : { "$zebra.ui.Border": [] }
+                    "border" : { "$zebkit.ui.Border": [] }
                 },
 
                 "endDate" : {
-                    "border" : { "$zebra.ui.Border": [] }
+                    "border" : { "$zebkit.ui.Border": [] }
                 }
             },
 
             "border"  : "plain",
-            "layout"  : { "$zebra.layout.FlowLayout" : 2 },
+            "layout"  : { "$zebkit.layout.FlowLayout" : 2 },
             "padding" : [2,4,2,4]
         }
     }

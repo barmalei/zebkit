@@ -1,21 +1,21 @@
 {
-    "$zebra.ui.Panel" : [],
-    "layout" : { "$zebra.layout.FlowLayout": [ "left", "center", "horizontal", 8 ] },
+    "$zebkit.ui.Panel" : [],
+    "layout" : { "$zebkit.layout.FlowLayout": [ "left", "center", "horizontal", 8 ] },
     "background": "white",
     "padding": 4,
     "kids" : [
         {
-            "$zebra.ui.Button": { "$zebra.ui.ImagePan": "../images/mail.png" },
+            "$zebkit.ui.Button": { "$zebkit.ui.ImagePan": "../images/mail.png" },
             "canHaveFocus": false,
             "padding" : 2
         },
         {
-            "$zebra.ui.Button": { "$zebra.ui.ImagePan": "../images/home.png" },
+            "$zebkit.ui.Button": { "$zebkit.ui.ImagePan": "../images/home.png" },
             "canHaveFocus": false,
             "padding" : 2
         },
         {
-            "$zebra.ui.Button": { "$zebra.ui.ImagePan": "../images/apple.png" },
+            "$zebkit.ui.Button": { "$zebkit.ui.ImagePan": "../images/apple.png" },
             "canHaveFocus": false,
             "padding" : 2
         }

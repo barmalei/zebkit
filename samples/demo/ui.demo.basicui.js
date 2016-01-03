@@ -1,7 +1,7 @@
-zebra.package("ui.demo", function(pkg, Class) {
+zebkit.package("ui.demo", function(pkg, Class) {
 
-var ui = zebra.ui;
-eval(zebra.Import("ui", "layout"));
+var ui = zebkit.ui;
+eval(zebkit.Import("ui", "layout"));
 
 pkg.BasicUIDemo = new Class(pkg.DemoPan, [
     function() {
@@ -49,7 +49,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
 
 
 
-        tf = new TextField(new zebra.data.SingleLineTxt("dsd", 5));
+        tf = new TextField(new zebkit.data.SingleLineTxt("dsd", 5));
         tf.setPreferredSize(150, -1);
         p.add(ctr, new BoldLabel("Fixed size(5):"));
         p.add(ctr, tf);
@@ -114,7 +114,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
 
     function createListPan() {
         var p = new Panel(new ListLayout(8));
-        var m = new zebra.data.ListModel();
+        var m = new zebkit.data.ListModel();
         m.add("Item 1");
         m.add("Item 2");
         m.add("Item 3");

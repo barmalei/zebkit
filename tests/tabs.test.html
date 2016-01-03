@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
 	<head>
-        <script src='../zebra.js' type='text/javascript'></script>
+        <script src='../zebkit.js' type='text/javascript'></script>
 
 		<script type='text/javascript'>
-		    zebra.ready(
+		    zebkit.ready(
 		    	function() {
-				    eval(zebra.Import("ui"));
+				    eval(zebkit.Import("ui"));
 
                     function createTabs(size, borderSize, radius, align, bg, tab, lineAlign)  {
                         var tabs = new Tabs(align);
@@ -34,8 +34,8 @@
                     }
 
 			 		var c = new zCanvas(), bg = "yellow", main = new Panel();
-                    main.setLayout(new zebra.layout.GridLayout(5, 7));
-                    c.root.setLayout(new zebra.layout.BorderLayout());
+                    main.setLayout(new zebkit.layout.GridLayout(5, 7));
+                    c.root.setLayout(new zebkit.layout.BorderLayout());
                     main.layout.constraints.setPadding(8);
                     c.root.add("center", new ScrollPan(main));
 

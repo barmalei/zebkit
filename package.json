@@ -1,5 +1,5 @@
 {
-    "name"       : "zebra",
+    "name"       : "zebkit",
     "version"    : "1.0.0",
     "description": "![ScreenShot](/samples/images/header.jpg)",
     "main": "gulpfile.js",

@@ -2,13 +2,13 @@
 <html>
 	<head>
 
-        <script src='../zebra.min.js' type='text/javascript'></script>
-        
+        <script src='../zebkit.min.js' type='text/javascript'></script>
+
 		<script type='text/javascript'>
-		    zebra.ready(function() {
-				// import all classes, functions and cosntans from 
-				// zebra.ui, zebra.layout packages
-				eval(zebra.Import("ui", "layout"));
+		    zebkit.ready(function() {
+				// import all classes, functions and cosntans from
+				// zebkit.ui, zebkit.layout packages
+				eval(zebkit.Import("ui", "layout"));
 
 				// create canvas
 			    var root = (new zCanvas(400, 300)).root;
@@ -18,7 +18,7 @@
 			    	padding: 8,
 			    	kids: [
 			    		new BorderPan("Check", new Panel({
-			    			layout : new ListLayout(), 
+			    			layout : new ListLayout(),
 			    			padding: 6,
 			    			kids: [
 			    				new Checkbox("Checkbox 1").properties({ value:true }),
@@ -28,7 +28,7 @@
 			    		})),
 
 			    		new BorderPan("Combo", new Panel({
-			    			layout  : new ListLayout(), 
+			    			layout  : new ListLayout(),
 			    			padding : 6,
 			    			kids    : [
 			    				new Combo(["Item 1", "Item 2", "Item 3"])
@@ -38,16 +38,16 @@
 			    		new BorderPan("Tree", new Panel({
 			    			layout: new BorderLayout(),
 			    			preferredSize: [-1, 75],
-				    		kids: { CENTER : new zebra.ui.tree.Tree({ value:"Root", kids : [ { value : "Item 1", kids:[ { value: "Item 2"} ] } ]  }) }
+				    		kids: { CENTER : new zebkit.ui.tree.Tree({ value:"Root", kids : [ { value : "Item 1", kids:[ { value: "Item 2"} ] } ]  }) }
 			    		}))
 			    	]
-			    });				
+			    });
 	 		});
 
 		</script>
 	</head>
 
 	<body bgcolor="#EEEEEE" align="center" style="padding:15px;">
-	    <h2>Few basic Zebra UI components</h2>
+	    <h2>Few basic Zebkit UI components</h2>
 	</body>
 </html>

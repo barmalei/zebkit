@@ -15,9 +15,9 @@
  * @main
  */
 
-var Matrix = zebra.data.Matrix, L = zebra.layout, MB = zebra.util,
-    Cursor = ui.Cursor, Position = zebra.util.Position, KE = ui.KeyEvent,
-    Listeners = zebra.util.Listeners;
+var Matrix = zebkit.data.Matrix, L = zebkit.layout, MB = zebkit.util,
+    Cursor = ui.Cursor, Position = zebkit.util.Position, KE = ui.KeyEvent,
+    Listeners = zebkit.util.Listeners;
 
 //!!! crappy function
 //TODO: think how to remove/replace it
@@ -40,9 +40,9 @@ function CellsVisibility() {
 
 /**
  *  Interface that describes a grid component metrics
- *  @class zebra.ui.grid.Metrics
+ *  @class zebkit.ui.grid.Metrics
  */
-pkg.Metrics = zebra.Interface();
+pkg.Metrics = zebkit.Interface();
 
 /**
  * Get the given column width of a grid component
@@ -115,7 +115,7 @@ pkg.Metrics = zebra.Interface();
    /**
     * Get a structure that describes a grid component
     * columns and rows visibility
-    * @return {zebra.ui.grid.CellsVisibility} a grid cells visibility
+    * @return {zebkit.ui.grid.CellsVisibility} a grid cells visibility
     * @method getCellsVisibility
     */
 
@@ -138,8 +138,8 @@ pkg.Metrics = zebra.Interface();
  * background has to be rendered and aligned. Developers can implement an own
  * views providers and than setup it for a grid by calling "setViewProvider(...)"
  * method.
- * @param {zebra.ui.TextRender|zebra.ui.StringText} [render] a string render
- * @class zebra.ui.grid.DefViews
+ * @param {zebkit.ui.TextRender|zebkit.ui.StringText} [render] a string render
+ * @class zebkit.ui.grid.DefViews
  * @constructor
  */
 pkg.DefViews = Class([
@@ -147,18 +147,18 @@ pkg.DefViews = Class([
         this[''] = function(render){
             /**
              * Default render that is used to paint grid content.
-             * @type {zebra.ui.StringRender}
+             * @type {zebkit.ui.StringRender}
              * @attribute render
              * @readOnly
              * @protected
              */
             this.render = (render == null ? new ui.StringRender("") : render);
-            zebra.properties(this, this.clazz);
+            zebkit.properties(this, this.clazz);
         };
 
         /**
          * Set the default view provider text render font
-         * @param {zebra.ui.Font} f a font
+         * @param {zebkit.ui.Font} f a font
          * @method setFont
          */
         this.setFont = function(f) {
@@ -176,11 +176,11 @@ pkg.DefViews = Class([
 
         /**
          * Get a renderer to draw the specified grid model value.
-         * @param  {zebra.ui.grid.Grid} target a target Grid component
+         * @param  {zebkit.ui.grid.Grid} target a target Grid component
          * @param  {Integer} row  a grid cell row
          * @param  {Integer} col  a grid cell column
          * @param  {Object} obj   a model value for the given grid cell
-         * @return {zebra.ui.View}  an instance of zebra view to be used to
+         * @return {zebkit.ui.View}  an instance of  view to be used to
          * paint the given cell model value
          * @method  getView
          */
@@ -197,26 +197,26 @@ pkg.DefViews = Class([
         /**
          * Get an horizontal alignment a content in the given grid cell
          * has to be adjusted. The method is optional.
-         * @param  {zebra.ui.grid.Grid} target a target grid component
+         * @param  {zebkit.ui.grid.Grid} target a target grid component
          * @param  {Integer} row   a grid cell row
          * @param  {Integer} col   a grid cell column
-         * @return {Integer}  a horizontal alignment (zebra.layout.LEFT, zebra.layout.CENTER, zebra.layout.RIGHT)
+         * @return {Integer}  a horizontal alignment (zebkit.layout.LEFT, zebkit.layout.CENTER, zebkit.layout.RIGHT)
          * @method  getXAlignment
          */
 
          /**
           * Get a vertical alignment a content in the given grid cell
           * has to be adjusted. The method is optional.
-          * @param  {zebra.ui.grid.Grid} target a target grid component
+          * @param  {zebkit.ui.grid.Grid} target a target grid component
           * @param  {Integer} row   a grid cell row
           * @param  {Integer} col   a grid cell column
-          * @return {Integer}  a vertical alignment (zebra.layout.TOP, zebra.layout.CENTER, zebra.layout.BOTTOM)
+          * @return {Integer}  a vertical alignment (zebkit.layout.TOP, zebkit.layout.CENTER, zebkit.layout.BOTTOM)
           * @method  getYAlignment
           */
 
          /**
           * Get the given grid cell color
-          * @param  {zebra.ui.grid.Grid} target a target grid component
+          * @param  {zebkit.ui.grid.Grid} target a target grid component
           * @param  {Integer} row   a grid cell row
           * @param  {Integer} col   a grid cell column
           * @return {String}  a cell color to be applied to the given grid cell
@@ -234,14 +234,14 @@ pkg.DefViews = Class([
         // grid with tree columns and three rows
         // first and last column will be editable with text field component
         // second column will be editable with check box component
-        var grid = new zebra.ui.grid.Grid([
+        var grid = new zebkit.ui.grid.Grid([
             ["Text Cell", true, "Text cell"],
             ["Text Cell", false, "Text cell"],
             ["Text Cell", true, "Text cell"]
         ]);
 
         // make grid cell editable
-        grid.setEditorProvider(new zebra.ui.grid.DefEditors());
+        grid.setEditorProvider(new zebkit.ui.grid.DefEditors());
 
 
  * It is possible to customize a grid column editor by specifying setting "editors[col]" property
@@ -251,14 +251,14 @@ pkg.DefViews = Class([
         // grid with tree columns and three rows
         // first and last column will be editable with text field component
         // second column will be editable with check box component
-        var grid = new zebra.ui.grid.Grid([
+        var grid = new zebkit.ui.grid.Grid([
             ["Text Cell", true, "Text cell"],
             ["Text Cell", false, "Text cell"],
             ["Text Cell", true, "Text cell"]
         ]);
 
         // grid cell editors provider
-        var editorsProvider = new zebra.ui.grid.DefEditors();
+        var editorsProvider = new zebkit.ui.grid.DefEditors();
 
         // disable the first column editing
         editorsProvider.editors[0] = null;
@@ -267,7 +267,7 @@ pkg.DefViews = Class([
         grid.setEditorProvider(editorsProvider);
 
  * @constructor
- * @class zebra.ui.grid.DefEditors
+ * @class zebkit.ui.grid.DefEditors
  */
 pkg.DefEditors = Class([
     function $clazz() {
@@ -319,11 +319,11 @@ pkg.DefEditors = Class([
 
         /**
          * Fetch an edited value from the given UI editor component.
-         * @param  {zebra.ui.grid.Grid} grid a target grid component
+         * @param  {zebkit.ui.grid.Grid} grid a target grid component
          * @param  {Integer} row a grid cell row that has been edited
          * @param  {Integer} col a grid cell column that has been edited
          * @param  {Object} data an original cell content
-         * @param  {zebra.ui.Panel} editor an editor that has been used to
+         * @param  {zebkit.ui.Panel} editor an editor that has been used to
          * edit the given cell
          * @return {Object} a value that can be applied as a new content of
          * the edited cell content
@@ -339,11 +339,11 @@ pkg.DefEditors = Class([
 
         /**
          * Get an editor UI component to be used for the given cell of the specified grid
-         * @param  {zebra.ui.grid.Grid} grid a grid whose cell is going to be edited
+         * @param  {zebkit.ui.grid.Grid} grid a grid whose cell is going to be edited
          * @param  {Integer} row  a grid cell row
          * @param  {Integer} col  a grid cell column
          * @param  {Object}  v    a grid cell model data
-         * @return {zebra.ui.Panel} an editor UI component to be used to edit the given cell
+         * @return {zebkit.ui.Panel} an editor UI component to be used to edit the given cell
          * @method  getEditor
          */
         this.getEditor = function(grid, row, col, v) {
@@ -353,8 +353,8 @@ pkg.DefEditors = Class([
                 return editor;
             }
 
-            editor = zebra.isBoolean(v) ? this.boolEditor
-                                        : (zebra.instanceOf(v, this.clazz.Items) ? this.selectorEditor : this.textEditor);
+            editor = zebkit.isBoolean(v) ? this.boolEditor
+                                        : (zebkit.instanceOf(v, this.clazz.Items) ? this.selectorEditor : this.textEditor);
 
             if (editor === this.selectorEditor) {
                 editor.list.setModel(v.items);
@@ -372,10 +372,10 @@ pkg.DefEditors = Class([
 
         /**
          * Test if the specified input event has to trigger the given grid cell editing
-         * @param  {zebra.ui.grid.Grid} grid a grid
+         * @param  {zebkit.ui.grid.Grid} grid a grid
          * @param  {Integer} row  a grid cell row
          * @param  {Integer} col  a grid cell column
-         * @param  {zebra.util.Event} e  an event to be evaluated
+         * @param  {zebkit.util.Event} e  an event to be evaluated
          * @return {Boolean} true if the given input event triggers the given cell editing
          * @method shouldStart
          */
@@ -385,10 +385,10 @@ pkg.DefEditors = Class([
 
         /**
          * Test if the specified input event has to canceling the given grid cell editing
-         * @param  {zebra.ui.grid.Grid} grid a grid
+         * @param  {zebkit.ui.grid.Grid} grid a grid
          * @param  {Integer} row  a grid cell row
          * @param  {Integer} col  a grid cell column
-         * @param  {zebra.util.Event} e  an event to be evaluated
+         * @param  {zebkit.util.Event} e  an event to be evaluated
          * @return {Boolean} true if the given input event triggers the given cell editing
          * cancellation
          * @method shouldCancel
@@ -399,10 +399,10 @@ pkg.DefEditors = Class([
 
         /**
          * Test if the specified input event has to trigger finishing the given grid cell editing
-         * @param  {zebra.ui.grid.Grid} grid [description]
+         * @param  {zebkit.ui.grid.Grid} grid [description]
          * @param  {Integer} row  a grid cell row
          * @param  {Integer} col  a grid cell column
-         * @param  {zebra.util.Event} e  an event to be evaluated
+         * @param  {zebkit.util.Event} e  an event to be evaluated
          * @return {Boolean} true if the given input event triggers finishing the given cell editing
          * @method shouldFinish
          */
@@ -415,8 +415,8 @@ pkg.DefEditors = Class([
 /**
  * Grid caption base UI component class. This class has to be used
  * as base to implement grid caption components
- * @class  zebra.ui.grid.BaseCaption
- * @extends {zebra.ui.Panel}
+ * @class  zebkit.ui.grid.BaseCaption
+ * @extends {zebkit.ui.Panel}
  * @constructor
  * @param {Array} [titles] a caption component titles
  */
@@ -429,14 +429,14 @@ pkg.DefEditors = Class([
         });
 
  * @event captionResized
- * @param  {zebra.ui.grid.BaseCaption} caption a caption
+ * @param  {zebkit.ui.grid.BaseCaption} caption a caption
  * @param  {Integer} rowcol a row or column that has been resized
  * @param  {Integer} pwh a a previous row or column size
  */
 
 pkg.BaseCaption = Class(ui.Panel, [
     function $clazz() {
-        this.Listeners = new zebra.util.ListenersClass("captionResized");
+        this.Listeners = new zebkit.util.ListenersClass("captionResized");
     },
 
     function $prototype() {
@@ -492,7 +492,7 @@ pkg.BaseCaption = Class(ui.Panel, [
 
         /**
          * Define pointer dragged events handler.
-         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
          * @method pointerDragged
          */
         this.pointerDragged = function(e){
@@ -512,7 +512,7 @@ pkg.BaseCaption = Class(ui.Panel, [
 
         /**
          * Define pointer drag started events handler.
-         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
          * @method pointerDragStarted
          */
         this.pointerDragStarted = function(e){
@@ -531,7 +531,7 @@ pkg.BaseCaption = Class(ui.Panel, [
 
         /**
          * Define pointer drag ended events handler.
-         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
          * @method pointerDragEnded
          */
         this.pointerDragEnded = function (e){
@@ -546,7 +546,7 @@ pkg.BaseCaption = Class(ui.Panel, [
 
         /**
          * Define pointer moved events handler.
-         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
          * @method pointerMoved
          */
         this.pointerMoved = function(e) {
@@ -557,7 +557,7 @@ pkg.BaseCaption = Class(ui.Panel, [
 
         /**
          * Define pointer clicked events handler.
-         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
          * @method pointerClicked
          */
         this.pointerDoubleClicked = function (e){
@@ -681,7 +681,7 @@ pkg.BaseCaption = Class(ui.Panel, [
         /**
          * Implement the method to be aware when number of rows or columns in
          * a grid model has been updated
-         * @param  {zebra.ui.grid.Grid} target a target grid
+         * @param  {zebkit.ui.grid.Grid} target a target grid
          * @param  {Integer} prevRows a previous number of rows
          * @param  {Integer} prevCols a previous number of columns
          * @method matrixResized
@@ -690,7 +690,7 @@ pkg.BaseCaption = Class(ui.Panel, [
         /**
          * Implement the method to be aware when a grid model data has been
          * re-ordered.
-         * @param  {zebra.ui.grid.Grid} target a target grid
+         * @param  {zebkit.ui.grid.Grid} target a target grid
          * @param  {Object} sortInfo an order information
          * @method matrixSorted
          */
@@ -712,7 +712,7 @@ pkg.BaseCaption = Class(ui.Panel, [
         this.$super(p);
 
         this.metrics = this.orient = null;
-        if (p == null || zebra.instanceOf(p, pkg.Metrics)) {
+        if (p == null || zebkit.instanceOf(p, pkg.Metrics)) {
             this.metrics = p;
             if (this.constraints != null) {
                 this.orient = (this.constraints === L.TOP    || this.constraints === "top"   ||
@@ -728,12 +728,12 @@ pkg.BaseCaption = Class(ui.Panel, [
  * Rendered means all caption titles, border are painted
  * as a number of views.
  * @param  {Array} [titles] a caption titles. Title can be a string or
- * a zebra.ui.View class instance
- * @param  {zebra.ui.StringRender|zebra.ui.TextRender} [render] a text render to be used
+ * a zebkit.ui.View class instance
+ * @param  {zebkit.ui.StringRender|zebkit.ui.TextRender} [render] a text render to be used
  * to paint grid titles
  * @constructor
- * @class zebra.ui.grid.GridCaption
- * @extends zebra.ui.grid.BaseCaption
+ * @class zebkit.ui.grid.GridCaption
+ * @extends zebkit.ui.grid.BaseCaption
  */
 pkg.GridCaption = Class(pkg.BaseCaption, [
     function $prototype() {
@@ -743,7 +743,7 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
          * Get a grid caption column or row title view
          * @param  {Integer} i a row (if the caption is vertical) or
          * column (if the caption is horizontal) index
-         * @return {zebra.ui.View} a view to be used as the given
+         * @return {zebkit.ui.View} a view to be used as the given
          * row or column title view
          * @method getTitleView
          */
@@ -801,14 +801,14 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
         /**
          * Put the given title for the given caption cell.
          * @param  {Integer} rowcol a grid caption cell index
-         * @param  {String|zebra.ui.View|zebra.ui.Panel} title a title of the given grid caption cell.
-         * Can be a string or zebra.ui.View or zebra.ui.Panel class instance
+         * @param  {String|zebkit.ui.View|zebkit.ui.Panel} title a title of the given grid caption cell.
+         * Can be a string or zebkit.ui.View or zebkit.ui.Panel class instance
          * @method putTitle
          */
         this.putTitle = function(rowcol, title){
             var prev = this.titles[rowcol] != null ? this.titles[rowcol] : {};
             if (prev.title != title) {
-                if (title != null && zebra.instanceOf(title, ui.Panel)) {
+                if (title != null && zebkit.instanceOf(title, ui.Panel)) {
                     title = new ui.CompRender(title);
                 }
 
@@ -946,10 +946,10 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
  * Component based caption uses other UI component as the
  * caption titles.
  * @param  {Array} a caption titles. Title can be a string or
- * a zebra.ui.Panel class instance
+ * a zebkit.ui.Panel class instance
  * @constructor
- * @class zebra.ui.grid.CompGridCaption
- * @extends zebra.ui.grid.BaseCaption
+ * @class zebkit.ui.grid.CompGridCaption
+ * @extends zebkit.ui.grid.BaseCaption
  */
 pkg.CompGridCaption = Class(pkg.BaseCaption, [
     function $clazz() {
@@ -1004,7 +1004,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
          * component you can have sortable grid columns.
          * @constructor
          * @param {String} a grid column or row title
-         * @class zebra.ui.grid.CompGridCaption.TitlePan
+         * @class zebkit.ui.grid.CompGridCaption.TitlePan
          */
         this.TitlePan = Class(ui.Panel, [
             function(title) {
@@ -1024,7 +1024,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
                 /**
                  * Image panel to keep grtid caption title
                  * @attribute iconPan
-                 * @type {zebra.ui.ImagePan}
+                 * @type {zebkit.ui.ImagePan}
                  * @readOnly
                  */
                 this.iconPan = new ui.ImagePan(null);
@@ -1032,7 +1032,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
                 /**
                  * Title link
                  * @attribute link
-                 * @type {zebra.ui.Link}
+                 * @type {zebkit.ui.Link}
                  * @readOnly
                  */
                 this.link = new pkg.CompGridCaption.Link(title);
@@ -1047,7 +1047,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
 
             function getGridCaption() {
                 var c = this.parent;
-                while(c != null && zebra.instanceOf(c, pkg.BaseCaption) === false) {
+                while(c != null && zebkit.instanceOf(c, pkg.BaseCaption) === false) {
                     c = c.parent;
                 }
                 return c;
@@ -1085,8 +1085,8 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
 
             function fired(target) {
                 if (this.isSortable === true) {
-                    var f = this.sortState == 1 ? zebra.data.ascent
-                                                : zebra.data.descent,
+                    var f = this.sortState == 1 ? zebkit.data.ascent
+                                                : zebkit.data.descent,
                         model = this.getGridCaption().metrics.model,
                         col   = this.parent.indexOf(this);
                     model.sortCol(col, f);
@@ -1112,7 +1112,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
     },
 
     /**
-     * @for zebra.ui.grid.CompGridCaption
+     * @for zebkit.ui.grid.CompGridCaption
      */
     function $prototype() {
         this.catchInput = function(t) {
@@ -1127,8 +1127,8 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
         /**
          * Put the given title component for the given caption cell.
          * @param  {Integer} rowcol a grid caption cell index
-         * @param  {String|zebra.ui.Panel|zebra.ui.View} title a title of the given grid caption cell.
-         * Can be a string or zebra.ui.View or zebra.ui.Panel class instance
+         * @param  {String|zebkit.ui.Panel|zebkit.ui.View} title a title of the given grid caption cell.
+         * Can be a string or zebkit.ui.View or zebkit.ui.Panel class instance
          * @method putTitle
          */
         this.putTitle = function(rowcol, t) {
@@ -1137,11 +1137,11 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
                 this.add(new this.clazz.TitlePan(""));
             }
 
-            if (zebra.isString(t)) {
+            if (zebkit.isString(t)) {
                 t = new this.clazz.TitlePan("");
             }
             else {
-                if (zebra.instanceOf(t, ui.View)) {
+                if (zebkit.instanceOf(t, ui.View)) {
                     var p = new ui.ViewPan();
                     p.setView(t);
                     t = p;
@@ -1212,7 +1212,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
     },
 
     function insert(i,constr, c) {
-        if (zebra.isString(c)) {
+        if (zebkit.isString(c)) {
             c = new this.clazz.TitlePan(c);
         }
         this.$super(i,constr, c);
@@ -1238,7 +1238,7 @@ pkg.RowSelMode = Class([
         };
 
         this.select = function(row, col, b) {
-            if (arguments.length === 1 || (arguments.length === 2 && zebra.isNumber(col))) {
+            if (arguments.length === 1 || (arguments.length === 2 && zebkit.isNumber(col))) {
                 b = true;
             }
 
@@ -1273,21 +1273,21 @@ pkg.RowSelMode = Class([
 ]);
 
 /**
- * Grid UI component class. The grid component visualizes "zebra.data.Matrix" data model.
+ * Grid UI component class. The grid component visualizes "zebkit.data.Matrix" data model.
  * Grid cell visualization can be customized by defining and setting an own view provider.
  * Grid component supports cell editing. Every existent UI component can be configured
  * as a cell editor by defining an own editor provider.
  *
 
         // create a grid that contains three rows and tree columns
-        var grid  = new zebra.ui.grid.Grid([
+        var grid  = new zebkit.ui.grid.Grid([
             [ "Cell 1.1", "Cell 1.2", "Cell 1.3"],
             [ "Cell 2.1", "Cell 2.2", "Cell 2.3"],
             [ "Cell 3.1", "Cell 3.2", "Cell 3.3"]
         ]);
 
         // add the top caption
-        grid.add(zebra.layout.TOP, new zebra.ui.grid.GridCaption([
+        grid.add(zebkit.layout.TOP, new zebkit.ui.grid.GridCaption([
             "Caption title 1", "Caption title 2", "Caption title 3"
         ]));
 
@@ -1296,15 +1296,15 @@ pkg.RowSelMode = Class([
 
  *
  * Grid can have top and left captions.
- * @class  zebra.ui.grid.Grid
+ * @class  zebkit.ui.grid.Grid
  * @constructor
- * @param {zebra.data.Matrix|Array} [model] a matrix model to be visualized with the grid
- * component. It can be an instance of zebra.data.Matrix class or an array that contains
+ * @param {zebkit.data.Matrix|Array} [model] a matrix model to be visualized with the grid
+ * component. It can be an instance of zebkit.data.Matrix class or an array that contains
  * embedded arrays. Every embedded array is a grid row.
  * @param {Integer} [rows]  a number of rows
  * @param {Integer} [columns] a number of columns
- * @extends {zebra.ui.Panel}
- * @uses zebra.ui.grid.Metrics
+ * @extends {zebkit.ui.Panel}
+ * @uses zebkit.ui.grid.Metrics
  */
 
 /**
@@ -1315,7 +1315,7 @@ pkg.RowSelMode = Class([
         });
 
  * @event rowSelected
- * @param  {zebra.ui.grid.Grid} grid a grid that triggers the event
+ * @param  {zebkit.ui.grid.Grid} grid a grid that triggers the event
  * @param  {Integer} row a first row whose selection state has been updated. The row is
  * -1 if all selected rows have been unselected
  * @param  {Integer} count a number of rows whose selection state has been updated
@@ -1323,7 +1323,7 @@ pkg.RowSelMode = Class([
  */
 pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
         function $clazz() {
-            this.Listeners = zebra.util.ListenersClass("rowSelected");
+            this.Listeners = zebkit.util.ListenersClass("rowSelected");
 
             this.DEF_COLWIDTH  = 80;
             this.DEF_ROWHEIGHT = 25;
@@ -1385,7 +1385,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
              * Default cell content horizontal alignment
              * @type {Integer}
              * @attribute defXAlignment
-             * @default zebra.layout.LEFT
+             * @default zebkit.layout.LEFT
              */
             this.defXAlignment = L.LEFT;
 
@@ -1393,7 +1393,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
              * Default cell content vertical alignment
              * @type {Integer}
              * @attribute defYAlignment
-             * @default zebra.layout.CENTER
+             * @default zebkit.layout.CENTER
              */
             this.defYAlignment = L.CENTER;
 
@@ -1516,18 +1516,12 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 var rows = this.getGridRows();
                 if (rows === 0) return null;
 
-
-
                 var top = this.getTop(),
                     dy  = this.scrollManager.getSY(),
                     yy1 = Math.min(this.visibleArea.y + this.visibleArea.height,
                                    this.height - this.getBottom()),
                     yy2 = Math.max(this.visibleArea.y,
                                    top + this.getTopCaptionHeight());
-
-
-                console.log("Grid.rowVisibility() : " + yy1 + ","+ yy2 + "," + dy);
-
 
                 for(; row < rows && row >= 0; row += d){
                     if (y + dy < yy1 && (y + this.rowHeights[row] + dy) > yy2){
@@ -1901,7 +1895,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 this.repaint();
             };
 
-            //TODO: zebra doesn't support yet the method
+            //TODO: zebkit doesn't support yet the method
             this.isInvalidatedByChild = function (c){
                 return c != this.editor || this.isUsePsMetric;
             };
@@ -1919,7 +1913,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                     this.editingCol >= 0   )
                 {
                     try {
-                        if (zebra.instanceOf(this.editor, pkg.Grid)) {
+                        if (zebkit.instanceOf(this.editor, pkg.Grid)) {
                             this.editor.stopEditing(applyData);
                         }
 
@@ -2229,12 +2223,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                 if (this.visibility.hasVisibleCells()){
                     this.stopEditing(true);
 
-                    console.log("Grid.pointerClicked() " + e.isAction() );
-
-
                     if (e.isAction()){
-
-
                         var p = this.cellByLocation(e.x, e.y);
                         if (p != null) {
                             if (this.position != null){
@@ -2791,7 +2780,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                      * Virtual cursor position controller
                      * @readOnly
                      * @attribute position
-                     * @type {zebra.util.Position}
+                     * @type {zebkit.util.Position}
                      */
                     this.position = p;
                     if(this.position != null){
@@ -2819,8 +2808,8 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
             /**
              * Set the given matrix model to be visualized and controlled
              * with the grid component
-             * @param {zebra.data.Matrix|Array} d a model passed as an
-             * instance of zebra matrix model or an array that contains
+             * @param {zebkit.data.Matrix|Array} d a model passed as an
+             * instance of  matrix model or an array that contains
              * model rows as embedded arrays.
              * @method setModel
              */
@@ -3016,7 +3005,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
             /**
              * Reference to top caption component
              * @attribute topCaption
-             * @type {zebra.ui.grid.GridCaption|zebra.ui.grid.CompGridCaption}
+             * @type {zebkit.ui.grid.GridCaption|zebkit.ui.grid.CompGridCaption}
              * @default null
              * @readOnly
              */
@@ -3024,7 +3013,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
             /**
              * Reference to left caption component
              * @attribute leftCaption
-             * @type {zebra.ui.grid.GridCaption|zebra.ui.grid.CompGridCaption}
+             * @type {zebkit.ui.grid.GridCaption|zebkit.ui.grid.CompGridCaption}
              * @default null
              * @readOnly
              */
@@ -3118,19 +3107,19 @@ pkg.Grid.prototype.setViews = ui.$ViewsSetter;
 
         ...
 
-        var canvas = new zebra.ui.zCanvas();
-        var grid = new zebra.ui.grid.Grid(100,10);
-        var pan  = new zebra.ui.grid.GridStretchPan(grid);
+        var canvas = new zebkit.ui.zCanvas();
+        var grid = new zebkit.ui.grid.Grid(100,10);
+        var pan  = new zebkit.ui.grid.GridStretchPan(grid);
 
-        canvas.root.setLayout(new zebra.layout.BorderLayout());
+        canvas.root.setLayout(new zebkit.layout.BorderLayout());
         canvas.root.add("center", pan);
 
         ...
 
  * @constructor
- * @param {zebra.ui.grid.Grid} grid a grid component that has to be added in the panel
- * @class zebra.ui.grid.GridStretchPan
- * @extends {zebra.ui.Panel}
+ * @param {zebkit.ui.grid.Grid} grid a grid component that has to be added in the panel
+ * @class zebkit.ui.grid.GridStretchPan
+ * @extends {zebkit.ui.Panel}
  */
 pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
     function $prototype() {
@@ -3188,7 +3177,7 @@ pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
         };
 
         this.getMinWidth = function () {
-            return zebra.instanceOf(this.grid.topCaption, pkg.BaseCaption) ? this.grid.topCaption.minSize
+            return zebkit.instanceOf(this.grid.topCaption, pkg.BaseCaption) ? this.grid.topCaption.minSize
                                                                            : 10;
         };
 
@@ -3219,7 +3208,7 @@ pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
                 // calculate size excluding padding where
                 // the target grid columns have to be stretched
                 var p        = this.parent,
-                    isScr    = zebra.instanceOf(p, ui.ScrollPan),
+                    isScr    = zebkit.instanceOf(p, ui.ScrollPan),
                     taWidth  = (isScr ? p.width - p.getLeft() - p.getRight() - this.getRight() - this.getLeft()
                                       : this.width - this.getRight() - this.getLeft()),
                     taHeight = (isScr ? p.height - p.getTop() - p.getBottom() - this.getBottom() - this.getTop()
@@ -3287,7 +3276,7 @@ pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
 
         /**
          * Target grid component
-         * @type {zebra.ui.Grid}
+         * @type {zebkit.ui.Grid}
          * @readOnly
          * @attribute grid
          */
@@ -3328,4 +3317,4 @@ pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
  * @for
  */
 
-})(zebra("ui.grid"), zebra.Class, zebra("ui"));
+})(zebkit("ui.grid"), zebkit.Class, zebkit("ui"));

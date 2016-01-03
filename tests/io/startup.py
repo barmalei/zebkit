@@ -116,7 +116,7 @@ def START(host = "localhost", port = 8080):
         def run(self):
             self.server.serve_forever()
 
-    print("Start Zebra demo HTTP Server %s:%d" % (host, port))
+    print("Start zebkit demo HTTP Server %s:%d" % (host, port))
     #server1.serve_forever()
 
     ST(server1, "Start XML-RPC Server %s:%d" % (host, port))

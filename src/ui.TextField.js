@@ -16,12 +16,12 @@ var KE = pkg.KeyEvent;
     - Read-only mode
 
  * @constructor
- * @param {String|zebra.data.TextModel|zebra.ui.TextRender} [txt] a text the text field component
+ * @param {String|zebkit.data.TextModel|zebkit.ui.TextRender} [txt] a text the text field component
  * has to be filled. The parameter can be a simple string, text model or text render class instance.
  * @param {Integer} [maxCol] a maximal size of entered text. -1 means the size of the edited text
  * has no length limit.
- * @class zebra.ui.TextField
- * @extends zebra.ui.Label
+ * @class zebkit.ui.TextField
+ * @extends zebkit.ui.Label
  */
 pkg.TextField = Class(pkg.Label, [
     function $clazz() {
@@ -59,14 +59,14 @@ pkg.TextField = Class(pkg.Label, [
          * Text alignment
          * @attribute textAlign
          * @type {Integer}
-         * @default zebra.layout.LEFT
+         * @default zebkit.layout.LEFT
          */
-        this.textAlign = zebra.layout.LEFT;
+        this.textAlign = zebkit.layout.LEFT;
 
         /**
          * Cursor view
          * @attribute curView
-         * @type {zebra.ui.View}
+         * @type {zebkit.ui.View}
          * @readOnly
          */
 
@@ -98,7 +98,7 @@ pkg.TextField = Class(pkg.Label, [
         };
 
         this.setTextAlign = function(a) {
-            a = zebra.layout.$constraints(a);
+            a = zebkit.layout.$constraints(a);
             if (this.textAlign != a) {
                 this.textAlign = a;
                 this.vrp();
@@ -162,7 +162,7 @@ pkg.TextField = Class(pkg.Label, [
             // normalize text location to virtual (zero, zero)
             y -= (this.scrollManager.getSY() + this.getTop());
             x -= this.scrollManager.getSX();
-            if (this.textAlign === zebra.layout.LEFT) {
+            if (this.textAlign === zebkit.layout.LEFT) {
                 x -= this.getLeft();
             }
             else {
@@ -214,14 +214,14 @@ pkg.TextField = Class(pkg.Label, [
             for(; col >= 0 && col < ln.length; col += d){
                 if (b) {
                     if (d > 0) {
-                        if (zebra.util.isLetter(ln[col])) return { row:line, col:col };
+                        if (zebkit.util.isLetter(ln[col])) return { row:line, col:col };
                     }
                     else {
-                        if (!zebra.util.isLetter(ln[col])) return { row : line, col: col + 1 };
+                        if (!zebkit.util.isLetter(ln[col])) return { row : line, col: col + 1 };
                     }
                 }
                 else  {
-                    b = d > 0 ? !zebra.util.isLetter(ln[col]) : zebra.util.isLetter(ln[col]);
+                    b = d > 0 ? !zebkit.util.isLetter(ln[col]) : zebkit.util.isLetter(ln[col]);
                 }
             }
             return (d > 0 ? { row: line, col : ln.length }: { row : line, col : 0 } );
@@ -352,7 +352,7 @@ pkg.TextField = Class(pkg.Label, [
         /**
          * Test if the given key pressed event has to be processed
          * @protected
-         * @param  {zebra.ui.KeyEvent} e a key event
+         * @param  {zebkit.ui.KeyEvent} e a key event
          * @return {Boolean} true if the given key pressed event doesn't
          * have be processed
          * @method isFiltered
@@ -416,7 +416,7 @@ pkg.TextField = Class(pkg.Label, [
             var r = this.view;
             if (this.position.offset >= 0) {
                 var l = r.getLine(this.position.currentLine);
-                if (this.textAlign === zebra.layout.LEFT) {
+                if (this.textAlign === zebkit.layout.LEFT) {
                     this.curX = r.font.charsWidth(l, 0, this.position.currentCol) + this.getLeft();
                 }
                 else {
@@ -447,7 +447,7 @@ pkg.TextField = Class(pkg.Label, [
                 this.blinkMe              &&
                 this.hasFocus()              )
             {
-                if (this.textAlign === zebra.layout.LEFT)
+                if (this.textAlign === zebkit.layout.LEFT)
                     this.curView.paint(g, this.curX, this.curY,
                                           this.curW, this.curH, this);
                 else
@@ -525,7 +525,7 @@ pkg.TextField = Class(pkg.Label, [
                 var lineHeight = this.view.getLineHeight(),
                     top        = this.getTop();
 
-                this.scrollManager.makeVisible(this.textAlign === zebra.layout.LEFT ? this.curX
+                this.scrollManager.makeVisible(this.textAlign === zebkit.layout.LEFT ? this.curX
                                                                                     : this.curX - this.curW,
                                                 this.curY, this.curW, lineHeight);
 
@@ -568,7 +568,7 @@ pkg.TextField = Class(pkg.Label, [
             if (this.hint != null && this.getMaxOffset() === 0) {
                 var ps = this.hint.getPreferredSize(),
                     yy = Math.floor((this.height - ps.height)/2),
-                    xx = (zebra.layout.LEFT === this.textAlign) ? this.getLeft() + this.curW
+                    xx = (zebkit.layout.LEFT === this.textAlign) ? this.getLeft() + this.curW
                                                                 : this.width - ps.width - this.getRight() - this.curW;
 
                 this.hint.paint(g, xx, yy, this.width, this.height, this);
@@ -579,12 +579,12 @@ pkg.TextField = Class(pkg.Label, [
          * Set the specified hint text to be drawn with the given font and color.
          * The hint is not-editable text that is shown in empty text field to help
          * a user to understand which input the text field expects.
-         * @param {String|zebra.ui.View|Function} hint a hint text, view or view render method
-         * @return {zebra.ui.View} a hint view
+         * @param {String|zebkit.ui.View|Function} hint a hint text, view or view render method
+         * @return {zebkit.ui.View} a hint view
          * @method setHint
          */
         this.setHint = function(hint) {
-            this.hint = zebra.isString(hint) ? new this.clazz.HintRender(hint) : pkg.$view(hint);
+            this.hint = zebkit.isString(hint) ? new this.clazz.HintRender(hint) : pkg.$view(hint);
             this.repaint();
             return this.hint;
         };
@@ -663,7 +663,7 @@ pkg.TextField = Class(pkg.Label, [
 
         this.focusGained = function (e){
             if (this.position.offset < 0) {
-                this.position.setOffset(this.textAlign === zebra.layout.LEFT  || this.getLines() > 1 ? 0 : this.getMaxOffset());
+                this.position.setOffset(this.textAlign === zebkit.layout.LEFT  || this.getLines() > 1 ? 0 : this.getMaxOffset());
             }
             else {
                 if (this.hint != null) this.repaint();
@@ -675,7 +675,7 @@ pkg.TextField = Class(pkg.Label, [
             if (this.isEditable === true && this.blinkingPeriod > 0) {
                 this.blinkMeCounter = 0;
                 this.blinkMe = true;
-                this.blinkTask = zebra.util.task(this).run(~~(this.blinkingPeriod/3),
+                this.blinkTask = zebkit.util.task(this).run(~~(this.blinkingPeriod/3),
                                                            ~~(this.blinkingPeriod/3));
             }
         };
@@ -753,7 +753,7 @@ pkg.TextField = Class(pkg.Label, [
 
         /**
          * Set the specified cursor position controller
-         * @param {zebra.util.Position} p a position controller
+         * @param {zebkit.util.Position} p a position controller
          * @method setPosition
          */
         this.setPosition = function (p){
@@ -772,7 +772,7 @@ pkg.TextField = Class(pkg.Label, [
         /**
          * Set the cursor view. The view defines rendering of the text field
          * cursor.
-         * @param {zebra.ui.View} v a cursor view
+         * @param {zebkit.ui.View} v a cursor view
          * @method setCursorView
          */
         this.setCursorView = function (v){
@@ -869,7 +869,7 @@ pkg.TextField = Class(pkg.Label, [
             try {
                 g.translate(sx, sy);
 
-                if (this.textAlign === zebra.layout.LEFT) {
+                if (this.textAlign === zebkit.layout.LEFT) {
                     this.view.paint(g, l, t,
                                     this.width  - l - r,
                                     this.height - t - this.getBottom(), this);
@@ -897,14 +897,14 @@ pkg.TextField = Class(pkg.Label, [
         this.scrollManager = new pkg.ScrollManager(this);
 
         if (arguments.length === 1) {
-            if (zebra.isNumber(render)) {
+            if (zebkit.isNumber(render)) {
                 maxCol = render;
-                this.$super(new pkg.TextRender(new zebra.data.SingleLineTxt("", maxCol)));
+                this.$super(new pkg.TextRender(new zebkit.data.SingleLineTxt("", maxCol)));
             }
             else {
                 maxCol = -1;
-                this.$super(zebra.isString(render) ? new pkg.TextRender(new zebra.data.SingleLineTxt(render))
-                                                   : (zebra.instanceOf(render, zebra.data.TextModel) ?  new pkg.TextRender(render)
+                this.$super(zebkit.isString(render) ? new pkg.TextRender(new zebkit.data.SingleLineTxt(render))
+                                                   : (zebkit.instanceOf(render, zebkit.data.TextModel) ?  new pkg.TextRender(render)
                                                                                                      : render));
             }
         }
@@ -913,7 +913,7 @@ pkg.TextField = Class(pkg.Label, [
             if (arguments.length === 0) {
                 maxCol = -1;
             }
-            this.$super(new pkg.TextRender(new zebra.data.SingleLineTxt(render, maxCol)));
+            this.$super(new pkg.TextRender(new zebkit.data.SingleLineTxt(render, maxCol)));
         }
 
         if (maxCol > 0) this.setPSByRowsCols(-1, maxCol);
@@ -927,7 +927,7 @@ pkg.TextField = Class(pkg.Label, [
 
             this.$super(v);
             if (this.position == null) {
-                this.setPosition(new zebra.util.Position(this.view));
+                this.setPosition(new zebkit.util.Position(this.view));
             }
             else {
                 this.position.setMetric(this.view);
@@ -963,26 +963,26 @@ pkg.TextField = Class(pkg.Label, [
 
 /**
  * Text area UI component. The UI component to render multi-lines text.
- * @class zebra.ui.TextArea
+ * @class zebkit.ui.TextArea
  * @constructor
  * @param {String} [txt] a text
- * @extends zebra.ui.TextField
+ * @extends zebkit.ui.TextField
  */
 pkg.TextArea = Class(pkg.TextField, [
     function(txt) {
         if (arguments.length === 0) txt = "";
-        this.$super(new zebra.data.Text(txt));
+        this.$super(new zebkit.data.Text(txt));
     }
 ]);
 
 /**
  * Password text field.
- * @class zebra.ui.PassTextField
+ * @class zebkit.ui.PassTextField
  * @param {String} txt password text
  * @param {Integer} [maxSize] maximal size
  * @param {Boolean} [showLast] indicates if last typed character should
  * not be disguised with a star character
- * @extends zebra.ui.TextField
+ * @extends zebkit.ui.TextField
  */
 pkg.PassTextField = Class(pkg.TextField, [
     function(txt, size, showLast) {
@@ -994,7 +994,7 @@ pkg.PassTextField = Class(pkg.TextField, [
             showLast = false;
         }
 
-        var pt = new pkg.PasswordText(new zebra.data.SingleLineTxt(txt, size));
+        var pt = new pkg.PasswordText(new zebkit.data.SingleLineTxt(txt, size));
         pt.showLast = showLast;
         this.$super(pt);
         if (size > 0) {
@@ -1007,4 +1007,4 @@ pkg.PassTextField = Class(pkg.TextField, [
  * @for
  */
 
-})(zebra("ui"), zebra.Class);
+})(zebkit("ui"), zebkit.Class);

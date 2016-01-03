@@ -7,7 +7,7 @@
 	<link rel="stylesheet" type="text/css" media="screen" href="css/uidemo.css"/>
 
 	<!--[if (gte IE 9)|(!IE)]><!-->
-	<script src='../zebra.js' type='text/javascript'></script>
+	<script src='../zebkit.js' type='text/javascript'></script>
     <script src='demo/demo.all.js' type='text/javascript'></script>
 
     <script type='text/javascript'>
@@ -23,19 +23,19 @@
    			desktop.root.repaint();
 		}
 
-        zebra.ready(
+        zebkit.ready(
 			function() {
-				eval(zebra.Import("ui", "layout"));
+				eval(zebkit.Import("ui", "layout"));
 
-				var ZebraTextRender = zebra.Class(TextRender, [
+				var ZebkitTextRender = zebkit.Class(TextRender, [
 					function(t, reflection) {
 						if (arguments.length === 1) {
 							reflection = false;
 						}
 
 						this.$super(t);
-						this.setFont(new zebra.ui.Font("100px Futura, Helvetica, sans-serif"));
-						this.image = zebra.ui.demo.zebra_pattern;
+						this.setFont(new zebkit.ui.Font("100px Futura, Helvetica, sans-serif"));
+						this.image = zebkit.ui.demo.zebra_pattern;
 						this.hasReflection = reflection;
 						this.reflectionGap = -40;
 					},
@@ -86,11 +86,9 @@
 				]);
 
 
-
 	        	desktop = new zCanvas("zCanvas");
 
 				var root = desktop.root, nt = new Tabs(), prevSelected = -1;
-
 
 	    		root.properties({
 	    			padding: 4,
@@ -117,13 +115,13 @@
 		    										kids      : {
 		    											TOP: new Panel({
 		    												layout : new FlowLayout(CENTER, CENTER, VERTICAL, 0),
-		    												kids   : [ new Label(new ZebraTextRender("Zebra", true)).properties({
+		    												kids   : [ new Label(new ZebkitTextRender("Zebkit", true)).properties({
 		    													font : new Font("Helvetica", 'bold', 100)
 		    												}) ]
 		    											}),
 		    											CENTER : new Panel({
 		    												layout: new FlowLayout(CENTER, TOP, HORIZONTAL, 12),
-		    												kids  : [ new Label(new zebra.data.Text(zebra.io.GET("demo/desc.txt"))).properties({
+		    												kids  : [ new Label(new zebkit.data.Text(zebkit.io.GET("demo/desc.txt"))).properties({
 		    													color:"white",
 		    													font : new Font("Verdana", 14)
 		    												}) ]
@@ -138,26 +136,26 @@
 		    							})
 		    						}
 		    					}),
-								"Basic UI"     : new zebra.ui.demo.BasicUIDemo(),
-								"Panels"       : new zebra.ui.demo.PanelsDemo(),
-								"Tree"         : new zebra.ui.demo.TreeDemo(),
-								"Menu"    	   : new zebra.ui.demo.PopupDemo(),
-								"Tooltip & Win": new zebra.ui.demo.WinDemo(),
-								"Layouts"      : new zebra.ui.demo.LayoutDemo(),
-								"Grid"         : new zebra.ui.demo.GridDemo(),
-								"Designer"     : new zebra.ui.demo.DesignerDemo(),
-								"Zebra text"   : new Panel({
+								"Basic UI"     : new zebkit.ui.demo.BasicUIDemo(),
+								"Panels"       : new zebkit.ui.demo.PanelsDemo(),
+								"Tree"         : new zebkit.ui.demo.TreeDemo(),
+								"Menu"    	   : new zebkit.ui.demo.PopupDemo(),
+								"Tooltip & Win": new zebkit.ui.demo.WinDemo(),
+								"Layouts"      : new zebkit.ui.demo.LayoutDemo(),
+								"Grid"         : new zebkit.ui.demo.GridDemo(),
+								"Designer"     : new zebkit.ui.demo.DesignerDemo(),
+								"Zebkit text"   : new Panel({
 									layout  : new BorderLayout(8, 8),
 									padding : 8,
 									background: "gray",
 									kids    : {
-										CENTER: new TextField(new ZebraTextRender("Zebra ...")).properties({
+										CENTER: new TextField(new ZebkitTextRender("Zebkit ...")).properties({
 											cursorView    : "red",
 											curW          : 3,
 											selectionColor: "gray",
 											background    : "black"
 									    }),
-									    TOP: new Label("Type using Zebra font in text editor :)").properties({
+									    TOP: new Label("Type using Zebkit font in text editor :)").properties({
 									    	font : "22px Futura, Helvetica, sans-serif",
 									    	color: "white",
 									    	padding: 8,
@@ -309,7 +307,7 @@
 						</td>
 						<td align="left">
 							<div class="bullets" style="margin-top:3px;">
-								Zebra on iPhone 3G iOS 4.0.2
+								Zebkit on iPhone 3G iOS 4.0.2
 							</div>
 						</td>
 					</tr>
@@ -341,7 +339,7 @@
 							<canvas id="zCanvas"
 							        tabindex="0"
 							        style="outline:none;"
-							        class="zebracanvas"
+							        class="zebkitcanvas"
 							        width="750" height="550">
 							</canvas>
 							<!--<![endif]-->
@@ -351,7 +349,7 @@
 									<table>
 										<tr>
 											<td align="center" valign="center">
-											Zebra DEMO cannot be run in Internet Explorer version lower than 9 because of lack of HTML Canvas element support.
+											Zebkit DEMO cannot be run in Internet Explorer version lower than 9 because of lack of HTML Canvas element support.
 											Use one of the following browser to see the demo:
 											</td>
 										</tr>

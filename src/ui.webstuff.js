@@ -1,7 +1,7 @@
 (function(pkg, Class) {
     pkg.$canvases = [];
 
-    zebra.ready(function() {
+    zebkit.ready(function() {
         // canvases location has to be corrected if document layout is invalid
         pkg.$elBoundsUpdated = function() {
             for(var i = pkg.$canvases.length - 1; i >= 0; i--) {
@@ -13,7 +13,7 @@
                     // browser (mobile) can reduce size of browser window by
                     // the area a virtual keyboard occupies. Usually the
                     // content scrolls up to the size the VK occupies, so
-                    // to leave zebra full screen content in the window
+                    // to leave zebkit full screen content in the window
                     // with the real size (not reduced) size take in account
                     // scrolled metrics
                     c.setSize(ws.width + window.pageXOffset, ws.height + window.pageYOffset);
@@ -35,7 +35,7 @@
                 winSizeUpdated = true;
             }
             else {
-                $wrt = zebra.util.task(
+                $wrt = zebkit.util.task(
                     function(t) {
                         if (winSizeUpdated === false) {
                             pkg.$elBoundsUpdated();
@@ -75,7 +75,7 @@
         // else
         //
         // bunch of handlers to track HTML page metrics update
-        // it is necessary since to correct zebra canvases anchor
+        // it is necessary since to correct zebkit canvases anchor
         // and track when a canvas has been removed
         document.addEventListener("DOMNodeInserted", function(e) {
             pkg.$elBoundsUpdated();
@@ -100,7 +100,7 @@
     // TODO: not a good place for clipboard manager
     pkg.ClipboardSupport = Class([
         function $clazz() {
-            this.Listeners = zebra.util.ListenersClass("clipCopy", "clipPaste", "clipCut");
+            this.Listeners = zebkit.util.ListenersClass("clipCopy", "clipPaste", "clipCut");
         },
 
         function $prototype() {
@@ -193,7 +193,7 @@
                     }
                 };
 
-                if (zebra.isFF === true) {
+                if (zebkit.isFF === true) {
                     $clipboard.addEventListener ("input", function(ee) {
                         if (pkg.focusManager.focusOwner &&
                             pkg.focusManager.focusOwner.clipPaste != null)
@@ -219,4 +219,4 @@
         }
     ]);
 
-})(zebra("ui"), zebra.Class);
+})(zebkit("ui"), zebkit.Class);

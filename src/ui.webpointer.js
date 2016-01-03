@@ -26,17 +26,17 @@
     /**
      * Mouse and touch screen input event class. The input event is
      * triggered by a mouse or touch screen.
-     * @param {zebra.ui.Panel} source a source of the mouse input event
+     * @param {zebkit.ui.Panel} source a source of the mouse input event
      * @param {Integer} ax an absolute (relatively to a canvas where the source
      * UI component is hosted) mouse pointer x coordinate
      * @param {Integer} ax an absolute (relatively to a canvas where the source
      * UI component is hosted) mouse pointer y coordinate
      * @param {Integer} mask a bits mask of pressed mouse buttons:
 
-             zebra.ui.PointerEvent.LEFT_BUTTON
-             zebra.ui.PointerEvent.RIGHT_BUTTON
+             zebkit.ui.PointerEvent.LEFT_BUTTON
+             zebkit.ui.PointerEvent.RIGHT_BUTTON
 
-     * @class  zebra.ui.PointerEvent
+     * @class  zebkit.ui.PointerEvent
      * @constructor
      */
     pkg.PointerEvent = Class(zebkit.util.Event, [
@@ -136,11 +136,11 @@
 
     /**
      *  Mouse wheel support class. Installs necessary mouse wheel
-     *  listeners and handles mouse wheel events in zebra UI. The
+     *  listeners and handles mouse wheel events in zebkit UI. The
      *  mouse wheel support is plugging that is configured by a
      *  JSON configuration.
-     *  @class zebra.ui.MouseWheelSupport
-     *  @param  {zebra.ui.zCanvas} canvas a zebra zCanvas UI component
+     *  @class zebkit.ui.MouseWheelSupport
+     *  @param  {zebkit.ui.zCanvas} canvas a zCanvas UI component
      *  @constructor
      */
     pkg.MouseWheelSupport = Class([
@@ -297,7 +297,7 @@
                 // get appropriate pointerPressed event that has occurred before
                 var mp = $pointerPressedEvents[id];
 
-                // a pointer touched has been pressed and pressed target zebra component exists
+                // a pointer touched has been pressed and pressed target zebkit component exists
                 // emulate mouse dragging events if mouse has moved on the canvas where mouse
                 // pressed event occurred
                 if (mp != null) {
@@ -683,7 +683,7 @@
                         mp = $pointerPressedEvents[id];
 
                     // if a button has not been pressed handle mouse entered to detect
-                    // zebra component the mouse pointer entered and send appropriate
+                    // zebkit component the mouse pointer entered and send appropriate
                     // mouse entered event to it
                     if (mp == null) {
                         // just for the sake of error prevention
@@ -936,4 +936,4 @@
         }
     ]);
 
-})(zebra("ui"), zebra.Class);
+})(zebkit("ui"), zebkit.Class);

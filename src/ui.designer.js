@@ -7,7 +7,7 @@
  * @main
  */
 
-var L = zebra.layout, Cursor = ui.Cursor, KeyEvent = ui.KeyEvent, CURSORS = [];
+var L = zebkit.layout, Cursor = ui.Cursor, KeyEvent = ui.KeyEvent, CURSORS = [];
 
 CURSORS[L.LEFT  ] = Cursor.W_RESIZE;
 CURSORS[L.RIGHT ] = Cursor.E_RESIZE;
@@ -47,7 +47,7 @@ pkg.ShaperBorder = Class(ui.View, [
 
             g.beginPath();
 
-            var po = zebra.layout.toParentOrigin(x + Math.floor(this.gap / 2), y + Math.floor(this.gap / 2), d);
+            var po = zebkit.layout.toParentOrigin(x + Math.floor(this.gap / 2), y + Math.floor(this.gap / 2), d);
 
             // very strange thing with rect() method if it called with w or h
             // without decreasing with gap it is ok, otherwise moving   a
@@ -95,28 +95,28 @@ pkg.ShaperBorder = Class(ui.View, [
  * UI components to control the component size and location visually.
 
         // create canvas
-        var canvas = new zebra.ui.zCanvas(300,300);
+        var canvas = new zebkit.ui.zCanvas(300,300);
 
         // create two UI components
-        var lab = new zebra.ui.Label("Label");
-        var but = new zebra.ui.Button("Button");
+        var lab = new zebkit.ui.Label("Label");
+        var but = new zebkit.ui.Button("Button");
 
         // add created before label component as target of the shaper
         // component and than add the shaper component into root panel
-        canvas.root.add(new zebra.ui.designer.ShaperPan(lab).properties({
+        canvas.root.add(new zebkit.ui.designer.ShaperPan(lab).properties({
             bounds: [ 30,30,100,40]
         }));
 
         // add created before button component as target of the shaper
         // component and than add the shaper component into root panel
-        canvas.root.add(new zebra.ui.designer.ShaperPan(but).properties({
+        canvas.root.add(new zebkit.ui.designer.ShaperPan(but).properties({
             bounds: [ 130,130,100,50]
         }));
 
- * @class  zebra.ui.designer.ShaperPan
+ * @class  zebkit.ui.designer.ShaperPan
  * @constructor
- * @extends {zebra.ui.Panel}
- * @param {zebra.ui.Panel} target a target UI component whose size and location
+ * @extends {zebkit.ui.Panel}
+ * @param {zebkit.ui.Panel} target a target UI component whose size and location
  * has to be controlled
  */
 pkg.ShaperPan = Class(ui.Panel, [
@@ -161,7 +161,7 @@ pkg.ShaperPan = Class(ui.Panel, [
 
         /**
          * Define key pressed events handler
-         * @param  {zebra.ui.KeyEvent} e a key event
+         * @param  {zebkit.ui.KeyEvent} e a key event
          * @method keyPressed
          */
         this.keyPressed = function(e) {
@@ -200,7 +200,7 @@ pkg.ShaperPan = Class(ui.Panel, [
 
         /**
          * Define pointer drag started events handler
-         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
          * @method pointerDragStarted
          */
         this.pointerDragStarted = function(e){
@@ -225,7 +225,7 @@ pkg.ShaperPan = Class(ui.Panel, [
 
         /**
          * Define pointer dragged events handler
-         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
          * @method pointerDragged
          */
         this.pointerDragged = function(e){
@@ -288,7 +288,7 @@ pkg.ShaperPan = Class(ui.Panel, [
     }
 ]);
 
-pkg.FormTreeModel = Class(zebra.data.TreeModel, [
+pkg.FormTreeModel = Class(zebkit.data.TreeModel, [
     function $prototype() {
         this.buildModel = function(comp, root){
             var b    = this.exclude != null && this.exclude(comp),
@@ -318,7 +318,7 @@ pkg.FormTreeModel = Class(zebra.data.TreeModel, [
             var name = comp.clazz.$name;
             if (name == null) name = comp.toString();
             var index = name.lastIndexOf('.'),
-                item = new zebra.data.Item(index > 0 ? name.substring(index + 1) : name);
+                item = new zebkit.data.Item(index > 0 ? name.substring(index + 1) : name);
             item.comp = comp;
             return item;
         };
@@ -334,4 +334,4 @@ pkg.FormTreeModel = Class(zebra.data.TreeModel, [
  */
 
 
-})(zebra("ui.designer"), zebra.Class, zebra("ui"));
+})(zebkit("ui.designer"), zebkit.Class, zebkit("ui"));

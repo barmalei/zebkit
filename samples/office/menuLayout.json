@@ -1,5 +1,5 @@
 {
-    "$zebra.ui.Menubar" : {
+    "$zebkit.ui.Menubar" : {
         "Excel" :[
             "About ...",
             "-",
@@ -27,7 +27,7 @@
     },
 
     "border" : null,
-    "background": { "$zebra.ui.Gradient" : [ "black", "gray" ] }
+    "background": { "$zebkit.ui.Gradient" : [ "black", "gray" ] }
 }
 
 

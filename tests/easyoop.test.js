@@ -1,5 +1,5 @@
 
-if (typeof(zebra) === "undefined") {
+if (typeof(zebkit) === "undefined") {
     if (typeof arguments[0] === "undefined") p = "";
     else p = arguments[0] + "/";
     load(p + 'src/easyoop.js');
@@ -9,201 +9,201 @@ if (typeof(zebra) === "undefined") {
 }
 
 (function () {
-    var assertException = zebra.assertException, assert = zebra.assert, assume = zebra.assume,
-        Class = zebra.Class, Interface = zebra.Interface, assertObjEqual = zebra.assertObjEqual;
+    var assertException = zebkit.assertException, assert = zebkit.assert, assume = zebkit.assume,
+        Class = zebkit.Class, Interface = zebkit.Interface, assertObjEqual = zebkit.assertObjEqual;
 
-    zebra.runTests("Zebra easy OOP",
+    zebkit.runTests("Easy OOP",
 
         function test_cache() {
-            zebra.$cacheSize = 3;
+            zebkit.$cacheSize = 3;
 
-            zebra.A = "1";
-            zebra.B = "2";
-            zebra.C = "3";
-            zebra.D = "4";
-            zebra.E = "5";
+            zebkit.A = "1";
+            zebkit.B = "2";
+            zebkit.C = "3";
+            zebkit.D = "4";
+            zebkit.E = "5";
 
-            assert(zebra.$cachedE.length, 0);
+            assert(zebkit.$cachedE.length, 0);
 
             // add first entry A
-            assert(zebra.$cache("zebra.A"), "1");
-            assert(zebra.$cachedO["zebra.A"].i, 0);
-            assert(zebra.$cachedO["zebra.A"].o, "1");
-            assert(zebra.$cachedE.indexOf("zebra.A"), 0);
-            assert(zebra.$cachedE.length, 1);
-            assert(zebra.$cache("zebra.A"), "1");
-            assert(zebra.$cachedO["zebra.A"].i, 0);
-            assert(zebra.$cachedO["zebra.A"].o, "1");
-            assert(zebra.$cachedE.indexOf("zebra.A"), 0);
-            assert(zebra.$cachedE.length, 1);
-            assert(zebra.$cache("zebra.A"), "1");
-            assert(zebra.$cachedO["zebra.A"].i, 0);
-            assert(zebra.$cachedO["zebra.A"].o, "1");
-            assert(zebra.$cachedE.indexOf("zebra.A"), 0);
-            assert(zebra.$cachedE.length, 1);
+            assert(zebkit.$cache("zebkit.A"), "1");
+            assert(zebkit.$cachedO["zebkit.A"].i, 0);
+            assert(zebkit.$cachedO["zebkit.A"].o, "1");
+            assert(zebkit.$cachedE.indexOf("zebkit.A"), 0);
+            assert(zebkit.$cachedE.length, 1);
+            assert(zebkit.$cache("zebkit.A"), "1");
+            assert(zebkit.$cachedO["zebkit.A"].i, 0);
+            assert(zebkit.$cachedO["zebkit.A"].o, "1");
+            assert(zebkit.$cachedE.indexOf("zebkit.A"), 0);
+            assert(zebkit.$cachedE.length, 1);
+            assert(zebkit.$cache("zebkit.A"), "1");
+            assert(zebkit.$cachedO["zebkit.A"].i, 0);
+            assert(zebkit.$cachedO["zebkit.A"].o, "1");
+            assert(zebkit.$cachedE.indexOf("zebkit.A"), 0);
+            assert(zebkit.$cachedE.length, 1);
 
             // add second entry [A, B]
-            assert(zebra.$cache("zebra.B"), "2");
-            assert(zebra.$cachedO["zebra.B"].i, 1);
-            assert(zebra.$cachedO["zebra.B"].o, "2");
-            assert(zebra.$cachedO["zebra.A"].i, 0);
-            assert(zebra.$cachedO["zebra.A"].o, "1");
-            assert(zebra.$cachedE.indexOf("zebra.A"), 0);
-            assert(zebra.$cachedE.indexOf("zebra.B"), 1);
-            assert(zebra.$cachedE.length, 2);
+            assert(zebkit.$cache("zebkit.B"), "2");
+            assert(zebkit.$cachedO["zebkit.B"].i, 1);
+            assert(zebkit.$cachedO["zebkit.B"].o, "2");
+            assert(zebkit.$cachedO["zebkit.A"].i, 0);
+            assert(zebkit.$cachedO["zebkit.A"].o, "1");
+            assert(zebkit.$cachedE.indexOf("zebkit.A"), 0);
+            assert(zebkit.$cachedE.indexOf("zebkit.B"), 1);
+            assert(zebkit.$cachedE.length, 2);
 
             // access second entry (change nothing) [A, B]
-            assert(zebra.$cache("zebra.B"), "2");
-            assert(zebra.$cachedO["zebra.B"].i, 1);
-            assert(zebra.$cachedO["zebra.B"].o, "2");
-            assert(zebra.$cachedO["zebra.A"].i, 0);
-            assert(zebra.$cachedO["zebra.A"].o, "1");
-            assert(zebra.$cachedE.indexOf("zebra.A"), 0);
-            assert(zebra.$cachedE.indexOf("zebra.B"), 1);
-            assert(zebra.$cachedE.length, 2);
+            assert(zebkit.$cache("zebkit.B"), "2");
+            assert(zebkit.$cachedO["zebkit.B"].i, 1);
+            assert(zebkit.$cachedO["zebkit.B"].o, "2");
+            assert(zebkit.$cachedO["zebkit.A"].i, 0);
+            assert(zebkit.$cachedO["zebkit.A"].o, "1");
+            assert(zebkit.$cachedE.indexOf("zebkit.A"), 0);
+            assert(zebkit.$cachedE.indexOf("zebkit.B"), 1);
+            assert(zebkit.$cachedE.length, 2);
 
 
             // access first entry (change order) [B, A]
-            assert(zebra.$cache("zebra.A"), "1");
-            assert(zebra.$cachedO["zebra.B"].i, 0);
-            assert(zebra.$cachedO["zebra.B"].o, "2");
-            assert(zebra.$cachedO["zebra.A"].i, 1);
-            assert(zebra.$cachedO["zebra.A"].o, "1");
-            assert(zebra.$cachedE.indexOf("zebra.A"), 1);
-            assert(zebra.$cachedE.indexOf("zebra.B"), 0);
-            assert(zebra.$cachedE.length, 2);
+            assert(zebkit.$cache("zebkit.A"), "1");
+            assert(zebkit.$cachedO["zebkit.B"].i, 0);
+            assert(zebkit.$cachedO["zebkit.B"].o, "2");
+            assert(zebkit.$cachedO["zebkit.A"].i, 1);
+            assert(zebkit.$cachedO["zebkit.A"].o, "1");
+            assert(zebkit.$cachedE.indexOf("zebkit.A"), 1);
+            assert(zebkit.$cachedE.indexOf("zebkit.B"), 0);
+            assert(zebkit.$cachedE.length, 2);
 
             // access first entry (change nothing) [B, A]
-            assert(zebra.$cache("zebra.A"), "1");
-            assert(zebra.$cachedO["zebra.B"].i, 0);
-            assert(zebra.$cachedO["zebra.B"].o, "2");
-            assert(zebra.$cachedO["zebra.A"].i, 1);
-            assert(zebra.$cachedO["zebra.A"].o, "1");
-            assert(zebra.$cachedE.indexOf("zebra.A"), 1);
-            assert(zebra.$cachedE.indexOf("zebra.B"), 0);
-            assert(zebra.$cachedE.length, 2);
+            assert(zebkit.$cache("zebkit.A"), "1");
+            assert(zebkit.$cachedO["zebkit.B"].i, 0);
+            assert(zebkit.$cachedO["zebkit.B"].o, "2");
+            assert(zebkit.$cachedO["zebkit.A"].i, 1);
+            assert(zebkit.$cachedO["zebkit.A"].o, "1");
+            assert(zebkit.$cachedE.indexOf("zebkit.A"), 1);
+            assert(zebkit.$cachedE.indexOf("zebkit.B"), 0);
+            assert(zebkit.$cachedE.length, 2);
 
             // access second entry (change order) [A, B]
-            assert(zebra.$cache("zebra.B"), "2");
-            assert(zebra.$cachedO["zebra.B"].i, 1);
-            assert(zebra.$cachedO["zebra.B"].o, "2");
-            assert(zebra.$cachedO["zebra.A"].i, 0);
-            assert(zebra.$cachedO["zebra.A"].o, "1");
-            assert(zebra.$cachedE.indexOf("zebra.A"), 0);
-            assert(zebra.$cachedE.indexOf("zebra.B"), 1);
-            assert(zebra.$cachedE.length, 2);
+            assert(zebkit.$cache("zebkit.B"), "2");
+            assert(zebkit.$cachedO["zebkit.B"].i, 1);
+            assert(zebkit.$cachedO["zebkit.B"].o, "2");
+            assert(zebkit.$cachedO["zebkit.A"].i, 0);
+            assert(zebkit.$cachedO["zebkit.A"].o, "1");
+            assert(zebkit.$cachedE.indexOf("zebkit.A"), 0);
+            assert(zebkit.$cachedE.indexOf("zebkit.B"), 1);
+            assert(zebkit.$cachedE.length, 2);
 
             // add third entry [A, B, C]
-            assert(zebra.$cache("zebra.C"), "3");
-            assert(zebra.$cachedO["zebra.C"].i, 2);
-            assert(zebra.$cachedO["zebra.C"].o, "3");
-            assert(zebra.$cachedO["zebra.B"].i, 1);
-            assert(zebra.$cachedO["zebra.B"].o, "2");
-            assert(zebra.$cachedO["zebra.A"].i, 0);
-            assert(zebra.$cachedO["zebra.A"].o, "1");
-            assert(zebra.$cachedE.indexOf("zebra.A"), 0);
-            assert(zebra.$cachedE.indexOf("zebra.B"), 1);
-            assert(zebra.$cachedE.indexOf("zebra.C"), 2);
-            assert(zebra.$cachedE.length, 3);
+            assert(zebkit.$cache("zebkit.C"), "3");
+            assert(zebkit.$cachedO["zebkit.C"].i, 2);
+            assert(zebkit.$cachedO["zebkit.C"].o, "3");
+            assert(zebkit.$cachedO["zebkit.B"].i, 1);
+            assert(zebkit.$cachedO["zebkit.B"].o, "2");
+            assert(zebkit.$cachedO["zebkit.A"].i, 0);
+            assert(zebkit.$cachedO["zebkit.A"].o, "1");
+            assert(zebkit.$cachedE.indexOf("zebkit.A"), 0);
+            assert(zebkit.$cachedE.indexOf("zebkit.B"), 1);
+            assert(zebkit.$cachedE.indexOf("zebkit.C"), 2);
+            assert(zebkit.$cachedE.length, 3);
 
             // access third entry (change nothing) [ A, B, C]
-            assert(zebra.$cache("zebra.C"), "3");
-            assert(zebra.$cachedO["zebra.C"].i, 2);
-            assert(zebra.$cachedO["zebra.C"].o, "3");
-            assert(zebra.$cachedO["zebra.B"].i, 1);
-            assert(zebra.$cachedO["zebra.B"].o, "2");
-            assert(zebra.$cachedO["zebra.A"].i, 0);
-            assert(zebra.$cachedO["zebra.A"].o, "1");
-            assert(zebra.$cachedE.indexOf("zebra.A"), 0);
-            assert(zebra.$cachedE.indexOf("zebra.B"), 1);
-            assert(zebra.$cachedE.indexOf("zebra.C"), 2);
-            assert(zebra.$cachedE.length, 3);
+            assert(zebkit.$cache("zebkit.C"), "3");
+            assert(zebkit.$cachedO["zebkit.C"].i, 2);
+            assert(zebkit.$cachedO["zebkit.C"].o, "3");
+            assert(zebkit.$cachedO["zebkit.B"].i, 1);
+            assert(zebkit.$cachedO["zebkit.B"].o, "2");
+            assert(zebkit.$cachedO["zebkit.A"].i, 0);
+            assert(zebkit.$cachedO["zebkit.A"].o, "1");
+            assert(zebkit.$cachedE.indexOf("zebkit.A"), 0);
+            assert(zebkit.$cachedE.indexOf("zebkit.B"), 1);
+            assert(zebkit.$cachedE.indexOf("zebkit.C"), 2);
+            assert(zebkit.$cachedE.length, 3);
 
             // access A entry (change order)   [ B, A, C ]
-            assert(zebra.$cache("zebra.A"), "1");
-            assert(zebra.$cachedO["zebra.C"].i, 2);
-            assert(zebra.$cachedO["zebra.C"].o, "3");
-            assert(zebra.$cachedO["zebra.B"].i, 0);
-            assert(zebra.$cachedO["zebra.B"].o, "2");
-            assert(zebra.$cachedO["zebra.A"].i, 1);
-            assert(zebra.$cachedO["zebra.A"].o, "1");
-            assert(zebra.$cachedE.indexOf("zebra.A"), 1);
-            assert(zebra.$cachedE.indexOf("zebra.B"), 0);
-            assert(zebra.$cachedE.indexOf("zebra.C"), 2);
-            assert(zebra.$cachedE.length, 3);
+            assert(zebkit.$cache("zebkit.A"), "1");
+            assert(zebkit.$cachedO["zebkit.C"].i, 2);
+            assert(zebkit.$cachedO["zebkit.C"].o, "3");
+            assert(zebkit.$cachedO["zebkit.B"].i, 0);
+            assert(zebkit.$cachedO["zebkit.B"].o, "2");
+            assert(zebkit.$cachedO["zebkit.A"].i, 1);
+            assert(zebkit.$cachedO["zebkit.A"].o, "1");
+            assert(zebkit.$cachedE.indexOf("zebkit.A"), 1);
+            assert(zebkit.$cachedE.indexOf("zebkit.B"), 0);
+            assert(zebkit.$cachedE.indexOf("zebkit.C"), 2);
+            assert(zebkit.$cachedE.length, 3);
 
             // access A entry (change order)  [ B, C, A ]
-            assert(zebra.$cache("zebra.A"), "1");
-            assert(zebra.$cachedO["zebra.C"].i, 1);
-            assert(zebra.$cachedO["zebra.C"].o, "3");
-            assert(zebra.$cachedO["zebra.B"].i, 0);
-            assert(zebra.$cachedO["zebra.B"].o, "2");
-            assert(zebra.$cachedO["zebra.A"].i, 2);
-            assert(zebra.$cachedO["zebra.A"].o, "1");
-            assert(zebra.$cachedE.indexOf("zebra.A"), 2);
-            assert(zebra.$cachedE.indexOf("zebra.B"), 0);
-            assert(zebra.$cachedE.indexOf("zebra.C"), 1);
-            assert(zebra.$cachedE.length, 3);
+            assert(zebkit.$cache("zebkit.A"), "1");
+            assert(zebkit.$cachedO["zebkit.C"].i, 1);
+            assert(zebkit.$cachedO["zebkit.C"].o, "3");
+            assert(zebkit.$cachedO["zebkit.B"].i, 0);
+            assert(zebkit.$cachedO["zebkit.B"].o, "2");
+            assert(zebkit.$cachedO["zebkit.A"].i, 2);
+            assert(zebkit.$cachedO["zebkit.A"].o, "1");
+            assert(zebkit.$cachedE.indexOf("zebkit.A"), 2);
+            assert(zebkit.$cachedE.indexOf("zebkit.B"), 0);
+            assert(zebkit.$cachedE.indexOf("zebkit.C"), 1);
+            assert(zebkit.$cachedE.length, 3);
 
             // access A entry  [ B, C, A ]
-            assert(zebra.$cache("zebra.A"), "1");
-            assert(zebra.$cachedO["zebra.C"].i, 1);
-            assert(zebra.$cachedO["zebra.C"].o, "3");
-            assert(zebra.$cachedO["zebra.B"].i, 0);
-            assert(zebra.$cachedO["zebra.B"].o, "2");
-            assert(zebra.$cachedO["zebra.A"].i, 2);
-            assert(zebra.$cachedO["zebra.A"].o, "1");
-            assert(zebra.$cachedE.indexOf("zebra.A"), 2);
-            assert(zebra.$cachedE.indexOf("zebra.B"), 0);
-            assert(zebra.$cachedE.indexOf("zebra.C"), 1);
-            assert(zebra.$cachedE.length, 3);
+            assert(zebkit.$cache("zebkit.A"), "1");
+            assert(zebkit.$cachedO["zebkit.C"].i, 1);
+            assert(zebkit.$cachedO["zebkit.C"].o, "3");
+            assert(zebkit.$cachedO["zebkit.B"].i, 0);
+            assert(zebkit.$cachedO["zebkit.B"].o, "2");
+            assert(zebkit.$cachedO["zebkit.A"].i, 2);
+            assert(zebkit.$cachedO["zebkit.A"].o, "1");
+            assert(zebkit.$cachedE.indexOf("zebkit.A"), 2);
+            assert(zebkit.$cachedE.indexOf("zebkit.B"), 0);
+            assert(zebkit.$cachedE.indexOf("zebkit.C"), 1);
+            assert(zebkit.$cachedE.length, 3);
 
             // add D entry  [D, C, A]
-            assert(zebra.$cache("zebra.D"), "4");
-            assert(zebra.$cachedO["zebra.C"].i, 1);
-            assert(zebra.$cachedO["zebra.C"].o, "3");
-            assert(zebra.$cachedO["zebra.A"].i, 2);
-            assert(zebra.$cachedO["zebra.A"].o, "1");
-            assert(zebra.$cachedO["zebra.D"].i, 0);
-            assert(zebra.$cachedO["zebra.D"].o, "4");
-            assert(zebra.$cachedO["zebra.B"], undefined);
-            assert(zebra.$cachedE.indexOf("zebra.A"), 2);
-            assert(zebra.$cachedE.indexOf("zebra.B"), -1);
-            assert(zebra.$cachedE.indexOf("zebra.C"), 1);
-            assert(zebra.$cachedE.indexOf("zebra.D"), 0);
-            assert(zebra.$cachedE.length, 3);
+            assert(zebkit.$cache("zebkit.D"), "4");
+            assert(zebkit.$cachedO["zebkit.C"].i, 1);
+            assert(zebkit.$cachedO["zebkit.C"].o, "3");
+            assert(zebkit.$cachedO["zebkit.A"].i, 2);
+            assert(zebkit.$cachedO["zebkit.A"].o, "1");
+            assert(zebkit.$cachedO["zebkit.D"].i, 0);
+            assert(zebkit.$cachedO["zebkit.D"].o, "4");
+            assert(zebkit.$cachedO["zebkit.B"], undefined);
+            assert(zebkit.$cachedE.indexOf("zebkit.A"), 2);
+            assert(zebkit.$cachedE.indexOf("zebkit.B"), -1);
+            assert(zebkit.$cachedE.indexOf("zebkit.C"), 1);
+            assert(zebkit.$cachedE.indexOf("zebkit.D"), 0);
+            assert(zebkit.$cachedE.length, 3);
 
             // access entry D [C, D, A]
-            assert(zebra.$cache("zebra.D"), "4");
-            assert(zebra.$cachedO["zebra.C"].i, 0);
-            assert(zebra.$cachedO["zebra.C"].o, "3");
-            assert(zebra.$cachedO["zebra.B"], undefined);
-            assert(zebra.$cachedO["zebra.A"].i, 2);
-            assert(zebra.$cachedO["zebra.A"].o, "1");
-            assert(zebra.$cachedO["zebra.D"].i, 1);
-            assert(zebra.$cachedO["zebra.D"].o, "4");
-            assert(zebra.$cachedE.indexOf("zebra.A"), 2);
-            assert(zebra.$cachedE.indexOf("zebra.C"), 0);
-            assert(zebra.$cachedE.indexOf("zebra.D"), 1);
-            assert(zebra.$cachedE.length, 3);
+            assert(zebkit.$cache("zebkit.D"), "4");
+            assert(zebkit.$cachedO["zebkit.C"].i, 0);
+            assert(zebkit.$cachedO["zebkit.C"].o, "3");
+            assert(zebkit.$cachedO["zebkit.B"], undefined);
+            assert(zebkit.$cachedO["zebkit.A"].i, 2);
+            assert(zebkit.$cachedO["zebkit.A"].o, "1");
+            assert(zebkit.$cachedO["zebkit.D"].i, 1);
+            assert(zebkit.$cachedO["zebkit.D"].o, "4");
+            assert(zebkit.$cachedE.indexOf("zebkit.A"), 2);
+            assert(zebkit.$cachedE.indexOf("zebkit.C"), 0);
+            assert(zebkit.$cachedE.indexOf("zebkit.D"), 1);
+            assert(zebkit.$cachedE.length, 3);
 
 
             // add entry E [E, D, A]
-            assert(zebra.$cache("zebra.E"), "5");
-            assert(zebra.$cachedO["zebra.C"], undefined);
-            assert(zebra.$cachedO["zebra.B"], undefined);
-            assert(zebra.$cachedO["zebra.A"].i, 2);
-            assert(zebra.$cachedO["zebra.A"].o, "1");
-            assert(zebra.$cachedO["zebra.D"].i, 1);
-            assert(zebra.$cachedO["zebra.D"].o, "4");
-            assert(zebra.$cachedO["zebra.E"].i, 0);
-            assert(zebra.$cachedO["zebra.E"].o, "5");
-            assert(zebra.$cachedE.indexOf("zebra.A"), 2);
-            assert(zebra.$cachedE.indexOf("zebra.C"), -1);
-            assert(zebra.$cachedE.indexOf("zebra.B"), -1);
-            assert(zebra.$cachedE.indexOf("zebra.D"), 1);
-            assert(zebra.$cachedE.indexOf("zebra.E"), 0);
-            assert(zebra.$cachedE.length, 3);
+            assert(zebkit.$cache("zebkit.E"), "5");
+            assert(zebkit.$cachedO["zebkit.C"], undefined);
+            assert(zebkit.$cachedO["zebkit.B"], undefined);
+            assert(zebkit.$cachedO["zebkit.A"].i, 2);
+            assert(zebkit.$cachedO["zebkit.A"].o, "1");
+            assert(zebkit.$cachedO["zebkit.D"].i, 1);
+            assert(zebkit.$cachedO["zebkit.D"].o, "4");
+            assert(zebkit.$cachedO["zebkit.E"].i, 0);
+            assert(zebkit.$cachedO["zebkit.E"].o, "5");
+            assert(zebkit.$cachedE.indexOf("zebkit.A"), 2);
+            assert(zebkit.$cachedE.indexOf("zebkit.C"), -1);
+            assert(zebkit.$cachedE.indexOf("zebkit.B"), -1);
+            assert(zebkit.$cachedE.indexOf("zebkit.D"), 1);
+            assert(zebkit.$cachedE.indexOf("zebkit.E"), 0);
+            assert(zebkit.$cachedE.length, 3);
         },
 
         function test_function_name_detection() {
@@ -231,7 +231,7 @@ if (typeof(zebra) === "undefined") {
             ]
 
             for(var i=0; i < f.length; i++) {
-                assert(zebra.$FN(f[i]), "a");
+                assert(zebkit.$FN(f[i]), "a");
             }
         },
 
@@ -290,45 +290,45 @@ if (typeof(zebra) === "undefined") {
         },
 
         function test_isString() {
-            assert(zebra.isString("string literal"), true, "literal");
-            assert(zebra.isString("String object"), true, "String object");
-            assert(zebra.isString(1), false, "number literal");
-            assert(zebra.isString(true), false, "boolean literal");
-            assert(zebra.isString({}), false, "object");
-            assert(zebra.isString(zebra.kkkkkkkk), false, "undefined");
-            assert(zebra.isString(null), false, "null");
-            assert(zebra.isString(1), false, "number");
+            assert(zebkit.isString("string literal"), true, "literal");
+            assert(zebkit.isString("String object"), true, "String object");
+            assert(zebkit.isString(1), false, "number literal");
+            assert(zebkit.isString(true), false, "boolean literal");
+            assert(zebkit.isString({}), false, "object");
+            assert(zebkit.isString(zebkit.kkkkkkkk), false, "undefined");
+            assert(zebkit.isString(null), false, "null");
+            assert(zebkit.isString(1), false, "number");
         },
 
         function test_isNumber() {
-            assert(zebra.isNumber("string literal"), false, "literal as number");
-            assert(zebra.isNumber("String object"), false, "String as number");
-            assert(zebra.isNumber(1), true, "number");
-            assert(zebra.isNumber("1"), false, "number as string");
-            assert(zebra.isNumber(true), false, "boolean literal");
-            assert(zebra.isNumber({}), false, "object");
-            assert(zebra.isNumber(zebra.kkkkkkkk), false, "undefined");
-            assert(zebra.isNumber(null), false, "null");
+            assert(zebkit.isNumber("string literal"), false, "literal as number");
+            assert(zebkit.isNumber("String object"), false, "String as number");
+            assert(zebkit.isNumber(1), true, "number");
+            assert(zebkit.isNumber("1"), false, "number as string");
+            assert(zebkit.isNumber(true), false, "boolean literal");
+            assert(zebkit.isNumber({}), false, "object");
+            assert(zebkit.isNumber(zebkit.kkkkkkkk), false, "undefined");
+            assert(zebkit.isNumber(null), false, "null");
         },
 
         function test_isBoolean() {
-            assert(zebra.isBoolean("string literal"), false, "literal as bool");
-            assert(zebra.isBoolean("true"), false, "true literal as bool");
-            assert(zebra.isBoolean("false"), false, "false literal as bool");
-            assert(zebra.isBoolean("String object"), false, "String as bool");
-            assert(zebra.isBoolean(1), false, "number as bool");
-            assert(zebra.isBoolean(0), false, "number as bool");
-            assert(zebra.isBoolean({}), false, "obj as bool");
-            assert(zebra.isBoolean(undefined), false, "undefined as bool");
-            assert(zebra.isBoolean(null), false, "null as bool");
-            assert(zebra.isBoolean(test_isBoolean), false, "function as bool");
-            assert(zebra.isBoolean(true), true, "boolean as bool");
-            assert(zebra.isBoolean(false), true, "boolean as bool");
-            assert(zebra.isBoolean(new Boolean()), true, "boolean instance as bool");
+            assert(zebkit.isBoolean("string literal"), false, "literal as bool");
+            assert(zebkit.isBoolean("true"), false, "true literal as bool");
+            assert(zebkit.isBoolean("false"), false, "false literal as bool");
+            assert(zebkit.isBoolean("String object"), false, "String as bool");
+            assert(zebkit.isBoolean(1), false, "number as bool");
+            assert(zebkit.isBoolean(0), false, "number as bool");
+            assert(zebkit.isBoolean({}), false, "obj as bool");
+            assert(zebkit.isBoolean(undefined), false, "undefined as bool");
+            assert(zebkit.isBoolean(null), false, "null as bool");
+            assert(zebkit.isBoolean(test_isBoolean), false, "function as bool");
+            assert(zebkit.isBoolean(true), true, "boolean as bool");
+            assert(zebkit.isBoolean(false), true, "boolean as bool");
+            assert(zebkit.isBoolean(new Boolean()), true, "boolean instance as bool");
         },
 
-        function test_zebra() {
-            assert(typeof zebra.$FN === 'function', true);
+        function test_zebkit() {
+            assert(typeof zebkit.$FN === 'function', true);
         },
 
         function test_methods() {
@@ -346,21 +346,21 @@ if (typeof(zebra) === "undefined") {
             var A = Class([
                 function toString(a) { return a; }
             ]);
-            // assert(typeof zebra.getMethod(A, "toString", 1).modifier !== "undefined", true, "Proxy method correct wrap existent method");
-            assert(typeof zebra.getMethod(A, "toString").methodName !== "undefined", true, "Proxy method correct wrap existent method 1");
-            assert(typeof zebra.getMethod(A, "toString").boundTo !== "undefined ", true, "Proxy method correct wrap existent method 2");
+            // assert(typeof zebkit.getMethod(A, "toString", 1).modifier !== "undefined", true, "Proxy method correct wrap existent method");
+            assert(typeof zebkit.getMethod(A, "toString").methodName !== "undefined", true, "Proxy method correct wrap existent method 1");
+            assert(typeof zebkit.getMethod(A, "toString").boundTo !== "undefined ", true, "Proxy method correct wrap existent method 2");
 
 
-            // assert(zebra.getMethod(A, "toString", 1).modifier === 0, true, "Proxy method correct wrap existent method");
-            assert(zebra.getMethod(A, "toString").methodName === "toString", true, "Proxy method correct wrap existent method 3");
-            assert(zebra.getMethod(A, "toString").boundTo == A, true, "Proxy method correct wrap existent method 4");
+            // assert(zebkit.getMethod(A, "toString", 1).modifier === 0, true, "Proxy method correct wrap existent method");
+            assert(zebkit.getMethod(A, "toString").methodName === "toString", true, "Proxy method correct wrap existent method 3");
+            assert(zebkit.getMethod(A, "toString").boundTo == A, true, "Proxy method correct wrap existent method 4");
 
-            // assert(typeof zebra.getMethod(A, "toString", 0).modifier !== "undefined", true, "Proxy method correct wrap existent method");
-            assert(typeof zebra.getMethod(A, "toString").methodName !== "undefined", true, "Proxy method correct wrap existent method 5");
-            assert(typeof zebra.getMethod(A, "toString").boundTo !== "undefined", true, "Proxy method correct wrap existent method 6");
-            // assert(zebra.getMethod(A, "toString").modifier === 0, true, "Proxy method correct wrap existent method");
-            assert(zebra.getMethod(A, "toString").methodName == "toString", true, "Proxy method correct wrap existent method 7");
-            assert(zebra.getMethod(A, "toString").boundTo == A, true, "Proxy method correct wrap existent method 8");
+            // assert(typeof zebkit.getMethod(A, "toString", 0).modifier !== "undefined", true, "Proxy method correct wrap existent method");
+            assert(typeof zebkit.getMethod(A, "toString").methodName !== "undefined", true, "Proxy method correct wrap existent method 5");
+            assert(typeof zebkit.getMethod(A, "toString").boundTo !== "undefined", true, "Proxy method correct wrap existent method 6");
+            // assert(zebkit.getMethod(A, "toString").modifier === 0, true, "Proxy method correct wrap existent method");
+            assert(zebkit.getMethod(A, "toString").methodName == "toString", true, "Proxy method correct wrap existent method 7");
+            assert(zebkit.getMethod(A, "toString").boundTo == A, true, "Proxy method correct wrap existent method 8");
 
             var a = new A();
             assert(a.toString("11") === "11", true);
@@ -385,10 +385,10 @@ if (typeof(zebra) === "undefined") {
         },
 
         function test_class() {
-            assert(typeof zebra.Interface.clazz != 'undefined', true, "test_class 2");
-            assertException(function() {  zebra.instanceOf(Class, null); }, Error, "test_class 1");
+            assert(typeof zebkit.Interface.clazz != 'undefined', true, "test_class 2");
+            assertException(function() {  zebkit.instanceOf(Class, null); }, Error, "test_class 1");
 
-            assert(zebra.instanceOf(Class, Class), false, "test_class 2");
+            assert(zebkit.instanceOf(Class, Class), false, "test_class 2");
             assert(typeof Class.clazz != 'undefined', true, "test_class 2");
             assert(Class.clazz, null, "test_class 2");
             assertException(function() { new Class();  }, Error, "test_class 3");
@@ -398,20 +398,20 @@ if (typeof(zebra) === "undefined") {
             assert(A.clazz, Class, "test_class 6");
             assert(A.$parent, null, "test_class 8");
 
-            assert(zebra.getMethod(A, '', 1), null, "test_class 9");
-            assert(zebra.getMethod(A, 'blablabla'), null, "test_class 10");
+            assert(zebkit.getMethod(A, '', 1), null, "test_class 9");
+            assert(zebkit.getMethod(A, 'blablabla'), null, "test_class 10");
 
             // this should be not a class instance methods
-            assert(zebra.getMethod(A, 'getMethod'), null, "test_class 11");
-            assert(zebra.getMethod(A, 'getMethods'), null, "test_class 12");
+            assert(zebkit.getMethod(A, 'getMethod'), null, "test_class 11");
+            assert(zebkit.getMethod(A, 'getMethods'), null, "test_class 12");
 
             var B = new Class([
                 function a() {},
                 function b(p) {}
             ]);
 
-            assert(zebra.getMethod(B, 'a') !== null, true, "test_class 14");
-            assert(zebra.getMethod(B, 'b') !== null, true, "test_class 15");
+            assert(zebkit.getMethod(B, 'a') !== null, true, "test_class 14");
+            assert(zebkit.getMethod(B, 'b') !== null, true, "test_class 15");
 
             assertException(function() { Class("", []); }, ReferenceError, "test_class 171");
             assertException(function() { Class(null, []); }, ReferenceError, "test_class 172");
@@ -432,22 +432,22 @@ if (typeof(zebra) === "undefined") {
             ]);
 
             assert(A.clazz == Class, true, "test_class 22");
-            assert(zebra.getMethod(A, '') !== null, true, "test_class 222");
+            assert(zebkit.getMethod(A, '') !== null, true, "test_class 222");
 
             var B = new Class(A, [
                 function(p1, p2) {},
             ]);
 
             assert(B.clazz == Class, true, "test_class 26");
-            assert(zebra.getMethod(B, '') !== null, true, "test_class 26");
+            assert(zebkit.getMethod(B, '') !== null, true, "test_class 26");
 
             assert(B.$parent == A, true, "test_class 33");
             assert(A.$parent === null, true, "test_class 34");
 
-            assert(zebra.getMethod(B, '').boundTo == B, true, "test_class 35");
-            assert(zebra.getMethod(A, '').boundTo == A, true, "test_class 37");
+            assert(zebkit.getMethod(B, '').boundTo == B, true, "test_class 35");
+            assert(zebkit.getMethod(A, '').boundTo == A, true, "test_class 37");
 
-            if (!zebra.isIE) {
+            if (!zebkit.isIE) {
                 assertException(function() { Class(DHJ); }, ReferenceError, "test_class 20");
                 assertException(function() { Class(DHJ, MMM); }, ReferenceError, "test_class 20");
             }
@@ -493,8 +493,8 @@ if (typeof(zebra) === "undefined") {
             ]);
 
             var a = new A();
-            assert(zebra.getMethod(A, "a") !== null, true);
-            assert(zebra.getMethod(A, "b") !== null, true);
+            assert(zebkit.getMethod(A, "a") !== null, true);
+            assert(zebkit.getMethod(A, "b") !== null, true);
             assert(a.a(), 1);
             assert(a.b(1), 2);
         },
@@ -549,10 +549,10 @@ if (typeof(zebra) === "undefined") {
         function test_instance() {
             var A = new Class([]);
             var a = new A();
-            assert(zebra.instanceOf(a,Class), false, "Instance of a class is not instance of Class");
-            assert(zebra.instanceOf(a,A), true, "Instance of class is instance of the class");
-            assert(zebra.instanceOf(a,Object), false, "Class should not be an instance of standard JS Object class");
-            assert(zebra.instanceOf(a,String), false, "Class should not be an instance of standard JS String class");
+            assert(zebkit.instanceOf(a,Class), false, "Instance of a class is not instance of Class");
+            assert(zebkit.instanceOf(a,A), true, "Instance of class is instance of the class");
+            assert(zebkit.instanceOf(a,Object), false, "Class should not be an instance of standard JS Object class");
+            assert(zebkit.instanceOf(a,String), false, "Class should not be an instance of standard JS String class");
             assert(a.clazz, A, "getClazz has to point to a class an object has been instantiated");
         },
 
@@ -646,8 +646,8 @@ if (typeof(zebra) === "undefined") {
             ]);
 
 
-            zebra.assertNoException(function() { new D(1); }, ReferenceError, "test_constructor 22");
-            zebra.assertNoException(function() { new E(); }, ReferenceError, "test_constructor 23");
+            zebkit.assertNoException(function() { new D(1); }, ReferenceError, "test_constructor 22");
+            zebkit.assertNoException(function() { new E(); }, ReferenceError, "test_constructor 23");
             var e = new E();
             assert(e.a, undefined, "test_constructor 24");
 
@@ -863,7 +863,7 @@ if (typeof(zebra) === "undefined") {
             }]);
             var a = new A();
 
-            assert(zebra.getMethod(A, "b") != null, true, "test proto  method 1");
+            assert(zebkit.getMethod(A, "b") != null, true, "test proto  method 1");
             assert(a.a, 10), "test proto  method 2";
             assert(a.b.boundTo == null, true, "test proto  method 3");
             assert(a.b.methodName == null, true, "test proto  method 4");
@@ -876,7 +876,7 @@ if (typeof(zebra) === "undefined") {
             }]);
             var b = new B();
 
-            assert(zebra.getMethod(B, "b") != null, true, "test proto  method 6");
+            assert(zebkit.getMethod(B, "b") != null, true, "test proto  method 6");
             assert(b.a, 10), "test proto  method 7";
             assert(b.b(), 100, "test proto  method 8");
 
@@ -887,7 +887,7 @@ if (typeof(zebra) === "undefined") {
             ]);
             var c = new C();
 
-            assert(zebra.getMethod(C, "b") != null, true);
+            assert(zebkit.getMethod(C, "b") != null, true);
             assert(c.a, 10);
             assert(c.b(), 110);
             assert(c.b(1), 11);
@@ -900,7 +900,7 @@ if (typeof(zebra) === "undefined") {
             ]);
             var c = new C();
 
-            assert(zebra.getMethod(C, "b") != null, true);
+            assert(zebkit.getMethod(C, "b") != null, true);
             assert(c.a, 10);
             assert(c.b(), 110);
             assert(c.b(1), 11);
@@ -942,16 +942,16 @@ if (typeof(zebra) === "undefined") {
             assert(a.aa(0, 0, 0), 0, "test_public_methods 6");
 
             assertException(function() { a.b(); }, TypeError, "test_public_methods 7");
-            zebra.assertNoException(function() { a.a(1,2,3,4); }, ReferenceError, "test_public_methods 8");
-            zebra.assertNoException(function() { a.aa(1,2,3, 4); }, ReferenceError, "test_public_methods 9");
+            zebkit.assertNoException(function() { a.a(1,2,3,4); }, ReferenceError, "test_public_methods 8");
+            zebkit.assertNoException(function() { a.aa(1,2,3, 4); }, ReferenceError, "test_public_methods 9");
         },
 
         function test_inteface() {
-            assert(((zebra.Interface()) instanceof zebra.Interface), false, "test_interface1");
-            assert(((new zebra.Interface()) instanceof zebra.Interface), false, "test_interface1");
-            assert(zebra.instanceOf(zebra.Interface(), zebra.Interface), true, "test_interface2");
+            assert(((zebkit.Interface()) instanceof zebkit.Interface), false, "test_interface1");
+            assert(((new zebkit.Interface()) instanceof zebkit.Interface), false, "test_interface1");
+            assert(zebkit.instanceOf(zebkit.Interface(), zebkit.Interface), true, "test_interface2");
 
-            var I1 = new zebra.Interface(), I2 = new zebra.Interface();
+            var I1 = new zebkit.Interface(), I2 = new zebkit.Interface();
             assert(I1 == I2, false, "test_interface3");
             var m = {};
             m[I1] = 1;
@@ -959,90 +959,90 @@ if (typeof(zebra) === "undefined") {
             assert(m[I1], 1, "test_interface4");
             assert(m[I2], 2, "test_interface5");
 
-            var I1 = new zebra.Interface(), I2 = new zebra.Interface(), I3 = new zebra.Interface(), I4 = new zebra.Interface();
+            var I1 = new zebkit.Interface(), I2 = new zebkit.Interface(), I3 = new zebkit.Interface(), I4 = new zebkit.Interface();
             assert(I1 == I2, false, "test_interface6");
             assert(I1 == I3, false, "test_interface7");
             assert(I3 == I2, false, "test_interface8");
-            assert(zebra.instanceOf(I1, I2), false, "test_interface9");
-            assert(zebra.instanceOf(I1, I3), false, "test_interface9");
-            assert(zebra.instanceOf(I1, I1), false, "test_interface9");
-            assert(zebra.instanceOf(I2, I1), false, "test_interface9");
-            assert(zebra.instanceOf(I2, I2), false, "test_interface9");
-            assert(zebra.instanceOf(I2, I3), false, "test_interface9");
-            assert(zebra.instanceOf(I3, I1), false, "test_interface9");
-            assert(zebra.instanceOf(I3, I3), false, "test_interface9");
-            assert(zebra.instanceOf(I3, I2), false, "test_interface9");
+            assert(zebkit.instanceOf(I1, I2), false, "test_interface9");
+            assert(zebkit.instanceOf(I1, I3), false, "test_interface9");
+            assert(zebkit.instanceOf(I1, I1), false, "test_interface9");
+            assert(zebkit.instanceOf(I2, I1), false, "test_interface9");
+            assert(zebkit.instanceOf(I2, I2), false, "test_interface9");
+            assert(zebkit.instanceOf(I2, I3), false, "test_interface9");
+            assert(zebkit.instanceOf(I3, I1), false, "test_interface9");
+            assert(zebkit.instanceOf(I3, I3), false, "test_interface9");
+            assert(zebkit.instanceOf(I3, I2), false, "test_interface9");
 
-            var II   = new zebra.Interface(I1, I2);
-            var III  = new zebra.Interface(I1, I2, I3);
-            var IIII = new zebra.Interface(II, III);
+            var II   = new zebkit.Interface(I1, I2);
+            var III  = new zebkit.Interface(I1, I2, I3);
+            var IIII = new zebkit.Interface(II, III);
             var C1 = new Class(II,   []);
             var C2 = new Class(III,  []);
             var C3 = new Class(IIII, []);
             var C4 = new Class(I4, II, I3, []);
 
             var o = new C1();
-            assert(zebra.instanceOf(o,C1), true, "test_interface9");
-            assert(zebra.instanceOf(o,II), true, "test_interface10");
-            assert(zebra.instanceOf(o,I1), true, "test_interface11");
-            assert(zebra.instanceOf(o,I2), true, "test_interface12");
-            assert(zebra.instanceOf(o,I3), false, "test_interface13");
-            assert(zebra.instanceOf(o,III), false, "test_interface14");
-            assert(zebra.instanceOf(o,IIII), false, "test_interface15");
-            assert(zebra.instanceOf(o,I4), false, "test_interface16");
+            assert(zebkit.instanceOf(o,C1), true, "test_interface9");
+            assert(zebkit.instanceOf(o,II), true, "test_interface10");
+            assert(zebkit.instanceOf(o,I1), true, "test_interface11");
+            assert(zebkit.instanceOf(o,I2), true, "test_interface12");
+            assert(zebkit.instanceOf(o,I3), false, "test_interface13");
+            assert(zebkit.instanceOf(o,III), false, "test_interface14");
+            assert(zebkit.instanceOf(o,IIII), false, "test_interface15");
+            assert(zebkit.instanceOf(o,I4), false, "test_interface16");
 
             var o = new C2();
-            assert(zebra.instanceOf(o,C2), true, "test_interface17");
-            assert(zebra.instanceOf(o,C1), false, "test_interface18");
-            assert(zebra.instanceOf(o,II), false, "test_interface19");
-            assert(zebra.instanceOf(o,III), true, "test_interface20");
-            assert(zebra.instanceOf(o,I1), true, "test_interface21");
-            assert(zebra.instanceOf(o,I2), true, "test_interface22");
-            assert(zebra.instanceOf(o,I3), true, "test_interface23");
-            assert(zebra.instanceOf(o,IIII), false, "test_interface24");
-            assert(zebra.instanceOf(o,I4), false, "test_interface25");
+            assert(zebkit.instanceOf(o,C2), true, "test_interface17");
+            assert(zebkit.instanceOf(o,C1), false, "test_interface18");
+            assert(zebkit.instanceOf(o,II), false, "test_interface19");
+            assert(zebkit.instanceOf(o,III), true, "test_interface20");
+            assert(zebkit.instanceOf(o,I1), true, "test_interface21");
+            assert(zebkit.instanceOf(o,I2), true, "test_interface22");
+            assert(zebkit.instanceOf(o,I3), true, "test_interface23");
+            assert(zebkit.instanceOf(o,IIII), false, "test_interface24");
+            assert(zebkit.instanceOf(o,I4), false, "test_interface25");
 
             var o = new C3();
-            assert(zebra.instanceOf(o,C1), false, "test_interface27");
-            assert(zebra.instanceOf(o,C2), false, "test_interface28");
-            assert(zebra.instanceOf(o,C3), true, "test_interface29");
-            assert(zebra.instanceOf(o,II), true, "test_interface30");
-            assert(zebra.instanceOf(o,III), true, "test_interface31");
-            assert(zebra.instanceOf(o,IIII), true, "test_interface32");
+            assert(zebkit.instanceOf(o,C1), false, "test_interface27");
+            assert(zebkit.instanceOf(o,C2), false, "test_interface28");
+            assert(zebkit.instanceOf(o,C3), true, "test_interface29");
+            assert(zebkit.instanceOf(o,II), true, "test_interface30");
+            assert(zebkit.instanceOf(o,III), true, "test_interface31");
+            assert(zebkit.instanceOf(o,IIII), true, "test_interface32");
 
-            assert(zebra.instanceOf(o,I1), true, "test_interface33");
-            assert(zebra.instanceOf(o,I2), true, "test_interface34");
-            assert(zebra.instanceOf(o,I3), true, "test_interface35");
-            assert(zebra.instanceOf(o,I4), false, "test_interface36");
+            assert(zebkit.instanceOf(o,I1), true, "test_interface33");
+            assert(zebkit.instanceOf(o,I2), true, "test_interface34");
+            assert(zebkit.instanceOf(o,I3), true, "test_interface35");
+            assert(zebkit.instanceOf(o,I4), false, "test_interface36");
 
             var o = new C4();
-            assert(zebra.instanceOf(o,C1), false);
-            assert(zebra.instanceOf(o,C2), false);
-            assert(zebra.instanceOf(o,C3), false);
-            assert(zebra.instanceOf(o,C4), true);
-            assert(zebra.instanceOf(o,I4), true);
-            assert(zebra.instanceOf(o,II), true);
-            assert(zebra.instanceOf(o,I1), true);
-            assert(zebra.instanceOf(o,I2), true);
-            assert(zebra.instanceOf(o,I3), true);
-            assert(zebra.instanceOf(o,III), false);
-            assert(zebra.instanceOf(o,IIII), false);
+            assert(zebkit.instanceOf(o,C1), false);
+            assert(zebkit.instanceOf(o,C2), false);
+            assert(zebkit.instanceOf(o,C3), false);
+            assert(zebkit.instanceOf(o,C4), true);
+            assert(zebkit.instanceOf(o,I4), true);
+            assert(zebkit.instanceOf(o,II), true);
+            assert(zebkit.instanceOf(o,I1), true);
+            assert(zebkit.instanceOf(o,I2), true);
+            assert(zebkit.instanceOf(o,I3), true);
+            assert(zebkit.instanceOf(o,III), false);
+            assert(zebkit.instanceOf(o,IIII), false);
 
             var C1 = Class([]), c1 = new C1();
             var C2 = Class(C1, []), c2 = new C2();
             var C3 = Class(C2, []), c3 = new C3();
 
-            assert(zebra.instanceOf(c1, C1), true);
-            assert(zebra.instanceOf(c1, C2), false);
-            assert(zebra.instanceOf(c1, C3), false);
+            assert(zebkit.instanceOf(c1, C1), true);
+            assert(zebkit.instanceOf(c1, C2), false);
+            assert(zebkit.instanceOf(c1, C3), false);
 
-            assert(zebra.instanceOf(c2, C1), true);
-            assert(zebra.instanceOf(c2, C2), true);
-            assert(zebra.instanceOf(c2, C3), false);
+            assert(zebkit.instanceOf(c2, C1), true);
+            assert(zebkit.instanceOf(c2, C2), true);
+            assert(zebkit.instanceOf(c2, C3), false);
 
-            assert(zebra.instanceOf(c3, C1), true);
-            assert(zebra.instanceOf(c3, C2), true);
-            assert(zebra.instanceOf(c3, C3), true);
+            assert(zebkit.instanceOf(c3, C1), true);
+            assert(zebkit.instanceOf(c3, C2), true);
+            assert(zebkit.instanceOf(c3, C3), true);
         },
 
         function test_static_methods() {
@@ -1257,49 +1257,49 @@ if (typeof(zebra) === "undefined") {
         },
 
         function test_inheritance() {
-            var I1 = new zebra.Interface();
-            var I2 = new zebra.Interface();
+            var I1 = new zebkit.Interface();
+            var I2 = new zebkit.Interface();
             var A = new Class(I1, []), B = new Class(A, []), C = new Class(B, I2, []), D = new Class(I1, I2, []);
             var a = new A(), b = new B(), c = new C(), d = new D();
-            assert(zebra.instanceOf(a,A), true);
-            assert(zebra.instanceOf(a,B), false);
-            assert(zebra.instanceOf(a,C), false);
-            assert(zebra.instanceOf(a,I1), true);
-            assert(zebra.instanceOf(a,I2), false);
+            assert(zebkit.instanceOf(a,A), true);
+            assert(zebkit.instanceOf(a,B), false);
+            assert(zebkit.instanceOf(a,C), false);
+            assert(zebkit.instanceOf(a,I1), true);
+            assert(zebkit.instanceOf(a,I2), false);
             assert(a.clazz, A);
             assert(a.clazz.$parent, null);
 
 
-            assert(zebra.instanceOf(b,A), true);
+            assert(zebkit.instanceOf(b,A), true);
 
 
-            assert(zebra.instanceOf(b,B), true);
+            assert(zebkit.instanceOf(b,B), true);
 
-            assert(zebra.instanceOf(b,C), false);
-            assert(zebra.instanceOf(b,I1), true);
-            assert(zebra.instanceOf(b,I2), false);
+            assert(zebkit.instanceOf(b,C), false);
+            assert(zebkit.instanceOf(b,I1), true);
+            assert(zebkit.instanceOf(b,I2), false);
             assert(b.clazz, B);
             assert(b.clazz.$parent, A);
 
-            assert(zebra.instanceOf(c,A), true);
-            assert(zebra.instanceOf(c,B), true);
-            assert(zebra.instanceOf(c,C), true);
-            assert(zebra.instanceOf(c,I1), true);
-            assert(zebra.instanceOf(c,I2), true);
+            assert(zebkit.instanceOf(c,A), true);
+            assert(zebkit.instanceOf(c,B), true);
+            assert(zebkit.instanceOf(c,C), true);
+            assert(zebkit.instanceOf(c,I1), true);
+            assert(zebkit.instanceOf(c,I2), true);
             assert(c.clazz, C);
             assert(c.clazz.$parent, B);
 
-            assert(zebra.instanceOf(d,A), false);
-            assert(zebra.instanceOf(d,B), false);
-            assert(zebra.instanceOf(d,C), false);
-            assert(zebra.instanceOf(d,D), true);
-            assert(zebra.instanceOf(d,I1), true);
-            assert(zebra.instanceOf(d,I2), true);
+            assert(zebkit.instanceOf(d,A), false);
+            assert(zebkit.instanceOf(d,B), false);
+            assert(zebkit.instanceOf(d,C), false);
+            assert(zebkit.instanceOf(d,D), true);
+            assert(zebkit.instanceOf(d,I1), true);
+            assert(zebkit.instanceOf(d,I2), true);
 
-            assert(zebra.instanceOf(d,String), false);
-            assert(zebra.instanceOf(d,Function), false);
-            assert(zebra.instanceOf(D, String), false);
-            assert(zebra.instanceOf(D, Function), false);
+            assert(zebkit.instanceOf(d,String), false);
+            assert(zebkit.instanceOf(d,Function), false);
+            assert(zebkit.instanceOf(D, String), false);
+            assert(zebkit.instanceOf(D, Function), false);
 
             assert(d.clazz, D);
             assert(d.clazz.$parent,  null);
@@ -1372,15 +1372,15 @@ if (typeof(zebra) === "undefined") {
             assert(b.b(), 22, "test overriding 20");
 
             // test double super
-            var A = new zebra.Class([
+            var A = new zebkit.Class([
                 function b() { return 1000; }
             ]);
 
-            var B = new zebra.Class(A, [
+            var B = new zebkit.Class(A, [
                 function b() { return this.$super() + 1; }
             ]);
 
-            var C = new zebra.Class(B, [
+            var C = new zebkit.Class(B, [
                 function b() { return this.$super() + 2; }
             ]);
 
@@ -1439,11 +1439,11 @@ if (typeof(zebra) === "undefined") {
 
             assert(d.a(), 222, "test overriding 40");
             assert(d.a(1, 2), 1022, "test overriding 41");
-            zebra.assertNoException(function() {
+            zebkit.assertNoException(function() {
                 d.a(1);
             }, Error, "test overriding 42");
 
-            zebra.assertException(function() {
+            zebkit.assertException(function() {
                 var A = Class([
                     function $prototype() {
                         this.a = 100;
@@ -1725,7 +1725,7 @@ if (typeof(zebra) === "undefined") {
 
             // should not be in global space
             assert(this['a'], undefined);
-            assert(zebra.$global['a'], undefined);
+            assert(zebkit.$global['a'], undefined);
 
             var A = new Class([
                 function $prototype() {
@@ -1762,7 +1762,7 @@ if (typeof(zebra) === "undefined") {
             A.extend(M);
 
             a = new A();
-            assert(zebra.getMethod(A, "m1") != null, true);
+            assert(zebkit.getMethod(A, "m1") != null, true);
             assert(a.m1 != null, true);
             assert(a.m1.methodName, "m1");
             assert(a.m2.methodName, "m2");
@@ -1770,7 +1770,7 @@ if (typeof(zebra) === "undefined") {
 
 
             assert(a.m1(), 500);
-            assert(zebra.getMethod(A, "m2") != null, true);
+            assert(zebkit.getMethod(A, "m2") != null, true);
             assert(a.m2 != null, true);
             assert(a.m2(), 501);
             assert(a.a(), 502);
@@ -1785,11 +1785,11 @@ if (typeof(zebra) === "undefined") {
             B.extend(M);
             a = new B();
 
-            assert(zebra.getMethod(B, "m1") != null, true);
+            assert(zebkit.getMethod(B, "m1") != null, true);
             assert(a.m1 != null, true);
             assert(a.m1.methodName, "m1");
             assert(a.m1(), 500);
-            assert(zebra.getMethod(B, "m2") != null, true);
+            assert(zebkit.getMethod(B, "m2") != null, true);
             assert(a.m2 != null, true);
             assert(a.m2(), 501);
             assert(a.a(), 502);
@@ -1825,7 +1825,7 @@ if (typeof(zebra) === "undefined") {
             assert(a.a(), 2, "anonymous overridden method a()");
             assert(a.a(22), 22, "anonymous didn't touch method a(1)");
             assert(a.a(22, 1), 23, "anonymous declared new method a(2)");
-            assert(zebra.instanceOf(a,A), true, "anonymous is instance of initial class");
+            assert(zebkit.instanceOf(a,A), true, "anonymous is instance of initial class");
             assert(a.clazz != (new A()).clazz, true, "anonymous class doesn't equal initial class");
             assert(a.clazz.$parent == A, true, "anonymous has proper parent class");
 
@@ -1834,7 +1834,7 @@ if (typeof(zebra) === "undefined") {
             assert(a.a(), 1, "anonymous didn't touch method a() of initial class");
             assert(a.a(12), 12, "anonymous didn't touch method a(1) of initial class");
             assert(this['a'], undefined, "anonymous didn't update current scope");
-            assert(zebra.$global['a'], undefined, "anonymous didn't update global scope");
+            assert(zebkit.$global['a'], undefined, "anonymous didn't update global scope");
 
             var A = new Class([
                 function(m) { this.m = m; }
@@ -1848,21 +1848,21 @@ if (typeof(zebra) === "undefined") {
 
             assert(a.m, 100, "anonymous properly called super method");
 
-            var I = new zebra.Interface();
+            var I = new zebkit.Interface();
             var i = new I([
                 function a() {
                     return 10;
                 }
             ]);
 
-            assert(zebra.instanceOf(i, I), true);
+            assert(zebkit.instanceOf(i, I), true);
             assert(i.a(), 10);
 
             var A = new Class([
                 function() { this.m = 100; }
             ]);
 
-            zebra.assertNoException(function() {
+            zebkit.assertNoException(function() {
                 new A([]);
             }, Error);
             var a = new A([]);
@@ -1873,41 +1873,41 @@ if (typeof(zebra) === "undefined") {
             ]);
             assert(a.m, 100);
 
-            var I = new zebra.Interface();
+            var I = new zebkit.Interface();
             var aa = new A(I, [
                  function() { this.m = 200; }
             ]);
-            assert(zebra.instanceOf(aa, I), true);
-            assert(zebra.instanceOf(a, I), false);
-            assert(zebra.instanceOf(aa, A), true);
-            assert(zebra.instanceOf(a, A), true);
+            assert(zebkit.instanceOf(aa, I), true);
+            assert(zebkit.instanceOf(a, I), false);
+            assert(zebkit.instanceOf(aa, A), true);
+            assert(zebkit.instanceOf(a, A), true);
             assert(aa.m, 200);
             assert(a.m, 100);
 
-            var I2 = new zebra.Interface();
+            var I2 = new zebkit.Interface();
             var aaa = new A(300, I, I2, [
                  function(p) { this.m = p; }
             ]);
-            assert(zebra.instanceOf(aaa, A), true);
-            assert(zebra.instanceOf(aaa, I), true);
-            assert(zebra.instanceOf(aaa, I2), true);
+            assert(zebkit.instanceOf(aaa, A), true);
+            assert(zebkit.instanceOf(aaa, I), true);
+            assert(zebkit.instanceOf(aaa, I2), true);
             assert(aaa.m, 300);
 
-            assert(zebra.instanceOf(aa, A), true);
-            assert(zebra.instanceOf(aa, I), true);
-            assert(zebra.instanceOf(aa, I2), false);
+            assert(zebkit.instanceOf(aa, A), true);
+            assert(zebkit.instanceOf(aa, I), true);
+            assert(zebkit.instanceOf(aa, I2), false);
             assert(aa.m, 200);
 
-            assert(zebra.instanceOf(a, A), true);
-            assert(zebra.instanceOf(a, I), false);
-            assert(zebra.instanceOf(a, I2), false);
+            assert(zebkit.instanceOf(a, A), true);
+            assert(zebkit.instanceOf(a, I), false);
+            assert(zebkit.instanceOf(a, I2), false);
             assert(a.m, 100);
 
             assert(a != aa, true);
             assert(a != aaa, true);
             assert(aa != aaa, true);
 
-            zebra.assertNoException(function() {
+            zebkit.assertNoException(function() {
                 var aaa = new A(300, 200, I, I2, [
                      function(p) { this.m = p; }
                 ]);
@@ -1937,13 +1937,13 @@ if (typeof(zebra) === "undefined") {
         function test_packaging() {
 
             function isPackage(v) {
-               return v && zebra.$FN(v.constructor) === "Package";
+               return v && zebkit.$FN(v.constructor) === "Package";
             }
 
-            var np = zebra("newpackage");
+            var np = zebkit("newpackage");
             assert(isPackage(np), true);
 
-            var NS = zebra.namespace('NS');
+            var NS = zebkit.namespace('NS');
 
             NS('ui').var1 = 1;
             NS('ui').var2 = 2;
@@ -1987,7 +1987,7 @@ if (typeof(zebra) === "undefined") {
             assertException(function () { NS("ui.var1", 1); }, Error, "test_packaging10" );
             assertException(function () { NS("ui.grid.var1", 1); }, Error, "test_packaging11" );
 
-            var MyScope = zebra.namespace('MyScope');
+            var MyScope = zebkit.namespace('MyScope');
             assert(MyScope.ui === undefined, true);
             MyScope('ui').var1 = 11;
             MyScope('ui').var11 = 111;
@@ -2000,7 +2000,7 @@ if (typeof(zebra) === "undefined") {
             assert(isPackage(MyScope.ui.grid), true, "test_packaging41");
             assert(isPackage(MyScope.ui), true, "test_packaging42");
 
-            var MyScope2 = zebra.namespace('MyScope2');
+            var MyScope2 = zebkit.namespace('MyScope2');
             MyScope2(["a", "b", "c.d"]);
             MyScope2('c.d.e');
             MyScope2('a').mm = 200;
@@ -2024,14 +2024,14 @@ if (typeof(zebra) === "undefined") {
             assert(y, 100);
             assert(mm, 200);
 
-            zebra.namespace('GLOBAL');
-            zebra.namespace('GLOBAL')("a").a = 1213;
-            assert(zebra.namespace('GLOBAL').a.a, 1213);
+            zebkit.namespace('GLOBAL');
+            zebkit.namespace('GLOBAL')("a").a = 1213;
+            assert(zebkit.namespace('GLOBAL').a.a, 1213);
 
-            assertException(function () { zebra.namespace('Fictive Namespace', true); }, Error, "test_packaging12" );
-            assert(zebra.namespace('MyScope2'), MyScope2);
+            assertException(function () { zebkit.namespace('Fictive Namespace', true); }, Error, "test_packaging12" );
+            assert(zebkit.namespace('MyScope2'), MyScope2);
 
-            var NNN = zebra.namespace("NNN");
+            var NNN = zebkit.namespace("NNN");
             NNN("a").b = 100;
             NNN("a").c = 200;
             NNN("a.d").k = 300;
@@ -2046,7 +2046,7 @@ if (typeof(zebra) === "undefined") {
             assertException(function() { NNN.Import("this", 'a.d.l'); }, Error);
             assertException(function() { NNN.Import("this"); }, Error);
 
-            var N = zebra.namespace("d");
+            var N = zebkit.namespace("d");
             N(['a', 'b', 'c.d']);
             N.c.d.k = 10;
             assert(N.c.d.k, 10);
@@ -2148,15 +2148,15 @@ if (typeof(zebra) === "undefined") {
         },
 
         function test_caller() {
-            var A = new zebra.Class([
+            var A = new zebkit.Class([
                 function() {
-                    assert(zebra.$caller == zebra.getMethod(A, ''), true, "test_caller 1");
+                    assert(zebkit.$caller == zebkit.getMethod(A, ''), true, "test_caller 1");
                     this.toM();
-                    assert(zebra.$caller == zebra.getMethod(A, ''), true, "test_caller 2");
+                    assert(zebkit.$caller == zebkit.getMethod(A, ''), true, "test_caller 2");
                 },
 
                 function toM() {
-                    assert(zebra.$caller.methodBody.toString() == toM.toString(), true, "test_caller 3");
+                    assert(zebkit.$caller.methodBody.toString() == toM.toString(), true, "test_caller 3");
                     return "M";
                 }
             ]);
@@ -2240,7 +2240,7 @@ if (typeof(zebra) === "undefined") {
             assert(b.b(), 10);
             assert(b.a(111), 111);
             assert(b.$extended,  undefined);
-            assert(zebra.instanceOf(b, I), false);
+            assert(zebkit.instanceOf(b, I), false);
 
             b.extend(I, [
                 function b() {
@@ -2252,7 +2252,7 @@ if (typeof(zebra) === "undefined") {
             assert(b.b(), 121);
             assert(b.a(112), 112);
             assert(b.$extended, true);
-            assert(zebra.instanceOf(b, I), true);
+            assert(zebkit.instanceOf(b, I), true);
 
 
             // no side effect to parent class
@@ -2261,7 +2261,7 @@ if (typeof(zebra) === "undefined") {
             assert(b.b(), 10);
             assert(b.a(111), 111);
             assert(b.$extended, undefined);
-            assert(zebra.instanceOf(b, I), false);
+            assert(zebkit.instanceOf(b, I), false);
 
             var A = Class([
                 function $prototype() {
@@ -2377,7 +2377,7 @@ if (typeof(zebra) === "undefined") {
 
             assert(A.$instance == null, true);
 
-            var AA = zebra.Singleton(A);
+            var AA = zebkit.Singleton(A);
             assert(AA.$isSingleton, true);
             assert(A.$isSingleton !== true, true);
 
@@ -2411,7 +2411,7 @@ if (typeof(zebra) === "undefined") {
             assert(a2.m(), a3.m());
 
             assertException(function() {
-                zebra.Singleton(AA);
+                zebkit.Singleton(AA);
             }, Error);
 
             var B = new Class(A, [
@@ -2457,7 +2457,7 @@ if (typeof(zebra) === "undefined") {
         },
 
         function test_class_names() {
-            zebra.package("test", function(pkg) {
+            zebkit.package("test", function(pkg) {
                 pkg.A = Class([
                     function $clazz() {
                         this.B = Class([
@@ -2480,36 +2480,36 @@ if (typeof(zebra) === "undefined") {
                     }
                 ]);
 
-                zebra.$resolveClassNames();
+                zebkit.$resolveClassNames();
 
-                assert(zebra.test != null, true);
-                assert(zebra.test.A != null, true);
-                assert(zebra.test.AA != null, true);
-                assert(zebra.test.A.B != null, true);
-                assert(zebra.test.AA.BB != null, true);
+                assert(zebkit.test != null, true);
+                assert(zebkit.test.A != null, true);
+                assert(zebkit.test.AA != null, true);
+                assert(zebkit.test.A.B != null, true);
+                assert(zebkit.test.AA.BB != null, true);
 
-                assert(zebra.test.A.$name, "A");
-                assert(zebra.test.A.B.$name, "A.B");
-                assert(zebra.test.A.B.A.$name, "A.B.A");
-                assert(zebra.test.A.a, 100);
+                assert(zebkit.test.A.$name, "A");
+                assert(zebkit.test.A.B.$name, "A.B");
+                assert(zebkit.test.A.B.A.$name, "A.B.A");
+                assert(zebkit.test.A.a, 100);
 
-                assert(zebra.test.AA.$name, "AA");
-                assert(zebra.test.AA.a, 100);
-                assert(zebra.test.AA.BB.$name, "AA.BB");
-                assert(zebra.test.AA.BB.A.$name, "AA.BB.A");
-                assert(zebra.test.AA.B.$name, "A.B");
-                assert(zebra.test.AA.B.A.$name, "A.B.A");
+                assert(zebkit.test.AA.$name, "AA");
+                assert(zebkit.test.AA.a, 100);
+                assert(zebkit.test.AA.BB.$name, "AA.BB");
+                assert(zebkit.test.AA.BB.A.$name, "AA.BB.A");
+                assert(zebkit.test.AA.B.$name, "A.B");
+                assert(zebkit.test.AA.B.A.$name, "A.B.A");
             });
         },
 
         function test_clone() {
-            assert(zebra.clone(null), null);
-            assert(zebra.clone(undefined), undefined);
-            assert(zebra.clone(true), true);
-            assert(zebra.clone(1), 1);
-            assert(zebra.clone("abc"), "abc");
+            assert(zebkit.clone(null), null);
+            assert(zebkit.clone(undefined), undefined);
+            assert(zebkit.clone(true), true);
+            assert(zebkit.clone(1), 1);
+            assert(zebkit.clone("abc"), "abc");
 
-            var arr = [1,2,3, ["A", "B" ] ], carr = zebra.clone(arr);
+            var arr = [1,2,3, ["A", "B" ] ], carr = zebkit.clone(arr);
             assert(arr != carr, true);
             assert(arr.length, carr.length);
             assert(arr[arr.length-1] != carr[carr.length-1], true);
@@ -2517,7 +2517,7 @@ if (typeof(zebra) === "undefined") {
             assertObjEqual(arr[arr.length-1], carr[carr.length-1]);
             assertObjEqual(arr[arr.length-1].length, carr[carr.length-1].length);
 
-            var o = { a: "1", b: true, c : [ 3,4,5] }, co = zebra.clone(o);
+            var o = { a: "1", b: true, c : [ 3,4,5] }, co = zebkit.clone(o);
             assert(o != co, true);
             assert(o.c != co.c, true);
             assertObjEqual(o, co);
@@ -2554,7 +2554,7 @@ if (typeof(zebra) === "undefined") {
 
                     return a;
                 }
-            ]), a = new A(), aa = zebra.clone(a);
+            ]), a = new A(), aa = zebkit.clone(a);
 
             assert(a != aa, true);
             assert(a.$hash$ != null, true);
@@ -2587,7 +2587,7 @@ if (typeof(zebra) === "undefined") {
                 function test2() {
                     return this.$super() + 2;
                 }
-            ]), b = new B(), bb = zebra.clone(b);
+            ]), b = new B(), bb = zebkit.clone(b);
 
             assert(b != bb, true);
             assert(b.$hash$ != null, true);
@@ -2606,7 +2606,7 @@ if (typeof(zebra) === "undefined") {
             assert(b.test1, bb.test1);
             assert(b.test1(11), bb.test1(11));
 
-            var f1 = function() {}, f2 = zebra.clone(f1);
+            var f1 = function() {}, f2 = zebkit.clone(f1);
             assert(f1, f2);
         }
     );

@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 	<head>
-        <script src='../zebra.min.js' type='text/javascript'></script>
+        <script src='../zebkit.min.js' type='text/javascript'></script>
         <script src='js/uiengine.samples.min.js' type='text/javascript'></script>
 
 
 		<script type='text/javascript'>
 
-		    zebra.ready(function() {
-			    eval(zebra.Import("ui", "layout", "ui.grid"));
+		    zebkit.ready(function() {
+			    eval(zebkit.Import("ui", "layout", "ui.grid"));
 
                 BorderPan.Label.color = "black";
                 BorderPan.Label.font = new Font("Arial", "bold", 12);
@@ -54,7 +54,7 @@
                 qGrid.setViewProvider(new DefViews([
                     function() {
                         this.$super();
-                        this.render.setFont(zebra.ui.smallFont);
+                        this.render.setFont(zebkit.ui.smallFont);
                         this.render.setColor("black");
                     },
 
@@ -93,7 +93,7 @@
                     }
                 ]));
 
-                var Map = zebra.Class(Panel, [
+                var Map = zebkit.Class(Panel, [
                     function(lat, lon) {
 
                         if (arguments.length == null) {
@@ -113,7 +113,7 @@
                         this.lat = lat;
                         this.showDensity = false;
                         this.selected = null;
-                        this._ = new zebra.util.Listeners();
+                        this._ = new zebkit.util.Listeners();
                     },
 
                     function resized(pw, ph) {
@@ -195,14 +195,14 @@
                     }
                 ]);
 
-                var Timeline = zebra.Class(Panel, [
+                var Timeline = zebkit.Class(Panel, [
                     function(props) {
                         this.$super(props);
-                        this.chart = new zebra.ui.samples.SimpleChart(function(x) {
+                        this.chart = new zebkit.ui.samples.SimpleChart(function(x) {
                             return Math.sin(x) * Math.sin(x) - Math.cos(x);
                         }, -10,0, 0.1, "red" );
 
-                        this.chart2 = new zebra.ui.samples.SimpleChart(function(x) {
+                        this.chart2 = new zebkit.ui.samples.SimpleChart(function(x) {
                             return Math.sin(x)  - Math.cos(x)* Math.sin(x);
                         }, -10,0, 0.1, "blue" );
 
@@ -265,7 +265,7 @@
 
 		 		canvas.root.properties({
                     padding   : 16,
-                    border    : zebra.ui.borders.etched,
+                    border    : zebkit.ui.borders.etched,
                     background: "white",
 		 			layout    : new BorderLayout(16),
 		 		 	kids: {

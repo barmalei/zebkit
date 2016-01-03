@@ -2,50 +2,50 @@
 <html>
 	<head>
         <title>Tutorial</title>
-        <script src='../zebra.min.js' type='text/javascript'></script>
+        <script src='../zebkit.min.js' type='text/javascript'></script>
 
     <script type='text/javascript'>
-    zebra.ready(function() {
+    zebkit.ready(function() {
 
     if (document.getElementById("doc.json1") != null) {
 
-        var r = new zebra.ui.zCanvas("doc.json1").root;
-        r.setLayout(new zebra.layout.BorderLayout(4,4));
+        var r = new zebkit.ui.zCanvas("doc.json1").root;
+        r.setLayout(new zebkit.layout.BorderLayout(4,4));
         r.setPadding(4);
         r.setBorder("plain");
 
-        var l = new zebra.ui.BoldLabel("Simple application");
+        var l = new zebkit.ui.BoldLabel("Simple application");
         l.setPadding(4);
         l.setBackground("lightGray");
         r.add("top", l);
-        r.add("center", new zebra.ui.TextArea(""));
-        r.add("bottom", new zebra.ui.Button("Clear"));
+        r.add("center", new zebkit.ui.TextArea(""));
+        r.add("bottom", new zebkit.ui.Button("Clear"));
     }
 
     if (document.getElementById("doc.json2") != null) {
-        new zebra.ui.zCanvas("doc.json2").root.properties({
-           layout  : new zebra.layout.BorderLayout(4,4),
+        new zebkit.ui.zCanvas("doc.json2").root.properties({
+           layout  : new zebkit.layout.BorderLayout(4,4),
            padding : 4,
            border  : "plain",
            kids: {
-              TOP: new zebra.ui.BoldLabel("Simple application").properties({
+              TOP: new zebkit.ui.BoldLabel("Simple application").properties({
                   padding: 4,
                   background: "lightGray"
               }),
-              CENTER: new zebra.ui.TextArea(),
-              BOTTOM: new zebra.ui.Button("Clear")
+              CENTER: new zebkit.ui.TextArea(),
+              BOTTOM: new zebkit.ui.Button("Clear")
            }
         });
     }
 
     if (document.getElementById("doc.json3") != null) {
-        new zebra.ui.zCanvas("doc.json3").root.load("uifromjson2.json");
+        new zebkit.ui.zCanvas("doc.json3").root.load("uifromjson2.json");
     }
 
     if (document.getElementById("doc.json4") != null) {
 
-        var r = new zebra.ui.zCanvas("doc.json4").root;
-        r.setLayout(new zebra.layout.GridLayout(2,2));
+        var r = new zebkit.ui.zCanvas("doc.json4").root;
+        r.setLayout(new zebkit.layout.GridLayout(2,2));
         var url = "uifromjson1.json";
         r.load(url);
         r.load(url);

@@ -1,8 +1,8 @@
 
-zebra.package("ui.demo", function(pkg, Class) {
+zebkit.package("ui.demo", function(pkg, Class) {
 
-    var ui = zebra.ui;
-    eval(zebra.Import("ui", "layout"));
+    var ui = zebkit.ui;
+    eval(zebkit.Import("ui", "layout"));
 
     pkg.PanelsDemo = new Class(pkg.DemoPan, [
         function() {
@@ -74,12 +74,12 @@ zebra.package("ui.demo", function(pkg, Class) {
                 p1 = new ScrollPan(img);
 
             p1.setPreferredSize(270, 240);
-            p1.setBorder(zebra.ui.borders.plain);
+            p1.setBorder(zebkit.ui.borders.plain);
             var p2 = new ScrollPan(new ImagePan(pkg.cosmo1), "vertical");
             p2.setPreferredSize(270, 240);
-            p2.setBorder(zebra.ui.borders.plain);
+            p2.setBorder(zebkit.ui.borders.plain);
 
-            var p3_1 = new Panel(new zebra.layout.ListLayout(2));
+            var p3_1 = new Panel(new zebkit.layout.ListLayout(2));
             for(var i=0; i<20; i++) {
                 var ch = new Checkbox("Checkbox " + i);
                 ch.setLayout(new FlowLayout("left", "center", "horizontal", 4));
@@ -90,14 +90,14 @@ zebra.package("ui.demo", function(pkg, Class) {
             p3.setAutoHide(true);
 
             p3.setPreferredSize(270, 190);
-            p3.setBorder(zebra.ui.borders.plain);
+            p3.setBorder(zebkit.ui.borders.plain);
 
-            var p4_1 = new TextField(new zebra.data.Text(zebra.io.GET("demo/test.txt")));
+            var p4_1 = new TextField(new zebkit.data.Text(zebkit.io.GET("demo/test.txt")));
             p4_1.setBorder(null);
 
             var p4 = new ScrollPan(p4_1);
             p4.setPreferredSize(270, 190);
-            p4.setBorder(zebra.ui.borders.plain);
+            p4.setBorder(zebkit.ui.borders.plain);
 
             var ctr = new Constraints();
             ctr.setPadding(6);

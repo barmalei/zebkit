@@ -1,15 +1,15 @@
 
-if (typeof(zebra) === "undefined") {
+if (typeof(zebkit) === "undefined") {
     load(arguments[0] + '/src/easyoop.js');
     load(arguments[0] + '/src/tools.js');
     load(arguments[0] + '/src/util.js');
 }
 
-var assert = zebra.assert, Class = zebra.Class, assertException = zebra.assertException,
-    assertNoException = zebra.assertNoException, Listeners = zebra.util.Listeners,
-    ListenersClass = zebra.util.ListenersClass;
+var assert = zebkit.assert, Class = zebkit.Class, assertException = zebkit.assertException,
+    assertNoException = zebkit.assertNoException, Listeners = zebkit.util.Listeners,
+    ListenersClass = zebkit.util.ListenersClass;
 
-zebra.runTests("Util Listeners",
+zebkit.runTests("Util Listeners",
     function test_single_listener() {
         var clazz = ListenersClass(), aaa = 10, bbb = null;
         assert(clazz.prototype.fired != null, true);
@@ -126,7 +126,7 @@ zebra.runTests("Util Listeners",
     },
 
     function test_bind() {
-        var A  = zebra.Class([
+        var A  = zebkit.Class([
             function() {
                 this._ = new (new ListenersClass("ff"));
             }
@@ -134,7 +134,7 @@ zebra.runTests("Util Listeners",
 
         var a = new A(), t1 = 0, t2 = 0, t3 = 0;
 
-        var B = zebra.Class([
+        var B = zebkit.Class([
             function ff() {
                 t3 ++;
             }
@@ -214,7 +214,7 @@ zebra.runTests("Util Listeners",
 
 
         var L = ListenersClass("tt", "dd");
-        var A = zebra.Class([
+        var A = zebkit.Class([
             function() {
                 this._ = new L();
             }
@@ -542,7 +542,7 @@ zebra.runTests("Util Listeners",
         var B = Class([function test(src, num) {
             assert(src != null, true);
             assert(num, 100);
-            assert(zebra.instanceOf(src, A), true);
+            assert(zebkit.instanceOf(src, A), true);
         }]);
 
         var a = new A(), b = new B();
@@ -572,13 +572,13 @@ zebra.runTests("Util Listeners",
             function test(src, num) {
                 assert(src != null, true);
                 assert(num, 100);
-                assert(zebra.instanceOf(src, A), true);
+                assert(zebkit.instanceOf(src, A), true);
             },
 
             function test2(src, num) {
                 assert(src != null, true);
                 assert(num, 101);
-                assert(zebra.instanceOf(src, A), true);
+                assert(zebkit.instanceOf(src, A), true);
             }
         ]);
 

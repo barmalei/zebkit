@@ -1,13 +1,13 @@
 (function(pkg, Class) {
     /**
      * Input key event class.
-     * @param {zebra.ui.Panel} source a source of the key input event
+     * @param {zebkit.ui.Panel} source a source of the key input event
      * @param {Integer} code a code of pressed key
      * @param {String} ch a character of typed key
-     * @param {Integer} mask a bits mask of pressed meta keys:  zebra.ui.KeyEvent.M_CTRL,
-     * zebra.ui.KeyEvent.M_SHIFT, zebra.ui.KeyEvent.M_ALT, zebra.ui.KeyEvent.M_CMD
-     * @class  zebra.ui.KeyEvent
-     * @extends zebra.util.Event
+     * @param {Integer} mask a bits mask of pressed meta keys:  zebkit.ui.KeyEvent.M_CTRL,
+     * zebkit.ui.KeyEvent.M_SHIFT, zebkit.ui.KeyEvent.M_ALT, zebkit.ui.KeyEvent.M_CMD
+     * @class  zebkit.ui.KeyEvent
+     * @extends zebkit.util.Event
      * @constructor
      */
     pkg.KeyEvent = Class(zebkit.util.Event, [
@@ -161,4 +161,4 @@
         }
     ]);
 
-})(zebra("ui"), zebra.Class);
+})(zebkit("ui"), zebkit.Class);

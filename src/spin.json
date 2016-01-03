@@ -24,6 +24,6 @@
             "font" : "bold"
         },
 
-        "border": { "$zebra.ui.Border" : ["gray", 1, 3] }
+        "border": { "$zebkit.ui.Border" : ["gray", 1, 3] }
     }
 }

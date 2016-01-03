@@ -2,13 +2,13 @@
 <html>
 	<head>
 
-        <script src='../zebra.min.js' type='text/javascript'></script>
+        <script src='../zebkit.min.js' type='text/javascript'></script>
 
 		<script type='text/javascript'>
-		    zebra.ready(function() {
+		    zebkit.ready(function() {
 				// import all classes, functions and cosntans from
-				// zebra.ui, zebra.layout packages
-				eval(zebra.Import("ui", "layout"));
+				// zebkit.ui, zebkit.layout packages
+				eval(zebkit.Import("ui", "layout"));
 
 			    var canvas = new zCanvas(450, 300), root = canvas.root;
 
@@ -25,7 +25,7 @@
 					    		TOP: new TextField("Text Field").properties({
 					    			background: "rgba(200,200,200, 0.5)",
 					    			color: "white",
-					    			cursorView: zebra.util.rgb.red
+					    			cursorView: zebkit.util.rgb.red
 					    		}),
 
 					    		LEFT: (new Slider(VERTICAL)).properties({
@@ -52,12 +52,12 @@
 			    });
 
 			    var isPaused  = true,
-			    	video     = root.find("//zebra.ui.VideoPan"),
-			    	button    = root.find("//zebra.ui.Button"),
-			    	slider    = root.find("//zebra.ui.Slider"),
-			    	tf        = root.find("//zebra.ui.TextField");
+			    	video     = root.find("//zebkit.ui.VideoPan"),
+			    	button    = root.find("//zebkit.ui.Button"),
+			    	slider    = root.find("//zebkit.ui.Slider"),
+			    	tf        = root.find("//zebkit.ui.TextField");
 
-				// Highlight screen when pointer is in. It is done by zebra mixing.
+				// Highlight screen when pointer is in. It is done by mixing.
 				root.find("//*[@id='mypanel']").extend([
   					function pointerExited(e)  { this.setBackground(null); },
   					function pointerEntered(e) { this.setBackground("rgba(255, 255, 255, 0.5)");	 },
@@ -82,7 +82,7 @@
 	</head>
 
 	<body bgcolor="#EEEEEE" align="center" style="padding:15px;">
-	    <h2>Simple Zebra Video Panel</h2>
+	    <h2>Simple video Panel</h2>
 	    <div>Slide to change volume</div>
 	</body>
 </html>

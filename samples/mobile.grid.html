@@ -5,12 +5,12 @@
  		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0" />
 		<meta name="msapplication-tap-highlight" content="no" />
 
-	    <script src='../zebra.min.js' type='text/javascript'></script>
+	    <script src='../zebkit.min.js' type='text/javascript'></script>
 
 		<script type='text/javascript'>
 
-		    zebra.ready(function() {
-		    	eval(zebra.Import("ui", "layout", "ui.grid"));
+		    zebkit.ready(function() {
+		    	eval(zebkit.Import("ui", "layout", "ui.grid"));
 
 		    	GridCaption.font = new Font("Arial", "bold", 20);
 				Button.Label.font = new Font("Arial", "bold", 20);
@@ -48,7 +48,7 @@
 		    	grid.clazz.$name = "Grid";
 
 				// create canvas
-			    var z = new zebra.ui.zCanvas("test");
+			    var z = new zebkit.ui.zCanvas("test");
 			    z.fullScreen();
 
 				var sp      = new ScrollPan(new GridStretchPan(grid), "vertical"),

@@ -6,13 +6,13 @@
 
 pkg.HtmlElementMan = Class(pkg.Manager, [
 //
-// HTML element integrated into Zebra layout has to be tracked regarding:
-//    1) DOM hierarchy. New added into zebra layout DOM element has to be
+// HTML element integrated into zebkit layout has to be tracked regarding:
+//    1) DOM hierarchy. New added into zebkit layout DOM element has to be
 //       attached to the first found parent DOM element
-//    2) Visibility. If a zebra UI component change its visibility state
+//    2) Visibility. If a zebkit UI component change its visibility state
 //       it has to have side effect to all children HTML elements on any
 //       subsequent hierarchy level
-//    3) Moving a zebra UI component has to correct location of children
+//    3) Moving a zebkit UI component has to correct location of children
 //       HTML element on any subsequent hierarchy level.
 //
 //  The implementation of HTML element component has the following specific:
@@ -30,17 +30,17 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
 //          -- getCanvas() != null
 //       The visibility state is controlled with "e.style.visibility"
 //
-//   To support effective DOM hierarchy tracking a zebra UI component can
+//   To support effective DOM hierarchy tracking a zebkit UI component can
 //   host "$domKid" property that contains direct DOM element the UI component
 //   hosts and other UI components that host DOM element. So it is sort of tree.
 //   For instance:
 //
 //    +---------------------------------------------------------
-//    |  p1 (zebra component)
+//    |  p1 (zebkit component)
 //    |   +--------------------------------------------------
-//    |   |  p2 (zebra component)
+//    |   |  p2 (zebkit component)
 //    |   |    +---------+      +-----------------------+
-//    |   |    |   h1    |      | p3 zebra component    |
+//    |   |    |   h1    |      | p3 zebkit component    |
 //    |   |    +---------+      |  +---------------+    |
 //    |   |                     |  |    h3         |    |
 //    |   |    +---------+      |  |  +---------+  |    |
@@ -81,7 +81,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
         // attach to appropriate DOM parent if necessary
         // c parameter has to be DOM element
         function $resolveDOMParent(c) {
-            // try to find an HTML element in zebra (pay attention, in zebra hierarchy !)
+            // try to find an HTML element in zebkit (pay attention, in zebkit hierarchy !)
             // hierarchy that has to be a DOM parent for the given component
             var parentElement = null;
             for(var p = c.parent; p != null; p = p.parent) {
@@ -120,7 +120,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
         //    |             .  (x,y) -> (xx,yy) than correct left
         //                  .  and top of DOM2 relatively to DOM1
         //    |    +--------.--------------------------
-        //    |    |        .       zebra1
+        //    |    |        .       zebkit1
         //    |    |        .
         //    |    |  (left, top)
         //    |<............+-------------------------
@@ -128,9 +128,9 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
         //    |    |        |
         //    |    |        |
         //
-        //  Convert DOM (x, y) zebra coordinates into appropriate CSS top and left
+        //  Convert DOM (x, y) zebkit coordinates into appropriate CSS top and left
         //  locations relatively to its immediate DOM element. For instance if a
-        //  zebra component contains DOM component every movement of zebra component
+        //  zebkit component contains DOM component every movement of zebkit component
         //  has to bring to correction of the embedded DOM elements
         function $adjustLocation(c) {
             if (c.$container.parentNode != null) {
@@ -204,7 +204,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
         this.compMoved = function(e) {
             var c = e.source, px = e.prevX, py = e.prevY;
 
-            // if we move a zebra component that contains
+            // if we move a zebkit component that contains
             // DOM element(s) we have to correct the DOM elements
             // locations relatively to its parent DOM
             if (c.isDOMElement === true) {
@@ -342,7 +342,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
 
 pkg.HtmlFocusableElement = Class(pkg.HtmlElement, [
     function $prototype() {
-        this.$getFocusHolderElement = function() {
+        this.$getElementRootFocus = function() {
             return this.element;
         };
     }
@@ -354,8 +354,8 @@ pkg.HtmlFocusableElement = Class(pkg.HtmlElement, [
  * @constructor
  * @param {String} text a text the text input component has to be filled with
  * @param {String} element an input element name
- * @class zebra.ui.HtmlTextInput
- * @extends zebra.ui.HtmlElement
+ * @class zebkit.ui.HtmlTextInput
+ * @extends zebkit.ui.HtmlElement
  */
 pkg.HtmlTextInput = Class(pkg.HtmlFocusableElement, [
     function $prototype() {
@@ -393,11 +393,11 @@ pkg.HtmlTextInput = Class(pkg.HtmlFocusableElement, [
 
 /**
  * HTML input text element wrapper class. The class wraps standard HTML text field
- * and represents it as zebra UI component.
+ * and represents it as zebkit UI component.
  * @constructor
- * @class zebra.ui.HtmlTextField
+ * @class zebkit.ui.HtmlTextField
  * @param {String} [text] a text the text field component has to be filled with
- * @extends zebra.ui.HtmlTextInput
+ * @extends zebkit.ui.HtmlTextInput
  */
 pkg.HtmlTextField = Class(pkg.HtmlTextInput, [
     function(text) {
@@ -408,11 +408,11 @@ pkg.HtmlTextField = Class(pkg.HtmlTextInput, [
 
 /**
  * HTML input textarea element wrapper class. The class wraps standard HTML textarea
- * element and represents it as zebra UI component.
+ * element and represents it as zebkit UI component.
  * @constructor
  * @param {String} [text] a text the text area component has to be filled with
- * @class zebra.ui.HtmlTextArea
- * @extends zebra.ui.HtmlTextInput
+ * @class zebkit.ui.HtmlTextArea
+ * @extends zebkit.ui.HtmlTextInput
  */
 pkg.HtmlTextArea = Class(pkg.HtmlTextInput, [
     function setResizeable(b) {
@@ -429,7 +429,7 @@ pkg.HtmlTextArea = Class(pkg.HtmlTextInput, [
 /**
  * [description]
  * @param  {[type]} text  [description]
- * @param  {zebra}  href)
+ * @param  {zebkit}  href)
  * @return {[type]}       [description]
  */
 pkg.HtmlLink = Class(pkg.HtmlElement, [
@@ -437,7 +437,7 @@ pkg.HtmlLink = Class(pkg.HtmlElement, [
         this.$super("a");
         this.setContent(text);
         this.setAttribute("href", href == null ? "#": href);
-        this._ = new zebra.util.Listeners();
+        this._ = new zebkit.util.Listeners();
         var $this = this;
         this.element.onclick = function(e) {
             $this._.fired($this);
@@ -450,4 +450,4 @@ pkg.HtmlLink = Class(pkg.HtmlElement, [
  * @for
  */
 
-})(zebra("ui"), zebra.Class);
+})(zebkit("ui"), zebkit.Class);

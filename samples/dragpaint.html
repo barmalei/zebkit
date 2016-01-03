@@ -6,16 +6,16 @@
 		<meta name="msapplication-tap-highlight" content="no" />
 
 
-		<script src='../zebra.js' type='text/javascript'></script>
+		<script src='../zebkit.js' type='text/javascript'></script>
 
 
 		<script type='text/javascript'>
-		    zebra.ready(function() {
-                eval(zebra.Import("ui", "layout"));
+		    zebkit.ready(function() {
+                eval(zebkit.Import("ui", "layout"));
 
                 var z = new zCanvas(400,400), root = z.root;
                 z.root.setBorder("plain");
-                if (zebra.isTouchable) z.fullScreen();
+                if (zebkit.isTouchable) z.fullScreen();
                 root.setLayout(new BorderLayout());
 
                 root.add(CENTER, new Panel([

@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		
-		<script src='../zebra.js' type='text/javascript'></script>
+
+		<script src='../zebkit.js' type='text/javascript'></script>
 
 
 		<script type='text/javascript'>
-		    zebra.ready(function() {
+		    zebkit.ready(function() {
 				// import all classes, functions and cosntans from
-				// zebra.ui, zebra.layout and zebra.ui.grid packages
-				eval(zebra.Import("ui", "layout", "ui.grid"));
+				// zebkit.ui, zebkit.layout and zebkit.ui.grid packages
+				eval(zebkit.Import("ui", "layout", "ui.grid"));
 
 				// create canvas
 			    var root = (new zCanvas(1400, 800)).root;
 				root.setLayout(new BorderLayout(8,8));
 
 				var g = new Grid(1000, 20), h = g.add(TOP, new GridCaption());
-				
+
 				for(var i=0; i<g.getGridCols(); i++) {
 					h.putTitle(i, "Title " + i);
 				}

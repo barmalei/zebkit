@@ -10,13 +10,13 @@
 	<body bgcolor="#EEEEEE" align="center" style="padding:15px;">
         <script>
 
-            $.getScript('../zebra.js', function (script, textStatus, jqXHR) {
-                zebra()["zebra.json"] = "http://localhost:8090/zebra.json";
+            $.getScript('../zebkit.js', function (script, textStatus, jqXHR) {
+                zebkit()["zebkit.json"] = "http://localhost:8090/zebkit.json";
 
-                zebra.ready(function() {
-                    var root = new zebra.ui.zCanvas();
-                    root.root.setLayout(new zebra.layout.BorderLayout());
-                    root.root.add("center", new zebra.ui.Button("Test"));
+                zebkit.ready(function() {
+                    var root = new zebkit.ui.zCanvas();
+                    root.root.setLayout(new zebkit.layout.BorderLayout());
+                    root.root.add("center", new zebkit.ui.Button("Test"));
                 });
             });
 

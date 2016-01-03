@@ -7,7 +7,7 @@
  * organize customizable editing of the items.
 
         // create tree component instance to visualize the given tree model
-        var tree = new zebra.ui.tree.Tree({
+        var tree = new zebkit.ui.tree.Tree({
             value: "Root",
             kids : [
                 "Item 1",
@@ -17,18 +17,18 @@
         });
 
         // make all tree items editable with text field component
-        tree.setEditorProvider(new zebra.ui.tree.DefEditors());
+        tree.setEditorProvider(new zebkit.ui.tree.DefEditors());
 
  * One more tree  component implementation - "CompTree" - allows developers
  * to create tree whose nodes are  other UI components
 
         // create tree component instance to visualize the given tree model
-        var tree = new zebra.ui.tree.CompTree({
-            value: new zebra.ui.Label("Root label item"),
+        var tree = new zebkit.ui.tree.CompTree({
+            value: new zebkit.ui.Label("Root label item"),
             kids : [
-                new zebra.ui.Checkbox("Checkbox Item"),
-                new zebra.ui.Button("Button Item"),
-                new zebra.ui.TextField("Text field item")
+                new zebkit.ui.Checkbox("Checkbox Item"),
+                new zebkit.ui.Button("Button Item"),
+                new zebkit.ui.TextField("Text field item")
             ]
         });
 
@@ -52,7 +52,7 @@ var KE = ui.KeyEvent;
  * the state indicates if the given tree node is collapsed (false) or expanded
  * (true)
  * @private
- * @class zebra.ui.tree.$IM
+ * @class zebkit.ui.tree.$IM
  */
 pkg.$IM = function(b) {
     /**
@@ -111,9 +111,9 @@ pkg.$IM = function(b) {
       a tree item has to be visualized by implementing "this.paintItem(...)" method
 
  *
- * @class zebra.ui.tree.BaseTree
+ * @class zebkit.ui.tree.BaseTree
  * @constructor
- * @param {zebra.data.TreeModel|Object} a tree model. It can be an instance of tree model
+ * @param {zebkit.data.TreeModel|Object} a tree model. It can be an instance of tree model
  * class or an object that described tree model. An example of such object is shown below:
 
         {
@@ -131,7 +131,7 @@ pkg.$IM = function(b) {
         }
 
  * @param {Boolean} [nodeState] a default tree nodes state (expanded or collapsed)
- * @extends {zebra.ui.Panel}
+ * @extends {zebkit.ui.Panel}
  */
 
  /**
@@ -142,8 +142,8 @@ pkg.$IM = function(b) {
         });
 
   * @event toggled
-  * @param  {zebra.ui.tree.BaseTree} src a tree component that triggers the event
-  * @param  {zebra.data.Item} item an tree item that has been toggled
+  * @param  {zebkit.ui.tree.BaseTree} src a tree component that triggers the event
+  * @param  {zebkit.data.Item} item an tree item that has been toggled
   */
 
  /**
@@ -154,8 +154,8 @@ pkg.$IM = function(b) {
       });
 
   * @event selected
-  * @param  {zebra.ui.tree.BaseTree} src a tree component that triggers the event
-  * @param  {zebra.data.Item} prevItem a previously selected tree item
+  * @param  {zebkit.ui.tree.BaseTree} src a tree component that triggers the event
+  * @param  {zebkit.data.Item} prevItem a previously selected tree item
   */
 
 
@@ -167,9 +167,9 @@ pkg.$IM = function(b) {
       });
 
   * @event editingStarted
-  * @param  {zebra.ui.tree.BaseTree} src an tree component that triggers the event
-  * @param  {zebra.data.Item} item a tree item to be edited
-  * @param  {zebra.ui.Panel} editor an editor to be used to edit the given item
+  * @param  {zebkit.ui.tree.BaseTree} src an tree component that triggers the event
+  * @param  {zebkit.data.Item} item a tree item to be edited
+  * @param  {zebkit.ui.Panel} editor an editor to be used to edit the given item
   */
 
 /**
@@ -180,16 +180,16 @@ pkg.$IM = function(b) {
       });
 
   * @event editingStopped
-  * @param  {zebra.ui.tree.BaseTree} src a tree component that triggers the event
-  * @param  {zebra.data.Item} item a tree item that has been edited
+  * @param  {zebkit.ui.tree.BaseTree} src a tree component that triggers the event
+  * @param  {zebkit.data.Item} item a tree item that has been edited
   * @param  {Object} oldValue an old value of the edited tree item
-  * @param  {zebra.ui.Panel} editor an editor to be used to edit the given item
+  * @param  {zebkit.ui.Panel} editor an editor to be used to edit the given item
   * @param  {Boolean} isApplied flag that indicates if the edited value has been
   * applied to the given tree item
   */
 pkg.BaseTree = Class(ui.Panel, [
     function  $clazz() {
-        this.Listeners = zebra.util.ListenersClass("toggled", "selected", "editingStarted", "editingStopped");
+        this.Listeners = zebkit.util.ListenersClass("toggled", "selected", "editingStarted", "editingStopped");
     },
 
     function $prototype() {
@@ -214,7 +214,7 @@ pkg.BaseTree = Class(ui.Panel, [
 
         /**
          * Test if the given tree component item is opened
-         * @param  {zebra.data.Item}  i a tree model item
+         * @param  {zebkit.data.Item}  i a tree model item
          * @return {Boolean} true if the given tree component item is opened
          * @method isOpen
          */
@@ -225,7 +225,7 @@ pkg.BaseTree = Class(ui.Panel, [
 
         /**
          * Get calculated for the given tree model item metrics
-         * @param  {zebra.data.Item} i a tree item
+         * @param  {zebkit.data.Item} i a tree item
          * @return {Object}   an tree model item metrics. Th
          * @method getItemMetrics
          */
@@ -303,7 +303,7 @@ pkg.BaseTree = Class(ui.Panel, [
 
         /**
          * Get tree model item  metrical bounds (location and size).
-         * @param  {zebra.data.Item} root an tree model item
+         * @param  {zebkit.data.Item} root an tree model item
          * @return {Object} a structure that keeps an item view location
          * and size:
 
@@ -331,7 +331,7 @@ pkg.BaseTree = Class(ui.Panel, [
 
         /**
          * Get toggle element bounds for the given tree model item.
-         * @param  {zebra.data.Item} root an tree model item
+         * @param  {zebkit.data.Item} root an tree model item
          * @return {Object} a structure that keeps an item toggle location
          * and size:
 
@@ -355,9 +355,9 @@ pkg.BaseTree = Class(ui.Panel, [
 
         /**
          * Get current toggle element view. The view depends on the state of tree item.
-         * @param  {zebra.data.Item} i a tree model item
+         * @param  {zebkit.data.Item} i a tree model item
          * @protected
-         * @return {zebra.ui.View}  a toggle element view
+         * @return {zebkit.ui.View}  a toggle element view
          * @method getToogleView
          */
         this.getToggleView = function(i){
@@ -369,7 +369,7 @@ pkg.BaseTree = Class(ui.Panel, [
          * An abstract method that a concrete tree component implementations have to
          * override. The method has to return a preferred size the given tree model
          * item wants to have.
-         * @param  {zebra.data.Item} root an tree model item
+         * @param  {zebkit.data.Item} root an tree model item
          * @return {Object} a structure that keeps an item preferred size:
 
                 {
@@ -389,8 +389,8 @@ pkg.BaseTree = Class(ui.Panel, [
          * override. The method has to render the given tree node of the specified
          * tree model item at the given location
          * @param  {2DContext} g a graphical context
-         * @param  {zebra.data.Item} root a tree model item to be rendered
-         * @param  {zebra.ui.tree.$IM} node a tree node metrics
+         * @param  {zebkit.data.Item} root a tree model item to be rendered
+         * @param  {zebkit.ui.tree.$IM} node a tree node metrics
          * @param  {Ineteger} x a x location where the tree node has to be rendered
          * @param  {Ineteger} y a y location where the tree node has to be rendered
          * @method paintItem
@@ -447,8 +447,8 @@ pkg.BaseTree = Class(ui.Panel, [
 
         /**
          * Get a tree node metrics by the given tree model item.
-         * @param  {zebra.data.Item} i a tree model item
-         * @return {zebra.ui.tree.$IM} a tree node metrics
+         * @param  {zebkit.data.Item} i a tree model item
+         * @return {zebkit.ui.tree.$IM} a tree node metrics
          * @protected
          * @method getIM
          */
@@ -463,10 +463,10 @@ pkg.BaseTree = Class(ui.Panel, [
 
         /**
          * Get a tree item that is located at the given location.
-         * @param  {zebra.data.Item} [root] a starting tree node
+         * @param  {zebkit.data.Item} [root] a starting tree node
          * @param  {Integer} x a x coordinate
          * @param  {Integer} y a y coordinate
-         * @return {zebra.data.Item} a tree model item
+         * @return {zebkit.data.Item} a tree model item
          * @method getItemAt
          */
         this.getItemAt = function(root, x, y){
@@ -531,7 +531,7 @@ pkg.BaseTree = Class(ui.Panel, [
 
         /**
          * Get icon element bounds for the given tree model item.
-         * @param  {zebra.data.Item} root an tree model item
+         * @param  {zebkit.data.Item} root an tree model item
          * @return {Object} a structure that keeps an item icon location
          * and size:
 
@@ -674,7 +674,7 @@ pkg.BaseTree = Class(ui.Panel, [
                 dx   = this.scrollManager.getSX(),
                 dy   = this.scrollManager.getSY();
 
-            if (zebra.util.isIntersect(node.x + dx, node.y + dy,
+            if (zebkit.util.isIntersect(node.x + dx, node.y + dy,
                                        node.width, node.height,
                                        this.visibleArea.x, this.visibleArea.y,
                                        this.visibleArea.width, this.visibleArea.height))
@@ -738,7 +738,7 @@ pkg.BaseTree = Class(ui.Panel, [
         /**
          * Paint children items of the given root tree item.
          * @param  {2DContext} g a graphical context
-         * @param  {zebra.data.Item} root a root tree item
+         * @param  {zebkit.data.Item} root a root tree item
          * @param  {Integer} index an index
          * @return {Boolean}
          * @protected
@@ -823,7 +823,7 @@ pkg.BaseTree = Class(ui.Panel, [
 
         /**
          * Select the given item.
-         * @param  {zebra.data.Item} an item to be selected. Use null value to clear any selection
+         * @param  {zebkit.data.Item} an item to be selected. Use null value to clear any selection
          * @method  select
          */
         this.select = function(item){
@@ -857,7 +857,7 @@ pkg.BaseTree = Class(ui.Panel, [
          * Make the given tree item visible. Tree component rendered content can takes more space than
          * the UI component size is. In this case the content can be scrolled to make visible required
          * tree item.
-         * @param  {zebra.data.Item} item an item to be visible
+         * @param  {zebkit.data.Item} item an item to be visible
          * @method makeVisible
          */
         this.makeVisible = function(item){
@@ -868,7 +868,7 @@ pkg.BaseTree = Class(ui.Panel, [
 
         /**
          * Toggle off or on recursively all items of the given item
-         * @param  {zebra.data.Item} root a starting item to toggle
+         * @param  {zebkit.data.Item} root a starting item to toggle
          * @param  {Boolean} b  true if all items have to be in opened
          * state and false otherwise
          * @method toggleAll
@@ -885,7 +885,7 @@ pkg.BaseTree = Class(ui.Panel, [
 
         /**
          * Toggle the given tree item
-         * @param  {zebra.data.Item} item an item to be toggled
+         * @param  {zebkit.data.Item} item an item to be toggled
          * @method toggle
          */
         this.toggle = function(item){
@@ -938,7 +938,7 @@ pkg.BaseTree = Class(ui.Panel, [
          /**
           * Selected tree model item
           * @attribute selected
-          * @type {zebra.data.Item}
+          * @type {zebkit.data.Item}
           * @default null
           * @readOnly
           */
@@ -1032,7 +1032,7 @@ pkg.BaseTree = Class(ui.Panel, [
      * For instance:
 
         // build tree UI component
-        var tree = new zebra.ui.tree.Tree({
+        var tree = new zebkit.ui.tree.Tree({
             value: "Root",
             kids: [
                 "Item 1",
@@ -1043,8 +1043,8 @@ pkg.BaseTree = Class(ui.Panel, [
         // set " [x] " text render for toggle on and
         // " [o] " text render for toggle off tree elements
         tree.setViews({
-            "on": new zebra.ui.TextRender(" [x] "),
-            "off": new zebra.ui.TextRender(" [o] ")
+            "on": new zebkit.ui.TextRender(" [x] "),
+            "off": new zebkit.ui.TextRender(" [o] ")
         });
 
      * @param {Object} v dictionary of tree component decorative elements views
@@ -1066,13 +1066,13 @@ pkg.BaseTree = Class(ui.Panel, [
 
     /**
      * Set the given tree model to be visualized with the UI component.
-     * @param {zebra.data.TreeModel|Object} d a tree model
+     * @param {zebkit.data.TreeModel|Object} d a tree model
      * @method setModel
      */
     function setModel(d){
         if (this.model != d) {
-            if (zebra.instanceOf(d, zebra.data.TreeModel) === false) {
-                d = new zebra.data.TreeModel(d);
+            if (zebkit.instanceOf(d, zebkit.data.TreeModel) === false) {
+                d = new zebkit.data.TreeModel(d);
             }
 
             this.select(null);
@@ -1096,7 +1096,7 @@ pkg.BaseTree = Class(ui.Panel, [
 
 /**
  * Default tree editor provider
- * @class zebra.ui.tree.DefEditors
+ * @class zebkit.ui.tree.DefEditors
  */
 pkg.DefEditors = Class([
     function (){
@@ -1105,9 +1105,9 @@ pkg.DefEditors = Class([
          * @private
          * @readOnly
          * @attribute tf
-         * @type {zebra.ui.TextField}
+         * @type {zebkit.ui.TextField}
          */
-        this.tf = new ui.TextField(new zebra.data.SingleLineTxt(""));
+        this.tf = new ui.TextField(new zebkit.data.SingleLineTxt(""));
         this.tf.setBackground("white");
         this.tf.setBorder(null);
         this.tf.setPadding(0);
@@ -1116,9 +1116,9 @@ pkg.DefEditors = Class([
     function $prototype() {
         /**
          * Get an UI component to edit the given tree model element
-         * @param  {zebra.ui.tree.Tree} src a tree component
-         * @param  {zebra.data.Item} item an data model item
-         * @return {zebra.ui.Panel} an editor UI component
+         * @param  {zebkit.ui.tree.Tree} src a tree component
+         * @param  {zebkit.data.Item} item an data model item
+         * @return {zebkit.ui.Panel} an editor UI component
          * @method getEditor
          */
         this.getEditor = function(src,item){
@@ -1129,8 +1129,8 @@ pkg.DefEditors = Class([
 
         /**
          * Fetch a model item from the given UI editor component
-         * @param  {zebra.ui.tree.Tree} src a tree UI component
-         * @param  {zebra.ui.Panel} editor an editor that has been used to edit the tree model element
+         * @param  {zebkit.ui.tree.Tree} src a tree UI component
+         * @param  {zebkit.ui.Panel} editor an editor that has been used to edit the tree model element
          * @return {Object} an new tree model element value fetched from the given UI editor component
          * @method fetchEditedValue
          */
@@ -1140,8 +1140,8 @@ pkg.DefEditors = Class([
 
         /**
          * The method is called to ask if the given input event should trigger an tree component item
-         * @param  {zebra.ui.tree.Tree} src a tree UI component
-         * @param  {zebra.ui.PointerEvent|zebra.ui.KeyEvent} e   an input event: pointer or key event
+         * @param  {zebkit.ui.tree.Tree} src a tree UI component
+         * @param  {zebkit.ui.PointerEvent|zebkit.ui.KeyEvent} e   an input event: pointer or key event
          * @return {Boolean} true if the event should trigger edition of a tree component item
          * @method @shouldStartEdit
          */
@@ -1154,7 +1154,7 @@ pkg.DefEditors = Class([
 
 /**
  * Default tree editor view provider
- * @class zebra.ui.tree.DefViews
+ * @class zebkit.ui.tree.DefViews
  * @constructor
  * @param {String} [color] the tree item text color
  * @param {String} [font] the tree item text font
@@ -1163,9 +1163,9 @@ pkg.DefViews = Class([
     function $prototype() {
         /**
          * Get a view for the given model item of the UI tree component
-         * @param  {zebra.ui.tree.Tree} tree  a tree component
-         * @param  {zebra.data.Item} item a tree model element
-         * @return {zebra.ui.View}  a view to visualize the given tree data model element
+         * @param  {zebkit.ui.tree.Tree} tree  a tree component
+         * @param  {zebkit.data.Item} item a tree model element
+         * @return {zebkit.ui.View}  a view to visualize the given tree data model element
          * @method  getView
          */
         this.getView = function (tree, item){
@@ -1178,7 +1178,7 @@ pkg.DefViews = Class([
 
         /**
          * Set the default view provider text render font
-         * @param {zebra.ui.Font} f a font
+         * @param {zebkit.ui.Font} f a font
          * @method setFont
          */
         this.setFont = function(f) {
@@ -1199,11 +1199,11 @@ pkg.DefViews = Class([
              * Default tree item render
              * @attribute render
              * @readOnly
-             * @type {zebra.ui.StringRender}
+             * @type {zebkit.ui.StringRender}
              */
             this.render = new ui.StringRender("");
 
-            zebra.properties(this, this.clazz);
+            zebkit.properties(this, this.clazz);
 
             if (color != null) this.setColor(color);
             if (font  != null) this.setFont(font);
@@ -1213,29 +1213,29 @@ pkg.DefViews = Class([
 
 /**
  * Tree UI component that visualizes a tree data model. The model itself can be passed as JavaScript
- * structure or as a instance of zebra.data.TreeModel. Internally tree component keeps the model always
- * as zebra.data.TreeModel class instance:
+ * structure or as a instance of zebkit.data.TreeModel. Internally tree component keeps the model always
+ * as zebkit.data.TreeModel class instance:
 
-     var tree = new zebra.ui.tree.Tree({
+     var tree = new zebkit.ui.tree.Tree({
           value: "Root",
           kids : [  "Item 1", "Item 2"]
      });
 
  * or
 
-     var model = new zebra.data.TreeModel("Root");
+     var model = new zebkit.data.TreeModel("Root");
      model.add(model.root, "Item 1");
      model.add(model.root, "Item 2");
 
-     var tree = new zebra.ui.tree.Tree(model);
+     var tree = new zebkit.ui.tree.Tree(model);
 
  * Tree model rendering is fully customizable by defining an own views provider. Default views
  * provider renders tree model item as text. The tree node can be made editable by defining an
  * editor provider. By default tree modes are not editable.
- * @class  zebra.ui.tree.Tree
+ * @class  zebkit.ui.tree.Tree
  * @constructor
- * @extends zebra.ui.tree.BaseTree
- * @param {Object|zebra.data.TreeModel} [model] a tree data model passed as JavaScript
+ * @extends zebkit.ui.tree.BaseTree
+ * @param {Object|zebkit.data.TreeModel} [model] a tree data model passed as JavaScript
  * structure or as an instance
  * @param {Boolean} [b] the tree component items toggle state. true to have all items
  * in opened state.
@@ -1253,8 +1253,8 @@ pkg.Tree = Class(pkg.BaseTree, [
             }
             else {
                 if (e.code === KE.ENTER) {
-                    if ((zebra.instanceOf(e.source, ui.TextField) === false) ||
-                        (zebra.instanceOf(e.source.view.target, zebra.data.SingleLineTxt)))
+                    if ((zebkit.instanceOf(e.source, ui.TextField) === false) ||
+                        (zebkit.instanceOf(e.source.view.target, zebkit.data.SingleLineTxt)))
                     {
                         this.stopEditing(true);
                     }
@@ -1292,8 +1292,8 @@ pkg.Tree = Class(pkg.BaseTree, [
 
         /**
          * Initiate the given item editing if the specified event matches condition
-         * @param  {zebra.data.Item} item an item to be edited
-         * @param  {zebra.util.Event} e an even that may trigger the item editing
+         * @param  {zebkit.data.Item} item an item to be edited
+         * @param  {zebkit.util.Event} e an even that may trigger the item editing
          * @return {Boolean}  return true if an item editing process has been started,
          * false otherwise
          * @method  se
@@ -1365,7 +1365,7 @@ pkg.Tree = Class(pkg.BaseTree, [
 
         /**
          * Start editing the given if an editor for the item has been defined.
-         * @param  {zebra.data.Item} item an item whose content has to be edited
+         * @param  {zebkit.data.Item} item an item whose content has to be edited
          * @method startEditing
          * @protected
          */
@@ -1430,8 +1430,8 @@ pkg.Tree = Class(pkg.BaseTree, [
          * A tree model items view provider
          * @readOnly
          * @attribute provider
-         * @default an instance of zebra.ui.tree.DefsViews
-         * @type {zebra.ui.tree.DefsViews}
+         * @default an instance of zebkit.ui.tree.DefsViews
+         * @type {zebkit.ui.tree.DefsViews}
          */
 
         /**
@@ -1439,7 +1439,7 @@ pkg.Tree = Class(pkg.BaseTree, [
          * @readOnly
          * @attribute editors
          * @default null
-         * @type {zebra.ui.tree.DefEditors}
+         * @type {zebkit.ui.tree.DefEditors}
          */
 
         this.editors = null;
@@ -1466,7 +1466,7 @@ pkg.Tree = Class(pkg.BaseTree, [
      * Set the given editor provider. The editor provider is a class that is used to decide which UI
      * component has to be used as an item editor, how the editing should be triggered and how the
      * edited value has to be fetched from an UI editor.
-     * @param {zebra.ui.tree.DefEditors} p an editor provider
+     * @param {zebkit.ui.tree.DefEditors} p an editor provider
      * @method setEditorProvider
      */
     function setEditorProvider(p){
@@ -1479,7 +1479,7 @@ pkg.Tree = Class(pkg.BaseTree, [
     /**
      * Set tree component items view provider. Provider says how tree model items
      * have to be visualized.
-     * @param {zebra.ui.tree.DefViews} p a view provider
+     * @param {zebkit.ui.tree.DefViews} p a view provider
      * @method setViewProvider
      */
     function setViewProvider(p){
@@ -1494,7 +1494,7 @@ pkg.Tree = Class(pkg.BaseTree, [
 
     /**
      * Set the given tree model to be visualized with the UI component.
-     * @param {zebra.data.TreeModel|Object} d a tree model
+     * @param {zebkit.data.TreeModel|Object} d a tree model
      * @method setModel
      */
     function setModel(d){
@@ -1525,38 +1525,38 @@ pkg.Tree = Class(pkg.BaseTree, [
  * In general the implementation lays out passed via tree model UI components as tree
  * component nodes. For instance:
 
-     var tree = new zebra.ui.tree.Tree({
-          value: new zebra.ui.Label("Label root item"),
+     var tree = new zebkit.ui.tree.Tree({
+          value: new zebkit.ui.Label("Label root item"),
           kids : [
-                new zebra.ui.Checkbox("Checkbox Item"),
-                new zebra.ui.Button("Button item"),
-                new zebra.ui.Combo(["Combo item 1", "Combo item 2"])
+                new zebkit.ui.Checkbox("Checkbox Item"),
+                new zebkit.ui.Button("Button item"),
+                new zebkit.ui.Combo(["Combo item 1", "Combo item 2"])
          ]
      });
 
  * But to prevent unexpected navigation it is better to use number of predefined
  * with component tree UI components:
 
-   - zebra.ui.tree.CompTree.Label
-   - zebra.ui.tree.CompTree.Checkbox
-   - zebra.ui.tree.CompTree.Combo
+   - zebkit.ui.tree.CompTree.Label
+   - zebkit.ui.tree.CompTree.Checkbox
+   - zebkit.ui.tree.CompTree.Combo
 
  * You can describe tree model keeping in mind special notation
 
-     var tree = new zebra.ui.tree.Tree({
-          value: "Label root item",  // zebra.ui.tree.CompTree.Label
+     var tree = new zebkit.ui.tree.Tree({
+          value: "Label root item",  // zebkit.ui.tree.CompTree.Label
           kids : [
-                "[ ] Checkbox Item 1", // unchecked zebra.ui.tree.CompTree.Checkbox
-                "[x] Checkbox Item 2", // checked zebra.ui.tree.CompTree.Checkbox
-                ["Combo item 1", "Combo item 2"] // zebra.ui.tree.CompTree.Combo
+                "[ ] Checkbox Item 1", // unchecked zebkit.ui.tree.CompTree.Checkbox
+                "[x] Checkbox Item 2", // checked zebkit.ui.tree.CompTree.Checkbox
+                ["Combo item 1", "Combo item 2"] // zebkit.ui.tree.CompTree.Combo
          ]
      });
 
  *
- * @class  zebra.ui.tree.CompTree
+ * @class  zebkit.ui.tree.CompTree
  * @constructor
- * @extends zebra.ui.tree.BaseTree
- * @param {Object|zebra.data.TreeModel} [model] a tree data model passed as JavaScript
+ * @extends zebkit.ui.tree.BaseTree
+ * @param {Object|zebkit.data.TreeModel} [model] a tree data model passed as JavaScript
  * structure or as an instance
  * @param {Boolean} [b] the tree component items toggle state. true to have all items
  * in opened state.
@@ -1617,8 +1617,8 @@ pkg.CompTree = Class(pkg.BaseTree, [
             if (this.isSelectable === true && this.$blockCIE !== true) {
                 this.$blockCIE = true;
                 try {
-                    var item = zebra.data.TreeModel.findOne(this.model.root,
-                                                            zebra.layout.getDirectChild(this,
+                    var item = zebkit.data.TreeModel.findOne(this.model.root,
+                                                            zebkit.layout.getDirectChild(this,
                                                                                         e.source));
                     if (item != null) this.select(item);
                 }
@@ -1705,7 +1705,7 @@ pkg.CompTree = Class(pkg.BaseTree, [
                 var $this = this;
                 this.model.iterate(this.model.root, function(item) {
                     if (item.value == null ||
-                        zebra.isString(item.value))
+                        zebkit.isString(item.value))
                     {
                         if (item.value == null) item.value = "";
                         item.value = item.value.trim();
@@ -1759,4 +1759,4 @@ pkg.CompTree = Class(pkg.BaseTree, [
  * @for
  */
 
-})(zebra("ui.tree"), zebra.Class, zebra.ui);
+})(zebkit("ui.tree"), zebkit.Class, zebkit.ui);

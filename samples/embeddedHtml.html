@@ -2,11 +2,11 @@
 <html>
 	<head>
 
-		<script src='../zebra.js' type='text/javascript'></script>
+		<script src='../zebkit.js' type='text/javascript'></script>
 
 		<script type='text/javascript'>
-		    zebra.ready(function() {
-		    	eval(zebra.Import("ui", "layout"));
+		    zebkit.ready(function() {
+		    	eval(zebkit.Import("ui", "layout"));
 
 			    var root = new zCanvas(400, 400).root;
 			    root.setPadding(8);
@@ -15,14 +15,14 @@
 				root.setLayout(new BorderLayout(4,4));
 				root.add(LEFT, new HtmlTextArea("HTML text area"));
 				root.add(TOP, new HtmlTextField("HTML input field"));
-				root.add(CENTER, new TextArea("Zebra text area"));
+				root.add(CENTER, new TextArea("Zebkit text area"));
 				root.add(BOTTOM, new Button("Test"));
 	 		});
 		</script>
 	</head>
 
 	<body align="center" bgcolor="#EEEEEE">
-		<h3>DOM elements integrated into Zebra UI layout</h3>
+		<h3>DOM elements integrated into Zebkit UI layout</h3>
 	</body>
 
 </html>

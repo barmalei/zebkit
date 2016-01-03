@@ -3,7 +3,7 @@
  * with remote services and servers by HTTP, JSON-RPC, XML-RPC
  * protocols
  * @module io
- * @requires zebra, util
+ * @requires zebkit, util
  */
 
 (function(pkg, Class) {
@@ -15,7 +15,7 @@ var HEX = "0123456789ABCDEF";
  * @param {Integer} [size] the generated UUID length. The default size is 16 characters.
  * @return {String} an UUID
  * @method  ID
- * @api  zebra.io.ID()
+ * @api  zebkit.io.ID()
  */
 pkg.ID = function UUID(size) {
     if (size == null) size = 16;
@@ -41,7 +41,7 @@ var b64str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
  * Encode the given string into base64
  * @param  {String} input a string to be encoded
  * @method  b64encode
- * @api  zebra.io.b64encode()
+ * @api  zebkit.io.b64encode()
  */
 pkg.b64encode = function(input) {
     var out = [], i = 0, len = input.length, c1, c2, c3;
@@ -77,7 +77,7 @@ pkg.b64encode = function(input) {
  * Decode the base64 encoded string
  * @param {String} input base64 encoded string
  * @return {String} a string
- * @api zebra.io.b64decode()
+ * @api zebkit.io.b64decode()
  * @method b64decode
  */
 pkg.b64decode = function(input) {
@@ -166,7 +166,7 @@ pkg.parseXML = function(s) {
  * Query string parser class. The class provides number of
  * useful static methods to manipulate with a query string
  * of an URL
- * @class zebra.io.QS
+ * @class zebkit.io.QS
  * @static
  */
 pkg.QS = Class([
@@ -211,7 +211,7 @@ pkg.QS = Class([
          */
         this.toQS = function(obj, encode) {
             if (typeof encode === "undefined") encode = true;
-            if (zebra.isString(obj) || zebra.isBoolean(obj) || zebra.isNumber(obj)) {
+            if (zebkit.isString(obj) || zebkit.isBoolean(obj) || zebkit.isNumber(obj)) {
                 return "" + obj;
             }
 
@@ -235,7 +235,7 @@ var $Request = pkg.$Request = function() {
 
 $Request.prototype.open = function(method, url, async, user, password) {
     if (location.protocol.toLowerCase() == "file:" ||
-        (new zebra.URL(url)).host.toLowerCase() == location.host.toLowerCase())
+        (new zebkit.URL(url)).host.toLowerCase() == location.host.toLowerCase())
     {
         this._request = new XMLHttpRequest();
         this._xdomain = false;
@@ -358,7 +358,7 @@ pkg.getRequest = function() {
     if (typeof XMLHttpRequest !== "undefined") {
         var r = new XMLHttpRequest();
 
-        if (zebra.isFF) {
+        if (zebkit.isFF) {
             r.__send = r.send;
             r.send = function(data) {
                 // !!! FF can throw NS_ERROR_FAILURE exception instead of
@@ -384,7 +384,7 @@ pkg.getRequest = function() {
 /**
  * HTTP request class. This class provides API to generate different
  * (GET, POST, etc) HTTP requests in sync and async modes
- * @class zebra.io.HTTP
+ * @class zebkit.io.HTTP
  * @constructor
  * @param {String} url an URL to a HTTP resource
  */
@@ -404,14 +404,14 @@ pkg.HTTP = Class([
 
         // synchronous HTTP GET request with the number of
         // query parameters
-        var result = zebra.io.HTTP("google.com").GET({
+        var result = zebkit.io.HTTP("google.com").GET({
             param1: "var1",
             param3: "var2",
             param3: "var3"
         });
 
         // asynchronouse GET requests
-        zebra.io.HTTP("google.com").GET(function(request) {
+        zebkit.io.HTTP("google.com").GET(function(request) {
             // handle HTTP GET response
             if (request.status == 200) {
                 request.responseText
@@ -445,7 +445,7 @@ pkg.HTTP = Class([
      * is null the POST request will be done synchronously.
 
        // asynchronously send POST
-       zebra.io.HTTP("google.com").POST(function(request) {
+       zebkit.io.HTTP("google.com").POST(function(request) {
            // handle HTTP GET response
            if (request.status == 200) {
                request.responseText
@@ -460,7 +460,7 @@ pkg.HTTP = Class([
     * HTTP POST request:
 
        // send parameters synchronously by HTTP POST request
-       zebra.io.HTTP("google.com").POST({
+       zebkit.io.HTTP("google.com").POST({
            param1: "val1",
            param2: "val3",
            param3: "val3"
@@ -479,7 +479,7 @@ pkg.HTTP = Class([
         //
         // TODO: think also about changing content type
         // "application/x-www-form-urlencoded; charset=UTF-8"
-        if (d != null && zebra.isString(d) == false && d.constructor === Object) {
+        if (d != null && zebkit.isString(d) == false && d.constructor === Object) {
             d = pkg.QS.toQS(d, false);
         }
 
@@ -537,7 +537,7 @@ pkg.HTTP = Class([
             if (r.status != 200) {
 
                 // requesting local files can return 0 as a success result
-                if (r.status !== 0 || new zebra.URL(this.url).protocol != "file:") {
+                if (r.status !== 0 || new zebkit.URL(this.url).protocol != "file:") {
                     var e = new Error("HTTP error " + r.status + " response = '" + r.statusText + "' url = " + url);
                     e.request = r;
                     throw e;
@@ -552,10 +552,10 @@ pkg.HTTP = Class([
  * Shortcut method to perform asynchronous or synchronous HTTP GET requests.
 
         // synchronous HTTP GET call
-        var res = zebra.io.GET("http://test.com");
+        var res = zebkit.io.GET("http://test.com");
 
         // asynchronous HTTP GET call
-        zebra.io.GET("http://test.com", function(request) {
+        zebkit.io.GET("http://test.com", function(request) {
             // handle result
             if (request.status == 200) {
                 request.responseText
@@ -567,7 +567,7 @@ pkg.HTTP = Class([
         });
 
         // synchronous HTTP GET call with query parameters
-        var res = zebra.io.GET("http://test.com", {
+        var res = zebkit.io.GET("http://test.com", {
             param1 : "var1",
             param1 : "var2",
             param1 : "var3"
@@ -578,11 +578,11 @@ pkg.HTTP = Class([
  * @param {Funcion} [callback] a callback function that is called
  * when the GET request is completed. Pass it  to perform request
  * asynchronously
- * @api  zebra.io.GET()
+ * @api  zebkit.io.GET()
  * @method GET
  */
 pkg.GET = function(url) {
-    if (zebra.isString(url)) {
+    if (zebkit.isString(url)) {
         var http = new pkg.HTTP(url);
         return http.GET.apply(http, Array.prototype.slice.call(arguments, 1));
     }
@@ -602,10 +602,10 @@ pkg.GET = function(url) {
  * Shortcut method to perform asynchronous or synchronous HTTP POST requests.
 
         // synchronous HTTP POST call
-        var res = zebra.io.POST("http://test.com");
+        var res = zebkit.io.POST("http://test.com");
 
         // asynchronous HTTP POST call
-        zebra.io.POST("http://test.com", function(request) {
+        zebkit.io.POST("http://test.com", function(request) {
             // handle result
             if (request.status == 200) {
 
@@ -618,17 +618,17 @@ pkg.GET = function(url) {
         });
 
         // synchronous HTTP POST call with query parameters
-        var res = zebra.io.POST("http://test.com", {
+        var res = zebkit.io.POST("http://test.com", {
             param1 : "var1",
             param1 : "var2",
             param1 : "var3"
         });
 
         // synchronous HTTP POST call with data
-        var res = zebra.io.POST("http://test.com", "data");
+        var res = zebkit.io.POST("http://test.com", "data");
 
         // asynchronous HTTP POST call with data
-        zebra.io.POST("http://test.com", "request", function(request) {
+        zebkit.io.POST("http://test.com", "request", function(request) {
             // handle result
             if (request.status == 200) {
 
@@ -645,7 +645,7 @@ pkg.GET = function(url) {
  * when the GET request is completed. Pass it if to perform request
  * asynchronously
  * @method  POST
- * @api  zebra.io.POST()
+ * @api  zebkit.io.POST()
  */
 pkg.POST = function(url) {
     var http = new pkg.HTTP(url);
@@ -658,7 +658,7 @@ pkg.POST = function(url) {
  * a remote service is shown below:
 
         // create service connector that has two methods "a()" and "b(param1)"
-        var service = new zebra.io.Service("http://myservice.com", [
+        var service = new zebkit.io.Service("http://myservice.com", [
             "a", "b"
         ]);
 
@@ -670,7 +670,7 @@ pkg.POST = function(url) {
  * a callback method has to be passed as the last argument of called remote methods:
 
         // create service connector that has two methods "a()" and "b(param1)"
-        var service = new zebra.io.Service("http://myservice.com", [
+        var service = new zebkit.io.Service("http://myservice.com", [
             "a", "b"
         ]);
 
@@ -680,7 +680,7 @@ pkg.POST = function(url) {
             ...
         });
  *
- * Ideally any specific remote service extension of "zebra.io.Service"
+ * Ideally any specific remote service extension of "zebkit.io.Service"
  * class has to implement two methods:
 
     - **encode** to say how the given remote method with passed parameters have
@@ -688,7 +688,7 @@ pkg.POST = function(url) {
     - **decode** to say how the specific service response has to be converted into
     JavaScript object
 
- * @class  zebra.io.Service
+ * @class  zebkit.io.Service
  * @constructor
  * @param {String} url an URL of remote service
  * @param {Array} methods a list of methods names the remote service provides
@@ -790,7 +790,7 @@ pkg.Service.invoke = function(clazz, url, method) {
 
         // create JSON-RPC connector to a remote service that
         // has three remote methods
-        var service = new zebra.io.JRPC("json-rpc.com", [
+        var service = new zebkit.io.JRPC("json-rpc.com", [
             "method1", "method2", "method3"
         ]);
 
@@ -802,11 +802,11 @@ pkg.Service.invoke = function(clazz, url, method) {
             ...
         });
 
- * @class zebra.io.JRPC
+ * @class zebkit.io.JRPC
  * @constructor
  * @param {String} url an URL of remote service
  * @param {Array} methods a list of methods names the remote service provides
- * @extends {zebra.io.Service}
+ * @extends {zebkit.io.Service}
  */
 pkg.JRPC = Class(pkg.Service, [
     function(url, methods) {
@@ -845,7 +845,7 @@ pkg.Base64.prototype.decode   = function() { return pkg.b64decode(this.encoded);
 
         // create XML-RPC connector to a remote service that
         // has three remote methods
-        var service = new zebra.io.XRPC("xmlrpc.com", [
+        var service = new zebkit.io.XRPC("xmlrpc.com", [
             "method1", "method2", "method3"
         ]);
 
@@ -857,9 +857,9 @@ pkg.Base64.prototype.decode   = function() { return pkg.b64decode(this.encoded);
             ...
         });
 
- * @class zebra.io.XRPC
+ * @class zebkit.io.XRPC
  * @constructor
- * @extends {zebra.io.Service}
+ * @extends {zebkit.io.Service}
  * @param {String} url an URL of remote service
  * @param {Array} methods a list of methods names the remote service provides
  */
@@ -881,18 +881,18 @@ pkg.XRPC = Class(pkg.Service, [
                 throw new Error("Null is not allowed");
             }
 
-            if (zebra.isString(v)) {
+            if (zebkit.isString(v)) {
                 v = v.replace("<", "&lt;");
                 v = v.replace("&", "&amp;");
                 p.push("<string>", v, "</string>");
             }
             else {
-                if (zebra.isNumber(v)) {
+                if (zebkit.isNumber(v)) {
                     if (Math.round(v) == v) p.push("<i4>", v.toString(), "</i4>");
                     else                    p.push("<double>", v.toString(), "</double>");
                 }
                 else {
-                    if (zebra.isBoolean(v)) p.push("<boolean>", v?"1":"0", "</boolean>");
+                    if (zebkit.isBoolean(v)) p.push("<boolean>", v?"1":"0", "</boolean>");
                     else {
                         if (v instanceof Date)  p.push("<dateTime.iso8601>", pkg.dateToISO8601(v), "</dateTime.iso8601>");
                         else {
@@ -990,7 +990,7 @@ pkg.XRPC = Class(pkg.Service, [
  * Shortcut to call the specified method of a XML-RPC service.
  * @param  {String} url an URL
  * @param  {String} method a method name
- * @api zebra.io.XRPC.invoke()
+ * @api zebkit.io.XRPC.invoke()
  * @method invoke
  */
 pkg.XRPC.invoke = function(url, method) {
@@ -1001,7 +1001,7 @@ pkg.XRPC.invoke = function(url, method) {
  * Shortcut to call the specified method of a JSON-RPC service.
  * @param  {String} url an URL
  * @param  {String} method a method name
- * @api zebra.io.JRPC.invoke()
+ * @api zebkit.io.JRPC.invoke()
  * @method invoke
  */
 pkg.JRPC.invoke = function(url, method) {
@@ -1012,4 +1012,4 @@ pkg.JRPC.invoke = function(url, method) {
  * @for
  */
 
-})(zebra("io"), zebra.Class);
+})(zebkit("io"), zebkit.Class);

@@ -1,48 +1,48 @@
 (function(pkg, Class) {
 
 /**
- * Zebra UI. The UI is powerful way to create any imaginable
+ * Zebkit UI. The UI is powerful way to create any imaginable
  * user interface for WEB. The idea is based on developing
  * hierarchy of UI components that sits and renders on HTML5
  * Canvas element.
  *
- * Write zebra UI code in safe place where you can be sure all
+ * Write zebkit UI code in safe place where you can be sure all
  * necessary structure, configurations, etc are ready. The safe
- * place is "zebra.ready(...)" method. Development of zebra UI
- * application begins from creation "zebra.ui.zCanvas" class,
+ * place is "zebkit.ready(...)" method. Development of zebkit UI
+ * application begins from creation "zebkit.ui.zCanvas" class,
  * that is starting point and root element of your UI components
  * hierarchy. "zCanvas" is actually wrapper around HTML5 Canvas
- * element where zebra UI sits on. The typical zebra UI coding
+ * element where zebkit UI sits on. The typical zebkit UI coding
  * template is shown below:
 
      // build UI in safe place
-     zebra.ready(function() {
+     zebkit.ready(function() {
         // create canvas element
-        var c = new zebra.ui.zCanvas(400, 400);
+        var c = new zebkit.ui.zCanvas(400, 400);
 
         // start placing UI component on c.root panel
         //set layout manager
-        c.root.setLayout(new zebra.layout.BorderLayout());
+        c.root.setLayout(new zebkit.layout.BorderLayout());
         //add label to top
-        c.root.add("top",new zebra.ui.Label("Top label"));
+        c.root.add("top",new zebkit.ui.Label("Top label"));
         //add text area to center
-        c.root.add("center",new zebra.ui.TextArea(""));
+        c.root.add("center",new zebkit.ui.TextArea(""));
         //add button area to bottom
-        c.root.add("bottom",new zebra.ui.Button("Button"));
+        c.root.add("bottom",new zebkit.ui.Button("Button"));
         ...
      });
 
- *  The latest version of zebra JavaScript is available in repository:
+ *  The latest version of zebkit JavaScript is available in repository:
 
-        <script src='http://repo.zebkit.org/latest/zebra.min.js'
+        <script src='http://repo.zebkit.org/latest/zebkit.min.js'
                 type='text/javascript'></script>
 
  * @module ui
  * @main ui
- * @requires zebra, util, io, data
+ * @requires zebkit, util, io, data
  */
 
-var L = zebra.layout, rgb = zebra.util.rgb, temporary = { x:0, y:0, width:0, height:0 },
+var L = zebkit.layout, rgb = zebkit.util.rgb, temporary = { x:0, y:0, width:0, height:0 },
     MS = Math.sin, MC = Math.cos, $fmCanvas = null, $fmText = null, EM = pkg.events = null,
     $fmImage = null, $bodyFontSize = "14px", COMP_EVENT, FOCUS_EVENT;
 
@@ -67,6 +67,9 @@ pkg.CompEvent = Class(zebkit.util.Event, [
 COMP_EVENT  = new pkg.CompEvent();
 FOCUS_EVENT = new pkg.FocusEvent();
 
+//
+// Extend Pointer event with zebkit specific fields and methods
+//
 pkg.PointerEvent.extend([
     function $prototype() {
         /**
@@ -104,7 +107,7 @@ pkg.PointerEvent.extend([
         /**
          * Reset the event properties with new values
          * @private
-         * @param  {zebra.ui.Panel} source  a source component that triggers the event
+         * @param  {zebkit.ui.Panel} source  a source component that triggers the event
          * @param  {Integer} ax an absolute (relatively to a canvas where the source
          * component is hosted) x mouse cursor coordinate
          * @param  {Integer} ay an absolute (relatively to a canvas where the source
@@ -112,7 +115,7 @@ pkg.PointerEvent.extend([
          * @method  updateCoordinates
          */
         this.update = function(source,ax,ay){
-            // this can speed up calculation significantly check if source zebra component
+            // this can speed up calculation significantly check if source zebkit component
             // has not been changed, his location and parent component also has not been
             // changed than we can skip calculation of absolute location by traversing
             // parent hierarchy
@@ -158,7 +161,7 @@ pkg.load = function(path, callback) {
 /**
  * View class that is designed as a basis for various reusable decorative
  * UI elements implementations
- * @class zebra.ui.View
+ * @class zebkit.ui.View
  */
 pkg.View = Class([
     function $prototype() {
@@ -212,7 +215,7 @@ pkg.View = Class([
         * @param {Integer} y  y coordinate
         * @param {Integer} w  required width
         * @param {Integer} h  required height
-        * @param {zebra.ui.Panel} c an UI component on which the view
+        * @param {zebkit.ui.Panel} c an UI component on which the view
         * element has to be drawn
         * @method paint
         */
@@ -221,7 +224,7 @@ pkg.View = Class([
 ]);
 
 /**
- * Render class extends "zebra.ui.View" class with a notion
+ * Render class extends "zebkit.ui.View" class with a notion
  * of target object. Render stores reference  to a target that
  * the render knows how to visualize. Basically Render is an
  * object visualizer. For instance, developer can implement
@@ -229,8 +232,8 @@ pkg.View = Class([
  * @param {Object} target a target object to be visualized
  * with the render
  * @constructor
- * @extends zebra.ui.View
- * @class zebra.ui.Render
+ * @extends zebkit.ui.View
+ * @class zebkit.ui.Render
  */
 pkg.Render = Class(pkg.View, [
     function $prototype() {
@@ -267,13 +270,13 @@ pkg.Render = Class(pkg.View, [
     }
 ]);
 
-pkg.Bag = Class(zebra.util.Bag, [
+pkg.Bag = Class(zebkit.util.Bag, [
     function $prototype() {
         this.globalPropertyLookup = this.usePropertySetters = true;
 
         this.loadImage = function(path) {
-            if (this.$url != null && zebra.URL.isAbsolute(path) == false) {
-                var base = (new zebra.URL(this.$url)).getParentURL();
+            if (this.$url != null && zebkit.URL.isAbsolute(path) == false) {
+                var base = (new zebkit.URL(this.$url)).getParentURL();
                 path = base.join(path);
             }
             return zebkit.web.$loadImage(path);
@@ -282,7 +285,7 @@ pkg.Bag = Class(zebra.util.Bag, [
 
     function load(s, cb) {
         if (cb != null) {
-            zebra.busy();
+            zebkit.busy();
             try {
                 return this.$super(s, function(e) {
                     // if an error during loading has happened callback method
@@ -291,13 +294,13 @@ pkg.Bag = Class(zebra.util.Bag, [
                     // with the error as argument. So we have to recognize the situation
                     // by analyzing if the callback gets an error as
                     if (e == null) {
-                        zebra.ready();
+                        zebkit.ready();
                     }
                     cb.call(this, e);
                 });
             }
             catch(e) {
-                zebra.ready();
+                zebkit.ready();
                 throw e;
             }
         }
@@ -382,13 +385,13 @@ var $cvp = pkg.$cvp = function(c, r) {
  * height, ascent. Using the class developers can compute string width.
 
       // plain font
-      var f = new zebra.ui.Font("Arial", 14);
+      var f = new zebkit.ui.Font("Arial", 14);
 
       // bold font
-      var f = new zebra.ui.Font("Arial", "bold", 14);
+      var f = new zebkit.ui.Font("Arial", "bold", 14);
 
       // defining font with CSS font name
-      var f = new zebra.ui.Font("100px Futura, Helvetica, sans-serif");
+      var f = new zebkit.ui.Font("100px Futura, Helvetica, sans-serif");
 
  * @constructor
  * @param {String} name a name of the font. If size and style parameters
@@ -396,7 +399,7 @@ var $cvp = pkg.$cvp = function(c, r) {
  * includes size and style
  * @param {String} [style] a style of the font: "bold", "italic", etc
  * @param {Integer} [size] a size of the font
- * @class zebra.ui.Font
+ * @class zebkit.ui.Font
  */
 pkg.Font = function(name, style, size) {
     if (arguments.length == 1) {
@@ -445,7 +448,7 @@ pkg.Font = function(name, style, size) {
  * @param  {String} s a string whose width has to be computed
  * @return {Integer} a string size in pixels
  * @method stringWidth
- * @for zebra.ui.Font
+ * @for zebkit.ui.Font
  */
 pkg.Font.prototype.stringWidth = function(s) {
     if (s.length === 0) return 0;
@@ -460,7 +463,7 @@ pkg.Font.prototype.stringWidth = function(s) {
  * @param  {Integer} len length of substring
  * @return {Integer} a substring size in pixels
  * @method charsWidth
- * @for zebra.ui.Font
+ * @for zebkit.ui.Font
  */
 pkg.Font.prototype.charsWidth = function(s, off, len) {
     if ($fmCanvas.font !== this.s) $fmCanvas.font = this.s;
@@ -471,7 +474,7 @@ pkg.Font.prototype.charsWidth = function(s, off, len) {
  * Returns CSS font representation
  * @return {String} a CSS representation of the given Font
  * @method toString
- * @for zebra.ui.Font
+ * @for zebkit.ui.Font
  */
 pkg.Font.prototype.toString = function() { return this.s;  };
 
@@ -549,15 +552,15 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  *  successor of panel class.
 
       // instantiate panel with no arguments
-      var p = new zebra.ui.Panel();
+      var p = new zebkit.ui.Panel();
 
       // instantiate panel with border layout set as its layout manager
-      var p = new zebra.ui.Panel(new zebra.layout.BorderLayout());
+      var p = new zebkit.ui.Panel(new zebkit.layout.BorderLayout());
 
       // instantiate panel with the given properties (border
       // layout manager, blue background and plain border)
-      var p = new zebra.ui.Panel({
-         layout: new zebra.ui.BorderLayout(),
+      var p = new zebkit.ui.Panel({
+         layout: new zebkit.ui.BorderLayout(),
          background : "blue",
          border     : "plain"
       });
@@ -569,20 +572,20 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
 
       // add few children component to panel top, center and bottom parts
       // with help of border layout manager
-      var p = new zebra.ui.Panel();
-      p.setLayout(new zebra.layout.BorderLayout(4)); // set layout manager to
+      var p = new zebkit.ui.Panel();
+      p.setLayout(new zebkit.layout.BorderLayout(4)); // set layout manager to
                                                      // order children components
 
-      p.add("top", new zebra.ui.Label("Top label"));
-      p.add("center", new zebra.ui.TextArea("Text area"));
-      p.add("bottom", new zebra.ui.Button("Button"));
+      p.add("top", new zebkit.ui.Label("Top label"));
+      p.add("center", new zebkit.ui.TextArea("Text area"));
+      p.add("bottom", new zebkit.ui.Button("Button"));
 
  * **Events. **
  * The class provides possibility to catch various component and input
  * events by declaring an appropriate event method handler. The most
  * simple case you just define a method:
 
-      var p = new zebra.ui.Panel();
+      var p = new zebkit.ui.Panel();
       p.pointerPressed = function(e) {
           // handle event here
       };
@@ -590,7 +593,7 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
 * If you prefer to create an anonymous class instance you can do it as
 * follow:
 
-      var p = new zebra.ui.Panel([
+      var p = new zebkit.ui.Panel([
           function pointerPressed(e) {
               // handle event here
           }
@@ -599,14 +602,14 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
 * One more way to add the event handler is dynamic extending of an instance
 * class demonstrated below:
 
-      var p = new zebra.ui.Panel("Test");
+      var p = new zebkit.ui.Panel("Test");
       p.extend([
           function pointerPressed(e) {
               // handle event here
           }
       ]);
 
- * Pay attention Zebra UI components often declare own event handlers and
+ * Pay attention Zebkit UI components often declare own event handlers and
  * in this case you can overwrite the default event handler with a new one.
  * Preventing the basic event handler execution can cause the component will
  * work improperly. You should care about the base event handler execution
@@ -615,7 +618,7 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
       // button component declares own pointer pressed event handler
       // we have to call the original handler to keep the button component
       // properly working
-      var p = new zebra.ui.Button("Test");
+      var p = new zebkit.ui.Button("Test");
       p.extend([
           function pointerPressed(e) {
               this.$super(e); // call parent class event handler implementation
@@ -623,12 +626,12 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
           }
       ]);
 
- *  @class zebra.ui.Panel
- *  @param {Object|zebra.layout.Layout} [l] pass a layout manager or
+ *  @class zebkit.ui.Panel
+ *  @param {Object|zebkit.layout.Layout} [l] pass a layout manager or
  *  number of properties that have to be applied to the instance of
  *  the panel class.
  *  @constructor
- *  @extends zebra.layout.Layoutable
+ *  @extends zebkit.layout.Layoutable
  */
 
 
@@ -638,11 +641,11 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * The event is triggered every time a pointer button has been pressed or
  * a finger has touched a touch screen.
 
-     var p = new zebra.ui.Panel();
+     var p = new zebkit.ui.Panel();
      p.pointerPressed = function(e) { ... }; // add event handler
 
  * @event pointerPressed
- * @param {zebra.ui.PointerEvent} e a pointer event
+ * @param {zebkit.ui.PointerEvent} e a pointer event
 */
 
 /**
@@ -650,11 +653,11 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * The event is triggered every time a pointer button has been released or
  * a finger has untouched a touch screen.
 
-     var p = new zebra.ui.Panel();
+     var p = new zebkit.ui.Panel();
      p.pointerReleased = function(e) { ... }; // add event handler
 
  * @event pointerReleased
- * @param {zebra.ui.PointerEvent} e a pointer event
+ * @param {zebkit.ui.PointerEvent} e a pointer event
  */
 
 /**
@@ -662,10 +665,10 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * The event is triggered every time a pointer cursor has been moved with
  * no a pointer button pressed.
 
-     var p = new zebra.ui.Panel();
+     var p = new zebkit.ui.Panel();
      p.pointerMoved = function(e) { ... }; // add event handler
 
- * @param {zebra.ui.PointerEvent} e a pointer event
+ * @param {zebkit.ui.PointerEvent} e a pointer event
  * @event  pointerMoved
  */
 
@@ -674,10 +677,10 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * The event is triggered every time a pointer cursor entered the
  * given component.
 
-     var p = new zebra.ui.Panel();
+     var p = new zebkit.ui.Panel();
      p.pointerEntered = function(e) { ... }; // add event handler
 
- * @param {zebra.ui.PointerEvent} e a pointer event
+ * @param {zebkit.ui.PointerEvent} e a pointer event
  * @event  pointerEntered
  */
 
@@ -686,10 +689,10 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * The event is triggered every time a pointer cursor exited the given
  * component.
 
-     var p = new zebra.ui.Panel();
+     var p = new zebkit.ui.Panel();
      p.pointerExited = function(e) { ... }; // add event handler
 
- * @param {zebra.ui.PointerEvent} e a pointer event
+ * @param {zebkit.ui.PointerEvent} e a pointer event
  * @event  pointerExited
  */
 
@@ -699,10 +702,10 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * are generated only if no one pointer moved or drag events has been generated
  * in between pointer pressed -> pointer released events sequence.
 
-     var p = new zebra.ui.Panel();
+     var p = new zebkit.ui.Panel();
      p.pointerClicked = function(e) { ... }; // add event handler
 
- * @param {zebra.ui.PointerEvent} e a pointer event
+ * @param {zebkit.ui.PointerEvent} e a pointer event
  * @event  pointerClicked
  */
 
@@ -711,10 +714,10 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * The event is triggered every time a pointer cursor has been moved when a pointer button
  * has been pressed. Or when a finger has been moved over a touch screen.
 
-     var p = new zebra.ui.Panel();
+     var p = new zebkit.ui.Panel();
      p.pointerDragged = function(e) { ... }; // add event handler
 
- * @param {zebra.ui.PointerEvent} e a pointer event
+ * @param {zebkit.ui.PointerEvent} e a pointer event
  * @event  pointerDragged
  */
 
@@ -723,10 +726,10 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * The event is triggered every time a pointer cursor has been moved first time when a pointer button
  * has been pressed. Or when a finger has been moved first time over a touch screen.
 
-     var p = new zebra.ui.Panel();
+     var p = new zebkit.ui.Panel();
      p.pointerDragStarted = function(e) { ... }; // add event handler
 
- * @param {zebra.ui.PointerEvent} e a pointer event
+ * @param {zebkit.ui.PointerEvent} e a pointer event
  * @event  pointerDragStarted
 */
 
@@ -735,10 +738,10 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * The event is triggered every time a pointer cursor has been moved last time when a pointer button
  * has been pressed. Or when a finger has been moved last time over a touch screen.
 
-     var p = new zebra.ui.Panel();
+     var p = new zebkit.ui.Panel();
      p.pointerDragEnded = function(e) { ... }; // add event handler
 
- * @param {zebra.ui.PointerEvent} e a pointer event
+ * @param {zebkit.ui.PointerEvent} e a pointer event
  * @event  pointerDragEnded
 */
 
@@ -746,10 +749,10 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * Implement the event handler method to catch key pressed event
  * The event is triggered every time a key has been pressed.
 
-     var p = new zebra.ui.Panel();
+     var p = new zebkit.ui.Panel();
      p.keyPressed = function(e) { ... }; // add event handler
 
- * @param {zebra.ui.KeyEvent} e a key event
+ * @param {zebkit.ui.KeyEvent} e a key event
  * @event  keyPressed
  */
 
@@ -757,10 +760,10 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * Implement the event handler method to catch key types event
  * The event is triggered every time a key has been typed.
 
-     var p = new zebra.ui.Panel();
+     var p = new zebkit.ui.Panel();
      p.keyTyped = function(e) { ... }; // add event handler
 
- * @param {zebra.ui.KeyEvent} e a key event
+ * @param {zebkit.ui.KeyEvent} e a key event
  * @event  keyTyped
  */
 
@@ -768,10 +771,10 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * Implement the event handler method to catch key released event
  * The event is triggered every time a key has been released.
 
-     var p = new zebra.ui.Panel();
+     var p = new zebkit.ui.Panel();
      p.keyReleased = function(e) { ... }; // add event handler
 
- * @param {zebra.ui.KeyEvent} e a key event
+ * @param {zebkit.ui.KeyEvent} e a key event
  * @event  keyReleased
  */
 
@@ -779,10 +782,10 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * Implement the event handler method to catch the component sized event
  * The event is triggered every time the component has been re-sized.
 
-     var p = new zebra.ui.Panel();
+     var p = new zebkit.ui.Panel();
      p.compSized = function(c, pw, ph) { ... }; // add event handler
 
- * @param {zebra.ui.Panel} c a component that has been sized
+ * @param {zebkit.ui.Panel} c a component that has been sized
  * @param {Integer} pw a previous width the sized component had
  * @param {Integer} ph a previous height the sized component had
  * @event compSized
@@ -793,10 +796,10 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * The event is triggered every time the component location has been
  * updated.
 
-     var p = new zebra.ui.Panel();
+     var p = new zebkit.ui.Panel();
      p.compMoved = function(c, px, py) { ... }; // add event handler
 
- * @param {zebra.ui.Panel} c a component that has been moved
+ * @param {zebkit.ui.Panel} c a component that has been moved
  * @param {Integer} px a previous x coordinate the moved component had
  * @param {Integer} py a previous y coordinate the moved component had
  * @event compMoved
@@ -807,10 +810,10 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * The event is triggered every time a component enabled state has been
  * updated.
 
-     var p = new zebra.ui.Panel();
+     var p = new zebkit.ui.Panel();
      p.compEnabled = function(c) { ... }; // add event handler
 
- * @param {zebra.ui.Panel} c a component whose enabled state has been updated
+ * @param {zebkit.ui.Panel} c a component whose enabled state has been updated
  * @event compEnabled
  */
 
@@ -819,10 +822,10 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * The event is triggered every time a component visibility state has
  * been updated.
 
-     var p = new zebra.ui.Panel();
+     var p = new zebkit.ui.Panel();
      p.compShown = function(c) { ... }; // add event handler
 
- * @param {zebra.ui.Panel} c a component whose visibility state has been updated
+ * @param {zebkit.ui.Panel} c a component whose visibility state has been updated
  * @event compShown
  */
 
@@ -831,12 +834,12 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * The event is triggered every time the component has been inserted into
  * another one.
 
-     var p = new zebra.ui.Panel();
+     var p = new zebkit.ui.Panel();
      p.compAdded = function(p, constr, c) { ... }; // add event handler
 
- * @param {zebra.ui.Panel} p a parent component of the component has been added
+ * @param {zebkit.ui.Panel} p a parent component of the component has been added
  * @param {Object} constr a layout constraints
- * @param {zebra.ui.Panel} c a component that has been added
+ * @param {zebkit.ui.Panel} c a component that has been added
  * @event compAdded
  */
 
@@ -845,12 +848,12 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * The event is triggered every time the component has been removed from
  * its parent UI component.
 
-     var p = new zebra.ui.Panel();
+     var p = new zebkit.ui.Panel();
      p.compRemoved = function(p, i, c) { ... }; // add event handler
 
- * @param {zebra.ui.Panel} p a parent component of the component that has been removed
+ * @param {zebkit.ui.Panel} p a parent component of the component that has been removed
  * @param {Integer} i an index of removed component
- * @param {zebra.ui.Panel} c a component that has been removed
+ * @param {zebkit.ui.Panel} c a component that has been removed
  * @event compRemoved
  */
 
@@ -858,10 +861,10 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * Implement the event handler method to catch component focus gained event
  * The event is triggered every time a component has gained focus.
 
-     var p = new zebra.ui.Panel();
+     var p = new zebkit.ui.Panel();
      p.focusGained = function(e) { ... }; // add event handler
 
- * @param {zebra.ui.FocusEvent} e an input event
+ * @param {zebkit.ui.FocusEvent} e an input event
  * @event  focusGained
  */
 
@@ -869,40 +872,40 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
  * Implement the event handler method to catch component focus lost event
  * The event is triggered every time a component has lost focus
 
-     var p = new zebra.ui.Panel();
+     var p = new zebkit.ui.Panel();
      p.focusLost = function(e) { ... }; // add event handler
 
- * @param {zebra.ui.FocusEvent} e an input event
+ * @param {zebkit.ui.FocusEvent} e an input event
  * @event  focusLost
  */
 
 /**
  * Implement the event handler method to catch children components component events
  *
-     var p = new zebra.ui.Panel();
+     var p = new zebkit.ui.Panel();
      p.childCompEvent = function(id, src, p1, p2) { ... }; // add event handler
 
  * @param {Integer} id a component event ID. The id can have one of the following value:
 
 
- * @param {zebra.ui.Panel} src a component that triggers the event
- * @param {zebra.ui.Panel|Integer|Object} p1 an event first parameter that depends
+ * @param {zebkit.ui.Panel} src a component that triggers the event
+ * @param {zebkit.ui.Panel|Integer|Object} p1 an event first parameter that depends
  * on an component event that has happened:
 
 
-   - if id is **zebra.ui.Panel.SIZED** the parameter is previous component width
-   - if id is **zebra.ui.Panel.MOVED** the parameter is previous component x location
-   - if id is **zebra.ui.Panel.ADDED** the parameter is constraints a new component has been added
-   - if id is **zebra.ui.Panel.REMOVED** the parameter is null
+   - if id is **zebkit.ui.Panel.SIZED** the parameter is previous component width
+   - if id is **zebkit.ui.Panel.MOVED** the parameter is previous component x location
+   - if id is **zebkit.ui.Panel.ADDED** the parameter is constraints a new component has been added
+   - if id is **zebkit.ui.Panel.REMOVED** the parameter is null
 
- * @param {zebra.ui.Panel|Integer|Object} p2 an event second parameter depends
+ * @param {zebkit.ui.Panel|Integer|Object} p2 an event second parameter depends
  * on an component event that has happened:
 
 
-    - if id is **zebra.ui.Panel.SIZED** the parameter is previous component height
-    - if id is **zebra.ui.Panel.MOVED** the parameter is previous component y location
-    - if id is **zebra.ui.Panel.ADDED** the parameter is reference to the added children component
-    - if id is **zebra.ui.Panel.REMOVED** the parameter is reference to the removed children component
+    - if id is **zebkit.ui.Panel.SIZED** the parameter is previous component height
+    - if id is **zebkit.ui.Panel.MOVED** the parameter is previous component y location
+    - if id is **zebkit.ui.Panel.ADDED** the parameter is reference to the added children component
+    - if id is **zebkit.ui.Panel.REMOVED** the parameter is reference to the removed children component
 
  * @event  childCompEvent
  */
@@ -1053,7 +1056,7 @@ pkg.Panel = Class(L.Layoutable, [
                 // step III: initiate repainting thread
                 if (canvas.$paintTask === null && (canvas.isValid === false || canvas.$da.width > 0 || canvas.isLayoutValid === false)) {
                     var $this = this;
-                    canvas.$paintTask = zebra.web.$task(function() {
+                    canvas.$paintTask = zebkit.web.$task(function() {
                         try {
                             var g = null;
 
@@ -1222,7 +1225,7 @@ pkg.Panel = Class(L.Layoutable, [
          * @attribute border
          * @default null
          * @readOnly
-         * @type {zebra.ui.View}
+         * @type {zebkit.ui.View}
          */
 
         /**
@@ -1230,7 +1233,7 @@ pkg.Panel = Class(L.Layoutable, [
          * @attribute bg
          * @default null
          * @readOnly
-         * @type {zebra.ui.View}
+         * @type {zebkit.ui.View}
         */
 
         /**
@@ -1252,8 +1255,8 @@ pkg.Panel = Class(L.Layoutable, [
         this.isEnabled = true;
 
         /**
-         * Find a zebra.ui.zCanvas where the given UI component is hosted
-         * @return {zebra.ui.zCanvas} a zebra canvas
+         * Find a zebkit.ui.zCanvas where the given UI component is hosted
+         * @return {zebkit.ui.zCanvas} a zebkit canvas
          * @method getCanvas
          */
         this.getCanvas = function() {
@@ -1269,10 +1272,10 @@ pkg.Panel = Class(L.Layoutable, [
 
         /**
          * Shortcut method to register the specific to the concrete component
-         * events listener. For instance "zebra.ui.Button" component fires event
+         * events listener. For instance "zebkit.ui.Button" component fires event
          * when it is pressed:
 
-        var b = new zebra.ui.Button("Test");
+        var b = new zebkit.ui.Button("Test");
         b.bind(function() {
             // button has been pressed
         });
@@ -1307,7 +1310,7 @@ pkg.Panel = Class(L.Layoutable, [
          * Get a children UI component that embeds the given point.
          * @param  {Integer} x x coordinate
          * @param  {Integer} y y coordinate
-         * @return {zebra.ui.Panel} a children UI component
+         * @return {zebkit.ui.Panel} a children UI component
          * @method getComponentAt
          */
         this.getComponentAt = function(x,y){
@@ -1375,7 +1378,7 @@ pkg.Panel = Class(L.Layoutable, [
          * @param  {Integer} index an index at that a new children component
          * has been added
          * @param  {Object} constr a layout constraints of an inserted component
-         * @param  {zebra.ui.Panel} l a children component that has been inserted
+         * @param  {zebkit.ui.Panel} l a children component that has been inserted
          * @method kidAdded
          */
         this.kidAdded = function (index,constr,l){
@@ -1409,7 +1412,7 @@ pkg.Panel = Class(L.Layoutable, [
          * The method is implemented to be aware about a children component
          * removal.
          * @param  {Integer} i an index of a removed component
-         * @param  {zebra.ui.Panel} l a removed children component
+         * @param  {zebkit.ui.Panel} l a removed children component
          * @method kidRemoved
          */
         this.kidRemoved = function(i,l){
@@ -1602,7 +1605,7 @@ pkg.Panel = Class(L.Layoutable, [
 
         /**
          * Set the border view
-         * @param  {zebra.ui.View|Function|String} v a border view or border "paint(g,x,y,w,h,c)"
+         * @param  {zebkit.ui.View|Function|String} v a border view or border "paint(g,x,y,w,h,c)"
          * rendering function or border type: "plain", "sunken", "raised", "etched"
          * @method setBorder
          * @chainable
@@ -1633,14 +1636,14 @@ pkg.Panel = Class(L.Layoutable, [
         };
 
         /**
-         * Set the background. Background can be a color string or a zebra.ui.View class
+         * Set the background. Background can be a color string or a zebkit.ui.View class
          * instance, or a function(g,x,y,w,h,c) that paints the background:
 
             // set background color
             comp.setBackground("red");
 
             // set a picture as a component background
-            comp.setBackground(new zebra.ui.Picture(...));
+            comp.setBackground(new zebkit.ui.Picture(...));
 
             // set a custom rendered background
             comp.setBackground(function (g,x,y,w,h,target) {
@@ -1652,7 +1655,7 @@ pkg.Panel = Class(L.Layoutable, [
             });
 
 
-         * @param  {String|zebra.ui.View|Function} v a background view, color or
+         * @param  {String|zebkit.ui.View|Function} v a background view, color or
          * background "paint(g,x,y,w,h,c)" rendering function.
          * @method setBackground
          * @chainable
@@ -1671,7 +1674,7 @@ pkg.Panel = Class(L.Layoutable, [
         /**
          * Add the given children component or number of components to the given panel.
          * @protected
-         * @param {zebra.ui.Panel|Array|Object} a children component of number of
+         * @param {zebkit.ui.Panel|Array|Object} a children component of number of
          * components to be added. The parameter can be:
 
     - Component
@@ -1801,7 +1804,7 @@ pkg.Panel = Class(L.Layoutable, [
 
         /**
          * Build view by this component
-         * @return {zebra.ui.View} a view of the component
+         * @return {zebkit.ui.View} a view of the component
          * @method toView
          */
         this.toView = function() {
@@ -1811,7 +1814,7 @@ pkg.Panel = Class(L.Layoutable, [
         this[''] = function(l) {
             // !!! dirty trick to call super, for the sake of few milliseconds back
             //this.$super();
-            L.Layoutable.prototype[zebra.CNAME].call(this, l);
+            L.Layoutable.prototype[zebkit.CNAME].call(this, l);
 
             // apply default properties
             this.properties(this.clazz);
@@ -1831,15 +1834,15 @@ pkg.Panel = Class(L.Layoutable, [
 /**
  * HTML element UI component wrapper class. The class represents
  * an HTML element as if it is standard UI component. It helps to use
- * some standard HTML element as zebra UI components and embeds it
- * in zebra UI application layout.
- * @class zebra.ui.HtmlElement
+ * some standard HTML element as zebkit UI components and embeds it
+ * in zebkit UI application layout.
+ * @class zebkit.ui.HtmlElement
  * @constructor
  * @param {String|HTMLElement} [element] an HTML element to be represented
- * as a standard zebra UI component. If the passed parameter is string
+ * as a standard zebkit UI component. If the passed parameter is string
  * it denotes a name of an HTML element. In this case a new HTML element
  * will be created.
- * @extends {zebra.ui.Panel}
+ * @extends {zebkit.ui.Panel}
  */
 pkg.HtmlElement = Class(pkg.Panel, [
     function $clazz() {
@@ -1856,7 +1859,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
 
         /**
          * Set the CSS font of the wrapped HTML element
-         * @param {String|zebra.ui.Font} f a font
+         * @param {String|zebkit.ui.Font} f a font
          * @method setFont
          * @chainable
          */
@@ -1908,7 +1911,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
             name = name.trim();
             var i = name.indexOf(':');
             if (i > 0) {
-                if (zebra[name.substring(0, i)] == null) {
+                if (zebkit[name.substring(0, i)] == null) {
                     return;
                 }
                 name = name.substring(i + 1);
@@ -2061,7 +2064,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
             }
             else {
                 if (this.$blockElement == null) {
-                    this.$blockElement = zebra.web.$createBlockedElement();
+                    this.$blockElement = zebkit.web.$createBlockedElement();
                 }
                 this.$container.appendChild(this.$blockElement);
            }
@@ -2194,7 +2197,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
             e = "div";
         }
 
-        if (zebra.isString(e)) {
+        if (zebkit.isString(e)) {
             e = document.createElement(e);
             if (this.clazz.CLASS_NAME != null) {
                 e.setAttribute("class", this.clazz.CLASS_NAME);
@@ -2321,26 +2324,26 @@ pkg.HtmlElement = Class(pkg.Panel, [
 ]);
 
 /**
- *  zCanvas zebra UI component class. This is one of the key
+ *  zCanvas zebkit UI component class. This is one of the key
  *  class everybody has to use to start building an UI. The class is a wrapper
  *  for HTML Canvas element. Internally it catches all native HTML Canvas
- *  events and translates its into Zebra UI events.
+ *  events and translates its into Zebkit UI events.
  *
  *  zCanvas instantiation triggers a new HTML Canvas will be created
  *  and added to HTML DOM tree.  It happens if developer doesn't pass
  *  an HTML Canvas element reference or an ID of existing HTML Canvas
  *  element If developers need to re-use an existent in DOM tree canvas
  *  element they have to pass id of the canvas that has to be used as basis
- *  for zebra UI creation or reference to a HTML Canvas element:
+ *  for zebkit UI creation or reference to a HTML Canvas element:
 
         // a new HTML canvas element is created and added into HTML DOM tree
-        var canvas = zebra.ui.zCanvas();
+        var canvas = zebkit.ui.zCanvas();
 
         // a new HTML canvas element is created into HTML DOM tree
-        var canvas = zebra.ui.zCanvas(400,500);  // pass canvas size
+        var canvas = zebkit.ui.zCanvas(400,500);  // pass canvas size
 
         // stick to existent HTML canvas element
-        var canvas = zebra.ui.zCanvas("ExistentCanvasID");
+        var canvas = zebkit.ui.zCanvas("ExistentCanvasID");
 
  *  The zCanvas has layered structure. Every layer is responsible for
  *  showing and controlling a dedicated type of UI elements like windows
@@ -2349,19 +2352,19 @@ pkg.HtmlElement = Class(pkg.Panel, [
  *  that is accessible as zCanvas component instance "root" field.
 
         // create canvas
-        var canvas = zebra.ui.zCanvas(400,500);
+        var canvas = zebkit.ui.zCanvas(400,500);
 
         // save reference to canvas root layer where
         // hierarchy of UI components have to be hosted
         var root = canvas.root;
 
         // fill root with UI components
-        var label = new zebra.ui.Label("Label");
+        var label = new zebkit.ui.Label("Label");
         label.setBounds(10,10,100,50);
         root.add(label);
 
- *  @class zebra.ui.zCanvas
- *  @extends {zebra.ui.Panel}
+ *  @class zebkit.ui.zCanvas
+ *  @extends {zebkit.ui.Panel}
  *  @constructor
  *  @param {String|Canvas} [element] an ID of a HTML canvas element or
  *  reference to an HTML Canvas element.
@@ -2375,7 +2378,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
  * listeners of the canvas are set upped. The event can be used to load
  * saved data.
 
-     var p = new zebra.ui.zCanvas(300, 300, [
+     var p = new zebkit.ui.zCanvas(300, 300, [
           function canvasInitialized() {
               // do something
           }
@@ -2500,9 +2503,9 @@ pkg.HtmlCanvas = Class(pkg.HtmlElement, [
         this.$paintTask = null;
 
 
-        // set border for canvas has to be set as zebra border, since canvas
+        // set border for canvas has to be set as zebkit border, since canvas
         // is DOM component designed for rendering, so setting DOM border
-        // doesn't allow us to render zebra border
+        // doesn't allow us to render zebkit border
         this.setBorder = function(b) {
             return pkg.Panel.prototype.setBorder.call(this, b);
         };
@@ -2537,7 +2540,7 @@ pkg.HtmlCanvas = Class(pkg.HtmlElement, [
             return this;
         };
 
-        // set passing for canvas has to be set as zebra padding, since canvas
+        // set passing for canvas has to be set as zebkit padding, since canvas
         // is DOM component designed for rendering, so setting DOM padding
         // doesn't allow us to hold painting area proper
         this.setPadding = function() {
@@ -2618,7 +2621,7 @@ pkg.HtmlCanvas = Class(pkg.HtmlElement, [
 /**
  * Base layer UI component. Layer is special type of UI
  * components that is used to decouple different logical
- * UI components types from each other. Zebra Canvas
+ * UI components types from each other. Zebkit Canvas
  * consists from number of layers where only one can be
  * active at the given point in time. Layers are stretched
  * to fill full canvas size. Every time an input event
@@ -2628,8 +2631,8 @@ pkg.HtmlCanvas = Class(pkg.HtmlElement, [
  * are window layer, pop up menus layer and so on.
  * @param {String} id an unique id to identify the layer
  * @constructor
- * @class zebra.ui.CanvasLayer
- * @extends {zebra.ui.Panel}
+ * @class zebkit.ui.CanvasLayer
+ * @extends {zebkit.ui.Panel}
  */
 pkg.CanvasLayer = Class(pkg.HtmlCanvas, [
     function $prototype() {
@@ -2638,7 +2641,7 @@ pkg.CanvasLayer = Class(pkg.HtmlCanvas, [
          *  answer if the layer wants to have a control.
          *  If the method is not defined it is considered as the
          *  layer is not activated by the pointer event
-         *  @param {zebra.ui.PointerEvent} e a pointer event
+         *  @param {zebkit.ui.PointerEvent} e a pointer event
          *  @return {Boolean} return true if the layer wants to
          *  catch control
          *  @method layerPointerPressed
@@ -2649,7 +2652,7 @@ pkg.CanvasLayer = Class(pkg.HtmlCanvas, [
          *  answer if the layer wants to have a control.
          *  If the method is not defined it is considered
          *  as the key event doesn't activate the layer
-         *  @param {zebra.ui.KeyEvent} e a key code
+         *  @param {zebkit.ui.KeyEvent} e a key code
          *  @return {Boolean} return true if the layer wants to
          *  catch control
          *  @method layerKeyPressed
@@ -2671,9 +2674,9 @@ pkg.CanvasLayer = Class(pkg.HtmlCanvas, [
 /**
  *  Root layer implementation. This is the simplest UI layer implementation
  *  where the layer always try grabbing all input event
- *  @class zebra.ui.RootLayer
+ *  @class zebkit.ui.RootLayer
  *  @constructor
- *  @extends {zebra.ui.CanvasLayer}
+ *  @extends {zebkit.ui.CanvasLayer}
  */
 pkg.RootLayer = Class(pkg.HtmlCanvas, [
     function $clazz() {
@@ -2701,19 +2704,19 @@ pkg.RootLayer = Class(pkg.HtmlCanvas, [
 ]);
 
 /**
- *  UI component to keep and render the given "zebra.ui.View" class
+ *  UI component to keep and render the given "zebkit.ui.View" class
  *  instance. The target view defines the component preferred size
  *  and the component view.
- *  @class zebra.ui.ViewPan
+ *  @class zebkit.ui.ViewPan
  *  @constructor
- *  @extends {zebra.ui.Panel}
+ *  @extends {zebkit.ui.Panel}
  */
 pkg.ViewPan = Class(pkg.Panel, [
     function $prototype() {
         /**
          * Reference to a view that the component visualize
          * @attribute view
-         * @type {zebra.ui.View}
+         * @type {zebkit.ui.View}
          * @default null
          * @readOnly
          */
@@ -2731,7 +2734,7 @@ pkg.ViewPan = Class(pkg.Panel, [
 
         /**
          * Set the target view to be wrapped with the UI component
-         * @param  {zebra.ui.View|Function} v a view or a rendering
+         * @param  {zebkit.ui.View|Function} v a view or a rendering
          * view "paint(g,x,y,w,h,c)" function
          * @method setView
          * @chainable
@@ -2752,7 +2755,7 @@ pkg.ViewPan = Class(pkg.Panel, [
         /**
          * Override the parent method to calculate preferred size
          * basing on a target view.
-         * @param  {zebra.ui.Panel} t [description]
+         * @param  {zebkit.ui.Panel} t [description]
          * @return {Object} return a target view preferred size if it is defined.
          * The returned structure is the following:
               { width: {Integer}, height:{Integer} }
@@ -2769,9 +2772,9 @@ pkg.ViewPan = Class(pkg.Panel, [
  *  @param {String|Image} [img] a path or direct reference to an image object.
  *  If the passed parameter is string it considered as path to an image.
  *  In this case the image will be loaded using the passed path.
- *  @class zebra.ui.ImagePan
+ *  @class zebkit.ui.ImagePan
  *  @constructor
- *  @extends zebra.ui.ViewPan
+ *  @extends zebkit.ui.ViewPan
  */
 pkg.ImagePan = Class(pkg.ViewPan, [
     function(img, w, h) {
@@ -2784,8 +2787,8 @@ pkg.ImagePan = Class(pkg.ViewPan, [
     /**
      * Set image to be rendered in the UI component
      * @method setImage
-     * @param {String|Image|zebra.ui.Picture} img a path or direct reference to an
-     * image or zebra.ui.Picture render.
+     * @param {String|Image|zebkit.ui.Picture} img a path or direct reference to an
+     * image or zebkit.ui.Picture render.
      * If the passed parameter is string it considered as path to an image.
      * In this case the image will be loaded using the passed path
      * @chainable
@@ -2797,7 +2800,7 @@ pkg.ImagePan = Class(pkg.ViewPan, [
                 imgToLoad = isPic ? img.target : img ;
 
             if (this.$runner == null) {
-                this.$runner = new zebra.util.Runner();
+                this.$runner = new zebkit.util.Runner();
             }
 
             this.$runner.run(function() {
@@ -2841,7 +2844,7 @@ pkg.ImagePan = Class(pkg.ViewPan, [
  *  various UI managers like paint, focus, event etc. Manager is
  *  automatically registered as input and component events listener
  *  if it implements appropriate events methods handlers
- *  @class zebra.ui.Manager
+ *  @class zebkit.ui.Manager
  *  @constructor
  */
 pkg.Manager = Class([
@@ -2856,8 +2859,8 @@ pkg.Manager = Class([
  * Focus manager class defines the strategy of focus traversing among
  * hierarchy of UI components. It keeps current focus owner component
  * and provides API to change current focus component
- * @class zebra.ui.FocusManager
- * @extends {zebra.ui.Manager}
+ * @class zebkit.ui.FocusManager
+ * @extends {zebkit.ui.Manager}
  */
 pkg.FocusManager = Class(pkg.Manager, [
     function $prototype() {
@@ -2865,7 +2868,7 @@ pkg.FocusManager = Class(pkg.Manager, [
          * Reference to the current focus owner component.
          * @attribute focusOwner
          * @readOnly
-         * @type {zebra.ui.Panel}
+         * @type {zebkit.ui.Panel}
          */
         this.focusOwner = null;
 
@@ -2879,7 +2882,7 @@ pkg.FocusManager = Class(pkg.Manager, [
 
         /**
          * Component enabled event handler
-         * @param  {zebra.ui.Panel} c a component
+         * @param  {zebkit.ui.Panel} c a component
          * @method compEnabled
          */
         this.compEnabled = function(e) {
@@ -2891,7 +2894,7 @@ pkg.FocusManager = Class(pkg.Manager, [
 
         /**
          * Component shown event handler
-         * @param  {zebra.ui.Panel} c a component
+         * @param  {zebkit.ui.Panel} c a component
          * @method compShown
          */
         this.compShown = function(e) {
@@ -2903,9 +2906,9 @@ pkg.FocusManager = Class(pkg.Manager, [
 
         /**
          * Component removed event handler
-         * @param  {zebra.ui.Panel} p a parent
+         * @param  {zebkit.ui.Panel} p a parent
          * @param  {Integer} i      a removed component index
-         * @param  {zebra.ui.Panel} c a removed component
+         * @param  {zebkit.ui.Panel} c a removed component
          * @method compRemoved
          */
         this.compRemoved = function(e) {
@@ -2917,7 +2920,7 @@ pkg.FocusManager = Class(pkg.Manager, [
 
         /**
          * Test if the given component is a focus owner
-         * @param  {zebra.ui.Panel} c an UI component to be tested
+         * @param  {zebkit.ui.Panel} c an UI component to be tested
          * @method hasFocus
          * @return {Boolean} true if the given component holds focus
          */
@@ -2927,7 +2930,7 @@ pkg.FocusManager = Class(pkg.Manager, [
 
         /**
          * Key pressed event handler.
-         * @param  {zebra.ui.KeyEvent} e a key event
+         * @param  {zebkit.ui.KeyEvent} e a key event
          * @method keyPressed
          */
         this.keyPressed = function(e){
@@ -2955,13 +2958,12 @@ pkg.FocusManager = Class(pkg.Manager, [
 
         /**
          * Test if the given component can catch focus
-         * @param  {zebra.ui.Panel} c an UI component to be tested
+         * @param  {zebkit.ui.Panel} c an UI component to be tested
          * @method isFocusable
          * @return {Boolean} true if the given component can catch a focus
          */
         this.isFocusable = function(c) {
             var d = c.getCanvas();
-
             if (d != null &&
                    (c.canHaveFocus === true ||
                      (typeof c.canHaveFocus == "function" && c.canHaveFocus() === true)))
@@ -3043,7 +3045,7 @@ pkg.FocusManager = Class(pkg.Manager, [
 
         /**
          * Force to pass a focus to the given UI component
-         * @param  {zebra.ui.Panel} c an UI component to pass a focus
+         * @param  {zebkit.ui.Panel} c an UI component to pass a focus
          * @method requestFocus
          */
         this.requestFocus = function(c) {
@@ -3082,7 +3084,7 @@ pkg.FocusManager = Class(pkg.Manager, [
 
         /**
          * Pointer pressed event handler.
-         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
          * @method pointerPressed
          */
         this.pointerPressed = function(e){
@@ -3107,7 +3109,7 @@ pkg.FocusManager = Class(pkg.Manager, [
 
 /**
  *  Command manager supports short cut keys definition and listening. The shortcuts have to be defined in
- *  zebra JSON configuration files. There are two sections:
+ *  zebkit JSON configuration files. There are two sections:
 
     - **osx** to keep shortcuts for Mac OS X platform
     - **common** to keep shortcuts for all other platforms
@@ -3146,7 +3148,7 @@ pkg.FocusManager = Class(pkg.Manager, [
  *  Pay attention to catch shortcut command your component has to be focusable and holds focus at the given time.
  *  For instance, to catch "undo_command"  do the following:
 
-        var pan = new zebra.ui.Panel([
+        var pan = new zebkit.ui.Panel([
             function redo_command() {
                 // handle shortcut here
             },
@@ -3163,15 +3165,15 @@ pkg.FocusManager = Class(pkg.Manager, [
 
 
  *  @constructor
- *  @class zebra.ui.ShortcutManager
- *  @extends {zebra.ui.Manager}
+ *  @class zebkit.ui.ShortcutManager
+ *  @extends {zebkit.ui.Manager}
  */
 
 /**
  * Shortcut event is handled by registering a method handler with events manager. The manager is accessed as
- * "zebra.ui.events" static variable:
+ * "zebkit.ui.events" static variable:
 
-        zebra.ui.events.bind(function commandFired(c) {
+        zebkit.ui.events.bind(function commandFired(c) {
             ...
         });
 
@@ -3184,7 +3186,7 @@ pkg.ShortcutManager = Class(pkg.Manager, [
     function $prototype() {
         /**
          * Key pressed event handler.
-         * @param  {zebra.ui.KeyEvent} e a key event
+         * @param  {zebkit.ui.KeyEvent} e a key event
          * @method keyPressed
          */
         this.keyPressed = function(e) {
@@ -3250,7 +3252,7 @@ pkg.ShortcutManager = Class(pkg.Manager, [
         if (commands != null) {
             pkg.events._.addEvents("commandFired");
             this.setCommands(commands.common);
-            if (zebra.isMacOS === true && commands.osx != null) {
+            if (zebkit.isMacOS === true && commands.osx != null) {
                 this.setCommands(commands.osx);
             }
         }
@@ -3265,29 +3267,29 @@ pkg.ShortcutManager = Class(pkg.Manager, [
 
     - **Implement getCursorType method by the component itself if the cursor type depends on cursor location**
 
-          var p = new zebra.ui.Panel([
+          var p = new zebkit.ui.Panel([
                // implement getCursorType method to set required
                // pointer cursor type
                function getCursorType(target, x, y) {
-                   return zebra.ui.Cursor.WAIT;
+                   return zebkit.ui.Cursor.WAIT;
                }
           ]);
 
     - **Define "cursorType" property in component if the cursor type doesn't depend on cursor location **
 
-          var myPanel = new zebra.ui.Panel();
+          var myPanel = new zebkit.ui.Panel();
           ...
-          myPanel.cursorType = zebra.ui.Cursor.WAIT;
+          myPanel.cursorType = zebkit.ui.Cursor.WAIT;
 
- *  @class zebra.ui.CursorManager
+ *  @class zebkit.ui.CursorManager
  *  @constructor
- *  @extends {zebra.ui.Manager}
+ *  @extends {zebkit.ui.Manager}
  */
 pkg.CursorManager = Class(pkg.Manager, [
     function $prototype() {
         /**
          * Define pointer moved events handler.
-         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
          * @method pointerMoved
          */
         this.pointerMoved = function(e){
@@ -3300,7 +3302,7 @@ pkg.CursorManager = Class(pkg.Manager, [
 
         /**
          * Define pointer entered events handler.
-         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
          * @method pointerEntered
          */
         this.pointerEntered = function(e){
@@ -3319,7 +3321,7 @@ pkg.CursorManager = Class(pkg.Manager, [
 
         /**
          * Define pointer exited events handler.
-         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
          * @method pointerExited
          */
         this.pointerExited  = function(e){
@@ -3335,7 +3337,7 @@ pkg.CursorManager = Class(pkg.Manager, [
 
         /**
          * Define pointer dragged events handler.
-         * @param  {zebra.ui.PointerEvent} e a pointer event
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
          * @method pointerDragged
          */
         this.pointerDragged = function(e) {
@@ -3364,12 +3366,12 @@ pkg.CursorManager = Class(pkg.Manager, [
 ]);
 
 /**
- * Event manager class. One of the key zebra manager that is responsible for
- * distributing various events in zebra UI. The manager provides number of
+ * Event manager class. One of the key zebkit manager that is responsible for
+ * distributing various events in zebkit UI. The manager provides number of
  * methods to register global events listeners.
- * @class zebra.ui.EventManager
+ * @class zebkit.ui.EventManager
  * @constructor
- * @extends {zebra.ui.Manager}
+ * @extends {zebkit.ui.Manager}
  */
 pkg.EventManager = Class(pkg.Manager, [
     function $clazz(argument) {
@@ -3409,7 +3411,7 @@ pkg.EventManager = Class(pkg.Manager, [
             this.$CHILD_EVENTS_MAP[eventName] = eventNames[l + i];
         }
 
-        this.Listerners = zebra.util.ListenersClass.apply(this, eventNames);
+        this.Listerners = zebkit.util.ListenersClass.apply(this, eventNames);
     },
 
     function $prototype(clazz) {
@@ -3672,7 +3674,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
                 po = this.getComponentAt(this.$toElementX(e.pressPageX, e.pressPageY),
                                          this.$toElementY(e.pressPageX, e.pressPageY));
 
-            // mouse pressed has not null target zebra component
+            // mouse pressed has not null target zebkit component
             // send mouse released and mouse clicked (if necessary)
             // to him
             if (po != null) {
@@ -3783,7 +3785,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
          * of the canvas UI component. Every layer has an ID assigned to it the method
          * actually allows developers to get the canvas children component by its ID
          * @param  {String} id a layer ID
-         * @return {zebra.ui.Panel} a layer (children) component
+         * @return {zebkit.ui.Panel} a layer (children) component
          * @method getLayer
          */
         this.getLayer = function(id) {
@@ -3838,7 +3840,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
 
         // if passed element is string than consider it as
         // an ID of an element that is already in DOM tree
-        if (zebra.isString(element)) {
+        if (zebkit.isString(element)) {
             var id = element;
             element = document.getElementById(id);
 
@@ -3871,7 +3873,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
         if (h < 0) h = this.element.offsetHeight;
 
         // !!!
-        // save canvas in list of created Zebra canvases
+        // save canvas in list of created Zebkit canvases
         // do it before calling setSize(w,h) method
         pkg.$canvases.push(this);
 
@@ -3909,7 +3911,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
         if (this.width != w || h != this.height) {
             this.$super(w, h);
 
-            // let know to other zebra canvases that
+            // let know to other zebkit canvases that
             // the size of an element on the page has
             // been updated and they have to correct
             // its anchor.
@@ -3978,32 +3980,32 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
     }
 ]);
 
-zebra.ready(
+zebkit.ready(
     // dynamic HTML DOM tree has to be placed to separated function
     // that has to be first in ready list. the function make
     // the page loading busy before necessary dynamically
     // inserted elements will be ready.
     function() {
-        zebra.busy();
+        zebkit.busy();
         $fmCanvas = document.createElement("canvas").getContext("2d");
 
-        var e = document.getElementById("zebra.fm");
+        var e = document.getElementById("zebkit.fm");
         if (e == null) {
             e = document.createElement("div");
-            e.setAttribute("id", "zebra.fm");
+            e.setAttribute("id", "zebkit.fm");
             e.setAttribute("style", "visibility:hidden;line-height:0;height:1px;vertical-align:baseline;");
-            e.innerHTML = "<span id='zebra.fm.text' style='display:inline;vertical-align:baseline;'>&nbsp;</span>" +
-                          "<img id='zebra.fm.image' style='width:1px;height:1px;display:inline;vertical-align:baseline;' width='1' height='1'/>";
+            e.innerHTML = "<span id='zebkit.fm.text' style='display:inline;vertical-align:baseline;'>&nbsp;</span>" +
+                          "<img id='zebkit.fm.image' style='width:1px;height:1px;display:inline;vertical-align:baseline;' width='1' height='1'/>";
             document.body.appendChild(e);
         }
-        $fmText       = document.getElementById("zebra.fm.text");
-        $fmImage      = document.getElementById("zebra.fm.image");
+        $fmText       = document.getElementById("zebkit.fm.text");
+        $fmImage      = document.getElementById("zebkit.fm.image");
         $bodyFontSize = window.getComputedStyle(document.body, null).getPropertyValue('font-size');
 
-        // the next function passed to zebra.ready() will be blocked
+        // the next function passed to zebkit.ready() will be blocked
         // till the picture is completely loaded
         $fmImage.onload = function() {
-           zebra.ready();
+           zebkit.ready();
         };
 
         // set 1x1 transparent picture
@@ -4011,7 +4013,7 @@ zebra.ready(
     },
 
     function() {
-        var p = zebra()['zebra.json'];
+        var p = zebkit()['zebkit.json'];
         pkg.load(p != null ? p : pkg.$url.join("canvas.json"),
             function(e) {
                 if (e != null) {
@@ -4023,7 +4025,7 @@ zebra.ready(
 
     function() {
         try {
-            zebra.busy();
+            zebkit.busy();
 
             // store reference to event manager
             EM = pkg.events;
@@ -4032,7 +4034,7 @@ zebra.ready(
             // IE9 has an error: first mouse press formally pass focus to
             // canvas, but actually it doesn't get key events. To fix it
             // it is necessary to pass focus explicitly to window
-            if (zebra.isIE) window.focus();
+            if (zebkit.isIE) window.focus();
         }
         catch(e) {
             ///!!!!! for some reason throwing exception is not appeared in console.
@@ -4041,7 +4043,7 @@ zebra.ready(
             console.log(e.stack ? e.stack : e);
             throw new Error(e.toString());
         }
-        finally { zebra.ready(); }
+        finally { zebkit.ready(); }
     }
 );
 
@@ -4049,4 +4051,4 @@ zebra.ready(
  * @for
  */
 
-})(zebra("ui"), zebra.Class);
+})(zebkit("ui"), zebkit.Class);

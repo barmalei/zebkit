@@ -3,15 +3,15 @@
 /**
  * @module  ui
  */
-var L = zebra.layout;
+var L = zebkit.layout;
 
 pkg.$view = function(v) {
     if (v == null || v.paint != null) return v;
 
-    if (zebra.isString(v)) {
-        return zebra.util.rgb.hasOwnProperty(v) ? zebra.util.rgb[v]
+    if (zebkit.isString(v)) {
+        return zebkit.util.rgb.hasOwnProperty(v) ? zebkit.util.rgb[v]
                                      : (pkg.borders != null && pkg.borders.hasOwnProperty(v) ? pkg.borders[v]
-                                                                                             : new zebra.util.rgb(v));
+                                                                                             : new zebkit.util.rgb(v));
     }
 
     if (Array.isArray(v)) {
@@ -29,12 +29,12 @@ pkg.$view = function(v) {
 
 /**
 * Sunken border view
-* @class zebra.ui.Sunken
+* @class zebkit.ui.Sunken
 * @constructor
 * @param {String} [brightest] a brightest border line color
 * @param {String} [moddle] a middle border line color
 * @param {String} [darkest] a darkest border line color
-* @extends zebra.ui.View
+* @extends zebkit.ui.View
 */
 pkg.Sunken = Class(pkg.View, [
     function (brightest,middle,darkest) {
@@ -85,11 +85,11 @@ pkg.Sunken = Class(pkg.View, [
 
 /**
 * Etched border view
-* @class zebra.ui.Etched
+* @class zebkit.ui.Etched
 * @constructor
 * @param {String} [brightest] a brightest border line color
 * @param {String} [moddle] a middle border line color
-* @extends zebra.ui.View
+* @extends zebkit.ui.View
 */
 pkg.Etched = Class(pkg.View, [
     function (brightest, middle) {
@@ -133,11 +133,11 @@ pkg.Etched = Class(pkg.View, [
 
 /**
 * Raised border view
-* @class zebra.ui.Raised
+* @class zebkit.ui.Raised
 * @param {String} [brightest] a brightest border line color
 * @param {String} [middle] a middle border line color
 * @constructor
-* @extends zebra.ui.View
+* @extends zebkit.ui.View
 */
 pkg.Raised = Class(pkg.View, [
     function(brightest, middle) {
@@ -176,10 +176,10 @@ pkg.Raised = Class(pkg.View, [
 
 /**
 * Dotted border view
-* @class zebra.ui.Dotted
+* @class zebkit.ui.Dotted
 * @param {String} [c] the dotted border color
 * @constructor
-* @extends zebra.ui.View
+* @extends zebkit.ui.View
 */
 pkg.Dotted = Class(pkg.View, [
     function $prototype() {
@@ -204,20 +204,20 @@ pkg.Dotted = Class(pkg.View, [
 
 /**
  * Border view. Can be used to render CSS-like border. Border can be applied to any
- * zebra UI component by calling setBorder method:
+ * zebkit UI component by calling setBorder method:
 
         // create label component
-        var lab = new zebra.ui.Label("Test label");
+        var lab = new zebkit.ui.Label("Test label");
 
         // set red border to the label component
-        lab.setBorder(new zebra.ui.Border("red"));
+        lab.setBorder(new zebkit.ui.Border("red"));
 
  * @param  {String}  [c] border color
  * @param  {Integer} [w] border width
  * @param  {Integer} [r] border corners radius
  * @constructor
- * @class zebra.ui.Border
- * @extends zebra.ui.View
+ * @class zebkit.ui.Border
+ * @extends zebkit.ui.View
  */
 pkg.Border = Class(pkg.View, [
     function $prototype() {
@@ -226,9 +226,12 @@ pkg.Border = Class(pkg.View, [
         this.radius = 0;
 
         this.paint = function(g,x,y,w,h,d){
-            if (this.color != null) {
+            if (this.color != null && this.width > 0) {
                 var ps = g.lineWidth;
-                if (g.lineWidth !== this.width) g.lineWidth = this.width;
+
+                if (g.lineWidth !== this.width) {
+                    g.lineWidth = this.width;
+                }
 
                 if (this.radius > 0) {
                     this.outline(g,x,y,w,h, d);
@@ -239,8 +242,10 @@ pkg.Border = Class(pkg.View, [
                     g.rect(x + dt, y + dt, w - this.width, h - this.width);
                     g.closePath();
                 }
+
                 g.setColor(this.color);
                 g.stroke();
+
                 if (g.lineWidth !== ps) g.lineWidth = ps;
             }
         };
@@ -332,8 +337,8 @@ pkg.Border = Class(pkg.View, [
  * border color value to prevent painting of the border
  * @param  {Integer} [width] border width
  * @constructor
- * @class zebra.ui.RoundBorder
- * @extends zebra.ui.View
+ * @class zebkit.ui.RoundBorder
+ * @extends zebkit.ui.View
  */
 pkg.RoundBorder = Class(pkg.View, [
     function $prototype() {
@@ -382,10 +387,10 @@ pkg.RoundBorder = Class(pkg.View, [
 
         this[''] = function(col, width) {
             if (arguments.length > 0) {
-                if (zebra.isNumber(col)) this.width = col;
+                if (zebkit.isNumber(col)) this.width = col;
                 else {
                     this.color = col;
-                    if (zebra.isNumber(width)) this.width = width;
+                    if (zebkit.isNumber(width)) this.width = width;
                 }
             }
             this.gap = this.width;
@@ -396,10 +401,10 @@ pkg.RoundBorder = Class(pkg.View, [
 /**
  *  UI component render class. Renders the given target UI component
  *  on the given surface using the specified 2D context
- *  @param {zebra.ui.Panel} [target] an UI component to be rendered
- *  @class zebra.ui.CompRender
+ *  @param {zebkit.ui.Panel} [target] an UI component to be rendered
+ *  @class zebkit.ui.CompRender
  *  @constructor
- *  @extends zebra.ui.Render
+ *  @extends zebkit.ui.Render
  */
 pkg.CompRender = Class(pkg.Render, [
     function $prototype() {
@@ -449,10 +454,10 @@ pkg.CompRender = Class(pkg.Render, [
 * @param {String} startColor start color
 * @param {String} endColor end color
 * @param {Integer|String} [type] type of gradient
-* "zebra.layout.VERTICAL" or "zebra.layout.HORIZONTAL" or "vertical" or "horizontal"
+* "zebkit.layout.VERTICAL" or "zebkit.layout.HORIZONTAL" or "vertical" or "horizontal"
 * @constructor
-* @class zebra.ui.Gradient
-* @extends zebra.ui.View
+* @class zebkit.ui.Gradient
+* @extends zebkit.ui.View
 */
 pkg.Gradient = Class(pkg.View, [
     function $prototype() {
@@ -461,7 +466,7 @@ pkg.Gradient = Class(pkg.View, [
              * Gradient orientation: vertical or horizontal
              * @attribute orientation
              * @readOnly
-             * @default zebra.layout.VERTICAL
+             * @default zebkit.layout.VERTICAL
              * @type {Integer}
              */
 
@@ -515,8 +520,8 @@ pkg.Gradient = Class(pkg.View, [
 * @param {String} startColor a start color
 * @param {String} stopColor a stop color
 * @constructor
-* @class zebra.ui.Radial
-* @extends zebra.ui.View
+* @class zebkit.ui.Radial
+* @extends zebkit.ui.View
 */
 pkg.Radial = Class(pkg.View, [
     function $prototype() {
@@ -546,8 +551,8 @@ pkg.Radial = Class(pkg.View, [
 * @param {Integer} [w] a width of the rendered image part
 * @param {Integer} [h] a height of the rendered image part
 * @constructor
-* @class zebra.ui.Picture
-* @extends zebra.ui.Render
+* @class zebkit.ui.Picture
+* @extends zebkit.ui.Render
 */
 pkg.Picture = Class(pkg.Render, [
     function $prototype() {
@@ -621,10 +626,10 @@ pkg.Picture = Class(pkg.Render, [
 
 /**
 * Pattern render.
-* @class zebra.ui.Pattern
+* @class zebkit.ui.Pattern
 * @param {Image} [img] an image to be used as the pattern
 * @constructor
-* @extends zebra.ui.Render
+* @extends zebkit.ui.Render
 */
 pkg.Pattern = Class(pkg.Render, [
     function $prototype() {
@@ -657,11 +662,11 @@ pkg.Pattern = Class(pkg.Render, [
 /**
 * Composite view. The view allows developers to combine number of
 * views and renders its together.
-* @class zebra.ui.CompositeView
+* @class zebkit.ui.CompositeView
 * @param {Arrayt|Object} [views] array of dictionary of views
 * to be composed together
 * @constructor
-* @extends zebra.ui.View
+* @extends zebkit.ui.View
 */
 pkg.CompositeView = Class(pkg.View, [
     function $prototype() {
@@ -800,8 +805,8 @@ pkg.CompositeView = Class(pkg.View, [
 * @param {Object} args object that represents views instances that have
 * to be included in the ViewSet
 * @constructor
-* @class zebra.ui.ViewSet
-* @extends zebra.ui.CompositeView
+* @class zebkit.ui.ViewSet
+* @extends zebkit.ui.CompositeView
 */
 pkg.ViewSet = Class(pkg.CompositeView, [
     function $prototype() {
@@ -1017,20 +1022,20 @@ pkg.TextRenderMix = [
          * @default null
          * @readOnly
          * @protected
-         * @type {zebra.ui.Panel}
+         * @type {zebkit.ui.Panel}
          */
         this.owner = null;
 
         /**
          * Set the rendered text font.
-         * @param  {String|zebra.ui.Font} f a font as CSS string or
-         * zebra.ui.Font class instance
+         * @param  {String|zebkit.ui.Font} f a font as CSS string or
+         * zebkit.ui.Font class instance
          * @return {Boolean} return true if a text font has been updated
          * @method setFont
          */
         this.setFont = function(f){
             var old = this.font;
-            if (f != null && zebra.isString(f)) f = new pkg.Font(f);
+            if (f != null && zebkit.isString(f)) f = new pkg.Font(f);
 
             if (f !== old && (f == null || old == null || f.toString() !== old.toString())) {
                 this.font = f;
@@ -1075,7 +1080,7 @@ pkg.TextRenderMix = [
 
         /**
          * Called whenever an owner UI component has been changed
-         * @param  {zebra.ui.Panel} v a new owner UI component
+         * @param  {zebkit.ui.Panel} v a new owner UI component
          * @method ownerChanged
          */
         this.ownerChanged = function(v) {
@@ -1088,11 +1093,11 @@ pkg.TextRenderMix = [
  * Lightweight implementation of single line string render. The render requires
  * a simple string as a target object.
  * @param {String} str a string to be rendered
- * @param {zebra.ui.Font} [font] a text font
+ * @param {zebkit.ui.Font} [font] a text font
  * @param {String} [color] a text color
  * @constructor
- * @extends {zebra.ui.Render}
- * @class zebra.ui.StringRender
+ * @extends {zebkit.ui.Render}
+ * @class zebkit.ui.StringRender
  */
 pkg.StringRender = Class(pkg.Render, [
     function $mixing() {
@@ -1109,7 +1114,7 @@ pkg.StringRender = Class(pkg.Render, [
              * Font to be used to render the target string
              * @attribute font
              * @readOnly
-             * @type {zebra.ui.Font}
+             * @type {zebkit.ui.Font}
              */
             this.font = font != null ? font : this.clazz.font;
 
@@ -1183,12 +1188,12 @@ pkg.StringRender = Class(pkg.Render, [
 
 /**
  * Text render that expects and draws a text model or a string as its target
- * @class zebra.ui.TextRender
+ * @class zebkit.ui.TextRender
  * @constructor
- * @extends zebra.ui.Render
- * @param  {String|zebra.data.TextModel} text a text as string or text model object
+ * @extends zebkit.ui.Render
+ * @param  {String|zebkit.data.TextModel} text a text as string or text model object
  */
-pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
+pkg.TextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
     function $mixing() {
         return pkg.TextRenderMix;
     },
@@ -1217,7 +1222,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
          * @param  {Integer} x x coordinate
          * @param  {Integer} y y coordinate
          * @param  {Integer} line a line number
-         * @param  {zebra.ui.Panel} d an UI component on that the line has to be rendered
+         * @param  {zebkit.ui.Panel} d an UI component on that the line has to be rendered
          * @method paintLine
          */
         this.paintLine = function(g,x,y,line,d) {
@@ -1304,7 +1309,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
 
         /**
          * Text model update listener handler
-         * @param  {zebra.data.TextModel} src text model object
+         * @param  {zebkit.data.TextModel} src text model object
          * @param  {Boolean} b
          * @param  {Integer} off an offset starting from that
          * the text has been updated
@@ -1471,7 +1476,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
          * @param  {Integer} w a width of of selection rectangular area
          * @param  {Integer} h a height of of selection rectangular area
          * @param  {Integer} line [description]
-         * @param  {zebra.ui.Panel} d a target UI component where the text
+         * @param  {zebkit.ui.Panel} d a target UI component where the text
          * has to be rendered
          * @protected
          * @method paintSelection
@@ -1488,7 +1493,7 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
              * Text color
              * @attribute color
              * @type {String}
-             * @default zebra.ui.TextRender.color
+             * @default zebkit.ui.TextRender.color
              * @readOnly
              */
             this.color = this.clazz.color;
@@ -1496,8 +1501,8 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
             /**
              * Text font
              * @attribute font
-             * @type {String|zebra.ui.Font}
-             * @default zebra.ui.TextRender.font
+             * @type {String|zebkit.ui.Font}
+             * @default zebkit.ui.TextRender.font
              * @readOnly
              */
             this.font = this.clazz.font;
@@ -1509,20 +1514,20 @@ pkg.TextRender = Class(pkg.Render, zebra.util.Position.Metric, [
             //   since text render is widely used structure we do slight hack -
             //   don't call parent constructor
             //!!!
-            this.setTarget(zebra.isString(text) ? new zebra.data.Text(text) : text);
+            this.setTarget(zebkit.isString(text) ? new zebkit.data.Text(text) : text);
         };
     }
 ]);
 
 
-pkg.DecoratedTextRender = zebra.Class(pkg.TextRender, [
+pkg.DecoratedTextRender = zebkit.Class(pkg.TextRender, [
     function setDecoration(id, color) {
         if (id == null) throw new Error();
         this.decorations[id] = color;
     },
 
     function setDecorations(d) {
-        this.decorations = zebra.clone(d);
+        this.decorations = zebkit.clone(d);
     },
 
     function paintLine(g,x,y,line,d) {
@@ -1562,14 +1567,14 @@ pkg.BoldTextRender = Class(pkg.TextRender, [
 
 /**
  * Password text render class. This class renders a secret text with hiding it with the given character.
- * @param {String|zebra.data.TextModel} [text] a text as string or text model instance
- * @class zebra.ui.PasswordText
+ * @param {String|zebkit.data.TextModel} [text] a text as string or text model instance
+ * @class zebkit.ui.PasswordText
  * @constructor
- * @extends zebra.ui.TextRender
+ * @extends zebkit.ui.TextRender
  */
 pkg.PasswordText = Class(pkg.TextRender, [
     function(text){
-        if (arguments.length === 0) text = new zebra.data.SingleLineTxt("");
+        if (arguments.length === 0) text = new zebkit.data.SingleLineTxt("");
 
         /**
          * Echo character that will replace characters of hidden text
@@ -1786,10 +1791,10 @@ pkg.TabBorder = Class(pkg.View, [
  *      }
  *
  *
- * @class zebra.ui.TitledBorder
- * @extends zebra.ui.Render
+ * @class zebkit.ui.TitledBorder
+ * @extends zebkit.ui.Render
  * @constructor
- * @param {zebra.ui.View} border  a border to be rendered with a title area
+ * @param {zebkit.ui.View} border  a border to be rendered with a title area
  * @param {Integer|String} [lineAlignment] a line alignment. Specifies how
  * a title area has to be aligned relatively border line:
  *
@@ -2095,8 +2100,8 @@ pkg.BunldeView = Class(pkg.View, [
 
 /**
  * The radio button ticker view.
- * @class  zebra.ui.RadioView
- * @extends zebra.ui.View
+ * @class  zebkit.ui.RadioView
+ * @extends zebkit.ui.View
  * @constructor
  * @param {String} [col1] color one to render the outer cycle
  * @param {String} [col2] color tow to render the inner cycle
@@ -2125,8 +2130,8 @@ pkg.RadioView = Class(pkg.View, [
 
 /**
  * Toggle view element class
- * @class  zebra.ui.ToggleView
- * @extends {zebra.ui.View}
+ * @class  zebkit.ui.ToggleView
+ * @extends {zebkit.ui.View}
  * @constructor
  * @param  {Boolean} plus indicates the sign type plus (true) or minus (false)
  * @param  {String} color a color
@@ -2204,4 +2209,4 @@ pkg.CaptionBgView = Class(pkg.View, [
  * @for
  */
 
-})(zebra("ui"), zebra.Class);
+})(zebkit("ui"), zebkit.Class);

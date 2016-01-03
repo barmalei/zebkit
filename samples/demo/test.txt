@@ -1,11 +1,11 @@
 
-require 'gravity/zebra/j2js/converter'
+require 'gravity/zebkit/j2js/converter'
 
 $BASE_PATH = File.dirname(__FILE__)
 
 $TEST_CONTEXT="
-load(arguments[0] + '/lib/gravity/zebra.js');
-load(arguments[0] + '/lib/gravity/zebra/java.lang.js');
+load(arguments[0] + '/lib/gravity/zebkit.js');
+load(arguments[0] + '/lib/gravity/zebkit/java.lang.js');
 eval(JAVA.Import('lang'));
 
 var test = Gravity.NewNamespace('test');
@@ -14,12 +14,12 @@ var test = Gravity.NewNamespace('test');
 $HTML_TEMPLATE = "
 <html>
 <head>
-    <script src='../gravity/zebra.js' type='text/javascript'></script>
-    <script src='../gravity/zebra/java.lang.js' type='text/javascript'></script>
+    <script src='../gravity/zebkit.js' type='text/javascript'></script>
+    <script src='../gravity/zebkit/java.lang.js' type='text/javascript'></script>
     
     <script>
 (function() {
-        var test = zebra.NewNamespace('test');
+        var test = zebkit.NewNamespace('test');
         eval(JAVA.Import('lang'));
         
         $code

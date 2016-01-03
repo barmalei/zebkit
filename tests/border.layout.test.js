@@ -1,14 +1,14 @@
 
-if (typeof(zebra) === "undefined") {
+if (typeof(zebkit) === "undefined") {
     load(arguments[0] + '/src/easyoop.js');
     load(arguments[0] + '/src/util.js');
     load(arguments[0] + '/src/tools.js');
     load(arguments[0] + '/src/layout.js');
 }
 
-eval(zebra.Import("layout"));
+eval(zebkit.Import("layout"));
 
-var assert = zebra.assert;
+var assert = zebkit.assert;
 
 
 var MIX = [
@@ -45,7 +45,7 @@ function assertMetrics(c,x,y,w,h) {
     assert(c.height, h);
 }
 
-zebra.runTests("BorderLayout test",
+zebkit.runTests("BorderLayout test",
 
     function test_layoutable() {
         var l = new Layoutable();

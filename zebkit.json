@@ -4,18 +4,18 @@
     "doubleClickDelta":280,
 
     ".addClassAliases": {
-        "Picture"       : "zebra.ui.Picture",
-        "Border"        : "zebra.ui.Border",
-        "Dotted"        : "zebra.ui.Dotted",
-        "ViewSet"       : "zebra.ui.ViewSet",
-        "View"          : "zebra.ui.View",
-        "Gradient"      : "zebra.ui.Gradient",
-        "CompositeView" : "zebra.ui.CompositeView",
-        "rgb"           : "zebra.util.rgb",
-        "Font"          : "zebra.ui.Font",
-        "FlowLayout"    : "zebra.layout.FlowLayout",
-        "BorderLayout"  : "zebra.layout.BorderLayout",
-        "ListLayout"    : "zebra.layout.ListLayout"
+        "Picture"       : "zebkit.ui.Picture",
+        "Border"        : "zebkit.ui.Border",
+        "Dotted"        : "zebkit.ui.Dotted",
+        "ViewSet"       : "zebkit.ui.ViewSet",
+        "View"          : "zebkit.ui.View",
+        "Gradient"      : "zebkit.ui.Gradient",
+        "CompositeView" : "zebkit.ui.CompositeView",
+        "rgb"           : "zebkit.util.rgb",
+        "Font"          : "zebkit.ui.Font",
+        "FlowLayout"    : "zebkit.layout.FlowLayout",
+        "BorderLayout"  : "zebkit.layout.BorderLayout",
+        "ListLayout"    : "zebkit.layout.ListLayout"
     },
 
     "KeyEvent": {
@@ -26,17 +26,17 @@
         "F7":118, "F8":119, "F9":120, "F10":121, "F11" : 122, "F12" : 123, ",":188, ";" : 186, "'" : 222,
         "[":219, "]":221, "\\":220,  "/":191,  "ENTER":13, "ESCAPE" : 27, "SPACE" : 32, "DELETE" : 46,
         "BSPACE":8, "TAB":9, "INSERT":45, "DELETE":46, "LEFT":37, "RIGHT":39, "UP":38, "DOWN":40,
-        "HOME":36,"END":35,"PAGEUP":33,"PAGEDOWN":34, "CMD":{ ".expr":"zebra.isFF?224:91" }, "SHIFT": 16,
+        "HOME":36,"END":35,"PAGEUP":33,"PAGEDOWN":34, "CMD":{ ".expr":"zebkit.isFF?224:91" }, "SHIFT": 16,
         "CTRL" : 17, "ALT":18, "CHAR_UNDEFINED":0
     },
 
-    "events"        : { "$zebra.ui.EventManager":[]  },
-    "focusManager"  : { "$zebra.ui.FocusManager":[]  },
-    "htmlManager"   : { "$ ? zebra.ui.HtmlElementMan":[]  },
+    "events"        : { "$zebkit.ui.EventManager":[]  },
+    "focusManager"  : { "$zebkit.ui.FocusManager":[]  },
+    "htmlManager"   : { "$ ? zebkit.ui.HtmlElementMan":[]  },
 
-    "cursorManager"  : { "$zebra.ui.CursorManager"  :[] },
+    "cursorManager"  : { "$zebkit.ui.CursorManager"  :[] },
     "commandManager" : {
-        "$zebra.ui.ShortcutManager" :[{
+        "$zebkit.ui.ShortcutManager" :[{
             "common": [
                 {
                     "command" : "undo_command",
@@ -129,12 +129,12 @@
     },
 
     "popup" : {
-        "$ ? zebra.ui.PopupManager": [],
-        "hideTooltipByPress": { ".expr": "!zebra.isTouchable" }
+        "$ ? zebkit.ui.PopupManager": [],
+        "hideTooltipByPress": { ".expr": "!zebkit.isTouchable" }
     },
 
     "clipboardSupport" : {
-        "$zebra.ui.ClipboardSupport":  {".expr" : "zebra.isMacOS ? zebra.ui.KeyEvent.CMD : zebra.ui.KeyEvent.CTRL" }
+        "$zebkit.ui.ClipboardSupport":  {".expr" : "zebkit.isMacOS ? zebkit.ui.KeyEvent.CMD : zebkit.ui.KeyEvent.CTRL" }
     },
 
     "font"          : { "$Font" : ["Arial", 14] },
@@ -157,15 +157,15 @@
     },
 
     "borders" : {
-        "raised" : { "$zebra.ui.Raised":[] },
-        "sunken" : { "$zebra.ui.Sunken":[] },
-        "etched" : { "$zebra.ui.Etched":[] },
+        "raised" : { "$zebkit.ui.Raised":[] },
+        "sunken" : { "$zebkit.ui.Sunken":[] },
+        "etched" : { "$zebkit.ui.Etched":[] },
         "plain"  : { "$Border" : [ "#C5C5C5", 1, 3 ]  },
         "dot"    : { "$Dotted" : []  }
     },
 
     "CanvasLayer": {
-        "layout"     : { "$zebra.layout.RasterLayout":[] },
+        "layout"     : { "$zebkit.layout.RasterLayout":[] },
         "background" : null
     },
 
@@ -180,7 +180,7 @@
     "zCanvas": {
         "//"    :  "IT IS IMPORTANT TO HAVE CANVAS CSS PADDING = 0 TO FIX IE9 PROBLEM",
         "background2": "white",
-        "layout"    : { "$zebra.layout.StackLayout":[] },
+        "layout"    : { "$zebkit.layout.StackLayout":[] },
 
         "styles": {
             "background-color2"           : "green",
@@ -200,19 +200,19 @@
         },
 
         "features" : [
-            "zebra.ui.MouseWheelSupport"
+            "zebkit.ui.MouseWheelSupport"
         ],
 
         "kids": [
-            { "$ *zebra.ui.RootLayer" : "root" },
-            { "$ *zebra.ui.WinLayer"  : [] },
-            { "$ ? *zebra.ui.PopupLayer": [] }
+            { "$ *zebkit.ui.RootLayer" : "root" },
+            { "$ *zebkit.ui.WinLayer"  : [] },
+            { "$ ? *zebkit.ui.PopupLayer": [] }
         ]
     },
 
     "pictures" : {
-        "zebra" : {
-            ".loadImage": "zebra.png"
+        "zebkit" : {
+            ".loadImage": "zebkit.png"
         }
     },
 
@@ -283,11 +283,11 @@
                 "don": "lightGray"
             },
             "view": {
-                "on.out"   : { "$zebra.ui.CheckboxView": [] },
+                "on.out"   : { "$zebkit.ui.CheckboxView": [] },
                 "off.out"  : { "$View": [] },
-                "off.over" : { "$zebra.ui.CheckboxView": [ "lightGray" ] },
-                "on.over"  : { "$zebra.ui.CheckboxView": [ "red" ] },
-                "don"      : { "$zebra.ui.CheckboxView": [ "#AAAAAA" ] },
+                "off.over" : { "$zebkit.ui.CheckboxView": [ "lightGray" ] },
+                "on.over"  : { "$zebkit.ui.CheckboxView": [ "red" ] },
+                "don"      : { "$zebkit.ui.CheckboxView": [ "#AAAAAA" ] },
                 "doff"     : { "$View": [] }
             }
         },
@@ -313,18 +313,18 @@
 
         "Box": {
             "preferredSize": [ 16, 16],
-            "border"       : { "$zebra.ui.RoundBorder":["rgb(197,197,197)", 1] },
+            "border"       : { "$zebkit.ui.RoundBorder":["rgb(197,197,197)", 1] },
             "background"   : {
                 "*" : { "$Gradient": [ "rgb(250, 250, 250)", "rgb(234, 234, 234)" ] },
                 "doff": "lightGray",
                 "don": "lightGray"
             },
             "view": {
-                "on.out"   : { "$zebra.ui.RadioView" : []  },
+                "on.out"   : { "$zebkit.ui.RadioView" : []  },
                 "off.out"  : { "$View"      : []  },
-                "off.over" : { "$zebra.ui.RadioView" : [ "lightGray", "#DDDDDD"]  },
-                "on.over"  : { "$zebra.ui.RadioView" : [ "#111111", "red"    ] },
-                "don"      : { "$zebra.ui.RadioView" : [ "#AAAAAA", "#AAAAAA"] },
+                "off.over" : { "$zebkit.ui.RadioView" : [ "lightGray", "#DDDDDD"]  },
+                "on.over"  : { "$zebkit.ui.RadioView" : [ "#111111", "red"    ] },
+                "don"      : { "$zebkit.ui.RadioView" : [ "#AAAAAA", "#AAAAAA"] },
                 "doff"     : { "$View" : [] }
             }
         }
@@ -336,7 +336,7 @@
             "color": "@palette.gray1"
         },
 
-        "border": { "$zebra.ui.TitledBorder": [ "@borders.plain", "center" ] }
+        "border": { "$zebkit.ui.TitledBorder": [ "@borders.plain", "center" ] }
     },
 
     "SplitPan": {
@@ -379,13 +379,13 @@
         "VBundle": {
             "padding":1,
             "preferredSize" : [6, -1],
-            "background" : { "$zebra.ui.BunldeView": [] }
+            "background" : { "$zebkit.ui.BunldeView": [] }
         },
 
         "HBundle": {
             "padding":1,
             "preferredSize" : [ -1, 6 ],
-            "background" : { "$zebra.ui.BunldeView": [ 32 ] }
+            "background" : { "$zebkit.ui.BunldeView": [ 32 ] }
         },
 
         "background":  null,
@@ -394,10 +394,10 @@
     },
 
 
-    "mscroll": { "$zebra.ui.MobileScrollMan"  :[] },
+    "mscroll": { "$zebkit.ui.MobileScrollMan"  :[] },
 
     "ScrollPan": {
-        "autoHide": { ".expr": "zebra.isTouchable" }
+        "autoHide": { ".expr": "zebkit.isTouchable" }
     },
 
     "TextField": {
@@ -445,11 +445,11 @@
             "selectedFont"     : { "$Font": ["Arial", "bold", 14 ] }
         },
 
-        "border" : {  "$zebra.ui.TitledBorder": {"$Border": ["gray",1, 6] } },
+        "border" : {  "$zebkit.ui.TitledBorder": {"$Border": ["gray",1, 6] } },
         "views"  : {
-                    "tab"    : { "$zebra.ui.TabBorder": 1 },
-                    "tabover": { "$zebra.ui.TabBorder": 2 },
-                    "tabon"  : { "$zebra.ui.TabBorder": 0 },
+                    "tab"    : { "$zebkit.ui.TabBorder": 1 },
+                    "tabover": { "$zebkit.ui.TabBorder": 2 },
+                    "tabon"  : { "$zebkit.ui.TabBorder": 0 },
                     "marker" : { "$Border": [ "#66CCFF", 1, 3 ] }
                 },
         "pageGaps": [2, 2]
@@ -519,10 +519,10 @@
             "padding" : [4,0,4,0],
 
             "view": {
-               "out"       : { "$zebra.ui.ArrowView": [ "bottom", "black"], "gap" : 4 },
-               "over"      : { "$zebra.ui.ArrowView": [ "bottom", "red" ], "gap" : 4 },
-               "pressed.*" : { "$zebra.ui.ArrowView": [ "bottom", "blue"], "gap" : 4 },
-               "disabled"  : { "$zebra.ui.ArrowView": [ "bottom", "#CCCCCC"], "gap" : 4 }
+               "out"       : { "$zebkit.ui.ArrowView": [ "bottom", "black"], "gap" : 4 },
+               "over"      : { "$zebkit.ui.ArrowView": [ "bottom", "red" ], "gap" : 4 },
+               "pressed.*" : { "$zebkit.ui.ArrowView": [ "bottom", "blue"], "gap" : 4 },
+               "disabled"  : { "$zebkit.ui.ArrowView": [ "bottom", "#CCCCCC"], "gap" : 4 }
             }
         },
 
@@ -548,8 +548,8 @@
         },
         "views" : {
              "gauge"  : { "$Border" : "@palette.gray3" },
-             "hbundle": { "$Picture": [ "@pictures.zebra", 49,0,11,18 ] },
-             "vbundle": { "$Picture": [ "@pictures.zebra", 61,0,18,11 ] }
+             "hbundle": { "$Picture": [ "@pictures.zebkit", 49,0,11,18 ] },
+             "vbundle": { "$Picture": [ "@pictures.zebkit", 61,0,18,11 ] }
         },
         "scaleColor": "@palette.gray1",
         "padding"   : 4
@@ -578,8 +578,8 @@
 
         "CheckStatePan": {
             "view": {
-                "on"    : { "$zebra.ui.StringRender":[ "✓",  { "$Font": [ "Arial", "bold", 16] }, "gray" ] },
-                "dis.on": { "$zebra.ui.StringRender":[ "✓",  { "$Font": [ "Arial", "bold", 16] }, "lightGray" ] },
+                "on"    : { "$zebkit.ui.StringRender":[ "✓",  { "$Font": [ "Arial", "bold", 16] }, "gray" ] },
+                "dis.on": { "$zebkit.ui.StringRender":[ "✓",  { "$Font": [ "Arial", "bold", 16] }, "lightGray" ] },
                 "off"   : null
             }
         },
@@ -587,7 +587,7 @@
         "SubImage": {
             "padding": [ 0, 0, 0, 4],
             "view": {
-                "arrow" :  { "$zebra.ui.ArrowView" : [ "right", "black", 9 ] },
+                "arrow" :  { "$zebkit.ui.ArrowView" : [ "right", "black", 9 ] },
                 "*"     : null
             }
         }
@@ -692,8 +692,8 @@
 
         "TogglePan":{
             "view" : {
-                "off" : { "$zebra.ui.ToggleView": [ true,  "white", "orange" ], "width":14, "height":14  },
-                "on"  : { "$zebra.ui.ToggleView": [ false, "white", "orange" ], "width":14, "height":14  }
+                "off" : { "$zebkit.ui.ToggleView": [ true,  "white", "orange" ], "width":14, "height":14  },
+                "on"  : { "$zebkit.ui.ToggleView": [ false, "white", "orange" ], "width":14, "height":14  }
             }
         },
 
@@ -709,11 +709,11 @@
         "BaseTree" : {
             "lineColor" : "rgb(65, 131, 215)",
             "views": {
-                "close"   : { "$Picture": [ "@pictures.zebra", 61 ,20 ,16,14, true ] },
-                "open"    : { "$Picture": [ "@pictures.zebra", 49 ,34,16,14, true ] },
-                "leaf"    : { "$Picture": [ "@pictures.zebra", 49 ,20 ,16,14, true ] },
-                "off"     : { "$zebra.ui.ToggleView": [] },
-                "on"      : { "$zebra.ui.ToggleView": false },
+                "close"   : { "$Picture": [ "@pictures.zebkit", 61 ,20 ,16,14, true ] },
+                "open"    : { "$Picture": [ "@pictures.zebkit", 49 ,34,16,14, true ] },
+                "leaf"    : { "$Picture": [ "@pictures.zebkit", 49 ,20 ,16,14, true ] },
+                "off"     : { "$zebkit.ui.ToggleView": [] },
+                "on"      : { "$zebkit.ui.ToggleView": false },
                 "aselect" : [ [ "rgb(228, 244, 252)", { "$Border": "rgb(200,180,200)" } ] ]
             }
         },
@@ -738,12 +738,12 @@
 
             "inherit" : "tree.BaseTree",
             "views": {
-                "close"   : { "$Picture": [ "@pictures.zebra", 61 ,20 ,16,14, true ] },
-                "open"    : { "$Picture": [ "@pictures.zebra", 49 ,34,16,14, true ] },
-                "leaf"    : { "$Picture": [ "@pictures.zebra", 49 ,20 ,16,14, true ] },
+                "close"   : { "$Picture": [ "@pictures.zebkit", 61 ,20 ,16,14, true ] },
+                "open"    : { "$Picture": [ "@pictures.zebkit", 49 ,34,16,14, true ] },
+                "leaf"    : { "$Picture": [ "@pictures.zebkit", 49 ,20 ,16,14, true ] },
 
-                "off"     : { "$zebra.ui.ToggleView": [] },
-                "on"      : { "$zebra.ui.ToggleView": false },
+                "off"     : { "$zebkit.ui.ToggleView": [] },
+                "on"      : { "$zebkit.ui.ToggleView": false },
                 "iselect" : "#A0D9EA",
                 "aselect" : "#A0D9EA"
             }
@@ -786,9 +786,9 @@
 
             "StatusPan": {
                 "view" : {
-                    "*"       : { "$zebra.ui.ArrowView" : [ "left", "rgb(255, 153, 0)" ], "width":9, "height":9  },
-                    "ascent"  : { "$zebra.ui.ArrowView" : [ "top", "rgb(255, 153, 0)"  ]   },
-                    "descent" : { "$zebra.ui.ArrowView" : [ "bottom", "rgb(255, 153, 0)" ] }
+                    "*"       : { "$zebkit.ui.ArrowView" : [ "left", "rgb(255, 153, 0)" ], "width":9, "height":9  },
+                    "ascent"  : { "$zebkit.ui.ArrowView" : [ "top", "rgb(255, 153, 0)"  ]   },
+                    "descent" : { "$zebkit.ui.ArrowView" : [ "bottom", "rgb(255, 153, 0)" ] }
                 }
             },
 
@@ -841,8 +841,8 @@
         "CaptionPan": {
             "layout"     : { "$BorderLayout":[] },
             "background" : {
-                  "active"  : { "$ zebra.ui.CaptionBgView": [] },
-                  "inactive": { "$ zebra.ui.CaptionBgView": "#E0F4FF" }
+                  "active"  : { "$ zebkit.ui.CaptionBgView": [] },
+                  "inactive": { "$ zebkit.ui.CaptionBgView": "#E0F4FF" }
             },
             "padding"  : 8
         },
@@ -862,7 +862,7 @@
 
         "SizerIcon": {
             "padding" : [0,0,1,2],
-            "image"    : { "$Picture": [ "@pictures.zebra",0,32,9,8 ] }
+            "image"    : { "$Picture": [ "@pictures.zebkit",0,32,9,8 ] }
         },
 
         "Icon": {
@@ -879,9 +879,9 @@
         "padding"  : [0,0,2,0],
         "buttons"   : {
             "close": {
-                "over"   : { "$Picture": [ "@pictures.zebra",16,0,16,16   ]},
-                "out"    : { "$Picture": [ "@pictures.zebra",0,0,16,16    ]},
-                "pressed": { "$Picture": [ "@pictures.zebra",32,0,16,16   ]}
+                "over"   : { "$Picture": [ "@pictures.zebkit",16,0,16,16   ]},
+                "out"    : { "$Picture": [ "@pictures.zebkit",0,0,16,16    ]},
+                "pressed": { "$Picture": [ "@pictures.zebkit",32,0,16,16   ]}
             }
         }
     },

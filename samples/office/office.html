@@ -8,21 +8,21 @@
 <meta name="msapplication-tap-highlight" content="no" />
 
 
-<script src='../../zebra.min.js'    type='text/javascript'></script>
+<script src='../../zebkit.min.js'    type='text/javascript'></script>
 <script src='ui.excel.js' type='text/javascript'></script>
 
 
 <script>
 
-zebra.ready(function() {
-    var canvas = new zebra.ui.zCanvas();
+zebkit.ready(function() {
+    var canvas = new zebkit.ui.zCanvas();
     canvas.load("mainLayout.json");
 
-    var tabs         = canvas.find(".zebra.ui.Tabs"),
+    var tabs         = canvas.find(".zebkit.ui.Tabs"),
         cellLocation = canvas.find("#cellLocation"),
         cellContent  = canvas.find("#cellContent");
 
-    new zebra.ui.excel.Application(canvas.root, [
+    new zebkit.ui.excel.Application(canvas.root, [
         function sheetCellMarked(sheet, row, col, value) {
             if (row < 0 || col < 0) {
                 cellLocation.setValue("");

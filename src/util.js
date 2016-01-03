@@ -1,7 +1,7 @@
 /**
  * Number of different utilities methods and classes
  * @module util
- * @requires zebra
+ * @requires zebkit
  */
 (function(pkg, Class, Interface) {
 
@@ -68,13 +68,13 @@ pkg.Event = Class([
  * Sequential tasks runner. Allows developers to execute number of tasks (async and sync) in the
  * the order they have been called by runner:
 
-        var r = new zebra.util.Runner();
+        var r = new zebkit.util.Runner();
 
         r.run(function() {
             // call three asynchronous HTTP GET requests to read three files
-            zebra.io.GET("http://test.com/a.txt", this.join());
-            zebra.io.GET("http://test.com/b.txt", this.join());
-            zebra.io.GET("http://test.com/c.txt", this.join());
+            zebkit.io.GET("http://test.com/a.txt", this.join());
+            zebkit.io.GET("http://test.com/b.txt", this.join());
+            zebkit.io.GET("http://test.com/c.txt", this.join());
         })
         .
         run(function(r1, r2, r3) {
@@ -90,7 +90,7 @@ pkg.Event = Class([
         });
 
 
- * @class zebra.ui.Runner
+ * @class zebkit.ui.Runner
  */
 pkg.Runner = function() {
     this.$tasks      = [];
@@ -207,7 +207,7 @@ pkg.Runner = function() {
             ]
         };
 
-        zebra.util.findInTree(treeLikeRoot,
+        zebkit.util.findInTree(treeLikeRoot,
                               "/Root/item1",
                               function(item, fragment) {
                                   return item.value == fragment;
@@ -246,7 +246,7 @@ pkg.Runner = function() {
  * @param  {Function} cb callback function that is called every time a new tree element
  * matches the given path fragment. The function has to return true if the tree look up
  * has to be stopped
- * @api  zebra.util.findInTree()
+ * @api  zebkit.util.findInTree()
  * @method findInTree
  */
 pkg.findInTree = function(root, path, eq, cb) {
@@ -302,16 +302,16 @@ pkg.findInTree = function(root, path, eq, cb) {
  * RGB color class. This class represents rgb(a) color as JavaScript structure:
 
        // rgb color
-       var rgb1 = new zebra.util.rgb(100,200,100);
+       var rgb1 = new zebkit.util.rgb(100,200,100);
 
        // rgb with transparency
-       var rgb2 = new zebra.util.rgb(100,200,100, 0.6);
+       var rgb2 = new zebkit.util.rgb(100,200,100, 0.6);
 
        // encoded as a string rgb color
-       var rgb3 = new zebra.util.rgb("rgb(100,100,200)");
+       var rgb3 = new zebkit.util.rgb("rgb(100,100,200)");
 
        // hex rgb color
-       var rgb3 = new zebra.util.rgb("#CCDDFF");
+       var rgb3 = new zebkit.util.rgb("#CCDDFF");
 
  * @param  {Integer|String} r  red color intensity or if this is the only constructor parameter it denotes
  * encoded in string rgb color
@@ -319,7 +319,7 @@ pkg.findInTree = function(root, path, eq, cb) {
  * @param  {Integer} [b] blue color intensity
  * @param  {Float}   [a] alpha color intensity
  * @constructor
- * @class zebra.util.rgb
+ * @class zebkit.util.rgb
  */
 pkg.rgb = function (r, g, b, a) {
 
@@ -360,7 +360,7 @@ pkg.rgb = function (r, g, b, a) {
     this.isOpaque = true;
 
     if (arguments.length == 1) {
-        if (zebra.isString(r)) {
+        if (zebkit.isString(r)) {
             this.s = r;
             if (r[0] === '#') {
                 r = parseInt(r.substring(1), 16);
@@ -433,7 +433,7 @@ rgb.transparent = new rgb(0, 0, 0, 0.0);
  *      { x: {Integer}, y:{Integer}, width:{Integer}, height:{Integer} }
  *
  * @method intersection
- * @api zebra.util.intersection();
+ * @api zebkit.util.intersection();
  */
 pkg.intersection = function(x1,y1,w1,h1,x2,y2,w2,h2,r){
     r.x = x1 > x2 ? x1 : x2;
@@ -466,7 +466,7 @@ pkg.isLetter = function (ch) {
 
         // create listener container to keep three different events
         // handlers
-        var MyListenerContainerClass = zebra.util.ListenersClass("event1",
+        var MyListenerContainerClass = zebkit.util.ListenersClass("event1",
                                                                   "event2",
                                                                   "event3");
 
@@ -489,7 +489,7 @@ pkg.isLetter = function (ch) {
         // and firing event2 to registered handlers
         listeners.event2(...);
 
- * @class zebra.util.Listeners
+ * @class zebkit.util.Listeners
  * @constructor
  * @param {String} [events]* events types the container has to support
  */
@@ -576,7 +576,7 @@ var $NewListener = function() {
             }
 
             if (typeof l === 'function') {
-                if (n == null) n = zebra.$FN(l);
+                if (n == null) n = zebkit.$FN(l);
                 if (n !== '' && names.hasOwnProperty(n) === false) {
                     throw new Error("Unknown event type " + n);
                 }
@@ -676,11 +676,11 @@ pkg.ListenersClass = $NewListener;
  * Useful class to track a virtual cursor position in a structure that has
  * dedicated number of lines where every line has a number of elements. The
  * structure metric has to be described by providing an instance of
- * zebra.util.Position.Metric interface that discovers how many
+ * zebkit.util.Position.Metric interface that discovers how many
  * lines the structure has and how many elements every line includes.
- * @param {zebra.util.Position.Metric} m a position metric
+ * @param {zebkit.util.Position.Metric} m a position metric
  * @constructor
- * @class  zebra.util.Position
+ * @class  zebkit.util.Position
  */
 
 /**
@@ -691,7 +691,7 @@ pkg.ListenersClass = $NewListener;
         });
 
  * @event posChanged
- * @param {zebra.util.Position} src an object that triggers the event
+ * @param {zebkit.util.Position} src an object that triggers the event
  * @param {Integer} prevOffest a previous virtual cursor offset
  * @param {Integer} prevLine a previous virtual cursor line
  * @param {Integer} prevCol a previous virtual cursor column in the previous line
@@ -704,7 +704,7 @@ var  Position = pkg.Position = Class([
          * Position metric interface. This interface is designed for describing
          * a navigational structure that consists on number of lines where
          * every line consists of number of elements
-         * @class zebra.util.Position.Metric
+         * @class zebkit.util.Position.Metric
          */
 
         /**
@@ -992,7 +992,7 @@ var  Position = pkg.Position = Class([
         /**
          * Set position metric. Metric describes how many lines
          * and elements in these line the virtual cursor can be navigated
-         * @param {zebra.util.Position.Metric} p a position metric
+         * @param {zebkit.util.Position.Metric} p a position metric
          * @method setMetric
          */
         this.setMetric = function (p){
@@ -1095,9 +1095,9 @@ pkg.SingleColPosition = Class(pkg.Position, [
      * Task is keeps a context of and allows developers
      * to run, shutdown, pause a required method as a task
      * Developer cannot instantiate the class directly.
-     * Use "zebra.util.task(...)" method to do it:
+     * Use "zebkit.util.task(...)" method to do it:
 
-        var t = zebra.util.task(function(context) {
+        var t = zebkit.util.task(function(context) {
             // task body
             ...
         });
@@ -1109,7 +1109,7 @@ pkg.SingleColPosition = Class(pkg.Position, [
 
         t.shutdown(); // stop the task
 
-     * @class zebra.util.TaskCotext
+     * @class zebkit.util.TaskCotext
      */
     function Task() {
         this.ctx = this.task = null;
@@ -1195,7 +1195,7 @@ pkg.SingleColPosition = Class(pkg.Position, [
      * body and the given context.
 
         // allocate task
-        var task = zebra.util.task(function (ctx) {
+        var task = zebkit.util.task(function (ctx) {
             // do something
 
             // complete task if necessary
@@ -1216,9 +1216,9 @@ pkg.SingleColPosition = Class(pkg.Position, [
 
      * @param  {Function|Object} f a function that has to be executed
      * @param  {Object} [ctx]  a context the task has to be executed
-     * @return {zebra.util.Task} an allocated task
+     * @return {zebkit.util.Task} an allocated task
      * @method task
-     * @api zebra.util.task
+     * @api zebkit.util.task
      */
     pkg.task = function(f, ctx){
         if (typeof f != "function") {
@@ -1248,7 +1248,7 @@ pkg.SingleColPosition = Class(pkg.Position, [
      * Shut down all active at the given moment tasks
      * body and the given context.
      * @method shutdownAll
-     * @api zebra.util.shutdownAll
+     * @api zebkit.util.shutdownAll
      */
     pkg.shutdownAll = function() {
         for(var i=0; i < tasks.length; i++) {
@@ -1302,18 +1302,18 @@ pkg.SingleColPosition = Class(pkg.Position, [
         var loadedData = {};
 
         // create bag
-        var bag = zebra.util.Bag(loadedData);
+        var bag = zebkit.util.Bag(loadedData);
 
         // load the bag with two JSON
         bag.load("{ ... }", false).load("{  ...  }");
 
 
- * @class zebra.util.Bag
+ * @class zebkit.util.Bag
  * @constructor
  * @param {Object} [obj] a root object to be loaded with
  * the given JSON configuration
  */
-pkg.Bag = zebra.Class([
+pkg.Bag = zebkit.Class([
     function $prototype() {
         /**
          * The property says if the object introspection is required to try find a setter
@@ -1377,7 +1377,7 @@ pkg.Bag = zebra.Class([
         };
 
         this.$isAtomic = function(v) {
-            return zebra.isString(v) || zebra.isNumber(v) || zebra.isBoolean(v);
+            return zebkit.isString(v) || zebkit.isNumber(v) || zebkit.isBoolean(v);
         };
 
         this.callMethod = function(name, args) {
@@ -1402,7 +1402,7 @@ pkg.Bag = zebra.Class([
         };
 
         this.buildValue = function(d) {
-            if (d == null || zebra.isNumber(d) || zebra.isBoolean(d)) {
+            if (d == null || zebkit.isNumber(d) || zebkit.isBoolean(d)) {
                 return d;
             }
 
@@ -1411,20 +1411,20 @@ pkg.Bag = zebra.Class([
                 return d;
             }
 
-            if (zebra.isString(d)) {
+            if (zebkit.isString(d)) {
                 if (d[0] === '@') {
                     if (d[1] === "(" && d[d.length-1] === ")") {
                         // if the referenced path is not absolute path and the bag has been also
                         // loaded by an URL than build the full URL as a relative path from
                         // BAG URL
                         var path = d.substring(2, d.length-1).trim();
-                        if (this.$url != null && zebra.URL.isAbsolute(path) === false) {
-                            var pURL = new zebra.URL(this.$url).getParentURL();
+                        if (this.$url != null && zebkit.URL.isAbsolute(path) === false) {
+                            var pURL = new zebkit.URL(this.$url).getParentURL();
                             if (pURL != null) {
                                 path = pURL.join(path);
                             }
                         }
-                        return this.buildValue(JSON.parse(zebra.io.GET(path)));
+                        return this.buildValue(JSON.parse(zebkit.io.GET(path)));
                     }
                     return this.resolveVar(d.substring(1).trim());
                 }
@@ -1465,14 +1465,14 @@ pkg.Bag = zebra.Class([
                         return (function(clazz, args) {
                             return {
                                 $new : function() {
-                                    return zebra.newInstance(clazz, args);
+                                    return zebkit.newInstance(clazz, args);
                                 }
                             };
                         })(clz, args);
                     }
 
                     // apply properties to instantiated class
-                    var classInstance = zebra.newInstance(clz, args);
+                    var classInstance = zebkit.newInstance(clz, args);
                     this.populate(classInstance, d);
                     return classInstance;
                 }
@@ -1525,7 +1525,7 @@ pkg.Bag = zebra.Class([
                     }
 
                     if (this.usePropertySetters === true) {
-                        var m  = zebra.getPropertySetter(obj, k);
+                        var m  = zebkit.getPropertySetter(obj, k);
                         if (m != null) {
                             if (Array.isArray(v)) m.apply(obj, this.buildValue(v));
                             else                  m.call (obj, this.buildValue(v));
@@ -1578,7 +1578,7 @@ pkg.Bag = zebra.Class([
          */
         this.resolveClass = function (className) {
             return this.classAliases.hasOwnProperty(className) ? this.classAliases[className]
-                                                               : zebra.Class.forName(className);
+                                                               : zebkit.Class.forName(className);
         };
 
         this.addClassAliases = function (aliases) {
@@ -1622,7 +1622,7 @@ pkg.Bag = zebra.Class([
          * URL to JSON or JSON object
          * @param {Function} [cb] callback function if the JSOn content has to be loaded asynchronously
          * @chainable
-         * @return {zebra.util.Bag} a reference to the bag class instance
+         * @return {zebkit.util.Bag} a reference to the bag class instance
          * @method load
          */
         this.load = function(s, cb) {
@@ -1630,7 +1630,7 @@ pkg.Bag = zebra.Class([
                 $this  = this;
 
             runner.run(function() {
-                if (zebra.isString(s)) {
+                if (zebkit.isString(s)) {
                     s = s.trim();
 
                     // detect if the passed string is not a JSON
@@ -1643,11 +1643,11 @@ pkg.Bag = zebra.Class([
                         $this.$url = s.toString();
 
                         if (cb == null) {
-                            return zebra.io.GET(p);
+                            return zebkit.io.GET(p);
                         }
 
                         var join = this.join();
-                        zebra.io.GET(p, function(r) {
+                        zebkit.io.GET(p, function(r) {
                             if (r.status != 200) {
                                 runner.fireError(new Error("Invalid JSON path"));
                             }
@@ -1663,7 +1663,7 @@ pkg.Bag = zebra.Class([
             })
             . // parse JSON if necessary
             run(function(s) {
-                if (zebra.isString(s)) {
+                if (zebkit.isString(s)) {
                     try {
                         return JSON.parse(s);
                     }
@@ -1705,7 +1705,7 @@ pkg.Bag = zebra.Class([
             }
 
             if (typeof v === 'undefined' && this.globalPropertyLookup === true) {
-                v = this.$get(k, zebra.$global);
+                v = this.$get(k, zebkit.$global);
             }
 
             if (typeof v === 'undefined') {
@@ -1753,4 +1753,4 @@ pkg.Bag = zebra.Class([
  * @for
  */
 
-})(zebra("util"), zebra.Class, zebra.Interface);
+})(zebkit("util"), zebkit.Class, zebkit.Interface);

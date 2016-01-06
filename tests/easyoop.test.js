@@ -12,7 +12,118 @@ if (typeof(zebkit) === "undefined") {
     var assertException = zebkit.assertException, assert = zebkit.assert, assume = zebkit.assume,
         Class = zebkit.Class, Interface = zebkit.Interface, assertObjEqual = zebkit.assertObjEqual;
 
+    function test_a_map(Map, b) {
+        var m = new Map();
+
+        assert(m.size, 0);
+        assert(m.get("dsds"), undefined);
+        assert(m.has("dsds"), false);
+        assert(m.delete("dsds"), false);
+
+        var i = 0;
+        m.forEach(function(e, k, m) {
+            i++;
+        });
+        assert(i, 0);
+
+        assert(m.set("k1", 0), m, "test 1");
+        assert(m.size, 1, "test 2");
+        if (b == null) assert(m.keys.length, 1, "test 21");
+        if (b == null) assert(m.values.length, 1, "test 22");
+        assert(m.get("k1"), 0, "test 3");
+        assert(m.has("k1"), true, "test 4");
+        assert(m.delete("k1"), true, "test 5");
+        assert(m.size, 0, "test 6");
+        if (b == null) assert(m.keys.length, 0, "test 221");
+        if (b == null) assert(m.values.length, 0, "test 222");
+        assert(m.get("k1"), undefined, "test 7");
+        assert(m.has("k1"), false, "test 8");
+
+        var k1 = { a: 1 }, k2 = { a: 1 };
+
+        assert(m.set(k1, 1), m, "test 9");
+        assert(m.set(k2, 2), m, "test 10");
+        assert(m.size, 2, "test 11");
+        if (b == null) assert(m.keys.length, 2, "test 12");
+        if (b == null) assert(m.values.length, 2, "test 13");
+        assert(m.get(k1), 1, "test 14");
+        assert(m.get(k2), 2, "test 15");
+        assert(m.has(k1), true, "test 16");
+        assert(m.has(k2), true, "test 17");
+
+        var i = 0;
+        m.forEach(function(e, k, mm) {
+            assert(m, mm);
+
+            if (i == 0) {
+                assert(k, k1);
+                assert(e, 1);
+            }
+            if (i == 1) {
+                assert(k, k2);
+                assert(e, 2);
+            }
+            i++;
+        });
+        assert(i, 2, "test 18");
+
+        assert(m.delete(k1), true, "test 19");
+        assert(m.size, 1, "test 20");
+        if (b == null) assert(m.keys.length, 1, "test 21");
+        if (b == null) assert(m.values.length, 1, "test 22");
+        assert(m.get(k1), undefined, "test 23");
+        assert(m.get(k2), 2, "test 24");
+        assert(m.has(k1), false, "test 25");
+        assert(m.has(k2), true, "test 26");
+
+        m.clear();
+        assert(m.size, 0, "test 27");
+        if (b == null) assert(m.keys.length, 0, "test 28");
+        if (b == null) assert(m.values.length, 0, "test 29");
+        assert(m.get(k1), undefined, "test 30");
+        assert(m.get(k2), undefined, "test 31");
+        assert(m.has(k1), false, "test 32");
+        assert(m.has(k2), false, "test 33");
+        assert(m.delete(k1), false, "test 34");
+        assert(m.delete(k2), false, "test 35");
+        m.clear();
+
+        m.set(k1, 2);
+        assert(m.size, 1, "test 36");
+        if (b == null) assert(m.keys.length, 1, "test 37");
+        if (b == null) assert(m.values.length, 1, "test 38");
+        assert(m.get(k1), 2, "test 39");
+        assert(m.has(k1), true, "test 40");
+        m.set(k1, 12);
+        assert(m.size, 1, "test 41");
+        if (b == null) assert(m.keys.length, 1, "test 42");
+        if (b == null) assert(m.values.length, 1, "test 43");
+        assert(m.get(k1), 12, "test 44");
+        assert(m.has(k1), true, "test 45");
+
+
+        m.clear();
+        m.set(k1, 2);
+        m.set(k1, 2);
+        assert(m.size, 1, "test 46");
+        if (b == null) assert(m.keys.length, 1, "test 47");
+        if (b == null) assert(m.values.length, 1, "test 48");
+
+    }
+
     zebkit.runTests("Easy OOP",
+        function test_custom_map(b) {
+            test_a_map(zebkit.$MapImplementation());
+        },
+
+        function test_standard_map() {
+            if (typeof Map === "undefined") {
+                console.warn("Standard Map class is not provided by the environment");
+            }
+            else {
+                test_a_map(Map, true);
+            }
+        },
 
         function test_cache() {
             zebkit.$cacheSize = 3;
@@ -2608,6 +2719,23 @@ if (typeof(zebkit) === "undefined") {
 
             var f1 = function() {}, f2 = zebkit.clone(f1);
             assert(f1, f2);
+
+            console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+
+
+            // recursive references and the same references
+            var dr = { a: 10, b:"test", c: { a: 12 }  },
+                drr = { a: 15},
+                d1 = { a:dr, b: { a: dr, c: 12 }  },
+                d2 = zebkit.clone(d1);
+
+            console.log(d2);
+            console.log(d2.a === d2.b.a);
+
+            console.log("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+
+            //assert(d2.a.b, d2.b);
+
         }
     );
 })();

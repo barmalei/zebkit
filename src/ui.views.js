@@ -461,6 +461,8 @@ pkg.CompRender = Class(pkg.Render, [
 */
 pkg.Gradient = Class(pkg.View, [
     function $prototype() {
+        this.orientation = L.VERTICAL;
+
         this[''] =  function(){
             /**
              * Gradient orientation: vertical or horizontal
@@ -481,9 +483,6 @@ pkg.Gradient = Class(pkg.View, [
             if (arguments.length > 2) {
                 this.orientation = L.$constraints(arguments[arguments.length-1]);
                 this.colors.pop();
-            }
-            else {
-                this.orientation = L.VERTICAL;
             }
         };
 
@@ -939,9 +938,10 @@ pkg.ArrowView = Class(pkg.View, [
         this.gap  = 0;
         this.color  = "black";
         this.width = this.height = 6;
+        this.direction = L.BOTTOM;
 
         this[''] = function (d, col, w) {
-            this.direction = d == null ? L.BOTTOM : L.$constraints(d);
+            if (d   != null) this.direction = L.$constraints(d);
             if (col != null) this.color = col;
             if (w   != null) this.width = this.height = w;
         };
@@ -1814,6 +1814,8 @@ pkg.TabBorder = Class(pkg.View, [
  */
 pkg.TitledBorder = Class(pkg.Render, [
     function $prototype() {
+        this.lineAlignment = L.BOTTOM;
+
         this.getTop  = function (){
             return this.target.getTop();
         };
@@ -1905,7 +1907,6 @@ pkg.TitledBorder = Class(pkg.Render, [
                                 case L.TOP    : y = r.y - top; break;
                                 case L.BOTTOM : y = r.y + r.height; break;
                             }
-
 
                             // skip rendering border if the border is not in clip rectangle
                             // This is workaround because of IE10/IE11 have bug what causes
@@ -2020,6 +2021,8 @@ pkg.TitledBorder = Class(pkg.Render, [
                             g.lineTo(x, yy);
                             g.lineTo(x, y);
                             break;
+                        // throw error to avoid wrongly called restore method below
+                        default: throw new Error("Invalid title orientation " + r.orient);
                     }
 
                     g.closePath();
@@ -2034,7 +2037,9 @@ pkg.TitledBorder = Class(pkg.Render, [
         };
 
         this[''] = function (b, a){
-            this.lineAlignment = (a == null ? L.BOTTOM : L.$constraints(a));
+            if (a != null) {
+                this.lineAlignment = L.$constraints(a);
+            }
 
             if (b == null && this.lineAlignment != L.BOTTOM &&
                              this.lineAlignment != L.TOP &&
@@ -2049,8 +2054,10 @@ pkg.TitledBorder = Class(pkg.Render, [
 
 pkg.CheckboxView = Class(pkg.View, [
     function $prototype() {
+        this.color = "rgb(65, 131, 255)";
+
         this[''] = function(color) {
-            this.color = (color != null ? color : "rgb(65, 131, 255)");
+            if (color != null) this.color = color;
         };
 
         this.paint = function(g,x,y,w,h,d){
@@ -2071,9 +2078,12 @@ pkg.CheckboxView = Class(pkg.View, [
 
 pkg.BunldeView = Class(pkg.View, [
     function $prototype() {
+        this.color = "#AAAAAA";
+        this.direction = L.VERTICAL;
+
         this[''] = function(dir, color) {
-            this.color     = (color != null ? color : "#AAAAAA");
-            this.direction = (dir   != null ? L.$constraints(dir) : L.VERTICAL);
+            if (color != null) this.color = color;
+            if (dir != null) this.direction = L.$constraints(dir);
         };
 
         this.paint =  function(g,x,y,w,h,d) {
@@ -2108,11 +2118,14 @@ pkg.BunldeView = Class(pkg.View, [
  */
 pkg.RadioView = Class(pkg.View, [
     function(col1, col2) {
-        this.color1 = col1 == null ? "rgb(15, 81, 205)" : col1;
-        this.color2 = col2 == null ? "rgb(65, 131, 255)" : col2;
+        if (col1 != null) this.color1 = col1;
+        if (col2 != null) this.color2 = col2;
     },
 
     function $prototype() {
+        this.color1 = "rgb(15, 81, 205)";
+        this.color2 = "rgb(65, 131, 255)";
+
         this.paint = function(g,x,y,w,h,d){
             g.beginPath();
 
@@ -2180,9 +2193,11 @@ pkg.ToggleView = Class(pkg.View, [
 
 pkg.CaptionBgView = Class(pkg.View, [
     function $prototype() {
+        this.gap = this.radius = 6;
+        this.bg  = "#66CCFF";
+
         this[''] = function(bg) {
-            this.gap = this.radius = 6;
-            this.bg  = bg != null ? bg : "#66CCFF";
+            if (bg != null) this.bg = bg;
         };
 
         this.paint = function(g,x,y,w,h,d) {

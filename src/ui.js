@@ -1131,7 +1131,7 @@ pkg.BorderPan = Class(pkg.Panel, [
         this.label = this.content = null;
 
         this.$super();
-        if (title  != null) this.add(L.$constraints(ctr), title);
+        if (title  != null) this.add(ctr, title);
         if (center != null) this.add(L.CENTER, center);
     },
 
@@ -1146,14 +1146,22 @@ pkg.BorderPan = Class(pkg.Panel, [
     function kidAdded(index,ctr,lw) {
         this.$super(index, ctr, lw);
         ctr = L.$constraints(ctr);
-        if ((ctr == null && this.content == null) || L.CENTER === ctr) this.content = lw;
-        else this.label = lw;
+        if ((ctr == null && this.content == null) || L.CENTER === ctr) {
+            this.content = lw;
+        }
+        else if (this.label == null) {
+            this.label = lw;
+        }
     },
 
     function kidRemoved(index,lw){
         this.$super(index, lw);
-        if (lw === this.label) this.label = null;
-        else this.content = null;
+        if (lw === this.label) {
+            this.label = null;
+        }
+        else if (this.content === lw) {
+            this.content = null;
+        }
     }
 ]);
 
@@ -2833,7 +2841,16 @@ pkg.ScrollPan = Class(pkg.Panel, [
                 };
 
                 this.doLayout = function(t) {
-                    t.kids[0].toPreferredSize();
+                    var kid = t.kids[0];
+                    if (kid.constraints === L.STRETCH) {
+                        var ps = kid.getPreferredSize(),
+                            w  = t.parent.hBar != null ? ps.width : t.width,
+                            h  = t.parent.vBar != null ? ps.height : t.height;
+                        kid.setSize(w, h);
+                    }
+                    else {
+                        kid.toPreferredSize();
+                    }
                 };
             }
         ]);
@@ -4977,9 +4994,9 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
                 (e.direction === "bottom" || e.direction === "top") &&
                 this.target.vBar != null &&
                 this.target.vBar.isVisible === true &&
-                e.touch.dy !== 0)  // TODO: what is it ?
+                e.dy !== 0)
             {
-                this.$dt = 2 * e.touch.dy;   // TODO: what is it ?
+                this.$dt = 2 * e.dy;
                 var $this = this, bar = this.target.vBar, k = 0;
 
                 this.timer = setInterval(function() {

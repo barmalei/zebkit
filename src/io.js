@@ -3,7 +3,7 @@
  * with remote services and servers by HTTP, JSON-RPC, XML-RPC
  * protocols
  * @module io
- * @requires zebkit, util
+ * @requires zebkit
  */
 
 (function(pkg, Class) {

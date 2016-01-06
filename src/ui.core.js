@@ -1057,9 +1057,8 @@ pkg.Panel = Class(L.Layoutable, [
                 if (canvas.$paintTask === null && (canvas.isValid === false || canvas.$da.width > 0 || canvas.isLayoutValid === false)) {
                     var $this = this;
                     canvas.$paintTask = zebkit.web.$task(function() {
+                        var g = null;
                         try {
-                            var g = null;
-
                             // do validation before timer will be set to null to avoid
                             // unnecessary timer initiating what can be caused by validation
                             // procedure by calling repaint method
@@ -1078,7 +1077,6 @@ pkg.Panel = Class(L.Layoutable, [
                                 if (canvas.bg == null || canvas.bg.isOpaque !== true) {
                                     g.clearRect(canvas.$da.x, canvas.$da.y,
                                                 canvas.$da.width, canvas.$da.height);
-
                                 }
                                 // !!!
                                 // call clipping area later than possible
@@ -1928,6 +1926,13 @@ pkg.HtmlElement = Class(pkg.Panel, [
          */
         this.setAttribute = function(name, value) {
             this.element.setAttribute(name, value);
+            return this;
+        };
+
+        this.setAttributes = function(attrs) {
+            for(var name in attrs) {
+                this.element.setAttribute(name, attrs[name]);
+            }
             return this;
         };
 

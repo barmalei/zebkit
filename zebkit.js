@@ -23,43 +23,6 @@ function isBoolean(o) {
           (typeof o === "boolean" || o.constructor === Boolean);
 }
 
-if (!String.prototype.trim) {
-    String.prototype.trim = function() {
-        return this.replace(/^\s+|\s+$/g,'');
-    };
-}
-
-if (!Array.prototype.indexOf) {
-    Array.prototype.indexOf = function(searchElement) {
-        if (this == null) {
-            throw new TypeError();
-        }
-
-        var t = Object(this), len = t.length >>> 0;
-        if (len === 0) return -1;
-
-        var n = 0;
-        if (arguments.length > 0) {
-            n = Number(arguments[1]);
-            if (n != n) n = 0;
-            else if (n !== 0 && n != Infinity && n != -Infinity) {
-                n = (n > 0 || -1) * ~~Math.abs(n);
-            }
-        }
-        if (n >= len) return -1;
-        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
-        for (; k < len; k++) {
-            if (k in t && t[k] === searchElement) return k;
-        }
-        return -1;
-    };
-}
-
-if (!Array.isArray) {
-    Array.isArray = function(a) {
-        return Object.prototype.toString.call(a) == '[object Array]';
-    };
-}
 
 /**
  *  Create a new or return existent name space by the given name. The names space
@@ -195,13 +158,21 @@ var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
     return f;
 };
 
-var pkg = zebkit = zebkit = namespace('zebkit'),
+var pkg = zebra = zebkit = namespace('zebkit'),
     CNAME = pkg.CNAME = '$', CDNAME = '',
     FN = pkg.$FN = (isString.name !== "isString") ? (function(f) {     // IE stuff
-                                                                var mt = f.toString().match(/^function\s+([^\s(]+)/);
-                                                                return (mt == null) ? CDNAME : mt[1];
-                                                             })
-                                                           : (function(f) { return f.name; });
+                                                        var mt = f.toString().match(/^function\s+([^\s(]+)/);
+                                                        return (mt == null) ? CDNAME : mt[1];
+                                                    })
+                                                  : (function(f) { return f.name; });
+
+pkg.isInBrowser = typeof navigator !== "undefined";
+pkg.isIE        = pkg.isInBrowser && (Object.hasOwnProperty.call(window, "ActiveXObject") || !!window.ActiveXObject);
+pkg.isFF        = pkg.isInBrowser && window.mozInnerScreenX != null;
+pkg.isTouchable = pkg.isInBrowser && ( (pkg.isIE === false && (!!('ontouchstart' in window ) || !!('onmsgesturechange' in window))) ||
+                                       (!!window.navigator['msPointerEnabled'] && !!window.navigator["msMaxTouchPoints"] > 0)); // IE10
+
+pkg.isMacOS = pkg.isInBrowser && navigator.platform.toUpperCase().indexOf('MAC') !== -1;
 
 pkg.namespaces = namespaces;
 pkg.namespace  = namespace;
@@ -211,23 +182,98 @@ pkg.isNumber   = isNumber;
 pkg.isBoolean  = isBoolean;
 pkg.$caller    = null; // currently called method reference
 
+pkg.$MapImplementation = function() {
+    var Map = function() {
+        this.keys   = [];
+        this.values = [];
+        this.size   = 0 ;
+    };
 
-pkg.clone = function (obj) {
+    Map.prototype = {
+        set : function(key, value) {
+            var i = this.keys.indexOf(key);
+            if (i < 0) {
+                this.keys.push(key);
+                this.values.push(value);
+                this.size++;
+            }
+            else {
+               this.values[i] = value;
+            }
+            return this;
+         },
+
+        delete: function(key) {
+            var i = this.keys.indexOf(key);
+            if (i < 0) {
+               return false;
+            }
+
+            this.keys.splice(i, 1);
+            this.values.splice(i, 1);
+            this.size--;
+            return true;
+        },
+
+        get : function(key) {
+            var i = this.keys.indexOf(key);
+            return i < 0 ? undefined : this.values[i];
+        },
+
+        clear : function() {
+            this.keys = [];
+            this.keys.length = 0;
+            this.values = [];
+            this.values.length = 0;
+            this.size = 0;
+        },
+
+        has : function(key) {
+            return this.keys.indexOf(key) >= 0;
+        },
+
+        forEach: function(callback, context) {
+            var $this = context == null ? this : context;
+            for(var i = 0 ; i < this.size; i++) {
+                callback.call($this, this.values[i], this.keys[i], this);
+            }
+        }
+    };
+
+    return Map;
+};
+
+// Map is class
+if (typeof pkg.$global.Map === "undefined") {
+    pkg.$global.Map = pkg.$MapImplementation();
+}
+
+pkg.clone = function (obj, map) {
     // clone atomic type
     if (obj == null || zebkit.isString(obj) || zebkit.isBoolean(obj) || zebkit.isNumber(obj)) {
         return obj;
     }
 
+    map = map || new Map();
+    var t = map.get(obj);
+    if (typeof t !== "undefined") {
+        return t;
+    }
+
     // clone with provided custom "clone" method
     if (typeof obj.$clone !== "undefined") {
-        return obj.$clone();
+        return obj.$clone(map);
     }
 
     // clone array
     if (Array.isArray(obj)) {
         var nobj = [];
+
+        map.set(obj, nobj);
+        map[obj] = nobj;
+
         for(var i = 0; i < obj.length; i++) {
-            nobj[i] = pkg.clone(obj[i]);
+            nobj[i] = pkg.clone(obj[i], map);
         }
         return nobj;
     }
@@ -238,10 +284,12 @@ pkg.clone = function (obj) {
     }
 
     var nobj = {};
+    map.set(obj, nobj);
+
     // clone object fields
     for(var k in obj) {
         if (obj.hasOwnProperty(k) === true) {
-            nobj[k] = pkg.clone(obj[k]);
+            nobj[k] = pkg.clone(obj[k], map);
         }
     }
 
@@ -709,13 +757,28 @@ pkg.Class = make_template(null, function() {
         throw new Error("$super is called outside of class context");
     };
 
-    $template.prototype.$clone = function() {
+    $template.prototype.$clone = function(map) {
+        map = map || new Map();
+
         var f = function() {};
         f.prototype = this.constructor.prototype;
         var nobj = new f();
+        map.set(this, nobj);
+
         for(var k in this) {
-            if (this.hasOwnProperty(k)) nobj[k] = zebkit.clone(this[k]);
+            if (this.hasOwnProperty(k)) {
+                // obj's layout is obj itself
+                var t = map.get(this[k]);
+                if (t !== undefined) {
+                    nobj[k] = t;
+                } else {
+                    nobj[k] = zebra.clone(this[k], map);
+                }
+            }
         }
+
+        // speed up clearing resources
+        map.clear();
 
         nobj.constructor = this.constructor;
         nobj.$hash$ = "$zObj_" + ($$$++);
@@ -1075,13 +1138,6 @@ pkg.busy = function() { $busy++; };
  */
 pkg.Dummy = Class([]);
 
-pkg.isInBrowser = typeof navigator !== "undefined";
-pkg.isIE        = pkg.isInBrowser && (Object.hasOwnProperty.call(window, "ActiveXObject") || !!window.ActiveXObject);
-pkg.isFF        = pkg.isInBrowser && window.mozInnerScreenX != null;
-pkg.isTouchable = pkg.isInBrowser && ( (pkg.isIE === false && (!!('ontouchstart' in window ) || !!('onmsgesturechange' in window))) ||
-                                       (!!window.navigator['msPointerEnabled'] && !!window.navigator["msMaxTouchPoints"] > 0)); // IE10
-
-pkg.isMacOS = pkg.isInBrowser && navigator.platform.toUpperCase().indexOf('MAC') !== -1;
 
 // TODO:
 //!!! this code resolve names of classes  defined in a package
@@ -2391,21 +2447,27 @@ pkg.RasterLayout = Class(L, [
 
                     if (ctr != null) {
                         var x = el.x, y = el.y;
-                        if (ctr === pkg.CENTER) {
-                            x = Math.floor((c.width  - ww)/2);
-                            y = Math.floor((c.height - hh)/2);
-                        }
-                        else {
-                            if ((ctr & pkg.TOP) > 0)  y = 0;
-                            else {
-                                if ((ctr & pkg.BOTTOM) > 0)  y = c.height - hh;
-                            }
 
-                            if ((ctr & pkg.LEFT) > 0)   x = 0;
-                            else {
-                                if ((ctr & pkg.RIGHT) > 0)  x = c.width - ww;
-                            }
+                        if ((ctr & pkg.TOP) > 0) {
+                            y = 0;
                         }
+                        else if ((ctr & pkg.BOTTOM) > 0) {
+                            y = c.height - hh;
+                        }
+                        else if ((ctr & pkg.CENTER) > 0) {
+                            y = Math.floor((c.height - hh) / 2);
+                        }
+
+                        if ((ctr & pkg.LEFT) > 0) {
+                            x = 0;
+                        }
+                        else if ((ctr & pkg.RIGHT) > 0) {
+                            x = c.width - ww;
+                        }
+                        else if ((ctr & pkg.CENTER) > 0) {
+                            x = Math.floor((c.width  - ww) / 2);
+                        }
+
                         el.setLocation(x, y);
                     }
                 }
@@ -2573,22 +2635,36 @@ pkg.FlowLayout = Class(L, [
 
             for(var i = 0;i < c.kids.length; i++){
                 var a = c.kids[i];
-                if (a.isVisible === true){
+                if (a.isVisible === true) {
 
                     var d = a.getPreferredSize(),
                         ctr = a.constraints == null ? null : pkg.$constraints(a.constraints);
 
-                    if (this.direction === pkg.HORIZONTAL){
+                    if (this.direction === pkg.HORIZONTAL) {
+                        ctr = ctr || this.ay;
+
                         if (ctr === pkg.STRETCH) {
                             d.height = c.height - t - c.getBottom();
                         }
 
-                        a.setLocation(px, Math.floor((psSize.height - d.height) / 2) + py);
+                        a.setLocation(px, ctr === pkg.STRETCH    ? t :
+                                             (ctr === pkg.TOP    ? py :
+                                             (ctr === pkg.BOTTOM ? Math.floor(psSize.height - d.height) + py :
+                                                                   Math.floor((psSize.height - d.height) / 2) + py)));
                         px += (d.width + this.gap);
                     }
                     else {
-                        if (ctr === pkg.STRETCH) d.width = c.width - l - c.getRight();
-                        a.setLocation(px + Math.floor((psSize.width - d.width) / 2), py);
+                        ctr = ctr || this.ax;
+
+                        if (ctr === pkg.STRETCH) {
+                            d.width = c.width - l - c.getRight();
+                        }
+
+                        a.setLocation(ctr === pkg.STRETCH  ? l  :
+                                        (ctr === pkg.LEFT  ? px :
+                                        (ctr === pkg.RIGHT ? px + Math.floor(psSize.width - d.width) :
+                                                             px + Math.floor((psSize.width - d.width) / 2))), py);
+
                         py += d.height + this.gap;
                     }
 
@@ -4924,7 +5000,7 @@ pkg.Bag = zebkit.Class([
  * with remote services and servers by HTTP, JSON-RPC, XML-RPC
  * protocols
  * @module io
- * @requires zebkit, util
+ * @requires zebkit
  */
 
 (function(pkg, Class) {
@@ -7506,7 +7582,6 @@ pkg.Matrix = Class([
 
         return ctx;
     };
-
 })(zebkit("web"), zebkit.Class);
 (function(pkg, Class) {
     pkg.$canvases = [];
@@ -8647,7 +8722,7 @@ pkg.Matrix = Class([
                         if (t != null && (t.pageX != Math.floor(nmt.pageX) ||
                                           t.pageY != Math.floor(nmt.pageY))  )
                         {
-                            $this.$DRAG(t.identifier, t, TOUCH_STUB);
+                            $this.$DRAG(nmt.identifier, nmt, TOUCH_STUB);
                         }
                     }
 
@@ -9892,9 +9967,8 @@ pkg.Panel = Class(L.Layoutable, [
                 if (canvas.$paintTask === null && (canvas.isValid === false || canvas.$da.width > 0 || canvas.isLayoutValid === false)) {
                     var $this = this;
                     canvas.$paintTask = zebkit.web.$task(function() {
+                        var g = null;
                         try {
-                            var g = null;
-
                             // do validation before timer will be set to null to avoid
                             // unnecessary timer initiating what can be caused by validation
                             // procedure by calling repaint method
@@ -9913,7 +9987,6 @@ pkg.Panel = Class(L.Layoutable, [
                                 if (canvas.bg == null || canvas.bg.isOpaque !== true) {
                                     g.clearRect(canvas.$da.x, canvas.$da.y,
                                                 canvas.$da.width, canvas.$da.height);
-
                                 }
                                 // !!!
                                 // call clipping area later than possible
@@ -10763,6 +10836,13 @@ pkg.HtmlElement = Class(pkg.Panel, [
          */
         this.setAttribute = function(name, value) {
             this.element.setAttribute(name, value);
+            return this;
+        };
+
+        this.setAttributes = function(attrs) {
+            for(var name in attrs) {
+                this.element.setAttribute(name, attrs[name]);
+            }
             return this;
         };
 
@@ -13350,6 +13430,8 @@ pkg.CompRender = Class(pkg.Render, [
 */
 pkg.Gradient = Class(pkg.View, [
     function $prototype() {
+        this.orientation = L.VERTICAL;
+
         this[''] =  function(){
             /**
              * Gradient orientation: vertical or horizontal
@@ -13370,9 +13452,6 @@ pkg.Gradient = Class(pkg.View, [
             if (arguments.length > 2) {
                 this.orientation = L.$constraints(arguments[arguments.length-1]);
                 this.colors.pop();
-            }
-            else {
-                this.orientation = L.VERTICAL;
             }
         };
 
@@ -13828,9 +13907,10 @@ pkg.ArrowView = Class(pkg.View, [
         this.gap  = 0;
         this.color  = "black";
         this.width = this.height = 6;
+        this.direction = L.BOTTOM;
 
         this[''] = function (d, col, w) {
-            this.direction = d == null ? L.BOTTOM : L.$constraints(d);
+            if (d   != null) this.direction = L.$constraints(d);
             if (col != null) this.color = col;
             if (w   != null) this.width = this.height = w;
         };
@@ -14703,6 +14783,8 @@ pkg.TabBorder = Class(pkg.View, [
  */
 pkg.TitledBorder = Class(pkg.Render, [
     function $prototype() {
+        this.lineAlignment = L.BOTTOM;
+
         this.getTop  = function (){
             return this.target.getTop();
         };
@@ -14794,7 +14876,6 @@ pkg.TitledBorder = Class(pkg.Render, [
                                 case L.TOP    : y = r.y - top; break;
                                 case L.BOTTOM : y = r.y + r.height; break;
                             }
-
 
                             // skip rendering border if the border is not in clip rectangle
                             // This is workaround because of IE10/IE11 have bug what causes
@@ -14909,6 +14990,8 @@ pkg.TitledBorder = Class(pkg.Render, [
                             g.lineTo(x, yy);
                             g.lineTo(x, y);
                             break;
+                        // throw error to avoid wrongly called restore method below
+                        default: throw new Error("Invalid title orientation " + r.orient);
                     }
 
                     g.closePath();
@@ -14923,7 +15006,9 @@ pkg.TitledBorder = Class(pkg.Render, [
         };
 
         this[''] = function (b, a){
-            this.lineAlignment = (a == null ? L.BOTTOM : L.$constraints(a));
+            if (a != null) {
+                this.lineAlignment = L.$constraints(a);
+            }
 
             if (b == null && this.lineAlignment != L.BOTTOM &&
                              this.lineAlignment != L.TOP &&
@@ -14938,8 +15023,10 @@ pkg.TitledBorder = Class(pkg.Render, [
 
 pkg.CheckboxView = Class(pkg.View, [
     function $prototype() {
+        this.color = "rgb(65, 131, 255)";
+
         this[''] = function(color) {
-            this.color = (color != null ? color : "rgb(65, 131, 255)");
+            if (color != null) this.color = color;
         };
 
         this.paint = function(g,x,y,w,h,d){
@@ -14960,9 +15047,12 @@ pkg.CheckboxView = Class(pkg.View, [
 
 pkg.BunldeView = Class(pkg.View, [
     function $prototype() {
+        this.color = "#AAAAAA";
+        this.direction = L.VERTICAL;
+
         this[''] = function(dir, color) {
-            this.color     = (color != null ? color : "#AAAAAA");
-            this.direction = (dir   != null ? L.$constraints(dir) : L.VERTICAL);
+            if (color != null) this.color = color;
+            if (dir != null) this.direction = L.$constraints(dir);
         };
 
         this.paint =  function(g,x,y,w,h,d) {
@@ -14997,11 +15087,14 @@ pkg.BunldeView = Class(pkg.View, [
  */
 pkg.RadioView = Class(pkg.View, [
     function(col1, col2) {
-        this.color1 = col1 == null ? "rgb(15, 81, 205)" : col1;
-        this.color2 = col2 == null ? "rgb(65, 131, 255)" : col2;
+        if (col1 != null) this.color1 = col1;
+        if (col2 != null) this.color2 = col2;
     },
 
     function $prototype() {
+        this.color1 = "rgb(15, 81, 205)";
+        this.color2 = "rgb(65, 131, 255)";
+
         this.paint = function(g,x,y,w,h,d){
             g.beginPath();
 
@@ -15069,9 +15162,11 @@ pkg.ToggleView = Class(pkg.View, [
 
 pkg.CaptionBgView = Class(pkg.View, [
     function $prototype() {
+        this.gap = this.radius = 6;
+        this.bg  = "#66CCFF";
+
         this[''] = function(bg) {
-            this.gap = this.radius = 6;
-            this.bg  = bg != null ? bg : "#66CCFF";
+            if (bg != null) this.bg = bg;
         };
 
         this.paint = function(g,x,y,w,h,d) {
@@ -16233,7 +16328,7 @@ pkg.BorderPan = Class(pkg.Panel, [
         this.label = this.content = null;
 
         this.$super();
-        if (title  != null) this.add(L.$constraints(ctr), title);
+        if (title  != null) this.add(ctr, title);
         if (center != null) this.add(L.CENTER, center);
     },
 
@@ -16248,14 +16343,22 @@ pkg.BorderPan = Class(pkg.Panel, [
     function kidAdded(index,ctr,lw) {
         this.$super(index, ctr, lw);
         ctr = L.$constraints(ctr);
-        if ((ctr == null && this.content == null) || L.CENTER === ctr) this.content = lw;
-        else this.label = lw;
+        if ((ctr == null && this.content == null) || L.CENTER === ctr) {
+            this.content = lw;
+        }
+        else if (this.label == null) {
+            this.label = lw;
+        }
     },
 
     function kidRemoved(index,lw){
         this.$super(index, lw);
-        if (lw === this.label) this.label = null;
-        else this.content = null;
+        if (lw === this.label) {
+            this.label = null;
+        }
+        else if (this.content === lw) {
+            this.content = null;
+        }
     }
 ]);
 
@@ -17935,7 +18038,16 @@ pkg.ScrollPan = Class(pkg.Panel, [
                 };
 
                 this.doLayout = function(t) {
-                    t.kids[0].toPreferredSize();
+                    var kid = t.kids[0];
+                    if (kid.constraints === L.STRETCH) {
+                        var ps = kid.getPreferredSize(),
+                            w  = t.parent.hBar != null ? ps.width : t.width,
+                            h  = t.parent.vBar != null ? ps.height : t.height;
+                        kid.setSize(w, h);
+                    }
+                    else {
+                        kid.toPreferredSize();
+                    }
                 };
             }
         ]);
@@ -20079,9 +20191,9 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
                 (e.direction === "bottom" || e.direction === "top") &&
                 this.target.vBar != null &&
                 this.target.vBar.isVisible === true &&
-                e.touch.dy !== 0)  // TODO: what is it ?
+                e.dy !== 0)
             {
-                this.$dt = 2 * e.touch.dy;   // TODO: what is it ?
+                this.$dt = 2 * e.dy;
                 var $this = this, bar = this.target.vBar, k = 0;
 
                 this.timer = setInterval(function() {

@@ -915,7 +915,7 @@
                         if (t != null && (t.pageX != Math.floor(nmt.pageX) ||
                                           t.pageY != Math.floor(nmt.pageY))  )
                         {
-                            $this.$DRAG(t.identifier, t, TOUCH_STUB);
+                            $this.$DRAG(nmt.identifier, nmt, TOUCH_STUB);
                         }
                     }
 

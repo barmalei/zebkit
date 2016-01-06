@@ -23,43 +23,6 @@ function isBoolean(o) {
           (typeof o === "boolean" || o.constructor === Boolean);
 }
 
-if (!String.prototype.trim) {
-    String.prototype.trim = function() {
-        return this.replace(/^\s+|\s+$/g,'');
-    };
-}
-
-if (!Array.prototype.indexOf) {
-    Array.prototype.indexOf = function(searchElement) {
-        if (this == null) {
-            throw new TypeError();
-        }
-
-        var t = Object(this), len = t.length >>> 0;
-        if (len === 0) return -1;
-
-        var n = 0;
-        if (arguments.length > 0) {
-            n = Number(arguments[1]);
-            if (n != n) n = 0;
-            else if (n !== 0 && n != Infinity && n != -Infinity) {
-                n = (n > 0 || -1) * ~~Math.abs(n);
-            }
-        }
-        if (n >= len) return -1;
-        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
-        for (; k < len; k++) {
-            if (k in t && t[k] === searchElement) return k;
-        }
-        return -1;
-    };
-}
-
-if (!Array.isArray) {
-    Array.isArray = function(a) {
-        return Object.prototype.toString.call(a) == '[object Array]';
-    };
-}
 
 /**
  *  Create a new or return existent name space by the given name. The names space
@@ -195,13 +158,21 @@ var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
     return f;
 };
 
-var pkg = zebkit = zebkit = namespace('zebkit'),
+var pkg = zebra = zebkit = namespace('zebkit'),
     CNAME = pkg.CNAME = '$', CDNAME = '',
     FN = pkg.$FN = (isString.name !== "isString") ? (function(f) {     // IE stuff
-                                                                var mt = f.toString().match(/^function\s+([^\s(]+)/);
-                                                                return (mt == null) ? CDNAME : mt[1];
-                                                             })
-                                                           : (function(f) { return f.name; });
+                                                        var mt = f.toString().match(/^function\s+([^\s(]+)/);
+                                                        return (mt == null) ? CDNAME : mt[1];
+                                                    })
+                                                  : (function(f) { return f.name; });
+
+pkg.isInBrowser = typeof navigator !== "undefined";
+pkg.isIE        = pkg.isInBrowser && (Object.hasOwnProperty.call(window, "ActiveXObject") || !!window.ActiveXObject);
+pkg.isFF        = pkg.isInBrowser && window.mozInnerScreenX != null;
+pkg.isTouchable = pkg.isInBrowser && ( (pkg.isIE === false && (!!('ontouchstart' in window ) || !!('onmsgesturechange' in window))) ||
+                                       (!!window.navigator['msPointerEnabled'] && !!window.navigator["msMaxTouchPoints"] > 0)); // IE10
+
+pkg.isMacOS = pkg.isInBrowser && navigator.platform.toUpperCase().indexOf('MAC') !== -1;
 
 pkg.namespaces = namespaces;
 pkg.namespace  = namespace;
@@ -211,23 +182,98 @@ pkg.isNumber   = isNumber;
 pkg.isBoolean  = isBoolean;
 pkg.$caller    = null; // currently called method reference
 
+pkg.$MapImplementation = function() {
+    var Map = function() {
+        this.keys   = [];
+        this.values = [];
+        this.size   = 0 ;
+    };
 
-pkg.clone = function (obj) {
+    Map.prototype = {
+        set : function(key, value) {
+            var i = this.keys.indexOf(key);
+            if (i < 0) {
+                this.keys.push(key);
+                this.values.push(value);
+                this.size++;
+            }
+            else {
+               this.values[i] = value;
+            }
+            return this;
+         },
+
+        delete: function(key) {
+            var i = this.keys.indexOf(key);
+            if (i < 0) {
+               return false;
+            }
+
+            this.keys.splice(i, 1);
+            this.values.splice(i, 1);
+            this.size--;
+            return true;
+        },
+
+        get : function(key) {
+            var i = this.keys.indexOf(key);
+            return i < 0 ? undefined : this.values[i];
+        },
+
+        clear : function() {
+            this.keys = [];
+            this.keys.length = 0;
+            this.values = [];
+            this.values.length = 0;
+            this.size = 0;
+        },
+
+        has : function(key) {
+            return this.keys.indexOf(key) >= 0;
+        },
+
+        forEach: function(callback, context) {
+            var $this = context == null ? this : context;
+            for(var i = 0 ; i < this.size; i++) {
+                callback.call($this, this.values[i], this.keys[i], this);
+            }
+        }
+    };
+
+    return Map;
+};
+
+// Map is class
+if (typeof pkg.$global.Map === "undefined") {
+    pkg.$global.Map = pkg.$MapImplementation();
+}
+
+pkg.clone = function (obj, map) {
     // clone atomic type
     if (obj == null || zebkit.isString(obj) || zebkit.isBoolean(obj) || zebkit.isNumber(obj)) {
         return obj;
     }
 
+    map = map || new Map();
+    var t = map.get(obj);
+    if (typeof t !== "undefined") {
+        return t;
+    }
+
     // clone with provided custom "clone" method
     if (typeof obj.$clone !== "undefined") {
-        return obj.$clone();
+        return obj.$clone(map);
     }
 
     // clone array
     if (Array.isArray(obj)) {
         var nobj = [];
+
+        map.set(obj, nobj);
+        map[obj] = nobj;
+
         for(var i = 0; i < obj.length; i++) {
-            nobj[i] = pkg.clone(obj[i]);
+            nobj[i] = pkg.clone(obj[i], map);
         }
         return nobj;
     }
@@ -238,10 +284,12 @@ pkg.clone = function (obj) {
     }
 
     var nobj = {};
+    map.set(obj, nobj);
+
     // clone object fields
     for(var k in obj) {
         if (obj.hasOwnProperty(k) === true) {
-            nobj[k] = pkg.clone(obj[k]);
+            nobj[k] = pkg.clone(obj[k], map);
         }
     }
 
@@ -709,13 +757,28 @@ pkg.Class = make_template(null, function() {
         throw new Error("$super is called outside of class context");
     };
 
-    $template.prototype.$clone = function() {
+    $template.prototype.$clone = function(map) {
+        map = map || new Map();
+
         var f = function() {};
         f.prototype = this.constructor.prototype;
         var nobj = new f();
+        map.set(this, nobj);
+
         for(var k in this) {
-            if (this.hasOwnProperty(k)) nobj[k] = zebkit.clone(this[k]);
+            if (this.hasOwnProperty(k)) {
+                // obj's layout is obj itself
+                var t = map.get(this[k]);
+                if (t !== undefined) {
+                    nobj[k] = t;
+                } else {
+                    nobj[k] = zebra.clone(this[k], map);
+                }
+            }
         }
+
+        // speed up clearing resources
+        map.clear();
 
         nobj.constructor = this.constructor;
         nobj.$hash$ = "$zObj_" + ($$$++);
@@ -1075,13 +1138,6 @@ pkg.busy = function() { $busy++; };
  */
 pkg.Dummy = Class([]);
 
-pkg.isInBrowser = typeof navigator !== "undefined";
-pkg.isIE        = pkg.isInBrowser && (Object.hasOwnProperty.call(window, "ActiveXObject") || !!window.ActiveXObject);
-pkg.isFF        = pkg.isInBrowser && window.mozInnerScreenX != null;
-pkg.isTouchable = pkg.isInBrowser && ( (pkg.isIE === false && (!!('ontouchstart' in window ) || !!('onmsgesturechange' in window))) ||
-                                       (!!window.navigator['msPointerEnabled'] && !!window.navigator["msMaxTouchPoints"] > 0)); // IE10
-
-pkg.isMacOS = pkg.isInBrowser && navigator.platform.toUpperCase().indexOf('MAC') !== -1;
 
 // TODO:
 //!!! this code resolve names of classes  defined in a package

@@ -108,7 +108,7 @@
 
 		    	if (document.getElementById("doc.views.gradient2") != null) {
 			    	var c = new zCanvas("doc.views.gradient2");
-			    	c.root.setBackground(new Gradient("orange", "yellow", zebkit.layout.HORIZONTAL));
+			    	c.root.setBackground(new Gradient("orange", "yellow", "horizontal"));
 			    }
 
 			    if (document.getElementById("doc.views.radial") != null) {
@@ -124,14 +124,14 @@
 				   		padding: 30,
 				   		border: new Border("orange", 2),
 				   		kids: {
-				   			CENTER: new Panel({
+				   			center: new Panel({
 				   				layout: new BorderLayout(),
 				   				padding: 30,
 				   				border: new Border("red", 4, 8),
 				   			})
 				   		}
 				   	});
-				    c.root.add(CENTER, p);
+				    c.root.add("center", p);
 				}
 
 			    var p = new Panel({
@@ -139,17 +139,17 @@
 			    	layout : new BorderLayout(),
 			    	border : new Sunken(),
 			    	kids   : {
-			    		CENTER: new Panel({
+			    		center: new Panel({
 			    			padding: 15,
 			    			layout : new BorderLayout(),
 			    			border : new Raised(),
 			    			kids   : {
-			    				CENTER: new Panel({
+			    				center: new Panel({
 			    					padding: 15,
 			    					layout : new BorderLayout(),
 			    					border : new Etched(),
 			    					kids   : {
-			    						CENTER: new Panel({
+			    						center: new Panel({
 			    							padding: 15,
 			    							layout : new BorderLayout(),
 			    							border : new Dotted(),
@@ -165,7 +165,7 @@
 			    	var c = new zCanvas("doc.views.borders2");
 			    	c.root.setLayout(new BorderLayout());
 					c.root.setBackground("lightGray");
-			    	c.root.add(CENTER, p);
+			    	c.root.add("center", p);
 				}
 
 			    var p = new Panel({
@@ -173,17 +173,17 @@
 			    	layout : new BorderLayout(),
 			    	border : new Sunken("orange", "red", "#DD1133"),
 			    	kids   : {
-			    		CENTER: new Panel({
+			    		"center": new Panel({
 			    			padding: 20,
 			    			layout : new BorderLayout(),
 			    			border : new Raised("orange", "red"),
 			    			kids   : {
-			    				CENTER: new Panel({
+			    				"center": new Panel({
 			    					padding: 20,
 			    					layout : new BorderLayout(),
 			    					border : new Etched("orange", "red"),
 			    					kids   : {
-			    						CENTER: new Panel({
+			    						"center": new Panel({
 			    							padding: 20,
 			    							layout : new BorderLayout(),
 			    							border : new Dotted(),
@@ -198,7 +198,7 @@
 			    if (document.getElementById("doc.views.borders3") != null) {
 			    	var c = new zCanvas("doc.views.borders3");
 			    	c.root.setLayout(new BorderLayout());
-			    	c.root.add(CENTER, p);
+			    	c.root.add("center", p);
 				}
 
 			    if (document.getElementById("doc.views.pattern") != null) {

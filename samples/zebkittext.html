@@ -49,17 +49,17 @@
 					    	border : new zebkit.ui.Border(),
 					    	padding: 8,
 					    	kids: {
-					    		CENTER: new zebkit.ui.Panel({
+					    		center: new zebkit.ui.Panel({
 									layout  : new zebkit.layout.BorderLayout(8, 8),
 									padding : 8,
 									kids    : {
-										CENTER: new zebkit.ui.TextField(new ZebkitTextRender("Zebkit ...")).properties({
+										center: new zebkit.ui.TextField(new ZebkitTextRender("Zebkit ...")).properties({
 											cursorView    : "red",
 											curW          : 3,
 											selectionColor: "gray",
 											background    : "black"
 									    }),
-									    TOP: new zebkit.ui.Label("Type using Zebkit font in text editor below:").properties({
+									    top: new zebkit.ui.Label("Type using Zebkit font in text editor below:").properties({
 									    	font : "22px Futura, Helvetica, sans-serif",
 									    	color: "black",
 									    	padding: 8

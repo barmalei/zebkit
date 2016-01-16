@@ -7,18 +7,18 @@
  * @main
  */
 
-var L = zebkit.layout, Cursor = ui.Cursor, KeyEvent = ui.KeyEvent, CURSORS = [];
+var Cursor = ui.Cursor, KeyEvent = ui.KeyEvent, CURSORS = {};
 
-CURSORS[L.LEFT  ] = Cursor.W_RESIZE;
-CURSORS[L.RIGHT ] = Cursor.E_RESIZE;
-CURSORS[L.TOP   ] = Cursor.N_RESIZE;
-CURSORS[L.BOTTOM] = Cursor.S_RESIZE;
-CURSORS[L.TopLeft ]    = Cursor.NW_RESIZE;
-CURSORS[L.TopRight]    = Cursor.NE_RESIZE;
-CURSORS[L.BottomLeft ] = Cursor.SW_RESIZE;
-CURSORS[L.BottomRight] = Cursor.SE_RESIZE;
-CURSORS[L.CENTER] = Cursor.MOVE;
-CURSORS[L.NONE  ] = Cursor.DEFAULT;
+CURSORS["left"  ]      = Cursor.W_RESIZE;
+CURSORS["right" ]      = Cursor.E_RESIZE;
+CURSORS["top"   ]      = Cursor.N_RESIZE;
+CURSORS["bottom"]      = Cursor.S_RESIZE;
+CURSORS["topLeft" ]    = Cursor.NW_RESIZE;
+CURSORS["topRight"]    = Cursor.NE_RESIZE;
+CURSORS["bottomLeft" ] = Cursor.SW_RESIZE;
+CURSORS["bottomRight"] = Cursor.SE_RESIZE;
+CURSORS["center"]      = Cursor.MOVE;
+CURSORS["none"  ]      = Cursor.DEFAULT;
 
 pkg.ShaperBorder = Class(ui.View, [
     function $prototype() {
@@ -69,23 +69,25 @@ pkg.ShaperBorder = Class(ui.View, [
                 w    = target.width,
                 h    = target.height;
 
-            if (contains(x, y, gap, gap, w - gap2, h - gap2)) return L.CENTER;
-            if (contains(x, y, 0, 0, gap, gap))               return L.TopLeft;
-            if (contains(x, y, 0, h - gap, gap, gap))         return L.BottomLeft;
+            if (contains(x, y, gap, gap, w - gap2, h - gap2)) return "center";
 
-            if (contains(x, y, w - gap, 0, gap, gap)) {
-                return L.TopRight;
-            }
+            if (contains(x, y, 0, 0, gap, gap))               return "topLeft";
 
-            if (contains(x, y, w - gap, h - gap, gap, gap)) return L.BottomRight;
+            if (contains(x, y, 0, h - gap, gap, gap))         return "bottomLeft";
+
+            if (contains(x, y, w - gap, 0, gap, gap)) return "topRight";
+
+            if (contains(x, y, w - gap, h - gap, gap, gap)) return "bottomRight";
 
             var mx = Math.floor((w - gap)/2);
-            if (contains(x, y, mx, 0, gap, gap))        return L.TOP;
-            if (contains(x, y, mx, h - gap, gap, gap))  return L.BOTTOM;
+            if (contains(x, y, mx, 0, gap, gap))        return "top";
+
+            if (contains(x, y, mx, h - gap, gap, gap))  return "bottom";
 
             var my = Math.floor((h - gap)/2);
-            if (contains(x, y, 0, my, gap, gap)) return L.LEFT;
-            return contains(x, y, w - gap, my, gap, gap) ? L.RIGHT : L.NONE;
+            if (contains(x, y, 0, my, gap, gap)) return "left";
+
+            return contains(x, y, w - gap, my, gap, gap) ? "right" : "none";
         };
     }
 ]);
@@ -207,13 +209,13 @@ pkg.ShaperPan = Class(ui.Panel, [
             this.state = null;
             if (this.isResizeEnabled || this.isMoveEnabled) {
                 var t = this.shaperBr.detectAt(this, e.x, e.y);
-                if ((this.isMoveEnabled   === true || t != L.CENTER)||
-                    (this.isResizeEnabled === true || t == L.CENTER)  )
+                if ((this.isMoveEnabled   === true || t !== "center")||
+                    (this.isResizeEnabled === true || t === "center")  )
                 {
-                    this.state = { top    : ((t & L.TOP   ) > 0 ? 1 : 0),
-                                   left   : ((t & L.LEFT  ) > 0 ? 1 : 0),
-                                   right  : ((t & L.RIGHT ) > 0 ? 1 : 0),
-                                   bottom : ((t & L.BOTTOM) > 0 ? 1 : 0) };
+                    this.state = { top    : (t === "top"    || t === "topLeft"     || t === "topRight"   ) ? 1 : 0,
+                                   left   : (t === "left"   || t === "topLeft"     || t === "bottomLeft" ) ? 1 : 0,
+                                   right  : (t === "right"  || t === "topRight"    || t === "bottomRight") ? 1 : 0,
+                                   bottom : (t === "bottom" || t === "bottomRight" || t === "bottomLeft" ) ? 1 : 0 };
 
                     if (this.state != null) {
                         this.px = e.absX;
@@ -259,7 +261,7 @@ pkg.ShaperPan = Class(ui.Panel, [
     },
 
     function (t){
-        this.$super(new L.BorderLayout());
+        this.$super(new zebkit.layout.BorderLayout());
         this.px = this.py = 0;
         this.shaperBr = new pkg.ShaperBorder();
         this.colors   = [ "lightGray", "blue" ];
@@ -278,7 +280,7 @@ pkg.ShaperPan = Class(ui.Panel, [
         this.setBounds(d.x - left, d.y - top,
                        d.width + left + this.getRight(),
                        d.height + top + this.getBottom());
-        this.$super(i, L.CENTER, d);
+        this.$super(i, "center", d);
     },
 
     function focused(){

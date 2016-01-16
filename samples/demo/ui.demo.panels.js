@@ -8,11 +8,11 @@ zebkit.package("ui.demo", function(pkg, Class) {
         function() {
             this.$super();
             this.setLayout(new BorderLayout());
-            var n = new Tabs(LEFT);
+            var n = new Tabs("left");
             n.add("Split Panel",  this.createSplitPan());
             n.add("Border Panel", this.createTitledPan());
             n.add("Scroll Panel", this.createScrollPan());
-            this.add(CENTER, n);
+            this.add("center", n);
         },
 
         function createTitledPan() {
@@ -22,16 +22,16 @@ zebkit.package("ui.demo", function(pkg, Class) {
             p1.setPreferredSize(130, 130);
 
             var ll = new Label(""),
-                p2 = new BorderPan("Center aligned title", ll, CENTER | TOP);
+                p2 = new BorderPan("Center aligned title", ll,  "top", "center");
             p2.setPreferredSize(170, 130);
 
-            var p3 = new BorderPan("Right aligned title", new Label(""), TOP | RIGHT);
+            var p3 = new BorderPan("Right aligned title", new Label(""), "top", "right");
             p3.setPreferredSize(170, 130);
-            var p4 = new BorderPan("Bottom title", new Label(""), BOTTOM | LEFT);
+            var p4 = new BorderPan("Bottom title", new Label(""), "bottom", "left");
             p4.setPreferredSize(170, 130);
-            var p5 = new BorderPan("Bottom centered title", new Label(""), CENTER | BOTTOM);
+            var p5 = new BorderPan("Bottom centered title", new Label(""), "bottom", "center");
             p5.setPreferredSize(170, 130);
-            var p6 = new BorderPan("Bottom right title", new Label(""), RIGHT | BOTTOM);
+            var p6 = new BorderPan("Bottom right title", new Label(""), "bottom", "right");
             p6.setPreferredSize(170, 130);
             var p7 = new BorderPan(new ImageLabel("image title", pkg.butterfly), new Label(""));
             p7.setPreferredSize(170, 130);

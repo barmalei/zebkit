@@ -47,6 +47,9 @@
 
             this.altKey = this.shiftKey = this.ctrlKey = this.metaKey = false;
 
+            // TODO: experemental property
+            this.eatMe = false;
+
             this.$fillWithParams = function(source, code, ch, mask) {
                 this.$setMask(mask);
                 this.code   = code;
@@ -66,6 +69,8 @@
             };
 
             this.$fillWith = function(e) {
+                this.eatMe = false;
+
                 this.code = (e.which || e.keyCode || 0);
 
                 // FF sets keyCode to zero for some diacritic characters
@@ -132,9 +137,8 @@
 
             element.onkeypress = function(e) {
                 KEY_EVENT.$fillWith(e);
-
                 if (KEY_EVENT.ch === 0) {
-                    // warp with try catch to restore variable
+                    // wrap with try catch to restore variable
                     try {
                         if ($keyPressedCode != KEY_EVENT.code) {
                             if (destination.$keyPressed(KEY_EVENT) === true) {
@@ -151,7 +155,7 @@
                 else {
                     // Since container of zCanvas catch all events from its children DOM
                     // elements don't prevent the event for the children DOM element
-                    if (destination.$keyTyped(KEY_EVENT) === true || (e.target === element && KEY_EVENT.code < 47)) {
+                    if ((e.target === element && KEY_EVENT.code < 47) || destination.$keyTyped(KEY_EVENT) === true) {
                         e.preventDefault();
                     }
                 }

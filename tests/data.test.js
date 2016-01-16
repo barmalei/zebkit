@@ -586,11 +586,32 @@ zebkit.runTests("Util objects bag",
     },
 
     function test_text() {
+        var t = new Text("\n");
+        assert(t.getLines(), 2);
+        assert(t.getLine(0), "");
+        assert(t.getLine(1), "");
+        assertException(function() { t.getLine(2); }, RangeError);
+        assert(t.getTextLength(), 1);
+        assert(t.getValue(), "\n");
+        t.removeLines(1);
+        assert(t.getValue(), "");
+        assert(t.getLines(), 1);
+        assert(t.getLine(0), "");
+        assert(t.getTextLength(), 1);
+        assertException(function() { t.removeLines(1); }, RangeError);
+        assertException(function() { t.removeLines(-1); }, RangeError);
+        t.removeLines(0);
+        assert(t.getValue(), "");
+        assert(t.getLines(), 0);
+        assert(t.getTextLength(), 1);
+
+
         var t = new Text("");
         assert(t.getLines(), 1);
         assert(t.getLine(0), "");
         assertException(function() { t.getLine(1); }, RangeError);
         assert(t.getTextLength(), 0);
+        assert(t.getValue(), "");
 
         t.write("One\nTwo", 0);
         assert(t.getLines(), 2);
@@ -604,6 +625,149 @@ zebkit.runTests("Util objects bag",
         assert(t.getLine(0), "OneTwo");
         assertException(function() { t.getLine(1); }, RangeError);
         assert(t.getTextLength(), 6);
+
+        var txt = "abc\nd\nef\n";
+        t = new Text(txt);
+        assert(t.getLines(), 4);
+        assert(t.getLine(0), "abc");
+        assert(t.getLine(1), "d");
+        assert(t.getLine(2), "ef");
+        assert(t.getLine(3), "");
+        assert(t.getValue(), txt);
+        assertException(function() { t.getLine(4); }, RangeError);
+        assertException(function() { t.getLine(-1); }, RangeError);
+
+
+        var b_, offset_, slen_, sl_, lines_;
+        t.bind(function(text, b, offset, slen, sl, lines) {
+            b_ = b; offset_ = offset; slen_ = slen; sl_ = sl; lines_ = lines;
+        });
+
+        t.removeLines(0, 1);
+        assert(b_, false);
+        assert(offset_, 0);
+        assert(lines_, 1);
+        assert(sl_, 0);
+        assert(slen_, 4);
+        assert(t.getLines(), 3);
+        assert(t.getLine(0), "d");
+        assert(t.getLine(1), "ef");
+        assert(t.getLine(2), "");
+        assert(t.getValue(), "d\nef\n");
+
+
+        b_ = offset_ = slen_ = sl_ = lines_ = -1;
+        t.removeLines(1, 2);
+        assert(b_, false);
+        assert(offset_, 2);
+        assert(lines_, 2);
+        assert(sl_, 1);
+        assert(slen_, 4);
+        assert(t.getLines(), 1);
+        assert(t.getLine(0), "d");
+        assert(t.getValue(), "d");
+
+        t.setValue("\n");
+        b_ = offset_ = slen_ = sl_ = lines_ = -1;
+        t.removeLines(1, 1);
+        assert(b_, false);
+        assert(offset_, 0);
+        assert(lines_, 1);
+        assert(sl_, 1);
+        assert(slen_, 1);
+
+        t.setValue("\n");
+        b_ = offset_ = slen_ = sl_ = lines_ = -1;
+        t.removeLines(0, 1);
+        assert(b_, false);
+        assert(offset_, 0);
+        assert(lines_, 1);
+        assert(sl_, 0);
+        assert(slen_, 1);
+
+        t = new Text("");
+        b_ = offset_ = slen_ = sl_ = lines_ = -1;
+        t.bind(function(text, b, offset, slen, sl, lines) {
+            b_ = b; offset_ = offset; slen_ = slen; sl_ = sl; lines_ = lines;
+        });
+
+        assert(t.getLines(), 1);
+        assert(t.getLine(0), "");
+
+
+        t.insertLines(0, "a", "bc");
+        assert(b_, true);
+        assert(offset_, 0);
+        assert(slen_, 5);
+        assert(sl_, 0);
+        assert(lines_, 2);
+        assert(t.getLines(), 3);
+        assert(t.getLine(0), "a");
+        assert(t.getLine(1), "bc");
+        assert(t.getLine(2), "");
+        assert(t.getValue(), "a\nbc\n");
+
+        b_ = offset_ = slen_ = sl_ = lines_ = -1;
+        t.setValue("");
+        assert(t.getLines(), 1);
+        assert(t.getLine(0), "");
+        t.insertLines(1, "a");
+        assert(b_, true);
+        assert(offset_, 0);
+        assert(slen_, 2);
+        assert(sl_, 1);
+        assert(lines_, 1);
+        assert(t.getLines(), 2);
+        assert(t.getLine(0), "");
+        assert(t.getLine(1), "a");
+
+        b_ = offset_ = slen_ = sl_ = lines_ = -1;
+        t.setValue("\n");
+        assert(t.getLines(), 2);
+        assert(t.getLine(0), "");
+        assert(t.getLine(1), "");
+        t.insertLines(2, "a");
+        assert(b_, true);
+        assert(offset_, 1);
+        assert(slen_, 2);
+        assert(sl_, 2);
+        assert(lines_, 1);
+        assert(t.getLines(), 3);
+        assert(t.getLine(0), "");
+        assert(t.getLine(1), "");
+        assert(t.getLine(2), "a");
+
+        b_ = offset_ = slen_ = sl_ = lines_ = -1;
+        t.setValue("\n");
+        assert(t.getLines(), 2);
+        assert(t.getLine(0), "");
+        assert(t.getLine(1), "");
+        t.insertLines(0, "a");
+        assert(b_, true);
+        assert(offset_, 0);
+        assert(slen_, 2);
+        assert(sl_, 0);
+        assert(lines_, 1);
+        assert(t.getLines(), 3);
+        assert(t.getLine(0), "a");
+        assert(t.getLine(1), "");
+        assert(t.getLine(2), "");
+
+        b_ = offset_ = slen_ = sl_ = lines_ = -1;
+        t.setValue("\n");
+        assert(t.getLines(), 2);
+        assert(t.getLine(0), "");
+        assert(t.getLine(1), "");
+        t.insertLines(1, "a");
+        assert(b_, true);
+        assert(offset_, 1);
+        assert(slen_, 2);
+        assert(sl_, 1);
+        assert(lines_, 1);
+        assert(t.getLines(), 3);
+        assert(t.getLine(0), "");
+        assert(t.getLine(1), "a");
+        assert(t.getLine(2), "");
     },
 
     function test_singlelinetxt() {

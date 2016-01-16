@@ -18,7 +18,7 @@
                 if (zebkit.isTouchable) z.fullScreen();
                 root.setLayout(new BorderLayout());
 
-                root.add(CENTER, new Panel([
+                root.add("center", new Panel([
                     function() {
                         this.$super(new FlowLayout("center", "center"));
                         var p = new Panel(new StackLayout());

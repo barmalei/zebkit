@@ -150,7 +150,7 @@
                 $clipboard.setAttribute("style", "display:none;position:fixed;left:-99em;top:-99em;");
 
                 $clipboard.onkeydown = function(ee) {
-                    $this.$clipboardCanvas.$container.dispatchEvent($dupKeyEvent(ee, 'keydown', $this.$clipboardCanvas.$container));
+                    $this.$clipboardCanvas.element.dispatchEvent($dupKeyEvent(ee, 'keydown', $this.$clipboardCanvas.element));
                     $clipboard.value="1";
                     $clipboard.select();
                 };
@@ -158,10 +158,10 @@
                 $clipboard.onkeyup = function(ee) {
                     if (ee.keyCode === $this.clipboardTriggerKey) {
                         $clipboard.style.display = "none";
-                        $this.$clipboardCanvas.$container.focus();
+                        $this.$clipboardCanvas.element.focus();
                     }
 
-                    $this.$clipboardCanvas.$container.dispatchEvent($dupKeyEvent(ee, 'keyup', $this.$clipboardCanvas.$container));
+                    $this.$clipboardCanvas.element.dispatchEvent($dupKeyEvent(ee, 'keyup', $this.$clipboardCanvas.element));
                 };
 
                 $clipboard.onblur = function() {
@@ -171,7 +171,7 @@
                     //!!! pass focus back to canvas
                     //    it has to be done for the case when cmd+TAB (switch from browser to
                     //    another application)
-                    $this.$clipboardCanvas.$container.focus();
+                    $this.$clipboardCanvas.element.focus();
                 };
 
                 $clipboard.oncopy = function(ee) {

@@ -99,8 +99,8 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
         var l = new Label(new zebkit.data.Text("This page represents number of Zebkit components to control UI components size and location"));
         l.setPadding(6);
         l.setFont(ui.boldFont);
-        this.add(TOP, l);
-        this.add(CENTER, s);
+        this.add("top", l);
+        this.add("center", s);
 
 
         //this.setBackground("gray");

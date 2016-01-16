@@ -95,6 +95,9 @@
             // TODO: not completed
             this.pressGroup = [];
 
+            // TODO: experemental property
+            this.eatMe = false;
+
             this.isAction = function() {
                 return this.identifier === LMOUSE && this.touchCounter === 1;
             };
@@ -104,6 +107,7 @@
             };
 
             this.$fillWith = function(identifier, e) {
+                this.eatMe      = false;
                 this.pageX      = Math.floor(e.pageX);
                 this.pageY      = Math.floor(e.pageY);
                 this.target     = e.target;

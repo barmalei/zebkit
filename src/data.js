@@ -117,9 +117,22 @@ pkg.Text = Class(pkg.TextModel, [
     function $prototype() {
         this.textLength = 0;
 
-        this.getLnInfo = function(lines, start, startOffset, o){
-            for(; start < lines.length; start++){
-                var line = lines[start].s;
+        /**
+         * Detect line by offset starting from the given line and offset.
+         * @param  {Integer} [start]       start line
+         * @param  {Integer} [startOffset] start offset of the start line
+         * @param  {Integer} o             offset to detect line
+         * @private
+         * @method calcLineByOffset
+         * @return {Array}  an array that consists of two elements: detected line index and its offset
+         */
+        this.calcLineByOffset = function(start, startOffset, o) {
+            if (arguments.length === 1) {
+                startOffset = start = 0;
+            }
+
+            for(; start < this.lines.length; start++){
+                var line = this.lines[start].s;
                 if (o >= startOffset && o <= startOffset + line.length){
                     return [start, startOffset];
                 }
@@ -128,7 +141,15 @@ pkg.Text = Class(pkg.TextModel, [
             return [];
         };
 
-        this.$lineTags = function(i, value) {
+        this.calcLineOffset = function(line) {
+            var off = 0;
+            for(var i = 0; i < line; i++){
+                off += (this.lines[i].s.length + 1);
+            }
+            return off;
+        };
+
+        this.$lineTags = function(i) {
             return this.lines[i];
         };
 
@@ -149,10 +170,61 @@ pkg.Text = Class(pkg.TextModel, [
             return this.textLength;
         };
 
+        this.removeLines = function(start, size) {
+            if (start < 0 || start >= this.lines.length) {
+                throw new RangeError(start);
+            }
+
+            if (arguments.length === 1) {
+                size = 1;
+            }
+            else {
+                if (size <= 0) {
+                    throw new Error("Invalid number of lines : " + size);
+                }
+            }
+
+            // normalize number required lines to be removed
+            if ((start + size) > this.lines.length) {
+                size = this.lines.length - start;
+            }
+
+            var end  = start + size - 1,            // last line to be removed
+                off  = this.calcLineOffset(start),  // offset of the first line to be removed
+                olen = start != end ? this.calcLineOffset(end) + this.lines[end].s.length + 1 - off
+                                    : this.lines[start].s.length + 1;
+
+
+            // if this is the last line we have to correct offset to point to "\n" character in text
+            if (start === this.lines.length - 1) {
+                off--;
+            }
+
+            this.lines.splice(start, size);
+            this._.textUpdated(this, false, off, olen, start, size);
+        };
+
+        this.insertLines = function(startLine) {
+            if (startLine < 0 || startLine > this.lines.length) {
+                throw new RangeError(startLine);
+            }
+
+            var off = this.calcLineOffset(startLine), offlen = 0;
+            if (startLine == this.lines.length) {
+                off--;
+            }
+
+            for(var i = 1; i < arguments.length; i++) {
+                offlen += arguments[i].length + 1;
+                this.lines.splice(startLine + i - 1, 0, new Line(arguments[i]));
+            }
+            this._.textUpdated(this, true, off, offlen, startLine, arguments.length - 1);
+        };
+
         this.write = function (s, offset) {
             if (s.length > 0) {
                 var slen    = s.length,
-                    info    = this.getLnInfo(this.lines, 0, 0, offset),
+                    info    = this.calcLineByOffset(0,0,offset),
                     line    = this.lines[info[0]].s,
                     j       = 0,
                     lineOff = offset - info[1],
@@ -180,14 +252,14 @@ pkg.Text = Class(pkg.TextModel, [
 
         this.remove = function(offset, size) {
             if (size > 0) {
-                var i1   = this.getLnInfo(this.lines, 0, 0, offset),
-                    i2   = this.getLnInfo(this.lines, i1[0], i1[1], offset + size),
-                    l2   = this.lines[i2[0]].s,
+                var i1   = this.calcLineByOffset(0, 0, offset),
+                    i2   = this.calcLineByOffset(i1[0], i1[1], offset + size),
                     l1   = this.lines[i1[0]].s,
+                    l2   = this.lines[i2[0]].s,
                     off1 = offset - i1[1], off2 = offset + size - i2[1],
                     buf  = l1.substring(0, off1) + l2.substring(off2);
 
-                if (i2[0] == i1[0]) {
+                if (i2[0] === i1[0]) {
                     this.lines.splice(i1[0], 1, new Line(buf));
                 }
                 else {

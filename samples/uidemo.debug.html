@@ -126,39 +126,37 @@
 	        	desktop = new zCanvas("zCanvas");
 				var root = desktop.root, nt = new Tabs(), prevSelected = -1;
 
-
-
 	    		root.properties({
 	    			padding: 4,
 	    			//border : new Border(),
 	    			layout : new BorderLayout(),
 	    			kids   : {
-	    				CENTER: nt.properties({
+	    				center: nt.properties({
 	    					kids : {
 	    						"About": new Panel({
 		    						padding: 8,
 		    						layout : new BorderLayout(),
 		    						kids   : {
-		    							CENTER: new Panel({
+		    							center: new Panel({
 		    								padding   : 8,
 		    								layout    : new BorderLayout(),
 		    								background: "gray",
 		    								border    : new Border("white", 4, 8),
 		    								kids      : {
-		    									CENTER: new Panel({
+		    									center: new Panel({
 		    										background: "black",
 		    										layout    : new BorderLayout(8,16),
 		    										padding   : 8,
 		    										border    : new RoundBorder("lightGray", 4),
 		    										kids      : {
-		    											TOP: new Panel({
-		    												layout : new FlowLayout(CENTER, CENTER, VERTICAL, 0),
+		    											top: new Panel({
+		    												layout : new FlowLayout("center", "center", "vertical", 0),
 		    												kids   : [ new Label(new ZebkitTextRender("Zebkit", true)).properties({
 		    													font : new Font("Helvetica", 'bold', 100)
 		    												}) ]
 		    											}),
-		    											CENTER : new Panel({
-		    												layout: new FlowLayout(CENTER, TOP, HORIZONTAL, 12),
+		    											center : new Panel({
+		    												layout: new FlowLayout("center", "top", "horizontal", 12),
 		    												kids  : [ new TextField(new zebkit.data.Text(zebkit.io.GET("demo/desc.txt"))).properties({
 		    													color:"white",
 		    													background: null,
@@ -169,8 +167,8 @@
 		    													font : new Font("Verdana", 14)
 		    												}) ]
 		    											}),
-		    											BOTTOM: new Panel({
-		    												layout: new FlowLayout(CENTER, TOP, HORIZONTAL, 12),
+		    											bottom: new Panel({
+		    												layout: new FlowLayout("center", "top", "horizontal", 12),
 		    												kids  : [ new Label("Copyright (c) Andrei Vishneuski 2014") ]
 		    											})
 		    										}
@@ -192,13 +190,13 @@
 									padding : 8,
 									background: "gray",
 									kids    : {
-										CENTER: new TextField(new ZebkitTextRender("Zebkit ...")).properties({
+										center: new TextField(new ZebkitTextRender("Zebkit ...")).properties({
 											cursorView    : "red",
 											curW          : 3,
 											selectionColor: "gray",
 											background    : "black"
 									    }),
-									    TOP: new Label("Type using Zebkit font in text editor :)").properties({
+									    top: new Label("Type using Zebkit font in text editor :)").properties({
 									    	font : "22px Futura, Helvetica, sans-serif",
 									    	color: "white",
 									    	padding: 8,

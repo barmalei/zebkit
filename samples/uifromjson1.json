@@ -7,17 +7,17 @@
         "padding": 4,
         "border": "plain",
         "kids": {
-            "TOP": {
+            "top": {
                "$zebkit.ui.BoldLabel": "Simple application",
                "padding":4,
                "background": "lightGray"
             },
 
-            "CENTER": {
+            "center": {
                "$zebkit.ui.TextField": ""
             },
 
-            "BOTTOM": {
+            "bottom": {
                "$zebkit.ui.Button": "Clear"
             }
         }

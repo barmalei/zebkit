@@ -23,7 +23,7 @@
 		 			},
 
 		 			function getXAlignment(target, row, col) {
-		 				return col > 1 ? LEFT : CENTER;
+		 				return col > 1 ? "left" : "center";
 		 			},
 
 		 			function getCellColor(target, row,col){
@@ -81,9 +81,9 @@
 		 			padding: 8,
 		 			border : borders.plain,
 		 			kids   : {
-		 				CENTER: new ScrollPan(new GridStretchPan(grid)),
-		 				BOTTOM: new Panel({
-		 					layout: new FlowLayout(CENTER, CENTER, HORIZONTAL, 4),
+		 				center: new ScrollPan(new GridStretchPan(grid)),
+		 				bottom: new Panel({
+		 					layout: new FlowLayout("center", "center", "horizontal", 4),
 
 		 					kids : [ 	new Button("Clear Log", [
 					 						function fire() {

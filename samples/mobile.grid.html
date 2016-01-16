@@ -44,7 +44,7 @@
 		        	"Item 3"
 		        ])
 
-		    	grid.add(TOP, new GridCaption(["Title 1", "Title 2", "Title 3"]));
+		    	grid.add("top", new GridCaption(["Title 1", "Title 2", "Title 3"]));
 		    	grid.clazz.$name = "Grid";
 
 				// create canvas
@@ -79,11 +79,11 @@
 				// 	p.toPreferredSize();
 				// 	p.setLocation(10,10);
 
-				// 	//w.constraints = CENTER;
+				// 	//w.constraints = "center";
 
 				// 	var div = new HtmlElement("div");
 				// 	div.setLayout(new BorderLayout());
-				// 	div.add(CENTER, w);
+				// 	div.add("center", w);
 				// 	div.toPreferredSize();
 
 				// 	showModalWindow(z, div);
@@ -97,10 +97,10 @@
     			    	layout : new BorderLayout(6,6),
     			    	padding: 8,
     			    	kids   : {
-    			    		LEFT  : button2,
-    			    		TOP   : button,
-    			    		CENTER : sp,
-    			    		BOTTOM : new HtmlTextField("")
+    			    		left  : button2,
+    			    		top   : button,
+    			    		center : sp,
+    			    		bottom : new HtmlTextField("")
     			    	}
     			    });
 

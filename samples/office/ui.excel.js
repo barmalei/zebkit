@@ -49,7 +49,7 @@ zebkit.package("ui.excel", function(pkg) {
 
     pkg.EditorProvider = Class(ui.grid.DefEditors, [
         function shouldFinish(grid, row, col, e) {
-            return e.id == "keyPresssed" && e.code == ui.KeyEvent.ENTER;
+            return e.id === "keyTyped" && e.code == ui.KeyEvent.ENTER;
         },
 
         function shouldStart(grid, row, col, e) {

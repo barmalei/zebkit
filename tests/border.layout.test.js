@@ -100,7 +100,7 @@ zebkit.runTests("BorderLayout test",
             t.extend(MIX);
 
             var c = new Layoutable();
-            t.add(CENTER, c);
+            t.add("center", c);
 
             t.setSize(w, h);
 
@@ -111,13 +111,13 @@ zebkit.runTests("BorderLayout test",
             assertMetrics(c,t.getLeft(),t.getTop(),w-t.getLeft() - t.getRight(),h-8);
 
             var l = new Layoutable();
-            t.add(LEFT, l);
+            t.add("left", l);
             t.validate();
             assertMetrics(l,4,4,10,192);
             assertMetrics(c,14,4,182, 192);
 
             var tp = new Layoutable();
-            t.add(TOP, tp);
+            t.add("top", tp);
 
             t.validate();
             assertMetrics(l,4,14,10,182);
@@ -125,7 +125,7 @@ zebkit.runTests("BorderLayout test",
             assertMetrics(tp, 4, 4, 192, 10);
 
             var r = new Layoutable();
-            t.add(RIGHT, r);
+            t.add("right", r);
 
             t.validate();
             assertMetrics(l, 4, 14, 10,182);
@@ -134,7 +134,7 @@ zebkit.runTests("BorderLayout test",
             assertMetrics(r, 186,14,10,182);
 
             var bt = new Layoutable();
-            t.add(BOTTOM, bt);
+            t.add("bottom", bt);
 
             t.validate();
             assertMetrics(l, 4, 14, 10,172);

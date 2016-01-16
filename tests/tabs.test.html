@@ -12,7 +12,7 @@
                         var tabs = new Tabs(align);
                         tabs.setPreferredSize(size, size);
                         tabs.setBackground(bg);
-                        tabs.setBorder(new TitledBorder(new Border("gray",borderSize,radius), arguments.length > 6 ? lineAlign : "BOTTOM"));
+                        tabs.setBorder(new TitledBorder(new Border("gray",borderSize,radius), arguments.length > 6 ? lineAlign : "bottom"));
 
                         tabs.add("Page 1", new Panel({
                             border: new Border("black",1)
@@ -134,7 +134,7 @@
                             "tabover": new TabBorder(2, 3),
                             "tabon"  : new TabBorder(0, 4),
                         },
-                        "CENTER"
+                        "center"
                     ));
 
                     main.add(createTabs(200, 3, 8, "top", bg,
@@ -143,7 +143,7 @@
                             "tabover": new TabBorder(2, 3),
                             "tabon"  : new TabBorder(0, 4),
                         },
-                        "CENTER"
+                        "center"
                     ));
 
 
@@ -153,7 +153,7 @@
                             "tabover": new TabBorder(2, 3),
                             "tabon"  : new TabBorder(0, 4),
                         },
-                        "TOP"
+                        "top"
                     ));
 
                     c.fullScreen();

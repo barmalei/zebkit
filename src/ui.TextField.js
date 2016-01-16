@@ -58,10 +58,10 @@ pkg.TextField = Class(pkg.Label, [
         /**
          * Text alignment
          * @attribute textAlign
-         * @type {Integer}
-         * @default zebkit.layout.LEFT
+         * @type {String}
+         * @default "left"
          */
-        this.textAlign = zebkit.layout.LEFT;
+        this.textAlign = "left";
 
         /**
          * Cursor view
@@ -98,7 +98,6 @@ pkg.TextField = Class(pkg.Label, [
         };
 
         this.setTextAlign = function(a) {
-            a = zebkit.layout.$constraints(a);
             if (this.textAlign != a) {
                 this.textAlign = a;
                 this.vrp();
@@ -162,7 +161,7 @@ pkg.TextField = Class(pkg.Label, [
             // normalize text location to virtual (zero, zero)
             y -= (this.scrollManager.getSY() + this.getTop());
             x -= this.scrollManager.getSX();
-            if (this.textAlign === zebkit.layout.LEFT) {
+            if (this.textAlign === "left") {
                 x -= this.getLeft();
             }
             else {
@@ -171,7 +170,7 @@ pkg.TextField = Class(pkg.Label, [
 
             if (x >= 0 && y >= 0 && lines > 0) {
                 var lh = this.view.getLineHeight(),
-                    li = this.view.getLineIndent(),
+                    li = this.view.lineIndent,
                     row = (y < 0) ? 0 : Math.floor((y + li) / (lh + li)) + ((y + li) % (lh + li) > li ? 1 : 0) -1;
 
                 if (row < lines && row >= 0) {
@@ -231,8 +230,8 @@ pkg.TextField = Class(pkg.Label, [
         // r     - text view
         // start - start offset
         // end   - end offset
-        this.getSubString = function(r,start,end){
-            var res = [], sr = start[0], er = end[0], sc = start[1], ec = end[1];
+        this.getSubString = function(r, start, end){
+            var res = [], sr = start.row, er = end.row, sc = start.col, ec = end.col;
             for(var i = sr; i < er + 1; i++){
                 var ln = r.getLine(i);
                 if (i != sr) res.push('\n');
@@ -310,6 +309,8 @@ pkg.TextField = Class(pkg.Label, [
                     case KE.LEFT : foff *= -1;
                     case KE.RIGHT:
                         if (e.ctrlKey === false && e.metaKey === false) {
+
+                            console.log("TextField.keyPressed() seek " + foff);
                             position.seek(foff);
                         }
                         break;
@@ -416,7 +417,7 @@ pkg.TextField = Class(pkg.Label, [
             var r = this.view;
             if (this.position.offset >= 0) {
                 var l = r.getLine(this.position.currentLine);
-                if (this.textAlign === zebkit.layout.LEFT) {
+                if (this.textAlign === "left") {
                     this.curX = r.font.charsWidth(l, 0, this.position.currentCol) + this.getLeft();
                 }
                 else {
@@ -424,7 +425,7 @@ pkg.TextField = Class(pkg.Label, [
                                 r.font.charsWidth(l, 0, this.position.currentCol);
                 }
 
-                this.curY = this.position.currentLine * (r.getLineHeight() + r.getLineIndent()) +
+                this.curY = this.position.currentLine * (r.getLineHeight() + r.lineIndent) +
                             this.getTop();
             }
 
@@ -447,7 +448,7 @@ pkg.TextField = Class(pkg.Label, [
                 this.blinkMe              &&
                 this.hasFocus()              )
             {
-                if (this.textAlign === zebkit.layout.LEFT)
+                if (this.textAlign === "left")
                     this.curView.paint(g, this.curX, this.curY,
                                           this.curW, this.curH, this);
                 else
@@ -525,8 +526,8 @@ pkg.TextField = Class(pkg.Label, [
                 var lineHeight = this.view.getLineHeight(),
                     top        = this.getTop();
 
-                this.scrollManager.makeVisible(this.textAlign === zebkit.layout.LEFT ? this.curX
-                                                                                    : this.curX - this.curW,
+                this.scrollManager.makeVisible(this.textAlign === "left" ? this.curX
+                                                                         : this.curX - this.curW,
                                                 this.curY, this.curW, lineHeight);
 
                 if (pl >= 0) {
@@ -539,7 +540,7 @@ pkg.TextField = Class(pkg.Label, [
                     }
 
                     var minUpdatedLine = pl < position.currentLine ? pl : position.currentLine,
-                        li             = this.view.getLineIndent(),
+                        li             = this.view.lineIndent,
                         bottom         = this.getBottom(),
                         left           = this.getLeft(),
                         y1             = lineHeight * minUpdatedLine + minUpdatedLine * li +
@@ -568,8 +569,8 @@ pkg.TextField = Class(pkg.Label, [
             if (this.hint != null && this.getMaxOffset() === 0) {
                 var ps = this.hint.getPreferredSize(),
                     yy = Math.floor((this.height - ps.height)/2),
-                    xx = (zebkit.layout.LEFT === this.textAlign) ? this.getLeft() + this.curW
-                                                                : this.width - ps.width - this.getRight() - this.curW;
+                    xx = ("left" === this.textAlign) ? this.getLeft() + this.curW
+                                                     : this.width - ps.width - this.getRight() - this.curW;
 
                 this.hint.paint(g, xx, yy, this.width, this.height, this);
             }
@@ -625,8 +626,9 @@ pkg.TextField = Class(pkg.Label, [
          * @method getStartSelection
          */
         this.getStartSelection = function(){
-            return this.startOff != this.endOff ? ((this.startOff < this.endOff) ? [this.startLine, this.startCol]
-                                                                                 : [this.endLine, this.endCol]) : null;
+            return this.startOff != this.endOff ? ((this.startOff < this.endOff) ? { row: this.startLine, col: this.startCol }
+                                                                                 : { row: this.endLine, col: this.endCol } )
+                                                : null;
         };
 
         /**
@@ -637,8 +639,9 @@ pkg.TextField = Class(pkg.Label, [
          * @method getEndSelection
          */
         this.getEndSelection = function(){
-            return this.startOff != this.endOff ? ((this.startOff < this.endOff) ? [this.endLine, this.endCol]
-                                                                                 : [this.startLine, this.startCol]) : null;
+            return this.startOff != this.endOff ? ((this.startOff < this.endOff) ? { row : this.endLine,   col : this.endCol   }
+                                                                                 : { row : this.startLine, col : this.startCol })
+                                                : null;
         };
 
         /**
@@ -663,7 +666,7 @@ pkg.TextField = Class(pkg.Label, [
 
         this.focusGained = function (e){
             if (this.position.offset < 0) {
-                this.position.setOffset(this.textAlign === zebkit.layout.LEFT  || this.getLines() > 1 ? 0 : this.getMaxOffset());
+                this.position.setOffset(this.textAlign === "left" || this.getLines() > 1 ? 0 : this.getMaxOffset());
             }
             else {
                 if (this.hint != null) this.repaint();
@@ -727,7 +730,7 @@ pkg.TextField = Class(pkg.Label, [
 
         this.pageSize = function (){
             var height = this.height - this.getTop() - this.getBottom(),
-                indent = this.view.getLineIndent(),
+                indent = this.view.lineIndent,
                 textHeight = this.view.getLineHeight();
 
             return (((height + indent) / (textHeight + indent) + 0.5) | 0) +
@@ -794,7 +797,7 @@ pkg.TextField = Class(pkg.Label, [
             var tr = this.view,
                 w  = (c > 0) ? (tr.font.stringWidth("W") * c)
                              : this.psWidth,
-                h  = (r > 0) ? (r * tr.getLineHeight() + (r - 1) * tr.getLineIndent())
+                h  = (r > 0) ? (r * tr.getLineHeight() + (r - 1) * tr.lineIndent)
                              : this.psHeight;
             this.setPreferredSize(w, h);
         };
@@ -815,7 +818,6 @@ pkg.TextField = Class(pkg.Label, [
             }
         };
 
-
         this.pointerDoubleClicked = function(e){
             if (e.isAction()) {
                 this.select(0, this.getMaxOffset());
@@ -823,11 +825,7 @@ pkg.TextField = Class(pkg.Label, [
         };
 
         this.pointerPressed = function(e){
-            console.log("!!!!!!!!!!!!!");
             if (e.isAction()) {
-
-                console.log("IS SHIFT : " + e.shiftKey);
-
                 if (e.shiftKey) {
                     this.startSelection();
                 }
@@ -869,7 +867,7 @@ pkg.TextField = Class(pkg.Label, [
             try {
                 g.translate(sx, sy);
 
-                if (this.textAlign === zebkit.layout.LEFT) {
+                if (this.textAlign === "left") {
                     this.view.paint(g, l, t,
                                     this.width  - l - r,
                                     this.height - t - this.getBottom(), this);
@@ -922,7 +920,7 @@ pkg.TextField = Class(pkg.Label, [
     function setView(v){
         if (v != this.view) {
             if (this.view != null && this.view.target != null) {
-                this.view.target.unbind(this);
+                if (this.view.target.bind != null) this.view.target.unbind(this);
             }
 
             this.$super(v);
@@ -934,7 +932,7 @@ pkg.TextField = Class(pkg.Label, [
             }
 
             if (this.view != null && this.view.target != null) {
-                this.view.target.bind(this);
+                if (this.view.target.bind != null) this.view.target.bind(this);
             }
         }
     },

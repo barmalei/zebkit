@@ -20,7 +20,7 @@
                 (new zebkit.ui.zCanvas("picker1", 400, 350)).root.properties({
                     layout: new BorderLayout(),
                     kids  : {
-                        CENTER: new ImagePan(myimg, [
+                        center: new ImagePan(myimg, [
                             function getTooltip(target, x, y) {
                                 var imgData = this.getCanvas().root.$context.getImageData(x, y, 1, 1).data,
                                     color   = "rgb("+ imgData[0] + "," + imgData[1] + "," + imgData[2] +")",
@@ -54,22 +54,19 @@
                     layout: new BorderLayout(6, 6),
                     padding:6,
                     kids  : {
-                        TOP   : new Button("Clear Palette",[
+                        top   : new Button("Clear Palette",[
                             function fire() {
                                 this.$super();
                                 for(var i=0; i<max; i++) p.kids[i].setBackground(null);
                                 counter=0;
                             }
                         ]),
-                        BOTTOM: new Panel({
-                            layout : new GridLayout(2, 8, HORIZONTAL),
+                        bottom: new Panel({
+                            layout : new GridLayout(2, 8, true),
                             id     : "palette"
                         }),
-                        CENTER: new ImagePan(myimg, [
+                        center: new ImagePan(myimg, [
                             function pointerPressed(e) {
-                                console.log("absX " + e.absX + "," + e.absY);
-
-
                                 var i = this.getCanvas().root.$context.getImageData(e.absX, e.absY, 1, 1).data,
                                     c = "rgb("+ i[0] + "," + i[1] + "," + i[2] +")";
 
@@ -97,8 +94,8 @@
                     border : borders.plain,
                     layout : new BorderLayout(6,6),
                     kids   : {
-                        BOTTOM: new TextField(),
-                        CENTER: new ImagePan(myimg, [
+                        bottom: new TextField(),
+                        center: new ImagePan(myimg, [
                             function pointerPressed(e) {
                                 var ctx = this.getCanvas().root.$context,
                                     i = ctx.getImageData(e.absX, e.absY, 1, 1).data,

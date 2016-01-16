@@ -200,7 +200,7 @@ pkg.DefViews = Class([
          * @param  {zebkit.ui.grid.Grid} target a target grid component
          * @param  {Integer} row   a grid cell row
          * @param  {Integer} col   a grid cell column
-         * @return {Integer}  a horizontal alignment (zebkit.layout.LEFT, zebkit.layout.CENTER, zebkit.layout.RIGHT)
+         * @return {String}  a horizontal alignment ("left", "center", "right")
          * @method  getXAlignment
          */
 
@@ -210,7 +210,7 @@ pkg.DefViews = Class([
           * @param  {zebkit.ui.grid.Grid} target a target grid component
           * @param  {Integer} row   a grid cell row
           * @param  {Integer} col   a grid cell column
-          * @return {Integer}  a vertical alignment (zebkit.layout.TOP, zebkit.layout.CENTER, zebkit.layout.BOTTOM)
+          * @return {String}  a vertical alignment ("top", "center", "bottom")
           * @method  getYAlignment
           */
 
@@ -485,7 +485,7 @@ pkg.BaseCaption = Class(ui.Panel, [
             return this.metrics != null     &&
                    this.selectedColRow >= 0 &&
                    this.isResizable         &&
-                   this.metrics.isUsePsMetric === false ? ((this.orient === L.HORIZONTAL) ? Cursor.W_RESIZE
+                   this.metrics.isUsePsMetric === false ? ((this.orient === "horizontal") ? Cursor.W_RESIZE
                                                                                           : Cursor.S_RESIZE)
                                                         : null;
         };
@@ -497,7 +497,7 @@ pkg.BaseCaption = Class(ui.Panel, [
          */
         this.pointerDragged = function(e){
             if (this.pxy != null) {
-                var b  = (this.orient === L.HORIZONTAL),
+                var b  = (this.orient === "horizontal"),
                     rc = this.selectedColRow,
                     ns = (b ? this.metrics.getColWidth(rc) + e.x
                             : this.metrics.getRowHeight(rc) + e.y) - this.pxy;
@@ -523,7 +523,7 @@ pkg.BaseCaption = Class(ui.Panel, [
                 this.calcRowColAt(e.x, e.y);
 
                 if (this.selectedColRow >= 0) {
-                    this.pxy = (this.orient === L.HORIZONTAL) ? e.x
+                    this.pxy = (this.orient === "horizontal") ? e.x
                                                               : e.y;
                 }
             }
@@ -567,7 +567,7 @@ pkg.BaseCaption = Class(ui.Panel, [
                 this.isAutoFit === true     )
             {
                 var size = this.getCaptionPS(this.selectedColRow);
-                if (this.orient === L.HORIZONTAL) {
+                if (this.orient === "horizontal") {
                     this.metrics.setColWidth (this.selectedColRow, size);
                 }
                 else {
@@ -589,7 +589,7 @@ pkg.BaseCaption = Class(ui.Panel, [
 
         this.captionResized = function(rowcol, ns) {
             if (ns > this.minSize) {
-                if (this.orient === L.HORIZONTAL) {
+                if (this.orient === "horizontal") {
                     var pw = this.metrics.getColWidth(rowcol);
                     this.metrics.setColWidth(rowcol, ns);
                     this._.captionResized(this, rowcol, pw);
@@ -635,7 +635,7 @@ pkg.BaseCaption = Class(ui.Panel, [
             {
                 var m     = this.metrics,
                     cv    = m.getCellsVisibility(),
-                    isHor = (this.orient === L.HORIZONTAL);
+                    isHor = (this.orient === "horizontal");
 
                 if ((isHor && cv.fc != null) || (isHor === false && cv.fr != null)) {
                     var gap  = m.lineSize,
@@ -660,7 +660,7 @@ pkg.BaseCaption = Class(ui.Panel, [
                 var v = this.metrics.getCellsVisibility();
                 if (v != null) {
                     var m       = this.metrics,
-                        b       = this.orient === L.HORIZONTAL,
+                        b       = this.orient === "horizontal",
                         startRC = b ? v.fc[0] : v.fr[0],
                         endRC   = b ? v.lc[0] : v.lr[0],
                         xy      = b ? v.fc[1] - this.x - m.lineSize + m.getXOrigin()
@@ -715,9 +715,9 @@ pkg.BaseCaption = Class(ui.Panel, [
         if (p == null || zebkit.instanceOf(p, pkg.Metrics)) {
             this.metrics = p;
             if (this.constraints != null) {
-                this.orient = (this.constraints === L.TOP    || this.constraints === "top"   ||
-                               this.constraints === L.BOTTOM || this.constraints === "bottom"  ) ? L.HORIZONTAL
-                                                                                                 : L.VERTICAL;
+                this.orient = (this.constraints === "top"   ||
+                               this.constraints === "bottom"  ) ? "horizontal"
+                                                                : "vertical";
             }
         }
     }
@@ -737,7 +737,7 @@ pkg.BaseCaption = Class(ui.Panel, [
  */
 pkg.GridCaption = Class(pkg.BaseCaption, [
     function $prototype() {
-        this.defYAlignment = this.defXAlignment = L.CENTER;
+        this.defYAlignment = this.defXAlignment = "center";
 
         /**
          * Get a grid caption column or row title view
@@ -770,7 +770,7 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
             this.psW = this.psH = 0;
             if (this.metrics != null){
                 var m     = this.metrics,
-                    isHor = (this.orient === L.HORIZONTAL),
+                    isHor = (this.orient === "horizontal"),
                     size  = isHor ? m.getGridCols() : m.getGridRows();
 
                 for(var i = 0;i < size; i++) {
@@ -819,8 +819,6 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
         };
 
         this.setTitleAlignments = function(rowcol, xa, ya){
-            xa = L.$constraints(xa);
-            ya = L.$constraints(ya);
             var t = this.titles[rowcol];
             if (t == null || t.xa != xa || t.ya != ya) {
                 if (t == null) t = {};
@@ -842,7 +840,7 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
 
         this.getCaptionPS = function(rowcol) {
             var  v = this.getTitleView(rowcol);
-            return (v != null) ? (this.orient === L.HORIZONTAL ? v.getPreferredSize().width
+            return (v != null) ? (this.orient === "horizontal" ? v.getPreferredSize().width
                                                                : v.getPreferredSize().height)
                                : 0;
         };
@@ -852,11 +850,11 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
         if (this.metrics != null){
             var cv = this.metrics.getCellsVisibility();
 
-            if ((cv.fc != null && cv.lc != null && this.orient === L.HORIZONTAL)||
-                (cv.fr != null && cv.lr != null && this.orient === L.VERTICAL  )   )
+            if ((cv.fc != null && cv.lc != null && this.orient === "horizontal")||
+                (cv.fr != null && cv.lr != null && this.orient === "vertical"  )   )
             {
                 var m      = this.metrics,
-                    isHor  = (this.orient === L.HORIZONTAL),
+                    isHor  = (this.orient === "horizontal"),
                     gap    = m.lineSize,
                     top    = this.getTop(),
                     left   = this.getLeft(),
@@ -899,12 +897,12 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
                             ya = t != null && t.ya != null ? t.ya : this.defYAlignment,
                             bg = t == null ? null : t.bg,
                             ps = v.getPreferredSize(),
-                            vx = xa == L.CENTER ? Math.floor((ww - ps.width)/2)
-                                                : (xa === L.RIGHT ? ww - ps.width - ((i==size-1) ? right : 0)
-                                                                  : (i === 0 ? left: 0)),
-                            vy = ya == L.CENTER ? Math.floor((hh - ps.height)/2)
-                                                : (ya === L.BOTTOM ? hh - ps.height - ((i==size-1) ? bottom : 0)
-                                                                   :  (i === 0 ? top: 0));
+                            vx = xa === "center" ? Math.floor((ww - ps.width)/2)
+                                                 : (xa === "right" ? ww - ps.width - ((i==size-1) ? right : 0)
+                                                                   : (i === 0 ? left: 0)),
+                            vy = ya === "center" ? Math.floor((hh - ps.height)/2)
+                                                 : (ya === "bottom" ? hh - ps.height - ((i==size-1) ? bottom : 0)
+                                                                    :  (i === 0 ? top: 0));
 
 
                         if (bg != null) {
@@ -957,7 +955,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
             function $prototype() {
                 this.doLayout = function (target) {
                     var m    = target.metrics,
-                        b    = target.orient === L.HORIZONTAL,
+                        b    = target.orient === "horizontal",
                         top  = target.getTop(),
                         left = target.getLeft(),
                         wh   = (b ? target.height - top  - target.getBottom()
@@ -1008,7 +1006,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
          */
         this.TitlePan = Class(ui.Panel, [
             function(title) {
-                this.$super(new L.FlowLayout(L.CENTER, L.CENTER, L.HORIZONTAL, 8));
+                this.$super(new L.FlowLayout("center", "center", "horizontal", 8));
 
                 this.sortState = 0;
 
@@ -1188,8 +1186,8 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
 
         this.getCaptionPS = function(rowcol) {
             var  c = this.kids[rowcol];
-            return (c != null) ? (this.orient == L.HORIZONTAL ? c.getPreferredSize().width
-                                                              : c.getPreferredSize().height)
+            return (c != null) ? (this.orient === "horizontal" ? c.getPreferredSize().width
+                                                               : c.getPreferredSize().height)
                                : 0;
         };
     },
@@ -1287,7 +1285,7 @@ pkg.RowSelMode = Class([
         ]);
 
         // add the top caption
-        grid.add(zebkit.layout.TOP, new zebkit.ui.grid.GridCaption([
+        grid.add("top", new zebkit.ui.grid.GridCaption([
             "Caption title 1", "Caption title 2", "Caption title 3"
         ]));
 
@@ -1383,19 +1381,19 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
 
             /**
              * Default cell content horizontal alignment
-             * @type {Integer}
+             * @type {String}
              * @attribute defXAlignment
-             * @default zebkit.layout.LEFT
+             * @default "left"
              */
-            this.defXAlignment = L.LEFT;
+            this.defXAlignment = "left";
 
             /**
              * Default cell content vertical alignment
-             * @type {Integer}
+             * @type {String}
              * @attribute defYAlignment
-             * @default zebkit.layout.CENTER
+             * @default "center"
              */
-            this.defYAlignment = L.CENTER;
+            this.defYAlignment = "center";
 
             /**
              * Indicate if vertical lines have to be rendered
@@ -1477,8 +1475,8 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
 
             this.setDefCellAlignments = function(ax, ay) {
                 if (this.defXAlignment != ax || this.defYAlignment != ay) {
-                    this.defXAlignment = L.$constraints(ax);
-                    this.defYAlignment = L.$constraints(ay);
+                    this.defXAlignment = ax;
+                    this.defYAlignment = ay;
                     this.repaint();
                 }
             };
@@ -2381,18 +2379,18 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                             xx = x,
                                             yy = y,
                                             id = -1,
-                                            ps = (ax !== L.NONE || ay !== L.NONE) ? v.getPreferredSize()
-                                                                                  : null;
+                                            ps = (ax != null || ay != null) ? v.getPreferredSize(vw, vh)
+                                                                            : null;
 
-                                        if (ax !== L.NONE){
-                                            xx = x + ((ax === L.CENTER) ? ~~((w - ps.width) / 2)
-                                                                        : ((ax === L.RIGHT) ? w - ps.width : 0));
+                                        if (ax != null) {
+                                            xx = x + ((ax === "center") ? ~~((w - ps.width) / 2)
+                                                                        : ((ax === "right") ? w - ps.width : 0));
                                             vw = ps.width;
                                         }
 
-                                        if (ay !== L.NONE){
-                                            yy = y + ((ay === L.CENTER) ? ~~((h - ps.height) / 2)
-                                                                        : ((ay === L.BOTTOM) ? h - ps.height : 0));
+                                        if (ay != null) {
+                                            yy = y + ((ay === "center") ? ~~((h - ps.height) / 2)
+                                                                        : ((ay === "bottom") ? h - ps.height : 0));
                                             vh = ps.height;
                                         }
 
@@ -2402,7 +2400,6 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                         }
 
                                         v.paint(g, xx, yy, vw, vh, this);
-
                                         if (id >= 0) {
                                            g.restore();
                                         }
@@ -2918,7 +2915,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                             ui.showModalWindow(this, editor, this);
                         }
                         else {
-                            this.add(L.TEMPORARY, editor);
+                            this.add("editor", editor);
                             this.repaintRows(this.editingRow, this.editingRow);
                         }
                         ui.focusManager.requestFocus(editor);
@@ -3024,7 +3021,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
 
             this.$super();
 
-            this.add(L.NONE, new this.clazz.CornerPan());
+            this.add("corner", new this.clazz.CornerPan());
             this.setModel(model);
             this.setViewProvider(new pkg.DefViews());
             this.setPosition(new Position(this));
@@ -3042,21 +3039,20 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
             this.iRowVisibility(0);
         },
 
-        function kidAdded(index,ctr,c){
-            ctr = L.$constraints(ctr);
+        function kidAdded(index, ctr, c){
             this.$super(index, ctr, c);
 
-            if ((ctr == null && this.topCaption == null) || L.TOP === ctr){
+            if ((ctr == null && this.topCaption == null) || "top" === ctr){
                 this.topCaption = c;
             }
             else {
-                if (L.TEMPORARY === ctr) this.editor = c;
+                if ("editor" === ctr) this.editor = c;
                 else {
-                    if ((ctr == null && this.leftCaption == null) || L.LEFT === ctr) {
+                    if ((ctr == null && this.leftCaption == null) || "left" === ctr) {
                         this.leftCaption = c;
                     }
                     else {
-                        if ((ctr == null && this.stub == null) || L.NONE === ctr) {
+                        if ((ctr == null && this.stub == null) || "corner" === ctr) {
                             this.stub = c;
                         }
                     }

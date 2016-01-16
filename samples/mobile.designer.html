@@ -18,21 +18,21 @@
 			    	border: new Border("black", 3, 8),
 			    	padding: 8,
 			    	kids  : {
-			    		BOTTOM: new TextField("dsdsd", [
+			    		bottom: new TextField("dsdsd", [
 			    			function pointerReleased(e) {
 			    				//this.$super(e);
 			    			}
 			    		]).properties({ font: new Font("Arial", "bold", 24), padding:8 }),
 
-			    		CENTER: new Panel([
+			    		center: new Panel([
 			    			function() {
 			    				this.$super();
 			    				this.label = new Label("");
 			    				this.infoWin = new Panel({ border: new Border("orange", 2, 6), layout:new BorderLayout() });
-			    				this.infoWin.add(CENTER, this.label);
+			    				this.infoWin.add("center", this.label);
 			    				this.infoWin.setPadding(8);
 			    				this.infoWin.setBackground("white");
-			    				this.infoWin.constraints = CENTER;
+			    				this.infoWin.constraints = "center";
 			    			},
 
 			    			function childFocusGained(e) {

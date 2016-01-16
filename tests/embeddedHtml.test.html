@@ -18,8 +18,8 @@
 		 			layout: new BorderLayout(8,8),
 		 			padding:4,
 		 			kids  : {
-		 				CENTER: new HtmlTextArea("Test1").properties({padding:10}),
-		 				BOTTOM: b
+		 				center: new HtmlTextArea("Test1").properties({padding:10}),
+		 				bottom: b
 		 			}
 		 		}));
 
@@ -51,7 +51,7 @@
 
 		 		]));
 		 		canvas.root.setLayout(new BorderLayout());
-		 		canvas.root.add(CENTER, tabs);
+		 		canvas.root.add("center", tabs);
 
 		 		var canvas = new zCanvas("test2", 600, 400);
 		 		canvas.root.load("embeddedHtml.test.json");

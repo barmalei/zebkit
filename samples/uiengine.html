@@ -47,7 +47,7 @@
 				root.properties({
 					layout: new zebkit.layout.BorderLayout(),
 					kids  : {
-						CENTER: new MouseEventHandlerPan().properties({border: new Oval()})
+						center: new MouseEventHandlerPan().properties({border: new Oval()})
 					}
 				});
 
@@ -57,22 +57,22 @@
 					background: "black",
 					padding   : 4,
 					kids	  : {
-						LEFT: (new EditablePan()).properties({
+						left: (new EditablePan()).properties({
 							preferredSize : [ 70, 50 ],
 							border: new Oval("blue")
 						}),
-						TOP: (new EditablePan()).properties({
+						top: (new EditablePan()).properties({
 							preferredSize : [ 50, 80 ],
 							border: new Pentahedron("magenta")
 						}),
-						CENTER: (new EditablePan()).properties({
+						center: (new EditablePan()).properties({
 							border: new Triangle("green")
 						}),
-						BOTTOM: (new EditablePan()).properties({
+						bottom: (new EditablePan()).properties({
 							preferredSize : [ 50, 50 ],
 							border 	      : new Border("white", 4, 8)
 						}),
-						RIGHT: (new EditablePan()).properties({
+						right: (new EditablePan()).properties({
 							preferredSize : [ 50, 50 ],
 							border: new Border("orange", 4)
 						})
@@ -86,7 +86,7 @@
 					background2: "#AACACA",
 					padding    : 8,
 					kids       : {
-						CENTER: new Components()
+						center: new Components()
 					}
 				});
 
@@ -96,7 +96,7 @@
 					background: new Pattern(bg11),
 					kids: {
 						null: 		 new CirclePan(50),
-						USE_PS_SIZE: new TrianglePan()
+						"usePsSize": new TrianglePan()
 					}
 				});
 
@@ -105,7 +105,7 @@
 					layout: new StackLayout(),
 					kids: [
 						new Panel().properties({
-							layout: new zebkit.layout.GridLayout(2, 2, HORIZONTAL | VERTICAL),
+							layout: new zebkit.layout.GridLayout(2, 2, true, true),
 							kids: [
 								new CursorPan(Cursor.HAND, "red", new Picture(cursors, 180, 110, 60, 60)),
 								new CursorPan(Cursor.WAIT, "blue", new Picture(cursors, 180, 50, 60, 60)),
@@ -116,7 +116,7 @@
 
 						(new CursorPan("crosshair", "rgba(222,222,222, 0.6)",
 									   new Picture(cursors, 180, 0, 60, 55))).properties({
-							constraints: USE_PS_SIZE,
+							constraints: "usePsSize",
 							preferredSize: [100, 100]
 						})
 					]
@@ -178,13 +178,13 @@
 					layout: new zebkit.layout.BorderLayout(),
 					background: "black",
 					kids:{
-						TOP:    new SimpleChart(function(x) {
+						top:    new SimpleChart(function(x) {
 													return -x*Math.sin(x);
 												}, -1.4, 8.4, 0.01, "#33ddCC").properties({ preferredSize: [ 100, 80 ] }),
-						CENTER: new SimpleChart(function(x) {
+						center: new SimpleChart(function(x) {
 													return Math.sin(x);
 												}, -3, 9, 0.01, "#11FF99"),
-						BOTTOM: new SimpleChart(function(x) {
+						bottom: new SimpleChart(function(x) {
 													return Math.cos(x)*Math.sin(x) - 2 * Math.sin(x*x);
 												}, -2, 5, 0.01, "#CCFF77").properties({ preferredSize: [ -1, 70 ]  }),
 					}
@@ -195,7 +195,7 @@
 				var zc = new zebkit.ui.zCanvas("layerDemo"), root = zc.root;
 				zc.add(new CustomLayer());
 				root.properties({
-					layout: new FlowLayout(CENTER, CENTER, VERTICAL, 8),
+					layout: new FlowLayout("center", "center", "vertical", 8),
 					background: new Pattern(bg6),
 					border: new Border(null, 4, 8),
 					kids: [

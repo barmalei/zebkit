@@ -11,8 +11,8 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
 
         var p = new Panel(new GridLayout(3, 2)), ctr = new Constraints();
         ctr.left = ctr.right = ctr.bottom = ctr.top = 8;
-        ctr.ax = STRETCH;
-        ctr.ay = STRETCH;
+        ctr.ax = "stretch";
+        ctr.ay = "stretch";
         p.add(ctr, this.createCheckboxPan(3, true));
         p.add(ctr, this.createCheckboxPan(3, false));
         p.add(ctr, this.createTextFieldPan());
@@ -38,7 +38,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         var p = new Panel(new GridLayout(3, 2));
         var tf = new TextField();
         var ctr = new Constraints();
-        ctr.ay = CENTER;
+        ctr.ay = "center";
         ctr.setPadding(2);
 
         tf.setPreferredSize(150, -1);

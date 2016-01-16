@@ -70,7 +70,8 @@ zebkit.ready(function() {
     canvas.root.add("top", new zebkit.ui.TextField("sdas"));
     canvas.root.add("bottom", new zebkit.ui.Button("showWin").setId("showWin"));
 
-    canvas.find("#showWin").bind(function() {
+    canvas.find("#showWin").bind(function(src) {
+
         var w = new zebkit.ui.Window();
         w.root.setLayout(new zebkit.layout.BorderLayout());
         w.root.add("top", new zebkit.ui.TextField(""));

@@ -36,7 +36,7 @@ zebkit.package("ui.demo", function(pkg, Class) {
         function() {
             this.$super();
 
-            var p = new Panel(new FlowLayout(CENTER, TOP, HORIZONTAL, 8));
+            var p = new Panel(new FlowLayout("center", "top", "horizontal", 8));
             this.setLayout(new BorderLayout(4,4));
 
             var t1 = new Tree(makeTreeModel()), p1 = new BorderPan("Standard tree", t1);
@@ -77,14 +77,14 @@ zebkit.package("ui.demo", function(pkg, Class) {
             t4.select(t4.model.root);
             t4.setPadding(4);
             p4.setPreferredSize(-1, 280);
-            this.add(BOTTOM, p4);
+            this.add("bottom", p4);
 
             var ctr = new Constraints();
             this.setPadding(8);
             p.add(ctr, p1);
             p.add(ctr, p2);
             p.add(ctr, p3);
-            this.add(CENTER, p);
+            this.add("center", p);
         }
     ]);
 

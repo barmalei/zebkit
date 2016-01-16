@@ -19,7 +19,7 @@
                 map.id = "mapPan";
                 root.setPadding(6);
 
-                var fieldLayout = new FlowLayout(LEFT, CENTER, HORIZONTAL, 8);
+                var fieldLayout = new FlowLayout("left", "center", "horizontal", 8);
                 fieldLayout.stretchLast = true;
                 function createField(label, comp, button) {
                     var t = new BoldLabel(label);
@@ -36,8 +36,8 @@
                             kids: [ t, new Panel({
                                 layout: new BorderLayout(4),
                                 kids: {
-                                    CENTER: comp,
-                                    RIGHT : button
+                                    center: comp,
+                                    right : button
                                 }
                             })]
                         });
@@ -58,14 +58,14 @@
 
                 root.setLayout(new BorderLayout(8, 8));
 
-                root.add(TOP, new Panel({
+                root.add("top", new Panel({
                     layout : new BorderLayout(0),
                     border : new Border(null, 0, 8),
                     background: "#EAEAEA",
                     padding: 6,
                     kids   : {
-                        TOP   : createField("E-Mail:", new HtmlTextField(), createRoundButton("detBut")),
-                        CENTER: new Panel({
+                        top   : createField("E-Mail:", new HtmlTextField(), createRoundButton("detBut")),
+                        center: new Panel({
                             layout : new ListLayout(4),
                             id     : "fields",
                             padding: [4, 32, 16, 24],
@@ -78,17 +78,17 @@
                     }
                 }));
 
-                root.add(CENTER, new Panel({
+                root.add("center", new Panel({
                     layout: new BorderLayout(0, 8),
                     background: "#EAEAEA",
                     padding: 6,
                     kids  : {
-                        TOP: createField("Address:", new TextField(""), createRoundButton("map")),
-                        CENTER: new Panel({
+                        top: createField("Address:", new TextField(""), createRoundButton("map")),
+                        center: new Panel({
                             layout : new BorderLayout(2),
                             kids: {
-                                TOP   : new BoldLabel("Description:").properties({id:"descLab"}),
-                                CENTER: new Panel({
+                                top   : new BoldLabel("Description:").properties({id:"descLab"}),
+                                center: new Panel({
                                     layout: new StackLayout(),
                                     kids: [
                                         new TextArea().properties({ id:"description" } ),
@@ -101,7 +101,7 @@
                 }));
 
 
-                root.add(BOTTOM, new Button("Submit Report").properties({ id:"submit" } ));
+                root.add("bottom", new Button("Submit Report").properties({ id:"submit" } ));
 
 
                 function switchMap() {
@@ -144,19 +144,19 @@
 
 
                 z.root.setLayout(new BorderLayout());
-                z.root.add(TOP, new Panel({
+                z.root.add("top", new Panel({
                     background: "black",
                     padding   : 8,
                     layout    : new BorderLayout(8),
                     kids      : {
-                        LEFT: new Button(new BoldLabel("Call 12323-323").properties({  color: "white" }) ).properties( { border: "plain", background: "red" } ),
+                        left: new Button(new BoldLabel("Call 12323-323").properties({  color: "white" }) ).properties( { border: "plain", background: "red" } ),
 
-                        CENTER: new Panel({
+                        center: new Panel({
                             layout: new FlowLayout("center", "center"),
                             kids: new BoldLabel("Food Poisoning ").setColor("white")
                         }),
 
-                        RIGHT: new Panel({
+                        right: new Panel({
                             layout: new FlowLayout("center", "center", "horizontal", 2),
                             kids  : [
                                 new Radiobox(new BoldLabel("EN"), gr).properties({
@@ -187,7 +187,7 @@
                     z.fullScreen();
                 }
 
-                z.root.add(CENTER, root);
+                z.root.add("center", root);
 
 
                 // Create a map object and specify the DOM element for display.

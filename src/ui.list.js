@@ -1439,7 +1439,7 @@ pkg.Combo = Class(pkg.Panel, [
                  */
                 this.textField = new this.clazz.TextField("",  -1);
                 this.textField.view.target.bind(this);
-                this.add(L.CENTER, this.textField);
+                this.add("center", this.textField);
             }
         ]);
 
@@ -1802,9 +1802,9 @@ pkg.Combo = Class(pkg.Panel, [
 
         this.$super();
 
-        this.add(L.CENTER, editable ? new this.clazz.EditableContentPan()
+        this.add("center", editable ? new this.clazz.EditableContentPan()
                                     : new this.clazz.ReadonlyContentPan());
-        this.add(L.RIGHT, new this.clazz.Button());
+        this.add("right", new this.clazz.Button());
     },
 
     function focused(){

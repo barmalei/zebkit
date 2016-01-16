@@ -84,7 +84,7 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
         this.setLayout(new BorderLayout(8,8));
         this.setPadding(8);
 
-        var mbar = new Panel(new FlowLayout(CENTER, TOP, HORIZONTAL, 8));
+        var mbar = new Panel(new FlowLayout("center", "top", "horizontal", 8));
         var c    = new Panel(new BorderLayout());
         var ctr  = new Constraints();
 
@@ -92,7 +92,7 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
         c.setPreferredSize(290, 160);
         var mb = new Menubar(formMenuArray());
         mb.setBorder(new Border("lightGray"));
-        c.add(TOP, mb);
+        c.add("top", mb);
 
 
         var bp = new BorderPan("Top menu bar", c);
@@ -106,20 +106,20 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
         mb = new Menubar(formMenuArray());
         mb.setBorder(new Border("lightGray"));
 
-        c.add(BOTTOM, mb);
+        c.add("bottom", mb);
 
         c = new BorderPan("Bottom menu bar", c);
         c.setGaps(8,8);
         mbar.add(ctr, c);
-        this.add(CENTER, mbar);
+        this.add("center", mbar);
 
 
         var t = createToolbar();
         t = new BorderPan("Horizontal toolbar", t);
         t.setGaps(8,8);
-        this.add(TOP, t);
+        this.add("top", t);
 
-        var p  = new Panel(new FlowLayout(CENTER, CENTER, HORIZONTAL, 8));
+        var p  = new Panel(new FlowLayout("center", "center", "horizontal", 8));
         var l1 = pkg.createLabel("Press right mouse\nbutton to see\ncontext menu Cars", rgb.black);
         var l2 = pkg.createLabel("Press right mouse\nbutton to see\ncontext menu Colors", "003366");
         var l3 = pkg.createLabel("Press right mouse\nbutton to see\ncontext menu Brands", "99CC99");
@@ -140,7 +140,7 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
         var m1 = new Menu($get(0, formMenuArray()));
         var m2 = createColorPicker();
         var m3 = new Menu($get(2, formMenuArray()));
-        this.add(BOTTOM, new BorderPan("Context menu", p));
+        this.add("bottom", new BorderPan("Context menu", p));
 
         l1.popup = m1;
         l2.popup = m2;

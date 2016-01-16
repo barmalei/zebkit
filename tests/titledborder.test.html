@@ -26,7 +26,7 @@
 							}
 						]);
 
-						var a = title.align == null ? BOTTOM : title.align;
+						var a = title.align == null ? "bottom" : title.align;
 						p.setBorder(new TitledBorder(br,a));
 					}
 					else {
@@ -54,10 +54,10 @@
 				function makeBorderPan(panSize, borderSize, radius, bg, lineAlignemnt, ctr) {
 					var p = new BorderPan(new Label("Test W").properties({font: new Font("Arial", "bold", 22)}),
 										  new Panel({background: "orange"}),
-										  arguments.length > 5 ? ctr : TOP),
+										  arguments.length > 5 ? ctr : "top"),
 						br = new Border("magenta", borderSize, radius);
 
-					p.setBorder(new TitledBorder(br, lineAlignemnt == null ? CENTER :  lineAlignemnt));
+					p.setBorder(new TitledBorder(br, lineAlignemnt == null ? "center" :  lineAlignemnt));
 					p.setPreferredSize(panSize, panSize);
 
 					if (bg != null) {
@@ -70,7 +70,7 @@
 				var c = new zCanvas(700, 600), bg = "yellow", main = new Panel();
 				c.setBackground("white");
 				c.root.setLayout(new BorderLayout());
-				c.root.add(CENTER, new ScrollPan(main));
+				c.root.add("center", new ScrollPan(main));
 				main.setLayout(new GridLayout(5, 9));
 				main.layout.constraints.setPadding(10);
 
@@ -78,38 +78,38 @@
 				main.add(makePanWithBorder(150, 10, 0, bg));
 				main.add(makePanWithBorder(150, 15, 0, null));
 
-				main.add(makePanWithBorder(150, 1, 0, bg, { x:15, y:10, width:20, height:20, orient: TOP  }));
-				main.add(makePanWithBorder(150, 10, 0, bg, { x:15, y:10, width:20, height:20, orient: TOP, align:CENTER  }));
-				main.add(makePanWithBorder(150, 10, 0, bg, { x:15, y:10, width:20, height:20, orient: TOP, align:TOP  }));
+				main.add(makePanWithBorder(150, 1, 0, bg, { x:15, y:10, width:20, height:20, orient: "top"  }));
+				main.add(makePanWithBorder(150, 10, 0, bg, { x:15, y:10, width:20, height:20, orient: "top", align:"center"  }));
+				main.add(makePanWithBorder(150, 10, 0, bg, { x:15, y:10, width:20, height:20, orient: "top", align:"top"  }));
 
-				main.add(makePanWithBorder(150, 1, 0, bg, { x:15, y:110, width:20, height:20, orient: BOTTOM  }));
-				main.add(makePanWithBorder(150, 10, 0, bg, { x:15, y:110, width:20, height:20, orient: BOTTOM, align:CENTER  }));
-				main.add(makePanWithBorder(150, 11, 0, bg, { x:15, y:110, width:20, height:20, orient: BOTTOM, align:TOP  }));
+				main.add(makePanWithBorder(150, 1, 0, bg, { x:15, y:110, width:20, height:20, orient: "bottom"  }));
+				main.add(makePanWithBorder(150, 10, 0, bg, { x:15, y:110, width:20, height:20, orient: "bottom", align:"center"  }));
+				main.add(makePanWithBorder(150, 11, 0, bg, { x:15, y:110, width:20, height:20, orient: "bottom", align:"top"  }));
 
-				main.add(makePanWithBorder(150, 1, 0, bg, { x:15, y:110, width:20, height:20, orient: LEFT  }));
-				main.add(makePanWithBorder(150, 10, 0, bg, { x:15, y:110, width:20, height:20, orient: LEFT, align:CENTER  }));
-				main.add(makePanWithBorder(150, 11, 0, bg, { x:15, y:110, width:20, height:20, orient: LEFT, align:TOP  }));
+				main.add(makePanWithBorder(150, 1, 0, bg, { x:15, y:110, width:20, height:20, orient: "left"  }));
+				main.add(makePanWithBorder(150, 10, 0, bg, { x:15, y:110, width:20, height:20, orient: "left", align:"center"  }));
+				main.add(makePanWithBorder(150, 11, 0, bg, { x:15, y:110, width:20, height:20, orient: "left", align:"top"  }));
 
-				main.add(makePanWithBorder(150, 1, 0, bg, { x:110, y:15, width:20, height:20, orient: RIGHT  }));
-				main.add(makePanWithBorder(150, 10, 0, bg, { x:110, y:15, width:20, height:20, orient: RIGHT, align:CENTER  }));
-				main.add(makePanWithBorder(150, 11, 0, bg, { x:110, y:15, width:20, height:20, orient: RIGHT, align:TOP  }));
+				main.add(makePanWithBorder(150, 1, 0, bg, { x:110, y:15, width:20, height:20, orient: "right"  }));
+				main.add(makePanWithBorder(150, 10, 0, bg, { x:110, y:15, width:20, height:20, orient: "right", align:"center"  }));
+				main.add(makePanWithBorder(150, 11, 0, bg, { x:110, y:15, width:20, height:20, orient: "right", align:"top"  }));
 
 
-				main.add(makePanWithBorder(150, 1, 10, bg, { x:15, y:10, width:20, height:20, orient: TOP  }));
-				main.add(makePanWithBorder(150, 10, 5, bg, { x:15, y:10, width:20, height:20, orient: TOP, align:CENTER  }));
-				main.add(makePanWithBorder(150, 10, 8, bg, { x:15, y:10, width:20, height:20, orient: TOP, align:TOP  }));
+				main.add(makePanWithBorder(150, 1, 10, bg, { x:15, y:10, width:20, height:20, orient: "top"  }));
+				main.add(makePanWithBorder(150, 10, 5, bg, { x:15, y:10, width:20, height:20, orient: "top", align:"center"  }));
+				main.add(makePanWithBorder(150, 10, 8, bg, { x:15, y:10, width:20, height:20, orient: "top", align:"top"  }));
 
-				main.add(makePanWithBorder(150, 1, 10, bg, { x:15, y:110, width:20, height:20, orient: BOTTOM  }));
-				main.add(makePanWithBorder(150, 10, 5, bg, { x:15, y:110, width:20, height:20, orient: BOTTOM, align:CENTER  }));
-				main.add(makePanWithBorder(150, 11, 8, bg, { x:15, y:110, width:20, height:20, orient: BOTTOM, align:TOP  }));
+				main.add(makePanWithBorder(150, 1, 10, bg, { x:15, y:110, width:20, height:20, orient: "bottom"  }));
+				main.add(makePanWithBorder(150, 10, 5, bg, { x:15, y:110, width:20, height:20, orient: "bottom", align:"center"  }));
+				main.add(makePanWithBorder(150, 11, 8, bg, { x:15, y:110, width:20, height:20, orient: "bottom", align:"top"  }));
 
-				main.add(makePanWithBorder(150, 1, 10, bg, { x:15, y:110, width:20, height:20, orient: LEFT  }));
-				main.add(makePanWithBorder(150, 10, 5, bg, { x:15, y:110, width:20, height:20, orient: LEFT, align:CENTER  }));
-				main.add(makePanWithBorder(150, 11, 8, bg, { x:15, y:110, width:20, height:20, orient: LEFT, align:TOP  }));
+				main.add(makePanWithBorder(150, 1, 10, bg, { x:15, y:110, width:20, height:20, orient: "left"  }));
+				main.add(makePanWithBorder(150, 10, 5, bg, { x:15, y:110, width:20, height:20, orient: "left", align:"center"  }));
+				main.add(makePanWithBorder(150, 11, 8, bg, { x:15, y:110, width:20, height:20, orient: "left", align:"top"  }));
 
-				main.add(makePanWithBorder(150, 1, 10, bg, { x:110, y:15, width:20, height:20, orient: RIGHT  }));
-				main.add(makePanWithBorder(150, 10, 5, bg, { x:110, y:15, width:20, height:20, orient: RIGHT, align:CENTER  }));
-				main.add(makePanWithBorder(150, 11, 8, bg, { x:110, y:15, width:20, height:20, orient: RIGHT, align:TOP  }));
+				main.add(makePanWithBorder(150, 1, 10, bg, { x:110, y:15, width:20, height:20, orient: "right"  }));
+				main.add(makePanWithBorder(150, 10, 5, bg, { x:110, y:15, width:20, height:20, orient: "right", align:"center"  }));
+				main.add(makePanWithBorder(150, 11, 8, bg, { x:110, y:15, width:20, height:20, orient: "right", align:"top"  }));
 
 				main.add(makeBorderPan(150, 1, 0, bg));
 				main.add(makeBorderPan(150, 10, 0, bg));
@@ -119,22 +119,22 @@
 				main.add(makeBorderPan(150, 10, 8, bg));
 				main.add(makeBorderPan(150, 15, 12, bg));
 
-				main.add(makeBorderPan(150, 1, 10, bg, TOP));
-				main.add(makeBorderPan(150, 10, 8, bg, TOP));
-				main.add(makeBorderPan(150, 15, 12, bg, TOP));
+				main.add(makeBorderPan(150, 1, 10, bg, "top"));
+				main.add(makeBorderPan(150, 10, 8, bg, "top"));
+				main.add(makeBorderPan(150, 15, 12, bg, "top"));
 
-				main.add(makeBorderPan(150, 1, 10, bg, BOTTOM));
-				main.add(makeBorderPan(150, 10, 8, bg, BOTTOM));
-				main.add(makeBorderPan(150, 15, 12, bg, BOTTOM));
+				main.add(makeBorderPan(150, 1, 10, bg, "bottom"));
+				main.add(makeBorderPan(150, 10, 8, bg, "bottom"));
+				main.add(makeBorderPan(150, 15, 12, bg, "bottom"));
 
 
-				main.add(makeBorderPan(150, 1, 10, bg, BOTTOM, BOTTOM));
-				main.add(makeBorderPan(150, 10, 8, bg, BOTTOM, BOTTOM));
-				main.add(makeBorderPan(150, 15, 12, bg, BOTTOM, BOTTOM));
+				main.add(makeBorderPan(150, 1, 10, bg, "bottom", "bottom"));
+				main.add(makeBorderPan(150, 10, 8, bg, "bottom", "bottom"));
+				main.add(makeBorderPan(150, 15, 12, bg, "bottom", "bottom"));
 
-				main.add(makeBorderPan(150, 1, 10, bg, CENTER, BOTTOM));
-				main.add(makeBorderPan(150, 10, 8, bg, CENTER, BOTTOM));
-				main.add(makeBorderPan(150, 15, 12, bg, CENTER, BOTTOM));
+				main.add(makeBorderPan(150, 1, 10, bg, "center", "bottom"));
+				main.add(makeBorderPan(150, 10, 8, bg, "center", "bottom"));
+				main.add(makeBorderPan(150, 15, 12, bg, "center", "bottom"));
 
 				c.fullScreen();
 

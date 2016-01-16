@@ -44,34 +44,34 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, [
     function() {
         this.$super();
         this.setLayout(new BorderLayout());
-        var n = new Tabs(BOTTOM);
+        var n = new Tabs("bottom");
         n.add("Border layout", this.borderLayoutPage());
         n.add("Flow layout", this.flowLayoutPage());
         n.add("List layout", this.listLayoutPage());
         n.add("Percent layout", this.percentLayoutPage());
         n.add("Grid layout", this.gridLayoutPage());
-        this.add(CENTER, n);
+        this.add("center", n);
     },
 
     function borderLayoutPage() {
         var bl_p = new Panel(new BorderLayout(2,2));
         bl_p.setPadding(4);
-        bl_p.add(TOP, new Button("TOP"));
-        bl_p.add(BOTTOM, new Button("BOTTOM"));
-        bl_p.add(RIGHT, new Button("RIGHT"));
-        bl_p.add(LEFT, new Button("LEFT"));
-        bl_p.add(CENTER, new Button("CENTER"));
+        bl_p.add("top", new Button("TOP"));
+        bl_p.add("bottom", new Button("BOTTOM"));
+        bl_p.add("right", new Button("RIGHT"));
+        bl_p.add("left", new Button("LEFT"));
+        bl_p.add("center", new Button("CENTER"));
         return bl_p;
     },
 
     function flowLayoutPage() {
         var fl = new Panel(new ListLayout(4));
         fl.setPadding(4);
-        var fl_1 = new Panel(new FlowLayout(LEFT, CENTER, HORIZONTAL, 4));
-        var fl_2 = new Panel(new FlowLayout(CENTER, CENTER, HORIZONTAL, 4));
-        var fl_3 = new Panel(new FlowLayout(RIGHT, CENTER, HORIZONTAL, 4));
-        var fl_4 = new Panel(new FlowLayout(CENTER, CENTER, VERTICAL, 4));
-        var fl_5 = new Panel(new FlowLayout(RIGHT, BOTTOM, VERTICAL, 4));
+        var fl_1 = new Panel(new FlowLayout("left", "center", "horizontal", 4));
+        var fl_2 = new Panel(new FlowLayout("center", "center", "horizontal", 4));
+        var fl_3 = new Panel(new FlowLayout("right", "center", "horizontal", 4));
+        var fl_4 = new Panel(new FlowLayout("center", "center", "vertical", 4));
+        var fl_5 = new Panel(new FlowLayout("right", "bottom", "vertical", 4));
         fl.add(pkg.createBorderPan("Left aligned, horizontal", fl_1));
         fl.add(pkg.createBorderPan("Centered aligned, horizontal", fl_2));
         fl.add(pkg.createBorderPan("Right aligned, horizontal", fl_3));
@@ -110,11 +110,11 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, [
         ll_1.add(pkg.createLabel("Item 1"));
         ll_1.add(pkg.createLabel("Item 2"));
         ll_1.add(pkg.createLabel("Item 3"));
-        var ll_2 = new Panel(new ListLayout(CENTER,4));
+        var ll_2 = new Panel(new ListLayout("center",4));
         ll_2.add(pkg.createLabel("Item 1"));
         ll_2.add(pkg.createLabel("Item 2"));
         ll_2.add(pkg.createLabel("Item 3"));
-        var ll_3 = new Panel(new ListLayout(RIGHT,4));
+        var ll_3 = new Panel(new ListLayout("right",4));
         ll_3.add(pkg.createLabel("Item 1"));
         ll_3.add(pkg.createLabel("Item 2"));
         ll_3.add(pkg.createLabel("Item 3"));
@@ -127,11 +127,11 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, [
     function percentLayoutPage() {
         var pl = new Panel(new ListLayout(4));
         pl.setPadding(4);
-        var pl_1 = new Panel(new PercentLayout(HORIZONTAL, 4));
+        var pl_1 = new Panel(new PercentLayout("horizontal", 4));
         pl_1.add(30, pkg.createLabel("Takes 30%"));
         pl_1.add(50, pkg.createLabel("Takes 50%"));
         pl_1.add(20, pkg.createLabel("Takes 20%"));
-        var pl_2 = new Panel(new PercentLayout(VERTICAL, 4));
+        var pl_2 = new Panel(new PercentLayout("vertical", 4));
         pl_2.setPreferredSize(-1, 220);
         pl_2.add(30, pkg.createLabel("Takes 30%"));
         pl_2.add(50, pkg.createLabel("Takes 50%"));
@@ -150,7 +150,7 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, [
             return l;
         }
 
-        var p = new Panel(new FlowLayout(CENTER, CENTER));
+        var p = new Panel(new FlowLayout("center", "center"));
         p.setPadding(4);
         p.setPreferredSize(200,200);
 
@@ -158,15 +158,15 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, [
 
         var c = new Constraints();
         c.setPadding(4);
-        c.fill = 0;
-        c.ax = LEFT;
-        c.ay = TOP;
+        c.fill = "none";
+        c.ax = "left";
+        c.ay = "top";
         p1.add(c, createLabel("Left-top aligned", 0, 200));
 
         c = new Constraints();
         c.setPadding(4);
-        c.fill = HORIZONTAL;
-        c.ay = BOTTOM;
+        c.fill = "horizontal";
+        c.ay = "bottom";
         p1.add(c, createLabel("Aligned bottom,\nstretched horizontally", 0, 40));
 
         c = new Constraints();
@@ -175,9 +175,9 @@ pkg.LayoutDemo = new Class(pkg.DemoPan, [
 
         c = new Constraints();
         c.setPadding(4);
-        c.fill = 0;
-        c.ax = CENTER;
-        c.ay = CENTER;
+        c.fill = "none";
+        c.ax = "center";
+        c.ay = "center";
         p1.add(c, createLabel("Centered", 120, 50));
 
         p.add(pkg.createBorderPan("2x2 grid layout", p1));
@@ -199,8 +199,8 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
 
         var p = new Panel(new GridLayout(3, 2)), ctr = new Constraints();
         ctr.left = ctr.right = ctr.bottom = ctr.top = 8;
-        ctr.ax = STRETCH;
-        ctr.ay = STRETCH;
+        ctr.ax = "stretch";
+        ctr.ay = "stretch";
         p.add(ctr, this.createCheckboxPan(3, true));
         p.add(ctr, this.createCheckboxPan(3, false));
         p.add(ctr, this.createTextFieldPan());
@@ -226,7 +226,7 @@ pkg.BasicUIDemo = new Class(pkg.DemoPan, [
         var p = new Panel(new GridLayout(3, 2));
         var tf = new TextField();
         var ctr = new Constraints();
-        ctr.ay = CENTER;
+        ctr.ay = "center";
         ctr.setPadding(2);
 
         tf.setPreferredSize(150, -1);
@@ -383,11 +383,11 @@ zebkit.package("ui.demo", function(pkg, Class) {
         function() {
             this.$super();
             this.setLayout(new BorderLayout());
-            var n = new Tabs(LEFT);
+            var n = new Tabs("left");
             n.add("Split Panel",  this.createSplitPan());
             n.add("Border Panel", this.createTitledPan());
             n.add("Scroll Panel", this.createScrollPan());
-            this.add(CENTER, n);
+            this.add("center", n);
         },
 
         function createTitledPan() {
@@ -397,16 +397,16 @@ zebkit.package("ui.demo", function(pkg, Class) {
             p1.setPreferredSize(130, 130);
 
             var ll = new Label(""),
-                p2 = new BorderPan("Center aligned title", ll, CENTER | TOP);
+                p2 = new BorderPan("Center aligned title", ll,  "top", "center");
             p2.setPreferredSize(170, 130);
 
-            var p3 = new BorderPan("Right aligned title", new Label(""), TOP | RIGHT);
+            var p3 = new BorderPan("Right aligned title", new Label(""), "top", "right");
             p3.setPreferredSize(170, 130);
-            var p4 = new BorderPan("Bottom title", new Label(""), BOTTOM | LEFT);
+            var p4 = new BorderPan("Bottom title", new Label(""), "bottom", "left");
             p4.setPreferredSize(170, 130);
-            var p5 = new BorderPan("Bottom centered title", new Label(""), CENTER | BOTTOM);
+            var p5 = new BorderPan("Bottom centered title", new Label(""), "bottom", "center");
             p5.setPreferredSize(170, 130);
-            var p6 = new BorderPan("Bottom right title", new Label(""), RIGHT | BOTTOM);
+            var p6 = new BorderPan("Bottom right title", new Label(""), "bottom", "right");
             p6.setPreferredSize(170, 130);
             var p7 = new BorderPan(new ImageLabel("image title", pkg.butterfly), new Label(""));
             p7.setPreferredSize(170, 130);
@@ -524,7 +524,7 @@ zebkit.package("ui.demo", function(pkg, Class) {
         function() {
             this.$super();
 
-            var p = new Panel(new FlowLayout(CENTER, TOP, HORIZONTAL, 8));
+            var p = new Panel(new FlowLayout("center", "top", "horizontal", 8));
             this.setLayout(new BorderLayout(4,4));
 
             var t1 = new Tree(makeTreeModel()), p1 = new BorderPan("Standard tree", t1);
@@ -565,14 +565,14 @@ zebkit.package("ui.demo", function(pkg, Class) {
             t4.select(t4.model.root);
             t4.setPadding(4);
             p4.setPreferredSize(-1, 280);
-            this.add(BOTTOM, p4);
+            this.add("bottom", p4);
 
             var ctr = new Constraints();
             this.setPadding(8);
             p.add(ctr, p1);
             p.add(ctr, p2);
             p.add(ctr, p3);
-            this.add(CENTER, p);
+            this.add("center", p);
         }
     ]);
 
@@ -663,7 +663,7 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
         this.setLayout(new BorderLayout(8,8));
         this.setPadding(8);
 
-        var mbar = new Panel(new FlowLayout(CENTER, TOP, HORIZONTAL, 8));
+        var mbar = new Panel(new FlowLayout("center", "top", "horizontal", 8));
         var c    = new Panel(new BorderLayout());
         var ctr  = new Constraints();
 
@@ -671,7 +671,7 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
         c.setPreferredSize(290, 160);
         var mb = new Menubar(formMenuArray());
         mb.setBorder(new Border("lightGray"));
-        c.add(TOP, mb);
+        c.add("top", mb);
 
 
         var bp = new BorderPan("Top menu bar", c);
@@ -685,20 +685,20 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
         mb = new Menubar(formMenuArray());
         mb.setBorder(new Border("lightGray"));
 
-        c.add(BOTTOM, mb);
+        c.add("bottom", mb);
 
         c = new BorderPan("Bottom menu bar", c);
         c.setGaps(8,8);
         mbar.add(ctr, c);
-        this.add(CENTER, mbar);
+        this.add("center", mbar);
 
 
         var t = createToolbar();
         t = new BorderPan("Horizontal toolbar", t);
         t.setGaps(8,8);
-        this.add(TOP, t);
+        this.add("top", t);
 
-        var p  = new Panel(new FlowLayout(CENTER, CENTER, HORIZONTAL, 8));
+        var p  = new Panel(new FlowLayout("center", "center", "horizontal", 8));
         var l1 = pkg.createLabel("Press right mouse\nbutton to see\ncontext menu Cars", rgb.black);
         var l2 = pkg.createLabel("Press right mouse\nbutton to see\ncontext menu Colors", "003366");
         var l3 = pkg.createLabel("Press right mouse\nbutton to see\ncontext menu Brands", "99CC99");
@@ -719,7 +719,7 @@ pkg.PopupDemo = new Class(pkg.DemoPan, [
         var m1 = new Menu($get(0, formMenuArray()));
         var m2 = createColorPicker();
         var m3 = new Menu($get(2, formMenuArray()));
-        this.add(BOTTOM, new BorderPan("Context menu", p));
+        this.add("bottom", new BorderPan("Context menu", p));
 
         l1.popup = m1;
         l2.popup = m2;
@@ -750,7 +750,7 @@ var CardLayout = new Class(Layout, [
 
 
 function createTooltipDemo() {
-    var  p = new Panel(new FlowLayout(CENTER, CENTER, VERTICAL, 16));
+    var  p = new Panel(new FlowLayout("center", "center", "vertical", 16));
     var ccc = "black";
     var f = new Font("Helvetica", "bold", 16);
     var l1 = pkg.createLabel("HONDA\nShow textual\ntooltip", ccc, f);
@@ -768,7 +768,7 @@ function createTooltipDemo() {
     t1.setBackground("#E0F4FF");
     l1.tooltip = t1;
 
-    var pp = new Panel(new FlowLayout(CENTER, CENTER, HORIZONTAL, 2));
+    var pp = new Panel(new FlowLayout("center", "center", "horizontal", 2));
     var img = new ImagePan(ui.demo.bmw);
     var ll = new Label(new zebkit.data.Text("BMW is the best.\nAudi looks similar.\nBeware of imitation :)"));
     ll.setColor("#3366CC");
@@ -784,7 +784,7 @@ function createTooltipDemo() {
     ]);
     grid.setBackground("rgba(224, 244, 255, 0.7)");
     grid.setUsePsMetric(true);
-    grid.add(TOP, new GridCaption(["Product", "Picture", "Max speed"]));
+    grid.add("top", new GridCaption(["Product", "Picture", "Max speed"]));
     grid.setViewProvider(new DefViews([
         function getView(target, row, col, data) {
             if (col == 0 || col == 2) {
@@ -818,14 +818,14 @@ function createWindowComp(target) {
     tf.setValue("Drag and drop window\nby its title.\n\nResize window by\ndrag its right-bottom corner");
 
     var center = new Panel(new BorderLayout(4));
-    center.add(CENTER, tf);
-    center.add(TOP, new Combo(["Combo item 1", "Combo item 2", "Combo item 3"]));
+    center.add("center", tf);
+    center.add("top", new Combo(["Combo item 1", "Combo item 2", "Combo item 3"]));
     center.setPadding(8);
 
-    w.root.add(CENTER, center);
+    w.root.add("center", center);
     w.root.setPadding(0);
 
-    var p = new Panel(new FlowLayout(CENTER, CENTER));
+    var p = new Panel(new FlowLayout("center", "center"));
     var b = new Button("Close");
     b.setPadding(4,16,4,16);
 
@@ -839,12 +839,12 @@ function createWindowComp(target) {
     // p.setPadding(8);
     p.add(b);
 
-    w.root.add(BOTTOM, p);
+    w.root.add("bottom", p);
 
     b.bind(function(src, id, data) { target.hideWin(); });
 
 
-    w.root.add(TOP, new Menubar({
+    w.root.add("top", new Menubar({
         "MenuItem 1": [
             "Item 1.1", "-", "[x]Item 1.2", "[]Item 1.3"
         ],
@@ -868,9 +868,9 @@ pkg.WinDemo = new Class(pkg.DemoPan,  [
         this.shown = false;
         this.setLayout(new BorderLayout(8,8));
         this.setPadding(8);
-        this.add(LEFT, pkg.createBorderPan("Tooltips", createTooltipDemo()));
+        this.add("left", pkg.createBorderPan("Tooltips", createTooltipDemo()));
 
-        var cp = new Panel(new FlowLayout(CENTER, CENTER, VERTICAL, 8));
+        var cp = new Panel(new FlowLayout("center", "center", "vertical", 8));
         this.wp = new Panel(new CardLayout());
 
         this.ab = new Button("PRESS TO ACTIVATE WINDOW");
@@ -881,7 +881,7 @@ pkg.WinDemo = new Class(pkg.DemoPan,  [
         this.wp.add(this.w);
         this.wp.add(this.ab);
         cp.add(this.wp);
-        this.add(CENTER, new BorderPan("Window", cp));
+        this.add("center", new BorderPan("Window", cp));
 
         var $t = this;
         this.ab.bind(function actionPerformed(src, id, data) { $t.showWin(); });
@@ -920,7 +920,7 @@ var ui = zebkit.ui;
 eval(zebkit.Import("ui", "layout", "ui.grid", "data", "ui.tree"));
 
 function wrapWithPan() {
-    var p = new Panel(new FlowLayout(CENTER, TOP, VERTICAL, 16));
+    var p = new Panel(new FlowLayout("center", "top", "vertical", 16));
     p.setPadding(8);
     for(var i=0; i< arguments.length; i++) p.add(arguments[i]);
     return p;
@@ -944,21 +944,21 @@ var ColumnsAlignmentProvider = Class(zebkit.ui.grid.DefViews, [
     },
 
     function getXAlignment(target, row,col){
-        if(col === 0) return LEFT;
+        if(col === 0) return "left";
         else {
-            if (col == 1) return CENTER;
-            else if(col == 2) return RIGHT;
+            if (col == 1) return "center";
+            else if(col == 2) return "right";
         }
-        return this.$super(target, this.getXAlignment,row, col);
+        return this.$super(target, row, col);
     },
 
     function getYAlignment(target, row,col){
-        if(row === 0) return TOP;
+        if(row === 0) return "top";
         else {
-            if(row == 1) return CENTER;
-            else if(row == 2) return BOTTOM;
+            if(row == 1) return "center";
+            else if(row == 2) return "bottom";
         }
-        return this.$super(target, this.getYAlignment,row, col);
+        return this.$super(target, row, col);
     },
 
     function getCellColor(target,row,col) {
@@ -984,9 +984,9 @@ var CustomGridEditor = new Class(zebkit.ui.grid.DefEditors, [
                 this.list.setLayout(new GridLayout(2, 2));
                 this.list.setPadding(6);
                 this.list.views[0] = null;
-                this.add(CENTER, this.list);
+                this.add("center", this.list);
 
-                var controls = new Panel(new FlowLayout(CENTER, CENTER, HORIZONTAL, 8));
+                var controls = new Panel(new FlowLayout("center", "center", "horizontal", 8));
                 var cancelLink = new Link("<cancel>");
                 controls.add(cancelLink);
                 controls.setPadding(0, 0, 4, 0);
@@ -1003,7 +1003,7 @@ var CustomGridEditor = new Class(zebkit.ui.grid.DefEditors, [
                 this.setBorder(new zebkit.ui.Border("#7297BA", 2, 6));
                 this.setBackground("#E0F4FF");
 
-                this.add(BOTTOM, controls);
+                this.add("bottom", controls);
             },
 
             function fire(t, prev) {
@@ -1023,7 +1023,7 @@ var CustomGridEditor = new Class(zebkit.ui.grid.DefEditors, [
         this.extWin.toPreferredSize();
 
         this.editors["0"] = new Checkbox(null);
-        this.editors["0"].setLayout(new FlowLayout(CENTER, CENTER));
+        this.editors["0"].setLayout(new FlowLayout("center", "center"));
         this.editors["1"] = new this.clazz.Combo();
         this.editors["1"].setBorder(null);
         var list = this.editors["1"].list;
@@ -1088,17 +1088,17 @@ function longGrid() {
         },
 
         function getXAlignment(target, row,col) {
-            return zebkit.layout.CENTER;
+            return "center";
         }
     ]));
 
 	var gp1 = new GridCaption(g);
 	for(var i=0; i < m.cols; i++) gp1.putTitle(i, "Title " + i);
-    g.add(TOP, gp1);
+    g.add("top", gp1);
 
 	var gp2 = new GridCaption(g);
 	for(var i=0; i < m.rows; i++) gp2.putTitle(i, " " + i + " ");
-    g.add(LEFT, gp2);
+    g.add("left", gp2);
 
 	var p = new ScrollPan(g);
 	p.setPadding(4);
@@ -1120,7 +1120,7 @@ function editableGrid() {
         }
 
         cap.isResizable = false;
-        grid.add(TOP, cap);
+        grid.add("top", cap);
         return grid;
     }
 
@@ -1159,7 +1159,7 @@ function editableGrid() {
         cap.putTitle(0, "Grid Inside");
         cap.putTitle(1, "Tree Inside");
         cap.putTitle(2, "Tabs Inside");
-        grid.add(TOP, cap);
+        grid.add("top", cap);
         grid.setEditorProvider(new CompEditorProvider());
         grid.setViewProvider(new CompViewProvider());
         grid.setPosition(null);
@@ -1180,7 +1180,7 @@ function editableGrid() {
     var t = ["Checkbox\nas editor", "Drop down\nas editor", "Text field\nas editor", "External Window\nas editor"];
 
 	var g = new Grid();
-    g.defXAlignment = CENTER;
+    g.defXAlignment = "center";
     g.setViewProvider(new zebkit.ui.grid.DefViews([
         function getView(target, row, col, data) {
             if (col === 0) return (data == "on") ? onView : offView;
@@ -1197,7 +1197,7 @@ function editableGrid() {
 
 	var gp1 = new GridCaption(t, new TextRender(new Text("")));
 	gp1.isResizable = false;
-	g.add(TOP, gp1);
+	g.add("top", gp1);
 
     // for(var i = 0;i < m.rows; i ++ ) g.setRowHeight(i, 40);
     for(var i = 0;i < m.cols; i ++ ) g.setColWidth(i, 130);
@@ -1220,7 +1220,7 @@ function createSortableGrid() {
         cap.setSortable(i, true);
     }
 
-    g.add(TOP, cap);
+    g.add("top", cap);
     return new ScrollPan(new GridStretchPan(g));
 }
 
@@ -1231,7 +1231,7 @@ function customCellAlignmentGrid() {
               "Bottom-Left\nAlignment", "Bottom-Center\nAlignment", "Bottom-Right\nAlignment"];
     var titles = [ "Left Aligned", new CompRender(new zebkit.ui.ImageLabel("Center", zebkit.ui.demo.ringtone)), "Right Aligned"];
 
-    var root = new Panel(new RasterLayout(USE_PS_SIZE)),
+    var root = new Panel(new RasterLayout(true)),
         data = new Matrix(3, 3);
 
     for(var i = 0;i < data.rows * data.cols; i ++ ){
@@ -1243,13 +1243,13 @@ function customCellAlignmentGrid() {
         caption.putTitle(i, titles[i]);
     }
 
-    caption.setTitleAlignments(0, LEFT, CENTER);
-    caption.setTitleAlignments(1, CENTER, CENTER);
-    caption.setTitleAlignments(2, RIGHT, CENTER);
+    caption.setTitleAlignments(0, "left", "center");
+    caption.setTitleAlignments(1, "center", "center");
+    caption.setTitleAlignments(2, "right", "center");
     caption.render.setFont(new Font("Helvetica", "bold", 14));
     caption.isResizable = false;
 
-    grid.add(TOP, caption);
+    grid.add("top", caption);
     grid.setViewProvider(new ColumnsAlignmentProvider());
     grid.setLocation(20, 20);
     for(var i = 0;i < data.rows; i ++ ) grid.setRowHeight(i, 120);
@@ -1268,7 +1268,7 @@ function createDynamicGrid() {
     }
 
     var topCaption = new CompGridCaption();
-    grid.add(TOP, topCaption);
+    grid.add("top", topCaption);
 
     var addBt = new Button("+");
     addBt.setBorder(new RoundBorder("gray", 2));
@@ -1287,7 +1287,7 @@ function createDynamicGrid() {
     return new Panel({
         layout : new BorderLayout(8),
         kids   : {
-            CENTER : new ScrollPan(grid)
+            "center" : new ScrollPan(grid)
         }
     });
 }
@@ -1299,14 +1299,14 @@ pkg.GridDemo = new Class(pkg.DemoPan, [
         this.setLayout(new BorderLayout());
         this.setPadding(6);
 
-        var n = new Tabs(LEFT);
+        var n = new Tabs("left");
         n.add("1000 cells", longGrid());
         n.add("Grid", customCellAlignmentGrid());
         n.add("Editable grid", editableGrid());
         n.add("Sortable", createSortableGrid());
         n.add("Dynamic", createDynamicGrid());
 
-		this.add(CENTER, n);
+		this.add("center", n);
     }
 ]);
 
@@ -1412,8 +1412,8 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
         var l = new Label(new zebkit.data.Text("This page represents number of Zebkit components to control UI components size and location"));
         l.setPadding(6);
         l.setFont(ui.boldFont);
-        this.add(TOP, l);
-        this.add(CENTER, s);
+        this.add("top", l);
+        this.add("center", s);
 
 
         //this.setBackground("gray");

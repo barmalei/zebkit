@@ -29,7 +29,7 @@ var uiFiles = [
     'src/ui.designer.js'
 ];
 
-var zebraFiles = [
+var zebkitFiles = [
     'src/easyoop.js',
 ].concat(uiFiles);
 
@@ -56,13 +56,13 @@ gulp.task('http', function() {
 });
 
 gulp.task('lint', function() {
-    return gulp.src(zebraFiles)
+    return gulp.src(zebkitFiles)
         .pipe(jshint({ eqnull : true }))
         .pipe(jshint.reporter('default'));
 });
 
 gulp.task('copy', function() {
-    return gulp.src(["src/zebra.json", "src/zebra.png"]).pipe(gulp.dest("."));
+    return gulp.src(["src/zebkit.json", "src/zebkit.png"]).pipe(gulp.dest("."));
 });
 
 gulp.task('easyoopscript', function() {
@@ -75,25 +75,25 @@ gulp.task('easyoopscript', function() {
 
 gulp.task('uiscript', function() {
     return gulp.src(uiFiles)
-        .pipe(concat('zebra.ui.js'))
+        .pipe(concat('zebkit.ui.js'))
         .pipe(gulp.dest('.'))
-        .pipe(rename('zebra.ui.min.js'))
+        .pipe(rename('zebkit.ui.min.js'))
         .pipe(uglify({ compress: false, mangle: false }))
         .pipe(gulp.dest('.'));
 });
 
-gulp.task('zebrascript', function() {
-    return gulp.src(zebraFiles)
-        .pipe(concat('zebra.js'))
+gulp.task('zebkitscript', function() {
+    return gulp.src(zebkitFiles)
+        .pipe(concat('zebkit.js'))
         .pipe(gulp.dest('.'))
-        .pipe(rename('zebra.min.js'))
+        .pipe(rename('zebkit.min.js'))
         .pipe(uglify({ compress: false, mangle: false }))
         .pipe(gulp.dest('.'));
 });
 
 gulp.task('runtime', function () {
-    return gulp.src(['zebra.js', 'zebra.min.js', 'zebra.png', 'zebra.json'])
-        .pipe(zip('zebra.runtime.zip'))
+    return gulp.src(['zebkit.js', 'zebkit.min.js', 'zebkit.png', 'zebkit.json'])
+        .pipe(zip('zebkit.runtime.zip'))
         .pipe(gulp.dest('.'));
 });
 
@@ -115,11 +115,11 @@ gulp.task('demoscript', function() {
 
 
 gulp.task('watch', function() {
-    gulp.watch(zebraFiles, ['zebrascript']);
+    gulp.watch(zebkitFiles, ['zebkitscript']);
     gulp.watch(demoFiles, ['demoscript']);
     gulp.watch("samples/js/uiengine.samples.js", ['samplescript']);
 });
 
-gulp.task('scripts', [ "demoscript", "samplescript", "zebrascript"]);
+gulp.task('scripts', [ "demoscript", "samplescript", "zebkitscript"]);
 
 gulp.task('default', ['scripts', 'copy', 'runtime']);

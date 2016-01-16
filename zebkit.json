@@ -145,7 +145,7 @@
         "white"      : "#FFFFFF",
         "black"      : "#000000",
         "fontColor"  : "#808080",
-        "background" :  { "$Gradient": [ "white", "#F0F0F0", 32 ] },
+        "background" :  { "$Gradient": [ "white", "#F0F0F0", "horizontal" ] },
         "borderColor": "#AAAAAA",
         "gray1"      : "#A1A1A1",
         "gray2"      : "#AAAAAA",
@@ -385,7 +385,7 @@
         "HBundle": {
             "padding":1,
             "preferredSize" : [ -1, 6 ],
-            "background" : { "$zebkit.ui.BunldeView": [ 32 ] }
+            "background" : { "$zebkit.ui.BunldeView": [ "horizontal" ] }
         },
 
         "background":  null,

@@ -680,7 +680,7 @@ pkg.Window = Class(pkg.StatePan, [
          * @attribute icons
          * @readOnly
          */
-        this.icons = new pkg.Panel(new L.FlowLayout(L.LEFT, L.CENTER, L.HORIZONTAL, 2));
+        this.icons = new pkg.Panel(new L.FlowLayout("left", "center", "horizontal", 2));
         this.icons.add(new this.clazz.Icon());
 
         /**
@@ -689,11 +689,11 @@ pkg.Window = Class(pkg.StatePan, [
          * @attribute buttons
          * @readOnly
          */
-        this.buttons = new pkg.Panel(new L.FlowLayout(L.CENTER, L.CENTER));
+        this.buttons = new pkg.Panel(new L.FlowLayout("center", "center"));
 
-        this.caption.add(L.CENTER, this.title);
-        this.caption.add(L.LEFT, this.icons);
-        this.caption.add(L.RIGHT, this.buttons);
+        this.caption.add("center", this.title);
+        this.caption.add("left", this.icons);
+        this.caption.add("right", this.buttons);
 
         /**
          * Window status panel.
@@ -711,9 +711,9 @@ pkg.Window = Class(pkg.StatePan, [
         this.setLayout(new L.BorderLayout(2,2));
 
 
-        this.add(L.CENTER, this.root);
-        this.add(L.TOP, this.caption);
-        this.add(L.BOTTOM, this.status);
+        this.add("center", this.root);
+        this.add("top", this.caption);
+        this.add("bottom", this.status);
     },
 
     function fired(src) {
@@ -1606,7 +1606,7 @@ pkg.Menu = Class(pkg.CompList, [
             "Item 3": null
         });
 
-        canvas.root.add(zebkit.layout.BOTTOM, mbar);
+        canvas.root.add("bottom", mbar);
 
  * @class zebkit.ui.Menubar
  * @constructor

@@ -22,13 +22,13 @@
                             padding: 4,
  					    	layout: new BorderLayout(),
 					    	kids  : {
-					    		TOP: new TextField("Text Field").properties({
+					    		top: new TextField("Text Field").properties({
 					    			background: "rgba(200,200,200, 0.5)",
 					    			color: "white",
 					    			cursorView: zebkit.util.rgb.red
 					    		}),
 
-					    		LEFT: (new Slider(VERTICAL)).properties({
+					    		left: (new Slider("vertical")).properties({
 					    					values : [ 0, 10, [ 0, 5, 5 ], 1, 5],
 					    					scaleColor: "red",
 					    					value : 5,
@@ -37,8 +37,8 @@
 					    					background: null
 					    			  }),
 
-					    		BOTTOM: new Panel().properties({
-					    			layout : new FlowLayout(CENTER, CENTER, HORIZONTAL, 8),
+					    		bottom: new Panel().properties({
+					    			layout : new FlowLayout("center", "center", "horizontal", 8),
 					    			padding: 6,
 					    			kids   : [
 					    				new Button("Play video").properties({

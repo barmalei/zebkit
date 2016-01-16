@@ -26,7 +26,7 @@
                                 var kid = t.kids[i];
                                 if (kid.isVisible === true) {
                                     var ctr = kid.constraints;
-                                    if (ctr.alignment == LEFT) {
+                                    if (ctr.alignment === "left") {
                                         var ps = kid.getPreferredSize();
                                         ps.height = ~~((t.height*ctr.percentage)/100);
                                         kid.setSize(ps.width, ps.height);
@@ -78,13 +78,13 @@
                     p.cursorType = Cursor.HAND;
                     p.setBackground("orange");
                     p.setPadding(6);
-                    p.setLayout(new FlowLayout(CENTER, CENTER, VERTICAL, 8));
+                    p.setLayout(new FlowLayout("center", "center", "vertical", 8));
                     p.add(new Button("Button 1"));
                     p.add(new Button("Button 2"));
                     p.add(new Button("Button 3"));
 
                     root.setBorder("plain");
-                    root.add(new Constr(LEFT, 70), p);
+                    root.add(new Constr("left", 70), p);
 			 		//canvas.fullScreen();
 		 		});
 		</script>

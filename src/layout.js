@@ -1,72 +1,14 @@
 (function(pkg, Class) {
 
-pkg.NONE        = 0;
-pkg.LEFT        = 1;
-pkg.RIGHT       = 2;
-pkg.TOP         = 4;
-pkg.BOTTOM      = 8;
-pkg.CENTER      = 16;
-pkg.HORIZONTAL  = 32;
-pkg.VERTICAL    = 64;
-pkg.TEMPORARY   = 128;
-
-pkg.UsePsSize   = pkg.USE_PS_SIZE = 512;
-pkg.STRETCH     = 256;
-
-pkg.TopLeft     = pkg.LEFT  | pkg.TOP;
-pkg.TopRight    = pkg.RIGHT | pkg.TOP;
-pkg.BottomLeft  = pkg.LEFT  | pkg.BOTTOM;
-pkg.BottomRight = pkg.RIGHT | pkg.BOTTOM;
-
-// collect constraints into a separate dictionary
-var $ctrs = {};
-for(var k in pkg) {
-    if (pkg.hasOwnProperty(k) && /^\d+$/.test(pkg[k])) {
-        $ctrs[k] = pkg[k];
-        $ctrs[k.toUpperCase()] = pkg[k];
-        var lc = k.toLowerCase();
-        $ctrs[lc] = pkg[k];
-        $ctrs[lc[0].toUpperCase() + lc.substring(1)] = pkg[k];
-    }
-}
-
-pkg.$constraints = function(v) {
-    return (  v != null &&
-             (typeof v === "string" || v.constructor === String)) &&
-            $ctrs[v] != null ? $ctrs[v] : v;
-};
-
-
 /**
  * Layout package provides number of classes, interfaces, methods and
  * variables that allows developer easily implement rules based layouting
  * of hierarchy of rectangular elements. The package has no relation
  * to any concrete UI, but it can be applied to a required UI framework
  *
- * The package declares the following constraints constants:
-
-    - **NONE** no constraints
-    - **LEFT** left alignment constraint
-    - **TOP** top alignment constraint
-    - **RIGHT** right alignment constraint
-    - **BOTTOM** bottom alignment constraint
-    - **CENTER** center alignment constraint
-    - **HORIZONTAL** horizontal elements alignment constraint
-    - **VERTICAL** vertical elements alignment constraint
-    - **TopLeft** top left alignment constraint
-    - **TopRight** top right alignment constraint
-    - **BottomLeft** bottom left alignment constraint
-    - **BottomRight** bottom right alignment constraint
-    - **STRETCH** stretch element
-    - **USE_PS_SIZE** use preferred size for an element
- *
  * @module layout
  * @main layout
  */
-
-
-
-
 
  /**
   * Find a direct children element for the given children component
@@ -81,7 +23,6 @@ pkg.getDirectChild = function(parent, child){
     for(; child != null && child.parent !== parent; child = child.parent) {}
     return child;
 };
-
 
 /**
  * Layout manager interface
@@ -116,7 +57,9 @@ var L = pkg.Layout = new zebkit.Interface();
 pkg.getDirectAt = function(x,y,p){
     for(var i = 0;i < p.kids.length; i++){
         var c = p.kids[i];
-        if (c.isVisible === true && c.x <= x && c.y <= y && c.x + c.width > x && c.y + c.height > y) return i;
+        if (c.isVisible === true && c.x <= x && c.y <= y && c.x + c.width > x && c.y + c.height > y) {
+            return i;
+        }
     }
     return -1;
 };
@@ -445,7 +388,6 @@ pkg.Layoutable = Class(L, [
             p[arguments[0]] = arguments[1];
             return this.properties(p);
         };
-
 
         /**
          * Validate the component metrics. The method is called as
@@ -918,10 +860,9 @@ pkg.StackLayout = Class(L, [
             for(var i = 0;i < t.kids.length; i++){
                 var l = t.kids[i];
                 if (l.isVisible === true) {
-                    var ctr = l.constraints == null ? null
-                                                    : pkg.$constraints(l.constraints);
+                    var ctr = l.constraints == null ? null : l.constraints;
 
-                    if (ctr === pkg.USE_PS_SIZE) {
+                    if (ctr === "usePsSize") {
                         var ps = l.getPreferredSize();
                         l.setBounds(left + Math.floor((ww - ps.width )/2),
                                     top  + Math.floor((hh - ps.height)/2),
@@ -937,10 +878,10 @@ pkg.StackLayout = Class(L, [
 ]);
 
 /**
- *  Layout manager implementation that logically splits component area into five areas: TOP, BOTTOM, LEFT, RIGHT and CENTER.
- *  TOP and BOTTOM components are stretched to fill all available space horizontally and are sized to have preferred height horizontally.
- *  LEFT and RIGHT components are stretched to fill all available space vertically and are sized to have preferred width vertically.
- *  CENTER component is stretched to occupy all available space taking in account TOP, LEFT, RIGHT and BOTTOM components.
+ *  Layout manager implementation that logically splits component area into five areas: top, bottom, left, right and center.
+ *  Top and bottom components are stretched to fill all available space horizontally and are sized to have preferred height horizontally.
+ *  Left and right components are stretched to fill all available space vertically and are sized to have preferred width vertically.
+ *  Center component is stretched to occupy all available space taking in account top, left, right and bottom components.
 
        // create panel with border layout
        var p = new zebkit.ui.Panel(new zebkit.layout.BorderLayout());
@@ -990,14 +931,13 @@ pkg.BorderLayout = Class(L, [
             for(var i = 0; i < target.kids.length; i++){
                 var l = target.kids[i];
                 if (l.isVisible === true){
-                    var ctr = pkg.$constraints(l.constraints);
-                    switch(ctr) {
-                       case pkg.CENTER : center = l;break;
-                       case pkg.TOP    : north  = l;break;
-                       case pkg.BOTTOM : south  = l;break;
-                       case pkg.LEFT   : west   = l;break;
-                       case pkg.RIGHT  : east   = l;break;
-                       default: throw new Error("Invalid constraints: " + ctr);
+                    switch(l.constraints) {
+                       case "center" : center = l;break;
+                       case "top"    : north  = l;break;
+                       case "bottom" : south  = l;break;
+                       case "left"   : west   = l;break;
+                       case "right"  : east   = l;break;
+                       default: throw new Error("Invalid constraints: " + l.constraints);
                     }
                 }
             }
@@ -1047,22 +987,21 @@ pkg.BorderLayout = Class(L, [
             for(var i = 0;i < t.kids.length; i++){
                 var l = t.kids[i];
                 if (l.isVisible === true) {
-                    var ctr = pkg.$constraints(l.constraints);
-                    switch(ctr) {
-                        case pkg.CENTER: center = l; break;
-                        case pkg.TOP :
+                    switch(l.constraints) {
+                        case "center": center = l; break;
+                        case "top" :
                             var ps = l.getPreferredSize();
                             l.setBounds(left, top, right - left, ps.height);
                             top += ps.height + this.vgap;
                             break;
-                        case pkg.BOTTOM:
+                        case "bottom":
                             var ps = l.getPreferredSize();
                             l.setBounds(left, bottom - ps.height, right - left, ps.height);
                             bottom -= ps.height + this.vgap;
                             break;
-                        case pkg.LEFT: west = l; break;
-                        case pkg.RIGHT: east = l; break;
-                        default: throw new Error("Invalid constraints: " + ctr);
+                        case "left": west = l; break;
+                        case "right": east = l; break;
+                        default: throw new Error("Invalid constraints: " + l.constraints);
                     }
                 }
             }
@@ -1093,8 +1032,7 @@ pkg.BorderLayout = Class(L, [
  * provides extra possibilities to control children components placing.
  * It is possible to align components by specifying layout constraints,
  * size component to its preferred size and so on.
- * @param {Integer} [m] flag to add extra rule to components layouting.
- * For instance use zebkit.layout.USE_PS_SIZE as the flag value to set
+ * @param {Boolean} [usePsSize] flag to add extra rule to set
  * components size to its preferred sizes.
  * @class  zebkit.layout.RasterLayout
  * @constructor
@@ -1102,15 +1040,16 @@ pkg.BorderLayout = Class(L, [
  */
 pkg.RasterLayout = Class(L, [
     function $prototype() {
+        this.usePsSize = false;
+
         this.calcPreferredSize = function(c){
-            var m = { width:0, height:0 },
-                b = (this.flag & pkg.USE_PS_SIZE) > 0;
+            var m = { width:0, height:0 };
 
             for(var i = 0;i < c.kids.length; i++ ){
                 var kid = c.kids[i];
                 if (kid.isVisible === true) {
-                    var ps = b ? kid.getPreferredSize()
-                               : { width:kid.width, height:kid.height },
+                    var ps = this.usePsSize ? kid.getPreferredSize()
+                                            : { width:kid.width, height:kid.height },
                         px = kid.x + ps.width,
                         py = kid.y + ps.height;
 
@@ -1123,14 +1062,13 @@ pkg.RasterLayout = Class(L, [
 
         this.doLayout = function(c){
             var r = c.width - c.getRight(),
-                b = c.height - c.getBottom(),
-                usePsSize = (this.flag & pkg.USE_PS_SIZE) > 0;
+                b = c.height - c.getBottom();
 
             for(var i = 0;i < c.kids.length; i++){
                 var el = c.kids[i], ww = 0, hh = 0;
 
                 if (el.isVisible === true){
-                    if (usePsSize) {
+                    if (this.usePsSize) {
                         var ps = el.getPreferredSize();
                         ww = ps.width;
                         hh = ps.height;
@@ -1140,34 +1078,29 @@ pkg.RasterLayout = Class(L, [
                         hh = el.height;
                     }
 
-                    var ctr = el.constraints == null ? null : pkg.$constraints(el.constraints);
-
-                    if (ctr != null) {
-                        if ((ctr & pkg.HORIZONTAL)  > 0) ww = r - el.x;
-                        if ((ctr & pkg.VERTICAL)    > 0) hh = b - el.y;
-                    }
+                    var ctr = el.constraints == null ? null : el.constraints;
                     el.setSize(ww, hh);
 
                     if (ctr != null) {
                         var x = el.x, y = el.y;
 
-                        if ((ctr & pkg.TOP) > 0) {
+                        if (ctr === "top" || ctr === "topRight" || ctr === "topLeft") {
                             y = 0;
                         }
-                        else if ((ctr & pkg.BOTTOM) > 0) {
+                        else if (ctr === "bottom" || ctr === "bottomLeft" || ctr === "bottomRight") {
                             y = c.height - hh;
                         }
-                        else if ((ctr & pkg.CENTER) > 0) {
+                        else if (ctr === "center" || ctr === "left" || ctr === "right") {
                             y = Math.floor((c.height - hh) / 2);
                         }
 
-                        if ((ctr & pkg.LEFT) > 0) {
+                        if (ctr === "left" || ctr === "topLeft" || ctr === "bottomLeft") {
                             x = 0;
                         }
-                        else if ((ctr & pkg.RIGHT) > 0) {
+                        else if (ctr === "right" || ctr === "topRight" || ctr === "bottomRight") {
                             x = c.width - ww;
                         }
-                        else if ((ctr & pkg.CENTER) > 0) {
+                        else if (ctr === "center" || ctr === "top" || ctr === "bottom") {
                             x = Math.floor((c.width  - ww) / 2);
                         }
 
@@ -1177,9 +1110,10 @@ pkg.RasterLayout = Class(L, [
             }
         };
 
-        //!!! speed up
-        this[''] = function(f) {
-            this.flag = f ? f : 0;
+        this[''] = function(ups) {
+            if (arguments.length > 0) {
+                this.usePsSize = ups;
+            }
         };
     }
 ]);
@@ -1199,41 +1133,23 @@ pkg.RasterLayout = Class(L, [
         p.add(new zebkit.ui.Button("Button 2"));
         p.add(new zebkit.ui.Button("Button 3"));
 
- * @param {Integer|String} [ax] (zebkit.layout.LEFT by default) horizontal alignment:
-
-     zebkit.layout.LEFT - left alignment
-     zebkit.layout.RIGHT - right alignment
-     zebkit.layout.CENTER - center alignment
-
-     or
+ * @param {String} [ax] ("left" by default) horizontal alignment:
 
      "left"
      "center"
      "right"
 
- * @param {Integer|String} [ay] (zebkit.layout.TOP by default) vertical alignment:
-
-     zebkit.layout.TOP - top alignment
-     zebkit.layout.CENTER - center alignment
-     zebkit.layout.BOTTOM - bottom alignment
-
-     or
+ * @param {String} [ay] ("top" by default) vertical alignment:
 
      "top"
      "center"
      "bottom"
 
- * @param {Integer|String} [dir] (zebkit.layout.HORIZONTAL by default) a direction
+ * @param {String} [dir] ("horizontal" by default) a direction
  * the component has to be placed in the layout
-
-     zebkit.layout.VERTICAL - vertical placed components
-     zebkit.layout.HORIZONTAL - horizontal placed components
-
-     or
 
      "vertical"
      "horizontal"
-
 
  * @param {Integer} [gap] a space in pixels between laid out components
  * @class  zebkit.layout.FlowLayout
@@ -1255,42 +1171,42 @@ pkg.FlowLayout = Class(L, [
          * Horizontal laid out components alignment
          * @attribute ax
          * @readOnly
-         * @type {Integer|String}
-         * @default zebkit.layout.LEFT
+         * @type {String}
+         * @default "left"
          */
-        this.ax = pkg.LEFT;
+        this.ax = "left";
 
         /**
          * Vertical laid out components alignment
          * @attribute ay
          * @readOnly
-         * @type {Integer|String}
-         * @default zebkit.layout.TOP
+         * @type {String}
+         * @default "center"
          */
-        this.ay = pkg.TOP;
+        this.ay = "center";
 
         /**
          * Laid out components direction
          * @attribute direction
          * @readOnly
-         * @type {Integer|String}
-         * @default zebkit.layout.HORIZONTAL
+         * @type {String}
+         * @default "horizontal"
          */
-        this.direction = pkg.HORIZONTAL;
+        this.direction = "horizontal";
 
         this.stretchLast = false;
 
-        this[''] =  function (ax,ay,dir,g){
+        this[''] =  function (ax, ay, dir, g){
             if (arguments.length === 1) this.gap = ax;
             else {
                 if (arguments.length >= 2) {
-                    this.ax = pkg.$constraints(ax);
-                    this.ay = pkg.$constraints(ay);
+                    this.ax = ax;
+                    this.ay = ay;
                 }
 
                 if (arguments.length > 2)  {
-                    dir = pkg.$constraints(dir);
-                    if (dir !== pkg.HORIZONTAL && dir !== pkg.VERTICAL) {
+                    dir = dir;
+                    if (dir !== "horizontal" && dir !== "vertical") {
                         throw new Error("Invalid direction " + dir);
                     }
                     this.direction = dir;
@@ -1306,7 +1222,7 @@ pkg.FlowLayout = Class(L, [
                 var a = c.kids[i];
                 if (a.isVisible === true){
                     var d = a.getPreferredSize();
-                    if (this.direction === pkg.HORIZONTAL){
+                    if (this.direction === "horizontal"){
                         m.width += d.width;
                         m.height = d.height > m.height ? d.height : m.height;
                     }
@@ -1319,7 +1235,7 @@ pkg.FlowLayout = Class(L, [
             }
 
             var add = this.gap * (cc > 0 ? cc - 1 : 0);
-            if (this.direction === pkg.HORIZONTAL) m.width += add;
+            if (this.direction === "horizontal") m.width += add;
             else m.height += add;
             return m;
         };
@@ -1331,42 +1247,42 @@ pkg.FlowLayout = Class(L, [
                 lastOne = null,
                 ew      = c.width  - l - c.getRight(),
                 eh      = c.height - t - c.getBottom(),
-                px      = ((this.ax === pkg.RIGHT) ? ew - psSize.width
-                                                   : ((this.ax === pkg.CENTER) ? Math.floor((ew - psSize.width) / 2) : 0)) + l,
-                py      = ((this.ay === pkg.BOTTOM) ? eh - psSize.height
-                                                    : ((this.ay === pkg.CENTER) ? Math.floor((eh - psSize.height) / 2): 0)) + t;
+                px      = ((this.ax === "right") ? ew - psSize.width
+                                                 : ((this.ax === "center") ? Math.floor((ew - psSize.width) / 2) : 0)) + l,
+                py      = ((this.ay === "bottom") ? eh - psSize.height
+                                                  : ((this.ay === "center") ? Math.floor((eh - psSize.height) / 2): 0)) + t;
 
             for(var i = 0;i < c.kids.length; i++){
                 var a = c.kids[i];
                 if (a.isVisible === true) {
 
                     var d = a.getPreferredSize(),
-                        ctr = a.constraints == null ? null : pkg.$constraints(a.constraints);
+                        ctr = a.constraints == null ? null : a.constraints;
 
-                    if (this.direction === pkg.HORIZONTAL) {
+                    if (this.direction === "horizontal") {
                         ctr = ctr || this.ay;
 
-                        if (ctr === pkg.STRETCH) {
+                        if (ctr === "stretch") {
                             d.height = c.height - t - c.getBottom();
                         }
 
-                        a.setLocation(px, ctr === pkg.STRETCH    ? t :
-                                             (ctr === pkg.TOP    ? py :
-                                             (ctr === pkg.BOTTOM ? Math.floor(psSize.height - d.height) + py :
-                                                                   Math.floor((psSize.height - d.height) / 2) + py)));
+                        a.setLocation(px, ctr === "stretch" ? t :
+                                          (ctr === "top"    ? py :
+                                          (ctr === "bottom" ? Math.floor(psSize.height - d.height) + py :
+                                                              Math.floor((psSize.height - d.height) / 2) + py)));
                         px += (d.width + this.gap);
                     }
                     else {
                         ctr = ctr || this.ax;
 
-                        if (ctr === pkg.STRETCH) {
+                        if (ctr === "stretch") {
                             d.width = c.width - l - c.getRight();
                         }
 
-                        a.setLocation(ctr === pkg.STRETCH  ? l  :
-                                        (ctr === pkg.LEFT  ? px :
-                                        (ctr === pkg.RIGHT ? px + Math.floor(psSize.width - d.width) :
-                                                             px + Math.floor((psSize.width - d.width) / 2))), py);
+                        a.setLocation(ctr === "stretch"  ? l  :
+                                      (ctr === "left"    ? px :
+                                      (ctr === "right"   ? px + Math.floor(psSize.width - d.width) :
+                                                           px + Math.floor((psSize.width - d.width) / 2))), py);
 
                         py += d.height + this.gap;
                     }
@@ -1377,7 +1293,7 @@ pkg.FlowLayout = Class(L, [
             }
 
             if (lastOne !== null && this.stretchLast === true){
-                if (this.direction === pkg.HORIZONTAL) {
+                if (this.direction === "horizontal") {
                     lastOne.setSize(c.width - lastOne.x - c.getRight(), lastOne.height);
                 }
                 else {
@@ -1400,14 +1316,7 @@ pkg.FlowLayout = Class(L, [
         p.add(new zebkit.ui.Button("Item 2"));
         p.add(new zebkit.ui.Button("Item 3"));
 
- * @param {Integer|String} [ax] horizontal list item alignment:
-
-     zebkit.layout.LEFT - left alignment
-     zebkit.layout.RIGHT - right alignment
-     zebkit.layout.CENTER - center alignment
-     zebkit.layout.STRETCH - stretching item to occupy the whole horizontal space
-
-     or
+ * @param {String} [ax] horizontal list item alignment:
 
      "left"
      "right"
@@ -1421,38 +1330,35 @@ pkg.FlowLayout = Class(L, [
  */
 pkg.ListLayout = Class(L,[
     function $prototype() {
+        /**
+         * Horizontal list items alignment
+         * @attribute ax
+         * @type {String}
+         * @readOnly
+         */
+        this.ax = "stretch";
+
+        /**
+         * Pixel gap between list items
+         * @attribute gap
+         * @type {Integer}
+         * @readOnly
+         */
+        this.gap = 0;
+
         this[''] = function (ax, gap) {
             if (arguments.length === 1) {
-                gap = ax;
+                this.gap = ax;
+            } else if (arguments.length > 1) {
+                this.ax  = ax;
+                this.gap = gap;
             }
 
-            ax = (arguments.length <= 1) ? pkg.STRETCH : pkg.$constraints(ax);
-
-            if (arguments.length === 0) {
-                gap = 0;
-            }
-
-            if (ax !== pkg.STRETCH && ax !== pkg.LEFT &&
-                ax !== pkg.RIGHT && ax !== pkg.CENTER)
+            if (this.ax !== "stretch" && this.ax !== "left"  &&
+                this.ax !== "right"   && this.ax !== "center"  )
             {
-                throw new Error("Invalid alignment");
+                throw new Error("Invalid alignment " + this.ax);
             }
-
-            /**
-             * Horizontal list items alignment
-             * @attribute ax
-             * @type {Integer}
-             * @readOnly
-             */
-            this.ax = ax;
-
-            /**
-             * Pixel gap between list items
-             * @attribute gap
-             * @type {Integer}
-             * @readOnly
-             */
-            this.gap = gap;
         };
 
         this.calcPreferredSize = function (lw){
@@ -1480,14 +1386,14 @@ pkg.ListLayout = Class(L,[
                 if (cc.isVisible === true){
                     var d      = cc.getPreferredSize(),
                         constr = cc.constraints == null ? this.ax
-                                                        : pkg.$constraints(cc.constraints);
+                                                        : cc.constraints;
 
-                    cc.setSize    ((constr === pkg.STRETCH) ? psw
+                    cc.setSize    ((constr === "stretch") ? psw
                                                             : d.width, d.height);
-                    cc.setLocation((constr === pkg.STRETCH) ? x
-                                                            : x + ((constr === pkg.RIGHT) ? psw - cc.width
-                                                                                          : ((constr === pkg.CENTER) ? Math.floor((psw - cc.width) / 2)
-                                                                                                                     : 0)), y);
+                    cc.setLocation((constr === "stretch") ? x
+                                                            : x + ((constr === "right") ? psw - cc.width
+                                                                                        : ((constr === "center") ? Math.floor((psw - cc.width) / 2)
+                                                                                                                 : 0)), y);
                     y += (d.height + this.gap);
                 }
             }
@@ -1525,10 +1431,10 @@ pkg.PercentLayout = Class(L, [
           * Direction the components have to be placed (vertically or horizontally)
           * @attribute direction
           * @readOnly
-          * @type {Integer}
-          * @default zebkit.layout.HORIZONTAL
+          * @type {String}
+          * @default "horizontal"
           */
-        this.direction = pkg.HORIZONTAL;
+        this.direction = "horizontal";
 
         /**
          * Pixel gap between components
@@ -1541,8 +1447,8 @@ pkg.PercentLayout = Class(L, [
 
         /**
          * Boolean flag that say if the laid out components have
-         * to be stretched vertically (if direction is set to zebkit.layout.VERTICAL)
-         * or horizontally (if direction is set to zebkit.layout.HORIZONTAL)
+         * to be stretched vertically (if direction is set to "vertical")
+         * or horizontally (if direction is set to "horizontal")
          * @attribute stretch
          * @readOnly
          * @type {Integer}
@@ -1552,8 +1458,8 @@ pkg.PercentLayout = Class(L, [
 
         this[''] = function(dir, gap, stretch) {
             if (arguments.length > 0) {
-                this.direction = pkg.$constraints(dir);
-                if (this.direction !== pkg.HORIZONTAL && this.direction !== pkg.VERTICAL) {
+                this.direction = dir;
+                if (this.direction !== "horizontal" && this.direction !== "vertical") {
                     throw new Error("Invalid direction : " + this.direction);
                 }
 
@@ -1572,7 +1478,7 @@ pkg.PercentLayout = Class(L, [
                 loc    = 0,
                 ns     = 0;
 
-            if (this.direction === pkg.HORIZONTAL){
+            if (this.direction === "horizontal"){
                 rs += target.width - left - right;
                 loc = left;
             }
@@ -1581,9 +1487,9 @@ pkg.PercentLayout = Class(L, [
                 loc = top;
             }
 
-            for(var i = 0;i < size; i ++ ){
-                var l = target.kids[i], c = l.constraints, useps = (c === pkg.USE_PS_SIZE);
-                if (this.direction === pkg.HORIZONTAL){
+            for(var i = 0; i < size; i ++ ){
+                var l = target.kids[i], c = l.constraints, useps = (c === "usePsSize");
+                if (this.direction === "horizontal"){
                     ns = ((size - 1) == i) ? target.width - right - loc
                                            : (useps ? l.getPreferredSize().width
                                                       : ~~((rs * c) / 100));
@@ -1618,19 +1524,19 @@ pkg.PercentLayout = Class(L, [
                 size = target.kids.length,
                 as   = this.gap * (size === 0 ? 0 : size - 1);
 
-            for(var i = 0;i < size; i++){
+            for(var i = 0; i < size; i++){
                 var d = target.kids[i].getPreferredSize();
-                if (this.direction === pkg.HORIZONTAL){
+                if (this.direction === "horizontal"){
                     if (d.height > max) max = d.height;
                     as += d.width;
                 }
                 else {
-                    if(d.width > max) max = d.width;
+                    if (d.width > max) max = d.width;
                     as += d.height;
                 }
             }
-            return (this.direction === pkg.HORIZONTAL) ? { width:as, height:max }
-                                                       : { width:max, height:as };
+            return (this.direction === "horizontal") ? { width:as, height:max }
+                                                     : { width:max, height:as };
         };
     }
 ]);
@@ -1678,25 +1584,25 @@ pkg.Constraints = Class([
         /**
          * Horizontal alignment
          * @attribute ax
-         * @type {Integer}
-         * @default zebkit.layout.STRETCH
+         * @type {String}
+         * @default "stretch"
          */
 
         /**
          * Vertical alignment
          * @attribute ay
-         * @type {Integer}
-         * @default zebkit.layout.STRETCH
+         * @type {String}
+         * @default "stretch"
          */
 
         this.top = this.bottom = this.left = this.right = 0;
-        this.ay = this.ax = pkg.STRETCH;
+        this.ay = this.ax = "stretch";
         this.rowSpan = this.colSpan = 1;
 
         this[''] = function(ax, ay, p) {
             if (arguments.length > 0) {
-                this.ax = pkg.$constraints(ax);
-                if (arguments.length > 1) this.ay = pkg.$constraints(ay);
+                this.ax = ax;
+                if (arguments.length > 1) this.ay = ay;
                 if (arguments.length > 2) this.setPadding(p);
             }
         };
@@ -1742,7 +1648,7 @@ pkg.Constraints = Class([
         ctr.setPadding(8);
         // say the component has to be left aligned in a
         // virtual cell of grid layout
-        ctr.ax = zebkit.layout.LEFT;
+        ctr.ax = "left";
 
         // create panel and set grid layout manager with two
         // virtual rows and columns
@@ -1759,15 +1665,18 @@ pkg.Constraints = Class([
  * children components
  * @param {Integer} cols a number of virtual columns to
  * layout children components
+ * @param {String} [ax] horizontal alignment
+ * @param {String} [ay] vertical alignment
+ * layout children components
  * @constructor
  * @class  zebkit.layout.GridLayout
  * @extends {zebkit.layout.Layout}
  */
 pkg.GridLayout = Class(L, [
     function $prototype() {
-        this[''] = function(r,c,m) {
-            if (arguments.length < 3) m = 0;
+        this.stretchCols = this.stretchRows = false;
 
+        this[''] = function(r, c, stretchRows, stretchCols) {
             /**
              * Number of virtual rows to place children components
              * @attribute rows
@@ -1783,7 +1692,7 @@ pkg.GridLayout = Class(L, [
              * @type {Integer}
              */
             this.cols = c;
-            this.stretchCols = this.stretchRows = false;
+
             this.colSizes = Array(c + 1);
             this.rowSizes = Array(r + 1);
 
@@ -1794,6 +1703,9 @@ pkg.GridLayout = Class(L, [
              * @attribute constraints
              */
             this.constraints = new pkg.Constraints();
+
+            if (stretchRows != null) this.stretchRows = stretchRows;
+            if (stretchCols != null) this.stretchCols = stretchCols;
         };
 
         /**
@@ -1805,7 +1717,7 @@ pkg.GridLayout = Class(L, [
          */
         this.calcCols = function(c){
             this.colSizes[this.cols] = 0;
-            for(var i = 0;i < this.cols; i++){
+            for(var i = 0;i < this.cols; i++) {
                 this.colSizes[i] = this.calcCol(i, c);
                 this.colSizes[this.cols] += this.colSizes[i];
             }
@@ -1821,7 +1733,7 @@ pkg.GridLayout = Class(L, [
          */
         this.calcRows = function(c){
             this.rowSizes[this.rows] = 0;
-            for(var i = 0;i < this.rows; i++){
+            for(var i = 0;i < this.rows; i++) {
                 this.rowSizes[i] = this.calcRow(i, c);
                 this.rowSizes[this.rows] += this.rowSizes[i];
             }
@@ -1841,7 +1753,9 @@ pkg.GridLayout = Class(L, [
             for (var i = s; i < c.kids.length && i < s + this.cols; i++) {
                 var a = c.kids[i];
                 if (a.isVisible === true) {
-                    var arg = a.constraints || this.constraints, d = a.getPreferredSize().height;
+                    var arg = a.constraints || this.constraints,
+                        d   = a.getPreferredSize().height;
+
                     d += (arg.top + arg.bottom);
                     if (d > max) max = d;
                 }
@@ -1913,18 +1827,19 @@ pkg.GridLayout = Class(L, [
                         cellW -= (arg.left + arg.right);
                         cellH -= (arg.top  + arg.bottom);
 
-                        if (pkg.STRETCH === arg.ax) d.width  = cellW;
-                        if (pkg.STRETCH === arg.ay) d.height = cellH;
+                        if ("stretch" === arg.ax) d.width  = cellW;
+                        if ("stretch" === arg.ay) d.height = cellH;
 
                         l.setSize(d.width, d.height);
                         l.setLocation(
-                            xx  + arg.left + (pkg.STRETCH === arg.ax ? 0
-                                                                     : ((arg.ax === pkg.RIGHT) ? cellW - d.width
-                                                                                               : ((arg.ax === pkg.CENTER) ? Math.floor((cellW - d.width) / 2)
-                                                                                                                             : 0))),
-                            top + arg.top  + (pkg.STRETCH === arg.ay ? 0 : ((arg.ay === pkg.TOP  ) ? cellH - d.height
-                                                                                                   : ((arg.ay === pkg.CENTER) ? Math.floor((cellH - d.height) / 2)
-                                                                                                                              : 0)))
+                            xx  + arg.left + ("stretch" === arg.ax ? 0
+                                                                     : ((arg.ax === "right") ? cellW - d.width
+                                                                                             : ((arg.ax === "center") ? Math.floor((cellW - d.width) / 2)
+                                                                                                                      : 0))),
+                            top + arg.top  + ("stretch" === arg.ay ? 0
+                                                                   : ((arg.ay === "bottom" ) ? cellH - d.height
+                                                                                             : ((arg.ay === "center") ? Math.floor((cellH - d.height) / 2)
+                                                                                                                      : 0)))
                         );
 
                         xx += colSizes[j];
@@ -1939,6 +1854,5 @@ pkg.GridLayout = Class(L, [
 /**
  * @for
  */
-
 
 })(zebkit("layout"), zebkit.Class);

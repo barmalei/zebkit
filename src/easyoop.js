@@ -254,6 +254,10 @@ pkg.clone = function (obj, map) {
         return obj;
     }
 
+    if (obj.$notClonable === true) {
+        return obj;
+    }
+
     map = map || new Map();
     var t = map.get(obj);
     if (typeof t !== "undefined") {
@@ -446,9 +450,12 @@ pkg.Singleton = function(clazz) {
 pkg.Interface = make_template(null, function() {
     var $Interface = make_template(pkg.Interface, function() {
         if (arguments.length > 0) {
+            // return anonymous implementation of the interface if methods list is passed
+            // as an argument
             return new (pkg.Class($Interface, arguments[0]))();
         }
     }, arguments);
+
     return $Interface;
 });
 
@@ -924,7 +931,7 @@ pkg.Class = make_template(null, function() {
     if ($parent != null) {
         for (var k in $parent) {
             if (k[0] !== '$' &&
-                $parent.hasOwnProperty(k) === true &&
+                $parent.hasOwnProperty(k) &&
                 $template.hasOwnProperty(k) === false)
             {
                 $template[k] = pkg.clone($parent[k]);

@@ -6,18 +6,18 @@
     "background": "#EEEEEE",
 
     "kids": {
-        "TOP": {
+        "top": {
             "$zebkit.ui.Panel" : {
                 "layout": { "$zebkit.layout.BorderLayout": [] },
                 "kids"  : {
-                    "TOP"    : {
+                    "top"    : {
                         "$zebkit.ui.Panel" : { "$zebkit.layout.ListLayout": [] },
                         "kids": [
                             "@(menuLayout.json)",
                             "@(toolbarLayout.json)"
                         ]
                     },
-                    "CENTER" : {
+                    "center" : {
                         "$zebkit.ui.Panel": {
                             "id"     : "topPan",
                             "padding": 8,
@@ -57,7 +57,7 @@
             }
         },
 
-        "CENTER" : {
+        "center" : {
             "$zebkit.ui.Tabs" : "bottom",
             "id"    : "sheetsTab",
             "canHaveFocus": false,
@@ -76,7 +76,7 @@
             }
         },
 
-        "BOTTOM" : {
+        "bottom" : {
             "$zebkit.ui.StatusBar" : [],
             "borderView": null,
             "kids" : [

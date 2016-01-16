@@ -2,7 +2,7 @@
     "$zebkit.ui.Panel" : {
         "layout" : { "$zebkit.layout.BorderLayout":[] },
         "kids"   : {
-            "CENTER" : {
+            "center" : {
                 "$zebkit.ui.excel.SheetPan":  {
                     "$zebkit.ui.excel.Grid": [],
                     "model"          : { "$zebkit.ui.excel.Matrix": [ 200, 23 ] },
@@ -25,7 +25,7 @@
                     },
 
                     "kids" : {
-                        "TOP" : {
+                        "top" : {
                             "$zebkit.ui.excel.TopCaption":[],
                             "background": null,
                             "border"    : null,
@@ -33,15 +33,15 @@
                             "markerView" : "#FFC48C"
                         },
 
-                        "LEFT" : {
+                        "left" : {
                             "$zebkit.ui.excel.LeftCaption":[],
-                            "background" : null,
-                            "border"     : null,
-                            "lineColor"  : "lightGray",
+                            "background"  : null,
+                            "border"      : null,
+                            "lineColor"   : "lightGray",
                             "markerView"  : "#FFC48C"
                         },
 
-                        "NONE": {
+                        "corner": {
                             "$zebkit.ui.Panel": []
                         }
                     }

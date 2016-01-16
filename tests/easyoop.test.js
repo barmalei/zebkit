@@ -2637,6 +2637,12 @@ if (typeof(zebkit) === "undefined") {
             var A = Class([
                 function $clazz() {
                     this.AA = "300";
+                    this.SS = { a: "300", b: ["a", 1, 2], c: { d: 100 } } ;
+                    this.MM = function(a) {
+                        return a;
+                    };
+
+                    this.$TT = 100;
                 },
 
                 function $prototype() {
@@ -2700,6 +2706,14 @@ if (typeof(zebkit) === "undefined") {
                 }
             ]), b = new B(), bb = zebkit.clone(b);
 
+            // static field cloning
+            assert(B.AA, A.AA);
+            assert(B.SS != A.SS, true);
+            assertObjEqual(B.SS, A.SS);
+            assert(B.MM === A.MM, true);
+            assert(A.$TT, 100);
+            assert(B.$TT, undefined);
+
             assert(b != bb, true);
             assert(b.$hash$ != null, true);
             assert(bb.$hash$ != null, true);
@@ -2720,22 +2734,17 @@ if (typeof(zebkit) === "undefined") {
             var f1 = function() {}, f2 = zebkit.clone(f1);
             assert(f1, f2);
 
-            console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-
-
             // recursive references and the same references
             var dr = { a: 10, b:"test", c: { a: 12 }  },
-                drr = { a: 15},
                 d1 = { a:dr, b: { a: dr, c: 12 }  },
                 d2 = zebkit.clone(d1);
 
-            console.log(d2);
-            console.log(d2.a === d2.b.a);
-
-            console.log("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-
-            //assert(d2.a.b, d2.b);
-
+            assert(d2.a, d2.b.a);
+            assert(d2.a != d1.a, true);
+            assert(d2.a != dr, true);
+            assertObjEqual(d2.a, dr);
+            assertObjEqual(d1.a, dr);
+            assertObjEqual(d1, d2);
         }
     );
 })();

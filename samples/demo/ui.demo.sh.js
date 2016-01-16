@@ -96,7 +96,7 @@ pkg.ShDemo = new Class(pkg.DemoPan, [
         sh.words.put("height", "green");
 
         this.tf = new TextField(sh);
-        this.add(L.CENTER, new ScrollPan(this.tf));
+        this.add("center", new ScrollPan(this.tf));
     }
 ]);
 

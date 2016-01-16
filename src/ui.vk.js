@@ -617,7 +617,6 @@ zebkit.package("ui.vk", function(pkg, Class) {
         function $prototype() {
             this.catchFired = function() {
                 if (this.menu.parent != null) {
-                    console.log("remove popup");
                     this.menu.removeMe();
                 }
                 else {
@@ -625,8 +624,6 @@ zebkit.package("ui.vk", function(pkg, Class) {
                     this.menu.select(-1);
                     this.menu.toPreferredSize();
                     this.menu.setLocation(o.x, o.y - this.menu.height);
-
-                    console.log("Show popup menu " + this.menu.y);
                     ui.showPopupMenu(this, this.menu);
                 }
             };
@@ -655,19 +652,19 @@ zebkit.package("ui.vk", function(pkg, Class) {
     ]);
 
     var RL = Class(L.RasterLayout, [
-            function calcPreferredSize(t) {
-                var w = 0, h = 0;
-                for (var i = 0; i < t.kids.length; i++) {
-                    if (t.kids[i].isVisible === true) {
-                        var ps = t.kids[i].getPreferredSize();
-                        w += ps.width;
-                        h += ps.height;
-                    }
+        function calcPreferredSize(t) {
+            var w = 0, h = 0;
+            for (var i = 0; i < t.kids.length; i++) {
+                if (t.kids[i].isVisible === true) {
+                    var ps = t.kids[i].getPreferredSize();
+                    w += ps.width;
+                    h += ps.height;
                 }
-                return { width: w, height: h };
             }
-        ]),
-        KE = new ui.KeyEvent();
+            return { width: w, height: h };
+        }
+    ]),
+    KE = new ui.KeyEvent();
 
     KE.type = "vkb";
 
@@ -698,7 +695,7 @@ zebkit.package("ui.vk", function(pkg, Class) {
 
             this.KeysLabelPan = Class(ui.Panel, [
                 function $clazz() {
-                    this.layout = new RL(L.USE_PS_SIZE);
+                    this.layout = new RL(true);
                 },
 
                 function(chars) {
@@ -708,8 +705,8 @@ zebkit.package("ui.vk", function(pkg, Class) {
                     var mainLab = new pkg.VKeys.Label(chars[0]),
                         altLab  = new pkg.VKeys.SmallLabel(chars.length == 2 ? chars[1] : "...");
 
-                    mainLab.constraints = L.CENTER;
-                    altLab.constraints  = L.TopRight;
+                    mainLab.constraints = "center";
+                    altLab.constraints  = "topRight";
                     this.add(mainLab);
                     this.add(altLab);
 
@@ -882,28 +879,22 @@ zebkit.package("ui.vk", function(pkg, Class) {
             };
 
             this.show = function(d) {
-                console.log("VK.show() d = " + d);
-
-
                 this.removeMe();
-
                 if (d != null) {
-                    if (d.hasFocus() === false) {
-                        d.requestFocus();
-                    }
-
-                    this.constraints = L.HORIZONTAL | L.BOTTOM;
+                    this.constraints = "bottom";
                     this.toPreferredSize();
 
                     if (pkg.makeEditorVisible === true) {
-                        var p  = L.toParentOrigin(d);
-
+                        var p = L.toParentOrigin(d);
                         if (p.y + d.height > this.height) {
-                            this.constraints = L.HORIZONTAL | L.TOP;
+                            this.constraints = "top";
                         }
                     }
 
                     ui.showWindow(d, "mdi", this);
+                    var win = this.getCanvas().win;
+                    this.setSize(win.width - win.getLeft() - win.getRight(), this.height);
+
                     ui.activateWindow(this);
                 }
             };

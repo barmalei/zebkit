@@ -2,16 +2,16 @@
 
 /**
  * @module  ui
+ * @required easyoop, util
  */
-var L = zebkit.layout;
 
 pkg.$view = function(v) {
     if (v == null || v.paint != null) return v;
 
     if (zebkit.isString(v)) {
         return zebkit.util.rgb.hasOwnProperty(v) ? zebkit.util.rgb[v]
-                                     : (pkg.borders != null && pkg.borders.hasOwnProperty(v) ? pkg.borders[v]
-                                                                                             : new zebkit.util.rgb(v));
+                                                 : (pkg.borders != null && pkg.borders.hasOwnProperty(v) ? pkg.borders[v]
+                                                                                                         : new zebkit.util.rgb(v));
     }
 
     if (Array.isArray(v)) {
@@ -38,6 +38,12 @@ pkg.$view = function(v) {
 */
 pkg.Sunken = Class(pkg.View, [
     function (brightest,middle,darkest) {
+        if (arguments.length > 0) this.brightest = brightest;
+        if (arguments.length > 1) this.middle    = middle;
+        if (arguments.length > 2) this.darkest   = darkest;
+    },
+
+    function $prototype() {
         /**
          * Brightest border line color
          * @attribute brightest
@@ -61,13 +67,10 @@ pkg.Sunken = Class(pkg.View, [
          * @type {String}
          * @default "black"
          */
+        this.brightest = "white";
+        this.middle    = "gray" ;
+        this.darkest   = "black";
 
-        this.brightest = brightest == null ? "white"  : brightest;
-        this.middle    = middle    == null ? "gray"   : middle;
-        this.darkest   = darkest   == null ? "black"  : darkest;
-    },
-
-    function $prototype() {
         this.paint = function(g,x1,y1,w,h,d){
             var x2 = x1 + w - 1, y2 = y1 + h - 1;
             g.setColor(this.middle);
@@ -93,6 +96,11 @@ pkg.Sunken = Class(pkg.View, [
 */
 pkg.Etched = Class(pkg.View, [
     function (brightest, middle) {
+        if (arguments.length > 0) this.brightest = brightest;
+        if (arguments.length > 1) this.middle    = middle;
+    },
+
+    function $prototype() {
         /**
          * Brightest border line color
          * @attribute brightest
@@ -108,12 +116,9 @@ pkg.Etched = Class(pkg.View, [
          * @type {String}
          * @default "gray"
          */
+        this.brightest = "white";
+        this.middle    = "gray" ;
 
-        this.brightest = brightest == null ? "white" : brightest;
-        this.middle    = middle    == null ? "gray"  : middle;
-    },
-
-    function $prototype() {
         this.paint = function(g,x1,y1,w,h,d){
             var x2 = x1 + w - 1, y2 = y1 + h - 1;
             g.setColor(this.middle);
@@ -157,11 +162,14 @@ pkg.Raised = Class(pkg.View, [
          * @default "gray"
          */
 
-        this.brightest = brightest == null ? "white" : brightest;
-        this.middle    = middle    == null ? "gray"  : middle;
+        if (arguments.length > 0) this.brightest = brightest;
+        if (arguments.length > 1) this.middle    = middle;
     },
 
     function $prototype() {
+        this.brightest = "white";
+        this.middle    = "gray";
+
         this.paint = function(g,x1,y1,w,h,d){
             var x2 = x1 + w - 1, y2 = y1 + h - 1;
             g.setColor(this.brightest);
@@ -183,6 +191,12 @@ pkg.Raised = Class(pkg.View, [
 */
 pkg.Dotted = Class(pkg.View, [
     function $prototype() {
+        /**
+         * @attribute color
+         * @readOnly
+         * @type {String}
+         * @default "black"
+         */
         this.color = "black";
 
         this.paint = function(g,x,y,w,h,d){
@@ -191,13 +205,7 @@ pkg.Dotted = Class(pkg.View, [
         };
 
         this[''] = function (c){
-            /**
-             * @attribute color
-             * @readOnly
-             * @type {String}
-             * @default "black"
-             */
-            if (c != null) this.color = c;
+            if (arguments.length > 0) this.color = c;
         };
     }
 ]);
@@ -221,6 +229,30 @@ pkg.Dotted = Class(pkg.View, [
  */
 pkg.Border = Class(pkg.View, [
     function $prototype() {
+        /**
+         * Border color
+         * @attribute color
+         * @readOnly
+         * @type {String}
+         * @default "gray"
+         */
+
+        /**
+         * Border line width
+         * @attribute width
+         * @readOnly
+         * @type {Integer}
+         * @default 1
+         */
+
+        /**
+         * Border radius
+         * @attribute radius
+         * @readOnly
+         * @type {Integer}
+         * @default 0
+         */
+
         this.color  = "gray";
         this.gap    = this.width = 1;
         this.radius = 0;
@@ -300,33 +332,9 @@ pkg.Border = Class(pkg.View, [
         };
 
         this[''] = function (c,w,r){
-            /**
-             * Border color
-             * @attribute color
-             * @readOnly
-             * @type {String}
-             * @default "gray"
-             */
-
-            /**
-             * Border line width
-             * @attribute width
-             * @readOnly
-             * @type {Integer}
-             * @default 1
-             */
-
-            /**
-             * Border radius
-             * @attribute radius
-             * @readOnly
-             * @type {Integer}
-             * @default 0
-             */
-
-            if (c != null) this.color = c;
-            if (w != null) this.width = this.gap = w;
-            if (r != null) this.radius = r;
+            if (arguments.length > 0) this.color = c;
+            if (arguments.length > 1) this.width = this.gap = w;
+            if (arguments.length > 2) this.radius = r;
         };
     }
 ]);
@@ -453,23 +461,23 @@ pkg.CompRender = Class(pkg.Render, [
 * Vertical or horizontal linear gradient view
 * @param {String} startColor start color
 * @param {String} endColor end color
-* @param {Integer|String} [type] type of gradient
-* "zebkit.layout.VERTICAL" or "zebkit.layout.HORIZONTAL" or "vertical" or "horizontal"
+* @param {String} [type] type of gradient
+*  "vertical" or "horizontal"
 * @constructor
 * @class zebkit.ui.Gradient
 * @extends zebkit.ui.View
 */
 pkg.Gradient = Class(pkg.View, [
     function $prototype() {
-        this.orientation = L.VERTICAL;
+        this.orient = "vertical";
 
         this[''] =  function(){
             /**
              * Gradient orientation: vertical or horizontal
-             * @attribute orientation
+             * @attribute orient
              * @readOnly
-             * @default zebkit.layout.VERTICAL
-             * @type {Integer}
+             * @default "vertical"
+             * @type {String}
              */
 
             /**
@@ -481,13 +489,13 @@ pkg.Gradient = Class(pkg.View, [
 
             this.colors = Array.prototype.slice.call(arguments, 0);
             if (arguments.length > 2) {
-                this.orientation = L.$constraints(arguments[arguments.length-1]);
+                this.orient = arguments[arguments.length-1];
                 this.colors.pop();
             }
         };
 
         this.paint = function(g,x,y,w,h,dd){
-            var d = (this.orientation === L.HORIZONTAL? [0,1]: [1,0]),
+            var d = (this.orient === "horizontal" ? [0,1]: [1,0]),
                 x1 = x * d[1],
                 y1 = y * d[0],
                 x2 = (x + w - 1) * d[1],
@@ -893,12 +901,12 @@ pkg.ViewSet = Class(pkg.CompositeView, [
 
 pkg.LineView = Class(pkg.View, [
     function $prototype() {
-        this.side      = L.TOP;
+        this.side      = "top";
         this.color     = "black";
         this.lineWidth = 1;
 
         this[''] = function(side, color, lineWidth) {
-            if (side != null)      this.side      = L.$constraints(side);
+            if (side != null)      this.side      = side;
             if (color != null)     this.color     = color;
             if (lineWidth != null) this.lineWidth = lineWidth;
         };
@@ -909,12 +917,12 @@ pkg.LineView = Class(pkg.View, [
             g.lineWidth = this.lineWidth;
 
             var d = this.lineWidth / 2;
-            if (this.side === L.TOP) {
+            if (this.side === "top") {
                 g.moveTo(x, y + d);
                 g.lineTo(x + w - 1, y + d);
             }
             else {
-                if (this.side === L.BOTTOM) {
+                if (this.side === "bottom") {
                     g.moveTo(x, y + h - d);
                     g.lineTo(x + w - 1, y + h - d);
                 }
@@ -938,10 +946,10 @@ pkg.ArrowView = Class(pkg.View, [
         this.gap  = 0;
         this.color  = "black";
         this.width = this.height = 6;
-        this.direction = L.BOTTOM;
+        this.direction = "bottom";
 
         this[''] = function (d, col, w) {
-            if (d   != null) this.direction = L.$constraints(d);
+            if (d   != null) this.direction = d;
             if (col != null) this.color = col;
             if (w   != null) this.width = this.height = w;
         };
@@ -958,28 +966,28 @@ pkg.ArrowView = Class(pkg.View, [
 
             g.beginPath();
 
-            if (L.BOTTOM === this.direction) {
+            if ("bottom" === this.direction) {
                 g.moveTo(x, y + dt);
                 g.lineTo(x + w - 1, y + dt);
                 g.lineTo(x + w2, y + h - dt);
                 g.lineTo(x + dt, y + dt);
             }
             else {
-                if (L.TOP === this.direction) {
+                if ("top" === this.direction) {
                     g.moveTo(x, y + h - dt);
                     g.lineTo(x + w - 1, y + h - dt);
                     g.lineTo(x + w2, y);
                     g.lineTo(x + dt, y + h - dt);
                 }
                 else {
-                    if (L.LEFT === this.direction) {
+                    if ("left" === this.direction) {
                         g.moveTo(x + w - dt, y);
                         g.lineTo(x + w - dt, y + h - 1);
                         g.lineTo(x, y + h2);
                         g.lineTo(x + w + dt, y);
                     }
                     else {
-                        if (L.RIGHT === this.direction) {
+                        if ("right" === this.direction) {
                             g.moveTo(x + dt, y);
                             g.lineTo(x + dt, y + h - 1);
                             g.lineTo(x + w, y + h2);
@@ -1014,7 +1022,7 @@ pkg.ArrowView = Class(pkg.View, [
     }
 ]);
 
-pkg.TextRenderMix = [
+pkg.BaseTextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
     function $prototype() {
         /**
          * UI component that holds the text render
@@ -1026,6 +1034,13 @@ pkg.TextRenderMix = [
          */
         this.owner = null;
 
+        this.lineIndent = 1;
+
+        // implement position metric methods
+        this.getMaxOffset = this.getLineSize = this.getLines = function() {
+            return 0;
+        };
+
         /**
          * Set the rendered text font.
          * @param  {String|zebkit.ui.Font} f a font as CSS string or
@@ -1033,7 +1048,7 @@ pkg.TextRenderMix = [
          * @return {Boolean} return true if a text font has been updated
          * @method setFont
          */
-        this.setFont = function(f){
+        this.setFont = function(f) {
             var old = this.font;
             if (f != null && zebkit.isString(f)) f = new pkg.Font(f);
 
@@ -1044,24 +1059,18 @@ pkg.TextRenderMix = [
                     this.owner.invalidate();
                 }
 
-                if (this.invalidate != null) this.invalidate();
+                if (this.invalidate != null) {
+                    this.invalidate();
+                }
+
                 return true;
             }
             return false;
         };
 
+        // TODO: probably the method can be removed
         this.getLineHeight = function() {
             return this.font.height;
-        };
-
-        /**
-         * Get a line indent
-         * @default 1
-         * @return {Integer} line indent
-         * @method getLineIndent
-         */
-        this.getLineIndent = function() {
-            return 1;
         };
 
         /**
@@ -1086,8 +1095,18 @@ pkg.TextRenderMix = [
         this.ownerChanged = function(v) {
             this.owner = v;
         };
+
+        this.targetWasChanged = function(o, n) {
+            if (this.owner != null && this.owner.isValid) {
+                this.owner.invalidate();
+            }
+
+            if (this.invalidate != null) {
+                this.invalidate();
+            }
+        };
     }
-];
+]);
 
 /**
  * Lightweight implementation of single line string render. The render requires
@@ -1099,11 +1118,7 @@ pkg.TextRenderMix = [
  * @extends {zebkit.ui.Render}
  * @class zebkit.ui.StringRender
  */
-pkg.StringRender = Class(pkg.Render, [
-    function $mixing() {
-        return pkg.TextRenderMix;
-    },
-
+pkg.StringRender = Class(pkg.BaseTextRender, [
     function $prototype() {
         this.stringWidth = -1;
 
@@ -1127,6 +1142,19 @@ pkg.StringRender = Class(pkg.Render, [
             this.color = color != null ? color : this.clazz.color;
         };
 
+        // implement position metric methods
+        this.getMaxOffset = function() {
+            return this.target.length;
+        };
+
+        this.getLineSize = function(l) {
+            return this.target.length + 1;
+        };
+
+        this.getLines = function() {
+            return 1;
+        };
+
         this.calcLineWidth = function() {
             if (this.stringWidth < 0) {
                 this.stringWidth = this.font.stringWidth(this.target);
@@ -1139,8 +1167,31 @@ pkg.StringRender = Class(pkg.Render, [
         };
 
         this.paint = function(g,x,y,w,h,d) {
-            if (this.font.s !== g.font) g.setFont(this.font);
-            if (this.color  !== g.fillStyle) g.fillStyle = this.color;
+            // save a few milliseconds
+            if (this.font.s !== g.font) {
+                g.setFont(this.font);
+            }
+
+            if (d != null && d.getStartSelection != null) {
+                var startSel = d.getStartSelection(),
+                    endSel   = d.getEndSelection();
+
+                if (startSel != null && endSel != null && startSel.col !== endSel.col) {
+                    g.setColor(d.selectionColor);
+
+                    g.fillRect( x + this.font.charsWidth(this.target, 0, startSel.col),
+                                y,
+                                this.font.charsWidth(this.target,
+                                                     startSel.col,
+                                                     endSel.col - startSel.col),
+                                this.getLineHeight());
+                }
+            }
+
+            // save a few milliseconds
+            if (this.color !== g.fillStyle) {
+                g.fillStyle = this.color;
+            }
 
             if (d != null && d.isEnabled === false) {
                 g.fillStyle = d != null && d.disabledColor != null ? d.disabledColor
@@ -1168,20 +1219,24 @@ pkg.StringRender = Class(pkg.Render, [
             this.setTarget(s);
         };
 
-        this.getLines = function() {
-            return 1;
+        this.getLine = function(l) {
+            console.log("l = " + l);
+
+            if (l < 0 || l > 1) {
+                throw new RangeError();
+            }
+            return this.target;
         };
 
         this.getPreferredSize = function() {
             if (this.stringWidth < 0) {
                 this.stringWidth = this.font.stringWidth(this.target);
             }
-            return { width: this.stringWidth, height: this.font.height };
-        };
 
-        this.targetWasChanged = function(o, n) {
-            this.stringWidth = -1;
-            if (this.owner != null) this.owner.invalidate();
+            return {
+                width: this.stringWidth,
+                height: this.font.height
+            };
         };
     }
 ]);
@@ -1193,11 +1248,7 @@ pkg.StringRender = Class(pkg.Render, [
  * @extends zebkit.ui.Render
  * @param  {String|zebkit.data.TextModel} text a text as string or text model object
  */
-pkg.TextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
-    function $mixing() {
-        return pkg.TextRenderMix;
-    },
-
+pkg.TextRender = Class(pkg.BaseTextRender, zebkit.util.Position.Metric, [
     function $prototype() {
         /**
          * Get number of lines of target text
@@ -1239,17 +1290,6 @@ pkg.TextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
             return this.target.getLine(r);
         };
 
-        this.targetWasChanged = function(o,n){
-            if (o != null) o.unbind(this);
-            if (n != null) {
-                n.bind(this);
-                this.invalidate(0, this.getLines());
-            }
-            else {
-                this.invLines = 0;
-            }
-        };
-
         /**
          * Return a string that is rendered by this class
          * @return  {String} a string
@@ -1285,24 +1325,24 @@ pkg.TextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
          */
         this.recalc = function() {
             if (this.invLines > 0 && this.target != null){
-                var text = this.target;
-                if (text != null) {
+                var model = this.target;
+                if (model != null) {
                     if (this.invLines > 0) {
                         for(var i = this.startInvLine + this.invLines - 1; i >= this.startInvLine; i--) {
-                            text.$lineTags(i).$lineWidth = this.font.stringWidth(this.getLine(i));
+                            model.$lineTags(i).$lineWidth = this.font.stringWidth(this.getLine(i));
                         }
                         this.startInvLine = this.invLines = 0;
                     }
 
                     this.textWidth = 0;
-                    var size = text.getLines();
+                    var size = model.getLines();
                     for(var i = 0; i < size; i++){
-                        var len = text.$lineTags(i).$lineWidth;
+                        var len = model.$lineTags(i).$lineWidth;
                         if (len > this.textWidth) {
                             this.textWidth = len;
                         }
                     }
-                    this.textHeight = this.getLineHeight() * size + (size - 1) * this.getLineIndent();
+                    this.textHeight = this.getLineHeight() * size + (size - 1) * this.lineIndent;
                 }
             }
         };
@@ -1332,7 +1372,10 @@ pkg.TextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
                     this.startInvLine = ful;
                     this.invLines = 1;
                 }
-                if (this.owner != null) this.owner.invalidate();
+
+                if (this.owner != null && this.owner.isValid !== true) {
+                    this.owner.invalidate();
+                }
             }
             else {
                 if (this.invLines > 0){
@@ -1356,6 +1399,10 @@ pkg.TextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
             if (arguments.length === 0) {
                 start = 0;
                 size  = this.getLines();
+                if (size === 0) {
+                    this.invLines = 0;
+                    return;
+                }
             }
 
             if (size > 0 && (this.startInvLine != start || size != this.invLines)) {
@@ -1385,10 +1432,10 @@ pkg.TextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
         this.paint = function(g,x,y,w,h,d) {
             var ts = g.$states[g.$curState];
             if (ts.width > 0 && ts.height > 0) {
-                var lineIndent = this.getLineIndent(),
-                    lineHeight = this.getLineHeight(),
-                    lilh       = lineHeight + lineIndent,
-                    startInvLine  = 0;
+                var lineIndent   = this.lineIndent,
+                    lineHeight   = this.getLineHeight(),
+                    lilh         = lineHeight + lineIndent,
+                    startInvLine = 0;
 
                 w = ts.width  < w ? ts.width  : w;
                 h = ts.height < h ? ts.height : h;
@@ -1401,44 +1448,50 @@ pkg.TextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
                     if (y > (ts.y + ts.height)) return;
                 }
 
-                var size = this.target.getLines();
+                var size = this.getLines();
                 if (startInvLine < size){
-                    var lines =  Math.floor((h + lineIndent) / lilh) + (((h + lineIndent) % lilh > lineIndent) ? 1 : 0);
+                    var lines = Math.floor((h + lineIndent) / lilh) + (((h + lineIndent) % lilh > lineIndent) ? 1 : 0);
                     if (startInvLine + lines > size) {
                         lines = size - startInvLine;
                     }
                     y += startInvLine * lilh;
 
-                    g.setFont(this.font);
+                    // save few milliseconds
+                    if (this.font.s !== g.font) {
+                        g.setFont(this.font);
+                    }
 
                     if (d == null || d.isEnabled === true){
-                        if (this.color != g.fillStyle) g.fillStyle = this.color;
+                        // save few milliseconds
+                        if (this.color != g.fillStyle) {
+                            g.fillStyle = this.color;
+                        }
 
                         var p1 = null, p2 = null, bsel = false;
                         if (lines > 0 && d != null && d.getStartSelection != null) {
                             p1   = d.getStartSelection();
                             p2   = d.getEndSelection();
-                            bsel = p1 != null && (p1[0] != p2[0] || p1[1] != p2[1]);
+                            bsel = p1 != null && (p1.row !== p2.row || p1.col !== p2.col);
                         }
 
                         for(var i = 0; i < lines; i++){
                             if (bsel === true) {
                                 var line = i + startInvLine;
-                                if (line >= p1[0] && line <= p2[0]){
+                                if (line >= p1.row && line <= p2.row){
                                     var s  = this.getLine(line),
                                         lw = this.calcLineWidth(line),
                                         xx = x;
 
-                                    if (line === p1[0]) {
-                                        var ww = this.font.charsWidth(s, 0, p1[1]);
+                                    if (line === p1.row) {
+                                        var ww = this.font.charsWidth(s, 0, p1.col);
                                         xx += ww;
                                         lw -= ww;
-                                        if (p1[0] === p2[0]) {
-                                            lw -= this.font.charsWidth(s, p2[1], s.length - p2[1]);
+                                        if (p1.row === p2.row) {
+                                            lw -= this.font.charsWidth(s, p2.col, s.length - p2.col);
                                         }
                                     }
                                     else {
-                                        if (line == p2[0]) lw = this.font.charsWidth(s, 0, p2[1]);
+                                        if (line === p2.row) lw = this.font.charsWidth(s, 0, p2.col);
                                     }
                                     this.paintSelection(g, xx, y, lw === 0 ? 1 : lw, lilh, line, d);
 
@@ -1516,9 +1569,104 @@ pkg.TextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
             //!!!
             this.setTarget(zebkit.isString(text) ? new zebkit.data.Text(text) : text);
         };
+    },
+
+    function targetWasChanged(o,n){
+        if (o != null) o.unbind(this);
+        if (n != null) {
+            n.bind(this);
+        }
+        this.$super(o, n);
     }
 ]);
 
+pkg.WrappedTextRender = new Class(pkg.TextRender, [
+    function $prototype() {
+        this.brokenLines = [];
+        this.lastWidth = -1;
+
+        this.breakLine = function (w, startIndex, line, lines) {
+            if (line == "") {
+                lines.push(line);
+            }
+            else {
+                var breakIndex = startIndex < line.length ? startIndex : line.length - 1,
+                    direction  = 0;
+
+                for(; breakIndex >= 0 && breakIndex < line.length ;) {
+                    var substrLen = this.font.charsWidth(line, 0, breakIndex + 1);
+                    if (substrLen < w) {
+                        if (direction < 0) break;
+                        else direction = 1;
+                        breakIndex ++;
+                    }
+                    else if (substrLen > w) {
+                        breakIndex--;
+                        if (direction > 0) break;
+                        else               direction = -1;
+                    }
+                    else {
+                        break;
+                    }
+                }
+
+                if (breakIndex >= 0) {
+                    lines.push(line.substring(0, breakIndex + 1));
+                    if (breakIndex < line.length - 1) {
+                        this.breakLine(w, startIndex, line.substring(breakIndex + 1), lines);
+                    }
+                }
+            }
+        };
+
+        this.breakToLines = function (w) {
+            var m = this.target, startIndex = 0, res = [];
+            for(var i = 0; i < m.getLines(); i++) {
+                var line = m.getLine(i);
+                this.breakLine(w, startIndex, line, res);
+            }
+            return res;
+        };
+
+        this.getLines = function() {
+            return this.brokenLines.length;
+        };
+
+        this.getLine = function(i) {
+            return this.brokenLines[i];
+        };
+    },
+
+    function invalidate(sl, len){
+        this.$super(sl, len);
+        if (this.brokenLines != null) {
+            this.brokenLines.length = 0;
+        }
+        this.lastWidth = -1;
+    },
+
+    function getPreferredSize(pw, ph) {
+        if (arguments.length === 2) {
+            if (this.lastWidth < 0 || this.lastWidth !== pw) {
+                this.lastWidth = pw;
+                this.brokenLines = this.breakToLines(pw);
+            }
+            return {
+                width  : pw,
+                height : this.brokenLines.length * this.getLineHeight() + (this.brokenLines.length - 1) * this.lineIndent
+            };
+        }
+        return this.$super();
+    },
+
+    function paint(g,x,y,w,h,d) {
+        if (this.lastWidth < 0 || this.lastWidth !== w) {
+            this.lastWidth = w;
+            this.brokenLines = this.breakToLines(w);
+        }
+        this.$super(g,x,y,w,h,d);
+    }
+]);
 
 pkg.DecoratedTextRender = zebkit.Class(pkg.TextRender, [
     function setDecoration(id, color) {
@@ -1645,7 +1793,7 @@ pkg.TabBorder = Class(pkg.View, [
             g.beginPath();
             g.lineWidth = s;
             switch(o) {
-                case L.LEFT:
+                case "left":
                     g.moveTo(xx + 1, y + dt);
                     g.lineTo(x + s*2, y + dt);
                     g.lineTo(x + dt , y + s*2);
@@ -1672,7 +1820,7 @@ pkg.TabBorder = Class(pkg.View, [
                         g.drawLine(x + 2*s + 1, yy - s, xx + 1, yy - s, s);
                     }
                     break;
-                case L.RIGHT:
+                case "right":
                     xx -= dt; // thick line grows left side and right side proportionally
                               // correct it
 
@@ -1703,7 +1851,7 @@ pkg.TabBorder = Class(pkg.View, [
                         g.drawLine(x, yy - s, xx - s - 1, yy - s, s);
                     }
                     break;
-                case L.TOP:
+                case "top":
                     g.moveTo(x + dt, yy + 1 );
                     g.lineTo(x + dt, y + s*2);
                     g.lineTo(x + s*2, y + dt);
@@ -1734,7 +1882,7 @@ pkg.TabBorder = Class(pkg.View, [
                     }
 
                     break;
-                case L.BOTTOM:
+                case "bottom":
                     yy -= dt;
 
                     g.moveTo(x + dt, y);
@@ -1798,23 +1946,22 @@ pkg.TabBorder = Class(pkg.View, [
  * @param {Integer|String} [lineAlignment] a line alignment. Specifies how
  * a title area has to be aligned relatively border line:
  *
- *      BOTTOM or "bottom"  - title area will be placed on top of border line:
+ *       "bottom"  - title area will be placed on top of border line:
  *                    ___| Title area |___
  *
  *
- *      CENTER or "center"  - title area will be centered relatively to border line:
+ *      "center"   - title area will be centered relatively to border line:
  *                    ---| Title area |-----
  *
  *
- *      TOP or "top"  - title area will be placed underneath of border line:
+ *      "top"      - title area will be placed underneath of border line:
  *                     ____              ________
  *                         |  Title area |
- *
  *
  */
 pkg.TitledBorder = Class(pkg.Render, [
     function $prototype() {
-        this.lineAlignment = L.BOTTOM;
+        this.lineAlignment = "bottom";
 
         this.getTop  = function (){
             return this.target.getTop();
@@ -1838,36 +1985,36 @@ pkg.TitledBorder = Class(pkg.Render, [
                 var r = d.getTitleInfo();
                 if (r != null) {
                     switch(r.orient) {
-                        case L.BOTTOM:
+                        case "bottom":
                             var bottom = this.target.getBottom();
                             switch (this.lineAlignment) {
-                                case L.CENTER : yy = r.y + Math.floor((r.height - bottom)/ 2) + bottom; break;
-                                case L.TOP    : yy = r.y + r.height + bottom; break;
-                                case L.BOTTOM : yy = r.y; break;
+                                case "center" : yy = r.y + Math.floor((r.height - bottom)/ 2) + bottom; break;
+                                case "top"    : yy = r.y + r.height + bottom; break;
+                                case "bottom" : yy = r.y; break;
                             }
                             break;
-                        case L.TOP:
+                        case "top":
                             var top = this.target.getTop();
                             switch (this.lineAlignment) {
-                                case L.CENTER : y = r.y + Math.floor((r.height - top)/2);   break; // y = r.y + Math.floor(r.height/ 2) ; break;
-                                case L.TOP    : y = r.y - top; break;
-                                case L.BOTTOM : y = r.y + r.height; break;
+                                case "center" : y = r.y + Math.floor((r.height - top)/2);   break; // y = r.y + Math.floor(r.height/ 2) ; break;
+                                case "top"    : y = r.y - top; break;
+                                case "bottom" : y = r.y + r.height; break;
                             }
                             break;
-                        case L.LEFT:
+                        case "left":
                             var left = this.target.getLeft();
                             switch (this.lineAlignment) {
-                                case L.CENTER : x = r.x + Math.floor((r.width - left) / 2); break;
-                                case L.TOP    : x = r.x - left; break;
-                                case L.BOTTOM : x = r.x + r.width; break;
+                                case "center" : x = r.x + Math.floor((r.width - left) / 2); break;
+                                case "top"    : x = r.x - left; break;
+                                case "bottom" : x = r.x + r.width; break;
                             }
                             break;
-                        case L.RIGHT:
+                        case "right":
                             var right = this.target.getRight();
                             switch (this.lineAlignment) {
-                                case L.CENTER : xx = r.x + Math.floor((r.width - right) / 2) + right; break;
-                                case L.TOP    : xx = r.x + r.width + right; break;
-                                case L.BOTTOM : xx = r.x; break;
+                                case "center" : xx = r.x + Math.floor((r.width - right) / 2) + right; break;
+                                case "top"    : xx = r.x + r.width + right; break;
+                                case "bottom" : xx = r.x; break;
                             }
                             break;
                     }
@@ -1899,13 +2046,13 @@ pkg.TitledBorder = Class(pkg.Render, [
                 if (r != null) {
                     var xx = x + w, yy = y + h, t = g.$states[g.$curState];
                     switch (r.orient) {
-                        case L.TOP:
+                        case "top":
                             var top = this.target.getTop();
                             // compute border y
                             switch (this.lineAlignment) {
-                                case L.CENTER : y = r.y + Math.floor((r.height - top) / 2) ; break;
-                                case L.TOP    : y = r.y - top; break;
-                                case L.BOTTOM : y = r.y + r.height; break;
+                                case "center" : y = r.y + Math.floor((r.height - top) / 2) ; break;
+                                case "top"    : y = r.y - top; break;
+                                case "bottom" : y = r.y + r.height; break;
                             }
 
                             // skip rendering border if the border is not in clip rectangle
@@ -1934,12 +2081,12 @@ pkg.TitledBorder = Class(pkg.Render, [
                             g.lineTo(x, y);
 
                             break;
-                        case L.BOTTOM:
+                        case "bottom":
                             var bottom = this.target.getBottom();
                             switch (this.lineAlignment) {
-                                case L.CENTER : yy = r.y + Math.floor((r.height - bottom) / 2) + bottom; break;
-                                case L.TOP    : yy = r.y + r.height + bottom; break;
-                                case L.BOTTOM : yy = r.y ; break;
+                                case "center" : yy = r.y + Math.floor((r.height - bottom) / 2) + bottom; break;
+                                case "top"    : yy = r.y + r.height + bottom; break;
+                                case "bottom" : yy = r.y ; break;
                             }
 
                             if (this.$isIn(t, x + this.target.getLeft(), y + this.target.getTop(),
@@ -1963,12 +2110,12 @@ pkg.TitledBorder = Class(pkg.Render, [
                             g.lineTo(x, y);
 
                             break;
-                        case L.LEFT:
+                        case "left":
                             var left = this.target.getLeft();
                             switch (this.lineAlignment) {
-                                case L.CENTER : x = r.x + Math.floor((r.width - left) / 2); break;
-                                case L.TOP    : x = r.x  - left; break;
-                                case L.BOTTOM : x = r.x + r.width; break;
+                                case "center" : x = r.x + Math.floor((r.width - left) / 2); break;
+                                case "top"    : x = r.x  - left; break;
+                                case "bottom" : x = r.x + r.width; break;
                             }
 
                             if (this.$isIn(t, x, y + this.target.getTop(),
@@ -1992,12 +2139,12 @@ pkg.TitledBorder = Class(pkg.Render, [
                             g.lineTo(x, y);
 
                             break;
-                        case L.RIGHT:
+                        case "right":
                             var right = this.target.getRight();
                             switch (this.lineAlignment) {
-                                case L.CENTER : xx = r.x + Math.floor((r.width - right) / 2) + right; break;
-                                case L.TOP    : xx = r.x  + r.width + right; break;
-                                case L.BOTTOM : xx = r.x; break;
+                                case "center" : xx = r.x + Math.floor((r.width - right) / 2) + right; break;
+                                case "top"    : xx = r.x  + r.width + right; break;
+                                case "bottom" : xx = r.x; break;
                             }
 
                             if (this.$isIn(t, x + this.target.getLeft(),
@@ -2038,12 +2185,12 @@ pkg.TitledBorder = Class(pkg.Render, [
 
         this[''] = function (b, a){
             if (a != null) {
-                this.lineAlignment = L.$constraints(a);
+                this.lineAlignment = a;
             }
 
-            if (b == null && this.lineAlignment != L.BOTTOM &&
-                             this.lineAlignment != L.TOP &&
-                             this.lineAlignment != L.CENTER)
+            if (b == null && this.lineAlignment !== "bottom" &&
+                             this.lineAlignment !== "top" &&
+                             this.lineAlignment !== "center")
             {
                 throw new Error("" + this.lineAlignment);
             }
@@ -2079,16 +2226,16 @@ pkg.CheckboxView = Class(pkg.View, [
 pkg.BunldeView = Class(pkg.View, [
     function $prototype() {
         this.color = "#AAAAAA";
-        this.direction = L.VERTICAL;
+        this.direction = "vertical";
 
         this[''] = function(dir, color) {
             if (color != null) this.color = color;
-            if (dir != null) this.direction = L.$constraints(dir);
+            if (dir != null) this.direction = dir;
         };
 
         this.paint =  function(g,x,y,w,h,d) {
             g.beginPath();
-            if (this.direction === L.VERTICAL) {
+            if (this.direction === "vertical") {
                 var r = w/2;
                 g.arc(x + r, y + r, r, Math.PI, 0, false);
                 g.lineTo(x + w, y + h - r);

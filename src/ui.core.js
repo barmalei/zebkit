@@ -1704,8 +1704,7 @@ pkg.Panel = Class(L.Layoutable, [
                         var kids = a;
                         for(var k in kids) {
                             if (kids.hasOwnProperty(k)) {
-                                var ctr = L.$constraints(k);
-                                this.add(ctr, kids[k]);
+                                this.add(k, kids[k]);
                             }
                         }
                     }
@@ -2683,7 +2682,7 @@ pkg.CanvasLayer = Class(pkg.HtmlCanvas, [
  *  @constructor
  *  @extends {zebkit.ui.CanvasLayer}
  */
-pkg.RootLayer = Class(pkg.HtmlCanvas, [
+pkg.RootLayer = Class(pkg.CanvasLayer, [
     function $clazz() {
         this.ID = "root";
     },
@@ -3514,6 +3513,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
             for(var i = this.kids.length - 1;i >= 0; i--){
                 var l = this.kids[i];
                 if (l.layerKeyPressed != null && l.layerKeyPressed(e) === true){
+                    if (e.eatMe === true) return true;
                     break;
                 }
             }
@@ -3725,6 +3725,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
             for(var i = this.kids.length - 1; i >= 0; i--){
                 tl = this.kids[i];
                 if (tl.layerPointerPressed != null && tl.layerPointerPressed(e)) {
+                    if (e.eatMe === true) return true;
                     break;
                 }
             }
@@ -3818,7 +3819,8 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
         this.$initListeners = function() {
             // TODO: hard-coded
             new pkg.PointerEventUnifier(this.$container, this);
-            new pkg.KeyEventUnifier(this.$container, this);
+            new pkg.KeyEventUnifier(this.element, this); // element has to be used since canvas is
+                                                         // styled to have focus and get key events
             new pkg.MouseWheelSupport(this.$container, this);
         };
     },
@@ -3870,8 +3872,9 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
             document.body.appendChild(this.$container);
         }
 
-        if (this.$container.getAttribute("tabindex") === null) {
-            this.$container.setAttribute("tabindex", "1");
+        // force canvas to have a focus
+        if (this.element.getAttribute("tabindex") === null) {
+            this.element.setAttribute("tabindex", "1");
         }
 
         if (w < 0) w = this.element.offsetWidth;

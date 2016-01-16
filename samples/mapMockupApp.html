@@ -48,7 +48,7 @@
 
                 qGrid.setLineColor("lightGray");
 
-                qGrid.add(TOP, new GridCaption(["Name", "Location", "Density"]));
+                qGrid.add("top", new GridCaption(["Name", "Location", "Density"]));
 
 
                 qGrid.setViewProvider(new DefViews([
@@ -59,9 +59,9 @@
                     },
 
                     function getXAlignment(grid, row, col) {
-                        if (col == 2 ) return RIGHT;
-                        if (col == 1) return CENTER;
-                        return LEFT;
+                        if (col == 2 ) return "right";
+                        if (col == 1) return "center";
+                        return "left";
                     },
 
                     function getView(grid, row, col, data) {
@@ -70,22 +70,22 @@
                             var c = new Panel(new BorderLayout(10));
                             c.setPadding(0,0,0,10);
 
-                            c.add(LEFT, new BoldLabel(data));
+                            c.add("left", new BoldLabel(data));
 
                             var dc = new Panel({preferredSize:[30,-1]});
                             if (d < 100) {
-                                dc.setBackground(new Gradient("green", "#00A000", HORIZONTAL));
+                                dc.setBackground(new Gradient("green", "#00A000", "horizontal"));
                             }
 
                             if (d >= 100 && d < 200) {
-                                dc.setBackground(new Gradient("blue", "#0000A0", HORIZONTAL));
+                                dc.setBackground(new Gradient("blue", "#0000A0", "horizontal"));
                             }
 
                             if (d >= 200) {
-                                dc.setBackground(new Gradient("red", "#A00000", HORIZONTAL));
+                                dc.setBackground(new Gradient("red", "#A00000", "horizontal"));
                             }
 
-                            c.add(RIGHT, dc);
+                            c.add("right", dc);
                             return new CompRender(c);
                         }
 
@@ -105,7 +105,7 @@
                         this.$super({
                             layout : new BorderLayout(),
                             kids   : {
-                                CENTER: new ImagePan()
+                                center: new ImagePan()
                             }
                         });
 
@@ -118,7 +118,7 @@
 
                     function resized(pw, ph) {
                         this.$super(pw, ph);
-                        this.getByConstraints(CENTER).setImage(
+                        this.getByConstraints("center").setImage(
                             "http://maps.google.com/maps/api/staticmap?sensor=false&center=52.234949,5.164554&scale=2&zoom=13&size="+ this.width + "x" + this.height);
                     },
 
@@ -244,9 +244,9 @@
                             g.fillText("" + i + "h", x, bottom + 8 + font.height);
 
                             if (i == 12) {
-                                var a = new ArrowView(BOTTOM,"red");
+                                var a = new ArrowView("bottom","red");
                                 a.paint(g, x - arrowSize/2, bottom - arrowSize ,arrowSize, arrowSize, this)
-                                a = new ArrowView(TOP, "red");
+                                a = new ArrowView("top", "red");
                                 a.paint(g, x - arrowSize/2, bottom-1 ,arrowSize, arrowSize, this)
                                 g.setColor("red")
                                 g.drawLine(x-1, bottom - arrowSize-6, x-1, bottom + arrowSize + 4,2);
@@ -269,27 +269,27 @@
                     background: "white",
 		 			layout    : new BorderLayout(16),
 		 		 	kids: {
-		 		 		RIGHT: new BorderPan("Quadrants",
+		 		 		right: new BorderPan("Quadrants",
                                              new ScrollPan(new GridStretchPan(qGrid)).properties({autoHide:true})).properties( { preferredSize:[350,-1] }),
-                        CENTER: new BorderPan("Map",
+                        center: new BorderPan("Map",
                                               new Panel({
-                                                  layout: new BorderLayout(4),
-                                                  kids: {
-                                                      TOP: new Panel({
-                                                                        layout: new FlowLayout(),
-                                                                        kids  : ch
-                                                                    }),
-                                                      CENTER: map
-                                                  }
+                                                    layout: new BorderLayout(4),
+                                                    kids: {
+                                                        top: new Panel({
+                                                            layout: new FlowLayout(),
+                                                            kids  : ch
+                                                        }),
+                                                        center: map
+                                                    }
                                             }).properties({padding:8})
 
                         ),
-                        BOTTOM: new BorderPan("Timeline", new Panel({
+                        bottom: new BorderPan("Timeline", new Panel({
                             layout: new BorderLayout(),
                             kids : {
-                                CENTER: tl,
-                                RIGHT: new Panel({
-                                    layout: new FlowLayout(CENTER, BOTTOM, VERTICAL, 0),
+                                center: tl,
+                                right: new Panel({
+                                    layout: new FlowLayout("center", "bottom", "vertical", 0),
                                     kids : [
                                         new BoldLabel("15-12-2014"),
                                         new ImagePan("images/calendar.png?" + (new Date().getTime()))

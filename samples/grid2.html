@@ -15,7 +15,7 @@
 			    var root = (new zCanvas(1400, 800)).root;
 				root.setLayout(new BorderLayout(8,8));
 
-				var g = new Grid(1000, 20), h = g.add(TOP, new GridCaption());
+				var g = new Grid(1000, 20), h = g.add("top", new GridCaption());
 
 				for(var i=0; i<g.getGridCols(); i++) {
 					h.putTitle(i, "Title " + i);
@@ -27,7 +27,7 @@
 				}
 
 				// add scrollable grid into canvas
-				root.add(CENTER, new ScrollPan(g));
+				root.add("center", new ScrollPan(g));
 	 		});
 		</script>
 	</head>

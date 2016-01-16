@@ -254,6 +254,10 @@ pkg.clone = function (obj, map) {
         return obj;
     }
 
+    if (obj.$notClonable === true) {
+        return obj;
+    }
+
     map = map || new Map();
     var t = map.get(obj);
     if (typeof t !== "undefined") {
@@ -446,9 +450,12 @@ pkg.Singleton = function(clazz) {
 pkg.Interface = make_template(null, function() {
     var $Interface = make_template(pkg.Interface, function() {
         if (arguments.length > 0) {
+            // return anonymous implementation of the interface if methods list is passed
+            // as an argument
             return new (pkg.Class($Interface, arguments[0]))();
         }
     }, arguments);
+
     return $Interface;
 });
 
@@ -924,7 +931,7 @@ pkg.Class = make_template(null, function() {
     if ($parent != null) {
         for (var k in $parent) {
             if (k[0] !== '$' &&
-                $parent.hasOwnProperty(k) === true &&
+                $parent.hasOwnProperty(k) &&
                 $template.hasOwnProperty(k) === false)
             {
                 $template[k] = pkg.clone($parent[k]);
@@ -1297,73 +1304,15 @@ else {
 
 (function(pkg, Class) {
 
-pkg.NONE        = 0;
-pkg.LEFT        = 1;
-pkg.RIGHT       = 2;
-pkg.TOP         = 4;
-pkg.BOTTOM      = 8;
-pkg.CENTER      = 16;
-pkg.HORIZONTAL  = 32;
-pkg.VERTICAL    = 64;
-pkg.TEMPORARY   = 128;
-
-pkg.UsePsSize   = pkg.USE_PS_SIZE = 512;
-pkg.STRETCH     = 256;
-
-pkg.TopLeft     = pkg.LEFT  | pkg.TOP;
-pkg.TopRight    = pkg.RIGHT | pkg.TOP;
-pkg.BottomLeft  = pkg.LEFT  | pkg.BOTTOM;
-pkg.BottomRight = pkg.RIGHT | pkg.BOTTOM;
-
-// collect constraints into a separate dictionary
-var $ctrs = {};
-for(var k in pkg) {
-    if (pkg.hasOwnProperty(k) && /^\d+$/.test(pkg[k])) {
-        $ctrs[k] = pkg[k];
-        $ctrs[k.toUpperCase()] = pkg[k];
-        var lc = k.toLowerCase();
-        $ctrs[lc] = pkg[k];
-        $ctrs[lc[0].toUpperCase() + lc.substring(1)] = pkg[k];
-    }
-}
-
-pkg.$constraints = function(v) {
-    return (  v != null &&
-             (typeof v === "string" || v.constructor === String)) &&
-            $ctrs[v] != null ? $ctrs[v] : v;
-};
-
-
 /**
  * Layout package provides number of classes, interfaces, methods and
  * variables that allows developer easily implement rules based layouting
  * of hierarchy of rectangular elements. The package has no relation
  * to any concrete UI, but it can be applied to a required UI framework
  *
- * The package declares the following constraints constants:
-
-    - **NONE** no constraints
-    - **LEFT** left alignment constraint
-    - **TOP** top alignment constraint
-    - **RIGHT** right alignment constraint
-    - **BOTTOM** bottom alignment constraint
-    - **CENTER** center alignment constraint
-    - **HORIZONTAL** horizontal elements alignment constraint
-    - **VERTICAL** vertical elements alignment constraint
-    - **TopLeft** top left alignment constraint
-    - **TopRight** top right alignment constraint
-    - **BottomLeft** bottom left alignment constraint
-    - **BottomRight** bottom right alignment constraint
-    - **STRETCH** stretch element
-    - **USE_PS_SIZE** use preferred size for an element
- *
  * @module layout
  * @main layout
  */
-
-
-
-
 
  /**
   * Find a direct children element for the given children component
@@ -1378,7 +1327,6 @@ pkg.getDirectChild = function(parent, child){
     for(; child != null && child.parent !== parent; child = child.parent) {}
     return child;
 };
-
 
 /**
  * Layout manager interface
@@ -1413,7 +1361,9 @@ var L = pkg.Layout = new zebkit.Interface();
 pkg.getDirectAt = function(x,y,p){
     for(var i = 0;i < p.kids.length; i++){
         var c = p.kids[i];
-        if (c.isVisible === true && c.x <= x && c.y <= y && c.x + c.width > x && c.y + c.height > y) return i;
+        if (c.isVisible === true && c.x <= x && c.y <= y && c.x + c.width > x && c.y + c.height > y) {
+            return i;
+        }
     }
     return -1;
 };
@@ -1742,7 +1692,6 @@ pkg.Layoutable = Class(L, [
             p[arguments[0]] = arguments[1];
             return this.properties(p);
         };
-
 
         /**
          * Validate the component metrics. The method is called as
@@ -2215,10 +2164,9 @@ pkg.StackLayout = Class(L, [
             for(var i = 0;i < t.kids.length; i++){
                 var l = t.kids[i];
                 if (l.isVisible === true) {
-                    var ctr = l.constraints == null ? null
-                                                    : pkg.$constraints(l.constraints);
+                    var ctr = l.constraints == null ? null : l.constraints;
 
-                    if (ctr === pkg.USE_PS_SIZE) {
+                    if (ctr === "usePsSize") {
                         var ps = l.getPreferredSize();
                         l.setBounds(left + Math.floor((ww - ps.width )/2),
                                     top  + Math.floor((hh - ps.height)/2),
@@ -2234,10 +2182,10 @@ pkg.StackLayout = Class(L, [
 ]);
 
 /**
- *  Layout manager implementation that logically splits component area into five areas: TOP, BOTTOM, LEFT, RIGHT and CENTER.
- *  TOP and BOTTOM components are stretched to fill all available space horizontally and are sized to have preferred height horizontally.
- *  LEFT and RIGHT components are stretched to fill all available space vertically and are sized to have preferred width vertically.
- *  CENTER component is stretched to occupy all available space taking in account TOP, LEFT, RIGHT and BOTTOM components.
+ *  Layout manager implementation that logically splits component area into five areas: top, bottom, left, right and center.
+ *  Top and bottom components are stretched to fill all available space horizontally and are sized to have preferred height horizontally.
+ *  Left and right components are stretched to fill all available space vertically and are sized to have preferred width vertically.
+ *  Center component is stretched to occupy all available space taking in account top, left, right and bottom components.
 
        // create panel with border layout
        var p = new zebkit.ui.Panel(new zebkit.layout.BorderLayout());
@@ -2287,14 +2235,13 @@ pkg.BorderLayout = Class(L, [
             for(var i = 0; i < target.kids.length; i++){
                 var l = target.kids[i];
                 if (l.isVisible === true){
-                    var ctr = pkg.$constraints(l.constraints);
-                    switch(ctr) {
-                       case pkg.CENTER : center = l;break;
-                       case pkg.TOP    : north  = l;break;
-                       case pkg.BOTTOM : south  = l;break;
-                       case pkg.LEFT   : west   = l;break;
-                       case pkg.RIGHT  : east   = l;break;
-                       default: throw new Error("Invalid constraints: " + ctr);
+                    switch(l.constraints) {
+                       case "center" : center = l;break;
+                       case "top"    : north  = l;break;
+                       case "bottom" : south  = l;break;
+                       case "left"   : west   = l;break;
+                       case "right"  : east   = l;break;
+                       default: throw new Error("Invalid constraints: " + l.constraints);
                     }
                 }
             }
@@ -2344,22 +2291,21 @@ pkg.BorderLayout = Class(L, [
             for(var i = 0;i < t.kids.length; i++){
                 var l = t.kids[i];
                 if (l.isVisible === true) {
-                    var ctr = pkg.$constraints(l.constraints);
-                    switch(ctr) {
-                        case pkg.CENTER: center = l; break;
-                        case pkg.TOP :
+                    switch(l.constraints) {
+                        case "center": center = l; break;
+                        case "top" :
                             var ps = l.getPreferredSize();
                             l.setBounds(left, top, right - left, ps.height);
                             top += ps.height + this.vgap;
                             break;
-                        case pkg.BOTTOM:
+                        case "bottom":
                             var ps = l.getPreferredSize();
                             l.setBounds(left, bottom - ps.height, right - left, ps.height);
                             bottom -= ps.height + this.vgap;
                             break;
-                        case pkg.LEFT: west = l; break;
-                        case pkg.RIGHT: east = l; break;
-                        default: throw new Error("Invalid constraints: " + ctr);
+                        case "left": west = l; break;
+                        case "right": east = l; break;
+                        default: throw new Error("Invalid constraints: " + l.constraints);
                     }
                 }
             }
@@ -2390,8 +2336,7 @@ pkg.BorderLayout = Class(L, [
  * provides extra possibilities to control children components placing.
  * It is possible to align components by specifying layout constraints,
  * size component to its preferred size and so on.
- * @param {Integer} [m] flag to add extra rule to components layouting.
- * For instance use zebkit.layout.USE_PS_SIZE as the flag value to set
+ * @param {Boolean} [usePsSize] flag to add extra rule to set
  * components size to its preferred sizes.
  * @class  zebkit.layout.RasterLayout
  * @constructor
@@ -2399,15 +2344,16 @@ pkg.BorderLayout = Class(L, [
  */
 pkg.RasterLayout = Class(L, [
     function $prototype() {
+        this.usePsSize = false;
+
         this.calcPreferredSize = function(c){
-            var m = { width:0, height:0 },
-                b = (this.flag & pkg.USE_PS_SIZE) > 0;
+            var m = { width:0, height:0 };
 
             for(var i = 0;i < c.kids.length; i++ ){
                 var kid = c.kids[i];
                 if (kid.isVisible === true) {
-                    var ps = b ? kid.getPreferredSize()
-                               : { width:kid.width, height:kid.height },
+                    var ps = this.usePsSize ? kid.getPreferredSize()
+                                            : { width:kid.width, height:kid.height },
                         px = kid.x + ps.width,
                         py = kid.y + ps.height;
 
@@ -2420,14 +2366,13 @@ pkg.RasterLayout = Class(L, [
 
         this.doLayout = function(c){
             var r = c.width - c.getRight(),
-                b = c.height - c.getBottom(),
-                usePsSize = (this.flag & pkg.USE_PS_SIZE) > 0;
+                b = c.height - c.getBottom();
 
             for(var i = 0;i < c.kids.length; i++){
                 var el = c.kids[i], ww = 0, hh = 0;
 
                 if (el.isVisible === true){
-                    if (usePsSize) {
+                    if (this.usePsSize) {
                         var ps = el.getPreferredSize();
                         ww = ps.width;
                         hh = ps.height;
@@ -2437,34 +2382,29 @@ pkg.RasterLayout = Class(L, [
                         hh = el.height;
                     }
 
-                    var ctr = el.constraints == null ? null : pkg.$constraints(el.constraints);
-
-                    if (ctr != null) {
-                        if ((ctr & pkg.HORIZONTAL)  > 0) ww = r - el.x;
-                        if ((ctr & pkg.VERTICAL)    > 0) hh = b - el.y;
-                    }
+                    var ctr = el.constraints == null ? null : el.constraints;
                     el.setSize(ww, hh);
 
                     if (ctr != null) {
                         var x = el.x, y = el.y;
 
-                        if ((ctr & pkg.TOP) > 0) {
+                        if (ctr === "top" || ctr === "topRight" || ctr === "topLeft") {
                             y = 0;
                         }
-                        else if ((ctr & pkg.BOTTOM) > 0) {
+                        else if (ctr === "bottom" || ctr === "bottomLeft" || ctr === "bottomRight") {
                             y = c.height - hh;
                         }
-                        else if ((ctr & pkg.CENTER) > 0) {
+                        else if (ctr === "center" || ctr === "left" || ctr === "right") {
                             y = Math.floor((c.height - hh) / 2);
                         }
 
-                        if ((ctr & pkg.LEFT) > 0) {
+                        if (ctr === "left" || ctr === "topLeft" || ctr === "bottomLeft") {
                             x = 0;
                         }
-                        else if ((ctr & pkg.RIGHT) > 0) {
+                        else if (ctr === "right" || ctr === "topRight" || ctr === "bottomRight") {
                             x = c.width - ww;
                         }
-                        else if ((ctr & pkg.CENTER) > 0) {
+                        else if (ctr === "center" || ctr === "top" || ctr === "bottom") {
                             x = Math.floor((c.width  - ww) / 2);
                         }
 
@@ -2474,9 +2414,10 @@ pkg.RasterLayout = Class(L, [
             }
         };
 
-        //!!! speed up
-        this[''] = function(f) {
-            this.flag = f ? f : 0;
+        this[''] = function(ups) {
+            if (arguments.length > 0) {
+                this.usePsSize = ups;
+            }
         };
     }
 ]);
@@ -2496,41 +2437,23 @@ pkg.RasterLayout = Class(L, [
         p.add(new zebkit.ui.Button("Button 2"));
         p.add(new zebkit.ui.Button("Button 3"));
 
- * @param {Integer|String} [ax] (zebkit.layout.LEFT by default) horizontal alignment:
-
-     zebkit.layout.LEFT - left alignment
-     zebkit.layout.RIGHT - right alignment
-     zebkit.layout.CENTER - center alignment
-
-     or
+ * @param {String} [ax] ("left" by default) horizontal alignment:
 
      "left"
      "center"
      "right"
 
- * @param {Integer|String} [ay] (zebkit.layout.TOP by default) vertical alignment:
-
-     zebkit.layout.TOP - top alignment
-     zebkit.layout.CENTER - center alignment
-     zebkit.layout.BOTTOM - bottom alignment
-
-     or
+ * @param {String} [ay] ("top" by default) vertical alignment:
 
      "top"
      "center"
      "bottom"
 
- * @param {Integer|String} [dir] (zebkit.layout.HORIZONTAL by default) a direction
+ * @param {String} [dir] ("horizontal" by default) a direction
  * the component has to be placed in the layout
-
-     zebkit.layout.VERTICAL - vertical placed components
-     zebkit.layout.HORIZONTAL - horizontal placed components
-
-     or
 
      "vertical"
      "horizontal"
-
 
  * @param {Integer} [gap] a space in pixels between laid out components
  * @class  zebkit.layout.FlowLayout
@@ -2552,42 +2475,42 @@ pkg.FlowLayout = Class(L, [
          * Horizontal laid out components alignment
          * @attribute ax
          * @readOnly
-         * @type {Integer|String}
-         * @default zebkit.layout.LEFT
+         * @type {String}
+         * @default "left"
          */
-        this.ax = pkg.LEFT;
+        this.ax = "left";
 
         /**
          * Vertical laid out components alignment
          * @attribute ay
          * @readOnly
-         * @type {Integer|String}
-         * @default zebkit.layout.TOP
+         * @type {String}
+         * @default "center"
          */
-        this.ay = pkg.TOP;
+        this.ay = "center";
 
         /**
          * Laid out components direction
          * @attribute direction
          * @readOnly
-         * @type {Integer|String}
-         * @default zebkit.layout.HORIZONTAL
+         * @type {String}
+         * @default "horizontal"
          */
-        this.direction = pkg.HORIZONTAL;
+        this.direction = "horizontal";
 
         this.stretchLast = false;
 
-        this[''] =  function (ax,ay,dir,g){
+        this[''] =  function (ax, ay, dir, g){
             if (arguments.length === 1) this.gap = ax;
             else {
                 if (arguments.length >= 2) {
-                    this.ax = pkg.$constraints(ax);
-                    this.ay = pkg.$constraints(ay);
+                    this.ax = ax;
+                    this.ay = ay;
                 }
 
                 if (arguments.length > 2)  {
-                    dir = pkg.$constraints(dir);
-                    if (dir !== pkg.HORIZONTAL && dir !== pkg.VERTICAL) {
+                    dir = dir;
+                    if (dir !== "horizontal" && dir !== "vertical") {
                         throw new Error("Invalid direction " + dir);
                     }
                     this.direction = dir;
@@ -2603,7 +2526,7 @@ pkg.FlowLayout = Class(L, [
                 var a = c.kids[i];
                 if (a.isVisible === true){
                     var d = a.getPreferredSize();
-                    if (this.direction === pkg.HORIZONTAL){
+                    if (this.direction === "horizontal"){
                         m.width += d.width;
                         m.height = d.height > m.height ? d.height : m.height;
                     }
@@ -2616,7 +2539,7 @@ pkg.FlowLayout = Class(L, [
             }
 
             var add = this.gap * (cc > 0 ? cc - 1 : 0);
-            if (this.direction === pkg.HORIZONTAL) m.width += add;
+            if (this.direction === "horizontal") m.width += add;
             else m.height += add;
             return m;
         };
@@ -2628,42 +2551,42 @@ pkg.FlowLayout = Class(L, [
                 lastOne = null,
                 ew      = c.width  - l - c.getRight(),
                 eh      = c.height - t - c.getBottom(),
-                px      = ((this.ax === pkg.RIGHT) ? ew - psSize.width
-                                                   : ((this.ax === pkg.CENTER) ? Math.floor((ew - psSize.width) / 2) : 0)) + l,
-                py      = ((this.ay === pkg.BOTTOM) ? eh - psSize.height
-                                                    : ((this.ay === pkg.CENTER) ? Math.floor((eh - psSize.height) / 2): 0)) + t;
+                px      = ((this.ax === "right") ? ew - psSize.width
+                                                 : ((this.ax === "center") ? Math.floor((ew - psSize.width) / 2) : 0)) + l,
+                py      = ((this.ay === "bottom") ? eh - psSize.height
+                                                  : ((this.ay === "center") ? Math.floor((eh - psSize.height) / 2): 0)) + t;
 
             for(var i = 0;i < c.kids.length; i++){
                 var a = c.kids[i];
                 if (a.isVisible === true) {
 
                     var d = a.getPreferredSize(),
-                        ctr = a.constraints == null ? null : pkg.$constraints(a.constraints);
+                        ctr = a.constraints == null ? null : a.constraints;
 
-                    if (this.direction === pkg.HORIZONTAL) {
+                    if (this.direction === "horizontal") {
                         ctr = ctr || this.ay;
 
-                        if (ctr === pkg.STRETCH) {
+                        if (ctr === "stretch") {
                             d.height = c.height - t - c.getBottom();
                         }
 
-                        a.setLocation(px, ctr === pkg.STRETCH    ? t :
-                                             (ctr === pkg.TOP    ? py :
-                                             (ctr === pkg.BOTTOM ? Math.floor(psSize.height - d.height) + py :
-                                                                   Math.floor((psSize.height - d.height) / 2) + py)));
+                        a.setLocation(px, ctr === "stretch" ? t :
+                                          (ctr === "top"    ? py :
+                                          (ctr === "bottom" ? Math.floor(psSize.height - d.height) + py :
+                                                              Math.floor((psSize.height - d.height) / 2) + py)));
                         px += (d.width + this.gap);
                     }
                     else {
                         ctr = ctr || this.ax;
 
-                        if (ctr === pkg.STRETCH) {
+                        if (ctr === "stretch") {
                             d.width = c.width - l - c.getRight();
                         }
 
-                        a.setLocation(ctr === pkg.STRETCH  ? l  :
-                                        (ctr === pkg.LEFT  ? px :
-                                        (ctr === pkg.RIGHT ? px + Math.floor(psSize.width - d.width) :
-                                                             px + Math.floor((psSize.width - d.width) / 2))), py);
+                        a.setLocation(ctr === "stretch"  ? l  :
+                                      (ctr === "left"    ? px :
+                                      (ctr === "right"   ? px + Math.floor(psSize.width - d.width) :
+                                                           px + Math.floor((psSize.width - d.width) / 2))), py);
 
                         py += d.height + this.gap;
                     }
@@ -2674,7 +2597,7 @@ pkg.FlowLayout = Class(L, [
             }
 
             if (lastOne !== null && this.stretchLast === true){
-                if (this.direction === pkg.HORIZONTAL) {
+                if (this.direction === "horizontal") {
                     lastOne.setSize(c.width - lastOne.x - c.getRight(), lastOne.height);
                 }
                 else {
@@ -2697,14 +2620,7 @@ pkg.FlowLayout = Class(L, [
         p.add(new zebkit.ui.Button("Item 2"));
         p.add(new zebkit.ui.Button("Item 3"));
 
- * @param {Integer|String} [ax] horizontal list item alignment:
-
-     zebkit.layout.LEFT - left alignment
-     zebkit.layout.RIGHT - right alignment
-     zebkit.layout.CENTER - center alignment
-     zebkit.layout.STRETCH - stretching item to occupy the whole horizontal space
-
-     or
+ * @param {String} [ax] horizontal list item alignment:
 
      "left"
      "right"
@@ -2718,38 +2634,35 @@ pkg.FlowLayout = Class(L, [
  */
 pkg.ListLayout = Class(L,[
     function $prototype() {
+        /**
+         * Horizontal list items alignment
+         * @attribute ax
+         * @type {String}
+         * @readOnly
+         */
+        this.ax = "stretch";
+
+        /**
+         * Pixel gap between list items
+         * @attribute gap
+         * @type {Integer}
+         * @readOnly
+         */
+        this.gap = 0;
+
         this[''] = function (ax, gap) {
             if (arguments.length === 1) {
-                gap = ax;
+                this.gap = ax;
+            } else if (arguments.length > 1) {
+                this.ax  = ax;
+                this.gap = gap;
             }
 
-            ax = (arguments.length <= 1) ? pkg.STRETCH : pkg.$constraints(ax);
-
-            if (arguments.length === 0) {
-                gap = 0;
-            }
-
-            if (ax !== pkg.STRETCH && ax !== pkg.LEFT &&
-                ax !== pkg.RIGHT && ax !== pkg.CENTER)
+            if (this.ax !== "stretch" && this.ax !== "left"  &&
+                this.ax !== "right"   && this.ax !== "center"  )
             {
-                throw new Error("Invalid alignment");
+                throw new Error("Invalid alignment " + this.ax);
             }
-
-            /**
-             * Horizontal list items alignment
-             * @attribute ax
-             * @type {Integer}
-             * @readOnly
-             */
-            this.ax = ax;
-
-            /**
-             * Pixel gap between list items
-             * @attribute gap
-             * @type {Integer}
-             * @readOnly
-             */
-            this.gap = gap;
         };
 
         this.calcPreferredSize = function (lw){
@@ -2777,14 +2690,14 @@ pkg.ListLayout = Class(L,[
                 if (cc.isVisible === true){
                     var d      = cc.getPreferredSize(),
                         constr = cc.constraints == null ? this.ax
-                                                        : pkg.$constraints(cc.constraints);
+                                                        : cc.constraints;
 
-                    cc.setSize    ((constr === pkg.STRETCH) ? psw
+                    cc.setSize    ((constr === "stretch") ? psw
                                                             : d.width, d.height);
-                    cc.setLocation((constr === pkg.STRETCH) ? x
-                                                            : x + ((constr === pkg.RIGHT) ? psw - cc.width
-                                                                                          : ((constr === pkg.CENTER) ? Math.floor((psw - cc.width) / 2)
-                                                                                                                     : 0)), y);
+                    cc.setLocation((constr === "stretch") ? x
+                                                            : x + ((constr === "right") ? psw - cc.width
+                                                                                        : ((constr === "center") ? Math.floor((psw - cc.width) / 2)
+                                                                                                                 : 0)), y);
                     y += (d.height + this.gap);
                 }
             }
@@ -2822,10 +2735,10 @@ pkg.PercentLayout = Class(L, [
           * Direction the components have to be placed (vertically or horizontally)
           * @attribute direction
           * @readOnly
-          * @type {Integer}
-          * @default zebkit.layout.HORIZONTAL
+          * @type {String}
+          * @default "horizontal"
           */
-        this.direction = pkg.HORIZONTAL;
+        this.direction = "horizontal";
 
         /**
          * Pixel gap between components
@@ -2838,8 +2751,8 @@ pkg.PercentLayout = Class(L, [
 
         /**
          * Boolean flag that say if the laid out components have
-         * to be stretched vertically (if direction is set to zebkit.layout.VERTICAL)
-         * or horizontally (if direction is set to zebkit.layout.HORIZONTAL)
+         * to be stretched vertically (if direction is set to "vertical")
+         * or horizontally (if direction is set to "horizontal")
          * @attribute stretch
          * @readOnly
          * @type {Integer}
@@ -2849,8 +2762,8 @@ pkg.PercentLayout = Class(L, [
 
         this[''] = function(dir, gap, stretch) {
             if (arguments.length > 0) {
-                this.direction = pkg.$constraints(dir);
-                if (this.direction !== pkg.HORIZONTAL && this.direction !== pkg.VERTICAL) {
+                this.direction = dir;
+                if (this.direction !== "horizontal" && this.direction !== "vertical") {
                     throw new Error("Invalid direction : " + this.direction);
                 }
 
@@ -2869,7 +2782,7 @@ pkg.PercentLayout = Class(L, [
                 loc    = 0,
                 ns     = 0;
 
-            if (this.direction === pkg.HORIZONTAL){
+            if (this.direction === "horizontal"){
                 rs += target.width - left - right;
                 loc = left;
             }
@@ -2878,9 +2791,9 @@ pkg.PercentLayout = Class(L, [
                 loc = top;
             }
 
-            for(var i = 0;i < size; i ++ ){
-                var l = target.kids[i], c = l.constraints, useps = (c === pkg.USE_PS_SIZE);
-                if (this.direction === pkg.HORIZONTAL){
+            for(var i = 0; i < size; i ++ ){
+                var l = target.kids[i], c = l.constraints, useps = (c === "usePsSize");
+                if (this.direction === "horizontal"){
                     ns = ((size - 1) == i) ? target.width - right - loc
                                            : (useps ? l.getPreferredSize().width
                                                       : ~~((rs * c) / 100));
@@ -2915,19 +2828,19 @@ pkg.PercentLayout = Class(L, [
                 size = target.kids.length,
                 as   = this.gap * (size === 0 ? 0 : size - 1);
 
-            for(var i = 0;i < size; i++){
+            for(var i = 0; i < size; i++){
                 var d = target.kids[i].getPreferredSize();
-                if (this.direction === pkg.HORIZONTAL){
+                if (this.direction === "horizontal"){
                     if (d.height > max) max = d.height;
                     as += d.width;
                 }
                 else {
-                    if(d.width > max) max = d.width;
+                    if (d.width > max) max = d.width;
                     as += d.height;
                 }
             }
-            return (this.direction === pkg.HORIZONTAL) ? { width:as, height:max }
-                                                       : { width:max, height:as };
+            return (this.direction === "horizontal") ? { width:as, height:max }
+                                                     : { width:max, height:as };
         };
     }
 ]);
@@ -2975,25 +2888,25 @@ pkg.Constraints = Class([
         /**
          * Horizontal alignment
          * @attribute ax
-         * @type {Integer}
-         * @default zebkit.layout.STRETCH
+         * @type {String}
+         * @default "stretch"
          */
 
         /**
          * Vertical alignment
          * @attribute ay
-         * @type {Integer}
-         * @default zebkit.layout.STRETCH
+         * @type {String}
+         * @default "stretch"
          */
 
         this.top = this.bottom = this.left = this.right = 0;
-        this.ay = this.ax = pkg.STRETCH;
+        this.ay = this.ax = "stretch";
         this.rowSpan = this.colSpan = 1;
 
         this[''] = function(ax, ay, p) {
             if (arguments.length > 0) {
-                this.ax = pkg.$constraints(ax);
-                if (arguments.length > 1) this.ay = pkg.$constraints(ay);
+                this.ax = ax;
+                if (arguments.length > 1) this.ay = ay;
                 if (arguments.length > 2) this.setPadding(p);
             }
         };
@@ -3039,7 +2952,7 @@ pkg.Constraints = Class([
         ctr.setPadding(8);
         // say the component has to be left aligned in a
         // virtual cell of grid layout
-        ctr.ax = zebkit.layout.LEFT;
+        ctr.ax = "left";
 
         // create panel and set grid layout manager with two
         // virtual rows and columns
@@ -3056,15 +2969,18 @@ pkg.Constraints = Class([
  * children components
  * @param {Integer} cols a number of virtual columns to
  * layout children components
+ * @param {String} [ax] horizontal alignment
+ * @param {String} [ay] vertical alignment
+ * layout children components
  * @constructor
  * @class  zebkit.layout.GridLayout
  * @extends {zebkit.layout.Layout}
  */
 pkg.GridLayout = Class(L, [
     function $prototype() {
-        this[''] = function(r,c,m) {
-            if (arguments.length < 3) m = 0;
+        this.stretchCols = this.stretchRows = false;
 
+        this[''] = function(r, c, stretchRows, stretchCols) {
             /**
              * Number of virtual rows to place children components
              * @attribute rows
@@ -3080,7 +2996,7 @@ pkg.GridLayout = Class(L, [
              * @type {Integer}
              */
             this.cols = c;
-            this.stretchCols = this.stretchRows = false;
+
             this.colSizes = Array(c + 1);
             this.rowSizes = Array(r + 1);
 
@@ -3091,6 +3007,9 @@ pkg.GridLayout = Class(L, [
              * @attribute constraints
              */
             this.constraints = new pkg.Constraints();
+
+            if (stretchRows != null) this.stretchRows = stretchRows;
+            if (stretchCols != null) this.stretchCols = stretchCols;
         };
 
         /**
@@ -3102,7 +3021,7 @@ pkg.GridLayout = Class(L, [
          */
         this.calcCols = function(c){
             this.colSizes[this.cols] = 0;
-            for(var i = 0;i < this.cols; i++){
+            for(var i = 0;i < this.cols; i++) {
                 this.colSizes[i] = this.calcCol(i, c);
                 this.colSizes[this.cols] += this.colSizes[i];
             }
@@ -3118,7 +3037,7 @@ pkg.GridLayout = Class(L, [
          */
         this.calcRows = function(c){
             this.rowSizes[this.rows] = 0;
-            for(var i = 0;i < this.rows; i++){
+            for(var i = 0;i < this.rows; i++) {
                 this.rowSizes[i] = this.calcRow(i, c);
                 this.rowSizes[this.rows] += this.rowSizes[i];
             }
@@ -3138,7 +3057,9 @@ pkg.GridLayout = Class(L, [
             for (var i = s; i < c.kids.length && i < s + this.cols; i++) {
                 var a = c.kids[i];
                 if (a.isVisible === true) {
-                    var arg = a.constraints || this.constraints, d = a.getPreferredSize().height;
+                    var arg = a.constraints || this.constraints,
+                        d   = a.getPreferredSize().height;
+
                     d += (arg.top + arg.bottom);
                     if (d > max) max = d;
                 }
@@ -3210,18 +3131,19 @@ pkg.GridLayout = Class(L, [
                         cellW -= (arg.left + arg.right);
                         cellH -= (arg.top  + arg.bottom);
 
-                        if (pkg.STRETCH === arg.ax) d.width  = cellW;
-                        if (pkg.STRETCH === arg.ay) d.height = cellH;
+                        if ("stretch" === arg.ax) d.width  = cellW;
+                        if ("stretch" === arg.ay) d.height = cellH;
 
                         l.setSize(d.width, d.height);
                         l.setLocation(
-                            xx  + arg.left + (pkg.STRETCH === arg.ax ? 0
-                                                                     : ((arg.ax === pkg.RIGHT) ? cellW - d.width
-                                                                                               : ((arg.ax === pkg.CENTER) ? Math.floor((cellW - d.width) / 2)
-                                                                                                                             : 0))),
-                            top + arg.top  + (pkg.STRETCH === arg.ay ? 0 : ((arg.ay === pkg.TOP  ) ? cellH - d.height
-                                                                                                   : ((arg.ay === pkg.CENTER) ? Math.floor((cellH - d.height) / 2)
-                                                                                                                              : 0)))
+                            xx  + arg.left + ("stretch" === arg.ax ? 0
+                                                                     : ((arg.ax === "right") ? cellW - d.width
+                                                                                             : ((arg.ax === "center") ? Math.floor((cellW - d.width) / 2)
+                                                                                                                      : 0))),
+                            top + arg.top  + ("stretch" === arg.ay ? 0
+                                                                   : ((arg.ay === "bottom" ) ? cellH - d.height
+                                                                                             : ((arg.ay === "center") ? Math.floor((cellH - d.height) / 2)
+                                                                                                                      : 0)))
                         );
 
                         xx += colSizes[j];
@@ -3236,7 +3158,6 @@ pkg.GridLayout = Class(L, [
 /**
  * @for
  */
-
 
 })(zebkit("layout"), zebkit.Class);
 /**
@@ -6130,9 +6051,22 @@ pkg.Text = Class(pkg.TextModel, [
     function $prototype() {
         this.textLength = 0;
 
-        this.getLnInfo = function(lines, start, startOffset, o){
-            for(; start < lines.length; start++){
-                var line = lines[start].s;
+        /**
+         * Detect line by offset starting from the given line and offset.
+         * @param  {Integer} [start]       start line
+         * @param  {Integer} [startOffset] start offset of the start line
+         * @param  {Integer} o             offset to detect line
+         * @private
+         * @method calcLineByOffset
+         * @return {Array}  an array that consists of two elements: detected line index and its offset
+         */
+        this.calcLineByOffset = function(start, startOffset, o) {
+            if (arguments.length === 1) {
+                startOffset = start = 0;
+            }
+
+            for(; start < this.lines.length; start++){
+                var line = this.lines[start].s;
                 if (o >= startOffset && o <= startOffset + line.length){
                     return [start, startOffset];
                 }
@@ -6141,7 +6075,15 @@ pkg.Text = Class(pkg.TextModel, [
             return [];
         };
 
-        this.$lineTags = function(i, value) {
+        this.calcLineOffset = function(line) {
+            var off = 0;
+            for(var i = 0; i < line; i++){
+                off += (this.lines[i].s.length + 1);
+            }
+            return off;
+        };
+
+        this.$lineTags = function(i) {
             return this.lines[i];
         };
 
@@ -6162,10 +6104,61 @@ pkg.Text = Class(pkg.TextModel, [
             return this.textLength;
         };
 
+        this.removeLines = function(start, size) {
+            if (start < 0 || start >= this.lines.length) {
+                throw new RangeError(start);
+            }
+
+            if (arguments.length === 1) {
+                size = 1;
+            }
+            else {
+                if (size <= 0) {
+                    throw new Error("Invalid number of lines : " + size);
+                }
+            }
+
+            // normalize number required lines to be removed
+            if ((start + size) > this.lines.length) {
+                size = this.lines.length - start;
+            }
+
+            var end  = start + size - 1,            // last line to be removed
+                off  = this.calcLineOffset(start),  // offset of the first line to be removed
+                olen = start != end ? this.calcLineOffset(end) + this.lines[end].s.length + 1 - off
+                                    : this.lines[start].s.length + 1;
+
+
+            // if this is the last line we have to correct offset to point to "\n" character in text
+            if (start === this.lines.length - 1) {
+                off--;
+            }
+
+            this.lines.splice(start, size);
+            this._.textUpdated(this, false, off, olen, start, size);
+        };
+
+        this.insertLines = function(startLine) {
+            if (startLine < 0 || startLine > this.lines.length) {
+                throw new RangeError(startLine);
+            }
+
+            var off = this.calcLineOffset(startLine), offlen = 0;
+            if (startLine == this.lines.length) {
+                off--;
+            }
+
+            for(var i = 1; i < arguments.length; i++) {
+                offlen += arguments[i].length + 1;
+                this.lines.splice(startLine + i - 1, 0, new Line(arguments[i]));
+            }
+            this._.textUpdated(this, true, off, offlen, startLine, arguments.length - 1);
+        };
+
         this.write = function (s, offset) {
             if (s.length > 0) {
                 var slen    = s.length,
-                    info    = this.getLnInfo(this.lines, 0, 0, offset),
+                    info    = this.calcLineByOffset(0,0,offset),
                     line    = this.lines[info[0]].s,
                     j       = 0,
                     lineOff = offset - info[1],
@@ -6193,14 +6186,14 @@ pkg.Text = Class(pkg.TextModel, [
 
         this.remove = function(offset, size) {
             if (size > 0) {
-                var i1   = this.getLnInfo(this.lines, 0, 0, offset),
-                    i2   = this.getLnInfo(this.lines, i1[0], i1[1], offset + size),
-                    l2   = this.lines[i2[0]].s,
+                var i1   = this.calcLineByOffset(0, 0, offset),
+                    i2   = this.calcLineByOffset(i1[0], i1[1], offset + size),
                     l1   = this.lines[i1[0]].s,
+                    l2   = this.lines[i2[0]].s,
                     off1 = offset - i1[1], off2 = offset + size - i2[1],
                     buf  = l1.substring(0, off1) + l2.substring(off2);
 
-                if (i2[0] == i1[0]) {
+                if (i2[0] === i1[0]) {
                     this.lines.splice(i1[0], 1, new Line(buf));
                 }
                 else {
@@ -7735,7 +7728,7 @@ pkg.Matrix = Class([
                 $clipboard.setAttribute("style", "display:none;position:fixed;left:-99em;top:-99em;");
 
                 $clipboard.onkeydown = function(ee) {
-                    $this.$clipboardCanvas.$container.dispatchEvent($dupKeyEvent(ee, 'keydown', $this.$clipboardCanvas.$container));
+                    $this.$clipboardCanvas.element.dispatchEvent($dupKeyEvent(ee, 'keydown', $this.$clipboardCanvas.element));
                     $clipboard.value="1";
                     $clipboard.select();
                 };
@@ -7743,10 +7736,10 @@ pkg.Matrix = Class([
                 $clipboard.onkeyup = function(ee) {
                     if (ee.keyCode === $this.clipboardTriggerKey) {
                         $clipboard.style.display = "none";
-                        $this.$clipboardCanvas.$container.focus();
+                        $this.$clipboardCanvas.element.focus();
                     }
 
-                    $this.$clipboardCanvas.$container.dispatchEvent($dupKeyEvent(ee, 'keyup', $this.$clipboardCanvas.$container));
+                    $this.$clipboardCanvas.element.dispatchEvent($dupKeyEvent(ee, 'keyup', $this.$clipboardCanvas.element));
                 };
 
                 $clipboard.onblur = function() {
@@ -7756,7 +7749,7 @@ pkg.Matrix = Class([
                     //!!! pass focus back to canvas
                     //    it has to be done for the case when cmd+TAB (switch from browser to
                     //    another application)
-                    $this.$clipboardCanvas.$container.focus();
+                    $this.$clipboardCanvas.element.focus();
                 };
 
                 $clipboard.oncopy = function(ee) {
@@ -7902,6 +7895,9 @@ pkg.Matrix = Class([
             // TODO: not completed
             this.pressGroup = [];
 
+            // TODO: experemental property
+            this.eatMe = false;
+
             this.isAction = function() {
                 return this.identifier === LMOUSE && this.touchCounter === 1;
             };
@@ -7911,6 +7907,7 @@ pkg.Matrix = Class([
             };
 
             this.$fillWith = function(identifier, e) {
+                this.eatMe      = false;
                 this.pageX      = Math.floor(e.pageX);
                 this.pageY      = Math.floor(e.pageY);
                 this.target     = e.target;
@@ -8793,6 +8790,9 @@ pkg.Matrix = Class([
 
             this.altKey = this.shiftKey = this.ctrlKey = this.metaKey = false;
 
+            // TODO: experemental property
+            this.eatMe = false;
+
             this.$fillWithParams = function(source, code, ch, mask) {
                 this.$setMask(mask);
                 this.code   = code;
@@ -8812,6 +8812,8 @@ pkg.Matrix = Class([
             };
 
             this.$fillWith = function(e) {
+                this.eatMe = false;
+
                 this.code = (e.which || e.keyCode || 0);
 
                 // FF sets keyCode to zero for some diacritic characters
@@ -8878,9 +8880,8 @@ pkg.Matrix = Class([
 
             element.onkeypress = function(e) {
                 KEY_EVENT.$fillWith(e);
-
                 if (KEY_EVENT.ch === 0) {
-                    // warp with try catch to restore variable
+                    // wrap with try catch to restore variable
                     try {
                         if ($keyPressedCode != KEY_EVENT.code) {
                             if (destination.$keyPressed(KEY_EVENT) === true) {
@@ -8897,7 +8898,7 @@ pkg.Matrix = Class([
                 else {
                     // Since container of zCanvas catch all events from its children DOM
                     // elements don't prevent the event for the children DOM element
-                    if (destination.$keyTyped(KEY_EVENT) === true || (e.target === element && KEY_EVENT.code < 47)) {
+                    if ((e.target === element && KEY_EVENT.code < 47) || destination.$keyTyped(KEY_EVENT) === true) {
                         e.preventDefault();
                     }
                 }
@@ -10614,8 +10615,7 @@ pkg.Panel = Class(L.Layoutable, [
                         var kids = a;
                         for(var k in kids) {
                             if (kids.hasOwnProperty(k)) {
-                                var ctr = L.$constraints(k);
-                                this.add(ctr, kids[k]);
+                                this.add(k, kids[k]);
                             }
                         }
                     }
@@ -11593,7 +11593,7 @@ pkg.CanvasLayer = Class(pkg.HtmlCanvas, [
  *  @constructor
  *  @extends {zebkit.ui.CanvasLayer}
  */
-pkg.RootLayer = Class(pkg.HtmlCanvas, [
+pkg.RootLayer = Class(pkg.CanvasLayer, [
     function $clazz() {
         this.ID = "root";
     },
@@ -12424,6 +12424,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
             for(var i = this.kids.length - 1;i >= 0; i--){
                 var l = this.kids[i];
                 if (l.layerKeyPressed != null && l.layerKeyPressed(e) === true){
+                    if (e.eatMe === true) return true;
                     break;
                 }
             }
@@ -12635,6 +12636,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
             for(var i = this.kids.length - 1; i >= 0; i--){
                 tl = this.kids[i];
                 if (tl.layerPointerPressed != null && tl.layerPointerPressed(e)) {
+                    if (e.eatMe === true) return true;
                     break;
                 }
             }
@@ -12728,7 +12730,8 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
         this.$initListeners = function() {
             // TODO: hard-coded
             new pkg.PointerEventUnifier(this.$container, this);
-            new pkg.KeyEventUnifier(this.$container, this);
+            new pkg.KeyEventUnifier(this.element, this); // element has to be used since canvas is
+                                                         // styled to have focus and get key events
             new pkg.MouseWheelSupport(this.$container, this);
         };
     },
@@ -12780,8 +12783,9 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
             document.body.appendChild(this.$container);
         }
 
-        if (this.$container.getAttribute("tabindex") === null) {
-            this.$container.setAttribute("tabindex", "1");
+        // force canvas to have a focus
+        if (this.element.getAttribute("tabindex") === null) {
+            this.element.setAttribute("tabindex", "1");
         }
 
         if (w < 0) w = this.element.offsetWidth;
@@ -12971,16 +12975,16 @@ zebkit.ready(
 
 /**
  * @module  ui
+ * @required easyoop, util
  */
-var L = zebkit.layout;
 
 pkg.$view = function(v) {
     if (v == null || v.paint != null) return v;
 
     if (zebkit.isString(v)) {
         return zebkit.util.rgb.hasOwnProperty(v) ? zebkit.util.rgb[v]
-                                     : (pkg.borders != null && pkg.borders.hasOwnProperty(v) ? pkg.borders[v]
-                                                                                             : new zebkit.util.rgb(v));
+                                                 : (pkg.borders != null && pkg.borders.hasOwnProperty(v) ? pkg.borders[v]
+                                                                                                         : new zebkit.util.rgb(v));
     }
 
     if (Array.isArray(v)) {
@@ -13007,6 +13011,12 @@ pkg.$view = function(v) {
 */
 pkg.Sunken = Class(pkg.View, [
     function (brightest,middle,darkest) {
+        if (arguments.length > 0) this.brightest = brightest;
+        if (arguments.length > 1) this.middle    = middle;
+        if (arguments.length > 2) this.darkest   = darkest;
+    },
+
+    function $prototype() {
         /**
          * Brightest border line color
          * @attribute brightest
@@ -13030,13 +13040,10 @@ pkg.Sunken = Class(pkg.View, [
          * @type {String}
          * @default "black"
          */
+        this.brightest = "white";
+        this.middle    = "gray" ;
+        this.darkest   = "black";
 
-        this.brightest = brightest == null ? "white"  : brightest;
-        this.middle    = middle    == null ? "gray"   : middle;
-        this.darkest   = darkest   == null ? "black"  : darkest;
-    },
-
-    function $prototype() {
         this.paint = function(g,x1,y1,w,h,d){
             var x2 = x1 + w - 1, y2 = y1 + h - 1;
             g.setColor(this.middle);
@@ -13062,6 +13069,11 @@ pkg.Sunken = Class(pkg.View, [
 */
 pkg.Etched = Class(pkg.View, [
     function (brightest, middle) {
+        if (arguments.length > 0) this.brightest = brightest;
+        if (arguments.length > 1) this.middle    = middle;
+    },
+
+    function $prototype() {
         /**
          * Brightest border line color
          * @attribute brightest
@@ -13077,12 +13089,9 @@ pkg.Etched = Class(pkg.View, [
          * @type {String}
          * @default "gray"
          */
+        this.brightest = "white";
+        this.middle    = "gray" ;
 
-        this.brightest = brightest == null ? "white" : brightest;
-        this.middle    = middle    == null ? "gray"  : middle;
-    },
-
-    function $prototype() {
         this.paint = function(g,x1,y1,w,h,d){
             var x2 = x1 + w - 1, y2 = y1 + h - 1;
             g.setColor(this.middle);
@@ -13126,11 +13135,14 @@ pkg.Raised = Class(pkg.View, [
          * @default "gray"
          */
 
-        this.brightest = brightest == null ? "white" : brightest;
-        this.middle    = middle    == null ? "gray"  : middle;
+        if (arguments.length > 0) this.brightest = brightest;
+        if (arguments.length > 1) this.middle    = middle;
     },
 
     function $prototype() {
+        this.brightest = "white";
+        this.middle    = "gray";
+
         this.paint = function(g,x1,y1,w,h,d){
             var x2 = x1 + w - 1, y2 = y1 + h - 1;
             g.setColor(this.brightest);
@@ -13152,6 +13164,12 @@ pkg.Raised = Class(pkg.View, [
 */
 pkg.Dotted = Class(pkg.View, [
     function $prototype() {
+        /**
+         * @attribute color
+         * @readOnly
+         * @type {String}
+         * @default "black"
+         */
         this.color = "black";
 
         this.paint = function(g,x,y,w,h,d){
@@ -13160,13 +13178,7 @@ pkg.Dotted = Class(pkg.View, [
         };
 
         this[''] = function (c){
-            /**
-             * @attribute color
-             * @readOnly
-             * @type {String}
-             * @default "black"
-             */
-            if (c != null) this.color = c;
+            if (arguments.length > 0) this.color = c;
         };
     }
 ]);
@@ -13190,6 +13202,30 @@ pkg.Dotted = Class(pkg.View, [
  */
 pkg.Border = Class(pkg.View, [
     function $prototype() {
+        /**
+         * Border color
+         * @attribute color
+         * @readOnly
+         * @type {String}
+         * @default "gray"
+         */
+
+        /**
+         * Border line width
+         * @attribute width
+         * @readOnly
+         * @type {Integer}
+         * @default 1
+         */
+
+        /**
+         * Border radius
+         * @attribute radius
+         * @readOnly
+         * @type {Integer}
+         * @default 0
+         */
+
         this.color  = "gray";
         this.gap    = this.width = 1;
         this.radius = 0;
@@ -13269,33 +13305,9 @@ pkg.Border = Class(pkg.View, [
         };
 
         this[''] = function (c,w,r){
-            /**
-             * Border color
-             * @attribute color
-             * @readOnly
-             * @type {String}
-             * @default "gray"
-             */
-
-            /**
-             * Border line width
-             * @attribute width
-             * @readOnly
-             * @type {Integer}
-             * @default 1
-             */
-
-            /**
-             * Border radius
-             * @attribute radius
-             * @readOnly
-             * @type {Integer}
-             * @default 0
-             */
-
-            if (c != null) this.color = c;
-            if (w != null) this.width = this.gap = w;
-            if (r != null) this.radius = r;
+            if (arguments.length > 0) this.color = c;
+            if (arguments.length > 1) this.width = this.gap = w;
+            if (arguments.length > 2) this.radius = r;
         };
     }
 ]);
@@ -13422,23 +13434,23 @@ pkg.CompRender = Class(pkg.Render, [
 * Vertical or horizontal linear gradient view
 * @param {String} startColor start color
 * @param {String} endColor end color
-* @param {Integer|String} [type] type of gradient
-* "zebkit.layout.VERTICAL" or "zebkit.layout.HORIZONTAL" or "vertical" or "horizontal"
+* @param {String} [type] type of gradient
+*  "vertical" or "horizontal"
 * @constructor
 * @class zebkit.ui.Gradient
 * @extends zebkit.ui.View
 */
 pkg.Gradient = Class(pkg.View, [
     function $prototype() {
-        this.orientation = L.VERTICAL;
+        this.orient = "vertical";
 
         this[''] =  function(){
             /**
              * Gradient orientation: vertical or horizontal
-             * @attribute orientation
+             * @attribute orient
              * @readOnly
-             * @default zebkit.layout.VERTICAL
-             * @type {Integer}
+             * @default "vertical"
+             * @type {String}
              */
 
             /**
@@ -13450,13 +13462,13 @@ pkg.Gradient = Class(pkg.View, [
 
             this.colors = Array.prototype.slice.call(arguments, 0);
             if (arguments.length > 2) {
-                this.orientation = L.$constraints(arguments[arguments.length-1]);
+                this.orient = arguments[arguments.length-1];
                 this.colors.pop();
             }
         };
 
         this.paint = function(g,x,y,w,h,dd){
-            var d = (this.orientation === L.HORIZONTAL? [0,1]: [1,0]),
+            var d = (this.orient === "horizontal" ? [0,1]: [1,0]),
                 x1 = x * d[1],
                 y1 = y * d[0],
                 x2 = (x + w - 1) * d[1],
@@ -13862,12 +13874,12 @@ pkg.ViewSet = Class(pkg.CompositeView, [
 
 pkg.LineView = Class(pkg.View, [
     function $prototype() {
-        this.side      = L.TOP;
+        this.side      = "top";
         this.color     = "black";
         this.lineWidth = 1;
 
         this[''] = function(side, color, lineWidth) {
-            if (side != null)      this.side      = L.$constraints(side);
+            if (side != null)      this.side      = side;
             if (color != null)     this.color     = color;
             if (lineWidth != null) this.lineWidth = lineWidth;
         };
@@ -13878,12 +13890,12 @@ pkg.LineView = Class(pkg.View, [
             g.lineWidth = this.lineWidth;
 
             var d = this.lineWidth / 2;
-            if (this.side === L.TOP) {
+            if (this.side === "top") {
                 g.moveTo(x, y + d);
                 g.lineTo(x + w - 1, y + d);
             }
             else {
-                if (this.side === L.BOTTOM) {
+                if (this.side === "bottom") {
                     g.moveTo(x, y + h - d);
                     g.lineTo(x + w - 1, y + h - d);
                 }
@@ -13907,10 +13919,10 @@ pkg.ArrowView = Class(pkg.View, [
         this.gap  = 0;
         this.color  = "black";
         this.width = this.height = 6;
-        this.direction = L.BOTTOM;
+        this.direction = "bottom";
 
         this[''] = function (d, col, w) {
-            if (d   != null) this.direction = L.$constraints(d);
+            if (d   != null) this.direction = d;
             if (col != null) this.color = col;
             if (w   != null) this.width = this.height = w;
         };
@@ -13927,28 +13939,28 @@ pkg.ArrowView = Class(pkg.View, [
 
             g.beginPath();
 
-            if (L.BOTTOM === this.direction) {
+            if ("bottom" === this.direction) {
                 g.moveTo(x, y + dt);
                 g.lineTo(x + w - 1, y + dt);
                 g.lineTo(x + w2, y + h - dt);
                 g.lineTo(x + dt, y + dt);
             }
             else {
-                if (L.TOP === this.direction) {
+                if ("top" === this.direction) {
                     g.moveTo(x, y + h - dt);
                     g.lineTo(x + w - 1, y + h - dt);
                     g.lineTo(x + w2, y);
                     g.lineTo(x + dt, y + h - dt);
                 }
                 else {
-                    if (L.LEFT === this.direction) {
+                    if ("left" === this.direction) {
                         g.moveTo(x + w - dt, y);
                         g.lineTo(x + w - dt, y + h - 1);
                         g.lineTo(x, y + h2);
                         g.lineTo(x + w + dt, y);
                     }
                     else {
-                        if (L.RIGHT === this.direction) {
+                        if ("right" === this.direction) {
                             g.moveTo(x + dt, y);
                             g.lineTo(x + dt, y + h - 1);
                             g.lineTo(x + w, y + h2);
@@ -13983,7 +13995,7 @@ pkg.ArrowView = Class(pkg.View, [
     }
 ]);
 
-pkg.TextRenderMix = [
+pkg.BaseTextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
     function $prototype() {
         /**
          * UI component that holds the text render
@@ -13995,6 +14007,13 @@ pkg.TextRenderMix = [
          */
         this.owner = null;
 
+        this.lineIndent = 1;
+
+        // implement position metric methods
+        this.getMaxOffset = this.getLineSize = this.getLines = function() {
+            return 0;
+        };
+
         /**
          * Set the rendered text font.
          * @param  {String|zebkit.ui.Font} f a font as CSS string or
@@ -14002,7 +14021,7 @@ pkg.TextRenderMix = [
          * @return {Boolean} return true if a text font has been updated
          * @method setFont
          */
-        this.setFont = function(f){
+        this.setFont = function(f) {
             var old = this.font;
             if (f != null && zebkit.isString(f)) f = new pkg.Font(f);
 
@@ -14013,24 +14032,18 @@ pkg.TextRenderMix = [
                     this.owner.invalidate();
                 }
 
-                if (this.invalidate != null) this.invalidate();
+                if (this.invalidate != null) {
+                    this.invalidate();
+                }
+
                 return true;
             }
             return false;
         };
 
+        // TODO: probably the method can be removed
         this.getLineHeight = function() {
             return this.font.height;
-        };
-
-        /**
-         * Get a line indent
-         * @default 1
-         * @return {Integer} line indent
-         * @method getLineIndent
-         */
-        this.getLineIndent = function() {
-            return 1;
         };
 
         /**
@@ -14055,8 +14068,18 @@ pkg.TextRenderMix = [
         this.ownerChanged = function(v) {
             this.owner = v;
         };
+
+        this.targetWasChanged = function(o, n) {
+            if (this.owner != null && this.owner.isValid) {
+                this.owner.invalidate();
+            }
+
+            if (this.invalidate != null) {
+                this.invalidate();
+            }
+        };
     }
-];
+]);
 
 /**
  * Lightweight implementation of single line string render. The render requires
@@ -14068,11 +14091,7 @@ pkg.TextRenderMix = [
  * @extends {zebkit.ui.Render}
  * @class zebkit.ui.StringRender
  */
-pkg.StringRender = Class(pkg.Render, [
-    function $mixing() {
-        return pkg.TextRenderMix;
-    },
-
+pkg.StringRender = Class(pkg.BaseTextRender, [
     function $prototype() {
         this.stringWidth = -1;
 
@@ -14096,6 +14115,19 @@ pkg.StringRender = Class(pkg.Render, [
             this.color = color != null ? color : this.clazz.color;
         };
 
+        // implement position metric methods
+        this.getMaxOffset = function() {
+            return this.target.length;
+        };
+
+        this.getLineSize = function(l) {
+            return this.target.length + 1;
+        };
+
+        this.getLines = function() {
+            return 1;
+        };
+
         this.calcLineWidth = function() {
             if (this.stringWidth < 0) {
                 this.stringWidth = this.font.stringWidth(this.target);
@@ -14108,8 +14140,31 @@ pkg.StringRender = Class(pkg.Render, [
         };
 
         this.paint = function(g,x,y,w,h,d) {
-            if (this.font.s !== g.font) g.setFont(this.font);
-            if (this.color  !== g.fillStyle) g.fillStyle = this.color;
+            // save a few milliseconds
+            if (this.font.s !== g.font) {
+                g.setFont(this.font);
+            }
+
+            if (d != null && d.getStartSelection != null) {
+                var startSel = d.getStartSelection(),
+                    endSel   = d.getEndSelection();
+
+                if (startSel != null && endSel != null && startSel.col !== endSel.col) {
+                    g.setColor(d.selectionColor);
+
+                    g.fillRect( x + this.font.charsWidth(this.target, 0, startSel.col),
+                                y,
+                                this.font.charsWidth(this.target,
+                                                     startSel.col,
+                                                     endSel.col - startSel.col),
+                                this.getLineHeight());
+                }
+            }
+
+            // save a few milliseconds
+            if (this.color !== g.fillStyle) {
+                g.fillStyle = this.color;
+            }
 
             if (d != null && d.isEnabled === false) {
                 g.fillStyle = d != null && d.disabledColor != null ? d.disabledColor
@@ -14137,20 +14192,24 @@ pkg.StringRender = Class(pkg.Render, [
             this.setTarget(s);
         };
 
-        this.getLines = function() {
-            return 1;
+        this.getLine = function(l) {
+            console.log("l = " + l);
+
+            if (l < 0 || l > 1) {
+                throw new RangeError();
+            }
+            return this.target;
         };
 
         this.getPreferredSize = function() {
             if (this.stringWidth < 0) {
                 this.stringWidth = this.font.stringWidth(this.target);
             }
-            return { width: this.stringWidth, height: this.font.height };
-        };
 
-        this.targetWasChanged = function(o, n) {
-            this.stringWidth = -1;
-            if (this.owner != null) this.owner.invalidate();
+            return {
+                width: this.stringWidth,
+                height: this.font.height
+            };
         };
     }
 ]);
@@ -14162,11 +14221,7 @@ pkg.StringRender = Class(pkg.Render, [
  * @extends zebkit.ui.Render
  * @param  {String|zebkit.data.TextModel} text a text as string or text model object
  */
-pkg.TextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
-    function $mixing() {
-        return pkg.TextRenderMix;
-    },
-
+pkg.TextRender = Class(pkg.BaseTextRender, zebkit.util.Position.Metric, [
     function $prototype() {
         /**
          * Get number of lines of target text
@@ -14208,17 +14263,6 @@ pkg.TextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
             return this.target.getLine(r);
         };
 
-        this.targetWasChanged = function(o,n){
-            if (o != null) o.unbind(this);
-            if (n != null) {
-                n.bind(this);
-                this.invalidate(0, this.getLines());
-            }
-            else {
-                this.invLines = 0;
-            }
-        };
-
         /**
          * Return a string that is rendered by this class
          * @return  {String} a string
@@ -14254,24 +14298,24 @@ pkg.TextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
          */
         this.recalc = function() {
             if (this.invLines > 0 && this.target != null){
-                var text = this.target;
-                if (text != null) {
+                var model = this.target;
+                if (model != null) {
                     if (this.invLines > 0) {
                         for(var i = this.startInvLine + this.invLines - 1; i >= this.startInvLine; i--) {
-                            text.$lineTags(i).$lineWidth = this.font.stringWidth(this.getLine(i));
+                            model.$lineTags(i).$lineWidth = this.font.stringWidth(this.getLine(i));
                         }
                         this.startInvLine = this.invLines = 0;
                     }
 
                     this.textWidth = 0;
-                    var size = text.getLines();
+                    var size = model.getLines();
                     for(var i = 0; i < size; i++){
-                        var len = text.$lineTags(i).$lineWidth;
+                        var len = model.$lineTags(i).$lineWidth;
                         if (len > this.textWidth) {
                             this.textWidth = len;
                         }
                     }
-                    this.textHeight = this.getLineHeight() * size + (size - 1) * this.getLineIndent();
+                    this.textHeight = this.getLineHeight() * size + (size - 1) * this.lineIndent;
                 }
             }
         };
@@ -14301,7 +14345,10 @@ pkg.TextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
                     this.startInvLine = ful;
                     this.invLines = 1;
                 }
-                if (this.owner != null) this.owner.invalidate();
+
+                if (this.owner != null && this.owner.isValid !== true) {
+                    this.owner.invalidate();
+                }
             }
             else {
                 if (this.invLines > 0){
@@ -14325,6 +14372,10 @@ pkg.TextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
             if (arguments.length === 0) {
                 start = 0;
                 size  = this.getLines();
+                if (size === 0) {
+                    this.invLines = 0;
+                    return;
+                }
             }
 
             if (size > 0 && (this.startInvLine != start || size != this.invLines)) {
@@ -14354,10 +14405,10 @@ pkg.TextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
         this.paint = function(g,x,y,w,h,d) {
             var ts = g.$states[g.$curState];
             if (ts.width > 0 && ts.height > 0) {
-                var lineIndent = this.getLineIndent(),
-                    lineHeight = this.getLineHeight(),
-                    lilh       = lineHeight + lineIndent,
-                    startInvLine  = 0;
+                var lineIndent   = this.lineIndent,
+                    lineHeight   = this.getLineHeight(),
+                    lilh         = lineHeight + lineIndent,
+                    startInvLine = 0;
 
                 w = ts.width  < w ? ts.width  : w;
                 h = ts.height < h ? ts.height : h;
@@ -14370,44 +14421,50 @@ pkg.TextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
                     if (y > (ts.y + ts.height)) return;
                 }
 
-                var size = this.target.getLines();
+                var size = this.getLines();
                 if (startInvLine < size){
-                    var lines =  Math.floor((h + lineIndent) / lilh) + (((h + lineIndent) % lilh > lineIndent) ? 1 : 0);
+                    var lines = Math.floor((h + lineIndent) / lilh) + (((h + lineIndent) % lilh > lineIndent) ? 1 : 0);
                     if (startInvLine + lines > size) {
                         lines = size - startInvLine;
                     }
                     y += startInvLine * lilh;
 
-                    g.setFont(this.font);
+                    // save few milliseconds
+                    if (this.font.s !== g.font) {
+                        g.setFont(this.font);
+                    }
 
                     if (d == null || d.isEnabled === true){
-                        if (this.color != g.fillStyle) g.fillStyle = this.color;
+                        // save few milliseconds
+                        if (this.color != g.fillStyle) {
+                            g.fillStyle = this.color;
+                        }
 
                         var p1 = null, p2 = null, bsel = false;
                         if (lines > 0 && d != null && d.getStartSelection != null) {
                             p1   = d.getStartSelection();
                             p2   = d.getEndSelection();
-                            bsel = p1 != null && (p1[0] != p2[0] || p1[1] != p2[1]);
+                            bsel = p1 != null && (p1.row !== p2.row || p1.col !== p2.col);
                         }
 
                         for(var i = 0; i < lines; i++){
                             if (bsel === true) {
                                 var line = i + startInvLine;
-                                if (line >= p1[0] && line <= p2[0]){
+                                if (line >= p1.row && line <= p2.row){
                                     var s  = this.getLine(line),
                                         lw = this.calcLineWidth(line),
                                         xx = x;
 
-                                    if (line === p1[0]) {
-                                        var ww = this.font.charsWidth(s, 0, p1[1]);
+                                    if (line === p1.row) {
+                                        var ww = this.font.charsWidth(s, 0, p1.col);
                                         xx += ww;
                                         lw -= ww;
-                                        if (p1[0] === p2[0]) {
-                                            lw -= this.font.charsWidth(s, p2[1], s.length - p2[1]);
+                                        if (p1.row === p2.row) {
+                                            lw -= this.font.charsWidth(s, p2.col, s.length - p2.col);
                                         }
                                     }
                                     else {
-                                        if (line == p2[0]) lw = this.font.charsWidth(s, 0, p2[1]);
+                                        if (line === p2.row) lw = this.font.charsWidth(s, 0, p2.col);
                                     }
                                     this.paintSelection(g, xx, y, lw === 0 ? 1 : lw, lilh, line, d);
 
@@ -14485,9 +14542,104 @@ pkg.TextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
             //!!!
             this.setTarget(zebkit.isString(text) ? new zebkit.data.Text(text) : text);
         };
+    },
+
+    function targetWasChanged(o,n){
+        if (o != null) o.unbind(this);
+        if (n != null) {
+            n.bind(this);
+        }
+        this.$super(o, n);
     }
 ]);
 
+pkg.WrappedTextRender = new Class(pkg.TextRender, [
+    function $prototype() {
+        this.brokenLines = [];
+        this.lastWidth = -1;
+
+        this.breakLine = function (w, startIndex, line, lines) {
+            if (line == "") {
+                lines.push(line);
+            }
+            else {
+                var breakIndex = startIndex < line.length ? startIndex : line.length - 1,
+                    direction  = 0;
+
+                for(; breakIndex >= 0 && breakIndex < line.length ;) {
+                    var substrLen = this.font.charsWidth(line, 0, breakIndex + 1);
+                    if (substrLen < w) {
+                        if (direction < 0) break;
+                        else direction = 1;
+                        breakIndex ++;
+                    }
+                    else if (substrLen > w) {
+                        breakIndex--;
+                        if (direction > 0) break;
+                        else               direction = -1;
+                    }
+                    else {
+                        break;
+                    }
+                }
+
+                if (breakIndex >= 0) {
+                    lines.push(line.substring(0, breakIndex + 1));
+                    if (breakIndex < line.length - 1) {
+                        this.breakLine(w, startIndex, line.substring(breakIndex + 1), lines);
+                    }
+                }
+            }
+        };
+
+        this.breakToLines = function (w) {
+            var m = this.target, startIndex = 0, res = [];
+            for(var i = 0; i < m.getLines(); i++) {
+                var line = m.getLine(i);
+                this.breakLine(w, startIndex, line, res);
+            }
+            return res;
+        };
+
+        this.getLines = function() {
+            return this.brokenLines.length;
+        };
+
+        this.getLine = function(i) {
+            return this.brokenLines[i];
+        };
+    },
+
+    function invalidate(sl, len){
+        this.$super(sl, len);
+        if (this.brokenLines != null) {
+            this.brokenLines.length = 0;
+        }
+        this.lastWidth = -1;
+    },
+
+    function getPreferredSize(pw, ph) {
+        if (arguments.length === 2) {
+            if (this.lastWidth < 0 || this.lastWidth !== pw) {
+                this.lastWidth = pw;
+                this.brokenLines = this.breakToLines(pw);
+            }
+            return {
+                width  : pw,
+                height : this.brokenLines.length * this.getLineHeight() + (this.brokenLines.length - 1) * this.lineIndent
+            };
+        }
+        return this.$super();
+    },
+
+    function paint(g,x,y,w,h,d) {
+        if (this.lastWidth < 0 || this.lastWidth !== w) {
+            this.lastWidth = w;
+            this.brokenLines = this.breakToLines(w);
+        }
+        this.$super(g,x,y,w,h,d);
+    }
+]);
 
 pkg.DecoratedTextRender = zebkit.Class(pkg.TextRender, [
     function setDecoration(id, color) {
@@ -14614,7 +14766,7 @@ pkg.TabBorder = Class(pkg.View, [
             g.beginPath();
             g.lineWidth = s;
             switch(o) {
-                case L.LEFT:
+                case "left":
                     g.moveTo(xx + 1, y + dt);
                     g.lineTo(x + s*2, y + dt);
                     g.lineTo(x + dt , y + s*2);
@@ -14641,7 +14793,7 @@ pkg.TabBorder = Class(pkg.View, [
                         g.drawLine(x + 2*s + 1, yy - s, xx + 1, yy - s, s);
                     }
                     break;
-                case L.RIGHT:
+                case "right":
                     xx -= dt; // thick line grows left side and right side proportionally
                               // correct it
 
@@ -14672,7 +14824,7 @@ pkg.TabBorder = Class(pkg.View, [
                         g.drawLine(x, yy - s, xx - s - 1, yy - s, s);
                     }
                     break;
-                case L.TOP:
+                case "top":
                     g.moveTo(x + dt, yy + 1 );
                     g.lineTo(x + dt, y + s*2);
                     g.lineTo(x + s*2, y + dt);
@@ -14703,7 +14855,7 @@ pkg.TabBorder = Class(pkg.View, [
                     }
 
                     break;
-                case L.BOTTOM:
+                case "bottom":
                     yy -= dt;
 
                     g.moveTo(x + dt, y);
@@ -14767,23 +14919,22 @@ pkg.TabBorder = Class(pkg.View, [
  * @param {Integer|String} [lineAlignment] a line alignment. Specifies how
  * a title area has to be aligned relatively border line:
  *
- *      BOTTOM or "bottom"  - title area will be placed on top of border line:
+ *       "bottom"  - title area will be placed on top of border line:
  *                    ___| Title area |___
  *
  *
- *      CENTER or "center"  - title area will be centered relatively to border line:
+ *      "center"   - title area will be centered relatively to border line:
  *                    ---| Title area |-----
  *
  *
- *      TOP or "top"  - title area will be placed underneath of border line:
+ *      "top"      - title area will be placed underneath of border line:
  *                     ____              ________
  *                         |  Title area |
- *
  *
  */
 pkg.TitledBorder = Class(pkg.Render, [
     function $prototype() {
-        this.lineAlignment = L.BOTTOM;
+        this.lineAlignment = "bottom";
 
         this.getTop  = function (){
             return this.target.getTop();
@@ -14807,36 +14958,36 @@ pkg.TitledBorder = Class(pkg.Render, [
                 var r = d.getTitleInfo();
                 if (r != null) {
                     switch(r.orient) {
-                        case L.BOTTOM:
+                        case "bottom":
                             var bottom = this.target.getBottom();
                             switch (this.lineAlignment) {
-                                case L.CENTER : yy = r.y + Math.floor((r.height - bottom)/ 2) + bottom; break;
-                                case L.TOP    : yy = r.y + r.height + bottom; break;
-                                case L.BOTTOM : yy = r.y; break;
+                                case "center" : yy = r.y + Math.floor((r.height - bottom)/ 2) + bottom; break;
+                                case "top"    : yy = r.y + r.height + bottom; break;
+                                case "bottom" : yy = r.y; break;
                             }
                             break;
-                        case L.TOP:
+                        case "top":
                             var top = this.target.getTop();
                             switch (this.lineAlignment) {
-                                case L.CENTER : y = r.y + Math.floor((r.height - top)/2);   break; // y = r.y + Math.floor(r.height/ 2) ; break;
-                                case L.TOP    : y = r.y - top; break;
-                                case L.BOTTOM : y = r.y + r.height; break;
+                                case "center" : y = r.y + Math.floor((r.height - top)/2);   break; // y = r.y + Math.floor(r.height/ 2) ; break;
+                                case "top"    : y = r.y - top; break;
+                                case "bottom" : y = r.y + r.height; break;
                             }
                             break;
-                        case L.LEFT:
+                        case "left":
                             var left = this.target.getLeft();
                             switch (this.lineAlignment) {
-                                case L.CENTER : x = r.x + Math.floor((r.width - left) / 2); break;
-                                case L.TOP    : x = r.x - left; break;
-                                case L.BOTTOM : x = r.x + r.width; break;
+                                case "center" : x = r.x + Math.floor((r.width - left) / 2); break;
+                                case "top"    : x = r.x - left; break;
+                                case "bottom" : x = r.x + r.width; break;
                             }
                             break;
-                        case L.RIGHT:
+                        case "right":
                             var right = this.target.getRight();
                             switch (this.lineAlignment) {
-                                case L.CENTER : xx = r.x + Math.floor((r.width - right) / 2) + right; break;
-                                case L.TOP    : xx = r.x + r.width + right; break;
-                                case L.BOTTOM : xx = r.x; break;
+                                case "center" : xx = r.x + Math.floor((r.width - right) / 2) + right; break;
+                                case "top"    : xx = r.x + r.width + right; break;
+                                case "bottom" : xx = r.x; break;
                             }
                             break;
                     }
@@ -14868,13 +15019,13 @@ pkg.TitledBorder = Class(pkg.Render, [
                 if (r != null) {
                     var xx = x + w, yy = y + h, t = g.$states[g.$curState];
                     switch (r.orient) {
-                        case L.TOP:
+                        case "top":
                             var top = this.target.getTop();
                             // compute border y
                             switch (this.lineAlignment) {
-                                case L.CENTER : y = r.y + Math.floor((r.height - top) / 2) ; break;
-                                case L.TOP    : y = r.y - top; break;
-                                case L.BOTTOM : y = r.y + r.height; break;
+                                case "center" : y = r.y + Math.floor((r.height - top) / 2) ; break;
+                                case "top"    : y = r.y - top; break;
+                                case "bottom" : y = r.y + r.height; break;
                             }
 
                             // skip rendering border if the border is not in clip rectangle
@@ -14903,12 +15054,12 @@ pkg.TitledBorder = Class(pkg.Render, [
                             g.lineTo(x, y);
 
                             break;
-                        case L.BOTTOM:
+                        case "bottom":
                             var bottom = this.target.getBottom();
                             switch (this.lineAlignment) {
-                                case L.CENTER : yy = r.y + Math.floor((r.height - bottom) / 2) + bottom; break;
-                                case L.TOP    : yy = r.y + r.height + bottom; break;
-                                case L.BOTTOM : yy = r.y ; break;
+                                case "center" : yy = r.y + Math.floor((r.height - bottom) / 2) + bottom; break;
+                                case "top"    : yy = r.y + r.height + bottom; break;
+                                case "bottom" : yy = r.y ; break;
                             }
 
                             if (this.$isIn(t, x + this.target.getLeft(), y + this.target.getTop(),
@@ -14932,12 +15083,12 @@ pkg.TitledBorder = Class(pkg.Render, [
                             g.lineTo(x, y);
 
                             break;
-                        case L.LEFT:
+                        case "left":
                             var left = this.target.getLeft();
                             switch (this.lineAlignment) {
-                                case L.CENTER : x = r.x + Math.floor((r.width - left) / 2); break;
-                                case L.TOP    : x = r.x  - left; break;
-                                case L.BOTTOM : x = r.x + r.width; break;
+                                case "center" : x = r.x + Math.floor((r.width - left) / 2); break;
+                                case "top"    : x = r.x  - left; break;
+                                case "bottom" : x = r.x + r.width; break;
                             }
 
                             if (this.$isIn(t, x, y + this.target.getTop(),
@@ -14961,12 +15112,12 @@ pkg.TitledBorder = Class(pkg.Render, [
                             g.lineTo(x, y);
 
                             break;
-                        case L.RIGHT:
+                        case "right":
                             var right = this.target.getRight();
                             switch (this.lineAlignment) {
-                                case L.CENTER : xx = r.x + Math.floor((r.width - right) / 2) + right; break;
-                                case L.TOP    : xx = r.x  + r.width + right; break;
-                                case L.BOTTOM : xx = r.x; break;
+                                case "center" : xx = r.x + Math.floor((r.width - right) / 2) + right; break;
+                                case "top"    : xx = r.x  + r.width + right; break;
+                                case "bottom" : xx = r.x; break;
                             }
 
                             if (this.$isIn(t, x + this.target.getLeft(),
@@ -15007,12 +15158,12 @@ pkg.TitledBorder = Class(pkg.Render, [
 
         this[''] = function (b, a){
             if (a != null) {
-                this.lineAlignment = L.$constraints(a);
+                this.lineAlignment = a;
             }
 
-            if (b == null && this.lineAlignment != L.BOTTOM &&
-                             this.lineAlignment != L.TOP &&
-                             this.lineAlignment != L.CENTER)
+            if (b == null && this.lineAlignment !== "bottom" &&
+                             this.lineAlignment !== "top" &&
+                             this.lineAlignment !== "center")
             {
                 throw new Error("" + this.lineAlignment);
             }
@@ -15048,16 +15199,16 @@ pkg.CheckboxView = Class(pkg.View, [
 pkg.BunldeView = Class(pkg.View, [
     function $prototype() {
         this.color = "#AAAAAA";
-        this.direction = L.VERTICAL;
+        this.direction = "vertical";
 
         this[''] = function(dir, color) {
             if (color != null) this.color = color;
-            if (dir != null) this.direction = L.$constraints(dir);
+            if (dir != null) this.direction = dir;
         };
 
         this.paint =  function(g,x,y,w,h,d) {
             g.beginPath();
-            if (this.direction === L.VERTICAL) {
+            if (this.direction === "vertical") {
                 var r = w/2;
                 g.arc(x + r, y + r, r, Math.PI, 0, false);
                 g.lineTo(x + w, y + h - r);
@@ -16022,7 +16173,6 @@ pkg.ArrowButton = Class(pkg.EvStatePan, [
 
     function $prototype() {
         this.setArrowDirection = function(d) {
-            d = L.$constraints(d);
             this.iterateArrowViews(function(k, v) {
                 if (v != null) v.direction = d;
             });
@@ -16182,7 +16332,7 @@ pkg.Button = Class(pkg.CompositeEvStatePan, [
          // top and aligned at the canter
          var bp = new zebkit.ui.BorderPan("Title",
                                          new zebkit.ui.Panel(),
-                                         zebkit.layout.TOP | zebkit.layout.CENTER);
+                                         "top", "center");
 
 
  *  @constructor
@@ -16212,7 +16362,7 @@ pkg.BorderPan = Class(pkg.Panel, [
           * @readOnly
           * @default 0
           */
-         this.vGap = this.hGap = 2;
+        this.vGap = this.hGap = 2;
 
          /**
           * Border panel label indent
@@ -16220,7 +16370,13 @@ pkg.BorderPan = Class(pkg.Panel, [
           * @attribute indent
           * @default 4
           */
-         this.indent = 4;
+        this.indent = 4;
+
+
+        this.orient = "top";
+
+        this.alignment = "left";
+
 
          /**
           * Get the border panel title info. The information
@@ -16242,13 +16398,13 @@ pkg.BorderPan = Class(pkg.Panel, [
                                             y      : this.label.y,
                                             width  : this.label.width,
                                             height : this.label.height,
-                                            orient : this.label.constraints & (L.TOP | L.BOTTOM) }
+                                            orient: this.orient }
                                         : null;
-        };
+    };
 
         this.calcPreferredSize = function(target){
             var ps = this.content != null && this.content.isVisible === true ? this.content.getPreferredSize()
-                                                                           : { width:0, height:0 };
+                                                                             : { width:0, height:0 };
             if (this.label != null && this.label.isVisible === true){
                 var lps = this.label.getPreferredSize();
                 ps.height += lps.height;
@@ -16263,25 +16419,23 @@ pkg.BorderPan = Class(pkg.Panel, [
             var h = 0,
                 right  = this.getRight(),
                 left   = this.getLeft(),
-                xa     = this.label != null ? this.label.constraints & (L.LEFT | L.CENTER | L.RIGHT): 0,
-                ya     = this.label != null ? this.label.constraints & (L.BOTTOM | L.TOP) : 0,
-                top    = ya === L.TOP    ? this.top    : this.getTop(),
-                bottom = ya === L.BOTTOM ? this.bottom : this.getBottom();
+                top    = this.orient === "top"   ? this.top    : this.getTop(),
+                bottom = this.orient === "bottom"? this.bottom : this.getBottom();
 
             if (this.label != null && this.label.isVisible === true){
                 var ps = this.label.getPreferredSize();
                 h = ps.height;
-                this.label.setBounds((xa === L.LEFT) ? left + this.indent
-                                                     : ((xa === L.RIGHT) ? this.width - right - ps.width - this.indent
-                                                                        : Math.floor((this.width - ps.width) / 2)),
-                                     (ya === L.BOTTOM) ? (this.height - bottom - ps.height) : top,
+                this.label.setBounds((this.alignment === "left") ? left + this.indent
+                                                                  : ((this.alignment === "right") ? this.width - right - ps.width - this.indent
+                                                                                                   : Math.floor((this.width - ps.width) / 2)),
+                                     (this.orient === "bottom") ? (this.height - bottom - ps.height) : top,
                                      ps.width, h);
             }
 
             if (this.content != null && this.content.isVisible === true){
                 this.content.setBounds(left + this.hGap,
-                                       (ya === L.BOTTOM ? top : top + h) + this.vGap,
-                                        this.width - right - left - 2 * this.hGap,
+                                       (this.orient === "bottom" ? top : top + h) + this.vGap,
+                                        this.width  - right - left - 2 * this.hGap,
                                         this.height - top - bottom - h - 2 * this.vGap);
             }
         };
@@ -16295,7 +16449,7 @@ pkg.BorderPan = Class(pkg.Panel, [
          * @method setGaps
          * @chainable
          */
-        this.setGaps = function(vg,hg){
+        this.setGaps = function(vg, hg){
             if (this.vGap != vg || hg != this.hGap){
                 this.vGap = vg;
                 this.hGap = hg;
@@ -16303,13 +16457,33 @@ pkg.BorderPan = Class(pkg.Panel, [
             }
             return this;
         };
+
+        this.setOrientation = function(o) {
+            if (this.orient !== o) {
+                this.orient = o;
+                this.vrp();
+            }
+        };
+
+        this.setAlignment = function(a) {
+            if (this.alignment !== a) {
+                this.alignment = a;
+                this.vrp();
+            }
+        };
     },
 
-    function(title, center, ctr){
-        if (ctr == null) ctr = L.TOP | L.LEFT;
-
+    function(title, center, o, a){
         if (zebkit.isString(title)) {
             title = new this.clazz.Label(title);
+        }
+
+        if (o != null) {
+            this.orient = o;
+        }
+
+        if (a != null) {
+            this.alignment = a;
         }
 
         /**
@@ -16328,22 +16502,21 @@ pkg.BorderPan = Class(pkg.Panel, [
         this.label = this.content = null;
 
         this.$super();
-        if (title  != null) this.add(ctr, title);
-        if (center != null) this.add(L.CENTER, center);
+        if (title  != null) this.add("caption", title);
+        if (center != null) this.add("center", center);
     },
 
     function setBorder(br) {
         br = pkg.$view(br);
         if (instanceOf(br, pkg.TitledBorder) === false) {
-            br = new pkg.TitledBorder(br, L.CENTER);
+            br = new pkg.TitledBorder(br, "center");
         }
         return this.$super(br);
     },
 
     function kidAdded(index,ctr,lw) {
         this.$super(index, ctr, lw);
-        ctr = L.$constraints(ctr);
-        if ((ctr == null && this.content == null) || L.CENTER === ctr) {
+        if ((ctr == null && this.content == null) || "center" === ctr) {
             this.content = lw;
         }
         else if (this.label == null) {
@@ -16752,7 +16925,7 @@ pkg.Radiobox = Class(pkg.Checkbox, [
 
  * @param {zebkit.ui.Panel} [first] a first UI component in splitter panel
  * @param {zebkit.ui.Panel} [second] a second UI component in splitter panel
- * @param {Integer} [o] an orientation of splitter element: zebkit.layout.VERTICAL or zebkit.layout.HORIZONTAL
+ * @param {String} [o] an orientation of splitter element: "vertical" or "horizontal"
  * @class zebkit.ui.SplitPan
  * @constructor
  * @extends {zebkit.ui.Panel}
@@ -16763,7 +16936,7 @@ pkg.SplitPan = Class(pkg.Panel, [
             function $prototype() {
                 this.pointerDragged = function(e){
                     var x = this.x + e.x, y = this.y + e.y;
-                    if (this.target.orientation == L.VERTICAL){
+                    if (this.target.orient === "vertical"){
                         if (this.prevLoc != x){
                             x = this.target.normalizeBarLoc(x);
                             if (x > 0){
@@ -16786,7 +16959,7 @@ pkg.SplitPan = Class(pkg.Panel, [
                 this.pointerDragStarted = function (e){
                     var x = this.x + e.x, y = this.y + e.y;
                     if (e.isAction()) {
-                        if (this.target.orientation == L.VERTICAL){
+                        if (this.target.orient === "vertical"){
                             x = this.target.normalizeBarLoc(x);
                             if (x > 0) this.prevLoc = x;
                         }
@@ -16798,14 +16971,14 @@ pkg.SplitPan = Class(pkg.Panel, [
                 };
 
                 this.pointerDragEnded = function(e){
-                    var xy = this.target.normalizeBarLoc(this.target.orientation == L.VERTICAL ? this.x + e.x
-                                                                                               : this.y + e.y);
+                    var xy = this.target.normalizeBarLoc(this.target.orient === "vertical" ? this.x + e.x
+                                                                                           : this.y + e.y);
                     if (xy > 0) this.target.setGripperLoc(xy);
                 };
 
                 this.getCursorType = function(t, x, y) {
-                    return (this.target.orientation == L.VERTICAL ? Cursor.W_RESIZE
-                                                                  : Cursor.N_RESIZE);
+                    return (this.target.orient === "vertical" ? Cursor.W_RESIZE
+                                                              : Cursor.N_RESIZE);
                 };
             },
 
@@ -16884,9 +17057,8 @@ pkg.SplitPan = Class(pkg.Panel, [
         };
 
         this.setOrientation = function(o) {
-            o = L.$constraints(o);
-            if (o != this.orientation) {
-                this.orientation = o;
+            if (o !== this.orient) {
+                this.orient = o;
                 this.vrp();
             }
         };
@@ -16908,7 +17080,7 @@ pkg.SplitPan = Class(pkg.Panel, [
                 sSize = pkg.$getPS(this.rightComp),
                 bSize = pkg.$getPS(this.gripper);
 
-            if (this.orientation === L.HORIZONTAL){
+            if (this.orient === "horizontal"){
                 bSize.width = Math.max(((fSize.width > sSize.width) ? fSize.width : sSize.width), bSize.width);
                 bSize.height = fSize.height + sSize.height + bSize.height + 2 * this.gap;
             }
@@ -16926,7 +17098,7 @@ pkg.SplitPan = Class(pkg.Panel, [
                 left   = this.getLeft(),
                 bSize  = pkg.$getPS(this.gripper);
 
-            if (this.orientation == L.HORIZONTAL){
+            if (this.orient === "horizontal"){
                 var w = this.width - left - right;
                 if (this.barLocation < top) this.barLocation = top;
                 else {
@@ -17032,7 +17204,7 @@ pkg.SplitPan = Class(pkg.Panel, [
     },
 
     function (f,s,o){
-        if (o == null) o = L.VERTICAL;
+        if (o == null) o = "vertical";
 
         this.minXY = this.maxXY = 0;
         this.barLocation = 70;
@@ -17041,25 +17213,23 @@ pkg.SplitPan = Class(pkg.Panel, [
 
         this.$super();
 
-        if (f != null) this.add(L.LEFT, f);
-        if (s != null) this.add(L.RIGHT, s);
-        this.add(L.CENTER, new this.clazz.Bar(this));
+        if (f != null) this.add("left", f);
+        if (s != null) this.add("right", s);
+        this.add("center", new this.clazz.Bar(this));
     },
 
     function kidAdded(index,ctr,c){
         this.$super(index, ctr, c);
 
-        ctr = L.$constraints(ctr);
-
-        if ((ctr == null && this.leftComp == null) || L.LEFT === ctr) {
+        if ((ctr == null && this.leftComp == null) || "left" === ctr) {
             this.leftComp = c;
         }
         else {
-            if ((ctr == null && this.rightComp == null) || L.RIGHT === ctr) {
+            if ((ctr == null && this.rightComp == null) || "right" === ctr) {
                 this.rightComp = c;
             }
             else {
-                if (L.CENTER === ctr) this.gripper = c;
+                if ("center" === ctr) this.gripper = c;
                 else throw new Error("" + ctr);
             }
         }
@@ -17080,7 +17250,7 @@ pkg.SplitPan = Class(pkg.Panel, [
 
     function resized(pw,ph) {
         var ps = this.gripper.getPreferredSize();
-        if (this.orientation == L.VERTICAL){
+        if (this.orient === "vertical"){
             this.minXY = this.getLeft() + this.gap + this.leftMinSize;
             this.maxXY = this.width - this.gap - this.rightMinSize - ps.width - this.getRight();
         }
@@ -17125,29 +17295,29 @@ pkg.Progress = Class(pkg.Panel, [
 
         /**
          * Progress bar orientation
-         * @default zebkit.layout.HORIZONTAL
-         * @attribute orientation
-         * @type {Integer}
+         * @default "horizontal"
+         * @attribute orient
+         * @type {String}
          * @readOnly
          */
-        this.orientation = L.HORIZONTAL;
+        this.orient = "horizontal";
 
         this.paint = function(g){
             var left = this.getLeft(), right = this.getRight(),
                 top = this.getTop(), bottom = this.getBottom(),
-                rs = (this.orientation == L.HORIZONTAL) ? this.width - left - right
-                                                        : this.height - top - bottom,
-                bundleSize = (this.orientation == L.HORIZONTAL) ? this.bundleWidth
-                                                                : this.bundleHeight;
+                rs = (this.orient === "horizontal") ? this.width - left - right
+                                                    : this.height - top - bottom,
+                bundleSize = (this.orient === "horizontal") ? this.bundleWidth
+                                                            : this.bundleHeight;
 
             if (rs >= bundleSize){
                 var vLoc = Math.floor((rs * this.value) / this.maxValue),
                     x = left, y = this.height - bottom, bundle = this.bundleView,
-                    wh = this.orientation == L.HORIZONTAL ? this.height - top - bottom
+                    wh = this.orient === "horizontal" ? this.height - top - bottom
                                                           : this.width - left - right;
 
                 while(x < (vLoc + left) && this.height - vLoc - bottom < y){
-                    if(this.orientation == L.HORIZONTAL){
+                    if(this.orient === "horizontal"){
                         bundle.paint(g, x, top, bundleSize, wh, this);
                         x += (bundleSize + this.gap);
                     }
@@ -17167,17 +17337,17 @@ pkg.Progress = Class(pkg.Panel, [
         };
 
         this.calcPreferredSize = function(l){
-            var bundleSize = (this.orientation == L.HORIZONTAL) ? this.bundleWidth
-                                                                : this.bundleHeight,
+            var bundleSize = (this.orient === "horizontal") ? this.bundleWidth
+                                                                 : this.bundleHeight,
                 v1 = (this.maxValue * bundleSize) + (this.maxValue - 1) * this.gap,
                 ps = this.bundleView.getPreferredSize();
 
-            ps = (this.orientation == L.HORIZONTAL) ? {
-                                                        width :v1,
-                                                        height:(this.bundleHeight >= 0 ? this.bundleHeight
+            ps = (this.orient === "horizontal") ? {
+                                                         width :v1,
+                                                         height:(this.bundleHeight >= 0 ? this.bundleHeight
                                                                                        : ps.height)
-                                                      }
-                                                    : {
+                                                       }
+                                                     : {
                                                         width:(this.bundleWidth >= 0 ? this.bundleWidth
                                                                                      : ps.width),
                                                         height: v1
@@ -17233,16 +17403,15 @@ pkg.Progress = Class(pkg.Panel, [
 
     /**
      * Set the progress bar orientation
-     * @param {Integer | String} o an orientation: zebkit.layout.VERTICAL or zebkit.layout.HORIZONTAL
+     * @param {String} o an orientation: "vertical" or "horizontal"
      * @method setOrientation
      */
     function setOrientation(o){
-        o = L.$constraints(o);
-        if (o != L.HORIZONTAL && o != L.VERTICAL) {
+        if (o !== "horizontal" && o !== "vertical") {
             throw new Error("" + o);
         }
-        if (o != this.orientation){
-            this.orientation = o;
+        if (o != this.orient){
+            this.orient = o;
             this.vrp();
         }
     },
@@ -17490,7 +17659,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
          * @readOnly
          */
         this.titlePan = new this.clazz.TitlePan();
-        this.add(L.TOP, this.titlePan);
+        this.add("top", this.titlePan);
 
         /**
          * Toggle panel
@@ -17510,7 +17679,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
          */
         this.contentPan = content;
         this.contentPan.setVisible(!this.isCollapsed);
-        this.add(L.CENTER, this.contentPan);
+        this.add("center", this.contentPan);
 
         this.toggle();
 
@@ -17646,10 +17815,10 @@ pkg.ScrollManager = Class([
 
 /**
  * Scroll bar UI component
- * @param {Integer|String} t type of the scroll bar components:
+ * @param {String} t type of the scroll bar components:
 
-        zebkit.layout.VERTICAL or "vertical" - vertical scroll bar
-        zebkit.layout.HORIZONTAL or "horizontal"- horizontal scroll bar
+        "vertical" - vertical scroll bar
+        "horizontal"- horizontal scroll bar
 
  * @class zebkit.ui.Scroll
  * @constructor
@@ -17724,19 +17893,19 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
 
         this.amount = function(){
             var db = this.decBt;
-            return (this.type === L.VERTICAL) ? this.incBt.y - db.y - db.height
+            return (this.orient === "vertical") ? this.incBt.y - db.y - db.height
                                               : this.incBt.x - db.x - db.width;
         };
 
         this.pixel2value = function(p) {
             var db = this.decBt;
-            return (this.type === L.VERTICAL) ? Math.floor((this.max * (p - db.y - db.height)) / (this.amount() - this.bundle.height))
+            return (this.orient === "vertical") ? Math.floor((this.max * (p - db.y - db.height)) / (this.amount() - this.bundle.height))
                                               : Math.floor((this.max * (p - db.x - db.width )) / (this.amount() - this.bundle.width));
         };
 
         this.value2pixel = function(){
             var db = this.decBt, bn = this.bundle, off = this.position.offset;
-            return (this.type === L.VERTICAL) ? db.y + db.height +  Math.floor(((this.amount() - bn.height) * off) / this.max)
+            return (this.orient === "vertical") ? db.y + db.height +  Math.floor(((this.amount() - bn.height) * off) / this.max)
                                               : db.x + db.width  +  Math.floor(((this.amount() - bn.width) * off) / this.max);
         };
 
@@ -17754,7 +17923,7 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
 
         this.posChanged = function(target,po,pl,pc){
             if (this.bundle != null) {
-                if (this.type == L.HORIZONTAL) {
+                if (this.orient === "horizontal") {
                     this.bundle.setLocation(this.value2pixel(), this.getTop());
                 }
                 else {
@@ -17781,7 +17950,7 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
             if (Number.MAX_VALUE != this.startDragLoc) {
                 this.position.setOffset(this.pixel2value(this.bundleLoc -
                                                          this.startDragLoc +
-                                                         ((this.type == L.HORIZONTAL) ? e.x : e.y)));
+                                                         ((this.orient === "horizontal") ? e.x : e.y)));
             }
         };
 
@@ -17792,8 +17961,8 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
          */
         this.pointerDragStarted = function (e){
             if (this.isDragable === true && this.isInBundle(e.x, e.y)) {
-                this.startDragLoc = this.type == L.HORIZONTAL ? e.x : e.y;
-                this.bundleLoc    = this.type == L.HORIZONTAL ? this.bundle.x : this.bundle.y;
+                this.startDragLoc = this.orient === "horizontal" ? e.x : e.y;
+                this.bundleLoc    = this.orient === "horizontal" ? this.bundle.x : this.bundle.y;
             }
         };
 
@@ -17814,7 +17983,7 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
         this.pointerClicked = function (e){
             if (this.isInBundle(e.x, e.y) === false && e.isAction()){
                 var d = this.pageIncrement;
-                if (this.type === L.VERTICAL){
+                if (this.orient === "vertical"){
                     if (e.y < (this.bundle != null ? this.bundle.y : Math.floor(this.height / 2))) d =  -d;
                 }
                 else {
@@ -17829,7 +17998,7 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
                 ps2 = pkg.$getPS(this.decBt),
                 ps3 = pkg.$getPS(this.bundle);
 
-            if (this.type === L.HORIZONTAL){
+            if (this.orient === "horizontal"){
                 ps1.width += (ps2.width + ps3.width);
                 ps1.height = Math.max((ps1.height > ps2.height ? ps1.height : ps2.height), ps3.height);
             }
@@ -17847,7 +18016,7 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
                 left   = this.getLeft(),
                 ew     = this.width - left - right,
                 eh     = this.height - top - bottom,
-                b      = (this.type === L.HORIZONTAL),
+                b      = (this.orient === "horizontal"),
                 ps1    = pkg.$getPS(this.decBt),
                 ps2    = pkg.$getPS(this.incBt),
                 minbs  = pkg.Scroll.MIN_BUNDLE_SIZE;
@@ -17886,7 +18055,9 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
         this.setMaximum = function (m){
             if (m != this.max) {
                 this.max = m;
-                if (this.position.offset > this.max) this.position.setOffset(this.max);
+                if (this.position.offset > this.max) {
+                    this.position.setOffset(this.max);
+                }
                 this.vrp();
             }
         };
@@ -17921,8 +18092,7 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
     },
 
     function(t) {
-        t = L.$constraints(t);
-        if (t !== L.VERTICAL && t !== L.HORIZONTAL) {
+        if (t !== "vertical" && t !== "horizontal") {
             throw new Error("" + t + "(alignment)");
         }
 
@@ -17948,31 +18118,30 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
          */
 
         this.incBt = this.decBt = this.bundle = this.position = null;
-        this.bundleLoc = this.type = 0;
+        this.bundleLoc = 0;
+        this.orient = t;
         this.startDragLoc = Number.MAX_VALUE;
         this.$super(this);
 
-        this.add(L.CENTER, t === L.VERTICAL ? new pkg.Scroll.VBundle()    : new pkg.Scroll.HBundle());
-        this.add(L.TOP   , t === L.VERTICAL ? new pkg.Scroll.VDecButton() : new pkg.Scroll.HDecButton());
-        this.add(L.BOTTOM, t === L.VERTICAL ? new pkg.Scroll.VIncButton() : new pkg.Scroll.HIncButton());
+        var b = (t === "vertical");
+        this.add("center", b ? new pkg.Scroll.VBundle()    : new pkg.Scroll.HBundle());
+        this.add("top"   , b ? new pkg.Scroll.VDecButton() : new pkg.Scroll.HDecButton());
+        this.add("bottom", b ? new pkg.Scroll.VIncButton() : new pkg.Scroll.HIncButton());
 
-        this.type = t;
         this.setPosition(new zebkit.util.SingleColPosition(this));
     },
 
     function kidAdded(index,ctr,lw){
         this.$super(index, ctr, lw);
 
-        ctr = L.$constraints(ctr);
-
-        if (L.CENTER === ctr) this.bundle = lw;
+        if ("center" === ctr) this.bundle = lw;
         else {
-            if (L.BOTTOM === ctr) {
+            if ("bottom" === ctr) {
                 this.incBt = lw;
                 this.incBt.bind(this);
             }
             else {
-                if (L.TOP === ctr) {
+                if ("top" === ctr) {
                     this.decBt = lw;
                     this.decBt.bind(this);
                 }
@@ -17983,7 +18152,7 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
 
     function kidRemoved(index,lw){
         this.$super(index, lw);
-        if(lw == this.bundle) this.bundle = null;
+        if (lw == this.bundle) this.bundle = null;
         else {
             if(lw == this.incBt){
                 this.incBt.unbind(this);
@@ -18039,7 +18208,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
 
                 this.doLayout = function(t) {
                     var kid = t.kids[0];
-                    if (kid.constraints === L.STRETCH) {
+                    if (kid.constraints === "stretch") {
                         var ps = kid.getPreferredSize(),
                             w  = t.parent.hBar != null ? ps.width : t.width,
                             h  = t.parent.vBar != null ? ps.height : t.height;
@@ -18360,7 +18529,9 @@ pkg.ScrollPan = Class(pkg.Panel, [
     },
 
     function (c, scrolls, autoHide) {
-        if (scrolls == null)  scrolls = "both";
+        if (scrolls == null)  {
+            scrolls = "both";
+        }
 
         /**
          * Vertical scroll bar component
@@ -18388,14 +18559,16 @@ pkg.ScrollPan = Class(pkg.Panel, [
         this.$super();
 
         if (scrolls === "both" || scrolls === "horizontal") {
-            this.add(L.BOTTOM, new pkg.Scroll(L.HORIZONTAL));
+            this.add("bottom", new pkg.Scroll("horizontal"));
         }
 
         if (scrolls === "both" || scrolls === "vertical") {
-            this.add(L.RIGHT, new pkg.Scroll(L.VERTICAL));
+            this.add("right", new pkg.Scroll("vertical"));
         }
 
-        if (c != null) this.add(L.CENTER, c);
+        if (c != null) {
+            this.add("center", c);
+        }
 
         if (autoHide != null) {
             this.setAutoHide(autoHide);
@@ -18403,9 +18576,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
     },
 
     function insert(i,ctr,c) {
-        ctr = L.$constraints(ctr);
-
-        if (L.CENTER === ctr) {
+        if ("center" === ctr) {
             if (c.scrollManager == null) {
                 c = new this.clazz.ContentPan(c);
             }
@@ -18414,11 +18585,11 @@ pkg.ScrollPan = Class(pkg.Panel, [
             c.scrollManager.bind(this);
         }
         else {
-            if (L.BOTTOM === ctr || L.TOP === ctr){
+            if ("bottom" === ctr || "top" === ctr){
                 this.hBar = c;
             }
             else {
-                if (L.LEFT === ctr || L.RIGHT === ctr) {
+                if ("left" === ctr || "right" === ctr) {
                     this.vBar = c;
                 }
                 else  {
@@ -18500,10 +18671,10 @@ pkg.ScrollPan = Class(pkg.Panel, [
 
  * @param {Integer|String} [o] the tab panel orientation:
 
-      zebkit.layout.TOP   or "top"
-      zebkit.layout.BOTTOM or "bottom"
-      zebkit.layout.LEFT or "left"
-      zebkit.layout.RIGHT or "right"
+      "top"
+      "bottom"
+      "left"
+      "right"
 
  * @class zebkit.ui.Tabs
  * @constructor
@@ -18800,7 +18971,7 @@ pkg.Tabs = Class(pkg.Panel, [
         };
 
         this.getTitleInfo = function(){
-            var b   = (this.orient === L.LEFT || this.orient === L.RIGHT),
+            var b   = (this.orient === "left" || this.orient === "right"),
                 res = b ? { x      : this.tabAreaX,
                             y      : 0,
                             width  : this.tabAreaWidth,
@@ -18928,7 +19099,7 @@ pkg.Tabs = Class(pkg.Panel, [
 
         this.calcPreferredSize = function(target){
             var max = L.getMaxPreferredSize(target);
-            if (this.orient === L.BOTTOM || this.orient === L.TOP){
+            if (this.orient === "bottom" || this.orient === "top"){
                 max.width = Math.max(max.width, 2 * this.sideSpace + this.tabAreaWidth);
                 max.height += this.tabAreaHeight + this.sideSpace;
             }
@@ -18940,31 +19111,31 @@ pkg.Tabs = Class(pkg.Panel, [
         };
 
         this.doLayout = function(target){
-            var right  = this.orient === L.RIGHT  ? this.right  : this.getRight(),
-                top    = this.orient === L.TOP    ? this.top    : this.getTop(),
-                bottom = this.orient === L.BOTTOM ? this.bottom : this.getBottom(),
-                left   = this.orient === L.LEFT   ? this.left   : this.getLeft(),
-                b      = (this.orient === L.TOP || this.orient === L.BOTTOM);
+            var right  = this.orient === "right"  ? this.right  : this.getRight(),
+                top    = this.orient === "top"    ? this.top    : this.getTop(),
+                bottom = this.orient === "bottom" ? this.bottom : this.getBottom(),
+                left   = this.orient === "left"   ? this.left   : this.getLeft(),
+                b      = (this.orient === "top" || this.orient === "bottom");
 
             if (b) {
                 this.repaintX = this.tabAreaX = left ;
-                this.repaintY = this.tabAreaY = (this.orient === L.TOP) ? top : this.height - bottom - this.tabAreaHeight;
-                if (this.orient === L.BOTTOM) {
+                this.repaintY = this.tabAreaY = (this.orient === "top") ? top : this.height - bottom - this.tabAreaHeight;
+                if (this.orient === "bottom") {
                     this.repaintY -= (this.border != null ? this.border.getBottom() : 0);
                 }
             }
             else {
-                this.repaintX = this.tabAreaX = (this.orient == L.LEFT ? left : this.width - right - this.tabAreaWidth);
+                this.repaintX = this.tabAreaX = (this.orient == "left" ? left : this.width - right - this.tabAreaWidth);
                 this.repaintY = this.tabAreaY = top ;
-                if (this.orient === L.RIGHT) {
+                if (this.orient === "right") {
                     this.repaintX -= (this.border != null ? this.border.getRight() : 0);
                 }
             }
 
             var count = this.kids.length,
                 sp    = 2 * this.sideSpace,
-                xx    = (this.orient == L.RIGHT  ? this.tabAreaX : this.tabAreaX + this.sideSpace),
-                yy    = (this.orient == L.BOTTOM ? this.tabAreaY : this.tabAreaY + this.sideSpace);
+                xx    = (this.orient === "right"  ? this.tabAreaX : this.tabAreaX + this.sideSpace),
+                yy    = (this.orient === "bottom" ? this.tabAreaY : this.tabAreaY + this.sideSpace);
 
             for(var i = 0;i < count; i++ ){
                 var r = this.getTabBounds(i);
@@ -18976,14 +19147,18 @@ pkg.Tabs = Class(pkg.Panel, [
                     xx += r.width;
                     if (i == this.selectedIndex) {
                         xx -= sp;
-                        if (this.orient === L.BOTTOM) r.y -= (this.border != null ? this.border.getBottom() : 0);
+                        if (this.orient === "bottom") {
+                            r.y -= (this.border != null ? this.border.getBottom() : 0);
+                        }
                     }
                 }
                 else {
                     yy += r.height;
                     if (i == this.selectedIndex) {
                         yy -= sp;
-                        if (this.orient === L.RIGHT) r.x -= (this.border != null ? this.border.getRight() : 0);
+                        if (this.orient === "right") {
+                            r.x -= (this.border != null ? this.border.getRight() : 0);
+                        }
                     }
                 }
             }
@@ -18993,12 +19168,12 @@ pkg.Tabs = Class(pkg.Panel, [
                 var r = this.getTabBounds(this.selectedIndex), dt = 0;
                 if (b) {
                     r.x -= this.sideSpace;
-                    r.y -= ((this.orient === L.TOP) ? this.sideSpace : 0);
+                    r.y -= ((this.orient === "top") ? this.sideSpace : 0);
                     dt = (r.x < left) ? left - r.x
                                       : (r.x + r.width > this.width - right) ? this.width - right - r.x - r.width : 0;
                 }
                 else {
-                    r.x -= (this.orient === L.LEFT) ? this.sideSpace : 0;
+                    r.x -= (this.orient === "left") ? this.sideSpace : 0;
                     r.y -= this.sideSpace;
                     dt = (r.y < top) ? top - r.y
                                      : (r.y + r.height > this.height - bottom) ? this.height - bottom - r.y - r.height : 0;
@@ -19016,12 +19191,12 @@ pkg.Tabs = Class(pkg.Panel, [
                 if (i === this.selectedIndex) {
                     if (b) {
                         l.setBounds(left + this.hgap,
-                                    ((this.orient === L.TOP) ? top + this.repaintHeight : top) + this.vgap,
+                                    ((this.orient === "top") ? top + this.repaintHeight : top) + this.vgap,
                                     this.width - left - right - 2 * this.hgap,
                                     this.height - this.repaintHeight - top - bottom - 2 * this.vgap);
                     }
                     else {
-                        l.setBounds(((this.orient === L.LEFT) ? left + this.repaintWidth : left) + this.hgap,
+                        l.setBounds(((this.orient === "left") ? left + this.repaintWidth : left) + this.hgap,
                                     top + this.vgap,
                                     this.width - this.repaintWidth - left - right - 2 * this.hgap,
                                     this.height - top - bottom - 2 * this.vgap);
@@ -19043,7 +19218,7 @@ pkg.Tabs = Class(pkg.Panel, [
                 this.tabAreaHeight = this.tabAreaWidth = 0;
 
                 var bv   = this.views.tab,
-                    b    = (this.orient === L.LEFT || this.orient === L.RIGHT),
+                    b    = (this.orient === "left" || this.orient === "right"),
                     max  = 0,
                     hadd = bv.getLeft() + bv.getRight(),
                     vadd = bv.getTop()  + bv.getBottom();
@@ -19076,7 +19251,7 @@ pkg.Tabs = Class(pkg.Panel, [
                     this.tabAreaWidth   = max + this.sideSpace;
                     this.tabAreaHeight += (2 * this.sideSpace);
                     this.repaintHeight  = this.tabAreaHeight;
-                    this.repaintWidth   = this.tabAreaWidth + (this.border != null ? (b === L.LEFT ? this.border.getLeft()
+                    this.repaintWidth   = this.tabAreaWidth + (this.border != null ? (b === "left" ? this.border.getLeft()
                                                                                                    : this.border.getRight())
                                                                                    : 0);
                 }
@@ -19084,7 +19259,7 @@ pkg.Tabs = Class(pkg.Panel, [
                     this.tabAreaWidth += (2 * this.sideSpace);
                     this.tabAreaHeight = this.sideSpace + max;
                     this.repaintWidth  = this.tabAreaWidth;
-                    this.repaintHeight = this.tabAreaHeight + (this.border != null ? (b === L.TOP ? this.border.getTop()
+                    this.repaintHeight = this.tabAreaHeight + (this.border != null ? (b === "top" ? this.border.getTop()
                                                                                                   : this.border.getBottom())
                                                                                    : 0);
                 }
@@ -19094,12 +19269,12 @@ pkg.Tabs = Class(pkg.Panel, [
                     var r = this.getTabBounds(this.selectedIndex);
                     if (b) {
                         r.height += 2 * this.sideSpace;
-                        r.width += this.sideSpace +  (this.border != null ? (b === L.LEFT ? this.border.getLeft()
+                        r.width += this.sideSpace +  (this.border != null ? (b === "left" ? this.border.getLeft()
                                                                                           : this.border.getRight())
                                                                           : 0);
                     }
                     else {
-                        r.height += this.sideSpace + (this.border != null ? (b === L.TOP ? this.border.getTop()
+                        r.height += this.sideSpace + (this.border != null ? (b === "top" ? this.border.getTop()
                                                                                          : this.border.getBottom())
                                                                           : 0);
                         r.width  += 2 * this.sideSpace;
@@ -19234,14 +19409,11 @@ pkg.Tabs = Class(pkg.Panel, [
         /**
          * Set the tab page element alignments
          * @param {Integer|String} o an alignment. The valid value is one of the following:
-         * zebkit.layout.LEFT, zebkit.layout.RIGHT, zebkit.layout.TOP, zebkit.layout.BOTTOM or
-         * "left", "right", "top", bottom
+         * "left", "right", "top", "bottom"
          * @method  setAlignment
          */
         this.setAlignment = function(o){
-            o = L.$constraints(o);
-
-            if (o != L.TOP && o != L.BOTTOM && o != L.LEFT && o != L.RIGHT) {
+            if (o !== "top" && o !== "bottom" && o !== "left" && o !== "right") {
                 throw new Error("" + o);
             }
 
@@ -19288,7 +19460,9 @@ pkg.Tabs = Class(pkg.Panel, [
     },
 
     function(o) {
-        if (arguments.length === 0) o = L.TOP;
+        if (arguments.length === 0) {
+            o = "top";
+        }
 
         /**
          * Selected tab page index
@@ -19301,7 +19475,7 @@ pkg.Tabs = Class(pkg.Panel, [
         /**
          * Tab orientation
          * @attribute orient
-         * @type {Integer}
+         * @type {String}
          * @readOnly
          */
 
@@ -19319,7 +19493,7 @@ pkg.Tabs = Class(pkg.Panel, [
 
         this.tabAreaY = this.tabAreaWidth = this.tabAreaHeight = 0;
         this.overTab = this.selectedIndex = -1;
-        this.orient = L.$constraints(o);
+        this.orient = o;
         this._ = new Listeners();
         this.pages = [];
         this.views = {};
@@ -19397,7 +19571,9 @@ pkg.Tabs = Class(pkg.Panel, [
 
     function setSize(w,h){
         if (this.width != w || this.height != h){
-            if (this.orient === L.RIGHT || this.orient === L.BOTTOM) this.tabAreaX =  -1;
+            if (this.orient === "right" || this.orient === "bottom") {
+                this.tabAreaX =  -1;
+            }
             this.$super(w, h);
         }
     }
@@ -19432,7 +19608,7 @@ pkg.Slider = Class(pkg.Panel, [
                     var render = this.provider.getView(this, this.getPointValue(i)),
                         d = render.getPreferredSize();
 
-                    if (this.orient == L.HORIZONTAL) {
+                    if (this.orient === "horizontal") {
                         render.paint(g, this.pl[i] - Math.floor(d.width / 2), loc, d.width, d.height, this);
                     }
                     else {
@@ -19443,7 +19619,7 @@ pkg.Slider = Class(pkg.Panel, [
 
         this.getScaleSize = function(){
             var bs = this.views.bundle.getPreferredSize();
-            return (this.orient == L.HORIZONTAL ? this.width - this.getLeft() -
+            return (this.orient === "horizontal" ? this.width - this.getLeft() -
                                                   this.getRight() - bs.width
                                                 : this.height - this.getTop() -
                                                   this.getBottom() - bs.height);
@@ -19451,8 +19627,8 @@ pkg.Slider = Class(pkg.Panel, [
 
         this.pointerDragged = function(e){
             if(this.dragged) {
-                this.setValue(this.findNearest(e.x + (this.orient == L.HORIZONTAL ? this.correctDt : 0),
-                                               e.y + (this.orient == L.HORIZONTAL ? 0 : this.correctDt)));
+                this.setValue(this.findNearest(e.x + (this.orient === "horizontal" ? this.correctDt : 0),
+                                               e.y + (this.orient === "horizontal" ? 0 : this.correctDt)));
             }
         };
 
@@ -19476,7 +19652,7 @@ pkg.Slider = Class(pkg.Panel, [
                 w      = this.width - left - right - 2,
                 h      = this.height - top - bottom - 2;
 
-            if (this.orient == L.HORIZONTAL){
+            if (this.orient === "horizontal"){
                 var topY = top + Math.floor((h - this.psH) / 2) + 1, by = topY;
                 if(this.isEnabled === true) {
                     gauge.paint(g, left + 1,
@@ -19551,7 +19727,7 @@ pkg.Slider = Class(pkg.Panel, [
         };
 
         this.findNearest = function(x,y){
-            var v = this.loc2value(this.orient == L.HORIZONTAL ? x : y);
+            var v = this.loc2value(this.orient === "horizontal" ? x : y);
             if (this.isIntervalMode){
                 var nearest = Number.MAX_VALUE, res = 0;
                 for(var i = 0;i < this.intervals.length; i ++ ){
@@ -19575,20 +19751,20 @@ pkg.Slider = Class(pkg.Panel, [
         this.value2loc = function (v){
             var ps = this.views.bundle.getPreferredSize(),
                 l  = Math.floor((this.getScaleSize() * (v - this.min)) / (this.max - this.min));
-            return  (this.orient == L.VERTICAL) ? this.height - Math.floor(ps.height/2) - this.getBottom() - l
-                                                : this.getLeft() + Math.floor(ps.width/2) + l;
+            return  (this.orient === "vertical") ? this.height - Math.floor(ps.height/2) - this.getBottom() - l
+                                                 : this.getLeft() + Math.floor(ps.width/2) + l;
         };
 
         this.loc2value = function(xy){
             var ps = this.views.bundle.getPreferredSize(),
-                sl = (this.orient == L.VERTICAL) ? this.getLeft() + Math.floor(ps.width/2) : this.getTop() + Math.floor(ps.height/2),
+                sl = (this.orient === "vertical") ? this.getLeft() + Math.floor(ps.width/2) : this.getTop() + Math.floor(ps.height/2),
                 ss = this.getScaleSize();
 
-            if (this.orient == L.VERTICAL) {
+            if (this.orient === "vertical") {
                 xy = this.height - xy;
             }
 
-            if(xy < sl) xy = sl;
+            if (xy < sl) xy = sl;
             else {
                 if (xy > sl + ss) xy = sl + ss;
             }
@@ -19612,13 +19788,13 @@ pkg.Slider = Class(pkg.Panel, [
 
         this.getBundleLoc = function(v){
             var bs = this.views.bundle.getPreferredSize();
-            return this.value2loc(v) - (this.orient == L.HORIZONTAL ? Math.floor(bs.width / 2)
-                                                                    : Math.floor(bs.height / 2));
+            return this.value2loc(v) - (this.orient === "horizontal" ? Math.floor(bs.width / 2)
+                                                                     : Math.floor(bs.height / 2));
         };
 
         this.getBundleBounds = function (v){
             var bs = this.views.bundle.getPreferredSize();
-            return this.orient == L.HORIZONTAL ? {
+            return this.orient === "horizontal"? {
                                                    x:this.getBundleLoc(v),
                                                    y:this.getTop() + Math.floor((this.height - this.getTop() - this.getBottom() - this.psH) / 2) + 1,
                                                    width:bs.width,
@@ -19667,14 +19843,14 @@ pkg.Slider = Class(pkg.Panel, [
                 ns = this.isShowScale ? (this.gap + 2 * this.netSize) : 0,
                 dt = this.max - this.min, hMax = 0, wMax = 0;
 
-            if(this.isShowTitle && this.intervals.length > 0){
+            if (this.isShowTitle && this.intervals.length > 0){
                 for(var i = 0;i < this.intervals.length; i ++ ){
                     var d = this.provider.getView(this, this.getPointValue(i)).getPreferredSize();
                     if (d.height > hMax) hMax = d.height;
                     if (d.width  > wMax) wMax = d.width;
                 }
             }
-            if(this.orient == L.HORIZONTAL){
+            if (this.orient === "horizontal"){
                 this.psW = dt * 2 + ps.width;
                 this.psH = ps.height + ns + hMax;
             }
@@ -19727,7 +19903,7 @@ pkg.Slider = Class(pkg.Panel, [
             if (e.isAction()){
                 var x = e.x, y = e.y, bb = this.getBundleBounds(this.value);
                 if (x < bb.x || y < bb.y || x >= bb.x + bb.width || y >= bb.y + bb.height) {
-                    var l = ((this.orient == L.HORIZONTAL) ? x : y), v = this.loc2value(l);
+                    var l = ((this.orient === "horizontal") ? x : y), v = this.loc2value(l);
                     if (this.value != v) {
                         this.setValue(this.isJumpOnPress ? v
                                                          : this.nextValue(this.value,
@@ -19746,8 +19922,8 @@ pkg.Slider = Class(pkg.Panel, [
                 e.y < r.y + r.height)
             {
                 this.dragged = true;
-                this.correctDt = this.orient == L.HORIZONTAL ? r.x + Math.floor(r.width  / 2) - e.x
-                                                             : r.y + Math.floor(r.height / 2) - e.y;
+                this.correctDt = this.orient === "horizontal" ? r.x + Math.floor(r.width  / 2) - e.x
+                                                              : r.y + Math.floor(r.height / 2) - e.y;
             }
         };
 
@@ -19762,19 +19938,19 @@ pkg.Slider = Class(pkg.Panel, [
     },
 
     function (o) {
-        if (o == null) o = L.HORIZONTAL;
+        if (o == null) o = "horizontal";
         this._ = new Listeners();
         this.views = {};
         this.isShowScale = this.isShowTitle = true;
         this.dragged = this.isIntervalMode = false;
         this.render = new pkg.BoldTextRender("");
         this.render.setColor("gray");
-        this.orient = L.$constraints(o);
+        this.orient = o;
         this.setValues(0, 20, [0, 5, 10], 2, 1);
         this.setScaleStep(1);
 
         this.$super();
-        this.views.bundle = (o == L.HORIZONTAL ? this.views.hbundle : this.views.vbundle);
+        this.views.bundle = (o === "horizontal" ? this.views.hbundle : this.views.vbundle);
 
         this.provider = this;
     },
@@ -19874,7 +20050,7 @@ pkg.StatusBar = Class(pkg.Panel, [
     function (gap){
         if (arguments.length === 0) gap = 2;
         this.setPadding(gap, 0, 0, 0);
-        this.$super(new L.PercentLayout(L.HORIZONTAL, gap));
+        this.$super(new L.PercentLayout("horizontal", gap));
     },
 
     /**
@@ -19928,7 +20104,7 @@ pkg.Toolbar = Class(pkg.Panel, [
         this.ToolPan = Class(pkg.EvStatePan, [
             function(c) {
                 this.$super(new L.BorderLayout());
-                this.add(L.CENTER, c);
+                this.add("center", c);
             },
 
             function getContentComponent() {
@@ -20014,7 +20190,7 @@ pkg.Toolbar = Class(pkg.Panel, [
      */
     function addLine(){
         var line = new this.clazz.Line();
-        line.constraints = L.STRETCH;
+        line.constraints = "stretch";
         return this.addDecorative(line);
     },
 
@@ -20042,7 +20218,7 @@ pkg.Toolbar = Class(pkg.Panel, [
         // play video
         var canvas = zebkit.ui.zCanvas(500,500).root.properties({
             layout: new zebkit.layout.BorderLayout(),
-            zebkit.layout.CENTER: new zebkit.ui.VideoPan("trailer.mpg")
+            center: new zebkit.ui.VideoPan("trailer.mpg")
         });
 
  *
@@ -20294,10 +20470,10 @@ pkg.TextField = Class(pkg.Label, [
         /**
          * Text alignment
          * @attribute textAlign
-         * @type {Integer}
-         * @default zebkit.layout.LEFT
+         * @type {String}
+         * @default "left"
          */
-        this.textAlign = zebkit.layout.LEFT;
+        this.textAlign = "left";
 
         /**
          * Cursor view
@@ -20334,7 +20510,6 @@ pkg.TextField = Class(pkg.Label, [
         };
 
         this.setTextAlign = function(a) {
-            a = zebkit.layout.$constraints(a);
             if (this.textAlign != a) {
                 this.textAlign = a;
                 this.vrp();
@@ -20398,7 +20573,7 @@ pkg.TextField = Class(pkg.Label, [
             // normalize text location to virtual (zero, zero)
             y -= (this.scrollManager.getSY() + this.getTop());
             x -= this.scrollManager.getSX();
-            if (this.textAlign === zebkit.layout.LEFT) {
+            if (this.textAlign === "left") {
                 x -= this.getLeft();
             }
             else {
@@ -20407,7 +20582,7 @@ pkg.TextField = Class(pkg.Label, [
 
             if (x >= 0 && y >= 0 && lines > 0) {
                 var lh = this.view.getLineHeight(),
-                    li = this.view.getLineIndent(),
+                    li = this.view.lineIndent,
                     row = (y < 0) ? 0 : Math.floor((y + li) / (lh + li)) + ((y + li) % (lh + li) > li ? 1 : 0) -1;
 
                 if (row < lines && row >= 0) {
@@ -20467,8 +20642,8 @@ pkg.TextField = Class(pkg.Label, [
         // r     - text view
         // start - start offset
         // end   - end offset
-        this.getSubString = function(r,start,end){
-            var res = [], sr = start[0], er = end[0], sc = start[1], ec = end[1];
+        this.getSubString = function(r, start, end){
+            var res = [], sr = start.row, er = end.row, sc = start.col, ec = end.col;
             for(var i = sr; i < er + 1; i++){
                 var ln = r.getLine(i);
                 if (i != sr) res.push('\n');
@@ -20546,6 +20721,8 @@ pkg.TextField = Class(pkg.Label, [
                     case KE.LEFT : foff *= -1;
                     case KE.RIGHT:
                         if (e.ctrlKey === false && e.metaKey === false) {
+
+                            console.log("TextField.keyPressed() seek " + foff);
                             position.seek(foff);
                         }
                         break;
@@ -20652,7 +20829,7 @@ pkg.TextField = Class(pkg.Label, [
             var r = this.view;
             if (this.position.offset >= 0) {
                 var l = r.getLine(this.position.currentLine);
-                if (this.textAlign === zebkit.layout.LEFT) {
+                if (this.textAlign === "left") {
                     this.curX = r.font.charsWidth(l, 0, this.position.currentCol) + this.getLeft();
                 }
                 else {
@@ -20660,7 +20837,7 @@ pkg.TextField = Class(pkg.Label, [
                                 r.font.charsWidth(l, 0, this.position.currentCol);
                 }
 
-                this.curY = this.position.currentLine * (r.getLineHeight() + r.getLineIndent()) +
+                this.curY = this.position.currentLine * (r.getLineHeight() + r.lineIndent) +
                             this.getTop();
             }
 
@@ -20683,7 +20860,7 @@ pkg.TextField = Class(pkg.Label, [
                 this.blinkMe              &&
                 this.hasFocus()              )
             {
-                if (this.textAlign === zebkit.layout.LEFT)
+                if (this.textAlign === "left")
                     this.curView.paint(g, this.curX, this.curY,
                                           this.curW, this.curH, this);
                 else
@@ -20761,8 +20938,8 @@ pkg.TextField = Class(pkg.Label, [
                 var lineHeight = this.view.getLineHeight(),
                     top        = this.getTop();
 
-                this.scrollManager.makeVisible(this.textAlign === zebkit.layout.LEFT ? this.curX
-                                                                                    : this.curX - this.curW,
+                this.scrollManager.makeVisible(this.textAlign === "left" ? this.curX
+                                                                         : this.curX - this.curW,
                                                 this.curY, this.curW, lineHeight);
 
                 if (pl >= 0) {
@@ -20775,7 +20952,7 @@ pkg.TextField = Class(pkg.Label, [
                     }
 
                     var minUpdatedLine = pl < position.currentLine ? pl : position.currentLine,
-                        li             = this.view.getLineIndent(),
+                        li             = this.view.lineIndent,
                         bottom         = this.getBottom(),
                         left           = this.getLeft(),
                         y1             = lineHeight * minUpdatedLine + minUpdatedLine * li +
@@ -20804,8 +20981,8 @@ pkg.TextField = Class(pkg.Label, [
             if (this.hint != null && this.getMaxOffset() === 0) {
                 var ps = this.hint.getPreferredSize(),
                     yy = Math.floor((this.height - ps.height)/2),
-                    xx = (zebkit.layout.LEFT === this.textAlign) ? this.getLeft() + this.curW
-                                                                : this.width - ps.width - this.getRight() - this.curW;
+                    xx = ("left" === this.textAlign) ? this.getLeft() + this.curW
+                                                     : this.width - ps.width - this.getRight() - this.curW;
 
                 this.hint.paint(g, xx, yy, this.width, this.height, this);
             }
@@ -20861,8 +21038,9 @@ pkg.TextField = Class(pkg.Label, [
          * @method getStartSelection
          */
         this.getStartSelection = function(){
-            return this.startOff != this.endOff ? ((this.startOff < this.endOff) ? [this.startLine, this.startCol]
-                                                                                 : [this.endLine, this.endCol]) : null;
+            return this.startOff != this.endOff ? ((this.startOff < this.endOff) ? { row: this.startLine, col: this.startCol }
+                                                                                 : { row: this.endLine, col: this.endCol } )
+                                                : null;
         };
 
         /**
@@ -20873,8 +21051,9 @@ pkg.TextField = Class(pkg.Label, [
          * @method getEndSelection
          */
         this.getEndSelection = function(){
-            return this.startOff != this.endOff ? ((this.startOff < this.endOff) ? [this.endLine, this.endCol]
-                                                                                 : [this.startLine, this.startCol]) : null;
+            return this.startOff != this.endOff ? ((this.startOff < this.endOff) ? { row : this.endLine,   col : this.endCol   }
+                                                                                 : { row : this.startLine, col : this.startCol })
+                                                : null;
         };
 
         /**
@@ -20899,7 +21078,7 @@ pkg.TextField = Class(pkg.Label, [
 
         this.focusGained = function (e){
             if (this.position.offset < 0) {
-                this.position.setOffset(this.textAlign === zebkit.layout.LEFT  || this.getLines() > 1 ? 0 : this.getMaxOffset());
+                this.position.setOffset(this.textAlign === "left" || this.getLines() > 1 ? 0 : this.getMaxOffset());
             }
             else {
                 if (this.hint != null) this.repaint();
@@ -20963,7 +21142,7 @@ pkg.TextField = Class(pkg.Label, [
 
         this.pageSize = function (){
             var height = this.height - this.getTop() - this.getBottom(),
-                indent = this.view.getLineIndent(),
+                indent = this.view.lineIndent,
                 textHeight = this.view.getLineHeight();
 
             return (((height + indent) / (textHeight + indent) + 0.5) | 0) +
@@ -21030,7 +21209,7 @@ pkg.TextField = Class(pkg.Label, [
             var tr = this.view,
                 w  = (c > 0) ? (tr.font.stringWidth("W") * c)
                              : this.psWidth,
-                h  = (r > 0) ? (r * tr.getLineHeight() + (r - 1) * tr.getLineIndent())
+                h  = (r > 0) ? (r * tr.getLineHeight() + (r - 1) * tr.lineIndent)
                              : this.psHeight;
             this.setPreferredSize(w, h);
         };
@@ -21051,7 +21230,6 @@ pkg.TextField = Class(pkg.Label, [
             }
         };
 
-
         this.pointerDoubleClicked = function(e){
             if (e.isAction()) {
                 this.select(0, this.getMaxOffset());
@@ -21059,11 +21237,7 @@ pkg.TextField = Class(pkg.Label, [
         };
 
         this.pointerPressed = function(e){
-            console.log("!!!!!!!!!!!!!");
             if (e.isAction()) {
-
-                console.log("IS SHIFT : " + e.shiftKey);
-
                 if (e.shiftKey) {
                     this.startSelection();
                 }
@@ -21105,7 +21279,7 @@ pkg.TextField = Class(pkg.Label, [
             try {
                 g.translate(sx, sy);
 
-                if (this.textAlign === zebkit.layout.LEFT) {
+                if (this.textAlign === "left") {
                     this.view.paint(g, l, t,
                                     this.width  - l - r,
                                     this.height - t - this.getBottom(), this);
@@ -21158,7 +21332,7 @@ pkg.TextField = Class(pkg.Label, [
     function setView(v){
         if (v != this.view) {
             if (this.view != null && this.view.target != null) {
-                this.view.target.unbind(this);
+                if (this.view.target.bind != null) this.view.target.unbind(this);
             }
 
             this.$super(v);
@@ -21170,7 +21344,7 @@ pkg.TextField = Class(pkg.Label, [
             }
 
             if (this.view != null && this.view.target != null) {
-                this.view.target.bind(this);
+                if (this.view.target.bind != null) this.view.target.bind(this);
             }
         }
     },
@@ -22685,7 +22859,7 @@ pkg.Combo = Class(pkg.Panel, [
                  */
                 this.textField = new this.clazz.TextField("",  -1);
                 this.textField.view.target.bind(this);
-                this.add(L.CENTER, this.textField);
+                this.add("center", this.textField);
             }
         ]);
 
@@ -23048,9 +23222,9 @@ pkg.Combo = Class(pkg.Panel, [
 
         this.$super();
 
-        this.add(L.CENTER, editable ? new this.clazz.EditableContentPan()
+        this.add("center", editable ? new this.clazz.EditableContentPan()
                                     : new this.clazz.ReadonlyContentPan());
-        this.add(L.RIGHT, new this.clazz.Button());
+        this.add("right", new this.clazz.Button());
     },
 
     function focused(){
@@ -23790,7 +23964,7 @@ pkg.Window = Class(pkg.StatePan, [
          * @attribute icons
          * @readOnly
          */
-        this.icons = new pkg.Panel(new L.FlowLayout(L.LEFT, L.CENTER, L.HORIZONTAL, 2));
+        this.icons = new pkg.Panel(new L.FlowLayout("left", "center", "horizontal", 2));
         this.icons.add(new this.clazz.Icon());
 
         /**
@@ -23799,11 +23973,11 @@ pkg.Window = Class(pkg.StatePan, [
          * @attribute buttons
          * @readOnly
          */
-        this.buttons = new pkg.Panel(new L.FlowLayout(L.CENTER, L.CENTER));
+        this.buttons = new pkg.Panel(new L.FlowLayout("center", "center"));
 
-        this.caption.add(L.CENTER, this.title);
-        this.caption.add(L.LEFT, this.icons);
-        this.caption.add(L.RIGHT, this.buttons);
+        this.caption.add("center", this.title);
+        this.caption.add("left", this.icons);
+        this.caption.add("right", this.buttons);
 
         /**
          * Window status panel.
@@ -23821,9 +23995,9 @@ pkg.Window = Class(pkg.StatePan, [
         this.setLayout(new L.BorderLayout(2,2));
 
 
-        this.add(L.CENTER, this.root);
-        this.add(L.TOP, this.caption);
-        this.add(L.BOTTOM, this.status);
+        this.add("center", this.root);
+        this.add("top", this.caption);
+        this.add("bottom", this.status);
     },
 
     function fired(src) {
@@ -24716,7 +24890,7 @@ pkg.Menu = Class(pkg.CompList, [
             "Item 3": null
         });
 
-        canvas.root.add(zebkit.layout.BOTTOM, mbar);
+        canvas.root.add("bottom", mbar);
 
  * @class zebkit.ui.Menubar
  * @constructor
@@ -25591,7 +25765,7 @@ pkg.DefViews = Class([
          * @param  {zebkit.ui.grid.Grid} target a target grid component
          * @param  {Integer} row   a grid cell row
          * @param  {Integer} col   a grid cell column
-         * @return {Integer}  a horizontal alignment (zebkit.layout.LEFT, zebkit.layout.CENTER, zebkit.layout.RIGHT)
+         * @return {String}  a horizontal alignment ("left", "center", "right")
          * @method  getXAlignment
          */
 
@@ -25601,7 +25775,7 @@ pkg.DefViews = Class([
           * @param  {zebkit.ui.grid.Grid} target a target grid component
           * @param  {Integer} row   a grid cell row
           * @param  {Integer} col   a grid cell column
-          * @return {Integer}  a vertical alignment (zebkit.layout.TOP, zebkit.layout.CENTER, zebkit.layout.BOTTOM)
+          * @return {String}  a vertical alignment ("top", "center", "bottom")
           * @method  getYAlignment
           */
 
@@ -25876,7 +26050,7 @@ pkg.BaseCaption = Class(ui.Panel, [
             return this.metrics != null     &&
                    this.selectedColRow >= 0 &&
                    this.isResizable         &&
-                   this.metrics.isUsePsMetric === false ? ((this.orient === L.HORIZONTAL) ? Cursor.W_RESIZE
+                   this.metrics.isUsePsMetric === false ? ((this.orient === "horizontal") ? Cursor.W_RESIZE
                                                                                           : Cursor.S_RESIZE)
                                                         : null;
         };
@@ -25888,7 +26062,7 @@ pkg.BaseCaption = Class(ui.Panel, [
          */
         this.pointerDragged = function(e){
             if (this.pxy != null) {
-                var b  = (this.orient === L.HORIZONTAL),
+                var b  = (this.orient === "horizontal"),
                     rc = this.selectedColRow,
                     ns = (b ? this.metrics.getColWidth(rc) + e.x
                             : this.metrics.getRowHeight(rc) + e.y) - this.pxy;
@@ -25914,7 +26088,7 @@ pkg.BaseCaption = Class(ui.Panel, [
                 this.calcRowColAt(e.x, e.y);
 
                 if (this.selectedColRow >= 0) {
-                    this.pxy = (this.orient === L.HORIZONTAL) ? e.x
+                    this.pxy = (this.orient === "horizontal") ? e.x
                                                               : e.y;
                 }
             }
@@ -25958,7 +26132,7 @@ pkg.BaseCaption = Class(ui.Panel, [
                 this.isAutoFit === true     )
             {
                 var size = this.getCaptionPS(this.selectedColRow);
-                if (this.orient === L.HORIZONTAL) {
+                if (this.orient === "horizontal") {
                     this.metrics.setColWidth (this.selectedColRow, size);
                 }
                 else {
@@ -25980,7 +26154,7 @@ pkg.BaseCaption = Class(ui.Panel, [
 
         this.captionResized = function(rowcol, ns) {
             if (ns > this.minSize) {
-                if (this.orient === L.HORIZONTAL) {
+                if (this.orient === "horizontal") {
                     var pw = this.metrics.getColWidth(rowcol);
                     this.metrics.setColWidth(rowcol, ns);
                     this._.captionResized(this, rowcol, pw);
@@ -26026,7 +26200,7 @@ pkg.BaseCaption = Class(ui.Panel, [
             {
                 var m     = this.metrics,
                     cv    = m.getCellsVisibility(),
-                    isHor = (this.orient === L.HORIZONTAL);
+                    isHor = (this.orient === "horizontal");
 
                 if ((isHor && cv.fc != null) || (isHor === false && cv.fr != null)) {
                     var gap  = m.lineSize,
@@ -26051,7 +26225,7 @@ pkg.BaseCaption = Class(ui.Panel, [
                 var v = this.metrics.getCellsVisibility();
                 if (v != null) {
                     var m       = this.metrics,
-                        b       = this.orient === L.HORIZONTAL,
+                        b       = this.orient === "horizontal",
                         startRC = b ? v.fc[0] : v.fr[0],
                         endRC   = b ? v.lc[0] : v.lr[0],
                         xy      = b ? v.fc[1] - this.x - m.lineSize + m.getXOrigin()
@@ -26106,9 +26280,9 @@ pkg.BaseCaption = Class(ui.Panel, [
         if (p == null || zebkit.instanceOf(p, pkg.Metrics)) {
             this.metrics = p;
             if (this.constraints != null) {
-                this.orient = (this.constraints === L.TOP    || this.constraints === "top"   ||
-                               this.constraints === L.BOTTOM || this.constraints === "bottom"  ) ? L.HORIZONTAL
-                                                                                                 : L.VERTICAL;
+                this.orient = (this.constraints === "top"   ||
+                               this.constraints === "bottom"  ) ? "horizontal"
+                                                                : "vertical";
             }
         }
     }
@@ -26128,7 +26302,7 @@ pkg.BaseCaption = Class(ui.Panel, [
  */
 pkg.GridCaption = Class(pkg.BaseCaption, [
     function $prototype() {
-        this.defYAlignment = this.defXAlignment = L.CENTER;
+        this.defYAlignment = this.defXAlignment = "center";
 
         /**
          * Get a grid caption column or row title view
@@ -26161,7 +26335,7 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
             this.psW = this.psH = 0;
             if (this.metrics != null){
                 var m     = this.metrics,
-                    isHor = (this.orient === L.HORIZONTAL),
+                    isHor = (this.orient === "horizontal"),
                     size  = isHor ? m.getGridCols() : m.getGridRows();
 
                 for(var i = 0;i < size; i++) {
@@ -26210,8 +26384,6 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
         };
 
         this.setTitleAlignments = function(rowcol, xa, ya){
-            xa = L.$constraints(xa);
-            ya = L.$constraints(ya);
             var t = this.titles[rowcol];
             if (t == null || t.xa != xa || t.ya != ya) {
                 if (t == null) t = {};
@@ -26233,7 +26405,7 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
 
         this.getCaptionPS = function(rowcol) {
             var  v = this.getTitleView(rowcol);
-            return (v != null) ? (this.orient === L.HORIZONTAL ? v.getPreferredSize().width
+            return (v != null) ? (this.orient === "horizontal" ? v.getPreferredSize().width
                                                                : v.getPreferredSize().height)
                                : 0;
         };
@@ -26243,11 +26415,11 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
         if (this.metrics != null){
             var cv = this.metrics.getCellsVisibility();
 
-            if ((cv.fc != null && cv.lc != null && this.orient === L.HORIZONTAL)||
-                (cv.fr != null && cv.lr != null && this.orient === L.VERTICAL  )   )
+            if ((cv.fc != null && cv.lc != null && this.orient === "horizontal")||
+                (cv.fr != null && cv.lr != null && this.orient === "vertical"  )   )
             {
                 var m      = this.metrics,
-                    isHor  = (this.orient === L.HORIZONTAL),
+                    isHor  = (this.orient === "horizontal"),
                     gap    = m.lineSize,
                     top    = this.getTop(),
                     left   = this.getLeft(),
@@ -26290,12 +26462,12 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
                             ya = t != null && t.ya != null ? t.ya : this.defYAlignment,
                             bg = t == null ? null : t.bg,
                             ps = v.getPreferredSize(),
-                            vx = xa == L.CENTER ? Math.floor((ww - ps.width)/2)
-                                                : (xa === L.RIGHT ? ww - ps.width - ((i==size-1) ? right : 0)
-                                                                  : (i === 0 ? left: 0)),
-                            vy = ya == L.CENTER ? Math.floor((hh - ps.height)/2)
-                                                : (ya === L.BOTTOM ? hh - ps.height - ((i==size-1) ? bottom : 0)
-                                                                   :  (i === 0 ? top: 0));
+                            vx = xa === "center" ? Math.floor((ww - ps.width)/2)
+                                                 : (xa === "right" ? ww - ps.width - ((i==size-1) ? right : 0)
+                                                                   : (i === 0 ? left: 0)),
+                            vy = ya === "center" ? Math.floor((hh - ps.height)/2)
+                                                 : (ya === "bottom" ? hh - ps.height - ((i==size-1) ? bottom : 0)
+                                                                    :  (i === 0 ? top: 0));
 
 
                         if (bg != null) {
@@ -26348,7 +26520,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
             function $prototype() {
                 this.doLayout = function (target) {
                     var m    = target.metrics,
-                        b    = target.orient === L.HORIZONTAL,
+                        b    = target.orient === "horizontal",
                         top  = target.getTop(),
                         left = target.getLeft(),
                         wh   = (b ? target.height - top  - target.getBottom()
@@ -26399,7 +26571,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
          */
         this.TitlePan = Class(ui.Panel, [
             function(title) {
-                this.$super(new L.FlowLayout(L.CENTER, L.CENTER, L.HORIZONTAL, 8));
+                this.$super(new L.FlowLayout("center", "center", "horizontal", 8));
 
                 this.sortState = 0;
 
@@ -26579,8 +26751,8 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
 
         this.getCaptionPS = function(rowcol) {
             var  c = this.kids[rowcol];
-            return (c != null) ? (this.orient == L.HORIZONTAL ? c.getPreferredSize().width
-                                                              : c.getPreferredSize().height)
+            return (c != null) ? (this.orient === "horizontal" ? c.getPreferredSize().width
+                                                               : c.getPreferredSize().height)
                                : 0;
         };
     },
@@ -26678,7 +26850,7 @@ pkg.RowSelMode = Class([
         ]);
 
         // add the top caption
-        grid.add(zebkit.layout.TOP, new zebkit.ui.grid.GridCaption([
+        grid.add("top", new zebkit.ui.grid.GridCaption([
             "Caption title 1", "Caption title 2", "Caption title 3"
         ]));
 
@@ -26774,19 +26946,19 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
 
             /**
              * Default cell content horizontal alignment
-             * @type {Integer}
+             * @type {String}
              * @attribute defXAlignment
-             * @default zebkit.layout.LEFT
+             * @default "left"
              */
-            this.defXAlignment = L.LEFT;
+            this.defXAlignment = "left";
 
             /**
              * Default cell content vertical alignment
-             * @type {Integer}
+             * @type {String}
              * @attribute defYAlignment
-             * @default zebkit.layout.CENTER
+             * @default "center"
              */
-            this.defYAlignment = L.CENTER;
+            this.defYAlignment = "center";
 
             /**
              * Indicate if vertical lines have to be rendered
@@ -26868,8 +27040,8 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
 
             this.setDefCellAlignments = function(ax, ay) {
                 if (this.defXAlignment != ax || this.defYAlignment != ay) {
-                    this.defXAlignment = L.$constraints(ax);
-                    this.defYAlignment = L.$constraints(ay);
+                    this.defXAlignment = ax;
+                    this.defYAlignment = ay;
                     this.repaint();
                 }
             };
@@ -27772,18 +27944,18 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                             xx = x,
                                             yy = y,
                                             id = -1,
-                                            ps = (ax !== L.NONE || ay !== L.NONE) ? v.getPreferredSize()
-                                                                                  : null;
+                                            ps = (ax != null || ay != null) ? v.getPreferredSize(vw, vh)
+                                                                            : null;
 
-                                        if (ax !== L.NONE){
-                                            xx = x + ((ax === L.CENTER) ? ~~((w - ps.width) / 2)
-                                                                        : ((ax === L.RIGHT) ? w - ps.width : 0));
+                                        if (ax != null) {
+                                            xx = x + ((ax === "center") ? ~~((w - ps.width) / 2)
+                                                                        : ((ax === "right") ? w - ps.width : 0));
                                             vw = ps.width;
                                         }
 
-                                        if (ay !== L.NONE){
-                                            yy = y + ((ay === L.CENTER) ? ~~((h - ps.height) / 2)
-                                                                        : ((ay === L.BOTTOM) ? h - ps.height : 0));
+                                        if (ay != null) {
+                                            yy = y + ((ay === "center") ? ~~((h - ps.height) / 2)
+                                                                        : ((ay === "bottom") ? h - ps.height : 0));
                                             vh = ps.height;
                                         }
 
@@ -27793,7 +27965,6 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                                         }
 
                                         v.paint(g, xx, yy, vw, vh, this);
-
                                         if (id >= 0) {
                                            g.restore();
                                         }
@@ -28309,7 +28480,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
                             ui.showModalWindow(this, editor, this);
                         }
                         else {
-                            this.add(L.TEMPORARY, editor);
+                            this.add("editor", editor);
                             this.repaintRows(this.editingRow, this.editingRow);
                         }
                         ui.focusManager.requestFocus(editor);
@@ -28415,7 +28586,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
 
             this.$super();
 
-            this.add(L.NONE, new this.clazz.CornerPan());
+            this.add("corner", new this.clazz.CornerPan());
             this.setModel(model);
             this.setViewProvider(new pkg.DefViews());
             this.setPosition(new Position(this));
@@ -28433,21 +28604,20 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
             this.iRowVisibility(0);
         },
 
-        function kidAdded(index,ctr,c){
-            ctr = L.$constraints(ctr);
+        function kidAdded(index, ctr, c){
             this.$super(index, ctr, c);
 
-            if ((ctr == null && this.topCaption == null) || L.TOP === ctr){
+            if ((ctr == null && this.topCaption == null) || "top" === ctr){
                 this.topCaption = c;
             }
             else {
-                if (L.TEMPORARY === ctr) this.editor = c;
+                if ("editor" === ctr) this.editor = c;
                 else {
-                    if ((ctr == null && this.leftCaption == null) || L.LEFT === ctr) {
+                    if ((ctr == null && this.leftCaption == null) || "left" === ctr) {
                         this.leftCaption = c;
                     }
                     else {
-                        if ((ctr == null && this.stub == null) || L.NONE === ctr) {
+                        if ((ctr == null && this.stub == null) || "corner" === ctr) {
                             this.stub = c;
                         }
                     }
@@ -30934,18 +31104,18 @@ pkg.HtmlLink = Class(pkg.HtmlElement, [
  * @main
  */
 
-var L = zebkit.layout, Cursor = ui.Cursor, KeyEvent = ui.KeyEvent, CURSORS = [];
+var Cursor = ui.Cursor, KeyEvent = ui.KeyEvent, CURSORS = {};
 
-CURSORS[L.LEFT  ] = Cursor.W_RESIZE;
-CURSORS[L.RIGHT ] = Cursor.E_RESIZE;
-CURSORS[L.TOP   ] = Cursor.N_RESIZE;
-CURSORS[L.BOTTOM] = Cursor.S_RESIZE;
-CURSORS[L.TopLeft ]    = Cursor.NW_RESIZE;
-CURSORS[L.TopRight]    = Cursor.NE_RESIZE;
-CURSORS[L.BottomLeft ] = Cursor.SW_RESIZE;
-CURSORS[L.BottomRight] = Cursor.SE_RESIZE;
-CURSORS[L.CENTER] = Cursor.MOVE;
-CURSORS[L.NONE  ] = Cursor.DEFAULT;
+CURSORS["left"  ]      = Cursor.W_RESIZE;
+CURSORS["right" ]      = Cursor.E_RESIZE;
+CURSORS["top"   ]      = Cursor.N_RESIZE;
+CURSORS["bottom"]      = Cursor.S_RESIZE;
+CURSORS["topLeft" ]    = Cursor.NW_RESIZE;
+CURSORS["topRight"]    = Cursor.NE_RESIZE;
+CURSORS["bottomLeft" ] = Cursor.SW_RESIZE;
+CURSORS["bottomRight"] = Cursor.SE_RESIZE;
+CURSORS["center"]      = Cursor.MOVE;
+CURSORS["none"  ]      = Cursor.DEFAULT;
 
 pkg.ShaperBorder = Class(ui.View, [
     function $prototype() {
@@ -30996,23 +31166,25 @@ pkg.ShaperBorder = Class(ui.View, [
                 w    = target.width,
                 h    = target.height;
 
-            if (contains(x, y, gap, gap, w - gap2, h - gap2)) return L.CENTER;
-            if (contains(x, y, 0, 0, gap, gap))               return L.TopLeft;
-            if (contains(x, y, 0, h - gap, gap, gap))         return L.BottomLeft;
+            if (contains(x, y, gap, gap, w - gap2, h - gap2)) return "center";
 
-            if (contains(x, y, w - gap, 0, gap, gap)) {
-                return L.TopRight;
-            }
+            if (contains(x, y, 0, 0, gap, gap))               return "topLeft";
 
-            if (contains(x, y, w - gap, h - gap, gap, gap)) return L.BottomRight;
+            if (contains(x, y, 0, h - gap, gap, gap))         return "bottomLeft";
+
+            if (contains(x, y, w - gap, 0, gap, gap)) return "topRight";
+
+            if (contains(x, y, w - gap, h - gap, gap, gap)) return "bottomRight";
 
             var mx = Math.floor((w - gap)/2);
-            if (contains(x, y, mx, 0, gap, gap))        return L.TOP;
-            if (contains(x, y, mx, h - gap, gap, gap))  return L.BOTTOM;
+            if (contains(x, y, mx, 0, gap, gap))        return "top";
+
+            if (contains(x, y, mx, h - gap, gap, gap))  return "bottom";
 
             var my = Math.floor((h - gap)/2);
-            if (contains(x, y, 0, my, gap, gap)) return L.LEFT;
-            return contains(x, y, w - gap, my, gap, gap) ? L.RIGHT : L.NONE;
+            if (contains(x, y, 0, my, gap, gap)) return "left";
+
+            return contains(x, y, w - gap, my, gap, gap) ? "right" : "none";
         };
     }
 ]);
@@ -31134,13 +31306,13 @@ pkg.ShaperPan = Class(ui.Panel, [
             this.state = null;
             if (this.isResizeEnabled || this.isMoveEnabled) {
                 var t = this.shaperBr.detectAt(this, e.x, e.y);
-                if ((this.isMoveEnabled   === true || t != L.CENTER)||
-                    (this.isResizeEnabled === true || t == L.CENTER)  )
+                if ((this.isMoveEnabled   === true || t !== "center")||
+                    (this.isResizeEnabled === true || t === "center")  )
                 {
-                    this.state = { top    : ((t & L.TOP   ) > 0 ? 1 : 0),
-                                   left   : ((t & L.LEFT  ) > 0 ? 1 : 0),
-                                   right  : ((t & L.RIGHT ) > 0 ? 1 : 0),
-                                   bottom : ((t & L.BOTTOM) > 0 ? 1 : 0) };
+                    this.state = { top    : (t === "top"    || t === "topLeft"     || t === "topRight"   ) ? 1 : 0,
+                                   left   : (t === "left"   || t === "topLeft"     || t === "bottomLeft" ) ? 1 : 0,
+                                   right  : (t === "right"  || t === "topRight"    || t === "bottomRight") ? 1 : 0,
+                                   bottom : (t === "bottom" || t === "bottomRight" || t === "bottomLeft" ) ? 1 : 0 };
 
                     if (this.state != null) {
                         this.px = e.absX;
@@ -31186,7 +31358,7 @@ pkg.ShaperPan = Class(ui.Panel, [
     },
 
     function (t){
-        this.$super(new L.BorderLayout());
+        this.$super(new zebkit.layout.BorderLayout());
         this.px = this.py = 0;
         this.shaperBr = new pkg.ShaperBorder();
         this.colors   = [ "lightGray", "blue" ];
@@ -31205,7 +31377,7 @@ pkg.ShaperPan = Class(ui.Panel, [
         this.setBounds(d.x - left, d.y - top,
                        d.width + left + this.getRight(),
                        d.height + top + this.getBottom());
-        this.$super(i, L.CENTER, d);
+        this.$super(i, "center", d);
     },
 
     function focused(){

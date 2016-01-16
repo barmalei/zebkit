@@ -69,19 +69,19 @@
 		if (document.getElementById("doc.paint") != null) {
     		var c = new zCanvas("doc.paint");
     		c.root.setLayout(new BorderLayout());
-    		c.root.add(CENTER, new PaintComponent());
+    		c.root.add("center", new PaintComponent());
     	}
 
     	if (document.getElementById("doc.update") != null) {
     		var c = new zCanvas("doc.update");
     		c.root.setLayout(new BorderLayout());
-    		c.root.add(CENTER, new UpdateComponent());
+    		c.root.add("center", new UpdateComponent());
     	}
 
     	if (document.getElementById("doc.paintOnTop") != null) {
 	    	var c = new zCanvas("doc.paintOnTop");
 	    	c.root.setLayout(new BorderLayout());
-	    	c.root.add(CENTER, new PaintOnTopComponent());
+	    	c.root.add("center", new PaintOnTopComponent());
 	    }
 
     	if (document.getElementById("doc.repaint") != null) {

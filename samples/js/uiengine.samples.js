@@ -73,6 +73,7 @@ pkg.EditablePan = Class(Panel, [
         this.color = color;
         this.showCursor = false;
         this.ch = '';
+        this.canHaveFocus = true;
         this.font = new Font("Arial", "bold", 32);
         this.$super();
     },
@@ -113,10 +114,6 @@ pkg.EditablePan = Class(Panel, [
     function run(t) {
         this.showCursor = !this.showCursor;
         this.repaint();
-    },
-
-    function canHaveFocus() {
-        return true;
     }
 ]);
 
@@ -211,17 +208,17 @@ pkg.Components = Class(Panel, [
         var constr = new Constraints(), col = "#DDEEEE", constr2 = new Constraints();
         constr.setPadding(4);
         constr2.setPadding(4);
-        constr2.ax = LEFT ;
-        constr2.ay = TOP;
+        constr2.ax = "left" ;
+        constr2.ay = "top";
 
         this.properties({
             layout: new BorderLayout(6,6),
             kids  : {
-                TOP   : makePanel(rgb.gray, rgb.white, "TOP"),
-                CENTER: makePanel(rgb.gray, rgb.white, "").properties({
-                    layout : new FlowLayout(CENTER, CENTER),
+                top   : makePanel(rgb.gray, rgb.white, "top"),
+                center: makePanel(rgb.gray, rgb.white, "").properties({
+                    layout : new FlowLayout("center", "center"),
                     kids: [ new Panel().properties({
-                        layout : new ListLayout(STRETCH, 2),
+                        layout : new ListLayout("stretch", 2),
                         padding: 4,
                         kids   : [
                             makePanel(rgb.black, rgb.black, "Item 1"),
@@ -242,9 +239,9 @@ pkg.Components = Class(Panel, [
                         ]
                     })]
                 }),
-                LEFT  :  makePanel(rgb.gray, rgb.white, "L"),
-                RIGHT :  makePanel(rgb.gray, rgb.white, "R"),
-                BOTTOM:  makePanel(rgb.gray, rgb.white, "BOTTOM")
+                left  :  makePanel(rgb.gray, rgb.white, "left"),
+                right :  makePanel(rgb.gray, rgb.white, "right"),
+                bottom:  makePanel(rgb.gray, rgb.white, "bottom")
             }
         });
     },
@@ -399,14 +396,14 @@ pkg.SimpleChart = Class(Panel, [
     }
 ]);
 
-pkg.CustomLayer = Class(HtmlCanvas, [
+pkg.CustomLayer = Class(CanvasLayer, [
     function() {
         this.$super();
         this.id = "CUSTOM";
         this.setLayout(new StackLayout());
 
         var $this = this, font = new Font("Arial", "bold", 24);
-        this.add(USE_PS_SIZE, new Panel([
+        this.add("usePsSize", new Panel([
             function paint(g) {
                 if ($this.bg != null) {
                     var s = "ALT-D to enable", l = font.stringWidth(s);
@@ -424,16 +421,32 @@ pkg.CustomLayer = Class(HtmlCanvas, [
     },
 
     function $prototype() {
+        this.activeComp = null;
+
         this.isLayerActiveAt = function(x, y) {
             return this.bg != null;
         };
 
         this.layerKeyPressed = function(e){
+            console.log("e.ch = " + e.ch);
+
             if (e.code == 68 && e.altKey) {
                 if (this.bg == null ) this.setBackground("rgba(255, 255, 255, 0.5)");
                 else                  this.setBackground(null);
-                this.activate(this.bg != null);
+              //  this.activate(this.bg != null);
                 this.kids[0].setBackground(this.bg ? "rgba(180,180,180, 0.9)" : null);
+
+                var focusManager = zebkit.ui.focusManager;
+                if (this.bg != null) {
+                    this.activeComp = focusManager.focusOwner;
+                    focusManager.requestFocus(null);
+                }
+                else {
+                    focusManager.requestFocus(this.activeComp);
+                    this.activeComp = null;
+                }
+
+                e.eatMe = true;
             }
             return this.bg != null;
         };

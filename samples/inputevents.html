@@ -29,9 +29,9 @@
                 var kid3 = new Panel({ border: new Border("green"), preferredSize:[100, 70]});
 
                 var myComp = new MyComponent();
-                myComp.setLayout(new FlowLayout(CENTER, CENTER, HORIZONTAL, 8));
+                myComp.setLayout(new FlowLayout("center", "center", "horizontal", 8));
 
-                canvas.root.add(CENTER, myComp);
+                canvas.root.add("center", myComp);
                 myComp.add(kid1);
                 myComp.add(kid2);
                 myComp.add(kid3);
@@ -56,11 +56,11 @@
                 var canvas = new zCanvas("doc.event.mpressed");
                 canvas.root.setPadding(8);
                 canvas.root.setBorder("plain");
-                canvas.root.setLayout(new FlowLayout(CENTER, CENTER, VERTICAL, 8));
+                canvas.root.setLayout(new FlowLayout("center", "center", "vertical", 8));
                 canvas.root.setBackground("#EAEAEA");
 
 
-                canvas.root.add(CENTER, p);
+                canvas.root.add("center", p);
             }
 
             if (document.getElementById("doc.event.composite")!=null) {
@@ -124,8 +124,8 @@
                 var c = new zCanvas("doc.event.composite2");
                 c.root.setBorder(new Border("black"));
                 c.root.setLayout(new BorderLayout());
-                composite.setLayout(new FlowLayout(CENTER, CENTER, VERTICAL, 16));
-                c.root.add(CENTER, composite);
+                composite.setLayout(new FlowLayout("center", "center", "vertical", 16));
+                c.root.add("center", composite);
 
                 var p1 = new Label("Event transparent children component");
                 p1.setBorder(new Border("red", 2));

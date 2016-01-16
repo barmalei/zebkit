@@ -14,7 +14,7 @@
 			    	border : new Border(),
 			    	padding: 8,
 			    	kids: {
-			    		CENTER: new BorderPan("Designer panel", new Panel({
+			    		center: new BorderPan("Designer panel", new Panel({
 			    			padding: 6,
 			    			kids: [
 			    				new zebkit.ui.designer.ShaperPan(new Checkbox("Check-box").properties({
@@ -35,7 +35,7 @@
 			    			]
 			    		})),
 
-			    		BOTTOM: new Button("Align", [
+			    		bottom: new Button("Align", [
 			    			function fire() {
 			    				this.$super();
 			    				var y = 10, c = root.findAll("//zebkit.ui.designer.ShaperPan");

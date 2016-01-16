@@ -20,7 +20,7 @@ var CardLayout = new Class(Layout, [
 
 
 function createTooltipDemo() {
-    var  p = new Panel(new FlowLayout(CENTER, CENTER, VERTICAL, 16));
+    var  p = new Panel(new FlowLayout("center", "center", "vertical", 16));
     var ccc = "black";
     var f = new Font("Helvetica", "bold", 16);
     var l1 = pkg.createLabel("HONDA\nShow textual\ntooltip", ccc, f);
@@ -38,7 +38,7 @@ function createTooltipDemo() {
     t1.setBackground("#E0F4FF");
     l1.tooltip = t1;
 
-    var pp = new Panel(new FlowLayout(CENTER, CENTER, HORIZONTAL, 2));
+    var pp = new Panel(new FlowLayout("center", "center", "horizontal", 2));
     var img = new ImagePan(ui.demo.bmw);
     var ll = new Label(new zebkit.data.Text("BMW is the best.\nAudi looks similar.\nBeware of imitation :)"));
     ll.setColor("#3366CC");
@@ -54,7 +54,7 @@ function createTooltipDemo() {
     ]);
     grid.setBackground("rgba(224, 244, 255, 0.7)");
     grid.setUsePsMetric(true);
-    grid.add(TOP, new GridCaption(["Product", "Picture", "Max speed"]));
+    grid.add("top", new GridCaption(["Product", "Picture", "Max speed"]));
     grid.setViewProvider(new DefViews([
         function getView(target, row, col, data) {
             if (col == 0 || col == 2) {
@@ -88,14 +88,14 @@ function createWindowComp(target) {
     tf.setValue("Drag and drop window\nby its title.\n\nResize window by\ndrag its right-bottom corner");
 
     var center = new Panel(new BorderLayout(4));
-    center.add(CENTER, tf);
-    center.add(TOP, new Combo(["Combo item 1", "Combo item 2", "Combo item 3"]));
+    center.add("center", tf);
+    center.add("top", new Combo(["Combo item 1", "Combo item 2", "Combo item 3"]));
     center.setPadding(8);
 
-    w.root.add(CENTER, center);
+    w.root.add("center", center);
     w.root.setPadding(0);
 
-    var p = new Panel(new FlowLayout(CENTER, CENTER));
+    var p = new Panel(new FlowLayout("center", "center"));
     var b = new Button("Close");
     b.setPadding(4,16,4,16);
 
@@ -109,12 +109,12 @@ function createWindowComp(target) {
     // p.setPadding(8);
     p.add(b);
 
-    w.root.add(BOTTOM, p);
+    w.root.add("bottom", p);
 
     b.bind(function(src, id, data) { target.hideWin(); });
 
 
-    w.root.add(TOP, new Menubar({
+    w.root.add("top", new Menubar({
         "MenuItem 1": [
             "Item 1.1", "-", "[x]Item 1.2", "[]Item 1.3"
         ],
@@ -138,9 +138,9 @@ pkg.WinDemo = new Class(pkg.DemoPan,  [
         this.shown = false;
         this.setLayout(new BorderLayout(8,8));
         this.setPadding(8);
-        this.add(LEFT, pkg.createBorderPan("Tooltips", createTooltipDemo()));
+        this.add("left", pkg.createBorderPan("Tooltips", createTooltipDemo()));
 
-        var cp = new Panel(new FlowLayout(CENTER, CENTER, VERTICAL, 8));
+        var cp = new Panel(new FlowLayout("center", "center", "vertical", 8));
         this.wp = new Panel(new CardLayout());
 
         this.ab = new Button("PRESS TO ACTIVATE WINDOW");
@@ -151,7 +151,7 @@ pkg.WinDemo = new Class(pkg.DemoPan,  [
         this.wp.add(this.w);
         this.wp.add(this.ab);
         cp.add(this.wp);
-        this.add(CENTER, new BorderPan("Window", cp));
+        this.add("center", new BorderPan("Window", cp));
 
         var $t = this;
         this.ab.bind(function actionPerformed(src, id, data) { $t.showWin(); });

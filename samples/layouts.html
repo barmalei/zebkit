@@ -3,7 +3,7 @@
 	<head>
     <title>Tutorial</title>
 
-<script src='../zebkit.min.js' type='text/javascript'></script>
+<script src='../zebkit.js' type='text/javascript'></script>
 
 <script type='text/javascript'>
       zebkit.ready(function() {
@@ -123,7 +123,7 @@
         var c = new zebkit.ui.zCanvas("doc.layout.percent2");
         var r = c.root;
         r.setBorder(zebkit.ui.borders.plain);
-        r.setLayout(new zebkit.layout.PercentLayout(zebkit.layout.HORIZONTAL, 2, false));
+        r.setLayout(new zebkit.layout.PercentLayout("horizontal", 2, false));
 
         r.add(20, new zebkit.ui.Button("20%"));
         r.add(30, new zebkit.ui.Button("30%"));
@@ -135,7 +135,7 @@
         var c = new zebkit.ui.zCanvas("doc.layout.percent3");
         var r = c.root;
         r.setBorder(zebkit.ui.borders.plain);
-        r.setLayout(new zebkit.layout.PercentLayout(zebkit.layout.VERTICAL, 2, false));
+        r.setLayout(new zebkit.layout.PercentLayout("vertical", 2, false));
 
         r.add(20, new zebkit.ui.Button("20%"));
         r.add(30, new zebkit.ui.Button("30%"));
@@ -147,7 +147,7 @@
         var c = new zebkit.ui.zCanvas("doc.layout.percent4");
         var r = c.root;
         r.setBorder(zebkit.ui.borders.plain);
-        r.setLayout(new zebkit.layout.PercentLayout(zebkit.layout.VERTICAL, 2, true));
+        r.setLayout(new zebkit.layout.PercentLayout("vertical", 2, true));
 
         r.add(20, new zebkit.ui.Button("20%"));
         r.add(30, new zebkit.ui.Button("30%"));
@@ -159,7 +159,7 @@
         var c = new zebkit.ui.zCanvas("doc.layout.flow1");
         var r = c.root;
         r.setBorder(zebkit.ui.borders.plain);
-        r.setLayout(new zebkit.layout.FlowLayout("center", "center", zebkit.layout.VERTICAL, 2));
+        r.setLayout(new zebkit.layout.FlowLayout("center", "center", "vertical", 2));
 
         r.add(new zebkit.ui.Button("VCentered"));
         r.add(new zebkit.ui.Button("VCentered"));
@@ -171,7 +171,7 @@
         var c = new zebkit.ui.zCanvas("doc.layout.flow2");
         var r = c.root;
         r.setBorder(zebkit.ui.borders.plain);
-        r.setLayout(new zebkit.layout.FlowLayout("center", "center", zebkit.layout.HORIZONTAL, 2));
+        r.setLayout(new zebkit.layout.FlowLayout("center", "center", "horizontal", 2));
 
 
         r.add(new zebkit.ui.Button("HCentered"));
@@ -184,7 +184,7 @@
         var c = new zebkit.ui.zCanvas("doc.layout.flow3");
         var r = c.root;
         r.setBorder(zebkit.ui.borders.plain);
-        r.setLayout(new zebkit.layout.FlowLayout("left", "center", zebkit.layout.HORIZONTAL, 2));
+        r.setLayout(new zebkit.layout.FlowLayout("left", "center", "horizontal", 2));
 
 
         r.add(new zebkit.ui.Button("Left-Center-Hor"));
@@ -197,7 +197,7 @@
         var c = new zebkit.ui.zCanvas("doc.layout.flow4");
         var r = c.root;
         r.setBorder(zebkit.ui.borders.plain);
-        r.setLayout(new zebkit.layout.FlowLayout("right", "center", zebkit.layout.HORIZONTAL, 2));
+        r.setLayout(new zebkit.layout.FlowLayout("right", "center", "horizontal", 2));
 
 
         r.add(new zebkit.ui.Button("Right-Center-Hor"));
@@ -211,7 +211,7 @@
         var c = new zebkit.ui.zCanvas("doc.layout.flow5");
         var r = c.root;
         r.setBorder(zebkit.ui.borders.plain);
-        r.setLayout(new zebkit.layout.FlowLayout("right", "top", zebkit.layout.HORIZONTAL, 2));
+        r.setLayout(new zebkit.layout.FlowLayout("right", "top", "horizontal", 2));
 
 
         r.add(new zebkit.ui.Button("Right-Top-Hor"));
@@ -224,7 +224,7 @@
         var c = new zebkit.ui.zCanvas("doc.layout.flow6");
         var r = c.root;
         r.setBorder(zebkit.ui.borders.plain);
-        r.setLayout(new zebkit.layout.FlowLayout("left", "top", zebkit.layout.HORIZONTAL, 2));
+        r.setLayout(new zebkit.layout.FlowLayout("left", "top", "horizontal", 2));
 
 
         r.add(new zebkit.ui.Button("Left-Top-Hor"));
@@ -237,7 +237,7 @@
         var c = new zebkit.ui.zCanvas("doc.layout.flow7");
         var r = c.root;
         r.setBorder(zebkit.ui.borders.plain);
-        r.setLayout(new zebkit.layout.FlowLayout("left", "top", zebkit.layout.VERTICAL, 2));
+        r.setLayout(new zebkit.layout.FlowLayout("left", "top", "vertical", 2));
 
 
         r.add(new zebkit.ui.Button("Left-Top-Ver"));
@@ -250,7 +250,7 @@
         var c = new zebkit.ui.zCanvas("doc.layout.flow8");
         var r = c.root;
         r.setBorder(zebkit.ui.borders.plain);
-        r.setLayout(new zebkit.layout.FlowLayout("right", "top", zebkit.layout.VERTICAL, 2));
+        r.setLayout(new zebkit.layout.FlowLayout("right", "top", "vertical", 2));
 
 
         r.add(new zebkit.ui.Button("Right-Top-Ver"));
@@ -263,7 +263,7 @@
         var c = new zebkit.ui.zCanvas("doc.layout.flow9");
         var r = c.root;
         r.setBorder(zebkit.ui.borders.plain);
-        r.setLayout(new zebkit.layout.FlowLayout("right", "bottom", zebkit.layout.VERTICAL, 2));
+        r.setLayout(new zebkit.layout.FlowLayout("right", "bottom", "vertical", 2));
 
 
         r.add(new zebkit.ui.Button("Right-Bottom-Ver"));
@@ -306,7 +306,7 @@
         var c = new zebkit.ui.zCanvas("doc.layout.raster2");
         var r = c.root;
         r.setBorder(zebkit.ui.borders.plain);
-        r.setLayout(new zebkit.layout.RasterLayout(zebkit.layout.USE_PS_SIZE));
+        r.setLayout(new zebkit.layout.RasterLayout(true));
 
         var b = new zebkit.ui.Button("(10,10) Preferred Sized");
         b.setLocation(10,10);
@@ -322,7 +322,7 @@
         var c = new zebkit.ui.zCanvas("doc.layout.raster3");
         var r = c.root;
         r.setBorder(zebkit.ui.borders.plain);
-        r.setLayout(new zebkit.layout.RasterLayout(zebkit.layout.USE_PS_SIZE));
+        r.setLayout(new zebkit.layout.RasterLayout(true));
 
         var b = new zebkit.ui.Button("(10,10) Preferred Sized ");
         b.setLocation(10,10);
@@ -391,7 +391,7 @@
         //ctr.setPadding(8);
 
         r.setBorder(zebkit.ui.borders.plain);
-        r.setLayout(new zebkit.layout.GridLayout(2,2, zebkit.layout.VERTICAL | zebkit.layout.HORIZONTAL));
+        r.setLayout(new zebkit.layout.GridLayout(2,2, true, true));
 
         r.add(ctr, new zebkit.ui.Button("1x1"));
         r.add(ctr, new zebkit.ui.Button("1x2"));
@@ -407,7 +407,7 @@
         //ctr.setPadding(8);
 
         r.setBorder(zebkit.ui.borders.plain);
-        r.setLayout(new zebkit.layout.GridLayout(2,2, zebkit.layout.VERTICAL | zebkit.layout.HORIZONTAL));
+        r.setLayout(new zebkit.layout.GridLayout(2,2, true, true));
 
         r.add(ctr, new zebkit.ui.Button("1x1"));
         r.add(ctr, new zebkit.ui.Button("1x2"));

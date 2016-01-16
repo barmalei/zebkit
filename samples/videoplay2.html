@@ -16,14 +16,14 @@
 			    	padding  : 6,
 			    	border   : new Border(null, 2, 8),
 			    	kids     : {
-			    		TOP   : new Label("Two video in zebkit layout").properties({
+			    		top   : new Label("Two video in zebkit layout").properties({
 			    			padding   : 6,
 			    			font      : new Font("Arial", "bold", 16),
 			    			background: "#ECEDED",
 			    			border    : new Border(null, 2, 8)
 			    		}),
-			    		CENTER: new ScrollPan((new Panel()).properties({
-			    				    layout: new FlowLayout(CENTER, CENTER, VERTICAL, 8),
+			    		center: new ScrollPan((new Panel()).properties({
+			    				    layout: new FlowLayout("center", "center", "vertical", 8),
 			    				    kids  :	[
 			    				        new BorderPan("Video 1", new VideoPan("http://mirror.cessen.com/blender.org/peach/trailer/trailer_iphone.m4v")),
 			    		   	   			new BorderPan("Video 2", new VideoPan("http://html5doctor.com/demos/video-canvas-magic/video.webm"))

@@ -275,8 +275,8 @@ pkg.Bag = Class(zebkit.util.Bag, [
         this.globalPropertyLookup = this.usePropertySetters = true;
 
         this.loadImage = function(path) {
-            if (this.$url != null && zebkit.URL.isAbsolute(path) == false) {
-                var base = (new zebkit.URL(this.$url)).getParentURL();
+            if (this.url != null && zebkit.URL.isAbsolute(path) == false) {
+                var base = (new zebkit.URL(this.url)).getParentURL();
                 path = base.join(path);
             }
             return zebkit.web.$loadImage(path);
@@ -977,7 +977,7 @@ pkg.Panel = Class(L.Layoutable, [
                     h = this.height;
                 }
 
-                // step II: calculate new current dirty area
+                // step II: calculate new actual dirty area
                 if (w > 0 && h > 0) {
                     var r = $cvp(this, temporary);
                     if (r != null) {
@@ -2943,8 +2943,8 @@ pkg.FocusManager = Class(pkg.Manager, [
                 if (cc != null) {
 
                     // TODO: WEB specific code has to be removed moved to another place
-                    if (document.activeElement != cc.getCanvas().$container) {
-                        cc.getCanvas().$container.focus();
+                    if (document.activeElement != cc.getCanvas().element) {
+                        cc.getCanvas().element.focus();
                         this.requestFocus(cc);
                     }
                     else {
@@ -3097,7 +3097,7 @@ pkg.FocusManager = Class(pkg.Manager, [
                 // the problem is a target canvas element get mouse pressed
                 // event earlier than it gets focus what is inconsistent behavior
                 // to fix it a timer is used
-                if (document.activeElement !== e.source.getCanvas().$container) {
+                if (document.activeElement !== e.source.getCanvas().element) {
                     var $this = this;
                     setTimeout(function() {
                         $this.requestFocus(e.source);
@@ -3982,8 +3982,8 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
 
     // TODO: should it renamed back ?
     function requestFocus2() {
-        if (document.activeElement != this.$container) {
-            this.$container.focus();
+        if (document.activeElement != this.element) {
+            this.element.focus();
         }
     }
 ]);

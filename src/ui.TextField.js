@@ -136,10 +136,11 @@ pkg.TextField = Class(pkg.Label, [
                             }
                         }
 
-                        this.endOff = this.startOff = -1; // clear selection
+                        //this.endOff = this.startOff = -1; // clear selection
                         this.remove(start, end - start);
                     }
 
+                    this.endOff = this.startOff = -1; // clear selection
                     this.position.inserted(off, size);
                 }
                 else {
@@ -295,11 +296,10 @@ pkg.TextField = Class(pkg.Label, [
             if (this.isFiltered(e) === false)  {
                 var position    = this.position,
                     col         = position.currentCol,
-                    isShiftDown = e.shiftKey,
                     line        = position.currentLine,
                     foff        = 1;
 
-                if (isShiftDown && (e.ch == KE.CHAR_UNDEFINED || e.ch == null)) {
+                if (e.shiftKey && (e.ch == KE.CHAR_UNDEFINED || e.ch == null)) {
                     this.startSelection();
                 }
 
@@ -309,8 +309,6 @@ pkg.TextField = Class(pkg.Label, [
                     case KE.LEFT : foff *= -1;
                     case KE.RIGHT:
                         if (e.ctrlKey === false && e.metaKey === false) {
-
-                            console.log("TextField.keyPressed() seek " + foff);
                             position.seek(foff);
                         }
                         break;
@@ -344,7 +342,7 @@ pkg.TextField = Class(pkg.Label, [
                     default: return ;
                 }
 
-                if (isShiftDown === false) {
+                if (e.shiftKey === false) {
                     this.clearSelection();
                 }
             }
@@ -720,11 +718,13 @@ pkg.TextField = Class(pkg.Label, [
          * Clear a text selection.
          * @method clearSelection
          */
-        this.clearSelection = function (){
+        this.clearSelection = function() {
             if (this.startOff >= 0){
                 var b = this.hasSelection();
                 this.endOff = this.startOff = -1;
-                if (b) this.repaint();
+                if (b) {
+                    this.repaint();
+                }
             }
         };
 

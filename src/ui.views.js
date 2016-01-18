@@ -1068,7 +1068,6 @@ pkg.BaseTextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
             return false;
         };
 
-        // TODO: probably the method can be removed
         this.getLineHeight = function() {
             return this.font.height;
         };

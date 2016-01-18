@@ -4580,8 +4580,8 @@ pkg.Bag = zebkit.Class([
                         // loaded by an URL than build the full URL as a relative path from
                         // BAG URL
                         var path = d.substring(2, d.length-1).trim();
-                        if (this.$url != null && zebkit.URL.isAbsolute(path) === false) {
-                            var pURL = new zebkit.URL(this.$url).getParentURL();
+                        if (this.url != null && zebkit.URL.isAbsolute(path) === false) {
+                            var pURL = new zebkit.URL(this.url).getParentURL();
                             if (pURL != null) {
                                 path = pURL.join(path);
                             }
@@ -4802,7 +4802,7 @@ pkg.Bag = zebkit.Class([
                         var p = s.toString();
                         p = p + (p.lastIndexOf("?") > 0 ? "&" : "?") + (new Date()).getTime().toString();
 
-                        $this.$url = s.toString();
+                        $this.url = s.toString();
 
                         if (cb == null) {
                             return zebkit.io.GET(p);
@@ -8815,19 +8815,20 @@ pkg.Matrix = Class([
                 this.eatMe = false;
 
                 this.code = (e.which || e.keyCode || 0);
-
-                // FF sets keyCode to zero for some diacritic characters
-                // to fix the problem we have to try get the code from "key" field
-                // of event that stores a character
-                if (this.code === 0 && e.key != null && e.key.length() === 1) {
-                    this.code = e.key.charCodeAt(0);
-                }
-
                 if (this.code === pkg.KeyEvent.ENTER) {
                     this.ch = "\n";
                 }
                 else {
-                    this.ch = e.charCode > 0 && (this.code >= 47 || this.code === 32) ? String.fromCharCode(e.charCode) : 0;
+                    // FF sets keyCode to zero for some diacritic characters
+                    // to fix the problem we have to try get the code from "key" field
+                    // of event that stores a character
+                    if (this.code === 0 && e.key != null && e.key.length() === 1) {
+                        this.code = e.key.charCodeAt(0);
+                        this.ch   = e.key;
+                    }
+                    else {
+                        this.ch = e.charCode > 0 && (this.code >= 47 || this.code === 32) ? String.fromCharCode(e.charCode) : 0;
+                    }
                 }
 
                 this.altKey   = e.altKey;
@@ -8851,19 +8852,46 @@ pkg.Matrix = Class([
 
     pkg.KeyEventUnifier = Class([
         function(element, destination) {
+
+            //   Alt + x  was pressed  (for IE11 consider sequence of execution of "alt" and "x" keys)
+            //   Chrome/Safari/FF  keydown -> keydown -> keypressed
+            // ----------------------------------------------------------------------------------------------------------------------
+            //          |     which   |    keyCode   | charCode |      code        |     key        |   keyIdentifier   |  char
+            // ----------------------------------------------------------------------------------------------------------------------
+            //          |             |              |          |                  |                |                   |
+            //  Chrome  |    unicode/ |    unicode/  |   0      |  undefined       |  undefined     | Mnemonic + Unistr |   No
+            //          |     code    |     code     |          |                  |                |  "Alt" + "U-0058" |
+            //          |   18 + 88   |    18 + 88   |          |                  |                |                   |
+            //----------+-----------------------------------------------------------------------------------------------|------------
+            //          |             |              |          |                  |                |                   |
+            //  IE11    |  unicode/   |  unicode/    |          |                  |                |                   |  Alt => ""
+            //          |   code      |    code      |    0     |   undefined      |   "Alt","x"    |   undefined       |  x => "x"
+            //          |    18, 88   |   18, 88     |          |                  |                |                   |
+            //          |             |              |          |                  |                |                   |
+            //----------+-------------|--------------|----------|------------------|----------------|-------------------|------------
+            //          |   unicode/  |   unicode/   |          |                  |                |                   |
+            //          |   code      |     code     |    0     |  undefined       | undefined      | Mnemonic + Unistr |   No
+            //  Safari  |   18 + 88   |   18 + 88    |          |                  |                |  "Alt" + "U-0058" |
+            //          |             |              |          |                  |                |                   |
+            //----------+-----------------------------------------------------------------------------------------------|------------
+            //          |             |              |          |                  |                |                   |
+            //  FF      |   unicode/  |   unicode/   |    0     |  Mnemonic        | Mnemonic/char  |                   |  No
+            //          |    code     |     code     |          |("AltLeft"+"KeyX")|  "Alt"+"≈"     |   undefined       |
+            //          |  18 + 88    |  18 + 88     |          |                  |                |                   |
+            //
             element.onkeydown = function(e) {
                 KEY_EVENT.$fillWith(e);
-                var code = $keyPressedCode = KEY_EVENT.code, b = destination.$keyPressed(KEY_EVENT);
-
-                if (KEY_EVENT.ch !== 0) {
-                    b = destination.$keyTyped(KEY_EVENT) || b;
-                }
-
+                var code = $keyPressedCode = KEY_EVENT.code;
                 //!!!!
                 // TODO: hard coded constants
                 // Since container of zCanvas catch all events from its children DOM
                 // elements don't prevent the event for the children DOM element
-                if (b === true || (code < 47 && code != 32 && e.target === element)) {
+                if (destination.$keyPressed(KEY_EVENT) === true ||
+                    (code != 13 &&
+                     code < 47  &&
+                     code != 32 &&
+                    e.target === element))
+                {
                     e.preventDefault();
                 }
 
@@ -8878,12 +8906,39 @@ pkg.Matrix = Class([
                 e.stopPropagation();
             };
 
+            //   Alt + x  was pressed  (for IE11 consider sequence of execution of "alt" and "x" keys)
+            // ----------------------------------------------------------------------------------------------------------------------
+            //          |     which   |    keyCode   | charCode |      code        |     key        |   keyIdentifier   |  char
+            // ----------------------------------------------------------------------------------------------------------------------
+            //          |             |              |          |                  |                |                   |
+            //  Chrome  |    unicode/ |    unicode/  |   8776   |  undefined       |  undefined     | Mnemonic + Unistr |   No
+            //          |     code    |     code     |   (≈)    |                  |                |     "U-0058"      |
+            //          |   8776 (≈)  |    8776 (≈)  |          |                  |                |                   |
+            //----------+-----------------------------------------------------------------------------------------------|------------
+            //          |             |              |          |                  |                |                   |
+            //  IE11    |  unicode/   |  unicode/    |          |                  |                |                   |
+            //          |   code      |    code      |  88 (x)  |   undefined      |     "x"        |   undefined       |   "x"
+            //          |    88 (x)   |   88 (x)     |          |                  |                |                   |
+            //          |             |              |          |                  |                |                   |
+            //----------+-------------|--------------|----------|------------------|----------------|-------------------|------------
+            //          |   unicode/  |   unicode/   |          |                  |                |                   |
+            //          |   code      |     code     | 8776 (≈) |  undefined       | undefined      |                   |   No
+            //  Safari  |   8776 (≈)  |   8776 (≈)   |          |                  |                |        ""         |
+            //          |             |              |          |                  |                |                   |
+            //----------+-----------------------------------------------------------------------------------------------|------------
+            //          |             |              |          |                  |                |                   |
+            //  FF      |   unicode/  |    0         |   8776   |  Mnemonic        | Mnemonic/char  |                   |   No
+            //          |    code     |              |   (≈)    |  ("KeyX")        |      "≈"       |   undefined       |
+            //          |  8776 (≈)   |              |          |                  |                |                   |
+            //
             element.onkeypress = function(e) {
                 KEY_EVENT.$fillWith(e);
+
+                var code = KEY_EVENT.code;
                 if (KEY_EVENT.ch === 0) {
                     // wrap with try catch to restore variable
                     try {
-                        if ($keyPressedCode != KEY_EVENT.code) {
+                        if ($keyPressedCode != code) {
                             if (destination.$keyPressed(KEY_EVENT) === true) {
                                 e.preventDefault();
                             }
@@ -8898,7 +8953,7 @@ pkg.Matrix = Class([
                 else {
                     // Since container of zCanvas catch all events from its children DOM
                     // elements don't prevent the event for the children DOM element
-                    if ((e.target === element && KEY_EVENT.code < 47) || destination.$keyTyped(KEY_EVENT) === true) {
+                    if (destination.$keyTyped(KEY_EVENT) === true || (e.target === element && code < 47 && code != 32)) {
                         e.preventDefault();
                     }
                 }
@@ -9186,8 +9241,8 @@ pkg.Bag = Class(zebkit.util.Bag, [
         this.globalPropertyLookup = this.usePropertySetters = true;
 
         this.loadImage = function(path) {
-            if (this.$url != null && zebkit.URL.isAbsolute(path) == false) {
-                var base = (new zebkit.URL(this.$url)).getParentURL();
+            if (this.url != null && zebkit.URL.isAbsolute(path) == false) {
+                var base = (new zebkit.URL(this.url)).getParentURL();
                 path = base.join(path);
             }
             return zebkit.web.$loadImage(path);
@@ -9888,7 +9943,7 @@ pkg.Panel = Class(L.Layoutable, [
                     h = this.height;
                 }
 
-                // step II: calculate new current dirty area
+                // step II: calculate new actual dirty area
                 if (w > 0 && h > 0) {
                     var r = $cvp(this, temporary);
                     if (r != null) {
@@ -11854,8 +11909,8 @@ pkg.FocusManager = Class(pkg.Manager, [
                 if (cc != null) {
 
                     // TODO: WEB specific code has to be removed moved to another place
-                    if (document.activeElement != cc.getCanvas().$container) {
-                        cc.getCanvas().$container.focus();
+                    if (document.activeElement != cc.getCanvas().element) {
+                        cc.getCanvas().element.focus();
                         this.requestFocus(cc);
                     }
                     else {
@@ -12008,7 +12063,7 @@ pkg.FocusManager = Class(pkg.Manager, [
                 // the problem is a target canvas element get mouse pressed
                 // event earlier than it gets focus what is inconsistent behavior
                 // to fix it a timer is used
-                if (document.activeElement !== e.source.getCanvas().$container) {
+                if (document.activeElement !== e.source.getCanvas().element) {
                     var $this = this;
                     setTimeout(function() {
                         $this.requestFocus(e.source);
@@ -12893,8 +12948,8 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
 
     // TODO: should it renamed back ?
     function requestFocus2() {
-        if (document.activeElement != this.$container) {
-            this.$container.focus();
+        if (document.activeElement != this.element) {
+            this.element.focus();
         }
     }
 ]);
@@ -14041,7 +14096,6 @@ pkg.BaseTextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
             return false;
         };
 
-        // TODO: probably the method can be removed
         this.getLineHeight = function() {
             return this.font.height;
         };
@@ -20548,10 +20602,11 @@ pkg.TextField = Class(pkg.Label, [
                             }
                         }
 
-                        this.endOff = this.startOff = -1; // clear selection
+                        //this.endOff = this.startOff = -1; // clear selection
                         this.remove(start, end - start);
                     }
 
+                    this.endOff = this.startOff = -1; // clear selection
                     this.position.inserted(off, size);
                 }
                 else {
@@ -20707,11 +20762,10 @@ pkg.TextField = Class(pkg.Label, [
             if (this.isFiltered(e) === false)  {
                 var position    = this.position,
                     col         = position.currentCol,
-                    isShiftDown = e.shiftKey,
                     line        = position.currentLine,
                     foff        = 1;
 
-                if (isShiftDown && (e.ch == KE.CHAR_UNDEFINED || e.ch == null)) {
+                if (e.shiftKey && (e.ch == KE.CHAR_UNDEFINED || e.ch == null)) {
                     this.startSelection();
                 }
 
@@ -20721,8 +20775,6 @@ pkg.TextField = Class(pkg.Label, [
                     case KE.LEFT : foff *= -1;
                     case KE.RIGHT:
                         if (e.ctrlKey === false && e.metaKey === false) {
-
-                            console.log("TextField.keyPressed() seek " + foff);
                             position.seek(foff);
                         }
                         break;
@@ -20756,7 +20808,7 @@ pkg.TextField = Class(pkg.Label, [
                     default: return ;
                 }
 
-                if (isShiftDown === false) {
+                if (e.shiftKey === false) {
                     this.clearSelection();
                 }
             }
@@ -21132,11 +21184,13 @@ pkg.TextField = Class(pkg.Label, [
          * Clear a text selection.
          * @method clearSelection
          */
-        this.clearSelection = function (){
+        this.clearSelection = function() {
             if (this.startOff >= 0){
                 var b = this.hasSelection();
                 this.endOff = this.startOff = -1;
-                if (b) this.repaint();
+                if (b) {
+                    this.repaint();
+                }
             }
         };
 
@@ -23699,7 +23753,7 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
                 this.topModalIndex--;
             }
             else {
-                if (this.topModalIndex == ci){
+                if (this.topModalIndex === ci){
                     for(this.topModalIndex = this.kids.length - 1;this.topModalIndex >= 0; this.topModalIndex--){
                         if (this.winsTypes[this.winsStack[this.topModalIndex]] === "modal") {
                             break;
@@ -24120,6 +24174,8 @@ pkg.HtmlWinCanvas = Class(pkg.HtmlCanvas, [
 
         this.setLayout(new L.BorderLayout());
         this.add("center", target);
+
+        this.setStyle("box-shadow", "10px 10px 5px #888888");
     }
 ]);
 

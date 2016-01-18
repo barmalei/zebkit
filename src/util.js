@@ -1418,8 +1418,8 @@ pkg.Bag = zebkit.Class([
                         // loaded by an URL than build the full URL as a relative path from
                         // BAG URL
                         var path = d.substring(2, d.length-1).trim();
-                        if (this.$url != null && zebkit.URL.isAbsolute(path) === false) {
-                            var pURL = new zebkit.URL(this.$url).getParentURL();
+                        if (this.url != null && zebkit.URL.isAbsolute(path) === false) {
+                            var pURL = new zebkit.URL(this.url).getParentURL();
                             if (pURL != null) {
                                 path = pURL.join(path);
                             }
@@ -1640,7 +1640,7 @@ pkg.Bag = zebkit.Class([
                         var p = s.toString();
                         p = p + (p.lastIndexOf("?") > 0 ? "&" : "?") + (new Date()).getTime().toString();
 
-                        $this.$url = s.toString();
+                        $this.url = s.toString();
 
                         if (cb == null) {
                             return zebkit.io.GET(p);

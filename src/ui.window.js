@@ -415,7 +415,7 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
                 this.topModalIndex--;
             }
             else {
-                if (this.topModalIndex == ci){
+                if (this.topModalIndex === ci){
                     for(this.topModalIndex = this.kids.length - 1;this.topModalIndex >= 0; this.topModalIndex--){
                         if (this.winsTypes[this.winsStack[this.topModalIndex]] === "modal") {
                             break;
@@ -836,6 +836,8 @@ pkg.HtmlWinCanvas = Class(pkg.HtmlCanvas, [
 
         this.setLayout(new L.BorderLayout());
         this.add("center", target);
+
+        this.setStyle("box-shadow", "10px 10px 5px #888888");
     }
 ]);
 

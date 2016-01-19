@@ -134,10 +134,11 @@ pkg.TextField = Class(pkg.Label, [
                             }
                         }
 
-                        this.endOff = this.startOff = -1; // clear selection
+
                         this.remove(start, end - start);
                     }
 
+                    this.endOff = this.startOff = -1; // clear selection
                     this.position.inserted(off, size);
                 }
                 else {
@@ -293,7 +294,8 @@ pkg.TextField = Class(pkg.Label, [
                     line        = position.currentLine,
                     foff        = 1;
 
-                if (isShiftDown && (e.ch == KE.CHAR_UNDEFINED || e.ch == null)) {
+
+                if (isShiftDown) {
                     this.startSelection();
                 }
 
@@ -352,7 +354,7 @@ pkg.TextField = Class(pkg.Label, [
          */
         this.isFiltered = function(e){
             var code = e.code;
-            return code == KE.SHIFT || code == KE.CTRL ||
+            return code == KE.CTRL ||
                    code == KE.TAB   || code == KE.ALT  ||
                    (e.mask & KE.M_ALT) > 0;
         };
@@ -817,7 +819,7 @@ pkg.TextField = Class(pkg.Label, [
                     this.select(0, this.getMaxOffset());
                 }
                 else {
-                    if ((e.mask & KE.M_SHIFT) > 0) {
+                    if (e.modifiers.shiftKey) {
                         this.startSelection();
                     }
                     else {

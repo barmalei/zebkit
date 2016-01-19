@@ -10810,7 +10810,6 @@ pkg.PaintManager = Class(pkg.Manager, [
             // step I: skip invisible components and components that are not in hierarchy
             //         don't initiate repainting thread for such sort of the components,
             //         but don't forget for zCanvas whose parent field is null
-            //console.log("PaintManager.repaint() : " + c.$clazz.$name + ", stop? = " + (c.isVisible === false || c.parent == null) + ", w = " + c.width);
             if ((c.isVisible === false || c.parent == null) && c.$context == null) {
                 return;
             }
@@ -10900,9 +10899,6 @@ pkg.PaintManager = Class(pkg.Manager, [
                         g.save();
 
                         try {
-
-                         //   console.log("Paintmanager.repaint() $timer: " +  canvas.$da.x + "," + canvas.$da.y + "," + canvas.$da.width + "," + canvas.$da.height);
-
                             g.translate(canvas.x, canvas.y);
                             g.clipRect(canvas.$da.x,
                                        canvas.$da.y,
@@ -12389,10 +12385,10 @@ pkg.zCanvas = Class(pkg.Panel, [
                 mp.component = d;
 
                 // setup modifiers
-                ME_STUB.modifiers.altKey   = mp.altKey;
-                ME_STUB.modifiers.ctrlKey  = mp.ctrlKey;
-                ME_STUB.modifiers.metaKey  = mp.metaKey;
-                ME_STUB.modifiers.shiftKey = mp.shiftKey;
+                ME_STUB.modifiers.altKey   = e.altKey;
+                ME_STUB.modifiers.ctrlKey  = e.ctrlKey;
+                ME_STUB.modifiers.metaKey  = e.metaKey;
+                ME_STUB.modifiers.shiftKey = e.shiftKey;
 
                 // make sure it was touch event to emulate mouse entered event
                 if (ME_STUB.touch != null) {
@@ -19436,10 +19432,11 @@ pkg.TextField = Class(pkg.Label, [
                             }
                         }
 
-                        this.endOff = this.startOff = -1; // clear selection
+
                         this.remove(start, end - start);
                     }
 
+                    this.endOff = this.startOff = -1; // clear selection
                     this.position.inserted(off, size);
                 }
                 else {
@@ -19595,7 +19592,8 @@ pkg.TextField = Class(pkg.Label, [
                     line        = position.currentLine,
                     foff        = 1;
 
-                if (isShiftDown && (e.ch == KE.CHAR_UNDEFINED || e.ch == null)) {
+
+                if (isShiftDown) {
                     this.startSelection();
                 }
 
@@ -19654,7 +19652,7 @@ pkg.TextField = Class(pkg.Label, [
          */
         this.isFiltered = function(e){
             var code = e.code;
-            return code == KE.SHIFT || code == KE.CTRL ||
+            return code == KE.CTRL ||
                    code == KE.TAB   || code == KE.ALT  ||
                    (e.mask & KE.M_ALT) > 0;
         };
@@ -20119,7 +20117,7 @@ pkg.TextField = Class(pkg.Label, [
                     this.select(0, this.getMaxOffset());
                 }
                 else {
-                    if ((e.mask & KE.M_SHIFT) > 0) {
+                    if (e.modifiers.shiftKey) {
                         this.startSelection();
                     }
                     else {

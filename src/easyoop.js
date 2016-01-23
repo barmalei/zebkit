@@ -23,7 +23,6 @@ function isBoolean(o) {
           (typeof o === "boolean" || o.constructor === Boolean);
 }
 
-
 /**
  *  Create a new or return existent name space by the given name. The names space
  *  is structure to host various packages, classes, interfaces and so on. Usually
@@ -68,8 +67,9 @@ var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
         throw new Error("Name space '" + nsname + "' doesn't exist");
     }
 
-    function Package() {
+    function Package(name) {
         this.$url = null;
+        this.$name = name;
         if (typeof document !== "undefined") {
             var s  = document.getElementsByTagName('script'),
                 ss = s[s.length - 1].getAttribute('src'),
@@ -115,7 +115,7 @@ var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
         for(var i = 0, k = names[0]; i < names.length; i++, k = k + '.' + names[i]) {
             var n = names[i], p = target[n];
             if (typeof p === "undefined") {
-                p = new Package();
+                p = new Package(name);
                 target[n] = p;
                 f[k] = p;
             }
@@ -325,39 +325,51 @@ function $toString() {
 }
 
 // return function that is meta class
-//  pt - parent template function (can be null)
-//  tf - template function
-//  p  - parent interfaces
-function make_template(pt, tf, p) {
-    tf.$hash$ = "$ZBr$" + ($$$++);
-    tf.toString = $toString;
+//  parentTemplate      - parent template function (can be null)
+//  templateConstructor - template function
+//  inheritanceList     - parent class and interfaces
+function make_template(parentTemplate, templateConstructor, inheritanceList) {
+    templateConstructor.$hash$ = "$zEk$" + ($$$++);
+    templateConstructor.toString = $toString;
 
-    if (pt != null) {
-        tf.prototype.clazz = tf;
+    if (parentTemplate != null) {
+        templateConstructor.prototype.clazz = templateConstructor;
     }
 
-    tf.clazz = pt;
-    tf.prototype.toString = $toString;
-    tf.prototype.constructor = tf;
+    templateConstructor.clazz = parentTemplate;
+    templateConstructor.prototype.toString = $toString;
+    templateConstructor.prototype.constructor = templateConstructor;
 
-    if (p != null && p.length > 0) {
-        tf.$parents = {};
-        for(var i=0; i < p.length; i++) {
-            var l = p[i];
-            if (l == null || typeof l !== "function") {
-                throw new ReferenceError("Invalid parent class or interface:" + i);
+    // setup parent entities
+    if (inheritanceList != null && inheritanceList.length > 0) {
+        templateConstructor.$parents = {};
+        for(var i = 0; i < inheritanceList.length; i++) {
+            var inherited = inheritanceList[i];
+            if (inherited == null || typeof inherited !== "function" || typeof inherited.$hash$ === "undefined") {
+                throw new ReferenceError("Invalid parent class or interface:" + inherited);
             }
 
-            tf.$parents[l] = true;
-            if (l.$parents != null) {
-                var pp = l.$parents;
-                for(var k in pp) {
-                    if (pp.hasOwnProperty(k)) tf.$parents[k] = true;
+            if (templateConstructor.$parents[inherited.$hash$] === true) {
+                throw Error("Duplicate inherited class or interface: " + inherited);
+            }
+
+            templateConstructor.$parents[inherited.$hash$] = true;
+
+            // if parent has own parents copy the parents references
+            if (inherited.$parents != null) {
+                for(var k in inherited.$parents) {
+                    if (inherited.$parents.hasOwnProperty(k)) {
+                        if (templateConstructor.$parents[k] === true) {
+                            throw Error("Duplicate inherited class or interface: " + k);
+                        }
+
+                        templateConstructor.$parents[k] = true;
+                    }
                 }
             }
         }
     }
-    return tf;
+    return templateConstructor;
 }
 
 pkg.getPropertySetter = function(obj, name) {
@@ -449,13 +461,52 @@ pkg.Singleton = function(clazz) {
  */
 pkg.Interface = make_template(null, function() {
     var $Interface = make_template(pkg.Interface, function() {
-        if (arguments.length > 0) {
-            // return anonymous implementation of the interface if methods list is passed
-            // as an argument
-            return new (pkg.Class($Interface, arguments[0]))();
-        }
-    }, arguments);
+        throw new Error("Interface cannot be instantiated")
+    }, null);
 
+    if (arguments.length > 1) {
+        throw Error("Only one argument is expected");
+    }
+
+    $Interface.api = [];
+
+    if (arguments.length > 0) {
+        var methods = [];
+
+        // TODO: temporary solution for abstract methods declaration
+        if (arguments[0] != null && arguments[0].abstract != null && Array.isArray(arguments[0].abstract)) {
+            methods = arguments[0].abstract;
+            for(var i = 0; i < methods.length; i++) {
+                var mn = FN(methods[i]);
+                eval("var method = function " + mn + "() { throw new Error('Method " + mn + "() not implemented'); };");
+                methods[i] = method;
+            }
+
+            if (Array.isArray(arguments[0].methods)) {
+                methods.concat.apply(this, arguments[0].methods);
+            }
+        } else {
+            if (Array.isArray(arguments[0]) == false) {
+                throw new Error("Array of methods is expected");
+            }
+            methods = arguments[0];
+        }
+
+        if (methods.length > 0) {
+            for(var i = 0; i < methods.length; i++) {
+                var method = methods[i];
+                if (typeof method !== "function") {
+                    throw new Error("Method is expected");
+                }
+
+                if (method.clazz != null) {
+                    throw new Error("Interface cannot be inherited");
+                }
+
+                $Interface.api[i] = method;
+            }
+        }
+    }
     return $Interface;
 });
 
@@ -587,6 +638,123 @@ function ProxyMethod(name, f, clazz) {
  * @api zebkit.Class()
  * @method Class
  */
+
+function copyProtoFields(targetClazz, parentClazz, cb) {
+    for (var k in parentClazz.prototype) {
+        if (parentClazz.prototype.hasOwnProperty(k) === true) {
+            var f = parentClazz.prototype[k];
+            targetClazz.prototype[k] = (f != null && f.methodBody != null) ? ProxyMethod(f.methodName, f.methodBody, f.boundTo)
+                                                                           : f;
+            if (cb != null) {
+                cb(targetClazz, parentClazz, targetClazz.prototype[k], f);
+            }
+        }
+    }
+}
+
+/**
+ * Extend existent class with the given methods and interfaces
+ * Be  careful to use the method, pay attention the following facts:
+
+- only the given class and the classes that inherit the class __after the extend method calling__ get the updates
+
+ *
+ * For example:
+
+    var A = zebkit.Class([ // declare class A that defines one "a" method
+        function a() {
+            console.log("A:a()");
+        }
+    ]);
+
+    var a = new A();
+    a.a();  // show "A:a()" message
+
+    A.extend([
+        function b() {
+            console.log("EA:b()");
+        },
+
+        function a() {   // redefine "a" method
+            console.log("EA:a()");
+        }
+    ]);
+
+    // can call b() method we just added to the instance class
+    a.b(); // show "EA:b()" message
+    a.a(); // show "EA:a()" message
+
+ * @param {Array} methods array of the methods the class have to be
+ * extended with
+ * @method mixing
+ */
+function mixing(clazz, methods, overwritable) {
+    if (overwritable == null) {
+        overwritable = false;
+    }
+
+    if (Array.isArray(methods) === false) {
+        throw new Error("Methods array is expected (" + methods + ")");
+    }
+
+    var names = {};
+    for(var i = 0; i < methods.length; i++) {
+        var method     = methods[i],
+            methodName = FN(method);
+
+        // detect if the passed method is proxy method
+        if (method.methodBody != null) {
+            throw new Error("Proxy method '" + methodName + "' cannot be mixed in a class");
+        }
+
+        // map user defined constructor to internal constructor name
+        if (methodName === CDNAME) {
+            methodName = CNAME;
+        }
+        else {
+            if (methodName[0] === "$") {
+                // populate prototype fields if a special method has been defined
+                if (methodName === "$prototype") {
+                    method.call(clazz.prototype, clazz);
+                    if (clazz.prototype[CDNAME]) {
+                        clazz.prototype[CNAME] = clazz.prototype[CDNAME];
+                        delete clazz.prototype[CDNAME];
+                    }
+                    continue;
+                }
+
+                // populate class level fields if a special method has been defined
+                if (methodName === "$clazz") {
+                    method.call(clazz);
+                    continue;
+                }
+            }
+        }
+
+        if (names[methodName] === true) {
+            throw new Error("Duplicate declaration of '" + methodName+ "(...)' method");
+        }
+
+        var existentMethod = clazz.prototype[methodName];
+        if (typeof existentMethod !== 'undefined') {
+            if (typeof existentMethod !== 'function') {
+                throw new Error("'" + methodName + "(...)' method clash with a field");
+            }
+
+            // check if the method has been already declared for the given class
+            if (overwritable === false && existentMethod.boundTo === clazz) {
+                throw new Error("Duplicate class '" + methodName +"(...)' method overwriting is not allowed");
+            }
+        }
+
+        // Create and set proxy method that is bound to the given class
+        clazz.prototype[methodName] = ProxyMethod(methodName, method, clazz);
+
+        // save method we have already added to check double declaration error
+        names[methodName] = true;
+    }
+}
+
 pkg.Class = make_template(null, function() {
     if (arguments.length === 0) {
         throw new Error("No class definition was found");
@@ -596,26 +764,34 @@ pkg.Class = make_template(null, function() {
         throw new Error("Invalid class definition");
     }
 
-    if (arguments.length > 1 && typeof arguments[0] !== "function") {
+    if (arguments.length > 1 && typeof arguments[0] !== "function")  {
         throw new ReferenceError("Invalid parent class '" + arguments[0] + "'");
     }
 
-    var df = arguments[arguments.length - 1],
-        $parent = null,
-        args = []; // using slice can be slower that trivial copying array
-                  // Array.prototype.slice.call(arguments, 0, arguments.length-1);
+    var classMethods = arguments[arguments.length - 1],
+        parentClass  = null,
+        toInherit    = []; // using slice can be slower that trivial copying array
+                           // Array.prototype.slice.call(arguments, 0, arguments.length-1);
+
+    // detect parent class in inheritance list as the first argument that has "clazz" set to Class
+    if (arguments.length > 0 && (arguments[0] == null || arguments[0].clazz === pkg.Class)) {
+        parentClass = arguments[0];
+    }
 
     // use instead of slice for performance reason
-    for(var i=0; i < arguments.length-1; i++) {
-        args[i] = arguments[i];
+    for(var i = 0; i < arguments.length - 1; i++) {
+        toInherit[i] = arguments[i];
+
+        // let's make sure we inherit interface
+        if (parentClass == null || i > 0) {
+            if (toInherit[i] == null || toInherit[i].clazz !== pkg.Interface) {
+                throw new ReferenceError("Invalid inherited interface :" + toInherit[i]);
+            }
+        }
     }
 
-    if (args.length > 0 && (args[0] == null || args[0].clazz === pkg.Class)) {
-        $parent = args[0];
-    }
-
-    var $template = make_template(pkg.Class, function() {
-        this.$hash$ = "$zObj_" + ($$$++);
+    var classTemplate = make_template(pkg.Class, function() {
+        this.$hash$ = "$ZkIo" + ($$$++);
 
         if (arguments.length > 0) {
             var a = arguments[arguments.length - 1];
@@ -625,11 +801,11 @@ pkg.Class = make_template(null, function() {
                 a = a[0];
 
                 // prepare arguments list to declare an anonymous class
-                var args = [ $template ],      // first of all the class has to inherit the original class
-                    k = arguments.length - 2;
+                var args = [ classTemplate ],      // first of all the class has to inherit the original class
+                    k    = arguments.length - 2;
 
                 // collect interfaces the anonymous class has to implement
-                for(; k >= 0 && pkg.instanceOf(arguments[k], pkg.Interface); k--) {
+                for(; k >= 0 && arguments[k].clazz === pkg.Interface; k--) {
                     args.push(arguments[k]);
                 }
 
@@ -642,7 +818,7 @@ pkg.Class = make_template(null, function() {
                     // call constructor properly since we have arguments as an array
                     f  = function() {};
 
-                cl.$name = $template.$name; // the same class name for anonymous
+                cl.$name = classTemplate.$name; // the same class name for anonymous
                 f.prototype = cl.prototype; // the same prototypes
 
                 var o = new f();
@@ -651,7 +827,7 @@ pkg.Class = make_template(null, function() {
                 // use array copy instead of cloning with slice for performance reason
                 // (Array.prototype.slice.call(arguments, 0, k + 1))
                 args = [];
-                for(var i=0; i < k + 1; i++) args[i] = arguments[i];
+                for(var i = 0; i < k + 1; i++) args[i] = arguments[i];
                 cl.apply(o, args);
 
                 // set constructor field for consistency
@@ -663,35 +839,31 @@ pkg.Class = make_template(null, function() {
         if (this[CNAME] != null) {
             return this[CNAME].apply(this, arguments);
         }
-    }, args);
+    }, toInherit);
 
     // prepare fields that caches the class properties
-    $template.$propertyInfo = {};
+    classTemplate.$propertyInfo = {};
 
-    function copyProtoMethod(targetClazz, parentClazz, cb) {
-        for (var k in parentClazz.prototype) {
-            if (parentClazz.prototype.hasOwnProperty(k) === true) {
-                var f = parentClazz.prototype[k];
-                targetClazz.prototype[k] = (f != null && f.methodBody != null) ? ProxyMethod(f.methodName, f.methodBody, f.boundTo)
-                                                                               : f;
-
-                if (cb != null) cb(targetClazz, parentClazz, targetClazz.prototype[k], f);
-            }
-        }
-    }
 
     // copy parents prototype methods and fields into
     // new class template
-    $template.$parent = $parent;
-    if ($parent != null) {
-        copyProtoMethod($template, $parent);
+    classTemplate.$parent = parentClass;
+    if (parentClass != null) {
+        copyProtoFields(classTemplate, parentClass);
+    }
+
+    if (toInherit.length > 0) {
+        for(var i = toInherit[0].clazz === pkg.Interface ? 0 : 1; i < toInherit.length; i++) {
+
+            mixing(classTemplate, toInherit[i].api);
+        }
     }
 
     // extend method cannot be overridden
-    $template.prototype.extend = function() {
+    classTemplate.prototype.extend = function() {
         var c = this.clazz,
             l = arguments.length,
-            f = arguments[l-1];
+            f = arguments[l - 1];
 
         // replace the instance class with a new intermediate class
         // that inherits the replaced class. it is done to support
@@ -723,7 +895,7 @@ pkg.Class = make_template(null, function() {
 
         // add new interfaces if they has been passed
         for(var i = 0; i < l; i++) {
-            if (pkg.instanceOf(arguments[i], pkg.Interface) === false) {
+            if (arguments[i].clazz !== pkg.Interface) {
                 throw new Error("Invalid argument: " + arguments[i]);
             }
             c.$parents[arguments[i]] = true;
@@ -731,7 +903,7 @@ pkg.Class = make_template(null, function() {
         return this;
     };
 
-    $template.prototype.$super = function() {
+    classTemplate.prototype.$super = function() {
        if (pkg.$caller != null) {
             var name = pkg.$caller.methodName,
                 $s   = pkg.$caller.boundTo.$parent,
@@ -747,10 +919,6 @@ pkg.Class = make_template(null, function() {
 
             while ($s != null) {
                 var m = $s.prototype[name];
-                // if the method found and the method is
-                //     not proxy method       <or>
-                //     single proxy method    <or>
-                //     multiple proxy method that contains a method with the required arity
                 if (m != null) {
                     return m.apply(this, args);
                 }
@@ -764,7 +932,7 @@ pkg.Class = make_template(null, function() {
         throw new Error("$super is called outside of class context");
     };
 
-    $template.prototype.$clone = function(map) {
+    classTemplate.prototype.$clone = function(map) {
         map = map || new Map();
 
         var f = function() {};
@@ -793,11 +961,11 @@ pkg.Class = make_template(null, function() {
         return nobj;
     };
 
-    $template.prototype.clazz = $template;
+    classTemplate.prototype.clazz = classTemplate;
 
     // check if the method has been already defined in the class
-    if (typeof $template.prototype.properties === 'undefined') {
-        $template.prototype.properties = function(p) {
+    if (typeof classTemplate.prototype.properties === 'undefined') {
+        classTemplate.prototype.properties = function(p) {
             return pkg.properties(this, p);
         };
     }
@@ -805,8 +973,8 @@ pkg.Class = make_template(null, function() {
     var lans = "Listeners are not supported";
 
     // check if the method has been already defined in the class
-    if (typeof $template.prototype.bind === 'undefined') {
-        $template.prototype.bind = function() {
+    if (typeof classTemplate.prototype.bind === 'undefined') {
+        classTemplate.prototype.bind = function() {
             if (this._ == null) {
                 throw new Error(lans);
             }
@@ -815,8 +983,8 @@ pkg.Class = make_template(null, function() {
     }
 
     // check if the method has been already defined in the class
-    if (typeof $template.prototype.unbind === 'undefined') {
-        $template.prototype.unbind = function() {
+    if (typeof classTemplate.prototype.unbind === 'undefined') {
+        classTemplate.prototype.unbind = function() {
             if (this._ == null) {
                 throw new Error(lans);
             }
@@ -824,123 +992,24 @@ pkg.Class = make_template(null, function() {
         };
     }
 
-    /**
-     * Extend existent class with the given methods and interfaces
-     * Be  careful to use the method, pay attention the following facts:
-
-    - only the given class and the classes that inherit the class __after the extend method calling__ get the updates
-    - if the class gets method that already defined the old method will be overridden
-    - **"$super"** cannot be called from the method the class is extended
-
-     *
-     * For example:
-
-        var A = zebkit.Class([ // declare class A that defines one "a" method
-            function a() {
-                console.log("A:a()");
-            }
-        ]);
-
-        var a = new A();
-        a.a();  // show "A:a()" message
-
-        A.extend([
-            function b() {
-                console.log("EA:b()");
-            },
-
-            function a() {   // redefine "a" method
-                console.log("EA:a()");
-            }
-        ]);
-
-        // can call b() method we just added to the instance class
-        a.b(); // show "EA:b()" message
-        a.a(); // show "EA:a()" message
-
-     * @param {Array} methods array of the methods the class have to be
-     * extended with
-     * @method extend
-     */
-    function extend(clazz, df, isMixing) {
-        if (arguments.length === 1) {
-            df    = clazz;
-            clazz = this;
-        }
-
-        if (isMixing == null) {
-            isMixing = false;
-        }
-
-        if (Array.isArray(df) === false) {
-            throw new Error("Invalid class definition '" + df + "', array is expected");
-        }
-
-        for(var i = 0; i < df.length; i++) {
-            var f  = df[i],
-                n  = FN(f);
-
-            // map user defined constructor to internal constructor name
-            if (n === CDNAME) {
-                n = CNAME;
-            }
-            else {
-                if (n[0] === "$") {
-                    // populate prototype fields if a special method has been defined
-                    if (n === "$prototype") {
-                        f.call(clazz.prototype, clazz);
-                        if (clazz.prototype[CDNAME]) {
-                            clazz.prototype[CNAME] = clazz.prototype[CDNAME];
-                            delete clazz.prototype[CDNAME];
-                        }
-                        continue;
-                    }
-
-                    // populate class level fields if a special method has been defined
-                    if (n === "$clazz") {
-                        f.call(clazz);
-                        continue;
-                    }
-
-                    if (n === "$mixing") {
-                        extend(clazz, f.call(clazz));
-                        continue;
-                    }
-                }
-            }
-
-            var v = clazz.prototype[n];
-
-            if (typeof v !== 'undefined') {
-                if (typeof v !== 'function') throw new Error("Method '" + n + "' clash with a property");
-
-                if (isMixing === false && v.boundTo === clazz) {
-                    throw new Error("Method '" + n + "' overriding is not allowed");
-                }
-            }
-
-            clazz.prototype[n] = ProxyMethod(n, f, clazz);
-        }
-    }
-
-    extend($template, df);
+    mixing(classTemplate, classMethods, true);
 
     // populate static fields
     // TODO: exclude the basic static methods and static constant
     // static inheritance
-    if ($parent != null) {
-        for (var k in $parent) {
+    if (parentClass != null) {
+        for (var k in parentClass) {
             if (k[0] !== '$' &&
-                $parent.hasOwnProperty(k) &&
-                $template.hasOwnProperty(k) === false)
+                parentClass.hasOwnProperty(k) &&
+                classTemplate.hasOwnProperty(k) === false)
             {
-                $template[k] = pkg.clone($parent[k]);
+                classTemplate[k] = pkg.clone(parentClass[k]);
             }
         }
     }
 
      // add extend later to avoid the method be inherited as a class static field
-    $template.extend = function() {
+    classTemplate.extend = function() {
         // inject class
         if (arguments[1] !== false && this.$isInjected !== true) {
             // create intermediate class
@@ -948,7 +1017,7 @@ pkg.Class = make_template(null, function() {
 
             // copy this class prototypes methods to intermediate class A and re-define
             // boundTo to the intermediate class A if they were bound to this class
-            copyProtoMethod(A, this, function(targetClazz, srcClazz, addedMethod, sourceMethod) {
+            copyProtoFields(A, this, function(targetClazz, srcClazz, addedMethod, sourceMethod) {
                 if (addedMethod != sourceMethod && addedMethod.boundTo === srcClazz) {
                     addedMethod.boundTo = A;
                     if (sourceMethod.boundTo === srcClazz) sourceMethod.boundTo = A;
@@ -959,10 +1028,10 @@ pkg.Class = make_template(null, function() {
             this.$isInjected = true;
         }
 
-        extend.call(this, this, arguments[0], true);
+        mixing.call(this, this, arguments[0], true);
     };
 
-    return $template;
+    return classTemplate;
 });
 
 var Class    = pkg.Class,
@@ -1066,7 +1135,7 @@ pkg.instanceOf = function(obj, clazz) {
 
         var c = obj.clazz;
         return c != null && (c === clazz ||
-               (typeof c.$parents !== 'undefined' && c.$parents.hasOwnProperty(clazz)));
+               (typeof c.$parents !== 'undefined' && c.$parents.hasOwnProperty(clazz.$hash$)));
     }
 
     throw new Error("instanceOf(): null class");
@@ -1108,7 +1177,7 @@ pkg.ready = function() {
         $readyCallbacks.push(arguments[i]);
     }
 
-    while($busy === 0 && $readyCallbacks.length > 0) {
+    while ($busy === 0 && $readyCallbacks.length > 0) {
         $readyCallbacks.shift()();
     }
 };
@@ -1121,6 +1190,7 @@ pkg.package = function(name, callback) {
         // can have influence on ready state
         zebkit.ready(function() {
             f.call(p, p, zebkit.Class);
+            pkg.$resolveClassNames(p);
         });
     }
 };
@@ -1149,34 +1219,29 @@ pkg.Dummy = Class([]);
 // TODO:
 //!!! this code resolve names of classes  defined in a package
 //    should be re-worked to use more generic and trust-able mechanism
-pkg.$resolveClassNames = function() {
-    pkg(function(n, p) {
-        function collect(pp, p) {
-            for(var k in p) {
-                if (k[0] !== "$" && p[k] != null && p[k].$name == null && p.hasOwnProperty(k) && zebkit.instanceOf(p[k], Class)) {
-                    p[k].$name = pp != null ? pp + "." + k : k;
-                    collect(p[k].$name, p[k]);
-                }
+pkg.$resolveClassNames = function(p) {
+    function collect(prefix, p) {
+        for(var k in p) {
+            if (k[0]   !== "$"         &&
+                p[k] != null         &&
+                p[k].$name == null   &&
+                p.hasOwnProperty(k)  &&
+                p[k].clazz === Class   )
+            {
+                p[k].$name = prefix != null ? prefix + "." + k : k;
+                collect(p[k].$name, p[k]);
             }
         }
-        collect(null, p);
-    });
-};
+    }
 
-function complete() {
-    // TODO:
-    //!!! this code resolve names of classes  defined in a package
-    //    should be re-worked to use more generic and trust-able mechanism
-    try {
-        pkg.$resolveClassNames();
+    if (arguments.length === 0) {
+        pkg(function(name, p) {
+            collect(null, p);
+        });
+    } else {
+        collect(null, p);
     }
-    catch(e) {
-        pkg.ready();
-        console.log("" + (e.stack ? e.stack : e));
-        throw e;
-    }
-    pkg.ready();
-}
+};
 
 if (pkg.isInBrowser) {
     var m = window.location.search.match(/[?&][a-zA-Z0-9_.]+=[^?&=]+/g), env = {};
@@ -1289,13 +1354,19 @@ if (pkg.isInBrowser) {
     var $interval = setInterval(function () {
         if (document.readyState === "complete") {
             clearInterval($interval);
-            complete();
+            pkg.ready();
         }
     }, 100);
+} else {
+    pkg.ready();
 }
-else {
-    complete();
-}
+
+pkg.ready(function() {
+    console.log(" ::: " + new Date().getTime());
+    pkg.$resolveClassNames();
+    console.log(" ::: " + new Date().getTime());
+});
+
 
 /**
  * @for

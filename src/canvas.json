@@ -27,7 +27,7 @@
         "[":219, "]":221, "\\":220,  "/":191,  "ENTER":13, "ESCAPE" : 27, "SPACE" : 32, "DELETE" : 46,
         "BSPACE":8, "TAB":9, "INSERT":45, "DELETE":46, "LEFT":37, "RIGHT":39, "UP":38, "DOWN":40,
         "HOME":36,"END":35,"PAGEUP":33,"PAGEDOWN":34, "CMD":{ ".expr":"zebkit.isFF?224:91" }, "SHIFT": 16,
-        "CTRL" : 17, "ALT":18, "CHAR_UNDEFINED":0
+        "CTRL" : 17, "ALT":18
     },
 
     "events"        : { "$zebkit.ui.EventManager":[]  },

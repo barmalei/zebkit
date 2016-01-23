@@ -474,20 +474,20 @@ if (typeof(zebkit) === "undefined") {
             assert(zebkit.getMethod(A, "toString").boundTo == A, true, "Proxy method correct wrap existent method 8");
 
             var a = new A();
-            assert(a.toString("11") === "11", true);
-            assert(a.toString() != a.toString("11"), true);
+            assert(a.toString("11") === "11", true, "toString overriding 1");
+            assert(a.toString() != a.toString("11"), true, "toString overriding 2");
 
             assertException(function() {
-                var A = new Class([
+                var A = Class([
                     function a() { return "1"; },
                     function a(b) {
                         return "*";
                     }
                 ]);
-            }, Error);
+            }, Error, "Double method definition ");
 
             assertException(function() {
-                var A = new Class([
+                var A = Class([
                     function () { },
                     function (b) {
                     }
@@ -496,16 +496,17 @@ if (typeof(zebkit) === "undefined") {
         },
 
         function test_class() {
-            assert(typeof zebkit.Interface.clazz != 'undefined', true, "test_class 2");
+            assert(typeof Interface.clazz != 'undefined', true, "test_class 2");
             assertException(function() {  zebkit.instanceOf(Class, null); }, Error, "test_class 1");
 
-            assert(zebkit.instanceOf(Class, Class), false, "test_class 2");
-            assert(typeof Class.clazz != 'undefined', true, "test_class 2");
-            assert(Class.clazz, null, "test_class 2");
-            assertException(function() { new Class();  }, Error, "test_class 3");
+            assert(zebkit.instanceOf(Class, Class), false, "test_class 21");
+            assert(typeof Class.clazz != 'undefined', true, "test_class 22");
+            assert(Class.clazz, null, "test_class 23");
+            assert(Class.$hash$ != null, true, "test_class 233");
+            assertException(function() { new Class();  }, Error, "test_class 33");
             var A = new Class([]);
 
-            assert(typeof A.clazz !== 'undefined', true, "test_class 5");
+            assert(typeof A.clazz !== 'undefined', true, "test_class 51");
             assert(A.clazz, Class, "test_class 6");
             assert(A.$parent, null, "test_class 8");
 
@@ -537,6 +538,8 @@ if (typeof(zebkit) === "undefined") {
             assertException(function() { Class(B, "", []); }, ReferenceError, "test_class 180");
             assertException(function() { Class(B, 1, []); }, ReferenceError, "test_class 181");
             assertException(function() { Class(B, B.cccc, []); }, ReferenceError, "test_class 182");
+            assertException(function() { Class([ function a() {}, function a() {}  ]); }, Error, "test_class 183");
+            assertException(function() { Class([ function () {}, function () {}  ]); }, Error, "test_class 184");
 
             var A = new Class([
                 function(p1, p2) {},
@@ -568,18 +571,19 @@ if (typeof(zebkit) === "undefined") {
             assert(b.clazz == B, true, "test_class 381");
             assert(b.clazz != a.clazz, true, "test_class 382");
 
-            var I = new Interface(), I2 = new Interface(I);
+            var I = new Interface();
             assert(I.clazz == Interface, true, "test_class 383");
-            assert(I2.clazz == Interface, true, "test_class 384");
-            var i = new I(), i2 = new I2();
-            assert(i.clazz == I, true, "test_class 385");
-            assert(i2.clazz == I2, true, "test_class 386");
-            assert(i2.clazz != i.clazz, true, "test_class 387");
+            assertException(function() { new I(); }, Error, "test_class 3833");
+            assertException(function() { Interface(I); }, Error, "test_class 3834");
+            assertException(function() { Interface("a"); }, Error, "test_class 383");
 
+            var I = new Interface([ function a() {} ]);
+
+            assert(I.api.length == 1, true, "test_class 38334");
+            assert(typeof I.api[0] === "function", true, "test_class 38334");
 
             assert(typeof a.toString == 'function' && typeof a.toString.methofBody == 'undefined', true, 'toString in class instance1');
             assert(typeof a.$super == 'function'  && typeof a.$super.methofBody == 'undefined', true, 'equals in class instance3');
-            assert(typeof i.toString == 'function' && typeof i.toString.methofBody == 'undefined', true, 'toString in interface instance4');
 
             var a = new A(1), b = new B();
             assert(A, a.constructor, "test_class 389");
@@ -1057,20 +1061,21 @@ if (typeof(zebkit) === "undefined") {
             zebkit.assertNoException(function() { a.aa(1,2,3, 4); }, ReferenceError, "test_public_methods 9");
         },
 
-        function test_inteface() {
-            assert(((zebkit.Interface()) instanceof zebkit.Interface), false, "test_interface1");
-            assert(((new zebkit.Interface()) instanceof zebkit.Interface), false, "test_interface1");
-            assert(zebkit.instanceOf(zebkit.Interface(), zebkit.Interface), true, "test_interface2");
+        function test_interface() {
+            assert(((Interface()) instanceof Interface), false, "test_interface1");
+            assert(((new Interface()) instanceof Interface), false, "test_interface1");
+            assert(zebkit.instanceOf(Interface(), Interface), true, "test_interface2");
 
-            var I1 = new zebkit.Interface(), I2 = new zebkit.Interface();
+            var I1 = new Interface(), I2 = new Interface();
             assert(I1 == I2, false, "test_interface3");
+
             var m = {};
             m[I1] = 1;
             m[I2] = 2;
             assert(m[I1], 1, "test_interface4");
             assert(m[I2], 2, "test_interface5");
 
-            var I1 = new zebkit.Interface(), I2 = new zebkit.Interface(), I3 = new zebkit.Interface(), I4 = new zebkit.Interface();
+            var I1 = new Interface(), I2 = new Interface(), I3 = new Interface(), I4 = new Interface();
             assert(I1 == I2, false, "test_interface6");
             assert(I1 == I3, false, "test_interface7");
             assert(I3 == I2, false, "test_interface8");
@@ -1084,34 +1089,61 @@ if (typeof(zebkit) === "undefined") {
             assert(zebkit.instanceOf(I3, I3), false, "test_interface9");
             assert(zebkit.instanceOf(I3, I2), false, "test_interface9");
 
-            var II   = new zebkit.Interface(I1, I2);
-            var III  = new zebkit.Interface(I1, I2, I3);
-            var IIII = new zebkit.Interface(II, III);
+            assertException(function() {
+                zebkit.Interface(I1, I2);
+            }, Error);
+
+
+            var II   = new Interface([ function a() {} ])
+            var III  = new Interface([ function b() {} ]);
+            var IIII = new Interface([ function c() {} ]);
             var C1 = new Class(II,   []);
-            var C2 = new Class(III,  []);
-            var C3 = new Class(IIII, []);
-            var C4 = new Class(I4, II, I3, []);
+            var C2 = new Class(III, II, []);
+            var C3 = new Class(IIII, II, III, []);
+            var C4 = new Class(C3, []);
+
+            assertException(function() {
+                Class(C1, II);
+            }, Error);
+
+            assertException(function() {
+                Class(C3, II);
+            }, Error);
+
+            assertException(function() {
+                Class(C4, II);
+            }, Error);
+
+            assertException(function() {
+                Class(C4, III);
+            }, Error);
 
             var o = new C1();
             assert(zebkit.instanceOf(o,C1), true, "test_interface9");
             assert(zebkit.instanceOf(o,II), true, "test_interface10");
-            assert(zebkit.instanceOf(o,I1), true, "test_interface11");
-            assert(zebkit.instanceOf(o,I2), true, "test_interface12");
+            assert(zebkit.instanceOf(o,I1), false, "test_interface11");
+            assert(zebkit.instanceOf(o,I2), false, "test_interface12");
             assert(zebkit.instanceOf(o,I3), false, "test_interface13");
             assert(zebkit.instanceOf(o,III), false, "test_interface14");
             assert(zebkit.instanceOf(o,IIII), false, "test_interface15");
             assert(zebkit.instanceOf(o,I4), false, "test_interface16");
+            assert(typeof o.a  === "function", true, "test_interface161");
+            assert(typeof o.b  === "undefined", true, "test_interface162");
+            assert(typeof o.c  === "undefined", true, "test_interface163");
 
             var o = new C2();
             assert(zebkit.instanceOf(o,C2), true, "test_interface17");
             assert(zebkit.instanceOf(o,C1), false, "test_interface18");
-            assert(zebkit.instanceOf(o,II), false, "test_interface19");
+            assert(zebkit.instanceOf(o,II), true, "test_interface19");
             assert(zebkit.instanceOf(o,III), true, "test_interface20");
-            assert(zebkit.instanceOf(o,I1), true, "test_interface21");
-            assert(zebkit.instanceOf(o,I2), true, "test_interface22");
-            assert(zebkit.instanceOf(o,I3), true, "test_interface23");
+            assert(zebkit.instanceOf(o,I1), false, "test_interface21");
+            assert(zebkit.instanceOf(o,I2), false, "test_interface22");
+            assert(zebkit.instanceOf(o,I3), false, "test_interface23");
             assert(zebkit.instanceOf(o,IIII), false, "test_interface24");
             assert(zebkit.instanceOf(o,I4), false, "test_interface25");
+            assert(typeof o.a  === "function", true, "test_interface251");
+            assert(typeof o.b  === "function", true, "test_interface252");
+            assert(typeof o.c  === "undefined", true, "test_interface253");
 
             var o = new C3();
             assert(zebkit.instanceOf(o,C1), false, "test_interface27");
@@ -1120,40 +1152,82 @@ if (typeof(zebkit) === "undefined") {
             assert(zebkit.instanceOf(o,II), true, "test_interface30");
             assert(zebkit.instanceOf(o,III), true, "test_interface31");
             assert(zebkit.instanceOf(o,IIII), true, "test_interface32");
-
-            assert(zebkit.instanceOf(o,I1), true, "test_interface33");
-            assert(zebkit.instanceOf(o,I2), true, "test_interface34");
-            assert(zebkit.instanceOf(o,I3), true, "test_interface35");
+            assert(zebkit.instanceOf(o,I1), false, "test_interface33");
+            assert(zebkit.instanceOf(o,I2), false, "test_interface34");
+            assert(zebkit.instanceOf(o,I3), false, "test_interface35");
             assert(zebkit.instanceOf(o,I4), false, "test_interface36");
+            assert(typeof o.a  === "function", true, "test_interface361");
+            assert(typeof o.b  === "function", true, "test_interface362");
+            assert(typeof o.c  === "function", true, "test_interface363");
 
             var o = new C4();
-            assert(zebkit.instanceOf(o,C1), false);
-            assert(zebkit.instanceOf(o,C2), false);
-            assert(zebkit.instanceOf(o,C3), false);
-            assert(zebkit.instanceOf(o,C4), true);
-            assert(zebkit.instanceOf(o,I4), true);
-            assert(zebkit.instanceOf(o,II), true);
-            assert(zebkit.instanceOf(o,I1), true);
-            assert(zebkit.instanceOf(o,I2), true);
-            assert(zebkit.instanceOf(o,I3), true);
-            assert(zebkit.instanceOf(o,III), false);
-            assert(zebkit.instanceOf(o,IIII), false);
+            assert(zebkit.instanceOf(o,C1), false, "test_interface37");
+            assert(zebkit.instanceOf(o,C2), false, "test_interface38");
+            assert(zebkit.instanceOf(o,C3), true, "test_interface39");
+            assert(zebkit.instanceOf(o,C4), true, "test_interface40");
+            assert(zebkit.instanceOf(o,I4), false, "test_interface41");
+            assert(zebkit.instanceOf(o,II), true, "test_interface42");
+            assert(zebkit.instanceOf(o,I1), false, "test_interface43");
+            assert(zebkit.instanceOf(o,I2), false, "test_interface44");
+            assert(zebkit.instanceOf(o,I3), false, "test_interface45");
+            assert(zebkit.instanceOf(o,III), true, "test_interface46");
+            assert(zebkit.instanceOf(o,IIII), true, "test_interface47");
+            assert(typeof o.a  === "function", true, "test_interface471");
+            assert(typeof o.b  === "function", true, "test_interface472");
+            assert(typeof o.c  === "function", true, "test_interface473");
 
-            var C1 = Class([]), c1 = new C1();
-            var C2 = Class(C1, []), c2 = new C2();
-            var C3 = Class(C2, []), c3 = new C3();
+            assertException(function () {
+                var IA = Interface([
+                    function a() {},
+                    function a() {}
+                ]);
 
-            assert(zebkit.instanceOf(c1, C1), true);
-            assert(zebkit.instanceOf(c1, C2), false);
-            assert(zebkit.instanceOf(c1, C3), false);
+                Class(IA);
+            }, Error);
 
-            assert(zebkit.instanceOf(c2, C1), true);
-            assert(zebkit.instanceOf(c2, C2), true);
-            assert(zebkit.instanceOf(c2, C3), false);
+            var IA = Interface([
+                function a() { return "0"; },
+                function b() {},
+            ]);
 
-            assert(zebkit.instanceOf(c3, C1), true);
-            assert(zebkit.instanceOf(c3, C2), true);
-            assert(zebkit.instanceOf(c3, C3), true);
+            var IB = Interface([
+                function c() {},
+                function b() {},
+            ]);
+
+            assertException(function () {
+                Class(IA, IB);
+            }, Error);
+
+            var A = Class(IA, [
+            ]), a = new A();
+            assert(a.a(), "0");
+
+            var A = Class(IA, [
+                function a() { return "1"; }
+            ]), a = new A();
+            assert(a.a(), "1");
+        },
+
+        function test_class_toString_overwriting() {
+            var A = Class([]);
+            var I = Interface();
+            var B = Class(A, I, []), b = new B();
+
+            assert(zebkit.instanceOf(b, A), true);
+            assert(zebkit.instanceOf(b, B), true);
+            assert(zebkit.instanceOf(b, I), true);
+            assert(B.toString(), B.$hash$);
+            assert(A.toString(), A.$hash$);
+            assert(I.toString(), I.$hash$);
+
+            I.toString = B.toString = A.toString = function() { return "1"; };
+            assert(B.toString() != B.$hash$, true);
+            assert(A.toString() != A.$hash$, true);
+            assert(I.toString() != I.$hash$, true);
+            assert(zebkit.instanceOf(b, A), true);
+            assert(zebkit.instanceOf(b, B), true);
+            assert(zebkit.instanceOf(b, I), true);
         },
 
         function test_static_methods() {
@@ -1368,8 +1442,8 @@ if (typeof(zebkit) === "undefined") {
         },
 
         function test_inheritance() {
-            var I1 = new zebkit.Interface();
-            var I2 = new zebkit.Interface();
+            var I1 = new Interface();
+            var I2 = new Interface();
             var A = new Class(I1, []), B = new Class(A, []), C = new Class(B, I2, []), D = new Class(I1, I2, []);
             var a = new A(), b = new B(), c = new C(), d = new D();
             assert(zebkit.instanceOf(a,A), true);
@@ -1379,11 +1453,7 @@ if (typeof(zebkit) === "undefined") {
             assert(zebkit.instanceOf(a,I2), false);
             assert(a.clazz, A);
             assert(a.clazz.$parent, null);
-
-
             assert(zebkit.instanceOf(b,A), true);
-
-
             assert(zebkit.instanceOf(b,B), true);
 
             assert(zebkit.instanceOf(b,C), false);
@@ -1414,6 +1484,10 @@ if (typeof(zebkit) === "undefined") {
 
             assert(d.clazz, D);
             assert(d.clazz.$parent,  null);
+
+            assertException(function() {
+                Class(A, B, []);
+            }, Error);
         },
 
         function test_overriding() {
@@ -1747,7 +1821,7 @@ if (typeof(zebkit) === "undefined") {
         },
 
         function test_mixing_definition () {
-            var Mix = [
+            var Mix = Interface([
                 function a() {
                     return 10 + this.$super();
                 },
@@ -1762,7 +1836,7 @@ if (typeof(zebkit) === "undefined") {
                         return 890;
                     }
                 }
-            ]
+            ]);
 
             var A = Class([
                 function   a() {
@@ -1770,13 +1844,9 @@ if (typeof(zebkit) === "undefined") {
                 }
             ]);
 
-            var B = Class(A, [
+            var B = Class(A, Mix, [
                 function  b() {
                     return 11;
-                },
-
-                function $mixing() {
-                    return Mix;
                 }
             ]);
 
@@ -1789,8 +1859,6 @@ if (typeof(zebkit) === "undefined") {
             assert(b.aaa(), 890);
             assert(B.prototype.aaa.boundTo == null, true);
             assert(b.af, 330);
-
-
         },
 
         function test_dynamic() {
@@ -1959,15 +2027,11 @@ if (typeof(zebkit) === "undefined") {
 
             assert(a.m, 100, "anonymous properly called super method");
 
-            var I = new zebkit.Interface();
-            var i = new I([
-                function a() {
-                    return 10;
-                }
-            ]);
+            var I = new Interface([ function a() { return 10; } ]);
+            assertException(function() {
+                new I();
+            }, Error);
 
-            assert(zebkit.instanceOf(i, I), true);
-            assert(i.a(), 10);
 
             var A = new Class([
                 function() { this.m = 100; }
@@ -1984,7 +2048,7 @@ if (typeof(zebkit) === "undefined") {
             ]);
             assert(a.m, 100);
 
-            var I = new zebkit.Interface();
+            var I = new Interface();
             var aa = new A(I, [
                  function() { this.m = 200; }
             ]);
@@ -1995,7 +2059,7 @@ if (typeof(zebkit) === "undefined") {
             assert(aa.m, 200);
             assert(a.m, 100);
 
-            var I2 = new zebkit.Interface();
+            var I2 = new Interface();
             var aaa = new A(300, I, I2, [
                  function(p) { this.m = p; }
             ]);
@@ -2023,7 +2087,6 @@ if (typeof(zebkit) === "undefined") {
                      function(p) { this.m = p; }
                 ]);
             }, Error);
-
 
             var A = Class([
                 function a() {
@@ -2280,7 +2343,7 @@ if (typeof(zebkit) === "undefined") {
                     if (arguments.length === 0) return 10;
                     return p1;
                 }
-            ]), I = Interface();
+            ]), I = Interface([ function i() { } ]);
 
 
             var a = new A(), clz = a.clazz;
@@ -2352,6 +2415,7 @@ if (typeof(zebkit) === "undefined") {
             assert(b.a(111), 111);
             assert(b.$extended,  undefined);
             assert(zebkit.instanceOf(b, I), false);
+
 
             b.extend(I, [
                 function b() {
@@ -2473,6 +2537,8 @@ if (typeof(zebkit) === "undefined") {
 
             a1.aa();
             assert(a1.ssValue, 77);
+            a2.aa();
+            assert(a2.ssValue, 77);
         },
 
         function test_singletone() {

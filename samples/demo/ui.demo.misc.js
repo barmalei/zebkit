@@ -36,9 +36,9 @@ zebkit.package("zebkit.ui", function(pkg, Class) {
             ext3Content.setBorder(new Border());
             ext3Content.setBackground(rgb.lightGray);
 
-            var ext1 = new zebkit.ui.ExtendablePan(ext1Content, "Panel 1");
-            var ext2 = new zebkit.ui.ExtendablePan(ext2Content, "Panel 2");
-            var ext3 = new zebkit.ui.ExtendablePan(ext3Content, "Panel 3");
+            var ext1 = new zebkit.ui.ExtendablePan("Panel 1", ext1Content);
+            var ext2 = new zebkit.ui.ExtendablePan("Panel 2", ext2Content);
+            var ext3 = new zebkit.ui.ExtendablePan( "Panel 3", ext3Content);
             extPan.add(ext1);
             extPan.add(ext2);
             extPan.add(ext3);

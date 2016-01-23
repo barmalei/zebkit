@@ -3594,9 +3594,13 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
                 o = pkg.$pointerOwner[e.identifier],
                 b = false;
 
+          //  console.log("$pointerMoved() currentMouseOwner = " + (o == null ? "null" : o.clazz.$name)  + ", new mouseOwner  = " +  (d == null ? "null" : d.clazz.$name));
+
+
             // check if pointer already inside a component
             if (o != null) {
                 if (d != o) {
+                    console.log("$pointerMoved() Fire poiunterExited for  " + e.identifier + ", owner = " + o);
                     pkg.$pointerOwner[e.identifier] = null;
                     b = EM.fireEvent("pointerExited", e.update(o, x, y));
 
@@ -3686,6 +3690,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
                 EM.fireEvent("pointerReleased", e.update(po, x, y));
 
                 //  make sure it is originally a touch event
+                //  TODO: Seems the code is invalid since it doesn't set move owner to null;
                 if (e.pointerType !== "mouse") {
                     EM.fireEvent("pointerExited", e.update(po, x, y));
                 }
@@ -3713,8 +3718,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
 
         this.$pointerPressed = function(e) {
             var x  = this.$toElementX(e.pageX, e.pageY),
-                y  = this.$toElementY(e.pageX, e.pageY),
-                tl = null;
+                y  = this.$toElementY(e.pageX, e.pageY);
 
             // adjust event for passing it to layers
             e.x = x;
@@ -3723,7 +3727,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
 
             // send pointer event to a layer and test if it has been activated
             for(var i = this.kids.length - 1; i >= 0; i--){
-                tl = this.kids[i];
+                var tl = this.kids[i];
                 if (tl.layerPointerPressed != null && tl.layerPointerPressed(e)) {
                     if (e.eatMe === true) return true;
                     break;
@@ -3731,6 +3735,10 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
             }
 
             var d = this.getComponentAt(x, y);
+
+            console.log("PointerPressed prev owner = " + pkg.$pointerOwner[e.identifier] + ", new owner = " + d);
+
+
             if (d != null && d.isEnabled === true) {
                 if (pkg.$pointerOwner[e.identifier] !== d) {
                     pkg.$pointerOwner[e.identifier] = d;

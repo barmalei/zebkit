@@ -1098,7 +1098,7 @@ pkg.MenuItem = Class(pkg.Panel, [
             var img = null;
             if (m[1] != null) {
                 img = m[1].substring(m[1].indexOf("@(") + 2, m[1].lastIndexOf(")")).trim();
-                if (img[0] == "'") {
+                if (img[0] === "'") {
                    img = img.substring(1, img.length-1);
                 }
                 else {

@@ -41,7 +41,12 @@ pkg.getDirectChild = function(parent, child){
  * @param {zebkit.layout.Layoutable} t a target layoutable component
  * @method doLayout
  */
-var L = pkg.Layout = new zebkit.Interface();
+var L = pkg.Layout = new zebkit.Interface({
+    abstract: [
+        function doLayout(target) {},
+        function calcPreferredSize(target) {}
+    ]
+});
 
 /**
  * Find a direct component located at the given location of the specified
@@ -927,30 +932,32 @@ pkg.BorderLayout = Class(L, [
         };
 
         this.calcPreferredSize = function (target){
-            var center = null, west = null,  east = null, north = null, south = null, d = null;
+            var center = null, left = null,  right = null, top = null, bottom = null, topRight = null, d = null;
             for(var i = 0; i < target.kids.length; i++){
                 var l = target.kids[i];
                 if (l.isVisible === true){
                     switch(l.constraints) {
-                       case "center" : center = l;break;
-                       case "top"    : north  = l;break;
-                       case "bottom" : south  = l;break;
-                       case "left"   : west   = l;break;
-                       case "right"  : east   = l;break;
+                       case null:
+                       case undefined:
+                       case "center"    : center = l; break;
+                       case "top"       : top    = l; break;
+                       case "bottom"    : bottom = l; break;
+                       case "left"      : left   = l; break;
+                       case "right"     : right  = l; break;
                        default: throw new Error("Invalid constraints: " + l.constraints);
                     }
                 }
             }
 
             var dim = { width:0, height:0 };
-            if (east != null) {
-                d = east.getPreferredSize();
-                dim.width += d.width + this.hgap;
+            if (right !== null) {
+                d = right.getPreferredSize();
+                dim.width  = d.width + this.hgap;
                 dim.height = (d.height > dim.height ? d.height: dim.height );
             }
 
-            if (west != null) {
-                d = west.getPreferredSize();
+            if (left !== null) {
+                d = left.getPreferredSize();
                 dim.width += d.width + this.hgap;
                 dim.height = d.height > dim.height ? d.height : dim.height;
             }
@@ -961,65 +968,68 @@ pkg.BorderLayout = Class(L, [
                 dim.height = d.height > dim.height ? d.height : dim.height;
             }
 
-            if (north != null) {
-                d = north.getPreferredSize();
+            if (top != null) {
+                d = top.getPreferredSize();
                 dim.width = d.width > dim.width ? d.width : dim.width;
                 dim.height += d.height + this.vgap;
             }
 
-            if (south != null) {
-                d = south.getPreferredSize();
+            if (bottom != null) {
+                d = bottom.getPreferredSize();
                 dim.width = d.width > dim.width ? d.width : dim.width;
                 dim.height += d.height + this.vgap;
             }
             return dim;
         };
 
-        this.doLayout = function(t){
-            var top    = t.getTop(),
-                bottom = t.height - t.getBottom(),
-                left   = t.getLeft(),
-                right  = t.width - t.getRight(),
+        this.doLayout = function(target){
+            var t      = target.getTop(),
+                b      = target.height - target.getBottom(),
+                l      = target.getLeft(),
+                r      = target.width - target.getRight(),
                 center = null,
-                west   = null,
-                east   = null;
+                left   = null,
+                right  = null;
 
-            for(var i = 0;i < t.kids.length; i++){
-                var l = t.kids[i];
-                if (l.isVisible === true) {
-                    switch(l.constraints) {
-                        case "center": center = l; break;
+            for(var i = 0;i < target.kids.length; i++){
+                var kid = target.kids[i];
+                if (kid.isVisible === true) {
+                    switch(kid.constraints) {
+                        case null:
+                        case undefined:
+                        case "center": center = kid; break;
                         case "top" :
-                            var ps = l.getPreferredSize();
-                            l.setBounds(left, top, right - left, ps.height);
-                            top += ps.height + this.vgap;
+                            var ps = kid.getPreferredSize();
+                            kid.setBounds(l, t, r - l, ps.height);
+                            t += ps.height + this.vgap;
+                            top = kid;
                             break;
                         case "bottom":
-                            var ps = l.getPreferredSize();
-                            l.setBounds(left, bottom - ps.height, right - left, ps.height);
-                            bottom -= ps.height + this.vgap;
+                            var ps = kid.getPreferredSize();
+                            kid.setBounds(l, b - ps.height, r - l, ps.height);
+                            b -= ps.height + this.vgap;
                             break;
-                        case "left": west = l; break;
-                        case "right": east = l; break;
-                        default: throw new Error("Invalid constraints: " + l.constraints);
+                        case "left": left = kid; break;
+                        case "right": right = kid; break;
+                        default: throw new Error("Invalid constraints: " + kid.constraints);
                     }
                 }
             }
 
-            if (east != null){
-                var d = east.getPreferredSize();
-                east.setBounds(right - d.width, top, d.width, bottom - top);
-                right -= d.width + this.hgap;
+            if (right != null){
+                var d = right.getPreferredSize();
+                right.setBounds(r - d.width, t, d.width, b - t);
+                r -= d.width + this.hgap;
             }
 
-            if (west != null){
-                var d = west.getPreferredSize();
-                west.setBounds(left, top, d.width, bottom - top);
-                left += d.width + this.hgap;
+            if (left != null){
+                var d = left.getPreferredSize();
+                left.setBounds(l, t, d.width, b - t);
+                l += d.width + this.hgap;
             }
 
             if (center != null){
-                center.setBounds(left, top, right - left, bottom - top);
+                center.setBounds(l, t, r - l, b - t);
             }
         };
     }

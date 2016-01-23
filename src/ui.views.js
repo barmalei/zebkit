@@ -1022,7 +1022,7 @@ pkg.ArrowView = Class(pkg.View, [
     }
 ]);
 
-pkg.BaseTextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
+pkg.BaseTextRender = Class(pkg.Render,  [
     function $prototype() {
         /**
          * UI component that holds the text render
@@ -1585,7 +1585,7 @@ pkg.WrappedTextRender = new Class(pkg.TextRender, [
         this.lastWidth = -1;
 
         this.breakLine = function (w, startIndex, line, lines) {
-            if (line == "") {
+            if (line === "") {
                 lines.push(line);
             }
             else {

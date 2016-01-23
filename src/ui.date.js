@@ -518,11 +518,7 @@ zebkit.package("ui.date", function(pkg, Class) {
             this.RightArrowButton  = Class(ui.ArrowButton, []);
             this.Link              = Class(ui.Link, []);
 
-            this.DotButton = Class(ui.EvStatePan, [
-                function $mixing() {
-                    return ui.ButtonRepeatMix;
-                },
-
+            this.DotButton = Class(ui.EvStatePan, ui.ButtonRepeatMix, [
                 function() {
                     this._ = new zebkit.util.Listeners();
                     this.$super();
@@ -907,7 +903,7 @@ zebkit.package("ui.date", function(pkg, Class) {
         }
     ]);
 
-    var PopupCalendarMix = [
+    var PopupCalendarMix = zebkit.Interface([
         function childKeyPressed(e) {
             if (e.code === ui.KeyEvent.ENTER) this.showCalendar(e.source);
             else {
@@ -994,9 +990,9 @@ zebkit.package("ui.date", function(pkg, Class) {
                 this.anchor = null;
             }
         }
-    ];
+    ]);
 
-    pkg.DateInputField = Class(ui.Panel, [
+    pkg.DateInputField = Class(ui.Panel, PopupCalendarMix, [
         function $clazz() {
             this.Button = Class(ui.Button, []);
 
@@ -1007,10 +1003,6 @@ zebkit.package("ui.date", function(pkg, Class) {
             ]);
 
             this.DateTextField = Class(pkg.DateTextField, []);
-        },
-
-        function $mixing() {
-            return PopupCalendarMix;
         },
 
         function calendarDateSet(src) {
@@ -1042,11 +1034,10 @@ zebkit.package("ui.date", function(pkg, Class) {
         }
     ]);
 
-    pkg.DateRangeInput = Class(ui.Panel, [
+    pkg.DateRangeInput = Class(ui.Panel, PopupCalendarMix, [
         function $clazz() {
             this.MinDateTextField  = Class(pkg.DateTextField, []);
             this.MaxDateTextField  = Class(pkg.DateTextField, []);
-
             this.LeftArrowButton   = Class(ui.ArrowButton, []);
             this.RightArrowButton  = Class(ui.ArrowButton, []);
 
@@ -1060,10 +1051,6 @@ zebkit.package("ui.date", function(pkg, Class) {
             ]);
 
             this.Line = Class(ui.Line, []);
-        },
-
-        function $mixing() {
-            return PopupCalendarMix;
         },
 
         function calendarShown(calendar) {

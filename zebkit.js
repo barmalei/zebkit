@@ -23,7 +23,6 @@ function isBoolean(o) {
           (typeof o === "boolean" || o.constructor === Boolean);
 }
 
-
 /**
  *  Create a new or return existent name space by the given name. The names space
  *  is structure to host various packages, classes, interfaces and so on. Usually
@@ -68,8 +67,9 @@ var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
         throw new Error("Name space '" + nsname + "' doesn't exist");
     }
 
-    function Package() {
+    function Package(name) {
         this.$url = null;
+        this.$name = name;
         if (typeof document !== "undefined") {
             var s  = document.getElementsByTagName('script'),
                 ss = s[s.length - 1].getAttribute('src'),
@@ -115,7 +115,7 @@ var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
         for(var i = 0, k = names[0]; i < names.length; i++, k = k + '.' + names[i]) {
             var n = names[i], p = target[n];
             if (typeof p === "undefined") {
-                p = new Package();
+                p = new Package(name);
                 target[n] = p;
                 f[k] = p;
             }
@@ -325,39 +325,51 @@ function $toString() {
 }
 
 // return function that is meta class
-//  pt - parent template function (can be null)
-//  tf - template function
-//  p  - parent interfaces
-function make_template(pt, tf, p) {
-    tf.$hash$ = "$ZBr$" + ($$$++);
-    tf.toString = $toString;
+//  parentTemplate      - parent template function (can be null)
+//  templateConstructor - template function
+//  inheritanceList     - parent class and interfaces
+function make_template(parentTemplate, templateConstructor, inheritanceList) {
+    templateConstructor.$hash$ = "$zEk$" + ($$$++);
+    templateConstructor.toString = $toString;
 
-    if (pt != null) {
-        tf.prototype.clazz = tf;
+    if (parentTemplate != null) {
+        templateConstructor.prototype.clazz = templateConstructor;
     }
 
-    tf.clazz = pt;
-    tf.prototype.toString = $toString;
-    tf.prototype.constructor = tf;
+    templateConstructor.clazz = parentTemplate;
+    templateConstructor.prototype.toString = $toString;
+    templateConstructor.prototype.constructor = templateConstructor;
 
-    if (p != null && p.length > 0) {
-        tf.$parents = {};
-        for(var i=0; i < p.length; i++) {
-            var l = p[i];
-            if (l == null || typeof l !== "function") {
-                throw new ReferenceError("Invalid parent class or interface:" + i);
+    // setup parent entities
+    if (inheritanceList != null && inheritanceList.length > 0) {
+        templateConstructor.$parents = {};
+        for(var i = 0; i < inheritanceList.length; i++) {
+            var inherited = inheritanceList[i];
+            if (inherited == null || typeof inherited !== "function" || typeof inherited.$hash$ === "undefined") {
+                throw new ReferenceError("Invalid parent class or interface:" + inherited);
             }
 
-            tf.$parents[l] = true;
-            if (l.$parents != null) {
-                var pp = l.$parents;
-                for(var k in pp) {
-                    if (pp.hasOwnProperty(k)) tf.$parents[k] = true;
+            if (templateConstructor.$parents[inherited.$hash$] === true) {
+                throw Error("Duplicate inherited class or interface: " + inherited);
+            }
+
+            templateConstructor.$parents[inherited.$hash$] = true;
+
+            // if parent has own parents copy the parents references
+            if (inherited.$parents != null) {
+                for(var k in inherited.$parents) {
+                    if (inherited.$parents.hasOwnProperty(k)) {
+                        if (templateConstructor.$parents[k] === true) {
+                            throw Error("Duplicate inherited class or interface: " + k);
+                        }
+
+                        templateConstructor.$parents[k] = true;
+                    }
                 }
             }
         }
     }
-    return tf;
+    return templateConstructor;
 }
 
 pkg.getPropertySetter = function(obj, name) {
@@ -449,13 +461,52 @@ pkg.Singleton = function(clazz) {
  */
 pkg.Interface = make_template(null, function() {
     var $Interface = make_template(pkg.Interface, function() {
-        if (arguments.length > 0) {
-            // return anonymous implementation of the interface if methods list is passed
-            // as an argument
-            return new (pkg.Class($Interface, arguments[0]))();
-        }
-    }, arguments);
+        throw new Error("Interface cannot be instantiated")
+    }, null);
 
+    if (arguments.length > 1) {
+        throw Error("Only one argument is expected");
+    }
+
+    $Interface.api = [];
+
+    if (arguments.length > 0) {
+        var methods = [];
+
+        // TODO: temporary solution for abstract methods declaration
+        if (arguments[0] != null && arguments[0].abstract != null && Array.isArray(arguments[0].abstract)) {
+            methods = arguments[0].abstract;
+            for(var i = 0; i < methods.length; i++) {
+                var mn = FN(methods[i]);
+                eval("var method = function " + mn + "() { throw new Error('Method " + mn + "() not implemented'); };");
+                methods[i] = method;
+            }
+
+            if (Array.isArray(arguments[0].methods)) {
+                methods.concat.apply(this, arguments[0].methods);
+            }
+        } else {
+            if (Array.isArray(arguments[0]) == false) {
+                throw new Error("Array of methods is expected");
+            }
+            methods = arguments[0];
+        }
+
+        if (methods.length > 0) {
+            for(var i = 0; i < methods.length; i++) {
+                var method = methods[i];
+                if (typeof method !== "function") {
+                    throw new Error("Method is expected");
+                }
+
+                if (method.clazz != null) {
+                    throw new Error("Interface cannot be inherited");
+                }
+
+                $Interface.api[i] = method;
+            }
+        }
+    }
     return $Interface;
 });
 
@@ -587,6 +638,123 @@ function ProxyMethod(name, f, clazz) {
  * @api zebkit.Class()
  * @method Class
  */
+
+function copyProtoFields(targetClazz, parentClazz, cb) {
+    for (var k in parentClazz.prototype) {
+        if (parentClazz.prototype.hasOwnProperty(k) === true) {
+            var f = parentClazz.prototype[k];
+            targetClazz.prototype[k] = (f != null && f.methodBody != null) ? ProxyMethod(f.methodName, f.methodBody, f.boundTo)
+                                                                           : f;
+            if (cb != null) {
+                cb(targetClazz, parentClazz, targetClazz.prototype[k], f);
+            }
+        }
+    }
+}
+
+/**
+ * Extend existent class with the given methods and interfaces
+ * Be  careful to use the method, pay attention the following facts:
+
+- only the given class and the classes that inherit the class __after the extend method calling__ get the updates
+
+ *
+ * For example:
+
+    var A = zebkit.Class([ // declare class A that defines one "a" method
+        function a() {
+            console.log("A:a()");
+        }
+    ]);
+
+    var a = new A();
+    a.a();  // show "A:a()" message
+
+    A.extend([
+        function b() {
+            console.log("EA:b()");
+        },
+
+        function a() {   // redefine "a" method
+            console.log("EA:a()");
+        }
+    ]);
+
+    // can call b() method we just added to the instance class
+    a.b(); // show "EA:b()" message
+    a.a(); // show "EA:a()" message
+
+ * @param {Array} methods array of the methods the class have to be
+ * extended with
+ * @method mixing
+ */
+function mixing(clazz, methods, overwritable) {
+    if (overwritable == null) {
+        overwritable = false;
+    }
+
+    if (Array.isArray(methods) === false) {
+        throw new Error("Methods array is expected (" + methods + ")");
+    }
+
+    var names = {};
+    for(var i = 0; i < methods.length; i++) {
+        var method     = methods[i],
+            methodName = FN(method);
+
+        // detect if the passed method is proxy method
+        if (method.methodBody != null) {
+            throw new Error("Proxy method '" + methodName + "' cannot be mixed in a class");
+        }
+
+        // map user defined constructor to internal constructor name
+        if (methodName === CDNAME) {
+            methodName = CNAME;
+        }
+        else {
+            if (methodName[0] === "$") {
+                // populate prototype fields if a special method has been defined
+                if (methodName === "$prototype") {
+                    method.call(clazz.prototype, clazz);
+                    if (clazz.prototype[CDNAME]) {
+                        clazz.prototype[CNAME] = clazz.prototype[CDNAME];
+                        delete clazz.prototype[CDNAME];
+                    }
+                    continue;
+                }
+
+                // populate class level fields if a special method has been defined
+                if (methodName === "$clazz") {
+                    method.call(clazz);
+                    continue;
+                }
+            }
+        }
+
+        if (names[methodName] === true) {
+            throw new Error("Duplicate declaration of '" + methodName+ "(...)' method");
+        }
+
+        var existentMethod = clazz.prototype[methodName];
+        if (typeof existentMethod !== 'undefined') {
+            if (typeof existentMethod !== 'function') {
+                throw new Error("'" + methodName + "(...)' method clash with a field");
+            }
+
+            // check if the method has been already declared for the given class
+            if (overwritable === false && existentMethod.boundTo === clazz) {
+                throw new Error("Duplicate class '" + methodName +"(...)' method overwriting is not allowed");
+            }
+        }
+
+        // Create and set proxy method that is bound to the given class
+        clazz.prototype[methodName] = ProxyMethod(methodName, method, clazz);
+
+        // save method we have already added to check double declaration error
+        names[methodName] = true;
+    }
+}
+
 pkg.Class = make_template(null, function() {
     if (arguments.length === 0) {
         throw new Error("No class definition was found");
@@ -596,26 +764,34 @@ pkg.Class = make_template(null, function() {
         throw new Error("Invalid class definition");
     }
 
-    if (arguments.length > 1 && typeof arguments[0] !== "function") {
+    if (arguments.length > 1 && typeof arguments[0] !== "function")  {
         throw new ReferenceError("Invalid parent class '" + arguments[0] + "'");
     }
 
-    var df = arguments[arguments.length - 1],
-        $parent = null,
-        args = []; // using slice can be slower that trivial copying array
-                  // Array.prototype.slice.call(arguments, 0, arguments.length-1);
+    var classMethods = arguments[arguments.length - 1],
+        parentClass  = null,
+        toInherit    = []; // using slice can be slower that trivial copying array
+                           // Array.prototype.slice.call(arguments, 0, arguments.length-1);
+
+    // detect parent class in inheritance list as the first argument that has "clazz" set to Class
+    if (arguments.length > 0 && (arguments[0] == null || arguments[0].clazz === pkg.Class)) {
+        parentClass = arguments[0];
+    }
 
     // use instead of slice for performance reason
-    for(var i=0; i < arguments.length-1; i++) {
-        args[i] = arguments[i];
+    for(var i = 0; i < arguments.length - 1; i++) {
+        toInherit[i] = arguments[i];
+
+        // let's make sure we inherit interface
+        if (parentClass == null || i > 0) {
+            if (toInherit[i] == null || toInherit[i].clazz !== pkg.Interface) {
+                throw new ReferenceError("Invalid inherited interface :" + toInherit[i]);
+            }
+        }
     }
 
-    if (args.length > 0 && (args[0] == null || args[0].clazz === pkg.Class)) {
-        $parent = args[0];
-    }
-
-    var $template = make_template(pkg.Class, function() {
-        this.$hash$ = "$zObj_" + ($$$++);
+    var classTemplate = make_template(pkg.Class, function() {
+        this.$hash$ = "$ZkIo" + ($$$++);
 
         if (arguments.length > 0) {
             var a = arguments[arguments.length - 1];
@@ -625,11 +801,11 @@ pkg.Class = make_template(null, function() {
                 a = a[0];
 
                 // prepare arguments list to declare an anonymous class
-                var args = [ $template ],      // first of all the class has to inherit the original class
-                    k = arguments.length - 2;
+                var args = [ classTemplate ],      // first of all the class has to inherit the original class
+                    k    = arguments.length - 2;
 
                 // collect interfaces the anonymous class has to implement
-                for(; k >= 0 && pkg.instanceOf(arguments[k], pkg.Interface); k--) {
+                for(; k >= 0 && arguments[k].clazz === pkg.Interface; k--) {
                     args.push(arguments[k]);
                 }
 
@@ -642,7 +818,7 @@ pkg.Class = make_template(null, function() {
                     // call constructor properly since we have arguments as an array
                     f  = function() {};
 
-                cl.$name = $template.$name; // the same class name for anonymous
+                cl.$name = classTemplate.$name; // the same class name for anonymous
                 f.prototype = cl.prototype; // the same prototypes
 
                 var o = new f();
@@ -651,7 +827,7 @@ pkg.Class = make_template(null, function() {
                 // use array copy instead of cloning with slice for performance reason
                 // (Array.prototype.slice.call(arguments, 0, k + 1))
                 args = [];
-                for(var i=0; i < k + 1; i++) args[i] = arguments[i];
+                for(var i = 0; i < k + 1; i++) args[i] = arguments[i];
                 cl.apply(o, args);
 
                 // set constructor field for consistency
@@ -663,35 +839,31 @@ pkg.Class = make_template(null, function() {
         if (this[CNAME] != null) {
             return this[CNAME].apply(this, arguments);
         }
-    }, args);
+    }, toInherit);
 
     // prepare fields that caches the class properties
-    $template.$propertyInfo = {};
+    classTemplate.$propertyInfo = {};
 
-    function copyProtoMethod(targetClazz, parentClazz, cb) {
-        for (var k in parentClazz.prototype) {
-            if (parentClazz.prototype.hasOwnProperty(k) === true) {
-                var f = parentClazz.prototype[k];
-                targetClazz.prototype[k] = (f != null && f.methodBody != null) ? ProxyMethod(f.methodName, f.methodBody, f.boundTo)
-                                                                               : f;
-
-                if (cb != null) cb(targetClazz, parentClazz, targetClazz.prototype[k], f);
-            }
-        }
-    }
 
     // copy parents prototype methods and fields into
     // new class template
-    $template.$parent = $parent;
-    if ($parent != null) {
-        copyProtoMethod($template, $parent);
+    classTemplate.$parent = parentClass;
+    if (parentClass != null) {
+        copyProtoFields(classTemplate, parentClass);
+    }
+
+    if (toInherit.length > 0) {
+        for(var i = toInherit[0].clazz === pkg.Interface ? 0 : 1; i < toInherit.length; i++) {
+
+            mixing(classTemplate, toInherit[i].api);
+        }
     }
 
     // extend method cannot be overridden
-    $template.prototype.extend = function() {
+    classTemplate.prototype.extend = function() {
         var c = this.clazz,
             l = arguments.length,
-            f = arguments[l-1];
+            f = arguments[l - 1];
 
         // replace the instance class with a new intermediate class
         // that inherits the replaced class. it is done to support
@@ -723,7 +895,7 @@ pkg.Class = make_template(null, function() {
 
         // add new interfaces if they has been passed
         for(var i = 0; i < l; i++) {
-            if (pkg.instanceOf(arguments[i], pkg.Interface) === false) {
+            if (arguments[i].clazz !== pkg.Interface) {
                 throw new Error("Invalid argument: " + arguments[i]);
             }
             c.$parents[arguments[i]] = true;
@@ -731,7 +903,7 @@ pkg.Class = make_template(null, function() {
         return this;
     };
 
-    $template.prototype.$super = function() {
+    classTemplate.prototype.$super = function() {
        if (pkg.$caller != null) {
             var name = pkg.$caller.methodName,
                 $s   = pkg.$caller.boundTo.$parent,
@@ -747,10 +919,6 @@ pkg.Class = make_template(null, function() {
 
             while ($s != null) {
                 var m = $s.prototype[name];
-                // if the method found and the method is
-                //     not proxy method       <or>
-                //     single proxy method    <or>
-                //     multiple proxy method that contains a method with the required arity
                 if (m != null) {
                     return m.apply(this, args);
                 }
@@ -764,7 +932,7 @@ pkg.Class = make_template(null, function() {
         throw new Error("$super is called outside of class context");
     };
 
-    $template.prototype.$clone = function(map) {
+    classTemplate.prototype.$clone = function(map) {
         map = map || new Map();
 
         var f = function() {};
@@ -793,11 +961,11 @@ pkg.Class = make_template(null, function() {
         return nobj;
     };
 
-    $template.prototype.clazz = $template;
+    classTemplate.prototype.clazz = classTemplate;
 
     // check if the method has been already defined in the class
-    if (typeof $template.prototype.properties === 'undefined') {
-        $template.prototype.properties = function(p) {
+    if (typeof classTemplate.prototype.properties === 'undefined') {
+        classTemplate.prototype.properties = function(p) {
             return pkg.properties(this, p);
         };
     }
@@ -805,8 +973,8 @@ pkg.Class = make_template(null, function() {
     var lans = "Listeners are not supported";
 
     // check if the method has been already defined in the class
-    if (typeof $template.prototype.bind === 'undefined') {
-        $template.prototype.bind = function() {
+    if (typeof classTemplate.prototype.bind === 'undefined') {
+        classTemplate.prototype.bind = function() {
             if (this._ == null) {
                 throw new Error(lans);
             }
@@ -815,8 +983,8 @@ pkg.Class = make_template(null, function() {
     }
 
     // check if the method has been already defined in the class
-    if (typeof $template.prototype.unbind === 'undefined') {
-        $template.prototype.unbind = function() {
+    if (typeof classTemplate.prototype.unbind === 'undefined') {
+        classTemplate.prototype.unbind = function() {
             if (this._ == null) {
                 throw new Error(lans);
             }
@@ -824,123 +992,24 @@ pkg.Class = make_template(null, function() {
         };
     }
 
-    /**
-     * Extend existent class with the given methods and interfaces
-     * Be  careful to use the method, pay attention the following facts:
-
-    - only the given class and the classes that inherit the class __after the extend method calling__ get the updates
-    - if the class gets method that already defined the old method will be overridden
-    - **"$super"** cannot be called from the method the class is extended
-
-     *
-     * For example:
-
-        var A = zebkit.Class([ // declare class A that defines one "a" method
-            function a() {
-                console.log("A:a()");
-            }
-        ]);
-
-        var a = new A();
-        a.a();  // show "A:a()" message
-
-        A.extend([
-            function b() {
-                console.log("EA:b()");
-            },
-
-            function a() {   // redefine "a" method
-                console.log("EA:a()");
-            }
-        ]);
-
-        // can call b() method we just added to the instance class
-        a.b(); // show "EA:b()" message
-        a.a(); // show "EA:a()" message
-
-     * @param {Array} methods array of the methods the class have to be
-     * extended with
-     * @method extend
-     */
-    function extend(clazz, df, isMixing) {
-        if (arguments.length === 1) {
-            df    = clazz;
-            clazz = this;
-        }
-
-        if (isMixing == null) {
-            isMixing = false;
-        }
-
-        if (Array.isArray(df) === false) {
-            throw new Error("Invalid class definition '" + df + "', array is expected");
-        }
-
-        for(var i = 0; i < df.length; i++) {
-            var f  = df[i],
-                n  = FN(f);
-
-            // map user defined constructor to internal constructor name
-            if (n === CDNAME) {
-                n = CNAME;
-            }
-            else {
-                if (n[0] === "$") {
-                    // populate prototype fields if a special method has been defined
-                    if (n === "$prototype") {
-                        f.call(clazz.prototype, clazz);
-                        if (clazz.prototype[CDNAME]) {
-                            clazz.prototype[CNAME] = clazz.prototype[CDNAME];
-                            delete clazz.prototype[CDNAME];
-                        }
-                        continue;
-                    }
-
-                    // populate class level fields if a special method has been defined
-                    if (n === "$clazz") {
-                        f.call(clazz);
-                        continue;
-                    }
-
-                    if (n === "$mixing") {
-                        extend(clazz, f.call(clazz));
-                        continue;
-                    }
-                }
-            }
-
-            var v = clazz.prototype[n];
-
-            if (typeof v !== 'undefined') {
-                if (typeof v !== 'function') throw new Error("Method '" + n + "' clash with a property");
-
-                if (isMixing === false && v.boundTo === clazz) {
-                    throw new Error("Method '" + n + "' overriding is not allowed");
-                }
-            }
-
-            clazz.prototype[n] = ProxyMethod(n, f, clazz);
-        }
-    }
-
-    extend($template, df);
+    mixing(classTemplate, classMethods, true);
 
     // populate static fields
     // TODO: exclude the basic static methods and static constant
     // static inheritance
-    if ($parent != null) {
-        for (var k in $parent) {
+    if (parentClass != null) {
+        for (var k in parentClass) {
             if (k[0] !== '$' &&
-                $parent.hasOwnProperty(k) &&
-                $template.hasOwnProperty(k) === false)
+                parentClass.hasOwnProperty(k) &&
+                classTemplate.hasOwnProperty(k) === false)
             {
-                $template[k] = pkg.clone($parent[k]);
+                classTemplate[k] = pkg.clone(parentClass[k]);
             }
         }
     }
 
      // add extend later to avoid the method be inherited as a class static field
-    $template.extend = function() {
+    classTemplate.extend = function() {
         // inject class
         if (arguments[1] !== false && this.$isInjected !== true) {
             // create intermediate class
@@ -948,7 +1017,7 @@ pkg.Class = make_template(null, function() {
 
             // copy this class prototypes methods to intermediate class A and re-define
             // boundTo to the intermediate class A if they were bound to this class
-            copyProtoMethod(A, this, function(targetClazz, srcClazz, addedMethod, sourceMethod) {
+            copyProtoFields(A, this, function(targetClazz, srcClazz, addedMethod, sourceMethod) {
                 if (addedMethod != sourceMethod && addedMethod.boundTo === srcClazz) {
                     addedMethod.boundTo = A;
                     if (sourceMethod.boundTo === srcClazz) sourceMethod.boundTo = A;
@@ -959,10 +1028,10 @@ pkg.Class = make_template(null, function() {
             this.$isInjected = true;
         }
 
-        extend.call(this, this, arguments[0], true);
+        mixing.call(this, this, arguments[0], true);
     };
 
-    return $template;
+    return classTemplate;
 });
 
 var Class    = pkg.Class,
@@ -1066,7 +1135,7 @@ pkg.instanceOf = function(obj, clazz) {
 
         var c = obj.clazz;
         return c != null && (c === clazz ||
-               (typeof c.$parents !== 'undefined' && c.$parents.hasOwnProperty(clazz)));
+               (typeof c.$parents !== 'undefined' && c.$parents.hasOwnProperty(clazz.$hash$)));
     }
 
     throw new Error("instanceOf(): null class");
@@ -1108,7 +1177,7 @@ pkg.ready = function() {
         $readyCallbacks.push(arguments[i]);
     }
 
-    while($busy === 0 && $readyCallbacks.length > 0) {
+    while ($busy === 0 && $readyCallbacks.length > 0) {
         $readyCallbacks.shift()();
     }
 };
@@ -1121,6 +1190,7 @@ pkg.package = function(name, callback) {
         // can have influence on ready state
         zebkit.ready(function() {
             f.call(p, p, zebkit.Class);
+            pkg.$resolveClassNames(p);
         });
     }
 };
@@ -1149,34 +1219,29 @@ pkg.Dummy = Class([]);
 // TODO:
 //!!! this code resolve names of classes  defined in a package
 //    should be re-worked to use more generic and trust-able mechanism
-pkg.$resolveClassNames = function() {
-    pkg(function(n, p) {
-        function collect(pp, p) {
-            for(var k in p) {
-                if (k[0] !== "$" && p[k] != null && p[k].$name == null && p.hasOwnProperty(k) && zebkit.instanceOf(p[k], Class)) {
-                    p[k].$name = pp != null ? pp + "." + k : k;
-                    collect(p[k].$name, p[k]);
-                }
+pkg.$resolveClassNames = function(p) {
+    function collect(prefix, p) {
+        for(var k in p) {
+            if (k[0]   !== "$"         &&
+                p[k] != null         &&
+                p[k].$name == null   &&
+                p.hasOwnProperty(k)  &&
+                p[k].clazz === Class   )
+            {
+                p[k].$name = prefix != null ? prefix + "." + k : k;
+                collect(p[k].$name, p[k]);
             }
         }
-        collect(null, p);
-    });
-};
+    }
 
-function complete() {
-    // TODO:
-    //!!! this code resolve names of classes  defined in a package
-    //    should be re-worked to use more generic and trust-able mechanism
-    try {
-        pkg.$resolveClassNames();
+    if (arguments.length === 0) {
+        pkg(function(name, p) {
+            collect(null, p);
+        });
+    } else {
+        collect(null, p);
     }
-    catch(e) {
-        pkg.ready();
-        console.log("" + (e.stack ? e.stack : e));
-        throw e;
-    }
-    pkg.ready();
-}
+};
 
 if (pkg.isInBrowser) {
     var m = window.location.search.match(/[?&][a-zA-Z0-9_.]+=[^?&=]+/g), env = {};
@@ -1289,13 +1354,19 @@ if (pkg.isInBrowser) {
     var $interval = setInterval(function () {
         if (document.readyState === "complete") {
             clearInterval($interval);
-            complete();
+            pkg.ready();
         }
     }, 100);
+} else {
+    pkg.ready();
 }
-else {
-    complete();
-}
+
+pkg.ready(function() {
+    console.log(" ::: " + new Date().getTime());
+    pkg.$resolveClassNames();
+    console.log(" ::: " + new Date().getTime());
+});
+
 
 /**
  * @for
@@ -1345,7 +1416,12 @@ pkg.getDirectChild = function(parent, child){
  * @param {zebkit.layout.Layoutable} t a target layoutable component
  * @method doLayout
  */
-var L = pkg.Layout = new zebkit.Interface();
+var L = pkg.Layout = new zebkit.Interface({
+    abstract: [
+        function doLayout(target) {},
+        function calcPreferredSize(target) {}
+    ]
+});
 
 /**
  * Find a direct component located at the given location of the specified
@@ -2231,30 +2307,32 @@ pkg.BorderLayout = Class(L, [
         };
 
         this.calcPreferredSize = function (target){
-            var center = null, west = null,  east = null, north = null, south = null, d = null;
+            var center = null, left = null,  right = null, top = null, bottom = null, topRight = null, d = null;
             for(var i = 0; i < target.kids.length; i++){
                 var l = target.kids[i];
                 if (l.isVisible === true){
                     switch(l.constraints) {
-                       case "center" : center = l;break;
-                       case "top"    : north  = l;break;
-                       case "bottom" : south  = l;break;
-                       case "left"   : west   = l;break;
-                       case "right"  : east   = l;break;
+                       case null:
+                       case undefined:
+                       case "center"    : center = l; break;
+                       case "top"       : top    = l; break;
+                       case "bottom"    : bottom = l; break;
+                       case "left"      : left   = l; break;
+                       case "right"     : right  = l; break;
                        default: throw new Error("Invalid constraints: " + l.constraints);
                     }
                 }
             }
 
             var dim = { width:0, height:0 };
-            if (east != null) {
-                d = east.getPreferredSize();
-                dim.width += d.width + this.hgap;
+            if (right !== null) {
+                d = right.getPreferredSize();
+                dim.width  = d.width + this.hgap;
                 dim.height = (d.height > dim.height ? d.height: dim.height );
             }
 
-            if (west != null) {
-                d = west.getPreferredSize();
+            if (left !== null) {
+                d = left.getPreferredSize();
                 dim.width += d.width + this.hgap;
                 dim.height = d.height > dim.height ? d.height : dim.height;
             }
@@ -2265,65 +2343,68 @@ pkg.BorderLayout = Class(L, [
                 dim.height = d.height > dim.height ? d.height : dim.height;
             }
 
-            if (north != null) {
-                d = north.getPreferredSize();
+            if (top != null) {
+                d = top.getPreferredSize();
                 dim.width = d.width > dim.width ? d.width : dim.width;
                 dim.height += d.height + this.vgap;
             }
 
-            if (south != null) {
-                d = south.getPreferredSize();
+            if (bottom != null) {
+                d = bottom.getPreferredSize();
                 dim.width = d.width > dim.width ? d.width : dim.width;
                 dim.height += d.height + this.vgap;
             }
             return dim;
         };
 
-        this.doLayout = function(t){
-            var top    = t.getTop(),
-                bottom = t.height - t.getBottom(),
-                left   = t.getLeft(),
-                right  = t.width - t.getRight(),
+        this.doLayout = function(target){
+            var t      = target.getTop(),
+                b      = target.height - target.getBottom(),
+                l      = target.getLeft(),
+                r      = target.width - target.getRight(),
                 center = null,
-                west   = null,
-                east   = null;
+                left   = null,
+                right  = null;
 
-            for(var i = 0;i < t.kids.length; i++){
-                var l = t.kids[i];
-                if (l.isVisible === true) {
-                    switch(l.constraints) {
-                        case "center": center = l; break;
+            for(var i = 0;i < target.kids.length; i++){
+                var kid = target.kids[i];
+                if (kid.isVisible === true) {
+                    switch(kid.constraints) {
+                        case null:
+                        case undefined:
+                        case "center": center = kid; break;
                         case "top" :
-                            var ps = l.getPreferredSize();
-                            l.setBounds(left, top, right - left, ps.height);
-                            top += ps.height + this.vgap;
+                            var ps = kid.getPreferredSize();
+                            kid.setBounds(l, t, r - l, ps.height);
+                            t += ps.height + this.vgap;
+                            top = kid;
                             break;
                         case "bottom":
-                            var ps = l.getPreferredSize();
-                            l.setBounds(left, bottom - ps.height, right - left, ps.height);
-                            bottom -= ps.height + this.vgap;
+                            var ps = kid.getPreferredSize();
+                            kid.setBounds(l, b - ps.height, r - l, ps.height);
+                            b -= ps.height + this.vgap;
                             break;
-                        case "left": west = l; break;
-                        case "right": east = l; break;
-                        default: throw new Error("Invalid constraints: " + l.constraints);
+                        case "left": left = kid; break;
+                        case "right": right = kid; break;
+                        default: throw new Error("Invalid constraints: " + kid.constraints);
                     }
                 }
             }
 
-            if (east != null){
-                var d = east.getPreferredSize();
-                east.setBounds(right - d.width, top, d.width, bottom - top);
-                right -= d.width + this.hgap;
+            if (right != null){
+                var d = right.getPreferredSize();
+                right.setBounds(r - d.width, t, d.width, b - t);
+                r -= d.width + this.hgap;
             }
 
-            if (west != null){
-                var d = west.getPreferredSize();
-                west.setBounds(left, top, d.width, bottom - top);
-                left += d.width + this.hgap;
+            if (left != null){
+                var d = left.getPreferredSize();
+                left.setBounds(l, t, d.width, b - t);
+                l += d.width + this.hgap;
             }
 
             if (center != null){
-                center.setBounds(left, top, right - left, bottom - top);
+                center.setBounds(l, t, r - l, b - t);
             }
         };
     }
@@ -8220,7 +8301,6 @@ pkg.Matrix = Class([
                     // (where mouse down is happened) to handle it
                     if (this.element !== mp.$adapter.element) {
                         $enteredElement = null;
-
                         // wrap with try-catch to prevent inconsistency
                         try {
                             stub.$fillWith(id, e);
@@ -8231,6 +8311,7 @@ pkg.Matrix = Class([
                         catch(ee) {
                             // keep it for exceptional cases
                             $enteredElement = this.element;
+                            throw ee;
                         }
                         finally {
                             mp.$adapter.$UP(id, e, stub);
@@ -8318,13 +8399,14 @@ pkg.Matrix = Class([
                         }
                         catch(ex) {
                             // don't forget to decrease counter
-                            if (t.stub != null && t.stub.touchCounter > 0) t.stub.touchCounter--;
+                            if (t.stub != null && t.stub.touchCounter > 0) {
+                                t.stub.touchCounter--;
+                            }
                             delete $pointerPressedEvents[t.identifier];
                             console.log(ex.stack);
                         }
                     }
                     this.$queue.length = 0;
-
                 }
             };
 
@@ -8396,7 +8478,6 @@ pkg.Matrix = Class([
                     this.$mousePageX = pageX;
                     this.$mousePageY = pageY;
 
-
                     if ($pointerPressedEvents[LMOUSE] != null || $pointerPressedEvents[RMOUSE] != null) {
                         if ($pointerPressedEvents[LMOUSE] != null) {
                             this.$DRAG(LMOUSE, e, ME_STUB);
@@ -8464,8 +8545,7 @@ pkg.Matrix = Class([
                     e.preventDefault();
                 }
                 else {
-                    var id = e.button == 0 ? LMOUSE : RMOUSE,
-                        mp = $pointerPressedEvents[id];
+                    var id = e.button == 0 ? LMOUSE : RMOUSE;
 
                     $this.$UP(id, e, ME_STUB);
 
@@ -8725,7 +8805,6 @@ pkg.Matrix = Class([
 
                     e.preventDefault();
                 }, false);
-
 
                 element.onmousemove = function(e) {
                     $this.$MMOVE(e);
@@ -12560,9 +12639,13 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
                 o = pkg.$pointerOwner[e.identifier],
                 b = false;
 
+          //  console.log("$pointerMoved() currentMouseOwner = " + (o == null ? "null" : o.clazz.$name)  + ", new mouseOwner  = " +  (d == null ? "null" : d.clazz.$name));
+
+
             // check if pointer already inside a component
             if (o != null) {
                 if (d != o) {
+                    console.log("$pointerMoved() Fire poiunterExited for  " + e.identifier + ", owner = " + o);
                     pkg.$pointerOwner[e.identifier] = null;
                     b = EM.fireEvent("pointerExited", e.update(o, x, y));
 
@@ -12652,6 +12735,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
                 EM.fireEvent("pointerReleased", e.update(po, x, y));
 
                 //  make sure it is originally a touch event
+                //  TODO: Seems the code is invalid since it doesn't set move owner to null;
                 if (e.pointerType !== "mouse") {
                     EM.fireEvent("pointerExited", e.update(po, x, y));
                 }
@@ -12679,8 +12763,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
 
         this.$pointerPressed = function(e) {
             var x  = this.$toElementX(e.pageX, e.pageY),
-                y  = this.$toElementY(e.pageX, e.pageY),
-                tl = null;
+                y  = this.$toElementY(e.pageX, e.pageY);
 
             // adjust event for passing it to layers
             e.x = x;
@@ -12689,7 +12772,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
 
             // send pointer event to a layer and test if it has been activated
             for(var i = this.kids.length - 1; i >= 0; i--){
-                tl = this.kids[i];
+                var tl = this.kids[i];
                 if (tl.layerPointerPressed != null && tl.layerPointerPressed(e)) {
                     if (e.eatMe === true) return true;
                     break;
@@ -12697,6 +12780,10 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
             }
 
             var d = this.getComponentAt(x, y);
+
+            console.log("PointerPressed prev owner = " + pkg.$pointerOwner[e.identifier] + ", new owner = " + d);
+
+
             if (d != null && d.isEnabled === true) {
                 if (pkg.$pointerOwner[e.identifier] !== d) {
                     pkg.$pointerOwner[e.identifier] = d;
@@ -14050,7 +14137,7 @@ pkg.ArrowView = Class(pkg.View, [
     }
 ]);
 
-pkg.BaseTextRender = Class(pkg.Render, zebkit.util.Position.Metric, [
+pkg.BaseTextRender = Class(pkg.Render,  [
     function $prototype() {
         /**
          * UI component that holds the text render
@@ -14613,7 +14700,7 @@ pkg.WrappedTextRender = new Class(pkg.TextRender, [
         this.lastWidth = -1;
 
         this.breakLine = function (w, startIndex, line, lines) {
-            if (line == "") {
+            if (line === "") {
                 lines.push(line);
             }
             else {
@@ -15603,8 +15690,9 @@ pkg.Label = Class(pkg.ViewPan, [
 
     function (r) {
         this.setView(arguments.length === 0 ||
-                     zebkit.isString(r)       ? new pkg.StringRender(r)
-                                             : (instanceOf(r, zebkit.data.TextModel) ? new pkg.TextRender(r) : r));
+                     zebkit.isString(r)      ? new pkg.StringRender(r)
+                                             : (instanceOf(r, zebkit.data.TextModel) ? new pkg.TextRender(r)
+                                                                                     : r));
         this.$super();
     }
 ]);
@@ -15786,7 +15874,7 @@ pkg.StatePan = Class(pkg.ViewPan, [
         if (v != this.view){
             this.$super(v);
             // check if the method called after constructor execution
-            // othrwise sync is not possible
+            // otherwise sync is not possible
             if (this.kids != null) this.syncState(this.state, this.state);
         }
         return this;
@@ -16131,12 +16219,12 @@ pkg.CompositeEvStatePan = Class(pkg.EvStatePan, [
     },
 
     function kidRemoved(i,l){
-        if (l == this.focusComponent) this.focusComponent = null;
+        if (l === this.focusComponent) this.focusComponent = null;
         this.$super(i, l);
     }
 ]);
 
-pkg.ButtonRepeatMix = [
+pkg.ButtonRepeatMix = zebkit.Interface([
     function $prototype () {
         /**
          * Indicate if the button should
@@ -16218,14 +16306,16 @@ pkg.ButtonRepeatMix = [
             }
         }
     }
-];
+]);
 
-pkg.ArrowButton = Class(pkg.EvStatePan, [
+pkg.ArrowButton = Class(pkg.EvStatePan, pkg.ButtonRepeatMix, [
     function $clazz() {
         this.ArrowView = Class(pkg.ArrowView, []);
     },
 
     function $prototype() {
+        this.direction = "left";
+
         this.setArrowDirection = function(d) {
             this.iterateArrowViews(function(k, v) {
                 if (v != null) v.direction = d;
@@ -16262,21 +16352,19 @@ pkg.ArrowButton = Class(pkg.EvStatePan, [
         };
     },
 
-    function $mixing() {
-        return pkg.ButtonRepeatMix;
-    },
-
     function(direction) {
         this._ = new Listeners();
         this.cursorType = Cursor.HAND;
 
-        if (direction == null) direction = "left";
+        if (arguments.length > 0) {
+            this.direction = direction;
+        }
 
         this.setView({
-            "out"          : new this.clazz.ArrowView(direction, "black"),
-            "over"         : new this.clazz.ArrowView(direction, "red"),
-            "pressed.over" : new this.clazz.ArrowView(direction, "black"),
-            "disabled"     : new this.clazz.ArrowView(direction, "lightGray")
+            "out"          : new this.clazz.ArrowView(this.direction, "black"),
+            "over"         : new this.clazz.ArrowView(this.direction, "red"),
+            "pressed.over" : new this.clazz.ArrowView(this.direction, "black"),
+            "disabled"     : new this.clazz.ArrowView(this.direction, "lightGray")
         });
         this.$super();
         this.syncState(this.state, this.state);
@@ -16319,7 +16407,7 @@ pkg.ArrowButton = Class(pkg.EvStatePan, [
  * @event buttonPressed
  * @param {zebkit.ui.Button} src a button that has been pressed
  */
-pkg.Button = Class(pkg.CompositeEvStatePan, [
+pkg.Button = Class(pkg.CompositeEvStatePan, pkg.ButtonRepeatMix, [
     function $clazz() {
         this.Label = Class(pkg.Label, []);
 
@@ -16341,10 +16429,6 @@ pkg.Button = Class(pkg.CompositeEvStatePan, [
 
     function $prototype() {
         this.canHaveFocus = true;
-    },
-
-    function $mixing() {
-        return pkg.ButtonRepeatMix;
     },
 
     function(t) {
@@ -16447,14 +16531,14 @@ pkg.BorderPan = Class(pkg.Panel, [
           * @method getTitleInfo
           * @protected
           */
-         this.getTitleInfo = function() {
+        this.getTitleInfo = function() {
             return (this.label != null) ? { x      : this.label.x,
                                             y      : this.label.y,
                                             width  : this.label.width,
                                             height : this.label.height,
                                             orient: this.orient }
                                         : null;
-    };
+        };
 
         this.calcPreferredSize = function(target){
             var ps = this.content != null && this.content.isVisible === true ? this.content.getPreferredSize()
@@ -16532,11 +16616,11 @@ pkg.BorderPan = Class(pkg.Panel, [
             title = new this.clazz.Label(title);
         }
 
-        if (o != null) {
+        if (arguments.lengh > 2) {
             this.orient = o;
         }
 
-        if (a != null) {
+        if (arguments.lengh > 3) {
             this.alignment = a;
         }
 
@@ -17101,6 +17185,7 @@ pkg.SplitPan = Class(pkg.Panel, [
         this.leftMinSize = this.rightMinSize = 50;
         this.isMoveable = true;
         this.gap = 1;
+        this.orient = "vertical";
 
         this.normalizeBarLoc = function(xy){
             if (xy < this.minXY) xy = this.minXY;
@@ -17257,21 +17342,6 @@ pkg.SplitPan = Class(pkg.Panel, [
         };
     },
 
-    function (f,s,o){
-        if (o == null) o = "vertical";
-
-        this.minXY = this.maxXY = 0;
-        this.barLocation = 70;
-        this.leftComp = this.rightComp = this.gripper = null;
-        this.setOrientation(o);
-
-        this.$super();
-
-        if (f != null) this.add("left", f);
-        if (s != null) this.add("right", s);
-        this.add("center", new this.clazz.Bar(this));
-    },
-
     function kidAdded(index,ctr,c){
         this.$super(index, ctr, c);
 
@@ -17291,13 +17361,13 @@ pkg.SplitPan = Class(pkg.Panel, [
 
     function kidRemoved(index,c){
         this.$super(index, c);
-        if (c == this.leftComp) this.leftComp = null;
+        if (c === this.leftComp) this.leftComp = null;
         else {
-            if (c == this.rightComp) {
+            if (c === this.rightComp) {
                 this.rightComp = null;
             }
             else {
-                if (c == this.gripper) this.gripper = null;
+                if (c === this.gripper) this.gripper = null;
             }
         }
     },
@@ -17313,6 +17383,22 @@ pkg.SplitPan = Class(pkg.Panel, [
             this.maxXY = this.height - this.gap - this.rightMinSize - ps.height - this.getBottom();
         }
         this.$super(pw, ph);
+    },
+
+    function (f,s,o){
+        if (arguments.length > 2) {
+            this.orient = o;
+        }
+
+        this.minXY = this.maxXY = 0;
+        this.barLocation = 70;
+        this.leftComp = this.rightComp = this.gripper = null;
+
+        this.$super();
+
+        if (f != null) this.add("left", f);
+        if (s != null) this.add("right", s);
+        this.add("center", new this.clazz.Bar(this));
     }
 ]);
 
@@ -17619,25 +17705,25 @@ pkg.Link = Class(pkg.Button, [
  * element:
 
         // create extendable panel that contains list as its content
-        var ext = zebkit.ui.ExtendablePan(new zebkit.ui.List([
+        var ext = zebkit.ui.ExtendablePan("Title", new zebkit.ui.List([
             "Item 1",
             "Item 2",
             "Item 3"
-        ]), "Title");
+        ]));
 
 
  * @constructor
  * @class zebkit.ui.ExtendablePan
  * @extends {zebkit.ui.Panel}
- * @param {zebkit.ui.Panel} c a content of the extender panel
  * @param {zebkit.ui.Panel|String} l a title label text or
+ * @param {zebkit.ui.Panel} c a content of the extender panel
  * component
  */
 
  /**
   * Fired when extender is collapsed or extended
 
-         var ex = new zebkit.ui.ExtendablePan(pan, "Title");
+         var ex = new zebkit.ui.ExtendablePan("Title", pan);
          ex.bind(function (src, isCollapsed) {
              ...
          });
@@ -17682,7 +17768,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
         ]);
     },
 
-    function (content, lab){
+    function (lab, content){
         /**
          * Indicate if the extender panel is collapsed
          * @type {Boolean}
@@ -17694,17 +17780,14 @@ pkg.ExtendablePan = Class(pkg.Panel, [
 
         this.$super();
 
-        if (zebkit.isString(lab)) {
-            lab = new this.clazz.Label(lab);
-        }
-
         /**
          * Label component
          * @attribute label
          * @type {zebkit.ui.Panel}
          * @readOnly
          */
-        this.label = lab;
+        if (lab == null) lab = "";
+        this.label = zebkit.isString(lab) ? new this.clazz.Label(lab) : lab;
 
         /**
          * Title panel
@@ -17869,7 +17952,7 @@ pkg.ScrollManager = Class([
 
 /**
  * Scroll bar UI component
- * @param {String} t type of the scroll bar components:
+ * @param {String} [t] orintation of the scroll bar components:
 
         "vertical" - vertical scroll bar
         "horizontal"- horizontal scroll bar
@@ -17928,6 +18011,9 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
          */
         this.unitIncrement = 5;
 
+
+        this.orient = "vertical";
+
         /**
          * Evaluate if the given point is in scroll bar bundle element
          * @param  {Integer}  x a x location
@@ -17971,8 +18057,8 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
          * @method catchInput
          */
         this.catchInput = function (child){
-            return child == this.bundle || (this.bundle.kids.length > 0 &&
-                                            L.isAncestorOf(this.bundle, child));
+            return child === this.bundle || (this.bundle.kids.length > 0 &&
+                                             L.isAncestorOf(this.bundle, child));
         };
 
         this.posChanged = function(target,po,pl,pc){
@@ -18146,8 +18232,11 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
     },
 
     function(t) {
-        if (t !== "vertical" && t !== "horizontal") {
-            throw new Error("" + t + "(alignment)");
+        if (arguments.length > 0) {
+            if (t !== "vertical" && t !== "horizontal") {
+                throw new Error("" + t + "(alignment)");
+            }
+            this.orient = t;
         }
 
         /**
@@ -18173,11 +18262,10 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
 
         this.incBt = this.decBt = this.bundle = this.position = null;
         this.bundleLoc = 0;
-        this.orient = t;
         this.startDragLoc = Number.MAX_VALUE;
         this.$super(this);
 
-        var b = (t === "vertical");
+        var b = (this.orient === "vertical");
         this.add("center", b ? new pkg.Scroll.VBundle()    : new pkg.Scroll.HBundle());
         this.add("top"   , b ? new pkg.Scroll.VDecButton() : new pkg.Scroll.HDecButton());
         this.add("bottom", b ? new pkg.Scroll.VIncButton() : new pkg.Scroll.HIncButton());
@@ -18206,14 +18294,14 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
 
     function kidRemoved(index,lw){
         this.$super(index, lw);
-        if (lw == this.bundle) this.bundle = null;
+        if (lw === this.bundle) this.bundle = null;
         else {
-            if(lw == this.incBt){
+            if(lw === this.incBt){
                 this.incBt.unbind(this);
                 this.incBt = null;
             }
             else {
-                if(lw == this.decBt){
+                if(lw === this.decBt){
                     this.decBt.unbind(this);
                     this.decBt = null;
                 }
@@ -18612,11 +18700,11 @@ pkg.ScrollPan = Class(pkg.Panel, [
         this.$isPosChangedLocked = false;
         this.$super();
 
-        if (scrolls === "both" || scrolls === "horizontal") {
+        if (arguments.length < 2 || scrolls === "both" || scrolls === "horizontal") {
             this.add("bottom", new pkg.Scroll("horizontal"));
         }
 
-        if (scrolls === "both" || scrolls === "vertical") {
+        if (arguments.length < 2 || scrolls === "both" || scrolls === "vertical") {
             this.add("right", new pkg.Scroll("vertical"));
         }
 
@@ -18624,7 +18712,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
             this.add("center", c);
         }
 
-        if (autoHide != null) {
+        if (arguments.length > 2) {
             this.setAutoHide(autoHide);
         }
     },
@@ -19179,7 +19267,7 @@ pkg.Tabs = Class(pkg.Panel, [
                 }
             }
             else {
-                this.repaintX = this.tabAreaX = (this.orient == "left" ? left : this.width - right - this.tabAreaWidth);
+                this.repaintX = this.tabAreaX = (this.orient === "left" ? left : this.width - right - this.tabAreaWidth);
                 this.repaintY = this.tabAreaY = top ;
                 if (this.orient === "right") {
                     this.repaintX -= (this.border != null ? this.border.getRight() : 0);
@@ -19199,7 +19287,7 @@ pkg.Tabs = Class(pkg.Panel, [
 
                 if (b) {
                     xx += r.width;
-                    if (i == this.selectedIndex) {
+                    if (i === this.selectedIndex) {
                         xx -= sp;
                         if (this.orient === "bottom") {
                             r.y -= (this.border != null ? this.border.getBottom() : 0);
@@ -19208,7 +19296,7 @@ pkg.Tabs = Class(pkg.Panel, [
                 }
                 else {
                     yy += r.height;
-                    if (i == this.selectedIndex) {
+                    if (i === this.selectedIndex) {
                         yy -= sp;
                         if (this.orient === "right") {
                             r.x -= (this.border != null ? this.border.getRight() : 0);
@@ -19462,13 +19550,13 @@ pkg.Tabs = Class(pkg.Panel, [
 
         /**
          * Set the tab page element alignments
-         * @param {Integer|String} o an alignment. The valid value is one of the following:
+         * @param {String} o an alignment. The valid value is one of the following:
          * "left", "right", "top", "bottom"
          * @method  setAlignment
          */
         this.setAlignment = function(o){
             if (o !== "top" && o !== "bottom" && o !== "left" && o !== "right") {
-                throw new Error("" + o);
+                throw new Error("Invalid tabs alignment:" + o);
             }
 
             if (this.orient != o){
@@ -19487,7 +19575,7 @@ pkg.Tabs = Class(pkg.Panel, [
             var c = this.kids[i];
             if (c.isEnabled != b){
                 c.setEnabled(b);
-                if (b === false && this.selectedIndex == i) {
+                if (b === false && this.selectedIndex === i) {
                     this.select(-1);
                 }
                 this.repaint();
@@ -19646,6 +19734,7 @@ pkg.Slider = Class(pkg.Panel, [
         this.correctDt = this.scaleStep = this.psW = this.psH = 0;
         this.intervals = this.pl = null;
         this.canHaveFocus = true;
+        this.orient = "horizontal";
 
         /**
          * Get a value
@@ -19992,14 +20081,15 @@ pkg.Slider = Class(pkg.Panel, [
     },
 
     function (o) {
-        if (o == null) o = "horizontal";
         this._ = new Listeners();
         this.views = {};
         this.isShowScale = this.isShowTitle = true;
         this.dragged = this.isIntervalMode = false;
         this.render = new pkg.BoldTextRender("");
         this.render.setColor("gray");
-        this.orient = o;
+        if (arguments.length > 0) {
+            this.orient = o;
+        }
         this.setValues(0, 20, [0, 5, 10], 2, 1);
         this.setScaleStep(1);
 
@@ -20024,7 +20114,7 @@ pkg.Slider = Class(pkg.Panel, [
     function setScaleColor(c){
         if (c != this.scaleColor) {
             this.scaleColor = c;
-            if (this.provider == this) this.render.setColor(c);
+            if (this.provider === this) this.render.setColor(c);
             this.repaint();
         }
         return this;
@@ -20167,7 +20257,7 @@ pkg.Toolbar = Class(pkg.Panel, [
 
             function stateUpdated(o, n) {
                 this.$super(o, n);
-                if (o == PRESSED_OVER && n == OVER) {
+                if (o === PRESSED_OVER && n === OVER) {
                     this.parent._.fired(this);
                 }
             }
@@ -20761,11 +20851,12 @@ pkg.TextField = Class(pkg.Label, [
         this.keyPressed = function(e) {
             if (this.isFiltered(e) === false)  {
                 var position    = this.position,
-                    col         = position.currentCol,
                     line        = position.currentLine,
                     foff        = 1;
 
-                if (e.shiftKey && (e.ch == KE.CHAR_UNDEFINED || e.ch == null)) {
+                console.log("keyPressed !!!!! " + e.shiftKey);
+
+                if (e.shiftKey) {
                     this.startSelection();
                 }
 
@@ -24436,7 +24527,7 @@ pkg.MenuItem = Class(pkg.Panel, [
             var img = null;
             if (m[1] != null) {
                 img = m[1].substring(m[1].indexOf("@(") + 2, m[1].lastIndexOf(")")).trim();
-                if (img[0] == "'") {
+                if (img[0] === "'") {
                    img = img.substring(1, img.length-1);
                 }
                 else {
@@ -28738,7 +28829,7 @@ pkg.Grid.prototype.setViews = ui.$ViewsSetter;
  * @class zebkit.ui.grid.GridStretchPan
  * @extends {zebkit.ui.Panel}
  */
-pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
+pkg.GridStretchPan = Class(ui.Panel, [
     function $prototype() {
         this.calcPreferredSize = function(target) {
             this.recalcPS();

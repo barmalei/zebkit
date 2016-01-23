@@ -295,11 +295,12 @@ pkg.TextField = Class(pkg.Label, [
         this.keyPressed = function(e) {
             if (this.isFiltered(e) === false)  {
                 var position    = this.position,
-                    col         = position.currentCol,
                     line        = position.currentLine,
                     foff        = 1;
 
-                if (e.shiftKey && (e.ch == KE.CHAR_UNDEFINED || e.ch == null)) {
+                console.log("keyPressed !!!!! " + e.shiftKey);
+
+                if (e.shiftKey) {
                     this.startSelection();
                 }
 

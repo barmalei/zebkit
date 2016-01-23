@@ -420,7 +420,6 @@
                     // (where mouse down is happened) to handle it
                     if (this.element !== mp.$adapter.element) {
                         $enteredElement = null;
-
                         // wrap with try-catch to prevent inconsistency
                         try {
                             stub.$fillWith(id, e);
@@ -431,6 +430,7 @@
                         catch(ee) {
                             // keep it for exceptional cases
                             $enteredElement = this.element;
+                            throw ee;
                         }
                         finally {
                             mp.$adapter.$UP(id, e, stub);
@@ -518,13 +518,14 @@
                         }
                         catch(ex) {
                             // don't forget to decrease counter
-                            if (t.stub != null && t.stub.touchCounter > 0) t.stub.touchCounter--;
+                            if (t.stub != null && t.stub.touchCounter > 0) {
+                                t.stub.touchCounter--;
+                            }
                             delete $pointerPressedEvents[t.identifier];
                             console.log(ex.stack);
                         }
                     }
                     this.$queue.length = 0;
-
                 }
             };
 
@@ -596,7 +597,6 @@
                     this.$mousePageX = pageX;
                     this.$mousePageY = pageY;
 
-
                     if ($pointerPressedEvents[LMOUSE] != null || $pointerPressedEvents[RMOUSE] != null) {
                         if ($pointerPressedEvents[LMOUSE] != null) {
                             this.$DRAG(LMOUSE, e, ME_STUB);
@@ -664,8 +664,7 @@
                     e.preventDefault();
                 }
                 else {
-                    var id = e.button == 0 ? LMOUSE : RMOUSE,
-                        mp = $pointerPressedEvents[id];
+                    var id = e.button == 0 ? LMOUSE : RMOUSE;
 
                     $this.$UP(id, e, ME_STUB);
 
@@ -925,7 +924,6 @@
 
                     e.preventDefault();
                 }, false);
-
 
                 element.onmousemove = function(e) {
                     $this.$MMOVE(e);

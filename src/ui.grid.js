@@ -3117,7 +3117,7 @@ pkg.Grid.prototype.setViews = ui.$ViewsSetter;
  * @class zebkit.ui.grid.GridStretchPan
  * @extends {zebkit.ui.Panel}
  */
-pkg.GridStretchPan = Class(ui.Panel, L.Layout, [
+pkg.GridStretchPan = Class(ui.Panel, [
     function $prototype() {
         this.calcPreferredSize = function(target) {
             this.recalcPS();

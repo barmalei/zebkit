@@ -201,8 +201,9 @@ pkg.Label = Class(pkg.ViewPan, [
 
     function (r) {
         this.setView(arguments.length === 0 ||
-                     zebkit.isString(r)       ? new pkg.StringRender(r)
-                                             : (instanceOf(r, zebkit.data.TextModel) ? new pkg.TextRender(r) : r));
+                     zebkit.isString(r)      ? new pkg.StringRender(r)
+                                             : (instanceOf(r, zebkit.data.TextModel) ? new pkg.TextRender(r)
+                                                                                     : r));
         this.$super();
     }
 ]);
@@ -384,7 +385,7 @@ pkg.StatePan = Class(pkg.ViewPan, [
         if (v != this.view){
             this.$super(v);
             // check if the method called after constructor execution
-            // othrwise sync is not possible
+            // otherwise sync is not possible
             if (this.kids != null) this.syncState(this.state, this.state);
         }
         return this;
@@ -729,12 +730,12 @@ pkg.CompositeEvStatePan = Class(pkg.EvStatePan, [
     },
 
     function kidRemoved(i,l){
-        if (l == this.focusComponent) this.focusComponent = null;
+        if (l === this.focusComponent) this.focusComponent = null;
         this.$super(i, l);
     }
 ]);
 
-pkg.ButtonRepeatMix = [
+pkg.ButtonRepeatMix = zebkit.Interface([
     function $prototype () {
         /**
          * Indicate if the button should
@@ -816,14 +817,16 @@ pkg.ButtonRepeatMix = [
             }
         }
     }
-];
+]);
 
-pkg.ArrowButton = Class(pkg.EvStatePan, [
+pkg.ArrowButton = Class(pkg.EvStatePan, pkg.ButtonRepeatMix, [
     function $clazz() {
         this.ArrowView = Class(pkg.ArrowView, []);
     },
 
     function $prototype() {
+        this.direction = "left";
+
         this.setArrowDirection = function(d) {
             this.iterateArrowViews(function(k, v) {
                 if (v != null) v.direction = d;
@@ -860,21 +863,19 @@ pkg.ArrowButton = Class(pkg.EvStatePan, [
         };
     },
 
-    function $mixing() {
-        return pkg.ButtonRepeatMix;
-    },
-
     function(direction) {
         this._ = new Listeners();
         this.cursorType = Cursor.HAND;
 
-        if (direction == null) direction = "left";
+        if (arguments.length > 0) {
+            this.direction = direction;
+        }
 
         this.setView({
-            "out"          : new this.clazz.ArrowView(direction, "black"),
-            "over"         : new this.clazz.ArrowView(direction, "red"),
-            "pressed.over" : new this.clazz.ArrowView(direction, "black"),
-            "disabled"     : new this.clazz.ArrowView(direction, "lightGray")
+            "out"          : new this.clazz.ArrowView(this.direction, "black"),
+            "over"         : new this.clazz.ArrowView(this.direction, "red"),
+            "pressed.over" : new this.clazz.ArrowView(this.direction, "black"),
+            "disabled"     : new this.clazz.ArrowView(this.direction, "lightGray")
         });
         this.$super();
         this.syncState(this.state, this.state);
@@ -917,7 +918,7 @@ pkg.ArrowButton = Class(pkg.EvStatePan, [
  * @event buttonPressed
  * @param {zebkit.ui.Button} src a button that has been pressed
  */
-pkg.Button = Class(pkg.CompositeEvStatePan, [
+pkg.Button = Class(pkg.CompositeEvStatePan, pkg.ButtonRepeatMix, [
     function $clazz() {
         this.Label = Class(pkg.Label, []);
 
@@ -939,10 +940,6 @@ pkg.Button = Class(pkg.CompositeEvStatePan, [
 
     function $prototype() {
         this.canHaveFocus = true;
-    },
-
-    function $mixing() {
-        return pkg.ButtonRepeatMix;
     },
 
     function(t) {
@@ -1045,14 +1042,14 @@ pkg.BorderPan = Class(pkg.Panel, [
           * @method getTitleInfo
           * @protected
           */
-         this.getTitleInfo = function() {
+        this.getTitleInfo = function() {
             return (this.label != null) ? { x      : this.label.x,
                                             y      : this.label.y,
                                             width  : this.label.width,
                                             height : this.label.height,
                                             orient: this.orient }
                                         : null;
-    };
+        };
 
         this.calcPreferredSize = function(target){
             var ps = this.content != null && this.content.isVisible === true ? this.content.getPreferredSize()
@@ -1130,11 +1127,11 @@ pkg.BorderPan = Class(pkg.Panel, [
             title = new this.clazz.Label(title);
         }
 
-        if (o != null) {
+        if (arguments.lengh > 2) {
             this.orient = o;
         }
 
-        if (a != null) {
+        if (arguments.lengh > 3) {
             this.alignment = a;
         }
 
@@ -1699,6 +1696,7 @@ pkg.SplitPan = Class(pkg.Panel, [
         this.leftMinSize = this.rightMinSize = 50;
         this.isMoveable = true;
         this.gap = 1;
+        this.orient = "vertical";
 
         this.normalizeBarLoc = function(xy){
             if (xy < this.minXY) xy = this.minXY;
@@ -1855,21 +1853,6 @@ pkg.SplitPan = Class(pkg.Panel, [
         };
     },
 
-    function (f,s,o){
-        if (o == null) o = "vertical";
-
-        this.minXY = this.maxXY = 0;
-        this.barLocation = 70;
-        this.leftComp = this.rightComp = this.gripper = null;
-        this.setOrientation(o);
-
-        this.$super();
-
-        if (f != null) this.add("left", f);
-        if (s != null) this.add("right", s);
-        this.add("center", new this.clazz.Bar(this));
-    },
-
     function kidAdded(index,ctr,c){
         this.$super(index, ctr, c);
 
@@ -1889,13 +1872,13 @@ pkg.SplitPan = Class(pkg.Panel, [
 
     function kidRemoved(index,c){
         this.$super(index, c);
-        if (c == this.leftComp) this.leftComp = null;
+        if (c === this.leftComp) this.leftComp = null;
         else {
-            if (c == this.rightComp) {
+            if (c === this.rightComp) {
                 this.rightComp = null;
             }
             else {
-                if (c == this.gripper) this.gripper = null;
+                if (c === this.gripper) this.gripper = null;
             }
         }
     },
@@ -1911,6 +1894,22 @@ pkg.SplitPan = Class(pkg.Panel, [
             this.maxXY = this.height - this.gap - this.rightMinSize - ps.height - this.getBottom();
         }
         this.$super(pw, ph);
+    },
+
+    function (f,s,o){
+        if (arguments.length > 2) {
+            this.orient = o;
+        }
+
+        this.minXY = this.maxXY = 0;
+        this.barLocation = 70;
+        this.leftComp = this.rightComp = this.gripper = null;
+
+        this.$super();
+
+        if (f != null) this.add("left", f);
+        if (s != null) this.add("right", s);
+        this.add("center", new this.clazz.Bar(this));
     }
 ]);
 
@@ -2217,25 +2216,25 @@ pkg.Link = Class(pkg.Button, [
  * element:
 
         // create extendable panel that contains list as its content
-        var ext = zebkit.ui.ExtendablePan(new zebkit.ui.List([
+        var ext = zebkit.ui.ExtendablePan("Title", new zebkit.ui.List([
             "Item 1",
             "Item 2",
             "Item 3"
-        ]), "Title");
+        ]));
 
 
  * @constructor
  * @class zebkit.ui.ExtendablePan
  * @extends {zebkit.ui.Panel}
- * @param {zebkit.ui.Panel} c a content of the extender panel
  * @param {zebkit.ui.Panel|String} l a title label text or
+ * @param {zebkit.ui.Panel} c a content of the extender panel
  * component
  */
 
  /**
   * Fired when extender is collapsed or extended
 
-         var ex = new zebkit.ui.ExtendablePan(pan, "Title");
+         var ex = new zebkit.ui.ExtendablePan("Title", pan);
          ex.bind(function (src, isCollapsed) {
              ...
          });
@@ -2280,7 +2279,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
         ]);
     },
 
-    function (content, lab){
+    function (lab, content){
         /**
          * Indicate if the extender panel is collapsed
          * @type {Boolean}
@@ -2292,17 +2291,14 @@ pkg.ExtendablePan = Class(pkg.Panel, [
 
         this.$super();
 
-        if (zebkit.isString(lab)) {
-            lab = new this.clazz.Label(lab);
-        }
-
         /**
          * Label component
          * @attribute label
          * @type {zebkit.ui.Panel}
          * @readOnly
          */
-        this.label = lab;
+        if (lab == null) lab = "";
+        this.label = zebkit.isString(lab) ? new this.clazz.Label(lab) : lab;
 
         /**
          * Title panel
@@ -2467,7 +2463,7 @@ pkg.ScrollManager = Class([
 
 /**
  * Scroll bar UI component
- * @param {String} t type of the scroll bar components:
+ * @param {String} [t] orintation of the scroll bar components:
 
         "vertical" - vertical scroll bar
         "horizontal"- horizontal scroll bar
@@ -2526,6 +2522,9 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
          */
         this.unitIncrement = 5;
 
+
+        this.orient = "vertical";
+
         /**
          * Evaluate if the given point is in scroll bar bundle element
          * @param  {Integer}  x a x location
@@ -2569,8 +2568,8 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
          * @method catchInput
          */
         this.catchInput = function (child){
-            return child == this.bundle || (this.bundle.kids.length > 0 &&
-                                            L.isAncestorOf(this.bundle, child));
+            return child === this.bundle || (this.bundle.kids.length > 0 &&
+                                             L.isAncestorOf(this.bundle, child));
         };
 
         this.posChanged = function(target,po,pl,pc){
@@ -2744,8 +2743,11 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
     },
 
     function(t) {
-        if (t !== "vertical" && t !== "horizontal") {
-            throw new Error("" + t + "(alignment)");
+        if (arguments.length > 0) {
+            if (t !== "vertical" && t !== "horizontal") {
+                throw new Error("" + t + "(alignment)");
+            }
+            this.orient = t;
         }
 
         /**
@@ -2771,11 +2773,10 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
 
         this.incBt = this.decBt = this.bundle = this.position = null;
         this.bundleLoc = 0;
-        this.orient = t;
         this.startDragLoc = Number.MAX_VALUE;
         this.$super(this);
 
-        var b = (t === "vertical");
+        var b = (this.orient === "vertical");
         this.add("center", b ? new pkg.Scroll.VBundle()    : new pkg.Scroll.HBundle());
         this.add("top"   , b ? new pkg.Scroll.VDecButton() : new pkg.Scroll.HDecButton());
         this.add("bottom", b ? new pkg.Scroll.VIncButton() : new pkg.Scroll.HIncButton());
@@ -2804,14 +2805,14 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
 
     function kidRemoved(index,lw){
         this.$super(index, lw);
-        if (lw == this.bundle) this.bundle = null;
+        if (lw === this.bundle) this.bundle = null;
         else {
-            if(lw == this.incBt){
+            if(lw === this.incBt){
                 this.incBt.unbind(this);
                 this.incBt = null;
             }
             else {
-                if(lw == this.decBt){
+                if(lw === this.decBt){
                     this.decBt.unbind(this);
                     this.decBt = null;
                 }
@@ -3210,11 +3211,11 @@ pkg.ScrollPan = Class(pkg.Panel, [
         this.$isPosChangedLocked = false;
         this.$super();
 
-        if (scrolls === "both" || scrolls === "horizontal") {
+        if (arguments.length < 2 || scrolls === "both" || scrolls === "horizontal") {
             this.add("bottom", new pkg.Scroll("horizontal"));
         }
 
-        if (scrolls === "both" || scrolls === "vertical") {
+        if (arguments.length < 2 || scrolls === "both" || scrolls === "vertical") {
             this.add("right", new pkg.Scroll("vertical"));
         }
 
@@ -3222,7 +3223,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
             this.add("center", c);
         }
 
-        if (autoHide != null) {
+        if (arguments.length > 2) {
             this.setAutoHide(autoHide);
         }
     },
@@ -3777,7 +3778,7 @@ pkg.Tabs = Class(pkg.Panel, [
                 }
             }
             else {
-                this.repaintX = this.tabAreaX = (this.orient == "left" ? left : this.width - right - this.tabAreaWidth);
+                this.repaintX = this.tabAreaX = (this.orient === "left" ? left : this.width - right - this.tabAreaWidth);
                 this.repaintY = this.tabAreaY = top ;
                 if (this.orient === "right") {
                     this.repaintX -= (this.border != null ? this.border.getRight() : 0);
@@ -3797,7 +3798,7 @@ pkg.Tabs = Class(pkg.Panel, [
 
                 if (b) {
                     xx += r.width;
-                    if (i == this.selectedIndex) {
+                    if (i === this.selectedIndex) {
                         xx -= sp;
                         if (this.orient === "bottom") {
                             r.y -= (this.border != null ? this.border.getBottom() : 0);
@@ -3806,7 +3807,7 @@ pkg.Tabs = Class(pkg.Panel, [
                 }
                 else {
                     yy += r.height;
-                    if (i == this.selectedIndex) {
+                    if (i === this.selectedIndex) {
                         yy -= sp;
                         if (this.orient === "right") {
                             r.x -= (this.border != null ? this.border.getRight() : 0);
@@ -4060,13 +4061,13 @@ pkg.Tabs = Class(pkg.Panel, [
 
         /**
          * Set the tab page element alignments
-         * @param {Integer|String} o an alignment. The valid value is one of the following:
+         * @param {String} o an alignment. The valid value is one of the following:
          * "left", "right", "top", "bottom"
          * @method  setAlignment
          */
         this.setAlignment = function(o){
             if (o !== "top" && o !== "bottom" && o !== "left" && o !== "right") {
-                throw new Error("" + o);
+                throw new Error("Invalid tabs alignment:" + o);
             }
 
             if (this.orient != o){
@@ -4085,7 +4086,7 @@ pkg.Tabs = Class(pkg.Panel, [
             var c = this.kids[i];
             if (c.isEnabled != b){
                 c.setEnabled(b);
-                if (b === false && this.selectedIndex == i) {
+                if (b === false && this.selectedIndex === i) {
                     this.select(-1);
                 }
                 this.repaint();
@@ -4244,6 +4245,7 @@ pkg.Slider = Class(pkg.Panel, [
         this.correctDt = this.scaleStep = this.psW = this.psH = 0;
         this.intervals = this.pl = null;
         this.canHaveFocus = true;
+        this.orient = "horizontal";
 
         /**
          * Get a value
@@ -4590,14 +4592,15 @@ pkg.Slider = Class(pkg.Panel, [
     },
 
     function (o) {
-        if (o == null) o = "horizontal";
         this._ = new Listeners();
         this.views = {};
         this.isShowScale = this.isShowTitle = true;
         this.dragged = this.isIntervalMode = false;
         this.render = new pkg.BoldTextRender("");
         this.render.setColor("gray");
-        this.orient = o;
+        if (arguments.length > 0) {
+            this.orient = o;
+        }
         this.setValues(0, 20, [0, 5, 10], 2, 1);
         this.setScaleStep(1);
 
@@ -4622,7 +4625,7 @@ pkg.Slider = Class(pkg.Panel, [
     function setScaleColor(c){
         if (c != this.scaleColor) {
             this.scaleColor = c;
-            if (this.provider == this) this.render.setColor(c);
+            if (this.provider === this) this.render.setColor(c);
             this.repaint();
         }
         return this;
@@ -4765,7 +4768,7 @@ pkg.Toolbar = Class(pkg.Panel, [
 
             function stateUpdated(o, n) {
                 this.$super(o, n);
-                if (o == PRESSED_OVER && n == OVER) {
+                if (o === PRESSED_OVER && n === OVER) {
                     this.parent._.fired(this);
                 }
             }

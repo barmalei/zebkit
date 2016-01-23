@@ -1,5 +1,5 @@
 
-![ScreenShot](/samples/images/header.jpg)
+![ScreenShot](/docs/zebkit.logo.png)
 
 v11.2014 (Anna)
 

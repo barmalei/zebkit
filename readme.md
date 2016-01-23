@@ -1,7 +1,7 @@
 
 ![ScreenShot](/docs/zebkit.logo.png)
 
-v11.2014 (Anna)
+v02.2016 (Gleb)
 
 ## For impatient: look at few demos   
 

@@ -1,5 +1,5 @@
 (function(pkg, Class) {
-    if (typeof document === "undefined" && typeof console === "undefined" ) {
+    if (typeof console === "undefined" ) {
         console = {
             log  : function() {
                 return print.apply(this, arguments);

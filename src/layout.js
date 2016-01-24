@@ -989,6 +989,8 @@ pkg.BorderLayout = Class(L, [
                 r      = target.width - target.getRight(),
                 center = null,
                 left   = null,
+                top    = null,
+                bottom = null,
                 right  = null;
 
             for(var i = 0;i < target.kids.length; i++){
@@ -997,20 +999,42 @@ pkg.BorderLayout = Class(L, [
                     switch(kid.constraints) {
                         case null:
                         case undefined:
-                        case "center": center = kid; break;
+                        case "center":
+                            if (center != null) {
+                                throw new Error("Component with center constraints is already defined");
+                            }
+                            center = kid;
+                            break;
                         case "top" :
+                            if (top != null) {
+                                throw new Error("Component with top constraints is already defined");
+                            }
                             var ps = kid.getPreferredSize();
                             kid.setBounds(l, t, r - l, ps.height);
                             t += ps.height + this.vgap;
                             top = kid;
                             break;
                         case "bottom":
+                            if (bottom != null) {
+                                throw new Error("Component with bottom constraints is already defined");
+                            }
                             var ps = kid.getPreferredSize();
                             kid.setBounds(l, b - ps.height, r - l, ps.height);
                             b -= ps.height + this.vgap;
+                            bottom = kid;
                             break;
-                        case "left": left = kid; break;
-                        case "right": right = kid; break;
+                        case "left":
+                            if (left != null) {
+                                throw new Error("Component with left constraints is already defined");
+                            }
+                            left = kid;
+                            break;
+                        case "right":
+                            if (right != null) {
+                                throw new Error("Component with right constraints is already defined");
+                            }
+                            right = kid;
+                            break;
                         default: throw new Error("Invalid constraints: " + kid.constraints);
                     }
                 }
@@ -1425,9 +1449,8 @@ pkg.ListLayout = Class(L,[
         p.add(30, new zebkit.ui.Button("30%"));
         p.add(50, new zebkit.ui.Button("50%"));
 
- * @param {Integer|String} [dir] a direction of placing components. The
- * value can be "zebkit.layout.HORIZONTAL" or "zebkit.layout.VERTICAL" or
- * "horizontal" or "vertical"
+ * @param {String} [dir] a direction of placing components. The
+ * value can be "horizontal" or "vertical"
  * @param {Integer} [gap] a space in pixels between laid out components
  * @param {Boolean} [stretch] true if the component should be stretched
  * vertically or horizontally

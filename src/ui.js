@@ -10,13 +10,30 @@ zebkit()["zebkit.json"] = pkg.$url.join("zebkit.json");
 var Cursor = pkg.Cursor, Listeners = zebkit.util.Listeners, KE = pkg.KeyEvent,
     L = zebkit.layout, instanceOf = zebkit.instanceOf;
 
-pkg.$ViewsSetter = function (v){
-    this.views = {};
-    for(var k in v) {
-        if (v.hasOwnProperty(k)) this.views[k] = pkg.$view(v[k]);
+pkg.$ViewsSetterMix = zebkit.Interface([
+    function $prototype() {
+        this.setViews = function (v){
+            if (this.views == null) {
+                this.views = {};
+            }
+
+            var b = false;
+            for(var k in v) {
+                if (v.hasOwnProperty(k)) {
+                    var nv = pkg.$view(v[k]);
+                    if (this.views[k] !== nv) {
+                        this.views[k] = nv;
+                        b = true;
+                    }
+                }
+            }
+
+            if (b) {
+                this.vrp();
+            }
+        }
     }
-    this.vrp();
-};
+]);
 
 /**
  * Line UI component class. Draw series of vertical or horizontal lines of using
@@ -129,7 +146,7 @@ pkg.Label = Class(pkg.ViewPan, [
          */
         this.setModel = function(m) {
             this.setView(zebkit.isString(m) ? new pkg.StringRender(m)
-                                           : new pkg.TextRender(m));
+                                            : new pkg.TextRender(m));
         };
 
         this.getModel = function() {
@@ -2463,7 +2480,7 @@ pkg.ScrollManager = Class([
 
 /**
  * Scroll bar UI component
- * @param {String} [t] orintation of the scroll bar components:
+ * @param {String} [t] orientation of the scroll bar components:
 
         "vertical" - vertical scroll bar
         "horizontal"- horizontal scroll bar
@@ -3322,7 +3339,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
         // set other caption for the tab in not selected state
         tabs.getTab(0).setCaption(false, "Test");
 
- * @param {Integer|String} [o] the tab panel orientation:
+ * @param {String} [o] the tab panel orientation:
 
       "top"
       "bottom"
@@ -3345,7 +3362,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
  * @param {zebkit.ui.Tabs} src a tabs component that triggers the event
  * @param {Integer} selectedIndex a tab page index that has been selected
  */
-pkg.Tabs = Class(pkg.Panel, [
+pkg.Tabs = Class(pkg.Panel, pkg.$ViewsSetterMix, [
     function $clazz() {
         /**
          * Tab view class that defines the tab page title and icon
@@ -3698,10 +3715,12 @@ pkg.Tabs = Class(pkg.Panel, [
             var marker = this.views.marker;
             if (marker != null){
                 //TODO: why only "tab" is checked ?
-                var bv = this.views.tab;
-                marker.paint(g, r.x + bv.getLeft(), r.y + bv.getTop(),
-                                r.width - bv.getLeft() - bv.getRight(),
-                                r.height - bv.getTop() - bv.getBottom(), this);
+                var bv = this.views.tab,
+                    left = bv == null ? 0 : bv.getLeft(),
+                    top  = bv == null ? 0 : bv.getTop();
+                marker.paint(g, r.x + left, r.y + top,
+                                r.width  - left - (bv == null ? 0 : bv.getRight()),
+                                r.height - top  - (bv == null ? 0 : bv.getBottom()), this);
             }
         };
 
@@ -3724,7 +3743,9 @@ pkg.Tabs = Class(pkg.Panel, [
                 tabon.paint(g, b.x, b.y, b.width, b.height, page);
             }
             else {
-                tab.paint(g, b.x, b.y, b.width, b.height, page);
+                if (tab != null) {
+                    tab.paint(g, b.x, b.y, b.width, b.height, page);
+                }
             }
 
             if (this.overTab >= 0 && this.overTab === pageIndex && tabover != null) {
@@ -3873,8 +3894,8 @@ pkg.Tabs = Class(pkg.Panel, [
                 var bv   = this.views.tab,
                     b    = (this.orient === "left" || this.orient === "right"),
                     max  = 0,
-                    hadd = bv.getLeft() + bv.getRight(),
-                    vadd = bv.getTop()  + bv.getBottom();
+                    hadd = bv == null ? 0 : bv.getLeft() + bv.getRight(),
+                    vadd = bv == null ? 0 : bv.getTop()  + bv.getBottom();
 
                 for(var i = 0;i < count; i++){
                     var ps =  this.pages[i * 2] != null ? this.pages[i * 2].getPreferredSize()
@@ -4231,21 +4252,20 @@ pkg.Tabs = Class(pkg.Panel, [
         }
     }
 ]);
-pkg.Tabs.prototype.setViews = pkg.$ViewsSetter;
 
 /**
  * Slider UI component class.
  * @class  zebkit.ui.Slider
  * @extends {zebkit.ui.Panel}
  */
-pkg.Slider = Class(pkg.Panel, [
+pkg.Slider = Class(pkg.Panel, pkg.$ViewsSetterMix, [
     function $prototype() {
         this.max = this.min = this.value = this.roughStep = this.exactStep = 0;
         this.netSize = this.gap = 3;
         this.correctDt = this.scaleStep = this.psW = this.psH = 0;
         this.intervals = this.pl = null;
         this.canHaveFocus = true;
-        this.orient = "horizontal";
+        this.orient       = "horizontal";
 
         /**
          * Get a value
@@ -4280,7 +4300,7 @@ pkg.Slider = Class(pkg.Panel, [
         };
 
         this.pointerDragged = function(e){
-            if(this.dragged) {
+            if (this.dragged) {
                 this.setValue(this.findNearest(e.x + (this.orient === "horizontal" ? this.correctDt : 0),
                                                e.y + (this.orient === "horizontal" ? 0 : this.correctDt)));
             }
@@ -4312,8 +4332,7 @@ pkg.Slider = Class(pkg.Panel, [
                     gauge.paint(g, left + 1,
                                    topY + Math.floor((bs.height - gs.height) / 2),
                                    w, gs.height, this);
-                }
-                else{
+                } else {
                     g.setColor("gray");
                     g.strokeRect(left + 1, topY + Math.floor((bs.height - gs.height) / 2), w, gs.height);
                 }
@@ -4329,7 +4348,7 @@ pkg.Slider = Class(pkg.Panel, [
                         g.lineTo(xx, topY + this.netSize);
                     }
 
-                    for(var i = 0;i < this.pl.length; i ++ ) {
+                    for(var i = 0;i < this.pl.length; i++) {
                         g.moveTo(this.pl[i] + 0.5, topY);
                         g.lineTo(this.pl[i] + 0.5, topY + 2 * this.netSize);
                     }
@@ -4605,7 +4624,7 @@ pkg.Slider = Class(pkg.Panel, [
         this.setScaleStep(1);
 
         this.$super();
-        this.views.bundle = (o === "horizontal" ? this.views.hbundle : this.views.vbundle);
+        this.views.bundle = (this.orient === "horizontal" ? this.views.hbundle : this.views.vbundle);
 
         this.provider = this;
     },
@@ -4693,7 +4712,6 @@ pkg.Slider = Class(pkg.Panel, [
         this.$super();
     }
 ]);
-pkg.Slider.prototype.setViews = pkg.$ViewsSetter;
 
 /**
  * Status bar UI component class

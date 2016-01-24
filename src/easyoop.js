@@ -1362,9 +1362,7 @@ if (pkg.isInBrowser) {
 }
 
 pkg.ready(function() {
-    console.log(" ::: " + new Date().getTime());
     pkg.$resolveClassNames();
-    console.log(" ::: " + new Date().getTime());
 });
 
 

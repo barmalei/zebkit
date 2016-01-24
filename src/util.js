@@ -6,7 +6,7 @@
 (function(pkg, Class, Interface) {
 
 pkg.format = function(s, obj, ph) {
-    if (ph == null) ph = '';
+    if (arguments.length < 3) ph = '';
 
     var rg = /\$\{([0-9]+\s*,)?(.?,)?([a-zA-Z_][a-zA-Z0-9_]*)\}/g,
         r  = [],

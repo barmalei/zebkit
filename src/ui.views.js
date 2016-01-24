@@ -1942,7 +1942,7 @@ pkg.TabBorder = Class(pkg.View, [
  * @extends zebkit.ui.Render
  * @constructor
  * @param {zebkit.ui.View} border  a border to be rendered with a title area
- * @param {Integer|String} [lineAlignment] a line alignment. Specifies how
+ * @param {String} [lineAlignment] a line alignment. Specifies how
  * a title area has to be aligned relatively border line:
  *
  *       "bottom"  - title area will be placed on top of border line:

@@ -298,8 +298,6 @@ pkg.TextField = Class(pkg.Label, [
                     line        = position.currentLine,
                     foff        = 1;
 
-                console.log("keyPressed !!!!! " + e.shiftKey);
-
                 if (e.shiftKey) {
                     this.startSelection();
                 }

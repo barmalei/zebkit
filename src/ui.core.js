@@ -3594,13 +3594,9 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
                 o = pkg.$pointerOwner[e.identifier],
                 b = false;
 
-          //  console.log("$pointerMoved() currentMouseOwner = " + (o == null ? "null" : o.clazz.$name)  + ", new mouseOwner  = " +  (d == null ? "null" : d.clazz.$name));
-
-
             // check if pointer already inside a component
             if (o != null) {
                 if (d != o) {
-                    console.log("$pointerMoved() Fire poiunterExited for  " + e.identifier + ", owner = " + o);
                     pkg.$pointerOwner[e.identifier] = null;
                     b = EM.fireEvent("pointerExited", e.update(o, x, y));
 
@@ -3735,10 +3731,6 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
             }
 
             var d = this.getComponentAt(x, y);
-
-            console.log("PointerPressed prev owner = " + pkg.$pointerOwner[e.identifier] + ", new owner = " + d);
-
-
             if (d != null && d.isEnabled === true) {
                 if (pkg.$pointerOwner[e.identifier] !== d) {
                     pkg.$pointerOwner[e.identifier] = d;
@@ -3950,8 +3942,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
          */
         this.isFullScreen = true;
         this.setLocation(0,0);
-
-        var ws = zebkit.web.$windowSize();
+        var ws = zebkit.web.$viewPortSize();
         this.setSize(ws.width, ws.height);
     },
 

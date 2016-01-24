@@ -24,6 +24,20 @@
                  height: window.innerHeight   };
     };
 
+    pkg.$viewPortSize = function() {
+        var ws   = pkg.$windowSize(),
+            body = document.body,
+            css  = [ "margin-left", "margin-right", "margin-top", "margin-bottom",
+                     "padding-left", "padding-right", "padding-top", "padding-bottom",
+                     "border-left-width", "border-right-width", "border-top-width", "border-bottom-width"];
+
+        for(var i = 0; i < css.length;) {
+            ws.width  -= (pkg.$measure(body, css[i++]) + pkg.$measure(body, css[i++]));
+            ws.height -= (pkg.$measure(body, css[i++]) + pkg.$measure(body, css[i++]));
+        }
+        return ws;
+    };
+
     pkg.$measure = function(e, cssprop) {
         var value = window.getComputedStyle(e, null).getPropertyValue(cssprop);
         return (value == null || value === '') ? 0
@@ -165,7 +179,6 @@
 
         return be;
     };
-
 
     pkg.$ContextMethods = {
         setFont : function(f) {

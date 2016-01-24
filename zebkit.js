@@ -1362,9 +1362,7 @@ if (pkg.isInBrowser) {
 }
 
 pkg.ready(function() {
-    console.log(" ::: " + new Date().getTime());
     pkg.$resolveClassNames();
-    console.log(" ::: " + new Date().getTime());
 });
 
 
@@ -2364,6 +2362,8 @@ pkg.BorderLayout = Class(L, [
                 r      = target.width - target.getRight(),
                 center = null,
                 left   = null,
+                top    = null,
+                bottom = null,
                 right  = null;
 
             for(var i = 0;i < target.kids.length; i++){
@@ -2372,20 +2372,42 @@ pkg.BorderLayout = Class(L, [
                     switch(kid.constraints) {
                         case null:
                         case undefined:
-                        case "center": center = kid; break;
+                        case "center":
+                            if (center != null) {
+                                throw new Error("Component with center constraints is already defined");
+                            }
+                            center = kid;
+                            break;
                         case "top" :
+                            if (top != null) {
+                                throw new Error("Component with top constraints is already defined");
+                            }
                             var ps = kid.getPreferredSize();
                             kid.setBounds(l, t, r - l, ps.height);
                             t += ps.height + this.vgap;
                             top = kid;
                             break;
                         case "bottom":
+                            if (bottom != null) {
+                                throw new Error("Component with bottom constraints is already defined");
+                            }
                             var ps = kid.getPreferredSize();
                             kid.setBounds(l, b - ps.height, r - l, ps.height);
                             b -= ps.height + this.vgap;
+                            bottom = kid;
                             break;
-                        case "left": left = kid; break;
-                        case "right": right = kid; break;
+                        case "left":
+                            if (left != null) {
+                                throw new Error("Component with left constraints is already defined");
+                            }
+                            left = kid;
+                            break;
+                        case "right":
+                            if (right != null) {
+                                throw new Error("Component with right constraints is already defined");
+                            }
+                            right = kid;
+                            break;
                         default: throw new Error("Invalid constraints: " + kid.constraints);
                     }
                 }
@@ -2800,9 +2822,8 @@ pkg.ListLayout = Class(L,[
         p.add(30, new zebkit.ui.Button("30%"));
         p.add(50, new zebkit.ui.Button("50%"));
 
- * @param {Integer|String} [dir] a direction of placing components. The
- * value can be "zebkit.layout.HORIZONTAL" or "zebkit.layout.VERTICAL" or
- * "horizontal" or "vertical"
+ * @param {String} [dir] a direction of placing components. The
+ * value can be "horizontal" or "vertical"
  * @param {Integer} [gap] a space in pixels between laid out components
  * @param {Boolean} [stretch] true if the component should be stretched
  * vertically or horizontally
@@ -3249,7 +3270,7 @@ pkg.GridLayout = Class(L, [
 (function(pkg, Class, Interface) {
 
 pkg.format = function(s, obj, ph) {
-    if (ph == null) ph = '';
+    if (arguments.length < 3) ph = '';
 
     var rg = /\$\{([0-9]+\s*,)?(.?,)?([a-zA-Z_][a-zA-Z0-9_]*)\}/g,
         r  = [],
@@ -7285,6 +7306,20 @@ pkg.Matrix = Class([
                  height: window.innerHeight   };
     };
 
+    pkg.$viewPortSize = function() {
+        var ws   = pkg.$windowSize(),
+            body = document.body,
+            css  = [ "margin-left", "margin-right", "margin-top", "margin-bottom",
+                     "padding-left", "padding-right", "padding-top", "padding-bottom",
+                     "border-left-width", "border-right-width", "border-top-width", "border-bottom-width"];
+
+        for(var i = 0; i < css.length;) {
+            ws.width  -= (pkg.$measure(body, css[i++]) + pkg.$measure(body, css[i++]));
+            ws.height -= (pkg.$measure(body, css[i++]) + pkg.$measure(body, css[i++]));
+        }
+        return ws;
+    };
+
     pkg.$measure = function(e, cssprop) {
         var value = window.getComputedStyle(e, null).getPropertyValue(cssprop);
         return (value == null || value === '') ? 0
@@ -7426,7 +7461,6 @@ pkg.Matrix = Class([
 
         return be;
     };
-
 
     pkg.$ContextMethods = {
         setFont : function(f) {
@@ -7668,14 +7702,16 @@ pkg.Matrix = Class([
                 if (c.isFullScreen === true) {
                     //c.setLocation(window.pageXOffset, -window.pageYOffset);
 
-                    var ws = zebkit.web.$windowSize();
+                    var ws = zebkit.web.$viewPortSize();
+
                     // browser (mobile) can reduce size of browser window by
                     // the area a virtual keyboard occupies. Usually the
                     // content scrolls up to the size the VK occupies, so
                     // to leave zebkit full screen content in the window
                     // with the real size (not reduced) size take in account
                     // scrolled metrics
-                    c.setSize(ws.width + window.pageXOffset, ws.height + window.pageYOffset);
+                    c.setSize(ws.width  + window.pageXOffset,
+                              ws.height + window.pageYOffset);
                 }
                 c.recalcOffset();
             }
@@ -7755,129 +7791,6 @@ pkg.Matrix = Class([
             pkg.$elBoundsUpdated();
         }, false);
     });
-
-    // TODO: not a good place for clipboard manager
-    pkg.ClipboardSupport = Class([
-        function $clazz() {
-            this.Listeners = zebkit.util.ListenersClass("clipCopy", "clipPaste", "clipCut");
-        },
-
-        function $prototype() {
-            this.keyPressed = function (e) {
-                var focusOwner = pkg.focusManager.focusOwner;
-                if (e.code     === this.clipboardTriggerKey &&
-                    focusOwner !=  null                     &&
-                    (focusOwner.clipCopy  != null || focusOwner.clipPaste != null))
-                {
-                    this.$clipboard.style.display = "block";
-                    this.$clipboardCanvas = focusOwner.getCanvas();
-
-                    // value has to be set, otherwise some browsers (Safari) do not generate
-                    // "copy" event
-                    this.$clipboard.value = "1";
-
-                    this.$clipboard.select();
-                    this.$clipboard.focus();
-                }
-            };
-        },
-
-        function(clipboardTriggerKey) {
-            this.clipboardTriggerKey = clipboardTriggerKey;
-
-            function $dupKeyEvent(e, id, target)  {
-                var k = new Event(id);
-                k.keyCode  = e.keyCode;
-                k.key      = e.key;
-                k.target   = target;
-                k.ctrlKey  = e.ctrlKey;
-                k.altKey   = e.altKey;
-                k.shiftKey = e.shiftKey;
-                k.metaKey  = e.metaKey;
-                return k;
-            }
-
-            if (clipboardTriggerKey > 0) {
-                // TODO: why bind instead of being a manager ?
-                pkg.events.bind(this);
-
-                this._ = new this.clazz.Listeners();
-
-                var $clipboard = this.$clipboard = document.createElement("textarea"),
-                    $this = this;
-
-                $clipboard.setAttribute("style", "display:none;position:fixed;left:-99em;top:-99em;");
-
-                $clipboard.onkeydown = function(ee) {
-                    $this.$clipboardCanvas.element.dispatchEvent($dupKeyEvent(ee, 'keydown', $this.$clipboardCanvas.element));
-                    $clipboard.value="1";
-                    $clipboard.select();
-                };
-
-                $clipboard.onkeyup = function(ee) {
-                    if (ee.keyCode === $this.clipboardTriggerKey) {
-                        $clipboard.style.display = "none";
-                        $this.$clipboardCanvas.element.focus();
-                    }
-
-                    $this.$clipboardCanvas.element.dispatchEvent($dupKeyEvent(ee, 'keyup', $this.$clipboardCanvas.element));
-                };
-
-                $clipboard.onblur = function() {
-                    this.value="";
-                    this.style.display="none";
-
-                    //!!! pass focus back to canvas
-                    //    it has to be done for the case when cmd+TAB (switch from browser to
-                    //    another application)
-                    $this.$clipboardCanvas.element.focus();
-                };
-
-                $clipboard.oncopy = function(ee) {
-                    if (pkg.focusManager.focusOwner          != null &&
-                        pkg.focusManager.focusOwner.clipCopy != null    )
-                    {
-                        var v = pkg.focusManager.focusOwner.clipCopy();
-                        $clipboard.value = (v == null ? "" : v);
-                        $clipboard.select();
-                        $this._.clipCopy(v, $clipboard.value);
-                    }
-                };
-
-                $clipboard.oncut = function(ee) {
-                    if (pkg.focusManager.focusOwner && pkg.focusManager.focusOwner.cut != null) {
-                        $clipboard.value = pkg.focusManager.focusOwner.cut();
-                        $clipboard.select();
-                        $this._.clipCut(pkg.focusManager.focusOwner, $clipboard.value);
-                    }
-                };
-
-                if (zebkit.isFF === true) {
-                    $clipboard.addEventListener ("input", function(ee) {
-                        if (pkg.focusManager.focusOwner &&
-                            pkg.focusManager.focusOwner.clipPaste != null)
-                        {
-                            pkg.focusManager.focusOwner.clipPaste($clipboard.value);
-                            $this._.clipPaste(pkg.focusManager.focusOwner, $clipboard.value);
-                        }
-                    }, false);
-                }
-                else {
-                    $clipboard.onpaste = function(ee) {
-                        if (pkg.focusManager.focusOwner != null && pkg.focusManager.focusOwner.clipPaste != null) {
-                            var txt = (typeof ee.clipboardData == "undefined") ? window.clipboardData.getData('Text')  // IE
-                                                                               : ee.clipboardData.getData('text/plain');
-                            pkg.focusManager.focusOwner.clipPaste(txt);
-                            $this._.clipPaste(pkg.focusManager.focusOwner, txt);
-                        }
-                        $clipboard.value = "";
-                    };
-                }
-                document.body.appendChild($clipboard);
-            }
-        }
-    ]);
-
 })(zebkit("ui"), zebkit.Class);
 // TODO List:
 //    [+] add pressure level field to pointer events
@@ -8821,6 +8734,130 @@ pkg.Matrix = Class([
 
 })(zebkit("ui"), zebkit.Class);
 (function(pkg, Class) {
+
+    pkg.ClipboardSupport = Class([
+        function $clazz() {
+            this.Listeners = zebkit.util.ListenersClass("clipCopy", "clipPaste", "clipCut");
+        },
+
+        function $prototype() {
+            this.keyPressed = function (e) {
+                var focusOwner = pkg.focusManager.focusOwner;
+                if (e.code     === this.clipboardTriggerKey &&
+                    focusOwner !=  null                     &&
+                    (focusOwner.clipCopy  != null || focusOwner.clipPaste != null))
+                {
+                    this.$clipboard.style.display = "block";
+                    this.$clipboardCanvas = focusOwner.getCanvas();
+
+                    // value has to be set, otherwise some browsers (Safari) do not generate
+                    // "copy" event
+                    this.$clipboard.value = "1";
+
+                    this.$clipboard.select();
+                    this.$clipboard.focus();
+                }
+            };
+        },
+
+        function(clipboardTriggerKey) {
+            this.clipboardTriggerKey = clipboardTriggerKey;
+
+            function $dupKeyEvent(e, id, target)  {
+                var k = new Event(id);
+                k.keyCode  = e.keyCode;
+                k.key      = e.key;
+                k.target   = target;
+                k.ctrlKey  = e.ctrlKey;
+                k.altKey   = e.altKey;
+                k.shiftKey = e.shiftKey;
+                k.metaKey  = e.metaKey;
+                return k;
+            }
+
+            if (clipboardTriggerKey > 0) {
+                // TODO: why bind instead of being a manager ?
+                pkg.events.bind(this);
+
+                this._ = new this.clazz.Listeners();
+
+                var $clipboard = this.$clipboard = document.createElement("textarea"),
+                    $this = this;
+
+                $clipboard.setAttribute("style", "display:none;position:fixed;left:-99em;top:-99em;");
+
+                $clipboard.onkeydown = function(ee) {
+                    $this.$clipboardCanvas.element.dispatchEvent($dupKeyEvent(ee, 'keydown', $this.$clipboardCanvas.element));
+                    $clipboard.value="1";
+                    $clipboard.select();
+                };
+
+                $clipboard.onkeyup = function(ee) {
+                    if (ee.keyCode === $this.clipboardTriggerKey) {
+                        $clipboard.style.display = "none";
+                        $this.$clipboardCanvas.element.focus();
+                    }
+
+                    $this.$clipboardCanvas.element.dispatchEvent($dupKeyEvent(ee, 'keyup', $this.$clipboardCanvas.element));
+                };
+
+                $clipboard.onblur = function() {
+                    this.value="";
+                    this.style.display="none";
+
+                    //!!! pass focus back to canvas
+                    //    it has to be done for the case when cmd+TAB (switch from browser to
+                    //    another application)
+                    $this.$clipboardCanvas.element.focus();
+                };
+
+                $clipboard.oncopy = function(ee) {
+                    if (pkg.focusManager.focusOwner          != null &&
+                        pkg.focusManager.focusOwner.clipCopy != null    )
+                    {
+                        var v = pkg.focusManager.focusOwner.clipCopy();
+                        $clipboard.value = (v == null ? "" : v);
+                        $clipboard.select();
+                        $this._.clipCopy(v, $clipboard.value);
+                    }
+                };
+
+                $clipboard.oncut = function(ee) {
+                    if (pkg.focusManager.focusOwner && pkg.focusManager.focusOwner.cut != null) {
+                        $clipboard.value = pkg.focusManager.focusOwner.cut();
+                        $clipboard.select();
+                        $this._.clipCut(pkg.focusManager.focusOwner, $clipboard.value);
+                    }
+                };
+
+                if (zebkit.isFF === true) {
+                    $clipboard.addEventListener ("input", function(ee) {
+                        if (pkg.focusManager.focusOwner &&
+                            pkg.focusManager.focusOwner.clipPaste != null)
+                        {
+                            pkg.focusManager.focusOwner.clipPaste($clipboard.value);
+                            $this._.clipPaste(pkg.focusManager.focusOwner, $clipboard.value);
+                        }
+                    }, false);
+                }
+                else {
+                    $clipboard.onpaste = function(ee) {
+                        if (pkg.focusManager.focusOwner != null && pkg.focusManager.focusOwner.clipPaste != null) {
+                            var txt = (typeof ee.clipboardData == "undefined") ? window.clipboardData.getData('Text')  // IE
+                                                                               : ee.clipboardData.getData('text/plain');
+                            pkg.focusManager.focusOwner.clipPaste(txt);
+                            $this._.clipPaste(pkg.focusManager.focusOwner, txt);
+                        }
+                        $clipboard.value = "";
+                    };
+                }
+                document.body.appendChild($clipboard);
+            }
+        }
+    ]);
+
+
+
     /**
      * Input key event class.
      * @param {zebkit.ui.Panel} source a source of the key input event
@@ -12639,13 +12676,9 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
                 o = pkg.$pointerOwner[e.identifier],
                 b = false;
 
-          //  console.log("$pointerMoved() currentMouseOwner = " + (o == null ? "null" : o.clazz.$name)  + ", new mouseOwner  = " +  (d == null ? "null" : d.clazz.$name));
-
-
             // check if pointer already inside a component
             if (o != null) {
                 if (d != o) {
-                    console.log("$pointerMoved() Fire poiunterExited for  " + e.identifier + ", owner = " + o);
                     pkg.$pointerOwner[e.identifier] = null;
                     b = EM.fireEvent("pointerExited", e.update(o, x, y));
 
@@ -12780,10 +12813,6 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
             }
 
             var d = this.getComponentAt(x, y);
-
-            console.log("PointerPressed prev owner = " + pkg.$pointerOwner[e.identifier] + ", new owner = " + d);
-
-
             if (d != null && d.isEnabled === true) {
                 if (pkg.$pointerOwner[e.identifier] !== d) {
                     pkg.$pointerOwner[e.identifier] = d;
@@ -12995,8 +13024,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
          */
         this.isFullScreen = true;
         this.setLocation(0,0);
-
-        var ws = zebkit.web.$windowSize();
+        var ws = zebkit.web.$viewPortSize();
         this.setSize(ws.width, ws.height);
     },
 
@@ -15057,7 +15085,7 @@ pkg.TabBorder = Class(pkg.View, [
  * @extends zebkit.ui.Render
  * @constructor
  * @param {zebkit.ui.View} border  a border to be rendered with a title area
- * @param {Integer|String} [lineAlignment] a line alignment. Specifies how
+ * @param {String} [lineAlignment] a line alignment. Specifies how
  * a title area has to be aligned relatively border line:
  *
  *       "bottom"  - title area will be placed on top of border line:
@@ -15499,13 +15527,30 @@ zebkit()["zebkit.json"] = pkg.$url.join("zebkit.json");
 var Cursor = pkg.Cursor, Listeners = zebkit.util.Listeners, KE = pkg.KeyEvent,
     L = zebkit.layout, instanceOf = zebkit.instanceOf;
 
-pkg.$ViewsSetter = function (v){
-    this.views = {};
-    for(var k in v) {
-        if (v.hasOwnProperty(k)) this.views[k] = pkg.$view(v[k]);
+pkg.$ViewsSetterMix = zebkit.Interface([
+    function $prototype() {
+        this.setViews = function (v){
+            if (this.views == null) {
+                this.views = {};
+            }
+
+            var b = false;
+            for(var k in v) {
+                if (v.hasOwnProperty(k)) {
+                    var nv = pkg.$view(v[k]);
+                    if (this.views[k] !== nv) {
+                        this.views[k] = nv;
+                        b = true;
+                    }
+                }
+            }
+
+            if (b) {
+                this.vrp();
+            }
+        }
     }
-    this.vrp();
-};
+]);
 
 /**
  * Line UI component class. Draw series of vertical or horizontal lines of using
@@ -15618,7 +15663,7 @@ pkg.Label = Class(pkg.ViewPan, [
          */
         this.setModel = function(m) {
             this.setView(zebkit.isString(m) ? new pkg.StringRender(m)
-                                           : new pkg.TextRender(m));
+                                            : new pkg.TextRender(m));
         };
 
         this.getModel = function() {
@@ -17952,7 +17997,7 @@ pkg.ScrollManager = Class([
 
 /**
  * Scroll bar UI component
- * @param {String} [t] orintation of the scroll bar components:
+ * @param {String} [t] orientation of the scroll bar components:
 
         "vertical" - vertical scroll bar
         "horizontal"- horizontal scroll bar
@@ -18811,7 +18856,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
         // set other caption for the tab in not selected state
         tabs.getTab(0).setCaption(false, "Test");
 
- * @param {Integer|String} [o] the tab panel orientation:
+ * @param {String} [o] the tab panel orientation:
 
       "top"
       "bottom"
@@ -18834,7 +18879,7 @@ pkg.ScrollPan = Class(pkg.Panel, [
  * @param {zebkit.ui.Tabs} src a tabs component that triggers the event
  * @param {Integer} selectedIndex a tab page index that has been selected
  */
-pkg.Tabs = Class(pkg.Panel, [
+pkg.Tabs = Class(pkg.Panel, pkg.$ViewsSetterMix, [
     function $clazz() {
         /**
          * Tab view class that defines the tab page title and icon
@@ -19187,10 +19232,12 @@ pkg.Tabs = Class(pkg.Panel, [
             var marker = this.views.marker;
             if (marker != null){
                 //TODO: why only "tab" is checked ?
-                var bv = this.views.tab;
-                marker.paint(g, r.x + bv.getLeft(), r.y + bv.getTop(),
-                                r.width - bv.getLeft() - bv.getRight(),
-                                r.height - bv.getTop() - bv.getBottom(), this);
+                var bv = this.views.tab,
+                    left = bv == null ? 0 : bv.getLeft(),
+                    top  = bv == null ? 0 : bv.getTop();
+                marker.paint(g, r.x + left, r.y + top,
+                                r.width  - left - (bv == null ? 0 : bv.getRight()),
+                                r.height - top  - (bv == null ? 0 : bv.getBottom()), this);
             }
         };
 
@@ -19213,7 +19260,9 @@ pkg.Tabs = Class(pkg.Panel, [
                 tabon.paint(g, b.x, b.y, b.width, b.height, page);
             }
             else {
-                tab.paint(g, b.x, b.y, b.width, b.height, page);
+                if (tab != null) {
+                    tab.paint(g, b.x, b.y, b.width, b.height, page);
+                }
             }
 
             if (this.overTab >= 0 && this.overTab === pageIndex && tabover != null) {
@@ -19362,8 +19411,8 @@ pkg.Tabs = Class(pkg.Panel, [
                 var bv   = this.views.tab,
                     b    = (this.orient === "left" || this.orient === "right"),
                     max  = 0,
-                    hadd = bv.getLeft() + bv.getRight(),
-                    vadd = bv.getTop()  + bv.getBottom();
+                    hadd = bv == null ? 0 : bv.getLeft() + bv.getRight(),
+                    vadd = bv == null ? 0 : bv.getTop()  + bv.getBottom();
 
                 for(var i = 0;i < count; i++){
                     var ps =  this.pages[i * 2] != null ? this.pages[i * 2].getPreferredSize()
@@ -19720,21 +19769,20 @@ pkg.Tabs = Class(pkg.Panel, [
         }
     }
 ]);
-pkg.Tabs.prototype.setViews = pkg.$ViewsSetter;
 
 /**
  * Slider UI component class.
  * @class  zebkit.ui.Slider
  * @extends {zebkit.ui.Panel}
  */
-pkg.Slider = Class(pkg.Panel, [
+pkg.Slider = Class(pkg.Panel, pkg.$ViewsSetterMix, [
     function $prototype() {
         this.max = this.min = this.value = this.roughStep = this.exactStep = 0;
         this.netSize = this.gap = 3;
         this.correctDt = this.scaleStep = this.psW = this.psH = 0;
         this.intervals = this.pl = null;
         this.canHaveFocus = true;
-        this.orient = "horizontal";
+        this.orient       = "horizontal";
 
         /**
          * Get a value
@@ -19769,7 +19817,7 @@ pkg.Slider = Class(pkg.Panel, [
         };
 
         this.pointerDragged = function(e){
-            if(this.dragged) {
+            if (this.dragged) {
                 this.setValue(this.findNearest(e.x + (this.orient === "horizontal" ? this.correctDt : 0),
                                                e.y + (this.orient === "horizontal" ? 0 : this.correctDt)));
             }
@@ -19801,8 +19849,7 @@ pkg.Slider = Class(pkg.Panel, [
                     gauge.paint(g, left + 1,
                                    topY + Math.floor((bs.height - gs.height) / 2),
                                    w, gs.height, this);
-                }
-                else{
+                } else {
                     g.setColor("gray");
                     g.strokeRect(left + 1, topY + Math.floor((bs.height - gs.height) / 2), w, gs.height);
                 }
@@ -19818,7 +19865,7 @@ pkg.Slider = Class(pkg.Panel, [
                         g.lineTo(xx, topY + this.netSize);
                     }
 
-                    for(var i = 0;i < this.pl.length; i ++ ) {
+                    for(var i = 0;i < this.pl.length; i++) {
                         g.moveTo(this.pl[i] + 0.5, topY);
                         g.lineTo(this.pl[i] + 0.5, topY + 2 * this.netSize);
                     }
@@ -20094,7 +20141,7 @@ pkg.Slider = Class(pkg.Panel, [
         this.setScaleStep(1);
 
         this.$super();
-        this.views.bundle = (o === "horizontal" ? this.views.hbundle : this.views.vbundle);
+        this.views.bundle = (this.orient === "horizontal" ? this.views.hbundle : this.views.vbundle);
 
         this.provider = this;
     },
@@ -20182,7 +20229,6 @@ pkg.Slider = Class(pkg.Panel, [
         this.$super();
     }
 ]);
-pkg.Slider.prototype.setViews = pkg.$ViewsSetter;
 
 /**
  * Status bar UI component class
@@ -20853,8 +20899,6 @@ pkg.TextField = Class(pkg.Label, [
                 var position    = this.position,
                     line        = position.currentLine,
                     foff        = 1;
-
-                console.log("keyPressed !!!!! " + e.shiftKey);
 
                 if (e.shiftKey) {
                     this.startSelection();
@@ -21590,7 +21634,7 @@ var L = zebkit.layout, Position = zebkit.util.Position, KE = pkg.KeyEvent;
  * @param {zebkit.ui.BaseList} src a list that triggers the event
  * @param {Integer|Object} prev a previous selected index, return null if the selected item has been re-selected
  */
-pkg.BaseList = Class(pkg.Panel, Position.Metric, [
+pkg.BaseList = Class(pkg.Panel, Position.Metric, pkg.$ViewsSetterMix, [
     function $clazz() {
         this.Listeners = zebkit.util.ListenersClass("selected");
     },
@@ -22221,8 +22265,6 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         this.repaint();
     }
 ]);
-pkg.BaseList.prototype.setViews = pkg.$ViewsSetter;
-
 
 /**
  * The class is list component implementation that visualizes zebkit.data.ListModel.
@@ -27031,7 +27073,7 @@ pkg.RowSelMode = Class([
  * @param  {Integer} count a number of rows whose selection state has been updated
  * @param {Boolean} status a status. true means rows have been selected
  */
-pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
+pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, ui.$ViewsSetterMix, [
         function $clazz() {
             this.Listeners = zebkit.util.ListenersClass("rowSelected");
 
@@ -28806,8 +28848,6 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
          *  @method  setViews
          */
 ]);
-pkg.Grid.prototype.setViews = ui.$ViewsSetter;
-
 
 /**
  * Special UI panel that manages to stretch grid columns to occupy the whole panel space.
@@ -31489,7 +31529,6 @@ pkg.ShaperPan = Class(ui.Panel, [
                         this.setLocation(this.x + dx, this.y + dy);
                     }
                     else {
-                        console.log("ShaperPan.pointerDragged() setBounds " + nw);
                         this.setBounds(this.x + dx * s.left, this.y + dy * s.top, nw, nh);
                  //       this.invalidateLayout();
                     }

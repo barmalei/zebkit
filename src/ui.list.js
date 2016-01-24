@@ -25,7 +25,7 @@ var L = zebkit.layout, Position = zebkit.util.Position, KE = pkg.KeyEvent;
  * @param {zebkit.ui.BaseList} src a list that triggers the event
  * @param {Integer|Object} prev a previous selected index, return null if the selected item has been re-selected
  */
-pkg.BaseList = Class(pkg.Panel, Position.Metric, [
+pkg.BaseList = Class(pkg.Panel, Position.Metric, pkg.$ViewsSetterMix, [
     function $clazz() {
         this.Listeners = zebkit.util.ListenersClass("selected");
     },
@@ -656,8 +656,6 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, [
         this.repaint();
     }
 ]);
-pkg.BaseList.prototype.setViews = pkg.$ViewsSetter;
-
 
 /**
  * The class is list component implementation that visualizes zebkit.data.ListModel.

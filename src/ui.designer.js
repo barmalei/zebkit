@@ -245,7 +245,6 @@ pkg.ShaperPan = Class(ui.Panel, [
                         this.setLocation(this.x + dx, this.y + dy);
                     }
                     else {
-                        console.log("ShaperPan.pointerDragged() setBounds " + nw);
                         this.setBounds(this.x + dx * s.left, this.y + dy * s.top, nw, nh);
                  //       this.invalidateLayout();
                     }

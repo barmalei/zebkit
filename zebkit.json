@@ -216,16 +216,18 @@
         }
     },
 
-    "StringRender" : {
+    "BaseTextRender" : {
         "disabledColor": "white",
         "color": "@palette.fontColor",
         "font" : "@font"
     },
 
+    "StringRender" : {
+        "inherit" :  "BaseTextRender"
+    },
+
     "TextRender" : {
-        "disabledColor": "white",
-        "color": "@palette.fontColor",
-        "font" : "@font"
+        "inherit" :  "BaseTextRender"
     },
 
     "DecoratedTextRender" : {
@@ -237,6 +239,10 @@
     },
 
     "BoldTextRender" : {
+        "inherit" :  "TextRender"
+    },
+
+    "WrappedTextRender" : {
         "inherit" :  "TextRender"
     },
 

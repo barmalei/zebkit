@@ -1319,7 +1319,7 @@ pkg.RowSelMode = Class([
  * @param  {Integer} count a number of rows whose selection state has been updated
  * @param {Boolean} status a status. true means rows have been selected
  */
-pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
+pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, ui.$ViewsSetterMix, [
         function $clazz() {
             this.Listeners = zebkit.util.ListenersClass("rowSelected");
 
@@ -3094,8 +3094,6 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, [
          *  @method  setViews
          */
 ]);
-pkg.Grid.prototype.setViews = ui.$ViewsSetter;
-
 
 /**
  * Special UI panel that manages to stretch grid columns to occupy the whole panel space.

@@ -204,6 +204,13 @@ zebkit.package("ui", function(pkg, Class) {
         }
     ]);
 
-    new pkg.load(pkg.$url + "spin.json");
+    console.log("pkg.$url  = " + pkg.$url ) ;
+
+    pkg.load(pkg.$url + "src/spin.json", function(e) {
+        if (e != null) {
+
+            console.log("" + (e.stack ? e.stack : e));
+        }
+    });
 });
 

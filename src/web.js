@@ -20,8 +20,10 @@
         // in landscape mode because of a bug (full page size is
         // just 1 pixels column more than video memory that can keep it)
         // So, just make width always one pixel less.
-        return { width : window.innerWidth - 1,
-                 height: window.innerHeight   };
+        return  {
+                    width : window.innerWidth, //   - 1,
+                    height: window.innerHeight
+                };
     };
 
     pkg.$viewPortSize = function() {
@@ -44,8 +46,9 @@
                                                : parseInt(/(^[0-9\.]+)([a-z]+)?/.exec(value)[1], 10);
     };
 
-    // TODO: not sure it is required, probabbly it can be replaced with document.body.contains(e);
+
     pkg.$contains = function(element) {
+        // TODO: not sure it is required, probabbly it can be replaced with document.body.contains(e);
         return (document.contains != null && document.contains(element)) ||
                (document.body.contains != null && document.body.contains(element)); // !!! use body for IE
     };

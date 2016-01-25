@@ -553,9 +553,9 @@
             "focusoff":  { "$View":[] }
         },
         "views" : {
-             "gauge"  : { "$Border" : "@palette.gray3" },
-             "hbundle": { "$Picture": [ "@pictures.zebkit", 49,0,11,18 ] },
-             "vbundle": { "$Picture": [ "@pictures.zebkit", 61,0,18,11 ] }
+             "gauge2"  : { "$Border" : "@palette.gray3" },
+             "hbundle2": { "$Picture": [ "@pictures.zebkit", 49,0,11,18 ] },
+             "vbundle2": { "$Picture": [ "@pictures.zebkit", 61,0,18,11 ] }
         },
         "scaleColor": "@palette.gray1",
         "padding"   : 4
@@ -792,7 +792,7 @@
 
             "StatusPan": {
                 "view" : {
-                    "*"       : { "$zebkit.ui.ArrowView" : [ "left", "rgb(255, 153, 0)" ], "width":9, "height":9  },
+                    "*"       : { "$zebkit.ui.ArrowView" : [ "left", "rgb(255, 153, 0)" ], "width" : 9, "height" : 9  },
                     "ascent"  : { "$zebkit.ui.ArrowView" : [ "top", "rgb(255, 153, 0)"  ]   },
                     "descent" : { "$zebkit.ui.ArrowView" : [ "bottom", "rgb(255, 153, 0)" ] }
                 }
@@ -825,6 +825,7 @@
                 "onselection" :"#D0EAFF",
                 "offselection":"#ADC1D6"
             },
+
             "lineColor": "rgb(65, 131, 215)"
         }
     },

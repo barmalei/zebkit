@@ -7302,8 +7302,10 @@ pkg.Matrix = Class([
         // in landscape mode because of a bug (full page size is
         // just 1 pixels column more than video memory that can keep it)
         // So, just make width always one pixel less.
-        return { width : window.innerWidth - 1,
-                 height: window.innerHeight   };
+        return  {
+                    width : window.innerWidth, //   - 1,
+                    height: window.innerHeight
+                };
     };
 
     pkg.$viewPortSize = function() {
@@ -7326,8 +7328,9 @@ pkg.Matrix = Class([
                                                : parseInt(/(^[0-9\.]+)([a-z]+)?/.exec(value)[1], 10);
     };
 
-    // TODO: not sure it is required, probabbly it can be replaced with document.body.contains(e);
+
     pkg.$contains = function(element) {
+        // TODO: not sure it is required, probabbly it can be replaced with document.body.contains(e);
         return (document.contains != null && document.contains(element)) ||
                (document.body.contains != null && document.body.contains(element)); // !!! use body for IE
     };
@@ -7699,10 +7702,12 @@ pkg.Matrix = Class([
         pkg.$elBoundsUpdated = function() {
             for(var i = pkg.$canvases.length - 1; i >= 0; i--) {
                 var c = pkg.$canvases[i];
-                if (c.isFullScreen === true) {
+                if (c.isFullSize === true) {
                     //c.setLocation(window.pageXOffset, -window.pageYOffset);
 
                     var ws = zebkit.web.$viewPortSize();
+
+                    console.log("ws.width = " + ws.width);
 
                     // browser (mobile) can reduce size of browser window by
                     // the area a virtual keyboard occupies. Usually the
@@ -7719,7 +7724,10 @@ pkg.Matrix = Class([
 
         var $wrt = null, winSizeUpdated = false, wpw = -1, wph = -1;
         window.addEventListener("resize", function(e) {
-            if (wpw == window.innerWidth && wph == window.innerHeight) {
+            var ws = zebkit.web.$viewPortSize();
+
+            //
+            if (wpw === window.innerWidth && wph === window.innerHeight) {
                 return;
             }
 
@@ -10179,7 +10187,9 @@ pkg.Panel = Class(L.Layoutable, [
                         catch(ee) {
                             canvas.$paintTask = null;
                             canvas.$da.width = -1;
-                            if (g !== null) g.restore();
+                            if (g !== null) {
+                                g.restoreAll();
+                            }
                             throw ee;
                         }
                     });
@@ -11543,6 +11553,12 @@ pkg.HtmlCanvas = Class(pkg.HtmlElement, [
                 return this.$curState - 1;
             },
 
+            restoreAll : function() {
+                while(this.$curState > 0) {
+                    this.restore();
+                }
+            },
+
             restore : function() {
                 if (this.$curState === 0) {
                     throw new Error("Context restore history is empty");
@@ -11754,6 +11770,11 @@ pkg.CanvasLayer = Class(pkg.HtmlCanvas, [
          *  at this location
          *  @method isLayerActiveAt
          */
+    },
+
+    function() {
+        this.$super();
+        this.id = this.clazz.ID;
     }
 ]);
 
@@ -11781,11 +11802,6 @@ pkg.RootLayer = Class(pkg.CanvasLayer, [
         this.getFocusRoot = function() {
             return this;
         };
-    },
-
-    function() {
-        this.$super();
-        this.id = this.clazz.ID;
     }
 ]);
 
@@ -12546,6 +12562,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
     function $prototype() {
         this.$isRootCanvas   = true;
         this.$lastFocusOwner = null;
+        this.isSizeFull      = false;
 
         this.$toElementX = function(pageX, pageY) {
             pageX -= this.offx;
@@ -13010,22 +13027,30 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
         return this;
     },
 
-    /**
-     * Stretch Canvas to occupy full screen area
-     * @method fullScreen
-     */
-    function fullScreen() {
+    function fullSize() {
         /**
          * Indicate if the canvas has to be stretched to
          * fill the whole screen area.
          * @type {Boolean}
-         * @attribute isFullScreen
+         * @attribute isFullSize
          * @readOnly
          */
-        this.isFullScreen = true;
-        this.setLocation(0,0);
-        var ws = zebkit.web.$viewPortSize();
-        this.setSize(ws.width, ws.height);
+        if (this.isFullSize !== true) {
+            if (zebkit.web.$contains(this.$container) !== true) {
+                throw new Error("zCanvas is not a part of DOM tree");
+            }
+
+            this.isFullSize = true;
+            this.setLocation(0, 0);
+
+            // adjust body to kill unnecessary gap for inline-block zCanvas element
+            // otherwise body size will be slightly horizontally bigger than visual
+            // viewport height what causes scroller appears
+            document.body.style["font-size"] = "0px";
+
+            var ws = zebkit.web.$viewPortSize();
+            this.setSize(ws.width, ws.height);
+        }
     },
 
     function setVisible(b) {
@@ -13081,8 +13106,8 @@ zebkit.ready(
         var e = document.getElementById("zebkit.fm");
         if (e == null) {
             e = document.createElement("div");
-            e.setAttribute("id", "zebkit.fm");
-            e.setAttribute("style", "visibility:hidden;line-height:0;height:1px;vertical-align:baseline;");
+            e.setAttribute("id", "zebkit.fm");  // !!! position fixed below allows to avoid 1px size in HTML layout for "zebkit.fm" element
+            e.setAttribute("style", "visibility:hidden;line-height:0;height:1px;vertical-align:baseline;position:fixed;");
             e.innerHTML = "<span id='zebkit.fm.text' style='display:inline;vertical-align:baseline;'>&nbsp;</span>" +
                           "<img id='zebkit.fm.image' style='width:1px;height:1px;display:inline;vertical-align:baseline;' width='1' height='1'/>";
             document.body.appendChild(e);
@@ -19797,7 +19822,7 @@ pkg.Slider = Class(pkg.Panel, pkg.$ViewsSetterMix, [
             if (this.isShowTitle === true)
                 for(var i = 0;i < this.pl.length; i++ ){
                     var render = this.provider.getView(this, this.getPointValue(i)),
-                        d = render.getPreferredSize();
+                        d      = render.getPreferredSize();
 
                     if (this.orient === "horizontal") {
                         render.paint(g, this.pl[i] - Math.floor(d.width / 2), loc, d.width, d.height, this);
@@ -19809,7 +19834,7 @@ pkg.Slider = Class(pkg.Panel, pkg.$ViewsSetterMix, [
         };
 
         this.getScaleSize = function(){
-            var bs = this.views.bundle.getPreferredSize();
+            var bs = this.views.bundle == null ? { width: 0, height:0 } : this.views.bundle.getPreferredSize();
             return (this.orient === "horizontal" ? this.width - this.getLeft() -
                                                   this.getRight() - bs.width
                                                 : this.height - this.getTop() -
@@ -19838,17 +19863,19 @@ pkg.Slider = Class(pkg.Panel, pkg.$ViewsSetterMix, [
                 bottom = this.getBottom(),
                 bnv    = this.views.bundle,
                 gauge  = this.views.gauge,
-                bs     = bnv.getPreferredSize(),
-                gs     = gauge.getPreferredSize(),
+                bs     = bnv == null ? { width: 0, height: 0 } : bnv.getPreferredSize(),
+                gs     = gauge == null ? { width: 0, height: 0 } : gauge.getPreferredSize(),
                 w      = this.width - left - right - 2,
                 h      = this.height - top - bottom - 2;
 
             if (this.orient === "horizontal"){
                 var topY = top + Math.floor((h - this.psH) / 2) + 1, by = topY;
-                if(this.isEnabled === true) {
-                    gauge.paint(g, left + 1,
-                                   topY + Math.floor((bs.height - gs.height) / 2),
-                                   w, gs.height, this);
+                if (this.isEnabled === true) {
+                    if (gauge != null) {
+                        gauge.paint(g, left + 1,
+                                       topY + Math.floor((bs.height - gs.height) / 2),
+                                       w, gs.height, this);
+                    }
                 } else {
                     g.setColor("gray");
                     g.strokeRect(left + 1, topY + Math.floor((bs.height - gs.height) / 2), w, gs.height);
@@ -19873,15 +19900,18 @@ pkg.Slider = Class(pkg.Panel, pkg.$ViewsSetterMix, [
                     topY += (2 * this.netSize);
                 }
                 this.paintNums(g, topY);
-                bnv.paint(g, this.getBundleLoc(this.value), by, bs.width, bs.height, this);
+                if (bnv != null) {
+                    bnv.paint(g, this.getBundleLoc(this.value), by, bs.width, bs.height, this);
+                }
             }
             else {
                 var leftX = left + Math.floor((w - this.psW) / 2) + 1, bx = leftX;
                 if (this.isEnabled === true) {
-                    gauge.paint(g, leftX + Math.floor((bs.width - gs.width) / 2),
-                                   top + 1, gs.width, h, this);
-                }
-                else {
+                    if (gauge != null) {
+                        gauge.paint(g, leftX + Math.floor((bs.width - gs.width) / 2),
+                                       top + 1, gs.width, h, this);
+                    }
+                } else {
                     g.setColor("gray");
                     g.strokeRect(leftX + Math.floor((bs.width - gs.width) / 2),
                                  top + 1, gs.width, h);
@@ -19908,7 +19938,9 @@ pkg.Slider = Class(pkg.Panel, pkg.$ViewsSetterMix, [
                 }
 
                 this.paintNums(g, leftX);
-                bnv.paint(g, bx, this.getBundleLoc(this.value), bs.width, bs.height, this);
+                if (bnv != null) {
+                    bnv.paint(g, bx, this.getBundleLoc(this.value), bs.width, bs.height, this);
+                }
             }
 
             if (this.hasFocus() && this.views.marker != null) {
@@ -19939,15 +19971,16 @@ pkg.Slider = Class(pkg.Panel, pkg.$ViewsSetterMix, [
         };
 
         this.value2loc = function (v){
-            var ps = this.views.bundle.getPreferredSize(),
+            var ps = this.views.bundle == null ? { width:0, height:0 } : this.views.bundle.getPreferredSize(),
                 l  = Math.floor((this.getScaleSize() * (v - this.min)) / (this.max - this.min));
             return  (this.orient === "vertical") ? this.height - Math.floor(ps.height/2) - this.getBottom() - l
                                                  : this.getLeft() + Math.floor(ps.width/2) + l;
         };
 
         this.loc2value = function(xy){
-            var ps = this.views.bundle.getPreferredSize(),
-                sl = (this.orient === "vertical") ? this.getLeft() + Math.floor(ps.width/2) : this.getTop() + Math.floor(ps.height/2),
+            var ps = this.views.bundle == null ? { width:0, height:0 } : this.views.bundle.getPreferredSize(),
+                sl = (this.orient === "vertical") ? this.getLeft() + Math.floor(ps.width/2)
+                                                  : this.getTop()  + Math.floor(ps.height/2),
                 ss = this.getScaleSize();
 
             if (this.orient === "vertical") {
@@ -19977,13 +20010,13 @@ pkg.Slider = Class(pkg.Panel, pkg.$ViewsSetterMix, [
         };
 
         this.getBundleLoc = function(v){
-            var bs = this.views.bundle.getPreferredSize();
+            var bs = this.views.bundle == null ? { width:0, height:0 } : this.views.bundle.getPreferredSize();
             return this.value2loc(v) - (this.orient === "horizontal" ? Math.floor(bs.width / 2)
                                                                      : Math.floor(bs.height / 2));
         };
 
         this.getBundleBounds = function (v){
-            var bs = this.views.bundle.getPreferredSize();
+            var bs = this.views.bundle == null ? { width:0, height:0 } : this.views.bundle.getPreferredSize();
             return this.orient === "horizontal"? {
                                                    x:this.getBundleLoc(v),
                                                    y:this.getTop() + Math.floor((this.height - this.getTop() - this.getBottom() - this.psH) / 2) + 1,
@@ -20029,7 +20062,7 @@ pkg.Slider = Class(pkg.Panel, pkg.$ViewsSetterMix, [
         };
 
         this.recalc = function(){
-            var ps = this.views.bundle.getPreferredSize(),
+            var ps = this.views.bundle != null ? this.views.bundle.getPreferredSize() : { width: 0, height:0 },
                 ns = this.isShowScale ? (this.gap + 2 * this.netSize) : 0,
                 dt = this.max - this.min, hMax = 0, wMax = 0;
 
@@ -20127,25 +20160,6 @@ pkg.Slider = Class(pkg.Panel, pkg.$ViewsSetterMix, [
         };
     },
 
-    function (o) {
-        this._ = new Listeners();
-        this.views = {};
-        this.isShowScale = this.isShowTitle = true;
-        this.dragged = this.isIntervalMode = false;
-        this.render = new pkg.BoldTextRender("");
-        this.render.setColor("gray");
-        if (arguments.length > 0) {
-            this.orient = o;
-        }
-        this.setValues(0, 20, [0, 5, 10], 2, 1);
-        this.setScaleStep(1);
-
-        this.$super();
-        this.views.bundle = (this.orient === "horizontal" ? this.views.hbundle : this.views.vbundle);
-
-        this.provider = this;
-    },
-
     function focused() {
         this.$super();
         this.repaint();
@@ -20227,6 +20241,25 @@ pkg.Slider = Class(pkg.Panel, pkg.$ViewsSetterMix, [
     function invalidate(){
         this.pl = null;
         this.$super();
+    },
+
+    function (o) {
+        this._ = new Listeners();
+        this.views = {};
+        this.isShowScale = this.isShowTitle = true;
+        this.dragged = this.isIntervalMode = false;
+        this.render = new pkg.BoldTextRender("");
+        this.render.setColor("gray");
+        if (arguments.length > 0) {
+            this.orient = o;
+        }
+        this.setValues(0, 20, [0, 5, 10], 2, 1);
+        this.setScaleStep(1);
+
+        this.$super();
+        this.views.bundle = (this.orient === "horizontal" ? this.views.hbundle : this.views.vbundle);
+
+        this.provider = this;
     }
 ]);
 
@@ -23586,7 +23619,7 @@ pkg.activateWindow = function(win) {
  * @constructor
  * @extends {zebkit.ui.HtmlCanvas}
  */
-pkg.WinLayer = Class(pkg.HtmlCanvas, [
+pkg.WinLayer = Class(pkg.CanvasLayer, [
     function $clazz() {
         this.ID = "win";
         this.Listeners = zebkit.util.ListenersClass("winOpened", "winActivated");
@@ -23823,12 +23856,13 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
         this.winsTypes     = {};
 
         this._ = new this.clazz.Listeners();
-        this.id = this.clazz.ID;
         this.$super();
+
 
         // TODO: why 1000 and how to avoid z-index manipulation
         // the layer has to be placed above other elements that are virtually
         // inserted in the layer
+        // TODO: this line brings to fails if window layer inherits Panel
         this.element.style["z-index"] = "10000";
     },
 
@@ -25175,12 +25209,13 @@ pkg.Menubar = Class(pkg.Menu, [
  * @constructor
  * @extends {zebkit.ui.HtmlCanvas}
  */
-pkg.PopupLayer = Class(pkg.HtmlCanvas, [
+pkg.PopupLayer = Class(pkg.CanvasLayer, [
     function $clazz() {
         this.ID = "pop";
     },
 
     function $prototype() {
+        this.activeMenubar = null;
         this.mTop = this.mLeft = this.mBottom = this.mRight = 0;
 
         this.layerPointerPressed = function(e) {
@@ -25301,12 +25336,6 @@ pkg.PopupLayer = Class(pkg.HtmlCanvas, [
                 }
             }
         };
-    },
-
-    function () {
-        this.activeMenubar = null;
-        this.id = this.clazz.ID;
-        this.$super();
     }
 ]);
 
@@ -29592,10 +29621,10 @@ pkg.BaseTree = Class(ui.Panel, [
         };
 
         this.getIconSize = function (i) {
-            var v =  i.kids.length > 0 ? (this.getIM(i).isOpen ? this.viewSizes.open
-                                                               : this.viewSizes.close)
+            var v = i.kids.length > 0 ? (this.getIM(i).isOpen ? this.viewSizes.open
+                                                              : this.viewSizes.close)
                                        : this.viewSizes.leaf;
-            return v ? v : { width:0, height:0 };
+            return v != null ? v : { width:0, height:0 };
         };
 
         /**
@@ -29614,7 +29643,7 @@ pkg.BaseTree = Class(ui.Panel, [
          * @method getToggleBounds
          * @protected
          */
-        this.getIconBounds = function (root){
+        this.getIconBounds = function(root) {
             var node = this.getIM(root),
                 id   = this.getIconSize(root),
                 td   = this.getToggleSize(root);
@@ -29623,21 +29652,21 @@ pkg.BaseTree = Class(ui.Panel, [
                      width:id.width, height:id.height };
         };
 
-        this.getToggleSize = function (i){
+        this.getToggleSize = function(i) {
             return this.isOpen_(i) ? this.viewSizes.on : this.viewSizes.off;
         };
 
-        this.isOverVisibleArea = function (i){
+        this.isOverVisibleArea = function (i) {
             var node = this.getIM(i);
             return node.y + node.height + this.scrollManager.getSY() < this.visibleArea.y;
         };
 
-        this.findOpened = function (item){
+        this.findOpened = function(item) {
             var parent = item.parent;
             return (parent == null || this.isOpen_(parent)) ? item : this.findOpened(parent);
         };
 
-        this.findNext = function (item){
+        this.findNext = function(item) {
             if (item != null){
                 if (item.kids.length > 0 && this.isOpen_(item)){
                     return item.kids[0];
@@ -30119,14 +30148,17 @@ pkg.BaseTree = Class(ui.Panel, [
      * @param {Object} v dictionary of tree component decorative elements views
      * @method setViews
      */
-    function setViews(v){
+    function setViews(v) {
+        // setting to 0 prevents exception when on/off view is not defined
+        this.viewSizes.on  = { width: 0, height : 0};
+        this.viewSizes.off = { width: 0, height : 0};
         for(var k in v) {
             if (v.hasOwnProperty(k)) {
                 var vv = ui.$view(v[k]);
 
                 this.views[k] = vv;
                 if (k != "aselect" && k != "iselect"){
-                    this.viewSizes[k] = vv ? vv.getPreferredSize() : null;
+                    this.viewSizes[k] = vv ? vv.getPreferredSize() : { width: 0, height : 0};
                     this.vrp();
                 }
             }

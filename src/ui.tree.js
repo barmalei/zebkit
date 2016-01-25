@@ -523,10 +523,10 @@ pkg.BaseTree = Class(ui.Panel, [
         };
 
         this.getIconSize = function (i) {
-            var v =  i.kids.length > 0 ? (this.getIM(i).isOpen ? this.viewSizes.open
-                                                               : this.viewSizes.close)
+            var v = i.kids.length > 0 ? (this.getIM(i).isOpen ? this.viewSizes.open
+                                                              : this.viewSizes.close)
                                        : this.viewSizes.leaf;
-            return v ? v : { width:0, height:0 };
+            return v != null ? v : { width:0, height:0 };
         };
 
         /**
@@ -545,7 +545,7 @@ pkg.BaseTree = Class(ui.Panel, [
          * @method getToggleBounds
          * @protected
          */
-        this.getIconBounds = function (root){
+        this.getIconBounds = function(root) {
             var node = this.getIM(root),
                 id   = this.getIconSize(root),
                 td   = this.getToggleSize(root);
@@ -554,21 +554,21 @@ pkg.BaseTree = Class(ui.Panel, [
                      width:id.width, height:id.height };
         };
 
-        this.getToggleSize = function (i){
+        this.getToggleSize = function(i) {
             return this.isOpen_(i) ? this.viewSizes.on : this.viewSizes.off;
         };
 
-        this.isOverVisibleArea = function (i){
+        this.isOverVisibleArea = function (i) {
             var node = this.getIM(i);
             return node.y + node.height + this.scrollManager.getSY() < this.visibleArea.y;
         };
 
-        this.findOpened = function (item){
+        this.findOpened = function(item) {
             var parent = item.parent;
             return (parent == null || this.isOpen_(parent)) ? item : this.findOpened(parent);
         };
 
-        this.findNext = function (item){
+        this.findNext = function(item) {
             if (item != null){
                 if (item.kids.length > 0 && this.isOpen_(item)){
                     return item.kids[0];
@@ -1050,14 +1050,17 @@ pkg.BaseTree = Class(ui.Panel, [
      * @param {Object} v dictionary of tree component decorative elements views
      * @method setViews
      */
-    function setViews(v){
+    function setViews(v) {
+        // setting to 0 prevents exception when on/off view is not defined
+        this.viewSizes.on  = { width: 0, height : 0};
+        this.viewSizes.off = { width: 0, height : 0};
         for(var k in v) {
             if (v.hasOwnProperty(k)) {
                 var vv = ui.$view(v[k]);
 
                 this.views[k] = vv;
                 if (k != "aselect" && k != "iselect"){
-                    this.viewSizes[k] = vv ? vv.getPreferredSize() : null;
+                    this.viewSizes[k] = vv ? vv.getPreferredSize() : { width: 0, height : 0};
                     this.vrp();
                 }
             }

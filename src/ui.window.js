@@ -115,7 +115,7 @@ pkg.activateWindow = function(win) {
  * @constructor
  * @extends {zebkit.ui.HtmlCanvas}
  */
-pkg.WinLayer = Class(pkg.HtmlCanvas, [
+pkg.WinLayer = Class(pkg.CanvasLayer, [
     function $clazz() {
         this.ID = "win";
         this.Listeners = zebkit.util.ListenersClass("winOpened", "winActivated");
@@ -352,12 +352,13 @@ pkg.WinLayer = Class(pkg.HtmlCanvas, [
         this.winsTypes     = {};
 
         this._ = new this.clazz.Listeners();
-        this.id = this.clazz.ID;
         this.$super();
+
 
         // TODO: why 1000 and how to avoid z-index manipulation
         // the layer has to be placed above other elements that are virtually
         // inserted in the layer
+        // TODO: this line brings to fails if window layer inherits Panel
         this.element.style["z-index"] = "10000";
     },
 
@@ -1704,12 +1705,13 @@ pkg.Menubar = Class(pkg.Menu, [
  * @constructor
  * @extends {zebkit.ui.HtmlCanvas}
  */
-pkg.PopupLayer = Class(pkg.HtmlCanvas, [
+pkg.PopupLayer = Class(pkg.CanvasLayer, [
     function $clazz() {
         this.ID = "pop";
     },
 
     function $prototype() {
+        this.activeMenubar = null;
         this.mTop = this.mLeft = this.mBottom = this.mRight = 0;
 
         this.layerPointerPressed = function(e) {
@@ -1830,12 +1832,6 @@ pkg.PopupLayer = Class(pkg.HtmlCanvas, [
                 }
             }
         };
-    },
-
-    function () {
-        this.activeMenubar = null;
-        this.id = this.clazz.ID;
-        this.$super();
     }
 ]);
 

@@ -1097,7 +1097,9 @@ pkg.Panel = Class(L.Layoutable, [
                         catch(ee) {
                             canvas.$paintTask = null;
                             canvas.$da.width = -1;
-                            if (g !== null) g.restore();
+                            if (g !== null) {
+                                g.restoreAll();
+                            }
                             throw ee;
                         }
                     });
@@ -2461,6 +2463,12 @@ pkg.HtmlCanvas = Class(pkg.HtmlElement, [
                 return this.$curState - 1;
             },
 
+            restoreAll : function() {
+                while(this.$curState > 0) {
+                    this.restore();
+                }
+            },
+
             restore : function() {
                 if (this.$curState === 0) {
                     throw new Error("Context restore history is empty");
@@ -2672,6 +2680,11 @@ pkg.CanvasLayer = Class(pkg.HtmlCanvas, [
          *  at this location
          *  @method isLayerActiveAt
          */
+    },
+
+    function() {
+        this.$super();
+        this.id = this.clazz.ID;
     }
 ]);
 
@@ -2699,11 +2712,6 @@ pkg.RootLayer = Class(pkg.CanvasLayer, [
         this.getFocusRoot = function() {
             return this;
         };
-    },
-
-    function() {
-        this.$super();
-        this.id = this.clazz.ID;
     }
 ]);
 
@@ -3464,6 +3472,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
     function $prototype() {
         this.$isRootCanvas   = true;
         this.$lastFocusOwner = null;
+        this.isSizeFull      = false;
 
         this.$toElementX = function(pageX, pageY) {
             pageX -= this.offx;
@@ -3928,22 +3937,30 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
         return this;
     },
 
-    /**
-     * Stretch Canvas to occupy full screen area
-     * @method fullScreen
-     */
-    function fullScreen() {
+    function fullSize() {
         /**
          * Indicate if the canvas has to be stretched to
          * fill the whole screen area.
          * @type {Boolean}
-         * @attribute isFullScreen
+         * @attribute isFullSize
          * @readOnly
          */
-        this.isFullScreen = true;
-        this.setLocation(0,0);
-        var ws = zebkit.web.$viewPortSize();
-        this.setSize(ws.width, ws.height);
+        if (this.isFullSize !== true) {
+            if (zebkit.web.$contains(this.$container) !== true) {
+                throw new Error("zCanvas is not a part of DOM tree");
+            }
+
+            this.isFullSize = true;
+            this.setLocation(0, 0);
+
+            // adjust body to kill unnecessary gap for inline-block zCanvas element
+            // otherwise body size will be slightly horizontally bigger than visual
+            // viewport height what causes scroller appears
+            document.body.style["font-size"] = "0px";
+
+            var ws = zebkit.web.$viewPortSize();
+            this.setSize(ws.width, ws.height);
+        }
     },
 
     function setVisible(b) {
@@ -3999,8 +4016,8 @@ zebkit.ready(
         var e = document.getElementById("zebkit.fm");
         if (e == null) {
             e = document.createElement("div");
-            e.setAttribute("id", "zebkit.fm");
-            e.setAttribute("style", "visibility:hidden;line-height:0;height:1px;vertical-align:baseline;");
+            e.setAttribute("id", "zebkit.fm");  // !!! position fixed below allows to avoid 1px size in HTML layout for "zebkit.fm" element
+            e.setAttribute("style", "visibility:hidden;line-height:0;height:1px;vertical-align:baseline;position:fixed;");
             e.innerHTML = "<span id='zebkit.fm.text' style='display:inline;vertical-align:baseline;'>&nbsp;</span>" +
                           "<img id='zebkit.fm.image' style='width:1px;height:1px;display:inline;vertical-align:baseline;' width='1' height='1'/>";
             document.body.appendChild(e);

@@ -6,10 +6,12 @@
         pkg.$elBoundsUpdated = function() {
             for(var i = pkg.$canvases.length - 1; i >= 0; i--) {
                 var c = pkg.$canvases[i];
-                if (c.isFullScreen === true) {
+                if (c.isFullSize === true) {
                     //c.setLocation(window.pageXOffset, -window.pageYOffset);
 
                     var ws = zebkit.web.$viewPortSize();
+
+                    console.log("ws.width = " + ws.width);
 
                     // browser (mobile) can reduce size of browser window by
                     // the area a virtual keyboard occupies. Usually the
@@ -26,7 +28,10 @@
 
         var $wrt = null, winSizeUpdated = false, wpw = -1, wph = -1;
         window.addEventListener("resize", function(e) {
-            if (wpw == window.innerWidth && wph == window.innerHeight) {
+            var ws = zebkit.web.$viewPortSize();
+
+            //
+            if (wpw === window.innerWidth && wph === window.innerHeight) {
                 return;
             }
 

@@ -6,15 +6,15 @@
 		<meta name="msapplication-tap-highlight" content="no" />
 
 
-		<script src='../zebkit.min.js' type='text/javascript'></script>
+		<script src='../zebkit.js' type='text/javascript'></script>
 
 		<script type='text/javascript'>
 		    zebkit.ready(function() {
 		    	eval(zebkit.Import("ui", "layout"));
 
-		    	var data = [ "images/035.png;Test1", "images/058.png;Test2", "images/058.png;Test3" ];
+		    	var data = [ "images/gmail_16.png;Test1", "images/android_16.png;Test2", "images/google_16.png;Test3" ];
 		    	for(var i=0; i < 1000; i++) {
-		    	 	data[i] = "images/060.png;" + " Item  [ " + i + " ]";
+		    	 	data[i] = "images/gmail_16.png;" + " Item  [ " + i + " ]";
 		    	}
 
 
@@ -31,21 +31,13 @@
 
 				list.setViewProvider(new zebkit.Dummy([
 					function $prototype() {
-
 						this.getView = function(target, value, i) {
 							var v = value.split(";");
-
-							return (v.length > 1) ? new CompRender(new ImageLabel(v[1], i))
+							return (v.length > 1) ? new CompRender(new ImageLabel(v[1], v[0]))
 												  : new TextRender(value);
 						};
 					}
 				]));
-
-				var image = loadImage(v[0], function() {
-					target.vrp();
-				});
-
-
 
 			    var root = z.root.properties({
 			    	layout : new BorderLayout(6,6),

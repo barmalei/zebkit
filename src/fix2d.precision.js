@@ -1,4 +1,4 @@
-(function() {
+zebkit.package("ui", function() {
     var ctx = zebkit.ui.HtmlCanvas.$ContextMethods;
 
     ctx.translate = function(dx, dy) {
@@ -92,4 +92,4 @@
                                            arguments[7], arguments[8]);
         }
     };
-})();
+});

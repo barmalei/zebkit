@@ -85,7 +85,8 @@ pkg.DesignerDemo = new Class(pkg.DemoPan, [
 
         var prev = null, prevCol = null;
         t.bind(function selected(src, data) {
-            var c = lookup(pp, src.selected);
+            var c = lookup(pp, src.selected.comp);
+
             if (prev != null) {
                 prev.setBackground(null);
             }

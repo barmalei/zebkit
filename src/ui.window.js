@@ -1,7 +1,36 @@
-(function(pkg, Class) {
+zebkit.package("ui", function(pkg, Class) {
 
-var KE = pkg.KeyEvent, task = zebkit.util.task, L = zebkit.layout,
-    WIN_OPENED = 1, WIN_CLOSED = 2, WIN_ACTIVATED = 3, WIN_DEACTIVATED = 4;
+pkg.WinEvent = Class(zebkit.util.Event, [
+    function $prototype() {
+        this.isShown = this.isActive = false;
+        this.layer = null;
+
+        this.$fillWith = function(src, layer, isActive, isShown) {
+            this.source = src;
+            this.layer = layer;
+            this.isActive = isActive;
+            this.isShown = isShown;
+            return this;
+        };
+    }
+]);
+
+pkg.MenuEvent = Class(zebkit.util.Event, [
+    function $prototype() {
+        this.index = -1;
+        this.item  = null;
+
+        this.$fillWith = function(src, index, item) {
+            this.source = src;
+            this.index = index;
+            this.item = item;
+            return this;
+        };
+    }
+]);
+
+var WIN_EVENT  = new pkg.WinEvent(),
+    MENU_EVENT = new pkg.MenuEvent();
 
 /**
  * Show the given UI component as a modal window
@@ -10,11 +39,11 @@ var KE = pkg.KeyEvent, task = zebkit.util.task, L = zebkit.layout,
  * @param  {Object} [listener] a window listener
 
         {
-            winActivated : function(layer, win, isActive) {
+            winActivated : function(e) {
 
             },
 
-            winOpened : function(layer, win, isOpened) {
+            winOpened : function(e) {
 
             }
         }
@@ -35,11 +64,11 @@ pkg.showModalWindow = function(context, win, listener) {
  * @param  {Object} [listener] a window listener
 
         {
-            winActivated : function(layer, win, isActive) {
+            winActivated : function(e) {
                ...
             },
 
-            winOpened : function(layer, win, isOpened) {
+            winOpened : function(e) {
               ...
             }
         }
@@ -67,7 +96,7 @@ pkg.showPopupMenu = function(context, menu) {
  */
 pkg.activateWindow = function(win) {
     var l = win.getCanvas().getLayer("win");
-    l.activate(L.getDirectChild(l, win));
+    l.activate(zebkit.layout.getDirectChild(l, win));
 };
 
 /**
@@ -118,7 +147,7 @@ pkg.activateWindow = function(win) {
 pkg.WinLayer = Class(pkg.CanvasLayer, [
     function $clazz() {
         this.ID = "win";
-        this.Listeners = zebkit.util.ListenersClass("winOpened", "winActivated");
+        this.layout = new zebkit.layout.RasterLayout();
     },
 
     function $prototype() {
@@ -131,7 +160,7 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
             if (cnt > 0) {
                 // check if pointer pressed has occurred in the topest window since
                 // this is the most probable case
-                if (this.activeWin != null && this.indexOf(this.activeWin) == cnt - 1) {
+                if (this.activeWin != null && this.indexOf(this.activeWin) === cnt - 1) {
                     var x1 = this.activeWin.x,
                         y1 = this.activeWin.y,
                         x2 = x1 + this.activeWin.width,
@@ -169,9 +198,9 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
         };
 
         this.layerKeyPressed = function(e){
-            if (this.kids.length > 0  &&
-                e.code === KE.TAB     &&
-                e.shiftKey              )
+            if (this.kids.length > 0        &&
+                e.code === pkg.KeyEvent.TAB &&
+                e.shiftKey                     )
             {
                 if (this.activeWin == null) {
                     this.activate(this.kids[this.kids.length - 1]);
@@ -214,7 +243,7 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
          * @method childFocusGained
          */
         this.childFocusGained = function (e) {
-            this.activate(L.getDirectChild(this, e.source));
+            this.activate(zebkit.layout.getDirectChild(this, e.source));
         };
 
         this.getComponentAt = function(x,y) {
@@ -252,7 +281,7 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
                     }
 
                     this.activeWin = null;
-                    this.fire(WIN_DEACTIVATED, old);
+                    this.fire("winActivated", WIN_EVENT.$fillWith(old, this, false, false));
 
                     // TODO: special flag $dontGrabFocus is not very elegant
                     if (type === "mdi" && old.$dontGrabFocus !== true) {
@@ -268,10 +297,10 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
                     this.activeWin.toFront();
 
                     if (old != null) {
-                        this.fire(WIN_DEACTIVATED, old);
+                        this.fire("winActivated", WIN_EVENT.$fillWith(old, this, false, false));
                     }
 
-                    this.fire(WIN_ACTIVATED, this.activeWin);
+                    this.fire("winActivated", WIN_EVENT.$fillWith(c, this, true, false));
                     this.activeWin.validate();
 
                     var type = this.winsTypes[this.activeWin];
@@ -284,22 +313,14 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
             }
         };
 
-        this.fire = function(id, win, l) {
+        this.fire = function(id, e, l) {
             if (arguments.length < 3) {
-                l = this.winsListeners[win];
+                l = this.winsListeners[e.source];
             }
 
-            var b = (id == WIN_OPENED || id == WIN_ACTIVATED),
-                n = (id == WIN_OPENED || id == WIN_CLOSED) ? "winOpened"
-                                                           : "winActivated";
-
-            this._[n](this, win, b);
-            if (win[n] != null) {
-                win[n].apply(win, [this, win, b]);
-            }
-
-            if (l != null && l[n] != null) {
-                l[n].apply(l, [this, win, b]);
+            pkg.events.fireEvent(id, e)
+            if (l != null && l[id] != null) {
+                l[id].call(l, e);
             }
         };
 
@@ -311,11 +332,11 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
          * @param {Object} [listener] an optional the window listener
 
          {
-             winActivated : function(layer, win, isActive) {
+             winActivated : function(e) {
 
              },
 
-             winOpened : function(layer, win, isOpened) {
+             winOpened : function(e) {
 
              }
          }
@@ -351,9 +372,7 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
         this.winsListeners = {};
         this.winsTypes     = {};
 
-        this._ = new this.clazz.Listeners();
         this.$super();
-
 
         // TODO: why 1000 and how to avoid z-index manipulation
         // the layer has to be placed above other elements that are virtually
@@ -384,11 +403,11 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
         this.winsStack.push(lw);
         if (type === "modal") {
             this.topModalIndex = this.winsStack.length - 1;
-            this.fire(WIN_OPENED, lw);
+            this.fire("winOpened", WIN_EVENT.$fillWith(lw, this, false, true));
             this.activate(lw);
         }
         else {
-            this.fire(WIN_OPENED, lw);
+            this.fire("winOpened", WIN_EVENT.$fillWith(lw, this, false, true));
         }
     },
 
@@ -403,7 +422,7 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
                 // TODO:  deactivated event can be used
                 // as a trigger of a window closing so
                 // it is better don't fire it here
-                // this.fire(WIN_DEACTIVATED, lw, l);
+                // this.fire("winActivated", lw, l);
                 if (this.winsTypes[lw] === "mdi" && lw.$dontGrabFocus !== true) {
                     pkg.focusManager.requestFocus(null);
                 }
@@ -425,7 +444,7 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
                 }
             }
 
-            this.fire(WIN_CLOSED, lw, l);
+            this.fire("winOpened", WIN_EVENT.$fillWith(lw, this, false, false), l);
 
             if (this.topModalIndex >= 0){
                 var aindex = this.winsStack.length - 1;
@@ -466,6 +485,21 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
  * @extends {zebkit.ui.Panel}
  */
 pkg.Window = Class(pkg.StatePan, [
+    function $clazz() {
+        this.CaptionPan = Class(pkg.StatePan, [
+            function $prototype() {
+                this.state = "inactive";
+            }
+        ]);
+
+        this.TitleLab   = Class(pkg.Label, []);
+        this.StatusPan  = Class(pkg.Panel, []);
+        this.ContentPan = Class(pkg.Panel, []);
+        this.SizerIcon  = Class(pkg.ImagePan, []);
+        this.Icon       = Class(pkg.ImagePan, []);
+        this.Button     = Class(pkg.Button, []);
+    },
+
     function $prototype() {
         var MOVE_ACTION = 1, SIZE_ACTION = 2;
 
@@ -502,22 +536,22 @@ pkg.Window = Class(pkg.StatePan, [
         this.pointerDragStarted = function(e){
             this.px = e.absX;
             this.py = e.absY;
-            this.psw = this.width;
-            this.psh = this.height;
             this.action = this.insideCorner(e.x, e.y) ? (this.isSizeable ? SIZE_ACTION : -1)
                                                       : MOVE_ACTION;
-            if (this.action > 0) this.dy = this.dx = 0;
+            if (this.action > 0) {
+                this.dy = this.dx = 0;
+            }
         };
 
         this.pointerDragged = function(e){
             if (this.action > 0) {
                 if (this.action !== MOVE_ACTION){
-                    var nw = this.psw + this.dx,
-                        nh = this.psh + this.dy;
+                    var container = this.getWinContainer(),
+                        nw = this.dx + container.width,
+                        nh = this.dy + container.height;
 
                     if (nw > this.minSize && nh > this.minSize) {
-                        var container = this.getWinContainer();
-                        container.setSize(this.dx + container.width, this.dy + container.height);
+                        container.setSize(nw, nh);
                     }
                 }
 
@@ -566,22 +600,21 @@ pkg.Window = Class(pkg.StatePan, [
 
         this.catchInput = function(c){
             var tp = this.caption;
-            return c === tp || (L.isAncestorOf(tp, c)         &&
+            return c === tp || (zebkit.layout.isAncestorOf(tp, c)         &&
                    zebkit.instanceOf(c, pkg.Button) === false) ||
                    this.sizer === c;
         };
 
-        this.winOpened = function(winLayer,target,b) {
+        this.winOpened = function(e) {
             var state = this.isActive() ? "active" : "inactive";
-
             if (this.caption != null && this.caption.setState != null) {
                 this.caption.setState(state);
             }
             this.setState(state);
         };
 
-        this.winActivated = function(winLayer, target,b){
-            this.winOpened(winLayer, target,b);
+        this.winActivated = function(e) {
+            this.winOpened(e);
         };
 
         this.pointerDoubleClicked = function (e){
@@ -622,30 +655,107 @@ pkg.Window = Class(pkg.StatePan, [
             }
             this.icons.setAt(i, icon);
         };
-    },
 
-    function $clazz() {
-        this.CaptionPan = Class(pkg.StatePan, [
-            function $prototype() {
-                this.state = "inactive";
+        /**
+         * Make the window sizable or not sizeable
+         * @param {Boolean} b a sizeable state of the window
+         * @method setSizeable
+         */
+        this.setSizeable = function(b){
+            if (this.isSizeable != b){
+                this.isSizeable = b;
+                if (this.sizer != null) {
+                    this.sizer.setVisible(b);
+                }
             }
-        ]);
+        };
 
-        this.TitleLab   = Class(pkg.Label, []);
-        this.StatusPan  = Class(pkg.Panel, []);
-        this.ContentPan = Class(pkg.Panel, []);
-        this.SizerIcon  = Class(pkg.ImagePan, []);
-        this.Icon       = Class(pkg.ImagePan, []);
-        this.Button     = Class(pkg.Button, []);
+        /**
+         * Maximize the window
+         * @method maximize
+         */
+        this.maximize = function(){
+            if(this.prevW < 0){
+                var d    = this.getCanvas(),
+                    cont = this.getWinContainer(),
+                    left = d.getLeft(),
+                    top  = d.getTop();
+
+                this.prevX = cont.x;
+                this.prevY = cont.y;
+                this.prevW = cont.width;
+                this.prevH = cont.height;
+
+                cont.setBounds(left, top,
+                               d.width  - left - d.getRight(),
+                               d.height - top - d.getBottom());
+            }
+        };
+
+        /**
+         * Restore the window size
+         * @method restore
+         */
+        this.restore = function(){
+            if (this.prevW >= 0){
+                this.getWinContainer().setBounds(this.prevX, this.prevY,
+                                                 this.prevW, this.prevH);
+                this.prevW = -1;
+            }
+        };
+
+        /**
+         * Close the window
+         * @method close
+         */
+        this.close = function() {
+            this.getWinContainer().removeMe();
+        };
+
+        /**
+         * Set the window buttons set.
+         * @param {Object} buttons dictionary of buttons icons for window buttons.
+         * The dictionary key defines a method of the window component to be called
+         * when the given button has been pressed. So the method has to be defined
+         * in the window component.
+         * @method setButtons
+         */
+        this.setButtons = function(buttons) {
+            // remove previously added buttons
+            for(var i=0; i< this.buttons.length; i++) {
+                var kid = this.buttons.kids[i];
+                if (kid._ != null) kid.unbind();
+            }
+            this.buttons.removeAll();
+
+            // add new buttons set
+            for(var k in buttons) {
+                if (buttons.hasOwnProperty(k)) {
+                    var b = new this.clazz.Button();
+                    b.setView(buttons[k]);
+                    this.buttons.add(b);
+                    (function(t, f) {
+                        b.bind(function() { f.call(t); });
+                    })(this, this[k]);
+                }
+            }
+        };
+
     },
 
+    function focused(){
+        this.$super();
+        if (this.caption != null) {
+            this.caption.repaint();
+        }
+    },
 
     function (s, c) {
         //!!! for some reason state has to be set beforehand
         this.state = "inactive";
 
-        this.prevH = this.prevX = this.prevY = this.psw = 0;
-        this.psh = this.px = this.py = this.dx = this.dy = 0;
+        this.prevH = this.prevX = this.prevY = 0;
+        this.px = this.py = this.dx = this.dy = 0;
         this.prevW = this.action = -1;
 
         /**
@@ -681,7 +791,7 @@ pkg.Window = Class(pkg.StatePan, [
          * @attribute icons
          * @readOnly
          */
-        this.icons = new pkg.Panel(new L.FlowLayout("left", "center", "horizontal", 2));
+        this.icons = new pkg.Panel(new zebkit.layout.FlowLayout("left", "center", "horizontal", 2));
         this.icons.add(new this.clazz.Icon());
 
         /**
@@ -690,7 +800,7 @@ pkg.Window = Class(pkg.StatePan, [
          * @attribute buttons
          * @readOnly
          */
-        this.buttons = new pkg.Panel(new L.FlowLayout("center", "center"));
+        this.buttons = new pkg.Panel(new zebkit.layout.FlowLayout("center", "center"));
 
         this.caption.add("center", this.title);
         this.caption.add("left", this.icons);
@@ -709,119 +819,22 @@ pkg.Window = Class(pkg.StatePan, [
         this.setSizeable(true);
 
         this.$super();
-        this.setLayout(new L.BorderLayout(2,2));
-
+        this.setLayout(new zebkit.layout.BorderLayout(2,2));
 
         this.add("center", this.root);
         this.add("top", this.caption);
         this.add("bottom", this.status);
-    },
-
-    function fired(src) {
-        this.close();
-    },
-
-    function focused(){
-        this.$super();
-        if (this.caption != null) {
-            this.caption.repaint();
-        }
-    },
-
-    /**
-     * Make the window sizable or not sizeable
-     * @param {Boolean} b a sizeable state of the window
-     * @method setSizeable
-     */
-    function setSizeable(b){
-        if (this.isSizeable != b){
-            this.isSizeable = b;
-            if (this.sizer != null) {
-                this.sizer.setVisible(b);
-            }
-        }
-    },
-
-    /**
-     * Maximize the window
-     * @method maximize
-     */
-    function maximize(){
-        if(this.prevW < 0){
-            var d    = this.getCanvas(),
-                cont = this.getWinContainer(),
-                left = d.getLeft(),
-                top  = d.getTop();
-
-            this.prevX = cont.x;
-            this.prevY = cont.y;
-            this.prevW = cont.width;
-            this.prevH = cont.height;
-
-            cont.setBounds(left, top,
-                           d.width  - left - d.getRight(),
-                           d.height - top - d.getBottom());
-        }
-    },
-
-    /**
-     * Restore the window size
-     * @method restore
-     */
-    function restore(){
-        if (this.prevW >= 0){
-            this.getWinContainer().setBounds(this.prevX, this.prevY,
-                                             this.prevW, this.prevH);
-            this.prevW = -1;
-        }
-    },
-
-    /**
-     * Close the window
-     * @method close
-     */
-    function close() {
-        this.getWinContainer().removeMe();
-    },
-
-    /**
-     * Set the window buttons set.
-     * @param {Object} buttons dictionary of buttons icons for window buttons.
-     * The dictionary key defines a method of the window component to be called
-     * when the given button has been pressed. So the method has to be defined
-     * in the window component.
-     * @method setButtons
-     */
-    function setButtons(buttons) {
-        // remove previously added buttons
-        for(var i=0; i< this.buttons.length; i++) {
-            var kid = this.buttons.kids[i];
-            if (kid._ != null) kid.unbind();
-        }
-        this.buttons.removeAll();
-
-        // add new buttons set
-        for(var k in buttons) {
-            if (buttons.hasOwnProperty(k)) {
-                var b = new this.clazz.Button();
-                b.setView(buttons[k]);
-                this.buttons.add(b);
-                (function(t, f) {
-                    b.bind(function() { f.call(t); });
-                })(this, this[k]);
-            }
-        }
     }
 ]);
 
 pkg.HtmlWinCanvas = Class(pkg.HtmlCanvas, [
     function $prototype() {
-        this.winOpened = function(winLayer,target,b) {
-            this.target.winOpened(winLayer,target,b);
+        this.winOpened = function(e) {
+            this.target.winOpened(e);
         };
 
-        this.winActivated = function(winLayer, target,b){
-            this.target.winActivated(winLayer,target,b);
+        this.winActivated = function(e){
+            this.target.winActivated(e);
         };
     },
 
@@ -835,10 +848,8 @@ pkg.HtmlWinCanvas = Class(pkg.HtmlCanvas, [
             return $this;
         };
 
-        this.setLayout(new L.BorderLayout());
+        this.setLayout(new zebkit.layout.BorderLayout());
         this.add("center", target);
-
-        this.setStyle("box-shadow", "10px 10px 5px #888888");
     }
 ]);
 
@@ -1009,7 +1020,7 @@ pkg.MenuItem = Class(pkg.Panel, [
 
             if (left != null && left.isVisible === true) {
                 left.toPreferredSize();
-                left.setLocation(l, t + ~~((eh - left.height)/2));
+                left.setLocation(l, t + Math.floor((eh - left.height)/2));
                 l += this.gap + left.width;
                 ew -= (this.gap + left.width);
             }
@@ -1017,7 +1028,7 @@ pkg.MenuItem = Class(pkg.Panel, [
             if (right != null && right.isVisible === true) {
                 right.toPreferredSize();
                 right.setLocation(target.width - target.getRight() - right.width,
-                                  t + ~~((eh - right.height)/2));
+                                  t + Math.floor((eh - right.height)/2));
                 ew -= (this.gap + right.width);
             }
 
@@ -1026,7 +1037,7 @@ pkg.MenuItem = Class(pkg.Panel, [
                 if (content.width > ew) {
                     content.setSize(ew, content.height);
                 }
-                content.setLocation(l, t + ~~((eh - content.height)/2));
+                content.setLocation(l, t + Math.floor((eh - content.height)/2));
             }
         };
 
@@ -1092,7 +1103,7 @@ pkg.MenuItem = Class(pkg.Panel, [
 
             if (m[2] != null) {
                 var s = m[2].trim();
-                this.setCheckManager(s[0] == '(' ? new pkg.Group() : new pkg.SwitchManager());
+                this.setCheckManager(s[0] === '(' ? new pkg.Group() : new pkg.SwitchManager());
                 this.manager.setValue(this, m[2].indexOf('x') > 0);
             }
 
@@ -1103,10 +1114,11 @@ pkg.MenuItem = Class(pkg.Panel, [
                    img = img.substring(1, img.length-1);
                 }
                 else {
-                    var parts = img.split('.'), scope = zebkit.$global;
-                    img = null;
+                    var parts = img.split('.'),
+                        scope = zebkit.$global;
 
-                    for (var i=0; i<parts.length; i++) {
+                    img = null;
+                    for (var i = 0; i < parts.length; i++) {
                         scope = scope[parts[i]];
                         if (scope == null) break;
                     }
@@ -1119,8 +1131,7 @@ pkg.MenuItem = Class(pkg.Panel, [
             if (m != null) {
                 this.id = m[2].trim();
                 c       = m[1].trim();
-            }
-            else {
+            } else {
                 this.id = c.toLowerCase().replace(/[ ]+/, '_');
             }
 
@@ -1471,7 +1482,7 @@ pkg.Menu = Class(pkg.CompList, [
      * @method keyPressed
      */
     function keyPressed(e){
-        if (e.code === KE.ESCAPE) {
+        if (e.code === pkg.KeyEvent.ESCAPE) {
             if (this.parent != null) {
                 var p = this.$parentMenu;
                 this.$canceled(this);
@@ -1582,7 +1593,8 @@ pkg.Menu = Class(pkg.CompList, [
                 }
             }
 
-            pkg.popup._.menuItemSelected(this, this.selectedIndex, this.kids[this.selectedIndex]);
+            pkg.events.fireEvent("menuItemSelected",
+                                 MENU_EVENT.$fillWith(this, this.selectedIndex, this.kids[this.selectedIndex]));
         }
         this.$super(prev);
     }
@@ -1659,7 +1671,7 @@ pkg.Menubar = Class(pkg.Menu, [
                 pop = d.getLayer(pkg.PopupLayer.ID);
 
             if (menu.hasSelectableItems()) {
-                var abs = L.toParentOrigin(0,0,k);
+                var abs = zebkit.layout.toParentOrigin(0,0,k);
                 menu.setLocation(abs.x, abs.y + k.height + 1);
                 menu.toPreferredSize();
                 pop.add(menu);
@@ -1760,19 +1772,19 @@ pkg.PopupLayer = Class(pkg.CanvasLayer, [
          * @method childKeyPressed
          */
         this.childKeyPressed = function(e){
-            var dc = L.getDirectChild(this, e.source);
+            var dc = zebkit.layout.getDirectChild(this, e.source);
 
             if (zebkit.instanceOf(dc, pkg.Menu) && this.activeMenubar != null) {
                 var s = this.activeMenubar.selectedIndex;
-                switch(e.code) {
-                    case KE.RIGHT :
+                switch (e.code) {
+                    case pkg.KeyEvent.RIGHT :
                         if (s < this.activeMenubar.model.count()-1) {
                             //this.removeAll();
                             this.activeMenubar.requestFocus();
                             this.activeMenubar.position.seekLineTo("down");
                         }
                         break;
-                    case KE.LEFT :
+                    case pkg.KeyEvent.LEFT :
                         if (s > 0) {
                            // this.removeAll();
                             this.activeMenubar.requestFocus();
@@ -1796,7 +1808,7 @@ pkg.PopupLayer = Class(pkg.CanvasLayer, [
                     // save an area the menu bar component takes
                     // it is required to allow the menu bar getting input
                     // event by inactivating the pop up layer
-                    var abs = L.toParentOrigin(0, 0, this.activeMenubar);
+                    var abs = zebkit.layout.toParentOrigin(0, 0, this.activeMenubar);
                     this.mLeft   = abs.x;
                     this.mRight  = this.mLeft + this.activeMenubar.width - 1;
                     this.mTop    = abs.y;
@@ -2019,7 +2031,7 @@ pkg.Tooltip = Class(pkg.Panel, [
  /**
   * Fired when a menu item has been selected
 
-         zebkit.ui.popup.bind(function menuItemSelected(menu, index, item) {
+         zebkit.ui.events.bind(function menuItemSelected(menu, index, item) {
              ...
          });
 
@@ -2030,10 +2042,6 @@ pkg.Tooltip = Class(pkg.Panel, [
   * @param {zebkit.ui.Panel} item a menu item component that has been selected
   */
 pkg.PopupManager = Class(pkg.Manager, [
-    function $clazz() {
-        this.Listeners = zebkit.util.ListenersClass("menuItemSelected");
-    },
-
     function $prototype() {
         /**
          * Indicates if a shown tooltip has to disappear by pointer pressed event
@@ -2097,7 +2105,7 @@ pkg.PopupManager = Class(pkg.Manager, [
                 this.$targetTooltipLayer = c.getCanvas().getLayer(pkg.WinLayer.ID);
                 this.$tooltipX = e.x;
                 this.$tooltipY = e.y;
-                this.$toolTask = task(this).run(this.showTooltipIn, this.showTooltipIn);
+                this.$toolTask = zebkit.util.task(this).run(this.showTooltipIn, this.showTooltipIn);
             }
         };
 
@@ -2158,7 +2166,7 @@ pkg.PopupManager = Class(pkg.Manager, [
 
                     // if new tooltip exists than show it
                     if (ntooltip != null) {
-                        var p = L.toParentOrigin(this.$tooltipX, this.$tooltipY, this.$target);
+                        var p = zebkit.layout.toParentOrigin(this.$tooltipX, this.$tooltipY, this.$target);
 
                         this.$tooltip.toPreferredSize();
                         var tx = p.x,
@@ -2184,7 +2192,7 @@ pkg.PopupManager = Class(pkg.Manager, [
                 }
                 else {
                     if (this.$tooltip != null && this.syncTooltipPosition === true) {
-                        var p  = L.toParentOrigin(this.$tooltipX, this.$tooltipY, this.$target),
+                        var p  = zebkit.layout.toParentOrigin(this.$tooltipX, this.$tooltipY, this.$target),
                             tx = p.x,
                             ty = p.y - this.$tooltip.height;
 
@@ -2195,21 +2203,21 @@ pkg.PopupManager = Class(pkg.Manager, [
             t.pause();
         };
 
-        this.winActivated = function(layer, win, b) {
+        this.winActivated = function(e) {
             // this method is called for only for mdi window
             // consider every deactivation of a mdi window as
             // a signal to stop showing tooltip
-            if (b === false && this.$tooltip != null)  {
+            if (e.isActive === false && this.$tooltip != null)  {
                 this.$tooltip.removeMe();
             }
         };
 
-        this.winOpened = function(layer, win, b) {
-            if (b === false) {
+        this.winOpened = function(e) {
+            if (e.isShown === false) {
                 // cleanup tooltip reference
                 this.$tooltip = null;
 
-                if (win.winType !== "info") {
+                if (e.source.winType !== "info") {
                     this.stopShowingTooltip();
                 }
             }
@@ -2244,7 +2252,9 @@ pkg.PopupManager = Class(pkg.Manager, [
          * @method pointerPressed
          */
         this.pointerPressed = function(e){
-            if (this.hideTooltipByPress === true && this.$target != null &&
+            if (this.hideTooltipByPress === true &&
+                e.pointerType === "mouse" &&
+                this.$target != null &&
                 (this.$tooltip == null || this.$tooltip.winType === "info"))
             {
                 this.stopShowingTooltip();
@@ -2257,7 +2267,10 @@ pkg.PopupManager = Class(pkg.Manager, [
          * @method pointerReleased
          */
         this.pointerReleased = function(e) {
-            if (this.hideTooltipByPress === false && this.$target != null && (this.$tooltip == null || this.$tooltip.winType === "info")) {
+            if ((this.hideTooltipByPress === false || e.pointerType !== "mouse") &&
+                this.$target != null &&
+                (this.$tooltip == null || this.$tooltip.winType === "info"))
+            {
                 this.stopShowingTooltip();
             }
         };
@@ -2268,12 +2281,10 @@ pkg.PopupManager = Class(pkg.Manager, [
         this.$popupMenuX = this.$popupMenuY = 0;
         this.$tooltipX = this.$tooltipY = 0;
         this.$targetTooltipLayer = this.$tooltip = this.$target = null;
-        this._ = new this.clazz.Listeners();
     }
 ]);
 
 /**
  * @for
  */
-
-})(zebkit("ui"), zebkit.Class);
+});

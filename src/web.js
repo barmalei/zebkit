@@ -6,13 +6,13 @@
                             : 1);
 
 
-    var $taskMethod = window.requestAnimationFrame       ||
+    pkg.$taskMethod = window.requestAnimationFrame       ||
                       window.webkitRequestAnimationFrame ||
                       window.mozRequestAnimationFrame    ||
                       function(callback) { return window.setTimeout(callback, 35); };
 
     pkg.$task = function(f){
-        return $taskMethod.call(window, f);
+        return pkg.$taskMethod.call(window, f);
     };
 
     pkg.$windowSize = function() {
@@ -155,10 +155,10 @@
         return i;
     };
 
-    function $eventsBlackHole(e) {
+    pkg.$eventsBlackHole = function(e) {
         e.preventDefault();
         e.stopPropagation();
-    }
+    };
 
     pkg.$createBlockedElement = function() {
         var be = document.createElement("div");
@@ -170,14 +170,14 @@
 
         be.onmouseup   = be.onmousedown = be.onmouseout =
         be.onmouseover = be.onmousemove = be.onkeydown  =
-        be.onkeypress  = be.onkeyup = $eventsBlackHole;
+        be.onkeypress  = be.onkeyup = pkg.$eventsBlackHole;
 
         var events = [ "touchstart", "touchend", "touchmove",
                        "pointerdown", "pointerup", "pointermove",
                        "pointerenter", "pointerleave" ];
 
         for(var i = 0 ; i < events.length ; i++ ) {
-           be.addEventListener(events[i], $eventsBlackHole, false);
+           be.addEventListener(events[i], pkg.$eventsBlackHole, false);
         }
 
         return be;

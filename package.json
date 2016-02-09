@@ -24,6 +24,7 @@
         "gulp-rename": "latest",
         "gulp-uglify": "latest",
         "gulp-concat": "latest",
+        "gulp-wrap": "latest",
         "gulp-webserver": "latest",
         "gulp-zip": "latest",
         "gulp-jshint": "latest"

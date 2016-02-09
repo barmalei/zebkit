@@ -1,4 +1,6 @@
-(function(pkg, Class, ui)  {
+zebkit.package("ui.tree", function(pkg, Class) {
+
+var ui = zebkit("ui");
 
 /**
  * Tree UI components and all related to the component classes and interfaces.
@@ -36,13 +38,10 @@
  * @main
  */
 
-
 //  tree node metrics:
 //   |
 //   |-- <-gapx-> {icon} -- <-gapx-> {view}
 //
-
-var KE = ui.KeyEvent;
 
 /**
  * Simple private structure to keep a tree model item metrical characteristics
@@ -746,7 +745,7 @@ pkg.BaseTree = Class(ui.Panel, [
          */
         this.paintChild = function (g, root, index){
             var b = this.isOpen_(root);
-            if (root == this.firstVisible && this.lnColor != null) {
+            if (root === this.firstVisible && this.lnColor != null) {
                 g.setColor(this.lnColor);
                 var xx = this.getIM(root).x + Math.floor((b ? this.viewSizes.on.width
                                                             : this.viewSizes.off.width) / 2);
@@ -778,7 +777,7 @@ pkg.BaseTree = Class(ui.Panel, [
                             y = this.y_(child, true);
                         }
                         if (this.paintBranch(g, child) === false){
-                            if (this.lnColor != null && i + 1 != count){
+                            if (this.lnColor != null && i + 1 !== count){
                                 g.setColor(this.lnColor);
                                 g.beginPath();
                                 g.moveTo(x + 0.5, y);
@@ -900,8 +899,8 @@ pkg.BaseTree = Class(ui.Panel, [
                     do {
                         parent = parent.parent;
                     }
-                    while(parent != item && parent != null);
-                    if(parent == item) this.select(item);
+                    while (parent !== item && parent != null);
+                    if (parent === item) this.select(item);
                 }
                 this.repaint();
             }
@@ -912,8 +911,8 @@ pkg.BaseTree = Class(ui.Panel, [
         };
 
         this.itemRemoved = function (target,item){
-            if (item == this.firstVisible) this.firstVisible = null;
-            if (item == this.selected) this.select(null);
+            if (item === this.firstVisible) this.firstVisible = null;
+            if (item === this.selected) this.select(null);
             delete this.nodes[item];
             this.vrp();
         };
@@ -1150,7 +1149,7 @@ pkg.DefEditors = Class([
          */
         this.shouldStartEdit = function(src,e){
             return  e.id === "pointerDoubleClicked" ||
-                   (e.id === "keyPressed" && e.code === KE.ENTER);
+                   (e.id === "keyPressed" && e.code === ui.KeyEvent.ENTER);
         };
     }
 ]);
@@ -1251,11 +1250,11 @@ pkg.Tree = Class(pkg.BaseTree, [
         this.childKeyPressed = function(e){
             console.log("childKeyPressed : " + e.code);
 
-            if (e.code === KE.ESCAPE) {
+            if (e.code === ui.KeyEvent.ESCAPE) {
                 this.stopEditing(false);
             }
             else {
-                if (e.code === KE.ENTER) {
+                if (e.code === ui.KeyEvent.ENTER) {
                     if ((zebkit.instanceOf(e.source, ui.TextField) === false) ||
                         (zebkit.instanceOf(e.source.view.target, zebkit.data.SingleLineTxt)))
                     {
@@ -1325,7 +1324,7 @@ pkg.Tree = Class(pkg.BaseTree, [
             }
             else {
                 if (this.selected != null &&
-                    this.getItemAt(this.firstVisible, e.x, e.y) == this.selected)
+                    this.getItemAt(this.firstVisible, e.x, e.y) === this.selected)
                 {
                     this.toggle(this.selected);
                 }
@@ -1352,15 +1351,15 @@ pkg.Tree = Class(pkg.BaseTree, [
         this.keyPressed = function(e){
             var newSelection = null;
             switch(e.code) {
-                case KE.DOWN    :
-                case KE.RIGHT   : newSelection = this.findNext(this.selected);break;
-                case KE.UP      :
-                case KE.LEFT    : newSelection = this.findPrev(this.selected);break;
-                case KE.HOME    : if (e.ctrlKey) this.select(this.model.root);break;
-                case KE.END     : if (e.ctrlKey) this.select(this.findLast(this.model.root));break;
-                case KE.PAGEDOWN: if (this.selected != null) this.select(this.nextPage(this.selected, 1));break;
-                case KE.PAGEUP  : if (this.selected != null) this.select(this.nextPage(this.selected,  -1));break;
-                //!!!!case KE.ENTER: if(this.selected != null) this.toggle(this.selected);break;
+                case ui.KeyEvent.DOWN    :
+                case ui.KeyEvent.RIGHT   : newSelection = this.findNext(this.selected);break;
+                case ui.KeyEvent.UP      :
+                case ui.KeyEvent.LEFT    : newSelection = this.findPrev(this.selected);break;
+                case ui.KeyEvent.HOME    : if (e.ctrlKey) this.select(this.model.root);break;
+                case ui.KeyEvent.END     : if (e.ctrlKey) this.select(this.findLast(this.model.root));break;
+                case ui.KeyEvent.PAGEDOWN: if (this.selected != null) this.select(this.nextPage(this.selected, 1));break;
+                case ui.KeyEvent.PAGEUP  : if (this.selected != null) this.select(this.nextPage(this.selected,  -1));break;
+                //!!!!case ui.KeyEvent.ENTER: if(this.selected != null) this.toggle(this.selected);break;
             }
             if (newSelection != null) this.select(newSelection);
             this.se(this.selected, e);
@@ -1576,7 +1575,7 @@ pkg.CompTree = Class(pkg.BaseTree, [
 
         this.Combo = Class(ui.Combo, [
             function keyPressed(e) {
-                if (e.code != KE.UP && e.code != KE.DOWN) {
+                if (e.code != ui.KeyEvent.UP && e.code != ui.KeyEvent.DOWN) {
                     this.$super(e);
                 }
             }
@@ -1607,9 +1606,9 @@ pkg.CompTree = Class(pkg.BaseTree, [
 
         this.childKeyPressed = function(e) {
             if (this.isSelectable === true){
-                var newSelection = (e.code == KE.DOWN) ? this.findNext(this.selected)
-                                                       : (e.code == KE.UP) ? this.findPrev(this.selected)
-                                                                           : null;
+                var newSelection = (e.code === ui.KeyEvent.DOWN) ? this.findNext(this.selected)
+                                                        : (e.code === ui.KeyEvent.UP) ? this.findPrev(this.selected)
+                                                                             : null;
                 if (newSelection != null) {
                     this.select(newSelection);
                 }
@@ -1629,7 +1628,7 @@ pkg.CompTree = Class(pkg.BaseTree, [
                     this.$blockCIE = false;
                 }
             }
-        }
+        };
 
         this.childFocusLost = function(e) {
             if (this.isSelectable === true) {
@@ -1658,7 +1657,7 @@ pkg.CompTree = Class(pkg.BaseTree, [
                     var node = $this.nodes[item];  // slightly improve performance
                                                    // (instead of calling $this.getIM(...))
 
-                    if (started === 0 && item == $this.firstVisible) {
+                    if (started === 0 && item === $this.firstVisible) {
                         started = 1;
                     }
 
@@ -1761,5 +1760,4 @@ pkg.CompTree = Class(pkg.BaseTree, [
 /**
  * @for
  */
-
-})(zebkit("ui.tree"), zebkit.Class, zebkit.ui);
+});

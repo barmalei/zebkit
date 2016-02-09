@@ -8,30 +8,47 @@ var webserver = require('gulp-webserver');
 var zip = require('gulp-zip');
 
 
-var uiFiles = [
+var miscFiles = [
     'src/layout.js',
     'src/util.js',
     'src/io.js',
     'src/data.js',
-    'src/web.js',
+    'src/web.js'
+];
+
+var uiFiles = [
     'src/ui.webstuff.js',
     'src/ui.webpointer.js',
     'src/ui.webkey.js',
-    'src/ui.core.js',
     'src/ui.views.js',
+    'src/ui.core.js',
+    'src/ui.html.js',
     'src/ui.js',
-    'src/ui.TextField.js',
+    'src/ui.field.js',
     'src/ui.list.js',
     'src/ui.window.js',
     'src/ui.grid.js',
     'src/ui.tree.js',
+    'src/ui.designer.js',
+    'src/ui.bootstrap.js'
+];
+
+var uiPkg = [
+    'src/ui.webstuff.js',
+    'src/ui.webpointer.js',
+    'src/ui.webkey.js',
+    'src/ui.views.js',
+    'src/ui.core.js',
     'src/ui.html.js',
-    'src/ui.designer.js'
+    'src/ui.js',
+    'src/ui.field.js',
+    'src/ui.list.js',
+    'src/ui.window.js'
 ];
 
 var zebkitFiles = [
     'src/easyoop.js',
-].concat(uiFiles);
+].concat(miscFiles).concat(uiFiles);
 
 var demoFiles = [
     "samples/demo/ui.demo.js",

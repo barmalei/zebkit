@@ -54,123 +54,131 @@ function isBoolean(o) {
  *  @method namespace
  *  @api zebkit.namespace()
  */
-var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
-    if (isString(nsname) === false) {
-        throw new Error("Invalid name space name : '" + nsname + "'");
+
+
+// package class
+function Package(name) {
+    this.$url  = null;
+    this.$name = name;
+    if (typeof document !== "undefined") {
+        var s  = document.getElementsByTagName('script'),
+            ss = s[s.length - 1].getAttribute('src'),
+            i  = ss == null ? -1 : ss.lastIndexOf("/");
+
+        this.$url = (i > 0) ? new zebkit.URL(ss.substring(0, i + 1))
+                            : new zebkit.URL(document.location.toString()).getParentURL() ;
     }
+}
 
-    if (namespaces.hasOwnProperty(nsname)) {
-        return namespaces[nsname];
-    }
-
-    if (dontCreate === true) {
-        throw new Error("Name space '" + nsname + "' doesn't exist");
-    }
-
-    function Package(name) {
-        this.$url = null;
-        this.$name = name;
-        if (typeof document !== "undefined") {
-            var s  = document.getElementsByTagName('script'),
-                ss = s[s.length - 1].getAttribute('src'),
-                i  = ss == null ? -1 : ss.lastIndexOf("/");
-
-            this.$url = (i > 0) ? new zebkit.URL(ss.substring(0, i + 1))
-                                : new zebkit.URL(document.location.toString()).getParentURL() ;
-        }
-    }
-
-    if (namespaces.hasOwnProperty(nsname)) {
-        throw new Error("Name space '" + nsname + "' already exists");
-    }
-
-    var f = function(name) {
-        if (arguments.length === 0) return f.$env;
-
-        if (typeof name === 'function') {
-            for(var k in f) {
-                if (f[k] instanceof Package) name(k, f[k]);
-            }
-            return null;
+var $$$        = 11,
+    namespaces = {},
+    namespace  = function(nsname, dontCreate) {
+        if (isString(nsname) === false) {
+            throw new Error("Invalid name space name : '" + nsname + "'");
         }
 
-        var b = Array.isArray(name);
-        if (isString(name) === false && b === false) {
-            for(var k in name) {
-                if (name.hasOwnProperty(k)) f.$env[k] = name[k];
-            }
-            return;
+        if (namespaces.hasOwnProperty(nsname)) {
+            return namespaces[nsname];
         }
 
-        if (b) {
-           for(var i = 0; i < name.length; i++) f(name[i]);
-           return null;
+        if (dontCreate === true) {
+            throw new Error("Name space '" + nsname + "' doesn't exist");
         }
 
-        if (f[name] instanceof Package) {
-            return f[name];
+        if (namespaces.hasOwnProperty(nsname)) {
+            throw new Error("Name space '" + nsname + "' already exists");
         }
 
-        var names = name.split('.'), target = f;
-        for(var i = 0, k = names[0]; i < names.length; i++, k = k + '.' + names[i]) {
-            var n = names[i], p = target[n];
-            if (typeof p === "undefined") {
-                p = new Package(name);
-                target[n] = p;
-                f[k] = p;
-            }
-            else {
-                if ((p instanceof Package) === false) {
-                    throw new Error("Requested package '" + name +  "' conflicts with variable '" + n + "'");
+        var f = function(name) {
+            if (arguments.length === 0) return f.$env;
+
+            if (typeof name === 'function') {
+                for(var k in f) {
+                    if (f[k] instanceof Package) name(k, f[k]);
                 }
+                return null;
             }
 
-            target = p;
-        }
-        return target;
-    };
+            var b = Array.isArray(name);
+            if (isString(name) === false && b === false) {
+                for(var k in name) {
+                    if (name.hasOwnProperty(k)) f.$env[k] = name[k];
+                }
+                return;
+            }
 
-    f.Import = function() {
-        var ns   = "=" + nsname + ".",
-            code = [],
-            packages = arguments.length === 0 ? null
-                                              : Array.prototype.slice.call(arguments, 0);
-        f(function(n, p) {
-            if (packages == null || packages.indexOf(n) >= 0) {
-                for (var k in p) {
-                    if (k[0] !== '$' && k[0] !== '_' && (p[k] instanceof Package) === false && p.hasOwnProperty(k)) {
-                        code.push(k + ns + n + "." + k);
+            if (b) {
+               for(var i = 0; i < name.length; i++) f(name[i]);
+               return null;
+            }
+
+            if (f[name] instanceof Package) {
+                return f[name];
+            }
+
+            var names = name.split('.'), target = f;
+            for(var i = 0, k = names[0]; i < names.length; i++, k = k + '.' + names[i]) {
+                var n = names[i], p = target[n];
+                if (typeof p === "undefined") {
+                    p = new Package(name);
+                    target[n] = p;
+                    f[k] = p;
+                }
+                else {
+                    if ((p instanceof Package) === false) {
+                        throw new Error("Requested package '" + name +  "' conflicts with variable '" + n + "'");
                     }
                 }
-                if (packages != null) packages.splice(packages.indexOf(n), 1);
+
+                target = p;
             }
-        });
+            return target;
+        };
 
-        if (packages != null && packages.length !== 0) {
-            throw new Error("Unknown package(s): " + packages.join(","));
-        }
+        f.Import = function() {
+            var ns   = "=" + nsname + ".",
+                code = [],
+                packages = arguments.length === 0 ? null
+                                                  : Array.prototype.slice.call(arguments, 0);
+            f(function(n, p) {
+                if (packages == null || packages.indexOf(n) >= 0) {
+                    for (var k in p) {
+                        if (k[0] !== '$' && k[0] !== '_' && (p[k] instanceof Package) === false && p.hasOwnProperty(k)) {
+                            code.push(k + ns + n + "." + k);
+                        }
+                    }
+                    if (packages != null) packages.splice(packages.indexOf(n), 1);
+                }
+            });
 
-        return code.length > 0 ?  "var " + code.join(",") + ";" : null;
+            if (packages != null && packages.length !== 0) {
+                throw new Error("Unknown package(s): " + packages.join(","));
+            }
+
+            return code.length > 0 ?  "var " + code.join(",") + ";" : null;
+        };
+
+        f.$env = {};
+        namespaces[nsname] = f;
+        return f;
     };
 
-    f.$env = {};
-    namespaces[nsname] = f;
-    return f;
-};
-
 var pkg = zebra = zebkit = namespace('zebkit'),
-    CNAME = pkg.CNAME = '$', CDNAME = '',
-    FN = pkg.$FN = (isString.name !== "isString") ? (function(f) {     // IE stuff
-                                                        var mt = f.toString().match(/^function\s+([^\s(]+)/);
-                                                        return (mt == null) ? CDNAME : mt[1];
-                                                    })
-                                                  : (function(f) { return f.name; });
+    CNAME  = pkg.CNAME = '$',
+    CDNAME = '';
+
+pkg.$FN = (isString.name !== "isString") ? (function(f) {  // IE stuff
+                                                if (f.$methodName == null) { // test if name has been earlier detected
+                                                    var mt = f.toString().match(/^function\s+([^\s(]+)/);
+                                                    f.$methodName = (mt == null) ? CDNAME : mt[1];
+                                                }
+                                                return f.$methodName;
+                                            })
+                                         : (function(f) { return f.name; });
 
 pkg.isInBrowser = typeof navigator !== "undefined";
 pkg.isIE        = pkg.isInBrowser && (Object.hasOwnProperty.call(window, "ActiveXObject") || !!window.ActiveXObject);
 pkg.isFF        = pkg.isInBrowser && window.mozInnerScreenX != null;
-pkg.isTouchable = pkg.isInBrowser && ( (pkg.isIE === false && (!!('ontouchstart' in window ) || !!('onmsgesturechange' in window))) ||
-                                       (!!window.navigator['msPointerEnabled'] && !!window.navigator["msMaxTouchPoints"] > 0)); // IE10
 
 pkg.isMacOS = pkg.isInBrowser && navigator.platform.toUpperCase().indexOf('MAC') !== -1;
 
@@ -461,7 +469,7 @@ pkg.Singleton = function(clazz) {
  */
 pkg.Interface = make_template(null, function() {
     var $Interface = make_template(pkg.Interface, function() {
-        throw new Error("Interface cannot be instantiated")
+        throw new Error("Interface cannot be instantiated");
     }, null);
 
     if (arguments.length > 1) {
@@ -477,7 +485,7 @@ pkg.Interface = make_template(null, function() {
         if (arguments[0] != null && arguments[0].abstract != null && Array.isArray(arguments[0].abstract)) {
             methods = arguments[0].abstract;
             for(var i = 0; i < methods.length; i++) {
-                var mn = FN(methods[i]);
+                var mn = pkg.$FN(methods[i]);
                 eval("var method = function " + mn + "() { throw new Error('Method " + mn + "() not implemented'); };");
                 methods[i] = method;
             }
@@ -486,7 +494,7 @@ pkg.Interface = make_template(null, function() {
                 methods.concat.apply(this, arguments[0].methods);
             }
         } else {
-            if (Array.isArray(arguments[0]) == false) {
+            if (Array.isArray(arguments[0]) === false) {
                 throw new Error("Array of methods is expected");
             }
             methods = arguments[0];
@@ -519,13 +527,12 @@ function ProxyMethod(name, f, clazz) {
     var a = function() {
         var cm = pkg.$caller;
         pkg.$caller = a;
-        // don't use finally section it slower than try-catch
+        // don't use finally section it is slower than try-catch
         try {
-            var r = a.methodBody.apply(this, arguments);
+            var r = f.apply(this, arguments);
             pkg.$caller = cm;
             return r;
-        }
-        catch(e) {
+        } catch(e) {
             pkg.$caller = cm;
             console.log(name + "(" + arguments.length + ") " + (e.stack ? e.stack : e));
             throw e;
@@ -700,7 +707,7 @@ function mixing(clazz, methods, overwritable) {
     var names = {};
     for(var i = 0; i < methods.length; i++) {
         var method     = methods[i],
-            methodName = FN(method);
+            methodName = pkg.$FN(method);
 
         // detect if the passed method is proxy method
         if (method.methodBody != null) {
@@ -785,7 +792,7 @@ pkg.Class = make_template(null, function() {
         // let's make sure we inherit interface
         if (parentClass == null || i > 0) {
             if (toInherit[i] == null || toInherit[i].clazz !== pkg.Interface) {
-                throw new ReferenceError("Invalid inherited interface :" + toInherit[i]);
+                throw new ReferenceError("Invalid inherited interface [" + i + "] :" + toInherit[i]);
             }
         }
     }
@@ -878,7 +885,7 @@ pkg.Class = make_template(null, function() {
         if (Array.isArray(f)) {
             var init = null;
             for(var i = 0; i < f.length; i++) {
-                var n = FN(f[i]);
+                var n = pkg.$FN(f[i]);
                 if (n === CDNAME) {
                     init = f[i];  // postpone calling initializer before all methods will be defined
                 }
@@ -904,11 +911,12 @@ pkg.Class = make_template(null, function() {
     };
 
     classTemplate.prototype.$super = function() {
-       if (pkg.$caller != null) {
+       if (pkg.$caller !== null) {
             var name = pkg.$caller.methodName,
                 $s   = pkg.$caller.boundTo.$parent,
                 args = arguments;
 
+            // fetch function name if it is passed as the first argument
             if (arguments.length > 0 && typeof arguments[0] === 'function') {
                 name = arguments[0].methodName;
                 args = [];
@@ -917,7 +925,7 @@ pkg.Class = make_template(null, function() {
                 }
             }
 
-            while ($s != null) {
+            while ($s !== null) {
                 var m = $s.prototype[name];
                 if (m != null) {
                     return m.apply(this, args);
@@ -925,6 +933,7 @@ pkg.Class = make_template(null, function() {
                 $s = $s.$parent;
             }
 
+            // handle method not found error
             var cln = this.clazz && this.clazz.$name ? this.clazz.$name + "." : "";
             throw new ReferenceError("Method '" + cln + (name === CNAME ? "constructor"
                                                                         : name) + "(" + args.length + ")" + "' not found");
@@ -1365,7 +1374,6 @@ pkg.ready(function() {
     pkg.$resolveClassNames();
 });
 
-
 /**
  * @for
  */
@@ -1414,7 +1422,7 @@ pkg.getDirectChild = function(parent, child){
  * @param {zebkit.layout.Layoutable} t a target layoutable component
  * @method doLayout
  */
-var L = pkg.Layout = new zebkit.Interface({
+pkg.Layout = new zebkit.Interface({
     abstract: [
         function doLayout(target) {},
         function calcPreferredSize(target) {}
@@ -1552,7 +1560,7 @@ pkg.isAncestorOf = function(p, c){
  * @constructor
  * @extends {zebkit.layout.Layout}
  */
-pkg.Layoutable = Class(L, [
+pkg.Layoutable = Class(pkg.Layout, [
     function $prototype() {
         /**
          * x coordinate
@@ -2223,7 +2231,7 @@ pkg.Layoutable = Class(L, [
  *  @class zebkit.layout.StackLayout
  *  @constructor
  */
-pkg.StackLayout = Class(L, [
+pkg.StackLayout = Class(pkg.Layout, [
     function $prototype() {
         this.calcPreferredSize = function (target){
             return pkg.getMaxPreferredSize(target);
@@ -2276,7 +2284,7 @@ pkg.StackLayout = Class(L, [
  * @class zebkit.layout.BorderLayout
  * @extends {zebkit.layout.Layout}
  */
-pkg.BorderLayout = Class(L, [
+pkg.BorderLayout = Class(pkg.Layout, [
     function $prototype() {
         /**
          * Horizontal gap (space between components)
@@ -2445,7 +2453,7 @@ pkg.BorderLayout = Class(L, [
  * @constructor
  * @extends {zebkit.layout.Layout}
  */
-pkg.RasterLayout = Class(L, [
+pkg.RasterLayout = Class(pkg.Layout, [
     function $prototype() {
         this.usePsSize = false;
 
@@ -2467,29 +2475,27 @@ pkg.RasterLayout = Class(L, [
             return m;
         };
 
-        this.doLayout = function(c){
+        this.doLayout = function(c) {
             var r = c.width - c.getRight(),
                 b = c.height - c.getBottom();
 
             for(var i = 0;i < c.kids.length; i++){
-                var el = c.kids[i], ww = 0, hh = 0;
+                var kid = c.kids[i], ww = 0, hh = 0;
 
-                if (el.isVisible === true){
+                if (kid.isVisible === true){
                     if (this.usePsSize) {
-                        var ps = el.getPreferredSize();
+                        var ps = kid.toPreferredSize();
                         ww = ps.width;
                         hh = ps.height;
                     }
                     else {
-                        ww = el.width;
-                        hh = el.height;
+                        ww = kid.width;
+                        hh = kid.height;
                     }
 
-                    var ctr = el.constraints == null ? null : el.constraints;
-                    el.setSize(ww, hh);
-
+                    var ctr = kid.constraints == null ? null : kid.constraints;
                     if (ctr != null) {
-                        var x = el.x, y = el.y;
+                        var x = kid.x, y = kid.y, size = null;
 
                         if (ctr === "top" || ctr === "topRight" || ctr === "topLeft") {
                             y = 0;
@@ -2511,7 +2517,7 @@ pkg.RasterLayout = Class(L, [
                             x = Math.floor((c.width  - ww) / 2);
                         }
 
-                        el.setLocation(x, y);
+                        kid.setLocation(x, y);
                     }
                 }
             }
@@ -2563,7 +2569,7 @@ pkg.RasterLayout = Class(L, [
  * @constructor
  * @extends {zebkit.layout.Layout}
  */
-pkg.FlowLayout = Class(L, [
+pkg.FlowLayout = Class(pkg.Layout, [
     function $prototype() {
         /**
          * Gap between laid out components
@@ -2735,7 +2741,7 @@ pkg.FlowLayout = Class(L, [
  * @constructor
  * @extends {zebkit.layout.Layout}
  */
-pkg.ListLayout = Class(L,[
+pkg.ListLayout = Class(pkg.Layout,[
     function $prototype() {
         /**
          * Horizontal list items alignment
@@ -2831,7 +2837,7 @@ pkg.ListLayout = Class(L,[
  * @constructor
  * @extends {zebkit.layout.Layout}
  */
-pkg.PercentLayout = Class(L, [
+pkg.PercentLayout = Class(pkg.Layout, [
     function $prototype() {
          /**
           * Direction the components have to be placed (vertically or horizontally)
@@ -2896,9 +2902,9 @@ pkg.PercentLayout = Class(L, [
             for(var i = 0; i < size; i ++ ){
                 var l = target.kids[i], c = l.constraints, useps = (c === "usePsSize");
                 if (this.direction === "horizontal"){
-                    ns = ((size - 1) == i) ? target.width - right - loc
-                                           : (useps ? l.getPreferredSize().width
-                                                      : ~~((rs * c) / 100));
+                    ns = ((size - 1) === i) ? target.width - right - loc
+                                            : (useps ? l.getPreferredSize().width
+                                                     : ~~((rs * c) / 100));
                     var yy = top, hh = target.height - top - bottom;
                     if (this.stretch === false) {
                         var ph = hh;
@@ -3078,7 +3084,7 @@ pkg.Constraints = Class([
  * @class  zebkit.layout.GridLayout
  * @extends {zebkit.layout.Layout}
  */
-pkg.GridLayout = Class(L, [
+pkg.GridLayout = Class(pkg.Layout, [
     function $prototype() {
         this.stretchCols = this.stretchRows = false;
 
@@ -3239,9 +3245,9 @@ pkg.GridLayout = Class(L, [
                         l.setSize(d.width, d.height);
                         l.setLocation(
                             xx  + arg.left + ("stretch" === arg.ax ? 0
-                                                                     : ((arg.ax === "right") ? cellW - d.width
-                                                                                             : ((arg.ax === "center") ? Math.floor((cellW - d.width) / 2)
-                                                                                                                      : 0))),
+                                                                   : ((arg.ax === "right") ? cellW - d.width
+                                                                                           : ((arg.ax === "center") ? Math.floor((cellW - d.width) / 2)
+                                                                                                                    : 0))),
                             top + arg.top  + ("stretch" === arg.ay ? 0
                                                                    : ((arg.ay === "bottom" ) ? cellH - d.height
                                                                                              : ((arg.ay === "center") ? Math.floor((cellH - d.height) / 2)
@@ -3281,7 +3287,6 @@ pkg.format = function(s, obj, ph) {
     while ((m = rg.exec(s)) !== null) {
         r[i++] = s.substring(j, m.index);
 
-
         j = m.index + m[0].length;
 
         var v  = obj[m[3]],
@@ -3317,10 +3322,6 @@ pkg.format = function(s, obj, ph) {
     }
     return s;
 };
-
-function hex(v) {
-    return (v < 16) ? "0" + v.toString(16) : v.toString(16);
-}
 
 pkg.Event = Class([
     function $prototype() {
@@ -3586,7 +3587,6 @@ pkg.findInTree = function(root, path, eq, cb) {
  * @class zebkit.util.rgb
  */
 pkg.rgb = function (r, g, b, a) {
-
     /**
      * Red color intensity
      * @attribute r
@@ -3655,14 +3655,17 @@ pkg.rgb = function (r, g, b, a) {
     }
 
     if (this.s == null) {
-        this.s = (typeof this.a !== "undefined") ? ['rgba(', this.r, ",", this.g, ",",
-                                                             this.b, ",", this.a, ")"].join('')
-                                                 : ['#', hex(this.r), hex(this.g), hex(this.b)].join('');
+        this.s = (typeof this.a !== "undefined") ? 'rgba(' + this.r + "," + this.g +  "," +
+                                                             this.b + "," + this.a + ")"
+                                                 : '#' +
+                                                   ((this.r < 16) ? "0" + this.r.toString(16) : this.r.toString(16)) +
+                                                   ((this.g < 16) ? "0" + this.g.toString(16) : this.g.toString(16)) +
+                                                   ((this.b < 16) ? "0" + this.b.toString(16) : this.b.toString(16));
     }
 };
 
 var rgb = pkg.rgb;
-rgb.prototype.toString = function() {
+pkg.rgb.prototype.toString = function() {
     return this.s;
 };
 
@@ -3960,7 +3963,7 @@ pkg.ListenersClass = $NewListener;
  * @param {Integer} prevLine a previous virtual cursor line
  * @param {Integer} prevCol a previous virtual cursor column in the previous line
  */
-var  Position = pkg.Position = Class([
+pkg.Position = Class([
     function $clazz() {
         this.Listeners = pkg.ListenersClass("posChanged"),
 
@@ -3990,7 +3993,13 @@ var  Position = pkg.Position = Class([
           * @method  getMaxOffset
           */
 
-        this.Metric = Interface();
+        this.Metric = Interface({
+            abstract: [
+                function getLines()     {},
+                function getLineSize()  {},
+                function getMaxOffset() {}
+            ]
+        });
     },
 
     function $prototype() {
@@ -4711,6 +4720,7 @@ pkg.Bag = zebkit.Class([
 
                     delete d[k]; // delete class name
 
+                    // '?' means optinal class instance.
                     if (classname[0] === "?") {
                         classname = classname.substring(1).trim();
                         try {
@@ -4748,6 +4758,10 @@ pkg.Bag = zebkit.Class([
                 break;
             }
 
+            if (inc != null) {
+                this.inherit(d, inc);
+            }
+
             for (var k in d) {
                 if (d.hasOwnProperty(k)) {
                     var v = d[k];
@@ -4762,13 +4776,17 @@ pkg.Bag = zebkit.Class([
                         }
                     }
                     else {
-                        d[k] = this.buildValue(d[k]);
+                        if (k[0] === "?") {
+                            k = k.substring(1).trim();
+                            if (typeof d[k] !== "undefined") {
+                                d[k] = this.buildValue(d[k]);
+                            }
+                        }
+                        else {
+                            d[k] = this.buildValue(d[k]);
+                        }
                     }
                 }
-            }
-
-            if (inc != null) {
-                this.inherit(d, inc);
             }
 
             return d;
@@ -4780,16 +4798,28 @@ pkg.Bag = zebkit.Class([
                 delete desc.inherit;
             }
 
+            if (inc != null) {
+                this.inherit(obj, inc);
+            }
+
             for(var k in desc) {
                 if (desc.hasOwnProperty(k) === true) {
                     var v = desc[k];
+
                     if (k[0] === '.') {
                         this.callMethod(k.substring(1).trim(), this.buildValue(v));
                         continue;
                     }
 
+                    if (k[0] === '?') {
+                        k = k.substring(1).trim();
+                        if (typeof obj[k] === "undefined") {
+                            continue;
+                        }
+                    }
+
                     if (this.usePropertySetters === true) {
-                        var m  = zebkit.getPropertySetter(obj, k);
+                        var m = zebkit.getPropertySetter(obj, k);
                         if (m != null) {
                             if (Array.isArray(v)) m.apply(obj, this.buildValue(v));
                             else                  m.call (obj, this.buildValue(v));
@@ -4803,7 +4833,7 @@ pkg.Bag = zebkit.Class([
                     var ov = obj[k];
                     if (ov == null || this.$isAtomic(ov) || Array.isArray(ov) ||
                         v == null  || this.$isAtomic(v)  || Array.isArray(v)  ||
-                        this.$isClassDefinition(k, v)                               )
+                        this.$isClassDefinition(k, v)                            )
                     {
 
                         obj[k] = this.buildValue(v);
@@ -4813,11 +4843,6 @@ pkg.Bag = zebkit.Class([
                     }
                 }
             }
-
-            if (inc != null) {
-                this.inherit(obj, inc);
-            }
-
             return obj;
         };
 
@@ -4871,7 +4896,7 @@ pkg.Bag = zebkit.Class([
                 }
 
                 for(var kk in v) {
-                    if (kk[0] !== '$' && v.hasOwnProperty(kk) === true && o.hasOwnProperty(kk) === false) {
+                    if (kk[0] !== '$' && v.hasOwnProperty(kk) === true && typeof v[kk] !== "function") {
                         o[kk] = v[kk];
                     }
                 }
@@ -4932,7 +4957,7 @@ pkg.Bag = zebkit.Class([
                         return JSON.parse(s);
                     }
                     catch(e) {
-                        throw new Error("JSON format error");
+                        throw new Error("JSON format error: " + e);
                     }
                 }
                 return s;
@@ -4940,7 +4965,8 @@ pkg.Bag = zebkit.Class([
             . // populate JSON content
             run(function(content) {
                 $this.content = content;
-                $this.root = ($this.root == null ? $this.buildValue(content) : $this.populate($this.root, content));
+                $this.root = ($this.root == null ? $this.buildValue(content)
+                                                 : $this.populate($this.root, content));
                 if (cb != null) cb.call($this);
             })
             .
@@ -4957,8 +4983,7 @@ pkg.Bag = zebkit.Class([
                 return this.variables[name];
             }
 
-            var k = name.split("."),
-                v = undefined;
+            var k = name.split("."), v;
 
             if (this.root != null) {
                 v = this.$get(k, this.root);
@@ -5499,7 +5524,7 @@ pkg.HTTP = Class([
         //
         // TODO: think also about changing content type
         // "application/x-www-form-urlencoded; charset=UTF-8"
-        if (d != null && zebkit.isString(d) == false && d.constructor === Object) {
+        if (d != null && zebkit.isString(d) === false && d.constructor === Object) {
             d = pkg.QS.toQS(d, false);
         }
 
@@ -6135,13 +6160,6 @@ pkg.TextModel = Class([
     }
 ]);
 
-function Line(s) {
-    this.s = s;
-}
-
-//  toString for array.join method
-Line.prototype.toString = function() { return this.s; };
-
 /**
  * Multi-lines text model implementation
  * @class zebkit.data.Text
@@ -6150,6 +6168,17 @@ Line.prototype.toString = function() { return this.s; };
  * @extends zebkit.data.TextModel
  */
 pkg.Text = Class(pkg.TextModel, [
+    function $clazz() {
+        this.Line = function(s) {
+            this.s = s;
+        };
+
+        //  toString for array.join method
+        this.Line.prototype.toString = function() {
+            return this.s;
+        };
+    },
+
     function $prototype() {
         this.textLength = 0;
 
@@ -6227,8 +6256,8 @@ pkg.Text = Class(pkg.TextModel, [
 
             var end  = start + size - 1,            // last line to be removed
                 off  = this.calcLineOffset(start),  // offset of the first line to be removed
-                olen = start != end ? this.calcLineOffset(end) + this.lines[end].s.length + 1 - off
-                                    : this.lines[start].s.length + 1;
+                olen = start !== end ? this.calcLineOffset(end) + this.lines[end].s.length + 1 - off
+                                     : this.lines[start].s.length + 1;
 
 
             // if this is the last line we have to correct offset to point to "\n" character in text
@@ -6246,13 +6275,13 @@ pkg.Text = Class(pkg.TextModel, [
             }
 
             var off = this.calcLineOffset(startLine), offlen = 0;
-            if (startLine == this.lines.length) {
+            if (startLine === this.lines.length) {
                 off--;
             }
 
             for(var i = 1; i < arguments.length; i++) {
                 offlen += arguments[i].length + 1;
-                this.lines.splice(startLine + i - 1, 0, new Line(arguments[i]));
+                this.lines.splice(startLine + i - 1, 0, new this.clazz.Line(arguments[i]));
             }
             this._.textUpdated(this, true, off, offlen, startLine, arguments.length - 1);
         };
@@ -6266,7 +6295,7 @@ pkg.Text = Class(pkg.TextModel, [
                     lineOff = offset - info[1],
                     tmp     = line.substring(0, lineOff) + s + line.substring(lineOff);
 
-                for(; j < slen && s[j] != '\n'; j++);
+                for(; j < slen && s[j] !== '\n'; j++);
 
                 if (j >= slen) {
                     this.lines[info[0]].s = tmp;
@@ -6296,11 +6325,11 @@ pkg.Text = Class(pkg.TextModel, [
                     buf  = l1.substring(0, off1) + l2.substring(off2);
 
                 if (i2[0] === i1[0]) {
-                    this.lines.splice(i1[0], 1, new Line(buf));
+                    this.lines.splice(i1[0], 1, new this.clazz.Line(buf));
                 }
                 else {
                     this.lines.splice(i1[0], i2[0] - i1[0] + 1);
-                    this.lines.splice(i1[0], 0, new Line(buf));
+                    this.lines.splice(i1[0], 0, new this.clazz.Line(buf));
                 }
 
                 if (size > 0) {
@@ -6317,7 +6346,7 @@ pkg.Text = Class(pkg.TextModel, [
             for(var index = 0; index <= size; prevIndex = index, startLine++){
                 var fi = text.indexOf("\n", index);
                 index = (fi < 0 ? size : fi);
-                this.lines.splice(startLine, 0, new Line(text.substring(prevIndex, index)));
+                this.lines.splice(startLine, 0, new this.clazz.Line(text.substring(prevIndex, index)));
                 index++;
             }
             return startLine - prevStartLine;
@@ -6333,7 +6362,7 @@ pkg.Text = Class(pkg.TextModel, [
                 if (old.length > 0) {
                     var numLines = this.getLines(), txtLen = this.getTextLength();
                     this.lines.length = 0;
-                    this.lines = [ new Line("") ];
+                    this.lines = [ new this.clazz.Line("") ];
                     this._.textUpdated(this, false, 0, txtLen, 0, numLines);
                 }
 
@@ -6347,7 +6376,7 @@ pkg.Text = Class(pkg.TextModel, [
         };
 
         this[''] = function(s){
-            this.lines = [ new Line("") ];
+            this.lines = [ new this.clazz.Line("") ];
             this._ = new this.clazz.Listeners();
             this.setValue(s == null ? "" : s);
         };
@@ -6429,7 +6458,7 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
                 var nl = this.buf.substring(0, offset) +
                          this.buf.substring(offset + size);
 
-                if (nl.length != this.buf.length && (this.validate == null || this.validate(nl))) {
+                if (nl.length !== this.buf.length && (this.validate == null || this.validate(nl))) {
                     this.buf = nl;
                     this._.textUpdated(this, false, offset, size, 0, 1);
                     return true;
@@ -6443,7 +6472,7 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
                 throw new Error("Invalid null string");
             }
 
-            if (this.validate != null && this.validate(text) == false) {
+            if (this.validate != null && this.validate(text) === false) {
                 return false;
             }
 
@@ -6476,7 +6505,7 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
          * @param  {Integer} max a maximal length of text
          */
         this.setMaxLength = function (max){
-            if (max != this.maxLen){
+            if (max !== this.maxLen){
                 this.maxLen = max;
                 this.setValue("");
             }
@@ -6688,7 +6717,7 @@ pkg.ListModel = Class([
  * @param  {Object} [v] the item value
  * @constructor
  */
-var Item = pkg.Item = Class([
+pkg.Item = Class([
     function $prototype() {
         this[''] = function(v) {
             /**
@@ -6779,7 +6808,7 @@ pkg.TreeModel = Class([
         this.Listeners = zebkit.util.ListenersClass("itemModified", "itemRemoved", "itemInserted");
 
         this.create = function(r, p) {
-            var item = new Item(r.hasOwnProperty("value")? r.value : r);
+            var item = new pkg.Item(r.hasOwnProperty("value")? r.value : r);
             item.parent = p;
             if (r.hasOwnProperty("kids")) {
                 for(var i = 0; i < r.kids.length; i++) {
@@ -6870,7 +6899,7 @@ pkg.TreeModel = Class([
         this.insert = function(to,item,i){
             if (i < 0 || to.kids.length < i) throw new RangeError(i);
             if (zebkit.isString(item)) {
-                item = new Item(item);
+                item = new pkg.Item(item);
             }
             to.kids.splice(i, 0, item);
             item.parent = to;
@@ -6923,7 +6952,7 @@ pkg.TreeModel = Class([
         };
 
         this[''] = function(r) {
-            if (arguments.length === 0) r = new Item();
+            if (arguments.length === 0) r = new pkg.Item();
 
             /**
              * Reference to the tree model root item
@@ -6931,7 +6960,7 @@ pkg.TreeModel = Class([
              * @type {zebkit.data.Item}
              * @readOnly
              */
-            this.root = zebkit.instanceOf(r, Item) ? r : pkg.TreeModel.create(r);
+            this.root = zebkit.instanceOf(r, pkg.Item) ? r : pkg.TreeModel.create(r);
             this.root.parent = null;
             this._ = new this.clazz.Listeners();
         };
@@ -7259,7 +7288,7 @@ pkg.Matrix = Class([
              */
 
             this._ = new this.clazz.Listeners();
-            if (arguments.length == 1) {
+            if (arguments.length === 1) {
                 this.objs = arguments[0];
                 this.cols = (this.objs.length > 0) ? this.objs[0].length : 0;
                 this.rows = this.objs.length;
@@ -7288,13 +7317,13 @@ pkg.Matrix = Class([
                             : 1);
 
 
-    var $taskMethod = window.requestAnimationFrame       ||
+    pkg.$taskMethod = window.requestAnimationFrame       ||
                       window.webkitRequestAnimationFrame ||
                       window.mozRequestAnimationFrame    ||
                       function(callback) { return window.setTimeout(callback, 35); };
 
     pkg.$task = function(f){
-        return $taskMethod.call(window, f);
+        return pkg.$taskMethod.call(window, f);
     };
 
     pkg.$windowSize = function() {
@@ -7437,10 +7466,10 @@ pkg.Matrix = Class([
         return i;
     };
 
-    function $eventsBlackHole(e) {
+    pkg.$eventsBlackHole = function(e) {
         e.preventDefault();
         e.stopPropagation();
-    }
+    };
 
     pkg.$createBlockedElement = function() {
         var be = document.createElement("div");
@@ -7452,14 +7481,14 @@ pkg.Matrix = Class([
 
         be.onmouseup   = be.onmousedown = be.onmouseout =
         be.onmouseover = be.onmousemove = be.onkeydown  =
-        be.onkeypress  = be.onkeyup = $eventsBlackHole;
+        be.onkeypress  = be.onkeyup = pkg.$eventsBlackHole;
 
         var events = [ "touchstart", "touchend", "touchmove",
                        "pointerdown", "pointerup", "pointermove",
                        "pointerenter", "pointerleave" ];
 
         for(var i = 0 ; i < events.length ; i++ ) {
-           be.addEventListener(events[i], $eventsBlackHole, false);
+           be.addEventListener(events[i], pkg.$eventsBlackHole, false);
         }
 
         return be;
@@ -7694,112 +7723,241 @@ pkg.Matrix = Class([
         return ctx;
     };
 })(zebkit("web"), zebkit.Class);
-(function(pkg, Class) {
+zebkit.package("ui", function(pkg, Class) {
+    /**
+     * This class represents a font and provides basic font metrics like
+     * height, ascent. Using the class developers can compute string width.
+
+          // plain font
+          var f = new zebkit.ui.Font("Arial", 14);
+
+          // bold font
+          var f = new zebkit.ui.Font("Arial", "bold", 14);
+
+          // defining font with CSS font name
+          var f = new zebkit.ui.Font("100px Futura, Helvetica, sans-serif");
+
+     * @constructor
+     * @param {String} name a name of the font. If size and style parameters
+     * has not been passed the name is considered as CSS font name that
+     * includes size and style
+     * @param {String} [style] a style of the font: "bold", "italic", etc
+     * @param {Integer} [size] a size of the font
+     * @class zebkit.ui.Font
+     */
+    pkg.Font = function(name, style, size) {
+        if (arguments.length === 1) {
+            name = name.replace(/[ ]+/, ' ');
+            this.s = name.trim();
+        }
+        else {
+            if (arguments.length === 2) {
+                size  = style;
+                style = '';
+            }
+            style  = style.trim();
+            this.s = style + (style !== '' ? ' ' : '') + size + 'px '+ name;
+            this.name = name;
+        }
+
+
+        var $fmText = pkg.Font.$fmText;
+        $fmText.style.font = this.s;
+
+        /**
+         * Height of the font
+         * @attribute height
+         * @readOnly
+         * @type {Integer}
+         */
+        this.height = $fmText.offsetHeight;
+
+        //!!!
+        // Something weird is going sometimes in IE10 !
+        // Sometimes the property offsetHeight is 0 but
+        // second attempt to access to the property gives
+        // proper result
+        if (this.height === 0) {
+            this.height = $fmText.offsetHeight;
+        }
+
+        /**
+         * Ascent of the font
+         * @attribute ascent
+         * @readOnly
+         * @type {Integer}
+         */
+        this.ascent = pkg.Font.$fmImage.offsetTop - $fmText.offsetTop + 1;
+    };
+
+    /**
+     * Calculate the given string width in pixels
+     * @param  {String} s a string whose width has to be computed
+     * @return {Integer} a string size in pixels
+     * @method stringWidth
+     * @for zebkit.ui.Font
+     */
+    pkg.Font.prototype.stringWidth = function(s) {
+        if (s.length === 0) return 0;
+
+        if (pkg.Font.$fmCanvas.font !== this.s) {
+            pkg.Font.$fmCanvas.font = this.s;
+        }
+
+        return (pkg.Font.$fmCanvas.measureText(s).width + 0.5) | 0;
+    };
+
+    /**
+     * Calculate the specified substring width
+     * @param  {String} s a string
+     * @param  {Integer} off fist character index
+     * @param  {Integer} len length of substring
+     * @return {Integer} a substring size in pixels
+     * @method charsWidth
+     * @for zebkit.ui.Font
+     */
+    pkg.Font.prototype.charsWidth = function(s, off, len) {
+        if (pkg.Font.$fmCanvas.font !== this.s) {
+            pkg.Font.$fmCanvas.font = this.s;
+        }
+
+        return ( pkg.Font.$fmCanvas.measureText(len === 1 ? s[off]
+                                                          : s.substring(off, off + len)).width + 0.5) | 0;
+    };
+
+    /**
+     * Returns CSS font representation
+     * @return {String} a CSS representation of the given Font
+     * @method toString
+     * @for zebkit.ui.Font
+     */
+    pkg.Font.prototype.toString = function() {
+        return this.s;
+    };
+
+    // initialize font specific structures
+    zebkit.busy();
+    pkg.Font.$fmCanvas = document.createElement("canvas").getContext("2d");
+
+    var e = document.getElementById("zebkit.fm");
+    if (e == null) {
+        e = document.createElement("div");
+        e.setAttribute("id", "zebkit.fm");  // !!! position fixed below allows to avoid 1px size in HTML layout for "zebkit.fm" element
+        e.setAttribute("style", "visibility:hidden;line-height:0;height:1px;vertical-align:baseline;position:fixed;");
+        e.innerHTML = "<span id='zebkit.fm.text' style='display:inline;vertical-align:baseline;'>&nbsp;</span>" +
+                      "<img id='zebkit.fm.image' style='width:1px;height:1px;display:inline;vertical-align:baseline;' width='1' height='1'/>";
+        document.body.appendChild(e);
+    }
+    pkg.Font.$fmText  = document.getElementById("zebkit.fm.text");
+    pkg.Font.$fmImage = document.getElementById("zebkit.fm.image");
+
+    //the next function passed to zebkit.ready() will be blocked
+    //till the picture is completely loaded
+    pkg.Font.$fmImage.onload = function() {
+       zebkit.ready();
+    };
+
+    // set 1x1 transparent picture
+    pkg.Font.$fmImage.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII%3D';
+
     pkg.$canvases = [];
+    // canvases location has to be corrected if document layout is invalid
+    pkg.$elBoundsUpdated = function() {
+        for(var i = pkg.$canvases.length - 1; i >= 0; i--) {
+            var c = pkg.$canvases[i];
+            if (c.isFullSize === true) {
+                //c.setLocation(window.pageXOffset, -window.pageYOffset);
 
-    zebkit.ready(function() {
-        // canvases location has to be corrected if document layout is invalid
-        pkg.$elBoundsUpdated = function() {
-            for(var i = pkg.$canvases.length - 1; i >= 0; i--) {
-                var c = pkg.$canvases[i];
-                if (c.isFullSize === true) {
-                    //c.setLocation(window.pageXOffset, -window.pageYOffset);
+                var ws = zebkit.web.$viewPortSize();
 
-                    var ws = zebkit.web.$viewPortSize();
-
-                    console.log("ws.width = " + ws.width);
-
-                    // browser (mobile) can reduce size of browser window by
-                    // the area a virtual keyboard occupies. Usually the
-                    // content scrolls up to the size the VK occupies, so
-                    // to leave zebkit full screen content in the window
-                    // with the real size (not reduced) size take in account
-                    // scrolled metrics
-                    c.setSize(ws.width  + window.pageXOffset,
-                              ws.height + window.pageYOffset);
-                }
-                c.recalcOffset();
+                // browser (mobile) can reduce size of browser window by
+                // the area a virtual keyboard occupies. Usually the
+                // content scrolls up to the size the VK occupies, so
+                // to leave zebkit full screen content in the window
+                // with the real size (not reduced) size take in account
+                // scrolled metrics
+                c.setSize(ws.width  + window.pageXOffset,
+                          ws.height + window.pageYOffset);
             }
-        };
+            c.recalcOffset();
+        }
+    };
 
-        var $wrt = null, winSizeUpdated = false, wpw = -1, wph = -1;
-        window.addEventListener("resize", function(e) {
-            var ws = zebkit.web.$viewPortSize();
-
-            //
-            if (wpw === window.innerWidth && wph === window.innerHeight) {
-                return;
-            }
-
-            wpw = window.innerWidth;
-            wph = window.innerHeight;
+    var $wrt = null, $winSizeUpdated = false, $wpw = -1, $wph = -1;
+    window.addEventListener("resize", function(e) {
+        var ws = zebkit.web.$viewPortSize();
+        if ($wpw !== window.innerWidth || $wph !== window.innerHeight) {
+            $wpw = window.innerWidth;
+            $wph = window.innerHeight;
 
             if ($wrt != null) {
-                winSizeUpdated = true;
+                $winSizeUpdated = true;
             }
             else {
                 $wrt = zebkit.util.task(
                     function(t) {
-                        if (winSizeUpdated === false) {
+                        if ($winSizeUpdated === false) {
                             pkg.$elBoundsUpdated();
                             t.shutdown();
                             $wrt = null;
                         }
-                        winSizeUpdated = false;
+                        $winSizeUpdated = false;
                     }
                 ).run(200, 150);
             }
-        }, false);
+        }
+    }, false);
 
-        window.onbeforeunload = function(e) {
-            var msgs = [];
-            for(var i = pkg.$canvases.length - 1; i >= 0; i--) {
-                if (pkg.$canvases[i].saveBeforeLeave != null) {
-                    var m = pkg.$canvases[i].saveBeforeLeave();
-                    if (m != null) {
-                        msgs.push(m);
-                    }
+    window.onbeforeunload = function(e) {
+        var msgs = [];
+        for(var i = pkg.$canvases.length - 1; i >= 0; i--) {
+            if (pkg.$canvases[i].saveBeforeLeave != null) {
+                var m = pkg.$canvases[i].saveBeforeLeave();
+                if (m != null) {
+                    msgs.push(m);
                 }
             }
+        }
 
-            if (msgs.length > 0) {
-                var message = msgs.join("  ");
-                if (typeof e === 'undefined') {
-                    e = window.event;
-                }
-
-                if (e) e.returnValue = message;
-                return message;
-            }
-        };
-
-        // TODO: this is depricated events that can have significant impact to
-        // page performance. That means it has to be removed and replace with soemting
-        // else
-        //
-        // bunch of handlers to track HTML page metrics update
-        // it is necessary since to correct zebkit canvases anchor
-        // and track when a canvas has been removed
-        document.addEventListener("DOMNodeInserted", function(e) {
-            pkg.$elBoundsUpdated();
-        }, false);
-
-        document.addEventListener("DOMNodeRemoved", function(e) {
-            // remove canvas from list
-            for(var i = pkg.$canvases.length - 1; i >= 0; i--) {
-                var canvas = pkg.$canvases[i];
-                if (zebkit.web.$contains(canvas.element) !== true) {
-                    pkg.$canvases.splice(i, 1);
-                    if (canvas.saveBeforeLeave != null) {
-                        canvas.saveBeforeLeave();
-                    }
-                }
+        if (msgs.length > 0) {
+            var message = msgs.join("  ");
+            if (typeof e === 'undefined') {
+                e = window.event;
             }
 
-            pkg.$elBoundsUpdated();
-        }, false);
-    });
-})(zebkit("ui"), zebkit.Class);
+            if (e) e.returnValue = message;
+            return message;
+        }
+    };
+
+    // TODO: this is depricated events that can have significant impact to
+    // page performance. That means it has to be removed and replace with soemting
+    // else
+    //
+    // bunch of handlers to track HTML page metrics update
+    // it is necessary since to correct zebkit canvases anchor
+    // and track when a canvas has been removed
+    document.addEventListener("DOMNodeInserted", function(e) {
+        pkg.$elBoundsUpdated();
+    }, false);
+
+    document.addEventListener("DOMNodeRemoved", function(e) {
+        // remove canvas from list
+        for(var i = pkg.$canvases.length - 1; i >= 0; i--) {
+            var canvas = pkg.$canvases[i];
+            if (zebkit.web.$contains(canvas.element) !== true) {
+                pkg.$canvases.splice(i, 1);
+                if (canvas.saveBeforeLeave != null) {
+                    canvas.saveBeforeLeave();
+                }
+            }
+        }
+
+        pkg.$elBoundsUpdated();
+    }, false);
+});
+zebkit.package("ui", function(pkg, Class) {
+
 // TODO List:
 //    [+] add pressure level field to pointer events
 //    [-] group field
@@ -7811,937 +7969,939 @@ pkg.Matrix = Class([
 //    [-] list of active touches or pointers have to be available
 //    [-] meX/meY -> (x, y) ?
 
-(function(pkg, Class) {
-    if (pkg.doubleClickDelta == null) {
-        pkg.doubleClickDelta = 180;
+if (pkg.doubleClickDelta == null) {
+    pkg.doubleClickDelta = 180;
+}
+
+var PI4                      = Math.PI/4,  // used to calculate touch event gamma (direction
+    PI4_3                    = PI4 * 3,    // in polar coordinate)
+    $enteredElement          = null,
+    $tmpWinMouseMoveListener = null,
+    $lastPointerReleased     = null,
+    $pointerPressedEvents    = {},         // collect all pointer pressed events
+    LMOUSE = "lmouse",
+    RMOUSE = "rmouse";
+
+/**
+ * Mouse and touch screen input event class. The input event is
+ * triggered by a mouse or touch screen.
+ * @param {zebkit.ui.Panel} source a source of the mouse input event
+ * @param {Integer} ax an absolute (relatively to a canvas where the source
+ * UI component is hosted) mouse pointer x coordinate
+ * @param {Integer} ax an absolute (relatively to a canvas where the source
+ * UI component is hosted) mouse pointer y coordinate
+ * @param {Integer} mask a bits mask of pressed mouse buttons:
+
+         zebkit.ui.PointerEvent.LEFT_BUTTON
+         zebkit.ui.PointerEvent.RIGHT_BUTTON
+
+ * @class  zebkit.ui.PointerEvent
+ * @constructor
+ */
+pkg.PointerEvent = Class(zebkit.util.Event, [
+    function $prototype() {
+        /**
+         * Pointer type. Can be "mouse", "touch", "pen"
+         * @attribute  poiterType
+         * @type {String}
+         */
+        this.pointerType = "mouse";
+
+        /**
+         * Touch counter
+         * @attribute touchCounter
+         * @type {Integer}
+         * @default 0
+         */
+        this.touchCounter = 0;
+
+        /**
+         * Page x
+         * @attribute pageX
+         * @type {Integer}
+         * @default -1
+         */
+        this.pageX = -1;
+
+        /**
+         * Page y
+         * @attribute pageY
+         * @type {Integer}
+         * @default -1
+         */
+        this.pageY = -1;
+
+        /**
+         * Target DOM element
+         * @attribute target
+         * @type {DOMElement}
+         * @default null
+         */
+        this.target = null;
+
+        /**
+         * Pointer identifier
+         * @attribute identifier
+         * @type {Object}
+         * @default null
+         */
+        this.identifier = null;
+
+        this.shiftKey = this.altKey = this.metaKey = this.ctrlKey = false;
+
+        this.pressure = 0.5;
+
+        // TODO: not completed
+        this.pressGroup = [];
+
+        // TODO: experemental property
+        this.eatMe = false;
+
+        this.isAction = function() {
+            return this.identifier === LMOUSE && this.touchCounter === 1;
+        };
+
+        this.isContext = function() {
+            return this.identifier === RMOUSE && this.touchCounter === 1;
+        };
+
+        this.$fillWith = function(identifier, e) {
+            this.eatMe      = false;
+            this.pageX      = Math.floor(e.pageX);
+            this.pageY      = Math.floor(e.pageY);
+            this.target     = e.target;
+            this.identifier = identifier;
+            this.altKey     = typeof e.altKey   !== 'undefined' ? e.altKey   : false;
+            this.shiftKey   = typeof e.shiftKey !== 'undefined' ? e.shiftKey : false;
+            this.ctrlKey    = typeof e.ctrlKey  !== 'undefined' ? e.ctrlKey  : false;
+            this.metaKey    = typeof e.metaKey  !== 'undefined' ? e.metaKey  : false;
+            this.pressure   = typeof e.pressure !== 'undefined' ? e.pressure : 0.5;
+        };
     }
+]);
 
-    var PI4                      = Math.PI/4,  // used to calculate touch event gamma (direction
-        PI4_3                    = PI4 * 3,    // in polar coordinate)
-        $enteredElement          = null,
-        $tmpWinMouseMoveListener = null,
-        $lastPointerReleased     = null,
-        $pointerPressedEvents    = {},         // collect all pointer pressed events
-        LMOUSE = "lmouse",
-        RMOUSE = "rmouse";
+var ME_STUB      = new pkg.PointerEvent(), // instance of mouse event
+    TOUCH_STUB   = new pkg.PointerEvent(), // instance of touch event
+    POINTER_STUB = new pkg.PointerEvent(); // instance of pointer event
 
-    /**
-     * Mouse and touch screen input event class. The input event is
-     * triggered by a mouse or touch screen.
-     * @param {zebkit.ui.Panel} source a source of the mouse input event
-     * @param {Integer} ax an absolute (relatively to a canvas where the source
-     * UI component is hosted) mouse pointer x coordinate
-     * @param {Integer} ax an absolute (relatively to a canvas where the source
-     * UI component is hosted) mouse pointer y coordinate
-     * @param {Integer} mask a bits mask of pressed mouse buttons:
 
-             zebkit.ui.PointerEvent.LEFT_BUTTON
-             zebkit.ui.PointerEvent.RIGHT_BUTTON
+TOUCH_STUB.isAction = function() {
+    return this.touchCounter === 1;
+};
 
-     * @class  zebkit.ui.PointerEvent
-     * @constructor
-     */
-    pkg.PointerEvent = Class(zebkit.util.Event, [
-        function $prototype() {
-            /**
-             * Pointer type. Can be "mouse", "touch", "pen"
-             * @attribute  poiterType
-             * @type {String}
-             */
-            this.pointerType = "mouse";
+TOUCH_STUB.isContext = function() {
+    return this.touchCounter === 2;  // TODO: here should be group analyzed (both touch has to be the same group)
+};
 
-            /**
-             * Touch counter
-             * @attribute touchCounter
-             * @type {Integer}
-             * @default 0
-             */
-            this.touchCounter = 0;
+ME_STUB.pointerType      = "mouse";
+TOUCH_STUB.pointerType   = "touch";
+POINTER_STUB.pointerType = "unknown"; // type of pointer events have to be copied from original WEB PointerEvent
 
-            /**
-             * Page x
-             * @attribute pageX
-             * @type {Integer}
-             * @default -1
-             */
-            this.pageX = -1;
+/**
+ *  Mouse wheel support class. Installs necessary mouse wheel
+ *  listeners and handles mouse wheel events in zebkit UI. The
+ *  mouse wheel support is plugging that is configured by a
+ *  JSON configuration.
+ *  @class zebkit.ui.MouseWheelSupport
+ *  @param  {zebkit.ui.zCanvas} canvas a zCanvas UI component
+ *  @constructor
+ */
+pkg.MouseWheelSupport = Class([
+    function $clazz() {
+        this.dxZoom = this.dyZoom = 20;
+        this.dxNorma = this.dyNorma = 80;
 
-            /**
-             * Page y
-             * @attribute pageY
-             * @type {Integer}
-             * @default -1
-             */
-            this.pageY = -1;
+        this.$META = {
+            wheel: {
+                dy  : "deltaY",
+                dx  : "deltaX",
+                dir : 1,
+                test: function() {
+                    return "WheelEvent" in window;
+                }
+            },
+            mousewheel: {
+                dy  : "wheelDelta",
+                dx  : "wheelDeltaX",
+                dir : -1,
+                test: function() {
+                    return document.onmousewheel !== undefined;
+                }
+            },
+            DOMMouseScroll: {
+                dy  : "detail",
+                dir : 1,
+                test: function() {
+                    return true;
+                }
+            }
+        };
+    },
 
-            /**
-             * Target DOM element
-             * @attribute target
-             * @type {DOMElement}
-             * @default null
-             */
-            this.target = null;
+    function $prototype() {
+        this.naturalDirection = true;
+    },
 
-            /**
-             * Pointer identifier
-             * @attribute identifier
-             * @type {Object}
-             * @default null
-             */
-            this.identifier = null;
+    function(element, destination) {
+        var META = this.clazz.$META;
+        for(var k in META) {
+            if (META[k].test()) {
+                var $wheelMeta = META[k], $clazz = this.clazz;
+                element.addEventListener(k,
+                    function(e) {
+                        var dy = e[$wheelMeta.dy] != null ? e[$wheelMeta.dy] * $wheelMeta.dir : 0,
+                            dx = e[$wheelMeta.dx] != null ? e[$wheelMeta.dx] * $wheelMeta.dir : 0;
 
-            this.shiftKey = this.altKey = this.metaKey = this.ctrlKey = false;
+                        // some version of FF can generates dx/dy  < 1
+                        if (Math.abs(dy) < 1) {
+                            dy *= $clazz.dyZoom;
+                        }
 
-            this.pressure = 0.5;
+                        if (Math.abs(dx) < 1) {
+                            dx *= $clazz.dxZoom;
+                        }
 
-            // TODO: not completed
-            this.pressGroup = [];
+                        dy = Math.abs(dy) > $clazz.dyNorma ? dy % $clazz.dyNorma : dy;
+                        dx = Math.abs(dx) > $clazz.dxNorma ? dx % $clazz.dxNorma : dx;
 
-            // TODO: experemental property
-            this.eatMe = false;
 
-            this.isAction = function() {
-                return this.identifier === LMOUSE && this.touchCounter === 1;
-            };
-
-            this.isContext = function() {
-                return this.identifier === RMOUSE && this.touchCounter === 1;
-            };
-
-            this.$fillWith = function(identifier, e) {
-                this.eatMe      = false;
-                this.pageX      = Math.floor(e.pageX);
-                this.pageY      = Math.floor(e.pageY);
-                this.target     = e.target;
-                this.identifier = identifier;
-                this.altKey     = typeof e.altKey   !== 'undefined' ? e.altKey   : false;
-                this.shiftKey   = typeof e.shiftKey !== 'undefined' ? e.shiftKey : false;
-                this.ctrlKey    = typeof e.ctrlKey  !== 'undefined' ? e.ctrlKey  : false;
-                this.metaKey    = typeof e.metaKey  !== 'undefined' ? e.metaKey  : false;
-                this.pressure   = typeof e.pressure !== 'undefined' ? e.pressure : 0.5;
-            };
+                        // do floor since some mouse devices can fire float as
+                        if (destination.$doScroll(Math.floor(dx),
+                                                  Math.floor(dy), "wheel"))
+                        {
+                            e.preventDefault();
+                        }
+                    },
+                    false);
+                break;
+            }
         }
-    ]);
+    }
+]);
 
-    var ME_STUB      = new pkg.PointerEvent(), // instance of mouse event
-        TOUCH_STUB   = new pkg.PointerEvent(), // instance of touch event
-        POINTER_STUB = new pkg.PointerEvent(); // instance of pointer event
+// !!!
+// global mouse move events handler (registered by drag out a canvas surface)
+// has to be removed every time a mouse button released with the given function
+function $cleanDragFix() {
+    if ($tmpWinMouseMoveListener != null && $pointerPressedEvents[LMOUSE] == null && $pointerPressedEvents[RMOUSE] == null) {
+        window.removeEventListener("mousemove", $tmpWinMouseMoveListener, true);
+        $tmpWinMouseMoveListener = null;
+        return true;
+    }
+    return false;
+}
 
+pkg.PointerEventUnifier = Class([
+    function $clazz() {
+        // !!!!
+        // TODO: this method works only for mouse (constant of mouse event ids is in)
+        // not clear if it is ok
+        //
+        // the document mouse up happens when we drag outside a canvas.
+        // in this case canvas doesn't catch mouse up, so we have to do it
+        // by global mouseup handler
+        document.addEventListener("mouseup", function(e) {
+            // ignore any mouse buttons except left
+            // and right buttons
+            if (e.button === 0 || e.button === 2) {
+                var id = e.button === 0 ? LMOUSE : RMOUSE,
+                    mp = $pointerPressedEvents[id];
 
-    TOUCH_STUB.isAction = function() {
-        return this.touchCounter === 1;
-    };
-
-    TOUCH_STUB.isContext = function() {
-        return this.touchCounter === 2;  // TODO: here should be group analyzed (both touch has to be the same group)
-    };
-
-    ME_STUB.pointerType      = "mouse";
-    TOUCH_STUB.pointerType   = "touch";
-    POINTER_STUB.pointerType = "pointer"
-
-    /**
-     *  Mouse wheel support class. Installs necessary mouse wheel
-     *  listeners and handles mouse wheel events in zebkit UI. The
-     *  mouse wheel support is plugging that is configured by a
-     *  JSON configuration.
-     *  @class zebkit.ui.MouseWheelSupport
-     *  @param  {zebkit.ui.zCanvas} canvas a zCanvas UI component
-     *  @constructor
-     */
-    pkg.MouseWheelSupport = Class([
-        function $clazz() {
-            this.dxZoom = this.dyZoom = 20;
-            this.dxNorma = this.dyNorma = 80;
-
-            this.$META = {
-                wheel: {
-                    dy  : "deltaY",
-                    dx  : "deltaX",
-                    dir : 1,
-                    test: function() {
-                        return "WheelEvent" in window;
+                // !!!!
+                // Check if the event target is not the canvas itself
+                // On desktop  "mouseup" event is generated only if
+                // you drag mouse outside a canvas and than release a mouse button
+                // At the same time in Android native browser (and may be other mobile
+                // browsers) "mouseup" event is fired every time you touch
+                // canvas or any other element. So check if target is not a canvas
+                // before doing releasing, otherwise it brings to error on mobile
+                if (mp != null                       &&
+                    mp.$adapter.element != e.target  &&
+                    mp.$adapter.element.contains(e.target) === false)
+                {
+                    try {
+                        if ($enteredElement != null) {
+                            $enteredElement = null;
+                            mp.$adapter.destination.$pointerExited(ME_STUB);
+                        }
                     }
-                },
-                mousewheel: {
-                    dy  : "wheelDelta",
-                    dx  : "wheelDeltaX",
-                    dir : -1,
-                    test: function() {
-                        return document.onmousewheel !== undefined;
+                    finally {
+                        mp.$adapter.$UP(id, e, ME_STUB);
                     }
-                },
-                DOMMouseScroll: {
-                    dy  : "detail",
-                    dir : 1,
-                    test: function() {
+                }
+            }
+        },  false); // false is important since if mouseUp  happens on
+                    // canvas the canvas gets the event first and than stops
+                    // propagating to prevent it
+    },
+
+    function $prototype() {
+        this.$timer = null;
+        this.$queue = [];
+
+        this.$touchedAt = function(pageX, pageY, d) {
+            var lx = pageX - d,
+                ty = pageY - d,
+                rx = pageX + d,
+                by = pageY + d;
+
+            for(var k in $pointerPressedEvents) {
+                if (k !== LMOUSE && k !== RMOUSE) {
+                    var e = $pointerPressedEvents[k];
+                    if (e.pageX >= lx && e.pageY >= ty && e.pageX <= rx && e.pageY <= by) {
                         return true;
                     }
                 }
-            };
-        },
+            }
+            return false;
+        };
 
-        function $prototype() {
-            this.naturalDirection = true;
-        },
+        this.$DRAG = function(id, e, stub) {
+            // get appropriate pointerPressed event that has occurred before
+            var mp = $pointerPressedEvents[id];
 
-        function(element, destination) {
-            var META = this.clazz.$META;
-            for(var k in META) {
-                if (META[k].test()) {
-                    var $wheelMeta = META[k], $clazz = this.clazz;
-                    element.addEventListener(k,
-                        function(e) {
-                            var dy = e[$wheelMeta.dy] != null ? e[$wheelMeta.dy] * $wheelMeta.dir : 0,
-                                dx = e[$wheelMeta.dx] != null ? e[$wheelMeta.dx] * $wheelMeta.dir : 0;
+            // a pointer touched has been pressed and pressed target zebkit component exists
+            // emulate mouse dragging events if mouse has moved on the canvas where mouse
+            // pressed event occurred
+            if (mp != null) {
+                // ignore moved if there still start events that are waiting for to be fired
+                if (mp.$adapter.element === this.element) {
+                    // target component exists and mouse cursor moved on the same
+                    // canvas where mouse pressed occurred
+                    if (this.$timer === null) {
+                        stub.$fillWith(id, e);
 
-                            // some version of FF can generates dx/dy  < 1
-                            if (Math.abs(dy) < 1) {
-                                dy *= $clazz.dyZoom;
+                        var dx = stub.pageX - mp.pageX,
+                            dy = stub.pageY - mp.pageY,
+                            d  = mp.direction;
+
+                        // accumulate shifting of pointer
+                        mp.$adx += dx;
+                        mp.$ady += dy;
+
+                        // update stored touch coordinates with a new one
+                        mp.pageX  = stub.pageX;
+                        mp.pageY  = stub.pageY;
+
+                        // we can recognize direction only if move was not too small
+                        if (Math.abs(mp.$adx) > 4 || Math.abs(mp.$ady) > 4) {
+                            // compute gamma, this is corner in polar coordinate system
+                            var gamma = Math.atan2(mp.$ady, mp.$adx);
+
+                            // using gamma we can figure out direction
+                            if (gamma > -PI4) {
+                                d = (gamma < PI4) ? "right" : (gamma < PI4_3 ? "buttom" : "left");
+                            }
+                            else {
+                                d = (gamma > -PI4_3) ? "top" : "left";
                             }
 
-                            if (Math.abs(dx) < 1) {
-                                dx *= $clazz.dxZoom;
+                            mp.direction = d;
+
+                            // clear accumulated shift
+                            mp.$ady = mp.$adx = 0;
+
+                            mp.gamma = gamma;
+                        }
+
+                        stub.direction = mp.direction;
+                        stub.dx = dx;
+                        stub.dy = dy;
+
+                        try {
+                            if (mp.isDragged === false) {
+                                this.destination.$pointerDragStarted(stub);
                             }
 
-                            dy = Math.abs(dy) > $clazz.dyNorma ? dy % $clazz.dyNorma : dy;
-                            dx = Math.abs(dx) > $clazz.dxNorma ? dx % $clazz.dxNorma : dx;
-
-
-                            // do floor since some mouse devices can fire float as
-                            if (destination.$doScroll(Math.floor(dx),
-                                                      Math.floor(dy), "wheel"))
-                            {
-                                e.preventDefault();
+                            if (mp.isDragged === false || dx !== 0 || dy !== 0) {
+                                this.destination.$pointerDragged(stub);
                             }
-                        },
-                        false);
+                        }
+                        finally {
+                            mp.isDragged = true;
+                        }
+                    }
+                }
+                else {
+                    mp.$adapter.$DRAG(id, e, stub);
+                }
+            }
+        };
+
+        //  Possible cases of mouse up events:
+        //
+        //   a) +-------------+        b) +----------------+       c) +---------------+
+        //      |  E          |           | E +----+       |          | E       +-----|
+        //      |      p--u   |          |    | p--|-u     |          |         |  p--|-u
+        //      |             |           |   +----+       |          |         +-----|
+        //      +-------------+           +----------------+          +---------------+
+        // (out to document/body)      (out from kid to element)   (out from kid to document)
+        //
+        //   d) +--------+--------+    e) +----------+----------+    f) +---------+-------+
+        //      | E      |        |       |  E +-----|-----+    |       | E +-----|       |
+        //      |     p--|--u     |       |    | p---|--u  |    |       |   |  p--|-u     |
+        //      |        |        |       |    +-----|-----+    |       |   +-----|       |
+        //      +--------+--------+       +----------+----------+       +---------+-------+
+        //     (out from element to       (out from kid of element     (out from kid element
+        //      other element)            to kid of another element)    to another element)
+        // Contract:
+        //   -- handle only mouse events whose destination is the passed element
+        //   -- does stop propagation if event has been handled
+        //   -- clear drag  fix ?
+        this.$UP = function(id, e, stub) {
+            // remove timer if it has not been started yet since we already have
+            // got UP event and have to fire pressed events from queue with the
+            // UP handler
+            if (this.$timer != null) {
+                clearTimeout(this.$timer);
+                this.$timer = null;
+            }
+
+            // test if the pressed event for the given id has not been fired yet
+            var isPressedInQ = false;
+            for(var i = 0; i < this.$queue.length; i++) {
+                if (this.$queue[i].identifier === id) {
+                    isPressedInQ = true;
                     break;
                 }
             }
-        }
-    ]);
 
-    // !!!
-    // global mouse move events handler (registered by drag out a canvas surface)
-    // has to be removed every time a mouse button released with the given function
-    function $cleanDragFix() {
-        if ($tmpWinMouseMoveListener != null && $pointerPressedEvents[LMOUSE] == null && $pointerPressedEvents[RMOUSE] == null) {
-            window.removeEventListener("mousemove", $tmpWinMouseMoveListener, true);
-            $tmpWinMouseMoveListener = null;
-            return true;
-        }
-        return false;
-    };
+            // fire collected in queue pressed events
+            this.$firePressedFromQ();
 
-    pkg.PointerEventUnifier = Class([
-        function $clazz() {
-            // !!!!
-            // TODO: this method works only for mouse (constant of mouse event ids is in)
-            // not clear if it is ok
-            //
-            // the document mouse up happens when we drag outside a canvas.
-            // in this case canvas doesn't catch mouse up, so we have to do it
-            // by global mouseup handler
-            document.addEventListener("mouseup", function(e) {
-                // ignore any mouse buttons except left
-                // and right buttons
-                if (e.button === 0 || e.button === 2) {
-                    var id = e.button == 0 ? LMOUSE : RMOUSE,
-                        mp = $pointerPressedEvents[id];
+            // get pointer pressed state for the given id
+            var mp = $pointerPressedEvents[id];
 
-                    // !!!!
-                    // Check if the event target is not the canvas itself
-                    // On desktop  "mouseup" event is generated only if
-                    // you drag mouse outside a canvas and than release a mouse button
-                    // At the same time in Android native browser (and may be other mobile
-                    // browsers) "mouseup" event is fired every time you touch
-                    // canvas or any other element. So check if target is not a canvas
-                    // before doing releasing, otherwise it brings to error on mobile
-                    if (mp != null                       &&
-                        mp.$adapter.element != e.target  &&
-                        mp.$adapter.element.contains(e.target) === false)
-                    {
+            // check if a pointer state is in pressed state
+            if (mp != null) {
+                // mouse up can happen in another element than
+                // mouse down occurred. let the original element
+                // (where mouse down is happened) to handle it
+                if (this.element !== mp.$adapter.element) {
+                    $enteredElement = null;
+                    // wrap with try-catch to prevent inconsistency
+                    try {
+                        stub.$fillWith(id, e);
+                        mp.$adapter.destination.$pointerExited(stub);
+                        $enteredElement = this.element;
+                        this.destination.$pointerEntered(stub);
+                    }
+                    catch(ee) {
+                        // keep it for exceptional cases
+                        $enteredElement = this.element;
+                        throw ee;
+                    }
+                    finally {
+                        mp.$adapter.$UP(id, e, stub);
+                    }
+                }
+                else {
+                    function $fireUP(id, e, mp, stub, destination) {
                         try {
-                            if ($enteredElement != null) {
-                                $enteredElement = null;
-                                mp.$adapter.destination.$pointerExited(ME_STUB);
-                            }
-                        }
-                        finally {
-                            mp.$adapter.$UP(id, e, ME_STUB);
-                        }
-                    }
-                }
-            },  false); // false is important since if mouseUp  happens on
-                        // canvas the canvas gets the event first and than stops
-                        // propagating to prevent it
-        },
-
-        function $prototype() {
-            this.$timer = null;
-            this.$queue = [];
-
-            this.$touchedAt = function(pageX, pageY, d) {
-                var lx = pageX - d,
-                    ty = pageY - d,
-                    rx = pageX + d,
-                    by = pageY + d;
-
-                for(var k in $pointerPressedEvents) {
-                    if (k !== LMOUSE && k !== RMOUSE) {
-                        var e = $pointerPressedEvents[k];
-                        if (e.pageX >= lx && e.pageY >= ty && e.pageX <= rx && e.pageY <= by) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            };
-
-            this.$DRAG = function(id, e, stub) {
-                // get appropriate pointerPressed event that has occurred before
-                var mp = $pointerPressedEvents[id];
-
-                // a pointer touched has been pressed and pressed target zebkit component exists
-                // emulate mouse dragging events if mouse has moved on the canvas where mouse
-                // pressed event occurred
-                if (mp != null) {
-                    // ignore moved if there still start events that are waiting for to be fired
-                    if (mp.$adapter.element === this.element) {
-                        // target component exists and mouse cursor moved on the same
-                        // canvas where mouse pressed occurred
-                        if (this.$timer === null) {
+                            // store coordinates and target
                             stub.$fillWith(id, e);
 
-                            var dx = stub.pageX - mp.pageX,
-                                dy = stub.pageY - mp.pageY,
-                                d  = mp.direction;
+                            // TODO: uncomment it and replace with sub or so
+                            //if (tt.group != null) tt.group.active = false;
 
-                            // accumulate shifting of pointer
-                            mp.$adx += dx;
-                            mp.$ady += dy;
+                            // add press coordinates what can help to detect source
+                            // of the event
+                            stub.pressPageX = mp.pressPageX;
+                            stub.pressPageY = mp.pressPageY;
 
-                            // update stored touch coordinates with a new one
-                            mp.pageX  = stub.pageX;
-                            mp.pageY  = stub.pageY;
-
-                            // we can recognize direction only if move was not too small
-                            if (Math.abs(mp.$adx) > 4 || Math.abs(mp.$ady) > 4) {
-                                // compute gamma, this is corner in polar coordinate system
-                                var gamma = Math.atan2(mp.$ady, mp.$adx);
-
-                                // using gamma we can figure out direction
-                                if (gamma > -PI4) {
-                                    d = (gamma < PI4) ? "right" : (gamma < PI4_3 ? "buttom" : "left");
+                            // fire dragged or clicked
+                            if (mp.isDragged === true) {
+                                destination.$pointerDragEnded(stub);
+                            }
+                            else {
+                                if ($lastPointerReleased != null &&
+                                    $lastPointerReleased.identifier === id &&
+                                    (new Date().getTime() - $lastPointerReleased.time) <= pkg.doubleClickDelta)
+                                {
+                                    destination.$pointerDoubleClicked(stub);
                                 }
                                 else {
-                                    d = (gamma > -PI4_3) ? "top" : "left";
-                                }
-
-                                mp.direction = d;
-
-                                // clear accumulated shift
-                                mp.$ady = mp.$adx = 0;
-
-                                mp.gamma = gamma;
-                            }
-
-                            stub.direction = mp.direction;
-                            stub.dx = dx;
-                            stub.dy = dy;
-
-                            try {
-                                if (mp.isDragged === false) {
-                                    this.destination.$pointerDragStarted(stub);
-                                }
-
-                                if (mp.isDragged === false || dx != 0 || dy != 0) {
-                                    this.destination.$pointerDragged(stub);
+                                    destination.$pointerClicked(stub);
                                 }
                             }
-                            finally {
-                                mp.isDragged = true;
-                            }
-                        }
-                    }
-                    else {
-                        mp.$adapter.$DRAG(id, e, stub);
-                    }
-                }
-            };
 
-            //  Possible cases of mouse up events:
-            //
-            //   a) +-------------+        b) +----------------+       c) +---------------+
-            //      |  E          |           | E +----+       |          | E       +-----|
-            //      |      p--u   |          |    | p--|-u     |          |         |  p--|-u
-            //      |             |           |   +----+       |          |         +-----|
-            //      +-------------+           +----------------+          +---------------+
-            // (out to document/body)      (out from kid to element)   (out from kid to document)
-            //
-            //   d) +--------+--------+    e) +----------+----------+    f) +---------+-------+
-            //      | E      |        |       |  E +-----|-----+    |       | E +-----|       |
-            //      |     p--|--u     |       |    | p---|--u  |    |       |   |  p--|-u     |
-            //      |        |        |       |    +-----|-----+    |       |   +-----|       |
-            //      +--------+--------+       +----------+----------+       +---------+-------+
-            //     (out from element to       (out from kid of element     (out from kid element
-            //      other element)            to kid of another element)    to another element)
-            // Contract:
-            //   -- handle only mouse events whose destination is the passed element
-            //   -- does stop propagation if event has been handled
-            //   -- clear drag  fix ?
-            this.$UP = function(id, e, stub) {
-                // remove timer if it has not been started yet since we already have
-                // got UP event and have to fire pressed events from queue with the
-                // UP handler
-                if (this.$timer != null) {
-                    clearTimeout(this.$timer);
-                    this.$timer = null;
-                }
-
-                // test if the pressed event for the given id has not been fired yet
-                var isPressedInQ = false;
-                for(var i = 0; i < this.$queue.length; i++) {
-                    if (this.$queue[i].identifier === id) {
-                        isPressedInQ = true;
-                        break;
-                    }
-                }
-
-                // fire collected in queue pressed events
-                this.$firePressedFromQ();
-
-                // get pointer pressed state for the given id
-                var mp = $pointerPressedEvents[id];
-
-                // check if a pointer state is in pressed state
-                if (mp != null) {
-                    // mouse up can happen in another element than
-                    // mouse down occurred. let the original element
-                    // (where mouse down is happened) to handle it
-                    if (this.element !== mp.$adapter.element) {
-                        $enteredElement = null;
-                        // wrap with try-catch to prevent inconsistency
-                        try {
-                            stub.$fillWith(id, e);
-                            mp.$adapter.destination.$pointerExited(stub);
-                            $enteredElement = this.element;
-                            this.destination.$pointerEntered(stub);
-                        }
-                        catch(ee) {
-                            // keep it for exceptional cases
-                            $enteredElement = this.element;
-                            throw ee;
+                            // always complete pointer pressed with appropriate
+                            // release event
+                            destination.$pointerReleased(stub);
                         }
                         finally {
-                            mp.$adapter.$UP(id, e, stub);
-                        }
-                    }
-                    else {
-                        function $fireUP(id, e, mp, stub, destination) {
-                            try {
-                                // store coordinates and target
-                                stub.$fillWith(id, e);
+                            // clear handled pressed and dragged state
+                            if (stub.touchCounter > 0) stub.touchCounter--;
+                            $lastPointerReleased = $pointerPressedEvents[id];
+                            delete $pointerPressedEvents[id];
 
-                                // TODO: uncomment it and replace with sub or so
-                                //if (tt.group != null) tt.group.active = false;
-
-                                // add press coordinates what can help to detect source
-                                // of the event
-                                stub.pressPageX = mp.pressPageX;
-                                stub.pressPageY = mp.pressPageY;
-
-                                // fire dragged or clicked
-                                if (mp.isDragged === true) {
-                                    destination.$pointerDragEnded(stub);
-                                }
-                                else {
-                                    if ($lastPointerReleased != null &&
-                                        $lastPointerReleased.identifier === id &&
-                                        (new Date().getTime() - $lastPointerReleased.time) <= pkg.doubleClickDelta)
-                                    {
-                                        destination.$pointerDoubleClicked(stub);
-                                    }
-                                    else {
-                                        destination.$pointerClicked(stub);
-                                    }
-                                }
-
-                                // always complete pointer pressed with appropriate
-                                // release event
-                                destination.$pointerReleased(stub);
-                            }
-                            finally {
-                                // clear handled pressed and dragged state
-                                if (stub.touchCounter > 0) stub.touchCounter--;
-                                $lastPointerReleased = $pointerPressedEvents[id];
-                                delete $pointerPressedEvents[id];
-
-                                // remove global move listener if necessary
-                                $cleanDragFix();
-                            }
-                        }
-
-                        if (isPressedInQ) {
-                            var $this = this;
-                            setTimeout(function() {
-                                $fireUP(id, e, mp, stub, $this.destination);
-                            }, 50);
-                        }
-                        else {
-                            $fireUP(id, e, mp, stub, this.destination);
-                        }
-                    }
-                }
-            };
-
-            this.$indexOfQ = function(id) {
-                for(var i = 0; i < this.$queue.length; i++) {
-                    if (id === this.$queue[i].identifier) return i;
-                }
-                return -1;
-            };
-
-            this.$firePressedFromQ = function() {
-                // fire collected pointer pressed events
-                if (this.$queue.length > 0) {
-                    var l = this.$queue.length;
-                    for(var i = 0; i < l; i++) {
-                        var t = this.$queue[i];
-
-                        try {
-                            // reg the event
-                            $pointerPressedEvents[t.identifier] = t;
-
-                            t.stub.$fillWith(t.identifier, t);
-                            t.stub.group = l; // TODO: temporary solution
-                            this.destination.$pointerPressed(t.stub);
-                        }
-                        catch(ex) {
-                            // don't forget to decrease counter
-                            if (t.stub != null && t.stub.touchCounter > 0) {
-                                t.stub.touchCounter--;
-                            }
-                            delete $pointerPressedEvents[t.identifier];
-                            console.log(ex.stack);
-                        }
-                    }
-                    this.$queue.length = 0;
-                }
-            };
-
-            this.$DOWN = function(id, e, stub) {
-                $cleanDragFix();
-
-                // remove not fired pointer pressed from queue if necessary
-                var i = this.$indexOfQ(id);
-                if (i >= 0) {
-                    this.$queue.splice(i, 1);
-                }
-
-                // release mouse pressed if it has not happened before
-                var mp = $pointerPressedEvents[id];
-                if (mp != null) {
-                    mp.$adapter.$UP(id, e, mp.stub);
-                }
-
-                // count pointer pressed
-                stub.touchCounter++;
-
-                try {
-                    // put pointer pressed in queue
-                    this.$queue.push({
-                        pageX       : Math.floor(e.pageX),
-                        pageY       : Math.floor(e.pageY),
-                        pressPageX  : Math.floor(e.pageX),
-                        pressPageY  : Math.floor(e.pageY),
-                        target      : e.target,
-                        direction   : null,
-                        identifier  : id,
-                        shiftKey    : e.shiftKey,
-                        altKey      : e.altKey,
-                        metaKey     : e.metaKey,
-                        ctrlKey     : e.ctrlKey,
-                        time        : (new Date()).getTime(),
-                        $adapter    : this,
-                        $adx        : 0,
-                        $ady        : 0,
-                        isDragged   : false,
-                        stub        : stub
-                    });
-
-                    // initiate timer to send collected new touch events
-                    // if any new has appeared. the timer helps to collect
-                    // events in one group
-                    if (this.$queue.length > 0 && this.$timer === null) {
-                        var $this = this;
-                        this.$timer = setTimeout(function() {
-                            $this.$timer = null;
-                            $this.$firePressedFromQ(); // flush queue
-                        }, 25);
-                    }
-                }
-                catch(ee) {
-                    // restore touch counter if an error has happened
-                    if (stub.touchCounter > 0) stub.touchCounter--;
-                    throw ee;
-                }
-            };
-
-            this.$MMOVE = function(e) {
-                var pageX = Math.floor(e.pageX),
-                    pageY = Math.floor(e.pageY) ;
-
-                // ignore extra mouse moved event that can appear in IE
-                if (this.$mousePageY != pageY || this.$mousePageX != pageX) {
-
-                    this.$mousePageX = pageX;
-                    this.$mousePageY = pageY;
-
-                    if ($pointerPressedEvents[LMOUSE] != null || $pointerPressedEvents[RMOUSE] != null) {
-                        if ($pointerPressedEvents[LMOUSE] != null) {
-                            this.$DRAG(LMOUSE, e, ME_STUB);
-                        }
-
-                        if ($pointerPressedEvents[RMOUSE] != null) {
-                            this.$DRAG(RMOUSE, e, ME_STUB);
-                        }
-                    }
-                    else {
-                        // initialize native fields
-                        ME_STUB.$fillWith("mouse", e);
-                        this.destination.$pointerMoved(ME_STUB);
-                    }
-                }
-            };
-        },
-
-        function (element, destination) {
-            this.destination = destination;
-            this.element     = element;
-
-            var $this = this;
-
-            element.onmousedown = function(e) {
-                // ignore any mouse buttons except left
-                // and right buttons or long touch emulates mouse event what causes generations of
-                // mouse down event after touch start event. Let's suppress it
-                if ((e.button !== 0 && e.button !== 2) ||
-                     $this.$touchedAt(e.pageX, e.pageY, 0))
-                {
-                    e.preventDefault();
-                }
-                else {
-                    $this.$DOWN(e.button == 0 ? LMOUSE : RMOUSE, e, ME_STUB);
-                    e.stopPropagation();
-                }
-            };
-
-
-            //  Possible cases of mouse up events:
-            //
-            //   a) +-------------+        b) +----------------+       c) +---------------+
-            //      |  E          |           | E +----+       |          | E       +-----|
-            //      |      p--u   |          |    | p--|-u     |          |         |  p--|-u
-            //      |             |           |   +----+       |          |         +-----|
-            //      +-------------+           +----------------+          +---------------+
-            // (out to document/body)      (out from kid to element)   (out from kid to document)
-            //
-            //   d) +--------+--------+    e) +----------+----------+    f) +---------+-------+
-            //      | E      |        |       |  E +-----|-----+    |       | E +-----|       |
-            //      |     p--|--u     |       |    | p---|--u  |    |       |   |  p--|-u     |
-            //      |        |        |       |    +-----|-----+    |       |   +-----|       |
-            //      +--------+--------+       +----------+----------+       +---------+-------+
-            //     (out from element to       (out from kid of element     (out from kid element
-            //      other element)            to kid of another element)    to another element)
-            // Contract:
-            //   -- handle only mouse events whose destination is the passed element
-            //   -- does stop propagation if event has been handled
-            //   -- clear drag  fix ?
-            element.onmouseup = function(e) {
-                // ignore any mouse buttons except left
-                // and right buttons
-                if (e.button !== 0 && e.button !== 2) {
-                    e.preventDefault();
-                }
-                else {
-                    var id = e.button == 0 ? LMOUSE : RMOUSE;
-
-                    $this.$UP(id, e, ME_STUB);
-
-                    if (e.stopPropagation != null) e.stopPropagation();
-                }
-            };
-
-            // mouse over has to setup if necessary current over element variable
-            // it requires to detect repeat mouse over event that happens when
-            // for instance we switch between browser and other application, but
-            // mouse cursor stays at the same place
-            element.onmouseover = function(e) {
-                // this code prevent mouse over for first touch on iOS and Android
-                if ($this.$touchedAt(e.pageX, e.pageY, 0)) {
-                    e.preventDefault();
-                }
-                else {
-                    var id = e.button == 0 ? LMOUSE : RMOUSE,
-                        mp = $pointerPressedEvents[id];
-
-                    // if a button has not been pressed handle mouse entered to detect
-                    // zebkit component the mouse pointer entered and send appropriate
-                    // mouse entered event to it
-                    if (mp == null) {
-                        // just for the sake of error prevention
-                        // clean global move listeners
-                        $cleanDragFix();
-
-                        // if entered element is null or the target element
-                        // is not a children/element of the entered element than
-                        // fires pointer entered event
-                        if ($enteredElement == null || ($enteredElement.contains(e.target) === false && $enteredElement !== e.target)) {
-                            ME_STUB.$fillWith("mouse", e);
-                            $enteredElement = element;
-                            destination.$pointerEntered(ME_STUB);
-                        }
-                    }
-                    else {
-                        // remove any previously registered listener if
-                        //  -- a mouse button has been pressed
-                        //  -- a mouse button has been pressed on the canvas we have entered
-                        if (element === e.target || element.contains(e.target)) {
+                            // remove global move listener if necessary
                             $cleanDragFix();
                         }
                     }
 
-                    e.stopPropagation();
+                    if (isPressedInQ) {
+                        var $this = this;
+                        setTimeout(function() {
+                            $fireUP(id, e, mp, stub, $this.destination);
+                        }, 50);
+                    }
+                    else {
+                        $fireUP(id, e, mp, stub, this.destination);
+                    }
                 }
-            };
+            }
+        };
 
-            //  Possible cases of mouse out events:
-            //
-            //   a) +-------------+        b) +----------------+       c) +---------------+
-            //      |  E          |           | E +----+       |          | E       +-----|
-            //      |        *----|->         |   | *--|->     |          |         |  *--|->
-            //      |             |           |   +----+       |          |         +-----|
-            //      +-------------+           +----------------+          +---------------+
-            // (out to document/body)      (out from kid to element)   (out from kid to document)
-            //
-            //   d) +--------+--------+    e) +----------+----------+    f) +---------+-------+
-            //      | E      |        |       |  E +-----|-----+    |       | E +-----|       |
-            //      |     *--|-->     |       |    | *---|-->  |    |       |   |  *--|->     |
-            //      |        |        |       |    +-----|-----+    |       |   +-----|       |
-            //      +--------+--------+       +----------+----------+       +---------+-------+
-            //     (out from element to       (out from kid of element     (out from kid element
-            //      other element)            to kid of another element)    to another element)
-            //
-            //   1) a mouse button doesn't have to be pressed on any element
-            //   2) e.target always equals to element (E), just because we register event handler
-            //      for element. This guarantees element will get mouse out event only from itself
-            //      and its children elements
-            //   3) mouse out should trigger pointerExited event only if the relatedTarget element
-            //      is not the element (E) or kid of the element (E)
-            //   4) if a mouse button has been pressed than mouse out registers mouse move listener
-            //      to track drag events if the listener has nor been registered yet.
-            //   5) mouse out set to null $enteredElement
+        this.$indexOfQ = function(id) {
+            for(var i = 0; i < this.$queue.length; i++) {
+                if (id === this.$queue[i].identifier) return i;
+            }
+            return -1;
+        };
 
-            element.onmouseout = function(e) {
-                var id = e.button == 0 ? LMOUSE : RMOUSE,
-                    mp = $pointerPressedEvents[id];
+        this.$firePressedFromQ = function() {
+            // fire collected pointer pressed events
+            if (this.$queue.length > 0) {
+                var l = this.$queue.length;
+                for(var i = 0; i < l; i++) {
+                    var t = this.$queue[i];
 
-                // no pressed button exists
-                if (mp == null) {
-                    // the target element is the not a kid of the element
-                    if ($enteredElement != null && (e.relatedTarget != null     &&
-                                                    e.relatedTarget !== element &&
-                                                    element.contains(e.relatedTarget) === false))
-                    {
-                        $enteredElement = null;
-                        ME_STUB.$fillWith("mouse", e);
+                    try {
+                        // reg the event
+                        $pointerPressedEvents[t.identifier] = t;
 
-                        if (zebkit.web.$isInsideElement(element, e.pageX, e.pageY) === false) {
-                            destination.$pointerExited(ME_STUB);
+                        t.stub.$fillWith(t.identifier, t);
+                        t.stub.group = l; // TODO: temporary solution
+                        this.destination.$pointerPressed(t.stub);
+                    }
+                    catch(ex) {
+                        // don't forget to decrease counter
+                        if (t.stub != null && t.stub.touchCounter > 0) {
+                            t.stub.touchCounter--;
                         }
+                        delete $pointerPressedEvents[t.identifier];
+                        console.log(ex.stack);
+                    }
+                }
+                this.$queue.length = 0;
+            }
+        };
+
+        this.$DOWN = function(id, e, stub) {
+            $cleanDragFix();
+
+            // remove not fired pointer pressed from queue if necessary
+            var i = this.$indexOfQ(id);
+            if (i >= 0) {
+                this.$queue.splice(i, 1);
+            }
+
+            // release mouse pressed if it has not happened before
+            var mp = $pointerPressedEvents[id];
+            if (mp != null) {
+                mp.$adapter.$UP(id, e, mp.stub);
+            }
+
+            // count pointer pressed
+            stub.touchCounter++;
+
+            try {
+                // put pointer pressed in queue
+                this.$queue.push({
+                    pageX       : Math.floor(e.pageX),
+                    pageY       : Math.floor(e.pageY),
+                    pressPageX  : Math.floor(e.pageX),
+                    pressPageY  : Math.floor(e.pageY),
+                    target      : e.target,
+                    direction   : null,
+                    identifier  : id,
+                    shiftKey    : e.shiftKey,
+                    altKey      : e.altKey,
+                    metaKey     : e.metaKey,
+                    ctrlKey     : e.ctrlKey,
+                    time        : (new Date()).getTime(),
+                    $adapter    : this,
+                    $adx        : 0,
+                    $ady        : 0,
+                    isDragged   : false,
+                    stub        : stub
+                });
+
+                // initiate timer to send collected new touch events
+                // if any new has appeared. the timer helps to collect
+                // events in one group
+                if (this.$queue.length > 0 && this.$timer === null) {
+                    var $this = this;
+                    this.$timer = setTimeout(function() {
+                        $this.$timer = null;
+                        $this.$firePressedFromQ(); // flush queue
+                    }, 25);
+                }
+            }
+            catch(ee) {
+                // restore touch counter if an error has happened
+                if (stub.touchCounter > 0) stub.touchCounter--;
+                throw ee;
+            }
+        };
+
+        this.$MMOVE = function(e) {
+            var pageX = Math.floor(e.pageX),
+                pageY = Math.floor(e.pageY) ;
+
+            // ignore extra mouse moved event that can appear in IE
+            if (this.$mousePageY != pageY || this.$mousePageX != pageX) {
+
+                this.$mousePageX = pageX;
+                this.$mousePageY = pageY;
+
+                if ($pointerPressedEvents[LMOUSE] != null || $pointerPressedEvents[RMOUSE] != null) {
+                    if ($pointerPressedEvents[LMOUSE] != null) {
+                        this.$DRAG(LMOUSE, e, ME_STUB);
+                    }
+
+                    if ($pointerPressedEvents[RMOUSE] != null) {
+                        this.$DRAG(RMOUSE, e, ME_STUB);
                     }
                 }
                 else {
-                    // if a button has been pressed but the mouse cursor is outside of
-                    // the canvas, for a time being start listening mouse moved events
-                    // of Window to emulate mouse moved events in canvas
-                    if ($tmpWinMouseMoveListener == null &&
-                        e.relatedTarget != null &&
-                        element.contains(e.relatedTarget) === false)
-                    {
-                        // !!! ignore touchscreen devices
-                        if (id === LMOUSE || id === RMOUSE) {
-                            $tmpWinMouseMoveListener = function(ee) {
-                                ee.stopPropagation();
-
-                                if ($pointerPressedEvents[LMOUSE] != null) {
-                                    $this.$DRAG(LMOUSE, {
-                                        pageX  : ee.pageX,
-                                        pageY  : ee.pageY,
-                                        target : mp.target,
-                                    }, ME_STUB);
-                                }
-
-                                if ($pointerPressedEvents[RMOUSE] != null) {
-                                    $this.$DRAG(RMOUSE, {
-                                        pageX  : ee.pageX,
-                                        pageY  : ee.pageY,
-                                        target : mp.target,
-                                    }, ME_STUB);
-                                }
-
-                                ee.preventDefault();
-                            };
-
-                            window.addEventListener("mousemove", $tmpWinMouseMoveListener, true);
-                        }
-                    }
+                    // initialize native fields
+                    ME_STUB.$fillWith("mouse", e);
+                    this.destination.$pointerMoved(ME_STUB);
                 }
+            }
+        };
+    },
 
-                $this.$mousePageX = $this.$mousePageY = -1;
-                e.stopPropagation();
-            };
+    function (element, destination) {
+        this.destination = destination;
+        this.element     = element;
 
-            if ("onpointerdown" in window || "onmspointerdown" in window) {
-                var names = "onpointerdown" in window ? [ "pointerdown",
-                                                          "pointerup",
-                                                          "pointermove",
-                                                          "pointerenter",
-                                                          "pointerleave" ]
-                                                      : [ "MSPointerDown",
-                                                          "MSPointerUp",
-                                                          "MSPointerMove",
-                                                          "MSPointerEnter",
-                                                          "MSPointerLeave" ];
+        var $this = this;
 
-                element.addEventListener(names[0], function(e) {
-                    if (e.pointerType !== "mouse")  {
-                        POINTER_STUB.touch = e;
-                        $this.$DOWN(e.pointerId, e, POINTER_STUB);
-                    }
-                }, false);
-
-                element.addEventListener(names[1], function(e) {
-                    if (e.pointerType !== "mouse") {
-                        POINTER_STUB.touch = e;
-                        $this.$UP(e.pointerId, e, POINTER_STUB);
-                    }
-                }, false);
-
-                element.addEventListener(names[2], function(e) {
-                    if (e.pointerType !== "mouse") {
-                        POINTER_STUB.touch = e;
-                        $this.$DRAG(e.pointerId, e, POINTER_STUB);
-                    }
-                    else {
-                        $this.$MMOVE(e);
-                    }
-                }, false);
+        element.onmousedown = function(e) {
+            // ignore any mouse buttons except left
+            // and right buttons or long touch emulates mouse event what causes generations of
+            // mouse down event after touch start event. Let's suppress it
+            if ((e.button !== 0 && e.button !== 2) ||
+                 $this.$touchedAt(e.pageX, e.pageY, 0))
+            {
+                e.preventDefault();
             }
             else {
-                function isIn(t, id) {
-                    for(var i = 0; i < t.length; i++) {
-                        if (t[i].identifier == id) return true;
+                $this.$DOWN(e.button === 0 ? LMOUSE : RMOUSE, e, ME_STUB);
+                e.stopPropagation();
+            }
+        };
+
+
+        //  Possible cases of mouse up events:
+        //
+        //   a) +-------------+        b) +----------------+       c) +---------------+
+        //      |  E          |           | E +----+       |          | E       +-----|
+        //      |      p--u   |          |    | p--|-u     |          |         |  p--|-u
+        //      |             |           |   +----+       |          |         +-----|
+        //      +-------------+           +----------------+          +---------------+
+        // (out to document/body)      (out from kid to element)   (out from kid to document)
+        //
+        //   d) +--------+--------+    e) +----------+----------+    f) +---------+-------+
+        //      | E      |        |       |  E +-----|-----+    |       | E +-----|       |
+        //      |     p--|--u     |       |    | p---|--u  |    |       |   |  p--|-u     |
+        //      |        |        |       |    +-----|-----+    |       |   +-----|       |
+        //      +--------+--------+       +----------+----------+       +---------+-------+
+        //     (out from element to       (out from kid of element     (out from kid element
+        //      other element)            to kid of another element)    to another element)
+        // Contract:
+        //   -- handle only mouse events whose destination is the passed element
+        //   -- does stop propagation if event has been handled
+        //   -- clear drag  fix ?
+        element.onmouseup = function(e) {
+            // ignore any mouse buttons except left
+            // and right buttons
+            if (e.button !== 0 && e.button !== 2) {
+                e.preventDefault();
+            }
+            else {
+                var id = e.button === 0 ? LMOUSE : RMOUSE;
+
+                $this.$UP(id, e, ME_STUB);
+
+                if (e.stopPropagation != null) e.stopPropagation();
+            }
+        };
+
+        // mouse over has to setup if necessary current over element variable
+        // it requires to detect repeat mouse over event that happens when
+        // for instance we switch between browser and other application, but
+        // mouse cursor stays at the same place
+        element.onmouseover = function(e) {
+            // this code prevent mouse over for first touch on iOS and Android
+            if ($this.$touchedAt(e.pageX, e.pageY, 0)) {
+                e.preventDefault();
+            }
+            else {
+                var id = e.button === 0 ? LMOUSE : RMOUSE,
+                    mp = $pointerPressedEvents[id];
+
+                // if a button has not been pressed handle mouse entered to detect
+                // zebkit component the mouse pointer entered and send appropriate
+                // mouse entered event to it
+                if (mp == null) {
+                    // just for the sake of error prevention
+                    // clean global move listeners
+                    $cleanDragFix();
+
+                    // if entered element is null or the target element
+                    // is not a children/element of the entered element than
+                    // fires pointer entered event
+                    if ($enteredElement == null || ($enteredElement.contains(e.target) === false && $enteredElement !== e.target)) {
+                        ME_STUB.$fillWith("mouse", e);
+                        $enteredElement = element;
+                        destination.$pointerEntered(ME_STUB);
                     }
-                    return false;
+                }
+                else {
+                    // remove any previously registered listener if
+                    //  -- a mouse button has been pressed
+                    //  -- a mouse button has been pressed on the canvas we have entered
+                    if (element === e.target || element.contains(e.target)) {
+                        $cleanDragFix();
+                    }
                 }
 
-                element.addEventListener("touchstart", function(e) {
-                    var allTouches = e.touches,
-                        newTouches = e.changedTouches; // list of touch events that become
-                                               // active with the current touchstart
+                e.stopPropagation();
+            }
+        };
 
+        //  Possible cases of mouse out events:
+        //
+        //   a) +-------------+        b) +----------------+       c) +---------------+
+        //      |  E          |           | E +----+       |          | E       +-----|
+        //      |        *----|->         |   | *--|->     |          |         |  *--|->
+        //      |             |           |   +----+       |          |         +-----|
+        //      +-------------+           +----------------+          +---------------+
+        // (out to document/body)      (out from kid to element)   (out from kid to document)
+        //
+        //   d) +--------+--------+    e) +----------+----------+    f) +---------+-------+
+        //      | E      |        |       |  E +-----|-----+    |       | E +-----|       |
+        //      |     *--|-->     |       |    | *---|-->  |    |       |   |  *--|->     |
+        //      |        |        |       |    +-----|-----+    |       |   +-----|       |
+        //      +--------+--------+       +----------+----------+       +---------+-------+
+        //     (out from element to       (out from kid of element     (out from kid element
+        //      other element)            to kid of another element)    to another element)
+        //
+        //   1) a mouse button doesn't have to be pressed on any element
+        //   2) e.target always equals to element (E), just because we register event handler
+        //      for element. This guarantees element will get mouse out event only from itself
+        //      and its children elements
+        //   3) mouse out should trigger pointerExited event only if the relatedTarget element
+        //      is not the element (E) or kid of the element (E)
+        //   4) if a mouse button has been pressed than mouse out registers mouse move listener
+        //      to track drag events if the listener has nor been registered yet.
+        //   5) mouse out set to null $enteredElement
 
-                    // fix android bug: parasite event for multi touch
-                    // or stop capturing new touches since it is already fixed
-                    // TODO: have no idea what it is
-                    // if (TOUCH_STUB.touchCounter > e.touches.length) {
-                    //     return;
-                    // }
+        element.onmouseout = function(e) {
+            var id = e.button === 0 ? LMOUSE : RMOUSE,
+                mp = $pointerPressedEvents[id];
 
-                    // android devices fire mouse move if touched but not moved
-                    // let save coordinates what should prevent mouse move event
-                    // generation
-                    //
-                    // TODO: not clear if second tap will fire mouse move or if the
-                    // second tap will have any influence to first tap mouse move
-                    // initiation
-                    $this.$mousePageX = Math.floor(e.pageX);
-                    $this.$mousePageY = Math.floor(e.pageY);
+            // no pressed button exists
+            if (mp == null) {
+                // the target element is the not a kid of the element
+                if ($enteredElement != null && (e.relatedTarget != null     &&
+                                                e.relatedTarget !== element &&
+                                                element.contains(e.relatedTarget) === false))
+                {
+                    $enteredElement = null;
+                    ME_STUB.$fillWith("mouse", e);
 
-                    // fire touches that has not been fired yet
-                    for(var i = 0; i < newTouches.length; i++) {  // go through all touches
-                        var newTouch = newTouches[i];
-                        $this.$DOWN(newTouch.identifier, newTouch, TOUCH_STUB);
+                    if (zebkit.web.$isInsideElement(element, e.pageX, e.pageY) === false) {
+                        destination.$pointerExited(ME_STUB);
                     }
+                }
+            }
+            else {
+                // if a button has been pressed but the mouse cursor is outside of
+                // the canvas, for a time being start listening mouse moved events
+                // of Window to emulate mouse moved events in canvas
+                if ($tmpWinMouseMoveListener == null &&
+                    e.relatedTarget != null &&
+                    element.contains(e.relatedTarget) === false)
+                {
+                    // !!! ignore touchscreen devices
+                    if (id === LMOUSE || id === RMOUSE) {
+                        $tmpWinMouseMoveListener = function(ee) {
+                            ee.stopPropagation();
 
-                    // clear touches that still is not in list of touches
-                    for (var k in $pointerPressedEvents) {
-                        if (isIn(allTouches, k) === false) {
-                            var tt = $pointerPressedEvents[k];
-                            if (tt.group != null) tt.group.active = false;
-                            $this.$UP(tt.identifier, tt, TOUCH_STUB);
-                        }
+                            if ($pointerPressedEvents[LMOUSE] != null) {
+                                $this.$DRAG(LMOUSE, {
+                                    pageX  : ee.pageX,
+                                    pageY  : ee.pageY,
+                                    target : mp.target,
+                                }, ME_STUB);
+                            }
+
+                            if ($pointerPressedEvents[RMOUSE] != null) {
+                                $this.$DRAG(RMOUSE, {
+                                    pageX  : ee.pageX,
+                                    pageY  : ee.pageY,
+                                    target : mp.target,
+                                }, ME_STUB);
+                            }
+
+                            ee.preventDefault();
+                        };
+
+                        window.addEventListener("mousemove", $tmpWinMouseMoveListener, true);
                     }
-
-                    //!!!
-                    //TODO: this calling prevents generation of phantom mouse move event
-                    //but it is not clear if it will stop firing touch end/move events
-                    //for some mobile browsers. Check it !
-                    e.preventDefault();
-
-                }, false);
-
-                element.addEventListener("touchend", function(e) {
-                    // update touches
-                    var t = e.changedTouches;
-                    for (var i = 0; i < t.length; i++) {
-                        var tt = t[i];
-                        $this.$UP(tt.identifier, tt, TOUCH_STUB);
-                    }
-
-                    e.preventDefault();
-                }, false);
-
-                element.addEventListener("touchmove", function(e) {
-                    var mt = e.changedTouches;
-
-                    // clear dx, dy for not updated touches
-                    for(var k in $this.touches) {
-                        $pointerPressedEvents[k].dx = $pointerPressedEvents[k].dy = 0;
-                    }
-
-                    for(var i=0; i < mt.length; i++) {
-                        var nmt = mt[i],
-                            t   = $pointerPressedEvents[nmt.identifier];
-
-                        if (t != null && (t.pageX != Math.floor(nmt.pageX) ||
-                                          t.pageY != Math.floor(nmt.pageY))  )
-                        {
-                            $this.$DRAG(nmt.identifier, nmt, TOUCH_STUB);
-                        }
-                    }
-
-                    e.preventDefault();
-                }, false);
-
-                element.onmousemove = function(e) {
-                    $this.$MMOVE(e);
-                    e.stopPropagation();
-                };
+                }
             }
 
-            // TODO: not sure it has to be in pointer unifier
-            element.oncontextmenu = function(e) {
+            $this.$mousePageX = $this.$mousePageY = -1;
+            e.stopPropagation();
+        };
+
+        if ("onpointerdown" in window || "onmspointerdown" in window) {
+            var names = "onpointerdown" in window ? [ "pointerdown",
+                                                      "pointerup",
+                                                      "pointermove",
+                                                      "pointerenter",
+                                                      "pointerleave" ]
+                                                  : [ "MSPointerDown",
+                                                      "MSPointerUp",
+                                                      "MSPointerMove",
+                                                      "MSPointerEnter",
+                                                      "MSPointerLeave" ];
+
+            element.addEventListener(names[0], function(e) {
+                if (e.pointerType !== "mouse")  {
+                    POINTER_STUB.touch = e;
+                    POINTER_STUB.pointerType = e.pointerType;
+                    $this.$DOWN(e.pointerId, e, POINTER_STUB);
+                }
+            }, false);
+
+            element.addEventListener(names[1], function(e) {
+                if (e.pointerType !== "mouse") {
+                    POINTER_STUB.touch = e;
+                    POINTER_STUB.pointerType = e.pointerType;
+                    $this.$UP(e.pointerId, e, POINTER_STUB);
+                }
+            }, false);
+
+            element.addEventListener(names[2], function(e) {
+                if (e.pointerType !== "mouse") {
+                    POINTER_STUB.touch = e;
+                    POINTER_STUB.pointerType = e.pointerType;
+                    $this.$DRAG(e.pointerId, e, POINTER_STUB);
+                }
+                else {
+                    $this.$MMOVE(e);
+                }
+            }, false);
+        }
+        else {
+            function isIn(t, id) {
+                for(var i = 0; i < t.length; i++) {
+                    if (t[i].identifier == id) return true;
+                }
+                return false;
+            }
+
+            element.addEventListener("touchstart", function(e) {
+                var allTouches = e.touches,
+                    newTouches = e.changedTouches; // list of touch events that become
+                                           // active with the current touchstart
+
+
+                // fix android bug: parasite event for multi touch
+                // or stop capturing new touches since it is already fixed
+                // TODO: have no idea what it is
+                // if (TOUCH_STUB.touchCounter > e.touches.length) {
+                //     return;
+                // }
+
+                // android devices fire mouse move if touched but not moved
+                // let save coordinates what should prevent mouse move event
+                // generation
+                //
+                // TODO: not clear if second tap will fire mouse move or if the
+                // second tap will have any influence to first tap mouse move
+                // initiation
+                $this.$mousePageX = Math.floor(e.pageX);
+                $this.$mousePageY = Math.floor(e.pageY);
+
+                // fire touches that has not been fired yet
+                for(var i = 0; i < newTouches.length; i++) {  // go through all touches
+                    var newTouch = newTouches[i];
+                    $this.$DOWN(newTouch.identifier, newTouch, TOUCH_STUB);
+                }
+
+                // clear touches that still is not in list of touches
+                for (var k in $pointerPressedEvents) {
+                    if (isIn(allTouches, k) === false) {
+                        var tt = $pointerPressedEvents[k];
+                        if (tt.group != null) tt.group.active = false;
+                        $this.$UP(tt.identifier, tt, TOUCH_STUB);
+                    }
+                }
+
+                //!!!
+                //TODO: this calling prevents generation of phantom mouse move event
+                //but it is not clear if it will stop firing touch end/move events
+                //for some mobile browsers. Check it !
                 e.preventDefault();
+
+            }, false);
+
+            element.addEventListener("touchend", function(e) {
+                // update touches
+                var t = e.changedTouches;
+                for (var i = 0; i < t.length; i++) {
+                    var tt = t[i];
+                    $this.$UP(tt.identifier, tt, TOUCH_STUB);
+                }
+
+                e.preventDefault();
+            }, false);
+
+            element.addEventListener("touchmove", function(e) {
+                var mt = e.changedTouches;
+
+                // clear dx, dy for not updated touches
+                for(var k in $this.touches) {
+                    $pointerPressedEvents[k].dx = $pointerPressedEvents[k].dy = 0;
+                }
+
+                for(var i=0; i < mt.length; i++) {
+                    var nmt = mt[i],
+                        t   = $pointerPressedEvents[nmt.identifier];
+
+                    if (t != null && (t.pageX != Math.floor(nmt.pageX) ||
+                                      t.pageY != Math.floor(nmt.pageY))  )
+                    {
+                        $this.$DRAG(nmt.identifier, nmt, TOUCH_STUB);
+                    }
+                }
+
+                e.preventDefault();
+            }, false);
+
+            element.onmousemove = function(e) {
+                $this.$MMOVE(e);
+                e.stopPropagation();
             };
         }
-    ]);
 
-})(zebkit("ui"), zebkit.Class);
-(function(pkg, Class) {
+        // TODO: not sure it has to be in pointer unifier
+        element.oncontextmenu = function(e) {
+            e.preventDefault();
+        };
+    }
+]);
+
+});
+zebkit.package("ui", function(pkg, Class) {
 
     pkg.ClipboardSupport = Class([
         function $clazz() {
@@ -8926,7 +9086,7 @@ pkg.Matrix = Class([
             };
 
             this.$setMask = function(m) {
-                m = (m & pkg.KeyEvent.M_ALT & pkg.KeyEvent.M_SHIFT & pkg.KeyEvent.M_CTRL & pkg.KeyEvent.M_CMD)
+                m = (m & pkg.KeyEvent.M_ALT & pkg.KeyEvent.M_SHIFT & pkg.KeyEvent.M_CTRL & pkg.KeyEvent.M_CMD);
                 this.mask = m;
                 this.altKey   = ((m & pkg.KeyEvent.M_ALT  ) > 0);
                 this.shiftKey = ((m & pkg.KeyEvent.M_SHIFT) > 0);
@@ -9087,165 +9247,70 @@ pkg.Matrix = Class([
         }
     ]);
 
-})(zebkit("ui"), zebkit.Class);
-(function(pkg, Class) {
-
+});
+zebkit.package("ui", function(pkg, Class) {
 /**
- * Zebkit UI. The UI is powerful way to create any imaginable
- * user interface for WEB. The idea is based on developing
- * hierarchy of UI components that sits and renders on HTML5
- * Canvas element.
- *
- * Write zebkit UI code in safe place where you can be sure all
- * necessary structure, configurations, etc are ready. The safe
- * place is "zebkit.ready(...)" method. Development of zebkit UI
- * application begins from creation "zebkit.ui.zCanvas" class,
- * that is starting point and root element of your UI components
- * hierarchy. "zCanvas" is actually wrapper around HTML5 Canvas
- * element where zebkit UI sits on. The typical zebkit UI coding
- * template is shown below:
-
-     // build UI in safe place
-     zebkit.ready(function() {
-        // create canvas element
-        var c = new zebkit.ui.zCanvas(400, 400);
-
-        // start placing UI component on c.root panel
-        //set layout manager
-        c.root.setLayout(new zebkit.layout.BorderLayout());
-        //add label to top
-        c.root.add("top",new zebkit.ui.Label("Top label"));
-        //add text area to center
-        c.root.add("center",new zebkit.ui.TextArea(""));
-        //add button area to bottom
-        c.root.add("bottom",new zebkit.ui.Button("Button"));
-        ...
-     });
-
- *  The latest version of zebkit JavaScript is available in repository:
-
-        <script src='http://repo.zebkit.org/latest/zebkit.min.js'
-                type='text/javascript'></script>
-
- * @module ui
- * @main ui
- * @requires zebkit, util, io, data
+ * @module  ui
+ * @required easyoop, util
  */
 
-var L = zebkit.layout, rgb = zebkit.util.rgb, temporary = { x:0, y:0, width:0, height:0 },
-    MS = Math.sin, MC = Math.cos, $fmCanvas = null, $fmText = null, EM = pkg.events = null,
-    $fmImage = null, $bodyFontSize = "14px", COMP_EVENT, FOCUS_EVENT;
-
-// keep pointer owners (the component where cursor/finger placed in)
-pkg.$pointerOwner = {};
+pkg.font      = new pkg.Font("Arial", 14);
+pkg.smallFont = new pkg.Font("Arial", 10);
+pkg.boldFont  = new pkg.Font("Arial", "bold", 12);
 
 
-pkg.FocusEvent = Class(zebkit.util.Event, [
-    function $prototype() {
-        this.related = null;
+pkg.$view = function(v) {
+    if (v == null || v.paint != null) {
+        return v;
     }
-]);
 
-pkg.CompEvent = Class(zebkit.util.Event, [
-    function $prototype() {
-        this.kid = this.constraints = null;
-        this.prevX = this.prevY = this.index = -1;
-        this.prevWidth = this.prevHeight = -1;
+    if (zebkit.isString(v)) {
+        return zebkit.util.rgb.hasOwnProperty(v) ? zebkit.util.rgb[v]
+                                                 : (pkg.borders != null && pkg.borders.hasOwnProperty(v) ? pkg.borders[v]
+                                                                                                         : new zebkit.util.rgb(v));
     }
-]);
 
-COMP_EVENT  = new pkg.CompEvent();
-FOCUS_EVENT = new pkg.FocusEvent();
-
-//
-// Extend Pointer event with zebkit specific fields and methods
-//
-pkg.PointerEvent.extend([
-    function $prototype() {
-        /**
-         * Absolute mouse pointer x coordinate
-         * @attribute absX
-         * @readOnly
-         * @type {Integer}
-         */
-        this.absX = 0;
-
-        /**
-         * Absolute mouse pointer y coordinate
-         * @attribute absY
-         * @readOnly
-         * @type {Integer}
-         */
-         this.absY = 0;
-
-        /**
-         * Mouse pointer x coordinate (relatively to source UI component)
-         * @attribute x
-         * @readOnly
-         * @type {Integer}
-         */
-        this.x = 0;
-
-        /**
-         * Mouse pointer y coordinate (relatively to source UI component)
-         * @attribute y
-         * @readOnly
-         * @type {Integer}
-         */
-        this.y = 0;
-
-        /**
-         * Reset the event properties with new values
-         * @private
-         * @param  {zebkit.ui.Panel} source  a source component that triggers the event
-         * @param  {Integer} ax an absolute (relatively to a canvas where the source
-         * component is hosted) x mouse cursor coordinate
-         * @param  {Integer} ay an absolute (relatively to a canvas where the source
-         * component is hosted) y mouse cursor coordinate
-         * @method  updateCoordinates
-         */
-        this.update = function(source,ax,ay){
-            // this can speed up calculation significantly check if source zebkit component
-            // has not been changed, his location and parent component also has not been
-            // changed than we can skip calculation of absolute location by traversing
-            // parent hierarchy
-            if (this.source        === source        &&
-                this.source.parent === source.parent &&
-                source.x           === this.$px      &&
-                source.y           === this.$py         )
-            {
-                this.x += (ax - this.absX);
-                this.y += (ay - this.absY);
-                this.absX = ax;
-                this.absY = ay;
-                this.source = source;
-            }
-            else {
-                this.source = source;
-                this.absX = ax;
-                this.absY = ay;
-
-                // convert absolute location to relative location
-                while (source.parent != null) {
-                    ax -= source.x;
-                    ay -= source.y;
-                    source = source.parent;
-                }
-                this.x = ax;
-                this.y = ay;
-            }
-
-            this.$px = source.x;
-            this.$py = source.y;
-
-            return this;
-        };
+    if (Array.isArray(v)) {
+        return new pkg.CompositeView(v);
     }
-]);
 
+    if (typeof v !== 'function') {
+        return new pkg.ViewSet(v);
+    }
 
-pkg.load = function(path, callback) {
-    return new pkg.Bag(pkg).load(path, callback);
+    var vv = new pkg.View();
+    vv.paint = v;
+    return vv;
+};
+
+zebkit.util.rgb.prototype.paint = function(g,x,y,w,h,d) {
+    if (this.s != g.fillStyle) {
+        g.fillStyle = this.s;
+    }
+
+    // fix for IE10/11, calculate intersection of clipped area
+    // and the area that has to be filled. IE11/10 have a bug
+    // that triggers filling more space than it is restricted
+    // with clip
+    if (g.$states != null) {
+        var t  = g.$states[g.$curState],
+            rx = x > t.x ? x : t.x,
+            rw = Math.min(x + w, t.x + t.width) - rx;
+
+        if (rw > 0)  {
+            var ry = y > t.y ? y : t.y,
+            rh = Math.min(y + h, t.y + t.height) - ry;
+
+            if (rh > 0) g.fillRect(rx, ry, rw, rh);
+        }
+    }
+    else {
+        g.fillRect(x, y, w, h);
+    }
+};
+
+zebkit.util.rgb.prototype.getPreferredSize = function() {
+    return { width:0, height:0 };
 };
 
 /**
@@ -9359,3841 +9424,6 @@ pkg.Render = Class(pkg.View, [
         };
     }
 ]);
-
-pkg.Bag = Class(zebkit.util.Bag, [
-    function $prototype() {
-        this.globalPropertyLookup = this.usePropertySetters = true;
-
-        this.loadImage = function(path) {
-            if (this.url != null && zebkit.URL.isAbsolute(path) == false) {
-                var base = (new zebkit.URL(this.url)).getParentURL();
-                path = base.join(path);
-            }
-            return zebkit.web.$loadImage(path);
-        };
-    },
-
-    function load(s, cb) {
-        if (cb != null) {
-            zebkit.busy();
-            try {
-                return this.$super(s, function(e) {
-                    // if an error during loading has happened callback method
-                    // gets the error as a single argument. The problem callback itself
-                    // can triggers the error and than be called second time but
-                    // with the error as argument. So we have to recognize the situation
-                    // by analyzing if the callback gets an error as
-                    if (e == null) {
-                        zebkit.ready();
-                    }
-                    cb.call(this, e);
-                });
-            }
-            catch(e) {
-                zebkit.ready();
-                throw e;
-            }
-        }
-
-        return this.$super(s, null);
-    }
-]);
-
-rgb.prototype.paint = function(g,x,y,w,h,d) {
-    if (this.s != g.fillStyle) {
-        g.fillStyle = this.s;
-    }
-
-    // fix for IE10/11, calculate intersection of clipped area
-    // and the area that has to be filled. IE11/10 have a bug
-    // that triggers filling more space than it is restricted
-    // with clip
-    if (g.$states != null) {
-        var t  = g.$states[g.$curState],
-            rx = x > t.x ? x : t.x,
-            rw = Math.min(x + w, t.x + t.width) - rx;
-
-        if (rw > 0)  {
-            var ry = y > t.y ? y : t.y,
-            rh = Math.min(y + h, t.y + t.height) - ry;
-
-            if (rh > 0) g.fillRect(rx, ry, rw, rh);
-        }
-    }
-    else {
-        g.fillRect(x, y, w, h);
-    }
-};
-
-rgb.prototype.getPreferredSize = function() {
-    return { width:0, height:0 };
-};
-
-pkg.$getPS = function(l) {
-    return l != null && l.isVisible === true ? l.getPreferredSize()
-                                             : { width:0, height:0 };
-};
-
-var $cvp = pkg.$cvp = function(c, r) {
-    if (c.width > 0 && c.height > 0 && c.isVisible === true){
-        var p = c.parent, px = -c.x, py = -c.y;
-        if (r == null) {
-            r = { x:0, y:0, width : c.width, height : c.height };
-        }
-        else {
-            r.x = r.y = 0;
-            r.width  = c.width;
-            r.height = c.height;
-        }
-
-
-        while (p != null && r.width > 0 && r.height > 0) {
-            var xx = r.x > px ? r.x : px,
-                yy = r.y > py ? r.y : py,
-                w1 = r.x + r.width,
-                w2 = px  + p.width,
-                h1 = r.y + r.height,
-                h2 = py + p.height;
-
-            r.width  = (w1 < w2 ? w1 : w2) - xx,
-            r.height = (h1 < h2 ? h1 : h2) - yy;
-            r.x = xx;
-            r.y = yy;
-
-            px -= p.x;
-            py -= p.y;
-            p = p.parent;
-        }
-
-        return r.width > 0 && r.height > 0 ? r : null;
-    }
-    return null;
-};
-
-/**
- * This class represents a font and provides basic font metrics like
- * height, ascent. Using the class developers can compute string width.
-
-      // plain font
-      var f = new zebkit.ui.Font("Arial", 14);
-
-      // bold font
-      var f = new zebkit.ui.Font("Arial", "bold", 14);
-
-      // defining font with CSS font name
-      var f = new zebkit.ui.Font("100px Futura, Helvetica, sans-serif");
-
- * @constructor
- * @param {String} name a name of the font. If size and style parameters
- * has not been passed the name is considered as CSS font name that
- * includes size and style
- * @param {String} [style] a style of the font: "bold", "italic", etc
- * @param {Integer} [size] a size of the font
- * @class zebkit.ui.Font
- */
-pkg.Font = function(name, style, size) {
-    if (arguments.length == 1) {
-        name = name.replace(/[ ]+/, ' ');
-        this.s = name.trim();
-    }
-    else {
-        if (arguments.length == 2) {
-            size  = style;
-            style = '';
-        }
-        style  = style.trim();
-        this.s = style + (style !== '' ? ' ' : '') + size + 'px '+ name;
-        this.name = name;
-    }
-    $fmText.style.font = this.s;
-
-    /**
-     * Height of the font
-     * @attribute height
-     * @readOnly
-     * @type {Integer}
-     */
-    this.height = $fmText.offsetHeight;
-
-    //!!!
-    // Something weird is going sometimes in IE10 !
-    // Sometimes the property offsetHeight is 0 but
-    // second attempt to access to the property gives
-    // proper result
-    if (this.height === 0) {
-        this.height = $fmText.offsetHeight;
-    }
-
-    /**
-     * Ascent of the font
-     * @attribute ascent
-     * @readOnly
-     * @type {Integer}
-     */
-    this.ascent = $fmImage.offsetTop - $fmText.offsetTop + 1;
-};
-
-/**
- * Calculate the given string width in pixels
- * @param  {String} s a string whose width has to be computed
- * @return {Integer} a string size in pixels
- * @method stringWidth
- * @for zebkit.ui.Font
- */
-pkg.Font.prototype.stringWidth = function(s) {
-    if (s.length === 0) return 0;
-    if ($fmCanvas.font !== this.s) $fmCanvas.font = this.s;
-    return ($fmCanvas.measureText(s).width + 0.5) | 0;
-};
-
-/**
- * Calculate the specified substring width
- * @param  {String} s a string
- * @param  {Integer} off fist character index
- * @param  {Integer} len length of substring
- * @return {Integer} a substring size in pixels
- * @method charsWidth
- * @for zebkit.ui.Font
- */
-pkg.Font.prototype.charsWidth = function(s, off, len) {
-    if ($fmCanvas.font !== this.s) $fmCanvas.font = this.s;
-    return ($fmCanvas.measureText(len === 1 ? s[off] : s.substring(off, off + len)).width + 0.5) | 0;
-};
-
-/**
- * Returns CSS font representation
- * @return {String} a CSS representation of the given Font
- * @method toString
- * @for zebkit.ui.Font
- */
-pkg.Font.prototype.toString = function() { return this.s;  };
-
-pkg.Cursor = {
-    DEFAULT     : "default",
-    MOVE        : "move",
-    WAIT        : "wait",
-    TEXT        : "text",
-    HAND        : "pointer",
-    NE_RESIZE   : "ne-resize",
-    SW_RESIZE   : "sw-resize",
-    SE_RESIZE   : "se-resize",
-    NW_RESIZE   : "nw-resize",
-    S_RESIZE    : "s-resize",
-    W_RESIZE    : "w-resize",
-    N_RESIZE    : "n-resize",
-    E_RESIZE    : "e-resize",
-    COL_RESIZE  : "col-resize",
-    HELP        : "help"
-};
-
-pkg.makeFullyVisible = function(d,c){
-    if (arguments.length === 1) {
-        c = d;
-        d = c.parent;
-    }
-
-    var right  = d.getRight(),
-        top    = d.getTop(),
-        bottom = d.getBottom(),
-        left   = d.getLeft(),
-        xx     = c.x,
-        yy     = c.y;
-
-    if (xx < left) xx = left;
-    if (yy < top)  yy = top;
-    if (xx + c.width > d.width - right) xx = d.width + right - c.width;
-    if (yy + c.height > d.height - bottom) yy = d.height + bottom - c.height;
-    c.setLocation(xx, yy);
-};
-
-pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
-    if (arguments.length < 8) {
-        tt = t.getTop();
-        ll = t.getLeft();
-        bb = t.getBottom();
-        rr = t.getRight();
-    }
-
-    var dw = t.width, dh = t.height;
-    if (dw > 0 && dh > 0){
-        if (dw - ll - rr > w){
-            var xx = x + px;
-            if (xx < ll) px += (ll - xx);
-            else {
-                xx += w;
-                if (xx > dw - rr) px -= (xx - dw + rr);
-            }
-        }
-        if (dh - tt - bb > h){
-            var yy = y + py;
-            if (yy < tt) py += (tt - yy);
-            else {
-                yy += h;
-                if (yy > dh - bb) py -= (yy - dh + bb);
-            }
-        }
-        return [px, py];
-    }
-    return [0, 0];
-};
-
-/**
- *  This the core UI component class. All other UI components has to be
- *  successor of panel class.
-
-      // instantiate panel with no arguments
-      var p = new zebkit.ui.Panel();
-
-      // instantiate panel with border layout set as its layout manager
-      var p = new zebkit.ui.Panel(new zebkit.layout.BorderLayout());
-
-      // instantiate panel with the given properties (border
-      // layout manager, blue background and plain border)
-      var p = new zebkit.ui.Panel({
-         layout: new zebkit.ui.BorderLayout(),
-         background : "blue",
-         border     : "plain"
-      });
-
- * **Container. **
- * Panel can contains number of other UI components as its children where
- * the children components are placed with a defined by the panel layout
- * manager:
-
-      // add few children component to panel top, center and bottom parts
-      // with help of border layout manager
-      var p = new zebkit.ui.Panel();
-      p.setLayout(new zebkit.layout.BorderLayout(4)); // set layout manager to
-                                                     // order children components
-
-      p.add("top", new zebkit.ui.Label("Top label"));
-      p.add("center", new zebkit.ui.TextArea("Text area"));
-      p.add("bottom", new zebkit.ui.Button("Button"));
-
- * **Events. **
- * The class provides possibility to catch various component and input
- * events by declaring an appropriate event method handler. The most
- * simple case you just define a method:
-
-      var p = new zebkit.ui.Panel();
-      p.pointerPressed = function(e) {
-          // handle event here
-      };
-
-* If you prefer to create an anonymous class instance you can do it as
-* follow:
-
-      var p = new zebkit.ui.Panel([
-          function pointerPressed(e) {
-              // handle event here
-          }
-      ]);
-
-* One more way to add the event handler is dynamic extending of an instance
-* class demonstrated below:
-
-      var p = new zebkit.ui.Panel("Test");
-      p.extend([
-          function pointerPressed(e) {
-              // handle event here
-          }
-      ]);
-
- * Pay attention Zebkit UI components often declare own event handlers and
- * in this case you can overwrite the default event handler with a new one.
- * Preventing the basic event handler execution can cause the component will
- * work improperly. You should care about the base event handler execution
- * as follow:
-
-      // button component declares own pointer pressed event handler
-      // we have to call the original handler to keep the button component
-      // properly working
-      var p = new zebkit.ui.Button("Test");
-      p.extend([
-          function pointerPressed(e) {
-              this.$super(e); // call parent class event handler implementation
-              // handle event here
-          }
-      ]);
-
- *  @class zebkit.ui.Panel
- *  @param {Object|zebkit.layout.Layout} [l] pass a layout manager or
- *  number of properties that have to be applied to the instance of
- *  the panel class.
- *  @constructor
- *  @extends zebkit.layout.Layoutable
- */
-
-
-
-/**
- * Implement the event handler method to catch pointer pressed event.
- * The event is triggered every time a pointer button has been pressed or
- * a finger has touched a touch screen.
-
-     var p = new zebkit.ui.Panel();
-     p.pointerPressed = function(e) { ... }; // add event handler
-
- * @event pointerPressed
- * @param {zebkit.ui.PointerEvent} e a pointer event
-*/
-
-/**
- * Implement the event handler method to catch pointer released event.
- * The event is triggered every time a pointer button has been released or
- * a finger has untouched a touch screen.
-
-     var p = new zebkit.ui.Panel();
-     p.pointerReleased = function(e) { ... }; // add event handler
-
- * @event pointerReleased
- * @param {zebkit.ui.PointerEvent} e a pointer event
- */
-
-/**
- * Implement the event handler method  to catch pointer moved event.
- * The event is triggered every time a pointer cursor has been moved with
- * no a pointer button pressed.
-
-     var p = new zebkit.ui.Panel();
-     p.pointerMoved = function(e) { ... }; // add event handler
-
- * @param {zebkit.ui.PointerEvent} e a pointer event
- * @event  pointerMoved
- */
-
-/**
- * Implement the event handler method to catch pointer entered event.
- * The event is triggered every time a pointer cursor entered the
- * given component.
-
-     var p = new zebkit.ui.Panel();
-     p.pointerEntered = function(e) { ... }; // add event handler
-
- * @param {zebkit.ui.PointerEvent} e a pointer event
- * @event  pointerEntered
- */
-
-/**
- * Implement the event handler method to catch pointer exited event.
- * The event is triggered every time a pointer cursor exited the given
- * component.
-
-     var p = new zebkit.ui.Panel();
-     p.pointerExited = function(e) { ... }; // add event handler
-
- * @param {zebkit.ui.PointerEvent} e a pointer event
- * @event  pointerExited
- */
-
-/**
- * Implement the event handler method to catch pointer clicked event.
- * The event is triggered every time a pointer button has been clicked. Click events
- * are generated only if no one pointer moved or drag events has been generated
- * in between pointer pressed -> pointer released events sequence.
-
-     var p = new zebkit.ui.Panel();
-     p.pointerClicked = function(e) { ... }; // add event handler
-
- * @param {zebkit.ui.PointerEvent} e a pointer event
- * @event  pointerClicked
- */
-
-/**
- * Implement the event handler method to catch pointer dragged event.
- * The event is triggered every time a pointer cursor has been moved when a pointer button
- * has been pressed. Or when a finger has been moved over a touch screen.
-
-     var p = new zebkit.ui.Panel();
-     p.pointerDragged = function(e) { ... }; // add event handler
-
- * @param {zebkit.ui.PointerEvent} e a pointer event
- * @event  pointerDragged
- */
-
-/**
- * Implement the event handler method to catch pointer drag started event.
- * The event is triggered every time a pointer cursor has been moved first time when a pointer button
- * has been pressed. Or when a finger has been moved first time over a touch screen.
-
-     var p = new zebkit.ui.Panel();
-     p.pointerDragStarted = function(e) { ... }; // add event handler
-
- * @param {zebkit.ui.PointerEvent} e a pointer event
- * @event  pointerDragStarted
-*/
-
-/**
- * Implement the event handler method to catch pointer drag ended event.
- * The event is triggered every time a pointer cursor has been moved last time when a pointer button
- * has been pressed. Or when a finger has been moved last time over a touch screen.
-
-     var p = new zebkit.ui.Panel();
-     p.pointerDragEnded = function(e) { ... }; // add event handler
-
- * @param {zebkit.ui.PointerEvent} e a pointer event
- * @event  pointerDragEnded
-*/
-
-/**
- * Implement the event handler method to catch key pressed event
- * The event is triggered every time a key has been pressed.
-
-     var p = new zebkit.ui.Panel();
-     p.keyPressed = function(e) { ... }; // add event handler
-
- * @param {zebkit.ui.KeyEvent} e a key event
- * @event  keyPressed
- */
-
-/**
- * Implement the event handler method to catch key types event
- * The event is triggered every time a key has been typed.
-
-     var p = new zebkit.ui.Panel();
-     p.keyTyped = function(e) { ... }; // add event handler
-
- * @param {zebkit.ui.KeyEvent} e a key event
- * @event  keyTyped
- */
-
-/**
- * Implement the event handler method to catch key released event
- * The event is triggered every time a key has been released.
-
-     var p = new zebkit.ui.Panel();
-     p.keyReleased = function(e) { ... }; // add event handler
-
- * @param {zebkit.ui.KeyEvent} e a key event
- * @event  keyReleased
- */
-
-/**
- * Implement the event handler method to catch the component sized event
- * The event is triggered every time the component has been re-sized.
-
-     var p = new zebkit.ui.Panel();
-     p.compSized = function(c, pw, ph) { ... }; // add event handler
-
- * @param {zebkit.ui.Panel} c a component that has been sized
- * @param {Integer} pw a previous width the sized component had
- * @param {Integer} ph a previous height the sized component had
- * @event compSized
- */
-
-/**
- * Implement the event handler method to catch component moved event
- * The event is triggered every time the component location has been
- * updated.
-
-     var p = new zebkit.ui.Panel();
-     p.compMoved = function(c, px, py) { ... }; // add event handler
-
- * @param {zebkit.ui.Panel} c a component that has been moved
- * @param {Integer} px a previous x coordinate the moved component had
- * @param {Integer} py a previous y coordinate the moved component had
- * @event compMoved
- */
-
-/**
- * Implement the event handler method to catch component enabled event
- * The event is triggered every time a component enabled state has been
- * updated.
-
-     var p = new zebkit.ui.Panel();
-     p.compEnabled = function(c) { ... }; // add event handler
-
- * @param {zebkit.ui.Panel} c a component whose enabled state has been updated
- * @event compEnabled
- */
-
-/**
- * Implement the event handler method to catch component shown event
- * The event is triggered every time a component visibility state has
- * been updated.
-
-     var p = new zebkit.ui.Panel();
-     p.compShown = function(c) { ... }; // add event handler
-
- * @param {zebkit.ui.Panel} c a component whose visibility state has been updated
- * @event compShown
- */
-
-/**
- * Implement the event handler method to catch component added event
- * The event is triggered every time the component has been inserted into
- * another one.
-
-     var p = new zebkit.ui.Panel();
-     p.compAdded = function(p, constr, c) { ... }; // add event handler
-
- * @param {zebkit.ui.Panel} p a parent component of the component has been added
- * @param {Object} constr a layout constraints
- * @param {zebkit.ui.Panel} c a component that has been added
- * @event compAdded
- */
-
-/**
- * Implement the event handler method to catch component removed event
- * The event is triggered every time the component has been removed from
- * its parent UI component.
-
-     var p = new zebkit.ui.Panel();
-     p.compRemoved = function(p, i, c) { ... }; // add event handler
-
- * @param {zebkit.ui.Panel} p a parent component of the component that has been removed
- * @param {Integer} i an index of removed component
- * @param {zebkit.ui.Panel} c a component that has been removed
- * @event compRemoved
- */
-
-/**
- * Implement the event handler method to catch component focus gained event
- * The event is triggered every time a component has gained focus.
-
-     var p = new zebkit.ui.Panel();
-     p.focusGained = function(e) { ... }; // add event handler
-
- * @param {zebkit.ui.FocusEvent} e an input event
- * @event  focusGained
- */
-
-/**
- * Implement the event handler method to catch component focus lost event
- * The event is triggered every time a component has lost focus
-
-     var p = new zebkit.ui.Panel();
-     p.focusLost = function(e) { ... }; // add event handler
-
- * @param {zebkit.ui.FocusEvent} e an input event
- * @event  focusLost
- */
-
-/**
- * Implement the event handler method to catch children components component events
- *
-     var p = new zebkit.ui.Panel();
-     p.childCompEvent = function(id, src, p1, p2) { ... }; // add event handler
-
- * @param {Integer} id a component event ID. The id can have one of the following value:
-
-
- * @param {zebkit.ui.Panel} src a component that triggers the event
- * @param {zebkit.ui.Panel|Integer|Object} p1 an event first parameter that depends
- * on an component event that has happened:
-
-
-   - if id is **zebkit.ui.Panel.SIZED** the parameter is previous component width
-   - if id is **zebkit.ui.Panel.MOVED** the parameter is previous component x location
-   - if id is **zebkit.ui.Panel.ADDED** the parameter is constraints a new component has been added
-   - if id is **zebkit.ui.Panel.REMOVED** the parameter is null
-
- * @param {zebkit.ui.Panel|Integer|Object} p2 an event second parameter depends
- * on an component event that has happened:
-
-
-    - if id is **zebkit.ui.Panel.SIZED** the parameter is previous component height
-    - if id is **zebkit.ui.Panel.MOVED** the parameter is previous component y location
-    - if id is **zebkit.ui.Panel.ADDED** the parameter is reference to the added children component
-    - if id is **zebkit.ui.Panel.REMOVED** the parameter is reference to the removed children component
-
- * @event  childCompEvent
- */
-
- /**
-  * The method is called for focusable UI components (components that can hold input focus) to ask
-  * a string to be saved in native clipboard
-  *
-  * @return {String} a string to be copied in native clipboard
-  *
-  * @event clipCopy
-  */
-
- /**
-  * The method is called to pass string from clipboard to a focusable (a component that can hold
-  * input focus) UI component
-  *
-  * @param {String} s a string from native clipboard
-  *
-  * @event clipPaste
-  */
-
-pkg.Panel = Class(L.Layoutable, [
-    function $prototype() {
-        // TODO: not stable api, probably it should be moved to static
-        this.wrapWithCanvas = function() {
-            var c = new pkg.HtmlCanvas();
-            c.setLayout(new zebkit.layout.StackLayout());
-            c.add(this);
-            return c;
-        };
-
-        // TODO: not stable api, probably it should be moved to static
-        this.wrapWithHtmlElement = function() {
-            var c = new pkg.HtmlElement();
-            c.setLayout(new zebkit.layout.StackLayout());
-            c.add(this);
-            return c;
-        };
-
-        /**
-         * Request the whole UI component or part of the UI component to be repainted
-         * @param  {Integer} [x] x coordinate of the component area to be repainted
-         * @param  {Integer} [y] y coordinate of the component area to be repainted
-         * @param  {Integer} [w] width of the component area to be repainted
-         * @param  {Integer} [h] height of the component area to be repainted
-         * @method repaint
-         */
-        this.repaint = function(x,y,w,h) {
-            // step I: skip invisible components and components that are not in hierarchy
-            //         don't initiate repainting thread for such sort of the components,
-            //         but don't forget for zCanvas whose parent field is null, but it has $context
-            if (this.isVisible === true && (this.parent != null || this.$context != null)) {
-                //!!! find context buffer that holds the given component
-
-                var canvas = this;
-                for(; canvas.$context == null; canvas = canvas.parent) {
-                    // component either is not in visible state or is not in hierarchy
-                    // than stop repaint procedure
-                    if (canvas.isVisible === false || canvas.parent == null) {
-                        return;
-                    }
-                }
-
-                // no arguments means the whole component has top be repainted
-                if (arguments.length === 0) {
-                    x = y = 0;
-                    w = this.width;
-                    h = this.height;
-                }
-
-                // step II: calculate new actual dirty area
-                if (w > 0 && h > 0) {
-                    var r = $cvp(this, temporary);
-                    if (r != null) {
-                        zebkit.util.intersection(r.x, r.y, r.width, r.height, x, y, w, h, r);
-                        if (r.width > 0 && r.height > 0) {
-                            x = r.x;
-                            y = r.y;
-                            w = r.width;
-                            h = r.height;
-
-                            // calculate repainted component absolute location
-                            var cc = this;
-                            while (cc != canvas) {
-                                x += cc.x;
-                                y += cc.y;
-                                cc = cc.parent;
-                            }
-
-                            // normalize repaint area coordinates
-                            if (x < 0) {
-                                w += x;
-                                x = 0;
-                            }
-                            if (y < 0) {
-                                h += y;
-                                y = 0;
-                            }
-                            if (w + x > canvas.width ) w = canvas.width - x;
-                            if (h + y > canvas.height) h = canvas.height - y;
-
-                            // still have what to repaint than calculate new
-                            // dirty area of target canvas element
-                            if (w > 0 && h > 0) {
-                                var da = canvas.$da;
-
-                                // if the target canvas already has a dirty area set than
-                                // unite it with requested
-                                if (da.width > 0) {
-                                    // check if the requested repainted area is not in
-                                    // exiting dirty area
-                                    if (x < da.x                ||
-                                        y < da.y                ||
-                                        x + w > da.x + da.width ||
-                                        y + h > da.y + da.height  )
-                                    {
-                                        // !!!
-                                        // speed up to comment method call
-                                        //MB.unite(da.x, da.y, da.width, da.height, x, y, w, h, da);
-                                        var dax = da.x, day = da.y;
-                                        if (da.x > x) da.x = x;
-                                        if (da.y > y) da.y = y;
-                                        da.width  = Math.max(dax + da.width,  x + w) - da.x;
-                                        da.height = Math.max(day + da.height, y + h) - da.y;
-                                    }
-                                }
-                                else {
-                                    // if the target canvas doesn't have a dirty area set than
-                                    // cut (if necessary) the requested repainting area by the
-                                    // canvas size
-
-                                    // !!!
-                                    // not necessary to call the method since we have already normalized
-                                    // repaint coordinates and sizes
-                                    //!!! MB.intersection(0, 0, canvas.width, canvas.height, x, y, w, h, da);
-
-                                    da.x      = x;
-                                    da.width  = w;
-                                    da.y      = y;
-                                    da.height = h;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // step III: initiate repainting thread
-                if (canvas.$paintTask === null && (canvas.isValid === false || canvas.$da.width > 0 || canvas.isLayoutValid === false)) {
-                    var $this = this;
-                    canvas.$paintTask = zebkit.web.$task(function() {
-                        var g = null;
-                        try {
-                            // do validation before timer will be set to null to avoid
-                            // unnecessary timer initiating what can be caused by validation
-                            // procedure by calling repaint method
-                            if (canvas.isValid === false || canvas.isLayoutValid === false) {
-                                canvas.validate();
-                            }
-
-                            if (canvas.$da.width > 0) {
-                                g = canvas.$context;
-                                g.save();
-
-                                // check if the given canvas has transparent background
-                                // if it is true call clearRect method to clear dirty area
-                                // with transparent background, otherwise it will be cleaned
-                                // by filling the canvas with background later
-                                if (canvas.bg == null || canvas.bg.isOpaque !== true) {
-                                    g.clearRect(canvas.$da.x, canvas.$da.y,
-                                                canvas.$da.width, canvas.$da.height);
-                                }
-                                // !!!
-                                // call clipping area later than possible
-                                // clearRect since it can bring to error in IE
-                                g.clipRect(canvas.$da.x,
-                                           canvas.$da.y,
-                                           canvas.$da.width,
-                                           canvas.$da.height);
-
-                                canvas.paintComponent(g);
-                            }
-
-                            canvas.$paintTask = null;
-                            // no dirty area anymore
-                            canvas.$da.width = -1;
-                            if (g !== null) g.restore();
-                        }
-                        catch(ee) {
-                            canvas.$paintTask = null;
-                            canvas.$da.width = -1;
-                            if (g !== null) {
-                                g.restoreAll();
-                            }
-                            throw ee;
-                        }
-                    });
-                }
-            }
-        };
-
-        // destination is component itself or one of his composite parent.
-        // composite component is a component that grab control from his
-        // children component. to make a component composite
-        // it has to implement catchInput field or method. If composite component
-        // has catchInput method it will be called
-        // to detect if the composite component takes control for the given kid.
-        // composite components can be embedded (parent composite can take
-        // control on its child composite component)
-        this.getEventDestination = function() {
-            var c = this, p = this;
-            while ((p = p.parent) != null) {
-                if (p.catchInput != null && (p.catchInput === true || (p.catchInput !== false && p.catchInput(c)))) {
-                    c = p;
-                }
-            }
-            return c;
-        };
-
-        this.paintComponent = function(g) {
-            var ts = g.$states[g.$curState];
-            if (ts.width  > 0  &&
-                ts.height > 0  &&
-                this.isVisible === true)
-            {
-                // !!!
-                // calling setSize in the case of raster layout doesn't
-                // cause hierarchy layout invalidation
-                if (this.isLayoutValid === false) {
-                    this.validate();
-                }
-
-                var b = this.bg != null && (this.parent == null || this.bg != this.parent.bg);
-
-                // if component defines shape and has update, [paint?] or background that
-                // differs from parent background try to apply the shape and than build
-                // clip from the applied shape
-                if ( (this.border != null && this.border.outline != null) &&
-                     (b || this.update != null)                           &&
-                     this.border.outline(g, 0, 0, this.width, this.height, this))
-                {
-                    g.save();
-                    g.clip();
-
-                    if (b) this.bg.paint(g, 0, 0, this.width, this.height, this);
-                    if (this.update != null) this.update(g);
-
-                    g.restore();
-                }
-                else {
-                    if (b) {
-                        this.bg.paint(g, 0, 0, this.width, this.height, this);
-                    }
-                    if (this.update != null) this.update(g);
-                }
-
-                if (this.border != null) {
-                    this.border.paint(g, 0, 0, this.width, this.height, this);
-                }
-
-                if (this.paint != null) {
-                    var left   = this.getLeft(),
-                        top    = this.getTop(),
-                        bottom = this.getBottom(),
-                        right  = this.getRight();
-
-                    if (left > 0 || right > 0 || top > 0 || bottom > 0) {
-                        if (ts.width > 0 && ts.height > 0) {
-                            var x1   = (ts.x > left ? ts.x : left),
-                                y1   = (ts.y > top  ? ts.y : top),
-                                cxcw = ts.x + ts.width,
-                                cych = ts.y + ts.height,
-                                cright = this.width - right,
-                                cbottom = this.height - bottom;
-
-                            g.save();
-                            g.clipRect(x1, y1, (cxcw < cright  ? cxcw : cright)  - x1,
-                                               (cych < cbottom ? cych : cbottom) - y1);
-                            this.paint(g);
-                            g.restore();
-                        }
-                    }
-                    else {
-                        this.paint(g);
-                    }
-                }
-
-                var count = this.kids.length;
-                for(var i = 0; i < count; i++) {
-                    var kid = this.kids[i];
-                    if (kid.isVisible === true && kid.$context == null) {
-                        // calculate if the given component area has intersection
-                        // with current clipping area
-                        var kidXW = kid.x + kid.width,
-                            c_xw  = ts.x + ts.width,
-                            kidYH = kid.y + kid.height,
-                            c_yh  = ts.y + ts.height,
-                            iw = (kidXW < c_xw ? kidXW : c_xw) - (kid.x > ts.x ? kid.x : ts.x),
-                            ih = (kidYH < c_yh ? kidYH : c_yh) - (kid.y > ts.y ? kid.y : ts.y);
-
-                        if (iw > 0 && ih > 0) {
-                            g.save();
-                            g.translate(kid.x, kid.y);
-                            g.clipRect(0, 0, kid.width, kid.height);
-                            kid.paintComponent(g);
-                            g.restore();
-                        }
-                    }
-                }
-
-                if (this.paintOnTop != null) this.paintOnTop(g);
-            }
-        };
-
-        /**
-         * UI component border view
-         * @attribute border
-         * @default null
-         * @readOnly
-         * @type {zebkit.ui.View}
-         */
-
-        /**
-         * UI component background view
-         * @attribute bg
-         * @default null
-         * @readOnly
-         * @type {zebkit.ui.View}
-        */
-
-        /**
-         * Define and set the property to true if the component has to catch focus
-         * @attribute canHaveFocus
-         * @type {Boolean}
-         * @default undefined
-         */
-
-        this.top = this.left = this.right = this.bottom = 0;
-
-        /**
-         * UI component enabled state
-         * @attribute isEnabled
-         * @default true
-         * @readOnly
-         * @type {Boolean}
-         */
-        this.isEnabled = true;
-
-        /**
-         * Find a zebkit.ui.zCanvas where the given UI component is hosted
-         * @return {zebkit.ui.zCanvas} a zebkit canvas
-         * @method getCanvas
-         */
-        this.getCanvas = function() {
-            var c = this;
-            for(; c != null && c.$isRootCanvas !== true; c = c.parent);
-            return c;
-        };
-
-        this.notifyRender = function(o,n){
-            if (o != null && o.ownerChanged != null) o.ownerChanged(null);
-            if (n != null && n.ownerChanged != null) n.ownerChanged(this);
-        };
-
-        /**
-         * Shortcut method to register the specific to the concrete component
-         * events listener. For instance "zebkit.ui.Button" component fires event
-         * when it is pressed:
-
-        var b = new zebkit.ui.Button("Test");
-        b.bind(function() {
-            // button has been pressed
-        });
-
-
-         * @param {Function|Object} a listener function or an object that
-         * declares events handler methods
-         * @return {Function|Object} a registered listener
-         * @method bind
-         */
-
-        /**
-         * Shortcut method to remove the register component specific events listener
-         * @param {Function|Object} a listener function to be removed
-         * @method unbind
-         */
-
-
-        /**
-         * Load content of the panel UI components from the specified JSON file.
-         * @param  {String} jsonPath an URL to a JSON file that describes UI
-         * to be loaded into the panel
-         * @chainable
-         * @method load
-         */
-        this.load = function(jsonPath, cb) {
-            new pkg.Bag(this).load(jsonPath, cb);
-            return this;
-        };
-
-        /**
-         * Get a children UI component that embeds the given point.
-         * @param  {Integer} x x coordinate
-         * @param  {Integer} y y coordinate
-         * @return {zebkit.ui.Panel} a children UI component
-         * @method getComponentAt
-         */
-        this.getComponentAt = function(x,y){
-            var r = $cvp(this, temporary);
-
-            if (r == null || (x < r.x || y < r.y ||
-                x >= r.x + r.width || y >= r.y + r.height))
-            {
-                return null;
-            }
-
-            if (this.kids.length > 0){
-                for(var i = this.kids.length; --i >= 0; ){
-                    var kid = this.kids[i];
-                    kid = kid.getComponentAt(x - kid.x,
-                                             y - kid.y);
-                    if (kid != null) return kid;
-                }
-            }
-            return this.contains == null || this.contains(x, y) === true ? this : null;
-        };
-
-        /**
-         * Shortcut method to invalidating the component
-         * and initiating the component repainting
-         * @method vrp
-         */
-        this.vrp = function(){
-            this.invalidate();
-
-            // extra condition to save few millisecond on repaint() call
-            if (this.isVisible === true && this.parent != null) {
-                this.repaint();
-            }
-        };
-
-        this.getTop = function() {
-            return this.border != null ? this.top + this.border.getTop()
-                                       : this.top;
-        };
-
-        this.getLeft = function() {
-            return this.border != null ? this.left + this.border.getLeft()
-                                       : this.left;
-        };
-
-        this.getBottom = function() {
-            return this.border != null ? this.bottom + this.border.getBottom()
-                                       : this.bottom;
-        };
-
-        this.getRight  = function() {
-            return this.border != null ? this.right  + this.border.getRight()
-                                       : this.right;
-        };
-
-        //TODO: the method is not used yet
-        this.isInvalidatedByChild = function(c) {
-            return true;
-        };
-
-        /**
-         * The method is implemented to be aware about a children component
-         * insertion.
-         * @param  {Integer} index an index at that a new children component
-         * has been added
-         * @param  {Object} constr a layout constraints of an inserted component
-         * @param  {zebkit.ui.Panel} l a children component that has been inserted
-         * @method kidAdded
-         */
-        this.kidAdded = function (index,constr,l){
-            COMP_EVENT.source = this;
-            COMP_EVENT.constraints = constr;
-            COMP_EVENT.kid = l;
-
-            pkg.events.fireEvent("compAdded", COMP_EVENT);
-
-            if (l.width > 0 && l.height > 0) {
-                l.repaint();
-            }
-            else {
-                this.repaint(l.x, l.y, 1, 1);
-            }
-        };
-
-        /**
-         * Set the component layout constraints.
-         * @param {Object} ctr a constraints
-         * @method setConstraints
-         */
-        this.setConstraints = function(ctr) {
-            if (this.constraints != ctr) {
-                this.constraints = ctr;
-                this.vrp();
-            }
-        };
-
-        /**
-         * The method is implemented to be aware about a children component
-         * removal.
-         * @param  {Integer} i an index of a removed component
-         * @param  {zebkit.ui.Panel} l a removed children component
-         * @method kidRemoved
-         */
-        this.kidRemoved = function(i,l){
-            COMP_EVENT.source = this;
-            COMP_EVENT.index  = i;
-            COMP_EVENT.kid    = l;
-            pkg.events.fireEvent("compRemoved", COMP_EVENT);
-            if (l.isVisible === true) {
-                this.repaint(l.x, l.y, l.width, l.height);
-            }
-        };
-
-        /**
-         * The method is implemented to be aware the
-         * component location updating
-         * @param  {Integer} px a previous x coordinate of the component
-         * @param  {Integer} py a previous y coordinate of the component
-         * @method relocated
-         */
-        this.relocated = function(px, py) {
-            COMP_EVENT.source = this;
-            COMP_EVENT.prevX  = px;
-            COMP_EVENT.prevY  = py;
-            pkg.events.fireEvent("compMoved", COMP_EVENT);
-
-            var p = this.parent,
-                w = this.width,
-                h = this.height;
-
-            if (p != null && w > 0 && h > 0) {
-                var x = this.x,
-                    y = this.y,
-                    nx = x < px ? x : px,
-                    ny = y < py ? y : py;
-
-                //TODO: some mobile browser has bug: moving a component
-                //      leaves 0.5 sized traces to fix it 1 pixel extra
-                //      has to be added to all sides of repainted rect area
-                // nx--;
-                // ny--;
-
-                if (nx < 0) nx = 0;
-                if (ny < 0) ny = 0;
-
-                var w1 = p.width - nx,
-                    w2 = w + (x > px ? x - px : px - x),
-                    h1 = p.height - ny,
-                    h2 = h + (y > py ? y - py : py - y);
-
-                // TODO: add crappy 2 for mobile (android)
-                p.repaint(nx, ny, (w1 < w2 ? w1 : w2),// + 2,
-                                  (h1 < h2 ? h1 : h2));// + 2);
-            }
-        };
-
-        /**
-         * The method is implemented to be aware the
-         * component size updating
-         * @param  {Integer} pw a previous width of the component
-         * @param  {Integer} ph a previous height of the component
-         * @method resized
-         */
-        this.resized = function(pw,ph) {
-            COMP_EVENT.source = this;
-            COMP_EVENT.prevWidth  = pw;
-            COMP_EVENT.prevHeight = ph;
-            pkg.events.fireEvent("compSized", COMP_EVENT);
-
-            if (this.parent != null) {
-                this.parent.repaint(this.x, this.y,
-                                    ((this.width  > pw) ? this.width  : pw),
-                                    ((this.height > ph) ? this.height : ph));
-            }
-        };
-
-        /**
-         * Checks if the component has a focus
-         * @return {Boolean} true if the component has focus
-         * @method hasFocus
-         */
-        this.hasFocus = function(){
-            return pkg.focusManager.hasFocus(this);
-        };
-
-        /**
-         * Force the given component to catch focus if the component is focusable.
-         * @method requestFocus
-         */
-        this.requestFocus = function(){
-            pkg.focusManager.requestFocus(this);
-        };
-
-        /**
-         * Force the given component to catch focus in the given timeout.
-         * @param {Integer} [timeout] a timeout in milliseconds. The default value is 50
-         * milliseconds
-         * @method requestFocusIn
-         */
-        this.requestFocusIn = function(timeout) {
-            if (arguments.length === 0) {
-                timeout = 50;
-            }
-            var $this = this;
-            setTimeout(function () {
-                $this.requestFocus();
-            }, timeout);
-        };
-
-        /**
-         * Set the UI component visibility
-         * @param  {Boolean} b a visibility state
-         * @method setVisible
-         * @chainable
-         */
-        this.setVisible = function (b){
-            if (this.isVisible != b) {
-                this.isVisible = b;
-                this.invalidate();
-
-                COMP_EVENT.source = this;
-                pkg.events.fireEvent("compShown", COMP_EVENT);
-
-                if (this.parent != null) {
-                    if (b) this.repaint();
-                    else {
-                        this.parent.repaint(this.x, this.y, this.width, this.height);
-                    }
-                }
-            }
-            return this;
-        };
-
-        /**
-         *  Set the UI component enabled state. Using this property
-         *  an UI component can be excluded from getting input events
-         *  @param  {Boolean} b a enabled state
-         *  @method setEnabled
-         *  @chainable
-         */
-        this.setEnabled = function (b){
-            if (this.isEnabled != b){
-                this.isEnabled = b;
-
-                COMP_EVENT.source = this;
-                pkg.events.fireEvent("compEnabled", COMP_EVENT);
-                if (this.kids.length > 0) {
-                    for(var i = 0;i < this.kids.length; i++) {
-                        this.kids[i].setEnabled(b);
-                    }
-                }
-                this.repaint();
-            }
-            return this;
-        };
-
-        /**
-         * Set the UI component top, right, left, bottom paddings to the same given value
-         * @param  {Integer} v the value that will be set as top, right, left, bottom UI
-         * component paddings
-         * @method setPadding
-         * @chainable
-         */
-
-        /**
-         * Set UI component top, left, bottom, right paddings. The paddings are
-         * gaps between component border and painted area.
-         * @param  {Integer} top a top padding
-         * @param  {Integer} left a left padding
-         * @param  {Integer} bottom a bottom padding
-         * @param  {Integer} right a right padding
-         * @method setPadding
-         * @chainable
-         */
-        this.setPadding = function (top,left,bottom,right){
-            if (arguments.length === 1) {
-                left = bottom = right = top;
-            }
-
-            if (this.top    != top    || this.left != left  ||
-                this.bottom != bottom || this.right != right  )
-            {
-                this.top = top;
-                this.left = left;
-                this.bottom = bottom;
-                this.right = right;
-                this.vrp();
-            }
-            return this;
-        },
-
-        /**
-         * Set the border view
-         * @param  {zebkit.ui.View|Function|String} v a border view or border "paint(g,x,y,w,h,c)"
-         * rendering function or border type: "plain", "sunken", "raised", "etched"
-         * @method setBorder
-         * @chainable
-         */
-        this.setBorder = function (v) {
-            var old = this.border;
-            v = pkg.$view(v);
-            if (v != old){
-                this.border = v;
-                this.notifyRender(old, v);
-
-                if ( old == null || v == null         ||
-                     old.getTop()    != v.getTop()    ||
-                     old.getLeft()   != v.getLeft()   ||
-                     old.getBottom() != v.getBottom() ||
-                     old.getRight()  != v.getRight()     )
-                {
-                    this.invalidate();
-                }
-
-                if (v != null && v.activate != null) {
-                    v.activate(this.hasFocus() ?  "focuson": "focusoff");
-                }
-
-                this.repaint();
-            }
-            return this;
-        };
-
-        /**
-         * Set the background. Background can be a color string or a zebkit.ui.View class
-         * instance, or a function(g,x,y,w,h,c) that paints the background:
-
-            // set background color
-            comp.setBackground("red");
-
-            // set a picture as a component background
-            comp.setBackground(new zebkit.ui.Picture(...));
-
-            // set a custom rendered background
-            comp.setBackground(function (g,x,y,w,h,target) {
-                // paint a component background here
-                g.setColor("blue");
-                g.fillRect(x,y,w,h);
-                g.drawLine(...);
-                ...
-            });
-
-
-         * @param  {String|zebkit.ui.View|Function} v a background view, color or
-         * background "paint(g,x,y,w,h,c)" rendering function.
-         * @method setBackground
-         * @chainable
-         */
-        this.setBackground = function (v){
-            var old = this.bg;
-            v = pkg.$view(v);
-            if (v != old) {
-                this.bg = v;
-                this.notifyRender(old, v);
-                this.repaint();
-            }
-            return this;
-        };
-
-        /**
-         * Add the given children component or number of components to the given panel.
-         * @protected
-         * @param {zebkit.ui.Panel|Array|Object} a children component of number of
-         * components to be added. The parameter can be:
-
-    - Component
-    - Array of components
-    - Dictionary object where every element is a component to be added and the key of
-    the component is stored in the dictionary is considered as the component constraints
-
-         * @method setKids
-         */
-        this.setKids = function(a) {
-            if (arguments.length === 1 && zebkit.instanceOf(a, pkg.Panel)) {
-               this.add(a);
-            }
-            else {
-                // if components list passed as number of arguments
-                if (arguments.length > 1) {
-                    for(var i=0; i < arguments.length; i++) {
-                        var a = arguments[i];
-                        this.add(a.$new != null ? a.$new() : a);
-                    }
-                }
-                else {
-                    if (Array.isArray(a)) {
-                        for(var i=0; i < a.length; i++) {
-                            this.add(a[i]);
-                        }
-                    }
-                    else {
-                        var kids = a;
-                        for(var k in kids) {
-                            if (kids.hasOwnProperty(k)) {
-                                this.add(k, kids[k]);
-                            }
-                        }
-                    }
-                }
-            }
-        };
-
-        /**
-         * Called whenever the UI component gets or looses focus
-         * @method focused
-         */
-        this.focused = function() {
-            // extents of activate method indicates it is
-            if (this.border != null && this.border.activate != null) {
-                var id = this.hasFocus() ? "focuson" : "focusoff" ;
-                if (typeof this.border.views[id] !== 'undefined') {
-                    this.border.activate(id);
-                    this.repaint();
-                }
-            }
-
-            // TODO: think if the background has to be focus dependent
-            // if (this.bg != null && this.bg.activate != null) {
-            //     var id = this.hasFocus() ? "focuson" : "focusoff" ;
-            //     if (this.bg.views[id]) {
-            //         this.bg.activate(id);
-            //         this.repaint();
-            //     }
-            // }
-        };
-
-        /**
-         * Remove all children UI components
-         * @method removeAll
-         */
-        this.removeAll = function (){
-            if (this.kids.length > 0){
-                var size = this.kids.length, mx1 = Number.MAX_VALUE, my1 = mx1, mx2 = 0, my2 = 0;
-                for(; size > 0; size--){
-                    var child = this.kids[size - 1];
-                    if (child.isVisible === true){
-                        var xx = child.x, yy = child.y;
-                        mx1 = mx1 < xx ? mx1 : xx;
-                        my1 = my1 < yy ? my1 : yy;
-                        mx2 = Math.max(mx2, xx + child.width);
-                        my2 = Math.max(my2, yy + child.height);
-                    }
-                    this.removeAt(size - 1);
-                }
-                this.repaint(mx1, my1, mx2 - mx1, my2 - my1);
-            }
-        };
-
-        /**
-         * Bring the UI component to front
-         * @method toFront
-         */
-        this.toFront = function(){
-            if (this.parent != null && this.parent.kids[this.parent.kids.length-1] !== this){
-                var p = this.parent;
-                p.kids.splice(p.indexOf(this), 1);
-                p.kids[p.kids.length] = this;
-                p.vrp();
-            }
-        };
-
-        /**
-         * Send the UI component to back
-         * @method toBack
-         */
-        this.toBack = function(){
-            if (this.parent != null && this.parent.kids[0] !== this){
-                var p = this.parent;
-                p.kids.splice(p.indexOf(this), 1);
-                p.kids.unshift(this);
-                p.vrp();
-            }
-        };
-
-        /**
-         * Set the UI component size to its preferred size
-         * @return {Object} a preferred size applied to the component.
-         * The structure of the returned object is the following:
-
-            { width:{Integer}, height:{Integer} }
-
-         * @method toPreferredSize
-         */
-        this.toPreferredSize = function (){
-            var ps = this.getPreferredSize();
-            this.setSize(ps.width, ps.height);
-            return ps;
-        };
-
-        /**
-         * Build view by this component
-         * @return {zebkit.ui.View} a view of the component
-         * @method toView
-         */
-        this.toView = function() {
-            return new pkg.CompRender(this);
-        };
-
-        this[''] = function(l) {
-            // !!! dirty trick to call super, for the sake of few milliseconds back
-            //this.$super();
-            L.Layoutable.prototype[zebkit.CNAME].call(this, l);
-
-            // apply default properties
-            this.properties(this.clazz);
-
-            if (arguments.length > 0) {
-                if (l.constructor === Object) {
-                    this.properties(l);
-                }
-                else {
-                    this.setLayout(l);
-                }
-            }
-        };
-    }
-]);
-
-/**
- * HTML element UI component wrapper class. The class represents
- * an HTML element as if it is standard UI component. It helps to use
- * some standard HTML element as zebkit UI components and embeds it
- * in zebkit UI application layout.
- * @class zebkit.ui.HtmlElement
- * @constructor
- * @param {String|HTMLElement} [element] an HTML element to be represented
- * as a standard zebkit UI component. If the passed parameter is string
- * it denotes a name of an HTML element. In this case a new HTML element
- * will be created.
- * @extends {zebkit.ui.Panel}
- */
-pkg.HtmlElement = Class(pkg.Panel, [
-    function $clazz() {
-        this.CLASS_NAME = null;
-    },
-
-    function $prototype() {
-        this.$container = this.$canvas = null;
-        this.ePsW = this.ePsH = 0;
-        this.isDOMElement = true;   // indication of the DOM element that is used by DOM element manager to track
-                                    // and manage its visibility
-
-        this.$sizeAdjusted = false;
-
-        /**
-         * Set the CSS font of the wrapped HTML element
-         * @param {String|zebkit.ui.Font} f a font
-         * @method setFont
-         * @chainable
-         */
-        this.setFont = function(f) {
-            this.setStyle("font", f.toString());
-            this.vrp();
-            return this;
-        };
-
-        /**
-         * Set the CSS color of the wrapped HTML element
-         * @param {String} c a color
-         * @chainable
-         * @method setColor
-         */
-        this.setColor = function(c) {
-            this.setStyle("color", c.toString());
-            return this;
-        };
-
-        /**
-         * Apply the given set of CSS styles to the wrapped HTML element
-         * @param {Object} styles a dictionary of CSS styles
-         * @chainable
-         * @method setStyles
-         */
-        this.setStyles = function(styles) {
-            for(var k in styles) {
-                this.$setStyle(this.element, k, styles[k]);
-            }
-            this.vrp();
-            return this;
-        };
-
-        /**
-         * Apply the given CSS style to the wrapped HTML element
-         * @param {String} a name of the CSS style
-         * @param {String} a value the CSS style has to be set
-         * @chainable
-         * @method setStyle
-         */
-        this.setStyle = function(name, value) {
-            this.$setStyle(this.element, name, value);
-            this.vrp();
-            return this;
-        };
-
-        this.$setStyle = function(element, name, value) {
-            name = name.trim();
-            var i = name.indexOf(':');
-            if (i > 0) {
-                if (zebkit[name.substring(0, i)] == null) {
-                    return;
-                }
-                name = name.substring(i + 1);
-            }
-            element.style[name] = value;
-        };
-
-        /**
-         * Set the specified attribute of the wrapped HTML element
-         * @param {String} name  a name of attribute
-         * @param {String} value a value of the attribute
-         * @chainable
-         * @method setAttribute
-         */
-        this.setAttribute = function(name, value) {
-            this.element.setAttribute(name, value);
-            return this;
-        };
-
-        this.setAttributes = function(attrs) {
-            for(var name in attrs) {
-                this.element.setAttribute(name, attrs[name]);
-            }
-            return this;
-        };
-
-        this.paint = function(g) {
-            // this method is used as an indication that the component
-            // is visible and no one of his parent is invisible
-            if (this.$container.style.visibility === "hidden") {
-                this.$container.style.visibility = "visible";
-            }
-
-            // calling paint says that the component in DOM tree
-            // that is time to correct CSS size if necessary
-            if (this.$sizeAdjusted !== true) {
-                this.setSize(this.width, this.height);
-            }
-        };
-
-        this.calcPreferredSize = function(target) {
-            return { width: this.ePsW, height: this.ePsH };
-        };
-
-        var $store = [
-            "paddingTop","paddingLeft","paddingBottom","paddingRight",
-            "border","borderStyle","borderWidth", "borderTopStyle",
-            "borderTopWidth", "borderBottomStyle","borderBottomWidth",
-            "borderLeftStyle","borderLeftWidth", "borderRightStyle",
-            "visibility", "borderRightWidth", "width", "height", "position"
-        ];
-
-        // the method calculates the given HTML element preferred size
-        this.recalc = function() {
-            // if component has a layout set it is up to a layout manager to calculate
-            // the component preferred size. In this case the HTML element is a container
-            // whose preferred size is defined by its content
-            if (this.layout === this) {
-                var e         = this.element,
-                    vars      = {},
-                    domParent = null,
-                    b         = !zebkit.web.$contains(this.$container);
-
-                // element doesn't have preferred size if it is not a member of
-                // an html page, so add it if for a while
-                if (b) {
-                    // save previous parent node since
-                    // appendChild will overwrite it
-                    domParent = this.$container.parentNode;
-                    document.body.appendChild(this.$container);
-                }
-
-                // save element metrics
-                for(var i = 0; i < $store.length; i++) {
-                    var k = $store[i];
-                    vars[k] = e.style[k];
-                }
-
-                // force metrics to be calculated automatically
-                this.$container.style.visibility = "hidden";
-                e.style.padding  = "0px";
-                e.style.border   = "none";
-                e.style.position = e.style.height = e.style.width = "auto";
-
-                // fetch preferred size
-                this.ePsW = e.offsetWidth;
-                this.ePsH = e.offsetHeight;
-
-                for(var k in vars) {
-                    var v = vars[k];
-                    if (v != null) e.style[k] = v;
-                }
-
-                if (b) {
-                    document.body.removeChild(this.$container);
-                    // restore previous parent node
-                    if (domParent != null) domParent.appendChild(this.$container);
-                }
-            }
-        };
-
-        /**
-         * Set the inner content of the wrapped HTML element
-         * @param {String} an inner content
-         * @method setContent
-         * @chainable
-         */
-        this.setContent = function(content) {
-            this.element.innerHTML = content;
-            this.vrp();
-            return this;
-        };
-
-        this.$getElementRootFocus = function() {
-            return null;
-        };
-
-        this.canHaveFocus = function() {
-            return this.$getElementRootFocus() != null;
-        };
-
-        this.$focus = function() {
-            if (this.canHaveFocus() && document.activeElement !== this.$getElementRootFocus()) {
-                this.$getElementRootFocus().focus();
-            }
-        };
-
-        this.$blur = function() {
-            if (this.canHaveFocus() && document.activeElement === this.$getElementRootFocus()) {
-                this.$getElementRootFocus().blur();
-            }
-        };
-    },
-
-    function toFront() {
-        this.$super();
-        var pnode = this.$container.parentNode;
-        if (pnode != null && pnode.lastChild !== this.$container) {
-            pnode.removeChild(this.$container);
-            pnode.appendChild(this.$container);
-        }
-    },
-
-    function toBack() {
-        this.$super();
-        var pnode = this.$container.parentNode;
-        if (pnode != null && pnode.firstChild !== this.$container) {
-            pnode.removeChild(this.$container);
-            pnode.insertBefore(this.$container, pnode.firstChild);
-        }
-    },
-
-    function setEnabled(b) {
-        if (this.isEnabled != b) {
-            if (b) {
-                this.$container.removeChild(this.$blockElement);
-            }
-            else {
-                if (this.$blockElement == null) {
-                    this.$blockElement = zebkit.web.$createBlockedElement();
-                }
-                this.$container.appendChild(this.$blockElement);
-           }
-        }
-        return this.$super(b);
-    },
-
-    function setSize(w, h) {
-        // by the moment the method setSize is called the DOM element can be not a part of
-        // HTML layout. In this case offsetWidth/offsetHeihght are always zero what prevents
-        // us from proper calculation of CSS width and height. Postpone
-        if (zebkit.web.$contains(this.$container)) {
-            var prevVisibility = this.$container.style.visibility;
-            this.$container.style.visibility = "hidden"; // could make sizing smooth
-
-            // HTML element size is calculated as sum of CSS "width"/"height", paddings, border
-            // So the passed width and height has to be corrected (before it will be applied to
-            // an HTML element) by reduction of extra HTML gaps. For this we firstly set the
-            // width and size
-            this.element.style.width  = "" + w + "px";
-            this.element.style.height = "" + h + "px";
-
-            var ww = 2 * w - this.element.offsetWidth,
-                hh = 2 * h - this.element.offsetHeight;
-
-            if (ww != w || hh != h) {
-                // than we know the component metrics and can compute necessary reductions
-                this.element.style.width   = "" + ww + "px";
-                this.element.style.height  = "" + hh + "px";
-            }
-
-            this.$sizeAdjusted = true;
-
-            // visibility correction is done by HTML elements manager
-            this.$container.style.visibility = prevVisibility;
-        }
-        else {
-            this.$sizeAdjusted = false;
-        }
-
-        return this.$super(w, h);
-    },
-
-    function setPadding(t,l,b,r) {
-        if (arguments.length == 1) {
-            l = b = r = t;
-        }
-
-        this.setStyles({
-            paddingTop    : '' + t + "px",
-            paddingLeft   : '' + l + "px",
-            paddingRight  : '' + r + "px",
-            paddingBottom : '' + b + "px"
-        });
-
-        if (this.top != t || this.left != l || this.right != r || this.bottom != b) {
-            // changing padding has influence to CSS size the component has to have
-            // so we have to request CSS size recalculation
-            this.$sizeAdjusted = false;
-        }
-
-        this.$super.apply(this, arguments);
-        return this;
-    },
-
-    function setBorder(b) {
-        b = pkg.$view(b);
-
-        if (b == null) {
-           this.setStyle("border", "none");
-        }
-        else {
-            this.setStyles({
-                //!!!! bloody FF fix, the border can be made transparent
-                //!!!! only via "border" style
-                border : "0px solid transparent",
-
-                //!!! FF understands only decoupled border settings
-                borderTopStyle : "solid",
-                borderTopColor : "transparent",
-                borderTopWidth : "" + b.getTop() + "px",
-
-                borderLeftStyle : "solid",
-                borderLeftColor : "transparent",
-                borderLeftWidth : "" + b.getLeft() + "px",
-
-                borderBottomStyle : "solid",
-                borderBottomColor : "transparent",
-                borderBottomWidth : "" + b.getBottom() + "px",
-
-                borderRightStyle : "solid",
-                borderRightColor : "transparent",
-                borderRightWidth : "" + b.getRight() + "px"
-            });
-        }
-
-        // changing border can have influence to
-        // CSS size, so request recalculation of the CSS
-        // size
-        if (this.border != b) {
-            this.$sizeAdjusted = false;
-        }
-
-        return this.$super(b);
-    },
-
-    function validate() {
-        // lookup root canvas
-        if (this.$canvas == null && this.parent != null) {
-            this.$canvas = this.getCanvas();
-        }
-
-        this.$super();
-    },
-
-    function focused() {
-        this.$super();
-
-        // sync state of native focus and zebkit focus
-        if (this.hasFocus()) {
-            this.$focus();
-        }
-        else {
-            this.$blur();
-        }
-    },
-
-    function(e) {
-        if (e == null) {
-            e = "div";
-        }
-
-        if (zebkit.isString(e)) {
-            e = document.createElement(e);
-            if (this.clazz.CLASS_NAME != null) {
-                e.setAttribute("class", this.clazz.CLASS_NAME);
-            }
-            e.style.border   = "0px solid transparent"; // clean up border
-            e.style.fontSize = $bodyFontSize;           // DOM element is wrapped with a container that
-                                                        // has zero sized font, so let's set body  font
-                                                        // for the created element
-        }
-
-        // sync padding and margin of the DOM element with
-        // what appropriate properties are set
-        e.style.margin = e.style.padding = "0px";
-
-        /**
-         * Reference to HTML element the UI component wraps
-         * @attribute element
-         * @readOnly
-         * @type {HTMLElement}
-         */
-        this.element = e;
-
-        // this is set to make possible to use set z-index for HTML element
-        this.element.style.position = "relative";
-
-
-        if (e.parentNode != null && e.parentNode.getAttribute("data-zebcont") != null) {
-            throw new Error("DOM element '" + e + "' already has container");
-        }
-
-        // container is a DIV element that is used as a wrapper around original one
-        // it is done to make HtmlElement implementation more universal making
-        // all DOM elements capable to be a container for another one
-        this.$container = document.createElement("div");
-
-        // prevent stretching to a parent container element
-        this.$container.style.display = "inline-block";
-
-        // cut content
-        this.$container.style.overflow = "hidden";
-
-        // it fixes problem with adding, for instance, DOM element as window what can prevent
-        // showing components added to popup layer
-        this.$container.style["z-index"] = "0";
-
-
-        // coordinates have to be set to initial zero value in CSS
-        // otherwise the DOM layout can be wrong !
-        this.$container.style.left = this.$container.style.top = "0px";
-
-        this.$container.visibility = "hidden";  // before the component will be attached
-                                                // to parent hierarchy the component has to be hidden
-
-        // container div will always few pixel higher than its content
-        // to prevent the bloody effect set font to zero
-        // border and margin also have to be zero
-        this.$container.style.fontSize = this.$container.style.padding = this.$container.style.padding = "0px";
-
-        // add id
-        this.$container.setAttribute("id", "container-" + this.toString());
-
-        // mark wrapper with a special attribute to recognize it exists later
-        this.$container.setAttribute("data-zebcont", "true");
-
-        // let html element interact
-        this.$container.style["pointer-events"] = "auto";
-
-        // if passed DOM element already has parent
-        // attach it to container first and than
-        // attach the container to the original parent element
-        if (e.parentNode != null) {
-            // !!!
-            // Pay attention container position cannot be set to absolute
-            // since how the element has to be laid out is defined by its
-            // original parent
-            var pn = e.parentNode;
-            e.parentNode.removeChild(e);
-            this.$container.appendChild(e);
-            pn.appendChild(this.$container);
-        }
-        else {
-            // to force all children element be aligned
-            // relatively to the wrapper we have to set
-            // position CSS to absolute or absolute
-            this.$container.style.position = "absolute";
-            this.$container.appendChild(e);
-        }
-
-        // set ID if it has not been already defined
-        if (e.getAttribute("id") == null) {
-            e.setAttribute("id", this.toString());
-        }
-
-        this.$super();
-
-        // attach listeners
-        if (this.$initListeners != null) {
-            this.$initListeners();
-        }
-
-        var fe = this.$getElementRootFocus();
-
-        // TODO: may be this code should be moved to web place
-        //
-        // reg native focus listeners for HTML element that can hold focus
-        if (fe != null) {
-            var $this = this;
-
-            zebkit.web.$focusin(fe, function(e) {
-                // sync native focus with zebkit focus if necessary
-                if ($this.hasFocus() === false) {
-                    $this.requestFocus();
-                }
-            }, false);
-
-            zebkit.web.$focusout(fe, function(e) {
-                // sync native focus with zebkit focus if necessary
-                if ($this.hasFocus()) {
-                    pkg.focusManager.requestFocus(null);
-                }
-            }, false);
-        }
-    }
-]);
-
-/**
- *  zCanvas zebkit UI component class. This is one of the key
- *  class everybody has to use to start building an UI. The class is a wrapper
- *  for HTML Canvas element. Internally it catches all native HTML Canvas
- *  events and translates its into Zebkit UI events.
- *
- *  zCanvas instantiation triggers a new HTML Canvas will be created
- *  and added to HTML DOM tree.  It happens if developer doesn't pass
- *  an HTML Canvas element reference or an ID of existing HTML Canvas
- *  element If developers need to re-use an existent in DOM tree canvas
- *  element they have to pass id of the canvas that has to be used as basis
- *  for zebkit UI creation or reference to a HTML Canvas element:
-
-        // a new HTML canvas element is created and added into HTML DOM tree
-        var canvas = zebkit.ui.zCanvas();
-
-        // a new HTML canvas element is created into HTML DOM tree
-        var canvas = zebkit.ui.zCanvas(400,500);  // pass canvas size
-
-        // stick to existent HTML canvas element
-        var canvas = zebkit.ui.zCanvas("ExistentCanvasID");
-
- *  The zCanvas has layered structure. Every layer is responsible for
- *  showing and controlling a dedicated type of UI elements like windows
- *  pop-up menus, tool tips and so on. Developers have to build an own UI
- *  hierarchy on the canvas root layer. The layer is standard UI panel
- *  that is accessible as zCanvas component instance "root" field.
-
-        // create canvas
-        var canvas = zebkit.ui.zCanvas(400,500);
-
-        // save reference to canvas root layer where
-        // hierarchy of UI components have to be hosted
-        var root = canvas.root;
-
-        // fill root with UI components
-        var label = new zebkit.ui.Label("Label");
-        label.setBounds(10,10,100,50);
-        root.add(label);
-
- *  @class zebkit.ui.zCanvas
- *  @extends {zebkit.ui.Panel}
- *  @constructor
- *  @param {String|Canvas} [element] an ID of a HTML canvas element or
- *  reference to an HTML Canvas element.
- *  @param {Integer} [width] a width of an HTML canvas element
- *  @param {Integer} [height] a height of an HTML canvas element
- */
-
-/**
- * Implement the event handler method  to catch canvas initialized event.
- * The event is triggered once the canvas has been initiated and all properties
- * listeners of the canvas are set upped. The event can be used to load
- * saved data.
-
-     var p = new zebkit.ui.zCanvas(300, 300, [
-          function canvasInitialized() {
-              // do something
-          }
-     ]);
-
- * @event  canvasInitialized
- */
-pkg.HtmlCanvas = Class(pkg.HtmlElement, [
-    function $clazz() {
-        this.$ContextMethods = {
-            reset : function(w, h) {
-                this.$curState = 0;
-                var s = this.$states[0];
-                s.srot = s.rotateVal = s.x = s.y = s.width = s.height = s.dx = s.dy = 0;
-                s.crot = s.sx = s.sy = 1;
-                s.width = w;
-                s.height = h;
-                this.setFont(pkg.font);
-                this.setColor("white");
-            },
-
-            $init : function() {
-                // pre-allocate canvas save $states
-                this.$states = Array(50);
-                for(var i=0; i < this.$states.length; i++) {
-                    var s = {};
-                    s.srot = s.rotateVal = s.x = s.y = s.width = s.height = s.dx = s.dy = 0;
-                    s.crot = s.sx = s.sy = 1;
-                    this.$states[i] = s;
-                }
-            },
-
-            translate : function(dx, dy) {
-                if (dx !== 0 || dy !== 0) {
-                    var c = this.$states[this.$curState];
-                    c.x  -= dx;
-                    c.y  -= dy;
-                    c.dx += dx;
-                    c.dy += dy;
-                    this.$translate(dx, dy);
-                }
-            },
-
-            rotate : function(v) {
-                var c = this.$states[this.$curState];
-                c.rotateVal += v;
-                c.srot = MS(c.rotateVal);
-                c.crot = MC(c.rotateVal);
-                this.$rotate(v);
-            },
-
-            scale : function(sx, sy) {
-                var c = this.$states[this.$curState];
-                c.sx = c.sx * sx;
-                c.sy = c.sy * sy;
-                this.$scale(sx, sy);
-            },
-
-            save : function() {
-                this.$curState++;
-                var c = this.$states[this.$curState], cc = this.$states[this.$curState - 1];
-                c.x = cc.x;
-                c.y = cc.y;
-                c.width = cc.width;
-                c.height = cc.height;
-
-                c.dx = cc.dx;
-                c.dy = cc.dy;
-                c.sx = cc.sx;
-                c.sy = cc.sy;
-                c.srot = cc.srot;
-                c.crot = cc.crot;
-                c.rotateVal = cc.rotateVal;
-
-                this.$save();
-                return this.$curState - 1;
-            },
-
-            restoreAll : function() {
-                while(this.$curState > 0) {
-                    this.restore();
-                }
-            },
-
-            restore : function() {
-                if (this.$curState === 0) {
-                    throw new Error("Context restore history is empty");
-                }
-
-                this.$curState--;
-                this.$restore();
-                return this.$curState;
-            },
-
-            clipRect : function(x,y,w,h){
-                var c = this.$states[this.$curState];
-                if (c.x != x || y != c.y || w != c.width || h != c.height) {
-                    var xx = c.x, yy = c.y,
-                        ww = c.width,
-                        hh = c.height,
-                        xw = x + w,
-                        xxww = xx + ww,
-                        yh = y + h,
-                        yyhh = yy + hh;
-
-                    c.x      = x > xx ? x : xx;
-                    c.width  = (xw < xxww ? xw : xxww) - c.x;
-                    c.y      = y > yy ? y : yy;
-                    c.height = (yh < yyhh ? yh : yyhh) - c.y;
-
-                    if (c.x != xx || yy != c.y || ww != c.width || hh != c.height) {
-                        // begin path is very important to have proper clip area
-                        this.beginPath();
-                        this.rect(x, y, w, h);
-                        this.closePath();
-                        this.clip();
-                    }
-                }
-            }
-        };
-    },
-
-    function $prototype(clazz) {
-        this.$rotateValue = 0;
-        this.$scaleX = 1;
-        this.$scaleY = 1;
-
-        this.$paintTask = null;
-
-
-        // set border for canvas has to be set as zebkit border, since canvas
-        // is DOM component designed for rendering, so setting DOM border
-        // doesn't allow us to render zebkit border
-        this.setBorder = function(b) {
-            return pkg.Panel.prototype.setBorder.call(this, b);
-        };
-
-        this.rotate = function(r) {
-            this.$rotateValue += r;
-            if (this.$context != null) {
-                this.$context.rotate(r);
-            }
-
-            this.vrp();
-            return this;
-        };
-
-        this.scale = function(sx, sy) {
-            if (this.$context != null) this.$context.scale(sx, sy);
-            this.$scaleX = this.$scaleX * sx;
-            this.$scaleY = this.$scaleY * sy;
-            this.vrp();
-            return this;
-        };
-
-        this.clearTransformations = function() {
-            this.$scaleX = 1;
-            this.$scaleY = 1;
-            this.$rotateValue = 0;
-            if (this.$context != null) {
-                this.$context = zebkit.web.$canvas(this.element, this.width, this.height, true);
-                this.$context.reset(this.width, this.height);
-            }
-            this.vrp();
-            return this;
-        };
-
-        // set passing for canvas has to be set as zebkit padding, since canvas
-        // is DOM component designed for rendering, so setting DOM padding
-        // doesn't allow us to hold painting area proper
-        this.setPadding = function() {
-            return pkg.Panel.prototype.setPadding.apply(this, arguments);
-        };
-
-        this.setSize = function(w, h) {
-            if (this.width != w || h != this.height) {
-                var pw  = this.width,
-                    ph  = this.height;
-
-                this.$context = zebkit.web.$canvas(this.element, w, h);
-
-                // canvas has one instance of context, the code below
-                // test if the context has been already full filled
-                // with necessary methods and if it is not true
-                // fill it
-                if (typeof this.$context.$states === "undefined") {
-                    zebkit.web.$extendContext(this.$context, clazz.$ContextMethods);
-                }
-
-                this.$context.reset(w, h);
-
-                // if canvas has been rotated apply the rotation to the context
-                if (this.$rotateValue !== 0) {
-                    this.$context.rotate(this.$rotateValue);
-                }
-
-                // if canvas has been scaled apply it to it
-                if (this.$scaleX !== 1 || this.$scaleY !== 1) {
-                    this.$context.scale(this.$scaleX, this.$scaleY);
-                }
-
-                this.width  = w;
-                this.height = h;
-
-                this.invalidate();
-
-                // TODO: think to replace it with vrp()
-                this.validate();
-                this.repaint();
-
-                if (w != pw || h != ph) {
-                    this.resized(pw, ph);
-                }
-            }
-            return this;
-        };
-    },
-
-    function(e) {
-        if (e != null && (e.tagName == null || e.tagName != "CANVAS")) {
-            throw new Error("Invalid element '" + e + "'");
-        }
-
-        /**
-         * Keeps rectangular "dirty" area of the canvas component
-         * @private
-         * @attribute $da
-         * @type {Object}
-                { x:Integer, y:Integer, width:Integer, height:Integer }
-         */
-        this.$da = { x: 0, y: 0, width: -1, height: 0 };
-
-        this.$super(e == null ? "canvas" : e);
-
-        // let HTML Canvas be WEB event transparent
-        this.$container.style["pointer-events"] = "none";
-
-        // add class to canvas if this element has been created
-        if (e == null) {
-            // prevent canvas selection
-            this.element.onselectstart = function() { return false; };
-        }
-    }
-]);
-
-/**
- * Base layer UI component. Layer is special type of UI
- * components that is used to decouple different logical
- * UI components types from each other. Zebkit Canvas
- * consists from number of layers where only one can be
- * active at the given point in time. Layers are stretched
- * to fill full canvas size. Every time an input event
- * happens system detects an active layer by asking all
- * layers from top to bottom. First layer that wants to
- * catch input gets control. The typical layers examples
- * are window layer, pop up menus layer and so on.
- * @param {String} id an unique id to identify the layer
- * @constructor
- * @class zebkit.ui.CanvasLayer
- * @extends {zebkit.ui.Panel}
- */
-pkg.CanvasLayer = Class(pkg.HtmlCanvas, [
-    function $prototype() {
-        /**
-         *  Define the method to catch pointer pressed event and
-         *  answer if the layer wants to have a control.
-         *  If the method is not defined it is considered as the
-         *  layer is not activated by the pointer event
-         *  @param {zebkit.ui.PointerEvent} e a pointer event
-         *  @return {Boolean} return true if the layer wants to
-         *  catch control
-         *  @method layerPointerPressed
-         */
-
-        /**
-         *  Define the method to catch key pressed event and
-         *  answer if the layer wants to have a control.
-         *  If the method is not defined it is considered
-         *  as the key event doesn't activate the layer
-         *  @param {zebkit.ui.KeyEvent} e a key code
-         *  @return {Boolean} return true if the layer wants to
-         *  catch control
-         *  @method layerKeyPressed
-         */
-
-        /**
-         *  Ask if the layer is active at the given location.
-         *  If the method is not defined that means the layer
-         *  is active at any location.
-         *  @param {Integer} x a x location
-         *  @param {Integer} y a y location
-         *  @return {Boolean} return true if the layer is active
-         *  at this location
-         *  @method isLayerActiveAt
-         */
-    },
-
-    function() {
-        this.$super();
-        this.id = this.clazz.ID;
-    }
-]);
-
-/**
- *  Root layer implementation. This is the simplest UI layer implementation
- *  where the layer always try grabbing all input event
- *  @class zebkit.ui.RootLayer
- *  @constructor
- *  @extends {zebkit.ui.CanvasLayer}
- */
-pkg.RootLayer = Class(pkg.CanvasLayer, [
-    function $clazz() {
-        this.ID = "root";
-    },
-
-    function $prototype() {
-        this.layerPointerPressed = function(e) {
-            return true;
-        };
-
-        this.layerKeyPressed = function(e) {
-            return true;
-        };
-
-        this.getFocusRoot = function() {
-            return this;
-        };
-    }
-]);
-
-/**
- *  UI component to keep and render the given "zebkit.ui.View" class
- *  instance. The target view defines the component preferred size
- *  and the component view.
- *  @class zebkit.ui.ViewPan
- *  @constructor
- *  @extends {zebkit.ui.Panel}
- */
-pkg.ViewPan = Class(pkg.Panel, [
-    function $prototype() {
-        /**
-         * Reference to a view that the component visualize
-         * @attribute view
-         * @type {zebkit.ui.View}
-         * @default null
-         * @readOnly
-         */
-        this.view = null;
-
-        this.paint = function (g){
-            if (this.view != null){
-                var l = this.getLeft(),
-                    t = this.getTop();
-
-                this.view.paint(g, l, t, this.width  - l - this.getRight(),
-                                         this.height - t - this.getBottom(), this);
-            }
-        };
-
-        /**
-         * Set the target view to be wrapped with the UI component
-         * @param  {zebkit.ui.View|Function} v a view or a rendering
-         * view "paint(g,x,y,w,h,c)" function
-         * @method setView
-         * @chainable
-         */
-        this.setView = function (v){
-            var old = this.view;
-            v = pkg.$view(v);
-
-            if (v != old) {
-                this.view = v;
-                this.notifyRender(old, v);
-                this.vrp();
-            }
-
-            return this;
-        };
-
-        /**
-         * Override the parent method to calculate preferred size
-         * basing on a target view.
-         * @param  {zebkit.ui.Panel} t [description]
-         * @return {Object} return a target view preferred size if it is defined.
-         * The returned structure is the following:
-              { width: {Integer}, height:{Integer} }
-         * @method  calcPreferredSize
-         */
-        this.calcPreferredSize = function (t) {
-            return this.view != null ? this.view.getPreferredSize() : { width:0, height:0 };
-        };
-    }
-]);
-
-/**
- *  Image panel UI component class. The component renders an image.
- *  @param {String|Image} [img] a path or direct reference to an image object.
- *  If the passed parameter is string it considered as path to an image.
- *  In this case the image will be loaded using the passed path.
- *  @class zebkit.ui.ImagePan
- *  @constructor
- *  @extends zebkit.ui.ViewPan
- */
-pkg.ImagePan = Class(pkg.ViewPan, [
-    function(img, w, h) {
-        this.$runner = null;
-        this.setImage(img != null ? img : null);
-        this.$super();
-        if (arguments.length > 2) this.setPreferredSize(w, h);
-    },
-
-    /**
-     * Set image to be rendered in the UI component
-     * @method setImage
-     * @param {String|Image|zebkit.ui.Picture} img a path or direct reference to an
-     * image or zebkit.ui.Picture render.
-     * If the passed parameter is string it considered as path to an image.
-     * In this case the image will be loaded using the passed path
-     * @chainable
-     */
-    function setImage(img) {
-        if (img != null) {
-            var $this     = this,
-                isPic     = zebkit.instanceOf(img, pkg.Picture),
-                imgToLoad = isPic ? img.target : img ;
-
-            if (this.$runner == null) {
-                this.$runner = new zebkit.util.Runner();
-            }
-
-            this.$runner.run(function() {
-                zebkit.web.$loadImage(imgToLoad, this.join());
-            })
-            .
-            run(function(p, b, i) {
-                $this.$runner = null;
-                if (b) {
-                    $this.setView(isPic ? img : new pkg.Picture(i));
-                    $this.vrp();
-                }
-
-                if ($this.imageLoaded != null) {
-                    $this.imageLoaded(p, b, i);
-                }
-            })
-            .
-            error(function() {
-                this.$runner = null;
-                $this.setView(null);
-            });
-        }
-        else {
-            if (this.$runner == null) {
-                this.setView(null);
-            }
-            else {
-                var $this = this;
-                this.$runner.run(function() {
-                    $this.setView(null);
-                });
-            }
-        }
-        return this;
-    }
-]);
-
-/**
- *  UI manager class. The class is widely used as base for building
- *  various UI managers like paint, focus, event etc. Manager is
- *  automatically registered as input and component events listener
- *  if it implements appropriate events methods handlers
- *  @class zebkit.ui.Manager
- *  @constructor
- */
-pkg.Manager = Class([
-    function() {
-        if (pkg.events != null) {
-            pkg.events.bind(this);
-        }
-    }
-]);
-
-/**
- * Focus manager class defines the strategy of focus traversing among
- * hierarchy of UI components. It keeps current focus owner component
- * and provides API to change current focus component
- * @class zebkit.ui.FocusManager
- * @extends {zebkit.ui.Manager}
- */
-pkg.FocusManager = Class(pkg.Manager, [
-    function $prototype() {
-        /**
-         * Reference to the current focus owner component.
-         * @attribute focusOwner
-         * @readOnly
-         * @type {zebkit.ui.Panel}
-         */
-        this.focusOwner = null;
-
-        this.$freeFocus = function(comp) {
-            if ( this.focusOwner != null &&
-                (this.focusOwner === comp || L.isAncestorOf(comp, this.focusOwner)))
-            {
-                this.requestFocus(null);
-            }
-        };
-
-        /**
-         * Component enabled event handler
-         * @param  {zebkit.ui.Panel} c a component
-         * @method compEnabled
-         */
-        this.compEnabled = function(e) {
-            var c = e.source;
-            if (c.isVisible === true && c.isEnabled === false && this.focusOwner != null) {
-                this.$freeFocus(c);
-            }
-        };
-
-        /**
-         * Component shown event handler
-         * @param  {zebkit.ui.Panel} c a component
-         * @method compShown
-         */
-        this.compShown = function(e) {
-            var c = e.source;
-            if (c.isEnabled === true && c.isVisible === false && this.focusOwner != null) {
-                this.$freeFocus(c);
-            }
-        };
-
-        /**
-         * Component removed event handler
-         * @param  {zebkit.ui.Panel} p a parent
-         * @param  {Integer} i      a removed component index
-         * @param  {zebkit.ui.Panel} c a removed component
-         * @method compRemoved
-         */
-        this.compRemoved = function(e) {
-            var c = e.kid;
-            if (c.isEnabled === true && c.isVisible === true && this.focusOwner != null) {
-                this.$freeFocus(c);
-            }
-        };
-
-        /**
-         * Test if the given component is a focus owner
-         * @param  {zebkit.ui.Panel} c an UI component to be tested
-         * @method hasFocus
-         * @return {Boolean} true if the given component holds focus
-         */
-        this.hasFocus = function(c) {
-            return this.focusOwner === c;
-        };
-
-        /**
-         * Key pressed event handler.
-         * @param  {zebkit.ui.KeyEvent} e a key event
-         * @method keyPressed
-         */
-        this.keyPressed = function(e){
-            if (pkg.KeyEvent.TAB === e.code) {
-                var cc = this.ff(e.source, e.shiftKey ?  -1 : 1);
-                if (cc != null) {
-
-                    // TODO: WEB specific code has to be removed moved to another place
-                    if (document.activeElement != cc.getCanvas().element) {
-                        cc.getCanvas().element.focus();
-                        this.requestFocus(cc);
-                    }
-                    else {
-                        this.requestFocus(cc);
-                    }
-                }
-
-                return true;
-            }
-        };
-
-        this.findFocusable = function(c) {
-            return (this.isFocusable(c) ? c : this.fd(c, 0, 1));
-        };
-
-        /**
-         * Test if the given component can catch focus
-         * @param  {zebkit.ui.Panel} c an UI component to be tested
-         * @method isFocusable
-         * @return {Boolean} true if the given component can catch a focus
-         */
-        this.isFocusable = function(c) {
-            var d = c.getCanvas();
-            if (d != null &&
-                   (c.canHaveFocus === true ||
-                     (typeof c.canHaveFocus == "function" && c.canHaveFocus() === true)))
-            {
-                for(;c !== d && c != null; c = c.parent) {
-                    if (c.isVisible === false || c.isEnabled === false) {
-                        return false;
-                    }
-                }
-                return c === d;
-            }
-
-            return false;
-        };
-
-        // looking recursively a focusable component among children components of
-        // the given target  starting from the specified by index kid with the
-        // given direction (forward or backward lookup)
-        this.fd = function(t,index,d) {
-            if (t.kids.length > 0){
-                var isNComposite = t.catchInput == null || t.catchInput == false;
-                for(var i = index; i >= 0 && i < t.kids.length; i += d) {
-                    var cc = t.kids[i];
-
-                    // check if the current children component satisfies
-                    // conditions it can grab focus or any deeper in hierarchy
-                    // component that can grab the focus exist
-                    if (cc.isEnabled === true                                           &&
-                        cc.isVisible === true                                           &&
-                        cc.width      >  0                                              &&
-                        cc.height     >  0                                              &&
-                        (isNComposite || (t.catchInput != true       &&
-                                          t.catchInput(cc) === false)  )                &&
-                        ( (cc.canHaveFocus === true || (cc.canHaveFocus !=  null  &&
-                                                        cc.canHaveFocus !== false &&
-                                                        cc.canHaveFocus())            ) ||
-                          (cc = this.fd(cc, d > 0 ? 0 : cc.kids.length - 1, d)) != null)  )
-                    {
-                        return cc;
-                    }
-                }
-            }
-
-            return null;
-        };
-
-        // find next focusable component
-        // c - component starting from that a next focusable component has to be found
-        // d - a direction of next focusable component lookup: 1 (forward) or -1 (backward)
-        this.ff = function(c, d){
-            var top = c;
-            while (top != null && top.getFocusRoot == null) {
-                top = top.parent;
-            }
-
-            if (top == null) {
-                return null;
-            }
-
-            top = top.getFocusRoot();
-            if (top == null) {
-                return null;
-            }
-
-            if (top.traverseFocus != null) {
-                return top.traverseFocus(c, d);
-            }
-
-            for(var index = (d > 0) ? 0 : c.kids.length - 1; c != top.parent; ){
-                var cc = this.fd(c, index, d);
-                if (cc != null) return cc;
-                cc = c;
-                c = c.parent;
-                if (c != null) index = d + c.indexOf(cc);
-            }
-
-            return this.fd(top, d > 0 ? 0 : top.kids.length - 1, d);
-        };
-
-        /**
-         * Force to pass a focus to the given UI component
-         * @param  {zebkit.ui.Panel} c an UI component to pass a focus
-         * @method requestFocus
-         */
-        this.requestFocus = function(c) {
-            if (c != this.focusOwner && (c == null || this.isFocusable(c))) {
-                var oldFocusOwner = this.focusOwner;
-                if (c != null) {
-                    var nf = c.getEventDestination();
-                    if (nf == null || oldFocusOwner == nf) return;
-                    this.focusOwner = nf;
-                }
-                else {
-                    this.focusOwner = c;
-                }
-
-                if (oldFocusOwner != null) {
-                    var ofc = oldFocusOwner.getCanvas();
-                    if (ofc != null) ofc.$lastFocusOwner = oldFocusOwner;
-
-                    FOCUS_EVENT.source  = oldFocusOwner;
-                    FOCUS_EVENT.related = this.focusOwner;
-                    oldFocusOwner.focused();
-                    pkg.events.fireEvent("focusLost", FOCUS_EVENT);
-                }
-
-                if (this.focusOwner != null) {
-                    FOCUS_EVENT.source  = this.focusOwner;
-                    FOCUS_EVENT.related = oldFocusOwner;
-                    this.focusOwner.focused();
-                    pkg.events.fireEvent("focusGained", FOCUS_EVENT);
-                }
-
-                return this.focusOwner;
-            }
-            return null;
-        };
-
-        /**
-         * Pointer pressed event handler.
-         * @param  {zebkit.ui.PointerEvent} e a pointer event
-         * @method pointerPressed
-         */
-        this.pointerPressed = function(e){
-            if (e.isAction()) {
-                // TODO: WEB specific code that has to be moved to another place
-                // the problem is a target canvas element get mouse pressed
-                // event earlier than it gets focus what is inconsistent behavior
-                // to fix it a timer is used
-                if (document.activeElement !== e.source.getCanvas().element) {
-                    var $this = this;
-                    setTimeout(function() {
-                        $this.requestFocus(e.source);
-                    }, 50);
-                }
-                else {
-                    this.requestFocus(e.source);
-                }
-            }
-        };
-    }
-]);
-
-/**
- *  Command manager supports short cut keys definition and listening. The shortcuts have to be defined in
- *  zebkit JSON configuration files. There are two sections:
-
-    - **osx** to keep shortcuts for Mac OS X platform
-    - **common** to keep shortcuts for all other platforms
-
- *  The JSON configuration entity has simple structure:
-
-
-      {
-        "common": [
-             {
-                "command"   : "undo_command",
-                "args"      : [ true, "test"],
-                "key"       : "Ctrl+z"
-             },
-             {
-                "command" : "redo_command",
-                "key"     : "Ctrl+Shift+z"
-             },
-             ...
-        ],
-        "osx" : [
-             {
-                "command"   : "undo_command",
-                "args"      : [ true, "test"],
-                "key"       : "Cmd+z"
-             },
-             ...
-        ]
-      }
-
- *  The configuration contains list of shortcuts. Every shortcut is bound to a key combination it is triggered.
- *  Every shortcut has a name and an optional list of arguments that have to be passed to a shortcut listener method.
- *  The optional arguments can be used to differentiate two shortcuts that are bound to the same command.
- *
- *  On the component level shortcut commands can be listened by implementing method whose name equals to shortcut name.
- *  Pay attention to catch shortcut command your component has to be focusable and holds focus at the given time.
- *  For instance, to catch "undo_command"  do the following:
-
-        var pan = new zebkit.ui.Panel([
-            function redo_command() {
-                // handle shortcut here
-            },
-
-            // visualize the component gets focus
-            function focused() {
-                this.$super();
-                this.setBackground(this.hasFocus()?"red":null);
-            }
-        ]);
-
-        // let our panel to hold focus by setting appropriate property
-        pan.canHaveFocus = true;
-
-
- *  @constructor
- *  @class zebkit.ui.ShortcutManager
- *  @extends {zebkit.ui.Manager}
- */
-
-/**
- * Shortcut event is handled by registering a method handler with events manager. The manager is accessed as
- * "zebkit.ui.events" static variable:
-
-        zebkit.ui.events.bind(function commandFired(c) {
-            ...
-        });
-
- * @event shortcut
- * @param {Object} c shortcut command
- *         @param {Array} c.args shortcut arguments list
- *         @param {String} c.command shortcut name
- */
-pkg.ShortcutManager = Class(pkg.Manager, [
-    function $prototype() {
-        /**
-         * Key pressed event handler.
-         * @param  {zebkit.ui.KeyEvent} e a key event
-         * @method keyPressed
-         */
-        this.keyPressed = function(e) {
-            var fo = pkg.focusManager.focusOwner;
-            if (fo != null && this.keyCommands[e.code]) {
-                var c = this.keyCommands[e.code];
-                if (c && c[e.mask] != null) {
-                    c = c[e.mask];
-                    pkg.events._.commandFired(c);
-                    if (fo[c.command]) {
-                         if (c.args && c.args.length > 0) fo[c.command].apply(fo, c.args);
-                         else fo[c.command]();
-                    }
-                }
-            }
-        };
-
-        this.$parseKey = function(k) {
-            var m = 0, c = 0, r = k.split("+");
-            for(var i = 0; i < r.length; i++) {
-                var ch = r[i].trim().toUpperCase();
-                if (pkg.KeyEvent.hasOwnProperty("M_" + ch)) {
-                    m += pkg.KeyEvent["M_" + ch];
-                }
-                else {
-                    if (pkg.KeyEvent.hasOwnProperty(ch)) {
-                        c = pkg.KeyEvent[ch];
-                    }
-                    else {
-                        c = parseInt(ch);
-                        if (c == NaN) {
-                            throw new Error("Invalid key code : " + ch);
-                        }
-                    }
-                }
-            }
-            return [m, c];
-        };
-
-        this.setCommands = function(commands) {
-            for(var i=0; i < commands.length; i++) {
-                var c = commands[i],
-                    p = this.$parseKey(c.key),
-                    v = this.keyCommands[p[1]];
-
-                if (v && v[p[0]]) {
-                    throw new Error("Duplicated command: '" + c.command +  "' (" + p +")");
-                }
-
-                if (v == null) {
-                    v = [];
-                }
-
-                v[p[0]] = c;
-                this.keyCommands[p[1]] = v;
-            }
-        };
-    },
-
-    function(commands){
-        this.$super();
-        this.keyCommands = {};
-        if (commands != null) {
-            pkg.events._.addEvents("commandFired");
-            this.setCommands(commands.common);
-            if (zebkit.isMacOS === true && commands.osx != null) {
-                this.setCommands(commands.osx);
-            }
-        }
-    }
-]);
-
-/**
- * Cursor manager class. Allows developers to control pointer cursor type by implementing an own
- * getCursorType method or by specifying a cursor by cursorType field. Imagine an UI component
- * needs to change cursor type. It
- *  can be done by one of the following way:
-
-    - **Implement getCursorType method by the component itself if the cursor type depends on cursor location**
-
-          var p = new zebkit.ui.Panel([
-               // implement getCursorType method to set required
-               // pointer cursor type
-               function getCursorType(target, x, y) {
-                   return zebkit.ui.Cursor.WAIT;
-               }
-          ]);
-
-    - **Define "cursorType" property in component if the cursor type doesn't depend on cursor location **
-
-          var myPanel = new zebkit.ui.Panel();
-          ...
-          myPanel.cursorType = zebkit.ui.Cursor.WAIT;
-
- *  @class zebkit.ui.CursorManager
- *  @constructor
- *  @extends {zebkit.ui.Manager}
- */
-pkg.CursorManager = Class(pkg.Manager, [
-    function $prototype() {
-        /**
-         * Define pointer moved events handler.
-         * @param  {zebkit.ui.PointerEvent} e a pointer event
-         * @method pointerMoved
-         */
-        this.pointerMoved = function(e){
-            if (this.$isFunc === true) {
-                this.cursorType = this.source.getCursorType(this.source, e.x, e.y);
-                this.target.style.cursor = (this.cursorType == null) ? "default"
-                                                                     : this.cursorType;
-            }
-        };
-
-        /**
-         * Define pointer entered events handler.
-         * @param  {zebkit.ui.PointerEvent} e a pointer event
-         * @method pointerEntered
-         */
-        this.pointerEntered = function(e){
-            if (e.source.cursorType != null || e.source.getCursorType != null) {
-                this.$isFunc = (e.source.getCursorType != null);
-                this.target = e.target;
-                this.source = e.source;
-
-                this.cursorType = this.$isFunc === true ? this.source.getCursorType(this.source, e.x, e.y)
-                                                        : this.source.cursorType;
-
-                this.target.style.cursor = (this.cursorType == null) ? "default"
-                                                                     : this.cursorType;
-            }
-        };
-
-        /**
-         * Define pointer exited events handler.
-         * @param  {zebkit.ui.PointerEvent} e a pointer event
-         * @method pointerExited
-         */
-        this.pointerExited  = function(e){
-            if (this.source != null) {
-                this.cursorType = "default";
-                if (this.target.style.cursor != this.cursorType) {
-                    this.target.style.cursor = this.cursorType;
-                }
-                this.source = this.target = null;
-                this.$isFunc = false;
-            }
-        };
-
-        /**
-         * Define pointer dragged events handler.
-         * @param  {zebkit.ui.PointerEvent} e a pointer event
-         * @method pointerDragged
-         */
-        this.pointerDragged = function(e) {
-            if (this.$isFunc === true) {
-                this.cursorType = this.source.getCursorType(this.source, e.x, e.y);
-                this.target.style.cursor = (this.cursorType == null) ? "default"
-                                                                      : this.cursorType;
-            }
-        };
-    },
-
-    function(){
-        this.$super();
-
-        /**
-         * Current cursor type
-         * @attribute cursorType
-         * @type {String}
-         * @readOnly
-         * @default "default"
-         */
-        this.cursorType = "default";
-        this.source = this.target = null;
-        this.$isFunc = false;
-    }
-]);
-
-/**
- * Event manager class. One of the key zebkit manager that is responsible for
- * distributing various events in zebkit UI. The manager provides number of
- * methods to register global events listeners.
- * @class zebkit.ui.EventManager
- * @constructor
- * @extends {zebkit.ui.Manager}
- */
-pkg.EventManager = Class(pkg.Manager, [
-    function $clazz(argument) {
-        var eventNames = [
-            'keyTyped',
-            'keyReleased',
-            'keyPressed',
-            'pointerDragged',
-            'pointerDragStarted',
-            'pointerDragEnded',
-            'pointerMoved',
-            'pointerClicked',
-            'pointerDoubleClicked',
-            'pointerPressed',
-            'pointerReleased',
-            'pointerEntered',
-            'pointerExited',
-
-            'focusLost',
-            'focusGained',
-
-            'compSized',
-            'compMoved',
-            'compEnabled',
-            'compShown',
-            'compAdded',
-            'compRemoved'
-        ];
-
-        this.$CHILD_EVENTS_MAP = {};
-
-        // add child<eventName> events names
-        var l = eventNames.length;
-        for(var i = 0; i < l; i++) {
-            var eventName = eventNames[i];
-            eventNames.push("child" + eventName[0].toUpperCase() + eventName.substring(1));
-            this.$CHILD_EVENTS_MAP[eventName] = eventNames[l + i];
-        }
-
-        this.Listerners = zebkit.util.ListenersClass.apply(this, eventNames);
-    },
-
-    function $prototype(clazz) {
-        var $CEM = clazz.$CHILD_EVENTS_MAP;
-
-        this.fireEvent = function(id, e){
-            var t = e.source, kk = $CEM[id], b = false;
-
-            // assign id that matches method to be called
-            e.id = id;
-
-            // call target component listener
-            if (t[id] != null) {
-                if (t[id].call(t, e) === true) {
-                    return true;
-                }
-            }
-
-            // call global listeners
-            b = this._[id](e);
-
-            // call parent listeners
-            if (b === false) {
-                for (t = t.parent;t != null; t = t.parent){
-                    if (t[kk] != null) {
-                        t[kk].call(t, e);
-                    }
-                }
-            }
-
-            return b;
-        };
-    },
-
-    function() {
-        this._ = new this.clazz.Listerners();
-        this.$super();
-    }
-]);
-
-pkg.zCanvas = Class(pkg.HtmlCanvas, [
-    function $clazz () {
-        this.CLASS_NAME = "zebcanvas";
-    },
-
-    function $prototype() {
-        this.$isRootCanvas   = true;
-        this.$lastFocusOwner = null;
-        this.isSizeFull      = false;
-
-        this.$toElementX = function(pageX, pageY) {
-            pageX -= this.offx;
-            pageY -= this.offy;
-
-            var c = this.$context.$states[this.$context.$curState];
-            return ((c.sx != 1 || c.sy != 1 || c.rotateVal !== 0) ? Math.round((c.crot * pageX + pageY * c.srot)/c.sx)
-                                                                  : pageX) - c.dx;
-        };
-
-        this.$toElementY = function(pageX, pageY) {
-            pageX -= this.offx;
-            pageY -= this.offy;
-
-            var c = this.$context.$states[this.$context.$curState];
-            return ((c.sx != 1 || c.sy != 1 || c.rotateVal !== 0) ? Math.round((pageY * c.crot - c.srot * pageX)/c.sy)
-                                                                 : pageY) - c.dy;
-        };
-
-        this.load = function(jsonPath, cb){
-            return this.root.load(jsonPath, cb);
-        };
-
-        // TODO: may be rename to dedicated method $doWheelScroll
-        this.$doScroll = function(dx, dy, src) {
-            if (src === "wheel") {
-                var owner = pkg.$pointerOwner["mouse"];
-                while (owner != null && owner.doScroll == null) {
-                    owner = owner.parent;
-                }
-
-                if (owner != null) {
-                    return owner.doScroll(dx, dy, src);
-                }
-            }
-        };
-
-        this.$keyTyped = function(e) {
-            if (pkg.focusManager.focusOwner != null) {
-                e.source = pkg.focusManager.focusOwner;
-                return EM.fireEvent("keyTyped", e);
-            }
-            return false;
-        };
-
-        this.$keyPressed = function(e) {
-            for(var i = this.kids.length - 1;i >= 0; i--){
-                var l = this.kids[i];
-                if (l.layerKeyPressed != null && l.layerKeyPressed(e) === true){
-                    if (e.eatMe === true) return true;
-                    break;
-                }
-            }
-
-            if (pkg.focusManager.focusOwner != null) {
-                e.source = pkg.focusManager.focusOwner;
-                return EM.fireEvent("keyPressed", e);
-            }
-
-            return false;
-        };
-
-        this.$keyReleased = function(e){
-            if (pkg.focusManager.focusOwner != null) {
-                e.source = pkg.focusManager.focusOwner;
-                return EM.fireEvent("keyReleased", e);
-            }
-
-            return false;
-        };
-
-        this.$pointerEntered = function(e) {
-            // TODO: review it quick and dirty fix try to track a situation
-            //       when the canvas has been moved
-            this.recalcOffset();
-
-            var x = this.$toElementX(e.pageX, e.pageY),
-                y = this.$toElementY(e.pageX, e.pageY),
-                d = this.getComponentAt(x, y),
-                o = pkg.$pointerOwner[e.identifier];
-
-            // also correct current component on that  pointer is located
-            if (d !== o) {
-                // if pointer owner is not null but doesn't match new owner
-                // generate pointer exit and clean pointer owner
-                if (o != null) {
-                    pkg.$pointerOwner[e.identifier] = null;
-                    EM.fireEvent("pointerExited", e.update(o, x, y));
-                }
-
-                // if new pointer owner is not null and enabled
-                // generate pointer entered event ans set new pointer owner
-                if (d != null && d.isEnabled === true){
-                    pkg.$pointerOwner[e.identifier] = d;
-                    EM.fireEvent("pointerEntered", e.update(d, x, y));
-                }
-            }
-        };
-
-        this.$pointerExited = function(e) {
-            var o = pkg.$pointerOwner[e.identifier];
-            if (o != null) {
-                pkg.$pointerOwner[e.identifier] = null;
-                return EM.fireEvent("pointerExited", e.update(o,
-                                                     this.$toElementX(e.pageX, e.pageY),
-                                                     this.$toElementY(e.pageX, e.pageY)));
-            }
-        };
-
-        /**
-         * Catch native canvas pointer move events
-         * @param {String} id an touch id (for touchable devices)
-         * @param {String} e a pointer event that has been triggered by canvas element
-         *
-         *         {
-         *             pageX : {Integer},
-         *             pageY : {Integer},
-         *             target: {HTMLElement}
-         *         }
-         * @protected
-         * @method $pointerMoved
-         */
-        this.$pointerMoved = function(e){
-            // if a pointer button has not been pressed handle the normal pointer moved event
-            var x = this.$toElementX(e.pageX, e.pageY),
-                y = this.$toElementY(e.pageX, e.pageY),
-                d = this.getComponentAt(x, y),
-                o = pkg.$pointerOwner[e.identifier],
-                b = false;
-
-            // check if pointer already inside a component
-            if (o != null) {
-                if (d != o) {
-                    pkg.$pointerOwner[e.identifier] = null;
-                    b = EM.fireEvent("pointerExited", e.update(o, x, y));
-
-                    if (d != null && d.isEnabled === true) {
-                        pkg.$pointerOwner[e.identifier] = d;
-                        b = EM.fireEvent("pointerEntered", e.update(d, x, y)) || b;
-                    }
-                }
-                else {
-                    if (d != null && d.isEnabled === true) {
-                        b = EM.fireEvent("pointerMoved", e.update(d, x, y));
-                    }
-                }
-            }
-            else {
-                if (d != null && d.isEnabled === true) {
-                    pkg.$pointerOwner[e.identifier] = d;
-                    b = EM.fireEvent("pointerEntered", e.update(d, x, y));
-                }
-            }
-
-            return b;
-        };
-
-        this.$pointerDragStarted = function(e) {
-            var x = this.$toElementX(e.pageX, e.pageY),
-                y = this.$toElementY(e.pageX, e.pageY),
-                d = this.getComponentAt(x, y);
-
-            // if target component can be detected fire pointer start dragging and
-            // pointer dragged events to the component
-            if (d != null && d.isEnabled === true) {
-                return EM.fireEvent("pointerDragStarted", e.update(d, x, y));
-            }
-
-            return false;
-        };
-
-        this.$pointerDragged = function(e){
-            if (pkg.$pointerOwner[e.identifier] != null) {
-                return EM.fireEvent("pointerDragged", e.update( pkg.$pointerOwner[e.identifier],
-                                                                this.$toElementX(e.pageX, e.pageY),
-                                                                this.$toElementY(e.pageX, e.pageY)));
-            }
-
-            return false;
-        };
-
-        this.$pointerDragEnded = function(e) {
-            if (pkg.$pointerOwner[e.identifier] != null) {
-                return EM.fireEvent("pointerDragEnded", e.update(pkg.$pointerOwner[e.identifier],
-                                                                 this.$toElementX(e.pageX, e.pageY),
-                                                                 this.$toElementY(e.pageX, e.pageY)));
-            }
-
-            return false;
-        };
-
-        this.$pointerClicked = function(e) {
-            var x = this.$toElementX(e.pageX, e.pageY),
-                y = this.$toElementY(e.pageX, e.pageY),
-                d = this.getComponentAt(x, y);
-
-            return d != null ? EM.fireEvent("pointerClicked", e.update(d, x, y))
-                             : false;
-        };
-
-        this.$pointerDoubleClicked = function(e) {
-            var x = this.$toElementX(e.pageX, e.pageY),
-                y = this.$toElementY(e.pageX, e.pageY),
-                d = this.getComponentAt(x, y);
-
-            return d != null ? EM.fireEvent("pointerDoubleClicked", e.update(d, x, y))
-                             : false;
-        };
-
-        this.$pointerReleased = function(e) {
-            var x  = this.$toElementX(e.pageX, e.pageY),
-                y  = this.$toElementY(e.pageX, e.pageY),
-                po = this.getComponentAt(this.$toElementX(e.pressPageX, e.pressPageY),
-                                         this.$toElementY(e.pressPageX, e.pressPageY));
-
-            // mouse pressed has not null target zebkit component
-            // send mouse released and mouse clicked (if necessary)
-            // to him
-            if (po != null) {
-                EM.fireEvent("pointerReleased", e.update(po, x, y));
-
-                //  make sure it is originally a touch event
-                //  TODO: Seems the code is invalid since it doesn't set move owner to null;
-                if (e.pointerType !== "mouse") {
-                    EM.fireEvent("pointerExited", e.update(po, x, y));
-                }
-            }
-
-            // mouse released can happen at new location, so move owner has to be corrected
-            // and mouse exited entered event has to be generated.
-            // the correction takes effect if we have just completed dragging or mouse pressed
-            // event target doesn't match pkg.$pointerOwner
-            if (e.pointerType === "mouse" && (e.pressPageX != e.pageX || e.pressPageY != e.pageY)) {
-                var nd = this.getComponentAt(x, y);
-                if (nd !== po) {
-                    if (po != null) {
-                        pkg.$pointerOwner[e.identifier] = null;
-                        EM.fireEvent("pointerExited", e.update(po, x, y));
-                    }
-
-                    if (nd != null && nd.isEnabled === true){
-                        pkg.$pointerOwner[e.identifier] = nd;
-                        EM.fireEvent("pointerEntered", e.update(nd, x, y));
-                    }
-                }
-            }
-        };
-
-        this.$pointerPressed = function(e) {
-            var x  = this.$toElementX(e.pageX, e.pageY),
-                y  = this.$toElementY(e.pageX, e.pageY);
-
-            // adjust event for passing it to layers
-            e.x = x;
-            e.y = y;
-            e.source = null;
-
-            // send pointer event to a layer and test if it has been activated
-            for(var i = this.kids.length - 1; i >= 0; i--){
-                var tl = this.kids[i];
-                if (tl.layerPointerPressed != null && tl.layerPointerPressed(e)) {
-                    if (e.eatMe === true) return true;
-                    break;
-                }
-            }
-
-            var d = this.getComponentAt(x, y);
-            if (d != null && d.isEnabled === true) {
-                if (pkg.$pointerOwner[e.identifier] !== d) {
-                    pkg.$pointerOwner[e.identifier] = d;
-                    EM.fireEvent("pointerEntered",  e.update(d, x, y));
-                }
-
-                EM.fireEvent("pointerPressed", e.update(d, x, y));
-            }
-        };
-
-        this.getComponentAt = function(x, y){
-            for(var i = this.kids.length; --i >= 0; ){
-                var tl = this.kids[i];
-
-                if (tl.isLayerActiveAt == null || tl.isLayerActiveAt(x, y)) {
-                    // !!!
-                    //  since the method is widely used the code below duplicates
-                    //  functionality of EM.getEventDestination(tl.getComponentAt(x, y));
-                    //  method
-                    // !!!
-                    var c = tl.getComponentAt(x, y);
-                    if (c != null)  {
-                        var p = c;
-                        while ((p = p.parent) != null) {
-                            if (p.catchInput != null && (p.catchInput === true || (p.catchInput !== false && p.catchInput(c)))) {
-                                c = p;
-                            }
-                        }
-                    }
-                    return c;
-                }
-            }
-            return null;
-        };
-
-        this.recalcOffset = function() {
-            // calculate the DOM element offset relative to window taking in account
-            // scrolling
-            var poffx = this.offx,
-                poffy = this.offy,
-                ba    = this.$container.getBoundingClientRect();
-
-            this.offx = Math.round(ba.left) + zebkit.web.$measure(this.$container, "border-left-width") +
-                                              zebkit.web.$measure(this.$container, "padding-left") +
-                                              window.pageXOffset;
-            this.offy = Math.round(ba.top) +  zebkit.web.$measure(this.$container, "padding-top" ) +
-                                              zebkit.web.$measure(this.$container, "border-top-width") +
-                                              window.pageYOffset;
-
-            if (this.offx != poffx || this.offy != poffy) {
-                // force to fire component re-located event
-                this.relocated(this, poffx, poffy);
-            }
-        };
-
-        /**
-         * Get the canvas layer by the specified layer ID. Layer is a children component
-         * of the canvas UI component. Every layer has an ID assigned to it the method
-         * actually allows developers to get the canvas children component by its ID
-         * @param  {String} id a layer ID
-         * @return {zebkit.ui.Panel} a layer (children) component
-         * @method getLayer
-         */
-        this.getLayer = function(id) {
-            return this[id];
-        };
-
-        // override relocated and resized
-        // to prevent unnecessary repainting
-        this.relocated = function(px,py) {
-            COMP_EVENT.source = this;
-            COMP_EVENT.px     = px;
-            COMP_EVENT.py     = py;
-            pkg.events.fireEvent("compMoved", COMP_EVENT);
-        };
-
-        this.resized = function(pw,ph) {
-            COMP_EVENT.source = this;
-            COMP_EVENT.prevWidth  = pw;
-            COMP_EVENT.prevHeight = ph;
-            pkg.events.fireEvent("compSized", COMP_EVENT);
-            // don't forget repaint it
-            this.repaint();
-        };
-
-        this.$initListeners = function() {
-            // TODO: hard-coded
-            new pkg.PointerEventUnifier(this.$container, this);
-            new pkg.KeyEventUnifier(this.element, this); // element has to be used since canvas is
-                                                         // styled to have focus and get key events
-            new pkg.MouseWheelSupport(this.$container, this);
-        };
-    },
-
-    function(element, w, h) {
-        // no arguments
-        if (arguments.length === 0) {
-            w = 400;
-            h = 400;
-        }
-        else {
-            if (arguments.length === 1) {
-                w = -1;
-                h = -1;
-            }
-            else {
-                if (arguments.length === 2) {
-                    h = w;
-                    w = element;
-                    element = null;
-                }
-            }
-        }
-
-        // if passed element is string than consider it as
-        // an ID of an element that is already in DOM tree
-        if (zebkit.isString(element)) {
-            var id = element;
-            element = document.getElementById(id);
-
-            // no canvas can be detected
-            if (element == null) {
-                throw new Error("Canvas id='" + id + "' element cannot be found");
-            }
-        }
-
-        this.$super(element);
-
-        // since zCanvas is top level element it doesn't have to have
-        // absolute position
-        this.$container.style.position = "relative";
-
-        // let canvas zCanvas listen WEB event
-        this.$container.style["pointer-events"] = "auto";
-
-        // if canvas is not yet part of HTML let's attach it to
-        // body.
-        if (this.$container.parentNode == null) {
-            document.body.appendChild(this.$container);
-        }
-
-        // force canvas to have a focus
-        if (this.element.getAttribute("tabindex") === null) {
-            this.element.setAttribute("tabindex", "1");
-        }
-
-        if (w < 0) w = this.element.offsetWidth;
-        if (h < 0) h = this.element.offsetHeight;
-
-        // !!!
-        // save canvas in list of created Zebkit canvases
-        // do it before calling setSize(w,h) method
-        pkg.$canvases.push(this);
-
-        this.setSize(w, h);
-
-        // sync canvas visibility with what canvas style says
-        var cvis = (this.element.style.visibility == "hidden" ? false : true);
-        if (this.isVisible != cvis) {
-            this.setVisible(cvis);
-        }
-
-        // call event method if it is defined
-        if (this.canvasInitialized != null) {
-            this.canvasInitialized();
-        }
-
-        var $this = this;
-
-        // this method should clean focus if
-        // one of of a child DOM element gets focus
-        zebkit.web.$focusin(this.$container, function(e) {
-            if (e.target !== $this.$container && e.target.parentNode != null && e.target.parentNode.getAttribute("data-zebcont") == null) {
-                pkg.focusManager.requestFocus(null);
-            }
-            else {
-                // clear focus if a focus owner component is placed in another zCanvas
-                if (e.target === $this.$container && pkg.focusManager.focusOwner != null &&  pkg.focusManager.focusOwner.getCanvas() !== $this) {
-                    pkg.focusManager.requestFocus(null);
-                }
-            }
-        }, true);
-    },
-
-    function setSize(w, h) {
-        if (this.width != w || h != this.height) {
-            this.$super(w, h);
-
-            // let know to other zebkit canvases that
-            // the size of an element on the page has
-            // been updated and they have to correct
-            // its anchor.
-            pkg.$elBoundsUpdated();
-        }
-        return this;
-    },
-
-    function fullSize() {
-        /**
-         * Indicate if the canvas has to be stretched to
-         * fill the whole screen area.
-         * @type {Boolean}
-         * @attribute isFullSize
-         * @readOnly
-         */
-        if (this.isFullSize !== true) {
-            if (zebkit.web.$contains(this.$container) !== true) {
-                throw new Error("zCanvas is not a part of DOM tree");
-            }
-
-            this.isFullSize = true;
-            this.setLocation(0, 0);
-
-            // adjust body to kill unnecessary gap for inline-block zCanvas element
-            // otherwise body size will be slightly horizontally bigger than visual
-            // viewport height what causes scroller appears
-            document.body.style["font-size"] = "0px";
-
-            var ws = zebkit.web.$viewPortSize();
-            this.setSize(ws.width, ws.height);
-        }
-    },
-
-    function setVisible(b) {
-        var prev = this.isVisible;
-        this.$super(b);
-
-        // Since zCanvas has no parent component calling the super
-        // method above doesn't trigger repainting. So, do it here.
-        if (b != prev) {
-            this.repaint();
-        }
-        return this;
-    },
-
-    function vrp() {
-        this.$super();
-        if (zebkit.web.$contains(this.element) && this.element.style.visibility === "visible") {
-            this.repaint();
-        }
-    },
-
-    function kidAdded(i,constr,c){
-        if (typeof this[c.id] !== "undefined") {
-            throw new Error("Layer '" + c.id + "' already exist");
-        }
-
-        this[c.id] = c;
-        this.$super(i, constr, c);
-    },
-
-    function kidRemoved(i, c){
-        delete this[c.id];
-        this.$super(i, c);
-    },
-
-    // TODO: should it renamed back ?
-    function requestFocus2() {
-        if (document.activeElement != this.element) {
-            this.element.focus();
-        }
-    }
-]);
-
-zebkit.ready(
-    // dynamic HTML DOM tree has to be placed to separated function
-    // that has to be first in ready list. the function make
-    // the page loading busy before necessary dynamically
-    // inserted elements will be ready.
-    function() {
-        zebkit.busy();
-        $fmCanvas = document.createElement("canvas").getContext("2d");
-
-        var e = document.getElementById("zebkit.fm");
-        if (e == null) {
-            e = document.createElement("div");
-            e.setAttribute("id", "zebkit.fm");  // !!! position fixed below allows to avoid 1px size in HTML layout for "zebkit.fm" element
-            e.setAttribute("style", "visibility:hidden;line-height:0;height:1px;vertical-align:baseline;position:fixed;");
-            e.innerHTML = "<span id='zebkit.fm.text' style='display:inline;vertical-align:baseline;'>&nbsp;</span>" +
-                          "<img id='zebkit.fm.image' style='width:1px;height:1px;display:inline;vertical-align:baseline;' width='1' height='1'/>";
-            document.body.appendChild(e);
-        }
-        $fmText       = document.getElementById("zebkit.fm.text");
-        $fmImage      = document.getElementById("zebkit.fm.image");
-        $bodyFontSize = window.getComputedStyle(document.body, null).getPropertyValue('font-size');
-
-        // the next function passed to zebkit.ready() will be blocked
-        // till the picture is completely loaded
-        $fmImage.onload = function() {
-           zebkit.ready();
-        };
-
-        // set 1x1 transparent picture
-        $fmImage.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII%3D';
-    },
-
-    function() {
-        var p = zebkit()['zebkit.json'];
-        pkg.load(p != null ? p : pkg.$url.join("canvas.json"),
-            function(e) {
-                if (e != null) {
-                    console.log("Config JSON loading failed:" + (e.stack != null ? e.stack : e));
-                }
-            }
-        );
-    },
-
-    function() {
-        try {
-            zebkit.busy();
-
-            // store reference to event manager
-            EM = pkg.events;
-
-            //!!!
-            // IE9 has an error: first mouse press formally pass focus to
-            // canvas, but actually it doesn't get key events. To fix it
-            // it is necessary to pass focus explicitly to window
-            if (zebkit.isIE) window.focus();
-        }
-        catch(e) {
-            ///!!!!! for some reason throwing exception is not appeared in console.
-            //       but it has side effect to the system, what causes other exception
-            //       that is not relevant to initial one
-            console.log(e.stack ? e.stack : e);
-            throw new Error(e.toString());
-        }
-        finally { zebkit.ready(); }
-    }
-);
-
-/**
- * @for
- */
-
-})(zebkit("ui"), zebkit.Class);
-(function(pkg, Class) {
-
-/**
- * @module  ui
- * @required easyoop, util
- */
-
-pkg.$view = function(v) {
-    if (v == null || v.paint != null) return v;
-
-    if (zebkit.isString(v)) {
-        return zebkit.util.rgb.hasOwnProperty(v) ? zebkit.util.rgb[v]
-                                                 : (pkg.borders != null && pkg.borders.hasOwnProperty(v) ? pkg.borders[v]
-                                                                                                         : new zebkit.util.rgb(v));
-    }
-
-    if (Array.isArray(v)) {
-        return new pkg.CompositeView(v);
-    }
-
-    if (typeof v !== 'function') {
-        return new pkg.ViewSet(v);
-    }
-
-    var vv = new pkg.View();
-    vv.paint = v;
-    return vv;
-};
 
 /**
 * Sunken border view
@@ -13602,7 +9832,7 @@ pkg.CompRender = Class(pkg.Render, [
             var c = this.target;
             if (c != null && c.isVisible === true) {
                 var prevW = -1, prevH = 0;
-                if ((w != c.width || h != c.height) && c.getCanvas() == null){
+                if ((w !== c.width || h !== c.height) && c.getCanvas() == null){
                     prevW = c.width;
                     prevH = c.height;
                     c.setSize(w, h);
@@ -13962,7 +10192,7 @@ pkg.CompositeView = Class(pkg.View, [
 
         this[''] = function() {
             this.views = [];
-            var args = arguments.length == 1 ? arguments[0] : arguments;
+            var args = arguments.length === 1 ? arguments[0] : arguments;
             for(var i = 0; i < args.length; i++) {
                 this.views[i] = pkg.$view(args[i]);
                 this.$recalc(this.views[i]);
@@ -14191,7 +10421,13 @@ pkg.ArrowView = Class(pkg.View, [
 ]);
 
 pkg.BaseTextRender = Class(pkg.Render,  [
-    function $prototype() {
+    function $clazz() {
+        this.font          =  pkg.font;
+        this.color         = "gray";
+        this.disabledColor = "white";
+    },
+
+    function $prototype(clazz) {
         /**
          * UI component that holds the text render
          * @attribute owner
@@ -14874,9 +11110,8 @@ pkg.DecoratedTextRender = zebkit.Class(pkg.TextRender, [
 
 
 pkg.BoldTextRender = Class(pkg.TextRender, [
-    function(t) {
-        this.$super(t);
-        this.setFont(pkg.boldFont);
+    function $clazz() {
+        this.font = pkg.boldFont;
     }
 ]);
 
@@ -14889,7 +11124,9 @@ pkg.BoldTextRender = Class(pkg.TextRender, [
  */
 pkg.PasswordText = Class(pkg.TextRender, [
     function(text){
-        if (arguments.length === 0) text = new zebkit.data.SingleLineTxt("");
+        if (arguments.length === 0) {
+            text = new zebkit.data.SingleLineTxt("");
+        }
 
         /**
          * Echo character that will replace characters of hidden text
@@ -14919,7 +11156,9 @@ pkg.PasswordText = Class(pkg.TextRender, [
     function setEchoChar(ch){
         if (this.echo != ch){
             this.echo = ch;
-            if (this.target != null) this.invalidate(0, this.target.getLines());
+            if (this.target != null) {
+                this.invalidate(0, this.target.getLines());
+            }
         }
     },
 
@@ -15000,7 +11239,7 @@ pkg.TabBorder = Class(pkg.View, [
                     g.lineTo(x, yy + dt);
 
                     if (d.isEnabled === true){
-                        g.setColor(t == 2 ? this.fillColor1 : this.fillColor2);
+                        g.setColor(t === 2 ? this.fillColor1 : this.fillColor2);
                         g.fill();
                     }
 
@@ -15537,21 +11776,4262 @@ pkg.CaptionBgView = Class(pkg.View, [
 /**
  * @for
  */
+});
+zebkit.package("ui", function(pkg, Class) {
 
-})(zebkit("ui"), zebkit.Class);
+/**
+ * Zebkit UI. The UI is powerful way to create any imaginable
+ * user interface for WEB. The idea is based on developing
+ * hierarchy of UI components that sits and renders on HTML5
+ * Canvas element.
+ *
+ * Write zebkit UI code in safe place where you can be sure all
+ * necessary structure, configurations, etc are ready. The safe
+ * place is "zebkit.ready(...)" method. Development of zebkit UI
+ * application begins from creation "zebkit.ui.zCanvas" class,
+ * that is starting point and root element of your UI components
+ * hierarchy. "zCanvas" is actually wrapper around HTML5 Canvas
+ * element where zebkit UI sits on. The typical zebkit UI coding
+ * template is shown below:
 
-(function(pkg, Class) {
+     // build UI in safe place
+     zebkit.ready(function() {
+        // create canvas element
+        var c = new zebkit.ui.zCanvas(400, 400);
 
-// redefine configuration
-zebkit()["zebkit.json"] = pkg.$url.join("zebkit.json");
+        // start placing UI component on c.root panel
+        //set layout manager
+        c.root.setLayout(new zebkit.layout.BorderLayout());
+        //add label to top
+        c.root.add("top",new zebkit.ui.Label("Top label"));
+        //add text area to center
+        c.root.add("center",new zebkit.ui.TextArea(""));
+        //add button area to bottom
+        c.root.add("bottom",new zebkit.ui.Button("Button"));
+        ...
+     });
 
+ *  The latest version of zebkit JavaScript is available in repository:
+
+        <script src='http://repo.zebkit.org/latest/zebkit.min.js'
+                type='text/javascript'></script>
+
+ * @module ui
+ * @main ui
+ * @requires zebkit, util, io, data
+ */
+
+var temporary = { x:0, y:0, width:0, height:0 }, COMP_EVENT, FOCUS_EVENT;
+
+// keep pointer owners (the component where cursor/finger placed in)
+pkg.$pointerOwner = {};
+pkg.$pointerPressedOwner = {};
+
+pkg.FocusEvent = Class(zebkit.util.Event, [
+    function $prototype() {
+        this.related = null;
+    }
+]);
+
+pkg.CompEvent = Class(zebkit.util.Event, [
+    function $prototype() {
+        this.kid = this.constraints = null;
+        this.prevX = this.prevY = this.index = -1;
+        this.prevWidth = this.prevHeight = -1;
+    }
+]);
+
+COMP_EVENT  = new pkg.CompEvent();
+FOCUS_EVENT = new pkg.FocusEvent();
+
+//
+// Extend Pointer event with zebkit specific fields and methods
+//
+pkg.PointerEvent.extend([
+    function $prototype() {
+        /**
+         * Absolute mouse pointer x coordinate
+         * @attribute absX
+         * @readOnly
+         * @type {Integer}
+         */
+        this.absX = 0;
+
+        /**
+         * Absolute mouse pointer y coordinate
+         * @attribute absY
+         * @readOnly
+         * @type {Integer}
+         */
+         this.absY = 0;
+
+        /**
+         * Mouse pointer x coordinate (relatively to source UI component)
+         * @attribute x
+         * @readOnly
+         * @type {Integer}
+         */
+        this.x = 0;
+
+        /**
+         * Mouse pointer y coordinate (relatively to source UI component)
+         * @attribute y
+         * @readOnly
+         * @type {Integer}
+         */
+        this.y = 0;
+
+        /**
+         * Reset the event properties with new values
+         * @private
+         * @param  {zebkit.ui.Panel} source  a source component that triggers the event
+         * @param  {Integer} ax an absolute (relatively to a canvas where the source
+         * component is hosted) x mouse cursor coordinate
+         * @param  {Integer} ay an absolute (relatively to a canvas where the source
+         * component is hosted) y mouse cursor coordinate
+         * @method  updateCoordinates
+         */
+        this.update = function(source,ax,ay){
+            // this can speed up calculation significantly check if source zebkit component
+            // has not been changed, his location and parent component also has not been
+            // changed than we can skip calculation of absolute location by traversing
+            // parent hierarchy
+            if (this.source        === source        &&
+                this.source.parent === source.parent &&
+                source.x           === this.$px      &&
+                source.y           === this.$py         )
+            {
+                this.x += (ax - this.absX);
+                this.y += (ay - this.absY);
+                this.absX = ax;
+                this.absY = ay;
+                this.source = source;
+            }
+            else {
+                this.source = source;
+                this.absX = ax;
+                this.absY = ay;
+
+                // convert absolute location to relative location
+                while (source.parent != null) {
+                    ax -= source.x;
+                    ay -= source.y;
+                    source = source.parent;
+                }
+                this.x = ax;
+                this.y = ay;
+            }
+
+            this.$px = source.x;
+            this.$py = source.y;
+
+            return this;
+        };
+    }
+]);
+
+pkg.load = function(path, callback) {
+    return new pkg.Bag(pkg).load(path, callback);
+};
+
+pkg.Bag = Class(zebkit.util.Bag, [
+    function $prototype() {
+        this.globalPropertyLookup = this.usePropertySetters = true;
+
+        this.loadImage = function(path) {
+            if (this.url != null && zebkit.URL.isAbsolute(path) === false) {
+                var base = (new zebkit.URL(this.url)).getParentURL();
+                path = base.join(path);
+            }
+            return zebkit.web.$loadImage(path);
+        };
+    },
+
+    function load(s, cb) {
+        if (cb != null) {
+            zebkit.busy();
+            try {
+                return this.$super(s, function(e) {
+                    // if an error during loading has happened callback method
+                    // gets the error as a single argument. The problem callback itself
+                    // can triggers the error and than be called second time but
+                    // with the error as argument. So we have to recognize the situation
+                    // by analyzing if the callback gets an error as
+                    if (e == null) {
+                        zebkit.ready();
+                    }
+                    cb.call(this, e);
+                });
+            }
+            catch(e) {
+                zebkit.ready();
+                throw e;
+            }
+        }
+
+        return this.$super(s, null);
+    }
+]);
+
+pkg.$getPS = function(l) {
+    return l != null && l.isVisible === true ? l.getPreferredSize()
+                                             : { width:0, height:0 };
+};
+
+pkg.$cvp = function(c, r) {
+    if (c.width > 0 && c.height > 0 && c.isVisible === true){
+        var p = c.parent, px = -c.x, py = -c.y;
+        if (r == null) {
+            r = { x:0, y:0, width : c.width, height : c.height };
+        }
+        else {
+            r.x = r.y = 0;
+            r.width  = c.width;
+            r.height = c.height;
+        }
+
+
+        while (p != null && r.width > 0 && r.height > 0) {
+            var xx = r.x > px ? r.x : px,
+                yy = r.y > py ? r.y : py,
+                w1 = r.x + r.width,
+                w2 = px  + p.width,
+                h1 = r.y + r.height,
+                h2 = py + p.height;
+
+            r.width  = (w1 < w2 ? w1 : w2) - xx,
+            r.height = (h1 < h2 ? h1 : h2) - yy;
+            r.x = xx;
+            r.y = yy;
+
+            px -= p.x;
+            py -= p.y;
+            p = p.parent;
+        }
+
+        return r.width > 0 && r.height > 0 ? r : null;
+    }
+    return null;
+};
+
+pkg.Cursor = {
+    DEFAULT     : "default",
+    MOVE        : "move",
+    WAIT        : "wait",
+    TEXT        : "text",
+    HAND        : "pointer",
+    NE_RESIZE   : "ne-resize",
+    SW_RESIZE   : "sw-resize",
+    SE_RESIZE   : "se-resize",
+    NW_RESIZE   : "nw-resize",
+    S_RESIZE    : "s-resize",
+    W_RESIZE    : "w-resize",
+    N_RESIZE    : "n-resize",
+    E_RESIZE    : "e-resize",
+    COL_RESIZE  : "col-resize",
+    HELP        : "help"
+};
+
+pkg.makeFullyVisible = function(d,c){
+    if (arguments.length === 1) {
+        c = d;
+        d = c.parent;
+    }
+
+    var right  = d.getRight(),
+        top    = d.getTop(),
+        bottom = d.getBottom(),
+        left   = d.getLeft(),
+        xx     = c.x,
+        yy     = c.y;
+
+    if (xx < left) xx = left;
+    if (yy < top)  yy = top;
+    if (xx + c.width > d.width - right) xx = d.width + right - c.width;
+    if (yy + c.height > d.height - bottom) yy = d.height + bottom - c.height;
+    c.setLocation(xx, yy);
+};
+
+pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
+    if (arguments.length < 8) {
+        tt = t.getTop();
+        ll = t.getLeft();
+        bb = t.getBottom();
+        rr = t.getRight();
+    }
+
+    var dw = t.width, dh = t.height;
+    if (dw > 0 && dh > 0){
+        if (dw - ll - rr > w){
+            var xx = x + px;
+            if (xx < ll) px += (ll - xx);
+            else {
+                xx += w;
+                if (xx > dw - rr) px -= (xx - dw + rr);
+            }
+        }
+        if (dh - tt - bb > h){
+            var yy = y + py;
+            if (yy < tt) py += (tt - yy);
+            else {
+                yy += h;
+                if (yy > dh - bb) py -= (yy - dh + bb);
+            }
+        }
+        return [px, py];
+    }
+    return [0, 0];
+};
+
+/**
+ *  This the core UI component class. All other UI components has to be
+ *  successor of panel class.
+
+      // instantiate panel with no arguments
+      var p = new zebkit.ui.Panel();
+
+      // instantiate panel with border layout set as its layout manager
+      var p = new zebkit.ui.Panel(new zebkit.layout.BorderLayout());
+
+      // instantiate panel with the given properties (border
+      // layout manager, blue background and plain border)
+      var p = new zebkit.ui.Panel({
+         layout: new zebkit.ui.BorderLayout(),
+         background : "blue",
+         border     : "plain"
+      });
+
+ * **Container. **
+ * Panel can contains number of other UI components as its children where
+ * the children components are placed with a defined by the panel layout
+ * manager:
+
+      // add few children component to panel top, center and bottom parts
+      // with help of border layout manager
+      var p = new zebkit.ui.Panel();
+      p.setLayout(new zebkit.layout.BorderLayout(4)); // set layout manager to
+                                                     // order children components
+
+      p.add("top", new zebkit.ui.Label("Top label"));
+      p.add("center", new zebkit.ui.TextArea("Text area"));
+      p.add("bottom", new zebkit.ui.Button("Button"));
+
+ * **Events. **
+ * The class provides possibility to catch various component and input
+ * events by declaring an appropriate event method handler. The most
+ * simple case you just define a method:
+
+      var p = new zebkit.ui.Panel();
+      p.pointerPressed = function(e) {
+          // handle event here
+      };
+
+* If you prefer to create an anonymous class instance you can do it as
+* follow:
+
+      var p = new zebkit.ui.Panel([
+          function pointerPressed(e) {
+              // handle event here
+          }
+      ]);
+
+* One more way to add the event handler is dynamic extending of an instance
+* class demonstrated below:
+
+      var p = new zebkit.ui.Panel("Test");
+      p.extend([
+          function pointerPressed(e) {
+              // handle event here
+          }
+      ]);
+
+ * Pay attention Zebkit UI components often declare own event handlers and
+ * in this case you can overwrite the default event handler with a new one.
+ * Preventing the basic event handler execution can cause the component will
+ * work improperly. You should care about the base event handler execution
+ * as follow:
+
+      // button component declares own pointer pressed event handler
+      // we have to call the original handler to keep the button component
+      // properly working
+      var p = new zebkit.ui.Button("Test");
+      p.extend([
+          function pointerPressed(e) {
+              this.$super(e); // call parent class event handler implementation
+              // handle event here
+          }
+      ]);
+
+ *  @class zebkit.ui.Panel
+ *  @param {Object|zebkit.layout.Layout} [l] pass a layout manager or
+ *  number of properties that have to be applied to the instance of
+ *  the panel class.
+ *  @constructor
+ *  @extends zebkit.layout.Layoutable
+ */
+
+
+
+/**
+ * Implement the event handler method to catch pointer pressed event.
+ * The event is triggered every time a pointer button has been pressed or
+ * a finger has touched a touch screen.
+
+     var p = new zebkit.ui.Panel();
+     p.pointerPressed = function(e) { ... }; // add event handler
+
+ * @event pointerPressed
+ * @param {zebkit.ui.PointerEvent} e a pointer event
+*/
+
+/**
+ * Implement the event handler method to catch pointer released event.
+ * The event is triggered every time a pointer button has been released or
+ * a finger has untouched a touch screen.
+
+     var p = new zebkit.ui.Panel();
+     p.pointerReleased = function(e) { ... }; // add event handler
+
+ * @event pointerReleased
+ * @param {zebkit.ui.PointerEvent} e a pointer event
+ */
+
+/**
+ * Implement the event handler method  to catch pointer moved event.
+ * The event is triggered every time a pointer cursor has been moved with
+ * no a pointer button pressed.
+
+     var p = new zebkit.ui.Panel();
+     p.pointerMoved = function(e) { ... }; // add event handler
+
+ * @param {zebkit.ui.PointerEvent} e a pointer event
+ * @event  pointerMoved
+ */
+
+/**
+ * Implement the event handler method to catch pointer entered event.
+ * The event is triggered every time a pointer cursor entered the
+ * given component.
+
+     var p = new zebkit.ui.Panel();
+     p.pointerEntered = function(e) { ... }; // add event handler
+
+ * @param {zebkit.ui.PointerEvent} e a pointer event
+ * @event  pointerEntered
+ */
+
+/**
+ * Implement the event handler method to catch pointer exited event.
+ * The event is triggered every time a pointer cursor exited the given
+ * component.
+
+     var p = new zebkit.ui.Panel();
+     p.pointerExited = function(e) { ... }; // add event handler
+
+ * @param {zebkit.ui.PointerEvent} e a pointer event
+ * @event  pointerExited
+ */
+
+/**
+ * Implement the event handler method to catch pointer clicked event.
+ * The event is triggered every time a pointer button has been clicked. Click events
+ * are generated only if no one pointer moved or drag events has been generated
+ * in between pointer pressed -> pointer released events sequence.
+
+     var p = new zebkit.ui.Panel();
+     p.pointerClicked = function(e) { ... }; // add event handler
+
+ * @param {zebkit.ui.PointerEvent} e a pointer event
+ * @event  pointerClicked
+ */
+
+/**
+ * Implement the event handler method to catch pointer dragged event.
+ * The event is triggered every time a pointer cursor has been moved when a pointer button
+ * has been pressed. Or when a finger has been moved over a touch screen.
+
+     var p = new zebkit.ui.Panel();
+     p.pointerDragged = function(e) { ... }; // add event handler
+
+ * @param {zebkit.ui.PointerEvent} e a pointer event
+ * @event  pointerDragged
+ */
+
+/**
+ * Implement the event handler method to catch pointer drag started event.
+ * The event is triggered every time a pointer cursor has been moved first time when a pointer button
+ * has been pressed. Or when a finger has been moved first time over a touch screen.
+
+     var p = new zebkit.ui.Panel();
+     p.pointerDragStarted = function(e) { ... }; // add event handler
+
+ * @param {zebkit.ui.PointerEvent} e a pointer event
+ * @event  pointerDragStarted
+*/
+
+/**
+ * Implement the event handler method to catch pointer drag ended event.
+ * The event is triggered every time a pointer cursor has been moved last time when a pointer button
+ * has been pressed. Or when a finger has been moved last time over a touch screen.
+
+     var p = new zebkit.ui.Panel();
+     p.pointerDragEnded = function(e) { ... }; // add event handler
+
+ * @param {zebkit.ui.PointerEvent} e a pointer event
+ * @event  pointerDragEnded
+*/
+
+/**
+ * Implement the event handler method to catch key pressed event
+ * The event is triggered every time a key has been pressed.
+
+     var p = new zebkit.ui.Panel();
+     p.keyPressed = function(e) { ... }; // add event handler
+
+ * @param {zebkit.ui.KeyEvent} e a key event
+ * @event  keyPressed
+ */
+
+/**
+ * Implement the event handler method to catch key types event
+ * The event is triggered every time a key has been typed.
+
+     var p = new zebkit.ui.Panel();
+     p.keyTyped = function(e) { ... }; // add event handler
+
+ * @param {zebkit.ui.KeyEvent} e a key event
+ * @event  keyTyped
+ */
+
+/**
+ * Implement the event handler method to catch key released event
+ * The event is triggered every time a key has been released.
+
+     var p = new zebkit.ui.Panel();
+     p.keyReleased = function(e) { ... }; // add event handler
+
+ * @param {zebkit.ui.KeyEvent} e a key event
+ * @event  keyReleased
+ */
+
+/**
+ * Implement the event handler method to catch the component sized event
+ * The event is triggered every time the component has been re-sized.
+
+     var p = new zebkit.ui.Panel();
+     p.compSized = function(c, pw, ph) { ... }; // add event handler
+
+ * @param {zebkit.ui.Panel} c a component that has been sized
+ * @param {Integer} pw a previous width the sized component had
+ * @param {Integer} ph a previous height the sized component had
+ * @event compSized
+ */
+
+/**
+ * Implement the event handler method to catch component moved event
+ * The event is triggered every time the component location has been
+ * updated.
+
+     var p = new zebkit.ui.Panel();
+     p.compMoved = function(c, px, py) { ... }; // add event handler
+
+ * @param {zebkit.ui.Panel} c a component that has been moved
+ * @param {Integer} px a previous x coordinate the moved component had
+ * @param {Integer} py a previous y coordinate the moved component had
+ * @event compMoved
+ */
+
+/**
+ * Implement the event handler method to catch component enabled event
+ * The event is triggered every time a component enabled state has been
+ * updated.
+
+     var p = new zebkit.ui.Panel();
+     p.compEnabled = function(c) { ... }; // add event handler
+
+ * @param {zebkit.ui.Panel} c a component whose enabled state has been updated
+ * @event compEnabled
+ */
+
+/**
+ * Implement the event handler method to catch component shown event
+ * The event is triggered every time a component visibility state has
+ * been updated.
+
+     var p = new zebkit.ui.Panel();
+     p.compShown = function(c) { ... }; // add event handler
+
+ * @param {zebkit.ui.Panel} c a component whose visibility state has been updated
+ * @event compShown
+ */
+
+/**
+ * Implement the event handler method to catch component added event
+ * The event is triggered every time the component has been inserted into
+ * another one.
+
+     var p = new zebkit.ui.Panel();
+     p.compAdded = function(p, constr, c) { ... }; // add event handler
+
+ * @param {zebkit.ui.Panel} p a parent component of the component has been added
+ * @param {Object} constr a layout constraints
+ * @param {zebkit.ui.Panel} c a component that has been added
+ * @event compAdded
+ */
+
+/**
+ * Implement the event handler method to catch component removed event
+ * The event is triggered every time the component has been removed from
+ * its parent UI component.
+
+     var p = new zebkit.ui.Panel();
+     p.compRemoved = function(p, i, c) { ... }; // add event handler
+
+ * @param {zebkit.ui.Panel} p a parent component of the component that has been removed
+ * @param {Integer} i an index of removed component
+ * @param {zebkit.ui.Panel} c a component that has been removed
+ * @event compRemoved
+ */
+
+/**
+ * Implement the event handler method to catch component focus gained event
+ * The event is triggered every time a component has gained focus.
+
+     var p = new zebkit.ui.Panel();
+     p.focusGained = function(e) { ... }; // add event handler
+
+ * @param {zebkit.ui.FocusEvent} e an input event
+ * @event  focusGained
+ */
+
+/**
+ * Implement the event handler method to catch component focus lost event
+ * The event is triggered every time a component has lost focus
+
+     var p = new zebkit.ui.Panel();
+     p.focusLost = function(e) { ... }; // add event handler
+
+ * @param {zebkit.ui.FocusEvent} e an input event
+ * @event  focusLost
+ */
+
+/**
+ * Implement the event handler method to catch children components component events
+ *
+     var p = new zebkit.ui.Panel();
+     p.childCompEvent = function(id, src, p1, p2) { ... }; // add event handler
+
+ * @param {Integer} id a component event ID. The id can have one of the following value:
+
+
+ * @param {zebkit.ui.Panel} src a component that triggers the event
+ * @param {zebkit.ui.Panel|Integer|Object} p1 an event first parameter that depends
+ * on an component event that has happened:
+
+
+   - if id is **zebkit.ui.Panel.SIZED** the parameter is previous component width
+   - if id is **zebkit.ui.Panel.MOVED** the parameter is previous component x location
+   - if id is **zebkit.ui.Panel.ADDED** the parameter is constraints a new component has been added
+   - if id is **zebkit.ui.Panel.REMOVED** the parameter is null
+
+ * @param {zebkit.ui.Panel|Integer|Object} p2 an event second parameter depends
+ * on an component event that has happened:
+
+
+    - if id is **zebkit.ui.Panel.SIZED** the parameter is previous component height
+    - if id is **zebkit.ui.Panel.MOVED** the parameter is previous component y location
+    - if id is **zebkit.ui.Panel.ADDED** the parameter is reference to the added children component
+    - if id is **zebkit.ui.Panel.REMOVED** the parameter is reference to the removed children component
+
+ * @event  childCompEvent
+ */
+
+ /**
+  * The method is called for focusable UI components (components that can hold input focus) to ask
+  * a string to be saved in native clipboard
+  *
+  * @return {String} a string to be copied in native clipboard
+  *
+  * @event clipCopy
+  */
+
+ /**
+  * The method is called to pass string from clipboard to a focusable (a component that can hold
+  * input focus) UI component
+  *
+  * @param {String} s a string from native clipboard
+  *
+  * @event clipPaste
+  */
+
+pkg.Panel = Class(zebkit.layout.Layoutable, [
+    function $prototype() {
+        // TODO: not stable api, probably it should be moved to static
+        this.wrapWithCanvas = function() {
+            var c = new pkg.HtmlCanvas();
+            c.setLayout(new zebkit.layout.StackLayout());
+            c.add(this);
+            return c;
+        };
+
+        // TODO: not stable api, probably it should be moved to static
+        this.wrapWithHtmlElement = function() {
+            var c = new pkg.HtmlElement();
+            c.setLayout(new zebkit.layout.StackLayout());
+            c.add(this);
+            return c;
+        };
+
+        /**
+         * Request the whole UI component or part of the UI component to be repainted
+         * @param  {Integer} [x] x coordinate of the component area to be repainted
+         * @param  {Integer} [y] y coordinate of the component area to be repainted
+         * @param  {Integer} [w] width of the component area to be repainted
+         * @param  {Integer} [h] height of the component area to be repainted
+         * @method repaint
+         */
+        this.repaint = function(x,y,w,h) {
+            // step I: skip invisible components and components that are not in hierarchy
+            //         don't initiate repainting thread for such sort of the components,
+            //         but don't forget for zCanvas whose parent field is null, but it has $context
+            if (this.isVisible === true && (this.parent != null || this.$context != null)) {
+                //!!! find context buffer that holds the given component
+
+                var canvas = this;
+                for(; canvas.$context == null; canvas = canvas.parent) {
+                    // component either is not in visible state or is not in hierarchy
+                    // than stop repaint procedure
+                    if (canvas.isVisible === false || canvas.parent == null) {
+                        return;
+                    }
+                }
+
+                // no arguments means the whole component has top be repainted
+                if (arguments.length === 0) {
+                    x = y = 0;
+                    w = this.width;
+                    h = this.height;
+                }
+
+                // step II: calculate new actual dirty area
+                if (w > 0 && h > 0) {
+                    var r = pkg.$cvp(this, temporary);
+                    if (r != null) {
+                        zebkit.util.intersection(r.x, r.y, r.width, r.height, x, y, w, h, r);
+                        if (r.width > 0 && r.height > 0) {
+                            x = r.x;
+                            y = r.y;
+                            w = r.width;
+                            h = r.height;
+
+                            // calculate repainted component absolute location
+                            var cc = this;
+                            while (cc != canvas) {
+                                x += cc.x;
+                                y += cc.y;
+                                cc = cc.parent;
+                            }
+
+                            // normalize repaint area coordinates
+                            if (x < 0) {
+                                w += x;
+                                x = 0;
+                            }
+                            if (y < 0) {
+                                h += y;
+                                y = 0;
+                            }
+                            if (w + x > canvas.width ) w = canvas.width - x;
+                            if (h + y > canvas.height) h = canvas.height - y;
+
+                            // still have what to repaint than calculate new
+                            // dirty area of target canvas element
+                            if (w > 0 && h > 0) {
+                                var da = canvas.$da;
+
+                                // if the target canvas already has a dirty area set than
+                                // unite it with requested
+                                if (da.width > 0) {
+                                    // check if the requested repainted area is not in
+                                    // exiting dirty area
+                                    if (x < da.x                ||
+                                        y < da.y                ||
+                                        x + w > da.x + da.width ||
+                                        y + h > da.y + da.height  )
+                                    {
+                                        // !!!
+                                        // speed up to comment method call
+                                        //MB.unite(da.x, da.y, da.width, da.height, x, y, w, h, da);
+                                        var dax = da.x, day = da.y;
+                                        if (da.x > x) da.x = x;
+                                        if (da.y > y) da.y = y;
+                                        da.width  = Math.max(dax + da.width,  x + w) - da.x;
+                                        da.height = Math.max(day + da.height, y + h) - da.y;
+                                    }
+                                }
+                                else {
+                                    // if the target canvas doesn't have a dirty area set than
+                                    // cut (if necessary) the requested repainting area by the
+                                    // canvas size
+
+                                    // !!!
+                                    // not necessary to call the method since we have already normalized
+                                    // repaint coordinates and sizes
+                                    //!!! MB.intersection(0, 0, canvas.width, canvas.height, x, y, w, h, da);
+
+                                    da.x      = x;
+                                    da.width  = w;
+                                    da.y      = y;
+                                    da.height = h;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // step III: initiate repainting thread
+                if (canvas.$paintTask === null && (canvas.isValid === false || canvas.$da.width > 0 || canvas.isLayoutValid === false)) {
+                    var $this = this;
+                    canvas.$paintTask = zebkit.web.$task(function() {
+                        var g = null;
+                        try {
+                            // do validation before timer will be set to null to avoid
+                            // unnecessary timer initiating what can be caused by validation
+                            // procedure by calling repaint method
+                            if (canvas.isValid === false || canvas.isLayoutValid === false) {
+                                canvas.validate();
+                            }
+
+                            if (canvas.$da.width > 0) {
+                                g = canvas.$context;
+                                g.save();
+
+                                // check if the given canvas has transparent background
+                                // if it is true call clearRect method to clear dirty area
+                                // with transparent background, otherwise it will be cleaned
+                                // by filling the canvas with background later
+                                if (canvas.bg == null || canvas.bg.isOpaque !== true) {
+                                    g.clearRect(canvas.$da.x, canvas.$da.y,
+                                                canvas.$da.width, canvas.$da.height);
+                                }
+                                // !!!
+                                // call clipping area later than possible
+                                // clearRect since it can bring to error in IE
+                                g.clipRect(canvas.$da.x,
+                                           canvas.$da.y,
+                                           canvas.$da.width,
+                                           canvas.$da.height);
+
+                                canvas.paintComponent(g);
+                            }
+
+                            canvas.$paintTask = null;
+                            // no dirty area anymore
+                            canvas.$da.width = -1;
+                            if (g !== null) g.restore();
+                        }
+                        catch(ee) {
+                            canvas.$paintTask = null;
+                            canvas.$da.width = -1;
+                            if (g !== null) {
+                                g.restoreAll();
+                            }
+                            throw ee;
+                        }
+                    });
+                }
+            }
+        };
+
+        // destination is component itself or one of his composite parent.
+        // composite component is a component that grab control from his
+        // children component. to make a component composite
+        // it has to implement catchInput field or method. If composite component
+        // has catchInput method it will be called
+        // to detect if the composite component takes control for the given kid.
+        // composite components can be embedded (parent composite can take
+        // control on its child composite component)
+        this.getEventDestination = function() {
+            var c = this, p = this;
+            while ((p = p.parent) != null) {
+                if (p.catchInput != null && (p.catchInput === true || (p.catchInput !== false && p.catchInput(c)))) {
+                    c = p;
+                }
+            }
+            return c;
+        };
+
+        this.paintComponent = function(g) {
+            var ts = g.$states[g.$curState];
+            if (ts.width  > 0  &&
+                ts.height > 0  &&
+                this.isVisible === true)
+            {
+                // !!!
+                // calling setSize in the case of raster layout doesn't
+                // cause hierarchy layout invalidation
+                if (this.isLayoutValid === false) {
+                    this.validate();
+                }
+
+                var b = this.bg != null && (this.parent == null || this.bg != this.parent.bg);
+
+                // if component defines shape and has update, [paint?] or background that
+                // differs from parent background try to apply the shape and than build
+                // clip from the applied shape
+                if ( (this.border != null && this.border.outline != null) &&
+                     (b || this.update != null)                           &&
+                     this.border.outline(g, 0, 0, this.width, this.height, this))
+                {
+                    g.save();
+                    g.clip();
+
+                    if (b) this.bg.paint(g, 0, 0, this.width, this.height, this);
+                    if (this.update != null) this.update(g);
+
+                    g.restore();
+                }
+                else {
+                    if (b) {
+                        this.bg.paint(g, 0, 0, this.width, this.height, this);
+                    }
+                    if (this.update != null) this.update(g);
+                }
+
+                if (this.border != null) {
+                    this.border.paint(g, 0, 0, this.width, this.height, this);
+                }
+
+                if (this.paint != null) {
+                    var left   = this.getLeft(),
+                        top    = this.getTop(),
+                        bottom = this.getBottom(),
+                        right  = this.getRight();
+
+                    if (left > 0 || right > 0 || top > 0 || bottom > 0) {
+                        if (ts.width > 0 && ts.height > 0) {
+                            var x1   = (ts.x > left ? ts.x : left),
+                                y1   = (ts.y > top  ? ts.y : top),
+                                cxcw = ts.x + ts.width,
+                                cych = ts.y + ts.height,
+                                cright = this.width - right,
+                                cbottom = this.height - bottom;
+
+                            g.save();
+                            g.clipRect(x1, y1, (cxcw < cright  ? cxcw : cright)  - x1,
+                                               (cych < cbottom ? cych : cbottom) - y1);
+                            this.paint(g);
+                            g.restore();
+                        }
+                    }
+                    else {
+                        this.paint(g);
+                    }
+                }
+
+                var count = this.kids.length;
+                for(var i = 0; i < count; i++) {
+                    var kid = this.kids[i];
+                    if (kid.isVisible === true && kid.$context == null) {
+                        // calculate if the given component area has intersection
+                        // with current clipping area
+                        var kidXW = kid.x + kid.width,
+                            c_xw  = ts.x + ts.width,
+                            kidYH = kid.y + kid.height,
+                            c_yh  = ts.y + ts.height,
+                            iw = (kidXW < c_xw ? kidXW : c_xw) - (kid.x > ts.x ? kid.x : ts.x),
+                            ih = (kidYH < c_yh ? kidYH : c_yh) - (kid.y > ts.y ? kid.y : ts.y);
+
+                        if (iw > 0 && ih > 0) {
+                            g.save();
+                            g.translate(kid.x, kid.y);
+                            g.clipRect(0, 0, kid.width, kid.height);
+                            kid.paintComponent(g);
+                            g.restore();
+                        }
+                    }
+                }
+
+                if (this.paintOnTop != null) this.paintOnTop(g);
+            }
+        };
+
+        /**
+         * UI component border view
+         * @attribute border
+         * @default null
+         * @readOnly
+         * @type {zebkit.ui.View}
+         */
+
+        /**
+         * UI component background view
+         * @attribute bg
+         * @default null
+         * @readOnly
+         * @type {zebkit.ui.View}
+        */
+
+        /**
+         * Define and set the property to true if the component has to catch focus
+         * @attribute canHaveFocus
+         * @type {Boolean}
+         * @default undefined
+         */
+
+        this.top = this.left = this.right = this.bottom = 0;
+
+        /**
+         * UI component enabled state
+         * @attribute isEnabled
+         * @default true
+         * @readOnly
+         * @type {Boolean}
+         */
+        this.isEnabled = true;
+
+        /**
+         * Find a zebkit.ui.zCanvas where the given UI component is hosted
+         * @return {zebkit.ui.zCanvas} a zebkit canvas
+         * @method getCanvas
+         */
+        this.getCanvas = function() {
+            var c = this;
+            for(; c != null && c.$isRootCanvas !== true; c = c.parent);
+            return c;
+        };
+
+        this.notifyRender = function(o,n){
+            if (o != null && o.ownerChanged != null) o.ownerChanged(null);
+            if (n != null && n.ownerChanged != null) n.ownerChanged(this);
+        };
+
+        /**
+         * Shortcut method to register the specific to the concrete component
+         * events listener. For instance "zebkit.ui.Button" component fires event
+         * when it is pressed:
+
+        var b = new zebkit.ui.Button("Test");
+        b.bind(function() {
+            // button has been pressed
+        });
+
+
+         * @param {Function|Object} a listener function or an object that
+         * declares events handler methods
+         * @return {Function|Object} a registered listener
+         * @method bind
+         */
+
+        /**
+         * Shortcut method to remove the register component specific events listener
+         * @param {Function|Object} a listener function to be removed
+         * @method unbind
+         */
+
+
+        /**
+         * Load content of the panel UI components from the specified JSON file.
+         * @param  {String} jsonPath an URL to a JSON file that describes UI
+         * to be loaded into the panel
+         * @chainable
+         * @method load
+         */
+        this.load = function(jsonPath, cb) {
+            new pkg.Bag(this).load(jsonPath, cb);
+            return this;
+        };
+
+        /**
+         * Get a children UI component that embeds the given point.
+         * @param  {Integer} x x coordinate
+         * @param  {Integer} y y coordinate
+         * @return {zebkit.ui.Panel} a children UI component
+         * @method getComponentAt
+         */
+        this.getComponentAt = function(x,y){
+            var r = pkg.$cvp(this, temporary);
+
+            if (r == null || (x < r.x || y < r.y ||
+                x >= r.x + r.width || y >= r.y + r.height))
+            {
+                return null;
+            }
+
+            if (this.kids.length > 0){
+                for(var i = this.kids.length; --i >= 0; ){
+                    var kid = this.kids[i];
+                    kid = kid.getComponentAt(x - kid.x,
+                                             y - kid.y);
+                    if (kid != null) return kid;
+                }
+            }
+            return this.contains == null || this.contains(x, y) === true ? this : null;
+        };
+
+        /**
+         * Shortcut method to invalidating the component
+         * and initiating the component repainting
+         * @method vrp
+         */
+        this.vrp = function(){
+            this.invalidate();
+
+            // extra condition to save few millisecond on repaint() call
+            if (this.isVisible === true && this.parent != null) {
+                this.repaint();
+            }
+        };
+
+        this.getTop = function() {
+            return this.border != null ? this.top + this.border.getTop()
+                                       : this.top;
+        };
+
+        this.getLeft = function() {
+            return this.border != null ? this.left + this.border.getLeft()
+                                       : this.left;
+        };
+
+        this.getBottom = function() {
+            return this.border != null ? this.bottom + this.border.getBottom()
+                                       : this.bottom;
+        };
+
+        this.getRight  = function() {
+            return this.border != null ? this.right  + this.border.getRight()
+                                       : this.right;
+        };
+
+        //TODO: the method is not used yet
+        this.isInvalidatedByChild = function(c) {
+            return true;
+        };
+
+        /**
+         * The method is implemented to be aware about a children component
+         * insertion.
+         * @param  {Integer} index an index at that a new children component
+         * has been added
+         * @param  {Object} constr a layout constraints of an inserted component
+         * @param  {zebkit.ui.Panel} l a children component that has been inserted
+         * @method kidAdded
+         */
+        this.kidAdded = function (index,constr,l){
+            COMP_EVENT.source = this;
+            COMP_EVENT.constraints = constr;
+            COMP_EVENT.kid = l;
+
+            pkg.events.fireEvent("compAdded", COMP_EVENT);
+
+            if (l.width > 0 && l.height > 0) {
+                l.repaint();
+            }
+            else {
+                this.repaint(l.x, l.y, 1, 1);
+            }
+        };
+
+        /**
+         * Set the component layout constraints.
+         * @param {Object} ctr a constraints
+         * @method setConstraints
+         */
+        this.setConstraints = function(ctr) {
+            if (this.constraints != ctr) {
+                this.constraints = ctr;
+                this.vrp();
+            }
+        };
+
+        /**
+         * The method is implemented to be aware about a children component
+         * removal.
+         * @param  {Integer} i an index of a removed component
+         * @param  {zebkit.ui.Panel} l a removed children component
+         * @method kidRemoved
+         */
+        this.kidRemoved = function(i,l){
+            COMP_EVENT.source = this;
+            COMP_EVENT.index  = i;
+            COMP_EVENT.kid    = l;
+            pkg.events.fireEvent("compRemoved", COMP_EVENT);
+            if (l.isVisible === true) {
+                this.repaint(l.x, l.y, l.width, l.height);
+            }
+        };
+
+        /**
+         * The method is implemented to be aware the
+         * component location updating
+         * @param  {Integer} px a previous x coordinate of the component
+         * @param  {Integer} py a previous y coordinate of the component
+         * @method relocated
+         */
+        this.relocated = function(px, py) {
+            COMP_EVENT.source = this;
+            COMP_EVENT.prevX  = px;
+            COMP_EVENT.prevY  = py;
+            pkg.events.fireEvent("compMoved", COMP_EVENT);
+
+            var p = this.parent,
+                w = this.width,
+                h = this.height;
+
+            if (p != null && w > 0 && h > 0) {
+                var x = this.x,
+                    y = this.y,
+                    nx = x < px ? x : px,
+                    ny = y < py ? y : py;
+
+                //TODO: some mobile browser has bug: moving a component
+                //      leaves 0.5 sized traces to fix it 1 pixel extra
+                //      has to be added to all sides of repainted rect area
+                // nx--;
+                // ny--;
+
+                if (nx < 0) nx = 0;
+                if (ny < 0) ny = 0;
+
+                var w1 = p.width - nx,
+                    w2 = w + (x > px ? x - px : px - x),
+                    h1 = p.height - ny,
+                    h2 = h + (y > py ? y - py : py - y);
+
+                // TODO: add crappy 2 for mobile (android)
+                p.repaint(nx, ny, (w1 < w2 ? w1 : w2),// + 2,
+                                  (h1 < h2 ? h1 : h2));// + 2);
+            }
+        };
+
+        /**
+         * The method is implemented to be aware the
+         * component size updating
+         * @param  {Integer} pw a previous width of the component
+         * @param  {Integer} ph a previous height of the component
+         * @method resized
+         */
+        this.resized = function(pw,ph) {
+            COMP_EVENT.source = this;
+            COMP_EVENT.prevWidth  = pw;
+            COMP_EVENT.prevHeight = ph;
+            pkg.events.fireEvent("compSized", COMP_EVENT);
+
+            if (this.parent != null) {
+                this.parent.repaint(this.x, this.y,
+                                    ((this.width  > pw) ? this.width  : pw),
+                                    ((this.height > ph) ? this.height : ph));
+            }
+        };
+
+        /**
+         * Checks if the component has a focus
+         * @return {Boolean} true if the component has focus
+         * @method hasFocus
+         */
+        this.hasFocus = function(){
+            return pkg.focusManager.hasFocus(this);
+        };
+
+        /**
+         * Force the given component to catch focus if the component is focusable.
+         * @method requestFocus
+         */
+        this.requestFocus = function(){
+            pkg.focusManager.requestFocus(this);
+        };
+
+        /**
+         * Force the given component to catch focus in the given timeout.
+         * @param {Integer} [timeout] a timeout in milliseconds. The default value is 50
+         * milliseconds
+         * @method requestFocusIn
+         */
+        this.requestFocusIn = function(timeout) {
+            if (arguments.length === 0) {
+                timeout = 50;
+            }
+            var $this = this;
+            setTimeout(function () {
+                $this.requestFocus();
+            }, timeout);
+        };
+
+        /**
+         * Set the UI component visibility
+         * @param  {Boolean} b a visibility state
+         * @method setVisible
+         * @chainable
+         */
+        this.setVisible = function (b){
+            if (this.isVisible != b) {
+                this.isVisible = b;
+                this.invalidate();
+
+                COMP_EVENT.source = this;
+                pkg.events.fireEvent("compShown", COMP_EVENT);
+
+                if (this.parent != null) {
+                    if (b) this.repaint();
+                    else {
+                        this.parent.repaint(this.x, this.y, this.width, this.height);
+                    }
+                }
+            }
+            return this;
+        };
+
+        /**
+         *  Set the UI component enabled state. Using this property
+         *  an UI component can be excluded from getting input events
+         *  @param  {Boolean} b a enabled state
+         *  @method setEnabled
+         *  @chainable
+         */
+        this.setEnabled = function (b){
+            if (this.isEnabled != b){
+                this.isEnabled = b;
+
+                COMP_EVENT.source = this;
+                pkg.events.fireEvent("compEnabled", COMP_EVENT);
+                if (this.kids.length > 0) {
+                    for(var i = 0;i < this.kids.length; i++) {
+                        this.kids[i].setEnabled(b);
+                    }
+                }
+                this.repaint();
+            }
+            return this;
+        };
+
+        /**
+         * Set the UI component top, right, left, bottom paddings to the same given value
+         * @param  {Integer} v the value that will be set as top, right, left, bottom UI
+         * component paddings
+         * @method setPadding
+         * @chainable
+         */
+
+        /**
+         * Set UI component top, left, bottom, right paddings. The paddings are
+         * gaps between component border and painted area.
+         * @param  {Integer} top a top padding
+         * @param  {Integer} left a left padding
+         * @param  {Integer} bottom a bottom padding
+         * @param  {Integer} right a right padding
+         * @method setPadding
+         * @chainable
+         */
+        this.setPadding = function (top,left,bottom,right){
+            if (arguments.length === 1) {
+                left = bottom = right = top;
+            }
+
+            if (this.top    != top    || this.left != left  ||
+                this.bottom != bottom || this.right != right  )
+            {
+                this.top = top;
+                this.left = left;
+                this.bottom = bottom;
+                this.right = right;
+                this.vrp();
+            }
+            return this;
+        },
+
+        /**
+         * Set the border view
+         * @param  {zebkit.ui.View|Function|String} v a border view or border "paint(g,x,y,w,h,c)"
+         * rendering function or border type: "plain", "sunken", "raised", "etched"
+         * @method setBorder
+         * @chainable
+         */
+        this.setBorder = function (v) {
+            var old = this.border;
+            v = pkg.$view(v);
+            if (v != old){
+                this.border = v;
+                this.notifyRender(old, v);
+
+                if ( old == null || v == null         ||
+                     old.getTop()    != v.getTop()    ||
+                     old.getLeft()   != v.getLeft()   ||
+                     old.getBottom() != v.getBottom() ||
+                     old.getRight()  != v.getRight()     )
+                {
+                    this.invalidate();
+                }
+
+                if (v != null && v.activate != null) {
+                    v.activate(this.hasFocus() ?  "focuson": "focusoff");
+                }
+
+                this.repaint();
+            }
+            return this;
+        };
+
+        /**
+         * Set the background. Background can be a color string or a zebkit.ui.View class
+         * instance, or a function(g,x,y,w,h,c) that paints the background:
+
+            // set background color
+            comp.setBackground("red");
+
+            // set a picture as a component background
+            comp.setBackground(new zebkit.ui.Picture(...));
+
+            // set a custom rendered background
+            comp.setBackground(function (g,x,y,w,h,target) {
+                // paint a component background here
+                g.setColor("blue");
+                g.fillRect(x,y,w,h);
+                g.drawLine(...);
+                ...
+            });
+
+
+         * @param  {String|zebkit.ui.View|Function} v a background view, color or
+         * background "paint(g,x,y,w,h,c)" rendering function.
+         * @method setBackground
+         * @chainable
+         */
+        this.setBackground = function (v){
+            var old = this.bg;
+            v = pkg.$view(v);
+            if (v != old) {
+                this.bg = v;
+                this.notifyRender(old, v);
+                this.repaint();
+            }
+            return this;
+        };
+
+        /**
+         * Add the given children component or number of components to the given panel.
+         * @protected
+         * @param {zebkit.ui.Panel|Array|Object} a children component of number of
+         * components to be added. The parameter can be:
+
+    - Component
+    - Array of components
+    - Dictionary object where every element is a component to be added and the key of
+    the component is stored in the dictionary is considered as the component constraints
+
+         * @method setKids
+         */
+        this.setKids = function(a) {
+            if (arguments.length === 1 && zebkit.instanceOf(a, pkg.Panel)) {
+               this.add(a);
+            }
+            else {
+                // if components list passed as number of arguments
+                if (arguments.length > 1) {
+                    for(var i = 0; i < arguments.length; i++) {
+                        var a = arguments[i];
+                        if (a != null) {
+                            this.add(a.$new != null ? a.$new() : a);
+                        }
+                    }
+                }
+                else {
+                    if (Array.isArray(a)) {
+                        for(var i=0; i < a.length; i++) {
+                            if (a[i] != null) {
+                                this.add(a[i]);
+                            }
+                        }
+                    }
+                    else {
+                        var kids = a;
+                        for(var k in kids) {
+                            if (kids.hasOwnProperty(k)) {
+                                this.add(k, kids[k]);
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        /**
+         * Called whenever the UI component gets or looses focus
+         * @method focused
+         */
+        this.focused = function() {
+            // extents of activate method indicates it is
+            if (this.border != null && this.border.activate != null) {
+                var id = this.hasFocus() ? "focuson" : "focusoff" ;
+                if (typeof this.border.views[id] !== 'undefined') {
+                    this.border.activate(id);
+                    this.repaint();
+                }
+            }
+
+            // TODO: think if the background has to be focus dependent
+            // if (this.bg != null && this.bg.activate != null) {
+            //     var id = this.hasFocus() ? "focuson" : "focusoff" ;
+            //     if (this.bg.views[id]) {
+            //         this.bg.activate(id);
+            //         this.repaint();
+            //     }
+            // }
+        };
+
+        /**
+         * Remove all children UI components
+         * @method removeAll
+         */
+        this.removeAll = function (){
+            if (this.kids.length > 0){
+                var size = this.kids.length, mx1 = Number.MAX_VALUE, my1 = mx1, mx2 = 0, my2 = 0;
+                for(; size > 0; size--){
+                    var child = this.kids[size - 1];
+                    if (child.isVisible === true){
+                        var xx = child.x, yy = child.y;
+                        mx1 = mx1 < xx ? mx1 : xx;
+                        my1 = my1 < yy ? my1 : yy;
+                        mx2 = Math.max(mx2, xx + child.width);
+                        my2 = Math.max(my2, yy + child.height);
+                    }
+                    this.removeAt(size - 1);
+                }
+                this.repaint(mx1, my1, mx2 - mx1, my2 - my1);
+            }
+        };
+
+        /**
+         * Bring the UI component to front
+         * @method toFront
+         */
+        this.toFront = function(){
+            if (this.parent != null && this.parent.kids[this.parent.kids.length-1] !== this){
+                var p = this.parent;
+                p.kids.splice(p.indexOf(this), 1);
+                p.kids[p.kids.length] = this;
+                p.vrp();
+            }
+        };
+
+        /**
+         * Send the UI component to back
+         * @method toBack
+         */
+        this.toBack = function(){
+            if (this.parent != null && this.parent.kids[0] !== this){
+                var p = this.parent;
+                p.kids.splice(p.indexOf(this), 1);
+                p.kids.unshift(this);
+                p.vrp();
+            }
+        };
+
+        /**
+         * Set the UI component size to its preferred size
+         * @return {Object} a preferred size applied to the component.
+         * The structure of the returned object is the following:
+
+            { width:{Integer}, height:{Integer} }
+
+         * @method toPreferredSize
+         */
+        this.toPreferredSize = function (){
+            var ps = this.getPreferredSize();
+            this.setSize(ps.width, ps.height);
+            return ps;
+        };
+
+        /**
+         * Build view by this component
+         * @return {zebkit.ui.View} a view of the component
+         * @method toView
+         */
+        this.toView = function() {
+            return new pkg.CompRender(this);
+        };
+
+        this[''] = function(l) {
+            // !!! dirty trick to call super, for the sake of few milliseconds back
+            //this.$super();
+            zebkit.layout.Layoutable.prototype[zebkit.CNAME].call(this, l);
+
+            // apply default properties
+            this.properties(this.clazz);
+
+            if (arguments.length > 0) {
+                if (l.constructor === Object) {
+                    this.properties(l);
+                }
+                else {
+                    this.setLayout(l);
+                }
+            }
+        };
+    }
+]);
+
+/**
+ * HTML element UI component wrapper class. The class represents
+ * an HTML element as if it is standard UI component. It helps to use
+ * some standard HTML element as zebkit UI components and embeds it
+ * in zebkit UI application layout.
+ * @class zebkit.ui.HtmlElement
+ * @constructor
+ * @param {String|HTMLElement} [element] an HTML element to be represented
+ * as a standard zebkit UI component. If the passed parameter is string
+ * it denotes a name of an HTML element. In this case a new HTML element
+ * will be created.
+ * @extends {zebkit.ui.Panel}
+ */
+pkg.HtmlElement = Class(pkg.Panel, [
+    function $clazz() {
+        this.CLASS_NAME = null;
+        this.$bodyFontSize = window.getComputedStyle(document.body, null).getPropertyValue('font-size');
+    },
+
+    function $prototype() {
+        this.$container = this.$canvas = null;
+        this.ePsW = this.ePsH = 0;
+        this.isDOMElement = true;   // indication of the DOM element that is used by DOM element manager to track
+                                    // and manage its visibility
+
+        this.$sizeAdjusted = false;
+
+        /**
+         * Set the CSS font of the wrapped HTML element
+         * @param {String|zebkit.ui.Font} f a font
+         * @method setFont
+         * @chainable
+         */
+        this.setFont = function(f) {
+            this.setStyle("font", f.toString());
+            this.vrp();
+            return this;
+        };
+
+        /**
+         * Set the CSS color of the wrapped HTML element
+         * @param {String} c a color
+         * @chainable
+         * @method setColor
+         */
+        this.setColor = function(c) {
+            this.setStyle("color", c.toString());
+            return this;
+        };
+
+        /**
+         * Apply the given set of CSS styles to the wrapped HTML element
+         * @param {Object} styles a dictionary of CSS styles
+         * @chainable
+         * @method setStyles
+         */
+        this.setStyles = function(styles) {
+            for(var k in styles) {
+                this.$setStyle(this.element, k, styles[k]);
+            }
+            this.vrp();
+            return this;
+        };
+
+        /**
+         * Apply the given CSS style to the wrapped HTML element
+         * @param {String} a name of the CSS style
+         * @param {String} a value the CSS style has to be set
+         * @chainable
+         * @method setStyle
+         */
+        this.setStyle = function(name, value) {
+            this.$setStyle(this.element, name, value);
+            this.vrp();
+            return this;
+        };
+
+        this.$setStyle = function(element, name, value) {
+            name = name.trim();
+            var i = name.indexOf(':');
+            if (i > 0) {
+                if (zebkit[name.substring(0, i)] == null) {
+                    return;
+                }
+                name = name.substring(i + 1);
+            }
+            element.style[name] = value;
+        };
+
+        /**
+         * Set the specified attribute of the wrapped HTML element
+         * @param {String} name  a name of attribute
+         * @param {String} value a value of the attribute
+         * @chainable
+         * @method setAttribute
+         */
+        this.setAttribute = function(name, value) {
+            this.element.setAttribute(name, value);
+            return this;
+        };
+
+        this.setAttributes = function(attrs) {
+            for(var name in attrs) {
+                this.element.setAttribute(name, attrs[name]);
+            }
+            return this;
+        };
+
+        this.paint = function(g) {
+            // this method is used as an indication that the component
+            // is visible and no one of his parent is invisible
+            if (this.$container.style.visibility === "hidden") {
+                this.$container.style.visibility = "visible";
+            }
+
+            // calling paint says that the component in DOM tree
+            // that is time to correct CSS size if necessary
+            if (this.$sizeAdjusted !== true) {
+                this.setSize(this.width, this.height);
+            }
+        };
+
+        this.calcPreferredSize = function(target) {
+            return { width: this.ePsW, height: this.ePsH };
+        };
+
+        var $store = [
+            "paddingTop","paddingLeft","paddingBottom","paddingRight",
+            "border","borderStyle","borderWidth", "borderTopStyle",
+            "borderTopWidth", "borderBottomStyle","borderBottomWidth",
+            "borderLeftStyle","borderLeftWidth", "borderRightStyle",
+            "visibility", "borderRightWidth", "width", "height", "position"
+        ];
+
+        // the method calculates the given HTML element preferred size
+        this.recalc = function() {
+            // if component has a layout set it is up to a layout manager to calculate
+            // the component preferred size. In this case the HTML element is a container
+            // whose preferred size is defined by its content
+            if (this.layout === this) {
+                var e         = this.element,
+                    vars      = {},
+                    domParent = null,
+                    b         = !zebkit.web.$contains(this.$container);
+
+                // element doesn't have preferred size if it is not a member of
+                // an html page, so add it if for a while
+                if (b) {
+                    // save previous parent node since
+                    // appendChild will overwrite it
+                    domParent = this.$container.parentNode;
+                    document.body.appendChild(this.$container);
+                }
+
+                // save element metrics
+                for(var i = 0; i < $store.length; i++) {
+                    var k = $store[i];
+                    vars[k] = e.style[k];
+                }
+
+                // force metrics to be calculated automatically
+                this.$container.style.visibility = "hidden";
+                e.style.padding  = "0px";
+                e.style.border   = "none";
+                e.style.position = e.style.height = e.style.width = "auto";
+
+                // fetch preferred size
+                this.ePsW = e.offsetWidth;
+                this.ePsH = e.offsetHeight;
+
+                for(var k in vars) {
+                    var v = vars[k];
+                    if (v != null) e.style[k] = v;
+                }
+
+                if (b) {
+                    document.body.removeChild(this.$container);
+                    // restore previous parent node
+                    if (domParent != null) domParent.appendChild(this.$container);
+                }
+            }
+        };
+
+        /**
+         * Set the inner content of the wrapped HTML element
+         * @param {String} an inner content
+         * @method setContent
+         * @chainable
+         */
+        this.setContent = function(content) {
+            this.element.innerHTML = content;
+            this.vrp();
+            return this;
+        };
+
+        this.$getElementRootFocus = function() {
+            return null;
+        };
+
+        this.canHaveFocus = function() {
+            return this.$getElementRootFocus() != null;
+        };
+
+        this.$focus = function() {
+            if (this.canHaveFocus() && document.activeElement !== this.$getElementRootFocus()) {
+                this.$getElementRootFocus().focus();
+            }
+        };
+
+        this.$blur = function() {
+            if (this.canHaveFocus() && document.activeElement === this.$getElementRootFocus()) {
+                this.$getElementRootFocus().blur();
+            }
+        };
+    },
+
+    function toFront() {
+        this.$super();
+        var pnode = this.$container.parentNode;
+        if (pnode != null && pnode.lastChild !== this.$container) {
+            pnode.removeChild(this.$container);
+            pnode.appendChild(this.$container);
+        }
+    },
+
+    function toBack() {
+        this.$super();
+        var pnode = this.$container.parentNode;
+        if (pnode != null && pnode.firstChild !== this.$container) {
+            pnode.removeChild(this.$container);
+            pnode.insertBefore(this.$container, pnode.firstChild);
+        }
+    },
+
+    function setEnabled(b) {
+        if (this.isEnabled != b) {
+            if (b) {
+                this.$container.removeChild(this.$blockElement);
+            }
+            else {
+                if (this.$blockElement == null) {
+                    this.$blockElement = zebkit.web.$createBlockedElement();
+                }
+                this.$container.appendChild(this.$blockElement);
+           }
+        }
+        return this.$super(b);
+    },
+
+    function setSize(w, h) {
+        // by the moment the method setSize is called the DOM element can be not a part of
+        // HTML layout. In this case offsetWidth/offsetHeihght are always zero what prevents
+        // us from proper calculation of CSS width and height. Postpone
+        if (zebkit.web.$contains(this.$container)) {
+            var prevVisibility = this.$container.style.visibility;
+            this.$container.style.visibility = "hidden"; // could make sizing smooth
+
+            // HTML element size is calculated as sum of CSS "width"/"height", paddings, border
+            // So the passed width and height has to be corrected (before it will be applied to
+            // an HTML element) by reduction of extra HTML gaps. For this we firstly set the
+            // width and size
+            this.element.style.width  = "" + w + "px";
+            this.element.style.height = "" + h + "px";
+
+            var ww = 2 * w - this.element.offsetWidth,
+                hh = 2 * h - this.element.offsetHeight;
+
+            if (ww != w || hh != h) {
+                // than we know the component metrics and can compute necessary reductions
+                this.element.style.width   = "" + ww + "px";
+                this.element.style.height  = "" + hh + "px";
+            }
+
+            this.$sizeAdjusted = true;
+
+            // visibility correction is done by HTML elements manager
+            this.$container.style.visibility = prevVisibility;
+        }
+        else {
+            this.$sizeAdjusted = false;
+        }
+
+        return this.$super(w, h);
+    },
+
+    function setPadding(t,l,b,r) {
+        if (arguments.length === 1) {
+            l = b = r = t;
+        }
+
+        this.setStyles({
+            paddingTop    : '' + t + "px",
+            paddingLeft   : '' + l + "px",
+            paddingRight  : '' + r + "px",
+            paddingBottom : '' + b + "px"
+        });
+
+        if (this.top !== t || this.left !== l || this.right !== r || this.bottom !== b) {
+            // changing padding has influence to CSS size the component has to have
+            // so we have to request CSS size recalculation
+            this.$sizeAdjusted = false;
+        }
+
+        this.$super.apply(this, arguments);
+        return this;
+    },
+
+    function setBorder(b) {
+        b = pkg.$view(b);
+
+        if (b == null) {
+           this.setStyle("border", "none");
+        }
+        else {
+            this.setStyles({
+                //!!!! bloody FF fix, the border can be made transparent
+                //!!!! only via "border" style
+                border : "0px solid transparent",
+
+                //!!! FF understands only decoupled border settings
+                borderTopStyle : "solid",
+                borderTopColor : "transparent",
+                borderTopWidth : "" + b.getTop() + "px",
+
+                borderLeftStyle : "solid",
+                borderLeftColor : "transparent",
+                borderLeftWidth : "" + b.getLeft() + "px",
+
+                borderBottomStyle : "solid",
+                borderBottomColor : "transparent",
+                borderBottomWidth : "" + b.getBottom() + "px",
+
+                borderRightStyle : "solid",
+                borderRightColor : "transparent",
+                borderRightWidth : "" + b.getRight() + "px"
+            });
+        }
+
+        // changing border can have influence to
+        // CSS size, so request recalculation of the CSS
+        // size
+        if (this.border != b) {
+            this.$sizeAdjusted = false;
+        }
+
+        return this.$super(b);
+    },
+
+    function validate() {
+        // lookup root canvas
+        if (this.$canvas == null && this.parent != null) {
+            this.$canvas = this.getCanvas();
+        }
+
+        this.$super();
+    },
+
+    function focused() {
+        this.$super();
+
+        // sync state of native focus and zebkit focus
+        if (this.hasFocus()) {
+            this.$focus();
+        }
+        else {
+            this.$blur();
+        }
+    },
+
+    function(e) {
+        if (e == null) {
+            e = "div";
+        }
+
+        if (zebkit.isString(e)) {
+            e = document.createElement(e);
+            if (this.clazz.CLASS_NAME != null) {
+                e.setAttribute("class", this.clazz.CLASS_NAME);
+            }
+            e.style.border   = "0px solid transparent";   // clean up border
+            e.style.fontSize = this.clazz.$bodyFontSize;  // DOM element is wrapped with a container that
+                                                          // has zero sized font, so let's set body  font
+                                                          // for the created element
+        }
+
+        // sync padding and margin of the DOM element with
+        // what appropriate properties are set
+        e.style.margin = e.style.padding = "0px";
+
+        /**
+         * Reference to HTML element the UI component wraps
+         * @attribute element
+         * @readOnly
+         * @type {HTMLElement}
+         */
+        this.element = e;
+
+        // this is set to make possible to use set z-index for HTML element
+        this.element.style.position = "relative";
+
+
+        if (e.parentNode != null && e.parentNode.getAttribute("data-zebcont") != null) {
+            throw new Error("DOM element '" + e + "' already has container");
+        }
+
+        // container is a DIV element that is used as a wrapper around original one
+        // it is done to make HtmlElement implementation more universal making
+        // all DOM elements capable to be a container for another one
+        this.$container = document.createElement("div");
+
+        // prevent stretching to a parent container element
+        this.$container.style.display = "inline-block";
+
+        // cut content
+        this.$container.style.overflow = "hidden";
+
+        // it fixes problem with adding, for instance, DOM element as window what can prevent
+        // showing components added to popup layer
+        this.$container.style["z-index"] = "0";
+
+
+        // coordinates have to be set to initial zero value in CSS
+        // otherwise the DOM layout can be wrong !
+        this.$container.style.left = this.$container.style.top = "0px";
+
+        this.$container.visibility = "hidden";  // before the component will be attached
+                                                // to parent hierarchy the component has to be hidden
+
+        // container div will always few pixel higher than its content
+        // to prevent the bloody effect set font to zero
+        // border and margin also have to be zero
+        this.$container.style.fontSize = this.$container.style.padding = this.$container.style.padding = "0px";
+
+        // add id
+        this.$container.setAttribute("id", "container-" + this.toString());
+
+        // mark wrapper with a special attribute to recognize it exists later
+        this.$container.setAttribute("data-zebcont", "true");
+
+        // let html element interact
+        this.$container.style["pointer-events"] = "auto";
+
+        // if passed DOM element already has parent
+        // attach it to container first and than
+        // attach the container to the original parent element
+        if (e.parentNode != null) {
+            // !!!
+            // Pay attention container position cannot be set to absolute
+            // since how the element has to be laid out is defined by its
+            // original parent
+            var pn = e.parentNode;
+            e.parentNode.removeChild(e);
+            this.$container.appendChild(e);
+            pn.appendChild(this.$container);
+        }
+        else {
+            // to force all children element be aligned
+            // relatively to the wrapper we have to set
+            // position CSS to absolute or absolute
+            this.$container.style.position = "absolute";
+            this.$container.appendChild(e);
+        }
+
+        // set ID if it has not been already defined
+        if (e.getAttribute("id") == null) {
+            e.setAttribute("id", this.toString());
+        }
+
+        this.$super();
+
+        // attach listeners
+        if (this.$initListeners != null) {
+            this.$initListeners();
+        }
+
+        var fe = this.$getElementRootFocus();
+
+        // TODO: may be this code should be moved to web place
+        //
+        // reg native focus listeners for HTML element that can hold focus
+        if (fe != null) {
+            var $this = this;
+
+            zebkit.web.$focusin(fe, function(e) {
+                // sync native focus with zebkit focus if necessary
+                if ($this.hasFocus() === false) {
+                    $this.requestFocus();
+                }
+            }, false);
+
+            zebkit.web.$focusout(fe, function(e) {
+                // sync native focus with zebkit focus if necessary
+                if ($this.hasFocus()) {
+                    pkg.focusManager.requestFocus(null);
+                }
+            }, false);
+        }
+    }
+]);
+
+/**
+ *  zCanvas zebkit UI component class. This is one of the key
+ *  class everybody has to use to start building an UI. The class is a wrapper
+ *  for HTML Canvas element. Internally it catches all native HTML Canvas
+ *  events and translates its into Zebkit UI events.
+ *
+ *  zCanvas instantiation triggers a new HTML Canvas will be created
+ *  and added to HTML DOM tree.  It happens if developer doesn't pass
+ *  an HTML Canvas element reference or an ID of existing HTML Canvas
+ *  element If developers need to re-use an existent in DOM tree canvas
+ *  element they have to pass id of the canvas that has to be used as basis
+ *  for zebkit UI creation or reference to a HTML Canvas element:
+
+        // a new HTML canvas element is created and added into HTML DOM tree
+        var canvas = zebkit.ui.zCanvas();
+
+        // a new HTML canvas element is created into HTML DOM tree
+        var canvas = zebkit.ui.zCanvas(400,500);  // pass canvas size
+
+        // stick to existent HTML canvas element
+        var canvas = zebkit.ui.zCanvas("ExistentCanvasID");
+
+ *  The zCanvas has layered structure. Every layer is responsible for
+ *  showing and controlling a dedicated type of UI elements like windows
+ *  pop-up menus, tool tips and so on. Developers have to build an own UI
+ *  hierarchy on the canvas root layer. The layer is standard UI panel
+ *  that is accessible as zCanvas component instance "root" field.
+
+        // create canvas
+        var canvas = zebkit.ui.zCanvas(400,500);
+
+        // save reference to canvas root layer where
+        // hierarchy of UI components have to be hosted
+        var root = canvas.root;
+
+        // fill root with UI components
+        var label = new zebkit.ui.Label("Label");
+        label.setBounds(10,10,100,50);
+        root.add(label);
+
+ *  @class zebkit.ui.zCanvas
+ *  @extends {zebkit.ui.Panel}
+ *  @constructor
+ *  @param {String|Canvas} [element] an ID of a HTML canvas element or
+ *  reference to an HTML Canvas element.
+ *  @param {Integer} [width] a width of an HTML canvas element
+ *  @param {Integer} [height] a height of an HTML canvas element
+ */
+
+/**
+ * Implement the event handler method  to catch canvas initialized event.
+ * The event is triggered once the canvas has been initiated and all properties
+ * listeners of the canvas are set upped. The event can be used to load
+ * saved data.
+
+     var p = new zebkit.ui.zCanvas(300, 300, [
+          function canvasInitialized() {
+              // do something
+          }
+     ]);
+
+ * @event  canvasInitialized
+ */
+pkg.HtmlCanvas = Class(pkg.HtmlElement, [
+    function $clazz() {
+        this.$ContextMethods = {
+            reset : function(w, h) {
+                this.$curState = 0;
+                var s = this.$states[0];
+                s.srot = s.rotateVal = s.x = s.y = s.width = s.height = s.dx = s.dy = 0;
+                s.crot = s.sx = s.sy = 1;
+                s.width = w;
+                s.height = h;
+                this.setFont(pkg.font);
+                this.setColor("white");
+            },
+
+            $init : function() {
+                // pre-allocate canvas save $states
+                this.$states = Array(50);
+                for(var i=0; i < this.$states.length; i++) {
+                    var s = {};
+                    s.srot = s.rotateVal = s.x = s.y = s.width = s.height = s.dx = s.dy = 0;
+                    s.crot = s.sx = s.sy = 1;
+                    this.$states[i] = s;
+                }
+            },
+
+            translate : function(dx, dy) {
+                if (dx !== 0 || dy !== 0) {
+                    var c = this.$states[this.$curState];
+                    c.x  -= dx;
+                    c.y  -= dy;
+                    c.dx += dx;
+                    c.dy += dy;
+                    this.$translate(dx, dy);
+                }
+            },
+
+            rotate : function(v) {
+                var c = this.$states[this.$curState];
+                c.rotateVal += v;
+                c.srot = Math.sin(c.rotateVal);
+                c.crot = Math.cos(c.rotateVal);
+                this.$rotate(v);
+            },
+
+            scale : function(sx, sy) {
+                var c = this.$states[this.$curState];
+                c.sx = c.sx * sx;
+                c.sy = c.sy * sy;
+                this.$scale(sx, sy);
+            },
+
+            save : function() {
+                this.$curState++;
+                var c = this.$states[this.$curState], cc = this.$states[this.$curState - 1];
+                c.x = cc.x;
+                c.y = cc.y;
+                c.width = cc.width;
+                c.height = cc.height;
+
+                c.dx = cc.dx;
+                c.dy = cc.dy;
+                c.sx = cc.sx;
+                c.sy = cc.sy;
+                c.srot = cc.srot;
+                c.crot = cc.crot;
+                c.rotateVal = cc.rotateVal;
+
+                this.$save();
+                return this.$curState - 1;
+            },
+
+            restoreAll : function() {
+                while(this.$curState > 0) {
+                    this.restore();
+                }
+            },
+
+            restore : function() {
+                if (this.$curState === 0) {
+                    throw new Error("Context restore history is empty");
+                }
+
+                this.$curState--;
+                this.$restore();
+                return this.$curState;
+            },
+
+            clipRect : function(x,y,w,h){
+                var c = this.$states[this.$curState];
+                if (c.x != x || y != c.y || w != c.width || h != c.height) {
+                    var xx = c.x, yy = c.y,
+                        ww = c.width,
+                        hh = c.height,
+                        xw = x + w,
+                        xxww = xx + ww,
+                        yh = y + h,
+                        yyhh = yy + hh;
+
+                    c.x      = x > xx ? x : xx;
+                    c.width  = (xw < xxww ? xw : xxww) - c.x;
+                    c.y      = y > yy ? y : yy;
+                    c.height = (yh < yyhh ? yh : yyhh) - c.y;
+
+                    if (c.x != xx || yy != c.y || ww != c.width || hh != c.height) {
+                        // begin path is very important to have proper clip area
+                        this.beginPath();
+                        this.rect(x, y, w, h);
+                        this.closePath();
+                        this.clip();
+                    }
+                }
+            }
+        };
+    },
+
+    function $prototype(clazz) {
+        this.$rotateValue = 0;
+        this.$scaleX = 1;
+        this.$scaleY = 1;
+
+        this.$paintTask = null;
+
+
+        // set border for canvas has to be set as zebkit border, since canvas
+        // is DOM component designed for rendering, so setting DOM border
+        // doesn't allow us to render zebkit border
+        this.setBorder = function(b) {
+            return pkg.Panel.prototype.setBorder.call(this, b);
+        };
+
+        this.rotate = function(r) {
+            this.$rotateValue += r;
+            if (this.$context != null) {
+                this.$context.rotate(r);
+            }
+
+            this.vrp();
+            return this;
+        };
+
+        this.scale = function(sx, sy) {
+            if (this.$context != null) this.$context.scale(sx, sy);
+            this.$scaleX = this.$scaleX * sx;
+            this.$scaleY = this.$scaleY * sy;
+            this.vrp();
+            return this;
+        };
+
+        this.clearTransformations = function() {
+            this.$scaleX = 1;
+            this.$scaleY = 1;
+            this.$rotateValue = 0;
+            if (this.$context != null) {
+                this.$context = zebkit.web.$canvas(this.element, this.width, this.height, true);
+                this.$context.reset(this.width, this.height);
+            }
+            this.vrp();
+            return this;
+        };
+
+        // set passing for canvas has to be set as zebkit padding, since canvas
+        // is DOM component designed for rendering, so setting DOM padding
+        // doesn't allow us to hold painting area proper
+        this.setPadding = function() {
+            return pkg.Panel.prototype.setPadding.apply(this, arguments);
+        };
+
+        this.setSize = function(w, h) {
+            if (this.width != w || h != this.height) {
+                var pw  = this.width,
+                    ph  = this.height;
+
+                this.$context = zebkit.web.$canvas(this.element, w, h);
+
+                // canvas has one instance of context, the code below
+                // test if the context has been already full filled
+                // with necessary methods and if it is not true
+                // fill it
+                if (typeof this.$context.$states === "undefined") {
+                    zebkit.web.$extendContext(this.$context, clazz.$ContextMethods);
+                }
+
+                this.$context.reset(w, h);
+
+                // if canvas has been rotated apply the rotation to the context
+                if (this.$rotateValue !== 0) {
+                    this.$context.rotate(this.$rotateValue);
+                }
+
+                // if canvas has been scaled apply it to it
+                if (this.$scaleX !== 1 || this.$scaleY !== 1) {
+                    this.$context.scale(this.$scaleX, this.$scaleY);
+                }
+
+                this.width  = w;
+                this.height = h;
+
+                this.invalidate();
+
+                // TODO: think to replace it with vrp()
+                this.validate();
+                this.repaint();
+
+                if (w != pw || h != ph) {
+                    this.resized(pw, ph);
+                }
+            }
+            return this;
+        };
+    },
+
+    function(e) {
+        if (e != null && (e.tagName == null || e.tagName != "CANVAS")) {
+            throw new Error("Invalid element '" + e + "'");
+        }
+
+        /**
+         * Keeps rectangular "dirty" area of the canvas component
+         * @private
+         * @attribute $da
+         * @type {Object}
+                { x:Integer, y:Integer, width:Integer, height:Integer }
+         */
+        this.$da = { x: 0, y: 0, width: -1, height: 0 };
+
+        this.$super(e == null ? "canvas" : e);
+
+        // let HTML Canvas be WEB event transparent
+        this.$container.style["pointer-events"] = "none";
+
+        // add class to canvas if this element has been created
+        if (e == null) {
+            // prevent canvas selection
+            this.element.onselectstart = function() { return false; };
+        }
+    }
+]);
+
+/**
+ * Base layer UI component. Layer is special type of UI
+ * components that is used to decouple different logical
+ * UI components types from each other. Zebkit Canvas
+ * consists from number of layers where only one can be
+ * active at the given point in time. Layers are stretched
+ * to fill full canvas size. Every time an input event
+ * happens system detects an active layer by asking all
+ * layers from top to bottom. First layer that wants to
+ * catch input gets control. The typical layers examples
+ * are window layer, pop up menus layer and so on.
+ * @param {String} id an unique id to identify the layer
+ * @constructor
+ * @class zebkit.ui.CanvasLayer
+ * @extends {zebkit.ui.Panel}
+ */
+pkg.CanvasLayer = Class(pkg.HtmlCanvas, [
+    function $prototype() {
+        /**
+         *  Define the method to catch pointer pressed event and
+         *  answer if the layer wants to have a control.
+         *  If the method is not defined it is considered as the
+         *  layer is not activated by the pointer event
+         *  @param {zebkit.ui.PointerEvent} e a pointer event
+         *  @return {Boolean} return true if the layer wants to
+         *  catch control
+         *  @method layerPointerPressed
+         */
+
+        /**
+         *  Define the method to catch key pressed event and
+         *  answer if the layer wants to have a control.
+         *  If the method is not defined it is considered
+         *  as the key event doesn't activate the layer
+         *  @param {zebkit.ui.KeyEvent} e a key code
+         *  @return {Boolean} return true if the layer wants to
+         *  catch control
+         *  @method layerKeyPressed
+         */
+
+        /**
+         *  Ask if the layer is active at the given location.
+         *  If the method is not defined that means the layer
+         *  is active at any location.
+         *  @param {Integer} x a x location
+         *  @param {Integer} y a y location
+         *  @return {Boolean} return true if the layer is active
+         *  at this location
+         *  @method isLayerActiveAt
+         */
+    },
+
+    function() {
+        this.$super();
+        this.id = this.clazz.ID;
+    }
+]);
+
+/**
+ *  Root layer implementation. This is the simplest UI layer implementation
+ *  where the layer always try grabbing all input event
+ *  @class zebkit.ui.RootLayer
+ *  @constructor
+ *  @extends {zebkit.ui.CanvasLayer}
+ */
+pkg.RootLayer = Class(pkg.CanvasLayer, [
+    function $clazz() {
+        this.ID = "root";
+        this.layout = new zebkit.layout.RasterLayout();
+    },
+
+    function $prototype() {
+        this.layerPointerPressed = function(e) {
+            return true;
+        };
+
+        this.layerKeyPressed = function(e) {
+            return true;
+        };
+
+        this.getFocusRoot = function() {
+            return this;
+        };
+    }
+]);
+
+/**
+ *  UI component to keep and render the given "zebkit.ui.View" class
+ *  instance. The target view defines the component preferred size
+ *  and the component view.
+ *  @class zebkit.ui.ViewPan
+ *  @constructor
+ *  @extends {zebkit.ui.Panel}
+ */
+pkg.ViewPan = Class(pkg.Panel, [
+    function $prototype() {
+        /**
+         * Reference to a view that the component visualize
+         * @attribute view
+         * @type {zebkit.ui.View}
+         * @default null
+         * @readOnly
+         */
+        this.view = null;
+
+        this.paint = function (g){
+            if (this.view != null){
+                var l = this.getLeft(),
+                    t = this.getTop();
+
+                this.view.paint(g, l, t, this.width  - l - this.getRight(),
+                                         this.height - t - this.getBottom(), this);
+            }
+        };
+
+        /**
+         * Set the target view to be wrapped with the UI component
+         * @param  {zebkit.ui.View|Function} v a view or a rendering
+         * view "paint(g,x,y,w,h,c)" function
+         * @method setView
+         * @chainable
+         */
+        this.setView = function (v){
+            var old = this.view;
+            v = pkg.$view(v);
+
+            if (v != old) {
+                this.view = v;
+                this.notifyRender(old, v);
+                this.vrp();
+            }
+
+            return this;
+        };
+
+        /**
+         * Override the parent method to calculate preferred size
+         * basing on a target view.
+         * @param  {zebkit.ui.Panel} t [description]
+         * @return {Object} return a target view preferred size if it is defined.
+         * The returned structure is the following:
+              { width: {Integer}, height:{Integer} }
+         * @method  calcPreferredSize
+         */
+        this.calcPreferredSize = function (t) {
+            return this.view != null ? this.view.getPreferredSize() : { width:0, height:0 };
+        };
+    }
+]);
+
+/**
+ *  Image panel UI component class. The component renders an image.
+ *  @param {String|Image} [img] a path or direct reference to an image object.
+ *  If the passed parameter is string it considered as path to an image.
+ *  In this case the image will be loaded using the passed path.
+ *  @class zebkit.ui.ImagePan
+ *  @constructor
+ *  @extends zebkit.ui.ViewPan
+ */
+pkg.ImagePan = Class(pkg.ViewPan, [
+    function(img, w, h) {
+        this.$runner = null;
+        this.setImage(img != null ? img : null);
+        this.$super();
+        if (arguments.length > 2) this.setPreferredSize(w, h);
+    },
+
+    /**
+     * Set image to be rendered in the UI component
+     * @method setImage
+     * @param {String|Image|zebkit.ui.Picture} img a path or direct reference to an
+     * image or zebkit.ui.Picture render.
+     * If the passed parameter is string it considered as path to an image.
+     * In this case the image will be loaded using the passed path
+     * @chainable
+     */
+    function setImage(img) {
+        if (img != null) {
+            var $this     = this,
+                isPic     = zebkit.instanceOf(img, pkg.Picture),
+                imgToLoad = isPic ? img.target : img ;
+
+            if (this.$runner == null) {
+                this.$runner = new zebkit.util.Runner();
+            }
+
+            this.$runner.run(function() {
+                zebkit.web.$loadImage(imgToLoad, this.join());
+            })
+            .
+            run(function(p, b, i) {
+                $this.$runner = null;
+                if (b) {
+                    $this.setView(isPic ? img : new pkg.Picture(i));
+                    $this.vrp();
+                }
+
+                if ($this.imageLoaded != null) {
+                    $this.imageLoaded(p, b, i);
+                }
+            })
+            .
+            error(function() {
+                this.$runner = null;
+                $this.setView(null);
+            });
+        }
+        else {
+            if (this.$runner == null) {
+                this.setView(null);
+            }
+            else {
+                var $this = this;
+                this.$runner.run(function() {
+                    $this.setView(null);
+                });
+            }
+        }
+        return this;
+    }
+]);
+
+/**
+ *  UI manager class. The class is widely used as base for building
+ *  various UI managers like paint, focus, event etc. Manager is
+ *  automatically registered as input and component events listener
+ *  if it implements appropriate events methods handlers
+ *  @class zebkit.ui.Manager
+ *  @constructor
+ */
+pkg.Manager = Class([
+    function() {
+        if (pkg.events != null) {
+            pkg.events.bind(this);
+        }
+    }
+]);
+
+/**
+ * Focus manager class defines the strategy of focus traversing among
+ * hierarchy of UI components. It keeps current focus owner component
+ * and provides API to change current focus component
+ * @class zebkit.ui.FocusManager
+ * @extends {zebkit.ui.Manager}
+ */
+pkg.FocusManager = Class(pkg.Manager, [
+    function $prototype() {
+        /**
+         * Reference to the current focus owner component.
+         * @attribute focusOwner
+         * @readOnly
+         * @type {zebkit.ui.Panel}
+         */
+        this.focusOwner = null;
+
+        this.$freeFocus = function(comp) {
+            if ( this.focusOwner != null &&
+                (this.focusOwner === comp || zebkit.layout.isAncestorOf(comp, this.focusOwner)))
+            {
+                this.requestFocus(null);
+            }
+        };
+
+        /**
+         * Component enabled event handler
+         * @param  {zebkit.ui.Panel} c a component
+         * @method compEnabled
+         */
+        this.compEnabled = function(e) {
+            var c = e.source;
+            if (c.isVisible === true && c.isEnabled === false && this.focusOwner != null) {
+                this.$freeFocus(c);
+            }
+        };
+
+        /**
+         * Component shown event handler
+         * @param  {zebkit.ui.Panel} c a component
+         * @method compShown
+         */
+        this.compShown = function(e) {
+            var c = e.source;
+            if (c.isEnabled === true && c.isVisible === false && this.focusOwner != null) {
+                this.$freeFocus(c);
+            }
+        };
+
+        /**
+         * Component removed event handler
+         * @param  {zebkit.ui.Panel} p a parent
+         * @param  {Integer} i      a removed component index
+         * @param  {zebkit.ui.Panel} c a removed component
+         * @method compRemoved
+         */
+        this.compRemoved = function(e) {
+            var c = e.kid;
+            if (c.isEnabled === true && c.isVisible === true && this.focusOwner != null) {
+                this.$freeFocus(c);
+            }
+        };
+
+        /**
+         * Test if the given component is a focus owner
+         * @param  {zebkit.ui.Panel} c an UI component to be tested
+         * @method hasFocus
+         * @return {Boolean} true if the given component holds focus
+         */
+        this.hasFocus = function(c) {
+            return this.focusOwner === c;
+        };
+
+        /**
+         * Key pressed event handler.
+         * @param  {zebkit.ui.KeyEvent} e a key event
+         * @method keyPressed
+         */
+        this.keyPressed = function(e){
+            if (pkg.KeyEvent.TAB === e.code) {
+                var cc = this.ff(e.source, e.shiftKey ?  -1 : 1);
+                if (cc != null) {
+
+                    // TODO: WEB specific code has to be removed moved to another place
+                    if (document.activeElement != cc.getCanvas().element) {
+                        cc.getCanvas().element.focus();
+                        this.requestFocus(cc);
+                    }
+                    else {
+                        this.requestFocus(cc);
+                    }
+                }
+
+                return true;
+            }
+        };
+
+        this.findFocusable = function(c) {
+            return (this.isFocusable(c) ? c : this.fd(c, 0, 1));
+        };
+
+        /**
+         * Test if the given component can catch focus
+         * @param  {zebkit.ui.Panel} c an UI component to be tested
+         * @method isFocusable
+         * @return {Boolean} true if the given component can catch a focus
+         */
+        this.isFocusable = function(c) {
+            var d = c.getCanvas();
+            if (d != null &&
+                   (c.canHaveFocus === true ||
+                     (typeof c.canHaveFocus == "function" && c.canHaveFocus() === true)))
+            {
+                for(;c !== d && c != null; c = c.parent) {
+                    if (c.isVisible === false || c.isEnabled === false) {
+                        return false;
+                    }
+                }
+                return c === d;
+            }
+
+            return false;
+        };
+
+        // looking recursively a focusable component among children components of
+        // the given target  starting from the specified by index kid with the
+        // given direction (forward or backward lookup)
+        this.fd = function(t,index,d) {
+            if (t.kids.length > 0){
+                var isNComposite = t.catchInput == null || t.catchInput === false;
+                for(var i = index; i >= 0 && i < t.kids.length; i += d) {
+                    var cc = t.kids[i];
+
+                    // check if the current children component satisfies
+                    // conditions it can grab focus or any deeper in hierarchy
+                    // component that can grab the focus exist
+                    if (cc.isEnabled === true                                           &&
+                        cc.isVisible === true                                           &&
+                        cc.width      >  0                                              &&
+                        cc.height     >  0                                              &&
+                        (isNComposite || (t.catchInput !== true      &&
+                                          t.catchInput(cc) === false)  )                &&
+                        ( (cc.canHaveFocus === true || (cc.canHaveFocus !=  null  &&
+                                                        cc.canHaveFocus !== false &&
+                                                        cc.canHaveFocus())            ) ||
+                          (cc = this.fd(cc, d > 0 ? 0 : cc.kids.length - 1, d)) != null)  )
+                    {
+                        return cc;
+                    }
+                }
+            }
+
+            return null;
+        };
+
+        // find next focusable component
+        // c - component starting from that a next focusable component has to be found
+        // d - a direction of next focusable component lookup: 1 (forward) or -1 (backward)
+        this.ff = function(c, d){
+            var top = c;
+            while (top != null && top.getFocusRoot == null) {
+                top = top.parent;
+            }
+
+            if (top == null) {
+                return null;
+            }
+
+            top = top.getFocusRoot();
+            if (top == null) {
+                return null;
+            }
+
+            if (top.traverseFocus != null) {
+                return top.traverseFocus(c, d);
+            }
+
+            for(var index = (d > 0) ? 0 : c.kids.length - 1; c != top.parent; ){
+                var cc = this.fd(c, index, d);
+                if (cc != null) return cc;
+                cc = c;
+                c = c.parent;
+                if (c != null) index = d + c.indexOf(cc);
+            }
+
+            return this.fd(top, d > 0 ? 0 : top.kids.length - 1, d);
+        };
+
+        /**
+         * Force to pass a focus to the given UI component
+         * @param  {zebkit.ui.Panel} c an UI component to pass a focus
+         * @method requestFocus
+         */
+        this.requestFocus = function(c) {
+            if (c != this.focusOwner && (c == null || this.isFocusable(c))) {
+                var oldFocusOwner = this.focusOwner;
+                if (c != null) {
+                    var nf = c.getEventDestination();
+                    if (nf == null || oldFocusOwner == nf) return;
+                    this.focusOwner = nf;
+                }
+                else {
+                    this.focusOwner = c;
+                }
+
+                if (oldFocusOwner != null) {
+                    var ofc = oldFocusOwner.getCanvas();
+                    if (ofc != null) ofc.$lastFocusOwner = oldFocusOwner;
+
+                    FOCUS_EVENT.source  = oldFocusOwner;
+                    FOCUS_EVENT.related = this.focusOwner;
+                    oldFocusOwner.focused();
+                    pkg.events.fireEvent("focusLost", FOCUS_EVENT);
+                }
+
+                if (this.focusOwner != null) {
+                    FOCUS_EVENT.source  = this.focusOwner;
+                    FOCUS_EVENT.related = oldFocusOwner;
+                    this.focusOwner.focused();
+                    pkg.events.fireEvent("focusGained", FOCUS_EVENT);
+                }
+
+                return this.focusOwner;
+            }
+            return null;
+        };
+
+        /**
+         * Pointer pressed event handler.
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
+         * @method pointerPressed
+         */
+        this.pointerPressed = function(e){
+            if (e.isAction()) {
+                // TODO: WEB specific code that has to be moved to another place
+                // the problem is a target canvas element get mouse pressed
+                // event earlier than it gets focus what is inconsistent behavior
+                // to fix it a timer is used
+                if (document.activeElement !== e.source.getCanvas().element) {
+                    var $this = this;
+                    setTimeout(function() {
+                        $this.requestFocus(e.source);
+                    }, 50);
+                }
+                else {
+                    this.requestFocus(e.source);
+                }
+            }
+        };
+    }
+]);
+
+/**
+ *  Command manager supports short cut keys definition and listening. The shortcuts have to be defined in
+ *  zebkit JSON configuration files. There are two sections:
+
+    - **osx** to keep shortcuts for Mac OS X platform
+    - **common** to keep shortcuts for all other platforms
+
+ *  The JSON configuration entity has simple structure:
+
+
+      {
+        "common": [
+             {
+                "command"   : "undo_command",
+                "args"      : [ true, "test"],
+                "key"       : "Ctrl+z"
+             },
+             {
+                "command" : "redo_command",
+                "key"     : "Ctrl+Shift+z"
+             },
+             ...
+        ],
+        "osx" : [
+             {
+                "command"   : "undo_command",
+                "args"      : [ true, "test"],
+                "key"       : "Cmd+z"
+             },
+             ...
+        ]
+      }
+
+ *  The configuration contains list of shortcuts. Every shortcut is bound to a key combination it is triggered.
+ *  Every shortcut has a name and an optional list of arguments that have to be passed to a shortcut listener method.
+ *  The optional arguments can be used to differentiate two shortcuts that are bound to the same command.
+ *
+ *  On the component level shortcut commands can be listened by implementing method whose name equals to shortcut name.
+ *  Pay attention to catch shortcut command your component has to be focusable and holds focus at the given time.
+ *  For instance, to catch "undo_command"  do the following:
+
+        var pan = new zebkit.ui.Panel([
+            function redo_command() {
+                // handle shortcut here
+            },
+
+            // visualize the component gets focus
+            function focused() {
+                this.$super();
+                this.setBackground(this.hasFocus()?"red":null);
+            }
+        ]);
+
+        // let our panel to hold focus by setting appropriate property
+        pan.canHaveFocus = true;
+
+
+ *  @constructor
+ *  @class zebkit.ui.ShortcutManager
+ *  @extends {zebkit.ui.Manager}
+ */
+
+/**
+ * Shortcut event is handled by registering a method handler with events manager. The manager is accessed as
+ * "zebkit.ui.events" static variable:
+
+        zebkit.ui.events.bind(function commandFired(c) {
+            ...
+        });
+
+ * @event shortcut
+ * @param {Object} c shortcut command
+ *         @param {Array} c.args shortcut arguments list
+ *         @param {String} c.command shortcut name
+ */
+pkg.ShortcutManager = Class(pkg.Manager, [
+    function $prototype() {
+        /**
+         * Key pressed event handler.
+         * @param  {zebkit.ui.KeyEvent} e a key event
+         * @method keyPressed
+         */
+        this.keyPressed = function(e) {
+            var fo = pkg.focusManager.focusOwner;
+            if (fo != null && this.keyCommands[e.code]) {
+                var c = this.keyCommands[e.code];
+                if (c && c[e.mask] != null) {
+                    c = c[e.mask];
+                    pkg.events._.commandFired(c);
+                    if (fo[c.command]) {
+                         if (c.args && c.args.length > 0) fo[c.command].apply(fo, c.args);
+                         else fo[c.command]();
+                    }
+                }
+            }
+        };
+
+        this.$parseKey = function(k) {
+            var m = 0, c = 0, r = k.split("+");
+            for(var i = 0; i < r.length; i++) {
+                var ch = r[i].trim().toUpperCase();
+                if (pkg.KeyEvent.hasOwnProperty("M_" + ch)) {
+                    m += pkg.KeyEvent["M_" + ch];
+                }
+                else {
+                    if (pkg.KeyEvent.hasOwnProperty(ch)) {
+                        c = pkg.KeyEvent[ch];
+                    }
+                    else {
+                        c = parseInt(ch);
+                        if (c == NaN) {
+                            throw new Error("Invalid key code : " + ch);
+                        }
+                    }
+                }
+            }
+            return [m, c];
+        };
+
+        this.setCommands = function(commands) {
+            for(var i=0; i < commands.length; i++) {
+                var c = commands[i],
+                    p = this.$parseKey(c.key),
+                    v = this.keyCommands[p[1]];
+
+                if (v && v[p[0]]) {
+                    throw new Error("Duplicated command: '" + c.command +  "' (" + p +")");
+                }
+
+                if (v == null) {
+                    v = [];
+                }
+
+                v[p[0]] = c;
+                this.keyCommands[p[1]] = v;
+            }
+        };
+    },
+
+    function(commands){
+        this.$super();
+        this.keyCommands = {};
+        if (commands != null) {
+            pkg.events._.addEvents("commandFired");
+            this.setCommands(commands.common);
+            if (zebkit.isMacOS === true && commands.osx != null) {
+                this.setCommands(commands.osx);
+            }
+        }
+    }
+]);
+
+/**
+ * Cursor manager class. Allows developers to control pointer cursor type by implementing an own
+ * getCursorType method or by specifying a cursor by cursorType field. Imagine an UI component
+ * needs to change cursor type. It
+ *  can be done by one of the following way:
+
+    - **Implement getCursorType method by the component itself if the cursor type depends on cursor location**
+
+          var p = new zebkit.ui.Panel([
+               // implement getCursorType method to set required
+               // pointer cursor type
+               function getCursorType(target, x, y) {
+                   return zebkit.ui.Cursor.WAIT;
+               }
+          ]);
+
+    - **Define "cursorType" property in component if the cursor type doesn't depend on cursor location **
+
+          var myPanel = new zebkit.ui.Panel();
+          ...
+          myPanel.cursorType = zebkit.ui.Cursor.WAIT;
+
+ *  @class zebkit.ui.CursorManager
+ *  @constructor
+ *  @extends {zebkit.ui.Manager}
+ */
+pkg.CursorManager = Class(pkg.Manager, [
+    function $prototype() {
+        /**
+         * Define pointer moved events handler.
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
+         * @method pointerMoved
+         */
+        this.pointerMoved = function(e){
+            if (this.$isFunc === true) {
+                this.cursorType = this.source.getCursorType(this.source, e.x, e.y);
+                this.target.style.cursor = (this.cursorType == null) ? "default"
+                                                                     : this.cursorType;
+            }
+        };
+
+        /**
+         * Define pointer entered events handler.
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
+         * @method pointerEntered
+         */
+        this.pointerEntered = function(e){
+            if (e.source.cursorType != null || e.source.getCursorType != null) {
+                this.$isFunc = (e.source.getCursorType != null);
+                this.target = e.target;
+                this.source = e.source;
+
+                this.cursorType = this.$isFunc === true ? this.source.getCursorType(this.source, e.x, e.y)
+                                                        : this.source.cursorType;
+
+                this.target.style.cursor = (this.cursorType == null) ? "default"
+                                                                     : this.cursorType;
+            }
+        };
+
+        /**
+         * Define pointer exited events handler.
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
+         * @method pointerExited
+         */
+        this.pointerExited  = function(e){
+            if (this.source != null) {
+                this.cursorType = "default";
+                if (this.target.style.cursor != this.cursorType) {
+                    this.target.style.cursor = this.cursorType;
+                }
+                this.source = this.target = null;
+                this.$isFunc = false;
+            }
+        };
+
+        /**
+         * Define pointer dragged events handler.
+         * @param  {zebkit.ui.PointerEvent} e a pointer event
+         * @method pointerDragged
+         */
+        this.pointerDragged = function(e) {
+            if (this.$isFunc === true) {
+                this.cursorType = this.source.getCursorType(this.source, e.x, e.y);
+                this.target.style.cursor = (this.cursorType == null) ? "default"
+                                                                      : this.cursorType;
+            }
+        };
+    },
+
+    function(){
+        this.$super();
+
+        /**
+         * Current cursor type
+         * @attribute cursorType
+         * @type {String}
+         * @readOnly
+         * @default "default"
+         */
+        this.cursorType = "default";
+        this.source = this.target = null;
+        this.$isFunc = false;
+    }
+]);
+
+/**
+ * Event manager class. One of the key zebkit manager that is responsible for
+ * distributing various events in zebkit UI. The manager provides number of
+ * methods to register global events listeners.
+ * @class zebkit.ui.EventManager
+ * @constructor
+ * @extends {zebkit.ui.Manager}
+ */
+pkg.EventManager = Class(pkg.Manager, [
+    function $clazz(argument) {
+        var eventNames = [
+            'keyTyped',
+            'keyReleased',
+            'keyPressed',
+            'pointerDragged',
+            'pointerDragStarted',
+            'pointerDragEnded',
+            'pointerMoved',
+            'pointerClicked',
+            'pointerDoubleClicked',
+            'pointerPressed',
+            'pointerReleased',
+            'pointerEntered',
+            'pointerExited',
+
+            'focusLost',
+            'focusGained',
+
+            'compSized',
+            'compMoved',
+            'compEnabled',
+            'compShown',
+            'compAdded',
+            'compRemoved',
+
+            'winOpened',
+            'winActivated',
+
+            'menuItemSelected'
+        ];
+
+        this.$CHILD_EVENTS_MAP = {};
+
+        // add child<eventName> events names
+        var l = eventNames.length;
+        for(var i = 0; i < l; i++) {
+            var eventName = eventNames[i];
+            eventNames.push("child" + eventName[0].toUpperCase() + eventName.substring(1));
+            this.$CHILD_EVENTS_MAP[eventName] = eventNames[l + i];
+        }
+
+        this.Listerners = zebkit.util.ListenersClass.apply(this, eventNames);
+    },
+
+    function $prototype(clazz) {
+        var $CEM = clazz.$CHILD_EVENTS_MAP;
+
+        this.fireEvent = function(id, e){
+            var t = e.source, kk = $CEM[id], b = false;
+
+            // assign id that matches method to be called
+            e.id = id;
+
+            // call target component listener
+            if (t[id] != null) {
+                if (t[id].call(t, e) === true) {
+                    return true;
+                }
+            }
+
+            // call global listeners
+            b = this._[id](e);
+
+            // call parent listeners
+            if (b === false) {
+                for (t = t.parent;t != null; t = t.parent){
+                    if (t[kk] != null) {
+                        t[kk].call(t, e);
+                    }
+                }
+            }
+
+            return b;
+        };
+    },
+
+    function() {
+        this._ = new this.clazz.Listerners();
+        this.$super();
+    }
+]);
+
+this.events = new pkg.EventManager();
+
+pkg.zCanvas = Class(pkg.HtmlCanvas, [
+    function $clazz () {
+        this.CLASS_NAME = "zebcanvas";
+    },
+
+    function $prototype() {
+        this.$isRootCanvas   = true;
+        this.$lastFocusOwner = null;
+        this.isSizeFull      = false;
+
+        this.$toElementX = function(pageX, pageY) {
+            pageX -= this.offx;
+            pageY -= this.offy;
+
+            var c = this.$context.$states[this.$context.$curState];
+            return ((c.sx != 1 || c.sy != 1 || c.rotateVal !== 0) ? Math.round((c.crot * pageX + pageY * c.srot)/c.sx)
+                                                                  : pageX) - c.dx;
+        };
+
+        this.$toElementY = function(pageX, pageY) {
+            pageX -= this.offx;
+            pageY -= this.offy;
+
+            var c = this.$context.$states[this.$context.$curState];
+            return ((c.sx != 1 || c.sy != 1 || c.rotateVal !== 0) ? Math.round((pageY * c.crot - c.srot * pageX)/c.sy)
+                                                                 : pageY) - c.dy;
+        };
+
+        this.load = function(jsonPath, cb){
+            return this.root.load(jsonPath, cb);
+        };
+
+        // TODO: may be rename to dedicated method $doWheelScroll
+        this.$doScroll = function(dx, dy, src) {
+            if (src === "wheel") {
+                var owner = pkg.$pointerOwner.mouse;
+                while (owner != null && owner.doScroll == null) {
+                    owner = owner.parent;
+                }
+
+                if (owner != null) {
+                    return owner.doScroll(dx, dy, src);
+                }
+            }
+        };
+
+        this.$keyTyped = function(e) {
+            if (pkg.focusManager.focusOwner != null) {
+                e.source = pkg.focusManager.focusOwner;
+                return pkg.events.fireEvent("keyTyped", e);
+            }
+            return false;
+        };
+
+        this.$keyPressed = function(e) {
+            for(var i = this.kids.length - 1;i >= 0; i--){
+                var l = this.kids[i];
+                if (l.layerKeyPressed != null && l.layerKeyPressed(e) === true){
+                    if (e.eatMe === true) return true;
+                    break;
+                }
+            }
+
+            if (pkg.focusManager.focusOwner != null) {
+                e.source = pkg.focusManager.focusOwner;
+                return pkg.events.fireEvent("keyPressed", e);
+            }
+
+            return false;
+        };
+
+        this.$keyReleased = function(e){
+            if (pkg.focusManager.focusOwner != null) {
+                e.source = pkg.focusManager.focusOwner;
+                return pkg.events.fireEvent("keyReleased", e);
+            }
+
+            return false;
+        };
+
+        this.$pointerEntered = function(e) {
+            // TODO: review it quick and dirty fix try to track a situation
+            //       when the canvas has been moved
+            this.recalcOffset();
+
+            var x = this.$toElementX(e.pageX, e.pageY),
+                y = this.$toElementY(e.pageX, e.pageY),
+                d = this.getComponentAt(x, y),
+                o = pkg.$pointerOwner[e.identifier];
+
+            // also correct current component on that  pointer is located
+            if (d !== o) {
+                // if pointer owner is not null but doesn't match new owner
+                // generate pointer exit and clean pointer owner
+                if (o != null) {
+                    pkg.$pointerOwner[e.identifier] = null;
+                    pkg.events.fireEvent("pointerExited", e.update(o, x, y));
+                }
+
+                // if new pointer owner is not null and enabled
+                // generate pointer entered event ans set new pointer owner
+                if (d != null && d.isEnabled === true){
+                    pkg.$pointerOwner[e.identifier] = d;
+                    pkg.events.fireEvent("pointerEntered", e.update(d, x, y));
+                }
+            }
+        };
+
+        this.$pointerExited = function(e) {
+            var o = pkg.$pointerOwner[e.identifier];
+            if (o != null) {
+                pkg.$pointerOwner[e.identifier] = null;
+                return pkg.events.fireEvent("pointerExited", e.update(o,
+                                                                      this.$toElementX(e.pageX, e.pageY),
+                                                                      this.$toElementY(e.pageX, e.pageY)));
+            }
+        };
+
+        /**
+         * Catch native canvas pointer move events
+         * @param {String} id an touch id (for touchable devices)
+         * @param {String} e a pointer event that has been triggered by canvas element
+         *
+         *         {
+         *             pageX : {Integer},
+         *             pageY : {Integer},
+         *             target: {HTMLElement}
+         *         }
+         * @protected
+         * @method $pointerMoved
+         */
+        this.$pointerMoved = function(e){
+            // if a pointer button has not been pressed handle the normal pointer moved event
+            var x = this.$toElementX(e.pageX, e.pageY),
+                y = this.$toElementY(e.pageX, e.pageY),
+                d = this.getComponentAt(x, y),
+                o = pkg.$pointerOwner[e.identifier],
+                b = false;
+
+            // check if pointer already inside a component
+            if (o != null) {
+                if (d != o) {
+                    pkg.$pointerOwner[e.identifier] = null;
+                    b = pkg.events.fireEvent("pointerExited", e.update(o, x, y));
+
+                    if (d != null && d.isEnabled === true) {
+                        pkg.$pointerOwner[e.identifier] = d;
+                        b = pkg.events.fireEvent("pointerEntered", e.update(d, x, y)) || b;
+                    }
+                }
+                else {
+                    if (d != null && d.isEnabled === true) {
+                        b = pkg.events.fireEvent("pointerMoved", e.update(d, x, y));
+                    }
+                }
+            }
+            else {
+                if (d != null && d.isEnabled === true) {
+                    pkg.$pointerOwner[e.identifier] = d;
+                    b = pkg.events.fireEvent("pointerEntered", e.update(d, x, y));
+                }
+            }
+
+            return b;
+        };
+
+        this.$pointerDragStarted = function(e) {
+            var x = this.$toElementX(e.pageX, e.pageY),
+                y = this.$toElementY(e.pageX, e.pageY),
+                d = this.getComponentAt(x, y);
+
+            // if target component can be detected fire pointer start dragging and
+            // pointer dragged events to the component
+            if (d != null && d.isEnabled === true) {
+                return pkg.events.fireEvent("pointerDragStarted", e.update(d, x, y));
+            }
+
+            return false;
+        };
+
+        this.$pointerDragged = function(e){
+            if (pkg.$pointerOwner[e.identifier] != null) {
+                return pkg.events.fireEvent("pointerDragged", e.update(pkg.$pointerOwner[e.identifier],
+                                                                       this.$toElementX(e.pageX, e.pageY),
+                                                                       this.$toElementY(e.pageX, e.pageY)));
+            }
+
+            return false;
+        };
+
+        this.$pointerDragEnded = function(e) {
+            if (pkg.$pointerOwner[e.identifier] != null) {
+                return pkg.events.fireEvent("pointerDragEnded", e.update(pkg.$pointerOwner[e.identifier],
+                                                                         this.$toElementX(e.pageX, e.pageY),
+                                                                         this.$toElementY(e.pageX, e.pageY)));
+            }
+
+            return false;
+        };
+
+        this.$pointerClicked = function(e) {
+            var x = this.$toElementX(e.pageX, e.pageY),
+                y = this.$toElementY(e.pageX, e.pageY),
+                d = this.getComponentAt(x, y);
+
+            return d != null ? pkg.events.fireEvent("pointerClicked", e.update(d, x, y))
+                             : false;
+        };
+
+        this.$pointerDoubleClicked = function(e) {
+            var x = this.$toElementX(e.pageX, e.pageY),
+                y = this.$toElementY(e.pageX, e.pageY),
+                d = this.getComponentAt(x, y);
+
+            return d != null ? pkg.events.fireEvent("pointerDoubleClicked", e.update(d, x, y))
+                             : false;
+        };
+
+        this.$pointerReleased = function(e) {
+            var x  = this.$toElementX(e.pageX, e.pageY),
+                y  = this.$toElementY(e.pageX, e.pageY),
+                pp = pkg.$pointerPressedOwner[e.identifier];
+
+            // release pressed state
+            if (pp != null) {
+                try {
+                    pkg.events.fireEvent("pointerReleased", e.update(pp, x, y));
+                } finally {
+                    pkg.$pointerPressedOwner[e.identifier] = null;
+                }
+            }
+
+            // mouse released can happen at new location, so move owner has to be corrected
+            // and mouse exited entered event has to be generated.
+            // the correction takes effect if we have just completed dragging or mouse pressed
+            // event target doesn't match pkg.$pointerOwner
+            if (e.pointerType === "mouse" && (e.pressPageX != e.pageX || e.pressPageY != e.pageY)) {
+                var nd = this.getComponentAt(x, y),
+                    po = this.getComponentAt(this.$toElementX(e.pressPageX, e.pressPageY),
+                                             this.$toElementY(e.pressPageX, e.pressPageY));
+
+                if (nd !== po) {
+                    if (po != null) {
+                        pkg.$pointerOwner[e.identifier] = null;
+                        pkg.events.fireEvent("pointerExited", e.update(po, x, y));
+                    }
+
+                    if (nd != null && nd.isEnabled === true){
+                        pkg.$pointerOwner[e.identifier] = nd;
+                        pkg.events.fireEvent("pointerEntered", e.update(nd, x, y));
+                    }
+                }
+            }
+        };
+
+        this.$pointerPressed = function(e) {
+            var x  = this.$toElementX(e.pageX, e.pageY),
+                y  = this.$toElementY(e.pageX, e.pageY),
+                pp = pkg.$pointerPressedOwner[e.identifier];
+
+            // free pointer prev presssed if any
+            if (pp != null) {
+                try {
+                    pkg.events.fireEvent("pointerReleased", e.update(pp, x, y));
+                } finally {
+                    pkg.$pointerPressedOwner[e.identifier] = null;
+                }
+            }
+
+            // adjust event for passing it to layers
+            e.x = x;
+            e.y = y;
+            e.source = null;
+
+            // send pointer event to a layer and test if it has been activated
+            for(var i = this.kids.length - 1; i >= 0; i--){
+                var tl = this.kids[i];
+                if (tl.layerPointerPressed != null && tl.layerPointerPressed(e)) {
+                    if (e.eatMe === true) return true;
+                    break;
+                }
+            }
+
+            var d = this.getComponentAt(x, y);
+            if (d != null && d.isEnabled === true) {
+                if (pkg.$pointerOwner[e.identifier] !== d) {
+                    pkg.$pointerOwner[e.identifier] = d;
+                    pkg.events.fireEvent("pointerEntered",  e.update(d, x, y));
+                }
+
+                pkg.$pointerPressedOwner[e.identifier] = d;
+                pkg.events.fireEvent("pointerPressed", e.update(d, x, y));
+            }
+        };
+
+        this.getComponentAt = function(x, y){
+            for(var i = this.kids.length; --i >= 0; ){
+                var tl = this.kids[i];
+
+                if (tl.isLayerActiveAt == null || tl.isLayerActiveAt(x, y)) {
+                    // !!!
+                    //  since the method is widely used the code below duplicates
+                    //  functionality of pkg.events.getEventDestination(tl.getComponentAt(x, y));
+                    //  method
+                    // !!!
+                    var c = tl.getComponentAt(x, y);
+                    if (c != null)  {
+                        var p = c;
+                        while ((p = p.parent) != null) {
+                            if (p.catchInput != null && (p.catchInput === true || (p.catchInput !== false && p.catchInput(c)))) {
+                                c = p;
+                            }
+                        }
+                    }
+                    return c;
+                }
+            }
+            return null;
+        };
+
+        this.recalcOffset = function() {
+            // calculate the DOM element offset relative to window taking in account
+            // scrolling
+            var poffx = this.offx,
+                poffy = this.offy,
+                ba    = this.$container.getBoundingClientRect();
+
+            this.offx = Math.round(ba.left) + zebkit.web.$measure(this.$container, "border-left-width") +
+                                              zebkit.web.$measure(this.$container, "padding-left") +
+                                              window.pageXOffset;
+            this.offy = Math.round(ba.top) +  zebkit.web.$measure(this.$container, "padding-top" ) +
+                                              zebkit.web.$measure(this.$container, "border-top-width") +
+                                              window.pageYOffset;
+
+            if (this.offx != poffx || this.offy != poffy) {
+                // force to fire component re-located event
+                this.relocated(this, poffx, poffy);
+            }
+        };
+
+        /**
+         * Get the canvas layer by the specified layer ID. Layer is a children component
+         * of the canvas UI component. Every layer has an ID assigned to it the method
+         * actually allows developers to get the canvas children component by its ID
+         * @param  {String} id a layer ID
+         * @return {zebkit.ui.Panel} a layer (children) component
+         * @method getLayer
+         */
+        this.getLayer = function(id) {
+            return this[id];
+        };
+
+        // override relocated and resized
+        // to prevent unnecessary repainting
+        this.relocated = function(px,py) {
+            COMP_EVENT.source = this;
+            COMP_EVENT.px     = px;
+            COMP_EVENT.py     = py;
+            pkg.events.fireEvent("compMoved", COMP_EVENT);
+        };
+
+        this.resized = function(pw,ph) {
+            COMP_EVENT.source = this;
+            COMP_EVENT.prevWidth  = pw;
+            COMP_EVENT.prevHeight = ph;
+            pkg.events.fireEvent("compSized", COMP_EVENT);
+            // don't forget repaint it
+            this.repaint();
+        };
+
+        this.$initListeners = function() {
+            // TODO: hard-coded
+            new pkg.PointerEventUnifier(this.$container, this);
+            new pkg.KeyEventUnifier(this.element, this); // element has to be used since canvas is
+                                                         // styled to have focus and get key events
+            new pkg.MouseWheelSupport(this.$container, this);
+        };
+
+        this.fullScreen = function() {
+            var element = document.documentElement;
+            if (element.requestFullscreen) {
+                element.requestFullscreen();
+              } else if(element.mozRequestFullScreen) {
+                element.mozRequestFullScreen();
+              } else if(element.webkitRequestFullscreen) {
+                element.webkitRequestFullscreen();
+              } else if(element.msRequestFullscreen) {
+                element.msRequestFullscreen();
+              }
+            //}
+        //    document.documentElement.webkitRequestFullscreen();
+        };
+    },
+
+    function(element, w, h) {
+        // no arguments
+        if (arguments.length === 0) {
+            w = 400;
+            h = 400;
+        }
+        else {
+            if (arguments.length === 1) {
+                w = -1;
+                h = -1;
+            }
+            else {
+                if (arguments.length === 2) {
+                    h = w;
+                    w = element;
+                    element = null;
+                }
+            }
+        }
+
+        // if passed element is string than consider it as
+        // an ID of an element that is already in DOM tree
+        if (zebkit.isString(element)) {
+            var id = element;
+            element = document.getElementById(id);
+
+            // no canvas can be detected
+            if (element == null) {
+                throw new Error("Canvas id='" + id + "' element cannot be found");
+            }
+        }
+
+        this.$super(element);
+
+        // since zCanvas is top level element it doesn't have to have
+        // absolute position
+        this.$container.style.position = "relative";
+
+        // let canvas zCanvas listen WEB event
+        this.$container.style["pointer-events"] = "auto";
+
+        // if canvas is not yet part of HTML let's attach it to
+        // body.
+        if (this.$container.parentNode == null) {
+            document.body.appendChild(this.$container);
+        }
+
+        // force canvas to have a focus
+        if (this.element.getAttribute("tabindex") === null) {
+            this.element.setAttribute("tabindex", "1");
+        }
+
+        if (w < 0) w = this.element.offsetWidth;
+        if (h < 0) h = this.element.offsetHeight;
+
+        // !!!
+        // save canvas in list of created Zebkit canvases
+        // do it before calling setSize(w,h) method
+        pkg.$canvases.push(this);
+
+        this.setSize(w, h);
+
+        // sync canvas visibility with what canvas style says
+        var cvis = (this.element.style.visibility == "hidden" ? false : true);
+        if (this.isVisible != cvis) {
+            this.setVisible(cvis);
+        }
+
+        // call event method if it is defined
+        if (this.canvasInitialized != null) {
+            this.canvasInitialized();
+        }
+
+        var $this = this;
+
+        // this method should clean focus if
+        // one of of a child DOM element gets focus
+        zebkit.web.$focusin(this.$container, function(e) {
+            if (e.target !== $this.$container &&
+                e.target.parentNode != null &&
+                e.target.parentNode.getAttribute("data-zebcont") == null)
+            {
+                pkg.focusManager.requestFocus(null);
+            }
+            else {
+                // clear focus if a focus owner component is placed in another zCanvas
+                if (e.target === $this.$container &&
+                    pkg.focusManager.focusOwner != null &&
+                    pkg.focusManager.focusOwner.getCanvas() !== $this)
+                {
+                    pkg.focusManager.requestFocus(null);
+                }
+            }
+        }, true);
+    },
+
+    function setSize(w, h) {
+        if (this.width != w || h != this.height) {
+            this.$super(w, h);
+
+            // let know to other zebkit canvases that
+            // the size of an element on the page has
+            // been updated and they have to correct
+            // its anchor.
+            pkg.$elBoundsUpdated();
+        }
+        return this;
+    },
+
+    function fullSize() {
+        /**
+         * Indicate if the canvas has to be stretched to
+         * fill the whole screen area.
+         * @type {Boolean}
+         * @attribute isFullSize
+         * @readOnly
+         */
+        if (this.isFullSize !== true) {
+            if (zebkit.web.$contains(this.$container) !== true) {
+                throw new Error("zCanvas is not a part of DOM tree");
+            }
+
+            this.isFullSize = true;
+            this.setLocation(0, 0);
+
+            // adjust body to kill unnecessary gap for inline-block zCanvas element
+            // otherwise body size will be slightly horizontally bigger than visual
+            // viewport height what causes scroller appears
+            document.body.style["font-size"] = "0px";
+
+            var ws = zebkit.web.$viewPortSize();
+            this.setSize(ws.width, ws.height);
+        }
+    },
+
+    function setVisible(b) {
+        var prev = this.isVisible;
+        this.$super(b);
+
+        // Since zCanvas has no parent component calling the super
+        // method above doesn't trigger repainting. So, do it here.
+        if (b != prev) {
+            this.repaint();
+        }
+        return this;
+    },
+
+    function vrp() {
+        this.$super();
+        if (zebkit.web.$contains(this.element) && this.element.style.visibility === "visible") {
+            this.repaint();
+        }
+    },
+
+    function kidAdded(i,constr,c){
+        if (typeof this[c.id] !== "undefined") {
+            throw new Error("Layer '" + c.id + "' already exist");
+        }
+
+        this[c.id] = c;
+        this.$super(i, constr, c);
+    },
+
+    function kidRemoved(i, c){
+        delete this[c.id];
+        this.$super(i, c);
+    }
+]);
+
+
+pkg.HtmlElementMan = Class(pkg.Manager, [
+//
+// HTML element integrated into zebkit layout has to be tracked regarding:
+//    1) DOM hierarchy. New added into zebkit layout DOM element has to be
+//       attached to the first found parent DOM element
+//    2) Visibility. If a zebkit UI component change its visibility state
+//       it has to have side effect to all children HTML elements on any
+//       subsequent hierarchy level
+//    3) Moving a zebkit UI component has to correct location of children
+//       HTML element on any subsequent hierarchy level.
+//
+//  The implementation of HTML element component has the following specific:
+//    1) Every original HTML is wrapped with "div" element. It is necessary since
+//       not all HTML element has been designed to be a container for another
+//       HTML element. By adding extra div we can consider the wrapper as container.
+//       The wrapper element is used to control visibility, location, enabled state
+//    2) HTML element has "isDOMElement" property set to true
+//    3) HTML element visibility depends on an ancestor component visibility.
+//       HTML element is visible if:
+//          -- the element isVisible property is true
+//          -- the element has a parent DOM element set
+//          -- all his ancestors are visible
+//          -- size of element is more than zero
+//          -- getCanvas() != null
+//       The visibility state is controlled with "e.style.visibility"
+//
+//   To support effective DOM hierarchy tracking a zebkit UI component can
+//   host "$domKid" property that contains direct DOM element the UI component
+//   hosts and other UI components that host DOM element. So it is sort of tree.
+//   For instance:
+//
+//    +---------------------------------------------------------
+//    |  p1 (zebkit component)
+//    |   +--------------------------------------------------
+//    |   |  p2 (zebkit component)
+//    |   |    +---------+      +-----------------------+
+//    |   |    |   h1    |      | p3 zebkit component    |
+//    |   |    +---------+      |  +---------------+    |
+//    |   |                     |  |    h3         |    |
+//    |   |    +---------+      |  |  +---------+  |    |
+//    |   |    |   h2    |      |  |  |   p4    |  |    |
+//    |   |    +---------+      |  |  +---------+  |    |
+//    |   |                     |  +---------------+    |
+//    |   |                     +-----------------------+
+//
+//     p1.$domKids : {
+//         p2.$domKids : {
+//             h1,   // leaf elements are always DOM element
+//             h2,
+//             p3.$domKids : {
+//                h3
+//             }
+//         }
+//     }
+    function $prototype() {
+        function $isInInvisibleState(c) {
+            if (c.isVisible === false           ||
+                c.$container.parentNode == null ||
+                c.width       <= 0              ||
+                c.height      <= 0              ||
+                c.parent      == null           ||
+                zebkit.web.$contains(c.$container) === false)
+            {
+                return true;
+            }
+
+            var p = c.parent;
+            while (p != null && p.isVisible === true && p.width > 0 && p.height > 0) {
+                p = p.parent;
+            }
+
+            return p != null || pkg.$cvp(c) == null;
+        }
+
+        // attach to appropriate DOM parent if necessary
+        // c parameter has to be DOM element
+        function $resolveDOMParent(c) {
+            // try to find an HTML element in zebkit (pay attention, in zebkit hierarchy !)
+            // hierarchy that has to be a DOM parent for the given component
+            var parentElement = null;
+            for(var p = c.parent; p != null; p = p.parent) {
+                if (p.isDOMElement === true) {
+                    parentElement = p.$container;
+                    break;
+                }
+            }
+
+            // parentElement is null means the component has
+            // not been inserted into DOM hierarchy
+            if (parentElement != null && c.$container.parentNode == null) {
+                // parent DOM element of the component is null, but a DOM container
+                // for the element has been detected. We need to add it to DOM
+                // than we have to add the DOM to the found DOM parent element
+                parentElement.appendChild(c.$container);
+
+                // adjust location of just attached DOM component
+                $adjustLocation(c);
+            }
+            else {
+                // test consistency whether the DOM element already has
+                // parent node that doesn't match the discovered
+                if (parentElement           != null &&
+                    c.$container.parentNode != null &&
+                    c.$container.parentNode !== parentElement)
+                {
+                    throw new Error("DOM parent inconsistent state ");
+                }
+            }
+        }
+
+        //    +----------------------------------------
+        //    |             ^      DOM1
+        //    |             .
+        //    |             .  (x,y) -> (xx,yy) than correct left
+        //                  .  and top of DOM2 relatively to DOM1
+        //    |    +--------.--------------------------
+        //    |    |        .       zebkit1
+        //    |    |        .
+        //    |    |  (left, top)
+        //    |<............+-------------------------
+        //    |    |        |           DOM2
+        //    |    |        |
+        //
+        //  Convert DOM (x, y) zebkit coordinates into appropriate CSS top and left
+        //  locations relatively to its immediate DOM element. For instance if a
+        //  zebkit component contains DOM component every movement of zebkit component
+        //  has to bring to correction of the embedded DOM elements
+        function $adjustLocation(c) {
+            if (c.$container.parentNode != null) {
+                // hide DOM component before move
+                // makes moving more smooth
+                var prevVisibility = c.$container.style.visibility;
+                c.$container.style.visibility = "hidden";
+
+                // find a location relatively to the first parent HTML element
+                var p = c, xx = c.x, yy = c.y;
+                while (((p = p.parent) != null) && p.isDOMElement !== true) {
+                    xx += p.x;
+                    yy += p.y;
+                }
+
+                c.$container.style.left = "" + xx + "px";
+                c.$container.style.top  = "" + yy + "px";
+                c.$container.style.visibility = prevVisibility;
+            }
+        }
+
+        // iterate over all found children HTML elements
+        // !!! pay attention you have to check existence
+        // of "$domKids" field before the method calling
+        function $domElements(c, callback) {
+            for (var k in c.$domKids) {
+                var e = c.$domKids[k];
+                if (e.isDOMElement === true) {
+                    callback.call(this, e);
+                }
+                else {
+                    // prevent unnecessary method call by condition
+                    if (e.$domKids != null) {
+                        $domElements(e, callback);
+                    }
+                }
+            }
+        }
+
+        this.compShown = function(e) {
+            // 1) if c is DOM element than we have make it is visible if
+            //      -- c.isVisible == true : the component visible  AND
+            //      -- all elements in parent chain is visible      AND
+            //      -- the component is in visible area
+            //
+            // 2) if c is not a DOM component his visibility state can have
+            //    side effect to his children HTML elements (on any level)
+            //    In this case we have to do the following:
+            //      -- go through all children HTML elements
+            //      -- if c.isVisible == false: make invisible every children element
+            //      -- if c.isVisible != false: make visible every children element whose
+            //         visibility state satisfies the following conditions:
+            //          -- kid.isVisible == true
+            //          -- all parent to c are in visible state
+            //          -- the kid component is in visible area
+            var c = e.source;
+            if (c.isDOMElement === true) {
+                c.$container.style.visibility = c.isVisible === false || $isInInvisibleState(c) ? "hidden"
+                                                                                                : "visible";
+            }
+            else {
+                if (c.$domKids != null) {
+                    $domElements(c, function(e) {
+                        e.$container.style.visibility = e.isVisible === false || $isInInvisibleState(e) ? "hidden" : "visible";
+                    });
+                }
+            }
+        };
+
+        this.compMoved = function(e) {
+            var c = e.source;
+
+            // if we move a zebkit component that contains
+            // DOM element(s) we have to correct the DOM elements
+            // locations relatively to its parent DOM
+            if (c.isDOMElement === true) {
+                // root canvas location cannot be adjusted since it is up to DOM tree to do it
+                if (c.$isRootCanvas !== true) {
+                    var dx   = e.prevX - c.x,
+                        dy   = e.prevY - c.y,
+                        cont = c.$container;
+
+                    cont.style.left = ((parseInt(cont.style.left, 10) || 0) - dx) + "px";
+                    cont.style.top  = ((parseInt(cont.style.top,  10) || 0) - dy) + "px";
+                }
+            }
+            else {
+                if (c.$domKids != null) {
+                    $domElements(c, function(e) {
+                        $adjustLocation(e);
+                    });
+                }
+            }
+        };
+
+        function detachFromParent(p, c) {
+            // DOM parent means the detached element doesn't
+            // have upper parents since it is relative to the
+            // DOM element
+            if (p.isDOMElement !== true && p.$domKids != null) {
+                // delete from parent
+                delete p.$domKids[c];
+
+                // parent is not DOM and doesn't have kids anymore
+                // what means the parent has to be also detached
+                if (isLeaf(p)) {
+                    // parent of parent is not null and is not a DOM element
+                    if (p.parent != null && p.parent.isDOMElement !== true) {
+                        detachFromParent(p.parent, p);
+                    }
+
+                    // remove $domKids from parent since the parent is leaf
+                    delete p.$domKids;
+                }
+            }
+        }
+
+        function isLeaf(c) {
+            if (c.$domKids != null) {
+                for(var k in c.$domKids) {
+                    if (c.$domKids.hasOwnProperty(k)) return false;
+                }
+            }
+            return true;
+        }
+
+        function removeDOMChildren(c) {
+            // DOM element cannot have children dependency tree
+            if (c.isDOMElement !== true && c.$domKids != null) {
+                for(var k in c.$domKids) {
+                    if (c.$domKids.hasOwnProperty(k)) {
+                        var kid = c.$domKids[k];
+
+                        // DOM element
+                        if (kid.isDOMElement === true) {
+                            kid.$container.parentNode.removeChild(kid.$container);
+                            kid.$container.parentNode = null;
+                        }
+                        else {
+                            removeDOMChildren(kid);
+                        }
+                    }
+                }
+                delete c.$domKids;
+            }
+        }
+
+        this.compRemoved = function(e) {
+            var c = e.kid;
+
+            // if detached element is DOM element we have to
+            // remove it from DOM tree
+            if (c.isDOMElement === true) {
+                c.$container.parentNode.removeChild(c.$container);
+                c.$container.parentNode = null;
+            }
+            else {
+                removeDOMChildren(c);
+            }
+
+            detachFromParent(e.source, c);
+        };
+
+        this.compAdded = function(e) {
+            var p = e.source,  c = e.kid;
+            if (c.isDOMElement === true) {
+                $resolveDOMParent(c);
+            }
+            else {
+                if (c.$domKids != null) {
+                    $domElements(c, function(e) {
+                        $resolveDOMParent(e);
+                    });
+                }
+                else {
+                    return;
+                }
+            }
+
+            if (p.isDOMElement !== true) {
+                // we come here if parent is not a DOM element and
+                // inserted children is DOM element or an element that
+                // embeds DOM elements
+                while (p != null && p.isDOMElement !== true) {
+                    if (p.$domKids == null) {
+                        // if reference to kid DOM element or kid DOM elements holder
+                        // has bot been created we have to continue go up to parent of
+                        // the parent to register the whole chain of DOM and DOM holders
+                        p.$domKids = {};
+                        p.$domKids[c] = c;
+                        c = p;
+                        p = p.parent;
+                    }
+                    else {
+                        if (p.$domKids.hasOwnProperty(c)) {
+                            throw new Error("Inconsistent state for " + c + ", " + c.clazz.$name);
+                        }
+                        p.$domKids[c] = c;
+                        break;
+                    }
+                }
+            }
+        };
+    }
+]);
+
+
+/**
+ * @for
+ */
+
+});
+zebkit.package("ui", function(pkg, Class) {
+
+/**
+ * @module  ui.html
+ */
+pkg.HtmlFocusableElement = Class(pkg.HtmlElement, [
+    function $prototype() {
+        this.$getElementRootFocus = function() {
+            return this.element;
+        };
+    }
+]);
+
+/**
+ * HTML input element wrapper class. The class can be used as basis class
+ * to wrap HTML elements that can be used to enter a textual information.
+ * @constructor
+ * @param {String} text a text the text input component has to be filled with
+ * @param {String} element an input element name
+ * @class zebkit.ui.HtmlTextInput
+ * @extends zebkit.ui.HtmlElement
+ */
+pkg.HtmlTextInput = Class(pkg.HtmlFocusableElement, [
+    function $prototype() {
+        this.cursorType = pkg.Cursor.TEXT;
+
+        /**
+         * Get a text of the text input element
+         * @return {String} a text of the  text input element
+         * @method getValue
+         */
+        this.getValue = function() {
+            return this.element.value.toString();
+        };
+
+        /**
+         * Set the text
+         * @param {String} t a text
+         * @method setValue
+         */
+        this.setValue = function(t) {
+            if (this.element.value !== t) {
+                this.element.value = t;
+                this.vrp();
+            }
+        };
+    },
+
+    function(text, e) {
+        if (text == null) text = "";
+        this.$super(e);
+        this.setAttribute("tabindex", 0);
+        this.setValue(text);
+    }
+]);
+
+/**
+ * HTML input text element wrapper class. The class wraps standard HTML text field
+ * and represents it as zebkit UI component.
+ * @constructor
+ * @class zebkit.ui.HtmlTextField
+ * @param {String} [text] a text the text field component has to be filled with
+ * @extends zebkit.ui.HtmlTextInput
+ */
+pkg.HtmlTextField = Class(pkg.HtmlTextInput, [
+    function(text) {
+        this.$super(text, "input");
+        this.element.setAttribute("type",  "text");
+    }
+]);
+
+/**
+ * HTML input textarea element wrapper class. The class wraps standard HTML textarea
+ * element and represents it as zebkit UI component.
+ * @constructor
+ * @param {String} [text] a text the text area component has to be filled with
+ * @class zebkit.ui.HtmlTextArea
+ * @extends zebkit.ui.HtmlTextInput
+ */
+pkg.HtmlTextArea = Class(pkg.HtmlTextInput, [
+    function setResizeable(b) {
+        this.setStyle("resize", b === false ? "none" : "both");
+    },
+
+    function(text) {
+        this.$super(text, "textarea");
+        this.element.setAttribute("rows", 10);
+    }
+]);
+
+/**
+ * [description]
+ * @param  {[type]} text  [description]
+ * @param  {zebkit}  href)
+ * @return {[type]}       [description]
+ */
+pkg.HtmlLink = Class(pkg.HtmlElement, [
+    function(text, href) {
+        this.$super("a");
+        this.setContent(text);
+        this.setAttribute("href", href == null ? "#": href);
+        this._ = new zebkit.util.Listeners();
+        var $this = this;
+        this.element.onclick = function(e) {
+            $this._.fired($this);
+        };
+    }
+]);
+
+/**
+ * @for
+ */
+});
+zebkit.package("ui", function(pkg, Class) {
 /**
  * @module  ui
  */
-
-var Cursor = pkg.Cursor, Listeners = zebkit.util.Listeners, KE = pkg.KeyEvent,
-    L = zebkit.layout, instanceOf = zebkit.instanceOf;
-
 pkg.$ViewsSetterMix = zebkit.Interface([
     function $prototype() {
         this.setViews = function (v){
@@ -15573,7 +16053,7 @@ pkg.$ViewsSetterMix = zebkit.Interface([
             if (b) {
                 this.vrp();
             }
-        }
+        };
     }
 ]);
 
@@ -15761,8 +16241,8 @@ pkg.Label = Class(pkg.ViewPan, [
     function (r) {
         this.setView(arguments.length === 0 ||
                      zebkit.isString(r)      ? new pkg.StringRender(r)
-                                             : (instanceOf(r, zebkit.data.TextModel) ? new pkg.TextRender(r)
-                                                                                     : r));
+                                             : (zebkit.instanceOf(r, zebkit.data.TextModel) ? new pkg.TextRender(r)
+                                                                                            : r));
         this.$super();
     }
 ]);
@@ -15802,9 +16282,9 @@ pkg.BoldLabel = Class(pkg.Label, []);
  */
 pkg.ImageLabel = Class(pkg.Panel, [
     function(txt, img) {
-        this.$super(new L.FlowLayout("left", "center", "horizontal", 6));
+        this.$super(new zebkit.layout.FlowLayout("left", "center", "horizontal", 6));
         this.add(new pkg.ImagePan(null));
-        this.add(instanceOf(txt, pkg.Panel) ? txt : new pkg.Label(txt));
+        this.add(zebkit.instanceOf(txt, pkg.Panel) ? txt : new pkg.Label(txt));
         this.kids[1].setVisible(txt != null);
         this.setImage(img);
     },
@@ -16038,7 +16518,7 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
         this._keyPressed = function(e) {
             if (this.state !== PRESSED_OVER &&
                 this.state !== PRESSED_OUT  &&
-                (e.code === KE.ENTER || e.code === KE.SPACE))
+                (e.code === pkg.KeyEvent.ENTER || e.code === pkg.KeyEvent.SPACE))
             {
                 this.setState(PRESSED_OVER);
             }
@@ -16072,7 +16552,7 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
                                                                                                 : OUT);
                 }
                 else {
-                    var p = L.toParentOrigin(e.x, e.y, e.source, this);
+                    var p = zebkit.layout.toParentOrigin(e.x, e.y, e.source, this);
                     this.$isIn = p.x >= 0 && p.y >= 0 && p.x < this.width && p.y < this.height;
                     this.setState(this.$isIn ? OVER : OUT);
                 }
@@ -16106,7 +16586,7 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
                 this.$isIn = false;
             }
             else {
-                var p = L.toParentOrigin(e.x, e.y, e.source, this);
+                var p = zebkit.layout.toParentOrigin(e.x, e.y, e.source, this);
                 this.$isIn = p.x >= 0 && p.y >= 0 && p.x < this.width && p.y < this.height;
             }
 
@@ -16149,7 +16629,7 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
          */
         this.pointerExited = function(e){
             if (this.isEnabled === true) {
-                this.setState(this.state == PRESSED_OVER ? PRESSED_OUT : OUT);
+                this.setState(this.state === PRESSED_OVER ? PRESSED_OUT : OUT);
                 this.$isIn = false;
             }
         };
@@ -16358,7 +16838,7 @@ pkg.ButtonRepeatMix = zebkit.Interface([
 
     function stateUpdated(o,n){
         this.$super(o, n);
-        if (n === PRESSED_OVER){
+        if (n === PRESSED_OVER) {
             if (this.isFireByPress === true){
                 this.fire();
                 if (this.firePeriod > 0) {
@@ -16423,8 +16903,8 @@ pkg.ArrowButton = Class(pkg.EvStatePan, pkg.ButtonRepeatMix, [
     },
 
     function(direction) {
-        this._ = new Listeners();
-        this.cursorType = Cursor.HAND;
+        this._ = new zebkit.util.Listeners();
+        this.cursorType = pkg.Cursor.HAND;
 
         if (arguments.length > 0) {
             this.direction = direction;
@@ -16484,7 +16964,7 @@ pkg.Button = Class(pkg.CompositeEvStatePan, pkg.ButtonRepeatMix, [
         this.ViewPan = Class(pkg.ViewPan, [
             function $prototype() {
                 this.parentStateUpdated = function(o, n, id) {
-                    if (instanceOf(this.view, pkg.ViewSet)) {
+                    if (zebkit.instanceOf(this.view, pkg.ViewSet)) {
                         this.activate(id);
                     }
                 };
@@ -16502,14 +16982,14 @@ pkg.Button = Class(pkg.CompositeEvStatePan, pkg.ButtonRepeatMix, [
     },
 
     function(t) {
-        this._ = new Listeners();
+        this._ = new zebkit.util.Listeners();
         if (zebkit.isString(t)) t = new this.clazz.Label(t);
         else {
             if (t instanceof Image) {
                 t = new pkg.ImagePan(t);
             }
             else {
-                if (t != null && instanceOf(t, pkg.Panel) === false) {
+                if (t != null && zebkit.instanceOf(t, pkg.Panel) === false) {
                     t = new this.clazz.ViewPan(t);
                 }
             }
@@ -16716,7 +17196,7 @@ pkg.BorderPan = Class(pkg.Panel, [
 
     function setBorder(br) {
         br = pkg.$view(br);
-        if (instanceOf(br, pkg.TitledBorder) === false) {
+        if (zebkit.instanceOf(br, pkg.TitledBorder) === false) {
             br = new pkg.TitledBorder(br, "center");
         }
         return this.$super(br);
@@ -16820,7 +17300,7 @@ pkg.SwitchManager = Class([
 
         this[''] = function() {
             this.state = false;
-            this._ = new Listeners();
+            this._ = new zebkit.util.Listeners();
         };
     }
 ]);
@@ -17028,11 +17508,11 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
     },
 
     function keyPressed(e){
-        if (instanceOf(this.manager, pkg.Group) && this.getValue()){
+        if (zebkit.instanceOf(this.manager, pkg.Group) && this.getValue()){
             var code = e.code, d = 0;
-            if (code === KE.LEFT || code === KE.UP) d = -1;
+            if (code === pkg.KeyEvent.LEFT || code === pkg.KeyEvent.UP) d = -1;
             else {
-                if (code === KE.RIGHT || code === KE.DOWN) d = 1;
+                if (code === pkg.KeyEvent.RIGHT || code === pkg.KeyEvent.DOWN) d = 1;
             }
 
             if (d !== 0) {
@@ -17041,7 +17521,7 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
                     var l = p.kids[i];
                     if (l.isVisible === true &&
                         l.isEnabled === true &&
-                        instanceOf(l, pkg.Checkbox) &&
+                        zebkit.instanceOf(l, pkg.Checkbox) &&
                         l.manager === this.manager      )
                     {
                         l.requestFocus();
@@ -17185,8 +17665,8 @@ pkg.SplitPan = Class(pkg.Panel, [
                 };
 
                 this.getCursorType = function(t, x, y) {
-                    return (this.target.orient === "vertical" ? Cursor.W_RESIZE
-                                                              : Cursor.N_RESIZE);
+                    return (this.target.orient === "vertical" ? pkg.Cursor.W_RESIZE
+                                                              : pkg.Cursor.N_RESIZE);
                 };
             },
 
@@ -17607,7 +18087,7 @@ pkg.Progress = Class(pkg.Panel, [
          * @default 20
          */
         this.maxValue = 20;
-        this._ = new Listeners();
+        this._ = new zebkit.util.Listeners();
         this.$super();
     },
 
@@ -17702,7 +18182,7 @@ pkg.Progress = Class(pkg.Panel, [
  */
 pkg.Link = Class(pkg.Button, [
     function $prototype() {
-        this.cursorType = Cursor.HAND;
+        this.cursorType = pkg.Cursor.HAND;
 
         /**
          * Set link font
@@ -17833,7 +18313,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
                     }
                 };
 
-                this.cursorType = Cursor.HAND;
+                this.cursorType = pkg.Cursor.HAND;
             }
         ]);
     },
@@ -17890,7 +18370,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
 
         this.toggle();
 
-        this._ = new Listeners();
+        this._ = new zebkit.util.Listeners();
     }
 ]);
 
@@ -18128,7 +18608,7 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
          */
         this.catchInput = function (child){
             return child === this.bundle || (this.bundle.kids.length > 0 &&
-                                             L.isAncestorOf(this.bundle, child));
+                                             zebkit.layout.isAncestorOf(this.bundle, child));
         };
 
         this.posChanged = function(target,po,pl,pc){
@@ -18412,7 +18892,7 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
  */
 pkg.ScrollPan = Class(pkg.Panel, [
     function $clazz() {
-        this.ContentPanLayout = Class(L.Layout, [
+        this.ContentPanLayout = Class(zebkit.layout.Layout, [
             function $prototype() {
                 this.calcPreferredSize = function(t) {
                     return t.kids[0].getPreferredSize();
@@ -18690,11 +19170,11 @@ pkg.ScrollPan = Class(pkg.Panel, [
                             },
 
                             pointerEntered: function(e) {
-                                if (e.source == $this.vBar) {
+                                if (e.source === $this.vBar) {
                                     $this.$targetBar = $this.vBar;
                                 }
                                 else {
-                                    if (e.source == $this.hBar) {
+                                    if (e.source === $this.hBar) {
                                         $this.$targetBar = $this.hBar;
                                         return;
                                     }
@@ -18916,6 +19396,8 @@ pkg.Tabs = Class(pkg.Panel, pkg.$ViewsSetterMix, [
          */
         this.TabView = Class(pkg.CompRender, [
             function $clazz() {
+                this.font = pkg.font;
+
                 this.TabPan = Class(pkg.Panel, [
                     function() {
                         this.$super();
@@ -19314,7 +19796,7 @@ pkg.Tabs = Class(pkg.Panel, pkg.$ViewsSetterMix, [
         };
 
         this.calcPreferredSize = function(target){
-            var max = L.getMaxPreferredSize(target);
+            var max = zebkit.layout.getMaxPreferredSize(target);
             if (this.orient === "bottom" || this.orient === "top"){
                 max.width = Math.max(max.width, 2 * this.sideSpace + this.tabAreaWidth);
                 max.height += this.tabAreaHeight + this.sideSpace;
@@ -19542,13 +20024,13 @@ pkg.Tabs = Class(pkg.Panel, pkg.$ViewsSetterMix, [
         this.keyPressed = function(e){
             if (this.selectedIndex != -1 && this.pages.length > 0){
                 switch(e.code) {
-                    case KE.UP:
-                    case KE.LEFT:
+                    case pkg.KeyEvent.UP:
+                    case pkg.KeyEvent.LEFT:
                         var nxt = this.next(this.selectedIndex - 1,  -1);
                         if(nxt >= 0) this.select(nxt);
                         break;
-                    case KE.DOWN:
-                    case KE.RIGHT:
+                    case pkg.KeyEvent.DOWN:
+                    case pkg.KeyEvent.RIGHT:
                         var nxt = this.next(this.selectedIndex + 1, 1);
                         if(nxt >= 0) this.select(nxt);
                         break;
@@ -19710,7 +20192,7 @@ pkg.Tabs = Class(pkg.Panel, pkg.$ViewsSetterMix, [
         this.tabAreaY = this.tabAreaWidth = this.tabAreaHeight = 0;
         this.overTab = this.selectedIndex = -1;
         this.orient = o;
-        this._ = new Listeners();
+        this._ = new zebkit.util.Listeners();
         this.pages = [];
         this.views = {};
 
@@ -19752,7 +20234,7 @@ pkg.Tabs = Class(pkg.Panel, pkg.$ViewsSetterMix, [
 
     function insert(index,constr,c) {
         var render = null;
-        if (instanceOf(constr, this.clazz.TabView)) {
+        if (zebkit.instanceOf(constr, this.clazz.TabView)) {
             render = constr;
         }
         else {
@@ -20105,18 +20587,18 @@ pkg.Slider = Class(pkg.Panel, pkg.$ViewsSetterMix, [
         this.keyPressed = function(e){
             var b = this.isIntervalMode;
             switch(e.code) {
-                case KE.DOWN:
-                case KE.LEFT:
+                case pkg.KeyEvent.DOWN:
+                case pkg.KeyEvent.LEFT:
                     var v = this.nextValue(this.value, this.exactStep,-1);
                     if (v >= this.min) this.setValue(v);
                     break;
-                case KE.UP:
-                case KE.RIGHT:
+                case pkg.KeyEvent.UP:
+                case pkg.KeyEvent.RIGHT:
                     var v = this.nextValue(this.value, this.exactStep, 1);
                     if (v <= this.max) this.setValue(v);
                     break;
-                case KE.HOME: this.setValue(b ? this.getPointValue(0) : this.min);break;
-                case KE.END:  this.setValue(b ? this.getPointValue(this.intervals.length - 1)
+                case pkg.KeyEvent.HOME: this.setValue(b ? this.getPointValue(0) : this.min);break;
+                case pkg.KeyEvent.END:  this.setValue(b ? this.getPointValue(this.intervals.length - 1)
                                             : this.max);
                               break;
             }
@@ -20244,7 +20726,7 @@ pkg.Slider = Class(pkg.Panel, pkg.$ViewsSetterMix, [
     },
 
     function (o) {
-        this._ = new Listeners();
+        this._ = new zebkit.util.Listeners();
         this.views = {};
         this.isShowScale = this.isShowTitle = true;
         this.dragged = this.isIntervalMode = false;
@@ -20273,7 +20755,7 @@ pkg.StatusBar = Class(pkg.Panel, [
     function (gap){
         if (arguments.length === 0) gap = 2;
         this.setPadding(gap, 0, 0, 0);
-        this.$super(new L.PercentLayout("horizontal", gap));
+        this.$super(new zebkit.layout.PercentLayout("horizontal", gap));
     },
 
     /**
@@ -20326,7 +20808,7 @@ pkg.Toolbar = Class(pkg.Panel, [
     function $clazz() {
         this.ToolPan = Class(pkg.EvStatePan, [
             function(c) {
-                this.$super(new L.BorderLayout());
+                this.$super(new zebkit.layout.BorderLayout());
                 this.add("center", c);
             },
 
@@ -20359,12 +20841,12 @@ pkg.Toolbar = Class(pkg.Panel, [
          * @protected
          */
         this.isDecorative = function(c){
-            return instanceOf(c, pkg.EvStatePan) === false;
+            return zebkit.instanceOf(c, pkg.EvStatePan) === false;
         };
     },
 
     function () {
-        this._ = new Listeners();
+        this._ = new zebkit.util.Listeners();
         this.$super();
     },
 
@@ -20626,19 +21108,15 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
     }
 ]);
 
-
 /**
  * @for
  */
-
-})(zebkit("ui"), zebkit.Class);
-
-(function(pkg, Class) {
+});
+zebkit.package("ui", function(pkg, Class) {
 
 /**
  * @module ui
  */
-var KE = pkg.KeyEvent;
 
 /**
  * Text field UI component. The component is designed to enter single line, multi lines or password text.
@@ -20870,9 +21348,15 @@ pkg.TextField = Class(pkg.Label, [
             var res = [], sr = start.row, er = end.row, sc = start.col, ec = end.col;
             for(var i = sr; i < er + 1; i++){
                 var ln = r.getLine(i);
-                if (i != sr) res.push('\n');
-                else ln = ln.substring(sc);
-                if (i == er) ln = ln.substring(0, ec - ((sr == er) ? sc : 0));
+                if (i != sr) {
+                    res.push('\n');
+                } else {
+                    ln = ln.substring(sc);
+                }
+
+                if (i === er) {
+                    ln = ln.substring(0, ec - ((sr === er) ? sc : 0));
+                }
                 res.push(ln);
             }
             return res.join('');
@@ -20924,7 +21408,7 @@ pkg.TextField = Class(pkg.Label, [
 
         this.nextPage_command = function(b, d) {
             if (b) this.startSelection();
-            this.position.seekLineTo(d == 1 ? "down" : "up", this.pageSize());
+            this.position.seekLineTo(d === 1 ? "down" : "up", this.pageSize());
         };
 
         this.keyPressed = function(e) {
@@ -20938,32 +21422,32 @@ pkg.TextField = Class(pkg.Label, [
                 }
 
                 switch(e.code) {
-                    case KE.DOWN : position.seekLineTo("down");break;
-                    case KE.UP   : position.seekLineTo("up");break;
-                    case KE.LEFT : foff *= -1;
-                    case KE.RIGHT:
+                    case pkg.KeyEvent.DOWN : position.seekLineTo("down");break;
+                    case pkg.KeyEvent.UP   : position.seekLineTo("up");break;
+                    case pkg.KeyEvent.LEFT : foff *= -1;
+                    case pkg.KeyEvent.RIGHT:
                         if (e.ctrlKey === false && e.metaKey === false) {
                             position.seek(foff);
                         }
                         break;
-                    case KE.END:
+                    case pkg.KeyEvent.END:
                         if (e.ctrlKey) {
                             position.seekLineTo("down", this.getLines() - line - 1);
                         }
                         else position.seekLineTo("end");
                         break;
-                    case KE.HOME:
+                    case pkg.KeyEvent.HOME:
                         if (e.ctrlKey) position.seekLineTo("up", line);
                         else position.seekLineTo("begin");
                         break;
-                    case KE.DELETE:
+                    case pkg.KeyEvent.DELETE:
                         if (this.hasSelection() && this.isEditable === true) {
                             this.removeSelected();
                         }
                         else {
                             if (this.isEditable === true) this.remove(position.offset, 1);
                         } break;
-                    case KE.BSPACE:
+                    case pkg.KeyEvent.BSPACE:
                         if (this.isEditable === true) {
                             if (this.hasSelection()) this.removeSelected();
                             else {
@@ -20992,8 +21476,8 @@ pkg.TextField = Class(pkg.Label, [
          */
         this.isFiltered = function(e){
             var code = e.code;
-            return code == KE.SHIFT || code == KE.CTRL ||
-                   code == KE.TAB   || code == KE.ALT  ||
+            return code === pkg.KeyEvent.SHIFT || code === pkg.KeyEvent.CTRL ||
+                   code === pkg.KeyEvent.TAB   || code === pkg.KeyEvent.ALT  ||
                    e.altKey;
         };
 
@@ -21123,7 +21607,7 @@ pkg.TextField = Class(pkg.Label, [
             }
 
             if (this.startOff != startOffset || endOffset != this.endOff){
-                if (startOffset == endOffset) this.clearSelection();
+                if (startOffset === endOffset) this.clearSelection();
                 else {
                     this.startOff = startOffset;
                     var p = this.position.getPointByOffset(startOffset);
@@ -21227,8 +21711,8 @@ pkg.TextField = Class(pkg.Label, [
                 var h = this.history[this.historyPos];
 
                 this.historyPos--;
-                if (h[0] == 1) this.remove(h[1], h[2]);
-                else           this.write (h[1], h[2]);
+                if (h[0] === 1) this.remove(h[1], h[2]);
+                else            this.write (h[1], h[2]);
 
                 this.undoCounter -= 2;
                 this.redoCounter++;
@@ -21243,8 +21727,8 @@ pkg.TextField = Class(pkg.Label, [
         this.redo_command = function() {
             if (this.redoCounter > 0) {
                 var h = this.history[(this.historyPos + 1) % this.history.length];
-                if (h[0] == 1) this.remove(h[1], h[2]);
-                else           this.write (h[1], h[2]);
+                if (h[0] === 1) this.remove(h[1], h[2]);
+                else            this.write (h[1], h[2]);
                 this.redoCounter--;
                 this.repaint();
             }
@@ -21639,14 +22123,12 @@ pkg.PassTextField = Class(pkg.TextField, [
  * @for
  */
 
-})(zebkit("ui"), zebkit.Class);
-(function(pkg, Class) {
+});
+zebkit.package("ui", function(pkg, Class) {
 
 /**
  * @module ui
 */
-
-var L = zebkit.layout, Position = zebkit.util.Position, KE = pkg.KeyEvent;
 
 /**
  * Base UI list component class that has to be extended with a
@@ -21667,7 +22149,7 @@ var L = zebkit.layout, Position = zebkit.util.Position, KE = pkg.KeyEvent;
  * @param {zebkit.ui.BaseList} src a list that triggers the event
  * @param {Integer|Object} prev a previous selected index, return null if the selected item has been re-selected
  */
-pkg.BaseList = Class(pkg.Panel, Position.Metric, pkg.$ViewsSetterMix, [
+pkg.BaseList = Class(pkg.Panel, zebkit.util.Position.Metric, pkg.$ViewsSetterMix, [
     function $clazz() {
         this.Listeners = zebkit.util.ListenersClass("selected");
     },
@@ -21692,11 +22174,10 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, pkg.$ViewsSetterMix, [
         this.setValue = function(v) {
             if (v == null) {
                 this.select(-1);
-            }
-            else {
+            } else {
                 if (this.model != null) {
                     for(var i = 0; i < this.model.count(); i++) {
-                        if (this.model.get(i) == v && this.isItemSelectable(i)) {
+                        if (this.model.get(i) === v && this.isItemSelectable(i)) {
                             this.select(i);
                             return i;
                         }
@@ -21742,7 +22223,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, pkg.$ViewsSetterMix, [
                 ch = ch.toLowerCase();
                 for(var i = 0;i < count - 1; i++){
                     var idx = (index + i) % count, item = this.model.get(idx).toString();
-                    if (this.isItemSelectable(idx) && item.length > 0 && item[0].toLowerCase() == ch) {
+                    if (this.isItemSelectable(idx) && item.length > 0 && item[0].toLowerCase() === ch) {
                         return idx;
                     }
                 }
@@ -21757,7 +22238,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, pkg.$ViewsSetterMix, [
          * @method isSelected
          */
         this.isSelected = function(i) {
-            return i == this.selectedIndex;
+            return i === this.selectedIndex;
         };
 
         /**
@@ -22016,7 +22497,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, pkg.$ViewsSetterMix, [
             if (this.model != null && this.model.count() > 0){
                 var po = this.position.offset;
                 switch(e.code) {
-                    case KE.END:
+                    case pkg.KeyEvent.END:
                         if (e.ctrlKey) {
                             this.position.setOffset(this.position.metrics.getMaxOffset());
                         }
@@ -22024,18 +22505,18 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, pkg.$ViewsSetterMix, [
                             this.position.seekLineTo("end");
                         }
                         break;
-                    case KE.HOME:
+                    case pkg.KeyEvent.HOME:
                         if (e.ctrlKey) this.position.setOffset(0);
                         else this.position.seekLineTo("begin");
                         break;
-                    case KE.RIGHT    : this.position.seek(1); break;
-                    case KE.DOWN     : this.position.seekLineTo("down"); break;
-                    case KE.LEFT     : this.position.seek(-1);break;
-                    case KE.UP       : this.position.seekLineTo("up");break;
-                    case KE.PAGEUP   : this.position.seek(this.pageSize(-1));break;
-                    case KE.PAGEDOWN : this.position.seek(this.pageSize(1));break;
-                    case KE.SPACE    :
-                    case KE.ENTER    : this.$select(this.position.offset); break;
+                    case pkg.KeyEvent.RIGHT    : this.position.seek(1); break;
+                    case pkg.KeyEvent.DOWN     : this.position.seekLineTo("down"); break;
+                    case pkg.KeyEvent.LEFT     : this.position.seek(-1);break;
+                    case pkg.KeyEvent.UP       : this.position.seekLineTo("up");break;
+                    case pkg.KeyEvent.PAGEUP   : this.position.seek(this.pageSize(-1));break;
+                    case pkg.KeyEvent.PAGEDOWN : this.position.seek(this.pageSize(1));break;
+                    case pkg.KeyEvent.SPACE    :
+                    case pkg.KeyEvent.ENTER    : this.$select(this.position.offset); break;
                 }
             }
         };
@@ -22271,7 +22752,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, pkg.$ViewsSetterMix, [
         this.$super();
 
         // position manager should be set before model initialization
-        this.setPosition(new Position(this));
+        this.setPosition(new zebkit.util.Position(this));
 
         /**
          * List model
@@ -22692,7 +23173,7 @@ pkg.CompList = Class(pkg.BaseList, [
         };
 
         this.recalc = function (){
-            this.max = L.getMaxPreferredSize(this);
+            this.max = zebkit.layout.getMaxPreferredSize(this);
         };
 
         this.calcMaxItemSize = function (){
@@ -22701,7 +23182,7 @@ pkg.CompList = Class(pkg.BaseList, [
         };
 
         this.getItemIdxAt = function(x,y){
-            return L.getDirectAt(x, y, this);
+            return zebkit.layout.getDirectAt(x, y, this);
         };
 
         this.isItemSelectable = function(i) {
@@ -22732,7 +23213,7 @@ pkg.CompList = Class(pkg.BaseList, [
 
     function setPosition(c){
         if (c != this.position){
-            if (zebkit.instanceOf(this.layout, Position.Metric)) {
+            if (zebkit.instanceOf(this.layout, zebkit.util.Position.Metric)) {
                 c.setMetric(this.layout);
             }
             this.$super(c);
@@ -22766,7 +23247,7 @@ pkg.CompList = Class(pkg.BaseList, [
 
             this.$super(this.scrollManager);
             if (this.position != null) {
-                this.position.setMetric(zebkit.instanceOf(layout, Position.Metric) ? layout : this);
+                this.position.setMetric(zebkit.instanceOf(layout, zebkit.util.Position.Metric) ? layout : this);
             }
         }
 
@@ -22910,7 +23391,7 @@ pkg.Combo = Class(pkg.Panel, [
                  */
                 this.getCombo = function() {
                     var p = this;
-                    while((p = p.parent) && zebkit.instanceOf(p, pkg.Combo) == false);
+                    while ((p = p.parent) && zebkit.instanceOf(p, pkg.Combo) === false);
                     return p;
                 };
             }
@@ -22935,7 +23416,7 @@ pkg.Combo = Class(pkg.Panel, [
                  */
 
                 this.childKeyPressed = function(e){
-                    if (e.code === KE.ESCAPE && this.parent != null){
+                    if (e.code === pkg.KeyEvent.ESCAPE && this.parent != null){
                         this.removeMe();
                         if (this.owner != null) this.owner.requestFocus();
                     }
@@ -23120,7 +23601,7 @@ pkg.Combo = Class(pkg.Panel, [
         };
 
         this.contentUpdated = function(src, text){
-            if (src == this.content) {
+            if (src === this.content) {
                 try {
                     this.$lockListSelEvent = true;
                     if (text == null) this.list.select(-1);
@@ -23218,9 +23699,9 @@ pkg.Combo = Class(pkg.Panel, [
         this.showPad = function(){
             var canvas = this.getCanvas();
             if (canvas != null) {
-                var ps       = this.winpad.getPreferredSize(),
-                    p        = L.toParentOrigin(0, 0, this),
-                    py       = p.y;
+                var ps  = this.winpad.getPreferredSize(),
+                    p   = zebkit.layout.toParentOrigin(0, 0, this),
+                    py  = p.y;
 
                 // if (this.winpad.hbar && ps.width > this.width) {
                 //     ps.height += this.winpad.hbar.getPreferredSize().height;
@@ -23293,11 +23774,11 @@ pkg.Combo = Class(pkg.Panel, [
             if (this.list.model != null) {
                 var index = this.list.selectedIndex;
                 switch(e.code) {
-                    case KE.ENTER: this.showPad(); break;
-                    case KE.LEFT :
-                    case KE.UP   : if (index > 0) this.list.select(index - 1); break;
-                    case KE.DOWN :
-                    case KE.RIGHT: if (this.list.model.count() - 1 > index) this.list.select(index + 1); break;
+                    case pkg.KeyEvent.ENTER: this.showPad(); break;
+                    case pkg.KeyEvent.LEFT :
+                    case pkg.KeyEvent.UP   : if (index > 0) this.list.select(index - 1); break;
+                    case pkg.KeyEvent.DOWN :
+                    case pkg.KeyEvent.RIGHT: if (this.list.model.count() - 1 > index) this.list.select(index + 1); break;
                 }
             }
         };
@@ -23474,13 +23955,13 @@ pkg.Combo = Class(pkg.Panel, [
     },
 
     function kidRemoved(index,l){
-        if (this.content == l){
+        if (this.content === l){
             if (l._ != null) l.unbind(this);
             this.content = null;
         }
 
         this.$super(index, l);
-        if(this.button == l){
+        if (this.button === l) {
             this.button.unbind(this);
             this.button = null;
         }
@@ -23501,11 +23982,40 @@ pkg.Combo = Class(pkg.Panel, [
  * @for
  */
 
-})(zebkit("ui"), zebkit.Class);
-(function(pkg, Class) {
+});
+zebkit.package("ui", function(pkg, Class) {
 
-var KE = pkg.KeyEvent, task = zebkit.util.task, L = zebkit.layout,
-    WIN_OPENED = 1, WIN_CLOSED = 2, WIN_ACTIVATED = 3, WIN_DEACTIVATED = 4;
+pkg.WinEvent = Class(zebkit.util.Event, [
+    function $prototype() {
+        this.isShown = this.isActive = false;
+        this.layer = null;
+
+        this.$fillWith = function(src, layer, isActive, isShown) {
+            this.source = src;
+            this.layer = layer;
+            this.isActive = isActive;
+            this.isShown = isShown;
+            return this;
+        };
+    }
+]);
+
+pkg.MenuEvent = Class(zebkit.util.Event, [
+    function $prototype() {
+        this.index = -1;
+        this.item  = null;
+
+        this.$fillWith = function(src, index, item) {
+            this.source = src;
+            this.index = index;
+            this.item = item;
+            return this;
+        };
+    }
+]);
+
+var WIN_EVENT  = new pkg.WinEvent(),
+    MENU_EVENT = new pkg.MenuEvent();
 
 /**
  * Show the given UI component as a modal window
@@ -23514,11 +24024,11 @@ var KE = pkg.KeyEvent, task = zebkit.util.task, L = zebkit.layout,
  * @param  {Object} [listener] a window listener
 
         {
-            winActivated : function(layer, win, isActive) {
+            winActivated : function(e) {
 
             },
 
-            winOpened : function(layer, win, isOpened) {
+            winOpened : function(e) {
 
             }
         }
@@ -23539,11 +24049,11 @@ pkg.showModalWindow = function(context, win, listener) {
  * @param  {Object} [listener] a window listener
 
         {
-            winActivated : function(layer, win, isActive) {
+            winActivated : function(e) {
                ...
             },
 
-            winOpened : function(layer, win, isOpened) {
+            winOpened : function(e) {
               ...
             }
         }
@@ -23571,7 +24081,7 @@ pkg.showPopupMenu = function(context, menu) {
  */
 pkg.activateWindow = function(win) {
     var l = win.getCanvas().getLayer("win");
-    l.activate(L.getDirectChild(l, win));
+    l.activate(zebkit.layout.getDirectChild(l, win));
 };
 
 /**
@@ -23622,7 +24132,7 @@ pkg.activateWindow = function(win) {
 pkg.WinLayer = Class(pkg.CanvasLayer, [
     function $clazz() {
         this.ID = "win";
-        this.Listeners = zebkit.util.ListenersClass("winOpened", "winActivated");
+        this.layout = new zebkit.layout.RasterLayout();
     },
 
     function $prototype() {
@@ -23635,7 +24145,7 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
             if (cnt > 0) {
                 // check if pointer pressed has occurred in the topest window since
                 // this is the most probable case
-                if (this.activeWin != null && this.indexOf(this.activeWin) == cnt - 1) {
+                if (this.activeWin != null && this.indexOf(this.activeWin) === cnt - 1) {
                     var x1 = this.activeWin.x,
                         y1 = this.activeWin.y,
                         x2 = x1 + this.activeWin.width,
@@ -23673,9 +24183,9 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
         };
 
         this.layerKeyPressed = function(e){
-            if (this.kids.length > 0  &&
-                e.code === KE.TAB     &&
-                e.shiftKey              )
+            if (this.kids.length > 0        &&
+                e.code === pkg.KeyEvent.TAB &&
+                e.shiftKey                     )
             {
                 if (this.activeWin == null) {
                     this.activate(this.kids[this.kids.length - 1]);
@@ -23718,7 +24228,7 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
          * @method childFocusGained
          */
         this.childFocusGained = function (e) {
-            this.activate(L.getDirectChild(this, e.source));
+            this.activate(zebkit.layout.getDirectChild(this, e.source));
         };
 
         this.getComponentAt = function(x,y) {
@@ -23756,7 +24266,7 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
                     }
 
                     this.activeWin = null;
-                    this.fire(WIN_DEACTIVATED, old);
+                    this.fire("winActivated", WIN_EVENT.$fillWith(old, this, false, false));
 
                     // TODO: special flag $dontGrabFocus is not very elegant
                     if (type === "mdi" && old.$dontGrabFocus !== true) {
@@ -23772,10 +24282,10 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
                     this.activeWin.toFront();
 
                     if (old != null) {
-                        this.fire(WIN_DEACTIVATED, old);
+                        this.fire("winActivated", WIN_EVENT.$fillWith(old, this, false, false));
                     }
 
-                    this.fire(WIN_ACTIVATED, this.activeWin);
+                    this.fire("winActivated", WIN_EVENT.$fillWith(c, this, true, false));
                     this.activeWin.validate();
 
                     var type = this.winsTypes[this.activeWin];
@@ -23788,22 +24298,14 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
             }
         };
 
-        this.fire = function(id, win, l) {
+        this.fire = function(id, e, l) {
             if (arguments.length < 3) {
-                l = this.winsListeners[win];
+                l = this.winsListeners[e.source];
             }
 
-            var b = (id == WIN_OPENED || id == WIN_ACTIVATED),
-                n = (id == WIN_OPENED || id == WIN_CLOSED) ? "winOpened"
-                                                           : "winActivated";
-
-            this._[n](this, win, b);
-            if (win[n] != null) {
-                win[n].apply(win, [this, win, b]);
-            }
-
-            if (l != null && l[n] != null) {
-                l[n].apply(l, [this, win, b]);
+            pkg.events.fireEvent(id, e)
+            if (l != null && l[id] != null) {
+                l[id].call(l, e);
             }
         };
 
@@ -23815,11 +24317,11 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
          * @param {Object} [listener] an optional the window listener
 
          {
-             winActivated : function(layer, win, isActive) {
+             winActivated : function(e) {
 
              },
 
-             winOpened : function(layer, win, isOpened) {
+             winOpened : function(e) {
 
              }
          }
@@ -23855,9 +24357,7 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
         this.winsListeners = {};
         this.winsTypes     = {};
 
-        this._ = new this.clazz.Listeners();
         this.$super();
-
 
         // TODO: why 1000 and how to avoid z-index manipulation
         // the layer has to be placed above other elements that are virtually
@@ -23888,11 +24388,11 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
         this.winsStack.push(lw);
         if (type === "modal") {
             this.topModalIndex = this.winsStack.length - 1;
-            this.fire(WIN_OPENED, lw);
+            this.fire("winOpened", WIN_EVENT.$fillWith(lw, this, false, true));
             this.activate(lw);
         }
         else {
-            this.fire(WIN_OPENED, lw);
+            this.fire("winOpened", WIN_EVENT.$fillWith(lw, this, false, true));
         }
     },
 
@@ -23907,7 +24407,7 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
                 // TODO:  deactivated event can be used
                 // as a trigger of a window closing so
                 // it is better don't fire it here
-                // this.fire(WIN_DEACTIVATED, lw, l);
+                // this.fire("winActivated", lw, l);
                 if (this.winsTypes[lw] === "mdi" && lw.$dontGrabFocus !== true) {
                     pkg.focusManager.requestFocus(null);
                 }
@@ -23929,7 +24429,7 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
                 }
             }
 
-            this.fire(WIN_CLOSED, lw, l);
+            this.fire("winOpened", WIN_EVENT.$fillWith(lw, this, false, false), l);
 
             if (this.topModalIndex >= 0){
                 var aindex = this.winsStack.length - 1;
@@ -23970,6 +24470,21 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
  * @extends {zebkit.ui.Panel}
  */
 pkg.Window = Class(pkg.StatePan, [
+    function $clazz() {
+        this.CaptionPan = Class(pkg.StatePan, [
+            function $prototype() {
+                this.state = "inactive";
+            }
+        ]);
+
+        this.TitleLab   = Class(pkg.Label, []);
+        this.StatusPan  = Class(pkg.Panel, []);
+        this.ContentPan = Class(pkg.Panel, []);
+        this.SizerIcon  = Class(pkg.ImagePan, []);
+        this.Icon       = Class(pkg.ImagePan, []);
+        this.Button     = Class(pkg.Button, []);
+    },
+
     function $prototype() {
         var MOVE_ACTION = 1, SIZE_ACTION = 2;
 
@@ -24006,22 +24521,22 @@ pkg.Window = Class(pkg.StatePan, [
         this.pointerDragStarted = function(e){
             this.px = e.absX;
             this.py = e.absY;
-            this.psw = this.width;
-            this.psh = this.height;
             this.action = this.insideCorner(e.x, e.y) ? (this.isSizeable ? SIZE_ACTION : -1)
                                                       : MOVE_ACTION;
-            if (this.action > 0) this.dy = this.dx = 0;
+            if (this.action > 0) {
+                this.dy = this.dx = 0;
+            }
         };
 
         this.pointerDragged = function(e){
             if (this.action > 0) {
                 if (this.action !== MOVE_ACTION){
-                    var nw = this.psw + this.dx,
-                        nh = this.psh + this.dy;
+                    var container = this.getWinContainer(),
+                        nw = this.dx + container.width,
+                        nh = this.dy + container.height;
 
                     if (nw > this.minSize && nh > this.minSize) {
-                        var container = this.getWinContainer();
-                        container.setSize(this.dx + container.width, this.dy + container.height);
+                        container.setSize(nw, nh);
                     }
                 }
 
@@ -24070,22 +24585,21 @@ pkg.Window = Class(pkg.StatePan, [
 
         this.catchInput = function(c){
             var tp = this.caption;
-            return c === tp || (L.isAncestorOf(tp, c)         &&
+            return c === tp || (zebkit.layout.isAncestorOf(tp, c)         &&
                    zebkit.instanceOf(c, pkg.Button) === false) ||
                    this.sizer === c;
         };
 
-        this.winOpened = function(winLayer,target,b) {
+        this.winOpened = function(e) {
             var state = this.isActive() ? "active" : "inactive";
-
             if (this.caption != null && this.caption.setState != null) {
                 this.caption.setState(state);
             }
             this.setState(state);
         };
 
-        this.winActivated = function(winLayer, target,b){
-            this.winOpened(winLayer, target,b);
+        this.winActivated = function(e) {
+            this.winOpened(e);
         };
 
         this.pointerDoubleClicked = function (e){
@@ -24126,30 +24640,107 @@ pkg.Window = Class(pkg.StatePan, [
             }
             this.icons.setAt(i, icon);
         };
-    },
 
-    function $clazz() {
-        this.CaptionPan = Class(pkg.StatePan, [
-            function $prototype() {
-                this.state = "inactive";
+        /**
+         * Make the window sizable or not sizeable
+         * @param {Boolean} b a sizeable state of the window
+         * @method setSizeable
+         */
+        this.setSizeable = function(b){
+            if (this.isSizeable != b){
+                this.isSizeable = b;
+                if (this.sizer != null) {
+                    this.sizer.setVisible(b);
+                }
             }
-        ]);
+        };
 
-        this.TitleLab   = Class(pkg.Label, []);
-        this.StatusPan  = Class(pkg.Panel, []);
-        this.ContentPan = Class(pkg.Panel, []);
-        this.SizerIcon  = Class(pkg.ImagePan, []);
-        this.Icon       = Class(pkg.ImagePan, []);
-        this.Button     = Class(pkg.Button, []);
+        /**
+         * Maximize the window
+         * @method maximize
+         */
+        this.maximize = function(){
+            if(this.prevW < 0){
+                var d    = this.getCanvas(),
+                    cont = this.getWinContainer(),
+                    left = d.getLeft(),
+                    top  = d.getTop();
+
+                this.prevX = cont.x;
+                this.prevY = cont.y;
+                this.prevW = cont.width;
+                this.prevH = cont.height;
+
+                cont.setBounds(left, top,
+                               d.width  - left - d.getRight(),
+                               d.height - top - d.getBottom());
+            }
+        };
+
+        /**
+         * Restore the window size
+         * @method restore
+         */
+        this.restore = function(){
+            if (this.prevW >= 0){
+                this.getWinContainer().setBounds(this.prevX, this.prevY,
+                                                 this.prevW, this.prevH);
+                this.prevW = -1;
+            }
+        };
+
+        /**
+         * Close the window
+         * @method close
+         */
+        this.close = function() {
+            this.getWinContainer().removeMe();
+        };
+
+        /**
+         * Set the window buttons set.
+         * @param {Object} buttons dictionary of buttons icons for window buttons.
+         * The dictionary key defines a method of the window component to be called
+         * when the given button has been pressed. So the method has to be defined
+         * in the window component.
+         * @method setButtons
+         */
+        this.setButtons = function(buttons) {
+            // remove previously added buttons
+            for(var i=0; i< this.buttons.length; i++) {
+                var kid = this.buttons.kids[i];
+                if (kid._ != null) kid.unbind();
+            }
+            this.buttons.removeAll();
+
+            // add new buttons set
+            for(var k in buttons) {
+                if (buttons.hasOwnProperty(k)) {
+                    var b = new this.clazz.Button();
+                    b.setView(buttons[k]);
+                    this.buttons.add(b);
+                    (function(t, f) {
+                        b.bind(function() { f.call(t); });
+                    })(this, this[k]);
+                }
+            }
+        };
+
     },
 
+    function focused(){
+        this.$super();
+        if (this.caption != null) {
+            this.caption.repaint();
+        }
+    },
 
     function (s, c) {
         //!!! for some reason state has to be set beforehand
         this.state = "inactive";
 
-        this.prevH = this.prevX = this.prevY = this.psw = 0;
-        this.psh = this.px = this.py = this.dx = this.dy = 0;
+        this.prevH = this.prevX = this.prevY = 0;
+        this.px = this.py = this.dx = this.dy = 0;
         this.prevW = this.action = -1;
 
         /**
@@ -24185,7 +24776,7 @@ pkg.Window = Class(pkg.StatePan, [
          * @attribute icons
          * @readOnly
          */
-        this.icons = new pkg.Panel(new L.FlowLayout("left", "center", "horizontal", 2));
+        this.icons = new pkg.Panel(new zebkit.layout.FlowLayout("left", "center", "horizontal", 2));
         this.icons.add(new this.clazz.Icon());
 
         /**
@@ -24194,7 +24785,7 @@ pkg.Window = Class(pkg.StatePan, [
          * @attribute buttons
          * @readOnly
          */
-        this.buttons = new pkg.Panel(new L.FlowLayout("center", "center"));
+        this.buttons = new pkg.Panel(new zebkit.layout.FlowLayout("center", "center"));
 
         this.caption.add("center", this.title);
         this.caption.add("left", this.icons);
@@ -24213,119 +24804,22 @@ pkg.Window = Class(pkg.StatePan, [
         this.setSizeable(true);
 
         this.$super();
-        this.setLayout(new L.BorderLayout(2,2));
-
+        this.setLayout(new zebkit.layout.BorderLayout(2,2));
 
         this.add("center", this.root);
         this.add("top", this.caption);
         this.add("bottom", this.status);
-    },
-
-    function fired(src) {
-        this.close();
-    },
-
-    function focused(){
-        this.$super();
-        if (this.caption != null) {
-            this.caption.repaint();
-        }
-    },
-
-    /**
-     * Make the window sizable or not sizeable
-     * @param {Boolean} b a sizeable state of the window
-     * @method setSizeable
-     */
-    function setSizeable(b){
-        if (this.isSizeable != b){
-            this.isSizeable = b;
-            if (this.sizer != null) {
-                this.sizer.setVisible(b);
-            }
-        }
-    },
-
-    /**
-     * Maximize the window
-     * @method maximize
-     */
-    function maximize(){
-        if(this.prevW < 0){
-            var d    = this.getCanvas(),
-                cont = this.getWinContainer(),
-                left = d.getLeft(),
-                top  = d.getTop();
-
-            this.prevX = cont.x;
-            this.prevY = cont.y;
-            this.prevW = cont.width;
-            this.prevH = cont.height;
-
-            cont.setBounds(left, top,
-                           d.width  - left - d.getRight(),
-                           d.height - top - d.getBottom());
-        }
-    },
-
-    /**
-     * Restore the window size
-     * @method restore
-     */
-    function restore(){
-        if (this.prevW >= 0){
-            this.getWinContainer().setBounds(this.prevX, this.prevY,
-                                             this.prevW, this.prevH);
-            this.prevW = -1;
-        }
-    },
-
-    /**
-     * Close the window
-     * @method close
-     */
-    function close() {
-        this.getWinContainer().removeMe();
-    },
-
-    /**
-     * Set the window buttons set.
-     * @param {Object} buttons dictionary of buttons icons for window buttons.
-     * The dictionary key defines a method of the window component to be called
-     * when the given button has been pressed. So the method has to be defined
-     * in the window component.
-     * @method setButtons
-     */
-    function setButtons(buttons) {
-        // remove previously added buttons
-        for(var i=0; i< this.buttons.length; i++) {
-            var kid = this.buttons.kids[i];
-            if (kid._ != null) kid.unbind();
-        }
-        this.buttons.removeAll();
-
-        // add new buttons set
-        for(var k in buttons) {
-            if (buttons.hasOwnProperty(k)) {
-                var b = new this.clazz.Button();
-                b.setView(buttons[k]);
-                this.buttons.add(b);
-                (function(t, f) {
-                    b.bind(function() { f.call(t); });
-                })(this, this[k]);
-            }
-        }
     }
 ]);
 
 pkg.HtmlWinCanvas = Class(pkg.HtmlCanvas, [
     function $prototype() {
-        this.winOpened = function(winLayer,target,b) {
-            this.target.winOpened(winLayer,target,b);
+        this.winOpened = function(e) {
+            this.target.winOpened(e);
         };
 
-        this.winActivated = function(winLayer, target,b){
-            this.target.winActivated(winLayer,target,b);
+        this.winActivated = function(e){
+            this.target.winActivated(e);
         };
     },
 
@@ -24339,10 +24833,8 @@ pkg.HtmlWinCanvas = Class(pkg.HtmlCanvas, [
             return $this;
         };
 
-        this.setLayout(new L.BorderLayout());
+        this.setLayout(new zebkit.layout.BorderLayout());
         this.add("center", target);
-
-        this.setStyle("box-shadow", "10px 10px 5px #888888");
     }
 ]);
 
@@ -24513,7 +25005,7 @@ pkg.MenuItem = Class(pkg.Panel, [
 
             if (left != null && left.isVisible === true) {
                 left.toPreferredSize();
-                left.setLocation(l, t + ~~((eh - left.height)/2));
+                left.setLocation(l, t + Math.floor((eh - left.height)/2));
                 l += this.gap + left.width;
                 ew -= (this.gap + left.width);
             }
@@ -24521,7 +25013,7 @@ pkg.MenuItem = Class(pkg.Panel, [
             if (right != null && right.isVisible === true) {
                 right.toPreferredSize();
                 right.setLocation(target.width - target.getRight() - right.width,
-                                  t + ~~((eh - right.height)/2));
+                                  t + Math.floor((eh - right.height)/2));
                 ew -= (this.gap + right.width);
             }
 
@@ -24530,7 +25022,7 @@ pkg.MenuItem = Class(pkg.Panel, [
                 if (content.width > ew) {
                     content.setSize(ew, content.height);
                 }
-                content.setLocation(l, t + ~~((eh - content.height)/2));
+                content.setLocation(l, t + Math.floor((eh - content.height)/2));
             }
         };
 
@@ -24596,7 +25088,7 @@ pkg.MenuItem = Class(pkg.Panel, [
 
             if (m[2] != null) {
                 var s = m[2].trim();
-                this.setCheckManager(s[0] == '(' ? new pkg.Group() : new pkg.SwitchManager());
+                this.setCheckManager(s[0] === '(' ? new pkg.Group() : new pkg.SwitchManager());
                 this.manager.setValue(this, m[2].indexOf('x') > 0);
             }
 
@@ -24607,10 +25099,11 @@ pkg.MenuItem = Class(pkg.Panel, [
                    img = img.substring(1, img.length-1);
                 }
                 else {
-                    var parts = img.split('.'), scope = zebkit.$global;
-                    img = null;
+                    var parts = img.split('.'),
+                        scope = zebkit.$global;
 
-                    for (var i=0; i<parts.length; i++) {
+                    img = null;
+                    for (var i = 0; i < parts.length; i++) {
                         scope = scope[parts[i]];
                         if (scope == null) break;
                     }
@@ -24623,8 +25116,7 @@ pkg.MenuItem = Class(pkg.Panel, [
             if (m != null) {
                 this.id = m[2].trim();
                 c       = m[1].trim();
-            }
-            else {
+            } else {
                 this.id = c.toLowerCase().replace(/[ ]+/, '_');
             }
 
@@ -24975,7 +25467,7 @@ pkg.Menu = Class(pkg.CompList, [
      * @method keyPressed
      */
     function keyPressed(e){
-        if (e.code === KE.ESCAPE) {
+        if (e.code === pkg.KeyEvent.ESCAPE) {
             if (this.parent != null) {
                 var p = this.$parentMenu;
                 this.$canceled(this);
@@ -25086,7 +25578,8 @@ pkg.Menu = Class(pkg.CompList, [
                 }
             }
 
-            pkg.popup._.menuItemSelected(this, this.selectedIndex, this.kids[this.selectedIndex]);
+            pkg.events.fireEvent("menuItemSelected",
+                                 MENU_EVENT.$fillWith(this, this.selectedIndex, this.kids[this.selectedIndex]));
         }
         this.$super(prev);
     }
@@ -25163,7 +25656,7 @@ pkg.Menubar = Class(pkg.Menu, [
                 pop = d.getLayer(pkg.PopupLayer.ID);
 
             if (menu.hasSelectableItems()) {
-                var abs = L.toParentOrigin(0,0,k);
+                var abs = zebkit.layout.toParentOrigin(0,0,k);
                 menu.setLocation(abs.x, abs.y + k.height + 1);
                 menu.toPreferredSize();
                 pop.add(menu);
@@ -25264,19 +25757,19 @@ pkg.PopupLayer = Class(pkg.CanvasLayer, [
          * @method childKeyPressed
          */
         this.childKeyPressed = function(e){
-            var dc = L.getDirectChild(this, e.source);
+            var dc = zebkit.layout.getDirectChild(this, e.source);
 
             if (zebkit.instanceOf(dc, pkg.Menu) && this.activeMenubar != null) {
                 var s = this.activeMenubar.selectedIndex;
-                switch(e.code) {
-                    case KE.RIGHT :
+                switch (e.code) {
+                    case pkg.KeyEvent.RIGHT :
                         if (s < this.activeMenubar.model.count()-1) {
                             //this.removeAll();
                             this.activeMenubar.requestFocus();
                             this.activeMenubar.position.seekLineTo("down");
                         }
                         break;
-                    case KE.LEFT :
+                    case pkg.KeyEvent.LEFT :
                         if (s > 0) {
                            // this.removeAll();
                             this.activeMenubar.requestFocus();
@@ -25300,7 +25793,7 @@ pkg.PopupLayer = Class(pkg.CanvasLayer, [
                     // save an area the menu bar component takes
                     // it is required to allow the menu bar getting input
                     // event by inactivating the pop up layer
-                    var abs = L.toParentOrigin(0, 0, this.activeMenubar);
+                    var abs = zebkit.layout.toParentOrigin(0, 0, this.activeMenubar);
                     this.mLeft   = abs.x;
                     this.mRight  = this.mLeft + this.activeMenubar.width - 1;
                     this.mTop    = abs.y;
@@ -25523,7 +26016,7 @@ pkg.Tooltip = Class(pkg.Panel, [
  /**
   * Fired when a menu item has been selected
 
-         zebkit.ui.popup.bind(function menuItemSelected(menu, index, item) {
+         zebkit.ui.events.bind(function menuItemSelected(menu, index, item) {
              ...
          });
 
@@ -25534,10 +26027,6 @@ pkg.Tooltip = Class(pkg.Panel, [
   * @param {zebkit.ui.Panel} item a menu item component that has been selected
   */
 pkg.PopupManager = Class(pkg.Manager, [
-    function $clazz() {
-        this.Listeners = zebkit.util.ListenersClass("menuItemSelected");
-    },
-
     function $prototype() {
         /**
          * Indicates if a shown tooltip has to disappear by pointer pressed event
@@ -25601,7 +26090,7 @@ pkg.PopupManager = Class(pkg.Manager, [
                 this.$targetTooltipLayer = c.getCanvas().getLayer(pkg.WinLayer.ID);
                 this.$tooltipX = e.x;
                 this.$tooltipY = e.y;
-                this.$toolTask = task(this).run(this.showTooltipIn, this.showTooltipIn);
+                this.$toolTask = zebkit.util.task(this).run(this.showTooltipIn, this.showTooltipIn);
             }
         };
 
@@ -25662,7 +26151,7 @@ pkg.PopupManager = Class(pkg.Manager, [
 
                     // if new tooltip exists than show it
                     if (ntooltip != null) {
-                        var p = L.toParentOrigin(this.$tooltipX, this.$tooltipY, this.$target);
+                        var p = zebkit.layout.toParentOrigin(this.$tooltipX, this.$tooltipY, this.$target);
 
                         this.$tooltip.toPreferredSize();
                         var tx = p.x,
@@ -25688,7 +26177,7 @@ pkg.PopupManager = Class(pkg.Manager, [
                 }
                 else {
                     if (this.$tooltip != null && this.syncTooltipPosition === true) {
-                        var p  = L.toParentOrigin(this.$tooltipX, this.$tooltipY, this.$target),
+                        var p  = zebkit.layout.toParentOrigin(this.$tooltipX, this.$tooltipY, this.$target),
                             tx = p.x,
                             ty = p.y - this.$tooltip.height;
 
@@ -25699,21 +26188,21 @@ pkg.PopupManager = Class(pkg.Manager, [
             t.pause();
         };
 
-        this.winActivated = function(layer, win, b) {
+        this.winActivated = function(e) {
             // this method is called for only for mdi window
             // consider every deactivation of a mdi window as
             // a signal to stop showing tooltip
-            if (b === false && this.$tooltip != null)  {
+            if (e.isActive === false && this.$tooltip != null)  {
                 this.$tooltip.removeMe();
             }
         };
 
-        this.winOpened = function(layer, win, b) {
-            if (b === false) {
+        this.winOpened = function(e) {
+            if (e.isShown === false) {
                 // cleanup tooltip reference
                 this.$tooltip = null;
 
-                if (win.winType !== "info") {
+                if (e.source.winType !== "info") {
                     this.stopShowingTooltip();
                 }
             }
@@ -25748,7 +26237,9 @@ pkg.PopupManager = Class(pkg.Manager, [
          * @method pointerPressed
          */
         this.pointerPressed = function(e){
-            if (this.hideTooltipByPress === true && this.$target != null &&
+            if (this.hideTooltipByPress === true &&
+                e.pointerType === "mouse" &&
+                this.$target != null &&
                 (this.$tooltip == null || this.$tooltip.winType === "info"))
             {
                 this.stopShowingTooltip();
@@ -25761,7 +26252,10 @@ pkg.PopupManager = Class(pkg.Manager, [
          * @method pointerReleased
          */
         this.pointerReleased = function(e) {
-            if (this.hideTooltipByPress === false && this.$target != null && (this.$tooltip == null || this.$tooltip.winType === "info")) {
+            if ((this.hideTooltipByPress === false || e.pointerType !== "mouse") &&
+                this.$target != null &&
+                (this.$tooltip == null || this.$tooltip.winType === "info"))
+            {
                 this.stopShowingTooltip();
             }
         };
@@ -25772,17 +26266,16 @@ pkg.PopupManager = Class(pkg.Manager, [
         this.$popupMenuX = this.$popupMenuY = 0;
         this.$tooltipX = this.$tooltipY = 0;
         this.$targetTooltipLayer = this.$tooltip = this.$target = null;
-        this._ = new this.clazz.Listeners();
     }
 ]);
 
 /**
  * @for
  */
+});
+zebkit.package("ui.grid", function(pkg, Class) {
 
-})(zebkit("ui"), zebkit.Class);
-(function(pkg, Class, ui) {
-
+var ui = zebkit("ui");
 
 //      ---------------------------------------------------
 //      | x |    col0 width     | x |   col2 width    | x |
@@ -25798,19 +26291,7 @@ pkg.PopupManager = Class(pkg.Manager, [
  * @main
  */
 
-var Matrix = zebkit.data.Matrix, L = zebkit.layout, MB = zebkit.util,
-    Cursor = ui.Cursor, Position = zebkit.util.Position, KE = ui.KeyEvent,
-    Listeners = zebkit.util.Listeners;
-
-//!!! crappy function
-//TODO: think how to remove/replace it
-function arr(l, v) {
-    var a = Array(l);
-    for(var i=0; i<l; i++) a[i] = v;
-    return a;
-}
-
-function CellsVisibility() {
+pkg.CellsVisibility = function() {
     this.hasVisibleCells = function(){
         return this.fr != null && this.fc != null &&
                this.lr != null && this.lc != null   ;
@@ -25819,13 +26300,21 @@ function CellsVisibility() {
     // first visible row (row and y), first visible
     // col, last visible col and row
     this.fr = this.fc = this.lr = this.lc = null;
-}
+};
 
 /**
  *  Interface that describes a grid component metrics
  *  @class zebkit.ui.grid.Metrics
  */
-pkg.Metrics = zebkit.Interface();
+pkg.Metrics = zebkit.Interface({
+    abstract: [
+        function getCellsVisibility() {},
+        function getColWidth(col) {},
+        function getRowHeight(row) {},
+        function setRowHeight(row, height) {},
+        function setColWidth(col, width) {}
+    ]
+});
 
 /**
  * Get the given column width of a grid component
@@ -26058,7 +26547,7 @@ pkg.DefEditors = Class([
         this.Checkbox  = Class(ui.Checkbox,  []);
         this.Combo     = Class(ui.Combo,     [
             function padShown(src, b) {
-                if (b == false) {
+                if (b === false) {
                     this.parent.stopEditing(true);
                     this.setSize(0,0);
                 }
@@ -26177,7 +26666,7 @@ pkg.DefEditors = Class([
          * @method shouldCancel
          */
         this.shouldCancel = function(grid,row,col,e){
-            return e.id === "keyPressed" && KE.ESCAPE === e.code;
+            return e.id === "keyPressed" && ui.KeyEvent.ESCAPE === e.code;
         };
 
         /**
@@ -26190,7 +26679,7 @@ pkg.DefEditors = Class([
          * @method shouldFinish
          */
         this.shouldFinish = function(grid,row,col,e){
-            return e.id === "keyPressed" && KE.ENTER === e.code;
+            return e.id === "keyPressed" && ui.KeyEvent.ENTER === e.code;
         };
     }
 ]);
@@ -26268,8 +26757,8 @@ pkg.BaseCaption = Class(ui.Panel, [
             return this.metrics != null     &&
                    this.selectedColRow >= 0 &&
                    this.isResizable         &&
-                   this.metrics.isUsePsMetric === false ? ((this.orient === "horizontal") ? Cursor.W_RESIZE
-                                                                                          : Cursor.S_RESIZE)
+                   this.metrics.isUsePsMetric === false ? ((this.orient === "horizontal") ? ui.Cursor.W_RESIZE
+                                                                                          : ui.Cursor.S_RESIZE)
                                                         : null;
         };
 
@@ -26681,11 +27170,11 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
                             bg = t == null ? null : t.bg,
                             ps = v.getPreferredSize(),
                             vx = xa === "center" ? Math.floor((ww - ps.width)/2)
-                                                 : (xa === "right" ? ww - ps.width - ((i==size-1) ? right : 0)
+                                                 : (xa === "right" ? ww - ps.width - ((i === size - 1) ? right : 0)
                                                                    : (i === 0 ? left: 0)),
                             vy = ya === "center" ? Math.floor((hh - ps.height)/2)
-                                                 : (ya === "bottom" ? hh - ps.height - ((i==size-1) ? bottom : 0)
-                                                                    :  (i === 0 ? top: 0));
+                                                 : (ya === "bottom" ? hh - ps.height - ((i === size - 1) ? bottom : 0)
+                                                                    : (i === 0 ? top: 0));
 
 
                         if (bg != null) {
@@ -26734,7 +27223,7 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
  */
 pkg.CompGridCaption = Class(pkg.BaseCaption, [
     function $clazz() {
-        this.Layout = Class(L.Layout, [
+        this.Layout = Class(zebkit.layout.Layout, [
             function $prototype() {
                 this.doLayout = function (target) {
                     var m    = target.metrics,
@@ -26768,7 +27257,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
                 };
 
                 this.calcPreferredSize = function (target) {
-                    return L.getMaxPreferredSize(target);
+                    return zebkit.layout.getMaxPreferredSize(target);
                 };
             }
         ]);
@@ -26789,7 +27278,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
          */
         this.TitlePan = Class(ui.Panel, [
             function(title) {
-                this.$super(new L.FlowLayout("center", "center", "horizontal", 8));
+                this.$super(new zebkit.layout.FlowLayout("center", "center", "horizontal", 8));
 
                 this.sortState = 0;
 
@@ -26837,7 +27326,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
             function matrixSorted(target, info) {
                 if (this.isSortable) {
                     var col = this.parent.indexOf(this);
-                    if (info.col == col) {
+                    if (info.col === col) {
                         this.sortState = info.name === 'descent' ? 1 : -1;
                         this.statusPan.setState(info.name);
                     }
@@ -26866,8 +27355,8 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
 
             function fired(target) {
                 if (this.isSortable === true) {
-                    var f = this.sortState == 1 ? zebkit.data.ascent
-                                                : zebkit.data.descent,
+                    var f = this.sortState === 1 ? zebkit.data.ascent
+                                                 : zebkit.data.descent,
                         model = this.getGridCaption().metrics.model,
                         col   = this.parent.indexOf(this);
                     model.sortCol(col, f);
@@ -27102,9 +27591,10 @@ pkg.RowSelMode = Class([
  * @param  {Integer} count a number of rows whose selection state has been updated
  * @param {Boolean} status a status. true means rows have been selected
  */
-pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, ui.$ViewsSetterMix, [
+pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSetterMix, [
         function $clazz() {
             this.Listeners = zebkit.util.ListenersClass("rowSelected");
+            this.Matrix    = Class(zebkit.data.Matrix, []);
 
             this.DEF_COLWIDTH  = 80;
             this.DEF_ROWHEIGHT = 25;
@@ -27522,7 +28012,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, ui.$ViewsSetterMix, [
                 var start = 0,
                     d     = 1,
                     x     = this.getLeft() +
-                            (this.leftCaption == null || this.leftCaption.isVisible == false ? this.lineSize : 0) +
+                            (this.leftCaption == null || this.leftCaption.isVisible === false ? this.lineSize : 0) +
                             this.getLeftCaptionWidth();
 
                 if (this.visibility.hasVisibleCells()) {
@@ -27551,7 +28041,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, ui.$ViewsSetterMix, [
                 var start = 0,
                     d     = 1,
                     y     = this.getTop() +
-                            (this.topCaption == null || this.topCaption.isVisible == false ? this.lineSize : 0) +
+                            (this.topCaption == null || this.topCaption.isVisible === false ? this.lineSize : 0) +
                             this.getTopCaptionHeight();
 
                 if (this.visibility.hasVisibleCells()){
@@ -27811,14 +28301,14 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, ui.$ViewsSetterMix, [
             this.keyPressed = function(e){
                 if (this.position != null){
                     switch(e.code) {
-                        case KE.LEFT    : this.position.seek(-1); break;
-                        case KE.UP      : this.position.seekLineTo("up"); break;
-                        case KE.RIGHT   : this.position.seek(1); break;
-                        case KE.DOWN    : this.position.seekLineTo("down");break;
-                        case KE.PAGEUP  : this.position.seekLineTo("up", this.pageSize(-1));break;
-                        case KE.PAGEDOWN: this.position.seekLineTo("down", this.pageSize(1));break;
-                        case KE.END     : if (e.ctrlKey) this.position.setOffset(this.getLines() - 1);break;
-                        case KE.HOME    : if (e.ctrlKey) this.position.setOffset(0);break;
+                        case ui.KeyEvent.LEFT    : this.position.seek(-1); break;
+                        case ui.KeyEvent.UP      : this.position.seekLineTo("up"); break;
+                        case ui.KeyEvent.RIGHT   : this.position.seek(1); break;
+                        case ui.KeyEvent.DOWN    : this.position.seekLineTo("down");break;
+                        case ui.KeyEvent.PAGEUP  : this.position.seekLineTo("up", this.pageSize(-1));break;
+                        case ui.KeyEvent.PAGEDOWN: this.position.seekLineTo("down", this.pageSize(1));break;
+                        case ui.KeyEvent.END     : if (e.ctrlKey) this.position.setOffset(this.getLines() - 1);break;
+                        case ui.KeyEvent.HOME    : if (e.ctrlKey) this.position.setOffset(0);break;
                     }
 
                     this.$se(this.position.currentLine, this.position.currentCol, e);
@@ -27855,7 +28345,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, ui.$ViewsSetterMix, [
                 if (r1 < rows) {
                     if (r2 >= rows) r2 = rows - 1;
                     var y1 = this.getRowY(r1),
-                        y2 = ((r1 == r2) ? y1 + 1  : this.getRowY(r2)) + this.rowHeights[r2];
+                        y2 = ((r1 === r2) ? y1 + 1 : this.getRowY(r2)) + this.rowHeights[r2];
 
                     this.repaint(0, y1 + this.scrollManager.getSY(), this.width, y2 - y1);
                 }
@@ -28255,14 +28745,16 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, ui.$ViewsSetterMix, [
                     addH = this.cellInsetsTop  + this.cellInsetsBottom;
 
                 if (this.colWidths == null || this.colWidths.length != cols) {
-                    this.colWidths = arr(cols, 0);
+                    this.colWidths = Array(cols);
+                    for(var i = 0; i < cols; i++) this.colWidths[i] = 0;
                 }
                 else {
                     for(var i = 0;i < cols; i++) this.colWidths[i] = 0;
                 }
 
                 if (this.rowHeights == null || this.rowHeights.length != rows) {
-                    this.rowHeights = arr(rows, 0);
+                    this.rowHeights = Array(rows);
+                    for(var i = 0; i < rows; i++) this.rowHeights[i] = 0;
                 }
                 else {
                     for(var i = 0;i < rows; i++) this.rowHeights[i] = 0;
@@ -28596,7 +29088,7 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, ui.$ViewsSetterMix, [
             this.setModel = function(d){
                 if (d != this.model) {
                     this.clearSelect();
-                    if (Array.isArray(d)) d = new Matrix(d);
+                    if (Array.isArray(d)) d = new this.clazz.Matrix(d);
 
                     if (this.model != null && this.model._) {
                         this.model.unbind(this);
@@ -28688,9 +29180,9 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, ui.$ViewsSetterMix, [
                         this.editingRow = row;
                         this.editingCol = col;
                         if (editor.isPopupEditor === true) {
-                            var p = L.toParentOrigin(this.getColX(col) + this.scrollManager.getSX(),
-                                                     this.getRowY(row) + this.scrollManager.getSY(),
-                                                     this);
+                            var p = zebkit.layout.toParentOrigin(this.getColX(col) + this.scrollManager.getSX(),
+                                                                 this.getRowY(row) + this.scrollManager.getSY(),
+                                                                 this);
 
                             editor.setLocation(p.x, p.y);
                             ui.makeFullyVisible(this.getCanvas(), editor);
@@ -28709,8 +29201,8 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, ui.$ViewsSetterMix, [
                 return false;
             };
 
-            this.winOpened = function(winLayer,target,b){
-                if (this.editor == target &&  b === false){
+            this.winOpened = function(e){
+                if (this.editor == e.source && e.isShown === false){
                     this.stopEditing(this.editor.isAccepted());
                 }
             };
@@ -28742,11 +29234,11 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, ui.$ViewsSetterMix, [
 
         function(model) {
             if (arguments.length === 0) {
-                model = new Matrix(5, 5);
+                model = new this.clazz.Matrix(5, 5);
             }
             else {
                 if (arguments.length === 2) {
-                    model = new Matrix(arguments[0], arguments[1]);
+                    model = new this.clazz.Matrix(arguments[0], arguments[1]);
                 }
             }
 
@@ -28800,14 +29292,14 @@ pkg.Grid = Class(ui.Panel, Position.Metric, pkg.Metrics, ui.$ViewsSetterMix, [
 
             this.editors = this.leftCaption = this.topCaption = this.colWidths = null;
             this.rowHeights = this.position = this.stub = null;
-            this.visibility = new CellsVisibility();
+            this.visibility = new pkg.CellsVisibility();
 
             this.$super();
 
             this.add("corner", new this.clazz.CornerPan());
             this.setModel(model);
             this.setViewProvider(new pkg.DefViews());
-            this.setPosition(new Position(this));
+            this.setPosition(new zebkit.util.Position(this));
             this.scrollManager = new ui.ScrollManager(this);
         },
 
@@ -28969,7 +29461,7 @@ pkg.GridStretchPan = Class(ui.Panel, [
             }
 
             for(var i = 0; i < cols; i++){
-                if (this.$props.length - 1 == i) {
+                if (this.$props.length - 1 === i) {
                     this.$widths[i] = ew - sw;
                 }
                 else {
@@ -29003,7 +29495,7 @@ pkg.GridStretchPan = Class(ui.Panel, [
                     if (this.$propW < 0 || this.$props == null || this.$props.length != cols) {
                         // calculate col proportions
                         var cols = grid.getGridCols();
-                        if (this.$props == null || this.$props.length != cols) {
+                        if (this.$props == null || this.$props.length !== cols) {
                             this.$props = Array(cols);
                         }
                         this.$propW = 0;
@@ -29094,9 +29586,10 @@ pkg.GridStretchPan = Class(ui.Panel, [
  * @for
  */
 
-})(zebkit("ui.grid"), zebkit.Class, zebkit("ui"));
+});
+zebkit.package("ui.tree", function(pkg, Class) {
 
-(function(pkg, Class, ui)  {
+var ui = zebkit("ui");
 
 /**
  * Tree UI components and all related to the component classes and interfaces.
@@ -29134,13 +29627,10 @@ pkg.GridStretchPan = Class(ui.Panel, [
  * @main
  */
 
-
 //  tree node metrics:
 //   |
 //   |-- <-gapx-> {icon} -- <-gapx-> {view}
 //
-
-var KE = ui.KeyEvent;
 
 /**
  * Simple private structure to keep a tree model item metrical characteristics
@@ -29844,7 +30334,7 @@ pkg.BaseTree = Class(ui.Panel, [
          */
         this.paintChild = function (g, root, index){
             var b = this.isOpen_(root);
-            if (root == this.firstVisible && this.lnColor != null) {
+            if (root === this.firstVisible && this.lnColor != null) {
                 g.setColor(this.lnColor);
                 var xx = this.getIM(root).x + Math.floor((b ? this.viewSizes.on.width
                                                             : this.viewSizes.off.width) / 2);
@@ -29876,7 +30366,7 @@ pkg.BaseTree = Class(ui.Panel, [
                             y = this.y_(child, true);
                         }
                         if (this.paintBranch(g, child) === false){
-                            if (this.lnColor != null && i + 1 != count){
+                            if (this.lnColor != null && i + 1 !== count){
                                 g.setColor(this.lnColor);
                                 g.beginPath();
                                 g.moveTo(x + 0.5, y);
@@ -29998,8 +30488,8 @@ pkg.BaseTree = Class(ui.Panel, [
                     do {
                         parent = parent.parent;
                     }
-                    while(parent != item && parent != null);
-                    if(parent == item) this.select(item);
+                    while (parent !== item && parent != null);
+                    if (parent === item) this.select(item);
                 }
                 this.repaint();
             }
@@ -30010,8 +30500,8 @@ pkg.BaseTree = Class(ui.Panel, [
         };
 
         this.itemRemoved = function (target,item){
-            if (item == this.firstVisible) this.firstVisible = null;
-            if (item == this.selected) this.select(null);
+            if (item === this.firstVisible) this.firstVisible = null;
+            if (item === this.selected) this.select(null);
             delete this.nodes[item];
             this.vrp();
         };
@@ -30248,7 +30738,7 @@ pkg.DefEditors = Class([
          */
         this.shouldStartEdit = function(src,e){
             return  e.id === "pointerDoubleClicked" ||
-                   (e.id === "keyPressed" && e.code === KE.ENTER);
+                   (e.id === "keyPressed" && e.code === ui.KeyEvent.ENTER);
         };
     }
 ]);
@@ -30349,11 +30839,11 @@ pkg.Tree = Class(pkg.BaseTree, [
         this.childKeyPressed = function(e){
             console.log("childKeyPressed : " + e.code);
 
-            if (e.code === KE.ESCAPE) {
+            if (e.code === ui.KeyEvent.ESCAPE) {
                 this.stopEditing(false);
             }
             else {
-                if (e.code === KE.ENTER) {
+                if (e.code === ui.KeyEvent.ENTER) {
                     if ((zebkit.instanceOf(e.source, ui.TextField) === false) ||
                         (zebkit.instanceOf(e.source.view.target, zebkit.data.SingleLineTxt)))
                     {
@@ -30423,7 +30913,7 @@ pkg.Tree = Class(pkg.BaseTree, [
             }
             else {
                 if (this.selected != null &&
-                    this.getItemAt(this.firstVisible, e.x, e.y) == this.selected)
+                    this.getItemAt(this.firstVisible, e.x, e.y) === this.selected)
                 {
                     this.toggle(this.selected);
                 }
@@ -30450,15 +30940,15 @@ pkg.Tree = Class(pkg.BaseTree, [
         this.keyPressed = function(e){
             var newSelection = null;
             switch(e.code) {
-                case KE.DOWN    :
-                case KE.RIGHT   : newSelection = this.findNext(this.selected);break;
-                case KE.UP      :
-                case KE.LEFT    : newSelection = this.findPrev(this.selected);break;
-                case KE.HOME    : if (e.ctrlKey) this.select(this.model.root);break;
-                case KE.END     : if (e.ctrlKey) this.select(this.findLast(this.model.root));break;
-                case KE.PAGEDOWN: if (this.selected != null) this.select(this.nextPage(this.selected, 1));break;
-                case KE.PAGEUP  : if (this.selected != null) this.select(this.nextPage(this.selected,  -1));break;
-                //!!!!case KE.ENTER: if(this.selected != null) this.toggle(this.selected);break;
+                case ui.KeyEvent.DOWN    :
+                case ui.KeyEvent.RIGHT   : newSelection = this.findNext(this.selected);break;
+                case ui.KeyEvent.UP      :
+                case ui.KeyEvent.LEFT    : newSelection = this.findPrev(this.selected);break;
+                case ui.KeyEvent.HOME    : if (e.ctrlKey) this.select(this.model.root);break;
+                case ui.KeyEvent.END     : if (e.ctrlKey) this.select(this.findLast(this.model.root));break;
+                case ui.KeyEvent.PAGEDOWN: if (this.selected != null) this.select(this.nextPage(this.selected, 1));break;
+                case ui.KeyEvent.PAGEUP  : if (this.selected != null) this.select(this.nextPage(this.selected,  -1));break;
+                //!!!!case ui.KeyEvent.ENTER: if(this.selected != null) this.toggle(this.selected);break;
             }
             if (newSelection != null) this.select(newSelection);
             this.se(this.selected, e);
@@ -30674,7 +31164,7 @@ pkg.CompTree = Class(pkg.BaseTree, [
 
         this.Combo = Class(ui.Combo, [
             function keyPressed(e) {
-                if (e.code != KE.UP && e.code != KE.DOWN) {
+                if (e.code != ui.KeyEvent.UP && e.code != ui.KeyEvent.DOWN) {
                     this.$super(e);
                 }
             }
@@ -30705,9 +31195,9 @@ pkg.CompTree = Class(pkg.BaseTree, [
 
         this.childKeyPressed = function(e) {
             if (this.isSelectable === true){
-                var newSelection = (e.code == KE.DOWN) ? this.findNext(this.selected)
-                                                       : (e.code == KE.UP) ? this.findPrev(this.selected)
-                                                                           : null;
+                var newSelection = (e.code === ui.KeyEvent.DOWN) ? this.findNext(this.selected)
+                                                        : (e.code === ui.KeyEvent.UP) ? this.findPrev(this.selected)
+                                                                             : null;
                 if (newSelection != null) {
                     this.select(newSelection);
                 }
@@ -30727,7 +31217,7 @@ pkg.CompTree = Class(pkg.BaseTree, [
                     this.$blockCIE = false;
                 }
             }
-        }
+        };
 
         this.childFocusLost = function(e) {
             if (this.isSelectable === true) {
@@ -30756,7 +31246,7 @@ pkg.CompTree = Class(pkg.BaseTree, [
                     var node = $this.nodes[item];  // slightly improve performance
                                                    // (instead of calling $this.getIM(...))
 
-                    if (started === 0 && item == $this.firstVisible) {
+                    if (started === 0 && item === $this.firstVisible) {
                         started = 1;
                     }
 
@@ -30859,462 +31349,10 @@ pkg.CompTree = Class(pkg.BaseTree, [
 /**
  * @for
  */
+});
+zebkit.package("ui.designer", function(pkg, Class) {
 
-})(zebkit("ui.tree"), zebkit.Class, zebkit.ui);
-(function(pkg, Class) {
-
-/**
- * @module  ui
- */
-
-pkg.HtmlElementMan = Class(pkg.Manager, [
-//
-// HTML element integrated into zebkit layout has to be tracked regarding:
-//    1) DOM hierarchy. New added into zebkit layout DOM element has to be
-//       attached to the first found parent DOM element
-//    2) Visibility. If a zebkit UI component change its visibility state
-//       it has to have side effect to all children HTML elements on any
-//       subsequent hierarchy level
-//    3) Moving a zebkit UI component has to correct location of children
-//       HTML element on any subsequent hierarchy level.
-//
-//  The implementation of HTML element component has the following specific:
-//    1) Every original HTML is wrapped with "div" element. It is necessary since
-//       not all HTML element has been designed to be a container for another
-//       HTML element. By adding extra div we can consider the wrapper as container.
-//       The wrapper element is used to control visibility, location, enabled state
-//    2) HTML element has "isDOMElement" property set to true
-//    3) HTML element visibility depends on an ancestor component visibility.
-//       HTML element is visible if:
-//          -- the element isVisible property is true
-//          -- the element has a parent DOM element set
-//          -- all his ancestors are visible
-//          -- size of element is more than zero
-//          -- getCanvas() != null
-//       The visibility state is controlled with "e.style.visibility"
-//
-//   To support effective DOM hierarchy tracking a zebkit UI component can
-//   host "$domKid" property that contains direct DOM element the UI component
-//   hosts and other UI components that host DOM element. So it is sort of tree.
-//   For instance:
-//
-//    +---------------------------------------------------------
-//    |  p1 (zebkit component)
-//    |   +--------------------------------------------------
-//    |   |  p2 (zebkit component)
-//    |   |    +---------+      +-----------------------+
-//    |   |    |   h1    |      | p3 zebkit component    |
-//    |   |    +---------+      |  +---------------+    |
-//    |   |                     |  |    h3         |    |
-//    |   |    +---------+      |  |  +---------+  |    |
-//    |   |    |   h2    |      |  |  |   p4    |  |    |
-//    |   |    +---------+      |  |  +---------+  |    |
-//    |   |                     |  +---------------+    |
-//    |   |                     +-----------------------+
-//
-//     p1.$domKids : {
-//         p2.$domKids : {
-//             h1,   // leaf elements are always DOM element
-//             h2,
-//             p3.$domKids : {
-//                h3
-//             }
-//         }
-//     }
-    function $prototype() {
-        function $isInInvisibleState(c) {
-            if (c.isVisible === false           ||
-                c.$container.parentNode == null ||
-                c.width       <= 0              ||
-                c.height      <= 0              ||
-                c.parent      == null           ||
-                zebkit.web.$contains(c.$container) === false)
-            {
-                return true;
-            }
-
-            var p = c.parent;
-            while (p != null && p.isVisible === true && p.width > 0 && p.height > 0) {
-                p = p.parent;
-            }
-
-            return p != null || pkg.$cvp(c) == null;
-        }
-
-        // attach to appropriate DOM parent if necessary
-        // c parameter has to be DOM element
-        function $resolveDOMParent(c) {
-            // try to find an HTML element in zebkit (pay attention, in zebkit hierarchy !)
-            // hierarchy that has to be a DOM parent for the given component
-            var parentElement = null;
-            for(var p = c.parent; p != null; p = p.parent) {
-                if (p.isDOMElement === true) {
-                    parentElement = p.$container;
-                    break;
-                }
-            }
-
-            // parentElement is null means the component has
-            // not been inserted into DOM hierarchy
-            if (parentElement != null && c.$container.parentNode == null) {
-                // parent DOM element of the component is null, but a DOM container
-                // for the element has been detected. We need to add it to DOM
-                // than we have to add the DOM to the found DOM parent element
-                parentElement.appendChild(c.$container);
-
-                // adjust location of just attached DOM component
-                $adjustLocation(c);
-            }
-            else {
-                // test consistency whether the DOM element already has
-                // parent node that doesn't match the discovered
-                if (parentElement           != null &&
-                    c.$container.parentNode != null &&
-                    c.$container.parentNode !== parentElement)
-                {
-                    throw new Error("DOM parent inconsistent state ");
-                }
-            }
-        }
-
-        //    +----------------------------------------
-        //    |             ^      DOM1
-        //    |             .
-        //    |             .  (x,y) -> (xx,yy) than correct left
-        //                  .  and top of DOM2 relatively to DOM1
-        //    |    +--------.--------------------------
-        //    |    |        .       zebkit1
-        //    |    |        .
-        //    |    |  (left, top)
-        //    |<............+-------------------------
-        //    |    |        |           DOM2
-        //    |    |        |
-        //    |    |        |
-        //
-        //  Convert DOM (x, y) zebkit coordinates into appropriate CSS top and left
-        //  locations relatively to its immediate DOM element. For instance if a
-        //  zebkit component contains DOM component every movement of zebkit component
-        //  has to bring to correction of the embedded DOM elements
-        function $adjustLocation(c) {
-            if (c.$container.parentNode != null) {
-                // hide DOM component before move
-                // makes moving more smooth
-                var prevVisibility = c.$container.style.visibility;
-                c.$container.style.visibility = "hidden";
-
-                // find a location relatively to the first parent HTML element
-                var p = c, xx = c.x, yy = c.y;
-                while (((p = p.parent) != null) && p.isDOMElement !== true) {
-                    xx += p.x;
-                    yy += p.y;
-                }
-
-                c.$container.style.left = "" + xx + "px";
-                c.$container.style.top  = "" + yy + "px";
-                c.$container.style.visibility = prevVisibility;
-            }
-        }
-
-        // iterate over all found children HTML elements
-        // !!! pay attention you have to check existence
-        // of "$domKids" field before the method calling
-        function $domElements(c, callback) {
-            for (var k in c.$domKids) {
-                var e = c.$domKids[k];
-                if (e.isDOMElement === true) {
-                    callback.call(this, e);
-                }
-                else {
-                    // prevent unnecessary method call by condition
-                    if (e.$domKids != null) {
-                        $domElements(e, callback);
-                    }
-                }
-            }
-        }
-
-        this.compShown = function(e) {
-            // 1) if c is DOM element than we have make it is visible if
-            //      -- c.isVisible == true : the component visible  AND
-            //      -- all elements in parent chain is visible      AND
-            //      -- the component is in visible area
-            //
-            // 2) if c is not a DOM component his visibility state can have
-            //    side effect to his children HTML elements (on any level)
-            //    In this case we have to do the following:
-            //      -- go through all children HTML elements
-            //      -- if c.isVisible == false: make invisible every children element
-            //      -- if c.isVisible != false: make visible every children element whose
-            //         visibility state satisfies the following conditions:
-            //          -- kid.isVisible == true
-            //          -- all parent to c are in visible state
-            //          -- the kid component is in visible area
-
-            var c = e.source;
-            if (c.isDOMElement === true) {
-                c.$container.style.visibility = c.isVisible === false || $isInInvisibleState(c) ? "hidden"
-                                                                                                : "visible";
-            }
-            else {
-                if (c.$domKids != null) {
-                    $domElements(c, function(e) {
-                        e.$container.style.visibility = e.isVisible === false || $isInInvisibleState(e) ? "hidden" : "visible";
-                    });
-                }
-            }
-        };
-
-        this.compMoved = function(e) {
-            var c = e.source, px = e.prevX, py = e.prevY;
-
-            // if we move a zebkit component that contains
-            // DOM element(s) we have to correct the DOM elements
-            // locations relatively to its parent DOM
-            if (c.isDOMElement === true) {
-                // root canvas location cannot be adjusted since it is up to DOM tree to do it
-                if (c.$isRootCanvas !== true) {
-                    var dx   = px - c.x,
-                        dy   = py - c.y,
-                        cont = c.$container;
-
-                    cont.style.left = ((parseInt(cont.style.left, 10) || 0) - dx) + "px";
-                    cont.style.top  = ((parseInt(cont.style.top,  10) || 0) - dy) + "px";
-                }
-            }
-            else {
-                if (c.$domKids != null) {
-                    $domElements(c, function(e) {
-                        $adjustLocation(e);
-                    });
-                }
-            }
-        };
-
-        function detachFromParent(p, c) {
-            // DOM parent means the detached element doesn't
-            // have upper parents since it is relative to the
-            // DOM element
-            if (p.isDOMElement !== true && p.$domKids != null) {
-                // delete from parent
-                delete p.$domKids[c];
-
-                // parent is not DOM and doesn't have kids anymore
-                // what means the parent has to be also detached
-                if (isLeaf(p)) {
-                    // parent of parent is not null and is not a DOM element
-                    if (p.parent != null && p.parent.isDOMElement !== true) {
-                        detachFromParent(p.parent, p);
-                    }
-
-                    // remove $domKids from parent since the parent is leaf
-                    delete p.$domKids;
-                }
-            }
-        }
-
-        function isLeaf(c) {
-            if (c.$domKids != null) {
-                for(var k in c.$domKids) {
-                    if (c.$domKids.hasOwnProperty(k)) return false;
-                }
-            }
-            return true;
-        }
-
-        function removeDOMChildren(c) {
-            // DOM element cannot have children dependency tree
-            if (c.isDOMElement !== true && c.$domKids != null) {
-                for(var k in c.$domKids) {
-                    if (c.$domKids.hasOwnProperty(k)) {
-                        var kid = c.$domKids[k];
-
-                        // DOM element
-                        if (kid.isDOMElement === true) {
-                            kid.$container.parentNode.removeChild(kid.$container);
-                            kid.$container.parentNode = null;
-                        }
-                        else {
-                            removeDOMChildren(kid);
-                        }
-                    }
-                }
-                delete c.$domKids;
-            }
-        }
-
-        this.compRemoved = function(e) {
-            var p = e.source,
-                i = e.index,
-                c = e.kid;
-
-            // if detached element is DOM element we have to
-            // remove it from DOM tree
-            if (c.isDOMElement === true) {
-                c.$container.parentNode.removeChild(c.$container);
-                c.$container.parentNode = null;
-            }
-            else {
-                removeDOMChildren(c);
-            }
-
-            detachFromParent(p, c);
-        };
-
-        this.compAdded = function(e) {
-            var p = e.source,  c = e.kid;
-            if (c.isDOMElement === true) {
-                $resolveDOMParent(c);
-            }
-            else {
-                if (c.$domKids != null) {
-                    $domElements(c, function(e) {
-                        $resolveDOMParent(e);
-                    });
-                }
-                else {
-                    return;
-                }
-            }
-
-            if (p.isDOMElement !== true) {
-                // we come here if parent is not a DOM element and
-                // inserted children is DOM element or an element that
-                // embeds DOM elements
-                while (p != null && p.isDOMElement !== true) {
-                    if (p.$domKids == null) {
-                        // if reference to kid DOM element or kid DOM elements holder
-                        // has bot been created we have to continue go up to parent of
-                        // the parent to register the whole chain of DOM and DOM holders
-                        p.$domKids = {};
-                        p.$domKids[c] = c;
-                        c = p;
-                        p = p.parent;
-                    }
-                    else {
-                        if (p.$domKids.hasOwnProperty(c)) {
-                            throw new Error("Inconsistent state for " + c + ", " + c.clazz.$name);
-                        }
-                        p.$domKids[c] = c;
-                        break;
-                    }
-                }
-            }
-        };
-    }
-]);
-
-pkg.HtmlFocusableElement = Class(pkg.HtmlElement, [
-    function $prototype() {
-        this.$getElementRootFocus = function() {
-            return this.element;
-        };
-    }
-]);
-
-/**
- * HTML input element wrapper class. The class can be used as basis class
- * to wrap HTML elements that can be used to enter a textual information.
- * @constructor
- * @param {String} text a text the text input component has to be filled with
- * @param {String} element an input element name
- * @class zebkit.ui.HtmlTextInput
- * @extends zebkit.ui.HtmlElement
- */
-pkg.HtmlTextInput = Class(pkg.HtmlFocusableElement, [
-    function $prototype() {
-        this.cursorType = pkg.Cursor.TEXT;
-
-        /**
-         * Get a text of the text input element
-         * @return {String} a text of the  text input element
-         * @method getValue
-         */
-        this.getValue = function() {
-            return this.element.value.toString();
-        };
-
-        /**
-         * Set the text
-         * @param {String} t a text
-         * @method setValue
-         */
-        this.setValue = function(t) {
-            if (this.element.value != t) {
-                this.element.value = t;
-                this.vrp();
-            }
-        };
-    },
-
-    function(text, e) {
-        if (text == null) text = "";
-        this.$super(e);
-        this.setAttribute("tabindex", 0);
-        this.setValue(text);
-    }
-]);
-
-/**
- * HTML input text element wrapper class. The class wraps standard HTML text field
- * and represents it as zebkit UI component.
- * @constructor
- * @class zebkit.ui.HtmlTextField
- * @param {String} [text] a text the text field component has to be filled with
- * @extends zebkit.ui.HtmlTextInput
- */
-pkg.HtmlTextField = Class(pkg.HtmlTextInput, [
-    function(text) {
-        this.$super(text, "input");
-        this.element.setAttribute("type",  "text");
-    }
-]);
-
-/**
- * HTML input textarea element wrapper class. The class wraps standard HTML textarea
- * element and represents it as zebkit UI component.
- * @constructor
- * @param {String} [text] a text the text area component has to be filled with
- * @class zebkit.ui.HtmlTextArea
- * @extends zebkit.ui.HtmlTextInput
- */
-pkg.HtmlTextArea = Class(pkg.HtmlTextInput, [
-    function setResizeable(b) {
-        if (b === false) this.setStyle("resize", "none");
-        else             this.setStyle("resize", "both");
-    },
-
-    function(text) {
-        this.$super(text, "textarea");
-        this.element.setAttribute("rows", 10);
-    }
-]);
-
-/**
- * [description]
- * @param  {[type]} text  [description]
- * @param  {zebkit}  href)
- * @return {[type]}       [description]
- */
-pkg.HtmlLink = Class(pkg.HtmlElement, [
-    function(text, href) {
-        this.$super("a");
-        this.setContent(text);
-        this.setAttribute("href", href == null ? "#": href);
-        this._ = new zebkit.util.Listeners();
-        var $this = this;
-        this.element.onclick = function(e) {
-            $this._.fired($this);
-        };
-    }
-]);
-
-
-/**
- * @for
- */
-
-})(zebkit("ui"), zebkit.Class);
-(function(pkg, Class, ui) {
+var ui = zebkit("ui");
 
 /**
  * The package contains number of UI components that can be helpful to
@@ -31323,18 +31361,18 @@ pkg.HtmlLink = Class(pkg.HtmlElement, [
  * @main
  */
 
-var Cursor = ui.Cursor, KeyEvent = ui.KeyEvent, CURSORS = {};
-
-CURSORS["left"  ]      = Cursor.W_RESIZE;
-CURSORS["right" ]      = Cursor.E_RESIZE;
-CURSORS["top"   ]      = Cursor.N_RESIZE;
-CURSORS["bottom"]      = Cursor.S_RESIZE;
-CURSORS["topLeft" ]    = Cursor.NW_RESIZE;
-CURSORS["topRight"]    = Cursor.NE_RESIZE;
-CURSORS["bottomLeft" ] = Cursor.SW_RESIZE;
-CURSORS["bottomRight"] = Cursor.SE_RESIZE;
-CURSORS["center"]      = Cursor.MOVE;
-CURSORS["none"  ]      = Cursor.DEFAULT;
+pkg.CURSORS = {
+    left        : ui.Cursor.W_RESIZE,
+    right       : ui.Cursor.E_RESIZE,
+    top         : ui.Cursor.N_RESIZE,
+    bottom      : ui.Cursor.S_RESIZE,
+    topLeft     : ui.Cursor.NW_RESIZE,
+    topRight    : ui.Cursor.NE_RESIZE,
+    bottomLeft  : ui.Cursor.SW_RESIZE,
+    bottomRight : ui.Cursor.SE_RESIZE,
+    center      : ui.Cursor.MOVE,
+    none        : ui.Cursor.DEFAULT
+};
 
 pkg.ShaperBorder = Class(ui.View, [
     function $prototype() {
@@ -31474,7 +31512,7 @@ pkg.ShaperPan = Class(ui.Panel, [
         this.catchInput = true;
 
         this.getCursorType = function (t, x ,y) {
-            return this.kids.length > 0 ? CURSORS[this.shaperBr.detectAt(t, x, y)] : null;
+            return this.kids.length > 0 ? pkg.CURSORS[this.shaperBr.detectAt(t, x, y)] : null;
         };
 
         /**
@@ -31486,8 +31524,8 @@ pkg.ShaperPan = Class(ui.Panel, [
             if (this.kids.length > 0){
                 var b  = e.shiftKey,
                     c  = e.code,
-                    dx = (c == KeyEvent.LEFT ? -1 : (c == KeyEvent.RIGHT ? 1 : 0)),
-                    dy = (c == KeyEvent.UP   ? -1 : (c == KeyEvent.DOWN  ? 1 : 0)),
+                    dx = (c === ui.KeyEvent.LEFT ? -1 : (c === ui.KeyEvent.RIGHT ? 1 : 0)),
+                    dy = (c === ui.KeyEvent.UP   ? -1 : (c === ui.KeyEvent.DOWN  ? 1 : 0)),
                     w  = this.width  + dx,
                     h  = this.height + dy,
                     x  = this.x + dx,
@@ -31623,7 +31661,7 @@ pkg.FormTreeModel = Class(zebkit.data.TreeModel, [
 
         this.itemByComponent = function (c, r){
             if (r == null) r = this.root;
-            if (r.comp == c) return c;
+            if (r.comp === c) return c;
             for(var i = 0;i < r.kids.length; i++) {
                 var item = this.itemByComponent(c, r.kids[i]);
                 if (item != null) return item;
@@ -31649,6 +31687,27 @@ pkg.FormTreeModel = Class(zebkit.data.TreeModel, [
 /**
  * @for
  */
+});
+zebkit.package("ui", function(pkg, Class) {
 
+    var path = zebkit()['zebkit.json'];
+    if (typeof path === "undefined") {
+        path = pkg.$url.join("zebkit.json");
+    }
 
-})(zebkit("ui.designer"), zebkit.Class, zebkit("ui"));
+    if (path != null) {
+        zebkit.busy();
+        pkg.load(path,function(e) {
+            if (e != null) {
+                console.log("Config JSON loading failed:" + (e.stack != null ? e.stack : e));
+            }
+            zebkit.ready();
+        });
+    }
+
+    //!!!
+    // IE9 has an error: first mouse press formally pass focus to
+    // canvas, but actually it doesn't get key events. To fix it
+    // it is necessary to pass focus explicitly to window
+    if (zebkit.isIE) window.focus();
+});

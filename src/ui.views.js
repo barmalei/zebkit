@@ -1,12 +1,18 @@
-(function(pkg, Class) {
-
+zebkit.package("ui", function(pkg, Class) {
 /**
  * @module  ui
  * @required easyoop, util
  */
 
+pkg.font      = new pkg.Font("Arial", 14);
+pkg.smallFont = new pkg.Font("Arial", 10);
+pkg.boldFont  = new pkg.Font("Arial", "bold", 12);
+
+
 pkg.$view = function(v) {
-    if (v == null || v.paint != null) return v;
+    if (v == null || v.paint != null) {
+        return v;
+    }
 
     if (zebkit.isString(v)) {
         return zebkit.util.rgb.hasOwnProperty(v) ? zebkit.util.rgb[v]
@@ -26,6 +32,148 @@ pkg.$view = function(v) {
     vv.paint = v;
     return vv;
 };
+
+zebkit.util.rgb.prototype.paint = function(g,x,y,w,h,d) {
+    if (this.s != g.fillStyle) {
+        g.fillStyle = this.s;
+    }
+
+    // fix for IE10/11, calculate intersection of clipped area
+    // and the area that has to be filled. IE11/10 have a bug
+    // that triggers filling more space than it is restricted
+    // with clip
+    if (g.$states != null) {
+        var t  = g.$states[g.$curState],
+            rx = x > t.x ? x : t.x,
+            rw = Math.min(x + w, t.x + t.width) - rx;
+
+        if (rw > 0)  {
+            var ry = y > t.y ? y : t.y,
+            rh = Math.min(y + h, t.y + t.height) - ry;
+
+            if (rh > 0) g.fillRect(rx, ry, rw, rh);
+        }
+    }
+    else {
+        g.fillRect(x, y, w, h);
+    }
+};
+
+zebkit.util.rgb.prototype.getPreferredSize = function() {
+    return { width:0, height:0 };
+};
+
+/**
+ * View class that is designed as a basis for various reusable decorative
+ * UI elements implementations
+ * @class zebkit.ui.View
+ */
+pkg.View = Class([
+    function $prototype() {
+        this.gap = 2;
+
+        /**
+         * Get left gap. The method informs UI component that uses the view as
+         * a border view how much space left side of the border occupies
+         * @return {Integer} a left gap
+         * @method getLeft
+         */
+
+         /**
+          * Get right gap. The method informs UI component that uses the view as
+          * a border view how much space right side of the border occupies
+          * @return {Integer} a right gap
+          * @method getRight
+          */
+
+         /**
+          * Get top gap. The method informs UI component that uses the view as
+          * a border view how much space top side of the border occupies
+          * @return {Integer} a top gap
+          * @method getTop
+          */
+
+         /**
+          * Get bottom gap. The method informs UI component that uses the view as
+          * a border view how much space bottom side of the border occupies
+          * @return {Integer} a bottom gap
+          * @method getBottom
+          */
+        this.getRight = this.getLeft = this.getBottom = this.getTop = function() {
+            return this.gap;
+        };
+
+        /**
+        * Return preferred size the view desires to have
+        * @method getPreferredSize
+        * @return {Object}
+        */
+        this.getPreferredSize = function() {
+            return { width:0, height:0 };
+        };
+
+        /**
+        * The method is called to render the decorative element on the
+        * given surface of the specified UI component
+        * @param {Canvas 2D context} g  graphical context
+        * @param {Integer} x  x coordinate
+        * @param {Integer} y  y coordinate
+        * @param {Integer} w  required width
+        * @param {Integer} h  required height
+        * @param {zebkit.ui.Panel} c an UI component on which the view
+        * element has to be drawn
+        * @method paint
+        */
+        this.paint = function(g,x,y,w,h,c) {};
+    }
+]);
+
+/**
+ * Render class extends "zebkit.ui.View" class with a notion
+ * of target object. Render stores reference  to a target that
+ * the render knows how to visualize. Basically Render is an
+ * object visualizer. For instance, developer can implement
+ * text, image and so other objects visualizers.
+ * @param {Object} target a target object to be visualized
+ * with the render
+ * @constructor
+ * @extends zebkit.ui.View
+ * @class zebkit.ui.Render
+ */
+pkg.Render = Class(pkg.View, [
+    function $prototype() {
+        /**
+         * Target object to be visualized
+         * @attribute target
+         * @default null
+         * @readOnly
+         * @type {Object}
+         */
+        this.target = null;
+
+        this[''] = function(target) {
+            this.setTarget(target);
+        };
+
+        /**
+         * Set the given target object. The method triggers
+         * "targetWasChanged(oldTarget, newTarget)" execution if
+         * the method is declared. Implement the method if you need
+         * to track a target object updating.
+         * @method setTarget
+         * @param  {Object} o a target object to be visualized
+         */
+        this.setTarget = function(o) {
+            if (this.target != o) {
+                var old = this.target;
+                this.target = o;
+                if (this.targetWasChanged != null) {
+                    this.targetWasChanged(old, o);
+                }
+            }
+        };
+    }
+]);
 
 /**
 * Sunken border view
@@ -434,7 +582,7 @@ pkg.CompRender = Class(pkg.Render, [
             var c = this.target;
             if (c != null && c.isVisible === true) {
                 var prevW = -1, prevH = 0;
-                if ((w != c.width || h != c.height) && c.getCanvas() == null){
+                if ((w !== c.width || h !== c.height) && c.getCanvas() == null){
                     prevW = c.width;
                     prevH = c.height;
                     c.setSize(w, h);
@@ -794,7 +942,7 @@ pkg.CompositeView = Class(pkg.View, [
 
         this[''] = function() {
             this.views = [];
-            var args = arguments.length == 1 ? arguments[0] : arguments;
+            var args = arguments.length === 1 ? arguments[0] : arguments;
             for(var i = 0; i < args.length; i++) {
                 this.views[i] = pkg.$view(args[i]);
                 this.$recalc(this.views[i]);
@@ -1023,7 +1171,13 @@ pkg.ArrowView = Class(pkg.View, [
 ]);
 
 pkg.BaseTextRender = Class(pkg.Render,  [
-    function $prototype() {
+    function $clazz() {
+        this.font          =  pkg.font;
+        this.color         = "gray";
+        this.disabledColor = "white";
+    },
+
+    function $prototype(clazz) {
         /**
          * UI component that holds the text render
          * @attribute owner
@@ -1706,9 +1860,8 @@ pkg.DecoratedTextRender = zebkit.Class(pkg.TextRender, [
 
 
 pkg.BoldTextRender = Class(pkg.TextRender, [
-    function(t) {
-        this.$super(t);
-        this.setFont(pkg.boldFont);
+    function $clazz() {
+        this.font = pkg.boldFont;
     }
 ]);
 
@@ -1721,7 +1874,9 @@ pkg.BoldTextRender = Class(pkg.TextRender, [
  */
 pkg.PasswordText = Class(pkg.TextRender, [
     function(text){
-        if (arguments.length === 0) text = new zebkit.data.SingleLineTxt("");
+        if (arguments.length === 0) {
+            text = new zebkit.data.SingleLineTxt("");
+        }
 
         /**
          * Echo character that will replace characters of hidden text
@@ -1751,7 +1906,9 @@ pkg.PasswordText = Class(pkg.TextRender, [
     function setEchoChar(ch){
         if (this.echo != ch){
             this.echo = ch;
-            if (this.target != null) this.invalidate(0, this.target.getLines());
+            if (this.target != null) {
+                this.invalidate(0, this.target.getLines());
+            }
         }
     },
 
@@ -1832,7 +1989,7 @@ pkg.TabBorder = Class(pkg.View, [
                     g.lineTo(x, yy + dt);
 
                     if (d.isEnabled === true){
-                        g.setColor(t == 2 ? this.fillColor1 : this.fillColor2);
+                        g.setColor(t === 2 ? this.fillColor1 : this.fillColor2);
                         g.fill();
                     }
 
@@ -2369,5 +2526,4 @@ pkg.CaptionBgView = Class(pkg.View, [
 /**
  * @for
  */
-
-})(zebkit("ui"), zebkit.Class);
+});

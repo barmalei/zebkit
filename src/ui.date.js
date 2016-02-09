@@ -1,5 +1,5 @@
 zebkit.package("ui.date", function(pkg, Class) {
-    var ui = zebkit("ui"), L = zebkit.layout;
+    var ui = zebkit("ui");
 
     pkg.compareDates = function(d1, d2) {
         if (arguments.length === 2 && d1 === d2) {
@@ -265,7 +265,7 @@ zebkit.package("ui.date", function(pkg, Class) {
             };
 
             this.setValue = function(month, year) {
-                if (arguments.length == 1) {
+                if (arguments.length === 1) {
                     year  = month.getFullYear();
                     month = month.getMonth();
                 }
@@ -365,7 +365,7 @@ zebkit.package("ui.date", function(pkg, Class) {
             };
 
             this.indexOfItem = function(day, month, year) {
-                if (arguments.length == 1) {
+                if (arguments.length === 1) {
                     month = day.getMonth();
                     year  = day.getFullYear();
                     day   = day.getDate();
@@ -714,8 +714,8 @@ zebkit.package("ui.date", function(pkg, Class) {
 
                         var prevDate = this.selectedDate;
                         if (prevDate != null                                 &&
-                            prevDate.getMonth() == this.monthDaysGrid.month  &&
-                            prevDate.getFullYear() == this.monthDaysGrid.year  )
+                            prevDate.getMonth() === this.monthDaysGrid.month  &&
+                            prevDate.getFullYear() === this.monthDaysGrid.year  )
                         {
                             this.monthDaysGrid.selectCell(this.selectedDate, false);
                         }
@@ -744,7 +744,7 @@ zebkit.package("ui.date", function(pkg, Class) {
 
             var $this = this;
 
-            this.$super(new L.BorderLayout());
+            this.$super(new zebkit.layout.BorderLayout());
             this.monthDaysGrid = new pkg.DaysGrid([
                 function isItemSelectable(item) {
                     return (item.tags.length > 0 && item.hasTag("shownMonth") == null) ||
@@ -774,18 +774,18 @@ zebkit.package("ui.date", function(pkg, Class) {
             ]);
 
             var topPan = new this.clazz.InfoPan({
-                layout: new L.BorderLayout(),
+                layout: new zebkit.layout.BorderLayout(),
                 kids  : {
                     center: new ui.Panel({
-                        layout : new L.FlowLayout("center", "center"),
+                        layout : new zebkit.layout.FlowLayout("center", "center"),
                         kids   : [
                             this.comboMonth,
                             new ui.Panel({
-                                layout : new L.BorderLayout(),
+                                layout : new zebkit.layout.BorderLayout(),
                                 kids   : {
                                     center : this.yearText,
                                     right  : new ui.Panel({
-                                        layout: new L.FlowLayout("center", "center", "vertical", 1),
+                                        layout: new zebkit.layout.FlowLayout("center", "center", "vertical", 1),
                                         kids  : [
                                             new this.clazz.TopArrowButton(),
                                             new this.clazz.BottomArrowButton()
@@ -797,7 +797,7 @@ zebkit.package("ui.date", function(pkg, Class) {
                     }),
 
                     left: new ui.Panel({
-                        layout : new L.FlowLayout("center", "center", "horizontal", 3),
+                        layout : new zebkit.layout.FlowLayout("center", "center", "horizontal", 3),
                         kids   : [
                             new this.clazz.LeftArrowButton(),
                             new this.clazz.DotButton(),
@@ -806,7 +806,7 @@ zebkit.package("ui.date", function(pkg, Class) {
                     }),
 
                     right: new ui.Panel({
-                        layout : new L.FlowLayout("center", "bottom"),
+                        layout : new zebkit.layout.FlowLayout("center", "bottom"),
                         kids   : new this.clazz.Link("today"),
                         padding: [0,8,4,0]
                     })
@@ -918,8 +918,8 @@ zebkit.package("ui.date", function(pkg, Class) {
                 this.$freezeCalendar = false;
 
                 this.calendar = new pkg.Calendar([
-                    function winActivated (winLayer, target,b){
-                        if (b === false) {
+                    function winActivated (e){
+                        if (e.isActive === false) {
                             $this.hideCalendar();
                         }
                     },
@@ -953,7 +953,7 @@ zebkit.package("ui.date", function(pkg, Class) {
 
                 var c = this.getCanvas(),
                     w = c.getLayer("win"),
-                    p = L.toParentOrigin(0, 0, anchor, c);
+                    p = zebkit.layout.toParentOrigin(0, 0, anchor, c);
 
                 calendar.toPreferredSize();
 
@@ -1018,7 +1018,7 @@ zebkit.package("ui.date", function(pkg, Class) {
         },
 
         function (format) {
-            this.$super(new L.FlowLayout());
+            this.$super(new zebkit.layout.FlowLayout());
 
             var $this = this;
             this.dateField = new this.clazz.DateTextField(format);

@@ -1,4 +1,4 @@
-(function(pkg, Class) {
+zebkit.package("ui", function(pkg, Class) {
 
 /**
  * Zebkit UI. The UI is powerful way to create any imaginable
@@ -42,13 +42,11 @@
  * @requires zebkit, util, io, data
  */
 
-var L = zebkit.layout, rgb = zebkit.util.rgb, temporary = { x:0, y:0, width:0, height:0 },
-    MS = Math.sin, MC = Math.cos, $fmCanvas = null, $fmText = null, EM = pkg.events = null,
-    $fmImage = null, $bodyFontSize = "14px", COMP_EVENT, FOCUS_EVENT;
+var temporary = { x:0, y:0, width:0, height:0 }, COMP_EVENT, FOCUS_EVENT;
 
 // keep pointer owners (the component where cursor/finger placed in)
 pkg.$pointerOwner = {};
-
+pkg.$pointerPressedOwner = {};
 
 pkg.FocusEvent = Class(zebkit.util.Event, [
     function $prototype() {
@@ -153,129 +151,16 @@ pkg.PointerEvent.extend([
     }
 ]);
 
-
 pkg.load = function(path, callback) {
     return new pkg.Bag(pkg).load(path, callback);
 };
-
-/**
- * View class that is designed as a basis for various reusable decorative
- * UI elements implementations
- * @class zebkit.ui.View
- */
-pkg.View = Class([
-    function $prototype() {
-        this.gap = 2;
-
-        /**
-         * Get left gap. The method informs UI component that uses the view as
-         * a border view how much space left side of the border occupies
-         * @return {Integer} a left gap
-         * @method getLeft
-         */
-
-         /**
-          * Get right gap. The method informs UI component that uses the view as
-          * a border view how much space right side of the border occupies
-          * @return {Integer} a right gap
-          * @method getRight
-          */
-
-         /**
-          * Get top gap. The method informs UI component that uses the view as
-          * a border view how much space top side of the border occupies
-          * @return {Integer} a top gap
-          * @method getTop
-          */
-
-         /**
-          * Get bottom gap. The method informs UI component that uses the view as
-          * a border view how much space bottom side of the border occupies
-          * @return {Integer} a bottom gap
-          * @method getBottom
-          */
-        this.getRight = this.getLeft = this.getBottom = this.getTop = function() {
-            return this.gap;
-        };
-
-        /**
-        * Return preferred size the view desires to have
-        * @method getPreferredSize
-        * @return {Object}
-        */
-        this.getPreferredSize = function() {
-            return { width:0, height:0 };
-        };
-
-        /**
-        * The method is called to render the decorative element on the
-        * given surface of the specified UI component
-        * @param {Canvas 2D context} g  graphical context
-        * @param {Integer} x  x coordinate
-        * @param {Integer} y  y coordinate
-        * @param {Integer} w  required width
-        * @param {Integer} h  required height
-        * @param {zebkit.ui.Panel} c an UI component on which the view
-        * element has to be drawn
-        * @method paint
-        */
-        this.paint = function(g,x,y,w,h,c) {};
-    }
-]);
-
-/**
- * Render class extends "zebkit.ui.View" class with a notion
- * of target object. Render stores reference  to a target that
- * the render knows how to visualize. Basically Render is an
- * object visualizer. For instance, developer can implement
- * text, image and so other objects visualizers.
- * @param {Object} target a target object to be visualized
- * with the render
- * @constructor
- * @extends zebkit.ui.View
- * @class zebkit.ui.Render
- */
-pkg.Render = Class(pkg.View, [
-    function $prototype() {
-        /**
-         * Target object to be visualized
-         * @attribute target
-         * @default null
-         * @readOnly
-         * @type {Object}
-         */
-        this.target = null;
-
-        this[''] = function(target) {
-            this.setTarget(target);
-        };
-
-        /**
-         * Set the given target object. The method triggers
-         * "targetWasChanged(oldTarget, newTarget)" execution if
-         * the method is declared. Implement the method if you need
-         * to track a target object updating.
-         * @method setTarget
-         * @param  {Object} o a target object to be visualized
-         */
-        this.setTarget = function(o) {
-            if (this.target != o) {
-                var old = this.target;
-                this.target = o;
-                if (this.targetWasChanged != null) {
-                    this.targetWasChanged(old, o);
-                }
-            }
-        };
-    }
-]);
 
 pkg.Bag = Class(zebkit.util.Bag, [
     function $prototype() {
         this.globalPropertyLookup = this.usePropertySetters = true;
 
         this.loadImage = function(path) {
-            if (this.url != null && zebkit.URL.isAbsolute(path) == false) {
+            if (this.url != null && zebkit.URL.isAbsolute(path) === false) {
                 var base = (new zebkit.URL(this.url)).getParentURL();
                 path = base.join(path);
             }
@@ -309,42 +194,12 @@ pkg.Bag = Class(zebkit.util.Bag, [
     }
 ]);
 
-rgb.prototype.paint = function(g,x,y,w,h,d) {
-    if (this.s != g.fillStyle) {
-        g.fillStyle = this.s;
-    }
-
-    // fix for IE10/11, calculate intersection of clipped area
-    // and the area that has to be filled. IE11/10 have a bug
-    // that triggers filling more space than it is restricted
-    // with clip
-    if (g.$states != null) {
-        var t  = g.$states[g.$curState],
-            rx = x > t.x ? x : t.x,
-            rw = Math.min(x + w, t.x + t.width) - rx;
-
-        if (rw > 0)  {
-            var ry = y > t.y ? y : t.y,
-            rh = Math.min(y + h, t.y + t.height) - ry;
-
-            if (rh > 0) g.fillRect(rx, ry, rw, rh);
-        }
-    }
-    else {
-        g.fillRect(x, y, w, h);
-    }
-};
-
-rgb.prototype.getPreferredSize = function() {
-    return { width:0, height:0 };
-};
-
 pkg.$getPS = function(l) {
     return l != null && l.isVisible === true ? l.getPreferredSize()
                                              : { width:0, height:0 };
 };
 
-var $cvp = pkg.$cvp = function(c, r) {
+pkg.$cvp = function(c, r) {
     if (c.width > 0 && c.height > 0 && c.isVisible === true){
         var p = c.parent, px = -c.x, py = -c.y;
         if (r == null) {
@@ -379,104 +234,6 @@ var $cvp = pkg.$cvp = function(c, r) {
     }
     return null;
 };
-
-/**
- * This class represents a font and provides basic font metrics like
- * height, ascent. Using the class developers can compute string width.
-
-      // plain font
-      var f = new zebkit.ui.Font("Arial", 14);
-
-      // bold font
-      var f = new zebkit.ui.Font("Arial", "bold", 14);
-
-      // defining font with CSS font name
-      var f = new zebkit.ui.Font("100px Futura, Helvetica, sans-serif");
-
- * @constructor
- * @param {String} name a name of the font. If size and style parameters
- * has not been passed the name is considered as CSS font name that
- * includes size and style
- * @param {String} [style] a style of the font: "bold", "italic", etc
- * @param {Integer} [size] a size of the font
- * @class zebkit.ui.Font
- */
-pkg.Font = function(name, style, size) {
-    if (arguments.length == 1) {
-        name = name.replace(/[ ]+/, ' ');
-        this.s = name.trim();
-    }
-    else {
-        if (arguments.length == 2) {
-            size  = style;
-            style = '';
-        }
-        style  = style.trim();
-        this.s = style + (style !== '' ? ' ' : '') + size + 'px '+ name;
-        this.name = name;
-    }
-    $fmText.style.font = this.s;
-
-    /**
-     * Height of the font
-     * @attribute height
-     * @readOnly
-     * @type {Integer}
-     */
-    this.height = $fmText.offsetHeight;
-
-    //!!!
-    // Something weird is going sometimes in IE10 !
-    // Sometimes the property offsetHeight is 0 but
-    // second attempt to access to the property gives
-    // proper result
-    if (this.height === 0) {
-        this.height = $fmText.offsetHeight;
-    }
-
-    /**
-     * Ascent of the font
-     * @attribute ascent
-     * @readOnly
-     * @type {Integer}
-     */
-    this.ascent = $fmImage.offsetTop - $fmText.offsetTop + 1;
-};
-
-/**
- * Calculate the given string width in pixels
- * @param  {String} s a string whose width has to be computed
- * @return {Integer} a string size in pixels
- * @method stringWidth
- * @for zebkit.ui.Font
- */
-pkg.Font.prototype.stringWidth = function(s) {
-    if (s.length === 0) return 0;
-    if ($fmCanvas.font !== this.s) $fmCanvas.font = this.s;
-    return ($fmCanvas.measureText(s).width + 0.5) | 0;
-};
-
-/**
- * Calculate the specified substring width
- * @param  {String} s a string
- * @param  {Integer} off fist character index
- * @param  {Integer} len length of substring
- * @return {Integer} a substring size in pixels
- * @method charsWidth
- * @for zebkit.ui.Font
- */
-pkg.Font.prototype.charsWidth = function(s, off, len) {
-    if ($fmCanvas.font !== this.s) $fmCanvas.font = this.s;
-    return ($fmCanvas.measureText(len === 1 ? s[off] : s.substring(off, off + len)).width + 0.5) | 0;
-};
-
-/**
- * Returns CSS font representation
- * @return {String} a CSS representation of the given Font
- * @method toString
- * @for zebkit.ui.Font
- */
-pkg.Font.prototype.toString = function() { return this.s;  };
 
 pkg.Cursor = {
     DEFAULT     : "default",
@@ -928,7 +685,7 @@ pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
   * @event clipPaste
   */
 
-pkg.Panel = Class(L.Layoutable, [
+pkg.Panel = Class(zebkit.layout.Layoutable, [
     function $prototype() {
         // TODO: not stable api, probably it should be moved to static
         this.wrapWithCanvas = function() {
@@ -979,7 +736,7 @@ pkg.Panel = Class(L.Layoutable, [
 
                 // step II: calculate new actual dirty area
                 if (w > 0 && h > 0) {
-                    var r = $cvp(this, temporary);
+                    var r = pkg.$cvp(this, temporary);
                     if (r != null) {
                         zebkit.util.intersection(r.x, r.y, r.width, r.height, x, y, w, h, r);
                         if (r.width > 0 && r.height > 0) {
@@ -1314,7 +1071,7 @@ pkg.Panel = Class(L.Layoutable, [
          * @method getComponentAt
          */
         this.getComponentAt = function(x,y){
-            var r = $cvp(this, temporary);
+            var r = pkg.$cvp(this, temporary);
 
             if (r == null || (x < r.x || y < r.y ||
                 x >= r.x + r.width || y >= r.y + r.height))
@@ -1691,15 +1448,19 @@ pkg.Panel = Class(L.Layoutable, [
             else {
                 // if components list passed as number of arguments
                 if (arguments.length > 1) {
-                    for(var i=0; i < arguments.length; i++) {
+                    for(var i = 0; i < arguments.length; i++) {
                         var a = arguments[i];
-                        this.add(a.$new != null ? a.$new() : a);
+                        if (a != null) {
+                            this.add(a.$new != null ? a.$new() : a);
+                        }
                     }
                 }
                 else {
                     if (Array.isArray(a)) {
                         for(var i=0; i < a.length; i++) {
-                            this.add(a[i]);
+                            if (a[i] != null) {
+                                this.add(a[i]);
+                            }
                         }
                     }
                     else {
@@ -1813,7 +1574,7 @@ pkg.Panel = Class(L.Layoutable, [
         this[''] = function(l) {
             // !!! dirty trick to call super, for the sake of few milliseconds back
             //this.$super();
-            L.Layoutable.prototype[zebkit.CNAME].call(this, l);
+            zebkit.layout.Layoutable.prototype[zebkit.CNAME].call(this, l);
 
             // apply default properties
             this.properties(this.clazz);
@@ -1846,6 +1607,7 @@ pkg.Panel = Class(L.Layoutable, [
 pkg.HtmlElement = Class(pkg.Panel, [
     function $clazz() {
         this.CLASS_NAME = null;
+        this.$bodyFontSize = window.getComputedStyle(document.body, null).getPropertyValue('font-size');
     },
 
     function $prototype() {
@@ -2115,7 +1877,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
     },
 
     function setPadding(t,l,b,r) {
-        if (arguments.length == 1) {
+        if (arguments.length === 1) {
             l = b = r = t;
         }
 
@@ -2126,7 +1888,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
             paddingBottom : '' + b + "px"
         });
 
-        if (this.top != t || this.left != l || this.right != r || this.bottom != b) {
+        if (this.top !== t || this.left !== l || this.right !== r || this.bottom !== b) {
             // changing padding has influence to CSS size the component has to have
             // so we have to request CSS size recalculation
             this.$sizeAdjusted = false;
@@ -2208,10 +1970,10 @@ pkg.HtmlElement = Class(pkg.Panel, [
             if (this.clazz.CLASS_NAME != null) {
                 e.setAttribute("class", this.clazz.CLASS_NAME);
             }
-            e.style.border   = "0px solid transparent"; // clean up border
-            e.style.fontSize = $bodyFontSize;           // DOM element is wrapped with a container that
-                                                        // has zero sized font, so let's set body  font
-                                                        // for the created element
+            e.style.border   = "0px solid transparent";   // clean up border
+            e.style.fontSize = this.clazz.$bodyFontSize;  // DOM element is wrapped with a container that
+                                                          // has zero sized font, so let's set body  font
+                                                          // for the created element
         }
 
         // sync padding and margin of the DOM element with
@@ -2431,8 +2193,8 @@ pkg.HtmlCanvas = Class(pkg.HtmlElement, [
             rotate : function(v) {
                 var c = this.$states[this.$curState];
                 c.rotateVal += v;
-                c.srot = MS(c.rotateVal);
-                c.crot = MC(c.rotateVal);
+                c.srot = Math.sin(c.rotateVal);
+                c.crot = Math.cos(c.rotateVal);
                 this.$rotate(v);
             },
 
@@ -2698,6 +2460,7 @@ pkg.CanvasLayer = Class(pkg.HtmlCanvas, [
 pkg.RootLayer = Class(pkg.CanvasLayer, [
     function $clazz() {
         this.ID = "root";
+        this.layout = new zebkit.layout.RasterLayout();
     },
 
     function $prototype() {
@@ -2886,7 +2649,7 @@ pkg.FocusManager = Class(pkg.Manager, [
 
         this.$freeFocus = function(comp) {
             if ( this.focusOwner != null &&
-                (this.focusOwner === comp || L.isAncestorOf(comp, this.focusOwner)))
+                (this.focusOwner === comp || zebkit.layout.isAncestorOf(comp, this.focusOwner)))
             {
                 this.requestFocus(null);
             }
@@ -2996,7 +2759,7 @@ pkg.FocusManager = Class(pkg.Manager, [
         // given direction (forward or backward lookup)
         this.fd = function(t,index,d) {
             if (t.kids.length > 0){
-                var isNComposite = t.catchInput == null || t.catchInput == false;
+                var isNComposite = t.catchInput == null || t.catchInput === false;
                 for(var i = index; i >= 0 && i < t.kids.length; i += d) {
                     var cc = t.kids[i];
 
@@ -3007,7 +2770,7 @@ pkg.FocusManager = Class(pkg.Manager, [
                         cc.isVisible === true                                           &&
                         cc.width      >  0                                              &&
                         cc.height     >  0                                              &&
-                        (isNComposite || (t.catchInput != true       &&
+                        (isNComposite || (t.catchInput !== true      &&
                                           t.catchInput(cc) === false)  )                &&
                         ( (cc.canHaveFocus === true || (cc.canHaveFocus !=  null  &&
                                                         cc.canHaveFocus !== false &&
@@ -3410,7 +3173,12 @@ pkg.EventManager = Class(pkg.Manager, [
             'compEnabled',
             'compShown',
             'compAdded',
-            'compRemoved'
+            'compRemoved',
+
+            'winOpened',
+            'winActivated',
+
+            'menuItemSelected'
         ];
 
         this.$CHILD_EVENTS_MAP = {};
@@ -3464,6 +3232,8 @@ pkg.EventManager = Class(pkg.Manager, [
     }
 ]);
 
+this.events = new pkg.EventManager();
+
 pkg.zCanvas = Class(pkg.HtmlCanvas, [
     function $clazz () {
         this.CLASS_NAME = "zebcanvas";
@@ -3499,7 +3269,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
         // TODO: may be rename to dedicated method $doWheelScroll
         this.$doScroll = function(dx, dy, src) {
             if (src === "wheel") {
-                var owner = pkg.$pointerOwner["mouse"];
+                var owner = pkg.$pointerOwner.mouse;
                 while (owner != null && owner.doScroll == null) {
                     owner = owner.parent;
                 }
@@ -3513,7 +3283,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
         this.$keyTyped = function(e) {
             if (pkg.focusManager.focusOwner != null) {
                 e.source = pkg.focusManager.focusOwner;
-                return EM.fireEvent("keyTyped", e);
+                return pkg.events.fireEvent("keyTyped", e);
             }
             return false;
         };
@@ -3529,7 +3299,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
 
             if (pkg.focusManager.focusOwner != null) {
                 e.source = pkg.focusManager.focusOwner;
-                return EM.fireEvent("keyPressed", e);
+                return pkg.events.fireEvent("keyPressed", e);
             }
 
             return false;
@@ -3538,7 +3308,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
         this.$keyReleased = function(e){
             if (pkg.focusManager.focusOwner != null) {
                 e.source = pkg.focusManager.focusOwner;
-                return EM.fireEvent("keyReleased", e);
+                return pkg.events.fireEvent("keyReleased", e);
             }
 
             return false;
@@ -3560,14 +3330,14 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
                 // generate pointer exit and clean pointer owner
                 if (o != null) {
                     pkg.$pointerOwner[e.identifier] = null;
-                    EM.fireEvent("pointerExited", e.update(o, x, y));
+                    pkg.events.fireEvent("pointerExited", e.update(o, x, y));
                 }
 
                 // if new pointer owner is not null and enabled
                 // generate pointer entered event ans set new pointer owner
                 if (d != null && d.isEnabled === true){
                     pkg.$pointerOwner[e.identifier] = d;
-                    EM.fireEvent("pointerEntered", e.update(d, x, y));
+                    pkg.events.fireEvent("pointerEntered", e.update(d, x, y));
                 }
             }
         };
@@ -3576,9 +3346,9 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
             var o = pkg.$pointerOwner[e.identifier];
             if (o != null) {
                 pkg.$pointerOwner[e.identifier] = null;
-                return EM.fireEvent("pointerExited", e.update(o,
-                                                     this.$toElementX(e.pageX, e.pageY),
-                                                     this.$toElementY(e.pageX, e.pageY)));
+                return pkg.events.fireEvent("pointerExited", e.update(o,
+                                                                      this.$toElementX(e.pageX, e.pageY),
+                                                                      this.$toElementY(e.pageX, e.pageY)));
             }
         };
 
@@ -3607,23 +3377,23 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
             if (o != null) {
                 if (d != o) {
                     pkg.$pointerOwner[e.identifier] = null;
-                    b = EM.fireEvent("pointerExited", e.update(o, x, y));
+                    b = pkg.events.fireEvent("pointerExited", e.update(o, x, y));
 
                     if (d != null && d.isEnabled === true) {
                         pkg.$pointerOwner[e.identifier] = d;
-                        b = EM.fireEvent("pointerEntered", e.update(d, x, y)) || b;
+                        b = pkg.events.fireEvent("pointerEntered", e.update(d, x, y)) || b;
                     }
                 }
                 else {
                     if (d != null && d.isEnabled === true) {
-                        b = EM.fireEvent("pointerMoved", e.update(d, x, y));
+                        b = pkg.events.fireEvent("pointerMoved", e.update(d, x, y));
                     }
                 }
             }
             else {
                 if (d != null && d.isEnabled === true) {
                     pkg.$pointerOwner[e.identifier] = d;
-                    b = EM.fireEvent("pointerEntered", e.update(d, x, y));
+                    b = pkg.events.fireEvent("pointerEntered", e.update(d, x, y));
                 }
             }
 
@@ -3638,7 +3408,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
             // if target component can be detected fire pointer start dragging and
             // pointer dragged events to the component
             if (d != null && d.isEnabled === true) {
-                return EM.fireEvent("pointerDragStarted", e.update(d, x, y));
+                return pkg.events.fireEvent("pointerDragStarted", e.update(d, x, y));
             }
 
             return false;
@@ -3646,9 +3416,9 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
 
         this.$pointerDragged = function(e){
             if (pkg.$pointerOwner[e.identifier] != null) {
-                return EM.fireEvent("pointerDragged", e.update( pkg.$pointerOwner[e.identifier],
-                                                                this.$toElementX(e.pageX, e.pageY),
-                                                                this.$toElementY(e.pageX, e.pageY)));
+                return pkg.events.fireEvent("pointerDragged", e.update(pkg.$pointerOwner[e.identifier],
+                                                                       this.$toElementX(e.pageX, e.pageY),
+                                                                       this.$toElementY(e.pageX, e.pageY)));
             }
 
             return false;
@@ -3656,9 +3426,9 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
 
         this.$pointerDragEnded = function(e) {
             if (pkg.$pointerOwner[e.identifier] != null) {
-                return EM.fireEvent("pointerDragEnded", e.update(pkg.$pointerOwner[e.identifier],
-                                                                 this.$toElementX(e.pageX, e.pageY),
-                                                                 this.$toElementY(e.pageX, e.pageY)));
+                return pkg.events.fireEvent("pointerDragEnded", e.update(pkg.$pointerOwner[e.identifier],
+                                                                         this.$toElementX(e.pageX, e.pageY),
+                                                                         this.$toElementY(e.pageX, e.pageY)));
             }
 
             return false;
@@ -3669,7 +3439,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
                 y = this.$toElementY(e.pageX, e.pageY),
                 d = this.getComponentAt(x, y);
 
-            return d != null ? EM.fireEvent("pointerClicked", e.update(d, x, y))
+            return d != null ? pkg.events.fireEvent("pointerClicked", e.update(d, x, y))
                              : false;
         };
 
@@ -3678,26 +3448,21 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
                 y = this.$toElementY(e.pageX, e.pageY),
                 d = this.getComponentAt(x, y);
 
-            return d != null ? EM.fireEvent("pointerDoubleClicked", e.update(d, x, y))
+            return d != null ? pkg.events.fireEvent("pointerDoubleClicked", e.update(d, x, y))
                              : false;
         };
 
         this.$pointerReleased = function(e) {
             var x  = this.$toElementX(e.pageX, e.pageY),
                 y  = this.$toElementY(e.pageX, e.pageY),
-                po = this.getComponentAt(this.$toElementX(e.pressPageX, e.pressPageY),
-                                         this.$toElementY(e.pressPageX, e.pressPageY));
+                pp = pkg.$pointerPressedOwner[e.identifier];
 
-            // mouse pressed has not null target zebkit component
-            // send mouse released and mouse clicked (if necessary)
-            // to him
-            if (po != null) {
-                EM.fireEvent("pointerReleased", e.update(po, x, y));
-
-                //  make sure it is originally a touch event
-                //  TODO: Seems the code is invalid since it doesn't set move owner to null;
-                if (e.pointerType !== "mouse") {
-                    EM.fireEvent("pointerExited", e.update(po, x, y));
+            // release pressed state
+            if (pp != null) {
+                try {
+                    pkg.events.fireEvent("pointerReleased", e.update(pp, x, y));
+                } finally {
+                    pkg.$pointerPressedOwner[e.identifier] = null;
                 }
             }
 
@@ -3706,16 +3471,19 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
             // the correction takes effect if we have just completed dragging or mouse pressed
             // event target doesn't match pkg.$pointerOwner
             if (e.pointerType === "mouse" && (e.pressPageX != e.pageX || e.pressPageY != e.pageY)) {
-                var nd = this.getComponentAt(x, y);
+                var nd = this.getComponentAt(x, y),
+                    po = this.getComponentAt(this.$toElementX(e.pressPageX, e.pressPageY),
+                                             this.$toElementY(e.pressPageX, e.pressPageY));
+
                 if (nd !== po) {
                     if (po != null) {
                         pkg.$pointerOwner[e.identifier] = null;
-                        EM.fireEvent("pointerExited", e.update(po, x, y));
+                        pkg.events.fireEvent("pointerExited", e.update(po, x, y));
                     }
 
                     if (nd != null && nd.isEnabled === true){
                         pkg.$pointerOwner[e.identifier] = nd;
-                        EM.fireEvent("pointerEntered", e.update(nd, x, y));
+                        pkg.events.fireEvent("pointerEntered", e.update(nd, x, y));
                     }
                 }
             }
@@ -3723,7 +3491,17 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
 
         this.$pointerPressed = function(e) {
             var x  = this.$toElementX(e.pageX, e.pageY),
-                y  = this.$toElementY(e.pageX, e.pageY);
+                y  = this.$toElementY(e.pageX, e.pageY),
+                pp = pkg.$pointerPressedOwner[e.identifier];
+
+            // free pointer prev presssed if any
+            if (pp != null) {
+                try {
+                    pkg.events.fireEvent("pointerReleased", e.update(pp, x, y));
+                } finally {
+                    pkg.$pointerPressedOwner[e.identifier] = null;
+                }
+            }
 
             // adjust event for passing it to layers
             e.x = x;
@@ -3743,10 +3521,11 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
             if (d != null && d.isEnabled === true) {
                 if (pkg.$pointerOwner[e.identifier] !== d) {
                     pkg.$pointerOwner[e.identifier] = d;
-                    EM.fireEvent("pointerEntered",  e.update(d, x, y));
+                    pkg.events.fireEvent("pointerEntered",  e.update(d, x, y));
                 }
 
-                EM.fireEvent("pointerPressed", e.update(d, x, y));
+                pkg.$pointerPressedOwner[e.identifier] = d;
+                pkg.events.fireEvent("pointerPressed", e.update(d, x, y));
             }
         };
 
@@ -3757,7 +3536,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
                 if (tl.isLayerActiveAt == null || tl.isLayerActiveAt(x, y)) {
                     // !!!
                     //  since the method is widely used the code below duplicates
-                    //  functionality of EM.getEventDestination(tl.getComponentAt(x, y));
+                    //  functionality of pkg.events.getEventDestination(tl.getComponentAt(x, y));
                     //  method
                     // !!!
                     var c = tl.getComponentAt(x, y);
@@ -3831,6 +3610,21 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
             new pkg.KeyEventUnifier(this.element, this); // element has to be used since canvas is
                                                          // styled to have focus and get key events
             new pkg.MouseWheelSupport(this.$container, this);
+        };
+
+        this.fullScreen = function() {
+            var element = document.documentElement;
+            if (element.requestFullscreen) {
+                element.requestFullscreen();
+              } else if(element.mozRequestFullScreen) {
+                element.mozRequestFullScreen();
+              } else if(element.webkitRequestFullscreen) {
+                element.webkitRequestFullscreen();
+              } else if(element.msRequestFullscreen) {
+                element.msRequestFullscreen();
+              }
+            //}
+        //    document.documentElement.webkitRequestFullscreen();
         };
     },
 
@@ -3912,12 +3706,18 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
         // this method should clean focus if
         // one of of a child DOM element gets focus
         zebkit.web.$focusin(this.$container, function(e) {
-            if (e.target !== $this.$container && e.target.parentNode != null && e.target.parentNode.getAttribute("data-zebcont") == null) {
+            if (e.target !== $this.$container &&
+                e.target.parentNode != null &&
+                e.target.parentNode.getAttribute("data-zebcont") == null)
+            {
                 pkg.focusManager.requestFocus(null);
             }
             else {
                 // clear focus if a focus owner component is placed in another zCanvas
-                if (e.target === $this.$container && pkg.focusManager.focusOwner != null &&  pkg.focusManager.focusOwner.getCanvas() !== $this) {
+                if (e.target === $this.$container &&
+                    pkg.focusManager.focusOwner != null &&
+                    pkg.focusManager.focusOwner.getCanvas() !== $this)
+                {
                     pkg.focusManager.requestFocus(null);
                 }
             }
@@ -3994,85 +3794,345 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
     function kidRemoved(i, c){
         delete this[c.id];
         this.$super(i, c);
-    },
-
-    // TODO: should it renamed back ?
-    function requestFocus2() {
-        if (document.activeElement != this.element) {
-            this.element.focus();
-        }
     }
 ]);
 
-zebkit.ready(
-    // dynamic HTML DOM tree has to be placed to separated function
-    // that has to be first in ready list. the function make
-    // the page loading busy before necessary dynamically
-    // inserted elements will be ready.
-    function() {
-        zebkit.busy();
-        $fmCanvas = document.createElement("canvas").getContext("2d");
 
-        var e = document.getElementById("zebkit.fm");
-        if (e == null) {
-            e = document.createElement("div");
-            e.setAttribute("id", "zebkit.fm");  // !!! position fixed below allows to avoid 1px size in HTML layout for "zebkit.fm" element
-            e.setAttribute("style", "visibility:hidden;line-height:0;height:1px;vertical-align:baseline;position:fixed;");
-            e.innerHTML = "<span id='zebkit.fm.text' style='display:inline;vertical-align:baseline;'>&nbsp;</span>" +
-                          "<img id='zebkit.fm.image' style='width:1px;height:1px;display:inline;vertical-align:baseline;' width='1' height='1'/>";
-            document.body.appendChild(e);
+pkg.HtmlElementMan = Class(pkg.Manager, [
+//
+// HTML element integrated into zebkit layout has to be tracked regarding:
+//    1) DOM hierarchy. New added into zebkit layout DOM element has to be
+//       attached to the first found parent DOM element
+//    2) Visibility. If a zebkit UI component change its visibility state
+//       it has to have side effect to all children HTML elements on any
+//       subsequent hierarchy level
+//    3) Moving a zebkit UI component has to correct location of children
+//       HTML element on any subsequent hierarchy level.
+//
+//  The implementation of HTML element component has the following specific:
+//    1) Every original HTML is wrapped with "div" element. It is necessary since
+//       not all HTML element has been designed to be a container for another
+//       HTML element. By adding extra div we can consider the wrapper as container.
+//       The wrapper element is used to control visibility, location, enabled state
+//    2) HTML element has "isDOMElement" property set to true
+//    3) HTML element visibility depends on an ancestor component visibility.
+//       HTML element is visible if:
+//          -- the element isVisible property is true
+//          -- the element has a parent DOM element set
+//          -- all his ancestors are visible
+//          -- size of element is more than zero
+//          -- getCanvas() != null
+//       The visibility state is controlled with "e.style.visibility"
+//
+//   To support effective DOM hierarchy tracking a zebkit UI component can
+//   host "$domKid" property that contains direct DOM element the UI component
+//   hosts and other UI components that host DOM element. So it is sort of tree.
+//   For instance:
+//
+//    +---------------------------------------------------------
+//    |  p1 (zebkit component)
+//    |   +--------------------------------------------------
+//    |   |  p2 (zebkit component)
+//    |   |    +---------+      +-----------------------+
+//    |   |    |   h1    |      | p3 zebkit component    |
+//    |   |    +---------+      |  +---------------+    |
+//    |   |                     |  |    h3         |    |
+//    |   |    +---------+      |  |  +---------+  |    |
+//    |   |    |   h2    |      |  |  |   p4    |  |    |
+//    |   |    +---------+      |  |  +---------+  |    |
+//    |   |                     |  +---------------+    |
+//    |   |                     +-----------------------+
+//
+//     p1.$domKids : {
+//         p2.$domKids : {
+//             h1,   // leaf elements are always DOM element
+//             h2,
+//             p3.$domKids : {
+//                h3
+//             }
+//         }
+//     }
+    function $prototype() {
+        function $isInInvisibleState(c) {
+            if (c.isVisible === false           ||
+                c.$container.parentNode == null ||
+                c.width       <= 0              ||
+                c.height      <= 0              ||
+                c.parent      == null           ||
+                zebkit.web.$contains(c.$container) === false)
+            {
+                return true;
+            }
+
+            var p = c.parent;
+            while (p != null && p.isVisible === true && p.width > 0 && p.height > 0) {
+                p = p.parent;
+            }
+
+            return p != null || pkg.$cvp(c) == null;
         }
-        $fmText       = document.getElementById("zebkit.fm.text");
-        $fmImage      = document.getElementById("zebkit.fm.image");
-        $bodyFontSize = window.getComputedStyle(document.body, null).getPropertyValue('font-size');
 
-        // the next function passed to zebkit.ready() will be blocked
-        // till the picture is completely loaded
-        $fmImage.onload = function() {
-           zebkit.ready();
-        };
-
-        // set 1x1 transparent picture
-        $fmImage.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII%3D';
-    },
-
-    function() {
-        var p = zebkit()['zebkit.json'];
-        pkg.load(p != null ? p : pkg.$url.join("canvas.json"),
-            function(e) {
-                if (e != null) {
-                    console.log("Config JSON loading failed:" + (e.stack != null ? e.stack : e));
+        // attach to appropriate DOM parent if necessary
+        // c parameter has to be DOM element
+        function $resolveDOMParent(c) {
+            // try to find an HTML element in zebkit (pay attention, in zebkit hierarchy !)
+            // hierarchy that has to be a DOM parent for the given component
+            var parentElement = null;
+            for(var p = c.parent; p != null; p = p.parent) {
+                if (p.isDOMElement === true) {
+                    parentElement = p.$container;
+                    break;
                 }
             }
-        );
-    },
 
-    function() {
-        try {
-            zebkit.busy();
+            // parentElement is null means the component has
+            // not been inserted into DOM hierarchy
+            if (parentElement != null && c.$container.parentNode == null) {
+                // parent DOM element of the component is null, but a DOM container
+                // for the element has been detected. We need to add it to DOM
+                // than we have to add the DOM to the found DOM parent element
+                parentElement.appendChild(c.$container);
 
-            // store reference to event manager
-            EM = pkg.events;
-
-            //!!!
-            // IE9 has an error: first mouse press formally pass focus to
-            // canvas, but actually it doesn't get key events. To fix it
-            // it is necessary to pass focus explicitly to window
-            if (zebkit.isIE) window.focus();
+                // adjust location of just attached DOM component
+                $adjustLocation(c);
+            }
+            else {
+                // test consistency whether the DOM element already has
+                // parent node that doesn't match the discovered
+                if (parentElement           != null &&
+                    c.$container.parentNode != null &&
+                    c.$container.parentNode !== parentElement)
+                {
+                    throw new Error("DOM parent inconsistent state ");
+                }
+            }
         }
-        catch(e) {
-            ///!!!!! for some reason throwing exception is not appeared in console.
-            //       but it has side effect to the system, what causes other exception
-            //       that is not relevant to initial one
-            console.log(e.stack ? e.stack : e);
-            throw new Error(e.toString());
+
+        //    +----------------------------------------
+        //    |             ^      DOM1
+        //    |             .
+        //    |             .  (x,y) -> (xx,yy) than correct left
+        //                  .  and top of DOM2 relatively to DOM1
+        //    |    +--------.--------------------------
+        //    |    |        .       zebkit1
+        //    |    |        .
+        //    |    |  (left, top)
+        //    |<............+-------------------------
+        //    |    |        |           DOM2
+        //    |    |        |
+        //
+        //  Convert DOM (x, y) zebkit coordinates into appropriate CSS top and left
+        //  locations relatively to its immediate DOM element. For instance if a
+        //  zebkit component contains DOM component every movement of zebkit component
+        //  has to bring to correction of the embedded DOM elements
+        function $adjustLocation(c) {
+            if (c.$container.parentNode != null) {
+                // hide DOM component before move
+                // makes moving more smooth
+                var prevVisibility = c.$container.style.visibility;
+                c.$container.style.visibility = "hidden";
+
+                // find a location relatively to the first parent HTML element
+                var p = c, xx = c.x, yy = c.y;
+                while (((p = p.parent) != null) && p.isDOMElement !== true) {
+                    xx += p.x;
+                    yy += p.y;
+                }
+
+                c.$container.style.left = "" + xx + "px";
+                c.$container.style.top  = "" + yy + "px";
+                c.$container.style.visibility = prevVisibility;
+            }
         }
-        finally { zebkit.ready(); }
+
+        // iterate over all found children HTML elements
+        // !!! pay attention you have to check existence
+        // of "$domKids" field before the method calling
+        function $domElements(c, callback) {
+            for (var k in c.$domKids) {
+                var e = c.$domKids[k];
+                if (e.isDOMElement === true) {
+                    callback.call(this, e);
+                }
+                else {
+                    // prevent unnecessary method call by condition
+                    if (e.$domKids != null) {
+                        $domElements(e, callback);
+                    }
+                }
+            }
+        }
+
+        this.compShown = function(e) {
+            // 1) if c is DOM element than we have make it is visible if
+            //      -- c.isVisible == true : the component visible  AND
+            //      -- all elements in parent chain is visible      AND
+            //      -- the component is in visible area
+            //
+            // 2) if c is not a DOM component his visibility state can have
+            //    side effect to his children HTML elements (on any level)
+            //    In this case we have to do the following:
+            //      -- go through all children HTML elements
+            //      -- if c.isVisible == false: make invisible every children element
+            //      -- if c.isVisible != false: make visible every children element whose
+            //         visibility state satisfies the following conditions:
+            //          -- kid.isVisible == true
+            //          -- all parent to c are in visible state
+            //          -- the kid component is in visible area
+            var c = e.source;
+            if (c.isDOMElement === true) {
+                c.$container.style.visibility = c.isVisible === false || $isInInvisibleState(c) ? "hidden"
+                                                                                                : "visible";
+            }
+            else {
+                if (c.$domKids != null) {
+                    $domElements(c, function(e) {
+                        e.$container.style.visibility = e.isVisible === false || $isInInvisibleState(e) ? "hidden" : "visible";
+                    });
+                }
+            }
+        };
+
+        this.compMoved = function(e) {
+            var c = e.source;
+
+            // if we move a zebkit component that contains
+            // DOM element(s) we have to correct the DOM elements
+            // locations relatively to its parent DOM
+            if (c.isDOMElement === true) {
+                // root canvas location cannot be adjusted since it is up to DOM tree to do it
+                if (c.$isRootCanvas !== true) {
+                    var dx   = e.prevX - c.x,
+                        dy   = e.prevY - c.y,
+                        cont = c.$container;
+
+                    cont.style.left = ((parseInt(cont.style.left, 10) || 0) - dx) + "px";
+                    cont.style.top  = ((parseInt(cont.style.top,  10) || 0) - dy) + "px";
+                }
+            }
+            else {
+                if (c.$domKids != null) {
+                    $domElements(c, function(e) {
+                        $adjustLocation(e);
+                    });
+                }
+            }
+        };
+
+        function detachFromParent(p, c) {
+            // DOM parent means the detached element doesn't
+            // have upper parents since it is relative to the
+            // DOM element
+            if (p.isDOMElement !== true && p.$domKids != null) {
+                // delete from parent
+                delete p.$domKids[c];
+
+                // parent is not DOM and doesn't have kids anymore
+                // what means the parent has to be also detached
+                if (isLeaf(p)) {
+                    // parent of parent is not null and is not a DOM element
+                    if (p.parent != null && p.parent.isDOMElement !== true) {
+                        detachFromParent(p.parent, p);
+                    }
+
+                    // remove $domKids from parent since the parent is leaf
+                    delete p.$domKids;
+                }
+            }
+        }
+
+        function isLeaf(c) {
+            if (c.$domKids != null) {
+                for(var k in c.$domKids) {
+                    if (c.$domKids.hasOwnProperty(k)) return false;
+                }
+            }
+            return true;
+        }
+
+        function removeDOMChildren(c) {
+            // DOM element cannot have children dependency tree
+            if (c.isDOMElement !== true && c.$domKids != null) {
+                for(var k in c.$domKids) {
+                    if (c.$domKids.hasOwnProperty(k)) {
+                        var kid = c.$domKids[k];
+
+                        // DOM element
+                        if (kid.isDOMElement === true) {
+                            kid.$container.parentNode.removeChild(kid.$container);
+                            kid.$container.parentNode = null;
+                        }
+                        else {
+                            removeDOMChildren(kid);
+                        }
+                    }
+                }
+                delete c.$domKids;
+            }
+        }
+
+        this.compRemoved = function(e) {
+            var c = e.kid;
+
+            // if detached element is DOM element we have to
+            // remove it from DOM tree
+            if (c.isDOMElement === true) {
+                c.$container.parentNode.removeChild(c.$container);
+                c.$container.parentNode = null;
+            }
+            else {
+                removeDOMChildren(c);
+            }
+
+            detachFromParent(e.source, c);
+        };
+
+        this.compAdded = function(e) {
+            var p = e.source,  c = e.kid;
+            if (c.isDOMElement === true) {
+                $resolveDOMParent(c);
+            }
+            else {
+                if (c.$domKids != null) {
+                    $domElements(c, function(e) {
+                        $resolveDOMParent(e);
+                    });
+                }
+                else {
+                    return;
+                }
+            }
+
+            if (p.isDOMElement !== true) {
+                // we come here if parent is not a DOM element and
+                // inserted children is DOM element or an element that
+                // embeds DOM elements
+                while (p != null && p.isDOMElement !== true) {
+                    if (p.$domKids == null) {
+                        // if reference to kid DOM element or kid DOM elements holder
+                        // has bot been created we have to continue go up to parent of
+                        // the parent to register the whole chain of DOM and DOM holders
+                        p.$domKids = {};
+                        p.$domKids[c] = c;
+                        c = p;
+                        p = p.parent;
+                    }
+                    else {
+                        if (p.$domKids.hasOwnProperty(c)) {
+                            throw new Error("Inconsistent state for " + c + ", " + c.clazz.$name);
+                        }
+                        p.$domKids[c] = c;
+                        break;
+                    }
+                }
+            }
+        };
     }
-);
+]);
+
 
 /**
  * @for
  */
 
-})(zebkit("ui"), zebkit.Class);
+});

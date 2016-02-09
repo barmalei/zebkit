@@ -99,13 +99,6 @@ pkg.TextModel = Class([
     }
 ]);
 
-function Line(s) {
-    this.s = s;
-}
-
-//  toString for array.join method
-Line.prototype.toString = function() { return this.s; };
-
 /**
  * Multi-lines text model implementation
  * @class zebkit.data.Text
@@ -114,6 +107,17 @@ Line.prototype.toString = function() { return this.s; };
  * @extends zebkit.data.TextModel
  */
 pkg.Text = Class(pkg.TextModel, [
+    function $clazz() {
+        this.Line = function(s) {
+            this.s = s;
+        };
+
+        //  toString for array.join method
+        this.Line.prototype.toString = function() {
+            return this.s;
+        };
+    },
+
     function $prototype() {
         this.textLength = 0;
 
@@ -191,8 +195,8 @@ pkg.Text = Class(pkg.TextModel, [
 
             var end  = start + size - 1,            // last line to be removed
                 off  = this.calcLineOffset(start),  // offset of the first line to be removed
-                olen = start != end ? this.calcLineOffset(end) + this.lines[end].s.length + 1 - off
-                                    : this.lines[start].s.length + 1;
+                olen = start !== end ? this.calcLineOffset(end) + this.lines[end].s.length + 1 - off
+                                     : this.lines[start].s.length + 1;
 
 
             // if this is the last line we have to correct offset to point to "\n" character in text
@@ -210,13 +214,13 @@ pkg.Text = Class(pkg.TextModel, [
             }
 
             var off = this.calcLineOffset(startLine), offlen = 0;
-            if (startLine == this.lines.length) {
+            if (startLine === this.lines.length) {
                 off--;
             }
 
             for(var i = 1; i < arguments.length; i++) {
                 offlen += arguments[i].length + 1;
-                this.lines.splice(startLine + i - 1, 0, new Line(arguments[i]));
+                this.lines.splice(startLine + i - 1, 0, new this.clazz.Line(arguments[i]));
             }
             this._.textUpdated(this, true, off, offlen, startLine, arguments.length - 1);
         };
@@ -230,7 +234,7 @@ pkg.Text = Class(pkg.TextModel, [
                     lineOff = offset - info[1],
                     tmp     = line.substring(0, lineOff) + s + line.substring(lineOff);
 
-                for(; j < slen && s[j] != '\n'; j++);
+                for(; j < slen && s[j] !== '\n'; j++);
 
                 if (j >= slen) {
                     this.lines[info[0]].s = tmp;
@@ -260,11 +264,11 @@ pkg.Text = Class(pkg.TextModel, [
                     buf  = l1.substring(0, off1) + l2.substring(off2);
 
                 if (i2[0] === i1[0]) {
-                    this.lines.splice(i1[0], 1, new Line(buf));
+                    this.lines.splice(i1[0], 1, new this.clazz.Line(buf));
                 }
                 else {
                     this.lines.splice(i1[0], i2[0] - i1[0] + 1);
-                    this.lines.splice(i1[0], 0, new Line(buf));
+                    this.lines.splice(i1[0], 0, new this.clazz.Line(buf));
                 }
 
                 if (size > 0) {
@@ -281,7 +285,7 @@ pkg.Text = Class(pkg.TextModel, [
             for(var index = 0; index <= size; prevIndex = index, startLine++){
                 var fi = text.indexOf("\n", index);
                 index = (fi < 0 ? size : fi);
-                this.lines.splice(startLine, 0, new Line(text.substring(prevIndex, index)));
+                this.lines.splice(startLine, 0, new this.clazz.Line(text.substring(prevIndex, index)));
                 index++;
             }
             return startLine - prevStartLine;
@@ -297,7 +301,7 @@ pkg.Text = Class(pkg.TextModel, [
                 if (old.length > 0) {
                     var numLines = this.getLines(), txtLen = this.getTextLength();
                     this.lines.length = 0;
-                    this.lines = [ new Line("") ];
+                    this.lines = [ new this.clazz.Line("") ];
                     this._.textUpdated(this, false, 0, txtLen, 0, numLines);
                 }
 
@@ -311,7 +315,7 @@ pkg.Text = Class(pkg.TextModel, [
         };
 
         this[''] = function(s){
-            this.lines = [ new Line("") ];
+            this.lines = [ new this.clazz.Line("") ];
             this._ = new this.clazz.Listeners();
             this.setValue(s == null ? "" : s);
         };
@@ -393,7 +397,7 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
                 var nl = this.buf.substring(0, offset) +
                          this.buf.substring(offset + size);
 
-                if (nl.length != this.buf.length && (this.validate == null || this.validate(nl))) {
+                if (nl.length !== this.buf.length && (this.validate == null || this.validate(nl))) {
                     this.buf = nl;
                     this._.textUpdated(this, false, offset, size, 0, 1);
                     return true;
@@ -407,7 +411,7 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
                 throw new Error("Invalid null string");
             }
 
-            if (this.validate != null && this.validate(text) == false) {
+            if (this.validate != null && this.validate(text) === false) {
                 return false;
             }
 
@@ -440,7 +444,7 @@ pkg.SingleLineTxt = Class(pkg.TextModel, [
          * @param  {Integer} max a maximal length of text
          */
         this.setMaxLength = function (max){
-            if (max != this.maxLen){
+            if (max !== this.maxLen){
                 this.maxLen = max;
                 this.setValue("");
             }
@@ -652,7 +656,7 @@ pkg.ListModel = Class([
  * @param  {Object} [v] the item value
  * @constructor
  */
-var Item = pkg.Item = Class([
+pkg.Item = Class([
     function $prototype() {
         this[''] = function(v) {
             /**
@@ -743,7 +747,7 @@ pkg.TreeModel = Class([
         this.Listeners = zebkit.util.ListenersClass("itemModified", "itemRemoved", "itemInserted");
 
         this.create = function(r, p) {
-            var item = new Item(r.hasOwnProperty("value")? r.value : r);
+            var item = new pkg.Item(r.hasOwnProperty("value")? r.value : r);
             item.parent = p;
             if (r.hasOwnProperty("kids")) {
                 for(var i = 0; i < r.kids.length; i++) {
@@ -834,7 +838,7 @@ pkg.TreeModel = Class([
         this.insert = function(to,item,i){
             if (i < 0 || to.kids.length < i) throw new RangeError(i);
             if (zebkit.isString(item)) {
-                item = new Item(item);
+                item = new pkg.Item(item);
             }
             to.kids.splice(i, 0, item);
             item.parent = to;
@@ -887,7 +891,7 @@ pkg.TreeModel = Class([
         };
 
         this[''] = function(r) {
-            if (arguments.length === 0) r = new Item();
+            if (arguments.length === 0) r = new pkg.Item();
 
             /**
              * Reference to the tree model root item
@@ -895,7 +899,7 @@ pkg.TreeModel = Class([
              * @type {zebkit.data.Item}
              * @readOnly
              */
-            this.root = zebkit.instanceOf(r, Item) ? r : pkg.TreeModel.create(r);
+            this.root = zebkit.instanceOf(r, pkg.Item) ? r : pkg.TreeModel.create(r);
             this.root.parent = null;
             this._ = new this.clazz.Listeners();
         };
@@ -1223,7 +1227,7 @@ pkg.Matrix = Class([
              */
 
             this._ = new this.clazz.Listeners();
-            if (arguments.length == 1) {
+            if (arguments.length === 1) {
                 this.objs = arguments[0];
                 this.cols = (this.objs.length > 0) ? this.objs[0].length : 0;
                 this.rows = this.objs.length;

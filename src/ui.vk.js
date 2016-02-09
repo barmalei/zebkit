@@ -1,5 +1,7 @@
 zebkit.package("ui.vk", function(pkg, Class) {
-    var L = zebkit.layout, ui = zebkit("ui"), $vk = null;
+    var ui = zebkit("ui");
+
+    pkg.$vk = null;
 
     pkg.makeEditorVisible = true;
 
@@ -8,7 +10,7 @@ zebkit.package("ui.vk", function(pkg, Class) {
      * @module  ui.vk
      * @main
      */
-    pkg.VKLayout = Class(L.Layout, [
+    pkg.VKLayout = Class(zebkit.layout.Layout, [
         function $prototype () {
             this.ratio = this.gap = 2;
 
@@ -57,7 +59,7 @@ zebkit.package("ui.vk", function(pkg, Class) {
 
                     if (row != ctr.row) {
                         row ++;
-                        y += (row == 0 ? top : this.gap + m.rowHeight);
+                        y += (row === 0 ? top : this.gap + m.rowHeight);
 
                         // compute actual width the row occupies
                         var aw = r.fixKeys * m.fixKeyWidth + r.occupiedHorSpace + (r.keys > 0 ? r.keys - 1 : 0) * this.gap;
@@ -302,7 +304,7 @@ zebkit.package("ui.vk", function(pkg, Class) {
 
                 tooltip.setValue(ch);
                 tooltip.toPreferredSize();
-                var rl = L.toParentOrigin(this);
+                var rl = zebkit.layout.toParentOrigin(this);
                 if (rl.y - tooltip.height > 0) {
                     tooltip.setLocation(rl.x, rl.y - tooltip.height);
                 }
@@ -360,7 +362,7 @@ zebkit.package("ui.vk", function(pkg, Class) {
                 }
                 v = new ui.ViewPan().setView(v);
                 this.$super(v);
-                this.setLayout(new L.StackLayout());
+                this.setLayout(new zebkit.layout.StackLayout());
             }
             else {
                 this.$super(v);
@@ -454,7 +456,7 @@ zebkit.package("ui.vk", function(pkg, Class) {
             this.upperCase = function() {
                 if (this.ch != null) {
                     var l = this.getLabel();
-                    if (l != null && l.toLowerCase() == this.ch.toLowerCase()) {
+                    if (l != null && l.toLowerCase() === this.ch.toLowerCase()) {
                         this.setLabel(l.toUpperCase());
                     }
                 }
@@ -463,7 +465,7 @@ zebkit.package("ui.vk", function(pkg, Class) {
             this.lowerCase = function() {
                 if (this.ch != null) {
                     var l = this.getLabel();
-                    if (l != null && l.toLowerCase() == this.ch.toLowerCase()) {
+                    if (l != null && l.toLowerCase() === this.ch.toLowerCase()) {
                         this.setLabel(l.toLowerCase());
                     }
                 }
@@ -506,7 +508,7 @@ zebkit.package("ui.vk", function(pkg, Class) {
         },
 
         function _pointerReleased(e) {
-            if (this.mask == 0) {
+            if (this.mask === 0) {
                 this.$super(e);
                 this.fireVkReleased(this.code, this.ch, this.mask);
             }
@@ -620,7 +622,7 @@ zebkit.package("ui.vk", function(pkg, Class) {
                     this.menu.removeMe();
                 }
                 else {
-                    var o = L.toParentOrigin(this);
+                    var o = zebkit.layout.toParentOrigin(this);
                     this.menu.select(-1);
                     this.menu.toPreferredSize();
                     this.menu.setLocation(o.x, o.y - this.menu.height);
@@ -651,7 +653,7 @@ zebkit.package("ui.vk", function(pkg, Class) {
         }
     ]);
 
-    var RL = Class(L.RasterLayout, [
+    var RL = Class(zebkit.layout.RasterLayout, [
         function calcPreferredSize(t) {
             var w = 0, h = 0;
             for (var i = 0; i < t.kids.length; i++) {
@@ -668,17 +670,16 @@ zebkit.package("ui.vk", function(pkg, Class) {
 
     KE.type = "vkb";
 
-
     pkg.VKeys = Class(pkg.VKey, [
         function $clazz () {
-            this.layout = new L.BorderLayout();
+            this.layout = new zebkit.layout.BorderLayout();
 
             this.SmallLabel = Class(ui.Label, []);
             this.SmallLabel.font = new ui.Font(pkg.VKey.Label.font.name, Math.floor((2*pkg.VKey.Label.font.height)/3));
 
             this.KeysPopupPan = Class(ui.Panel, [
                 function $clazz() {
-                    this.layout     = new L.FlowLayout("left", "center", "horizontal", 6);
+                    this.layout     = new zebkit.layout.FlowLayout("left", "center", "horizontal", 6);
               		this.padding    = 6;
               		this.border     = new ui.Border("plain");
               		this.background = "rgba(200,200,200,0.8)";
@@ -729,12 +730,12 @@ zebkit.package("ui.vk", function(pkg, Class) {
 
                 if (this.keysPopupPan == null) {
                     this.$counter = (this.$counter + 1 ) % 2;
-                    this.showHint(this.$counter == 0 ? this.ch : this.altCh);
+                    this.showHint(this.$counter === 0 ? this.ch : this.altCh);
                 }
                 else {
                     this.$pressed.shutdown();
 
-                    var rl = L.toParentOrigin(this);
+                    var rl = zebkit.layout.toParentOrigin(this);
                     for(var i = 0; i < this.keysPopupPan.kids.length; i++) {
                         this.keysPopupPan.kids[i].setPreferredSize(this.width, this.height);
                     }
@@ -742,9 +743,9 @@ zebkit.package("ui.vk", function(pkg, Class) {
                     this.keysPopupPan.toPreferredSize();
                     this.keysPopupPan.setLocation(rl.x, rl.y - this.keysPopupPan.height);
                     ui.showWindow(this, "mdi", this.keysPopupPan, {
-                        winActivated : function (l, w, isActive) {
-                            if (isActive === false) {
-                                w.removeMe();
+                        winActivated : function (e) {
+                            if (e.isActive === false) {
+                                e.source.removeMe();
                             }
                         }
                     });
@@ -823,11 +824,11 @@ zebkit.package("ui.vk", function(pkg, Class) {
     ]);
 
     pkg.showVK = function(input) {
-        $vk.show(input);
+        pkg.$vk.show(input);
     };
 
     pkg.getVK = function() {
-        return $vk;
+        return pkg.$vk;
     };
 
     pkg.createVKey = function(d) {
@@ -845,7 +846,9 @@ zebkit.package("ui.vk", function(pkg, Class) {
                                       : new pkg.VKeys(d);
             }
             else {
-                if (d.hasOwnProperty("vkey")) return d["vkey"];
+                if (d.hasOwnProperty("vkey")) {
+                    return d["vkey"];
+                }
             }
         }
 
@@ -885,7 +888,7 @@ zebkit.package("ui.vk", function(pkg, Class) {
                     this.toPreferredSize();
 
                     if (pkg.makeEditorVisible === true) {
-                        var p = L.toParentOrigin(d);
+                        var p = zebkit.layout.toParentOrigin(d);
                         if (p.y + d.height > this.height) {
                             this.constraints = "top";
                         }
@@ -894,7 +897,6 @@ zebkit.package("ui.vk", function(pkg, Class) {
                     ui.showWindow(d, "mdi", this);
                     var win = this.getCanvas().win;
                     this.setSize(win.width - win.getLeft() - win.getRight(), this.height);
-
                     ui.activateWindow(this);
                 }
             };
@@ -979,16 +981,23 @@ zebkit.package("ui.vk", function(pkg, Class) {
                     this.group = name;
                     for(var i = 0; i < this.kids.length; i++) {
                         var k = this.kids[i];
-                        k.setVisible(k.name == name);
+                        k.setVisible(k.name === name);
                     }
-                    this.toPreferredSize();
+
+                    // adjust size if VK is shown
+                    var can = this.getCanvas();
+                    if (can != null && can.win != null) {
+                        var win = can.win;
+                        this.toPreferredSize();
+                        this.setSize(win.width - win.getLeft() - win.getRight(), this.height);
+                    }
                 }
             };
 
             this.getGroupPan = function(name) {
                 for(var i = 0; i < this.kids.length; i++) {
                     var k = this.kids[i];
-                    if (k.name == name) return k;
+                    if (k.name === name) return k;
                 }
                 return null;
             };
@@ -1050,8 +1059,8 @@ zebkit.package("ui.vk", function(pkg, Class) {
     ]);
 
     pkg.activateVK = function() {
-        $vk = new pkg.VK();
-        return $vk;
+        pkg.$vk = new pkg.VK();
+        return pkg.$vk;
     };
 
     function $isVkElement(c) {
@@ -1062,20 +1071,23 @@ zebkit.package("ui.vk", function(pkg, Class) {
 
     ui.events.bind({
         focusGained : function (e) {
-            if ($vk != null && $isVkElement(e.source) === false && e.source.vkMode != null) {
+            if (pkg.$vk != null && $isVkElement(e.source) === false && e.source.vkMode != null) {
                 pkg.showVK(zebkit.instanceOf(e.source, ui.TextField) ? e.source : null);
             }
         },
 
         pointerPressed : function(e) {
-            if ($vk != null) {
-                if ($vk.parent != null && $isVkElement(e.source) === false && L.isAncestorOf($vk, e.source) === false) {
+            if (pkg.$vk != null) {
+                if (pkg.$vk.parent != null &&
+                    $isVkElement(e.source) === false &&
+                    zebkit.layout.isAncestorOf(pkg.$vk, e.source) === false)
+                {
                     pkg.showVK(null);
                 }
 
                 // if input component holds focus, virtual keyboard is
                 // hidden and we press on the input component
-                if ($vk.parent == null && e.source.vkMode != null) {
+                if (pkg.$vk.parent == null && e.source.vkMode != null) {
                     pkg.showVK(e.source);
                 }
             }

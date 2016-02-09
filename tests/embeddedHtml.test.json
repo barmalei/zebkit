@@ -4,13 +4,13 @@
 		{
 			"$zebkit.ui.Panel" : [],
 			"id" : "login",
-			"layout" : { "$zebkit.layout.FlowLayout" : [ 16, 16, 64, 8 ] },
+			"layout" : { "$zebkit.layout.FlowLayout" : [ "center", "center", "vertical", 8 ] },
 			"background" : null,
 			"visible" : true,
 			"kids" : [
 				{
 					"$zebkit.ui.Panel" : [],
-					"layout" : { "$zebkit.layout.FlowLayout" : [ 16, 16, 64, 8 ] },
+					"layout" : { "$zebkit.layout.FlowLayout" : [ "center", "center", "vertical", 8 ] },
 					"background" : "lightgrey",
 					"padding" : 8,
 					"kids" : [
@@ -45,7 +45,7 @@
 		{
 			"$zebkit.ui.Panel" : [],
 			"id" : "welcome",
-			"layout" : { "$zebkit.layout.FlowLayout" : [ 16, 16, 64, 4 ] },
+			"layout" : { "$zebkit.layout.FlowLayout" : [ "center", "center", "vertical", 4 ] },
 			"background" : null,
 			"visible" : false,
 			"kids" : [
@@ -73,13 +73,13 @@
 		{
 			"$zebkit.ui.Panel" : [],
 			"id" : "newAccount",
-			"layout" : { "$zebkit.layout.FlowLayout" : [ 16, 16, 64, 8 ] },
+			"layout" : { "$zebkit.layout.FlowLayout" : [ "center", "center", "vertical", 8 ] },
 			"background" : null,
 			"visible" : false,
 			"kids" : [
 				{
 					"$zebkit.ui.Panel" : [],
-					"layout" : { "$zebkit.layout.FlowLayout" : [ 16, 16, 64, 8 ] },
+					"layout" : { "$zebkit.layout.FlowLayout" : [ "center", "center", "vertical", 8 ] },
 					"background" : "lightgrey",
 					"padding" : 8,
 					"kids" : [
@@ -89,7 +89,6 @@
 						{
 							"$zebkit.ui.Label" : [ "Email Address" ]
 						},
-
 						{
 							"$zebkit.ui.HtmlElement" : [ "div" ],
 							"layout": { "$zebkit.layout.FlowLayout":[] },
@@ -98,12 +97,10 @@
 									"$zebkit.ui.HtmlTextField" : [ "" ],
 									"id" : "NewAccount/EmailAddress"
 								},
-
 								{
 									"$zebkit.ui.HtmlTextField" : [ "" ],
 									"id" : "NewAccount/EmailAddress"
 								}
-
 							]
 						},
 						{

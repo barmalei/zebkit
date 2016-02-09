@@ -17,7 +17,6 @@ pkg.format = function(s, obj, ph) {
     while ((m = rg.exec(s)) !== null) {
         r[i++] = s.substring(j, m.index);
 
-
         j = m.index + m[0].length;
 
         var v  = obj[m[3]],
@@ -53,10 +52,6 @@ pkg.format = function(s, obj, ph) {
     }
     return s;
 };
-
-function hex(v) {
-    return (v < 16) ? "0" + v.toString(16) : v.toString(16);
-}
 
 pkg.Event = Class([
     function $prototype() {
@@ -322,7 +317,6 @@ pkg.findInTree = function(root, path, eq, cb) {
  * @class zebkit.util.rgb
  */
 pkg.rgb = function (r, g, b, a) {
-
     /**
      * Red color intensity
      * @attribute r
@@ -391,14 +385,17 @@ pkg.rgb = function (r, g, b, a) {
     }
 
     if (this.s == null) {
-        this.s = (typeof this.a !== "undefined") ? ['rgba(', this.r, ",", this.g, ",",
-                                                             this.b, ",", this.a, ")"].join('')
-                                                 : ['#', hex(this.r), hex(this.g), hex(this.b)].join('');
+        this.s = (typeof this.a !== "undefined") ? 'rgba(' + this.r + "," + this.g +  "," +
+                                                             this.b + "," + this.a + ")"
+                                                 : '#' +
+                                                   ((this.r < 16) ? "0" + this.r.toString(16) : this.r.toString(16)) +
+                                                   ((this.g < 16) ? "0" + this.g.toString(16) : this.g.toString(16)) +
+                                                   ((this.b < 16) ? "0" + this.b.toString(16) : this.b.toString(16));
     }
 };
 
 var rgb = pkg.rgb;
-rgb.prototype.toString = function() {
+pkg.rgb.prototype.toString = function() {
     return this.s;
 };
 
@@ -696,7 +693,7 @@ pkg.ListenersClass = $NewListener;
  * @param {Integer} prevLine a previous virtual cursor line
  * @param {Integer} prevCol a previous virtual cursor column in the previous line
  */
-var  Position = pkg.Position = Class([
+pkg.Position = Class([
     function $clazz() {
         this.Listeners = pkg.ListenersClass("posChanged"),
 
@@ -726,7 +723,13 @@ var  Position = pkg.Position = Class([
           * @method  getMaxOffset
           */
 
-        this.Metric = Interface();
+        this.Metric = Interface({
+            abstract: [
+                function getLines()     {},
+                function getLineSize()  {},
+                function getMaxOffset() {}
+            ]
+        });
     },
 
     function $prototype() {
@@ -1447,6 +1450,7 @@ pkg.Bag = zebkit.Class([
 
                     delete d[k]; // delete class name
 
+                    // '?' means optinal class instance.
                     if (classname[0] === "?") {
                         classname = classname.substring(1).trim();
                         try {
@@ -1484,6 +1488,10 @@ pkg.Bag = zebkit.Class([
                 break;
             }
 
+            if (inc != null) {
+                this.inherit(d, inc);
+            }
+
             for (var k in d) {
                 if (d.hasOwnProperty(k)) {
                     var v = d[k];
@@ -1498,13 +1506,17 @@ pkg.Bag = zebkit.Class([
                         }
                     }
                     else {
-                        d[k] = this.buildValue(d[k]);
+                        if (k[0] === "?") {
+                            k = k.substring(1).trim();
+                            if (typeof d[k] !== "undefined") {
+                                d[k] = this.buildValue(d[k]);
+                            }
+                        }
+                        else {
+                            d[k] = this.buildValue(d[k]);
+                        }
                     }
                 }
-            }
-
-            if (inc != null) {
-                this.inherit(d, inc);
             }
 
             return d;
@@ -1516,16 +1528,28 @@ pkg.Bag = zebkit.Class([
                 delete desc.inherit;
             }
 
+            if (inc != null) {
+                this.inherit(obj, inc);
+            }
+
             for(var k in desc) {
                 if (desc.hasOwnProperty(k) === true) {
                     var v = desc[k];
+
                     if (k[0] === '.') {
                         this.callMethod(k.substring(1).trim(), this.buildValue(v));
                         continue;
                     }
 
+                    if (k[0] === '?') {
+                        k = k.substring(1).trim();
+                        if (typeof obj[k] === "undefined") {
+                            continue;
+                        }
+                    }
+
                     if (this.usePropertySetters === true) {
-                        var m  = zebkit.getPropertySetter(obj, k);
+                        var m = zebkit.getPropertySetter(obj, k);
                         if (m != null) {
                             if (Array.isArray(v)) m.apply(obj, this.buildValue(v));
                             else                  m.call (obj, this.buildValue(v));
@@ -1539,7 +1563,7 @@ pkg.Bag = zebkit.Class([
                     var ov = obj[k];
                     if (ov == null || this.$isAtomic(ov) || Array.isArray(ov) ||
                         v == null  || this.$isAtomic(v)  || Array.isArray(v)  ||
-                        this.$isClassDefinition(k, v)                               )
+                        this.$isClassDefinition(k, v)                            )
                     {
 
                         obj[k] = this.buildValue(v);
@@ -1549,11 +1573,6 @@ pkg.Bag = zebkit.Class([
                     }
                 }
             }
-
-            if (inc != null) {
-                this.inherit(obj, inc);
-            }
-
             return obj;
         };
 
@@ -1607,7 +1626,7 @@ pkg.Bag = zebkit.Class([
                 }
 
                 for(var kk in v) {
-                    if (kk[0] !== '$' && v.hasOwnProperty(kk) === true && o.hasOwnProperty(kk) === false) {
+                    if (kk[0] !== '$' && v.hasOwnProperty(kk) === true && typeof v[kk] !== "function") {
                         o[kk] = v[kk];
                     }
                 }
@@ -1668,7 +1687,7 @@ pkg.Bag = zebkit.Class([
                         return JSON.parse(s);
                     }
                     catch(e) {
-                        throw new Error("JSON format error");
+                        throw new Error("JSON format error: " + e);
                     }
                 }
                 return s;
@@ -1676,7 +1695,8 @@ pkg.Bag = zebkit.Class([
             . // populate JSON content
             run(function(content) {
                 $this.content = content;
-                $this.root = ($this.root == null ? $this.buildValue(content) : $this.populate($this.root, content));
+                $this.root = ($this.root == null ? $this.buildValue(content)
+                                                 : $this.populate($this.root, content));
                 if (cb != null) cb.call($this);
             })
             .
@@ -1693,8 +1713,7 @@ pkg.Bag = zebkit.Class([
                 return this.variables[name];
             }
 
-            var k = name.split("."),
-                v = undefined;
+            var k = name.split("."), v;
 
             if (this.root != null) {
                 v = this.$get(k, this.root);

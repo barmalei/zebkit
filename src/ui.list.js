@@ -1,10 +1,8 @@
-(function(pkg, Class) {
+zebkit.package("ui", function(pkg, Class) {
 
 /**
  * @module ui
 */
-
-var L = zebkit.layout, Position = zebkit.util.Position, KE = pkg.KeyEvent;
 
 /**
  * Base UI list component class that has to be extended with a
@@ -25,7 +23,7 @@ var L = zebkit.layout, Position = zebkit.util.Position, KE = pkg.KeyEvent;
  * @param {zebkit.ui.BaseList} src a list that triggers the event
  * @param {Integer|Object} prev a previous selected index, return null if the selected item has been re-selected
  */
-pkg.BaseList = Class(pkg.Panel, Position.Metric, pkg.$ViewsSetterMix, [
+pkg.BaseList = Class(pkg.Panel, zebkit.util.Position.Metric, pkg.$ViewsSetterMix, [
     function $clazz() {
         this.Listeners = zebkit.util.ListenersClass("selected");
     },
@@ -50,11 +48,10 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, pkg.$ViewsSetterMix, [
         this.setValue = function(v) {
             if (v == null) {
                 this.select(-1);
-            }
-            else {
+            } else {
                 if (this.model != null) {
                     for(var i = 0; i < this.model.count(); i++) {
-                        if (this.model.get(i) == v && this.isItemSelectable(i)) {
+                        if (this.model.get(i) === v && this.isItemSelectable(i)) {
                             this.select(i);
                             return i;
                         }
@@ -100,7 +97,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, pkg.$ViewsSetterMix, [
                 ch = ch.toLowerCase();
                 for(var i = 0;i < count - 1; i++){
                     var idx = (index + i) % count, item = this.model.get(idx).toString();
-                    if (this.isItemSelectable(idx) && item.length > 0 && item[0].toLowerCase() == ch) {
+                    if (this.isItemSelectable(idx) && item.length > 0 && item[0].toLowerCase() === ch) {
                         return idx;
                     }
                 }
@@ -115,7 +112,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, pkg.$ViewsSetterMix, [
          * @method isSelected
          */
         this.isSelected = function(i) {
-            return i == this.selectedIndex;
+            return i === this.selectedIndex;
         };
 
         /**
@@ -374,7 +371,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, pkg.$ViewsSetterMix, [
             if (this.model != null && this.model.count() > 0){
                 var po = this.position.offset;
                 switch(e.code) {
-                    case KE.END:
+                    case pkg.KeyEvent.END:
                         if (e.ctrlKey) {
                             this.position.setOffset(this.position.metrics.getMaxOffset());
                         }
@@ -382,18 +379,18 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, pkg.$ViewsSetterMix, [
                             this.position.seekLineTo("end");
                         }
                         break;
-                    case KE.HOME:
+                    case pkg.KeyEvent.HOME:
                         if (e.ctrlKey) this.position.setOffset(0);
                         else this.position.seekLineTo("begin");
                         break;
-                    case KE.RIGHT    : this.position.seek(1); break;
-                    case KE.DOWN     : this.position.seekLineTo("down"); break;
-                    case KE.LEFT     : this.position.seek(-1);break;
-                    case KE.UP       : this.position.seekLineTo("up");break;
-                    case KE.PAGEUP   : this.position.seek(this.pageSize(-1));break;
-                    case KE.PAGEDOWN : this.position.seek(this.pageSize(1));break;
-                    case KE.SPACE    :
-                    case KE.ENTER    : this.$select(this.position.offset); break;
+                    case pkg.KeyEvent.RIGHT    : this.position.seek(1); break;
+                    case pkg.KeyEvent.DOWN     : this.position.seekLineTo("down"); break;
+                    case pkg.KeyEvent.LEFT     : this.position.seek(-1);break;
+                    case pkg.KeyEvent.UP       : this.position.seekLineTo("up");break;
+                    case pkg.KeyEvent.PAGEUP   : this.position.seek(this.pageSize(-1));break;
+                    case pkg.KeyEvent.PAGEDOWN : this.position.seek(this.pageSize(1));break;
+                    case pkg.KeyEvent.SPACE    :
+                    case pkg.KeyEvent.ENTER    : this.$select(this.position.offset); break;
                 }
             }
         };
@@ -629,7 +626,7 @@ pkg.BaseList = Class(pkg.Panel, Position.Metric, pkg.$ViewsSetterMix, [
         this.$super();
 
         // position manager should be set before model initialization
-        this.setPosition(new Position(this));
+        this.setPosition(new zebkit.util.Position(this));
 
         /**
          * List model
@@ -1050,7 +1047,7 @@ pkg.CompList = Class(pkg.BaseList, [
         };
 
         this.recalc = function (){
-            this.max = L.getMaxPreferredSize(this);
+            this.max = zebkit.layout.getMaxPreferredSize(this);
         };
 
         this.calcMaxItemSize = function (){
@@ -1059,7 +1056,7 @@ pkg.CompList = Class(pkg.BaseList, [
         };
 
         this.getItemIdxAt = function(x,y){
-            return L.getDirectAt(x, y, this);
+            return zebkit.layout.getDirectAt(x, y, this);
         };
 
         this.isItemSelectable = function(i) {
@@ -1090,7 +1087,7 @@ pkg.CompList = Class(pkg.BaseList, [
 
     function setPosition(c){
         if (c != this.position){
-            if (zebkit.instanceOf(this.layout, Position.Metric)) {
+            if (zebkit.instanceOf(this.layout, zebkit.util.Position.Metric)) {
                 c.setMetric(this.layout);
             }
             this.$super(c);
@@ -1124,7 +1121,7 @@ pkg.CompList = Class(pkg.BaseList, [
 
             this.$super(this.scrollManager);
             if (this.position != null) {
-                this.position.setMetric(zebkit.instanceOf(layout, Position.Metric) ? layout : this);
+                this.position.setMetric(zebkit.instanceOf(layout, zebkit.util.Position.Metric) ? layout : this);
             }
         }
 
@@ -1268,7 +1265,7 @@ pkg.Combo = Class(pkg.Panel, [
                  */
                 this.getCombo = function() {
                     var p = this;
-                    while((p = p.parent) && zebkit.instanceOf(p, pkg.Combo) == false);
+                    while ((p = p.parent) && zebkit.instanceOf(p, pkg.Combo) === false);
                     return p;
                 };
             }
@@ -1293,7 +1290,7 @@ pkg.Combo = Class(pkg.Panel, [
                  */
 
                 this.childKeyPressed = function(e){
-                    if (e.code === KE.ESCAPE && this.parent != null){
+                    if (e.code === pkg.KeyEvent.ESCAPE && this.parent != null){
                         this.removeMe();
                         if (this.owner != null) this.owner.requestFocus();
                     }
@@ -1478,7 +1475,7 @@ pkg.Combo = Class(pkg.Panel, [
         };
 
         this.contentUpdated = function(src, text){
-            if (src == this.content) {
+            if (src === this.content) {
                 try {
                     this.$lockListSelEvent = true;
                     if (text == null) this.list.select(-1);
@@ -1576,9 +1573,9 @@ pkg.Combo = Class(pkg.Panel, [
         this.showPad = function(){
             var canvas = this.getCanvas();
             if (canvas != null) {
-                var ps       = this.winpad.getPreferredSize(),
-                    p        = L.toParentOrigin(0, 0, this),
-                    py       = p.y;
+                var ps  = this.winpad.getPreferredSize(),
+                    p   = zebkit.layout.toParentOrigin(0, 0, this),
+                    py  = p.y;
 
                 // if (this.winpad.hbar && ps.width > this.width) {
                 //     ps.height += this.winpad.hbar.getPreferredSize().height;
@@ -1651,11 +1648,11 @@ pkg.Combo = Class(pkg.Panel, [
             if (this.list.model != null) {
                 var index = this.list.selectedIndex;
                 switch(e.code) {
-                    case KE.ENTER: this.showPad(); break;
-                    case KE.LEFT :
-                    case KE.UP   : if (index > 0) this.list.select(index - 1); break;
-                    case KE.DOWN :
-                    case KE.RIGHT: if (this.list.model.count() - 1 > index) this.list.select(index + 1); break;
+                    case pkg.KeyEvent.ENTER: this.showPad(); break;
+                    case pkg.KeyEvent.LEFT :
+                    case pkg.KeyEvent.UP   : if (index > 0) this.list.select(index - 1); break;
+                    case pkg.KeyEvent.DOWN :
+                    case pkg.KeyEvent.RIGHT: if (this.list.model.count() - 1 > index) this.list.select(index + 1); break;
                 }
             }
         };
@@ -1832,13 +1829,13 @@ pkg.Combo = Class(pkg.Panel, [
     },
 
     function kidRemoved(index,l){
-        if (this.content == l){
+        if (this.content === l){
             if (l._ != null) l.unbind(this);
             this.content = null;
         }
 
         this.$super(index, l);
-        if(this.button == l){
+        if (this.button === l) {
             this.button.unbind(this);
             this.button = null;
         }
@@ -1859,4 +1856,4 @@ pkg.Combo = Class(pkg.Panel, [
  * @for
  */
 
-})(zebkit("ui"), zebkit.Class);
+});

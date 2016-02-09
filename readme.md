@@ -121,7 +121,7 @@ To write the first application **no zebkit stuff on your PC has to be downloaded
 				// define layout
 				root.setLayout(new BorderLayout());
 				// add button to center
-				root.add(CENTER, new Button("Ok"));
+				root.add("center", new Button("Ok"));
 				...
 	 		});
 		</script>
@@ -146,11 +146,11 @@ We can write the application following more graceful manner using JSON-like styl
 			    (new zCanvas()).root.properties({
 			    	layout: new BorderLayout(),
 			    	kids  : {
-			    		CENTER: new TextField("", true),
-			    		TOP   : (new BoldLabel("Sample application")).properties({
+			    		center: new TextField("", true),
+			    		top   : (new BoldLabel("Sample application")).properties({
 			    			padding : 8
 			    		}),
-			    		BOTTOM: new Button("Ok")
+			    		bottom: new Button("Ok")
 			    	}
 			    });
 			}); 
@@ -168,8 +168,8 @@ JSON can be interpreted as Zebkit UI form definition language. For instance, use
 	"padding": 8, 
 	"layout" : { "$zebkit.layout.BorderLayout":[ 4] },
 	"kids"   : {
-		"CENTER": { "$zebkit.ui.TextField": ["", true]  },
-		"BOTTOM": { "$zebkit.ui.Panel": [],
+		"center": { "$zebkit.ui.TextField": ["", true]  },
+		"bottom": { "$zebkit.ui.Panel": [],
 			"layout": { "$zebkit.layout.FlowLayout": [] },
 			"kids"  : [
 				{ "$zebkit.ui.Button": "Clear" } 
@@ -252,8 +252,8 @@ By implementing special methods __"clipCopy()"__  and/or __"clipPaste(s)"__ a fo
 					layout: new BorderLayout(8,8), 
                     padding: 8,
 					kids  : {
-						TOP   : new BoldLabel("Copy/Paste in box below"),
-						CENTER: new MyComponent("Copy me in clipboard").properties({border:borders.plain, padding:8})
+						top   : new BoldLabel("Copy/Paste in box below"),
+						center: new MyComponent("Copy me in clipboard").properties({border:borders.plain, padding:8})
 					}
 				});
 			});

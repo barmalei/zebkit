@@ -1,4 +1,4 @@
-(function(pkg, Class) {
+zebkit.package("ui", function(pkg, Class) {
 
     pkg.ClipboardSupport = Class([
         function $clazz() {
@@ -183,7 +183,7 @@
             };
 
             this.$setMask = function(m) {
-                m = (m & pkg.KeyEvent.M_ALT & pkg.KeyEvent.M_SHIFT & pkg.KeyEvent.M_CTRL & pkg.KeyEvent.M_CMD)
+                m = (m & pkg.KeyEvent.M_ALT & pkg.KeyEvent.M_SHIFT & pkg.KeyEvent.M_CTRL & pkg.KeyEvent.M_CMD);
                 this.mask = m;
                 this.altKey   = ((m & pkg.KeyEvent.M_ALT  ) > 0);
                 this.shiftKey = ((m & pkg.KeyEvent.M_SHIFT) > 0);
@@ -344,4 +344,4 @@
         }
     ]);
 
-})(zebkit("ui"), zebkit.Class);
+});

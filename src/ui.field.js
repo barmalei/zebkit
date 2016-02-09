@@ -1,9 +1,8 @@
-(function(pkg, Class) {
+zebkit.package("ui", function(pkg, Class) {
 
 /**
  * @module ui
  */
-var KE = pkg.KeyEvent;
 
 /**
  * Text field UI component. The component is designed to enter single line, multi lines or password text.
@@ -235,9 +234,15 @@ pkg.TextField = Class(pkg.Label, [
             var res = [], sr = start.row, er = end.row, sc = start.col, ec = end.col;
             for(var i = sr; i < er + 1; i++){
                 var ln = r.getLine(i);
-                if (i != sr) res.push('\n');
-                else ln = ln.substring(sc);
-                if (i == er) ln = ln.substring(0, ec - ((sr == er) ? sc : 0));
+                if (i != sr) {
+                    res.push('\n');
+                } else {
+                    ln = ln.substring(sc);
+                }
+
+                if (i === er) {
+                    ln = ln.substring(0, ec - ((sr === er) ? sc : 0));
+                }
                 res.push(ln);
             }
             return res.join('');
@@ -289,7 +294,7 @@ pkg.TextField = Class(pkg.Label, [
 
         this.nextPage_command = function(b, d) {
             if (b) this.startSelection();
-            this.position.seekLineTo(d == 1 ? "down" : "up", this.pageSize());
+            this.position.seekLineTo(d === 1 ? "down" : "up", this.pageSize());
         };
 
         this.keyPressed = function(e) {
@@ -303,32 +308,32 @@ pkg.TextField = Class(pkg.Label, [
                 }
 
                 switch(e.code) {
-                    case KE.DOWN : position.seekLineTo("down");break;
-                    case KE.UP   : position.seekLineTo("up");break;
-                    case KE.LEFT : foff *= -1;
-                    case KE.RIGHT:
+                    case pkg.KeyEvent.DOWN : position.seekLineTo("down");break;
+                    case pkg.KeyEvent.UP   : position.seekLineTo("up");break;
+                    case pkg.KeyEvent.LEFT : foff *= -1;
+                    case pkg.KeyEvent.RIGHT:
                         if (e.ctrlKey === false && e.metaKey === false) {
                             position.seek(foff);
                         }
                         break;
-                    case KE.END:
+                    case pkg.KeyEvent.END:
                         if (e.ctrlKey) {
                             position.seekLineTo("down", this.getLines() - line - 1);
                         }
                         else position.seekLineTo("end");
                         break;
-                    case KE.HOME:
+                    case pkg.KeyEvent.HOME:
                         if (e.ctrlKey) position.seekLineTo("up", line);
                         else position.seekLineTo("begin");
                         break;
-                    case KE.DELETE:
+                    case pkg.KeyEvent.DELETE:
                         if (this.hasSelection() && this.isEditable === true) {
                             this.removeSelected();
                         }
                         else {
                             if (this.isEditable === true) this.remove(position.offset, 1);
                         } break;
-                    case KE.BSPACE:
+                    case pkg.KeyEvent.BSPACE:
                         if (this.isEditable === true) {
                             if (this.hasSelection()) this.removeSelected();
                             else {
@@ -357,8 +362,8 @@ pkg.TextField = Class(pkg.Label, [
          */
         this.isFiltered = function(e){
             var code = e.code;
-            return code == KE.SHIFT || code == KE.CTRL ||
-                   code == KE.TAB   || code == KE.ALT  ||
+            return code === pkg.KeyEvent.SHIFT || code === pkg.KeyEvent.CTRL ||
+                   code === pkg.KeyEvent.TAB   || code === pkg.KeyEvent.ALT  ||
                    e.altKey;
         };
 
@@ -488,7 +493,7 @@ pkg.TextField = Class(pkg.Label, [
             }
 
             if (this.startOff != startOffset || endOffset != this.endOff){
-                if (startOffset == endOffset) this.clearSelection();
+                if (startOffset === endOffset) this.clearSelection();
                 else {
                     this.startOff = startOffset;
                     var p = this.position.getPointByOffset(startOffset);
@@ -592,8 +597,8 @@ pkg.TextField = Class(pkg.Label, [
                 var h = this.history[this.historyPos];
 
                 this.historyPos--;
-                if (h[0] == 1) this.remove(h[1], h[2]);
-                else           this.write (h[1], h[2]);
+                if (h[0] === 1) this.remove(h[1], h[2]);
+                else            this.write (h[1], h[2]);
 
                 this.undoCounter -= 2;
                 this.redoCounter++;
@@ -608,8 +613,8 @@ pkg.TextField = Class(pkg.Label, [
         this.redo_command = function() {
             if (this.redoCounter > 0) {
                 var h = this.history[(this.historyPos + 1) % this.history.length];
-                if (h[0] == 1) this.remove(h[1], h[2]);
-                else           this.write (h[1], h[2]);
+                if (h[0] === 1) this.remove(h[1], h[2]);
+                else            this.write (h[1], h[2]);
                 this.redoCounter--;
                 this.repaint();
             }
@@ -1004,4 +1009,4 @@ pkg.PassTextField = Class(pkg.TextField, [
  * @for
  */
 
-})(zebkit("ui"), zebkit.Class);
+});

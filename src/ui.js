@@ -1,15 +1,7 @@
-(function(pkg, Class) {
-
-// redefine configuration
-zebkit()["zebkit.json"] = pkg.$url.join("zebkit.json");
-
+zebkit.package("ui", function(pkg, Class) {
 /**
  * @module  ui
  */
-
-var Cursor = pkg.Cursor, Listeners = zebkit.util.Listeners, KE = pkg.KeyEvent,
-    L = zebkit.layout, instanceOf = zebkit.instanceOf;
-
 pkg.$ViewsSetterMix = zebkit.Interface([
     function $prototype() {
         this.setViews = function (v){
@@ -31,7 +23,7 @@ pkg.$ViewsSetterMix = zebkit.Interface([
             if (b) {
                 this.vrp();
             }
-        }
+        };
     }
 ]);
 
@@ -219,8 +211,8 @@ pkg.Label = Class(pkg.ViewPan, [
     function (r) {
         this.setView(arguments.length === 0 ||
                      zebkit.isString(r)      ? new pkg.StringRender(r)
-                                             : (instanceOf(r, zebkit.data.TextModel) ? new pkg.TextRender(r)
-                                                                                     : r));
+                                             : (zebkit.instanceOf(r, zebkit.data.TextModel) ? new pkg.TextRender(r)
+                                                                                            : r));
         this.$super();
     }
 ]);
@@ -260,9 +252,9 @@ pkg.BoldLabel = Class(pkg.Label, []);
  */
 pkg.ImageLabel = Class(pkg.Panel, [
     function(txt, img) {
-        this.$super(new L.FlowLayout("left", "center", "horizontal", 6));
+        this.$super(new zebkit.layout.FlowLayout("left", "center", "horizontal", 6));
         this.add(new pkg.ImagePan(null));
-        this.add(instanceOf(txt, pkg.Panel) ? txt : new pkg.Label(txt));
+        this.add(zebkit.instanceOf(txt, pkg.Panel) ? txt : new pkg.Label(txt));
         this.kids[1].setVisible(txt != null);
         this.setImage(img);
     },
@@ -496,7 +488,7 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
         this._keyPressed = function(e) {
             if (this.state !== PRESSED_OVER &&
                 this.state !== PRESSED_OUT  &&
-                (e.code === KE.ENTER || e.code === KE.SPACE))
+                (e.code === pkg.KeyEvent.ENTER || e.code === pkg.KeyEvent.SPACE))
             {
                 this.setState(PRESSED_OVER);
             }
@@ -530,7 +522,7 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
                                                                                                 : OUT);
                 }
                 else {
-                    var p = L.toParentOrigin(e.x, e.y, e.source, this);
+                    var p = zebkit.layout.toParentOrigin(e.x, e.y, e.source, this);
                     this.$isIn = p.x >= 0 && p.y >= 0 && p.x < this.width && p.y < this.height;
                     this.setState(this.$isIn ? OVER : OUT);
                 }
@@ -564,7 +556,7 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
                 this.$isIn = false;
             }
             else {
-                var p = L.toParentOrigin(e.x, e.y, e.source, this);
+                var p = zebkit.layout.toParentOrigin(e.x, e.y, e.source, this);
                 this.$isIn = p.x >= 0 && p.y >= 0 && p.x < this.width && p.y < this.height;
             }
 
@@ -607,7 +599,7 @@ pkg.EvStatePan = Class(pkg.StatePan,  [
          */
         this.pointerExited = function(e){
             if (this.isEnabled === true) {
-                this.setState(this.state == PRESSED_OVER ? PRESSED_OUT : OUT);
+                this.setState(this.state === PRESSED_OVER ? PRESSED_OUT : OUT);
                 this.$isIn = false;
             }
         };
@@ -816,7 +808,7 @@ pkg.ButtonRepeatMix = zebkit.Interface([
 
     function stateUpdated(o,n){
         this.$super(o, n);
-        if (n === PRESSED_OVER){
+        if (n === PRESSED_OVER) {
             if (this.isFireByPress === true){
                 this.fire();
                 if (this.firePeriod > 0) {
@@ -881,8 +873,8 @@ pkg.ArrowButton = Class(pkg.EvStatePan, pkg.ButtonRepeatMix, [
     },
 
     function(direction) {
-        this._ = new Listeners();
-        this.cursorType = Cursor.HAND;
+        this._ = new zebkit.util.Listeners();
+        this.cursorType = pkg.Cursor.HAND;
 
         if (arguments.length > 0) {
             this.direction = direction;
@@ -942,7 +934,7 @@ pkg.Button = Class(pkg.CompositeEvStatePan, pkg.ButtonRepeatMix, [
         this.ViewPan = Class(pkg.ViewPan, [
             function $prototype() {
                 this.parentStateUpdated = function(o, n, id) {
-                    if (instanceOf(this.view, pkg.ViewSet)) {
+                    if (zebkit.instanceOf(this.view, pkg.ViewSet)) {
                         this.activate(id);
                     }
                 };
@@ -960,14 +952,14 @@ pkg.Button = Class(pkg.CompositeEvStatePan, pkg.ButtonRepeatMix, [
     },
 
     function(t) {
-        this._ = new Listeners();
+        this._ = new zebkit.util.Listeners();
         if (zebkit.isString(t)) t = new this.clazz.Label(t);
         else {
             if (t instanceof Image) {
                 t = new pkg.ImagePan(t);
             }
             else {
-                if (t != null && instanceOf(t, pkg.Panel) === false) {
+                if (t != null && zebkit.instanceOf(t, pkg.Panel) === false) {
                     t = new this.clazz.ViewPan(t);
                 }
             }
@@ -1174,7 +1166,7 @@ pkg.BorderPan = Class(pkg.Panel, [
 
     function setBorder(br) {
         br = pkg.$view(br);
-        if (instanceOf(br, pkg.TitledBorder) === false) {
+        if (zebkit.instanceOf(br, pkg.TitledBorder) === false) {
             br = new pkg.TitledBorder(br, "center");
         }
         return this.$super(br);
@@ -1278,7 +1270,7 @@ pkg.SwitchManager = Class([
 
         this[''] = function() {
             this.state = false;
-            this._ = new Listeners();
+            this._ = new zebkit.util.Listeners();
         };
     }
 ]);
@@ -1486,11 +1478,11 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
     },
 
     function keyPressed(e){
-        if (instanceOf(this.manager, pkg.Group) && this.getValue()){
+        if (zebkit.instanceOf(this.manager, pkg.Group) && this.getValue()){
             var code = e.code, d = 0;
-            if (code === KE.LEFT || code === KE.UP) d = -1;
+            if (code === pkg.KeyEvent.LEFT || code === pkg.KeyEvent.UP) d = -1;
             else {
-                if (code === KE.RIGHT || code === KE.DOWN) d = 1;
+                if (code === pkg.KeyEvent.RIGHT || code === pkg.KeyEvent.DOWN) d = 1;
             }
 
             if (d !== 0) {
@@ -1499,7 +1491,7 @@ pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
                     var l = p.kids[i];
                     if (l.isVisible === true &&
                         l.isEnabled === true &&
-                        instanceOf(l, pkg.Checkbox) &&
+                        zebkit.instanceOf(l, pkg.Checkbox) &&
                         l.manager === this.manager      )
                     {
                         l.requestFocus();
@@ -1643,8 +1635,8 @@ pkg.SplitPan = Class(pkg.Panel, [
                 };
 
                 this.getCursorType = function(t, x, y) {
-                    return (this.target.orient === "vertical" ? Cursor.W_RESIZE
-                                                              : Cursor.N_RESIZE);
+                    return (this.target.orient === "vertical" ? pkg.Cursor.W_RESIZE
+                                                              : pkg.Cursor.N_RESIZE);
                 };
             },
 
@@ -2065,7 +2057,7 @@ pkg.Progress = Class(pkg.Panel, [
          * @default 20
          */
         this.maxValue = 20;
-        this._ = new Listeners();
+        this._ = new zebkit.util.Listeners();
         this.$super();
     },
 
@@ -2160,7 +2152,7 @@ pkg.Progress = Class(pkg.Panel, [
  */
 pkg.Link = Class(pkg.Button, [
     function $prototype() {
-        this.cursorType = Cursor.HAND;
+        this.cursorType = pkg.Cursor.HAND;
 
         /**
          * Set link font
@@ -2291,7 +2283,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
                     }
                 };
 
-                this.cursorType = Cursor.HAND;
+                this.cursorType = pkg.Cursor.HAND;
             }
         ]);
     },
@@ -2348,7 +2340,7 @@ pkg.ExtendablePan = Class(pkg.Panel, [
 
         this.toggle();
 
-        this._ = new Listeners();
+        this._ = new zebkit.util.Listeners();
     }
 ]);
 
@@ -2586,7 +2578,7 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
          */
         this.catchInput = function (child){
             return child === this.bundle || (this.bundle.kids.length > 0 &&
-                                             L.isAncestorOf(this.bundle, child));
+                                             zebkit.layout.isAncestorOf(this.bundle, child));
         };
 
         this.posChanged = function(target,po,pl,pc){
@@ -2870,7 +2862,7 @@ pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
  */
 pkg.ScrollPan = Class(pkg.Panel, [
     function $clazz() {
-        this.ContentPanLayout = Class(L.Layout, [
+        this.ContentPanLayout = Class(zebkit.layout.Layout, [
             function $prototype() {
                 this.calcPreferredSize = function(t) {
                     return t.kids[0].getPreferredSize();
@@ -3148,11 +3140,11 @@ pkg.ScrollPan = Class(pkg.Panel, [
                             },
 
                             pointerEntered: function(e) {
-                                if (e.source == $this.vBar) {
+                                if (e.source === $this.vBar) {
                                     $this.$targetBar = $this.vBar;
                                 }
                                 else {
-                                    if (e.source == $this.hBar) {
+                                    if (e.source === $this.hBar) {
                                         $this.$targetBar = $this.hBar;
                                         return;
                                     }
@@ -3374,6 +3366,8 @@ pkg.Tabs = Class(pkg.Panel, pkg.$ViewsSetterMix, [
          */
         this.TabView = Class(pkg.CompRender, [
             function $clazz() {
+                this.font = pkg.font;
+
                 this.TabPan = Class(pkg.Panel, [
                     function() {
                         this.$super();
@@ -3772,7 +3766,7 @@ pkg.Tabs = Class(pkg.Panel, pkg.$ViewsSetterMix, [
         };
 
         this.calcPreferredSize = function(target){
-            var max = L.getMaxPreferredSize(target);
+            var max = zebkit.layout.getMaxPreferredSize(target);
             if (this.orient === "bottom" || this.orient === "top"){
                 max.width = Math.max(max.width, 2 * this.sideSpace + this.tabAreaWidth);
                 max.height += this.tabAreaHeight + this.sideSpace;
@@ -4000,13 +3994,13 @@ pkg.Tabs = Class(pkg.Panel, pkg.$ViewsSetterMix, [
         this.keyPressed = function(e){
             if (this.selectedIndex != -1 && this.pages.length > 0){
                 switch(e.code) {
-                    case KE.UP:
-                    case KE.LEFT:
+                    case pkg.KeyEvent.UP:
+                    case pkg.KeyEvent.LEFT:
                         var nxt = this.next(this.selectedIndex - 1,  -1);
                         if(nxt >= 0) this.select(nxt);
                         break;
-                    case KE.DOWN:
-                    case KE.RIGHT:
+                    case pkg.KeyEvent.DOWN:
+                    case pkg.KeyEvent.RIGHT:
                         var nxt = this.next(this.selectedIndex + 1, 1);
                         if(nxt >= 0) this.select(nxt);
                         break;
@@ -4168,7 +4162,7 @@ pkg.Tabs = Class(pkg.Panel, pkg.$ViewsSetterMix, [
         this.tabAreaY = this.tabAreaWidth = this.tabAreaHeight = 0;
         this.overTab = this.selectedIndex = -1;
         this.orient = o;
-        this._ = new Listeners();
+        this._ = new zebkit.util.Listeners();
         this.pages = [];
         this.views = {};
 
@@ -4210,7 +4204,7 @@ pkg.Tabs = Class(pkg.Panel, pkg.$ViewsSetterMix, [
 
     function insert(index,constr,c) {
         var render = null;
-        if (instanceOf(constr, this.clazz.TabView)) {
+        if (zebkit.instanceOf(constr, this.clazz.TabView)) {
             render = constr;
         }
         else {
@@ -4563,18 +4557,18 @@ pkg.Slider = Class(pkg.Panel, pkg.$ViewsSetterMix, [
         this.keyPressed = function(e){
             var b = this.isIntervalMode;
             switch(e.code) {
-                case KE.DOWN:
-                case KE.LEFT:
+                case pkg.KeyEvent.DOWN:
+                case pkg.KeyEvent.LEFT:
                     var v = this.nextValue(this.value, this.exactStep,-1);
                     if (v >= this.min) this.setValue(v);
                     break;
-                case KE.UP:
-                case KE.RIGHT:
+                case pkg.KeyEvent.UP:
+                case pkg.KeyEvent.RIGHT:
                     var v = this.nextValue(this.value, this.exactStep, 1);
                     if (v <= this.max) this.setValue(v);
                     break;
-                case KE.HOME: this.setValue(b ? this.getPointValue(0) : this.min);break;
-                case KE.END:  this.setValue(b ? this.getPointValue(this.intervals.length - 1)
+                case pkg.KeyEvent.HOME: this.setValue(b ? this.getPointValue(0) : this.min);break;
+                case pkg.KeyEvent.END:  this.setValue(b ? this.getPointValue(this.intervals.length - 1)
                                             : this.max);
                               break;
             }
@@ -4702,7 +4696,7 @@ pkg.Slider = Class(pkg.Panel, pkg.$ViewsSetterMix, [
     },
 
     function (o) {
-        this._ = new Listeners();
+        this._ = new zebkit.util.Listeners();
         this.views = {};
         this.isShowScale = this.isShowTitle = true;
         this.dragged = this.isIntervalMode = false;
@@ -4731,7 +4725,7 @@ pkg.StatusBar = Class(pkg.Panel, [
     function (gap){
         if (arguments.length === 0) gap = 2;
         this.setPadding(gap, 0, 0, 0);
-        this.$super(new L.PercentLayout("horizontal", gap));
+        this.$super(new zebkit.layout.PercentLayout("horizontal", gap));
     },
 
     /**
@@ -4784,7 +4778,7 @@ pkg.Toolbar = Class(pkg.Panel, [
     function $clazz() {
         this.ToolPan = Class(pkg.EvStatePan, [
             function(c) {
-                this.$super(new L.BorderLayout());
+                this.$super(new zebkit.layout.BorderLayout());
                 this.add("center", c);
             },
 
@@ -4817,12 +4811,12 @@ pkg.Toolbar = Class(pkg.Panel, [
          * @protected
          */
         this.isDecorative = function(c){
-            return instanceOf(c, pkg.EvStatePan) === false;
+            return zebkit.instanceOf(c, pkg.EvStatePan) === false;
         };
     },
 
     function () {
-        this._ = new Listeners();
+        this._ = new zebkit.util.Listeners();
         this.$super();
     },
 
@@ -5084,9 +5078,7 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
     }
 ]);
 
-
 /**
  * @for
  */
-
-})(zebkit("ui"), zebkit.Class);
+});

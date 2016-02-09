@@ -1,7 +1,7 @@
 {
-    "version" : "07.2015",
+    "version" : "02.2016",
 
-    "doubleClickDelta":280,
+    "doubleClickDelta" : 280,
 
     ".addClassAliases": {
         "Picture"       : "zebkit.ui.Picture",
@@ -30,11 +30,10 @@
         "CTRL" : 17, "ALT":18
     },
 
-    "events"        : { "$zebkit.ui.EventManager":[]  },
-    "focusManager"  : { "$zebkit.ui.FocusManager":[]  },
-    "htmlManager"   : { "$ ? zebkit.ui.HtmlElementMan":[]  },
+    "focusManager"   : { "$ ? zebkit.ui.FocusManager"  :[] },
+    "htmlManager"    : { "$ ? zebkit.ui.HtmlElementMan":[] },
+    "cursorManager"  : { "$ ? zebkit.ui.CursorManager" :[] },
 
-    "cursorManager"  : { "$zebkit.ui.CursorManager"  :[] },
     "commandManager" : {
         "$zebkit.ui.ShortcutManager" :[{
             "common": [
@@ -129,8 +128,7 @@
     },
 
     "popup" : {
-        "$ ? zebkit.ui.PopupManager": [],
-        "hideTooltipByPress": { ".expr": "!zebkit.isTouchable" }
+        "$ ? zebkit.ui.PopupManager": []
     },
 
     "clipboardSupport" : {
@@ -164,17 +162,30 @@
         "dot"    : { "$Dotted" : []  }
     },
 
-    "CanvasLayer": {
-        "layout"     : { "$zebkit.layout.RasterLayout":[] },
-        "background" : null
+    "pictures" : {
+        "zebkit" : {
+            ".loadImage": "zebkit.png"
+        }
     },
 
-    "RootLayer" : {
-        "inherit":  "CanvasLayer"
-    },
+    "HtmlElement": {
+        "styles": {
+            "margin"          : "0px",
+            "border"          : "none",
+            "borderWidth"     : "0px",
+            "boxSizing"       : "border-box",
+            "-moz-box-sizing" : "border-box",
+            "display"         : "block",
+            "backgroundImage" : "none",
+            "backgroundColor" : "transparent",
+            "boxShadow"       : "none",
+            "-moz-box-shadow" : "none",
+            "isIE:overflow"   : "hidden",
+            "top"             : "0px",
+            "left"            : "0px"
+        },
 
-    "WinLayer" : {
-        "inherit":  "CanvasLayer"
+        "border": null
     },
 
     "zCanvas": {
@@ -183,7 +194,6 @@
         "layout"    : { "$zebkit.layout.StackLayout":[] },
 
         "styles": {
-            "background-color2"           : "green",
             "outline"                    : "none",
             "padding"                    : "0px",
             "-webkit-user-select"        : "none",
@@ -199,63 +209,23 @@
             "tap-highlight-color"        : "rgba(0,0,0,0)"
         },
 
-        "features" : [
-            "zebkit.ui.MouseWheelSupport"
-        ],
-
         "kids": [
-            { "$ *zebkit.ui.RootLayer" : "root" },
-            { "$ *zebkit.ui.WinLayer"  : [] },
+            { "$ *zebkit.ui.RootLayer"   : [] },
+            { "$ ? *zebkit.ui.WinLayer"  : [] },
             { "$ ? *zebkit.ui.PopupLayer": [] }
         ]
     },
 
-    "pictures" : {
-        "zebkit" : {
-            ".loadImage": "zebkit.png"
-        }
-    },
-
-    "BaseTextRender" : {
-        "disabledColor": "white",
-        "color": "@palette.fontColor",
-        "font" : "@font"
-    },
-
-    "StringRender" : {
-        "inherit" :  "BaseTextRender"
-    },
-
-    "TextRender" : {
-        "inherit" :  "BaseTextRender"
-    },
-
-    "DecoratedTextRender" : {
-        "inherit" :  "TextRender"
-    },
-
-    "PasswordText" : {
-        "inherit" :  "TextRender"
-    },
-
-    "BoldTextRender" : {
-        "inherit" :  "TextRender"
-    },
-
-    "WrappedTextRender" : {
-        "inherit" :  "TextRender"
-    },
-
-    "CompositeEvStatePan": {
-        "layout"     : { "$FlowLayout": [ "center", "center", "horizontal",2 ] },
+    "? CompositeEvStatePan": {
+        "layout"     : { "$FlowLayout": [ "center", "center", "horizontal", 2 ] },
         "focusMarker": "@borders.dot"
     },
 
-    "BoldLabel": {
+    "? BoldLabel": {
         "font": "@boldFont"
     },
 
-    "Button": {
+    "? Button": {
         "Label": {
             "font": { "$Font" : ["Arial", "bold", 15] },
             "disabledColor": "white"
@@ -279,7 +249,7 @@
         "padding"         : 6
     },
 
-    "Checkbox": {
+    "? Checkbox": {
         "Box": {
             "preferredSize": [ 16, 16],
             "border"       : "@borders.plain",
@@ -310,7 +280,7 @@
         "padding": 2
     },
 
-    "Radiobox": {
+    "? Radiobox": {
         "inherit" :  "Checkbox" ,
 
         "Label": {
@@ -336,7 +306,7 @@
         }
     },
 
-    "BorderPan": {
+    "? BorderPan": {
         "Label": {
             "font" : "@boldFont",
             "color": "@palette.gray1"
@@ -345,7 +315,7 @@
         "border": { "$zebkit.ui.TitledBorder": [ "@borders.plain", "center" ] }
     },
 
-    "SplitPan": {
+    "? SplitPan": {
         "Bar": {
             "border"        : "@borders.plain",
             "background"    : {
@@ -357,7 +327,7 @@
         }
     },
 
-    "Scroll" : {
+    "? Scroll" : {
         "HIncButton": {
             "arrowDirection" : "right",
             "preferredSize":[ 12, 11 ],
@@ -400,13 +370,13 @@
     },
 
 
-    "mscroll": { "$zebkit.ui.MobileScrollMan"  :[] },
+    "mscroll": { "$ ? zebkit.ui.MobileScrollMan"  :[] },
 
-    "ScrollPan": {
-        "autoHide": { ".expr": "zebkit.isTouchable" }
+    "? ScrollPan": {
+        "autoHide": false
     },
 
-    "TextField": {
+    "? TextField": {
         "HintRender" : {
             "font"  : { "$Font": ["Arial", "bold italic", 12] },
             "color" : "#C1C1C1"
@@ -416,6 +386,7 @@
             "focuson" :  { "$Border" : [ "#66CCFF", 2, 8 ] },
             "focusoff":  { "$Border" : [ "#DDDDDD", 2, 8 ] }
         },
+
         "background"    : "rgb(248, 250, 255)",
         "selectionColor": "#d3edad",
         "color"         : "#515151",
@@ -424,21 +395,21 @@
         "padding"      : [4, 4, 4, 4]
     },
 
-    "TextArea" : {
+    "? TextArea" : {
         "inherit" :  "TextField"
     },
 
-    "PassTextField" : {
+    "? PassTextField" : {
         "inherit" :  "TextField"
     },
 
-    "Progress": {
+    "? Progress": {
         "border"    : { "$Border" : [ "rgb(200,200,255)", 1, 3] },
         "bundleView": "@palette.gray4",
         "padding"   : 2
     },
 
-    "Tabs": {
+    "? Tabs": {
         "TabView": {
             "TabPan": {
                 "layout": { "$FlowLayout": 4 }
@@ -461,7 +432,7 @@
         "pageGaps": [2, 2]
     },
 
-    "BaseList": {
+    "? BaseList": {
         "views" :  {
             "select"    :  "rgb(228,244,252)",
             "top.marker": { "$Border": [ "#0081C4", 1, 4 ] },
@@ -476,12 +447,12 @@
         "padding": 0
     },
 
-    "List": {
+    "? List": {
         "inherit" :  "BaseList" ,
         "gap":4
     },
 
-    "CompList": {
+    "? CompList": {
         "inherit" :  "BaseList" ,
 
         "Label" : {
@@ -495,7 +466,7 @@
         "layout"  : { "$ListLayout":[] }
     },
 
-    "Combo": {
+    "? Combo": {
         "ComboPadPan": {
             "border"    : { "$Border":[ "#969696", 1, 3] },
             "background": "@palette.white",
@@ -547,21 +518,21 @@
         "selectionView":  null
     },
 
-    "Slider": {
+    "? Slider": {
         "border": {
             "focuson" :  { "$Border" : [ "#66CCFF", 1, 3 ] },
             "focusoff":  { "$View":[] }
         },
         "views" : {
-             "gauge2"  : { "$Border" : "@palette.gray3" },
-             "hbundle2": { "$Picture": [ "@pictures.zebkit", 49,0,11,18 ] },
-             "vbundle2": { "$Picture": [ "@pictures.zebkit", 61,0,18,11 ] }
+             "gauge"  : { "$Border" : "@palette.gray3" },
+             "hbundle": { "$Picture": [ "@pictures.zebkit", 49,0,11,18 ] },
+             "vbundle": { "$Picture": [ "@pictures.zebkit", 61,0,18,11 ] }
         },
         "scaleColor": "@palette.gray1",
         "padding"   : 4
     },
 
-    "Link": {
+    "? Link": {
         "font"        : "@boldFont",
         "colors"      : {
             "pressed.over" : "blue",
@@ -573,7 +544,7 @@
         "canHaveFocus": false
     },
 
-    "MenuItem" : {
+    "? MenuItem" : {
         "padding": [ 4,4,4,4],
 
         "Label": {
@@ -599,7 +570,7 @@
         }
     },
 
-    "Menu": {
+    "? Menu": {
         "Line": {
             "padding": 4
         },
@@ -620,7 +591,7 @@
         "layout"     : { "$ListLayout":0 }
     },
 
-    "Menubar": {
+    "? Menubar": {
         "MenuItem" : {
             "inherit" : "MenuItem",
             "padding"  : [6, 16, 6, 16],
@@ -640,7 +611,7 @@
         }
     },
 
-    "Toolbar": {
+    "? Toolbar": {
         "Combo": {
             "background": "@palette.white",
             "border"    : { "$Border": "rgb(200,180,200)" },
@@ -684,7 +655,7 @@
         "padding": 4
     },
 
-    "ExtendablePan": {
+    "? ExtendablePan": {
         "Label":{
             "font"  : "@boldFont",
             "color" : "@palette.white"
@@ -706,7 +677,7 @@
         "layout": { "$BorderLayout":[] }
     },
 
-    "tree": {
+    "? tree": {
         "DefViews": {
             "color" : "@palette.gray1",
             "font"  : "12px 'Lucida Grande', 'Lucida Sans', Arial, sans-serif"
@@ -756,7 +727,7 @@
         }
     },
 
-    "grid" : {
+    "? grid" : {
         "DefViews": {
             "cellBackground": null,
             "font": "13px 'Lucida Grande', 'Lucida Sans', Arial, sans-serif",
@@ -830,7 +801,7 @@
         }
     },
 
-    "Tooltip": {
+    "? Tooltip": {
         "borderColor":"gray",
         "borderWidth":1,
 
@@ -844,7 +815,7 @@
         "layout": { "$FlowLayout": [ "center", "top" ] }
     },
 
-    "Window": {
+    "? Window": {
         "CaptionPan": {
             "layout"     : { "$BorderLayout":[] },
             "background" : {
@@ -876,10 +847,6 @@
             "visible":false
         },
 
-        "Button": {
-
-        },
-
         "border"    : { "active"   : { "$Border":["#33AAFF", 2, 8], "gap":2 },
                         "inactive" : { "$Border":["lightGray", 2, 8], "gap":2 } },
         "background": "#ECECEC",
@@ -893,45 +860,21 @@
         }
     },
 
-    "StatusBar" : {
+    "? StatusBar" : {
         "borderView" : "etched"
     },
 
-    "HtmlElement": {
-        "styles": {
-            "margin"          : "0px",
-            "border"          : "none",
-            "borderWidth"     : "0px",
-            "boxSizing"       : "border-box",
-            "-moz-box-sizing" : "border-box",
-            "display"         : "block",
-            "backgroundImage" : "none",
-            "backgroundColor" : "transparent",
-            "boxShadow"       : "none",
-            "-moz-box-shadow" : "none",
-            "isIE:overflow"   : "hidden",
-            "top"             : "0px",
-            "left"            : "0px"
-        },
-
-        "border": null
-    },
-
-    "HtmlContent": {
-        "inherit": [ "TextField", "HtmlElement" ]
-    },
-
-    "HtmlTextInput": {
-        "inherit": [ "TextField", "HtmlElement" ],
+    "? HtmlTextInput": {
+        "inherit": [ "HtmlElement", "TextField" ],
         "style"   : [ "outline", "none"],
         "padding" : [4,4,4,4]
     },
 
-    "HtmlTextField": {
+    "? HtmlTextField": {
         "inherit":  "HtmlTextInput"
     },
 
-    "HtmlTextArea": {
+    "? HtmlTextArea": {
         "inherit":  "HtmlTextInput",
         "resizeable"  :  false
     }

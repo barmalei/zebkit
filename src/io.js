@@ -479,7 +479,7 @@ pkg.HTTP = Class([
         //
         // TODO: think also about changing content type
         // "application/x-www-form-urlencoded; charset=UTF-8"
-        if (d != null && zebkit.isString(d) == false && d.constructor === Object) {
+        if (d != null && zebkit.isString(d) === false && d.constructor === Object) {
             d = pkg.QS.toQS(d, false);
         }
 

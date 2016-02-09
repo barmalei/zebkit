@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-	    <script src='../zebkit.min.js' type='text/javascript'></script>
+	    <script src='../zebkit.js' type='text/javascript'></script>
 
 		<script type='text/javascript'>
 
@@ -16,7 +16,7 @@
                         this.percentage = percentage;
                     };
 
-                    root.setLayout(new Layout([
+                    root.setLayout(new zebkit.Dummy(Layout, [
                         function calcPreferredSize(t) {
                             return { width: 0, height:0 }; // just a stub
                         },

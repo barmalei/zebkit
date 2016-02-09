@@ -153,7 +153,7 @@
 
                         center: new Panel({
                             layout: new FlowLayout("center", "center"),
-                            kids: new BoldLabel("Food Poisoning ").setColor("white")
+                            kids  : new BoldLabel("Food Poisoning ").setColor("white")
                         }),
 
                         right: new Panel({
@@ -183,7 +183,7 @@
                 z.root.setBackground("white");
                 z.root.setBorder(new Border("black", 1, 0));
 
-                if (zebkit.isTouchable) {
+                if (window.screen.width < 900) {
                     z.fullSize();
                 }
 

@@ -1,4 +1,6 @@
-(function(pkg, Class, ui) {
+zebkit.package("ui.designer", function(pkg, Class) {
+
+var ui = zebkit("ui");
 
 /**
  * The package contains number of UI components that can be helpful to
@@ -7,18 +9,18 @@
  * @main
  */
 
-var Cursor = ui.Cursor, KeyEvent = ui.KeyEvent, CURSORS = {};
-
-CURSORS["left"  ]      = Cursor.W_RESIZE;
-CURSORS["right" ]      = Cursor.E_RESIZE;
-CURSORS["top"   ]      = Cursor.N_RESIZE;
-CURSORS["bottom"]      = Cursor.S_RESIZE;
-CURSORS["topLeft" ]    = Cursor.NW_RESIZE;
-CURSORS["topRight"]    = Cursor.NE_RESIZE;
-CURSORS["bottomLeft" ] = Cursor.SW_RESIZE;
-CURSORS["bottomRight"] = Cursor.SE_RESIZE;
-CURSORS["center"]      = Cursor.MOVE;
-CURSORS["none"  ]      = Cursor.DEFAULT;
+pkg.CURSORS = {
+    left        : ui.Cursor.W_RESIZE,
+    right       : ui.Cursor.E_RESIZE,
+    top         : ui.Cursor.N_RESIZE,
+    bottom      : ui.Cursor.S_RESIZE,
+    topLeft     : ui.Cursor.NW_RESIZE,
+    topRight    : ui.Cursor.NE_RESIZE,
+    bottomLeft  : ui.Cursor.SW_RESIZE,
+    bottomRight : ui.Cursor.SE_RESIZE,
+    center      : ui.Cursor.MOVE,
+    none        : ui.Cursor.DEFAULT
+};
 
 pkg.ShaperBorder = Class(ui.View, [
     function $prototype() {
@@ -158,7 +160,7 @@ pkg.ShaperPan = Class(ui.Panel, [
         this.catchInput = true;
 
         this.getCursorType = function (t, x ,y) {
-            return this.kids.length > 0 ? CURSORS[this.shaperBr.detectAt(t, x, y)] : null;
+            return this.kids.length > 0 ? pkg.CURSORS[this.shaperBr.detectAt(t, x, y)] : null;
         };
 
         /**
@@ -170,8 +172,8 @@ pkg.ShaperPan = Class(ui.Panel, [
             if (this.kids.length > 0){
                 var b  = e.shiftKey,
                     c  = e.code,
-                    dx = (c == KeyEvent.LEFT ? -1 : (c == KeyEvent.RIGHT ? 1 : 0)),
-                    dy = (c == KeyEvent.UP   ? -1 : (c == KeyEvent.DOWN  ? 1 : 0)),
+                    dx = (c === ui.KeyEvent.LEFT ? -1 : (c === ui.KeyEvent.RIGHT ? 1 : 0)),
+                    dy = (c === ui.KeyEvent.UP   ? -1 : (c === ui.KeyEvent.DOWN  ? 1 : 0)),
                     w  = this.width  + dx,
                     h  = this.height + dy,
                     x  = this.x + dx,
@@ -307,7 +309,7 @@ pkg.FormTreeModel = Class(zebkit.data.TreeModel, [
 
         this.itemByComponent = function (c, r){
             if (r == null) r = this.root;
-            if (r.comp == c) return c;
+            if (r.comp === c) return c;
             for(var i = 0;i < r.kids.length; i++) {
                 var item = this.itemByComponent(c, r.kids[i]);
                 if (item != null) return item;
@@ -333,6 +335,4 @@ pkg.FormTreeModel = Class(zebkit.data.TreeModel, [
 /**
  * @for
  */
-
-
-})(zebkit("ui.designer"), zebkit.Class, zebkit("ui"));
+});

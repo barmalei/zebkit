@@ -15,7 +15,7 @@
 
                 var z = new zCanvas(400,400), root = z.root;
                 z.root.setBorder("plain");
-                if (zebkit.isTouchable) z.fullSize();
+                if (window.screen.width < 900) z.fullSize();
                 root.setLayout(new BorderLayout());
 
                 root.add("center", new Panel([

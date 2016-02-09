@@ -41,7 +41,7 @@ pkg.getDirectChild = function(parent, child){
  * @param {zebkit.layout.Layoutable} t a target layoutable component
  * @method doLayout
  */
-var L = pkg.Layout = new zebkit.Interface({
+pkg.Layout = new zebkit.Interface({
     abstract: [
         function doLayout(target) {},
         function calcPreferredSize(target) {}
@@ -179,7 +179,7 @@ pkg.isAncestorOf = function(p, c){
  * @constructor
  * @extends {zebkit.layout.Layout}
  */
-pkg.Layoutable = Class(L, [
+pkg.Layoutable = Class(pkg.Layout, [
     function $prototype() {
         /**
          * x coordinate
@@ -850,7 +850,7 @@ pkg.Layoutable = Class(L, [
  *  @class zebkit.layout.StackLayout
  *  @constructor
  */
-pkg.StackLayout = Class(L, [
+pkg.StackLayout = Class(pkg.Layout, [
     function $prototype() {
         this.calcPreferredSize = function (target){
             return pkg.getMaxPreferredSize(target);
@@ -903,7 +903,7 @@ pkg.StackLayout = Class(L, [
  * @class zebkit.layout.BorderLayout
  * @extends {zebkit.layout.Layout}
  */
-pkg.BorderLayout = Class(L, [
+pkg.BorderLayout = Class(pkg.Layout, [
     function $prototype() {
         /**
          * Horizontal gap (space between components)
@@ -1072,7 +1072,7 @@ pkg.BorderLayout = Class(L, [
  * @constructor
  * @extends {zebkit.layout.Layout}
  */
-pkg.RasterLayout = Class(L, [
+pkg.RasterLayout = Class(pkg.Layout, [
     function $prototype() {
         this.usePsSize = false;
 
@@ -1094,29 +1094,27 @@ pkg.RasterLayout = Class(L, [
             return m;
         };
 
-        this.doLayout = function(c){
+        this.doLayout = function(c) {
             var r = c.width - c.getRight(),
                 b = c.height - c.getBottom();
 
             for(var i = 0;i < c.kids.length; i++){
-                var el = c.kids[i], ww = 0, hh = 0;
+                var kid = c.kids[i], ww = 0, hh = 0;
 
-                if (el.isVisible === true){
+                if (kid.isVisible === true){
                     if (this.usePsSize) {
-                        var ps = el.getPreferredSize();
+                        var ps = kid.toPreferredSize();
                         ww = ps.width;
                         hh = ps.height;
                     }
                     else {
-                        ww = el.width;
-                        hh = el.height;
+                        ww = kid.width;
+                        hh = kid.height;
                     }
 
-                    var ctr = el.constraints == null ? null : el.constraints;
-                    el.setSize(ww, hh);
-
+                    var ctr = kid.constraints == null ? null : kid.constraints;
                     if (ctr != null) {
-                        var x = el.x, y = el.y;
+                        var x = kid.x, y = kid.y, size = null;
 
                         if (ctr === "top" || ctr === "topRight" || ctr === "topLeft") {
                             y = 0;
@@ -1138,7 +1136,7 @@ pkg.RasterLayout = Class(L, [
                             x = Math.floor((c.width  - ww) / 2);
                         }
 
-                        el.setLocation(x, y);
+                        kid.setLocation(x, y);
                     }
                 }
             }
@@ -1190,7 +1188,7 @@ pkg.RasterLayout = Class(L, [
  * @constructor
  * @extends {zebkit.layout.Layout}
  */
-pkg.FlowLayout = Class(L, [
+pkg.FlowLayout = Class(pkg.Layout, [
     function $prototype() {
         /**
          * Gap between laid out components
@@ -1362,7 +1360,7 @@ pkg.FlowLayout = Class(L, [
  * @constructor
  * @extends {zebkit.layout.Layout}
  */
-pkg.ListLayout = Class(L,[
+pkg.ListLayout = Class(pkg.Layout,[
     function $prototype() {
         /**
          * Horizontal list items alignment
@@ -1458,7 +1456,7 @@ pkg.ListLayout = Class(L,[
  * @constructor
  * @extends {zebkit.layout.Layout}
  */
-pkg.PercentLayout = Class(L, [
+pkg.PercentLayout = Class(pkg.Layout, [
     function $prototype() {
          /**
           * Direction the components have to be placed (vertically or horizontally)
@@ -1523,9 +1521,9 @@ pkg.PercentLayout = Class(L, [
             for(var i = 0; i < size; i ++ ){
                 var l = target.kids[i], c = l.constraints, useps = (c === "usePsSize");
                 if (this.direction === "horizontal"){
-                    ns = ((size - 1) == i) ? target.width - right - loc
-                                           : (useps ? l.getPreferredSize().width
-                                                      : ~~((rs * c) / 100));
+                    ns = ((size - 1) === i) ? target.width - right - loc
+                                            : (useps ? l.getPreferredSize().width
+                                                     : ~~((rs * c) / 100));
                     var yy = top, hh = target.height - top - bottom;
                     if (this.stretch === false) {
                         var ph = hh;
@@ -1705,7 +1703,7 @@ pkg.Constraints = Class([
  * @class  zebkit.layout.GridLayout
  * @extends {zebkit.layout.Layout}
  */
-pkg.GridLayout = Class(L, [
+pkg.GridLayout = Class(pkg.Layout, [
     function $prototype() {
         this.stretchCols = this.stretchRows = false;
 
@@ -1866,9 +1864,9 @@ pkg.GridLayout = Class(L, [
                         l.setSize(d.width, d.height);
                         l.setLocation(
                             xx  + arg.left + ("stretch" === arg.ax ? 0
-                                                                     : ((arg.ax === "right") ? cellW - d.width
-                                                                                             : ((arg.ax === "center") ? Math.floor((cellW - d.width) / 2)
-                                                                                                                      : 0))),
+                                                                   : ((arg.ax === "right") ? cellW - d.width
+                                                                                           : ((arg.ax === "center") ? Math.floor((cellW - d.width) / 2)
+                                                                                                                    : 0))),
                             top + arg.top  + ("stretch" === arg.ay ? 0
                                                                    : ((arg.ay === "bottom" ) ? cellH - d.height
                                                                                              : ((arg.ay === "center") ? Math.floor((cellH - d.height) / 2)

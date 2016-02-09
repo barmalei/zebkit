@@ -2147,32 +2147,32 @@ if (typeof(zebkit) === "undefined") {
             assert(isPackage(NS('ui.grid')), true, "test_packaging81");
             assert(isPackage(NS('ui')), true, "test_packaging42");
 
-            assert(NS() == NS(),  true);
-            assert(NS() !== null && typeof NS() !== "undefined", true);
+            assert(NS() == NS(),  true, "test_packaging43");
+            assert(NS() !== null && typeof NS() !== "undefined", true, "test_packaging44");
             NS({a:100, b:200});
-            assert(NS().a, 100);
-            assert(NS().b, 200);
+            assert(NS().a, 100, "test_packaging45");
+            assert(NS().b, 200, "test_packaging46");
             NS()['m'] = 88;
-            assert(NS().m, 88);
-            assert(NS().a, 100);
-            assert(NS().b, 200);
+            assert(NS().m, 88, "test_packaging47");
+            assert(NS().a, 100, "test_packaging48");
+            assert(NS().b, 200, "test_packaging49");
 
 
-            assertException(function () { NS("ui.var1", 1); }, Error, "test_packaging10" );
-            assertException(function () { NS("ui.grid.var1", 1); }, Error, "test_packaging11" );
+            assertException(function () { NS("ui.var1", 1); }, Error, "test_packaging101" );
+            assertException(function () { NS("ui.grid.var1", 1); }, Error, "test_packaging111" );
 
             var MyScope = zebkit.namespace('MyScope');
-            assert(MyScope.ui === undefined, true);
+            assert(MyScope.ui === undefined, true, "test_packaging50");
             MyScope('ui').var1 = 11;
             MyScope('ui').var11 = 111;
             MyScope('ui.grid').var1 = 24;
-            assert(MyScope.ui !== undefined, true);
-            assert(MyScope.ui.var11, 111);
-            assert(MyScope.ui.var1, 11);
-            assert(MyScope.ui.var2, undefined);
-            assert(MyScope.ui.grid.var1, 24);
-            assert(isPackage(MyScope.ui.grid), true, "test_packaging41");
-            assert(isPackage(MyScope.ui), true, "test_packaging42");
+            assert(MyScope.ui !== undefined, true, "test_packaging51");
+            assert(MyScope.ui.var11, 111, "test_packaging52");
+            assert(MyScope.ui.var1, 11, "test_packaging53");
+            assert(MyScope.ui.var2, undefined, "test_packaging55");
+            assert(MyScope.ui.grid.var1, 24, "test_packaging56");
+            assert(isPackage(MyScope.ui.grid), true, "test_packaging57");
+            assert(isPackage(MyScope.ui), true, "test_packaging58");
 
             var MyScope2 = zebkit.namespace('MyScope2');
             MyScope2(["a", "b", "c.d"]);
@@ -2180,30 +2180,30 @@ if (typeof(zebkit) === "undefined") {
             MyScope2('a').mm = 200;
             MyScope2('c.d.e').y = 100;
 
-            assert(isPackage(MyScope2.a), true);
-            assert(isPackage(MyScope2.b), true);
-            assert(isPackage(MyScope2.c), true);
-            assert(isPackage(MyScope2.c.d), true);
-            assert(isPackage(MyScope2.c.d.e), true);
-            assert(MyScope2.c.d.e.y, 100);
-            assert(MyScope2.a.mm, 200);
+            assert(isPackage(MyScope2.a), true, "test_packaging59");
+            assert(isPackage(MyScope2.b), true, "test_packaging60");
+            assert(isPackage(MyScope2.c), true, "test_packaging61");
+            assert(isPackage(MyScope2.c.d), true, "test_packaging62");
+            assert(isPackage(MyScope2.c.d.e), true, "test_packaging63");
+            assert(MyScope2.c.d.e.y, 100, "test_packaging64");
+            assert(MyScope2.a.mm, 200, "test_packaging65");
 
             var r = [];
             MyScope2(function(n, p) {
                r.push(n);
             });
-            assert(r.length, 5);
+            assert(r.length, 5, "test_packaging66");
 
             eval(MyScope2.Import());
-            assert(y, 100);
-            assert(mm, 200);
+            assert(y, 100, "test_packaging67");
+            assert(mm, 200, "test_packaging68");
 
             zebkit.namespace('GLOBAL');
             zebkit.namespace('GLOBAL')("a").a = 1213;
-            assert(zebkit.namespace('GLOBAL').a.a, 1213);
+            assert(zebkit.namespace('GLOBAL').a.a, 1213, "test_packaging69");
 
-            assertException(function () { zebkit.namespace('Fictive Namespace', true); }, Error, "test_packaging12" );
-            assert(zebkit.namespace('MyScope2'), MyScope2);
+            assertException(function () { zebkit.namespace('Fictive Namespace', true); }, Error, "test_packaging70" );
+            assert(zebkit.namespace('MyScope2'), MyScope2, "test_packaging71");
 
             var NNN = zebkit.namespace("NNN");
             NNN("a").b = 100;
@@ -2211,21 +2211,21 @@ if (typeof(zebkit) === "undefined") {
             NNN("a.d").k = 300;
             NNN("a.d.l");
 
-            assert(NNN.Import('a').split(",").length, 2);
-            assert(NNN.Import('a.d').split(",").length, 1);
-            assert(NNN.Import().split(",").length, 3);
-            assert(NNN.Import('a.d.l'), null);
+            assert(NNN.Import('a').split(",").length, 2, "test_packaging72");
+            assert(NNN.Import('a.d').split(",").length, 1, "test_packaging73");
+            assert(NNN.Import().split(",").length, 3, "test_packaging74");
+            assert(NNN.Import('a.d.l'), null, "test_packaging75");
 
-            assertException(function() { NNN.Import('a.d.l', "this"); }, Error);
-            assertException(function() { NNN.Import("this", 'a.d.l'); }, Error);
-            assertException(function() { NNN.Import("this"); }, Error);
+            assertException(function() { NNN.Import('a.d.l', "this"); }, Error, "test_packaging76");
+            assertException(function() { NNN.Import("this", 'a.d.l'); }, Error, "test_packaging77");
+            assertException(function() { NNN.Import("this"); }, Error, "test_packaging78");
 
             var N = zebkit.namespace("d");
             N(['a', 'b', 'c.d']);
             N.c.d.k = 10;
-            assert(N.c.d.k, 10);
+            assert(N.c.d.k, 10, "test_packaging79");
             N(['a', 'b', 'c.d']);
-            assert(N.c.d.k, 10);
+            assert(N.c.d.k, 10, "test_packaging80");
         },
 
         function test_prototype() {

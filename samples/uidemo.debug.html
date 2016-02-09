@@ -18,11 +18,11 @@
     <script src='../src/ui.webstuff.js' type='text/javascript'></script>
     <script src='../src/ui.webpointer.js' type='text/javascript'></script>
     <script src='../src/ui.webkey.js' type='text/javascript'></script>
+    <script src='../src/ui.views.js'   type='text/javascript'></script>
     <script src='../src/ui.core.js'      type='text/javascript'></script>
-    <script src='../src/ui.views.js'      type='text/javascript'></script>
     <script src='../src/ui.js' 	      type='text/javascript'></script>
 
-    <script src='../src/ui.TextField.js' type='text/javascript'></script>
+    <script src='../src/ui.field.js' type='text/javascript'></script>
     <script src='../src/ui.list.js' type='text/javascript'></script>
     <script src='../src/ui.window.js' type='text/javascript'></script>
 
@@ -30,6 +30,7 @@
     <script src='../src/ui.grid.js' type='text/javascript'></script>
     <script src='../src/ui.designer.js' type='text/javascript'></script>
     <script src='../src/ui.html.js' type='text/javascript'></script>
+    <script src='../src/ui.bootstrap.js' type='text/javascript'></script>
 
     <script src='demo/ui.demo.js' 	       type='text/javascript'></script>
     <script src='demo/ui.demo.layout.js'   type='text/javascript'></script>
@@ -61,67 +62,70 @@
    			desktop.root.repaint();
 		}
 
-		var ZebkitTextRender = zebkit.Class(zebkit.ui.TextRender, [
-			function(t, reflection) {
-				if (arguments.length === 1) {
-					reflection = false;
-				}
-
-				this.$super(t);
-				this.setFont(new zebkit.ui.Font("100px Futura, Helvetica, sans-serif"));
-				this.image = zebkit.ui.demo.zebra_pattern;
-				this.hasReflection = reflection;
-				this.reflectionGap = -40;
-			},
-
-			function getLineHeight() {
-				return this.hasReflection ? this.font.height*2 + this.reflectionGap : this.font.height;
-			},
-
-			function paintLine2(g,x,y,line,d) {
-				var gradient = g.createLinearGradient(x, y, x, y + this.font.height);
-				gradient.addColorStop(0.1, '#000');
-				gradient.addColorStop(0.35, '#fff');
-				gradient.addColorStop(0.65, '#fff');
-			    gradient.addColorStop(1.0, '#000');
-				g.fillStyle = gradient;
-				g.fillText(this.getLine(line), x, y);
-
-				var prev = g.globalCompositeOperation;
-				if (this.hasReflection) {
-					// draw reflected text
-					g.save();
-					g.globalCompositeOperation = "source-over";
-					g.scale(1, -1);
-					g.font = this.font.s;
-					g.fillStyle = "#fff";
-					g.fillText(this.getLine(line), x, -y - this.font.height - 2*this.font.height - this.reflectionGap);
-					g.scale(1, -1);
-
-					// cut the gradient out of the reflected text
-					var gradient = g.createLinearGradient(x, y + this.font.height + this.reflectionGap, x, y + 2*d.height + this.reflectionGap);
-					gradient.addColorStop(0.0, 'rgba(0,0,0,0.65)');
-					gradient.addColorStop(1.0, '#000');
-					g.fillStyle = gradient;
-					g.fillRect(x, y + this.font.height + this.reflectionGap + 30, this.calcLineWidth(line), 2*this.font.height);
-					g.restore();
-				}
-
-			//	g.globalCompositeOperation = "source-atop";
-				g.fillStyle = this.pattern;
-				g.fillRect(x, y, this.calcLineWidth(line), this.getLineHeight());
-				g.globalCompositeOperation = prev;
-			},
-
-			function paint(g,x,y,w,h,d) {
-				this.pattern = g.createPattern(this.image, 'repeat');
-				this.$super(g,x,y,w,h,d);
-			}
-		]);
 
         zebkit.ready(
 			function() {
 				eval(zebkit.Import("ui", "layout"));
+
+
+				var ZebkitTextRender = zebkit.Class(zebkit.ui.TextRender, [
+					function(t, reflection) {
+						if (arguments.length === 1) {
+							reflection = false;
+						}
+
+						this.$super(t);
+						this.setFont(new zebkit.ui.Font("100px Futura, Helvetica, sans-serif"));
+						this.image = zebkit.ui.demo.zebra_pattern;
+						this.hasReflection = reflection;
+						this.reflectionGap = -40;
+					},
+
+					function getLineHeight() {
+						return this.hasReflection ? this.font.height*2 + this.reflectionGap : this.font.height;
+					},
+
+					function paintLine2(g,x,y,line,d) {
+						var gradient = g.createLinearGradient(x, y, x, y + this.font.height);
+						gradient.addColorStop(0.1, '#000');
+						gradient.addColorStop(0.35, '#fff');
+						gradient.addColorStop(0.65, '#fff');
+					    gradient.addColorStop(1.0, '#000');
+						g.fillStyle = gradient;
+						g.fillText(this.getLine(line), x, y);
+
+						var prev = g.globalCompositeOperation;
+						if (this.hasReflection) {
+							// draw reflected text
+							g.save();
+							g.globalCompositeOperation = "source-over";
+							g.scale(1, -1);
+							g.font = this.font.s;
+							g.fillStyle = "#fff";
+							g.fillText(this.getLine(line), x, -y - this.font.height - 2*this.font.height - this.reflectionGap);
+							g.scale(1, -1);
+
+							// cut the gradient out of the reflected text
+							var gradient = g.createLinearGradient(x, y + this.font.height + this.reflectionGap, x, y + 2*d.height + this.reflectionGap);
+							gradient.addColorStop(0.0, 'rgba(0,0,0,0.65)');
+							gradient.addColorStop(1.0, '#000');
+							g.fillStyle = gradient;
+							g.fillRect(x, y + this.font.height + this.reflectionGap + 30, this.calcLineWidth(line), 2*this.font.height);
+							g.restore();
+						}
+
+					//	g.globalCompositeOperation = "source-atop";
+						g.fillStyle = this.pattern;
+						g.fillRect(x, y, this.calcLineWidth(line), this.getLineHeight());
+						g.globalCompositeOperation = prev;
+					},
+
+					function paint(g,x,y,w,h,d) {
+						this.pattern = g.createPattern(this.image, 'repeat');
+						this.$super(g,x,y,w,h,d);
+					}
+				]);
+
 
 	        	desktop = new zCanvas("zCanvas");
 				var root = desktop.root, nt = new Tabs(), prevSelected = -1;

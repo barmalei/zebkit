@@ -54,123 +54,131 @@ function isBoolean(o) {
  *  @method namespace
  *  @api zebkit.namespace()
  */
-var $$$ = 0, namespaces = {}, namespace = function(nsname, dontCreate) {
-    if (isString(nsname) === false) {
-        throw new Error("Invalid name space name : '" + nsname + "'");
+
+
+// package class
+function Package(name) {
+    this.$url  = null;
+    this.$name = name;
+    if (typeof document !== "undefined") {
+        var s  = document.getElementsByTagName('script'),
+            ss = s[s.length - 1].getAttribute('src'),
+            i  = ss == null ? -1 : ss.lastIndexOf("/");
+
+        this.$url = (i > 0) ? new zebkit.URL(ss.substring(0, i + 1))
+                            : new zebkit.URL(document.location.toString()).getParentURL() ;
     }
+}
 
-    if (namespaces.hasOwnProperty(nsname)) {
-        return namespaces[nsname];
-    }
-
-    if (dontCreate === true) {
-        throw new Error("Name space '" + nsname + "' doesn't exist");
-    }
-
-    function Package(name) {
-        this.$url = null;
-        this.$name = name;
-        if (typeof document !== "undefined") {
-            var s  = document.getElementsByTagName('script'),
-                ss = s[s.length - 1].getAttribute('src'),
-                i  = ss == null ? -1 : ss.lastIndexOf("/");
-
-            this.$url = (i > 0) ? new zebkit.URL(ss.substring(0, i + 1))
-                                : new zebkit.URL(document.location.toString()).getParentURL() ;
-        }
-    }
-
-    if (namespaces.hasOwnProperty(nsname)) {
-        throw new Error("Name space '" + nsname + "' already exists");
-    }
-
-    var f = function(name) {
-        if (arguments.length === 0) return f.$env;
-
-        if (typeof name === 'function') {
-            for(var k in f) {
-                if (f[k] instanceof Package) name(k, f[k]);
-            }
-            return null;
+var $$$        = 11,
+    namespaces = {},
+    namespace  = function(nsname, dontCreate) {
+        if (isString(nsname) === false) {
+            throw new Error("Invalid name space name : '" + nsname + "'");
         }
 
-        var b = Array.isArray(name);
-        if (isString(name) === false && b === false) {
-            for(var k in name) {
-                if (name.hasOwnProperty(k)) f.$env[k] = name[k];
-            }
-            return;
+        if (namespaces.hasOwnProperty(nsname)) {
+            return namespaces[nsname];
         }
 
-        if (b) {
-           for(var i = 0; i < name.length; i++) f(name[i]);
-           return null;
+        if (dontCreate === true) {
+            throw new Error("Name space '" + nsname + "' doesn't exist");
         }
 
-        if (f[name] instanceof Package) {
-            return f[name];
+        if (namespaces.hasOwnProperty(nsname)) {
+            throw new Error("Name space '" + nsname + "' already exists");
         }
 
-        var names = name.split('.'), target = f;
-        for(var i = 0, k = names[0]; i < names.length; i++, k = k + '.' + names[i]) {
-            var n = names[i], p = target[n];
-            if (typeof p === "undefined") {
-                p = new Package(name);
-                target[n] = p;
-                f[k] = p;
-            }
-            else {
-                if ((p instanceof Package) === false) {
-                    throw new Error("Requested package '" + name +  "' conflicts with variable '" + n + "'");
+        var f = function(name) {
+            if (arguments.length === 0) return f.$env;
+
+            if (typeof name === 'function') {
+                for(var k in f) {
+                    if (f[k] instanceof Package) name(k, f[k]);
                 }
+                return null;
             }
 
-            target = p;
-        }
-        return target;
-    };
+            var b = Array.isArray(name);
+            if (isString(name) === false && b === false) {
+                for(var k in name) {
+                    if (name.hasOwnProperty(k)) f.$env[k] = name[k];
+                }
+                return;
+            }
 
-    f.Import = function() {
-        var ns   = "=" + nsname + ".",
-            code = [],
-            packages = arguments.length === 0 ? null
-                                              : Array.prototype.slice.call(arguments, 0);
-        f(function(n, p) {
-            if (packages == null || packages.indexOf(n) >= 0) {
-                for (var k in p) {
-                    if (k[0] !== '$' && k[0] !== '_' && (p[k] instanceof Package) === false && p.hasOwnProperty(k)) {
-                        code.push(k + ns + n + "." + k);
+            if (b) {
+               for(var i = 0; i < name.length; i++) f(name[i]);
+               return null;
+            }
+
+            if (f[name] instanceof Package) {
+                return f[name];
+            }
+
+            var names = name.split('.'), target = f;
+            for(var i = 0, k = names[0]; i < names.length; i++, k = k + '.' + names[i]) {
+                var n = names[i], p = target[n];
+                if (typeof p === "undefined") {
+                    p = new Package(name);
+                    target[n] = p;
+                    f[k] = p;
+                }
+                else {
+                    if ((p instanceof Package) === false) {
+                        throw new Error("Requested package '" + name +  "' conflicts with variable '" + n + "'");
                     }
                 }
-                if (packages != null) packages.splice(packages.indexOf(n), 1);
+
+                target = p;
             }
-        });
+            return target;
+        };
 
-        if (packages != null && packages.length !== 0) {
-            throw new Error("Unknown package(s): " + packages.join(","));
-        }
+        f.Import = function() {
+            var ns   = "=" + nsname + ".",
+                code = [],
+                packages = arguments.length === 0 ? null
+                                                  : Array.prototype.slice.call(arguments, 0);
+            f(function(n, p) {
+                if (packages == null || packages.indexOf(n) >= 0) {
+                    for (var k in p) {
+                        if (k[0] !== '$' && k[0] !== '_' && (p[k] instanceof Package) === false && p.hasOwnProperty(k)) {
+                            code.push(k + ns + n + "." + k);
+                        }
+                    }
+                    if (packages != null) packages.splice(packages.indexOf(n), 1);
+                }
+            });
 
-        return code.length > 0 ?  "var " + code.join(",") + ";" : null;
+            if (packages != null && packages.length !== 0) {
+                throw new Error("Unknown package(s): " + packages.join(","));
+            }
+
+            return code.length > 0 ?  "var " + code.join(",") + ";" : null;
+        };
+
+        f.$env = {};
+        namespaces[nsname] = f;
+        return f;
     };
 
-    f.$env = {};
-    namespaces[nsname] = f;
-    return f;
-};
-
 var pkg = zebra = zebkit = namespace('zebkit'),
-    CNAME = pkg.CNAME = '$', CDNAME = '',
-    FN = pkg.$FN = (isString.name !== "isString") ? (function(f) {     // IE stuff
-                                                        var mt = f.toString().match(/^function\s+([^\s(]+)/);
-                                                        return (mt == null) ? CDNAME : mt[1];
-                                                    })
-                                                  : (function(f) { return f.name; });
+    CNAME  = pkg.CNAME = '$',
+    CDNAME = '';
+
+pkg.$FN = (isString.name !== "isString") ? (function(f) {  // IE stuff
+                                                if (f.$methodName == null) { // test if name has been earlier detected
+                                                    var mt = f.toString().match(/^function\s+([^\s(]+)/);
+                                                    f.$methodName = (mt == null) ? CDNAME : mt[1];
+                                                }
+                                                return f.$methodName;
+                                            })
+                                         : (function(f) { return f.name; });
 
 pkg.isInBrowser = typeof navigator !== "undefined";
 pkg.isIE        = pkg.isInBrowser && (Object.hasOwnProperty.call(window, "ActiveXObject") || !!window.ActiveXObject);
 pkg.isFF        = pkg.isInBrowser && window.mozInnerScreenX != null;
-pkg.isTouchable = pkg.isInBrowser && ( (pkg.isIE === false && (!!('ontouchstart' in window ) || !!('onmsgesturechange' in window))) ||
-                                       (!!window.navigator['msPointerEnabled'] && !!window.navigator["msMaxTouchPoints"] > 0)); // IE10
 
 pkg.isMacOS = pkg.isInBrowser && navigator.platform.toUpperCase().indexOf('MAC') !== -1;
 
@@ -461,7 +469,7 @@ pkg.Singleton = function(clazz) {
  */
 pkg.Interface = make_template(null, function() {
     var $Interface = make_template(pkg.Interface, function() {
-        throw new Error("Interface cannot be instantiated")
+        throw new Error("Interface cannot be instantiated");
     }, null);
 
     if (arguments.length > 1) {
@@ -477,7 +485,7 @@ pkg.Interface = make_template(null, function() {
         if (arguments[0] != null && arguments[0].abstract != null && Array.isArray(arguments[0].abstract)) {
             methods = arguments[0].abstract;
             for(var i = 0; i < methods.length; i++) {
-                var mn = FN(methods[i]);
+                var mn = pkg.$FN(methods[i]);
                 eval("var method = function " + mn + "() { throw new Error('Method " + mn + "() not implemented'); };");
                 methods[i] = method;
             }
@@ -486,7 +494,7 @@ pkg.Interface = make_template(null, function() {
                 methods.concat.apply(this, arguments[0].methods);
             }
         } else {
-            if (Array.isArray(arguments[0]) == false) {
+            if (Array.isArray(arguments[0]) === false) {
                 throw new Error("Array of methods is expected");
             }
             methods = arguments[0];
@@ -519,13 +527,12 @@ function ProxyMethod(name, f, clazz) {
     var a = function() {
         var cm = pkg.$caller;
         pkg.$caller = a;
-        // don't use finally section it slower than try-catch
+        // don't use finally section it is slower than try-catch
         try {
-            var r = a.methodBody.apply(this, arguments);
+            var r = f.apply(this, arguments);
             pkg.$caller = cm;
             return r;
-        }
-        catch(e) {
+        } catch(e) {
             pkg.$caller = cm;
             console.log(name + "(" + arguments.length + ") " + (e.stack ? e.stack : e));
             throw e;
@@ -700,7 +707,7 @@ function mixing(clazz, methods, overwritable) {
     var names = {};
     for(var i = 0; i < methods.length; i++) {
         var method     = methods[i],
-            methodName = FN(method);
+            methodName = pkg.$FN(method);
 
         // detect if the passed method is proxy method
         if (method.methodBody != null) {
@@ -785,7 +792,7 @@ pkg.Class = make_template(null, function() {
         // let's make sure we inherit interface
         if (parentClass == null || i > 0) {
             if (toInherit[i] == null || toInherit[i].clazz !== pkg.Interface) {
-                throw new ReferenceError("Invalid inherited interface :" + toInherit[i]);
+                throw new ReferenceError("Invalid inherited interface [" + i + "] :" + toInherit[i]);
             }
         }
     }
@@ -878,7 +885,7 @@ pkg.Class = make_template(null, function() {
         if (Array.isArray(f)) {
             var init = null;
             for(var i = 0; i < f.length; i++) {
-                var n = FN(f[i]);
+                var n = pkg.$FN(f[i]);
                 if (n === CDNAME) {
                     init = f[i];  // postpone calling initializer before all methods will be defined
                 }
@@ -904,11 +911,12 @@ pkg.Class = make_template(null, function() {
     };
 
     classTemplate.prototype.$super = function() {
-       if (pkg.$caller != null) {
+       if (pkg.$caller !== null) {
             var name = pkg.$caller.methodName,
                 $s   = pkg.$caller.boundTo.$parent,
                 args = arguments;
 
+            // fetch function name if it is passed as the first argument
             if (arguments.length > 0 && typeof arguments[0] === 'function') {
                 name = arguments[0].methodName;
                 args = [];
@@ -917,7 +925,7 @@ pkg.Class = make_template(null, function() {
                 }
             }
 
-            while ($s != null) {
+            while ($s !== null) {
                 var m = $s.prototype[name];
                 if (m != null) {
                     return m.apply(this, args);
@@ -925,6 +933,7 @@ pkg.Class = make_template(null, function() {
                 $s = $s.$parent;
             }
 
+            // handle method not found error
             var cln = this.clazz && this.clazz.$name ? this.clazz.$name + "." : "";
             throw new ReferenceError("Method '" + cln + (name === CNAME ? "constructor"
                                                                         : name) + "(" + args.length + ")" + "' not found");
@@ -1364,7 +1373,6 @@ if (pkg.isInBrowser) {
 pkg.ready(function() {
     pkg.$resolveClassNames();
 });
-
 
 /**
  * @for

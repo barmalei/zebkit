@@ -93,22 +93,11 @@ pkg.PointerEvent = Class(zebkit.util.Event, [
 
         this.pressure = 0.5;
 
-        // TODO: not completed
-        this.pressGroup = [];
-
-        // TODO: experemental property
-        this.eatMe = false;
-
         this.isAction = function() {
-            return this.identifier === LMOUSE && this.touchCounter === 1;
-        };
-
-        this.isContext = function() {
-            return this.identifier === RMOUSE && this.touchCounter === 1;
+            return this.identifier !== RMOUSE && this.touchCounter === 1;
         };
 
         this.$fillWith = function(identifier, e) {
-            this.eatMe      = false;
             this.pageX      = Math.floor(e.pageX);
             this.pageY      = Math.floor(e.pageY);
             this.target     = e.target;
@@ -119,6 +108,14 @@ pkg.PointerEvent = Class(zebkit.util.Event, [
             this.metaKey    = typeof e.metaKey  !== 'undefined' ? e.metaKey  : false;
             this.pressure   = typeof e.pressure !== 'undefined' ? e.pressure : 0.5;
         };
+
+        // TODO: not implemented method
+        this.getTouches = function() {
+            var touches = [];
+            for(var k in pkg.$pointerPressedEvents) {
+
+            }
+        };
     }
 ]);
 
@@ -126,14 +123,6 @@ var ME_STUB      = new pkg.PointerEvent(), // instance of mouse event
     TOUCH_STUB   = new pkg.PointerEvent(), // instance of touch event
     POINTER_STUB = new pkg.PointerEvent(); // instance of pointer event
 
-
-TOUCH_STUB.isAction = function() {
-    return this.touchCounter === 1;
-};
-
-TOUCH_STUB.isContext = function() {
-    return this.touchCounter === 2;  // TODO: here should be group analyzed (both touch has to be the same group)
-};
 
 ME_STUB.pointerType      = "mouse";
 TOUCH_STUB.pointerType   = "touch";
@@ -310,7 +299,7 @@ pkg.PointerEventUnifier = Class([
                 if (mp.$adapter.element === this.element) {
                     // target component exists and mouse cursor moved on the same
                     // canvas where mouse pressed occurred
-                    if (this.$timer === null) {
+                    if (this.$timer === null) {  // ignore drag for if the queue of touches is not empty
                         stub.$fillWith(id, e);
 
                         var dx = stub.pageX - mp.pageX,
@@ -332,7 +321,7 @@ pkg.PointerEventUnifier = Class([
 
                             // using gamma we can figure out direction
                             if (gamma > -PI4) {
-                                d = (gamma < PI4) ? "right" : (gamma < PI4_3 ? "buttom" : "left");
+                                d = (gamma < PI4) ? "right" : (gamma < PI4_3 ? "bottom" : "left");
                             }
                             else {
                                 d = (gamma > -PI4_3) ? "top" : "left";
@@ -367,6 +356,52 @@ pkg.PointerEventUnifier = Class([
                 else {
                     mp.$adapter.$DRAG(id, e, stub);
                 }
+            }
+        };
+
+        this.$fireUP = function(id, e, mp, stub, destination) {
+            try {
+                // store coordinates and target
+                stub.$fillWith(id, e);
+
+                // TODO: uncomment it and replace with sub or so
+                //if (tt.group != null) tt.group.active = false;
+
+                // add press coordinates what can help to detect source
+                // of the event
+                stub.pressPageX = mp.pressPageX;
+                stub.pressPageY = mp.pressPageY;
+
+                // fire dragged or clicked
+                if (mp.isDragged === true) {
+                    destination.$pointerDragEnded(stub);
+                }
+                else {
+                    if ($lastPointerReleased != null &&
+                        $lastPointerReleased.identifier === id &&
+                        (new Date().getTime() - $lastPointerReleased.time) <= pkg.doubleClickDelta)
+                    {
+                        destination.$pointerDoubleClicked(stub);
+                    }
+                    else {
+                        if (mp.group === stub.touchCounter) {  // TODO: temporary solution
+                            destination.$pointerClicked(stub);
+                        }
+                    }
+                }
+
+                // always complete pointer pressed with appropriate
+                // release event
+                destination.$pointerReleased(stub);
+            }
+            finally {
+                // clear handled pressed and dragged state
+                if (stub.touchCounter > 0) stub.touchCounter--;
+                $lastPointerReleased = $pointerPressedEvents[id];
+                delete $pointerPressedEvents[id];
+
+                // remove global move listener if necessary
+                $cleanDragFix();
             }
         };
 
@@ -432,64 +467,17 @@ pkg.PointerEventUnifier = Class([
                         // keep it for exceptional cases
                         $enteredElement = this.element;
                         throw ee;
-                    }
-                    finally {
+                    } finally {
                         mp.$adapter.$UP(id, e, stub);
                     }
-                }
-                else {
-                    function $fireUP(id, e, mp, stub, destination) {
-                        try {
-                            // store coordinates and target
-                            stub.$fillWith(id, e);
-
-                            // TODO: uncomment it and replace with sub or so
-                            //if (tt.group != null) tt.group.active = false;
-
-                            // add press coordinates what can help to detect source
-                            // of the event
-                            stub.pressPageX = mp.pressPageX;
-                            stub.pressPageY = mp.pressPageY;
-
-                            // fire dragged or clicked
-                            if (mp.isDragged === true) {
-                                destination.$pointerDragEnded(stub);
-                            }
-                            else {
-                                if ($lastPointerReleased != null &&
-                                    $lastPointerReleased.identifier === id &&
-                                    (new Date().getTime() - $lastPointerReleased.time) <= pkg.doubleClickDelta)
-                                {
-                                    destination.$pointerDoubleClicked(stub);
-                                }
-                                else {
-                                    destination.$pointerClicked(stub);
-                                }
-                            }
-
-                            // always complete pointer pressed with appropriate
-                            // release event
-                            destination.$pointerReleased(stub);
-                        }
-                        finally {
-                            // clear handled pressed and dragged state
-                            if (stub.touchCounter > 0) stub.touchCounter--;
-                            $lastPointerReleased = $pointerPressedEvents[id];
-                            delete $pointerPressedEvents[id];
-
-                            // remove global move listener if necessary
-                            $cleanDragFix();
-                        }
-                    }
-
+                } else {
                     if (isPressedInQ) {
                         var $this = this;
                         setTimeout(function() {
-                            $fireUP(id, e, mp, stub, $this.destination);
+                            $this.$fireUP(id, e, mp, stub, $this.destination);
                         }, 50);
-                    }
-                    else {
-                        $fireUP(id, e, mp, stub, this.destination);
+                    } else {
+                        this.$fireUP(id, e, mp, stub, this.destination);
                     }
                 }
             }
@@ -514,10 +502,15 @@ pkg.PointerEventUnifier = Class([
                         $pointerPressedEvents[t.identifier] = t;
 
                         t.stub.$fillWith(t.identifier, t);
-                        t.stub.group = l; // TODO: temporary solution
-                        this.destination.$pointerPressed(t.stub);
-                    }
-                    catch(ex) {
+                        t.group = l; // TODO: temporary solution
+
+                        if (this.destination.$pointerPressed(t.stub) === true) {
+                            if (t.stub != null && t.stub.touchCounter > 0) {
+                                t.stub.touchCounter--;
+                            }
+                            delete $pointerPressedEvents[t.identifier];
+                        }
+                    } catch(ex) {
                         // don't forget to decrease counter
                         if (t.stub != null && t.stub.touchCounter > 0) {
                             t.stub.touchCounter--;
@@ -922,7 +915,13 @@ pkg.PointerEventUnifier = Class([
                     if (t != null && (t.pageX != Math.floor(nmt.pageX) ||
                                       t.pageY != Math.floor(nmt.pageY))  )
                     {
-                        $this.$DRAG(nmt.identifier, nmt, TOUCH_STUB);
+                        // TODO: analyzing time is not enough to generate click event since
+                        // a user can put finger and wait for a long time. the best way is
+                        // normalize time with movement (number of movement of dx/dy accumulation)
+                        //if (t.isDragged) {// || (new Date().getTime() - t.time) > 200) {
+                        if (t.isDragged || Math.abs(nmt.pageX - t.pageX) + Math.abs(nmt.pageY - t.pageY) > 4) {
+                            $this.$DRAG(nmt.identifier, nmt, TOUCH_STUB);
+                        }
                     }
                 }
 

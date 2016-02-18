@@ -5,6 +5,21 @@
  */
 (function(pkg, Class, Interface) {
 
+
+pkg.$validateValue = function(value) {
+    if (arguments.length < 2) {
+        throw new Error("Invalid arguments list. List of valid values is expected");
+    }
+
+    for(var i = 1; i < arguments.length; i++) {
+        if (arguments[i] === value) return value;
+    }
+
+    var values = Array.prototype.slice.call(arguments).slice(1);
+    throw new Error("Invalid value '" + value + "',the following values are expected: " + values.join(','));
+};
+
+
 pkg.format = function(s, obj, ph) {
     if (arguments.length < 3) ph = '';
 

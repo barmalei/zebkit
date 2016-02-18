@@ -1237,11 +1237,7 @@ pkg.FlowLayout = Class(pkg.Layout, [
                 }
 
                 if (arguments.length > 2)  {
-                    dir = dir;
-                    if (dir !== "horizontal" && dir !== "vertical") {
-                        throw new Error("Invalid direction " + dir);
-                    }
-                    this.direction = dir;
+                    this.direction = zebkit.util.$validateValue(dir, "horizontal", "vertical");
                 }
 
                 if (arguments.length > 3) this.gap = g;
@@ -1382,14 +1378,8 @@ pkg.ListLayout = Class(pkg.Layout,[
             if (arguments.length === 1) {
                 this.gap = ax;
             } else if (arguments.length > 1) {
-                this.ax  = ax;
+                this.ax  = zebkit.util.$validateValue(ax, "stretch", "left", "right", "center");
                 this.gap = gap;
-            }
-
-            if (this.ax !== "stretch" && this.ax !== "left"  &&
-                this.ax !== "right"   && this.ax !== "center"  )
-            {
-                throw new Error("Invalid alignment " + this.ax);
             }
         };
 
@@ -1489,11 +1479,7 @@ pkg.PercentLayout = Class(pkg.Layout, [
 
         this[''] = function(dir, gap, stretch) {
             if (arguments.length > 0) {
-                this.direction = dir;
-                if (this.direction !== "horizontal" && this.direction !== "vertical") {
-                    throw new Error("Invalid direction : " + this.direction);
-                }
-
+                this.direction = zebkit.util.$validateValue(dir, "horizontal", "vertical");
                 if (arguments.length > 1) this.gap = gap;
                 if (arguments.length > 2) this.stretch = stretch;
             }
@@ -1635,6 +1621,9 @@ pkg.Constraints = Class([
                 this.ax = ax;
                 if (arguments.length > 1) this.ay = ay;
                 if (arguments.length > 2) this.setPadding(p);
+
+                zebkit.util.$validateValue(this.ax, "stretch", "left", "center", "right");
+                zebkit.util.$validateValue(this.ay, "stretch", "top", "center", "bottom");
             }
         };
 

@@ -171,8 +171,6 @@ zebkit.package("ui", function(pkg, Class) {
 
             this.altKey = this.shiftKey = this.ctrlKey = this.metaKey = false;
 
-            // TODO: experemental property
-            this.eatMe = false;
 
             this.$fillWithParams = function(source, code, ch, mask) {
                 this.$setMask(mask);
@@ -193,8 +191,6 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             this.$fillWith = function(e) {
-                this.eatMe = false;
-
                 this.code = (e.which || e.keyCode || 0);
                 if (this.code === pkg.KeyEvent.ENTER) {
                     this.ch = "\n";

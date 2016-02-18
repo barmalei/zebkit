@@ -311,8 +311,7 @@ pkg.BaseList = Class(pkg.Panel, zebkit.util.Position.Metric, pkg.$ViewsSetterMix
                     this.repaintByOffsets(prev, this.selectedIndex);
                     this.fireSelected(prev);
                 }
-            }
-            else {
+            } else {
                 this.fireSelected(null);
             }
         };
@@ -337,7 +336,7 @@ pkg.BaseList = Class(pkg.Panel, zebkit.util.Position.Metric, pkg.$ViewsSetterMix
         this.pointerReleased = function(e){
             if (this.model != null     &&
                 this.model.count() > 0 &&
-                e.isAction()       &&
+                e.isAction()           &&
                 this.position.offset != this.selectedIndex)
             {
                 this.position.setOffset(this.selectedIndex);
@@ -374,8 +373,7 @@ pkg.BaseList = Class(pkg.Panel, zebkit.util.Position.Metric, pkg.$ViewsSetterMix
                     case pkg.KeyEvent.END:
                         if (e.ctrlKey) {
                             this.position.setOffset(this.position.metrics.getMaxOffset());
-                        }
-                        else {
+                        } else {
                             this.position.seekLineTo("end");
                         }
                         break;
@@ -429,8 +427,7 @@ pkg.BaseList = Class(pkg.Panel, zebkit.util.Position.Metric, pkg.$ViewsSetterMix
             this.invalidate();
             if (this.selectedIndex == index || this.model.count() === 0) {
                 this.select(-1);
-            }
-            else {
+            } else {
                 if (this.selectedIndex > index) {
                     this.selectedIndex--;
                 }
@@ -478,8 +475,7 @@ pkg.BaseList = Class(pkg.Panel, zebkit.util.Position.Metric, pkg.$ViewsSetterMix
 
             if (this.isComboMode === true) {
                 this.notifyScrollMan(off);
-            }
-            else {
+            } else {
                 this.select(off);
             }
 
@@ -883,8 +879,7 @@ pkg.List = Class(pkg.BaseList, [
                         this.firstVisible--;
                         this.firstVisibleY -= this.heights[this.firstVisible];
                     }
-                }
-                else {
+                } else {
                     this.firstVisible  = 0;
                     this.firstVisibleY = top;
                 }
@@ -1078,8 +1073,7 @@ pkg.CompList = Class(pkg.BaseList, [
         this.setModel = function(m){
             if (Array.isArray(m)) {
                 for(var i=0; i < m.length; i++) this.add(m[i]);
-            }
-            else {
+            } else {
                 throw new Error("Invalid comp list model");
             }
         };
@@ -1478,8 +1472,9 @@ pkg.Combo = Class(pkg.Panel, [
             if (src === this.content) {
                 try {
                     this.$lockListSelEvent = true;
-                    if (text == null) this.list.select(-1);
-                    else {
+                    if (text == null) {
+                        this.list.select(-1);
+                    } else {
                         var m = this.list.model;
                         for(var i = 0;i < m.count(); i++){
                             var mv = m.get(i);
@@ -1586,14 +1581,16 @@ pkg.Combo = Class(pkg.Panel, [
                 }
 
                 if (py + this.height + ps.height > canvas.height) {
-                    if (py - ps.height >= 0) py -= (ps.height + this.height);
-                    else {
+                    if (py - ps.height >= 0) {
+                        py -= (ps.height + this.height);
+                    } else {
                         var hAbove = canvas.height - py - this.height;
                         if(py > hAbove) {
                             ps.height = py;
                             py -= (ps.height + this.height);
+                        } else {
+                            ps.height = hAbove;
                         }
-                        else ps.height = hAbove;
                     }
                 }
 
@@ -1644,7 +1641,8 @@ pkg.Combo = Class(pkg.Panel, [
          * @param  {zebkit.ui.KeyEvent} e a key event
          * @method keyPressed
          */
-        this.keyPressed = function (e){
+        this.keyPressed = function (e) {
+            console.log("Combo.keyPressed() " + e.code);
             if (this.list.model != null) {
                 var index = this.list.selectedIndex;
                 switch(e.code) {

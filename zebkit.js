@@ -469,7 +469,8 @@ pkg.Singleton = function(clazz) {
  */
 pkg.Interface = make_template(null, function() {
     var $Interface = make_template(pkg.Interface, function() {
-        throw new Error("Interface cannot be instantiated");
+        return new (pkg.Class($Interface, arguments[0]))();
+        //throw new Error("Interface cannot be instantiated");
     }, null);
 
     if (arguments.length > 1) {
@@ -1038,6 +1039,11 @@ pkg.Class = make_template(null, function() {
         }
 
         mixing.call(this, this, arguments[0], true);
+    };
+
+
+    classTemplate.mixing = function() {
+        mixing.call(this, this, arguments[0]);
     };
 
     return classTemplate;
@@ -2618,11 +2624,7 @@ pkg.FlowLayout = Class(pkg.Layout, [
                 }
 
                 if (arguments.length > 2)  {
-                    dir = dir;
-                    if (dir !== "horizontal" && dir !== "vertical") {
-                        throw new Error("Invalid direction " + dir);
-                    }
-                    this.direction = dir;
+                    this.direction = zebkit.util.$validateValue(dir, "horizontal", "vertical");
                 }
 
                 if (arguments.length > 3) this.gap = g;
@@ -2763,14 +2765,8 @@ pkg.ListLayout = Class(pkg.Layout,[
             if (arguments.length === 1) {
                 this.gap = ax;
             } else if (arguments.length > 1) {
-                this.ax  = ax;
+                this.ax  = zebkit.util.$validateValue(ax, "stretch", "left", "right", "center");
                 this.gap = gap;
-            }
-
-            if (this.ax !== "stretch" && this.ax !== "left"  &&
-                this.ax !== "right"   && this.ax !== "center"  )
-            {
-                throw new Error("Invalid alignment " + this.ax);
             }
         };
 
@@ -2870,11 +2866,7 @@ pkg.PercentLayout = Class(pkg.Layout, [
 
         this[''] = function(dir, gap, stretch) {
             if (arguments.length > 0) {
-                this.direction = dir;
-                if (this.direction !== "horizontal" && this.direction !== "vertical") {
-                    throw new Error("Invalid direction : " + this.direction);
-                }
-
+                this.direction = zebkit.util.$validateValue(dir, "horizontal", "vertical");
                 if (arguments.length > 1) this.gap = gap;
                 if (arguments.length > 2) this.stretch = stretch;
             }
@@ -3016,6 +3008,9 @@ pkg.Constraints = Class([
                 this.ax = ax;
                 if (arguments.length > 1) this.ay = ay;
                 if (arguments.length > 2) this.setPadding(p);
+
+                zebkit.util.$validateValue(this.ax, "stretch", "left", "center", "right");
+                zebkit.util.$validateValue(this.ay, "stretch", "top", "center", "bottom");
             }
         };
 
@@ -3274,6 +3269,21 @@ pkg.GridLayout = Class(pkg.Layout, [
  * @requires zebkit
  */
 (function(pkg, Class, Interface) {
+
+
+pkg.$validateValue = function(value) {
+    if (arguments.length < 2) {
+        throw new Error("Invalid arguments list. List of valid values is expected");
+    }
+
+    for(var i = 1; i < arguments.length; i++) {
+        if (arguments[i] === value) return value;
+    }
+
+    var values = Array.prototype.slice.call(arguments).slice(1);
+    throw new Error("Invalid value '" + value + "',the following values are expected: " + values.join(','));
+};
+
 
 pkg.format = function(s, obj, ph) {
     if (arguments.length < 3) ph = '';
@@ -8051,22 +8061,11 @@ pkg.PointerEvent = Class(zebkit.util.Event, [
 
         this.pressure = 0.5;
 
-        // TODO: not completed
-        this.pressGroup = [];
-
-        // TODO: experemental property
-        this.eatMe = false;
-
         this.isAction = function() {
-            return this.identifier === LMOUSE && this.touchCounter === 1;
-        };
-
-        this.isContext = function() {
-            return this.identifier === RMOUSE && this.touchCounter === 1;
+            return this.identifier !== RMOUSE && this.touchCounter === 1;
         };
 
         this.$fillWith = function(identifier, e) {
-            this.eatMe      = false;
             this.pageX      = Math.floor(e.pageX);
             this.pageY      = Math.floor(e.pageY);
             this.target     = e.target;
@@ -8077,6 +8076,14 @@ pkg.PointerEvent = Class(zebkit.util.Event, [
             this.metaKey    = typeof e.metaKey  !== 'undefined' ? e.metaKey  : false;
             this.pressure   = typeof e.pressure !== 'undefined' ? e.pressure : 0.5;
         };
+
+        // TODO: not implemented method
+        this.getTouches = function() {
+            var touches = [];
+            for(var k in pkg.$pointerPressedEvents) {
+
+            }
+        };
     }
 ]);
 
@@ -8084,14 +8091,6 @@ var ME_STUB      = new pkg.PointerEvent(), // instance of mouse event
     TOUCH_STUB   = new pkg.PointerEvent(), // instance of touch event
     POINTER_STUB = new pkg.PointerEvent(); // instance of pointer event
 
-
-TOUCH_STUB.isAction = function() {
-    return this.touchCounter === 1;
-};
-
-TOUCH_STUB.isContext = function() {
-    return this.touchCounter === 2;  // TODO: here should be group analyzed (both touch has to be the same group)
-};
 
 ME_STUB.pointerType      = "mouse";
 TOUCH_STUB.pointerType   = "touch";
@@ -8268,7 +8267,7 @@ pkg.PointerEventUnifier = Class([
                 if (mp.$adapter.element === this.element) {
                     // target component exists and mouse cursor moved on the same
                     // canvas where mouse pressed occurred
-                    if (this.$timer === null) {
+                    if (this.$timer === null) {  // ignore drag for if the queue of touches is not empty
                         stub.$fillWith(id, e);
 
                         var dx = stub.pageX - mp.pageX,
@@ -8290,7 +8289,7 @@ pkg.PointerEventUnifier = Class([
 
                             // using gamma we can figure out direction
                             if (gamma > -PI4) {
-                                d = (gamma < PI4) ? "right" : (gamma < PI4_3 ? "buttom" : "left");
+                                d = (gamma < PI4) ? "right" : (gamma < PI4_3 ? "bottom" : "left");
                             }
                             else {
                                 d = (gamma > -PI4_3) ? "top" : "left";
@@ -8325,6 +8324,52 @@ pkg.PointerEventUnifier = Class([
                 else {
                     mp.$adapter.$DRAG(id, e, stub);
                 }
+            }
+        };
+
+        this.$fireUP = function(id, e, mp, stub, destination) {
+            try {
+                // store coordinates and target
+                stub.$fillWith(id, e);
+
+                // TODO: uncomment it and replace with sub or so
+                //if (tt.group != null) tt.group.active = false;
+
+                // add press coordinates what can help to detect source
+                // of the event
+                stub.pressPageX = mp.pressPageX;
+                stub.pressPageY = mp.pressPageY;
+
+                // fire dragged or clicked
+                if (mp.isDragged === true) {
+                    destination.$pointerDragEnded(stub);
+                }
+                else {
+                    if ($lastPointerReleased != null &&
+                        $lastPointerReleased.identifier === id &&
+                        (new Date().getTime() - $lastPointerReleased.time) <= pkg.doubleClickDelta)
+                    {
+                        destination.$pointerDoubleClicked(stub);
+                    }
+                    else {
+                        if (mp.group === stub.touchCounter) {  // TODO: temporary solution
+                            destination.$pointerClicked(stub);
+                        }
+                    }
+                }
+
+                // always complete pointer pressed with appropriate
+                // release event
+                destination.$pointerReleased(stub);
+            }
+            finally {
+                // clear handled pressed and dragged state
+                if (stub.touchCounter > 0) stub.touchCounter--;
+                $lastPointerReleased = $pointerPressedEvents[id];
+                delete $pointerPressedEvents[id];
+
+                // remove global move listener if necessary
+                $cleanDragFix();
             }
         };
 
@@ -8390,64 +8435,17 @@ pkg.PointerEventUnifier = Class([
                         // keep it for exceptional cases
                         $enteredElement = this.element;
                         throw ee;
-                    }
-                    finally {
+                    } finally {
                         mp.$adapter.$UP(id, e, stub);
                     }
-                }
-                else {
-                    function $fireUP(id, e, mp, stub, destination) {
-                        try {
-                            // store coordinates and target
-                            stub.$fillWith(id, e);
-
-                            // TODO: uncomment it and replace with sub or so
-                            //if (tt.group != null) tt.group.active = false;
-
-                            // add press coordinates what can help to detect source
-                            // of the event
-                            stub.pressPageX = mp.pressPageX;
-                            stub.pressPageY = mp.pressPageY;
-
-                            // fire dragged or clicked
-                            if (mp.isDragged === true) {
-                                destination.$pointerDragEnded(stub);
-                            }
-                            else {
-                                if ($lastPointerReleased != null &&
-                                    $lastPointerReleased.identifier === id &&
-                                    (new Date().getTime() - $lastPointerReleased.time) <= pkg.doubleClickDelta)
-                                {
-                                    destination.$pointerDoubleClicked(stub);
-                                }
-                                else {
-                                    destination.$pointerClicked(stub);
-                                }
-                            }
-
-                            // always complete pointer pressed with appropriate
-                            // release event
-                            destination.$pointerReleased(stub);
-                        }
-                        finally {
-                            // clear handled pressed and dragged state
-                            if (stub.touchCounter > 0) stub.touchCounter--;
-                            $lastPointerReleased = $pointerPressedEvents[id];
-                            delete $pointerPressedEvents[id];
-
-                            // remove global move listener if necessary
-                            $cleanDragFix();
-                        }
-                    }
-
+                } else {
                     if (isPressedInQ) {
                         var $this = this;
                         setTimeout(function() {
-                            $fireUP(id, e, mp, stub, $this.destination);
+                            $this.$fireUP(id, e, mp, stub, $this.destination);
                         }, 50);
-                    }
-                    else {
-                        $fireUP(id, e, mp, stub, this.destination);
+                    } else {
+                        this.$fireUP(id, e, mp, stub, this.destination);
                     }
                 }
             }
@@ -8472,10 +8470,15 @@ pkg.PointerEventUnifier = Class([
                         $pointerPressedEvents[t.identifier] = t;
 
                         t.stub.$fillWith(t.identifier, t);
-                        t.stub.group = l; // TODO: temporary solution
-                        this.destination.$pointerPressed(t.stub);
-                    }
-                    catch(ex) {
+                        t.group = l; // TODO: temporary solution
+
+                        if (this.destination.$pointerPressed(t.stub) === true) {
+                            if (t.stub != null && t.stub.touchCounter > 0) {
+                                t.stub.touchCounter--;
+                            }
+                            delete $pointerPressedEvents[t.identifier];
+                        }
+                    } catch(ex) {
                         // don't forget to decrease counter
                         if (t.stub != null && t.stub.touchCounter > 0) {
                             t.stub.touchCounter--;
@@ -8880,7 +8883,13 @@ pkg.PointerEventUnifier = Class([
                     if (t != null && (t.pageX != Math.floor(nmt.pageX) ||
                                       t.pageY != Math.floor(nmt.pageY))  )
                     {
-                        $this.$DRAG(nmt.identifier, nmt, TOUCH_STUB);
+                        // TODO: analyzing time is not enough to generate click event since
+                        // a user can put finger and wait for a long time. the best way is
+                        // normalize time with movement (number of movement of dx/dy accumulation)
+                        //if (t.isDragged) {// || (new Date().getTime() - t.time) > 200) {
+                        if (t.isDragged || Math.abs(nmt.pageX - t.pageX) + Math.abs(nmt.pageY - t.pageY) > 4) {
+                            $this.$DRAG(nmt.identifier, nmt, TOUCH_STUB);
+                        }
                     }
                 }
 
@@ -9074,8 +9083,6 @@ zebkit.package("ui", function(pkg, Class) {
 
             this.altKey = this.shiftKey = this.ctrlKey = this.metaKey = false;
 
-            // TODO: experemental property
-            this.eatMe = false;
 
             this.$fillWithParams = function(source, code, ch, mask) {
                 this.$setMask(mask);
@@ -9096,8 +9103,6 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             this.$fillWith = function(e) {
-                this.eatMe = false;
-
                 this.code = (e.which || e.keyCode || 0);
                 if (this.code === pkg.KeyEvent.ENTER) {
                     this.ch = "\n";
@@ -11171,22 +11176,6 @@ pkg.PasswordText = Class(pkg.TextRender, [
 ]);
 
 pkg.TabBorder = Class(pkg.View, [
-    function(t, w) {
-        if (arguments.length === 1) w = 1;
-
-        this.type  = t;
-        this.left = this.top = this.bottom = this.right = 6 + w;
-        this.width = w;
-
-        this.onColor1 = pkg.palette.black;
-        this.onColor2 = pkg.palette.gray5;
-        this.offColor = pkg.palette.gray1;
-
-        this.fillColor1 = "#DCF0F7";
-        this.fillColor2 = pkg.palette.white;
-        this.fillColor3 = pkg.palette.gray7;
-    },
-
     function $prototype() {
         this.paint = function(g,x,y,w,h,d){
             var xx = x + w - 1,
@@ -11328,6 +11317,22 @@ pkg.TabBorder = Class(pkg.View, [
         this.getBottom = function () { return this.bottom;};
         this.getLeft   = function () { return this.left;  };
         this.getRight  = function () { return this.right; };
+    },
+
+    function(t, w) {
+        if (arguments.length === 1) w = 1;
+
+        this.type  = t;
+        this.left  = this.top = this.bottom = this.right = 6 + w;
+        this.width = w;
+
+        this.onColor1 = pkg.palette.black;
+        this.onColor2 = pkg.palette.gray5;
+        this.offColor = pkg.palette.gray1;
+
+        this.fillColor1 = "#DCF0F7";
+        this.fillColor2 = pkg.palette.white;
+        this.fillColor3 = pkg.palette.gray7;
     }
 ]);
 
@@ -11590,15 +11595,8 @@ pkg.TitledBorder = Class(pkg.Render, [
         };
 
         this[''] = function (b, a){
-            if (a != null) {
-                this.lineAlignment = a;
-            }
-
-            if (b == null && this.lineAlignment !== "bottom" &&
-                             this.lineAlignment !== "top" &&
-                             this.lineAlignment !== "center")
-            {
-                throw new Error("" + this.lineAlignment);
+            if (arguments.length > 1) {
+                this.lineAlignment = zebkit.util.$validateValue(a, "bottom", "top", "center");
             }
             this.setTarget(b);
         };
@@ -11635,8 +11633,10 @@ pkg.BunldeView = Class(pkg.View, [
         this.direction = "vertical";
 
         this[''] = function(dir, color) {
-            if (color != null) this.color = color;
-            if (dir != null) this.direction = dir;
+            if (arguments.length > 0) {
+                this.direction = zebkit.util.$validateValue(dir, "vertical", "horizontal");
+                if (arguments.length > 1) this.color = color;
+            }
         };
 
         this.paint =  function(g,x,y,w,h,d) {
@@ -11847,7 +11847,7 @@ FOCUS_EVENT = new pkg.FocusEvent();
 //
 // Extend Pointer event with zebkit specific fields and methods
 //
-pkg.PointerEvent.extend([
+pkg.PointerEvent.mixing([
     function $prototype() {
         /**
          * Absolute mouse pointer x coordinate
@@ -11906,8 +11906,7 @@ pkg.PointerEvent.extend([
                 this.absX = ax;
                 this.absY = ay;
                 this.source = source;
-            }
-            else {
+            } else {
                 this.source = source;
                 this.absX = ax;
                 this.absY = ay;
@@ -11983,8 +11982,7 @@ pkg.$cvp = function(c, r) {
         var p = c.parent, px = -c.x, py = -c.y;
         if (r == null) {
             r = { x:0, y:0, width : c.width, height : c.height };
-        }
-        else {
+        } else {
             r.x = r.y = 0;
             r.width  = c.width;
             r.height = c.height;
@@ -12568,8 +12566,7 @@ pkg.Panel = Class(zebkit.layout.Layoutable, [
                                         da.width  = Math.max(dax + da.width,  x + w) - da.x;
                                         da.height = Math.max(day + da.height, y + h) - da.y;
                                     }
-                                }
-                                else {
+                                } else {
                                     // if the target canvas doesn't have a dirty area set than
                                     // cut (if necessary) the requested repainting area by the
                                     // canvas size
@@ -12690,8 +12687,7 @@ pkg.Panel = Class(zebkit.layout.Layoutable, [
                     if (this.update != null) this.update(g);
 
                     g.restore();
-                }
-                else {
+                } else {
                     if (b) {
                         this.bg.paint(g, 0, 0, this.width, this.height, this);
                     }
@@ -12723,8 +12719,7 @@ pkg.Panel = Class(zebkit.layout.Layoutable, [
                             this.paint(g);
                             g.restore();
                         }
-                    }
-                    else {
+                    } else {
                         this.paint(g);
                     }
                 }
@@ -12852,8 +12847,8 @@ pkg.Panel = Class(zebkit.layout.Layoutable, [
         this.getComponentAt = function(x,y){
             var r = pkg.$cvp(this, temporary);
 
-            if (r == null || (x < r.x || y < r.y ||
-                x >= r.x + r.width || y >= r.y + r.height))
+            if (r === null ||
+                (x < r.x || y < r.y || x >= r.x + r.width || y >= r.y + r.height))
             {
                 return null;
             }
@@ -12926,8 +12921,7 @@ pkg.Panel = Class(zebkit.layout.Layoutable, [
 
             if (l.width > 0 && l.height > 0) {
                 l.repaint();
-            }
-            else {
+            } else {
                 this.repaint(l.x, l.y, 1, 1);
             }
         };
@@ -13223,8 +13217,7 @@ pkg.Panel = Class(zebkit.layout.Layoutable, [
         this.setKids = function(a) {
             if (arguments.length === 1 && zebkit.instanceOf(a, pkg.Panel)) {
                this.add(a);
-            }
-            else {
+            } else {
                 // if components list passed as number of arguments
                 if (arguments.length > 1) {
                     for(var i = 0; i < arguments.length; i++) {
@@ -13233,16 +13226,14 @@ pkg.Panel = Class(zebkit.layout.Layoutable, [
                             this.add(a.$new != null ? a.$new() : a);
                         }
                     }
-                }
-                else {
+                } else {
                     if (Array.isArray(a)) {
                         for(var i=0; i < a.length; i++) {
                             if (a[i] != null) {
                                 this.add(a[i]);
                             }
                         }
-                    }
-                    else {
+                    } else {
                         var kids = a;
                         for(var k in kids) {
                             if (kids.hasOwnProperty(k)) {
@@ -13361,8 +13352,7 @@ pkg.Panel = Class(zebkit.layout.Layoutable, [
             if (arguments.length > 0) {
                 if (l.constructor === Object) {
                     this.properties(l);
-                }
-                else {
+                } else {
                     this.setLayout(l);
                 }
             }
@@ -13608,8 +13598,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
         if (this.isEnabled != b) {
             if (b) {
                 this.$container.removeChild(this.$blockElement);
-            }
-            else {
+            } else {
                 if (this.$blockElement == null) {
                     this.$blockElement = zebkit.web.$createBlockedElement();
                 }
@@ -13647,8 +13636,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
 
             // visibility correction is done by HTML elements manager
             this.$container.style.visibility = prevVisibility;
-        }
-        else {
+        } else {
             this.$sizeAdjusted = false;
         }
 
@@ -13682,8 +13670,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
 
         if (b == null) {
            this.setStyle("border", "none");
-        }
-        else {
+        } else {
             this.setStyles({
                 //!!!! bloody FF fix, the border can be made transparent
                 //!!!! only via "border" style
@@ -13733,8 +13720,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
         // sync state of native focus and zebkit focus
         if (this.hasFocus()) {
             this.$focus();
-        }
-        else {
+        } else {
             this.$blur();
         }
     },
@@ -13824,8 +13810,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
             e.parentNode.removeChild(e);
             this.$container.appendChild(e);
             pn.appendChild(this.$container);
-        }
-        else {
+        } else {
             // to force all children element be aligned
             // relatively to the wrapper we have to set
             // position CSS to absolute or absolute
@@ -13854,6 +13839,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
             var $this = this;
 
             zebkit.web.$focusin(fe, function(e) {
+
                 // sync native focus with zebkit focus if necessary
                 if ($this.hasFocus() === false) {
                     $this.requestFocus();
@@ -13861,6 +13847,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
             }, false);
 
             zebkit.web.$focusout(fe, function(e) {
+
                 // sync native focus with zebkit focus if necessary
                 if ($this.hasFocus()) {
                     pkg.focusManager.requestFocus(null);
@@ -14197,7 +14184,7 @@ pkg.CanvasLayer = Class(pkg.HtmlCanvas, [
          *  @param {zebkit.ui.PointerEvent} e a pointer event
          *  @return {Boolean} return true if the layer wants to
          *  catch control
-         *  @method layerPointerPressed
+         *  @method pointerPressed
          */
 
         /**
@@ -14208,18 +14195,7 @@ pkg.CanvasLayer = Class(pkg.HtmlCanvas, [
          *  @param {zebkit.ui.KeyEvent} e a key code
          *  @return {Boolean} return true if the layer wants to
          *  catch control
-         *  @method layerKeyPressed
-         */
-
-        /**
-         *  Ask if the layer is active at the given location.
-         *  If the method is not defined that means the layer
-         *  is active at any location.
-         *  @param {Integer} x a x location
-         *  @param {Integer} y a y location
-         *  @return {Boolean} return true if the layer is active
-         *  at this location
-         *  @method isLayerActiveAt
+         *  @method keyPressed
          */
     },
 
@@ -14243,14 +14219,6 @@ pkg.RootLayer = Class(pkg.CanvasLayer, [
     },
 
     function $prototype() {
-        this.layerPointerPressed = function(e) {
-            return true;
-        };
-
-        this.layerKeyPressed = function(e) {
-            return true;
-        };
-
         this.getFocusRoot = function() {
             return this;
         };
@@ -14377,12 +14345,10 @@ pkg.ImagePan = Class(pkg.ViewPan, [
                 this.$runner = null;
                 $this.setView(null);
             });
-        }
-        else {
+        } else {
             if (this.$runner == null) {
                 this.setView(null);
-            }
-            else {
+            } else {
                 var $this = this;
                 this.$runner.run(function() {
                     $this.setView(null);
@@ -14496,8 +14462,7 @@ pkg.FocusManager = Class(pkg.Manager, [
                     if (document.activeElement != cc.getCanvas().element) {
                         cc.getCanvas().element.focus();
                         this.requestFocus(cc);
-                    }
-                    else {
+                    } else {
                         this.requestFocus(cc);
                     }
                 }
@@ -14609,15 +14574,12 @@ pkg.FocusManager = Class(pkg.Manager, [
                     var nf = c.getEventDestination();
                     if (nf == null || oldFocusOwner == nf) return;
                     this.focusOwner = nf;
-                }
-                else {
+                } else {
                     this.focusOwner = c;
                 }
 
                 if (oldFocusOwner != null) {
                     var ofc = oldFocusOwner.getCanvas();
-                    if (ofc != null) ofc.$lastFocusOwner = oldFocusOwner;
-
                     FOCUS_EVENT.source  = oldFocusOwner;
                     FOCUS_EVENT.related = this.focusOwner;
                     oldFocusOwner.focused();
@@ -14652,8 +14614,7 @@ pkg.FocusManager = Class(pkg.Manager, [
                     setTimeout(function() {
                         $this.requestFocus(e.source);
                     }, 50);
-                }
-                else {
+                } else {
                     this.requestFocus(e.source);
                 }
             }
@@ -14764,12 +14725,10 @@ pkg.ShortcutManager = Class(pkg.Manager, [
                 var ch = r[i].trim().toUpperCase();
                 if (pkg.KeyEvent.hasOwnProperty("M_" + ch)) {
                     m += pkg.KeyEvent["M_" + ch];
-                }
-                else {
+                } else {
                     if (pkg.KeyEvent.hasOwnProperty(ch)) {
                         c = pkg.KeyEvent[ch];
-                    }
-                    else {
+                    } else {
                         c = parseInt(ch);
                         if (c == NaN) {
                             throw new Error("Invalid key code : " + ch);
@@ -15020,7 +14979,6 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
 
     function $prototype() {
         this.$isRootCanvas   = true;
-        this.$lastFocusOwner = null;
         this.isSizeFull      = false;
 
         this.$toElementX = function(pageX, pageY) {
@@ -15070,9 +15028,8 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
         this.$keyPressed = function(e) {
             for(var i = this.kids.length - 1;i >= 0; i--){
                 var l = this.kids[i];
-                if (l.layerKeyPressed != null && l.layerKeyPressed(e) === true){
-                    if (e.eatMe === true) return true;
-                    break;
+                if (l.layerKeyPressed != null && l.layerKeyPressed(e) === true) {
+                    return true;
                 }
             }
 
@@ -15089,7 +15046,6 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
                 e.source = pkg.focusManager.focusOwner;
                 return pkg.events.fireEvent("keyReleased", e);
             }
-
             return false;
         };
 
@@ -15162,14 +15118,12 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
                         pkg.$pointerOwner[e.identifier] = d;
                         b = pkg.events.fireEvent("pointerEntered", e.update(d, x, y)) || b;
                     }
-                }
-                else {
+                } else {
                     if (d != null && d.isEnabled === true) {
                         b = pkg.events.fireEvent("pointerMoved", e.update(d, x, y));
                     }
                 }
-            }
-            else {
+            } else {
                 if (d != null && d.isEnabled === true) {
                     pkg.$pointerOwner[e.identifier] = d;
                     b = pkg.events.fireEvent("pointerEntered", e.update(d, x, y));
@@ -15209,7 +15163,6 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
                                                                          this.$toElementX(e.pageX, e.pageY),
                                                                          this.$toElementY(e.pageX, e.pageY)));
             }
-
             return false;
         };
 
@@ -15290,13 +15243,13 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
             // send pointer event to a layer and test if it has been activated
             for(var i = this.kids.length - 1; i >= 0; i--){
                 var tl = this.kids[i];
-                if (tl.layerPointerPressed != null && tl.layerPointerPressed(e)) {
-                    if (e.eatMe === true) return true;
-                    break;
+                if (tl.layerPointerPressed != null && tl.layerPointerPressed(e) === true) {
+                    return true;
                 }
             }
 
             var d = this.getComponentAt(x, y);
+
             if (d != null && d.isEnabled === true) {
                 if (pkg.$pointerOwner[e.identifier] !== d) {
                     pkg.$pointerOwner[e.identifier] = d;
@@ -15304,27 +15257,25 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
                 }
 
                 pkg.$pointerPressedOwner[e.identifier] = d;
-                pkg.events.fireEvent("pointerPressed", e.update(d, x, y));
+
+                // TODO: prove the solution !?
+                if (pkg.events.fireEvent("pointerPressed", e.update(d, x, y)) === true) {
+                    delete pkg.$pointerPressedOwner[e.identifier];
+                    return true;
+                }
             }
+
+            return false;
         };
 
         this.getComponentAt = function(x, y){
             for(var i = this.kids.length; --i >= 0; ){
-                var tl = this.kids[i];
-
-                if (tl.isLayerActiveAt == null || tl.isLayerActiveAt(x, y)) {
-                    // !!!
-                    //  since the method is widely used the code below duplicates
-                    //  functionality of pkg.events.getEventDestination(tl.getComponentAt(x, y));
-                    //  method
-                    // !!!
-                    var c = tl.getComponentAt(x, y);
-                    if (c != null)  {
-                        var p = c;
-                        while ((p = p.parent) != null) {
-                            if (p.catchInput != null && (p.catchInput === true || (p.catchInput !== false && p.catchInput(c)))) {
-                                c = p;
-                            }
+                var c = this.kids[i].getComponentAt(x, y);
+                if (c != null) {
+                    var p = c;
+                    while ((p = p.parent) != null) {
+                        if (p.catchInput != null && (p.catchInput === true || (p.catchInput !== false && p.catchInput(c)))) {
+                            c = p;
                         }
                     }
                     return c;
@@ -15412,13 +15363,11 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
         if (arguments.length === 0) {
             w = 400;
             h = 400;
-        }
-        else {
+        } else {
             if (arguments.length === 1) {
                 w = -1;
                 h = -1;
-            }
-            else {
+            } else {
                 if (arguments.length === 2) {
                     h = w;
                     w = element;
@@ -15490,8 +15439,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
                 e.target.parentNode.getAttribute("data-zebcont") == null)
             {
                 pkg.focusManager.requestFocus(null);
-            }
-            else {
+            } else {
                 // clear focus if a focus owner component is placed in another zCanvas
                 if (e.target === $this.$container &&
                     pkg.focusManager.focusOwner != null &&
@@ -15674,8 +15622,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
 
                 // adjust location of just attached DOM component
                 $adjustLocation(c);
-            }
-            else {
+            } else {
                 // test consistency whether the DOM element already has
                 // parent node that doesn't match the discovered
                 if (parentElement           != null &&
@@ -15732,8 +15679,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
                 var e = c.$domKids[k];
                 if (e.isDOMElement === true) {
                     callback.call(this, e);
-                }
-                else {
+                } else {
                     // prevent unnecessary method call by condition
                     if (e.$domKids != null) {
                         $domElements(e, callback);
@@ -15762,8 +15708,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
             if (c.isDOMElement === true) {
                 c.$container.style.visibility = c.isVisible === false || $isInInvisibleState(c) ? "hidden"
                                                                                                 : "visible";
-            }
-            else {
+            } else {
                 if (c.$domKids != null) {
                     $domElements(c, function(e) {
                         e.$container.style.visibility = e.isVisible === false || $isInInvisibleState(e) ? "hidden" : "visible";
@@ -15788,8 +15733,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
                     cont.style.left = ((parseInt(cont.style.left, 10) || 0) - dx) + "px";
                     cont.style.top  = ((parseInt(cont.style.top,  10) || 0) - dy) + "px";
                 }
-            }
-            else {
+            } else {
                 if (c.$domKids != null) {
                     $domElements(c, function(e) {
                         $adjustLocation(e);
@@ -15840,8 +15784,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
                         if (kid.isDOMElement === true) {
                             kid.$container.parentNode.removeChild(kid.$container);
                             kid.$container.parentNode = null;
-                        }
-                        else {
+                        } else {
                             removeDOMChildren(kid);
                         }
                     }
@@ -15858,8 +15801,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
             if (c.isDOMElement === true) {
                 c.$container.parentNode.removeChild(c.$container);
                 c.$container.parentNode = null;
-            }
-            else {
+            } else {
                 removeDOMChildren(c);
             }
 
@@ -15870,14 +15812,12 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
             var p = e.source,  c = e.kid;
             if (c.isDOMElement === true) {
                 $resolveDOMParent(c);
-            }
-            else {
+            } else {
                 if (c.$domKids != null) {
                     $domElements(c, function(e) {
                         $resolveDOMParent(e);
                     });
-                }
-                else {
+                } else {
                     return;
                 }
             }
@@ -15895,8 +15835,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
                         p.$domKids[c] = c;
                         c = p;
                         p = p.parent;
-                    }
-                    else {
+                    } else {
                         if (p.$domKids.hasOwnProperty(c)) {
                             throw new Error("Inconsistent state for " + c + ", " + c.clazz.$name);
                         }
@@ -15908,11 +15847,6 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
         };
     }
 ]);
-
-
-/**
- * @for
- */
 
 });
 zebkit.package("ui", function(pkg, Class) {
@@ -16907,7 +16841,7 @@ pkg.ArrowButton = Class(pkg.EvStatePan, pkg.ButtonRepeatMix, [
         this.cursorType = pkg.Cursor.HAND;
 
         if (arguments.length > 0) {
-            this.direction = direction;
+            this.direction = zebkit.util.$validateValue(direction, "left", "right", "top", "bottom");
         }
 
         this.setView({
@@ -17138,7 +17072,7 @@ pkg.BorderPan = Class(pkg.Panel, [
          * @chainable
          */
         this.setGaps = function(vg, hg){
-            if (this.vGap != vg || hg != this.hGap){
+            if (this.vGap !== vg || hg !== this.hGap){
                 this.vGap = vg;
                 this.hGap = hg;
                 this.vrp();
@@ -17148,14 +17082,14 @@ pkg.BorderPan = Class(pkg.Panel, [
 
         this.setOrientation = function(o) {
             if (this.orient !== o) {
-                this.orient = o;
+                this.orient = zebkit.util.$validateValue(o, "top", "bottom");
                 this.vrp();
             }
         };
 
         this.setAlignment = function(a) {
             if (this.alignment !== a) {
-                this.alignment = a;
+                this.alignment = zebkit.util.$validateValue(a, "left", "right", "center");
                 this.vrp();
             }
         };
@@ -17747,7 +17681,7 @@ pkg.SplitPan = Class(pkg.Panel, [
 
         this.setOrientation = function(o) {
             if (o !== this.orient) {
-                this.orient = o;
+                this.orient = zebkit.util.$validateValue(o, "horizontal", "vertical");
                 this.vrp();
             }
         };
@@ -18097,11 +18031,8 @@ pkg.Progress = Class(pkg.Panel, [
      * @method setOrientation
      */
     function setOrientation(o){
-        if (o !== "horizontal" && o !== "vertical") {
-            throw new Error("" + o);
-        }
-        if (o != this.orient){
-            this.orient = o;
+        if (o !== this.orient) {
+            this.orient = zebkit.util.$validateValue(o, "horizontal", "vertical");
             this.vrp();
         }
     },
@@ -20111,12 +20042,8 @@ pkg.Tabs = Class(pkg.Panel, pkg.$ViewsSetterMix, [
          * @method  setAlignment
          */
         this.setAlignment = function(o){
-            if (o !== "top" && o !== "bottom" && o !== "left" && o !== "right") {
-                throw new Error("Invalid tabs alignment:" + o);
-            }
-
-            if (this.orient != o){
-                this.orient = o;
+            if (this.orient !== o) {
+                this.orient = zebkit.util.$validateValue(o, "top", "bottom", "left", "right");
                 this.vrp();
             }
         };
@@ -21009,9 +20936,7 @@ pkg.VideoPan = Class(pkg.Panel,  [
  */
 pkg.MobileScrollMan = Class(pkg.Manager, [
     function $prototype() {
-        this.sx = this.sy = 0;
-        this.target = null;
-        this.identifier = -1;
+        this.$timer = this.identifier = this.target = null;
 
         /**
          * Define pointer drag started events handler.
@@ -21020,17 +20945,16 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
          */
         this.pointerDragStarted = function(e) {
             if (e.touchCounter === 1 && e.pointerType === "touch") {
-                this.identifier = e.identifier;  // finger
-                var owner = e.source;
+                this.$identifier = e.identifier;
+                this.$target     = e.source;
 
-                while(owner != null && owner.doScroll == null) {
-                    owner = owner.parent;
+                // detect scrollable component
+                while (this.$target != null && this.$target.doScroll == null) {
+                    this.$target = this.$target.parent;
                 }
 
-                if (owner != null && owner.pointerDragged == null) {
-                    this.target = owner;
-                    this.sx = e.x;
-                    this.sy = e.y;
+                if (this.$target != null && this.$target.pointerDragged != null) {
+                     this.$target = null;
                 }
             }
         };
@@ -21041,22 +20965,30 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
          * @method pointerDragged
          */
         this.pointerDragged = function(e) {
-            if (e.touchCounter   === 1 &&
-                this.target      != null &&
-                this.identifier  === e.identifier)
+            if (e.touchCounter   === 1            &&
+                this.$target    !==  null         &&
+                this.$identifier === e.identifier &&
+                e.direction     !==  null            )
             {
-                var d = e.direction;
-                if (d === "bottom" || d === "top") {
-                    this.target.doScroll(0, this.sy - e.y, "touch");
-                }
-                else {
-                    if (d === "left" || d === "right") {
-                        this.target.doScroll(this.sx - e.x, 0, "touch");
-                    }
-                }
+                this.$target.doScroll(-e.dx, -e.dy, "touch");
+            }
+        };
 
-                this.sx = e.x;
-                this.sy = e.y;
+        this.$taskMethod = function() {
+            var bar = this.$target.vBar,
+                o   = bar.position.offset;
+
+            // this is linear function with angel 42. every next value will
+            // be slightly lower prev. one. theoretically angel 45 should
+            // bring to infinite scrolling :)
+            this.$dt = Math.tan(42 * Math.PI / 180) * this.$dt;
+            bar.position.setOffset(o - Math.round(this.$dt));
+            this.$counter++;
+
+            if (o === bar.position.offset) {
+                this.$target = null;
+                clearInterval(this.$timer);
+                this.$timer = null;
             }
         };
 
@@ -21066,30 +20998,18 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
          * @method pointerDragEnded
          */
         this.pointerDragEnded = function(e) {
-            if (this.target != null &&
-                this.timer  == null &&
-                this.identifier === e.identifier &&
+            if (this.$target !== null &&
+                this.$timer  === null  &&
+                this.$identifier === e.identifier &&
                 (e.direction === "bottom" || e.direction === "top") &&
-                this.target.vBar != null &&
-                this.target.vBar.isVisible === true &&
+                this.$target.vBar != null &&
+                this.$target.vBar.isVisible &&
                 e.dy !== 0)
             {
                 this.$dt = 2 * e.dy;
-                var $this = this, bar = this.target.vBar, k = 0;
-
-                this.timer = setInterval(function() {
-                    var o = bar.position.offset;
-
-                    bar.position.setOffset(o - $this.$dt);
-                    if (++k % 5 === 0) {
-                        $this.$dt = Math.floor($this.$dt/2);
-                    }
-
-                    if (o === bar.position.offset || ($this.$dt >= -1  &&  $this.$dt <= 1)) {
-                        clearInterval($this.timer);
-                        $this.timer = $this.target = null;
-                    }
-                }, 10);
+                this.$counter = 0;
+                var $this = this;
+                this.$timer = setInterval(function() { $this.$taskMethod($this); } , 50);
             }
         };
 
@@ -21099,11 +21019,11 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
          * @method pointerPressed
          */
         this.pointerPressed = function(e) {
-            if (this.timer != null) {
-                clearInterval(this.timer);
-                this.timer = null;
+            if (this.$timer !== null) {
+                clearInterval(this.$timer);
+                this.$timer = null;
             }
-            this.target = null;
+            this.$target = null;
         };
     }
 ]);
@@ -22437,8 +22357,7 @@ pkg.BaseList = Class(pkg.Panel, zebkit.util.Position.Metric, pkg.$ViewsSetterMix
                     this.repaintByOffsets(prev, this.selectedIndex);
                     this.fireSelected(prev);
                 }
-            }
-            else {
+            } else {
                 this.fireSelected(null);
             }
         };
@@ -22463,7 +22382,7 @@ pkg.BaseList = Class(pkg.Panel, zebkit.util.Position.Metric, pkg.$ViewsSetterMix
         this.pointerReleased = function(e){
             if (this.model != null     &&
                 this.model.count() > 0 &&
-                e.isAction()       &&
+                e.isAction()           &&
                 this.position.offset != this.selectedIndex)
             {
                 this.position.setOffset(this.selectedIndex);
@@ -22500,8 +22419,7 @@ pkg.BaseList = Class(pkg.Panel, zebkit.util.Position.Metric, pkg.$ViewsSetterMix
                     case pkg.KeyEvent.END:
                         if (e.ctrlKey) {
                             this.position.setOffset(this.position.metrics.getMaxOffset());
-                        }
-                        else {
+                        } else {
                             this.position.seekLineTo("end");
                         }
                         break;
@@ -22555,8 +22473,7 @@ pkg.BaseList = Class(pkg.Panel, zebkit.util.Position.Metric, pkg.$ViewsSetterMix
             this.invalidate();
             if (this.selectedIndex == index || this.model.count() === 0) {
                 this.select(-1);
-            }
-            else {
+            } else {
                 if (this.selectedIndex > index) {
                     this.selectedIndex--;
                 }
@@ -22604,8 +22521,7 @@ pkg.BaseList = Class(pkg.Panel, zebkit.util.Position.Metric, pkg.$ViewsSetterMix
 
             if (this.isComboMode === true) {
                 this.notifyScrollMan(off);
-            }
-            else {
+            } else {
                 this.select(off);
             }
 
@@ -23009,8 +22925,7 @@ pkg.List = Class(pkg.BaseList, [
                         this.firstVisible--;
                         this.firstVisibleY -= this.heights[this.firstVisible];
                     }
-                }
-                else {
+                } else {
                     this.firstVisible  = 0;
                     this.firstVisibleY = top;
                 }
@@ -23204,8 +23119,7 @@ pkg.CompList = Class(pkg.BaseList, [
         this.setModel = function(m){
             if (Array.isArray(m)) {
                 for(var i=0; i < m.length; i++) this.add(m[i]);
-            }
-            else {
+            } else {
                 throw new Error("Invalid comp list model");
             }
         };
@@ -23604,8 +23518,9 @@ pkg.Combo = Class(pkg.Panel, [
             if (src === this.content) {
                 try {
                     this.$lockListSelEvent = true;
-                    if (text == null) this.list.select(-1);
-                    else {
+                    if (text == null) {
+                        this.list.select(-1);
+                    } else {
                         var m = this.list.model;
                         for(var i = 0;i < m.count(); i++){
                             var mv = m.get(i);
@@ -23712,14 +23627,16 @@ pkg.Combo = Class(pkg.Panel, [
                 }
 
                 if (py + this.height + ps.height > canvas.height) {
-                    if (py - ps.height >= 0) py -= (ps.height + this.height);
-                    else {
+                    if (py - ps.height >= 0) {
+                        py -= (ps.height + this.height);
+                    } else {
                         var hAbove = canvas.height - py - this.height;
                         if(py > hAbove) {
                             ps.height = py;
                             py -= (ps.height + this.height);
+                        } else {
+                            ps.height = hAbove;
                         }
-                        else ps.height = hAbove;
                     }
                 }
 
@@ -23770,7 +23687,8 @@ pkg.Combo = Class(pkg.Panel, [
          * @param  {zebkit.ui.KeyEvent} e a key event
          * @method keyPressed
          */
-        this.keyPressed = function (e){
+        this.keyPressed = function (e) {
+            console.log("Combo.keyPressed() " + e.code);
             if (this.list.model != null) {
                 var index = this.list.selectedIndex;
                 switch(e.code) {
@@ -24136,35 +24054,30 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
     },
 
     function $prototype() {
-        this.isLayerActiveAt = function(x, y) {
-            return this.activeWin != null;
-        };
+        this.layerPointerPressed = function(e) {
+            if (this.kids.length > 0) {
 
-        this.layerPointerPressed = function(e){
-            var cnt = this.kids.length, x = e.x, y = e.y;
-            if (cnt > 0) {
-                // check if pointer pressed has occurred in the topest window since
-                // this is the most probable case
-                if (this.activeWin != null && this.indexOf(this.activeWin) === cnt - 1) {
+                if (this.activeWin != null && this.indexOf(this.activeWin) === this.kids.length - 1) {
                     var x1 = this.activeWin.x,
                         y1 = this.activeWin.y,
                         x2 = x1 + this.activeWin.width,
                         y2 = y1 + this.activeWin.height;
 
-                    if (x >= x1 && y >= y1 && x < x2 && y < y2) {
-                        return true;
+                    if (e.x >= x1 && e.y >= y1 && e.x < x2 && e.y < y2) {
+                        return false;
                     }
                 }
 
                 // otherwise looking for a window starting from the topest one
-                for(var i = cnt - 1; i >= 0 && i >= this.topModalIndex; i--){
+                for(var i = this.kids.length - 1; i >= 0 && i >= this.topModalIndex; i--){
                     var d = this.kids[i];
-
-                    if (d.isVisible === true &&
-                        d.isEnabled === true &&
-                        this.winsTypes[d] != "info" &&
-                        x >= d.x && y >= d.y &&
-                        x < d.x + d.width && y < d.y + d.height)
+                    if (d.isVisible &&
+                        d.isEnabled &&
+                        this.winsTypes[d] !== "info" &&
+                        e.x >= d.x &&
+                        e.y >= d.y &&
+                        e.x < d.x + d.width &&
+                        e.y < d.y + d.height)
                     {
                         this.activate(d);
                         return true;
@@ -24175,22 +24088,18 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
                     this.activate(null);
                     return false;
                 }
-
-                return true;
             }
-
             return false;
         };
 
-        this.layerKeyPressed = function(e){
+        this.layoutKeyPressed = function(e){
             if (this.kids.length > 0        &&
                 e.code === pkg.KeyEvent.TAB &&
                 e.shiftKey                     )
             {
                 if (this.activeWin == null) {
                     this.activate(this.kids[this.kids.length - 1]);
-                }
-                else {
+                } else {
                     var winIndex = this.winsStack.indexOf(this.activeWin) - 1;
                     if (winIndex < this.topModalIndex || winIndex < 0) {
                         winIndex = this.winsStack.length - 1;
@@ -24231,12 +24140,6 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
             this.activate(zebkit.layout.getDirectChild(this, e.source));
         };
 
-        this.getComponentAt = function(x,y) {
-            return (this.activeWin == null) ? null
-                                            : this.activeWin.getComponentAt(x - this.activeWin.x,
-                                                                            y - this.activeWin.y);
-        };
-
         this.getFocusRoot = function() {
             return this.activeWin;
         };
@@ -24250,7 +24153,7 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
          * @param  {zebkit.ui.Panel} c a component to be activated as window
          * @method activate
          */
-        this.activate = function(c){
+        this.activate = function(c) {
             if (c != null && (this.kids.indexOf(c) < 0 ||
                               this.winsTypes[c] === "info"))
             {
@@ -24272,8 +24175,7 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
                     if (type === "mdi" && old.$dontGrabFocus !== true) {
                         pkg.focusManager.requestFocus(null);
                     }
-                }
-                else {
+                } else {
                     if (this.winsStack.indexOf(c) < this.topModalIndex) {
                         throw new Error();
                     }
@@ -24333,37 +24235,19 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
             if (zebkit.instanceOf(type, pkg.Panel) ) {
                 listener = win;
                 win      = type;
-            }
-            else {
+            } else {
                 this.winsTypes[win] = type;
             }
 
             this.winsListeners[win] = listener;
             this.add(win);
         };
-    },
 
-    function() {
-        /**
-         * Currently activated as a window children component
-         * @attribute activeWin
-         * @type {zebkit.ui.Panel}
-         * @readOnly
-         * @protected
-         */
-        this.activeWin     = null;
-        this.topModalIndex = -1;
-        this.winsStack     = [];
-        this.winsListeners = {};
-        this.winsTypes     = {};
-
-        this.$super();
-
-        // TODO: why 1000 and how to avoid z-index manipulation
-        // the layer has to be placed above other elements that are virtually
-        // inserted in the layer
-        // TODO: this line brings to fails if window layer inherits Panel
-        this.element.style["z-index"] = "10000";
+        this.getComponentAt = function(x, y) {
+            return (this.activeWin === null) ? null
+                                             : this.activeWin.getComponentAt(x - this.activeWin.x,
+                                                                             y - this.activeWin.y);
+        };
     },
 
     function insert(index, constr, lw) {
@@ -24390,8 +24274,7 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
             this.topModalIndex = this.winsStack.length - 1;
             this.fire("winOpened", WIN_EVENT.$fillWith(lw, this, false, true));
             this.activate(lw);
-        }
-        else {
+        } else {
             this.fire("winOpened", WIN_EVENT.$fillWith(lw, this, false, true));
         }
     },
@@ -24418,8 +24301,7 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
 
             if (ci < this.topModalIndex) {
                 this.topModalIndex--;
-            }
-            else {
+            } else {
                 if (this.topModalIndex === ci){
                     for(this.topModalIndex = this.kids.length - 1;this.topModalIndex >= 0; this.topModalIndex--){
                         if (this.winsTypes[this.winsStack[this.topModalIndex]] === "modal") {
@@ -24438,10 +24320,34 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
                 }
                 this.activate(this.winsStack[aindex]);
             }
-        }
-        finally {
+        } finally {
             delete this.winsTypes[lw];
             delete this.winsListeners[lw];
+        }
+    },
+
+    function() {
+        /**
+         * Currently activated as a window children component
+         * @attribute activeWin
+         * @type {zebkit.ui.Panel}
+         * @readOnly
+         * @protected
+         */
+        this.activeWin     = null;
+        this.topModalIndex = -1;
+        this.winsStack     = [];
+        this.winsListeners = {};
+        this.winsTypes     = {};
+
+        this.$super();
+
+        // TODO: why 1000 and how to avoid z-index manipulation
+        // the layer has to be placed above other elements that are virtually
+        // inserted in the layer
+        // TODO: this line brings to fails if window layer inherits Panel
+        if (typeof this.element !== "undefined") {
+            this.element.style["z-index"] = "10000";
         }
     }
 ]);
@@ -25097,8 +25003,7 @@ pkg.MenuItem = Class(pkg.Panel, [
                 img = m[1].substring(m[1].indexOf("@(") + 2, m[1].lastIndexOf(")")).trim();
                 if (img[0] === "'") {
                    img = img.substring(1, img.length-1);
-                }
-                else {
+                } else {
                     var parts = img.split('.'),
                         scope = zebkit.$global;
 
@@ -25121,8 +25026,7 @@ pkg.MenuItem = Class(pkg.Panel, [
             }
 
             c = new pkg.ImageLabel(new this.clazz.Label(c), img);
-        }
-        else {
+        } else {
             this.getCheck().setVisible(false);
         }
 
@@ -25295,8 +25199,7 @@ pkg.Menu = Class(pkg.CompList, [
                     if (sub == null) {
                         p.activateSub(true);
                     }
-                }
-                else {
+                } else {
                     if (sub != null) p.activateSub(false);
                 }
             }
@@ -25446,8 +25349,7 @@ pkg.Menu = Class(pkg.CompList, [
             for(var i = 0; i < d.length; i++) {
                 this.add(d[i]);
             }
-        }
-        else {
+        } else {
             for(var k in d) {
                 if (d.hasOwnProperty(k)) {
                     var sub = d[k];
@@ -25474,8 +25376,7 @@ pkg.Menu = Class(pkg.CompList, [
                 this.$hideMenu(this);
                 if (p != null) p.requestFocus();
             }
-        }
-        else {
+        } else {
             this.$super(e);
         }
     },
@@ -25492,8 +25393,7 @@ pkg.Menu = Class(pkg.CompList, [
         if (p != null) {
             this.select(-1);
             this.position.setOffset(null);
-        }
-        else {
+        } else {
             this.$parentMenu = null;
         }
         this.$super(p);
@@ -25557,14 +25457,12 @@ pkg.Menu = Class(pkg.CompList, [
                 if (sub.parent != null) {
                     // hide menu since it has been already shown
                     sub.$hideMenu(this);
-                }
-                else {
+                } else {
                     // show menu
                     sub.$parentMenu = this;
                     this.$showSubMenu(sub);
                 }
-            }
-            else {
+            } else {
                 var k = this.kids[this.selectedIndex];
                 if (k.itemSelected != null) {
                     k.itemSelected();
@@ -25677,8 +25575,7 @@ pkg.Menubar = Class(pkg.Menu, [
             if (i < 0) {
                 pop.setMenubar(null);
                 this.$isActive = false;
-            }
-            else {
+            } else {
                 pop.setMenubar(this);
             }
         }
@@ -25712,39 +25609,19 @@ pkg.PopupLayer = Class(pkg.CanvasLayer, [
         this.mTop = this.mLeft = this.mBottom = this.mRight = 0;
 
         this.layerPointerPressed = function(e) {
-            // if x,y is inside active menu bar let
-            // the menu bar handle it
-            if (this.activeMenubar != null  &&
-                e.y <= this.mBottom         &&
-                e.y >= this.mTop            &&
-                e.x >= this.mLeft           &&
-                e.x <= this.mRight            )
-            {
-                return false;
+            var b = false;
+            if (this.activeMenubar != null) {
+                this.activeMenubar.select(-1);
             }
 
-            if (this.getComponentAt(e.x, e.y) == this){
-                if (this.activeMenubar != null) {
-                    this.activeMenubar.select(-1);
-                }
-
-                if (this.kids.length > 0) {
-                    this.removeAll();
-                }
-
-                return false;
-            }
-
-            return true;
+            return b;
         };
 
-        this.isLayerActiveAt = function(x,y) {
-            return this.kids.length > 0 &&
-                   ( this.activeMenubar == null  ||
-                     y > this.mBottom   ||
-                     y < this.mTop      ||
-                     x < this.mLeft     ||
-                     x > this.mRight      );
+        this.pointerPressed = function(e) {
+            if (this.kids.length > 0) {
+                this.removeAll();
+            }
+            return true;
         };
 
         this.getFocusRoot = function() {
@@ -25759,7 +25636,7 @@ pkg.PopupLayer = Class(pkg.CanvasLayer, [
         this.childKeyPressed = function(e){
             var dc = zebkit.layout.getDirectChild(this, e.source);
 
-            if (zebkit.instanceOf(dc, pkg.Menu) && this.activeMenubar != null) {
+            if (this.activeMenubar != null && zebkit.instanceOf(dc, pkg.Menu)) {
                 var s = this.activeMenubar.selectedIndex;
                 switch (e.code) {
                     case pkg.KeyEvent.RIGHT :
@@ -25808,11 +25685,16 @@ pkg.PopupLayer = Class(pkg.CanvasLayer, [
             // TODO:
             // prove of concept. if layer is active don't allow WEB events comes to upper layer
             // since there can be another HtmlElement that should not be part of interaction
-            if (cnt > 0) {
-                this.$container.style["pointer-events"] = "auto";
-            }
-            else {
-                this.$container.style["pointer-events"] = "none";
+            if (this.$container != null) { // check existence of container DOM element since it can be not defined for Panel
+                if (cnt > 0) {
+                    if (this.$container.style["pointer-events"] !== "auto") {
+                        this.$container.style["pointer-events"] = "auto";
+                    }
+                } else {
+                    if (this.$container.style["pointer-events"] !== "none") {
+                        this.$container.style["pointer-events"] = "none";  // make the layer transparent for pointer events
+                    }
+                }
             }
 
             for(var i = 0; i < cnt; i++){
@@ -25829,6 +25711,14 @@ pkg.PopupLayer = Class(pkg.CanvasLayer, [
                 }
             }
         };
+    },
+
+    function getComponentAt(x, y) {
+        return this.kids.length === 0 || (this.activeMenubar !== null &&
+                                          y <= this.mBottom &&
+                                          y >= this.mTop &&
+                                          x >= this.mLeft &&
+                                          x <= this.mRight    )   ? null : this.$super(x, y);
     }
 ]);
 
@@ -26058,13 +25948,12 @@ pkg.PopupManager = Class(pkg.Manager, [
 
             // Right button
             // TODO: check if it is ok and compatible with touch
-            if (e.isContext()) {
+            if (this.isTriggeredWith(e)) {
                 var popup = null;
 
                 if (e.source.popup != null) {
                     popup = e.source.popup;
-                }
-                else {
+                } else {
                     if (e.source.getPopup != null) {
                         popup = e.source.getPopup(e.source, e.x, e.y);
                     }
@@ -26076,6 +25965,10 @@ pkg.PopupManager = Class(pkg.Manager, [
                     popup.requestFocus();
                 }
             }
+        };
+
+        this.isTriggeredWith = function(e) {
+            return e.isAction() === false && (e.identifier === "rmouse" || e.touchCounter === 2);
         };
 
         /**
@@ -26174,8 +26067,7 @@ pkg.PopupManager = Class(pkg.Manager, [
                             pkg.activateWindow(this.$tooltip);
                         }
                     }
-                }
-                else {
+                } else {
                     if (this.$tooltip != null && this.syncTooltipPosition === true) {
                         var p  = zebkit.layout.toParentOrigin(this.$tooltipX, this.$tooltipY, this.$target),
                             tx = p.x,
@@ -26631,8 +26523,7 @@ pkg.DefEditors = Class([
             if (editor === this.selectorEditor) {
                 editor.list.setModel(v.items);
                 editor.list.select(v.selectedIndex);
-            }
-            else {
+            } else {
                 editor.setValue(v);
             }
 
@@ -26841,8 +26732,7 @@ pkg.BaseCaption = Class(ui.Panel, [
                 var size = this.getCaptionPS(this.selectedColRow);
                 if (this.orient === "horizontal") {
                     this.metrics.setColWidth (this.selectedColRow, size);
-                }
-                else {
+                } else {
                     this.metrics.setRowHeight(this.selectedColRow, size);
                 }
                 this.captionResized(this.selectedColRow, size);
@@ -26865,8 +26755,7 @@ pkg.BaseCaption = Class(ui.Panel, [
                     var pw = this.metrics.getColWidth(rowcol);
                     this.metrics.setColWidth(rowcol, ns);
                     this._.captionResized(this, rowcol, pw);
-                }
-                else  {
+                } else  {
                     var ph = this.metrics.getRowHeight(rowcol);
                     this.metrics.setRowHeight(rowcol, ns);
                     this._.captionResized(this, rowcol, ph);
@@ -27052,8 +26941,7 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
                         if (isHor === true) {
                             if (ps.height > this.psH) this.psH = ps.height;
                             this.psW += ps.width;
-                        }
-                        else {
+                        } else {
                             if (ps.width > this.psW) this.psW = ps.width;
                             this.psH += ps.height;
                         }
@@ -27246,8 +27134,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
                         if (kid.isVisible === true) {
                             if (b) {
                                 kid.setBounds(xy, top, cwh, wh);
-                            }
-                            else {
+                            } else {
                                 kid.setBounds(left, xy, wh, cwh);
                             }
                         }
@@ -27329,8 +27216,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
                     if (info.col === col) {
                         this.sortState = info.name === 'descent' ? 1 : -1;
                         this.statusPan.setState(info.name);
-                    }
-                    else {
+                    } else {
                         this.sortState = 0;
                         this.statusPan.setState("*");
                     }
@@ -27409,8 +27295,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
 
             if (zebkit.isString(t)) {
                 t = new this.clazz.TitlePan("");
-            }
-            else {
+            } else {
                 if (zebkit.instanceOf(t, ui.View)) {
                     var p = new ui.ViewPan();
                     p.setView(t);
@@ -27420,8 +27305,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
 
             if (rowcol < this.kids.length) {
                 this.setAt(rowcol, t);
-            }
-            else {
+            } else {
                 this.add(t);
             }
         };
@@ -27768,14 +27652,13 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                 for(; col < cols && col >= 0; col += d) {
                     if (x + dx < xx1 && (x + this.colWidths[col] + dx) > xx2) {
                         if (b) return [col, x];
-                    }
-                    else {
+                    } else {
                         if (b === false) return this.colVisibility(col, x, (d > 0 ?  -1 : 1), true);
                     }
+
                     if (d < 0) {
                         if (col > 0) x -= (this.colWidths[col - 1] + this.lineSize);
-                    }
-                    else {
+                    } else {
                         if (col < cols - 1) x += (this.colWidths[col] + this.lineSize);
                     }
                 }
@@ -27797,14 +27680,13 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                 for(; row < rows && row >= 0; row += d){
                     if (y + dy < yy1 && (y + this.rowHeights[row] + dy) > yy2){
                         if (b) return [row, y];
-                    }
-                    else {
+                    } else {
                         if (b === false) return this.rowVisibility(row, y, (d > 0 ?  -1 : 1), true);
                     }
+
                     if (d < 0){
                         if (row > 0) y -= (this.rowHeights[row - 1] + this.lineSize);
-                    }
-                    else {
+                    } else {
                         if (row < rows - 1) y += (this.rowHeights[row] + this.lineSize);
                     }
                 }
@@ -27819,19 +27701,18 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                     this.visibility.fr = null; // say no visible cells are available
                     return;
                 }
-                else {
-                    // visible area has not been calculated or
-                    // visible area has been changed
-                    if (this.visibleArea == null            ||
-                        va.x != this.visibleArea.x          ||
-                        va.y != this.visibleArea.y          ||
-                        va.width  != this.visibleArea.width ||
-                        va.height != this.visibleArea.height  )
-                    {
-                        this.iColVisibility(0);
-                        this.iRowVisibility(0);
-                        this.visibleArea = va;
-                    }
+
+                // visible area has not been calculated or
+                // visible area has been changed
+                if (this.visibleArea == null            ||
+                    va.x != this.visibleArea.x          ||
+                    va.y != this.visibleArea.y          ||
+                    va.width  != this.visibleArea.width ||
+                    va.height != this.visibleArea.height  )
+                {
+                    this.iColVisibility(0);
+                    this.iRowVisibility(0);
+                    this.visibleArea = va;
                 }
 
                 var v = this.visibility,
@@ -27841,13 +27722,11 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                     if (this.colOffset > 0 && b){
                         v.lc = this.colVisibility(v.lc[0], v.lc[1],  -1, true);
                         v.fc = this.colVisibility(v.lc[0], v.lc[1],  -1, false);
-                    }
-                    else {
+                    } else {
                         if (this.colOffset < 0 && b) {
                             v.fc = this.colVisibility(v.fc[0], v.fc[1], 1, true);
                             v.lc = this.colVisibility(v.fc[0], v.fc[1], 1, false);
-                        }
-                        else {
+                        } else {
                             v.fc = this.colVisibility(0, this.$leftX(), 1, true);
                             v.lc = (v.fc != null) ? this.colVisibility(v.fc[0], v.fc[1], 1, false)
                                                   : null;
@@ -27860,13 +27739,11 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                     if (this.rowOffset > 0 && b) {
                         v.lr = this.rowVisibility(v.lr[0], v.lr[1],  -1, true);
                         v.fr = this.rowVisibility(v.lr[0], v.lr[1],  -1, false);
-                    }
-                    else {
+                    } else {
                         if(this.rowOffset < 0 && b){
                             v.fr = this.rowVisibility(v.fr[0], v.fr[1], 1, true);
                             v.lr = (v.fr != null) ? this.rowVisibility(v.fr[0], v.fr[1], 1, false) : null;
-                        }
-                        else {
+                        } else {
                             v.fr = this.rowVisibility(0, this.$topY(), 1, true);
                             v.lr = (v.fr != null) ? this.rowVisibility(v.fr[0], v.fr[1], 1, false) : null;
                         }
@@ -27938,8 +27815,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
             this.recalc = function(){
                 if (this.isUsePsMetric) {
                     this.rPsMetric();
-                }
-                else {
+                } else {
                     this.rCustomMetric();
                 }
 
@@ -28063,8 +27939,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                                                   this.editingCol, e))
                     {
                         this.stopEditing(false);
-                    }
-                    else {
+                    } else {
                         if (this.editors.shouldFinish(this,
                                                       this.editingRow,
                                                       this.editingCol, e))
@@ -28242,8 +28117,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                     this.getMaxOffset = function() {
                         return this.getGridRows()-1;
                     };
-                }
-                else {
+                } else {
                     this.navigationMode = "cell";
 
                     if (mode.toLowerCase() === "cell") {
@@ -28254,8 +28128,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                         this.getMaxOffset = function() {
                             return this.getGridRows()* this.getGridCols() - 1;
                         };
-                    }
-                    else {
+                    } else {
                         throw new Error("Unsupported position marker mode");
                     }
                 }
@@ -28279,8 +28152,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                     this.makeVisible(row, this.position.currentCol);
                     this.select(row, true);
                     this.repaintRows(prevLine, row);
-                }
-                else {
+                } else {
                     this.repaintRows(prevLine, prevLine);
                 }
             };
@@ -28421,8 +28293,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                         this.stub.setBounds(this.getLeft(), this.getTop(),
                                             this.topCaption.x - this.stub.x,
                                             this.leftCaption.y - this.stub.y);
-                    }
-                    else {
+                    } else {
                         this.stub.setSize(0, 0);
                     }
                 }
@@ -28490,8 +28361,8 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                 this.vVisibility();
             };
 
-            this.pointerClicked  = function(e) {
-                if (this.visibility.hasVisibleCells()){
+            this.pointerClicked = function(e) {
+                if (e.isAction() && this.visibility.hasVisibleCells()){
                     this.stopEditing(true);
 
                     if (e.isAction()){
@@ -28500,15 +28371,14 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                             if (this.position != null){
                                 var row = this.position.currentLine,
                                     col = this.position.currentCol,
-                                    ls  =  this.getLineSize(p.row);
+                                    ls  = this.getLineSize(p.row);
 
                                 // normalize column depending on marker mode: row or cell
                                 // in row mode marker can select only the whole row, so
                                 // column can be only 1  (this.getLineSize returns 1)
                                 if (row === p.row && col === p.col % ls) {
                                     this.makeVisible(row, col);
-                                }
-                                else {
+                                } else {
                                     this.clearSelect();
                                     this.position.setRowCol(p.row, p.col % ls);
                                 }
@@ -28612,8 +28482,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                         for(var j = this.visibility.fc[0];j <= this.visibility.lc[0]; j++) {
                             if (this.isSelected(i, j) === true) {
                                 this.paintCellSelection(g, i, j, x - this.cellInsetsLeft, y - this.cellInsetsTop);
-                            }
-                            else {
+                            } else {
                                 var bg = this.provider.getCellColor != null ? this.provider.getCellColor(this, i, j)
                                                                             : this.defCellColor;
                                 if (bg != null) {
@@ -28717,8 +28586,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                                             this.getRowY(row),
                                             v.lc[1] - v.fc[1] + this.colWidths[v.lc[0]],
                                             this.rowHeights[row], this);
-                        }
-                        else {
+                        } else {
                             // cell selection mode
                             view.paint(g,   this.getColX(col),
                                             this.getRowY(row),
@@ -28747,16 +28615,14 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                 if (this.colWidths == null || this.colWidths.length != cols) {
                     this.colWidths = Array(cols);
                     for(var i = 0; i < cols; i++) this.colWidths[i] = 0;
-                }
-                else {
+                } else {
                     for(var i = 0;i < cols; i++) this.colWidths[i] = 0;
                 }
 
                 if (this.rowHeights == null || this.rowHeights.length != rows) {
                     this.rowHeights = Array(rows);
                     for(var i = 0; i < rows; i++) this.rowHeights[i] = 0;
-                }
-                else {
+                } else {
                     for(var i = 0;i < rows; i++) this.rowHeights[i] = 0;
                 }
 
@@ -28769,8 +28635,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                             ps.height += addH;
                             if (ps.width  > this.colWidths[i] ) this.colWidths [i] = ps.width;
                             if (ps.height > this.rowHeights[j]) this.rowHeights[j] = ps.height;
-                        }
-                        else {
+                        } else {
                             if (pkg.Grid.DEF_COLWIDTH > this.colWidths [i]) {
                                 this.colWidths [i] = pkg.Grid.DEF_COLWIDTH;
                             }
@@ -28800,8 +28665,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
             this.getPSSize = function (rowcol,b){
                 if (this.isUsePsMetric === true) {
                     return b ? this.getRowHeight(rowcol) : this.getColWidth(rowcol);
-                }
-                else {
+                } else {
                     var max = 0, count = b ? this.getGridCols() : this.getGridRows();
                     for(var j = 0;j < count; j ++ ){
                         var r = b ? rowcol : j, c = b ? j : rowcol,
@@ -28811,8 +28675,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                             var ps = v.getPreferredSize();
                             if (b) {
                                 if (ps.height > max) max = ps.height;
-                            }
-                            else {
+                            } else {
                                 if (ps.width > max) max = ps.width;
                             }
                         }
@@ -28830,8 +28693,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                     if (this.colWidths.length != this.getGridCols()) {
                         this.colWidths.length = this.getGridCols();
                     }
-                }
-                else {
+                } else {
                     this.colWidths = Array(this.getGridCols());
                 }
 
@@ -28845,8 +28707,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                     if (this.rowHeights.length != this.getGridRows()) {
                         this.rowHeights.length = this.getGridRows();
                     }
-                }
-                else {
+                } else {
                     this.rowHeights = Array(this.getGridRows());
                 }
 
@@ -29188,8 +29049,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                             ui.makeFullyVisible(this.getCanvas(), editor);
                             this.editor = editor;
                             ui.showModalWindow(this, editor, this);
-                        }
-                        else {
+                        } else {
                             this.add("editor", editor);
                             this.repaintRows(this.editingRow, this.editingRow);
                         }
@@ -29235,8 +29095,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
         function(model) {
             if (arguments.length === 0) {
                 model = new this.clazz.Matrix(5, 5);
-            }
-            else {
+            } else {
                 if (arguments.length === 2) {
                     model = new this.clazz.Matrix(arguments[0], arguments[1]);
                 }
@@ -29319,14 +29178,12 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
 
             if ((ctr == null && this.topCaption == null) || "top" === ctr){
                 this.topCaption = c;
-            }
-            else {
+            } else {
                 if ("editor" === ctr) this.editor = c;
                 else {
                     if ((ctr == null && this.leftCaption == null) || "left" === ctr) {
                         this.leftCaption = c;
-                    }
-                    else {
+                    } else {
                         if ((ctr == null && this.stub == null) || "corner" === ctr) {
                             this.stub = c;
                         }
@@ -29341,12 +29198,10 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
             else {
                 if (c === this.topCaption){
                     this.topCaption = null;
-                }
-                else {
+                } else {
                     if (c === this.leftCaption){
                         this.leftCaption = null;
-                    }
-                    else {
+                    } else {
                         if (c === this.stub) this.stub = null;
                     }
                 }
@@ -29427,16 +29282,14 @@ pkg.GridStretchPan = Class(ui.Panel, [
 
                 if (dt < 0) {
                     grid.setColWidth(col + 1, grid.getColWidth(col + 1) - dt);
-                }
-                else {
+                } else {
                     var ww = grid.getColWidth(col + 1) - dt,
                         mw = this.getMinWidth();
 
                     if (ww < mw) {
                         grid.setColWidth(col, w - (mw - ww));
                         grid.setColWidth(col + 1, mw);
-                    }
-                    else {
+                    } else {
                         grid.setColWidth(col + 1, ww);
                     }
                 }
@@ -29463,8 +29316,7 @@ pkg.GridStretchPan = Class(ui.Panel, [
             for(var i = 0; i < cols; i++){
                 if (this.$props.length - 1 === i) {
                     this.$widths[i] = ew - sw;
-                }
-                else {
+                } else {
                     this.$widths[i] = Math.round(ew * this.$props[i]);
                     sw += this.$widths[i];
                 }

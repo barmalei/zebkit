@@ -356,8 +356,7 @@ pkg.DefEditors = Class([
             if (editor === this.selectorEditor) {
                 editor.list.setModel(v.items);
                 editor.list.select(v.selectedIndex);
-            }
-            else {
+            } else {
                 editor.setValue(v);
             }
 
@@ -566,8 +565,7 @@ pkg.BaseCaption = Class(ui.Panel, [
                 var size = this.getCaptionPS(this.selectedColRow);
                 if (this.orient === "horizontal") {
                     this.metrics.setColWidth (this.selectedColRow, size);
-                }
-                else {
+                } else {
                     this.metrics.setRowHeight(this.selectedColRow, size);
                 }
                 this.captionResized(this.selectedColRow, size);
@@ -590,8 +588,7 @@ pkg.BaseCaption = Class(ui.Panel, [
                     var pw = this.metrics.getColWidth(rowcol);
                     this.metrics.setColWidth(rowcol, ns);
                     this._.captionResized(this, rowcol, pw);
-                }
-                else  {
+                } else  {
                     var ph = this.metrics.getRowHeight(rowcol);
                     this.metrics.setRowHeight(rowcol, ns);
                     this._.captionResized(this, rowcol, ph);
@@ -777,8 +774,7 @@ pkg.GridCaption = Class(pkg.BaseCaption, [
                         if (isHor === true) {
                             if (ps.height > this.psH) this.psH = ps.height;
                             this.psW += ps.width;
-                        }
-                        else {
+                        } else {
                             if (ps.width > this.psW) this.psW = ps.width;
                             this.psH += ps.height;
                         }
@@ -971,8 +967,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
                         if (kid.isVisible === true) {
                             if (b) {
                                 kid.setBounds(xy, top, cwh, wh);
-                            }
-                            else {
+                            } else {
                                 kid.setBounds(left, xy, wh, cwh);
                             }
                         }
@@ -1054,8 +1049,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
                     if (info.col === col) {
                         this.sortState = info.name === 'descent' ? 1 : -1;
                         this.statusPan.setState(info.name);
-                    }
-                    else {
+                    } else {
                         this.sortState = 0;
                         this.statusPan.setState("*");
                     }
@@ -1134,8 +1128,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
 
             if (zebkit.isString(t)) {
                 t = new this.clazz.TitlePan("");
-            }
-            else {
+            } else {
                 if (zebkit.instanceOf(t, ui.View)) {
                     var p = new ui.ViewPan();
                     p.setView(t);
@@ -1145,8 +1138,7 @@ pkg.CompGridCaption = Class(pkg.BaseCaption, [
 
             if (rowcol < this.kids.length) {
                 this.setAt(rowcol, t);
-            }
-            else {
+            } else {
                 this.add(t);
             }
         };
@@ -1493,14 +1485,13 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                 for(; col < cols && col >= 0; col += d) {
                     if (x + dx < xx1 && (x + this.colWidths[col] + dx) > xx2) {
                         if (b) return [col, x];
-                    }
-                    else {
+                    } else {
                         if (b === false) return this.colVisibility(col, x, (d > 0 ?  -1 : 1), true);
                     }
+
                     if (d < 0) {
                         if (col > 0) x -= (this.colWidths[col - 1] + this.lineSize);
-                    }
-                    else {
+                    } else {
                         if (col < cols - 1) x += (this.colWidths[col] + this.lineSize);
                     }
                 }
@@ -1522,14 +1513,13 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                 for(; row < rows && row >= 0; row += d){
                     if (y + dy < yy1 && (y + this.rowHeights[row] + dy) > yy2){
                         if (b) return [row, y];
-                    }
-                    else {
+                    } else {
                         if (b === false) return this.rowVisibility(row, y, (d > 0 ?  -1 : 1), true);
                     }
+
                     if (d < 0){
                         if (row > 0) y -= (this.rowHeights[row - 1] + this.lineSize);
-                    }
-                    else {
+                    } else {
                         if (row < rows - 1) y += (this.rowHeights[row] + this.lineSize);
                     }
                 }
@@ -1544,19 +1534,18 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                     this.visibility.fr = null; // say no visible cells are available
                     return;
                 }
-                else {
-                    // visible area has not been calculated or
-                    // visible area has been changed
-                    if (this.visibleArea == null            ||
-                        va.x != this.visibleArea.x          ||
-                        va.y != this.visibleArea.y          ||
-                        va.width  != this.visibleArea.width ||
-                        va.height != this.visibleArea.height  )
-                    {
-                        this.iColVisibility(0);
-                        this.iRowVisibility(0);
-                        this.visibleArea = va;
-                    }
+
+                // visible area has not been calculated or
+                // visible area has been changed
+                if (this.visibleArea == null            ||
+                    va.x != this.visibleArea.x          ||
+                    va.y != this.visibleArea.y          ||
+                    va.width  != this.visibleArea.width ||
+                    va.height != this.visibleArea.height  )
+                {
+                    this.iColVisibility(0);
+                    this.iRowVisibility(0);
+                    this.visibleArea = va;
                 }
 
                 var v = this.visibility,
@@ -1566,13 +1555,11 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                     if (this.colOffset > 0 && b){
                         v.lc = this.colVisibility(v.lc[0], v.lc[1],  -1, true);
                         v.fc = this.colVisibility(v.lc[0], v.lc[1],  -1, false);
-                    }
-                    else {
+                    } else {
                         if (this.colOffset < 0 && b) {
                             v.fc = this.colVisibility(v.fc[0], v.fc[1], 1, true);
                             v.lc = this.colVisibility(v.fc[0], v.fc[1], 1, false);
-                        }
-                        else {
+                        } else {
                             v.fc = this.colVisibility(0, this.$leftX(), 1, true);
                             v.lc = (v.fc != null) ? this.colVisibility(v.fc[0], v.fc[1], 1, false)
                                                   : null;
@@ -1585,13 +1572,11 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                     if (this.rowOffset > 0 && b) {
                         v.lr = this.rowVisibility(v.lr[0], v.lr[1],  -1, true);
                         v.fr = this.rowVisibility(v.lr[0], v.lr[1],  -1, false);
-                    }
-                    else {
+                    } else {
                         if(this.rowOffset < 0 && b){
                             v.fr = this.rowVisibility(v.fr[0], v.fr[1], 1, true);
                             v.lr = (v.fr != null) ? this.rowVisibility(v.fr[0], v.fr[1], 1, false) : null;
-                        }
-                        else {
+                        } else {
                             v.fr = this.rowVisibility(0, this.$topY(), 1, true);
                             v.lr = (v.fr != null) ? this.rowVisibility(v.fr[0], v.fr[1], 1, false) : null;
                         }
@@ -1663,8 +1648,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
             this.recalc = function(){
                 if (this.isUsePsMetric) {
                     this.rPsMetric();
-                }
-                else {
+                } else {
                     this.rCustomMetric();
                 }
 
@@ -1788,8 +1772,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                                                   this.editingCol, e))
                     {
                         this.stopEditing(false);
-                    }
-                    else {
+                    } else {
                         if (this.editors.shouldFinish(this,
                                                       this.editingRow,
                                                       this.editingCol, e))
@@ -1967,8 +1950,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                     this.getMaxOffset = function() {
                         return this.getGridRows()-1;
                     };
-                }
-                else {
+                } else {
                     this.navigationMode = "cell";
 
                     if (mode.toLowerCase() === "cell") {
@@ -1979,8 +1961,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                         this.getMaxOffset = function() {
                             return this.getGridRows()* this.getGridCols() - 1;
                         };
-                    }
-                    else {
+                    } else {
                         throw new Error("Unsupported position marker mode");
                     }
                 }
@@ -2004,8 +1985,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                     this.makeVisible(row, this.position.currentCol);
                     this.select(row, true);
                     this.repaintRows(prevLine, row);
-                }
-                else {
+                } else {
                     this.repaintRows(prevLine, prevLine);
                 }
             };
@@ -2146,8 +2126,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                         this.stub.setBounds(this.getLeft(), this.getTop(),
                                             this.topCaption.x - this.stub.x,
                                             this.leftCaption.y - this.stub.y);
-                    }
-                    else {
+                    } else {
                         this.stub.setSize(0, 0);
                     }
                 }
@@ -2215,8 +2194,8 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                 this.vVisibility();
             };
 
-            this.pointerClicked  = function(e) {
-                if (this.visibility.hasVisibleCells()){
+            this.pointerClicked = function(e) {
+                if (e.isAction() && this.visibility.hasVisibleCells()){
                     this.stopEditing(true);
 
                     if (e.isAction()){
@@ -2225,15 +2204,14 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                             if (this.position != null){
                                 var row = this.position.currentLine,
                                     col = this.position.currentCol,
-                                    ls  =  this.getLineSize(p.row);
+                                    ls  = this.getLineSize(p.row);
 
                                 // normalize column depending on marker mode: row or cell
                                 // in row mode marker can select only the whole row, so
                                 // column can be only 1  (this.getLineSize returns 1)
                                 if (row === p.row && col === p.col % ls) {
                                     this.makeVisible(row, col);
-                                }
-                                else {
+                                } else {
                                     this.clearSelect();
                                     this.position.setRowCol(p.row, p.col % ls);
                                 }
@@ -2337,8 +2315,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                         for(var j = this.visibility.fc[0];j <= this.visibility.lc[0]; j++) {
                             if (this.isSelected(i, j) === true) {
                                 this.paintCellSelection(g, i, j, x - this.cellInsetsLeft, y - this.cellInsetsTop);
-                            }
-                            else {
+                            } else {
                                 var bg = this.provider.getCellColor != null ? this.provider.getCellColor(this, i, j)
                                                                             : this.defCellColor;
                                 if (bg != null) {
@@ -2442,8 +2419,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                                             this.getRowY(row),
                                             v.lc[1] - v.fc[1] + this.colWidths[v.lc[0]],
                                             this.rowHeights[row], this);
-                        }
-                        else {
+                        } else {
                             // cell selection mode
                             view.paint(g,   this.getColX(col),
                                             this.getRowY(row),
@@ -2472,16 +2448,14 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                 if (this.colWidths == null || this.colWidths.length != cols) {
                     this.colWidths = Array(cols);
                     for(var i = 0; i < cols; i++) this.colWidths[i] = 0;
-                }
-                else {
+                } else {
                     for(var i = 0;i < cols; i++) this.colWidths[i] = 0;
                 }
 
                 if (this.rowHeights == null || this.rowHeights.length != rows) {
                     this.rowHeights = Array(rows);
                     for(var i = 0; i < rows; i++) this.rowHeights[i] = 0;
-                }
-                else {
+                } else {
                     for(var i = 0;i < rows; i++) this.rowHeights[i] = 0;
                 }
 
@@ -2494,8 +2468,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                             ps.height += addH;
                             if (ps.width  > this.colWidths[i] ) this.colWidths [i] = ps.width;
                             if (ps.height > this.rowHeights[j]) this.rowHeights[j] = ps.height;
-                        }
-                        else {
+                        } else {
                             if (pkg.Grid.DEF_COLWIDTH > this.colWidths [i]) {
                                 this.colWidths [i] = pkg.Grid.DEF_COLWIDTH;
                             }
@@ -2525,8 +2498,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
             this.getPSSize = function (rowcol,b){
                 if (this.isUsePsMetric === true) {
                     return b ? this.getRowHeight(rowcol) : this.getColWidth(rowcol);
-                }
-                else {
+                } else {
                     var max = 0, count = b ? this.getGridCols() : this.getGridRows();
                     for(var j = 0;j < count; j ++ ){
                         var r = b ? rowcol : j, c = b ? j : rowcol,
@@ -2536,8 +2508,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                             var ps = v.getPreferredSize();
                             if (b) {
                                 if (ps.height > max) max = ps.height;
-                            }
-                            else {
+                            } else {
                                 if (ps.width > max) max = ps.width;
                             }
                         }
@@ -2555,8 +2526,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                     if (this.colWidths.length != this.getGridCols()) {
                         this.colWidths.length = this.getGridCols();
                     }
-                }
-                else {
+                } else {
                     this.colWidths = Array(this.getGridCols());
                 }
 
@@ -2570,8 +2540,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                     if (this.rowHeights.length != this.getGridRows()) {
                         this.rowHeights.length = this.getGridRows();
                     }
-                }
-                else {
+                } else {
                     this.rowHeights = Array(this.getGridRows());
                 }
 
@@ -2913,8 +2882,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
                             ui.makeFullyVisible(this.getCanvas(), editor);
                             this.editor = editor;
                             ui.showModalWindow(this, editor, this);
-                        }
-                        else {
+                        } else {
                             this.add("editor", editor);
                             this.repaintRows(this.editingRow, this.editingRow);
                         }
@@ -2960,8 +2928,7 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
         function(model) {
             if (arguments.length === 0) {
                 model = new this.clazz.Matrix(5, 5);
-            }
-            else {
+            } else {
                 if (arguments.length === 2) {
                     model = new this.clazz.Matrix(arguments[0], arguments[1]);
                 }
@@ -3044,14 +3011,12 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
 
             if ((ctr == null && this.topCaption == null) || "top" === ctr){
                 this.topCaption = c;
-            }
-            else {
+            } else {
                 if ("editor" === ctr) this.editor = c;
                 else {
                     if ((ctr == null && this.leftCaption == null) || "left" === ctr) {
                         this.leftCaption = c;
-                    }
-                    else {
+                    } else {
                         if ((ctr == null && this.stub == null) || "corner" === ctr) {
                             this.stub = c;
                         }
@@ -3066,12 +3031,10 @@ pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.$ViewsSe
             else {
                 if (c === this.topCaption){
                     this.topCaption = null;
-                }
-                else {
+                } else {
                     if (c === this.leftCaption){
                         this.leftCaption = null;
-                    }
-                    else {
+                    } else {
                         if (c === this.stub) this.stub = null;
                     }
                 }
@@ -3152,16 +3115,14 @@ pkg.GridStretchPan = Class(ui.Panel, [
 
                 if (dt < 0) {
                     grid.setColWidth(col + 1, grid.getColWidth(col + 1) - dt);
-                }
-                else {
+                } else {
                     var ww = grid.getColWidth(col + 1) - dt,
                         mw = this.getMinWidth();
 
                     if (ww < mw) {
                         grid.setColWidth(col, w - (mw - ww));
                         grid.setColWidth(col + 1, mw);
-                    }
-                    else {
+                    } else {
                         grid.setColWidth(col + 1, ww);
                     }
                 }
@@ -3188,8 +3149,7 @@ pkg.GridStretchPan = Class(ui.Panel, [
             for(var i = 0; i < cols; i++){
                 if (this.$props.length - 1 === i) {
                     this.$widths[i] = ew - sw;
-                }
-                else {
+                } else {
                     this.$widths[i] = Math.round(ew * this.$props[i]);
                     sw += this.$widths[i];
                 }

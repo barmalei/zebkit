@@ -877,7 +877,7 @@ pkg.ArrowButton = Class(pkg.EvStatePan, pkg.ButtonRepeatMix, [
         this.cursorType = pkg.Cursor.HAND;
 
         if (arguments.length > 0) {
-            this.direction = direction;
+            this.direction = zebkit.util.$validateValue(direction, "left", "right", "top", "bottom");
         }
 
         this.setView({
@@ -1108,7 +1108,7 @@ pkg.BorderPan = Class(pkg.Panel, [
          * @chainable
          */
         this.setGaps = function(vg, hg){
-            if (this.vGap != vg || hg != this.hGap){
+            if (this.vGap !== vg || hg !== this.hGap){
                 this.vGap = vg;
                 this.hGap = hg;
                 this.vrp();
@@ -1118,14 +1118,14 @@ pkg.BorderPan = Class(pkg.Panel, [
 
         this.setOrientation = function(o) {
             if (this.orient !== o) {
-                this.orient = o;
+                this.orient = zebkit.util.$validateValue(o, "top", "bottom");
                 this.vrp();
             }
         };
 
         this.setAlignment = function(a) {
             if (this.alignment !== a) {
-                this.alignment = a;
+                this.alignment = zebkit.util.$validateValue(a, "left", "right", "center");
                 this.vrp();
             }
         };
@@ -1717,7 +1717,7 @@ pkg.SplitPan = Class(pkg.Panel, [
 
         this.setOrientation = function(o) {
             if (o !== this.orient) {
-                this.orient = o;
+                this.orient = zebkit.util.$validateValue(o, "horizontal", "vertical");
                 this.vrp();
             }
         };
@@ -2067,11 +2067,8 @@ pkg.Progress = Class(pkg.Panel, [
      * @method setOrientation
      */
     function setOrientation(o){
-        if (o !== "horizontal" && o !== "vertical") {
-            throw new Error("" + o);
-        }
-        if (o != this.orient){
-            this.orient = o;
+        if (o !== this.orient) {
+            this.orient = zebkit.util.$validateValue(o, "horizontal", "vertical");
             this.vrp();
         }
     },
@@ -4081,12 +4078,8 @@ pkg.Tabs = Class(pkg.Panel, pkg.$ViewsSetterMix, [
          * @method  setAlignment
          */
         this.setAlignment = function(o){
-            if (o !== "top" && o !== "bottom" && o !== "left" && o !== "right") {
-                throw new Error("Invalid tabs alignment:" + o);
-            }
-
-            if (this.orient != o){
-                this.orient = o;
+            if (this.orient !== o) {
+                this.orient = zebkit.util.$validateValue(o, "top", "bottom", "left", "right");
                 this.vrp();
             }
         };
@@ -4979,9 +4972,7 @@ pkg.VideoPan = Class(pkg.Panel,  [
  */
 pkg.MobileScrollMan = Class(pkg.Manager, [
     function $prototype() {
-        this.sx = this.sy = 0;
-        this.target = null;
-        this.identifier = -1;
+        this.$timer = this.identifier = this.target = null;
 
         /**
          * Define pointer drag started events handler.
@@ -4990,17 +4981,16 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
          */
         this.pointerDragStarted = function(e) {
             if (e.touchCounter === 1 && e.pointerType === "touch") {
-                this.identifier = e.identifier;  // finger
-                var owner = e.source;
+                this.$identifier = e.identifier;
+                this.$target     = e.source;
 
-                while(owner != null && owner.doScroll == null) {
-                    owner = owner.parent;
+                // detect scrollable component
+                while (this.$target != null && this.$target.doScroll == null) {
+                    this.$target = this.$target.parent;
                 }
 
-                if (owner != null && owner.pointerDragged == null) {
-                    this.target = owner;
-                    this.sx = e.x;
-                    this.sy = e.y;
+                if (this.$target != null && this.$target.pointerDragged != null) {
+                     this.$target = null;
                 }
             }
         };
@@ -5011,22 +5001,30 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
          * @method pointerDragged
          */
         this.pointerDragged = function(e) {
-            if (e.touchCounter   === 1 &&
-                this.target      != null &&
-                this.identifier  === e.identifier)
+            if (e.touchCounter   === 1            &&
+                this.$target    !==  null         &&
+                this.$identifier === e.identifier &&
+                e.direction     !==  null            )
             {
-                var d = e.direction;
-                if (d === "bottom" || d === "top") {
-                    this.target.doScroll(0, this.sy - e.y, "touch");
-                }
-                else {
-                    if (d === "left" || d === "right") {
-                        this.target.doScroll(this.sx - e.x, 0, "touch");
-                    }
-                }
+                this.$target.doScroll(-e.dx, -e.dy, "touch");
+            }
+        };
 
-                this.sx = e.x;
-                this.sy = e.y;
+        this.$taskMethod = function() {
+            var bar = this.$target.vBar,
+                o   = bar.position.offset;
+
+            // this is linear function with angel 42. every next value will
+            // be slightly lower prev. one. theoretically angel 45 should
+            // bring to infinite scrolling :)
+            this.$dt = Math.tan(42 * Math.PI / 180) * this.$dt;
+            bar.position.setOffset(o - Math.round(this.$dt));
+            this.$counter++;
+
+            if (o === bar.position.offset) {
+                this.$target = null;
+                clearInterval(this.$timer);
+                this.$timer = null;
             }
         };
 
@@ -5036,30 +5034,18 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
          * @method pointerDragEnded
          */
         this.pointerDragEnded = function(e) {
-            if (this.target != null &&
-                this.timer  == null &&
-                this.identifier === e.identifier &&
+            if (this.$target !== null &&
+                this.$timer  === null  &&
+                this.$identifier === e.identifier &&
                 (e.direction === "bottom" || e.direction === "top") &&
-                this.target.vBar != null &&
-                this.target.vBar.isVisible === true &&
+                this.$target.vBar != null &&
+                this.$target.vBar.isVisible &&
                 e.dy !== 0)
             {
                 this.$dt = 2 * e.dy;
-                var $this = this, bar = this.target.vBar, k = 0;
-
-                this.timer = setInterval(function() {
-                    var o = bar.position.offset;
-
-                    bar.position.setOffset(o - $this.$dt);
-                    if (++k % 5 === 0) {
-                        $this.$dt = Math.floor($this.$dt/2);
-                    }
-
-                    if (o === bar.position.offset || ($this.$dt >= -1  &&  $this.$dt <= 1)) {
-                        clearInterval($this.timer);
-                        $this.timer = $this.target = null;
-                    }
-                }, 10);
+                this.$counter = 0;
+                var $this = this;
+                this.$timer = setInterval(function() { $this.$taskMethod($this); } , 50);
             }
         };
 
@@ -5069,11 +5055,11 @@ pkg.MobileScrollMan = Class(pkg.Manager, [
          * @method pointerPressed
          */
         this.pointerPressed = function(e) {
-            if (this.timer != null) {
-                clearInterval(this.timer);
-                this.timer = null;
+            if (this.$timer !== null) {
+                clearInterval(this.$timer);
+                this.$timer = null;
             }
-            this.target = null;
+            this.$target = null;
         };
     }
 ]);

@@ -151,35 +151,30 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
     },
 
     function $prototype() {
-        this.isLayerActiveAt = function(x, y) {
-            return this.activeWin != null;
-        };
+        this.layerPointerPressed = function(e) {
+            if (this.kids.length > 0) {
 
-        this.layerPointerPressed = function(e){
-            var cnt = this.kids.length, x = e.x, y = e.y;
-            if (cnt > 0) {
-                // check if pointer pressed has occurred in the topest window since
-                // this is the most probable case
-                if (this.activeWin != null && this.indexOf(this.activeWin) === cnt - 1) {
+                if (this.activeWin != null && this.indexOf(this.activeWin) === this.kids.length - 1) {
                     var x1 = this.activeWin.x,
                         y1 = this.activeWin.y,
                         x2 = x1 + this.activeWin.width,
                         y2 = y1 + this.activeWin.height;
 
-                    if (x >= x1 && y >= y1 && x < x2 && y < y2) {
-                        return true;
+                    if (e.x >= x1 && e.y >= y1 && e.x < x2 && e.y < y2) {
+                        return false;
                     }
                 }
 
                 // otherwise looking for a window starting from the topest one
-                for(var i = cnt - 1; i >= 0 && i >= this.topModalIndex; i--){
+                for(var i = this.kids.length - 1; i >= 0 && i >= this.topModalIndex; i--){
                     var d = this.kids[i];
-
-                    if (d.isVisible === true &&
-                        d.isEnabled === true &&
-                        this.winsTypes[d] != "info" &&
-                        x >= d.x && y >= d.y &&
-                        x < d.x + d.width && y < d.y + d.height)
+                    if (d.isVisible &&
+                        d.isEnabled &&
+                        this.winsTypes[d] !== "info" &&
+                        e.x >= d.x &&
+                        e.y >= d.y &&
+                        e.x < d.x + d.width &&
+                        e.y < d.y + d.height)
                     {
                         this.activate(d);
                         return true;
@@ -190,22 +185,18 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
                     this.activate(null);
                     return false;
                 }
-
-                return true;
             }
-
             return false;
         };
 
-        this.layerKeyPressed = function(e){
+        this.layoutKeyPressed = function(e){
             if (this.kids.length > 0        &&
                 e.code === pkg.KeyEvent.TAB &&
                 e.shiftKey                     )
             {
                 if (this.activeWin == null) {
                     this.activate(this.kids[this.kids.length - 1]);
-                }
-                else {
+                } else {
                     var winIndex = this.winsStack.indexOf(this.activeWin) - 1;
                     if (winIndex < this.topModalIndex || winIndex < 0) {
                         winIndex = this.winsStack.length - 1;
@@ -246,12 +237,6 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
             this.activate(zebkit.layout.getDirectChild(this, e.source));
         };
 
-        this.getComponentAt = function(x,y) {
-            return (this.activeWin == null) ? null
-                                            : this.activeWin.getComponentAt(x - this.activeWin.x,
-                                                                            y - this.activeWin.y);
-        };
-
         this.getFocusRoot = function() {
             return this.activeWin;
         };
@@ -265,7 +250,7 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
          * @param  {zebkit.ui.Panel} c a component to be activated as window
          * @method activate
          */
-        this.activate = function(c){
+        this.activate = function(c) {
             if (c != null && (this.kids.indexOf(c) < 0 ||
                               this.winsTypes[c] === "info"))
             {
@@ -287,8 +272,7 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
                     if (type === "mdi" && old.$dontGrabFocus !== true) {
                         pkg.focusManager.requestFocus(null);
                     }
-                }
-                else {
+                } else {
                     if (this.winsStack.indexOf(c) < this.topModalIndex) {
                         throw new Error();
                     }
@@ -348,37 +332,19 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
             if (zebkit.instanceOf(type, pkg.Panel) ) {
                 listener = win;
                 win      = type;
-            }
-            else {
+            } else {
                 this.winsTypes[win] = type;
             }
 
             this.winsListeners[win] = listener;
             this.add(win);
         };
-    },
 
-    function() {
-        /**
-         * Currently activated as a window children component
-         * @attribute activeWin
-         * @type {zebkit.ui.Panel}
-         * @readOnly
-         * @protected
-         */
-        this.activeWin     = null;
-        this.topModalIndex = -1;
-        this.winsStack     = [];
-        this.winsListeners = {};
-        this.winsTypes     = {};
-
-        this.$super();
-
-        // TODO: why 1000 and how to avoid z-index manipulation
-        // the layer has to be placed above other elements that are virtually
-        // inserted in the layer
-        // TODO: this line brings to fails if window layer inherits Panel
-        this.element.style["z-index"] = "10000";
+        this.getComponentAt = function(x, y) {
+            return (this.activeWin === null) ? null
+                                             : this.activeWin.getComponentAt(x - this.activeWin.x,
+                                                                             y - this.activeWin.y);
+        };
     },
 
     function insert(index, constr, lw) {
@@ -405,8 +371,7 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
             this.topModalIndex = this.winsStack.length - 1;
             this.fire("winOpened", WIN_EVENT.$fillWith(lw, this, false, true));
             this.activate(lw);
-        }
-        else {
+        } else {
             this.fire("winOpened", WIN_EVENT.$fillWith(lw, this, false, true));
         }
     },
@@ -433,8 +398,7 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
 
             if (ci < this.topModalIndex) {
                 this.topModalIndex--;
-            }
-            else {
+            } else {
                 if (this.topModalIndex === ci){
                     for(this.topModalIndex = this.kids.length - 1;this.topModalIndex >= 0; this.topModalIndex--){
                         if (this.winsTypes[this.winsStack[this.topModalIndex]] === "modal") {
@@ -453,10 +417,34 @@ pkg.WinLayer = Class(pkg.CanvasLayer, [
                 }
                 this.activate(this.winsStack[aindex]);
             }
-        }
-        finally {
+        } finally {
             delete this.winsTypes[lw];
             delete this.winsListeners[lw];
+        }
+    },
+
+    function() {
+        /**
+         * Currently activated as a window children component
+         * @attribute activeWin
+         * @type {zebkit.ui.Panel}
+         * @readOnly
+         * @protected
+         */
+        this.activeWin     = null;
+        this.topModalIndex = -1;
+        this.winsStack     = [];
+        this.winsListeners = {};
+        this.winsTypes     = {};
+
+        this.$super();
+
+        // TODO: why 1000 and how to avoid z-index manipulation
+        // the layer has to be placed above other elements that are virtually
+        // inserted in the layer
+        // TODO: this line brings to fails if window layer inherits Panel
+        if (typeof this.element !== "undefined") {
+            this.element.style["z-index"] = "10000";
         }
     }
 ]);
@@ -1112,8 +1100,7 @@ pkg.MenuItem = Class(pkg.Panel, [
                 img = m[1].substring(m[1].indexOf("@(") + 2, m[1].lastIndexOf(")")).trim();
                 if (img[0] === "'") {
                    img = img.substring(1, img.length-1);
-                }
-                else {
+                } else {
                     var parts = img.split('.'),
                         scope = zebkit.$global;
 
@@ -1136,8 +1123,7 @@ pkg.MenuItem = Class(pkg.Panel, [
             }
 
             c = new pkg.ImageLabel(new this.clazz.Label(c), img);
-        }
-        else {
+        } else {
             this.getCheck().setVisible(false);
         }
 
@@ -1310,8 +1296,7 @@ pkg.Menu = Class(pkg.CompList, [
                     if (sub == null) {
                         p.activateSub(true);
                     }
-                }
-                else {
+                } else {
                     if (sub != null) p.activateSub(false);
                 }
             }
@@ -1461,8 +1446,7 @@ pkg.Menu = Class(pkg.CompList, [
             for(var i = 0; i < d.length; i++) {
                 this.add(d[i]);
             }
-        }
-        else {
+        } else {
             for(var k in d) {
                 if (d.hasOwnProperty(k)) {
                     var sub = d[k];
@@ -1489,8 +1473,7 @@ pkg.Menu = Class(pkg.CompList, [
                 this.$hideMenu(this);
                 if (p != null) p.requestFocus();
             }
-        }
-        else {
+        } else {
             this.$super(e);
         }
     },
@@ -1507,8 +1490,7 @@ pkg.Menu = Class(pkg.CompList, [
         if (p != null) {
             this.select(-1);
             this.position.setOffset(null);
-        }
-        else {
+        } else {
             this.$parentMenu = null;
         }
         this.$super(p);
@@ -1572,14 +1554,12 @@ pkg.Menu = Class(pkg.CompList, [
                 if (sub.parent != null) {
                     // hide menu since it has been already shown
                     sub.$hideMenu(this);
-                }
-                else {
+                } else {
                     // show menu
                     sub.$parentMenu = this;
                     this.$showSubMenu(sub);
                 }
-            }
-            else {
+            } else {
                 var k = this.kids[this.selectedIndex];
                 if (k.itemSelected != null) {
                     k.itemSelected();
@@ -1692,8 +1672,7 @@ pkg.Menubar = Class(pkg.Menu, [
             if (i < 0) {
                 pop.setMenubar(null);
                 this.$isActive = false;
-            }
-            else {
+            } else {
                 pop.setMenubar(this);
             }
         }
@@ -1727,39 +1706,19 @@ pkg.PopupLayer = Class(pkg.CanvasLayer, [
         this.mTop = this.mLeft = this.mBottom = this.mRight = 0;
 
         this.layerPointerPressed = function(e) {
-            // if x,y is inside active menu bar let
-            // the menu bar handle it
-            if (this.activeMenubar != null  &&
-                e.y <= this.mBottom         &&
-                e.y >= this.mTop            &&
-                e.x >= this.mLeft           &&
-                e.x <= this.mRight            )
-            {
-                return false;
+            var b = false;
+            if (this.activeMenubar != null) {
+                this.activeMenubar.select(-1);
             }
 
-            if (this.getComponentAt(e.x, e.y) == this){
-                if (this.activeMenubar != null) {
-                    this.activeMenubar.select(-1);
-                }
-
-                if (this.kids.length > 0) {
-                    this.removeAll();
-                }
-
-                return false;
-            }
-
-            return true;
+            return b;
         };
 
-        this.isLayerActiveAt = function(x,y) {
-            return this.kids.length > 0 &&
-                   ( this.activeMenubar == null  ||
-                     y > this.mBottom   ||
-                     y < this.mTop      ||
-                     x < this.mLeft     ||
-                     x > this.mRight      );
+        this.pointerPressed = function(e) {
+            if (this.kids.length > 0) {
+                this.removeAll();
+            }
+            return true;
         };
 
         this.getFocusRoot = function() {
@@ -1774,7 +1733,7 @@ pkg.PopupLayer = Class(pkg.CanvasLayer, [
         this.childKeyPressed = function(e){
             var dc = zebkit.layout.getDirectChild(this, e.source);
 
-            if (zebkit.instanceOf(dc, pkg.Menu) && this.activeMenubar != null) {
+            if (this.activeMenubar != null && zebkit.instanceOf(dc, pkg.Menu)) {
                 var s = this.activeMenubar.selectedIndex;
                 switch (e.code) {
                     case pkg.KeyEvent.RIGHT :
@@ -1823,11 +1782,16 @@ pkg.PopupLayer = Class(pkg.CanvasLayer, [
             // TODO:
             // prove of concept. if layer is active don't allow WEB events comes to upper layer
             // since there can be another HtmlElement that should not be part of interaction
-            if (cnt > 0) {
-                this.$container.style["pointer-events"] = "auto";
-            }
-            else {
-                this.$container.style["pointer-events"] = "none";
+            if (this.$container != null) { // check existence of container DOM element since it can be not defined for Panel
+                if (cnt > 0) {
+                    if (this.$container.style["pointer-events"] !== "auto") {
+                        this.$container.style["pointer-events"] = "auto";
+                    }
+                } else {
+                    if (this.$container.style["pointer-events"] !== "none") {
+                        this.$container.style["pointer-events"] = "none";  // make the layer transparent for pointer events
+                    }
+                }
             }
 
             for(var i = 0; i < cnt; i++){
@@ -1844,6 +1808,14 @@ pkg.PopupLayer = Class(pkg.CanvasLayer, [
                 }
             }
         };
+    },
+
+    function getComponentAt(x, y) {
+        return this.kids.length === 0 || (this.activeMenubar !== null &&
+                                          y <= this.mBottom &&
+                                          y >= this.mTop &&
+                                          x >= this.mLeft &&
+                                          x <= this.mRight    )   ? null : this.$super(x, y);
     }
 ]);
 
@@ -2073,13 +2045,12 @@ pkg.PopupManager = Class(pkg.Manager, [
 
             // Right button
             // TODO: check if it is ok and compatible with touch
-            if (e.isContext()) {
+            if (this.isTriggeredWith(e)) {
                 var popup = null;
 
                 if (e.source.popup != null) {
                     popup = e.source.popup;
-                }
-                else {
+                } else {
                     if (e.source.getPopup != null) {
                         popup = e.source.getPopup(e.source, e.x, e.y);
                     }
@@ -2091,6 +2062,10 @@ pkg.PopupManager = Class(pkg.Manager, [
                     popup.requestFocus();
                 }
             }
+        };
+
+        this.isTriggeredWith = function(e) {
+            return e.isAction() === false && (e.identifier === "rmouse" || e.touchCounter === 2);
         };
 
         /**
@@ -2189,8 +2164,7 @@ pkg.PopupManager = Class(pkg.Manager, [
                             pkg.activateWindow(this.$tooltip);
                         }
                     }
-                }
-                else {
+                } else {
                     if (this.$tooltip != null && this.syncTooltipPosition === true) {
                         var p  = zebkit.layout.toParentOrigin(this.$tooltipX, this.$tooltipY, this.$target),
                             tx = p.x,

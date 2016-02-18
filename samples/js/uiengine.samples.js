@@ -419,22 +419,19 @@ zebkit.package("ui.samples", function(pkg, Class) {
             this.font = new Font("Arial", "bold", 22);
         },
 
+        function getComponentAt(x, y) {
+            return this.bg == null ? null : this.$super(x, y);
+        },
+
         function $prototype() {
             this.activeComp = null;
 
-            this.isLayerActiveAt = function(x, y) {
-                return this.bg != null;
-            };
-
             this.layerKeyPressed = function(e){
-                console.log("e.ch = " + e.ch);
-
                 if (e.code == 68 && e.altKey) {
                     if (this.bg == null ) this.setBackground("rgba(255, 255, 255, 0.5)");
                     else                  this.setBackground(null);
-                  //  this.activate(this.bg != null);
-                    this.kids[0].setBackground(this.bg ? "rgba(180,180,180, 0.9)" : null);
 
+                    this.kids[0].setBackground(this.bg ? "rgba(180,180,180, 0.9)" : null);
                     var focusManager = zebkit.ui.focusManager;
                     if (this.bg != null) {
                         this.activeComp = focusManager.focusOwner;
@@ -445,9 +442,9 @@ zebkit.package("ui.samples", function(pkg, Class) {
                         this.activeComp = null;
                     }
 
-                    e.eatMe = true;
+                    return true;
                 }
-                return this.bg != null;
+                return false;
             };
 
             this.paint = function(g) {

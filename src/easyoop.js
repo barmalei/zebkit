@@ -469,7 +469,8 @@ pkg.Singleton = function(clazz) {
  */
 pkg.Interface = make_template(null, function() {
     var $Interface = make_template(pkg.Interface, function() {
-        throw new Error("Interface cannot be instantiated");
+        return new (pkg.Class($Interface, arguments[0]))();
+        //throw new Error("Interface cannot be instantiated");
     }, null);
 
     if (arguments.length > 1) {
@@ -1038,6 +1039,11 @@ pkg.Class = make_template(null, function() {
         }
 
         mixing.call(this, this, arguments[0], true);
+    };
+
+
+    classTemplate.mixing = function() {
+        mixing.call(this, this, arguments[0]);
     };
 
     return classTemplate;

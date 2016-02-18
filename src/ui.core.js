@@ -68,7 +68,7 @@ FOCUS_EVENT = new pkg.FocusEvent();
 //
 // Extend Pointer event with zebkit specific fields and methods
 //
-pkg.PointerEvent.extend([
+pkg.PointerEvent.mixing([
     function $prototype() {
         /**
          * Absolute mouse pointer x coordinate
@@ -127,8 +127,7 @@ pkg.PointerEvent.extend([
                 this.absX = ax;
                 this.absY = ay;
                 this.source = source;
-            }
-            else {
+            } else {
                 this.source = source;
                 this.absX = ax;
                 this.absY = ay;
@@ -204,8 +203,7 @@ pkg.$cvp = function(c, r) {
         var p = c.parent, px = -c.x, py = -c.y;
         if (r == null) {
             r = { x:0, y:0, width : c.width, height : c.height };
-        }
-        else {
+        } else {
             r.x = r.y = 0;
             r.width  = c.width;
             r.height = c.height;
@@ -789,8 +787,7 @@ pkg.Panel = Class(zebkit.layout.Layoutable, [
                                         da.width  = Math.max(dax + da.width,  x + w) - da.x;
                                         da.height = Math.max(day + da.height, y + h) - da.y;
                                     }
-                                }
-                                else {
+                                } else {
                                     // if the target canvas doesn't have a dirty area set than
                                     // cut (if necessary) the requested repainting area by the
                                     // canvas size
@@ -911,8 +908,7 @@ pkg.Panel = Class(zebkit.layout.Layoutable, [
                     if (this.update != null) this.update(g);
 
                     g.restore();
-                }
-                else {
+                } else {
                     if (b) {
                         this.bg.paint(g, 0, 0, this.width, this.height, this);
                     }
@@ -944,8 +940,7 @@ pkg.Panel = Class(zebkit.layout.Layoutable, [
                             this.paint(g);
                             g.restore();
                         }
-                    }
-                    else {
+                    } else {
                         this.paint(g);
                     }
                 }
@@ -1073,8 +1068,8 @@ pkg.Panel = Class(zebkit.layout.Layoutable, [
         this.getComponentAt = function(x,y){
             var r = pkg.$cvp(this, temporary);
 
-            if (r == null || (x < r.x || y < r.y ||
-                x >= r.x + r.width || y >= r.y + r.height))
+            if (r === null ||
+                (x < r.x || y < r.y || x >= r.x + r.width || y >= r.y + r.height))
             {
                 return null;
             }
@@ -1147,8 +1142,7 @@ pkg.Panel = Class(zebkit.layout.Layoutable, [
 
             if (l.width > 0 && l.height > 0) {
                 l.repaint();
-            }
-            else {
+            } else {
                 this.repaint(l.x, l.y, 1, 1);
             }
         };
@@ -1444,8 +1438,7 @@ pkg.Panel = Class(zebkit.layout.Layoutable, [
         this.setKids = function(a) {
             if (arguments.length === 1 && zebkit.instanceOf(a, pkg.Panel)) {
                this.add(a);
-            }
-            else {
+            } else {
                 // if components list passed as number of arguments
                 if (arguments.length > 1) {
                     for(var i = 0; i < arguments.length; i++) {
@@ -1454,16 +1447,14 @@ pkg.Panel = Class(zebkit.layout.Layoutable, [
                             this.add(a.$new != null ? a.$new() : a);
                         }
                     }
-                }
-                else {
+                } else {
                     if (Array.isArray(a)) {
                         for(var i=0; i < a.length; i++) {
                             if (a[i] != null) {
                                 this.add(a[i]);
                             }
                         }
-                    }
-                    else {
+                    } else {
                         var kids = a;
                         for(var k in kids) {
                             if (kids.hasOwnProperty(k)) {
@@ -1582,8 +1573,7 @@ pkg.Panel = Class(zebkit.layout.Layoutable, [
             if (arguments.length > 0) {
                 if (l.constructor === Object) {
                     this.properties(l);
-                }
-                else {
+                } else {
                     this.setLayout(l);
                 }
             }
@@ -1829,8 +1819,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
         if (this.isEnabled != b) {
             if (b) {
                 this.$container.removeChild(this.$blockElement);
-            }
-            else {
+            } else {
                 if (this.$blockElement == null) {
                     this.$blockElement = zebkit.web.$createBlockedElement();
                 }
@@ -1868,8 +1857,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
 
             // visibility correction is done by HTML elements manager
             this.$container.style.visibility = prevVisibility;
-        }
-        else {
+        } else {
             this.$sizeAdjusted = false;
         }
 
@@ -1903,8 +1891,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
 
         if (b == null) {
            this.setStyle("border", "none");
-        }
-        else {
+        } else {
             this.setStyles({
                 //!!!! bloody FF fix, the border can be made transparent
                 //!!!! only via "border" style
@@ -1954,8 +1941,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
         // sync state of native focus and zebkit focus
         if (this.hasFocus()) {
             this.$focus();
-        }
-        else {
+        } else {
             this.$blur();
         }
     },
@@ -2045,8 +2031,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
             e.parentNode.removeChild(e);
             this.$container.appendChild(e);
             pn.appendChild(this.$container);
-        }
-        else {
+        } else {
             // to force all children element be aligned
             // relatively to the wrapper we have to set
             // position CSS to absolute or absolute
@@ -2075,6 +2060,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
             var $this = this;
 
             zebkit.web.$focusin(fe, function(e) {
+
                 // sync native focus with zebkit focus if necessary
                 if ($this.hasFocus() === false) {
                     $this.requestFocus();
@@ -2082,6 +2068,7 @@ pkg.HtmlElement = Class(pkg.Panel, [
             }, false);
 
             zebkit.web.$focusout(fe, function(e) {
+
                 // sync native focus with zebkit focus if necessary
                 if ($this.hasFocus()) {
                     pkg.focusManager.requestFocus(null);
@@ -2418,7 +2405,7 @@ pkg.CanvasLayer = Class(pkg.HtmlCanvas, [
          *  @param {zebkit.ui.PointerEvent} e a pointer event
          *  @return {Boolean} return true if the layer wants to
          *  catch control
-         *  @method layerPointerPressed
+         *  @method pointerPressed
          */
 
         /**
@@ -2429,18 +2416,7 @@ pkg.CanvasLayer = Class(pkg.HtmlCanvas, [
          *  @param {zebkit.ui.KeyEvent} e a key code
          *  @return {Boolean} return true if the layer wants to
          *  catch control
-         *  @method layerKeyPressed
-         */
-
-        /**
-         *  Ask if the layer is active at the given location.
-         *  If the method is not defined that means the layer
-         *  is active at any location.
-         *  @param {Integer} x a x location
-         *  @param {Integer} y a y location
-         *  @return {Boolean} return true if the layer is active
-         *  at this location
-         *  @method isLayerActiveAt
+         *  @method keyPressed
          */
     },
 
@@ -2464,14 +2440,6 @@ pkg.RootLayer = Class(pkg.CanvasLayer, [
     },
 
     function $prototype() {
-        this.layerPointerPressed = function(e) {
-            return true;
-        };
-
-        this.layerKeyPressed = function(e) {
-            return true;
-        };
-
         this.getFocusRoot = function() {
             return this;
         };
@@ -2598,12 +2566,10 @@ pkg.ImagePan = Class(pkg.ViewPan, [
                 this.$runner = null;
                 $this.setView(null);
             });
-        }
-        else {
+        } else {
             if (this.$runner == null) {
                 this.setView(null);
-            }
-            else {
+            } else {
                 var $this = this;
                 this.$runner.run(function() {
                     $this.setView(null);
@@ -2717,8 +2683,7 @@ pkg.FocusManager = Class(pkg.Manager, [
                     if (document.activeElement != cc.getCanvas().element) {
                         cc.getCanvas().element.focus();
                         this.requestFocus(cc);
-                    }
-                    else {
+                    } else {
                         this.requestFocus(cc);
                     }
                 }
@@ -2830,15 +2795,12 @@ pkg.FocusManager = Class(pkg.Manager, [
                     var nf = c.getEventDestination();
                     if (nf == null || oldFocusOwner == nf) return;
                     this.focusOwner = nf;
-                }
-                else {
+                } else {
                     this.focusOwner = c;
                 }
 
                 if (oldFocusOwner != null) {
                     var ofc = oldFocusOwner.getCanvas();
-                    if (ofc != null) ofc.$lastFocusOwner = oldFocusOwner;
-
                     FOCUS_EVENT.source  = oldFocusOwner;
                     FOCUS_EVENT.related = this.focusOwner;
                     oldFocusOwner.focused();
@@ -2873,8 +2835,7 @@ pkg.FocusManager = Class(pkg.Manager, [
                     setTimeout(function() {
                         $this.requestFocus(e.source);
                     }, 50);
-                }
-                else {
+                } else {
                     this.requestFocus(e.source);
                 }
             }
@@ -2985,12 +2946,10 @@ pkg.ShortcutManager = Class(pkg.Manager, [
                 var ch = r[i].trim().toUpperCase();
                 if (pkg.KeyEvent.hasOwnProperty("M_" + ch)) {
                     m += pkg.KeyEvent["M_" + ch];
-                }
-                else {
+                } else {
                     if (pkg.KeyEvent.hasOwnProperty(ch)) {
                         c = pkg.KeyEvent[ch];
-                    }
-                    else {
+                    } else {
                         c = parseInt(ch);
                         if (c == NaN) {
                             throw new Error("Invalid key code : " + ch);
@@ -3241,7 +3200,6 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
 
     function $prototype() {
         this.$isRootCanvas   = true;
-        this.$lastFocusOwner = null;
         this.isSizeFull      = false;
 
         this.$toElementX = function(pageX, pageY) {
@@ -3291,9 +3249,8 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
         this.$keyPressed = function(e) {
             for(var i = this.kids.length - 1;i >= 0; i--){
                 var l = this.kids[i];
-                if (l.layerKeyPressed != null && l.layerKeyPressed(e) === true){
-                    if (e.eatMe === true) return true;
-                    break;
+                if (l.layerKeyPressed != null && l.layerKeyPressed(e) === true) {
+                    return true;
                 }
             }
 
@@ -3310,7 +3267,6 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
                 e.source = pkg.focusManager.focusOwner;
                 return pkg.events.fireEvent("keyReleased", e);
             }
-
             return false;
         };
 
@@ -3383,14 +3339,12 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
                         pkg.$pointerOwner[e.identifier] = d;
                         b = pkg.events.fireEvent("pointerEntered", e.update(d, x, y)) || b;
                     }
-                }
-                else {
+                } else {
                     if (d != null && d.isEnabled === true) {
                         b = pkg.events.fireEvent("pointerMoved", e.update(d, x, y));
                     }
                 }
-            }
-            else {
+            } else {
                 if (d != null && d.isEnabled === true) {
                     pkg.$pointerOwner[e.identifier] = d;
                     b = pkg.events.fireEvent("pointerEntered", e.update(d, x, y));
@@ -3430,7 +3384,6 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
                                                                          this.$toElementX(e.pageX, e.pageY),
                                                                          this.$toElementY(e.pageX, e.pageY)));
             }
-
             return false;
         };
 
@@ -3511,13 +3464,13 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
             // send pointer event to a layer and test if it has been activated
             for(var i = this.kids.length - 1; i >= 0; i--){
                 var tl = this.kids[i];
-                if (tl.layerPointerPressed != null && tl.layerPointerPressed(e)) {
-                    if (e.eatMe === true) return true;
-                    break;
+                if (tl.layerPointerPressed != null && tl.layerPointerPressed(e) === true) {
+                    return true;
                 }
             }
 
             var d = this.getComponentAt(x, y);
+
             if (d != null && d.isEnabled === true) {
                 if (pkg.$pointerOwner[e.identifier] !== d) {
                     pkg.$pointerOwner[e.identifier] = d;
@@ -3525,27 +3478,25 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
                 }
 
                 pkg.$pointerPressedOwner[e.identifier] = d;
-                pkg.events.fireEvent("pointerPressed", e.update(d, x, y));
+
+                // TODO: prove the solution !?
+                if (pkg.events.fireEvent("pointerPressed", e.update(d, x, y)) === true) {
+                    delete pkg.$pointerPressedOwner[e.identifier];
+                    return true;
+                }
             }
+
+            return false;
         };
 
         this.getComponentAt = function(x, y){
             for(var i = this.kids.length; --i >= 0; ){
-                var tl = this.kids[i];
-
-                if (tl.isLayerActiveAt == null || tl.isLayerActiveAt(x, y)) {
-                    // !!!
-                    //  since the method is widely used the code below duplicates
-                    //  functionality of pkg.events.getEventDestination(tl.getComponentAt(x, y));
-                    //  method
-                    // !!!
-                    var c = tl.getComponentAt(x, y);
-                    if (c != null)  {
-                        var p = c;
-                        while ((p = p.parent) != null) {
-                            if (p.catchInput != null && (p.catchInput === true || (p.catchInput !== false && p.catchInput(c)))) {
-                                c = p;
-                            }
+                var c = this.kids[i].getComponentAt(x, y);
+                if (c != null) {
+                    var p = c;
+                    while ((p = p.parent) != null) {
+                        if (p.catchInput != null && (p.catchInput === true || (p.catchInput !== false && p.catchInput(c)))) {
+                            c = p;
                         }
                     }
                     return c;
@@ -3633,13 +3584,11 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
         if (arguments.length === 0) {
             w = 400;
             h = 400;
-        }
-        else {
+        } else {
             if (arguments.length === 1) {
                 w = -1;
                 h = -1;
-            }
-            else {
+            } else {
                 if (arguments.length === 2) {
                     h = w;
                     w = element;
@@ -3711,8 +3660,7 @@ pkg.zCanvas = Class(pkg.HtmlCanvas, [
                 e.target.parentNode.getAttribute("data-zebcont") == null)
             {
                 pkg.focusManager.requestFocus(null);
-            }
-            else {
+            } else {
                 // clear focus if a focus owner component is placed in another zCanvas
                 if (e.target === $this.$container &&
                     pkg.focusManager.focusOwner != null &&
@@ -3895,8 +3843,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
 
                 // adjust location of just attached DOM component
                 $adjustLocation(c);
-            }
-            else {
+            } else {
                 // test consistency whether the DOM element already has
                 // parent node that doesn't match the discovered
                 if (parentElement           != null &&
@@ -3953,8 +3900,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
                 var e = c.$domKids[k];
                 if (e.isDOMElement === true) {
                     callback.call(this, e);
-                }
-                else {
+                } else {
                     // prevent unnecessary method call by condition
                     if (e.$domKids != null) {
                         $domElements(e, callback);
@@ -3983,8 +3929,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
             if (c.isDOMElement === true) {
                 c.$container.style.visibility = c.isVisible === false || $isInInvisibleState(c) ? "hidden"
                                                                                                 : "visible";
-            }
-            else {
+            } else {
                 if (c.$domKids != null) {
                     $domElements(c, function(e) {
                         e.$container.style.visibility = e.isVisible === false || $isInInvisibleState(e) ? "hidden" : "visible";
@@ -4009,8 +3954,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
                     cont.style.left = ((parseInt(cont.style.left, 10) || 0) - dx) + "px";
                     cont.style.top  = ((parseInt(cont.style.top,  10) || 0) - dy) + "px";
                 }
-            }
-            else {
+            } else {
                 if (c.$domKids != null) {
                     $domElements(c, function(e) {
                         $adjustLocation(e);
@@ -4061,8 +4005,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
                         if (kid.isDOMElement === true) {
                             kid.$container.parentNode.removeChild(kid.$container);
                             kid.$container.parentNode = null;
-                        }
-                        else {
+                        } else {
                             removeDOMChildren(kid);
                         }
                     }
@@ -4079,8 +4022,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
             if (c.isDOMElement === true) {
                 c.$container.parentNode.removeChild(c.$container);
                 c.$container.parentNode = null;
-            }
-            else {
+            } else {
                 removeDOMChildren(c);
             }
 
@@ -4091,14 +4033,12 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
             var p = e.source,  c = e.kid;
             if (c.isDOMElement === true) {
                 $resolveDOMParent(c);
-            }
-            else {
+            } else {
                 if (c.$domKids != null) {
                     $domElements(c, function(e) {
                         $resolveDOMParent(e);
                     });
-                }
-                else {
+                } else {
                     return;
                 }
             }
@@ -4116,8 +4056,7 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
                         p.$domKids[c] = c;
                         c = p;
                         p = p.parent;
-                    }
-                    else {
+                    } else {
                         if (p.$domKids.hasOwnProperty(c)) {
                             throw new Error("Inconsistent state for " + c + ", " + c.clazz.$name);
                         }
@@ -4129,10 +4068,5 @@ pkg.HtmlElementMan = Class(pkg.Manager, [
         };
     }
 ]);
-
-
-/**
- * @for
- */
 
 });

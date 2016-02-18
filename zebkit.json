@@ -373,7 +373,7 @@
     "mscroll": { "$ ? zebkit.ui.MobileScrollMan"  :[] },
 
     "? ScrollPan": {
-        "autoHide": false
+        "autoHide": { ".expr" : "window.innerWidth < 600"}
     },
 
     "? TextField": {

@@ -1921,22 +1921,6 @@ pkg.PasswordText = Class(pkg.TextRender, [
 ]);
 
 pkg.TabBorder = Class(pkg.View, [
-    function(t, w) {
-        if (arguments.length === 1) w = 1;
-
-        this.type  = t;
-        this.left = this.top = this.bottom = this.right = 6 + w;
-        this.width = w;
-
-        this.onColor1 = pkg.palette.black;
-        this.onColor2 = pkg.palette.gray5;
-        this.offColor = pkg.palette.gray1;
-
-        this.fillColor1 = "#DCF0F7";
-        this.fillColor2 = pkg.palette.white;
-        this.fillColor3 = pkg.palette.gray7;
-    },
-
     function $prototype() {
         this.paint = function(g,x,y,w,h,d){
             var xx = x + w - 1,
@@ -2078,6 +2062,22 @@ pkg.TabBorder = Class(pkg.View, [
         this.getBottom = function () { return this.bottom;};
         this.getLeft   = function () { return this.left;  };
         this.getRight  = function () { return this.right; };
+    },
+
+    function(t, w) {
+        if (arguments.length === 1) w = 1;
+
+        this.type  = t;
+        this.left  = this.top = this.bottom = this.right = 6 + w;
+        this.width = w;
+
+        this.onColor1 = pkg.palette.black;
+        this.onColor2 = pkg.palette.gray5;
+        this.offColor = pkg.palette.gray1;
+
+        this.fillColor1 = "#DCF0F7";
+        this.fillColor2 = pkg.palette.white;
+        this.fillColor3 = pkg.palette.gray7;
     }
 ]);
 
@@ -2340,15 +2340,8 @@ pkg.TitledBorder = Class(pkg.Render, [
         };
 
         this[''] = function (b, a){
-            if (a != null) {
-                this.lineAlignment = a;
-            }
-
-            if (b == null && this.lineAlignment !== "bottom" &&
-                             this.lineAlignment !== "top" &&
-                             this.lineAlignment !== "center")
-            {
-                throw new Error("" + this.lineAlignment);
+            if (arguments.length > 1) {
+                this.lineAlignment = zebkit.util.$validateValue(a, "bottom", "top", "center");
             }
             this.setTarget(b);
         };
@@ -2385,8 +2378,10 @@ pkg.BunldeView = Class(pkg.View, [
         this.direction = "vertical";
 
         this[''] = function(dir, color) {
-            if (color != null) this.color = color;
-            if (dir != null) this.direction = dir;
+            if (arguments.length > 0) {
+                this.direction = zebkit.util.$validateValue(dir, "vertical", "horizontal");
+                if (arguments.length > 1) this.color = color;
+            }
         };
 
         this.paint =  function(g,x,y,w,h,d) {

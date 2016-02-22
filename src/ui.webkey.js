@@ -199,12 +199,12 @@ zebkit.package("ui", function(pkg, Class) {
                     // FF sets keyCode to zero for some diacritic characters
                     // to fix the problem we have to try get the code from "key" field
                     // of event that stores a character
-                    if (this.code === 0 && e.key != null && e.key.length() === 1) {
+                    if (this.code === 0 && e.key != null && e.key.length === 1) {
                         this.code = e.key.charCodeAt(0);
                         this.ch   = e.key;
                     }
                     else {
-                        this.ch = e.charCode > 0 && (this.code >= 47 || this.code === 32) ? String.fromCharCode(e.charCode) : 0;
+                        this.ch = e.charCode > 0 && this.code >= 32 ? String.fromCharCode(e.charCode) : 0;
                     }
                 }
 

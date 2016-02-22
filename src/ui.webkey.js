@@ -1,5 +1,5 @@
 zebkit.package("ui", function(pkg, Class) {
-
+ 
     pkg.ClipboardSupport = Class([
         function $clazz() {
             this.Listeners = zebkit.util.ListenersClass("clipCopy", "clipPaste", "clipCut");

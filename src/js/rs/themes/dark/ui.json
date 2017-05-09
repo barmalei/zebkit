@@ -1,0 +1,704 @@
+{
+    "version"   : "04.2017",
+    "themeName" : "dark",
+
+    "%{../ui.common.json}": null,
+
+
+    "font"          : { "@zebkit.ui.Font" : ["Arial", 16] },
+    "boldFont"      : { "@zebkit.ui.Font" : ["Arial", "bold", 14] },
+    "smallFont"     : { "@zebkit.ui.Font" : ["Arial", 10] },
+
+    "palette": {
+        "white"      : "#FFFFFF",
+        "black"      : "#000000",
+        "fontColor"  : "#808080",
+        "gray"       : "#A1A1A1"
+    },
+
+    "borders" : {
+        "raised" : { "@zebkit.ui.Raised":[] },
+        "sunken" : { "@zebkit.ui.Sunken":[] },
+        "etched" : { "@zebkit.ui.Etched":[] },
+        "plain"  : { "@zebkit.ui.Border": [ "red", 1, 6 ] },
+        "dot"    : { "@zebkit.ui.Dotted" : []  }
+    },
+
+    "CompositeEvStatePan": {
+        "layout"     : { "@zebkit.layout.FlowLayout": [ "center", "center", "horizontal", 2 ] },
+        "focusMarker": "%{borders.dot}"
+    },
+
+    "BoldLabel": {
+        "font": "%{boldFont}"
+    },
+
+    "Button": {
+        "Link": {
+            "font":  { "@zebkit.ui.Font" : ["Arial", "bold italic", 16] },
+            "colors"      : {
+                "pressed.over" : "white",
+                "out"          : "white",
+                "over"         : "white",
+                "pressed.out"  : "lightGray",
+                "disabled"     : "gray"
+            },
+            "canHaveFocus": false
+        },
+
+        "Label": {
+            "font": { "@zebkit.ui.Font" : ["Arial", "bold", 16] },
+            "disabledColor": "white",
+            "color" : "white"
+        },
+
+        "ImageLabel": {
+            "Label" : {
+                "font": { "@zebkit.ui.Font" : ["Arial", "bold", 16] },
+                "disabledColor": "white",
+                "color" : "white"
+            }
+        },
+
+        "layout": { "@zebkit.layout.FlowLayout": ["center", "center", "horizontal",2] },
+
+        "background"   : {
+            "pressed.over": { "@zebkit.ui.Gradient": [ "red", "orange" ] },
+            "disabled" : "lightGray",
+            "*"        : { "@zebkit.ui.Gradient": [ "orange", "red"  ] }
+        },
+
+        "border": {
+            "*" : { "@zebkit.ui.Border" : [ null, 1, 8 ]},
+            "pressed.out"  : { "@zebkit.ui.Border" : [ "black", 1, 8 ]},
+            "over"  : { "@zebkit.ui.Border" : [ "#F08763", 3, 8 ]},
+            "out"   : { "@zebkit.ui.Border" : [ "gray", 1, 8 ]}
+        },
+
+        "focusMarkerView" : null,
+        "padding"         : 8
+    },
+
+    "Checkbox": {
+        "Box": {
+            "preferredSize": [ 18, 18],
+            "border"       : { "@zebkit.ui.Border" : [ "orange", 2, 4 ] },
+            "background"   : {
+                "*": { "@zebkit.ui.Gradient": [ "red", "orange" ] },
+                "disabled": "lightGray",
+                "pressed.disabled" : "lightGray"
+            },
+            "view": {
+                "pressed.out"        : { "@zebkit.ui.CheckboxView": [ "black"] },
+                "out"                : { "@zebkit.ui.View": [] },
+                "over"               : { "@zebkit.ui.View": [] },
+                "pressed.over"       : { "@zebkit.ui.CheckboxView": [ "white" ] },
+                "pressed.disabled"   : { "@zebkit.ui.CheckboxView": [ "#AAAAAA" ] },
+                "disabled"           : { "@zebkit.ui.View": [] }
+            }
+        },
+
+        "Label": {
+            "disabledColor": "lightGray",
+            "color": "white",
+            "font"  : "bold"
+        },
+
+        "layout" : { "@zebkit.layout.FlowLayout": [ "left", "center", "horizontal", 6 ] },
+        "border" : {
+             "focuson" :  "%{borders.plain}",
+             "focusoff":  { "@zebkit.ui.View" : [] }
+        },
+        "padding": [4, 10, 4, 10]
+    },
+
+
+    "Radiobox": {
+        "inheritProperties" : true,
+
+        "Label": {
+            "disabledColor": "lightGray",
+            "color" : "white",
+            "font"  : "bold"
+        },
+
+        "Box": {
+            "preferredSize": [ 18, 18 ],
+            "border"       : { "@zebkit.ui.RoundBorder":["orange", 2] },
+            "background"   : {
+                "*" : { "@zebkit.ui.Gradient": [ "red", "orange" ] },
+                "disabled": "lightGray",
+                "pressed.disabled" : "lightGray"
+            },
+            "view": {
+                "pressed.out"       : { "@zebkit.ui.RadioView" : [ "black", "black" ]  },
+                "out"               : { "@zebkit.ui.View" : []  },
+                "over"              : { "@zebkit.ui.View" : [] },
+                "pressed.over"      : { "@zebkit.ui.RadioView" : [ "white", "white" ] },
+                "pressed.disabled"  : { "@zebkit.ui.RadioView" : [ "#AAAAAA", "#AAAAAA"] },
+                "disabled"          : { "@zebkit.ui.View" : [] }
+            }
+        }
+    },
+
+    "BorderPan": {
+        "Label": {
+            "font" : "120%",
+            "color": "orange"
+        },
+
+        "ImageLabel" : {
+            "Label": {
+                "font" : "120%",
+                "color": "orange"
+            }
+        },
+
+        "Checkbox": {
+            "inheritProperties" : true,
+            "Label": {
+                "font" : "120%",
+                "color": "orange"
+            }
+        },
+
+        "border": { "@zebkit.ui.Border": [ "red", 1, 6 ] }
+    },
+
+    "SplitPan": {
+        "Bar": {
+            "border" : {
+                "*"     : { "@zebkit.ui.Border" : [ "#DD2255", 1, 2] },
+                "over"  : { "@zebkit.ui.Border" : [ "#DD2255", 2, 2] },
+                "pressed.*": { "@zebkit.ui.Border" : [ "red", 2, 2] }
+            },
+
+            "background"    :  "#990000",
+            "preferredSize" : [ 6, 6 ]
+        }
+    },
+
+    "Scroll" : {
+        "HIncButton": {
+            "arrowDirection" : "right",
+            "preferredSize":[ 12, 11 ],
+            "canHaveFocus": false
+        },
+
+        "HDecButton": {
+            "arrowDirection" : "left",
+            "preferredSize":[ 12, 11 ],
+            "canHaveFocus": false
+        },
+
+        "VIncButton": {
+            "arrowDirection" : "bottom",
+            "preferredSize" :[ 11, 12 ],
+            "canHaveFocus": false
+        },
+
+        "VDecButton": {
+            "arrowDirection" : "top",
+            "preferredSize":[ 11, 12 ],
+            "canHaveFocus": false
+        },
+
+        "VBundle": {
+            "padding":1,
+            "preferredSize" : [4, -1],
+            "background" : { "@zebkit.ui.BunldeView": [ "vertical", "#DD2255"] }
+        },
+
+        "HBundle": {
+            "padding":1,
+            "preferredSize" : [ -1, 6 ],
+            "background" : { "@zebkit.ui.BunldeView": [ "horizontal", "#DD2255" ] }
+        },
+
+        "background":  null,
+        "padding"   : 1,
+        "border"    : { "@zebkit.ui.Border": [ null, 0, 4 ] }
+    },
+
+    "ScrollPan": {
+        "autoHide": "%{<js> window.innerWidth < 600}"
+    },
+
+    "TextField": {
+        "HintRender" : {
+            "font": {
+                "@zebkit.ui.Font": ["Arial", "bold italic", 12]
+            },
+            "color" : "#C1C1C1"
+        },
+
+        "border" : {
+            "focuson" :  { "@zebkit.ui.Border" : [ "orange", 2 ] },
+            "focusoff":  { "@zebkit.ui.Border" : [ "orange", 1 ] }
+        },
+
+        "background"    : { "@zebkit.ui.Gradient" : [ "black", "#444444" ]},
+        "selectionView" : "#F29879",
+        "color"         : "red",
+        "curW"          : 2,
+        "font"          : "%{font}",
+        "cursorView"    : "white",
+        "padding"       : [4,4,4,4]
+    },
+
+    "TextArea" : {
+        "inheritProperties" : true
+    },
+
+    "PassTextField" : {
+        "inheritProperties" : true
+    },
+
+    "Progress": {
+        "border"    : { "@zebkit.ui.Border" : [ "red", 1, 3] },
+        "bundleView": "orange",
+        "padding"   : 2
+    },
+
+    "Tabs": {
+        "TabView": {
+            "TabPan": {
+                "padding" : 4,
+                "layout": { "@zebkit.layout.FlowLayout": 4 }
+            },
+
+            "captionRender"    : "%{StringRender}",
+            "fontColor"        : "white",
+            "selectedFontColor": "red",
+            "font"             : "bold",
+            "selectedFont"     : { "@zebkit.ui.Font": ["Arial", "bold", 14 ] }
+        },
+
+        "border" : null,
+        "views"  : {
+            "out"      : null,
+            "over"     : "orange",
+            "selected" : { "@zebkit.ui.Border": [ "orange", 2 ], "sides": "top" },
+            "marker"   : null
+        },
+        "pageGaps": [2, 2]
+    },
+
+    "BaseList": {
+        "views" :  {
+            "select"    : { "@zebkit.ui.Border" : ["orange", 1, 6 ] },
+            "top.marker": { "@zebkit.ui.Border" : ["orange", 1, 6 ] },
+            "marker"    : { "@zebkit.ui.Border" : ["orange", 1, 6 ] }
+        },
+
+        "border" : {
+            "focuson" :  { "@zebkit.ui.Border" : [ "orange", 2 ] },
+            "focusoff":  { "@zebkit.ui.Border" : [ "orange", 1 ] }
+        },
+
+        "padding": 0,
+
+        "font" : "%{boldFont}"
+    },
+
+    "List": {
+        "inheritProperties" : true,
+        "padding": 2,
+        "ViewProvider" : {
+            "font" : "bold",
+            "color": "white"
+        }
+    },
+
+    "ImageLabel": {
+        "padding": 4
+    },
+
+    "CompList": {
+        "inheritProperties" : true,
+
+        "Label" : {
+            "padding": 4,
+            "font" : "bold",
+            "color": "white"
+        },
+
+        "ImageLabel" : {
+            "padding": 4,
+            "font" : "bold",
+            "color": "white"
+        },
+
+        "padding": 2,
+
+        "layout"  : { "@zebkit.layout.ListLayout":[ 4 ] }
+    },
+
+    "Combo": {
+        "ComboPadPan": {
+            "border"    : "%{borders.plain}",
+            "background": "black",
+            "autoHide"  : true
+        },
+
+        "ReadonlyContentPan": {
+            "padding": 0,
+            "background" : null
+        },
+
+        "EditableContentPan": {
+            "TextField": {
+                "inheritProperties" : true,
+
+                "border"    : null,
+                "background": null,
+                "padding"  : [ 0,0,0,0 ]
+            },
+
+            "padding": 4,
+            "layout" : { "@zebkit.layout.BorderLayout": 0 }
+        },
+
+        "Button": {
+            "preferredSize": [16, 16],
+            "canHaveFocus" : false,
+            "padding" : [4,0,4,0],
+
+            "view": {
+               "out"       : { "@zebkit.ui.ArrowView": [ "bottom", "orange", 8], "gap" : 4 },
+               "over"      : { "@zebkit.ui.ArrowView": [ "bottom", "red", 8 ], "gap" : 4 },
+               "pressed.*" : { "@zebkit.ui.ArrowView": [ "bottom", "blue", 8], "gap" : 4 },
+               "disabled"  : { "@zebkit.ui.ArrowView": [ "bottom", "#CCCCCC"], "gap" : 4 }
+            }
+        },
+
+        "List": {
+            "inheritProperties" : true,
+            "ViewProvider" : {
+                "color" : "white",
+                "font"  : "bold"
+            },
+
+            "gap" : 4,
+
+            "views" :  {
+                "select"    : { "@zebkit.ui.Border" : ["red", 2, 6 ] },
+                "top.marker": null,
+                "marker"    : [  [ { "@zebkit.ui.Border" : [ null, 0, 6 ] }, { "@zebkit.ui.Gradient" : ["red", "orange" ] } ] ]
+            }
+
+        },
+
+        "CompList": {
+            "inheritProperties" : true,
+
+            "Label" : {
+                "inheritProperties" : true,
+                "padding":4,
+                "color": "white"
+            },
+
+            "ImageLabel" : {
+                "padding":4,
+                "Label" : {
+                    "color" : "white"
+                }
+            },
+
+            "views" :  {
+                "select"    : { "@zebkit.ui.Border" : ["red", 2, 6 ] },
+                "top.marker": null,
+                "marker"    : [  [ { "@zebkit.ui.Border" : [ null, 0, 6 ] }, { "@zebkit.ui.Gradient" : ["red", "orange" ] } ] ]
+            }
+        },
+
+        "padding"      : [ 0, 4, 0, 4 ],
+        "border"       : {
+            "focuson" :  { "@zebkit.ui.Border" : [ "orange", 3, 6 ] },
+            "focusoff":  { "@zebkit.ui.Border" : [ "orange", 2, 6 ] }
+        },
+
+        "background"   : null,
+        "layout"       : { "@zebkit.layout.BorderLayout": 0 },
+        "selectionView":  null
+    },
+
+    "Slider": {
+        "ViewProvider" : {
+            "color" : "red"
+        },
+
+        "border": {
+            "focuson" :  { "@zebkit.ui.Border" : [ "red", 1, 3 ] },
+            "focusoff":  { "@zebkit.ui.View":[] }
+        },
+        "views" : {
+             "gauge"  : { "@zebkit.ui.Border" : "red" },
+             "hbundle": { "@zebkit.ui.RoundBorder": [ "red", 2 ], "fillColor" : "orange"  },
+             "vbundle": { "@zebkit.ui.RoundBorder": [ "red", 2 ], "fillColor" : "orange"  }
+        },
+        "scaleColor": "red",
+        "padding"   : 4
+    },
+
+    "Link": {
+        "font":  { "@zebkit.ui.Font" : [ "Arial", "italic", 14]},
+        "colors"      : {
+            "pressed.over" : "red",
+            "out"          : "red",
+            "over"         : "orange",
+            "pressed.out"  : "red",
+            "disabled"     : "gray"
+        },
+        "canHaveFocus": false
+    },
+
+    "MenuItem" : {
+        "padding": [ 4,4,4,4],
+
+        "Label": {
+            "color"   : "white",
+            "padding": [ 0,0, 0, 0 ],
+            "font"    : { "@zebkit.ui.Font": ["Arial", "bold", 14] }
+        },
+
+        "CheckStatePan": {
+            "view": {
+                "on"         : { "@zebkit.ui.StringRender":[ "✓",  { "@zebkit.ui.Font": [ "Arial", "bold", 16] }, "red" ] },
+                "on.disabled": { "@zebkit.ui.StringRender":[ "✓",  { "@zebkit.ui.Font": [ "Arial", "bold", 16] }, "lightGray" ] },
+                "off"        : null
+            }
+        },
+
+        "SubImage": {
+            "padding": [ 0, 0, 0, 4],
+            "view": {
+                "arrow" :  { "@zebkit.ui.ArrowView" : [ "right", "red", 10 ] },
+                "*"     : null
+            }
+        }
+    },
+
+    "Menu": {
+        "Line": {
+            "padding": 4,
+            "color": "red"
+        },
+
+        "MenuItem" : {
+            "inheritProperties" : true,
+            "Label": {
+                "inheritProperties" : true
+            }
+        },
+
+        "border"     : { "@zebkit.ui.Border": [ "red", 2 ]  },
+        "background" : "black",
+        "padding"   : [ 4,0,4,0 ],
+        "views"      : {
+            "marker" : { "@zebkit.ui.Gradient": [ "orange", "red"  ] }
+        },
+        "layout"     : { "@zebkit.layout.ListLayout":0 }
+    },
+
+
+    "Menubar": {
+        "inheritProperties" : true,
+
+        "MenuItem" : {
+            "inheritProperties" : true,
+            "padding"  : [6, 16, 6, 16],
+            "Label": {
+                "inheritProperties" : true,
+                "color" : "white"
+            }
+        },
+
+
+        "background" : null ,
+        "padding"    : [0,0,0,0],
+        "layout"     : { "@zebkit.layout.FlowLayout": 0 },
+        "border"     : { "@zebkit.ui.Border": [ "red" ], "gap" : 2, "sides": "top" },
+        "views"      : {
+            "select" : { "@zebkit.ui.Gradient": [ "red", "orange"  ] },
+            "marker" : { "@zebkit.ui.Gradient": [ "orange", "red"  ] }
+        }
+    },
+
+    "Tooltip": {
+        "Label": {
+            "color"  : "white",
+            "padding": 2
+        },
+
+        "ImageLabel": {
+            "Label": {
+                "color"  : "white"
+            }
+        },
+
+        "padding"    : 6,
+        "background" : {"@zebkit.ui.Gradient" : [ "black", "gray"]},
+        "border"     : { "@zebkit.ui.Tooltip.TooltipBorder" : [ "white", 1 ]},
+        "layout"     : { "@zebkit.layout.FlowLayout": [ "center", "top" ] }
+    },
+
+    "Toolbar": {
+        "Combo": {
+            "background": "%{palette.white}",
+            "border"    : { "@zebkit.ui.Border": "zebkit.util.rgb(200,180,200)" },
+            "padding"  : [1, 4, 1, 1]
+        },
+
+        "ToolPan": {
+            "padding" : 4,
+
+            "border": {
+                "over"        : "%{borders.plain}",
+                "*"           : null,
+                "pressed.over": { "@zebkit.ui.Border": [ "#E6563A", 1, 6] }
+            },
+
+            "background": {
+                "over"        : "orange",
+                "*"           : null,
+                "pressed.over": "#FF8637"
+            }
+        },
+
+        "ImagePan": {
+            "padding": 4
+        },
+
+        "Line" : {
+            "colors": "lightGray"
+        },
+
+        "Checkbox": {
+            "inheritProperties" : true,
+
+            "Box": {
+                "border"     : { "@zebkit.ui.Border": [ "gray", 1, 6 ] },
+                "background" : { "@zebkit.ui.Gradient" : [ "gray", "black" ] },
+                "view"       :  {
+                    "pressed.out"         : { "@zebkit.ui.CheckboxView" : [ "white"] },
+                    "out"        : { "@zebkit.ui.View": [] },
+                    "over"       : { "@zebkit.ui.View": [] },
+                    "pressed.over"        : { "@zebkit.ui.CheckboxView" : "white"  },
+                    "pressed.disabled"    : { "@zebkit.ui.CheckboxView" : "#AAAAAA" },
+                    "disabled"   : { "@zebkit.ui.View" : [] }
+                }
+            },
+
+            "canHaveFocus": false,
+            "padding": 4,
+            "background": {
+                "pressed.*": "orange",
+                "*": null
+            }
+        },
+
+        "Radiobox" : {
+            "inheritProperties" : true,
+            "inherit": [ "%{Radiobox}", "%{Toolbar.Checkbox}"]
+        },
+
+        "layout" : { "@zebkit.layout.FlowLayout":[ "left", "center", "horizontal", 6 ] },
+        "border" : { "@zebkit.ui.Border": ["lightGray", 2, 6 ] },
+        "padding": 4
+    },
+
+    "CollapsiblePan": {
+        "Label": {
+            "font"  : "bold",
+            "color" : "white"
+        },
+
+        "ImageLabel": {
+            "Label": {
+                "font"  : "bold",
+                "color" : "white"
+            }
+        },
+
+        "TitlePan":{
+            "border"     : {"@zebkit.ui.Border": [ "orange", 2], "sides": [ "top" ] },
+            "padding"    : 4,
+            "background2" : { "@zebkit.ui.Gradient" : [ "red", "orange" ]},
+            "background2" : "#333333",
+            "layout"     : { "@zebkit.layout.FlowLayout": 4  }
+        },
+
+        "TogglePan": {
+            "padding" : 4,
+            "view" : {
+                "off" : { "@zebkit.ui.ArrowView": [ "bottom",  "orange", 10, 10 ] },
+                "on"  : { "@zebkit.ui.ArrowView": [ "top", "orange", 10, 10 ] }
+            }
+        },
+
+        "GroupPan" : {
+            "border2": {
+                "@zebkit.ui.Border" : [ "orange" ], "sides2" : [ "left", "right", "bottom" ]
+            }
+        },
+
+        "layout": { "@zebkit.layout.BorderLayout":[] }
+    },
+
+    "Window": {
+        "CaptionPan": {
+            "layout"     : { "@zebkit.layout.BorderLayout":[] },
+            "background" : {
+                  "active"  : { "@zebkit.ui.CaptionBgView": "red" },
+                  "inactive": { "@zebkit.ui.CaptionBgView": "orange" }
+            },
+            "padding"  : 8
+        },
+
+        "ContentPan": {
+            "layout": { "@zebkit.layout.BorderLayout":[] }
+        },
+
+        "TitleLab": {
+            "font" : {"@zebkit.ui.Font" : ["Verdana", 16] },
+            "color": "%{palette.white}"
+        },
+
+        "StatusPan": {
+            "layout": { "@zebkit.layout.FlowLayout":["right","center"] }
+        },
+
+        "SizerPan": {
+            "padding" : [0,0,1,2],
+            "preferredSize" : [18,16],
+            "view"    : { "@zebkit.ui.TriangleShape": [ "red", 2 ] }
+        },
+
+        "Icon": {
+            "visible":false
+        },
+
+        "border"    : { "active"   : { "@zebkit.ui.Border":["red", 4, 8], "gap":2 },
+                        "inactive" : { "@zebkit.ui.Border":["red", 2, 8], "gap":2 } },
+        "background": "black",
+        "padding"   : [0,0,2,0],
+        "buttons"   : {
+            "close": {
+                "over"   : { "@zebkit.ui.CheckboxView": [ "white" ] },
+                "out"    : { "@zebkit.ui.CheckboxView": [ "white" ] },
+                "pressed": { "@zebkit.ui.CheckboxView": [ "white" ] }
+            }
+        }
+    },
+
+    "StatusBarPan" : {
+        "borderView" : "etched"
+    },
+
+    "design" : {
+        "ShaperPan" : {
+            "colors" :  [ "orange", "red" ]
+        }
+    }
+}

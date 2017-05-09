@@ -1,0 +1,73 @@
+{
+    "DefViews": {
+        "color" : "%{zebkit.ui.palette.gray}",
+        "font"  : "12px 'Lucida Grande', 'Lucida Sans', Arial, sans-serif"
+    },
+
+    "BaseTree" : {
+        "lineColor" : "red",
+        "color"     : "red",
+        "itemGapX"  : 4,
+        "itemGapY"  : 4,
+        "views": {
+            "off"     : { "@zebkit.ui.ArrowView":  [  "right", "orange", 10 , 14] },
+            "on"      : { "@zebkit.ui.ArrowView":  [ "bottom", "orange", 14, 10 ] },
+
+            "aselect" : { "@zebkit.ui.Border" : [ "orange", 2, 6 ] },
+            "iselect" : { "@zebkit.ui.Border" : [ "gray", 2, 6 ]   }
+        }
+    },
+
+    "DefViews" : {
+        "color" : "red",
+        "font"  : "bold"
+    },
+
+    "Tree": {
+        "inheritProperties" : true
+    },
+
+    "CompTree": {
+        "Checkbox" : {
+            "inheritProperties" : true,
+            "Label"   : {
+                "color"   : "red",
+                "font"    : "bold"
+            }
+        },
+
+        "Combo" : {
+            "inheritProperties" : true,
+            "background" : null,
+            "border"     : "%{zebkit.ui.borders.plain}",
+            "CompList" : {
+                "Label" : {
+                    "font" : "bold",
+                    "color" : "red"
+                },
+
+                "views" :  {
+                    "select"    : { "@zebkit.ui.Border" : ["white", 2, 6 ] },
+                    "top.marker": null,
+                    "marker"    : [  [ { "@zebkit.ui.Border" : [ null, 0, 6 ] }, { "@zebkit.ui.Gradient" : ["white", "lightGray" ] } ] ]
+                }
+
+            },
+            "List" : {
+                "ViewProvider" : {
+                    "font" : "bold",
+                    "color": "red"
+                }
+            }
+        },
+
+        "Label" : {
+            "inheritProperties" : true,
+            "color"   : "red",
+            "font"    : "bold",
+            "padding" : 4
+        },
+
+        "inheritProperties" : true
+    }
+}

@@ -1,0 +1,33 @@
+# Dependencies
+markdown:         redcarpet
+#highlighter:      pygments
+
+# Permalinks
+permalink:        :title.html
+
+# Setup
+title:            Zebkit - UI platform
+tagline:          JS Canvas UI Platform
+description:      "<b style='color:orange; font-size:1.5rem;'>Zebkit</b> is HTML5 Canvas based UI platform developed with unique EasyOOP JavaScript concept and rich extendible components set"
+url:              https://github.com/barmalei/zebkit
+#baseurl:          /build/website/
+baseurl:          /website/
+
+zebkitBase:       http://localhost:8090/build
+
+
+author:
+  name:           'Andrei Vishneuski'
+  url:            https://twitter.com/zebkit
+
+gems: [jekyll-paginate, jekyll-gist]
+paginate:         7
+
+# Custom vars
+version:          1.0.0
+
+
+destination:      build/website
+
+github:
+  repo:           https://github.com/barmalei/zebkit

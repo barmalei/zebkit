@@ -1,0 +1,7 @@
+{
+    "test":200,
+    "a"   : "%{<json>zson.test.1.2.1.json}",
+    "clz" : {
+        "@Date":[]
+    }
+}

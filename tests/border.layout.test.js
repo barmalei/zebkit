@@ -1,14 +1,14 @@
 
-if (typeof(zebra) === "undefined") {
-    load(arguments[0] + '/src/easyoop.js');
-    load(arguments[0] + '/src/util.js');
-    load(arguments[0] + '/src/tools.js');
-    load(arguments[0] + '/src/layout.js');
+if (typeof(zebkit) === "undefined") {
+    require('../src/js/easyoop.js');
+    require('../src/js/util.js');
+    require('../src/js/misc/tools.js');
+    require('../src/js/layout.js');
 }
 
-eval(zebra.Import("layout"));
+eval(zebkit.import("layout"));
 
-var assert = zebra.assert;
+var assert = zebkit.assert;
 
 
 var MIX = [
@@ -45,7 +45,7 @@ function assertMetrics(c,x,y,w,h) {
     assert(c.height, h);
 }
 
-zebra.runTests("BorderLayout test",
+zebkit.runTests("BorderLayout test",
 
     function test_layoutable() {
         var l = new Layoutable();
@@ -100,7 +100,7 @@ zebra.runTests("BorderLayout test",
             t.extend(MIX);
 
             var c = new Layoutable();
-            t.add(CENTER, c);
+            t.add("center", c);
 
             t.setSize(w, h);
 
@@ -111,13 +111,13 @@ zebra.runTests("BorderLayout test",
             assertMetrics(c,t.getLeft(),t.getTop(),w-t.getLeft() - t.getRight(),h-8);
 
             var l = new Layoutable();
-            t.add(LEFT, l);
+            t.add("left", l);
             t.validate();
             assertMetrics(l,4,4,10,192);
             assertMetrics(c,14,4,182, 192);
 
             var tp = new Layoutable();
-            t.add(TOP, tp);
+            t.add("top", tp);
 
             t.validate();
             assertMetrics(l,4,14,10,182);
@@ -125,7 +125,7 @@ zebra.runTests("BorderLayout test",
             assertMetrics(tp, 4, 4, 192, 10);
 
             var r = new Layoutable();
-            t.add(RIGHT, r);
+            t.add("right", r);
 
             t.validate();
             assertMetrics(l, 4, 14, 10,182);
@@ -134,7 +134,7 @@ zebra.runTests("BorderLayout test",
             assertMetrics(r, 186,14,10,182);
 
             var bt = new Layoutable();
-            t.add(BOTTOM, bt);
+            t.add("bottom", bt);
 
             t.validate();
             assertMetrics(l, 4, 14, 10,172);

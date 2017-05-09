@@ -1,27 +1,38 @@
 {
-    "name"       : "zebra",
-    "version"    : "1.0.0",
-    "description": "![ScreenShot](/samples/images/header.jpg)",
-    "main": "gulpfile.js",
-    "scripts": {},
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/barmalei/zebra.git"
-    },
-    "author": "",
-    "license": "Apache",
-    "bugs": {
-        "url": "https://github.com/barmalei/zebra/issues"
-    },
-    "homepage": "https://github.com/barmalei/zebra",
-    "devDependencies": {
-        "jshint"        : "latest",
-        "gulp"          : "latest",
-        "gulp-rename": "latest",
-        "gulp-uglify": "latest",
-        "gulp-concat": "latest",
-        "gulp-webserver": "latest",
-        "gulp-zip": "latest",
-        "gulp-jshint": "latest"
-    }
+  "name": "zebkit",
+  "version": "1.0.0",
+  "description": "zebkit",
+  "author": "Andrei Vishneuski",
+  "scripts": {},
+  "main": "zebkit.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/barmalei/zebra.git"
+  },
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/barmalei/zebkit/issues"
+  },
+  "homepage": "https://github.com/barmalei/zebra",
+  "devDependencies": {
+    "gulp": "latest",
+    "gulp-concat": "latest",
+    "gulp-expect-file": "latest",
+    "gulp-jshint": "latest",
+    "gulp-rename": "latest",
+    "gulp-rm": "latest",
+    "gulp-uglify": "latest",
+    "gulp-webserver": "latest",
+    "gulp-copy": "latest",
+    "gulp-wrap": "latest",
+    "gulp-zip": "latest",
+    "gulp-insert": "latest",
+    "jshint": "latest",
+    "graceful-fs": "latest",
+    "minimatch" : "latest",
+    "yuidoc-zebkit-theme": "https://github.com/barmalei/yuidoc-zebkit-theme"
+  },
+  "dependencies": {
+    "browser-env": "^2.0.19"
+  }
 }

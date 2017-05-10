@@ -5,7 +5,7 @@
 
 Zebkit works in MS Internet Explorer 9+, MS Edge, FireFox 3+, Safari 5+, Google Chrome. It should support iOS 7+ and Android 4+ mobile browsers.
 
-To build the package install nodejs. To generate zebkit website install jekyll (https://jekyllrb.com/). 
+To build the package install nodejs. To generate zebkit artifacts install jekyll (https://jekyllrb.com/). 
 
 ## Installation 
 
@@ -16,14 +16,14 @@ To install required packages run the following:
 
 ## Building zebkit artifacts
 
-To build Java Script packages:
+To build main artifacts like JS code, website:
 ```bash
    $ gulp
 ```
 
-To build all artifacts including web site:
+To build runtime package 
 ```bash
-   $ gulp build
+   $ gulp runtime
 ```
 
 To generate apidoc:

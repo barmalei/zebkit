@@ -1,5 +1,27 @@
 var gulp = require('gulp');
 
+
+// Build tree:
+// ----------
+//     [ 'easyoop', 'misc', 'ui', 'ui.grid', 'ui.tree', 'ui.design', 'web', 'ui.web' ]
+//                                    *
+//                                    |
+//                                [ zebkit ]        [ 'resource', 'ui.vk', 'ui.calendar' ]
+//                                    *                            *
+//                                    |                            |
+//                                    +----------------------------+
+//                                    |
+//                                [ buildJS ]
+//                                    *-------------------+
+//                                    |                   |
+//      [ 'apidoc' ]             [ 'runtime' ]      [ genWebsite ]
+//                                                        *
+//                                                        |
+//                                                   [ website ]
+//
+//
+
+
 var jshint    = require('gulp-jshint'),
     concat    = require('gulp-concat'),
     copy      = require('gulp-copy'),
@@ -204,10 +226,9 @@ gulp.task('zebkit',  ['genZebkit' ], function() {
           .pipe(rm());
 });
 
+gulp.task('buildJS', [ "zebkit", "resources", "ui.calendar", "ui.vk" ]);
 
-gulp.task('build', [ "zebkit", "resources", "ui.calendar", "ui.vk", 'website' ]);
-
-gulp.task('runtime', [ "build" ], function () {
+gulp.task('runtime', [ "buildJS" ], function () {
     return  gulp.src([
                 "build/rs/**/*",
                 "build/zebkit.js",
@@ -217,26 +238,8 @@ gulp.task('runtime', [ "build" ], function () {
             .pipe(gulp.dest("build"));
 });
 
-gulp.task('samplescript', function() {
-    return gulp.src("samples/js/uiengine.samples.js")
-          .pipe(expect("samples/js/uiengine.samples.js"))
-          .pipe(rename('uiengine.samples.min.js'))
-          .pipe(uglify({ compress: false, mangle: false }))
-          .pipe(gulp.dest('samples/js'));
-});
-
-gulp.task('demoscript', function() {
-    return gulp.src(demoFiles)
-        .pipe(expect(demoFiles))
-        .pipe(concat('demo.all.js'))
-        .pipe(gulp.dest('samples/demo'))
-        .pipe(rename('demo.all.min.js'))
-        .pipe(uglify({ compress: false, mangle: false }))
-        .pipe(gulp.dest('samples/demo'));
-});
-
 // generate WEB site
-gulp.task('genWebsite', function (gulpCallBack){
+gulp.task('genWebsite', [ 'buildJS' ], function (gulpCallBack){
     var spawn  = require('child_process').spawn;
     var jekyll = spawn('jekyll', ['build', '-d', 'website', '-s', 'src/jekyll/' ], { stdio: 'inherit' });
 
@@ -268,16 +271,27 @@ gulp.task('apidoc', function (gulpCallBack){
     });
 });
 
-// clean build
-gulp.task('clean', function() {
-    return gulp.src([ 'build/**/*' ], { read: false }).pipe(rm());
+
+gulp.task('test', function (gulpCallBack){
+    for(var name in { "tests/easyoop.test.js":'',
+                      "tests/util.listeners.test.js":'' })
+    {
+        var spawn = require('child_process').spawn,
+            test  = spawn('node', [ name ], { stdio: 'inherit' });
+        test.on('exit', function(code) {
+            //gulpCallBack(code === 0 ? null : 'ERROR: test-cases failed (' + code + ")");
+        });
+    }
 });
 
-gulp.task('default', ['zebkit', 'demoscript', 'samplescript', 'runtime']);
+// clean build
+gulp.task('clean', function() {
+    return gulp.src([ 'build/**/*', 'website/**/*' ], { read: false }).pipe(rm());
+});
+
+gulp.task('default', ['website']);
 
 gulp.task('watch', function() {
     gulp.watch("src/**/*.js", ['zebkit']);
-    gulp.watch(demoFiles,   ['demoscript']);
-    gulp.watch("samples/js/uiengine.samples.js", ['samplescript']);
 });
 

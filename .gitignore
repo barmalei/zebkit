@@ -1,4 +1,5 @@
-tests/io/*.pyc
 node_modules
+build
+website
 *.zip
 *.log

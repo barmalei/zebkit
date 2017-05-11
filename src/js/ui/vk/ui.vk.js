@@ -948,8 +948,6 @@ zebkit.package("ui.vk", function(pkg, Class) {
 
                 this.eachKey(function(group, key) {
                     if (key !== vkey && key.mask !== null && key.mask === mask) {
-
-                        console.log("key = " + key.clazz.$name + "," + mask);
                         key.$syncMask(mask, value);
                     }
                 });

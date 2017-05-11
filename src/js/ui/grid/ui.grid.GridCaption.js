@@ -94,8 +94,6 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 var m = this.$getCellMeta(rowcol);
                 if (m.bg !== bg) {
                     m.bg = ui.$view(bg);
-
-                    console.log("BG = " + bg);
                     return true;
                 } else {
                     return false;

@@ -857,7 +857,6 @@ zebkit.package("ui.date", function(pkg, Class) {
             this.date = null;
 
             this.$format = function(d) {
-                console.log("$format() : " + this.format + "," + this.clazz.$name);
                 return zebkit.util.format(this.format, d !== null ? d :{}, this.notDefined);
             };
         },
@@ -900,9 +899,6 @@ zebkit.package("ui.date", function(pkg, Class) {
         function recalc() {
             this.$super();
             var s = this.$format(new Date());
-
-            console.log("s = " + s);
-
             this.maxWidth = this.getFont().stringWidth(s);
             this.maxWidth += Math.floor(this.maxWidth / 10);
         }

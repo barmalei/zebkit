@@ -271,19 +271,6 @@ gulp.task('apidoc', function (gulpCallBack){
     });
 });
 
-
-gulp.task('test', function (gulpCallBack){
-    for(var name in { "tests/easyoop.test.js":'',
-                      "tests/util.listeners.test.js":'' })
-    {
-        var spawn = require('child_process').spawn,
-            test  = spawn('node', [ name ], { stdio: 'inherit' });
-        test.on('exit', function(code) {
-            //gulpCallBack(code === 0 ? null : 'ERROR: test-cases failed (' + code + ")");
-        });
-    }
-});
-
 // clean build
 gulp.task('clean', function() {
     return gulp.src([ 'build/**/*', 'website/**/*' ], { read: false }).pipe(rm());

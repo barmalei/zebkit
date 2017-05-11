@@ -699,13 +699,11 @@ zebkit.runTests("util objects bag",
         `;
 
         bag.then(json, function(bag) {
-            console.log("" + JSON.stringify(bag.root));
+            //console.log("" + JSON.stringify(bag.root));
             // assertObjEqual(bag.root.a.a, {"test":300,"a":"???"}, "test_mixin 1" );
             // assert(bag.root.b.a, 300, "test_mixin 2");
             // assert(bag.root.b.test, 200, "test_mixin 3");
         }).catch();
-
-
     },
 
     function test_class_asyncprops_and_constructor() {

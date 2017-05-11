@@ -27,6 +27,7 @@
     "gulp-wrap": "latest",
     "gulp-zip": "latest",
     "gulp-insert": "latest",
+    "xmlhttprequest": "latest",
     "jshint": "latest",
     "graceful-fs": "latest",
     "minimatch" : "latest",

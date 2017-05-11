@@ -1011,8 +1011,6 @@ zebkit.package("ui", function(pkg, Class) {
                 // if last component has been removed and the component is a menu
                 // than try to restore focus owner
                 if (this.$prevFocusOwner !== null && this.kids.length === 0 && zebkit.instanceOf(e.kid, pkg.Menu)) {
-
-                    console.log(">>>> return focus back : " + (this.$prevFocusOwner===null?"null":this.$prevFocusOwner.clazz.$name) + "," + document.activeElement + "," + document.activeElement.id);
                     this.$prevFocusOwner.requestFocus();
                     this.$prevFocusOwner = null;
                 }

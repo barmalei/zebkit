@@ -966,9 +966,6 @@ zebkit.package("data", function(pkg, Class) {
                 var b = typeof root.kids !== 'undefined' && root.kids !== null,
                     v = render !== null ? render(root)
                                         : (root.value === null ? "<null>" : root.value) + " {" + (b?root.kids.length:0) + "}";
-
-                console.log(shift + v);
-
                 if (b) {
                     shift = shift + "    ";
                     for (var i = 0; i < root.kids.length; i++) {

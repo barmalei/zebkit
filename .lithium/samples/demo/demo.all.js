@@ -1,9 +1,0 @@
-samples/demo/ui.demo.js
-samples/demo/ui.demo.layout.js
-samples/demo/ui.demo.basicui.js
-samples/demo/ui.demo.panels.js
-samples/demo/ui.demo.tree.js
-samples/demo/ui.demo.popup.js
-samples/demo/ui.demo.win.js
-samples/demo/ui.demo.grid.js
-samples/demo/ui.demo.designer.js

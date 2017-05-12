@@ -4,7 +4,7 @@ title: Get started
 tags: menu
 ---
 
-<script type="text/javascript" src="/website/public/js/zebkit.min.js">  
+<script type="text/javascript" src="../build/zebkit.min.js">  
 </script>
 
 In general is expected you are dealing with JS code following zebkit easy OOP concept, using and extending zebkit components. No HTML neither CSS manipulation is required. Dealing with WEB specific world should be avoided.  

@@ -27,7 +27,7 @@
 
 Zebkit works in MS Internet Explorer 9+, MS Edge, FireFox 3+, Safari 5+, Google Chrome. It should support iOS 7+ and Android 4+ mobile browsers.
 
-Zebkit require nodejs and jekyll (https://jekyllrb.com/) to be installed before.
+Zebkit require nodejs to be installed. If you plan to re-generate zebkit web site you have to install jekyll (https://jekyllrb.com/). 
 
 ## Installation 
 

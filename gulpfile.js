@@ -13,12 +13,8 @@ var gulp = require('gulp');
 //                                    |
 //                                [ buildJS ]
 //                                    *-------------------+
-//                                    |                   |
-//      [ 'apidoc' ]             [ 'runtime' ]      [ genWebsite ]
-//                                                        *
-//                                                        |
-//                                                   [ website ]
-//
+//                                    |                   x
+//      [ 'apidoc' ]             [ 'runtime' ]      [ website ]
 //
 
 
@@ -162,7 +158,8 @@ gulp.task('http', function() {
     gulp.src('.')
         .pipe(webserver({
             port: 8090,
-            host: "localhost",
+            //host: "localhost",
+            host: "192.168.178.18",
             directoryListing: true,
             open: false
         }));
@@ -239,7 +236,7 @@ gulp.task('runtime', [ "buildJS" ], function () {
 });
 
 // generate WEB site
-gulp.task('genWebsite', [ 'buildJS' ], function (gulpCallBack){
+gulp.task('website', [ 'buildJS' ], function (gulpCallBack){
     var spawn  = require('child_process').spawn;
     var jekyll = spawn('jekyll', ['build', '-d', 'website', '-s', 'src/jekyll/' ], { stdio: 'inherit' });
 
@@ -248,14 +245,14 @@ gulp.task('genWebsite', [ 'buildJS' ], function (gulpCallBack){
     });
 });
 
-gulp.task('website', [ "genWebsite" ],  function() {
-    return  gulp.src([
-                "build/rs/**/*",
-                "build/zebkit.js",
-                "build/zebkit.min.js"
-            ], { base: "build" }).
-            pipe(gulp.dest('website/public/js'));
-});
+//gulp.task('website', [ "genWebsite" ],  function() {
+//    return  gulp.src([
+//                "build/rs/**/*",
+//                "build/zebkit.js",
+//                "build/zebkit.min.js"
+//            ], { base: "build" }).
+//            pipe(gulp.dest('website/public/js'));
+//});
 
 // generate APIDOC
 gulp.task('apidoc', function (gulpCallBack){
@@ -273,10 +270,10 @@ gulp.task('apidoc', function (gulpCallBack){
 
 // clean build
 gulp.task('clean', function() {
-    return gulp.src([ 'build/**/*', 'website/**/*' ], { read: false }).pipe(rm());
+    return gulp.src([ 'build/**/*' ], { read: false }).pipe(rm());
 });
 
-gulp.task('default', ['website']);
+gulp.task('default', ['buildJS']);
 
 gulp.task('watch', function() {
     gulp.watch("src/**/*.js", ['zebkit']);

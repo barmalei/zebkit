@@ -6,7 +6,7 @@ title: Zebkit ?
 
 Zebkit is unique UI platform that renders hierarchy of UI components on HTML5 Canvas. It has minimal dependencies from WEB context and built with zebkit easy JS OOP approach what makes feasible to adapt zebkit UI to other canvas implementations. 
 
-<script type="text/javascript" src="/website/public/js/zebkit.min.js">  
+<script type="text/javascript" src="../build/zebkit.min.js">  
 </script>
 
 {% capture description %}
@@ -69,7 +69,7 @@ zebkit.require(function() {
 </tr>    
 </table>
 
-![ScreenShot]( {{ site.baseurl }}public/images/overview.png)
+![ScreenShot]( {{ site.baseurl }}public/images/soverview.png)
 
 **Easy OOP JavaScript concept** _Dart_, _CoffeeScript_, _TypeScript_ and other helping intermediate technologies are not necessary. Zebkit easy JavaScript OOP gives power to keep code under control, increases re-usability and simplifies support. Easy OOP produces classes and interfaces, inheritance and mixing, constructor, static context, method overriding, **true access to super context**, **anonymous classes**, packaging, dynamic class extension, etc. 
    

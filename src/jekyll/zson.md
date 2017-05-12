@@ -93,16 +93,13 @@ var A = zebkit.Class([
 
 
 ```json 
-{  "@A" : [ 1, 2, 3],
-    "d" : "property 'd' value"
+{  
+    "d" : "value of property 'd'"
 }
 ```
 
 
 ```js
-
-var a = null;
-new Zson().then(function(".json", conf) {
-    
-});  
+var a = new A();
+new Zson(a).catch();  
 ```

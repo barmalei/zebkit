@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  <head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    
+      Get started &middot; Zebkit - UI platform
+    
+  </title>
+
+  <!-- CSS -->
+
+
+  <link rel="stylesheet" href="/website/public/css/poole.css">
+  <link rel="stylesheet" href="/website/public/css/syntax.css">
+  <link rel="stylesheet" href="/website/public/css/blackdoc.css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=EB+Garamond">
+  <!-- Icons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/website/public/apple-touch-icon-144-precomposed.png">
+  <link rel="shortcut icon" href="/website/public/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+</head>
+
+
+
+  <body>
+
+    <div class="sidebar" style="padding: 0px;  background-color: #151515; border-right: 1px solid orange" >
+    <div class="container sidebar-sticky" style="padding: 0px; margin: 0px;">
+        <table style="height:100%;background-color: #151515;border-width: 0px; border-color: #151515;">
+            <tr>
+                <td colspan="2" align="center" style="background-color: #151515; border-width: 0px; margin: 0px; padding: 0px;">
+                    <img style="margin: 0px; padding: 0px;" src="/website/public/images/zebkit.logo.png" width="80%">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="border-width: 0px; background-color: #151515;">
+                    <p style="margin:0px; font-style: italic;"><b style='color:orange; font-size:1.5rem;'>Zebkit</b> is HTML5 Canvas based UI platform developed with unique EasyOOP JavaScript concept and rich extendible components set</p>
+                </td>
+            </tr>
+
+            <tr style="height:100%;" valign="top" align="right">
+                <td colspan="2" style="border-width: 0px;background-color: #151515;">
+                    
+                    
+                      
+                        
+                      
+                    
+                      
+                        
+                          <a class="sidebar-nav-item" href="/website/about.html">
+                            Zebkit ?
+                          </a>
+                        
+                      
+                    
+                      
+                        
+                          <a class="sidebar-nav-item" href="/website/api.html">
+                            API Doc
+                          </a>
+                        
+                      
+                    
+                      
+                        
+                      
+                    
+                      
+                        
+                      
+                    
+                      
+                        
+                          <a class="sidebar-nav-item active" href="/website/getstarted.html">
+                            Get started
+                          </a>
+                        
+                      
+                    
+                      
+                        
+                      
+                    
+                      
+                        
+                      
+                    
+                </td>
+            </tr>
+
+            <tr style="height:90px;">
+                <td colspan="2"  style="border-width: 0px;padding: 0px;"></td>
+            </tr>
+
+            <tr>
+                <td align="right" colspan="2" style="border-width: 0px;background-color: #151515; border-top: 1px solid orange;">
+                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2017</a></small>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="2" valign="top" align="right" style="border-width: 0px;padding: 0px;">
+                    <table style="width:240px;background-color: #151515;border-width: 0px; padding: 0px;" cellpadding="0" cellspacing="0">
+                        <tr style="padding: 0px;" border="1">
+                            <td style="width:60px;border-width: 0px;background-color: #151515; " align="right">
+                                <a href="https://github.com/barmalei/zebkit" title="Download">
+                                    <img alt="Download" title="Download" src="/website/public/images/github3.png" width="40px" height="40px">
+                                </a>
+                            </td>
+                            <td style="width:60px; border-width: 0px;background-color: #151515;" align="right">
+                                <a href="https://twitter.com/zebkit">
+                                    <img src="/website/public/images/twitter.png" width="40px" height="40px">
+                                </a>
+                            </td>
+                            <td style="width:60px; border-width: 0px;background-color: #151515;" align="right">
+                                <a href="https://nl.linkedin.com/in/andrei-vishneuski-34b52514">
+                                    <img src="/website/public/images/linkedin.png" width="40px" height="40px">
+                                </a>
+                            </td>
+
+                            <td style="width: 70px; border-width: 0px;background-color: #151515; " valign="center" align="right">
+                                <a href="Download">
+                                    <img src="/website/public/images/download.png" width="40px" height="40px">
+                                </a>
+                            </td>
+
+                        </tr>
+                    </table>
+                </td>
+
+            </tr>
+
+        </table>
+
+    <nav class="sidebar-nav">
+
+<!--
+      <a class="sidebar-nav-item" href="/website/">Home</a>
+ -->
+
+    </nav>
+
+  </div>
+</div>
+
+    <div class="content container">
+      <div class="page">
+  <h1 class="page-title">Get started</h1>
+  <script type="text/javascript" src="../build/zebkit.min.js">  
+</script>
+
+<p>In general is expected you are dealing with JS code following zebkit easy OOP concept, using and extending zebkit components. No HTML neither CSS manipulation is required. Dealing with WEB specific world should be avoided.  </p>
+
+<ul>
+<li><strong>Take existent or create a new HTML:</strong></li>
+</ul>
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="nt">&lt;html&gt;</span>
+    <span class="nt">&lt;head&gt;</span>
+       ...
+    <span class="nt">&lt;/head&gt;</span>
+    <span class="nt">&lt;body&gt;</span> ... <span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</code></pre></div>
+<ul>
+<li><strong>Add meta to HTML head tag for single page / mobile applications</strong><br></li>
+</ul>
+<div class="highlight"><pre><code class="language-html" data-lang="html">...
+<span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"viewport"</span> 
+   <span class="na">content=</span><span class="s">"user-scalable=no,width=device-width,initial-scale=1,maximum-scale=1"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"msapplication-tap-highlight"</span> <span class="na">content=</span><span class="s">"no"</span><span class="nt">&gt;</span>
+...
+</code></pre></div>
+<ul>
+<li><strong>Include zebkit JS in script section:</strong></li>
+</ul>
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;html&gt;</span>
+    <span class="nt">&lt;head&gt;</span>
+        <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span>
+                <span class="na">src=</span><span class="s">"http://repo.zebkit.org/latest/zebkit.min.js"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;/script&gt;</span>
+     ...
+</code></pre></div>
+<ul>
+<li><strong>Write application code:</strong></li>
+</ul>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// wrap zebkit code with require method to make sure everything</span>
+<span class="c1">// has been initialized </span>
+<span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">root</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"sample"</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">300</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
+    <span class="nx">root</span><span class="p">.</span><span class="nx">properties</span><span class="p">({</span>
+        <span class="na">border</span><span class="p">:</span>  <span class="s2">"plain"</span><span class="p">,</span> 
+        <span class="na">padding</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+        <span class="na">layout</span><span class="p">:</span>  <span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">(</span><span class="mi">6</span><span class="p">),</span>
+        <span class="na">kids</span>  <span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"center"</span><span class="p">:</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">TextArea</span><span class="p">(</span><span class="s2">"A text ... "</span><span class="p">),</span>
+            <span class="s2">"bottom"</span><span class="p">:</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"test"</span><span class="p">)</span> 
+        <span class="p">}</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</code></pre></div>
+<ul>
+<li><strong>Enjoy the result:</strong></li>
+</ul>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td align="center" valign="center" style="background-color: black; padding: 0px; margin: 0px;">
+            <canvas id="sample" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+        <td valign="top" rowspan="2" style="background-color: black; left-padding: 8px; margin: 0px;">
+            
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;background-color: black;">
+            <span style="color:red;font-size:14px;">Get started zebkit application </span>
+        </td>
+    </tr>
+</table>
+
+<script>
+zebkit.require("ui", "layout", function(ui, layout) {
+    var root = new ui.zCanvas("sample", 400, 300).root;
+    root.properties({
+        border:  "plain", 
+        padding: 8,
+        layout:  new layout.BorderLayout(6),
+        kids  : {
+            "center" : new ui.TextArea("A text ... "),
+            "bottom" : new ui.Button("test") 
+        }
+    });
+});
+</script>
+
+<h3>Add events handling</h3>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="p">...</span>
+    <span class="c1">// find first component whose class is zebkit.ui.Button</span>
+    <span class="nx">root</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"//zebkit.ui.Button"</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="c1">// find first component whose class is zebkit.ui.TextArea</span>
+        <span class="c1">// and clear it</span>
+        <span class="nx">root</span><span class="p">.</span><span class="nx">byPath</span><span class="p">(</span><span class="s2">"//zebkit.ui.TextArea"</span><span class="p">).</span><span class="nx">setValue</span><span class="p">(</span><span class="s2">""</span><span class="p">);</span>
+    <span class="p">})</span>
+<span class="p">});</span>
+</code></pre></div>
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td align="center" valign="center" style="background-color: black; padding: 0px; margin: 0px;">
+            <canvas id="sample2" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+        <td valign="top" rowspan="2" style="background-color: black; left-padding: 8px; margin: 0px;">
+            
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;background-color: black;">
+            <span style="color:red;font-size:14px;">Get started zebkit application </span>
+        </td>
+    </tr>
+</table>
+
+<script>
+zebkit.config["zebkit.theme"] = "dark";
+
+zebkit.require("ui", "layout", function(ui, layout) {
+    var root = new ui.zCanvas("sample2", 400, 300).root;
+    root.properties({
+        border:  "plain", 
+        padding: 8,
+        layout:  new layout.BorderLayout(6),
+        kids  : {
+            "center" : new ui.TextArea("A text ... "),
+            "bottom" : new ui.Button("Clear text") 
+        }
+    });
+
+    root.on("//zebkit.ui.Button", function() {
+        root.byPath("//zebkit.ui.TextArea").setValue("");
+    });
+});
+</script>
+
+<h3>Load required resources</h3>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">resources</span><span class="p">(</span><span class="s2">"myimage.jpg"</span><span class="p">,</span> <span class="s2">"mytext.txt"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">image</span><span class="p">,</span> <span class="nx">text</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// here you get completely loaded image and textual data  </span>
+    <span class="p">...</span>
+<span class="p">});</span>
+</code></pre></div>
+</div>
+
+    </div>
+
+
+  </body>
+</html>

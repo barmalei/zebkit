@@ -1,13 +1,13 @@
 
 ![ScreenShot](http://repo.zebkit.org/zebkit.logo.png)
 
-## Zebkit - HTML5 Canvas based UI framework 
+# Zebkit - HTML5 Canvas based UI framework 
 
 **Zebkit is the next generation of zebra project. It has been heavily re-worked, re-designed and re-organized. The new version is definitely not backward compatible with zebra because of big number of changes it has got. New zebkit grabs the best ideas from previous one and takes new one** 
 
 (If you still need previous generation of zebkit project you can find it in "latest_zebra" branch) 
 
-## Most significant changes 
+# Most significant changes 
 
    * **DOM elements can be hosted in zebkit layout** They look as natural as native zebkit UI components. For instance: Google map can be added into zebkit layout together with zebkit UI tool tip that will be rendered over the map. You can scroll HTML element in zebkit scroll panel even taking in account the scroll panel exists only as a rendered on HTML5 Canvas UI component.
 
@@ -23,20 +23,20 @@
 
    * **"Zson" configuration and zebkit "DoIt"** as a better variation of configuration and promises. Zson extends JSON with class instantiation, JSON key references, expressions, external JSONs inclusion and so on.
 
-## Requirements 
+# Requirements 
 
 Zebkit works in MS Internet Explorer 9+, MS Edge, FireFox 3+, Safari 5+, Google Chrome. It should support iOS 7+ and Android 4+ mobile browsers.
 
 Zebkit requires nodejs to be installed. If you plan to re-generate zebkit web site you have to install jekyll (https://jekyllrb.com/). 
 
-## Installation 
+# Installation 
 
 To install required nodejs packages run the following command from zebkit home folder: 
 ```bash
     $ npm install
 ```
 
-## Building zebkit artifacts
+# Building zebkit artifacts
 
 To build all main artifacts (JS code) run the following command:
 ```bash
@@ -53,16 +53,22 @@ To generate apidoc:
    $ gulp apidoc
 ```
 
-## Run http server and view web site 
+If you have installed jekyll you can initiate zebkit WEB site re-generation with the following command:
+```bash
+   $ gulp website
+```
+
+# Run http server and view web site 
 
 ```bash
    $ gulp http
 ```
 
-Open "http://localhost:8090/index.html" in a browser.
+Open zebkit WEB site "http://localhost:8090/index.html" in a browser.
 
-## Simple example of a zebkit application
+# Simple example of a zebkit application
 
+To have an idea what zebkit programming looks like take a look at the example code below:
 ```html
 <!DOCTYPE html>
 <html>
@@ -92,11 +98,11 @@ Open "http://localhost:8090/index.html" in a browser.
 </html>
 ```
 
-## License
+# License
 
 Apache License, Version 2.0 http://www.apache.org/licenses/LICENSE-2.0.html
 
-## Contact
+# Contact
 
 e-mail  : ask@zebkit.org
 linkedin: http://nl.linkedin.com/pub/andrei-vishneuski/14/525/34b/

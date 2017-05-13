@@ -455,15 +455,19 @@ zebkit.package("web", function(pkg, Class) {
 
             this.$MMOVE = function(e) {
                 var pageX = Math.floor(e.pageX),
-                    pageY = Math.floor(e.pageY) ;
+                    pageY = Math.floor(e.pageY);
 
                 // ignore extra mouse moved event that can appear in IE
-                if (this.$mousePageY !== pageY || this.$mousePageX !== pageX) {
+                if (this.$mousePageY !== pageY ||
+                    this.$mousePageX !== pageX   )
+                {
 
                     this.$mousePageX = pageX;
                     this.$mousePageY = pageY;
 
-                    if ($pointerPressedEvents.hasOwnProperty(LMOUSE) || $pointerPressedEvents.hasOwnProperty(RMOUSE)) {
+                    if ($pointerPressedEvents.hasOwnProperty(LMOUSE) ||
+                        $pointerPressedEvents.hasOwnProperty(RMOUSE)   )
+                    {
                         if ($pointerPressedEvents.hasOwnProperty(LMOUSE)) {
                             this.$DRAG(LMOUSE, e, ME_STUB);
                         }
@@ -684,28 +688,61 @@ zebkit.package("web", function(pkg, Class) {
                                                           "MSPointerEnter",
                                                           "MSPointerLeave" ];
 
+                //
+                // in windows 8 IE10  pointerType can be a number !!!
+                // what is nit the case fo rinstanvce for Win 8.1
+                //
+
                 element.addEventListener(names[0], function(e) {
-                    if (e.pointerType !== "mouse")  {
+                    var pt = e.pointerType;
+                    if (pt === 4) {
+                        pt = "mouse";
+                    } else if (pt === 2) {
+                        pt = "touch";
+                    } else if (pt === 3) {
+                        pt = "pen";
+                    }
+
+                    if (pt !== "mouse")  {
                         POINTER_STUB.touch = e;
-                        POINTER_STUB.pointerType = e.pointerType;
+                        POINTER_STUB.pointerType = pt;
                         $this.$DOWN(e.pointerId, e, POINTER_STUB);
                     }
                 }, false);
 
                 element.addEventListener(names[1], function(e) {
-                    if (e.pointerType !== "mouse") {
+                    var pt = e.pointerType;
+                    if (pt === 4) {
+                        pt = "mouse";
+                    } else if (pt === 2) {
+                        pt = "touch";
+                    } else if (pt === 3) {
+                        pt = "pen";
+                    }
+
+                    if (pt !== "mouse") {
                         POINTER_STUB.touch = e;
-                        POINTER_STUB.pointerType = e.pointerType;
+                        POINTER_STUB.pointerType = pt;
                         $this.$UP(e.pointerId, e, POINTER_STUB);
                     }
                 }, false);
 
                 element.addEventListener(names[2], function(e) {
-                    if (e.pointerType !== "mouse") {
+                    var pt = e.pointerType;
+                    if (pt === 4) {
+                        pt = "mouse";
+                    } else if (pt === 2) {
+                        pt = "touch";
+                    } else if (pt === 3) {
+                        pt = "pen";
+                    }
+
+                    if (pt !== "mouse") {
                         POINTER_STUB.touch = e;
-                        POINTER_STUB.pointerType = e.pointerType;
+                        POINTER_STUB.pointerType = pt;
                         $this.$DRAG(e.pointerId, e, POINTER_STUB);
                     } else {
+                        //e.pointerType = pt;
                         $this.$MMOVE(e);
                     }
                 }, false);

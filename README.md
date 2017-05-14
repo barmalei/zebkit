@@ -109,30 +109,36 @@ To have an idea what zebkit programming looks like see the example code below:
 <!DOCTYPE html>
 <html>
     <head>
-        <script src='http://repo.zebkit.org/latest/zebkit.min.js'
+        <script src='build/zebkit.min.js'
                 type='text/javascript'></script>
         <script type='text/javascript'>
             zebkit.require("ui", "layout", function(ui, layout) {
                 // create Canvas using JSON like style
-                (new zCanvas()).root.properties({
-                    layout: new layout.BorderLayout(),
+                var zc = new ui.zCanvas();
+                zc.root.properties({
+                    layout: new layout.BorderLayout(4),
+                    padding: 8,
                     kids  : {
-                        center: new ui.TextField("", true),
+                        center: new ui.TextArea("", true),
                         top   : (new ui.BoldLabel("Sample application")).properties({
                             padding : 8
                         }),
-                        bottom: new ui.Button("Ok")
+                        bottom: new ui.Button("Select all")
                     }
+                }).on("//zebkit.ui.Button", function(bt) { // reg event handler
+                    // select text in the text area
+                    zc.byPath("//zebkit.ui.TextArea").selectAll();
                 });
-            }).on("//zebkit.ui.Button", function(bt) { // reg event handler
-                // handle button pressed here
-                ...
-            }); 
+            });
         </script>
     </head>
     <body></body>
 </html>
 ```
+
+You can create, for instance, "sample.html" in zebkit home folder. Then fill the file with the content shown above and run it in a browser with the URL below:
+
+"http://localhost:8090/sample.html"
 
 # License
 

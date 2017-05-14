@@ -158,8 +158,7 @@ gulp.task('http', function() {
     gulp.src('.')
         .pipe(webserver({
             port: 8090,
-            //host: "localhost",
-            host: "192.168.178.18",
+            host: "localhost",
             directoryListing: true,
             open: false
         }));

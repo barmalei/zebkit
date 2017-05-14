@@ -59,7 +59,11 @@ The previous generation of zebkit (zebra) can be found in "latest_zebra" branch.
 
 Zebkit works in MS Internet Explorer 10+, MS Edge, FireFox 3+, Safari 5+, Google Chrome. It should support iOS 7+ and Android 4+ mobile browsers.
 
-Zebkit requires nodejs to be installed. If you plan to re-generate zebkit web site you have to install jekyll (https://jekyllrb.com/). 
+Zebkit requires nodejs to be installed. If you plan to re-generate zebkit web site you have to install jekyll (https://jekyllrb.com/). If you plan to re-generate am API Doc you have to install "yuidoc" as follow:
+
+```bash
+  $npm install -g yuidocjs
+```
 
 # Installation 
 
@@ -75,12 +79,12 @@ To build major zebkit artifacts (JS code) run the following command:
    $ gulp
 ```
 
-To build runtime zip package: 
+To build runtime zip package (find it in build "folder"): 
 ```bash
    $ gulp runtime
 ```
 
-To generate apidoc:
+To generate apidoc run the following command (find generated doc in "apidoc" folder):
 ```bash
    $ gulp apidoc
 ```

@@ -258,13 +258,13 @@ gulp.task('website', [ 'buildJS' ], function (gulpCallBack){
 //});
 
 // generate APIDOC
-gulp.task('apidoc', function (gulpCallBack){
+gulp.task('apidoc', [ "zebkit" ], function (gulpCallBack){
     var spawn  = require('child_process').spawn;
     var yuidoc = spawn('yuidoc', ['-t', 'node_modules/yuidoc-zebkit-theme',
                                   '-H', 'node_modules/yuidoc-zebkit-theme/helpers/helpers.js',
-                                  "-o", "build/apidoc",
+                                  "-o", "apidoc",
                                   "-n",
-                                  'build/.' ], { stdio: 'inherit' });
+                                  './build' ], { stdio: 'inherit' });
 
     yuidoc.on('exit', function(code) {
         gulpCallBack(code === 0 ? null : 'ERROR: yuidoc process exited with code: ' + code);

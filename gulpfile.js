@@ -12,8 +12,8 @@ var gulp = require('gulp');
 //                                    +----------------------------+
 //                                    |
 //                                [ buildJS ]
-//                                    *-------------------+
-//                                    |                   x
+//                                    *
+//                                    |
 //      [ 'apidoc' ]             [ 'runtime' ]      [ website ]
 //
 
@@ -229,7 +229,11 @@ gulp.task('runtime', [ "buildJS" ], function () {
     return  gulp.src([
                 "build/rs/**/*",
                 "build/zebkit.js",
-                "build/zebkit.min.js"
+                "build/zebkit.min.js",
+                "build/ui.vk.js",
+                "build/ui.vk.min.js",
+                "build/ui.calendar.js",
+                "build/ui.calendar.min.js"
             ], { base: "build" })
             .pipe(zip('zebkit.runtime.zip'))
             .pipe(gulp.dest("build"));

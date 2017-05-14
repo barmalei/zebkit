@@ -3136,7 +3136,7 @@ if (typeof(zebkit) === "undefined") {
 
         },
 
-        function test_perf() {
+        function _test_perf() {
             var NA = function(argument) {
             }
 

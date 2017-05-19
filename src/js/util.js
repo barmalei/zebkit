@@ -92,7 +92,7 @@ zebkit.package("util", function(pkg, Class) {
 
     /**
      * Load image or complete the given image loading.
-     * @param  {String|Image} ph path or image.
+     * @param  {String|Image} ph path or image to complete loading.
      * @param  {Boolean} [fireErr] flag to force or preserve error firing.
      * @return {zebkit.DoIt}
      * @method image
@@ -145,28 +145,28 @@ zebkit.package("util", function(pkg, Class) {
      *  Passed tree-like structure doesn't have a special requirements except every item of
      *  the structure have to define its kids by exposing "kids" field. The field is array
      *  of children elements:
-
-            // example of tree-like structure
-            var treeLikeRoot = {
-                value : "Root",
-                kids : [
-                    { value: "Item 1" },
-                    { value: "Item 2" }
-                ]
-            };
-
-            zebkit.util.findInTree(treeLikeRoot,
-              "/item1",
-              function(foundElement) {
-                 ...
-                 // returning true means stop lookup
-                 return true;
-              },
-              function(item, fragment) {
-                  return item.value === fragment;
-              });
-
-
+     *
+     *      // example of tree-like structure
+     *      var treeLikeRoot = {
+     *          value : "Root",
+     *          kids : [
+     *              { value: "Item 1" },
+     *              { value: "Item 2" }
+     *          ]
+     *      };
+     *
+     *      zebkit.util.findInTree(treeLikeRoot,
+     *          "/item1",
+     *          function(foundElement) {
+     *             ...
+     *             // returning true means stop lookup
+     *             return true;
+     *          },
+     *          function(item, fragment) {
+     *              return item.value === fragment;
+     *          });
+     *
+     *
      * The find method traverse the tree-like structure according to the xpath-like
      * expression. To understand if the given tree item confronts with the currently
      * traversing path fragment a special equality method has to be passed. The method
@@ -308,7 +308,7 @@ zebkit.package("util", function(pkg, Class) {
     };
 
     /**
-     * Interface that provide path search functionality for a tree-like structure.
+     * Interface that provides path search functionality for a tree-like structure.
      * @class  zebkit.util.PathSearch
      * @interface zebkit.util.PathSearch
      */
@@ -576,35 +576,35 @@ zebkit.package("util", function(pkg, Class) {
      * This method allows to declare a listeners container class for the given
      * dedicated event types.
 
-            // create listener container to keep three different events
-            // handlers
-            var MyListenerContainerClass = zebkit.util.ListenersClass("event1",
-                                                                      "event2",
-                                                                      "event3");
+        // create listener container to keep three different events
+        // handlers
+        var MyListenerContainerClass = zebkit.util.ListenersClass("event1",
+                                                                  "event2",
+                                                                  "event3");
 
-            // instantiate listener class container
-            var listeners = new MyListenerContainerClass();
+        // instantiate listener class container
+        var listeners = new MyListenerContainerClass();
 
-            // add "event1" listener
-            listeners.add(function event1() {
-                ...
-            });
+        // add "event1" listener
+        listeners.add(function event1() {
+            ...
+        });
 
-            // add "event2" listener
-            listeners.add(function event2() {
-               ...
-            });
+        // add "event2" listener
+        listeners.add(function event2() {
+           ...
+        });
 
-            // add listener for both event1 and event2 events
-            listeners.add(function() {
-               ...
-            });
+        // add listener for both event1 and event2 events
+        listeners.add(function() {
+           ...
+        });
 
-            // and firing event1 to registered handlers
-            listeners.event1(...);
+        // and firing event1 to registered handlers
+        listeners.event1(...);
 
-            // and firing event2 to registered handlers
-            listeners.event2(...);
+        // and firing event2 to registered handlers
+        listeners.event2(...);
 
      * @for zebkit.util
      * @method ListenersClass
@@ -941,11 +941,11 @@ zebkit.package("util", function(pkg, Class) {
 
     /**
      * Fire when a virtual cursor position has been updated
-
-            position.on(function(src, prevOffset, prevLine, prevCol) {
-                ...
-            });
-
+     *
+     *      position.on(function(src, prevOffset, prevLine, prevCol) {
+     *          ...
+     *      });
+     *
      * @event posChanged
      * @param {zebkit.util.Position} src an object that triggers the event
      * @param {Integer} prevOffest a previous virtual cursor offset

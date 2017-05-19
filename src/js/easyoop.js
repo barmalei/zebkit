@@ -1098,6 +1098,18 @@
         return false;
     };
 
+    /**
+     * List classes, variables and interfaces defined in the given package.
+     * If second parameter "all" passed to the method is false, the method
+     * will skip package entities whose name starts from "$" or "_" character.
+     * These entities are considered as private ones. Pay attention sub-packages
+     * are not listed.
+     * @param  {Function} cb a callback method that get the package entity key
+     * and the entity value as arguments.
+     * @param  {Boolean}  [all] flag that specifies if private entities are
+     * should be listed.
+     * @method ls
+     */
     Package.prototype.ls = function(cb, all) {
         return $ls.call(this, cb, all);
     };
@@ -1380,7 +1392,6 @@
     // =================================================================================================
     var zebkit = new Package("zebkit");
 
-
     /**
      * Reference to zebkit environment. Environment is basic, minimal API
      * zebkit and its components require.
@@ -1500,7 +1511,8 @@
             templateConstructor.clazz = templateConstructor.constructor = instanceOf;
 
             /**
-             *  Unique string hash code.
+             *  Unique string hash code. The property is not defined if the class was not
+             *  maid hashable by calling "hashable()" method.
              *  @attribute $hash$
              *  @private
              *  @type {String}
@@ -1555,6 +1567,12 @@
             return templateConstructor;
         }
 
+        /**
+         * Dump the given error to output.
+         * @param  {Exception | Object} e an error.
+         * @method dumpError
+         * @for  zebkit
+         */
         pkg.dumpError = function(e) {
             if (typeof console !== "undefined" && typeof console.log !== "undefined") {
                 var msg = "zebkit.err [";
@@ -1704,7 +1722,7 @@
          * traversing the given object structure recursively. Any part of an
          * object can be marked as not cloneable by adding  "$notCloneable"
          * field that equals to true. Also at any level of object structure
-         * the clonnig can be customized with adding "$clone" method. In this
+         * the cloning can be customized with adding "$clone" method. In this
          * case the method will be used to clone the part of object.
          * clonable
          * @param  {Object} obj an object to be cloned
@@ -1996,6 +2014,12 @@
                 }
             }
 
+            /**
+             * Private implementation of an interface cloning.
+             * @return {zebkit.Interface} a clone of the interface
+             * @method $clone
+             * @private
+             */
             $Interface.$clone = function() {
                 var clone = pkg.Interface(), k = null; // create interface
 
@@ -2017,8 +2041,7 @@
                 return clone;
             };
 
-            // assign name
-            $Interface.clazz.$name = "zebkit.Interface";
+            $Interface.clazz.$name = "zebkit.Interface"; // assign name
             return $Interface;
         });
 
@@ -2279,6 +2302,15 @@
                 }
             }, toInherit);
 
+
+            /**
+             *  Internal attribute that caches properties setter references.
+             *  @attribute $propertyInfo
+             *  @type {Object}
+             *  @private
+             *  @for zebkit.Class
+             *  @readOnly
+             */
             // prepare fields that caches the class properties. existence of the property
             // force getPropertySetter method to cache the method
             classTemplate.$propertyInfo = {};
@@ -2337,7 +2369,7 @@
              * @param {Array} methods list of methods the class instance has to be extended
              * with
              * @method extend
-             * @for zebkit.Class
+             * @for zebkit.Class.zObject
              */
             classTemplate.prototype.extend = function() {
                 var clazz = this.clazz,
@@ -2415,7 +2447,7 @@
              *    var b = new B();
              *    b.a(10) // return 200
              *
-             * @for zebkit.Class
+             * @for zebkit.Class.zObject
              */
             classTemplate.prototype.$super = function() {
                if ($caller !== null) {
@@ -2473,11 +2505,11 @@
             };
 
             /**
-             * Get a first super implementation of the given method in parent classes hierarchy.
+             * Get a first super implementation of the given method in a parent classes hierarchy.
              * @param  {String} name a name of the method
              * @return {Function} a super method implementation
              * @method  $getSuper
-             * @for  zebkit.Class
+             * @for  zebkit.Class.zObject
              */
             classTemplate.prototype.$getSuper = function(name) {
                if ($caller !== null) {
@@ -2620,6 +2652,14 @@
                 return this;
             };
 
+            /**
+             * Extend the class with new method and implemented interfaces.
+             * @param {zebkit.Interface} [varname]*  number of interfaces the class has to implement.
+             * @param {Array} methods set of methods the given class has to be extended.
+             * @method extend
+             * @for  zebkit.Class
+             */
+
             // add extend method later to avoid the method be inherited as a class static field
             classTemplate.extend = function() {
                 var methods    = arguments[arguments.length - 1],
@@ -2678,7 +2718,7 @@
 
             /**
              * Tests if the given class inherits the given class or interface.
-             * @param  {clazz}  clazz a class or interface
+             * @param  {clazz}  clazz a class or interface.
              * @return {Boolean} true if the class or interface is inherited with
              * the class.
              * @method  isInherit
@@ -2727,6 +2767,7 @@
          * @private
          * @default 7777
          * @type {Number}
+         * @for  zebkit
          */
         pkg.$cacheSize = 7777;
 

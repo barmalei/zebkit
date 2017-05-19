@@ -320,22 +320,21 @@ zebkit.package("layout", function(pkg, Class) {
 
             /**
              * Apply the given set of properties to the given component or a number of children
-             * components.
-
-            var c = new zebkit.layout.Layoutable();
-            c.properties({
-                width: [100, 100],
-                location: [10,10],
-                layout: new zebkit.layout.BorderLayout()
-            })
-
-            c.add(new zebkit.layout.Layoutable()).add(zebkit.layout.Layoutable())
-                                                 .add(zebkit.layout.Layoutable());
-            c.properties("//*", {
-                size: [100, 200]
-            });
-
-
+             * its components.
+             * @example
+             *
+             *     var c = new zebkit.layout.Layoutable();
+             *     c.properties({
+             *         width: [100, 100],
+             *         location: [10,10],
+             *         layout: new zebkit.layout.BorderLayout()
+             *     })
+             *
+             *     c.add(new zebkit.layout.Layoutable()).add(zebkit.layout.Layoutable())
+             *                                          .add(zebkit.layout.Layoutable());
+             *     c.properties("//*", {
+             *         size: [100, 200]
+             *     });
              *
              * @param  {String} [path]  a path to find children components
              * @param  {Object} props a dictionary of properties to be applied
@@ -356,7 +355,7 @@ zebkit.package("layout", function(pkg, Class) {
 
             /**
              * Set the given property to the component or children component
-             * specified by the given selector
+             * specified by the given path (optionally).
              * @param  {String} [path]  a path to find children components
              * @param  {String} name a property name
              * @param  {object} value a property value
@@ -689,7 +688,9 @@ zebkit.package("layout", function(pkg, Class) {
              */
 
             /**
-             * Get a children layoutable component by the given constraints.
+             * Get a children layoutable component by the given path (optionally)
+             * and the specified constraints.
+             * @param  {String} [p] a path.
              * @param  {zebkit.layout.Layoutable} c a constraints
              * @return {zebkit.layout.Layoutable} a children component
              * @method byConstraints
@@ -840,9 +841,10 @@ zebkit.package("layout", function(pkg, Class) {
     ]);
 
     /**
-     *  Layout manager implementation that places layoutbale components on top of each other stretching
-     *  its to fill all available parent component space. Components that want to have be sized according
-     *  to its preferred sizes have to have its constraints set to "usePsSize".
+     *  Layout manager implementation that places layoutbale components on top of
+     *  each other stretching its to fill all available parent component space.
+     *  Components that want to have be sized according to its preferred sizes
+     *  have to have its constraints set to "usePsSize".
      *  @example
      *
      *      var pan = new zebkit.ui.Panel();
@@ -897,15 +899,16 @@ zebkit.package("layout", function(pkg, Class) {
      *  stretched to fill all available space vertically and are sized to have preferred width vertically.
      *  Center component is stretched to occupy all available space taking in account top, left, right
      *  and bottom components.
-
-           // create panel with border layout
-           var p = new zebkit.ui.Panel(new zebkit.layout.BorderLayout());
-
-           // add children UI components with top, center and left constraints
-           p.add("top",    new zebkit.ui.Label("Top"));
-           p.add("center", new zebkit.ui.Label("Center"));
-           p.add("left",   new zebkit.ui.Label("Left"));
-
+     *
+     *      // create panel with border layout
+     *      var p = new zebkit.ui.Panel(new zebkit.layout.BorderLayout());
+     *
+     *      // add children UI components with top, center and left constraints
+     *      p.add("top",    new zebkit.ui.Label("Top"));
+     *      p.add("center", new zebkit.ui.Label("Center"));
+     *      p.add("left",   new zebkit.ui.Label("Left"));
+     *
+     *
      * Construct the layout with the given vertical and horizontal gaps.
      * @param  {Integer} [hgap] horizontal gap. The gap is a horizontal distance between laid out components
      * @param  {Integer} [vgap] vertical gap. The gap is a vertical distance between laid out components
@@ -1105,6 +1108,12 @@ zebkit.package("layout", function(pkg, Class) {
      * @extends {zebkit.layout.Layout}
      */
     pkg.RasterLayout = Class(pkg.Layout, [
+        function(usePsSize) {
+            if (arguments.length > 0) {
+                this.usePsSize = usePsSize;
+            }
+        },
+
         function $prototype() {
             /**
              * Define if managed with layout manager components have to be sized according to its
@@ -1177,30 +1186,24 @@ zebkit.package("layout", function(pkg, Class) {
                     }
                 }
             };
-        },
-
-        function(usePsSize) {
-            if (arguments.length > 0) {
-                this.usePsSize = usePsSize;
-            }
         }
     ]);
 
     /**
      * Flow layout manager group and places components ordered with different vertical and horizontal
      * alignments
-
-            // create panel and set flow layout for it
-            // components added to the panel will be placed
-            // horizontally aligned at the center of the panel
-            var p = new zebkit.ui.Panel();
-            p.setLayout(new zebkit.layout.FlowLayout("center", "center"));
-
-            // add three buttons into the panel with flow layout
-            p.add(new zebkit.ui.Button("Button 1"));
-            p.add(new zebkit.ui.Button("Button 2"));
-            p.add(new zebkit.ui.Button("Button 3"));
-
+     *
+     *     // create panel and set flow layout for it
+     *     // components added to the panel will be placed
+     *     // horizontally aligned at the center of the panel
+     *     var p = new zebkit.ui.Panel();
+     *     p.setLayout(new zebkit.layout.FlowLayout("center", "center"));
+     *
+     *     // add three buttons into the panel with flow layout
+     *     p.add(new zebkit.ui.Button("Button 1"));
+     *     p.add(new zebkit.ui.Button("Button 2"));
+     *     p.add(new zebkit.ui.Button("Button 3"));
+     *
      * @param {String} [ax] ("left" by default) horizontal alignment:
 
          "left"
@@ -1378,16 +1381,16 @@ zebkit.package("layout", function(pkg, Class) {
 
     /**
      * List layout places components vertically one by one
-
-            // create panel and set list layout for it
-            var p = new zebkit.ui.Panel();
-            p.setLayout(new zebkit.layout.ListLayout());
-
-            // add three buttons into the panel with list layout
-            p.add(new zebkit.ui.Button("Item 1"));
-            p.add(new zebkit.ui.Button("Item 2"));
-            p.add(new zebkit.ui.Button("Item 3"));
-
+     *
+     *     // create panel and set list layout for it
+     *     var p = new zebkit.ui.Panel();
+     *     p.setLayout(new zebkit.layout.ListLayout());
+     *
+     *     // add three buttons into the panel with list layout
+     *     p.add(new zebkit.ui.Button("Item 1"));
+     *     p.add(new zebkit.ui.Button("Item 2"));
+     *     p.add(new zebkit.ui.Button("Item 3"));
+     *
      * @param {String} [ax] horizontal list item alignment:
 
          "left"
@@ -1470,17 +1473,17 @@ zebkit.package("layout", function(pkg, Class) {
     /**
      * Percent layout places components vertically or horizontally and sizes its according to its
      * percentage constraints.
-
-            // create panel and set percent layout for it
-            var p = new zebkit.ui.Panel();
-            p.setLayout(new zebkit.layout.PercentLayout());
-
-            // add three buttons to the panel that are laid out horizontally with
-            // percent layout according to its constraints: 20, 30 and 50 percents
-            p.add(20, new zebkit.ui.Button("20%"));
-            p.add(30, new zebkit.ui.Button("30%"));
-            p.add(50, new zebkit.ui.Button("50%"));
-
+     *
+     *     // create panel and set percent layout for it
+     *     var p = new zebkit.ui.Panel();
+     *     p.setLayout(new zebkit.layout.PercentLayout());
+     *
+     *     // add three buttons to the panel that are laid out horizontally with
+     *     // percent layout according to its constraints: 20, 30 and 50 percents
+     *     p.add(20, new zebkit.ui.Button("20%"));
+     *     p.add(30, new zebkit.ui.Button("30%"));
+     *     p.add(50, new zebkit.ui.Button("50%"));
+     *
      * @param {String} [dir] a direction of placing components. The
      * value can be "horizontal" or "vertical"
      * @param {Integer} [gap] a space in pixels between laid out components
@@ -1524,7 +1527,7 @@ zebkit.package("layout", function(pkg, Class) {
              * or horizontally (if direction is set to "horizontal")
              * @attribute stretch
              * @readOnly
-             * @type {Integer}
+             * @type {Boolean}
              * @default true
              */
             this.stretch = true;
@@ -1705,27 +1708,27 @@ zebkit.package("layout", function(pkg, Class) {
      * Grid layout manager. can be used to split a component area to number of virtual cells where
      * children components can be placed. The way how the children components have to be laid out
      * in the cells can be customized by using "zebkit.layout.Constraints" class:
-
-            // create constraints
-            var ctr = new zebkit.layout.Constraints();
-
-            // specify cell top, left, right, bottom paddings
-            ctr.setPadding(8);
-            // say the component has to be left aligned in a
-            // virtual cell of grid layout
-            ctr.ax = "left";
-
-            // create panel and set grid layout manager with two
-            // virtual rows and columns
-            var p = new zebkit.ui.Panel();
-            p.setLayout(new zebkit.layout.GridLayout(2, 2));
-
-            // add children component
-            p.add(ctr, new zebkit.ui.Label("Cell 1, 1"));
-            p.add(ctr, new zebkit.ui.Label("Cell 1, 2"));
-            p.add(ctr, new zebkit.ui.Label("Cell 2, 1"));
-            p.add(ctr, new zebkit.ui.Label("Cell 2, 2"));
-
+     *
+     *     // create constraints
+     *     var ctr = new zebkit.layout.Constraints();
+     *
+     *     // specify cell top, left, right, bottom paddings
+     *     ctr.setPadding(8);
+     *     // say the component has to be left aligned in a
+     *     // virtual cell of grid layout
+     *     ctr.ax = "left";
+     *
+     *     // create panel and set grid layout manager with two
+     *     // virtual rows and columns
+     *     var p = new zebkit.ui.Panel();
+     *     p.setLayout(new zebkit.layout.GridLayout(2, 2));
+     *
+     *     // add children component
+     *     p.add(ctr, new zebkit.ui.Label("Cell 1, 1"));
+     *     p.add(ctr, new zebkit.ui.Label("Cell 1, 2"));
+     *     p.add(ctr, new zebkit.ui.Label("Cell 2, 1"));
+     *     p.add(ctr, new zebkit.ui.Label("Cell 2, 2"));
+     *
      * @param {Integer} rows a number of virtual rows to layout children components
      * @param {Integer} cols a number of virtual columns to layout children components
      * @param {Boolean} [stretchRows] true if virtual cell height has to be stretched to occupy the
@@ -1754,7 +1757,20 @@ zebkit.package("layout", function(pkg, Class) {
              */
             this.cols = c;
 
+            /**
+             * Computed columns sizes.
+             * @attribute colSizes
+             * @type {Array}
+             * @private
+             */
             this.colSizes = Array(c + 1);
+
+            /**
+             * Computed rows sizes.
+             * @attribute rowSizes
+             * @type {Array}
+             * @private
+             */
             this.rowSizes = Array(r + 1);
 
             /**
@@ -1765,12 +1781,35 @@ zebkit.package("layout", function(pkg, Class) {
              */
             this.constraints = new pkg.Constraints();
 
-            if (arguments.length > 2) this.stretchRows = (stretchRows === true);
-            if (arguments.length > 3) this.stretchCols = (stretchCols === true);
+            if (arguments.length > 2) {
+                this.stretchRows = (stretchRows === true);
+            }
+
+            if (arguments.length > 3) {
+                this.stretchCols = (stretchCols === true);
+            }
         },
 
         function $prototype() {
-            this.stretchCols = this.stretchRows = false;
+            /**
+             * Attributes that indicates if component has to be stretched
+             * horizontally to occupy the whole space of a virtual cell.
+             * @attribute stretchCols
+             * @readOnly
+             * @type {Boolean}
+             * @default false
+             */
+            this.stretchCols = false;
+
+            /**
+             * Attributes that indicates if component has to be stretched
+             * vertically to occupy the whole space of a virtual cell.
+             * @attribute stretchRows
+             * @readOnly
+             * @type {Boolean}
+             * @default false
+             */
+            this.stretchRows = false;
 
             /**
              * Set default grid layout cell paddings (top, left, bottom, right) to the given value

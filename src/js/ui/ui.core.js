@@ -532,7 +532,7 @@ zebkit.package("ui", function(pkg, Class) {
           p.add("center", new zebkit.ui.TextArea("Text area"));
           p.add("bottom", new zebkit.ui.Button("Button"));
 
-     * **Events**
+     * **Input and component events**
      * The class provides possibility to catch various component and input events by declaring an
      * appropriate event method handler. The most simple case you just define a method:
 

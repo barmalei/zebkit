@@ -80,6 +80,11 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                               <a href="../classes/zebkit.Class.zObject.html">zebkit.Class.zObject</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
                                                <a href="../classes/zebkit.data.DataModel.html">zebkit.data.DataModel</a>
                                             </td>
                                         </tr>
@@ -966,13 +971,13 @@ horizontally and are sized to have preferred height horizontally. Left and right
 stretched to fill all available space vertically and are sized to have preferred width vertically.
 Center component is stretched to occupy all available space taking in account top, left, right
 and bottom components.</p>
-<pre class="code prettyprint"><code>     // create panel with border layout
-     var p = new zebkit.ui.Panel(new zebkit.layout.BorderLayout());
+<pre class="code prettyprint"><code>// create panel with border layout
+var p = new zebkit.ui.Panel(new zebkit.layout.BorderLayout());
 
-     // add children UI components with top, center and left constraints
-     p.add("top",    new zebkit.ui.Label("Top"));
-     p.add("center", new zebkit.ui.Label("Center"));
-     p.add("left",   new zebkit.ui.Label("Left"));
+// add children UI components with top, center and left constraints
+p.add("top",    new zebkit.ui.Label("Top"));
+p.add("center", new zebkit.ui.Label("Center"));
+p.add("left",   new zebkit.ui.Label("Left"));
 </code></pre>
 <p>Construct the layout with the given vertical and horizontal gaps.</p>
 

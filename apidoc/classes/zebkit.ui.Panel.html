@@ -80,6 +80,11 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                               <a href="../classes/zebkit.Class.zObject.html">zebkit.Class.zObject</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
                                                <a href="../classes/zebkit.data.DataModel.html">zebkit.data.DataModel</a>
                                             </td>
                                         </tr>
@@ -1191,7 +1196,7 @@ to be applied to the instance of the panel class.</p>
 
                                     <td>
                                         <b>
-                                            <a class="name" href="#methods_byConstraints">byConstraints (c)</a>
+                                            <a class="name" href="#methods_byConstraints">byConstraints ([p], c)</a>
                                         </b>
                                     </td>
 
@@ -2978,16 +2983,25 @@ declares events handler methods</p>
                     &lt;<a href="../classes/zebkit.layout.Layoutable.html" class="crosslink">zebkit.layout.Layoutable</a>&gt;
                 </span>
 
-    <strong class="name"><code>byConstraints</code> (<code>c</code>)</strong>
+    <strong class="name"><code>byConstraints</code> (<code>[p], c</code>)</strong>
 
     <br/>
 
-    <p>Get a children layoutable component by the given constraints.</p>
+    <p>Get a children layoutable component by the given path (optionally)
+and the specified constraints.</p>
 
 
         <br/>
         <strong>Parameters:</strong>
         <ul class="params">
+                <li>
+                        <span class="name"><code>[p]</code></span>
+                        <strong class="type">
+                            &lt;String&gt;
+                        </strong>
+                    <p>a path.</p>
+
+                </li>
                 <li>
                         <span class="name"><code>c</code></span>
                         <strong class="type">
@@ -3993,19 +4007,7 @@ given 2D HTML Canvas context</p>
     <br/>
 
     <p>Apply the given set of properties to the given component or a number of children
-components.</p>
-<pre class="code prettyprint"><code>       var c = new zebkit.layout.Layoutable();
-       c.properties({
-           width: [100, 100],
-           location: [10,10],
-           layout: new zebkit.layout.BorderLayout()
-       })
-
-       c.add(new zebkit.layout.Layoutable()).add(zebkit.layout.Layoutable())
-                                            .add(zebkit.layout.Layoutable());
-       c.properties("//*", {
-           size: [100, 200]
-       });</code></pre>
+its components.</p>
 
 
         <br/>
@@ -4042,6 +4044,21 @@ components.</p>
             </div>
 
 
+        <br/>
+        <strong>Example:</strong>
+        <pre class="code prettyprint"><code>var c = new zebkit.layout.Layoutable();
+c.properties({
+    width: [100, 100],
+    location: [10,10],
+    layout: new zebkit.layout.BorderLayout()
+})
+
+c.add(new zebkit.layout.Layoutable()).add(zebkit.layout.Layoutable())
+                                     .add(zebkit.layout.Layoutable());
+c.properties("//*", {
+    size: [100, 200]
+});</code></pre>
+
 </div>
                             </td>
                         </tr>
@@ -4072,7 +4089,7 @@ components.</p>
     <br/>
 
     <p>Set the given property to the component or children component
-specified by the given selector</p>
+specified by the given path (optionally).</p>
 
 
         <br/>

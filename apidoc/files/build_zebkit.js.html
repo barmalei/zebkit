@@ -80,6 +80,11 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                               <a href="../classes/zebkit.Class.zObject.html">zebkit.Class.zObject</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
                                                <a href="../classes/zebkit.data.DataModel.html">zebkit.data.DataModel</a>
                                             </td>
                                         </tr>
@@ -2420,6 +2425,18 @@
         return false;
     };
 
+    /**
+     * List classes, variables and interfaces defined in the given package.
+     * If second parameter &quot;all&quot; passed to the method is false, the method
+     * will skip package entities whose name starts from &quot;$&quot; or &quot;_&quot; character.
+     * These entities are considered as private ones. Pay attention sub-packages
+     * are not listed.
+     * @param  {Function} cb a callback method that get the package entity key
+     * and the entity value as arguments.
+     * @param  {Boolean}  [all] flag that specifies if private entities are
+     * should be listed.
+     * @method ls
+     */
     Package.prototype.ls = function(cb, all) {
         return $ls.call(this, cb, all);
     };
@@ -2702,7 +2719,6 @@
     // =================================================================================================
     var zebkit = new Package(&quot;zebkit&quot;);
 
-
     /**
      * Reference to zebkit environment. Environment is basic, minimal API
      * zebkit and its components require.
@@ -2822,7 +2838,8 @@
             templateConstructor.clazz = templateConstructor.constructor = instanceOf;
 
             /**
-             *  Unique string hash code.
+             *  Unique string hash code. The property is not defined if the class was not
+             *  maid hashable by calling &quot;hashable()&quot; method.
              *  @attribute $hash$
              *  @private
              *  @type {String}
@@ -2877,6 +2894,12 @@
             return templateConstructor;
         }
 
+        /**
+         * Dump the given error to output.
+         * @param  {Exception | Object} e an error.
+         * @method dumpError
+         * @for  zebkit
+         */
         pkg.dumpError = function(e) {
             if (typeof console !== &quot;undefined&quot; &amp;&amp; typeof console.log !== &quot;undefined&quot;) {
                 var msg = &quot;zebkit.err [&quot;;
@@ -3026,7 +3049,7 @@
          * traversing the given object structure recursively. Any part of an
          * object can be marked as not cloneable by adding  &quot;$notCloneable&quot;
          * field that equals to true. Also at any level of object structure
-         * the clonnig can be customized with adding &quot;$clone&quot; method. In this
+         * the cloning can be customized with adding &quot;$clone&quot; method. In this
          * case the method will be used to clone the part of object.
          * clonable
          * @param  {Object} obj an object to be cloned
@@ -3318,6 +3341,12 @@
                 }
             }
 
+            /**
+             * Private implementation of an interface cloning.
+             * @return {zebkit.Interface} a clone of the interface
+             * @method $clone
+             * @private
+             */
             $Interface.$clone = function() {
                 var clone = pkg.Interface(), k = null; // create interface
 
@@ -3339,8 +3368,7 @@
                 return clone;
             };
 
-            // assign name
-            $Interface.clazz.$name = &quot;zebkit.Interface&quot;;
+            $Interface.clazz.$name = &quot;zebkit.Interface&quot;; // assign name
             return $Interface;
         });
 
@@ -3601,6 +3629,15 @@
                 }
             }, toInherit);
 
+
+            /**
+             *  Internal attribute that caches properties setter references.
+             *  @attribute $propertyInfo
+             *  @type {Object}
+             *  @private
+             *  @for zebkit.Class
+             *  @readOnly
+             */
             // prepare fields that caches the class properties. existence of the property
             // force getPropertySetter method to cache the method
             classTemplate.$propertyInfo = {};
@@ -3659,7 +3696,7 @@
              * @param {Array} methods list of methods the class instance has to be extended
              * with
              * @method extend
-             * @for zebkit.Class
+             * @for zebkit.Class.zObject
              */
             classTemplate.prototype.extend = function() {
                 var clazz = this.clazz,
@@ -3737,7 +3774,7 @@
              *    var b = new B();
              *    b.a(10) // return 200
              *
-             * @for zebkit.Class
+             * @for zebkit.Class.zObject
              */
             classTemplate.prototype.$super = function() {
                if ($caller !== null) {
@@ -3795,11 +3832,11 @@
             };
 
             /**
-             * Get a first super implementation of the given method in parent classes hierarchy.
+             * Get a first super implementation of the given method in a parent classes hierarchy.
              * @param  {String} name a name of the method
              * @return {Function} a super method implementation
              * @method  $getSuper
-             * @for  zebkit.Class
+             * @for  zebkit.Class.zObject
              */
             classTemplate.prototype.$getSuper = function(name) {
                if ($caller !== null) {
@@ -3942,6 +3979,14 @@
                 return this;
             };
 
+            /**
+             * Extend the class with new method and implemented interfaces.
+             * @param {zebkit.Interface} [varname]*  number of interfaces the class has to implement.
+             * @param {Array} methods set of methods the given class has to be extended.
+             * @method extend
+             * @for  zebkit.Class
+             */
+
             // add extend method later to avoid the method be inherited as a class static field
             classTemplate.extend = function() {
                 var methods    = arguments[arguments.length - 1],
@@ -4000,7 +4045,7 @@
 
             /**
              * Tests if the given class inherits the given class or interface.
-             * @param  {clazz}  clazz a class or interface
+             * @param  {clazz}  clazz a class or interface.
              * @return {Boolean} true if the class or interface is inherited with
              * the class.
              * @method  isInherit
@@ -4049,6 +4094,7 @@
          * @private
          * @default 7777
          * @type {Number}
+         * @for  zebkit
          */
         pkg.$cacheSize = 7777;
 
@@ -4505,7 +4551,7 @@ zebkit.package(&quot;util&quot;, function(pkg, Class) {
 
     /**
      * Load image or complete the given image loading.
-     * @param  {String|Image} ph path or image.
+     * @param  {String|Image} ph path or image to complete loading.
      * @param  {Boolean} [fireErr] flag to force or preserve error firing.
      * @return {zebkit.DoIt}
      * @method image
@@ -4558,28 +4604,28 @@ zebkit.package(&quot;util&quot;, function(pkg, Class) {
      *  Passed tree-like structure doesn&#x27;t have a special requirements except every item of
      *  the structure have to define its kids by exposing &quot;kids&quot; field. The field is array
      *  of children elements:
-
-            // example of tree-like structure
-            var treeLikeRoot = {
-                value : &quot;Root&quot;,
-                kids : [
-                    { value: &quot;Item 1&quot; },
-                    { value: &quot;Item 2&quot; }
-                ]
-            };
-
-            zebkit.util.findInTree(treeLikeRoot,
-              &quot;/item1&quot;,
-              function(foundElement) {
-                 ...
-                 // returning true means stop lookup
-                 return true;
-              },
-              function(item, fragment) {
-                  return item.value === fragment;
-              });
-
-
+     *
+     *      // example of tree-like structure
+     *      var treeLikeRoot = {
+     *          value : &quot;Root&quot;,
+     *          kids : [
+     *              { value: &quot;Item 1&quot; },
+     *              { value: &quot;Item 2&quot; }
+     *          ]
+     *      };
+     *
+     *      zebkit.util.findInTree(treeLikeRoot,
+     *          &quot;/item1&quot;,
+     *          function(foundElement) {
+     *             ...
+     *             // returning true means stop lookup
+     *             return true;
+     *          },
+     *          function(item, fragment) {
+     *              return item.value === fragment;
+     *          });
+     *
+     *
      * The find method traverse the tree-like structure according to the xpath-like
      * expression. To understand if the given tree item confronts with the currently
      * traversing path fragment a special equality method has to be passed. The method
@@ -4721,7 +4767,7 @@ zebkit.package(&quot;util&quot;, function(pkg, Class) {
     };
 
     /**
-     * Interface that provide path search functionality for a tree-like structure.
+     * Interface that provides path search functionality for a tree-like structure.
      * @class  zebkit.util.PathSearch
      * @interface zebkit.util.PathSearch
      */
@@ -4989,35 +5035,35 @@ zebkit.package(&quot;util&quot;, function(pkg, Class) {
      * This method allows to declare a listeners container class for the given
      * dedicated event types.
 
-            // create listener container to keep three different events
-            // handlers
-            var MyListenerContainerClass = zebkit.util.ListenersClass(&quot;event1&quot;,
-                                                                      &quot;event2&quot;,
-                                                                      &quot;event3&quot;);
+        // create listener container to keep three different events
+        // handlers
+        var MyListenerContainerClass = zebkit.util.ListenersClass(&quot;event1&quot;,
+                                                                  &quot;event2&quot;,
+                                                                  &quot;event3&quot;);
 
-            // instantiate listener class container
-            var listeners = new MyListenerContainerClass();
+        // instantiate listener class container
+        var listeners = new MyListenerContainerClass();
 
-            // add &quot;event1&quot; listener
-            listeners.add(function event1() {
-                ...
-            });
+        // add &quot;event1&quot; listener
+        listeners.add(function event1() {
+            ...
+        });
 
-            // add &quot;event2&quot; listener
-            listeners.add(function event2() {
-               ...
-            });
+        // add &quot;event2&quot; listener
+        listeners.add(function event2() {
+           ...
+        });
 
-            // add listener for both event1 and event2 events
-            listeners.add(function() {
-               ...
-            });
+        // add listener for both event1 and event2 events
+        listeners.add(function() {
+           ...
+        });
 
-            // and firing event1 to registered handlers
-            listeners.event1(...);
+        // and firing event1 to registered handlers
+        listeners.event1(...);
 
-            // and firing event2 to registered handlers
-            listeners.event2(...);
+        // and firing event2 to registered handlers
+        listeners.event2(...);
 
      * @for zebkit.util
      * @method ListenersClass
@@ -5354,11 +5400,11 @@ zebkit.package(&quot;util&quot;, function(pkg, Class) {
 
     /**
      * Fire when a virtual cursor position has been updated
-
-            position.on(function(src, prevOffset, prevLine, prevCol) {
-                ...
-            });
-
+     *
+     *      position.on(function(src, prevOffset, prevLine, prevCol) {
+     *          ...
+     *      });
+     *
      * @event posChanged
      * @param {zebkit.util.Position} src an object that triggers the event
      * @param {Integer} prevOffest a previous virtual cursor offset
@@ -7638,16 +7684,15 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
      * Collection of various data models. The models are widely used by zebkit UI
      * components as part of model-view-controller approach, but the package doesn&#x27;t depend on
      * zebkit UI and can be used independently.
-     * @example
      *
-     *      var treeModel = new zebkit.data.TreeModel();
-     *      treeModel.on(&quot;itemInserted&quot;, function(model, item) {
+     *      var model = new zebkit.data.TreeModel();
+     *      model.on(&quot;itemInserted&quot;, function(model, item) {
      *          // handle item inserted tree model event
      *          ...
      *      });
      *
-     *      treeModel.add(treeModel.root, new zebkit.data.Item(&quot;Child 1&quot;));
-     *      treeModel.add(treeModel.root, new zebkit.data.Item(&quot;Child 2&quot;));
+     *      model.add(model.root, new zebkit.data.Item(&quot;Child 1&quot;));
+     *      model.add(model.root, new zebkit.data.Item(&quot;Child 2&quot;));
      *
      * @class zebkit.data
      * @access package
@@ -7727,9 +7772,9 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
      * Fired when the text model has been updated: a string has been
      * inserted or removed
 
-            text.on(function (src, b, off, len, startLine, lines) {
-                ...
-            });
+        text.on(function(src, b, off, len, startLine, lines) {
+            ...
+        });
 
      *
      * @event textUpdated
@@ -8432,9 +8477,9 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
     /**
      * Fired when the tree model item value has been updated.
 
-         tree.on(&quot;itemModified&quot;, function(src, item, prevValue) {
-             ...
-         });
+     tree.on(&quot;itemModified&quot;, function(src, item, prevValue) {
+         ...
+     });
 
      * @event itemModified
      * @param {zebkit.data.TreeModel} src a tree model that triggers the event
@@ -8445,9 +8490,9 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
     /**
      * Fired when the tree model item has been removed
 
-         tree.on(&quot;itemRemoved&quot;, function(src, item) {
-            ...
-         });
+     tree.on(&quot;itemRemoved&quot;, function(src, item) {
+        ...
+     });
 
      * @event itemRemoved
      * @param {zebkit.data.TreeModel} src a tree model that triggers the event
@@ -8455,11 +8500,11 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
      */
 
     /**
-     * Fired when the tree model item has been inserted into the model)
+     * Fired when the tree model item has been inserted into the model
 
-         tree.on(&quot;itemInserted&quot;, function(src, item) {{
-            ...
-         });
+     tree.on(&quot;itemInserted&quot;, function(src, item) {{
+        ...
+     });
 
      * @event itemInserted
      * @param {zebkit.data.TreeModel} src a tree model that triggers the event
@@ -8796,9 +8841,9 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
     /**
      * Fired when the matrix model size (number of rows or columns) is changed.
 
-          matrix.on(&quot;matrixResized&quot;, function(src, pr, pc) {
-              ...
-          });
+      matrix.on(&quot;matrixResized&quot;, function(src, pr, pc) {
+          ...
+      });
 
      * @event matrixResized
      * @param {zebkit.data.Matrix} src a matrix that triggers the event
@@ -8809,9 +8854,9 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
     /**
      * Fired when the matrix model cell has been updated.
 
-          matrix.on(&quot;cellModified&quot;, function(src, row, col, old) {
-             ...
-          });
+      matrix.on(&quot;cellModified&quot;, function(src, row, col, old) {
+         ...
+      });
 
      * @event cellModified
      * @param {zebkit.data.Matrix} src a matrix that triggers the event
@@ -8823,9 +8868,9 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
     /**
      * Fired when the matrix data has been re-ordered.
 
-          matrix.on(&quot;matrixSorted&quot;, function(src, sortInfo) {
-             ...
-          });
+      matrix.on(&quot;matrixSorted&quot;, function(src, sortInfo) {
+         ...
+      });
 
      * @event matrixSorted
      * @param {zebkit.data.Matrix} src a matrix that triggers the event
@@ -8843,9 +8888,9 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
     /**
      * Fired when a row has been inserted into the matrix.
 
-          matrix.on(&quot;matrixRowInserted&quot;, function(src, rowIndex) {
-             ...
-          });
+      matrix.on(&quot;matrixRowInserted&quot;, function(src, rowIndex) {
+         ...
+      });
 
      * @event matrixColInserted
      * @param {zebkit.data.Matrix} src a matrix that triggers the event
@@ -8856,9 +8901,9 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
     /**
      * Fired when a column has been inserted into the matrix.
 
-          matrix.on(&quot;matrixColInserted&quot;, function(src, colIndex) {
-             ...
-          });
+      matrix.on(&quot;matrixColInserted&quot;, function(src, colIndex) {
+         ...
+      });
 
      * @event matrixColInserted
      * @param {zebkit.data.Matrix} src a matrix that triggers the event
@@ -8883,7 +8928,7 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
 
             /**
              * The multi-dimensional embedded arrays to host matrix data
-             * @attribute objs
+             * @attribute $objs
              * @type {Array}
              * @readOnly
              * @private
@@ -9475,22 +9520,21 @@ zebkit.package(&quot;layout&quot;, function(pkg, Class) {
 
             /**
              * Apply the given set of properties to the given component or a number of children
-             * components.
-
-            var c = new zebkit.layout.Layoutable();
-            c.properties({
-                width: [100, 100],
-                location: [10,10],
-                layout: new zebkit.layout.BorderLayout()
-            })
-
-            c.add(new zebkit.layout.Layoutable()).add(zebkit.layout.Layoutable())
-                                                 .add(zebkit.layout.Layoutable());
-            c.properties(&quot;//*&quot;, {
-                size: [100, 200]
-            });
-
-
+             * its components.
+             * @example
+             *
+             *     var c = new zebkit.layout.Layoutable();
+             *     c.properties({
+             *         width: [100, 100],
+             *         location: [10,10],
+             *         layout: new zebkit.layout.BorderLayout()
+             *     })
+             *
+             *     c.add(new zebkit.layout.Layoutable()).add(zebkit.layout.Layoutable())
+             *                                          .add(zebkit.layout.Layoutable());
+             *     c.properties(&quot;//*&quot;, {
+             *         size: [100, 200]
+             *     });
              *
              * @param  {String} [path]  a path to find children components
              * @param  {Object} props a dictionary of properties to be applied
@@ -9511,7 +9555,7 @@ zebkit.package(&quot;layout&quot;, function(pkg, Class) {
 
             /**
              * Set the given property to the component or children component
-             * specified by the given selector
+             * specified by the given path (optionally).
              * @param  {String} [path]  a path to find children components
              * @param  {String} name a property name
              * @param  {object} value a property value
@@ -9844,7 +9888,9 @@ zebkit.package(&quot;layout&quot;, function(pkg, Class) {
              */
 
             /**
-             * Get a children layoutable component by the given constraints.
+             * Get a children layoutable component by the given path (optionally)
+             * and the specified constraints.
+             * @param  {String} [p] a path.
              * @param  {zebkit.layout.Layoutable} c a constraints
              * @return {zebkit.layout.Layoutable} a children component
              * @method byConstraints
@@ -10052,15 +10098,16 @@ zebkit.package(&quot;layout&quot;, function(pkg, Class) {
      *  stretched to fill all available space vertically and are sized to have preferred width vertically.
      *  Center component is stretched to occupy all available space taking in account top, left, right
      *  and bottom components.
-
-           // create panel with border layout
-           var p = new zebkit.ui.Panel(new zebkit.layout.BorderLayout());
-
-           // add children UI components with top, center and left constraints
-           p.add(&quot;top&quot;,    new zebkit.ui.Label(&quot;Top&quot;));
-           p.add(&quot;center&quot;, new zebkit.ui.Label(&quot;Center&quot;));
-           p.add(&quot;left&quot;,   new zebkit.ui.Label(&quot;Left&quot;));
-
+     *
+     *      // create panel with border layout
+     *      var p = new zebkit.ui.Panel(new zebkit.layout.BorderLayout());
+     *
+     *      // add children UI components with top, center and left constraints
+     *      p.add(&quot;top&quot;,    new zebkit.ui.Label(&quot;Top&quot;));
+     *      p.add(&quot;center&quot;, new zebkit.ui.Label(&quot;Center&quot;));
+     *      p.add(&quot;left&quot;,   new zebkit.ui.Label(&quot;Left&quot;));
+     *
+     *
      * Construct the layout with the given vertical and horizontal gaps.
      * @param  {Integer} [hgap] horizontal gap. The gap is a horizontal distance between laid out components
      * @param  {Integer} [vgap] vertical gap. The gap is a vertical distance between laid out components
@@ -10260,6 +10307,12 @@ zebkit.package(&quot;layout&quot;, function(pkg, Class) {
      * @extends {zebkit.layout.Layout}
      */
     pkg.RasterLayout = Class(pkg.Layout, [
+        function(usePsSize) {
+            if (arguments.length &gt; 0) {
+                this.usePsSize = usePsSize;
+            }
+        },
+
         function $prototype() {
             /**
              * Define if managed with layout manager components have to be sized according to its
@@ -10332,30 +10385,24 @@ zebkit.package(&quot;layout&quot;, function(pkg, Class) {
                     }
                 }
             };
-        },
-
-        function(usePsSize) {
-            if (arguments.length &gt; 0) {
-                this.usePsSize = usePsSize;
-            }
         }
     ]);
 
     /**
      * Flow layout manager group and places components ordered with different vertical and horizontal
      * alignments
-
-            // create panel and set flow layout for it
-            // components added to the panel will be placed
-            // horizontally aligned at the center of the panel
-            var p = new zebkit.ui.Panel();
-            p.setLayout(new zebkit.layout.FlowLayout(&quot;center&quot;, &quot;center&quot;));
-
-            // add three buttons into the panel with flow layout
-            p.add(new zebkit.ui.Button(&quot;Button 1&quot;));
-            p.add(new zebkit.ui.Button(&quot;Button 2&quot;));
-            p.add(new zebkit.ui.Button(&quot;Button 3&quot;));
-
+     *
+     *     // create panel and set flow layout for it
+     *     // components added to the panel will be placed
+     *     // horizontally aligned at the center of the panel
+     *     var p = new zebkit.ui.Panel();
+     *     p.setLayout(new zebkit.layout.FlowLayout(&quot;center&quot;, &quot;center&quot;));
+     *
+     *     // add three buttons into the panel with flow layout
+     *     p.add(new zebkit.ui.Button(&quot;Button 1&quot;));
+     *     p.add(new zebkit.ui.Button(&quot;Button 2&quot;));
+     *     p.add(new zebkit.ui.Button(&quot;Button 3&quot;));
+     *
      * @param {String} [ax] (&quot;left&quot; by default) horizontal alignment:
 
          &quot;left&quot;
@@ -10533,16 +10580,16 @@ zebkit.package(&quot;layout&quot;, function(pkg, Class) {
 
     /**
      * List layout places components vertically one by one
-
-            // create panel and set list layout for it
-            var p = new zebkit.ui.Panel();
-            p.setLayout(new zebkit.layout.ListLayout());
-
-            // add three buttons into the panel with list layout
-            p.add(new zebkit.ui.Button(&quot;Item 1&quot;));
-            p.add(new zebkit.ui.Button(&quot;Item 2&quot;));
-            p.add(new zebkit.ui.Button(&quot;Item 3&quot;));
-
+     *
+     *     // create panel and set list layout for it
+     *     var p = new zebkit.ui.Panel();
+     *     p.setLayout(new zebkit.layout.ListLayout());
+     *
+     *     // add three buttons into the panel with list layout
+     *     p.add(new zebkit.ui.Button(&quot;Item 1&quot;));
+     *     p.add(new zebkit.ui.Button(&quot;Item 2&quot;));
+     *     p.add(new zebkit.ui.Button(&quot;Item 3&quot;));
+     *
      * @param {String} [ax] horizontal list item alignment:
 
          &quot;left&quot;
@@ -10625,17 +10672,17 @@ zebkit.package(&quot;layout&quot;, function(pkg, Class) {
     /**
      * Percent layout places components vertically or horizontally and sizes its according to its
      * percentage constraints.
-
-            // create panel and set percent layout for it
-            var p = new zebkit.ui.Panel();
-            p.setLayout(new zebkit.layout.PercentLayout());
-
-            // add three buttons to the panel that are laid out horizontally with
-            // percent layout according to its constraints: 20, 30 and 50 percents
-            p.add(20, new zebkit.ui.Button(&quot;20%&quot;));
-            p.add(30, new zebkit.ui.Button(&quot;30%&quot;));
-            p.add(50, new zebkit.ui.Button(&quot;50%&quot;));
-
+     *
+     *     // create panel and set percent layout for it
+     *     var p = new zebkit.ui.Panel();
+     *     p.setLayout(new zebkit.layout.PercentLayout());
+     *
+     *     // add three buttons to the panel that are laid out horizontally with
+     *     // percent layout according to its constraints: 20, 30 and 50 percents
+     *     p.add(20, new zebkit.ui.Button(&quot;20%&quot;));
+     *     p.add(30, new zebkit.ui.Button(&quot;30%&quot;));
+     *     p.add(50, new zebkit.ui.Button(&quot;50%&quot;));
+     *
      * @param {String} [dir] a direction of placing components. The
      * value can be &quot;horizontal&quot; or &quot;vertical&quot;
      * @param {Integer} [gap] a space in pixels between laid out components
@@ -10679,7 +10726,7 @@ zebkit.package(&quot;layout&quot;, function(pkg, Class) {
              * or horizontally (if direction is set to &quot;horizontal&quot;)
              * @attribute stretch
              * @readOnly
-             * @type {Integer}
+             * @type {Boolean}
              * @default true
              */
             this.stretch = true;
@@ -10860,27 +10907,27 @@ zebkit.package(&quot;layout&quot;, function(pkg, Class) {
      * Grid layout manager. can be used to split a component area to number of virtual cells where
      * children components can be placed. The way how the children components have to be laid out
      * in the cells can be customized by using &quot;zebkit.layout.Constraints&quot; class:
-
-            // create constraints
-            var ctr = new zebkit.layout.Constraints();
-
-            // specify cell top, left, right, bottom paddings
-            ctr.setPadding(8);
-            // say the component has to be left aligned in a
-            // virtual cell of grid layout
-            ctr.ax = &quot;left&quot;;
-
-            // create panel and set grid layout manager with two
-            // virtual rows and columns
-            var p = new zebkit.ui.Panel();
-            p.setLayout(new zebkit.layout.GridLayout(2, 2));
-
-            // add children component
-            p.add(ctr, new zebkit.ui.Label(&quot;Cell 1, 1&quot;));
-            p.add(ctr, new zebkit.ui.Label(&quot;Cell 1, 2&quot;));
-            p.add(ctr, new zebkit.ui.Label(&quot;Cell 2, 1&quot;));
-            p.add(ctr, new zebkit.ui.Label(&quot;Cell 2, 2&quot;));
-
+     *
+     *     // create constraints
+     *     var ctr = new zebkit.layout.Constraints();
+     *
+     *     // specify cell top, left, right, bottom paddings
+     *     ctr.setPadding(8);
+     *     // say the component has to be left aligned in a
+     *     // virtual cell of grid layout
+     *     ctr.ax = &quot;left&quot;;
+     *
+     *     // create panel and set grid layout manager with two
+     *     // virtual rows and columns
+     *     var p = new zebkit.ui.Panel();
+     *     p.setLayout(new zebkit.layout.GridLayout(2, 2));
+     *
+     *     // add children component
+     *     p.add(ctr, new zebkit.ui.Label(&quot;Cell 1, 1&quot;));
+     *     p.add(ctr, new zebkit.ui.Label(&quot;Cell 1, 2&quot;));
+     *     p.add(ctr, new zebkit.ui.Label(&quot;Cell 2, 1&quot;));
+     *     p.add(ctr, new zebkit.ui.Label(&quot;Cell 2, 2&quot;));
+     *
      * @param {Integer} rows a number of virtual rows to layout children components
      * @param {Integer} cols a number of virtual columns to layout children components
      * @param {Boolean} [stretchRows] true if virtual cell height has to be stretched to occupy the
@@ -10909,7 +10956,20 @@ zebkit.package(&quot;layout&quot;, function(pkg, Class) {
              */
             this.cols = c;
 
+            /**
+             * Computed columns sizes.
+             * @attribute colSizes
+             * @type {Array}
+             * @private
+             */
             this.colSizes = Array(c + 1);
+
+            /**
+             * Computed rows sizes.
+             * @attribute rowSizes
+             * @type {Array}
+             * @private
+             */
             this.rowSizes = Array(r + 1);
 
             /**
@@ -10920,12 +10980,35 @@ zebkit.package(&quot;layout&quot;, function(pkg, Class) {
              */
             this.constraints = new pkg.Constraints();
 
-            if (arguments.length &gt; 2) this.stretchRows = (stretchRows === true);
-            if (arguments.length &gt; 3) this.stretchCols = (stretchCols === true);
+            if (arguments.length &gt; 2) {
+                this.stretchRows = (stretchRows === true);
+            }
+
+            if (arguments.length &gt; 3) {
+                this.stretchCols = (stretchCols === true);
+            }
         },
 
         function $prototype() {
-            this.stretchCols = this.stretchRows = false;
+            /**
+             * Attributes that indicates if component has to be stretched
+             * horizontally to occupy the whole space of a virtual cell.
+             * @attribute stretchCols
+             * @readOnly
+             * @type {Boolean}
+             * @default false
+             */
+            this.stretchCols = false;
+
+            /**
+             * Attributes that indicates if component has to be stretched
+             * vertically to occupy the whole space of a virtual cell.
+             * @attribute stretchRows
+             * @readOnly
+             * @type {Boolean}
+             * @default false
+             */
+            this.stretchRows = false;
 
             /**
              * Set default grid layout cell paddings (top, left, bottom, right) to the given value

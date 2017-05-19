@@ -80,6 +80,11 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                               <a href="../classes/zebkit.Class.zObject.html">zebkit.Class.zObject</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
                                                <a href="../classes/zebkit.data.DataModel.html">zebkit.data.DataModel</a>
                                             </td>
                                         </tr>
@@ -962,15 +967,15 @@
 <div class="intro">
     <p>Percent layout places components vertically or horizontally and sizes its according to its
 percentage constraints.</p>
-<pre class="code prettyprint"><code>       // create panel and set percent layout for it
-       var p = new zebkit.ui.Panel();
-       p.setLayout(new zebkit.layout.PercentLayout());
+<pre class="code prettyprint"><code>// create panel and set percent layout for it
+var p = new zebkit.ui.Panel();
+p.setLayout(new zebkit.layout.PercentLayout());
 
-       // add three buttons to the panel that are laid out horizontally with
-       // percent layout according to its constraints: 20, 30 and 50 percents
-       p.add(20, new zebkit.ui.Button("20%"));
-       p.add(30, new zebkit.ui.Button("30%"));
-       p.add(50, new zebkit.ui.Button("50%"));</code></pre>
+// add three buttons to the panel that are laid out horizontally with
+// percent layout according to its constraints: 20, 30 and 50 percents
+p.add(20, new zebkit.ui.Button("20%"));
+p.add(30, new zebkit.ui.Button("30%"));
+p.add(50, new zebkit.ui.Button("50%"));</code></pre>
 
 </div>
 
@@ -1111,7 +1116,7 @@ vertically or horizontally</p>
         <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
 
         <strong class="type">
-            &lt;Integer&gt;
+            &lt;Boolean&gt;
         </strong>
 
     <strong class="name" style="color:orange;">

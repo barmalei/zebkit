@@ -5,6 +5,7 @@ YUI.add("yuidoc-meta", function(Y) {
         "ui.vk",
         "zebkit",
         "zebkit.Class",
+        "zebkit.Class.zObject",
         "zebkit.DoIt",
         "zebkit.Dummy",
         "zebkit.EventProducer",

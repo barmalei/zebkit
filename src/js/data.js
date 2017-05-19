@@ -3,16 +3,15 @@ zebkit.package("data", function(pkg, Class) {
      * Collection of various data models. The models are widely used by zebkit UI
      * components as part of model-view-controller approach, but the package doesn't depend on
      * zebkit UI and can be used independently.
-     * @example
      *
-     *      var treeModel = new zebkit.data.TreeModel();
-     *      treeModel.on("itemInserted", function(model, item) {
+     *      var model = new zebkit.data.TreeModel();
+     *      model.on("itemInserted", function(model, item) {
      *          // handle item inserted tree model event
      *          ...
      *      });
      *
-     *      treeModel.add(treeModel.root, new zebkit.data.Item("Child 1"));
-     *      treeModel.add(treeModel.root, new zebkit.data.Item("Child 2"));
+     *      model.add(model.root, new zebkit.data.Item("Child 1"));
+     *      model.add(model.root, new zebkit.data.Item("Child 2"));
      *
      * @class zebkit.data
      * @access package
@@ -92,9 +91,9 @@ zebkit.package("data", function(pkg, Class) {
      * Fired when the text model has been updated: a string has been
      * inserted or removed
 
-            text.on(function (src, b, off, len, startLine, lines) {
-                ...
-            });
+        text.on(function(src, b, off, len, startLine, lines) {
+            ...
+        });
 
      *
      * @event textUpdated
@@ -797,9 +796,9 @@ zebkit.package("data", function(pkg, Class) {
     /**
      * Fired when the tree model item value has been updated.
 
-         tree.on("itemModified", function(src, item, prevValue) {
-             ...
-         });
+     tree.on("itemModified", function(src, item, prevValue) {
+         ...
+     });
 
      * @event itemModified
      * @param {zebkit.data.TreeModel} src a tree model that triggers the event
@@ -810,9 +809,9 @@ zebkit.package("data", function(pkg, Class) {
     /**
      * Fired when the tree model item has been removed
 
-         tree.on("itemRemoved", function(src, item) {
-            ...
-         });
+     tree.on("itemRemoved", function(src, item) {
+        ...
+     });
 
      * @event itemRemoved
      * @param {zebkit.data.TreeModel} src a tree model that triggers the event
@@ -820,11 +819,11 @@ zebkit.package("data", function(pkg, Class) {
      */
 
     /**
-     * Fired when the tree model item has been inserted into the model)
+     * Fired when the tree model item has been inserted into the model
 
-         tree.on("itemInserted", function(src, item) {{
-            ...
-         });
+     tree.on("itemInserted", function(src, item) {{
+        ...
+     });
 
      * @event itemInserted
      * @param {zebkit.data.TreeModel} src a tree model that triggers the event
@@ -1161,9 +1160,9 @@ zebkit.package("data", function(pkg, Class) {
     /**
      * Fired when the matrix model size (number of rows or columns) is changed.
 
-          matrix.on("matrixResized", function(src, pr, pc) {
-              ...
-          });
+      matrix.on("matrixResized", function(src, pr, pc) {
+          ...
+      });
 
      * @event matrixResized
      * @param {zebkit.data.Matrix} src a matrix that triggers the event
@@ -1174,9 +1173,9 @@ zebkit.package("data", function(pkg, Class) {
     /**
      * Fired when the matrix model cell has been updated.
 
-          matrix.on("cellModified", function(src, row, col, old) {
-             ...
-          });
+      matrix.on("cellModified", function(src, row, col, old) {
+         ...
+      });
 
      * @event cellModified
      * @param {zebkit.data.Matrix} src a matrix that triggers the event
@@ -1188,9 +1187,9 @@ zebkit.package("data", function(pkg, Class) {
     /**
      * Fired when the matrix data has been re-ordered.
 
-          matrix.on("matrixSorted", function(src, sortInfo) {
-             ...
-          });
+      matrix.on("matrixSorted", function(src, sortInfo) {
+         ...
+      });
 
      * @event matrixSorted
      * @param {zebkit.data.Matrix} src a matrix that triggers the event
@@ -1208,9 +1207,9 @@ zebkit.package("data", function(pkg, Class) {
     /**
      * Fired when a row has been inserted into the matrix.
 
-          matrix.on("matrixRowInserted", function(src, rowIndex) {
-             ...
-          });
+      matrix.on("matrixRowInserted", function(src, rowIndex) {
+         ...
+      });
 
      * @event matrixColInserted
      * @param {zebkit.data.Matrix} src a matrix that triggers the event
@@ -1221,9 +1220,9 @@ zebkit.package("data", function(pkg, Class) {
     /**
      * Fired when a column has been inserted into the matrix.
 
-          matrix.on("matrixColInserted", function(src, colIndex) {
-             ...
-          });
+      matrix.on("matrixColInserted", function(src, colIndex) {
+         ...
+      });
 
      * @event matrixColInserted
      * @param {zebkit.data.Matrix} src a matrix that triggers the event
@@ -1248,7 +1247,7 @@ zebkit.package("data", function(pkg, Class) {
 
             /**
              * The multi-dimensional embedded arrays to host matrix data
-             * @attribute objs
+             * @attribute $objs
              * @type {Array}
              * @readOnly
              * @private

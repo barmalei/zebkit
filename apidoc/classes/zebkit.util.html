@@ -80,6 +80,11 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                               <a href="../classes/zebkit.Class.zObject.html">zebkit.Class.zObject</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
                                                <a href="../classes/zebkit.data.DataModel.html">zebkit.data.DataModel</a>
                                             </td>
                                         </tr>
@@ -1298,25 +1303,25 @@ and its properties value in JSON format.</p>
 Passed tree-like structure doesn't have a special requirements except every item of
 the structure have to define its kids by exposing "kids" field. The field is array
 of children elements:</p>
-<pre class="code prettyprint"><code>      // example of tree-like structure
-      var treeLikeRoot = {
-          value : "Root",
-          kids : [
-              { value: "Item 1" },
-              { value: "Item 2" }
-          ]
-      };
+<pre class="code prettyprint"><code>// example of tree-like structure
+var treeLikeRoot = {
+    value : "Root",
+    kids : [
+        { value: "Item 1" },
+        { value: "Item 2" }
+    ]
+};
 
-      zebkit.util.findInTree(treeLikeRoot,
-        "/item1",
-        function(foundElement) {
-           ...
-           // returning true means stop lookup
-           return true;
-        },
-        function(item, fragment) {
-            return item.value === fragment;
-        });
+zebkit.util.findInTree(treeLikeRoot,
+    "/item1",
+    function(foundElement) {
+       ...
+       // returning true means stop lookup
+       return true;
+    },
+    function(item, fragment) {
+        return item.value === fragment;
+    });
 </code></pre>
 <p>The find method traverse the tree-like structure according to the xpath-like
 expression. To understand if the given tree item confronts with the currently
@@ -1417,7 +1422,7 @@ a tree item has "path" field that is matched with  given path fragment.</p>
                         <strong class="type">
                             &lt;String | Image&gt;
                         </strong>
-                    <p>path or image.</p>
+                    <p>path or image to complete loading.</p>
 
                 </li>
                 <li>
@@ -1678,35 +1683,35 @@ a tree item has "path" field that is matched with  given path fragment.</p>
 
     <p>This method allows to declare a listeners container class for the given
 dedicated event types.</p>
-<pre class="code prettyprint"><code>       // create listener container to keep three different events
-       // handlers
-       var MyListenerContainerClass = zebkit.util.ListenersClass("event1",
-                                                                 "event2",
-                                                                 "event3");
+<pre class="code prettyprint"><code>   // create listener container to keep three different events
+   // handlers
+   var MyListenerContainerClass = zebkit.util.ListenersClass("event1",
+                                                             "event2",
+                                                             "event3");
 
-       // instantiate listener class container
-       var listeners = new MyListenerContainerClass();
+   // instantiate listener class container
+   var listeners = new MyListenerContainerClass();
 
-       // add "event1" listener
-       listeners.add(function event1() {
-           ...
-       });
+   // add "event1" listener
+   listeners.add(function event1() {
+       ...
+   });
 
-       // add "event2" listener
-       listeners.add(function event2() {
-          ...
-       });
+   // add "event2" listener
+   listeners.add(function event2() {
+      ...
+   });
 
-       // add listener for both event1 and event2 events
-       listeners.add(function() {
-          ...
-       });
+   // add listener for both event1 and event2 events
+   listeners.add(function() {
+      ...
+   });
 
-       // and firing event1 to registered handlers
-       listeners.event1(...);
+   // and firing event1 to registered handlers
+   listeners.event1(...);
 
-       // and firing event2 to registered handlers
-       listeners.event2(...);</code></pre>
+   // and firing event2 to registered handlers
+   listeners.event2(...);</code></pre>
 
 
         <br/>

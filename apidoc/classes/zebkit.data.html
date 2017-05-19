@@ -80,6 +80,11 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                               <a href="../classes/zebkit.Class.zObject.html">zebkit.Class.zObject</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
                                                <a href="../classes/zebkit.data.DataModel.html">zebkit.data.DataModel</a>
                                             </td>
                                         </tr>
@@ -952,6 +957,14 @@
     <p>Collection of various data models. The models are widely used by zebkit UI
 components as part of model-view-controller approach, but the package doesn't depend on
 zebkit UI and can be used independently.</p>
+<pre class="code prettyprint"><code> var model = new zebkit.data.TreeModel();
+ model.on("itemInserted", function(model, item) {
+     // handle item inserted tree model event
+     ...
+ });
+
+ model.add(model.root, new zebkit.data.Item("Child 1"));
+ model.add(model.root, new zebkit.data.Item("Child 2"));</code></pre>
 
 </div>
 

@@ -80,6 +80,11 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                               <a href="../classes/zebkit.Class.zObject.html">zebkit.Class.zObject</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
                                                <a href="../classes/zebkit.data.DataModel.html">zebkit.data.DataModel</a>
                                             </td>
                                         </tr>
@@ -963,25 +968,25 @@
     <p>Grid layout manager. can be used to split a component area to number of virtual cells where
 children components can be placed. The way how the children components have to be laid out
 in the cells can be customized by using "zebkit.layout.Constraints" class:</p>
-<pre class="code prettyprint"><code>       // create constraints
-       var ctr = new zebkit.layout.Constraints();
+<pre class="code prettyprint"><code>// create constraints
+var ctr = new zebkit.layout.Constraints();
 
-       // specify cell top, left, right, bottom paddings
-       ctr.setPadding(8);
-       // say the component has to be left aligned in a
-       // virtual cell of grid layout
-       ctr.ax = "left";
+// specify cell top, left, right, bottom paddings
+ctr.setPadding(8);
+// say the component has to be left aligned in a
+// virtual cell of grid layout
+ctr.ax = "left";
 
-       // create panel and set grid layout manager with two
-       // virtual rows and columns
-       var p = new zebkit.ui.Panel();
-       p.setLayout(new zebkit.layout.GridLayout(2, 2));
+// create panel and set grid layout manager with two
+// virtual rows and columns
+var p = new zebkit.ui.Panel();
+p.setLayout(new zebkit.layout.GridLayout(2, 2));
 
-       // add children component
-       p.add(ctr, new zebkit.ui.Label("Cell 1, 1"));
-       p.add(ctr, new zebkit.ui.Label("Cell 1, 2"));
-       p.add(ctr, new zebkit.ui.Label("Cell 2, 1"));
-       p.add(ctr, new zebkit.ui.Label("Cell 2, 2"));</code></pre>
+// add children component
+p.add(ctr, new zebkit.ui.Label("Cell 1, 1"));
+p.add(ctr, new zebkit.ui.Label("Cell 1, 2"));
+p.add(ctr, new zebkit.ui.Label("Cell 2, 1"));
+p.add(ctr, new zebkit.ui.Label("Cell 2, 2"));</code></pre>
 
 </div>
 
@@ -1640,6 +1645,32 @@ whole horizontal container component space</p>
                             </td>
                         </tr>
                         <tr>
+                            <td><a name="attrs_colSizes"></a>
+<div class="attrs item">
+
+        <strong>private </strong>
+
+
+        <strong class="type">
+            &lt;Array&gt;
+        </strong>
+
+    <strong class="name" style="color:orange;">
+        <code>colSizes</code>
+    </strong>
+
+    
+    
+
+    <br>
+
+    <p>Computed columns sizes.</p>
+
+
+</div>
+                            </td>
+                        </tr>
+                        <tr>
                             <td><a name="attrs_constraints"></a>
 <div class="attrs item">
 
@@ -1688,6 +1719,88 @@ that doesn't define own constraints</p>
     <br>
 
     <p>Number of virtual rows to place children components</p>
+
+
+</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><a name="attrs_rowSizes"></a>
+<div class="attrs item">
+
+        <strong>private </strong>
+
+
+        <strong class="type">
+            &lt;Array&gt;
+        </strong>
+
+    <strong class="name" style="color:orange;">
+        <code>rowSizes</code>
+    </strong>
+
+    
+    
+
+    <br>
+
+    <p>Computed rows sizes.</p>
+
+
+</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><a name="attrs_stretchCols"></a>
+<div class="attrs item">
+
+        <strong> public </strong>
+
+        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
+
+        <strong class="type">
+            &lt;Boolean&gt;
+        </strong>
+
+    <strong class="name" style="color:orange;">
+        <code>stretchCols</code>
+    </strong>
+
+    
+    
+
+    <br>
+
+    <p>Attributes that indicates if component has to be stretched
+horizontally to occupy the whole space of a virtual cell.</p>
+
+
+</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><a name="attrs_stretchRows"></a>
+<div class="attrs item">
+
+        <strong> public </strong>
+
+        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
+
+        <strong class="type">
+            &lt;Boolean&gt;
+        </strong>
+
+    <strong class="name" style="color:orange;">
+        <code>stretchRows</code>
+    </strong>
+
+    
+    
+
+    <br>
+
+    <p>Attributes that indicates if component has to be stretched
+vertically to occupy the whole space of a virtual cell.</p>
 
 
 </div>

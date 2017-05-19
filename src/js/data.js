@@ -3,6 +3,17 @@ zebkit.package("data", function(pkg, Class) {
      * Collection of various data models. The models are widely used by zebkit UI
      * components as part of model-view-controller approach, but the package doesn't depend on
      * zebkit UI and can be used independently.
+     * @example
+     *
+     *      var treeModel = new zebkit.data.TreeModel();
+     *      treeModel.on("itemInserted", function(model, item) {
+     *          // handle item inserted tree model event
+     *          ...
+     *      });
+     *
+     *      treeModel.add(treeModel.root, new zebkit.data.Item("Child 1"));
+     *      treeModel.add(treeModel.root, new zebkit.data.Item("Child 2"));
+     *
      * @class zebkit.data
      * @access package
      */
@@ -17,12 +28,17 @@ zebkit.package("data", function(pkg, Class) {
         return zebkit.isString(b) ? b.localeCompare(a) : b - a;
     };
 
-
+    /**
+     * Data model marker interface. It has no methods implemented.
+     * @class zebkit.data.DataModel
+     * @interface zebkit.data.DataModel
+     */
     pkg.DataModel = zebkit.Interface();
 
     /**
      * Abstract text model class
      * @class zebkit.data.TextModel
+     * @uses {zebkit.data.DataModel}
      */
 
     /**
@@ -106,8 +122,9 @@ zebkit.package("data", function(pkg, Class) {
      * @param  {String}  [s] the specified text the model has to be filled
      * @constructor
      * @extends zebkit.data.TextModel
+     * @uses {zebkit.EventProducer}
      */
-    pkg.Text = Class(pkg.TextModel, zebkit.EventProducer,[
+    pkg.Text = Class(pkg.TextModel, zebkit.EventProducer, [
         function(s) {
             /**
              * Array of lines
@@ -355,6 +372,7 @@ zebkit.package("data", function(pkg, Class) {
      * @constructor
      * @class zebkit.data.SingleLineTxt
      * @extends zebkit.data.TextModel
+     * @uses {zebkit.EventProducer}
      */
     pkg.SingleLineTxt = Class(pkg.TextModel, zebkit.EventProducer,[
         function (s, max) {
@@ -511,6 +529,7 @@ zebkit.package("data", function(pkg, Class) {
 
      * @constructor
      * @class zebkit.data.ListModel
+     * @uses {zebkit.EventProducer}
      */
 
      /**
@@ -715,11 +734,20 @@ zebkit.package("data", function(pkg, Class) {
              * Reference to a parent item
              * @attribute parent
              * @type {zebkit.data.Item}
-             * @default undefined
+             * @default null
              * @readOnly
              */
              this.parent = null;
 
+             /**
+              * The tree model item value. It is supposed the value should be updated
+              * via execution of "setValue(...)" method of a tree model the item
+              * belongs to.
+              * @attribute value
+              * @default null
+              * @type {Object}
+              * @readOnly
+              */
              this.value = null;
         }
     ]).hashable();
@@ -761,6 +789,8 @@ zebkit.package("data", function(pkg, Class) {
          tree.setValue(tree.root.kids[0], "new value");
 
      * @class zebkit.data.TreeModel
+     * @uses {zebkit.data.DataModel}
+     * @uses {zebkit.EventProducer}
      * @constructor
      */
 
@@ -805,12 +835,6 @@ zebkit.package("data", function(pkg, Class) {
             if (arguments.length === 0) {
                 this.root = new pkg.Item();
             } else {
-                /**
-                 * Reference to the tree model root item
-                 * @attribute root
-                 * @type {zebkit.data.Item}
-                 * @readOnly
-                 */
                 this.root = zebkit.instanceOf(r, pkg.Item) ? r : this.clazz.create(r);
             }
 
@@ -976,6 +1000,12 @@ zebkit.package("data", function(pkg, Class) {
         },
 
         function $prototype() {
+            /**
+             * Reference to the tree model root item
+             * @attribute root
+             * @type {zebkit.data.Item}
+             * @readOnly
+             */
             this.root = null;
 
             /**
@@ -983,10 +1013,13 @@ zebkit.package("data", function(pkg, Class) {
              * @param  {zebkit.data.Item} r a root element to start traversing the tree model
              * @param  {Function} f a callback function that is called for every tree item traversed item.
              * The callback gets tree model and the item as its arguments
+             * @method iterate
              */
             this.iterate = function(r, f) {
                 var res = f.call(this, r);
-                if (res === 1 || res === 2) return r;
+                if (res === 1 || res === 2) { //TODO: make it clear what is a mening of the res ?
+                    return r;
+                }
 
                 for (var i = 0; i < r.kids.length; i++) {
                     res = this.iterate(r.kids[i], f);
@@ -1009,11 +1042,16 @@ zebkit.package("data", function(pkg, Class) {
             /**
              * Add the new item to the tree model as a children element of the given parent item
              * @method add
-             * @param  {zebkit.data.Item} to a parent item to which the new item has to be added
+             * @param  {zebkit.data.Item} [to] a parent item to which the new item has to be added.
+             * If it has not been passed the node will be added to root.
              * @param  {Object|zebkit.data.Item} an item or value of the item to be
              * added to the parent item of the tree model
              */
-            this.add = function(to,item){
+            this.add = function(to,item) {
+                if (arguments.length < 2) {
+                    to = this.root;
+                }
+
                 this.insert(to, item, to.kids.length);
             };
 
@@ -1028,7 +1066,7 @@ zebkit.package("data", function(pkg, Class) {
              * @param  {Integer} i a position the new item has to be inserted into
              * the parent item
              */
-            this.insert = function(to, item, i){
+            this.insert = function(to, item, i) {
                 if (i < 0 || to.kids.length < i) throw new RangeError(i);
                 if (zebkit.isString(item)) {
                     item = new pkg.Item(item);
@@ -1089,6 +1127,8 @@ zebkit.package("data", function(pkg, Class) {
      *  @param  {Integer} [rows] a number of rows
      *  @param  {Integer} [cols] a number of columns
      *  @class zebkit.data.Matrix
+     *  @uses {zebkit.EventProducer}
+     *  @uses {zebkit.data.DataModel}
      *  @example
      *
      *      // create matrix with 10 rows and 5 columns

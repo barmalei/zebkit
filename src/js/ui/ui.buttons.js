@@ -125,7 +125,7 @@ zebkit.package("ui", function(pkg, Class) {
       * Button can be adjusted in respect how it generates the pressed event. Event can be
       * triggered by pressed or clicked even. Also event can be generated periodically if
       * the button is kept in pressed state.
-      * @event arrowPressed
+      * @event fired
       * @param {zebkit.ui.ArrowButton} src a button that has been pressed
       */
     pkg.ArrowButton = Class(pkg.EvStatePan, zebkit.util.Fireable, pkg.ButtonRepeatMix, [
@@ -170,6 +170,12 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.direction = "left";
 
+            /**
+             * Set arrow view orientation.
+             * @param {String} d an orientation of triangle arrow
+             * @method setArrowDirection
+             * @chainable
+             */
             this.setArrowDirection = function(d) {
                 this.iterateArrowViews(function(k, v) {
                     if (v !== null) v.direction = d;
@@ -178,6 +184,13 @@ zebkit.package("ui", function(pkg, Class) {
                 return this;
             };
 
+            /**
+             * Set arrow view size.
+             * @param {Integer} w an arrow view width
+             * @param {Integer} h an arrow view height
+             * @method setArrowSize
+             * @chainable
+             */
             this.setArrowSize = function(w, h) {
                 if (arguments.length < 2) h = w;
                 this.iterateArrowViews(function(k, v) {
@@ -190,6 +203,14 @@ zebkit.package("ui", function(pkg, Class) {
                 return this;
             };
 
+            /**
+             * Set arrow views states colors.
+             * @param {String} pressedColor a pressed state color
+             * @param {String} overColor an over state color
+             * @param {String} outColor an out state color
+             * @method setArrowColors
+             * @chainable
+             */
             this.setArrowColors = function(pressedColor, overColor, outColor) {
                 var views = this.view.views;
                 if (views.out !== null && typeof views.out !== 'undefined') {
@@ -208,6 +229,13 @@ zebkit.package("ui", function(pkg, Class) {
                 return this;
             };
 
+            /**
+             * Iterate button arrows views.
+             * @param  {Function} callback a callback that is called for every found arrow view.
+             * The method gets the view id and view itself as its arguments.
+             * @chainable
+             * @method iterateArrowViews
+             */
             this.iterateArrowViews = function(callback) {
                 var views = this.view.views;
                 for(var k in views) {
@@ -215,6 +243,7 @@ zebkit.package("ui", function(pkg, Class) {
                         callback.call(this, k, views[k]);
                     }
                 }
+                return this;
             };
         }
     ]);
@@ -254,6 +283,7 @@ zebkit.package("ui", function(pkg, Class) {
      * the button is kept in pressed state.
      * @event buttonPressed
      * @param {zebkit.ui.Button} src a button that has been pressed
+     *
      */
     pkg.Button = Class(pkg.CompositeEvStatePan, zebkit.util.Fireable, pkg.ButtonRepeatMix, [
         function(t) {
@@ -309,6 +339,7 @@ zebkit.package("ui", function(pkg, Class) {
      * having the class.
      * @constructor
      * @class  zebkit.ui.SwitchManager
+     * @uses   {zebkit.EventProducer}
      */
 
     /**

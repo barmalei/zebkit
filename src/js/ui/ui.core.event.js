@@ -170,7 +170,13 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.timeStamp = 0;
 
-
+            /**
+             * Get the given modifier key state. The following modifier key codes are supported:
+             * "Meta", "Control", "Shift", "Alt".
+             * @param  {String} m a modifier key code
+             * @return {Boolean} true if the modifier key state is pressed.
+             * @method getModifierState
+             */
             this.getModifierState = function(m) {
                 if (m === "Meta") {
                     return this.metaKey;
@@ -241,7 +247,7 @@ zebkit.package("ui", function(pkg, Class) {
             this.target = null;
 
             /**
-             * Pointer identifier
+             * Pointer identifier.
              * @attribute identifier
              * @type {Object}
              * @default null
@@ -458,7 +464,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Fire event with the given id
-             * @param  {String} id an event id
+             * @param  {String} id an event id type
              * @param  {zebkit.util.Event} e different sort of event
              * @return {Boolean} boolean flag that indicates if a event handling has been interrupted on one of a stage:
              *
@@ -509,7 +515,7 @@ zebkit.package("ui", function(pkg, Class) {
      * catch all pointer pressed events as follow:
      * @example
      *
-     *     zebkit.ui.events.addListeners(function pointerPressed(e) {
+     *     zebkit.ui.events.on("pointerPressed", function(e) {
      *         // handle pointer pressed event here
      *         ...
      *     });
@@ -538,23 +544,6 @@ zebkit.package("ui", function(pkg, Class) {
              * @default "default"
              */
             this.cursorType = "default";
-        }
-     ]);
-
-     // TODO: focus manager doesn't have to be overwritten with ui.FocusManager but inherited
-     pkg.FocusManager = Class(pkg.Manager, [
-        function $prototype() {
-            this.focusOwner = null;
-
-            this.requestFocus = function(c) {};
-
-            this.hasFocus = function(c) {
-                return false;
-            };
-
-            this.findFocusable = function(c) {
-                return null;
-            };
         }
      ]);
 });

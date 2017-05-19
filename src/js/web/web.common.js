@@ -95,8 +95,6 @@ zebkit.package("web", function(pkg, Class) {
                pageY <= r.bottom - 1   ;
     };
 
-
-
     var $focusInOutSupported = (function() {
         var support = false,
             parent  = document.lastChild,
@@ -120,7 +118,6 @@ zebkit.package("web", function(pkg, Class) {
     pkg.$focusout = function(element, f, b) {
         return element.addEventListener($focusInOutSupported ? "focusout" : "blur", f, b);
     };
-
 
     pkg.$eventsBlackHole = function(e) {
         e.preventDefault();

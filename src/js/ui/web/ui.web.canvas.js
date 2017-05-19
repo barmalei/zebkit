@@ -47,7 +47,7 @@ zebkit.package("ui.web", function(pkg, Class) {
             root.add(label);
 
      *  @class zebkit.ui.zCanvas
-     *  @extends {zebkit.ui.HtmlCanvas}
+     *  @extends {zebkit.ui.web.HtmlCanvas}
      *  @constructor
      *  @param {String|Canvas} [element] an ID of a HTML canvas element or reference to an HTML Canvas element.
      *  @param {Integer} [width] a width of an HTML canvas element

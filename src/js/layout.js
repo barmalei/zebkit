@@ -197,6 +197,8 @@ zebkit.package("layout", function(pkg, Class) {
      * @class zebkit.layout.Layoutable
      * @constructor
      * @extends {zebkit.layout.Layout}
+     * @uses {zebkit.EventProducer}
+     * @uses {zebkit.util.PathSearch}
      */
     pkg.Layoutable = Class(pkg.Layout, zebkit.EventProducer, zebkit.util.PathSearch, [
         function() {
@@ -366,9 +368,10 @@ zebkit.package("layout", function(pkg, Class) {
                 if (arguments.length > 2) {
                     p[arguments[1]] = arguments[2];
                     return this.properties(arguments[0], p);
+                } else {
+                    p[arguments[0]] = arguments[1];
+                    return this.properties(p);
                 }
-                p[arguments[0]] = arguments[1];
-                return this.properties(p);
             };
 
             /**

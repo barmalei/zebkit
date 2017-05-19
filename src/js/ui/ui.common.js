@@ -28,11 +28,18 @@ zebkit.package("ui", function(pkg, Class) {
     };
 
     /**
-     * @class  zebkit.ui
-     * @access package
+     * Named views holder interface.
+     * @class  zebkit.ui.$ViewsSetterMix
+     * @interface  zebkit.ui.$ViewsSetterMix
      */
     pkg.$ViewsSetterMix = zebkit.Interface([
         function $prototype() {
+            /**
+             * Set views set.
+             * @param {Object} v named views set.
+             * @method setViews
+             * @chainable
+             */
             this.setViews = function(v){
                 if (typeof this.views === 'undefined') {
                     this.views = {};

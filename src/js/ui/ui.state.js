@@ -121,7 +121,9 @@ zebkit.package("ui", function(pkg, Class) {
                 this.$super(v);
                 // check if the method called after constructor execution
                 // otherwise sync is not possible
-                if (typeof this.kids !== 'undefined') this.syncState(this.state, this.state);
+                if (typeof this.kids !== 'undefined') {
+                    this.syncState(this.state, this.state);
+                }
             }
             return this;
         },
@@ -200,7 +202,11 @@ zebkit.package("ui", function(pkg, Class) {
      * @constructor
      * @extends zebkit.ui.StatePan
      */
-    var OVER = "over", PRESSED_OVER = "pressed.over", OUT = "out", PRESSED_OUT = "pressed.out", DISABLED = "disabled";
+    var OVER         = "over",
+        PRESSED_OVER = "pressed.over",
+        OUT          = "out",
+        PRESSED_OUT  = "pressed.out",
+        DISABLED     = "disabled";
 
     pkg.EvStatePan = Class(pkg.StatePan,  [
         function $prototype() {
@@ -416,6 +422,12 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.focusMarkerView = null;
 
+            /**
+             * Focus marker verical and horizontal gaps.
+             * @attribute focusMarkerGaps
+             * @type {Number}
+             * @default 2
+             */
             this.focusMarkerGaps = 2;
 
             this.paintOnTop = function(g){

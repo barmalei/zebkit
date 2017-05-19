@@ -173,7 +173,7 @@ zebkit.package("ui", function(pkg, Class) {
                 return x < 10 && y < 10 ? t : null;
             };
 
-     * @class zebkit.TooltippupManager
+     * @class zebkit.ui.TooltipManager
      * @extends zebkit.ui.Manager
      * @constructor
      */
@@ -213,6 +213,12 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.showTooltipIn = 400;
 
+            /**
+             * Indicates if tool tip position has to be synchronized with pointer position
+             * @attribute syncTooltipPosition
+             * @type {Boolean}
+             * @default true
+             */
             this.syncTooltipPosition = true;
 
             /**
@@ -242,7 +248,6 @@ zebkit.package("ui", function(pkg, Class) {
             //         }
             //     }
             // };
-
 
             /**
              * Define pointer entered event handler
@@ -308,10 +313,11 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.run = function(t) {
                 if (this.$target !== null) {
-                    var ntooltip = (typeof this.$target.tooltip !== 'undefined' && this.$target.tooltip !== null) ? this.$target.tooltip
-                                                                                                                  : this.$target.getTooltip(this.$target,
-                                                                                                                                            this.$tooltipX,
-                                                                                                                                            this.$tooltipY),
+                    var ntooltip = (typeof this.$target.tooltip !== 'undefined' &&
+                                   this.$target.tooltip !== null) ? this.$target.tooltip
+                                                                  : this.$target.getTooltip(this.$target,
+                                                                                            this.$tooltipX,
+                                                                                            this.$tooltipY),
                         p = null,
                         tx = 0,
                         ty = 0;
@@ -386,7 +392,12 @@ zebkit.package("ui", function(pkg, Class) {
                 }
             };
 
-            this.stopShowingTooltip = function () {
+            /**
+             * Stop showing tooltip
+             * @private
+             * @method stopShowingTooltip
+             */
+            this.stopShowingTooltip = function() {
                 if (this.$target !== null) {
                     this.$target = null;
                 }

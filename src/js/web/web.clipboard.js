@@ -48,7 +48,8 @@ zebkit.package("web", function(pkg, Class) {
      *    - **paste**  "clipPaste(focusOwnerComponent, data)"
      *    - **cut**    "clipCut(focusOwnerComponent, data)"
      * @constructor
-     * @class zebkit.ui.ClipboardSupport
+     * @class zebkit.web.Clipboard
+     * @extends zebkit.ui.Clipboard
      */
     pkg.Clipboard = Class(zebkit.ui.Clipboard, [
         function(triggerKeyCode) {
@@ -176,8 +177,22 @@ zebkit.package("web", function(pkg, Class) {
         },
 
         function $prototype() {
+            /**
+             * Clipboard trigger key code.
+             * @private
+             * @readOnly
+             * @attribute triggerKeyCode
+             * @type {String}
+             */
             this.triggerKeyCode = null;
 
+            /**
+             * Write the given content into clipboard. This method not necessary work on
+             * all browsers by default. Many browsers issue security restrictions regarding
+             * clipboard data manipulation.
+             * @param  {String} txt a content
+             * @method  write
+             */
             this.write = function(txt) {
                 try {
                     this.$on(txt);
@@ -189,6 +204,13 @@ zebkit.package("web", function(pkg, Class) {
                 }
             };
 
+            /**
+             * Read clipboard content. This method not necessary work on
+             * all browsers by default. Many browsers issue security restrictions regarding
+             * clipboard data manipulation.
+             * @return {String} a clipboard content.
+             * @method  read
+             */
             this.read = function() {
                 try {
                     var clip = this.$on("");
@@ -202,6 +224,11 @@ zebkit.package("web", function(pkg, Class) {
                 }
             };
 
+            /**
+             * Return focus from a hidden element back to initial one.
+             * @private
+             * @method $off
+             */
             this.$off = function() {
                 if (this.$clipboard.style.display !== "none") {
                     this.$clipboard.value = "";
@@ -214,6 +241,11 @@ zebkit.package("web", function(pkg, Class) {
                 }
             };
 
+            /**
+             * Pass focus to hidden html element to catch input.
+             * @private
+             * @method $on
+             */
             this.$on = function(txt) {
                 this.$off();
 

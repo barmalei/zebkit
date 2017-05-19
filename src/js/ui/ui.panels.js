@@ -276,7 +276,7 @@ zebkit.package("ui", function(pkg, Class) {
      * @extends {zebkit.ui.Panel}
      */
     pkg.SplitPan = Class(pkg.Panel, [
-        function(f,s,o){
+        function(f,s,o) {
             if (arguments.length > 2) {
                 this.orient = o;
             }

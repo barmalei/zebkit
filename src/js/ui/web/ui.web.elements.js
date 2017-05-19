@@ -4,10 +4,10 @@ zebkit.package("ui.web", function(pkg, Class) {
     /**
      * HTML Canvas native DOM element wrapper.
      * @constructor
-     * @param  {HTMLCanvas} [e] HTML canvas element to be wrapped as a zebkit UI component or nothing to creete
-     * a new canvas element
-     * @class zebkit.ui.HtmlCanvas
-     * @extends {zebkit.ui.HtmlElement}
+     * @param  {HTMLCanvas} [e] HTML canvas element to be wrapped as a zebkit UI
+     * component or nothing to create a new canvas element
+     * @class zebkit.ui.web.HtmlCanvas
+     * @extends {zebkit.ui.web.HtmlElement}
      */
     pkg.HtmlCanvas = Class(pkg.HtmlElement,  [
         function(e) {
@@ -29,7 +29,7 @@ zebkit.package("ui.web", function(pkg, Class) {
             // let HTML Canvas be WEB event transparent
             this.$container.style["pointer-events"] = "none";
 
-            // add class to canvas if this element has been created
+            // check if this element has been created
             if (arguments.length === 0 || e === null) {
                 // prevent canvas selection
                 this.element.onselectstart = function() { return false; };
@@ -158,6 +158,7 @@ zebkit.package("ui.web", function(pkg, Class) {
             /**
              *  Canvas context
              *  @attribute $context
+             *  @private
              *  @type {CanvasRenderingContext2D}
              */
             this.$context = null;
@@ -264,11 +265,13 @@ zebkit.package("ui.web", function(pkg, Class) {
     ]);
 
     /**
-     * Class that wrapped window component with own HTML Canvas
-     * @param  {zebkit.ui.Window} target a window component. If target is not defined it will be instantiated
-     * automatically
+     * Class that wrapped window component with own HTML Canvas.
+     * @param  {zebkit.ui.Window} [target] a window component. If target is not defined
+     * it will be instantiated automatically. If the component is not passed the new
+     * window component (zebkit.ui.Window) will be created.
      * @constructor
-     * @class zebkit.ui.HtmlWinCanvas
+     * @extends {zebkit.ui.web.HtmlCanvas}
+     * @class zebkit.ui.web.HtmlWinCanvas
      */
     pkg.HtmlWinCanvas = Class(pkg.HtmlCanvas, [
         function $prototype() {
@@ -304,8 +307,9 @@ zebkit.package("ui.web", function(pkg, Class) {
 
     /**
      * WEB based HTML components wrapped with as zebkit components.
-     * @class  zebkit.ui.html
-     * @access package
+     * @class zebkit.ui.web.HtmlFocusableElement
+     * @constructor
+     * @extends {zebkit.ui.web.HtmlElement}
      */
     pkg.HtmlFocusableElement = Class(pkg.HtmlElement, [
         function $prototype() {
@@ -321,8 +325,8 @@ zebkit.package("ui.web", function(pkg, Class) {
      * @constructor
      * @param {String} text a text the text input component has to be filled with
      * @param {String} element an input element name
-     * @class zebkit.ui.html.HtmlTextInput
-     * @extends zebkit.ui.HtmlElement
+     * @class zebkit.ui.web.HtmlTextInput
+     * @extends zebkit.ui.web.HtmlElement
      */
     pkg.HtmlTextInput = Class(pkg.HtmlFocusableElement, [
         function(text, e) {
@@ -364,9 +368,9 @@ zebkit.package("ui.web", function(pkg, Class) {
      * HTML input text element wrapper class. The class wraps standard HTML text field
      * and represents it as zebkit UI component.
      * @constructor
-     * @class zebkit.ui.html.HtmlTextField
+     * @class zebkit.ui.web.HtmlTextField
      * @param {String} [text] a text the text field component has to be filled with
-     * @extends zebkit.ui.html.HtmlTextInput
+     * @extends zebkit.ui.web.HtmlTextInput
      */
     pkg.HtmlTextField = Class(pkg.HtmlTextInput, [
         function(text) {
@@ -376,12 +380,12 @@ zebkit.package("ui.web", function(pkg, Class) {
     ]);
 
     /**
-     * HTML input textarea element wrapper class. The class wraps standard HTML textarea
+     * HTML input text area element wrapper class. The class wraps standard HTML text area
      * element and represents it as zebkit UI component.
      * @constructor
      * @param {String} [text] a text the text area component has to be filled with
-     * @class zebkit.ui.html.HtmlTextArea
-     * @extends zebkit.ui.html.HtmlTextInput
+     * @class zebkit.ui.web.HtmlTextArea
+     * @extends zebkit.ui.web.HtmlTextInput
      */
     pkg.HtmlTextArea = Class(pkg.HtmlTextInput, [
         function(text) {
@@ -389,17 +393,26 @@ zebkit.package("ui.web", function(pkg, Class) {
             this.element.setAttribute("rows", 10);
         },
 
+        /**
+         * Set the text area resizeable or not resizeable.
+         * @param {Boolean} b true to make the text area component resizeable
+         * @method setResizeable
+         * @chainable
+         */
         function setResizeable(b) {
             this.setStyle("resize", b === false ? "none" : "both");
+            return this;
         }
     ]);
 
     /**
-     * HTML Link component
+     * HTML Link component.
      * @param  {String} text  a text of link
-     * @param  {String} href an href of the link
-     * @extends zebkit.ui.HtmlElement
-     * @class zebkit.ui.html.HtmlLink
+     * @param  {String} [href] an href of the link
+     * @extends zebkit.ui.web.HtmlElement
+     * @class zebkit.ui.web.HtmlLink
+     * @event fired
+     * @param {zebkit.ui.web.Link} src a link that has been pressed
      */
     pkg.HtmlLink = Class(pkg.HtmlElement, [
         function(text, href) {

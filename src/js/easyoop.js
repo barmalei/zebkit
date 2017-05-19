@@ -1,11 +1,103 @@
 (function() {
+/**
+ * This is the core package that provides powerful easy OOP concept, packaging
+ * and number of utility methods. The package doesn't have any dependencies
+ * from others zebkit packages and can be used independently. Briefly the
+ * package possibilities are listed below:
+
+   - **easy OOP concept**. Use "zebkit.Class" and "zebkit.Interface" to declare
+     classes and interfaces
+
+    ```JavaScript
+        // declare class A
+        var ClassA = zebkit.Class([
+            function() { // class constructor
+                ...
+            },
+            // class method
+            function a(p1, p2, p3) { ... }
+        ]);
+
+        var ClassB = zebkit.Class(ClassA, [
+            function() {  // override constructor
+                this.$super(); // call super constructor
+            },
+
+            function a(p1, p2, p3) { // override method "a"
+                this.$super(p1, p2, p3);  // call super implementation of method "a"
+            }
+        ]);
+
+        var b = new ClassB(); // instantiate classB
+        b.a(1,2,3); // call "a"
+
+        // instantiate anonymous class with new method "b" declared and
+        // overridden method "a"
+        var bb = new ClassB([
+            function a(p1, p2, p3) { // override method "a"
+                this.$super(p1, p2, p3);  // call super implementation of method "a"
+            },
+
+            function b() { ... } // declare method "b"
+        ]);
+
+        b.a();
+        b.b();
+    ```
+
+   - **Packaging.** Zebkit uses Java-like packaging system where your code is bundled in
+      the number of hierarchical packages.
+
+    ```JavaScript
+        // declare package "zebkit.test"
+        zebkit.package("test", function(pkg) {
+            // declare class "Test" in the package
+            pkg.Test = zebkit.Class([ ... ]);
+        });
+
+        ...
+        // Later on use class "Test" from package "zebkit.test"
+        zebkit.require("test", function(test) {
+            var test = new test.Test();
+        });
+    ```
+
+    - **Resources loading.** Resources should be loaded with a special method to guarantee
+      its proper loading in zebkit sequence and the loading completeness.
+
+    ```JavaScript
+        // declare package "zebkit.test"
+        zebkit.resources("http://my.com/test.jpg", function(img) {
+            // handle completely loaded image here
+            ...
+        });
+
+        zebkit.package("test", function(pkg, Class) {
+            // here we can be sure all resources are loaded and ready
+        });
+    ```
+
+   - **Declaring number of core API method and classes**
+      - **"zebkit.DoIt"** - improves Promise like alternative class
+      - **"zebkit.URI"** - URI helper class
+      - **"zebkit.Dummy"** - dummy class
+      - **instanceOf(...)** method to evaluate zebkit classes and and interfaces inheritance.
+        The method has to be used instead of JS "instanceof" operator to provide have valid
+        result.
+      - **zebkit.newInstance(...)** method
+      - **zebkit.clone(...)**  method
+      - etc
+
+ * @class zebkit
+ * @access package
+ */
+
     // Environment specific stuff
     var zenv = {},
         isInBrowser = typeof navigator !== "undefined",
         $global     = (typeof window !== "undefined" && window !== null) ? window
                                                                          : (typeof global !== 'undefined' ? global
                                                                                                           : this);
-
     if (typeof zebkitEnvironment === 'function') {
         zenv = zebkitEnvironment();
     } else {
@@ -14,22 +106,27 @@
         }
     }
 
-
-    //    ( (http) :// (host)? (:port)? (/)? )? (path)? (?query_string)?
+    // ( (http) :// (host)? (:port)? (/)? )? (path)? (?query_string)?
     //
-    //      [1] scheme://host/
-    //      [2] scheme
-    //      [3] host
-    //      [4]  port
-    //      [5] /
-    //      [6] path
-    //      [7] ?query_string
+    //  [1] scheme://host/
+    //  [2] scheme
+    //  [3] host
+    //  [4]  port
+    //  [5] /
+    //  [6] path
+    //  [7] ?query_string
     //
     var $uriRE = /^(([a-zA-Z]+)\:\/\/([^\/:]+)?(\:[0-9]+)?(\/)?)?([^?]+)?(\?.+)?/;
 
     /**
-     * URI class
-     * @param {String} uri an URI.
+     * URI class. Pass either a full uri (as a string or zebkit.URI) or number of an URI parts
+     * (scheme, host, etc) to constructor it.
+     * @param {String} [uri] an URI.
+     * @param {String} [scheme] a scheme.
+     * @param {String} [host] a host.
+     * @param {String|Integer} [port] a port.
+     * @param {String} [path] a path.
+     * @param {String} [qs] a query string.
      * @constructor
      * @class zebkit.URI
      */
@@ -117,6 +214,41 @@
                 this.path = "/" + this.path;
             }
         }
+
+        /**
+         * URI path.
+         * @attribute path
+         * @type {String}
+         * @readOnly
+         */
+
+        /**
+         * URI host.
+         * @attribute host
+         * @type {String}
+         * @readOnly
+         */
+
+        /**
+         * URI port number.
+         * @attribute port
+         * @type {Integer}
+         * @readOnly
+         */
+
+        /**
+         * URI query string.
+         * @attribute qs
+         * @type {String}
+         * @readOnly
+         */
+
+         /**
+          * URI scheme (e.g. 'http', 'ftp', etc).
+          * @attribute scheme
+          * @type {String}
+          * @readOnly
+          */
     }
 
     URI.prototype = {
@@ -126,6 +258,11 @@
         path     : null,
         qs       : null,
 
+        /**
+         * Serialize URI to its string representation.
+         * @method  toString
+         * @return {String} an URI as a string.
+         */
         toString : function() {
             return (this.scheme !== null ? this.scheme + "://" : '') +
                    (this.host !== null ? this.host : '' ) +
@@ -134,6 +271,11 @@
                    (this.qs   !== null ? "?" + this.qs : '' );
         },
 
+        /**
+         * Get a parent URI.
+         * @method getParent
+         * @return {zebkit.URI} a parent URI.
+         */
         getParent : function() {
             if (this.path === null) {
                 return null;
@@ -149,7 +291,7 @@
         },
 
         /**
-         * Append the given parameters to a query string of the specified URL
+         * Append the given parameters to a query string of the URI.
          * @param  {Object} obj a dictionary of parameters to be appended to
          * the URL query string
          * @method appendQS
@@ -170,9 +312,9 @@
     };
 
     /**
-     * Test if the given url is absolute
-     * @param  {String|zebkit.URL}  u an URL
-     * @return {Boolean} true if the URL is absolute
+     * Test if the given string is absolute path or URI.
+     * @param  {String|zebkit.URI}  u an URI
+     * @return {Boolean} true if the string is absolute path or URI.
      * @method isAbsolute
      * @static
      */
@@ -180,13 +322,21 @@
         return u[0] === '/' || /^[a-zA-Z]+\:\/\//i.test(u);
     };
 
+    /**
+     * Test if the given string is URL.
+     * @param  {String}  u a string to be checked.
+     * @return {Boolean} true if the string is URL
+     * @method isURL
+     * @static
+     */
     URI.isURL = function(u) {
         return /^[a-zA-Z]+\:\/\//i.test(u);
     };
 
     /**
-     * Fetch and parse query string of the given URL
-     * @param  {String} url an URL
+     * Parse the specified query string of the given URI.
+     * @param  {String} url an URI
+     * @param  {Boolean} [decode] pass true if query string has to be decoded.
      * @return {Object} a parsed query string as a dictionary of parameters
      * @method parseQS
      * @static
@@ -209,7 +359,7 @@
     /**
      * Convert the given dictionary of parameters to a query string.
      * @param  {Object} obj a dictionary of parameters
-     * @param  {Boolean} encode say if the parameters values have to be
+     * @param  {Boolean} [encode] pass true if the parameters values have to be
      * encoded
      * @return {String} a query string built from parameters list
      * @static
@@ -232,11 +382,11 @@
 
 
     /**
-     * Join the given relative path to the URL. If the passed path starts from "/" character
-     * it will be joined without taking in account the URL path
+     * Join the given  paths
      * @param  {String} p* a relative paths
-     * @return {String} an absolute URL
+     * @return {String} an absolute URI
      * @method join
+     * @static
      */
     URI.join = function() {
         var pu = new URI(arguments[0]);
@@ -266,37 +416,38 @@
     };
 
     /**
-     * Sequential tasks runner. Allows developers to execute number of steps (async and sync) in the
+     * Sequential tasks runner (D-then). Allows developers to execute number of steps (async and sync) in the
      * exact order they have been called by runner. The ideas of the runner implementation is making the
      * code more readable and plain nevertheless it includes asynchronous parts:
      * @example
 
-            var r = new zebkit.DoIt();
+        var r = new zebkit.DoIt();
 
-            // step 1
-            r.then(function() {
-                // call three asynchronous HTTP GET requests to read three files
-                // pass join to every async. method to be notified when the async.
-                // part is completed
-                asyncHttpCall("http://test.com/a.txt", this.join());
-                asyncHttpCall("http://test.com/b.txt", this.join());
-                asyncHttpCall("http://test.com/c.txt", this.join());
-            })
-            .  // step 2
-            then(function(r1, r2, r3) {
-                // handle completely read on previous step files
-                r1.responseText  // "a.txt" file content
-                r2.responseText  // "b.txt" file content
-                r3.responseText  // "c.txt" file content
-            })
-            . // handle error
-            catch(function(e) {
-                // called when an exception has occurred
-                ...
-            });
+        // step 1
+        r.then(function() {
+            // call three asynchronous HTTP GET requests to read three files
+            // pass join to every async. method to be notified when the async.
+            // part is completed
+            asyncHttpCall("http://test.com/a.txt", this.join());
+            asyncHttpCall("http://test.com/b.txt", this.join());
+            asyncHttpCall("http://test.com/c.txt", this.join());
+        })
+        .  // step 2
+        then(function(r1, r2, r3) {
+            // handle completely read on previous step files
+            r1.responseText  // "a.txt" file content
+            r2.responseText  // "b.txt" file content
+            r3.responseText  // "c.txt" file content
+        })
+        . // handle error
+        catch(function(e) {
+            // called when an exception has occurred
+            ...
+        });
 
 
      * @class zebkit.DoIt
+     * @param {Boolean} [ignore] flag to rule error ignorance
      * @constructor
      */
     function DoIt(body, ignore) {
@@ -331,18 +482,25 @@
             }
         },
 
-        restart : function(showErr) {
+        /**
+         * Restart the do it object to clear error that has happened and
+         * continue tasks that has not been run yet because of the error.
+         * @chainable
+         */
+        restart : function() {
             if (this.$error !== null) {
                 this.$error = null;
             }
             this.$schedule();
+            return this;
         },
 
         /**
-         * Run the given method as one of the sequential step of the runner execution.
+         * Run the given method as one of the sequential step of the doit execution.
          * @method  then
-         * @param  {Function} body a method to be executed. The method can get results of previous step
-         * execution as its arguments. The method is called in context of instance of a Do.
+         * @param  {Function} body a method to be executed. The method can get results
+         * of previous step execution as its arguments. The method is called in context
+         * of instance of a DoIt instance.
          * @chainable
          */
         then : function(body, completed) {
@@ -470,9 +628,10 @@
         },
 
         /**
-         * Fire error if something goes wrong.
-         * @param  {Error} e an error
+         * Force to fire error.
+         * @param  {Error} e an error to be fired
          * @method error
+         * @chainable
          */
         error : function(e, pr) {
             if (arguments.length === 0) {
@@ -501,10 +660,23 @@
         },
 
         /**
-         * Wait before the given runner can be called
+         * Wait before the given doit is ready to be called.
          * @param  {zebkit.DoIt} r a runner
+         * @example
+         *
+         *      var async = new DoIt().then(function() {
+         *          // imagine we do asynchronous ajax call
+         *          ajaxCall("http://test.com/data", this.join());
+         *      });
+         *
+         *      var doit = new DoIt().till(async).then(function(res) {
+         *          // handle result that has been fetched
+         *          // by "async" do it
+         *          ...
+         *      });
+         *
          * @chainable
-         * @method wait
+         * @method till
          */
         till : function(r) {
             // wait till the given DoIt is executed
@@ -536,12 +708,23 @@
         },
 
         /**
-         * Returns join callback for asynchronous parts of the runner. The callback
-         * has to be requested and called by
-         * an asynchronous method to inform the runner the given method is completed.
-         * @return {Function} a method to notify runner the given asynchronous part
-         * has been completed. The passed
-         * to the method arguments will be passed to the next step of the runner.
+         * Returns join callback for asynchronous parts of the doit. The callback
+         * has to be requested and called by an asynchronous method to inform the
+         * doit the given method is completed.
+         * @example
+         *
+         *      var d = new DoIt().then(function() {
+         *          // imagine we call ajax HTTP requests
+         *          ajaxCall("http://test.com/data1", this.join());
+         *          ajaxCall("http://test.com/data2", this.join());
+         *      }).then(function(res1, res2) {
+         *          // handle results of ajax requests from previous step
+         *          ...
+         *      });
+         *
+         * @return {Function} a method to notify doit the given asynchronous part
+         * has been completed. The passed to the method arguments will be passed
+         * to the next step of the runner.         *
          * @method join
          */
         join : function() {
@@ -609,9 +792,11 @@
         },
 
         /**
-         * Method to catch error that has occurred during the runner sequence execution.
-         * @param  {Function} callback a callback to handle the error. The method gets an error
-         * that has happened as its argument
+         * Method to catch error that has occurred during the doit sequence execution.
+         * @param  {Function} [body] a callback to handle the error. The method
+         * gets an error that has happened as its argument. If there is no argument
+         * the error will be printed in output. If body is null then no error output
+         * is expected.
          * @chainable
          * @method catch
          */
@@ -671,7 +856,13 @@
             return this;
         },
 
-        throw : function(e) {
+        /**
+         * Throw an exception if an error has happened before the method call,
+         * otherwise fo nothing.
+         * @method  throw
+         * @chainable
+         */
+        throw : function() {
             return this.catch(function(e) {
                 throw e;
             });
@@ -687,75 +878,6 @@
             this.recover();
         }
     };
-
-
-    /**
-     * This is the core package that provides powerful easy OOP concept, packaging and number of utility methods.
-     * The package has no any dependency from others zebkit packages and can be used independently. Briefly the
-     * package possibilities are listed below:
-
-       - **easy OOP concept**. Use "zebkit.Class" and "zebkit.Interface" to declare classes and interfaces
-
-        ```JavaScript
-            // declare class A
-            var ClassA = zebkit.Class([
-                function() {
-                    ... // class constructor
-                },
-
-                // class method
-                function a(p1, p2, p3) { ... }
-            ]);
-
-            var ClassB = zebkit.Class(ClassA, [
-                function() {  // override constructor
-                    this.$super(); // call super constructor
-                },
-
-                function a(p1, p2, p3) { // override method "a"
-                    this.$super(p1, p2, p3);  // call super implementation of method "a"
-                }
-            ]);
-
-            var b = new ClassB(); // instantiate classB
-            b.a(1,2,3); // call "a"
-
-            // instantiate anonymous class with new method "b" declared and
-            // overridden method "a"
-            var bb = new ClassB([
-                function a(p1, p2, p3) { // override method "a"
-                    this.$super(p1, p2, p3);  // call super implementation of method "a"
-                },
-
-                function b() { ... } // declare method "b"
-            ]);
-
-            b.a();
-            b.b();
-        ```
-
-       - **Packaging**. Zebkit uses Java-like packaging system where your code is bundled in the number of hierarchical packages.
-
-        ```JavaScript
-            // declare package "zebkit.test"
-            zebkit.package("test", function(pkg) {
-                // declare class "Test" in the package
-                pkg.Test = zebkit.Class([ ... ]);
-            });
-
-            ...
-            // Later on use class "Test" from package "zebkit.test"
-            zebkit.require("test", function(test) {
-                var test = new test.Test();
-            });
-        ```
-
-       - **Declaring number of core method and classes**
-
-     * @class zebkit
-     * @extends Package
-     * @access package
-     */
 
     //  Faster match operation analogues:
     //  Math.floor(f)  =>  ~~(a)
@@ -823,16 +945,35 @@
     }
 
     /**
-     *  Package private class. All zebkit packages are inherits the class methods
-     *  @class  Package
-     *  @private
+     *  Package is a special class to declare zebkit packages. Global variable "zebkit" is
+     *  root package for all other packages. To declare a new package use "zebkit" global
+     *  variable:
+     *
+     *      // declare new "mypkg" package
+     *      zebkit.package("mypkg", function(pkg, Class) {
+     *          // put the package entities in
+     *          pkg.packageVariable = 10;
+     *          ...
+     *      });
+     *      ...
+     *
+     *      // now we can access package and its entities directly
+     *      zebkit.mypkg.packageVariable
+     *
+     *      // or it is preferable to wrap a package access with "require"
+     *      // method
+     *      zebkit.require("mypkg", function(mypkg) {
+     *          mypkg.packageVariable
+     *      });
+     *
+     *  @class zebkit.Package
      */
     function Package(name, parent) {
         /**
          * URL the package has been loaded
          * @attribute $url
          * @readOnly
-         * @type {zebkit.URL}
+         * @type {String}
          */
         this.$url = null;
 
@@ -842,14 +983,23 @@
          * @readOnly
          * @type {String}
          */
-        this.$name  = name;
+        this.$name = name;
+
+        /**
+         * Package configuration parameters.
+         * @attribute config
+         * @readOnly
+         * @type {Object}
+         */
         this.config = {};
+
         this.$ready = new DoIt();
 
         /**
-         * Reference to parent package
+         * Reference to a parent package
          * @attribute $parent
-         * @type {Package}
+         * @private
+         * @type {zebkit.Package}
          */
         this.$parent = arguments.length < 2 ? null : parent;
 
@@ -885,8 +1035,22 @@
     };
 
     /**
-     * Convert file like path to package relatively to the given package.
+     * Find a package with the given file like path relatively to the given package.
+     * @param {String} path a file like path
      * @return {String} path a path
+     * @example
+     *
+     *      // declare "zebkit.test" package
+     *      zebkit.package("test", function(pkg, Class) {
+     *          ...
+     *      });
+     *      ...
+     *
+     *      zebkit.require("test", function(test) {
+     *          var parent = test.cd(".."); // parent points to zebkit package
+     *          ...
+     *      });
+     *
      * @method cd
      */
     Package.prototype.cd = function(path) {
@@ -946,7 +1110,7 @@
      *     (function() {
      *         // make visible variables, classes and methods declared in "zebkit.ui"
      *         // package in the method local space
-     *         eval(zeblit.import("ui"));
+     *         eval(zebkit.import("ui"));
      *
      *         // use imported from "zebkit.ui.Button" class without necessity to specify
      *         // full path to it
@@ -980,13 +1144,14 @@
     };
 
     /**
-     * Method to request sub-package or sub-packages be ready and visible in passed callback or series
-     * of callback methods. The method guarantees the callbacks be called the time all zebkit data is
-     * loaded and ready.
+     * Method to request sub-package or sub-packages be ready and visible in
+     * passed callback. The method guarantees the callbacks be called the time
+     * all zebkit data is loaded and ready.
      * @param {String} [packages]* name or names of sub-packages to make visible
      * in callback method
-     * @param {Function} [callback]* a method or number of methods to be called. The methods are called
-     * in context of the given package and gets packages passed as first arguments
+     * @param {Function} [callback] a method to be called. The method is called
+     * in context of the given package and gets requested packages passed as the
+     * method arguments in order they have been requested.
      * @method  require
      * @example
      *
@@ -1022,7 +1187,26 @@
         "txt", "json", "htm", "html", "md", "properties", "conf", "xml"
     ];
 
-    Package.prototype.resources = function(p) {
+    /**
+     * This method loads resources (images, textual files, etc) and call callback
+     * method with completely loaded resources as input arguments.
+     * @example
+     *
+     *     zebkit.resources(
+     *         "http://test.com/image1.jpg",
+     *         "http://test.com/text.txt",
+     *         function(image, text) {
+     *             // handle resources here
+     *             ...
+     *         }
+     *     );
+     *
+     * @param  {String} paths*  paths to resources to be loaded
+     * @param  {Function} cb callback method that is executed when all listed
+     * resources are loaded and ready to be used.
+     * @method resources
+     */
+    Package.prototype.resources = function() {
         var args  = Array.prototype.slice.call(arguments),
             $this = this,
             fn    = args.pop();
@@ -1088,6 +1272,25 @@
         });
     };
 
+    /**
+     * This method helps to sync accessing to package entities with the
+     * package internal state. For instance package declaration can initiate
+     * loading resources that happens asynchronously. In this case to make sure
+     * the package completed loading its configuration we should use package
+     * "then" method.
+     * @param  {Function} f a callback method where we can safely access the
+     * package entities
+     * @chainable
+     * @private
+     * @example
+     *
+     *     zebkit.then(function() {
+     *         // here we can make sure all package declarations
+     *         // are completed and we can start using it
+     *     });
+     *
+     * @method  then
+     */
     Package.prototype.then = function(f) {
         this.$ready.then(f).catch(function(e) {
             zebkit.dumpError(e);
@@ -1102,10 +1305,11 @@
     };
 
     /**
-     * Method that has to be used to declare package.
+     * Method that has to be used to declare packages.
      * @param  {String}   name     a name of the package
-     * @param  {Function} [callback] a call back method that is called in package context. The method has to
-     * be used to populate the given package classes, interfaces and variables.
+     * @param  {Function} [callback] a call back method that is called in package
+     * context. The method has to be used to populate the given package classes,
+     * interfaces and variables.
      * @example
      *     // declare package "zebkit.log"
      *     zebkit.package("log", function(pkg) {
@@ -1124,9 +1328,8 @@
      *         myLog.warn("Warning");
      *     });
      *
-     * @return {Package} a package
+     * @return {zebkit.Package} a package
      * @method package
-     * @for zebkit
      */
     Package.prototype.package = function(name, callback) {
         // no arguments than return the package itself
@@ -1176,6 +1379,16 @@
     //
     // =================================================================================================
     var zebkit = new Package("zebkit");
+
+
+    /**
+     * Reference to zebkit environment. Environment is basic, minimal API
+     * zebkit and its components require.
+     * @for  zebkit
+     * @attribute environment
+     * @readOnly
+     * @type {Object}
+     */
     zebkit.environment = zenv;
 
     // declaring zebkit as a global variable has to be done before calling "package" method
@@ -1487,7 +1700,13 @@
         }
 
         /**
-         * Clone the given object
+         * Clone the given object. The method tries to perform deep cloning by
+         * traversing the given object structure recursively. Any part of an
+         * object can be marked as not cloneable by adding  "$notCloneable"
+         * field that equals to true. Also at any level of object structure
+         * the clonnig can be customized with adding "$clone" method. In this
+         * case the method will be used to clone the part of object.
+         * clonable
          * @param  {Object} obj an object to be cloned
          * @return {Object} a cloned object
          * @method  clone
@@ -1496,7 +1715,7 @@
         pkg.clone = function (obj, map) {
             // clone atomic type
             // TODO: to speedup cloning we don't use isString, isNumber, isBoolean
-            if (obj === null || typeof obj === 'undefined' || obj.$notClonable === true ||
+            if (obj === null || typeof obj === 'undefined' || obj.$notCloneable === true ||
                                                               (typeof obj === "string"  || obj.constructor === String  ) ||
                                                               (typeof obj === "boolean" || obj.constructor === Boolean ) ||
                                                               (typeof obj === "number"  || obj.constructor === Number  )    )
@@ -1665,27 +1884,27 @@
          * Interface is way to share common functionality by avoiding multiple inheritance.
          * It allows developers to mix number of methods to different classes. For instance:
 
-                // declare "I" interface that contains one method a
-                var I = zebkit.Interface([
-                    function a() {
+        // declare "I" interface that contains one method a
+        var I = zebkit.Interface([
+            function a() {
 
-                    }
-                ]);
+            }
+        ]);
 
-                // declare "A" class
-                var A = zebkit.Class([]);
+        // declare "A" class
+        var A = zebkit.Class([]);
 
-                // declare "B" class that inherits class A and mix interface "I"
-                var B = zebkit.Class(A, I, []);
+        // declare "B" class that inherits class A and mix interface "I"
+        var B = zebkit.Class(A, I, []);
 
-                // instantiate "B" class
-                var b = new B();
-                zebkit.instanceOf(b, I);  // true
-                zebkit.instanceOf(b, A);  // true
-                zebkit.instanceOf(b, B);  // true
+        // instantiate "B" class
+        var b = new B();
+        zebkit.instanceOf(b, I);  // true
+        zebkit.instanceOf(b, A);  // true
+        zebkit.instanceOf(b, B);  // true
 
-                // call mixed method
-                b.a();
+        // call mixed method
+        b.a();
 
          * @return {Function} an interface
          * @param {Array} [methods] list of methods declared in the interface
@@ -1810,75 +2029,75 @@
          *
          *  __Single class inheritance.__ Any class can extend an another zebkit class
 
-            // declare class "A" that with one method "a"
-            var A = zebkit.Class([
-                function a() { ... }
-            ]);
+        // declare class "A" that with one method "a"
+        var A = zebkit.Class([
+            function a() { ... }
+        ]);
 
-            // declare class "B" that inherits class "A"
-            var B = zebkit.Class(A, []);
+        // declare class "B" that inherits class "A"
+        var B = zebkit.Class(A, []);
 
-            // instantiate class "B" and call method "a"
-            var b = new B();
-            b.a();
+        // instantiate class "B" and call method "a"
+        var b = new B();
+        b.a();
 
 
         * __Class method overriding.__ Override a parent class method implementation
 
-                // declare class "A" that with one method "a"
-                var A = zebkit.Class([
-                    function a() { ... }
-                ]);
+        // declare class "A" that with one method "a"
+        var A = zebkit.Class([
+            function a() { ... }
+        ]);
 
-                // declare class "B" that inherits class "A"
-                // and overrides method a with an own implementation
-                var B = zebkit.Class(A, [
-                    function a() { ... }
-                ]);
+        // declare class "B" that inherits class "A"
+        // and overrides method a with an own implementation
+        var B = zebkit.Class(A, [
+            function a() { ... }
+        ]);
 
 
         * __Constructors.__ Constructor is a method with empty name
 
-                // declare class "A" that with one constructor
-                var A = zebkit.Class([
-                    function () { this.variable = 100; }
-                ]);
+        // declare class "A" that with one constructor
+        var A = zebkit.Class([
+            function () { this.variable = 100; }
+        ]);
 
-                // instantiate "A"
-                var a = new A();
-                a.variable // variable is 100
+        // instantiate "A"
+        var a = new A();
+        a.variable // variable is 100
 
         * __Static methods and variables declaration.__ Static fields and methods can be defined
             by declaring special "$clazz" method whose context is set to declared class
 
-                var A = zebkit.Class([
-                    // special method where static stuff has to be declared
-                    function $clazz() {
-                        // declare static field
-                        this.staticVar = 100;
-                        // declare static method
-                        this.staticMethod = function() {};
-                    }
-                ]);
+        var A = zebkit.Class([
+            // special method where static stuff has to be declared
+            function $clazz() {
+                // declare static field
+                this.staticVar = 100;
+                // declare static method
+                this.staticMethod = function() {};
+            }
+        ]);
 
-                // access static field an method
-                A.staticVar      // 100
-                A.staticMethod() // call static method
+        // access static field an method
+        A.staticVar      // 100
+        A.staticMethod() // call static method
 
         * __Access to super class context.__ You can call method declared in a parent class
 
-                // declare "A" class with one class method "a(p1,p2)"
-                var A = zebkit.Class([
-                    function a(p1, p2) { ... }
-                ]);
+        // declare "A" class with one class method "a(p1,p2)"
+        var A = zebkit.Class([
+            function a(p1, p2) { ... }
+        ]);
 
-                // declare "B" class that inherits "A" class and overrides "a(p1,p2)" method
-                var B = zebkit.Class(A, [
-                    function a(p1, p2) {
-                        // call "a(p1,p2)" method implemented with "A" class
-                        this.$super(p1,p2);
-                    }
-                ]);
+        // declare "B" class that inherits "A" class and overrides "a(p1,p2)" method
+        var B = zebkit.Class(A, [
+            function a(p1, p2) {
+                // call "a(p1,p2)" method implemented with "A" class
+                this.$super(p1,p2);
+            }
+        ]);
 
          *
          *  One of the powerful feature of zebkit easy OOP concept is possibility to instantiate
@@ -1887,16 +2106,16 @@
          *  own list of interfaces and methods. In other words the class instance customizes class
          *  definition for the particular instance of the class;
 
-                    // declare "A" class
-                    var A = zebkit.Class([
-                        function a() { return 1; }
-                    ]);
+        // declare "A" class
+        var A = zebkit.Class([
+            function a() { return 1; }
+        ]);
 
-                    // instantiate anonymous class that add an own implementation of "a" method
-                    var a = new A([
-                        function a() { return 2; }
-                    ]);
-                    a.a() // return 2
+        // instantiate anonymous class that add an own implementation of "a" method
+        var a = new A([
+            function a() { return 2; }
+        ]);
+        a.a() // return 2
 
          * @param {zebkit.Class} [inheritedClass] an optional parent class to be inherited
          * @param {zebkit.Interface} [inheritedInterfaces]* an optional list of interfaces for
@@ -2368,6 +2587,16 @@
                 }
             }
 
+            /**
+             * Make the class hashable. Hashable class instances are automatically
+             * gets unique hash code that is returned with its overridden "toString()"
+             * method. The hash code is stored in special "$hash$" field. The feature
+             * can be useful when you want to store class instances in "{}" object
+             * where key is the hash and the value is the instance itself.
+             * @method hashable
+             * @chainable
+             * @for zebkit.Class
+             */
             classTemplate.hashable = function() {
                 if (this.$uniqueness !== true) {
                     this.$uniqueness = true;
@@ -2376,6 +2605,13 @@
                 return this;
             };
 
+            /**
+             * Make the class hashless. Prevents generation of hash code for
+             * instances of the classes.
+             * @method hashless
+             * @chainable
+             * @for zebkit.Class
+             */
             classTemplate.hashless = function() {
                 if (this.$uniqueness === true) {
                     this.$uniqueness = false;
@@ -2440,6 +2676,14 @@
                 }
             };
 
+            /**
+             * Tests if the given class inherits the given class or interface.
+             * @param  {clazz}  clazz a class or interface
+             * @return {Boolean} true if the class or interface is inherited with
+             * the class.
+             * @method  isInherit
+             * @for  zebkit.Class
+             */
             classTemplate.isInherit = function(clazz) {
                 if (this !== clazz) {
                     // detect class
@@ -2477,6 +2721,13 @@
         var $cachedO = pkg.$cachedO = {},
             $cachedE = pkg.$cachedE = [];
 
+        /**
+         * maximal cache size (cache is primary used to keep references to class).
+         * @attribute $cacheSize
+         * @private
+         * @default 7777
+         * @type {Number}
+         */
         pkg.$cacheSize = 7777;
 
         /**
@@ -2609,11 +2860,65 @@
 
         pkg.DoIt = DoIt;
 
+        /**
+         * Event producer interface. This interface provides number of methods
+         * to register, un-register, fire events. It follows on/off notion like
+         * JQuery does it. It is expected an event producer class implementation
+         * has a special field  "_" that keeps listeners.
+         *
+         *     var MyClass = zebkit.Class(zebkit.EventProducer, [
+         *         function() {
+         *             // "fired" events listeners container
+         *             this._ = new zebkit.util.Listeners();
+         *         }
+         *     ]);
+         *
+         *     var a = new MyClass();
+         *     a.on("fired", function(arg) {
+         *         // handle "fired" events
+         *     });
+         *
+         *     a.fire(10);
+         *
+         * @class zebkit.EventProducer
+         * @interface zebkit.EventProducer
+         */
         pkg.EventProducer = pkg.Interface([
             function $prototype() {
                 // on(event, path, cb)  handle the given event for all elements identified with the path
                 // on(cb)               handle all events
                 // on(path | event, cb) handle the given event or all events for elements matched with the path
+
+
+                /**
+                 * Register listener for the given events types or/and the given nodes in tree-like
+                 * structure or listen all events types.
+                 * @param {String} [eventName] an event type name to listen. If the event name is not passed
+                 * then listen all events types.
+                 * @param {String} [path] a xpath-like path to traversing elements in tree and register event
+                 * handlers for the found elements. The parameter can be used if the interface is implemented
+                 * with tree-like structure (for instance zebkit UI components).
+                 * @param {Function|Object} cb a listener method or an object that contains number of methods
+                 * to listen the specified events types.
+                 * @example
+                 *     var comp = new zebkit.ui.Panel();
+                 *     comp.add(new zebkit.ui.Button("Test 1").setId("c1"));
+                 *     comp.add(new zebkit.ui.Button("Test 2").setId("c2"));
+                 *     ...
+                 *     // register event handler for children components of "comp"
+                 *     comp.on("/*", function() {
+                 *         // handle button fired event
+                 *         ...
+                 *     });
+                 *
+                 *     // register event handler for button component with id equals "c1"
+                 *     comp.on("#c1", function() {
+                 *         // handle button fired event
+                 *         ...
+                 *     });
+                 *
+                 * @method on
+                 */
                 this.on = function() {
                     var cb = arguments[arguments.length - 1],  // callback or object
                         pt = null,                             // path
@@ -2663,6 +2968,17 @@
                 // off(path)
                 // off(cb)
                 // off(path, cb)
+                //
+                /**
+                 * Stop listening the given event type.
+                 * @param {String} [eventName] an event type name to stop listening. If the event name is not passed
+                 * then stop listening all events types.
+                 * @param {String} [path] a xpath-like path to traversing elements in tree and stop listening
+                 * the event type for the found in the tree elements. The parameter can be used if the interface
+                 * is implemented with tree-like structure (for instance zebkit UI components).
+                 * @param [cb] remove the given event handler.
+                 * @method off
+                 */
                 this.off = function() {
                     var pt = null,  // path
                         fn = null,  // handler

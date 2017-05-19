@@ -1,16 +1,24 @@
 zebkit.package("io", function(pkg, Class) {
     /**
      * The module provides number of classes to help to communicate with remote services and servers by HTTP,
-     * JSON-RPC, XML-RPC protocols
+     * JSON-RPC, XML-RPC protocols.
+     *
+     *       // shortcut method to perform HTTP GET request
+     *       zebkit.io.GET("http://test.com").then(function(req) {
+     *           // handle request
+     *           req.responseText
+     *           ...
+     *       }).catch(function(exception) {
+     *           // handle error
+     *       });
+     *
      * @class zebkit.io
      * @access package
      */
 
-
     // TODO: Web dependencies:
     //    -- Uint8Array
     //    -- ArrayBuffer
-
 
     // !!!
     // b64 is supposed to be used with binary stuff, applying it to utf-8 encoded data can bring to error
@@ -151,18 +159,18 @@ zebkit.package("io", function(pkg, Class) {
              * @return {zebkit.DoIt} an object to get response
              * @example
 
-                // GET request with the number of query parameters
-                var result = zebkit.io.HTTP("google.com").GET({
-                    param1: "var1",
-                    param3: "var2",
-                    param3: "var3"
-                }).then(function(req) {
-                    // handle response
-                    req.responseText;
-                }).catch(function(e)  {
-                    // handle error
-                    ...
-                });
+        // GET request with the number of query parameters
+        var result = zebkit.io.HTTP("google.com").GET({
+            param1: "var1",
+            param3: "var2",
+            param3: "var3"
+        }).then(function(req) {
+            // handle response
+            req.responseText;
+        }).catch(function(e)  {
+            // handle error
+            ...
+        });
 
              * @method GET
              */
@@ -180,25 +188,25 @@ zebkit.package("io", function(pkg, Class) {
              * @return {zebkit.DoIt} an object to get response
              * @example
 
-               // asynchronously send POST
-               zebkit.io.HTTP("google.com").POST("Hello").then(function(req) {
-                   // handle HTTP GET response ...
-               }).catch(function(e) {
-                   // handle error ...
-               });
+       // asynchronously send POST
+       zebkit.io.HTTP("google.com").POST("Hello").then(function(req) {
+           // handle HTTP GET response ...
+       }).catch(function(e) {
+           // handle error ...
+       });
 
             * Or you can pass a number of parameters to be sent:
 
-               // send parameters synchronously by HTTP POST request
-               zebkit.io.HTTP("google.com").POST({
-                   param1: "val1",
-                   param2: "val3",
-                   param3: "val3"
-               }).then(function(req) {
-                    // handle HTTP GET response ...
-               }).catch(function(e) {
-                    // handle error ...
-               });
+       // send parameters synchronously by HTTP POST request
+       zebkit.io.HTTP("google.com").POST({
+           param1: "val1",
+           param2: "val3",
+           param3: "val3"
+       }).then(function(req) {
+            // handle HTTP GET response ...
+       }).catch(function(e) {
+            // handle error ...
+       });
 
              * @method POST
              */
@@ -264,19 +272,19 @@ zebkit.package("io", function(pkg, Class) {
     /**
      * Shortcut method to perform HTTP GET requests.
 
-            zebkit.io.GET("http://test.com").then(function(request) {
-                // handle result ...
-            }).catch(function(e) {
-                // handle error ...
-            });
+        zebkit.io.GET("http://test.com").then(function(request) {
+            // handle result ...
+        }).catch(function(e) {
+            // handle error ...
+        });
 
-            var res = zebkit.io.GET("http://test.com", {
-                param1 : "var1",
-                param1 : "var2",
-                param1 : "var3"
-            }).then(function(req) {
-                // handle result ...
-            });
+        var res = zebkit.io.GET("http://test.com", {
+            param1 : "var1",
+            param1 : "var2",
+            param1 : "var3"
+        }).then(function(req) {
+            // handle result ...
+        });
 
      * @param {String|Object} url an URL
      * @param {Object} [parameters] a dictionary of query parameters
@@ -292,26 +300,26 @@ zebkit.package("io", function(pkg, Class) {
     /**
      * Shortcut method to perform HTTP POST requests.
 
-            zebkit.io.POST("http://test.com", null).then(function(request) {
-                // handle result
-                ...
-            }).catch(function(e) {
-                // handle error ...
-            });
+        zebkit.io.POST("http://test.com", null).then(function(request) {
+            // handle result
+            ...
+        }).catch(function(e) {
+            // handle error ...
+        });
 
-            var res = zebkit.io.POST("http://test.com", {
-                param1 : "var1",
-                param1 : "var2",
-                param1 : "var3"
-            }).then(function(request) {
-                // handle result
-                ...
-            });
+        var res = zebkit.io.POST("http://test.com", {
+            param1 : "var1",
+            param1 : "var2",
+            param1 : "var3"
+        }).then(function(request) {
+            // handle result
+            ...
+        });
 
-            zebkit.io.POST("http://test.com", "request").then(function(request) {
-                // handle error
-                ...
-            });
+        zebkit.io.POST("http://test.com", "request").then(function(request) {
+            // handle error
+            ...
+        });
 
      * @param {String} url an URL
      * @param {Object} [data] a data or form data parameters
@@ -329,28 +337,28 @@ zebkit.package("io", function(pkg, Class) {
      * different protocols like RPC, JSON etc. The typical pattern of connecting to
      * a remote service is shown below:
 
-            // create service connector that has two methods "a()" and "b(param1)"
-            var service = new zebkit.io.Service("http://myservice.com", [
-                "a", "b"
-            ]);
+        // create service connector that has two methods "a()" and "b(param1)"
+        var service = new zebkit.io.Service("http://myservice.com", [
+            "a", "b"
+        ]);
 
-            // call the methods of the remote service
-            service.a();
-            service.b(10);
+        // call the methods of the remote service
+        service.a();
+        service.b(10);
 
      * Also the methods of a remote service can be called asynchronously. In this case
      * a callback method has to be passed as the last argument of called remote methods:
 
-            // create service connector that has two methods "a()" and "b(param1)"
-            var service = new zebkit.io.Service("http://myservice.com", [
-                "a", "b"
-            ]);
+        // create service connector that has two methods "a()" and "b(param1)"
+        var service = new zebkit.io.Service("http://myservice.com", [
+            "a", "b"
+        ]);
 
-            // call "b" method from the remote service asynchronously
-            service.b(10, function(res) {
-                // handle a result of the remote method execution here
-                ...
-            });
+        // call "b" method from the remote service asynchronously
+        service.b(10, function(res) {
+            // handle a result of the remote method execution here
+            ...
+        });
      *
      * Ideally any specific remote service extension of "zebkit.io.Service"
      * class has to implement two methods:
@@ -382,7 +390,6 @@ zebkit.package("io", function(pkg, Class) {
              * @readOnly
              * @type {Array}
              */
-
             if (Array.isArray(methods) === false) {
                 methods = [ methods ];
             }
@@ -466,19 +473,19 @@ zebkit.package("io", function(pkg, Class) {
     /**
      * The class is implementation of JSON-RPC remote service connector.
 
-            // create JSON-RPC connector to a remote service that
-            // has three remote methods
-            var service = new zebkit.io.JRPC("json-rpc.com", [
-                "method1", "method2", "method3"
-            ]);
+        // create JSON-RPC connector to a remote service that
+        // has three remote methods
+        var service = new zebkit.io.JRPC("json-rpc.com", [
+            "method1", "method2", "method3"
+        ]);
 
-            // synchronously call remote method "method1"
-            service.method1();
+        // synchronously call remote method "method1"
+        service.method1();
 
-            // asynchronously call remote method "method1"
-            service.method1(function(res) {
-                ...
-            });
+        // asynchronously call remote method "method1"
+        service.method1(function(res) {
+            ...
+        });
 
      * @class zebkit.io.JRPC
      * @constructor
@@ -536,19 +543,19 @@ zebkit.package("io", function(pkg, Class) {
     /**
      * The class is implementation of XML-RPC remote service connector.
 
-            // create XML-RPC connector to a remote service that
-            // has three remote methods
-            var service = new zebkit.io.XRPC("xmlrpc.com", [
-                "method1", "method2", "method3"
-            ]);
+        // create XML-RPC connector to a remote service that
+        // has three remote methods
+        var service = new zebkit.io.XRPC("xmlrpc.com", [
+            "method1", "method2", "method3"
+        ]);
 
-            // synchronously call remote method "method1"
-            service.method1();
+        // synchronously call remote method "method1"
+        service.method1();
 
-            // asynchronously call remote method "method1"
-            service.method1(function(res) {
-                ...
-            });
+        // asynchronously call remote method "method1"
+        service.method1(function(res) {
+            ...
+        });
 
      * @class zebkit.io.XRPC
      * @constructor

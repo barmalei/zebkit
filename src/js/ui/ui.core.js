@@ -19,6 +19,47 @@ zebkit.package("ui", function(pkg, Class) {
     //   - ui.events EventManager
     //   - util.*
 
+
+    /**
+     *  Zebkit UI package contains a lot of various components. Zebkit UI idea is rendering
+     *  hierarchy of UI components on a canvas (HTML5 Canvas). Typical zebkit application
+     *  looks as following:
+     *
+     *       zebkit.require("ui", "layout", function(ui) {
+     *           // create canvas and save reference to root layer
+     *           // where zebkit UI components should live.
+     *           var root = new ui.zCanvas(400, 400).root;
+     *
+     *           // build UI layout
+     *           root.properties({
+     *               layout : new layout.BorderLayout(4),
+     *               padding: 8,
+     *               kids   : {
+     *                   "center" : new ui.TextArea("A text"),
+     *                   "top"    : new ui.ToolbarPan().properties({
+     *                       kids : [
+     *                           new ui.ImagePan("icon1.png"),
+     *                           new ui.ImagePan("icon2.png"),
+     *                           new ui.ImagePan("icon3.png")
+     *                      ]
+     *                   }),
+     *                   "bottom" : new ui.Button("Apply")
+     *               }
+     *           });
+     *       });
+     *
+     *  UI components are ordered with help of layout managers. You should not use absolute
+     *  location or size your component. It is up to layout manager to decide which size and
+     *  location the given  component has to have. In the example above we add number of UI
+     *  components to "root" (UI Panel). The root panel uses "BorderLayout" [to order the
+     *  added components. The layout manager split root area to number of areas: "center",
+     *  "top", "left", "right", "bottom" where children components can be placed.
+     *
+     *  @class zebkit.ui
+     *  @access package
+     */
+
+
     // TODO: not stable API
     pkg.$configWith = function(pkg, path) {
         if (arguments.length < 2) {
@@ -963,7 +1004,8 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             /**
-             * Paint the component and all its child components using the given 2D HTML Canvas context
+             * Paint the component and all its child components using the
+             * given 2D HTML Canvas context
              * @param  {CanvasRenderingContext2D} g a canvas 2D context
              * @method paintComponent
              */
@@ -1806,8 +1848,20 @@ zebkit.package("ui", function(pkg, Class) {
         }
     ]);
 
+    /**
+     * Root layer interface.
+     * @class zebkit.ui.RootLayerMix
+     * @interface zebkit.ui.RootLayerMix
+     */
     pkg.RootLayerMix = zebkit.Interface([
         function $clazz() {
+            /**
+             * Root layer id.
+             * @attribute id
+             * @type {String}
+             * @readOnly
+             * @default "root"
+             */
             this.id = "root";
         },
 
@@ -1818,5 +1872,11 @@ zebkit.package("ui", function(pkg, Class) {
         }
     ]);
 
+    /**
+     * Root layer panel implementation.
+     * @class zebkit.ui.RootLayer
+     * @extends {zebkit.ui.Panel}
+     * @use {zebkit.ui.RootLayerMix}
+     */
     pkg.RootLayer = Class(pkg.Panel, pkg.RootLayerMix, []);
 });

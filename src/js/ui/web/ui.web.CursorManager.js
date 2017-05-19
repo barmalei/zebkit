@@ -4,24 +4,25 @@ zebkit.package("ui.web", function(pkg, Class) {
      * getCursorType method or by specifying a cursor by cursorType field. Imagine an UI component
      * needs to change cursor type. It
      *  can be done by one of the following way:
+     *
+     *   - **Implement getCursorType method by the component itself if the cursor type depends on cursor location**
 
-        - **Implement getCursorType method by the component itself if the cursor type depends on cursor location**
+          var p = new zebkit.ui.Panel([
+               // implement getCursorType method to set required
+               // pointer cursor type
+               function getCursorType(target, x, y) {
+                   return zebkit.ui.Cursor.WAIT;
+               }
+          ]);
 
-              var p = new zebkit.ui.Panel([
-                   // implement getCursorType method to set required
-                   // pointer cursor type
-                   function getCursorType(target, x, y) {
-                       return zebkit.ui.Cursor.WAIT;
-                   }
-              ]);
+     *   - **Define "cursorType" property in component if the cursor type doesn't depend on cursor location**
 
-        - **Define "cursorType" property in component if the cursor type doesn't depend on cursor location **
+          var myPanel = new zebkit.ui.Panel();
+          ...
+          myPanel.cursorType = zebkit.ui.Cursor.WAIT;
 
-              var myPanel = new zebkit.ui.Panel();
-              ...
-              myPanel.cursorType = zebkit.ui.Cursor.WAIT;
 
-     *  @class zebkit.ui.CursorManager
+     *  @class zebkit.ui.web.CursorManager
      *  @constructor
      *  @extends {zebkit.ui.Manager}
      */

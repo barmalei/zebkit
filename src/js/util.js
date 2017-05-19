@@ -2,7 +2,7 @@ zebkit.package("util", function(pkg, Class) {
     /**
      * Number of different utilities methods and classes. The package has alternative to JS promise approach
      * that helps to make your code more linear looking nevertheless it can contain asynchronous calling.
-     * One more useful class is zebkit JSON bag that allows developer to describe number of objects
+     * One more useful class is zebkit Zson that allows developer to describe number of objects
      * and its properties value in JSON format.
      * @class zebkit.util
      * @access package
@@ -90,6 +90,14 @@ zebkit.package("util", function(pkg, Class) {
         return s;
     };
 
+    /**
+     * Load image or complete the given image loading.
+     * @param  {String|Image} ph path or image.
+     * @param  {Boolean} [fireErr] flag to force or preserve error firing.
+     * @return {zebkit.DoIt}
+     * @method image
+     * @for  zebkit.util
+     */
     pkg.image = function(ph, fireErr) {
         if (arguments.length < 2) {
             fireErr = false;
@@ -133,10 +141,12 @@ zebkit.package("util", function(pkg, Class) {
     ]);
 
     /**
-     *  Finds an item by xpath-like simplified expression applied to a tree-like structure. Passed tree-like structure
-     *  doesn't have a special requirements except items of the structure have to define its kids by exposing "kids"
-     *  field. The field is array of children elements:
+     *  Finds an item by xpath-like simplified expression applied to a tree-like structure.
+     *  Passed tree-like structure doesn't have a special requirements except every item of
+     *  the structure have to define its kids by exposing "kids" field. The field is array
+     *  of children elements:
 
+            // example of tree-like structure
             var treeLikeRoot = {
                 value : "Root",
                 kids : [
@@ -146,32 +156,33 @@ zebkit.package("util", function(pkg, Class) {
             };
 
             zebkit.util.findInTree(treeLikeRoot,
-                                  "/item1",
-                                  function(foundElement) {
-                                     ...
-                                     // true means stop lookup
-                                     return true;
-                                  },
-                                  function(item, fragment) {
-                                      return item.value === fragment;
-                                  });
+              "/item1",
+              function(foundElement) {
+                 ...
+                 // returning true means stop lookup
+                 return true;
+              },
+              function(item, fragment) {
+                  return item.value === fragment;
+              });
 
 
-     * The find method traverse the tree-like structure according to the xpath-like expression. To understand if
-     * the given tree item confronts with the currently traversing path fragment a special equality method has
-     * to be passed. The method gets the traversing tree item, a string path fragment and has to decide if the
-     * given tree item complies the specified path fragment.
+     * The find method traverse the tree-like structure according to the xpath-like
+     * expression. To understand if the given tree item confronts with the currently
+     * traversing path fragment a special equality method has to be passed. The method
+     * gets the traversing tree item and a string path fragment. The method has to
+     * decide if the given tree item complies the specified path fragment.
      *
-     * @param  {Object} root a tree root element. If the element has a children elements the children have to
-     * be stored in  "kids" field as an array.
+     * @param  {Object} root a tree root element. If the element has a children elements
+     * the children have to be stored in "kids" field as an array.
      * @param  {String}  path a path-like expression. The path has to satisfy number of requirements:
 
-        - has to start from "." or "/" or "//" characters
+        - has to start with "." or "/" or "//" character
         - has to define path part after "/" or "//"
         - path part can be either "*" or a name
-        - optionally an attribute and its can be defined as "[@<attr_name>=<attr_value>]"
+        - optionally an attribute or/and its value can be defined as "[@<attr_name>=<attr_value>]"
         - attribute value is optional and can be boolean (true or false), integer, null or string value
-        - string attribute value has to be wrapped with single quote
+        - string attribute value has to be wrapped with single quotes
 
      *
      * For examples:
@@ -180,14 +191,16 @@ zebkit.package("util", function(pkg, Class) {
         - "//*[@a=10]" traverse all tree elements that has an attribute "a" that equals 10
         - "//*[@a]" traverse all tree elements that has an attribute "a" defined
         - "/Item1/Item2" find an element by exact path
-        - ".//" traverse all tree elements including the root element (element traversing has started)
+        - ".//" traverse all tree elements including the root element
 
      * @param  {Function} cb callback function that is called every time a new tree element
      * matches the given path fragment. The function has to return true if the tree look up
      * has to be interrupted
-     * @param  {Function}  eq  an equality function. The function gets current evaluated tree element
+     * @param  {Function}  [eq]  an equality function. The function gets current evaluated tree element
      * and a path fragment against which the tree element has to be evaluated. It is expected the method
-     * returns boolean value to say if the given passed tree element matches the path fragment.
+     * returns boolean value to say if the given passed tree element matches the path fragment. If the
+     * parameter is not passed or null then default equality method is used. The default method expects
+     * a tree item has "path" field that is matched with  given path fragment.
      * @method findInTree
      * @for  zebkit.util
      */
@@ -213,7 +226,7 @@ zebkit.package("util", function(pkg, Class) {
         }
 
         if (eq === null || arguments.length < 4) {
-            eq = function(n, fragment) { return n.value === fragment; };
+            eq = function(n, fragment) { return n.path === fragment; };
         }
 
         if (typeof root.kids !== 'undefined' &&   // a node has children
@@ -295,30 +308,23 @@ zebkit.package("util", function(pkg, Class) {
     };
 
     /**
-     * Provide path search functionality
-     *
+     * Interface that provide path search functionality for a tree-like structure.
+     * @class  zebkit.util.PathSearch
      * @interface zebkit.util.PathSearch
      */
     pkg.PathSearch = zebkit.Interface([
         function $prototype() {
             /**
-             * Find all a first children component that satisfies the passed path expression.
+             * Find all children items with the passed path expression.
              * @param  {String} path path expression. Path expression is simplified form
-             * of XPath-like expression:
+             * of XPath-like expression. See  {{#crossLink "zebkit"}}sdsd{{/crossLink}} method to
+             * get more details.
              *
-             *   - **"/zebkit.ui.Panel"**  - find the first child item that has class name equals "zebkit.ui.Panel"
-             *   - **"/zebkit.ui.Panel[@id='top']"** - find the first child item that has class name equals "zebkit.ui.Panel" and "id" property equals "top"
-             *   - **"//zebkit.ui.Panel"**  - find recursively the first child item that has class name equals "zebkit.ui.Panel"
-             *   - **"//~zebkit.ui.Panel"**  - find recursively the first child item that is an instance of "zebkit.ui.Panel" class
-             *
-             * Shortcuts:
-             *
-             *   - **"#id"** - find an item by its "id" attribute value. This is equivalent of "//*[@id='a component id property']" path
-             *
-             * @param {Function} [cb] function that is called every time a new children component has been found.
-             * @method find
-             * @return {zebkit.layout.Layoutable} found children component or null if
-             * no children component can be found
+             * @param {Function} [cb] function that is called every time a new children
+             * component has been found. If callback has not been passed then the method
+             * return first found item or null.
+             * @method byPath
+             * @return {Object} found children item or null if no children items were found
              */
             this.byPath = function(path, cb) {
                 if (typeof this.$normalizePath !== 'undefined') {
@@ -991,6 +997,7 @@ zebkit.package("util", function(pkg, Class) {
              * a navigational structure that consists on number of lines where
              * every line consists of number of elements
              * @class zebkit.util.Position.Metric
+             * @interface zebkit.util.Position.Metric
              */
 
             /**
@@ -1378,23 +1385,23 @@ zebkit.package("util", function(pkg, Class) {
      * method execution. The class manages special tasks queue to run it one by one as soon as a dedicated interval for the
      * given task is elapsed
 
-            var tasks = zebkit.util.TaskSet();
+        var tasks = zebkit.util.TasksSet();
 
-            tasks.run(function(t) {
-                // task1 body
-                ...
-                if (condition) {
-                    t.shutdown();
-                }
-            }, 1000, 200);
+        tasks.run(function(t) {
+            // task1 body
+            ...
+            if (condition) {
+                t.shutdown();
+            }
+        }, 1000, 200);
 
-            tasks.run(function(t) {
-                // task2 body
-                ...
-                if (condition) {
-                    t.shutdown();
-                }
-            }, 2000, 300);
+        tasks.run(function(t) {
+            // task2 body
+            ...
+            if (condition) {
+                t.shutdown();
+            }
+        }, 2000, 300);
 
      * @constructor
      * @param  {Integer} [maxTasks] maximal possible number of active tasks in queue.
@@ -1578,37 +1585,37 @@ zebkit.package("util", function(pkg, Class) {
              * @param {Integer} [ri]  the time in milliseconds the task has to be periodically repeated
              * @return {zebkit.util.Task} an allocated task
              * @example
-             *
-                var tasks = new zebkit.util.TasksSet();
 
-                // execute task
-                var task = tasks.run(function (t) {
-                    // do something
-                    ...
-                    // complete task if necessary
-                    t.shutdown();
-                }, 100, 300);
+        var tasks = new zebkit.util.TasksSet();
 
-                // pause task
-                task.pause(1000, 2000);
+        // execute task
+        var task = tasks.run(function (t) {
+            // do something
+            ...
+            // complete task if necessary
+            t.shutdown();
+        }, 100, 300);
 
-                ...
-                // resume task in a second
-                task.resume(1000);
+        // pause task
+        task.pause(1000, 2000);
+
+        ...
+        // resume task in a second
+        task.resume(1000);
 
              * @example
-             *
-                 var tasks = new zebkit.util.TasksSet();
 
-                 var a = new zebkit.Dummy([
-                     function run() {
-                        // task body
-                        ...
-                     }
-                 ]);
+        var tasks = new zebkit.util.TasksSet();
 
-                 // execute task
-                 var task = tasks.runOnce(a);
+        var a = new zebkit.Dummy([
+            function run() {
+                // task body
+                ...
+            }
+        ]);
+
+        // execute task
+        var task = tasks.runOnce(a);
 
              * @method run
              */
@@ -1714,11 +1721,11 @@ zebkit.package("util", function(pkg, Class) {
      *  And than:
      *
      *       // load JSON mentioned above
-     *       zebkit.util.Zson.then("abc.json", function(bag) {
-     *           bag.get("instanceOfABC");
+     *       zebkit.util.Zson.then("abc.json", function(zson) {
+     *           zson.get("instanceOfABC");
      *       });
      *
-     *  Features the JSON bag supports are listed below:
+     *  Features the JSON zson supports are listed below:
      *
      *    - **Access to hierarchical properties** You can use dot notation to get a property value. For
      *    instance:
@@ -1730,8 +1737,8 @@ zebkit.package("util", function(pkg, Class) {
      *         }
      *     }
      *
-     *     zebkit.util.Zson.then("abc.json", function(bag) {
-     *         bag.get("a.b.c"); // 100
+     *     zebkit.util.Zson.then("abc.json", function(zson) {
+     *         zson.get("a.b.c"); // 100
      *     });
      *
      *
@@ -1766,7 +1773,7 @@ zebkit.package("util", function(pkg, Class) {
      *     }
      *
      *    - **Class instantiation**  Property can be easily initialized with an instantiation of required class. JSON
-     *    bag considers all properties whose name starts from "@" character as a class name that has to be instantiated:
+     *    zson considers all properties whose name starts from "@" character as a class name that has to be instantiated:
      *
      *     {  "date": {
      *           { "@Date" : [] }
@@ -1775,7 +1782,7 @@ zebkit.package("util", function(pkg, Class) {
      *
      *   Here property "date" is set to instance of JS Date class.
      *
-     *   - **Factory classes** JSON bag follows special pattern to describe special type of property whose value
+     *   - **Factory classes** JSON zson follows special pattern to describe special type of property whose value
      *   is re-instantiated every time the property is requested. Definition of the property value is the same
      *   to class instantiation, but the name of class has to prefixed with "*" character:
      *
@@ -1790,29 +1797,29 @@ zebkit.package("util", function(pkg, Class) {
      *   every time will have current time.
      *
      *   - **JS Object initialization** If you have an object in your code you can easily fulfill properties of the
-     *   object with JSON bag. For instance you can create zebkit UI panel and adjust its background, border and so on
+     *   object with JSON zson. For instance you can create zebkit UI panel and adjust its background, border and so on
      *   with what is stored in JSON:
      *
      *
-     *    {
-     *      "background": "red",
-     *      "layout"    : { "@zebkit.layout.BorderLayout": [] },
-     *      "border"    : { "@zebkit.ui.RoundBorder": [ "black", 2 ] }
-     *    }
+     *     {
+     *       "background": "red",
+     *       "layout"    : { "@zebkit.layout.BorderLayout": [] },
+     *       "border"    : { "@zebkit.ui.RoundBorder": [ "black", 2 ] }
+     *     }
      *
-     *    var pan = new zebkit.ui.Panel();
-     *    new zebkit.util.Zson(pan).then("pan.json", function(bag) {
-     *        // loaded and fullil panel
-     *        ...
-     *    });
+     *     var pan = new zebkit.ui.Panel();
+     *     new zebkit.util.Zson(pan).then("pan.json", function(zson) {
+     *         // loaded and fullil panel
+     *         ...
+     *     });
      *
      *
      *   - **Expression** You can evaluate expression as a property value:
      *
      *
-     *      {
-     *          "a": { ".expr":  "100*10" }
-     *      }
+     *     {
+     *         "a": { ".expr":  "100*10" }
+     *     }
      *
      *
      *   Here property "a" equals 1000
@@ -1869,7 +1876,7 @@ zebkit.package("util", function(pkg, Class) {
                 "color": "red"
              }
 
-             * the introspection will cause bag class to try finding "setColor(c)" method in
+             * the introspection will cause zson class to try finding "setColor(c)" method in
              * the loaded with the JSON object and call it to set "red" property value.
              * @attribute usePropertySetters
              * @default true
@@ -1880,8 +1887,8 @@ zebkit.package("util", function(pkg, Class) {
             /**
              * Get a property value by the given key. The property name can point to embedded fields:
              *
-             *      new zebkit.util.Zson().then("my.json", function(bag) {
-             *          bag.get("a.b.c");
+             *      new zebkit.util.Zson().then("my.json", function(zson) {
+             *          zson.get("a.b.c");
              *      });
              *
              *
@@ -2169,7 +2176,7 @@ zebkit.package("util", function(pkg, Class) {
                         $this = this;
 
                     if (d[2] === '<') {
-                        // if the referenced path is not absolute path and the bag has been also
+                        // if the referenced path is not absolute path and the zson has been also
                         // loaded by an URL than build the full URL as a relative path from
                         // BAG URL
                         idx = d.indexOf('>');
@@ -2399,7 +2406,7 @@ zebkit.package("util", function(pkg, Class) {
             /**
              * Called every time the given class name has to be transformed into
              * the class object (constructor) reference. The method checks if the given class name
-             * is alias that is mapped with the bag to a class.
+             * is alias that is mapped with the zson to a class.
              * @param  {String} className a class name
              * @return {Function} a class reference
              * @method resolveClass
@@ -2441,10 +2448,10 @@ zebkit.package("util", function(pkg, Class) {
              * @method then
              * @example
              *
-             *     // load JSON in bag from a remote site asynchronously
-             *     new zebkit.util.Zson().then("http://test.com/test.json", function(bag) {
-             *             // bag is loaded and ready for use
-             *             bag.get("a.c");
+             *     // load JSON in zson from a remote site asynchronously
+             *     new zebkit.util.Zson().then("http://test.com/test.json", function(zson) {
+             *             // zson is loaded and ready for use
+             *             zson.get("a.c");
              *         }
              *     ).catch(function(error) {
              *         // handle error

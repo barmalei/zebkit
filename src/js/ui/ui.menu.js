@@ -262,7 +262,7 @@ zebkit.package("ui", function(pkg, Class) {
             this.calcPreferredSize = function (target){
                 var cc = 0, pw = 0, ph = 0;
 
-                for(var i=0; i < target.kids.length; i++) {
+                for(var i = 0; i < target.kids.length; i++) {
                     var k = target.kids[i];
                     if (k.isVisible === true) {
                         var ps = k.getPreferredSize();
@@ -930,11 +930,10 @@ zebkit.package("ui", function(pkg, Class) {
     ]);
 
     /**
-     * UI popup layer class. Special layer implementation to show
-     * context menu. Normally the layer is not used directly.
+     * UI popup layer interface that defines common part of popup layer
+     * implementation.
      * @class zebkit.ui.PopupLayerMix
-     * @constructor
-     * @extends {zebkit.ui.HtmlCanvas}
+     * @interface zebkit.ui.PopupLayerMix
      */
     pkg.PopupLayerMix = zebkit.Interface([
         function $clazz() {

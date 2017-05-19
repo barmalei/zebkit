@@ -1,8 +1,4 @@
 zebkit.package("ui", function(pkg, Class) {
-   /**
-    * @for zebkit.ui
-    */
-
     /**
      * Base UI list component class that has to be extended with a
      * concrete list component implementation. The list component
@@ -1128,7 +1124,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             this.setModel = function(m){
                 if (Array.isArray(m)) {
-                    for(var i=0; i < m.length; i++) {
+                    for(var i = 0; i < m.length; i++) {
                         this.add(m[i]);
                     }
                 } else {

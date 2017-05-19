@@ -1,9 +1,5 @@
 zebkit.package("ui", function(pkg, Class) {
     /**
-     * @for zebkit.ui
-     */
-
-    /**
      * Text field UI component. The component is designed to enter single line, multi lines or password text.
      * The component implement text field functionality from the scratch. It supports the following features
 
@@ -71,6 +67,11 @@ zebkit.package("ui", function(pkg, Class) {
         function $prototype() {
             this.$blinkTask = null;
 
+            /**
+             * Selection view.
+             * @attribute selectionView
+             * @type {zebkit.ui.View}
+             */
             this.selectionView = this.hint = null;
 
             this.vkMode    = "indirect";
@@ -83,7 +84,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @type {String}
              * @readOnly
              */
-            this.selection = this.curView = this.position = null;
+            this.selection = this.position = null;
 
             /**
              * Specify the text field cursor blinking period in milliseconds.
@@ -119,6 +120,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @type {zebkit.ui.View}
              * @readOnly
              */
+            this.curView = null;
 
             /**
              * Indicate if the text field is editable

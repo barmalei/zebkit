@@ -1,14 +1,21 @@
 zebkit.package("ui.web", function(pkg, Class) {
     var ui = pkg.cd("..");
 
+    /**
+     * The base class for HTML developing HTML layers.
+     * @class zebkit.ui.web.HtmlLayer
+     * @constructor
+     * @extends {zebkit.ui.web.HtmlCanvas}
+     */
     pkg.HtmlLayer = Class(pkg.HtmlCanvas, []);
 
     /**
-     *  Root layer implementation. This is the simplest UI layer implementation where the layer always
-     *  try grabbing all input event
-     *  @class zebkit.ui.RootLayer
+     *  Root layer implementation. This is the simplest UI layer implementation
+     *  where the layer always try grabbing all input event
+     *  @class zebkit.ui.web.RootLayer
      *  @constructor
-     *  @extends {zebkit.ui.HtmlCanvas}
+     *  @extends {zebkit.ui.web.HtmlLayer}
+     *  @uses {zebkit.ui.RootLayerMix}
      */
     pkg.RootLayer = Class(pkg.HtmlLayer, ui.RootLayerMix, [
         function $clazz() {
@@ -16,11 +23,14 @@ zebkit.package("ui.web", function(pkg, Class) {
         }
     ]);
 
+    /**
+     *  Window layer implementation.
+     *  @class zebkit.ui.web.WinLayer
+     *  @constructor
+     *  @extends {zebkit.ui.web.HtmlLayer}
+     *  @uses {zebkit.ui.WinLayerMix}
+     */
     pkg.WinLayer = Class(pkg.HtmlLayer, ui.WinLayerMix, [
-        function $clazz() {
-            this.layout = new zebkit.layout.RasterLayout();
-        },
-
         function() {
             this.$super();
 
@@ -28,9 +38,20 @@ zebkit.package("ui.web", function(pkg, Class) {
             // the layer has to be placed above other elements that are virtually
             // inserted in the layer
             this.element.style["z-index"] = 10000;
+        },
+
+        function $clazz() {
+            this.layout = new zebkit.layout.RasterLayout();
         }
     ]);
 
+    /**
+     *  Ppopup layer implementation.
+     *  @class zebkit.ui.web.PopupLayer
+     *  @constructor
+     *  @extends {zebkit.ui.web.HtmlLayer}
+     *  @uses {zebkit.ui.PopupLayerMix}
+     */
     pkg.PopupLayer = Class(pkg.HtmlLayer, ui.PopupLayerMix, [
         function $clazz() {
             this.layout = new ui.PopupLayerLayout([

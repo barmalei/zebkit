@@ -151,7 +151,9 @@ zebkit.package("ui.tree", function(pkg, Class) {
                 }
 
                 if (this.firstVisible !== null) {
-                    var $this = this, fvNode = this.getIM(this.firstVisible), started = 0;
+                    var $this = this,
+                        fvNode = this.getIM(this.firstVisible),
+                        started = 0;
 
                     this.model.iterate(this.model.root, function(item) {
                         var node = $this.nodes[item];  // slightly improve performance

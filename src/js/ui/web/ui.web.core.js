@@ -2,10 +2,18 @@ zebkit.package("ui.web", function(pkg, Class) {
     var ui = pkg.cd("..");
 
     /**
+     *  WEB based zebkit UI components.
+     *
+     * @class zebkit.ui.web
+     * @access package
+     */
+
+
+    /**
      * HTML element UI component wrapper class. The class represents an HTML element as if it is standard
      * UI component. It helps to use some standard HTML element as zebkit UI components and embeds it
      * in zebkit UI application layout.
-     * @class zebkit.ui.HtmlElement
+     * @class zebkit.ui.web.HtmlElement
      * @constructor
      * @param {String|HTMLElement} [element] an HTML element to be represented as a standard zebkit UI
      * component. If the passed parameter is string it denotes a name of an HTML element. In this case
@@ -44,6 +52,17 @@ zebkit.package("ui.web", function(pkg, Class) {
             if (e.parentNode !== null && e.parentNode.getAttribute("data-zebcont") !== null) {
                 throw new Error("DOM element '" + e + "' already has container");
             }
+
+
+            /**
+             * Every zebkit HTML element is wrapped with a container (div) HTML element.
+             * It is required since not all HTML elements are designed to be a container
+             * (for instance HTMLCanvas element), where every zebkit has to be a container.
+             * @attribute $container
+             * @readOnly
+             * @private
+             * @type {HTMLElement}
+             */
 
             // container is a DIV element that is used as a wrapper around original one
             // it is done to make HtmlElement implementation more universal making
@@ -575,7 +594,7 @@ zebkit.package("ui.web", function(pkg, Class) {
      *
      *  @constructor
      *  @private
-     *  @class zebkit.ui.HtmlElementMan
+     *  @class zebkit.ui.web.HtmlElementMan
      */
     pkg.HtmlElementMan = Class(ui.Manager, [
         function $prototype() {

@@ -624,6 +624,12 @@ zebkit.package("ui", function(pkg, Class) {
                 return this;
             };
 
+            /**
+             * Make the commbo editable
+             * @param {Boolean} b  true to make the combo ediatable
+             * @chainable
+             * @method setEditable
+             */
             this.setEditable = function(b) {
                 if (this.content === null || this.content.isEditable !== b) {
                     var ctr = "center";
@@ -706,7 +712,9 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function setVisible(b) {
-            if (b === false) this.hidePad();
+            if (b === false) {
+                this.hidePad();
+            }
             this.$super(b);
             return this;
         },

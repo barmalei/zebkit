@@ -270,7 +270,7 @@ zebkit.package("web", function(pkg, Class) {
      * @param  {HTMLElement} element
      * @param  {Object} destination a destination listener that can listen
      * @constructor
-     * @class  zebkit.ui.KeyEventUninfier
+     * @class  zebkit.web.KeyEventUninfier
      */
     pkg.KeyEventUnifier = Class([
         function(element, destination) {

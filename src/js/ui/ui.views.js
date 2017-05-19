@@ -1,9 +1,5 @@
 zebkit.package("ui", function(pkg, Class) {
     /**
-     * @for zebkit.ui
-     */
-
-    /**
      * Default normal font
      * @attribute font
      * @type {zebkit.ui.Font}
@@ -680,6 +676,12 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.color = null;
 
+            /**
+             * Color to fill the inner area surrounded with the round border.
+             * @attribute fillColor
+             * @type {String}
+             * @default null
+             */
             this.fillColor = null;
 
             this.paint = function(g,x,y,w,h,d) {
@@ -1003,14 +1005,21 @@ zebkit.package("ui", function(pkg, Class) {
     * Composite view. The view allows developers to combine number of
     * views and renders its together.
     * @class zebkit.ui.CompositeView
-    * @param {Arrayt|Object} [views] array of dictionary of views
-    * to be composed together
+    * @param {Object} ...views number of views to be composed.
     * @constructor
     * @extends zebkit.ui.View
     */
     pkg.CompositeView = Class(pkg.View, [
         function() {
+            /**
+             * Composed views array.
+             * @attribute views
+             * @type {Array}
+             * @protected
+             * @readOnly
+             */
             this.views = [];
+
             var args = arguments.length === 1 ? arguments[0] : arguments;
             for(var i = 0; i < args.length; i++) {
                 this.views[i] = pkg.$view(args[i]);
@@ -1103,6 +1112,12 @@ zebkit.package("ui", function(pkg, Class) {
                 }
             };
 
+            /**
+             * Iterate over composed views.
+             * @param  {Function} f callback that is called for every iterated view. The callback
+             * gets a view index and view itself as its argument.
+             * @method iterate
+             */
             this.iterate = function(f) {
                 for(var i = 0; i < this.views.length; i++) {
                     f.call(this, i, this.views[i]);
@@ -1144,6 +1159,11 @@ zebkit.package("ui", function(pkg, Class) {
                 }
             };
 
+            /**
+             * Return number of composed views.
+             * @return {Integer} number of composed view.
+             * @method  count
+             */
             this.count = function() {
                 return this.views.length;
             };
@@ -1258,7 +1278,7 @@ zebkit.package("ui", function(pkg, Class) {
     ]);
 
     /**
-     * Line view
+     * Line view.
      * @class  zebkit.ui.Line
      * @extends {zebkit.ui.View}
      * @constructor
@@ -1327,6 +1347,17 @@ zebkit.package("ui", function(pkg, Class) {
         }
     ]);
 
+    /**
+     * Arrow view. Tye view can be use to render triangle arrow element to one of the
+     * following direction: "top", "left", "bottom", "right".
+     * @param  {String} d an arrow view direction.
+     * @param  {String} col an arrow view color.
+     * @param  {Integer} w an arrow view width.
+     * @param  {Integer} h an arrow view height.
+     * @constructor
+     * @class zebkit.ui.ArrowView
+     * @extends {zebkit.ui.View}
+     */
     pkg.ArrowView = Class(pkg.View, [
         function (d, col, w, h) {
             if (arguments.length > 0) this.direction = d;
@@ -1336,11 +1367,53 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $prototype() {
+            /**
+             *  Line width.
+             *  @attribute lineWidth
+             *  @type {Integer}
+             *  @default 1
+             */
             this.lineWidth = 1;
-            this.fill      = true;
-            this.gap       = 0;
-            this.color     = "black";
-            this.width     = this.height = 8;
+
+            /**
+             *  Indicates if the arrow has to be filled with the arrow line color.
+             *  @attribute fill
+             *  @type {Boolean}
+             *  @default true
+             */
+            this.fill = true;
+
+            this.gap = 0;
+
+            /**
+             * Arrow color
+             * @attribute color
+             * @type {String}
+             * @default "black"
+             */
+            this.color = "black";
+
+            /**
+             * Arrow width.
+             * @attribute width
+             * @type {Integer}
+             * @default 8
+             */
+
+             /**
+              * Arrow height.
+              * @attribute height
+              * @type {Integer}
+              * @default 8
+              */
+            this.width = this.height = 8;
+
+            /**
+             * Arrow direction.
+             * @attribute direction
+             * @type {String}
+             * @default "bottom"
+             */
             this.direction = "bottom";
 
             this.outline = function(g, x, y, w, h, d) {
@@ -1660,6 +1733,7 @@ zebkit.package("ui", function(pkg, Class) {
      * @class zebkit.ui.TextRender
      * @constructor
      * @extends zebkit.ui.BaseTextRender
+     * @uses zebkit.util.Position.Metric
      * @param  {String|zebkit.data.TextModel} text a text as string or text model object
      */
     pkg.TextRender = Class(pkg.BaseTextRender, zebkit.util.Position.Metric, [
@@ -2186,7 +2260,6 @@ zebkit.package("ui", function(pkg, Class) {
                 return this;
             };
         },
-
 
         function getLine(r){
             var buf = [], ln = this.$super(r);

@@ -852,7 +852,8 @@ pkg.Layoutable = Class(L, [
          * @method setAt
          */
         this.setAt = function(i, d) {
-            var pd = this.removeAt(i);
+            var constr = this.kids[i].constraints,
+                pd     = this.removeAt(i);
             if (d != null) this.insert(i, constr, d);
             return pd;
         };

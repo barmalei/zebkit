@@ -1,4 +1,0 @@
-{
-    "test": 800,
-    "a"   : "%{<json>zson.test.1.2.1.json}"
-}

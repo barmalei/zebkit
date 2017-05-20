@@ -753,7 +753,9 @@ zebkit.package("layout", function(pkg, Class) {
             this.removeAt = function (i){
                 var obj = this.kids[i];
                 obj.setParent(null);
-                if (obj.constraints !== null) obj.constraints = null;
+                if (obj.constraints !== null) {
+                    obj.constraints = null;
+                }
                 this.kids.splice(i, 1);
 
                 if (typeof this.kidRemoved !== 'undefined') {

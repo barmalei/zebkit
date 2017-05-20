@@ -115,7 +115,8 @@ zebkit.package("ui", function(pkg, Class) {
 
                 if (this.pl === null){
                     this.pl = Array(this.intervals.length);
-                    for(i = 0, l = this.min;i < this.pl.length; i ++ ){
+                    var l = this.min;
+                    for(i = 0; i < this.pl.length; i ++ ){
                         l += this.intervals[i];
                         this.pl[i] = this.value2loc(l);
                     }
@@ -490,9 +491,9 @@ zebkit.package("ui", function(pkg, Class) {
                 throw new Error("[" + min + "," + max + "], " + roughStep + "," + exactStep);
             }
 
-            var i = 0;
+            var i = 0, start = min;
 
-            for(i = 0, start = min;i < intervals.length; i ++ ){
+            for(i = 0; i < intervals.length; i ++ ){
                 start += intervals[i];
                 if (start > max || intervals[i] < 0) throw new Error();
             }

@@ -260,6 +260,7 @@ zebkit.require(function() {
 <ul>
    <li>Google map is in zebkit border panel</li>
    <li>Zebkit tool tip is shown every time a mouse is in google map element</li>
+   <li>Zebkit context menu is shown on google map</li>
    <li>Control google layer with zebkit combo component</li>
 </ul>
 {% endcapture %}

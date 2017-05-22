@@ -660,7 +660,7 @@ zebkit.package("ui", function(pkg, Class) {
              * combo pad list has been selected.
              * @param  {zebkit.ui.BaseList} src a list
              * @param  {Integer} data a selected index
-             * @selected
+             * @method selected
              * @protected
              */
             this.selected = function(src, data) {

@@ -1876,7 +1876,7 @@ zebkit.package("ui", function(pkg, Class) {
      * Root layer panel implementation.
      * @class zebkit.ui.RootLayer
      * @extends {zebkit.ui.Panel}
-     * @use {zebkit.ui.RootLayerMix}
+     * @uses {zebkit.ui.RootLayerMix}
      */
     pkg.RootLayer = Class(pkg.Panel, pkg.RootLayerMix, []);
 });

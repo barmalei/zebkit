@@ -4,6 +4,15 @@ zebkit.package("ui.date", function(pkg, Class) {
     /**
      * The package contains number of classes to implement
      * UI date related component like calendar, date field etc.
+     *
+     *     zebkit.require("ui", "ui.date", "layout", function(ui, date, layout) {
+     *         var root = (new ui.zCanvas()).root;
+     *         root.setLayout(new layout.FlowLayout("center", "center", "horizontal", 8));
+     *
+     *         // add calendar component
+     *         root.add(new date.Calendar());
+     *     });
+     *
      * @class ui.date
      * @access package
      */
@@ -283,10 +292,25 @@ zebkit.package("ui.date", function(pkg, Class) {
                 this.vrp();
             };
 
+            /**
+             * Set a month and an year with the given arguments.
+             * @param {Date} [date] a date object.
+             * @param {Integer} [month] a month.
+             * @param {Integer} [year] a full year.
+             * @method setValue
+             */
             this.setValue = function(month, year) {
                 if (arguments.length === 1) {
-                    year  = month.getFullYear();
-                    month = month.getMonth();
+                    if (month instanceof Date) {
+                        year  = month.getFullYear();
+                        month = month.getMonth();
+                    } else {
+                        year = (new Date()).getFullYear();
+                    }
+                } else if (arguments.length === 0) {
+                    var d = new Date();
+                    year  = d.getFullYear();
+                    month = d.getMonth();
                 }
 
                 pkg.validateDate(month, year);
@@ -338,10 +362,17 @@ zebkit.package("ui.date", function(pkg, Class) {
                 }
             };
 
+            /**
+             * Get days grid cell color.
+             * @param  {Integer} row  a row
+             * @param  {Integer} col  a column
+             * @return {String} a cell color
+             * @method  getCellColor
+             */
             this.getCellColor = function(grid, row, col) {
                 var color = null,
-                    item  = grid.model.get(row, col),
-                    tags  = grid.tags;
+                    item  = this.model.get(row, col),
+                    tags  = this.tags;
 
                 if (tags.length > 0) {
                     for(var i = 0; i < tags.length; i++) {

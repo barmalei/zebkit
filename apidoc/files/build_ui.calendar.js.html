@@ -940,6 +940,15 @@ zebkit.package(&quot;ui.date&quot;, function(pkg, Class) {
     /**
      * The package contains number of classes to implement
      * UI date related component like calendar, date field etc.
+     *
+     *     zebkit.require(&quot;ui&quot;, &quot;ui.date&quot;, &quot;layout&quot;, function(ui, date, layout) {
+     *         var root = (new ui.zCanvas()).root;
+     *         root.setLayout(new layout.FlowLayout(&quot;center&quot;, &quot;center&quot;, &quot;horizontal&quot;, 8));
+     *
+     *         // add calendar component
+     *         root.add(new date.Calendar());
+     *     });
+     *
      * @class ui.date
      * @access package
      */

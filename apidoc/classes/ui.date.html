@@ -956,6 +956,13 @@
 <div class="intro">
     <p>The package contains number of classes to implement
 UI date related component like calendar, date field etc.</p>
+<pre class="code prettyprint"><code>zebkit.require("ui", "ui.date", "layout", function(ui, date, layout) {
+    var root = (new ui.zCanvas()).root;
+    root.setLayout(new layout.FlowLayout("center", "center", "horizontal", 8));
+
+    // add calendar component
+    root.add(new date.Calendar());
+});</code></pre>
 
 </div>
 

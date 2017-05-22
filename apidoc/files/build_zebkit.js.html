@@ -1812,6 +1812,7 @@
         /**
          * Restart the do it object to clear error that has happened and
          * continue tasks that has not been run yet because of the error.
+         * @method  restart
          * @chainable
          */
         restart : function() {
@@ -13615,7 +13616,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
      * Root layer panel implementation.
      * @class zebkit.ui.RootLayer
      * @extends {zebkit.ui.Panel}
-     * @use {zebkit.ui.RootLayerMix}
+     * @uses {zebkit.ui.RootLayerMix}
      */
     pkg.RootLayer = Class(pkg.Panel, pkg.RootLayerMix, []);
 
@@ -25980,7 +25981,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
              * combo pad list has been selected.
              * @param  {zebkit.ui.BaseList} src a list
              * @param  {Integer} data a selected index
-             * @selected
+             * @method selected
              * @protected
              */
             this.selected = function(src, data) {

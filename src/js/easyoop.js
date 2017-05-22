@@ -485,6 +485,7 @@
         /**
          * Restart the do it object to clear error that has happened and
          * continue tasks that has not been run yet because of the error.
+         * @method  restart
          * @chainable
          */
         restart : function() {

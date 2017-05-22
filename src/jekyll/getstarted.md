@@ -37,7 +37,7 @@ In general is expected you are dealing with JS code following zebkit easy OOP co
 <html>
     <head>
         <script type="text/javascript"
-                src="http://repo.zebkit.org/latest/zebkit.min.js">
+                src="http://zebkit.org/ver/latest/zebkit.min.js">
         </script>
      ...
 ```

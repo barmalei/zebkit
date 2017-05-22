@@ -959,7 +959,6 @@ zebkit.package("ui", function(pkg, Class) {
                     this.$prevFocusOwner = null;
                 }
 
-
                 // save the focus owner whose owner was not a pop up layer
                 if (e.related !== null && zebkit.layout.isAncestorOf(this, e.related) === false && zebkit.instanceOf(e.source, pkg.Menu)) {
                     this.$prevFocusOwner = e.related;

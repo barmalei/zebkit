@@ -3,7 +3,20 @@ zebkit.package("ui.design", function(pkg, Class) {
 
     /**
      * The package contains number of UI components that can be helpful to
-     * make visual control of an UI component size and location
+     * perform visual control of an UI component. You can control an UI component
+     * size and location.
+     *
+     *     var root = (new zebkit.ui.zCanvas(400, 300)).root;
+     *     root.setLayout(new zebkit.layout.RasterLayout());
+     *     root.setPadding(8);
+     *
+     *     // Add check box component wrapped with shaper panel
+     *     // to control the component size and location
+     *     var ch = new zebkit.ui.Checkbox("Check-box")
+     *                           .setBounds(10, 10, 100, 30);
+     *
+     *     root.add(new zebkit.ui.design.ShaperPan(ch));
+     *
      * @class  zebkit.ui.design
      * @access package
      */

@@ -27,13 +27,14 @@
 
     "DaysGrid" : {
         "GridCaption": {
+            "inheritProperties" :true,
             "Label" : {
                 "padding" : [0, 2, 0, 2],
                 "font"    : "%{zebkit.ui.boldFont}"
             },
 
             "border" : null,
-            "background": null,
+            "background2": null,
             "namesOfWeekDays" : [ "%{WEEKS}" ]
         },
 
@@ -93,7 +94,7 @@
         "usePsMetric"       : true,
         "drawSideLines"     : false,
         "drawLines"         : [ false, true ],
-        "lineColor"         : "lightGray",
+        "lineColor2"         : "lightGray",
         "navigationMode"    : "cell",
         "defCellAlignments" : [ "none", "center" ],
         "views": {

@@ -10041,9 +10041,10 @@ zebkit.package(&quot;layout&quot;, function(pkg, Class) {
     ]);
 
     /**
-     *  Layout manager implementation that places layoutbale components on top of each other stretching
-     *  its to fill all available parent component space. Components that want to have be sized according
-     *  to its preferred sizes have to have its constraints set to &quot;usePsSize&quot;.
+     *  Layout manager implementation that places layoutbale components on top of
+     *  each other stretching its to fill all available parent component space.
+     *  Components that want to have be sized according to its preferred sizes
+     *  have to have its constraints set to &quot;usePsSize&quot;.
      *  @example
      *
      *      var pan = new zebkit.ui.Panel();
@@ -12270,7 +12271,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
           p.add(&quot;center&quot;, new zebkit.ui.TextArea(&quot;Text area&quot;));
           p.add(&quot;bottom&quot;, new zebkit.ui.Button(&quot;Button&quot;));
 
-     * **Events**
+     * **Input and component events**
      * The class provides possibility to catch various component and input events by declaring an
      * appropriate event method handler. The most simple case you just define a method:
 
@@ -21554,7 +21555,8 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
 
                 if (this.pl === null){
                     this.pl = Array(this.intervals.length);
-                    for(i = 0, l = this.min;i &lt; this.pl.length; i ++ ){
+                    var l = this.min;
+                    for(i = 0; i &lt; this.pl.length; i ++ ){
                         l += this.intervals[i];
                         this.pl[i] = this.value2loc(l);
                     }
@@ -21929,9 +21931,9 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
                 throw new Error(&quot;[&quot; + min + &quot;,&quot; + max + &quot;], &quot; + roughStep + &quot;,&quot; + exactStep);
             }
 
-            var i = 0;
+            var i = 0, start = min;
 
-            for(i = 0, start = min;i &lt; intervals.length; i ++ ){
+            for(i = 0; i &lt; intervals.length; i ++ ){
                 start += intervals[i];
                 if (start &gt; max || intervals[i] &lt; 0) throw new Error();
             }
@@ -25792,9 +25794,9 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
              * @method hidePad
              * @chainable
              */
-            this.hidePad = function (){
+            this.hidePad = function() {
                 var d = this.getCanvas();
-                if (d !== null &amp;&amp; this.winpad.parent !== null){
+                if (d !== null &amp;&amp; this.winpad.parent !== null) {
                     this.winpad.removeMe();
                     this.requestFocus();
                 }
@@ -25973,8 +25975,16 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
                 }
             };
 
+            /**
+             * Combo pad list listener method. Called every time an item in
+             * combo pad list has been selected.
+             * @param  {zebkit.ui.BaseList} src a list
+             * @param  {Integer} data a selected index
+             * @selected
+             * @protected
+             */
             this.selected = function(src, data) {
-                if (this.$lockListSelEvent === false){
+                if (this.$lockListSelEvent === false) {
                     this.hidePad();
                     if (this.content !== null) {
                         this.content.comboValueUpdated(this, this.list.getSelected());
@@ -27003,7 +27013,6 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
                     // component will be removed
                     this.$prevFocusOwner = null;
                 }
-
 
                 // save the focus owner whose owner was not a pop up layer
                 if (e.related !== null &amp;&amp; zebkit.layout.isAncestorOf(this, e.related) === false &amp;&amp; zebkit.instanceOf(e.source, pkg.Menu)) {
@@ -33742,7 +33751,20 @@ zebkit.package(&quot;ui.design&quot;, function(pkg, Class) {
 
     /**
      * The package contains number of UI components that can be helpful to
-     * make visual control of an UI component size and location
+     * perform visual control of an UI component. You can control an UI component
+     * size and location.
+     *
+     *     var root = (new zebkit.ui.zCanvas(400, 300)).root;
+     *     root.setLayout(new zebkit.layout.RasterLayout());
+     *     root.setPadding(8);
+     *
+     *     // Add check box component wrapped with shaper panel
+     *     // to control the component size and location
+     *     var ch = new zebkit.ui.Checkbox(&quot;Check-box&quot;)
+     *                           .setBounds(10, 10, 100, 30);
+     *
+     *     root.add(new zebkit.ui.design.ShaperPan(ch));
+     *
      * @class  zebkit.ui.design
      * @access package
      */

@@ -474,9 +474,9 @@ zebkit.package("ui", function(pkg, Class) {
              * @method hidePad
              * @chainable
              */
-            this.hidePad = function (){
+            this.hidePad = function() {
                 var d = this.getCanvas();
-                if (d !== null && this.winpad.parent !== null){
+                if (d !== null && this.winpad.parent !== null) {
                     this.winpad.removeMe();
                     this.requestFocus();
                 }
@@ -655,8 +655,16 @@ zebkit.package("ui", function(pkg, Class) {
                 }
             };
 
+            /**
+             * Combo pad list listener method. Called every time an item in
+             * combo pad list has been selected.
+             * @param  {zebkit.ui.BaseList} src a list
+             * @param  {Integer} data a selected index
+             * @selected
+             * @protected
+             */
             this.selected = function(src, data) {
-                if (this.$lockListSelEvent === false){
+                if (this.$lockListSelEvent === false) {
                     this.hidePad();
                     if (this.content !== null) {
                         this.content.comboValueUpdated(this, this.list.getSelected());

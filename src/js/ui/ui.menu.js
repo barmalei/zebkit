@@ -782,7 +782,11 @@ zebkit.package("ui", function(pkg, Class) {
                         // hide the whole menu hierarchy
                         var k = this.kids[this.selectedIndex];
                         if (typeof k.itemSelected !== 'undefined') {
-                            k.itemSelected();
+                          k.itemSelected();
+			  pkg.events.fire("menuItemSelected",
+					  MENU_EVENT.$fillWith(this,
+                                                               this.selectedIndex,
+                                                               this.kids[this.selectedIndex]));
                         }
 
                         // an atomic menu, what means a menu item has been selected
@@ -793,10 +797,6 @@ zebkit.package("ui", function(pkg, Class) {
                         }
                     }
 
-                    pkg.events.fire("menuItemSelected",
-                                     MENU_EVENT.$fillWith(this,
-                                                          this.selectedIndex,
-                                                          this.kids[this.selectedIndex]));
                 } else if (prev >= 0) {
                     // hide child menus if null item has been selected
                     sub = this.getMenuAt(prev);

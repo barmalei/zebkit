@@ -79,7 +79,7 @@ To build major zebkit artifacts (JS code) run the following command:
    $ gulp
 ```
 
-To build runtime zip package (find it in build "folder"): 
+To build runtime zip package (find it in "build" folder): 
 ```bash
    $ gulp runtime
 ```

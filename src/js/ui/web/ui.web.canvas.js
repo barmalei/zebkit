@@ -688,28 +688,24 @@ zebkit.package("ui.web", function(pkg, Class) {
              * @method setSizeFull
              */
             this.setSizeFull = function(b) {
-                /**
-                 * Indicate if the canvas has to be stretched to
-                 * fill the whole screen area.
-                 * @type {Boolean}
-                 * @attribute isSizeFull
-                 * @readOnly
-                 */
-                if (this.isSizeFull !== true) {
-                    if (zebkit.web.$contains(this.$container) !== true) {
-                        throw new Error("zCanvas is not a part of DOM tree");
+                if (this.isSizeFull !== b) {
+                    this.isSizeFull = b;
+
+                    if (b === true) {
+                        if (zebkit.web.$contains(this.$container) !== true) {
+                            throw new Error("zCanvas is not a part of DOM tree");
+                        }
+
+                        this.setLocation(0, 0);
+
+                        // adjust body to kill unnecessary gap for inline-block zCanvas element
+                        // otherwise body size will be slightly horizontally bigger than visual
+                        // viewport height what causes scroller appears
+                        document.body.style["font-size"] = "0px";
+
+                        var ws = zebkit.web.$viewPortSize();
+                        this.setSize(ws.width, ws.height);
                     }
-
-                    this.isSizeFull = true;
-                    this.setLocation(0, 0);
-
-                    // adjust body to kill unnecessary gap for inline-block zCanvas element
-                    // otherwise body size will be slightly horizontally bigger than visual
-                    // viewport height what causes scroller appears
-                    document.body.style["font-size"] = "0px";
-
-                    var ws = zebkit.web.$viewPortSize();
-                    this.setSize(ws.width, ws.height);
                 }
             };
         },
@@ -767,7 +763,7 @@ zebkit.package("ui.web", function(pkg, Class) {
     pkg.$elBoundsUpdated = function() {
         for(var i = pkg.zCanvas.$canvases.length - 1; i >= 0; i--) {
             var c = pkg.zCanvas.$canvases[i];
-            if (c.isFullSize === true) {
+            if (c.isSizeFull === true) {
                 //c.setLocation(window.pageXOffset, -window.pageYOffset);
 
                 var ws = zebkit.web.$viewPortSize();

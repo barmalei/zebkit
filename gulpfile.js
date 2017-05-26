@@ -260,8 +260,21 @@ gulp.task('website', [ 'buildJS' ], function (gulpCallBack){
 // generate APIDOC
 gulp.task('apidoc', [ "zebkit" ], function (gulpCallBack){
     var spawn  = require('child_process').spawn;
-    var yuidoc = spawn('yuidoc', ['-t', 'node_modules/yuidoc-zebkit-theme',
-                                  '-H', 'node_modules/yuidoc-zebkit-theme/helpers/helpers.js',
+    var yuidoc = spawn('yuidoc', ['-t', 'node_modules/yuidoc-zebkit-theme/themes/dark',
+                                  '-H', 'node_modules/yuidoc-zebkit-theme/src/helpers/helpers.js',
+                                  "-o", "apidoc",
+                                  "-n",
+                                  './build' ], { stdio: 'inherit' });
+
+    yuidoc.on('exit', function(code) {
+        gulpCallBack(code === 0 ? null : 'ERROR: yuidoc process exited with code: ' + code);
+    });
+});
+
+gulp.task('apidoc-light', [ "zebkit" ], function (gulpCallBack){
+    var spawn  = require('child_process').spawn;
+    var yuidoc = spawn('yuidoc', ['-t', 'node_modules/yuidoc-zebkit-theme/themes/light',
+                                  '-H', 'node_modules/yuidoc-zebkit-theme/src/helpers/helpers.js',
                                   "-o", "apidoc",
                                   "-n",
                                   './build' ], { stdio: 'inherit' });

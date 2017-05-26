@@ -84,9 +84,13 @@ To build runtime zip package (find it in "build" folder):
    $ gulp runtime
 ```
 
-To generate apidoc run the following command (find generated doc in "apidoc" folder):
+To generate API doc run the following command (find generated doc in "apidoc" folder):
 ```bash
    $ gulp apidoc
+```
+or if you prefer light version of API doc run the following command: 
+```bash
+   $ gulp apidoc-light
 ```
 
 If you have installed jekyll you can initiate zebkit WEB site re-generation with the following command:

@@ -7,7 +7,7 @@
 
 Zebkit provides impressive bunch of UI components that works on various devices, supports touch screens and fits single page application development. Implemented with help of easy OOP concept zebkit components are abstracted from WEB/CSS mess what brings support, extendibility and portability on the level of software engineering. With zebkit and its concept any imaginable UI component can be rendered on HTML5 Canvas.      
 
-The previous generation of zebkit (zebra) can be found in "latest_zebra" branch.
+The latest version of previous generation of zebkit (zebra) can be found as "zebra" release.
 
 # Most significant changes 
 

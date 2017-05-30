@@ -79,6 +79,10 @@
                     
                       
                         
+                          <a class="sidebar-nav-item active" href="/website/easyoop.html">
+                            Easy OOP
+                          </a>
+                        
                       
                     
                       
@@ -175,13 +179,11 @@
 <span class="kd">var</span> <span class="nx">MyClass</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
     <span class="c1">// Declare class constructor</span>
     <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-        <span class="k">this</span><span class="p">.</span><span class="nx">a</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span> <span class="c1">// Init variable "a" </span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">a</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span> <span class="c1">// Initialize variable "a" </span>
     <span class="p">},</span>
 
     <span class="c1">// Declare class method "abc"  </span>
-    <span class="kd">function</span> <span class="nx">abc</span><span class="p">()</span> <span class="p">{</span>
-       <span class="p">...</span>
-    <span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">abc</span><span class="p">()</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
 <span class="p">]);</span>
 
 <span class="c1">// Instantiate the class </span>
@@ -270,6 +272,29 @@
 <span class="nx">a</span><span class="p">.</span><span class="nx">abc</span><span class="p">();</span>
 <span class="nx">b</span><span class="p">.</span><span class="nx">abc</span><span class="p">();</span>
 <span class="nx">b</span><span class="p">.</span><span class="nx">cde</span><span class="p">();</span>
+</code></pre></div>
+<p><strong>Parametrized interfaces</strong> A declared interface can be parametrized. Parametrization is a declaration of the same interface (with the identical set of methods) but with another default properties set.</p>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// Declare an interface that renders rectangle </span>
+<span class="kd">var</span> <span class="nx">DrawRect</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Interface</span><span class="p">([</span>
+    <span class="kd">function</span> <span class="nx">paint</span><span class="p">(</span><span class="nx">g</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="k">this</span><span class="p">.</span><span class="nx">color</span> <span class="o">!==</span> <span class="s1">'undefined'</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">g</span><span class="p">.</span><span class="nx">color</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">color</span><span class="p">;</span> 
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="k">this</span><span class="p">.</span><span class="nx">lineWidth</span> <span class="o">!==</span> <span class="s1">'undefined'</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">g</span><span class="p">.</span><span class="nx">lineWidth</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">lineWidth</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="nx">g</span><span class="p">.</span><span class="nx">rect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>
+        <span class="nx">g</span><span class="p">.</span><span class="nx">stroke</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">]);</span>
+
+<span class="c1">// Let's create an interface that draws thick red rectangle </span>
+<span class="kd">var</span> <span class="nx">DrawSolidRedRect</span> <span class="o">=</span> <span class="nx">DrawRect</span><span class="p">({</span>
+    <span class="na">color</span><span class="p">:</span> <span class="s2">"red"</span><span class="p">,</span>
+    <span class="na">lineWidth</span><span class="p">:</span> <span class="mi">4</span>
+<span class="p">});</span>
 </code></pre></div>
 <p><strong>Anonymous classes</strong> Anonymous classes is one of the greatest feature zebkit Easy OOP provides. Zebkit allows developers to customize classes during the classes instantiation.</p>
 
@@ -392,7 +417,7 @@
 
 <span class="c1">// Extend instance of class "A" </span>
 <span class="nx">a</span><span class="p">.</span><span class="nx">extend</span><span class="p">([</span>
-   <span class="kd">function</span> <span class="nx">q</span><span class="p">(){</span><span class="k">this</span><span class="p">.</span><span class="nx">abc</span><span class="p">();</span> <span class="k">this</span><span class="p">.</span><span class="nx">cba</span><span class="p">();}</span>
+   <span class="kd">function</span> <span class="nx">q</span><span class="p">()</span> <span class="p">{</span> <span class="k">this</span><span class="p">.</span><span class="nx">abc</span><span class="p">();</span> <span class="k">this</span><span class="p">.</span><span class="nx">cba</span><span class="p">();</span> <span class="p">}</span>
 <span class="p">]);</span>
 <span class="nx">a</span><span class="p">.</span><span class="nx">q</span><span class="p">();</span> <span class="c1">// call "q()" instance specific method</span>
 <span class="nx">aa</span><span class="p">.</span><span class="nx">q</span><span class="p">;</span>  <span class="c1">// undefined</span>

@@ -28,7 +28,8 @@ zebkit.package("data", function(pkg, Class) {
     };
 
     /**
-     * Data model marker interface. It has no methods implemented.
+     * Data model is marker interface. It has no methods implemented, but the interface
+     * is supposed to be inherited with data models implementations
      * @class zebkit.data.DataModel
      * @interface zebkit.data.DataModel
      */
@@ -210,6 +211,10 @@ zebkit.package("data", function(pkg, Class) {
                 return this.$lines.join("\n");
             };
 
+            this.toString = function() {
+                return this.$lines.join("\n");
+            };
+
             this.getLines = function () {
                 return this.$lines.length;
             };
@@ -384,9 +389,8 @@ zebkit.package("data", function(pkg, Class) {
         },
 
         function $prototype() {
-            this.buf    = "";
+            this.$buf    = "";
             this.extra  =  0;
-            this.maxLen = -1;
 
             /**
              * Maximal text length. -1 means the text is not restricted
@@ -396,12 +400,18 @@ zebkit.package("data", function(pkg, Class) {
              * @default -1
              * @readOnly
              */
+            this.maxLen = -1;
+
             this.$lineTags = function(i) {
                 return this;
             };
 
             this.getValue = function(){
-                return this.buf;
+                return this.$buf;
+            };
+
+            this.toString = function() {
+                return this.$buf;
             };
 
             /**
@@ -415,14 +425,14 @@ zebkit.package("data", function(pkg, Class) {
             };
 
             this.getTextLength = function(){
-                return this.buf.length;
+                return this.$buf.length;
             };
 
             this.getLine = function(line){
                 if (line !== 0) {
                     throw new RangeError(line);
                 }
-                return this.buf;
+                return this.$buf;
             };
 
             this.write = function(s,offset) {
@@ -432,12 +442,12 @@ zebkit.package("data", function(pkg, Class) {
                     s = s.substring(0, j);
                 }
 
-                var l = (this.maxLen > 0 && (this.buf.length + s.length) >= this.maxLen) ? this.maxLen - this.buf.length
+                var l = (this.maxLen > 0 && (this.$buf.length + s.length) >= this.maxLen) ? this.maxLen - this.$buf.length
                                                                                          : s.length;
                 if (l !== 0) {
-                    var nl = this.buf.substring(0, offset) + s.substring(0, l) + this.buf.substring(offset);
+                    var nl = this.$buf.substring(0, offset) + s.substring(0, l) + this.$buf.substring(offset);
                     if (typeof this.validate !== 'function' || this.validate(nl)) {
-                        this.buf = nl;
+                        this.$buf = nl;
                         if (l > 0) {
                             this._.textUpdated(this, true, offset, l, 0, 1);
                             return true;
@@ -449,11 +459,11 @@ zebkit.package("data", function(pkg, Class) {
 
             this.remove = function(offset,size){
                 if (size > 0) {
-                    var nl = this.buf.substring(0, offset) +
-                             this.buf.substring(offset + size);
+                    var nl = this.$buf.substring(0, offset) +
+                             this.$buf.substring(offset + size);
 
-                    if (nl.length !== this.buf.length && (typeof this.validate !== 'function' || this.validate(nl))) {
-                        this.buf = nl;
+                    if (nl.length !== this.$buf.length && (typeof this.validate !== 'function' || this.validate(nl))) {
+                        this.$buf = nl;
                         this._.textUpdated(this, false, offset, size, 0, 1);
                         return true;
                     }
@@ -472,16 +482,16 @@ zebkit.package("data", function(pkg, Class) {
                     text = text.substring(0, i);
                 }
 
-                if ((this.buf === null || this.buf !== text) && (typeof this.validate !== 'function'  || this.validate(text))) {
-                    if (this.buf !== null && this.buf.length > 0) {
-                        this._.textUpdated(this, false, 0, this.buf.length, 0, 1);
+                if ((this.$buf === null || this.$buf !== text) && (typeof this.validate !== 'function'  || this.validate(text))) {
+                    if (this.$buf !== null && this.$buf.length > 0) {
+                        this._.textUpdated(this, false, 0, this.$buf.length, 0, 1);
                     }
 
                     if (this.maxLen > 0 && text.length > this.maxLen) {
                         text = text.substring(0, this.maxLen);
                     }
 
-                    this.buf = text;
+                    this.$buf = text;
                     this._.textUpdated(this, true, 0, text.length, 0, 1);
                     return true;
                 }
@@ -528,6 +538,7 @@ zebkit.package("data", function(pkg, Class) {
 
      * @constructor
      * @class zebkit.data.ListModel
+     * @uses {zebkit.data.DataModel}
      * @uses {zebkit.EventProducer}
      */
 
@@ -716,13 +727,6 @@ zebkit.package("data", function(pkg, Class) {
              */
             this.kids = [];
 
-            /**
-             * Value stored with this item
-             * @attribute value
-             * @type {Object}
-             * @default null
-             * @readOnly
-             */
             if (arguments.length > 0) {
                 this.value = v;
             }

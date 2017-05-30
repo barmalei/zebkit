@@ -65,7 +65,7 @@
         "inheritProperties" : true,
         "padding"  : 4,
         "font"     : "%{zebkit.ui.boldFont}",
-        "fontColor": "white"
+        "color"    : "white"
     },
 
     "LeftGridCaption" :{

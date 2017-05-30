@@ -6,33 +6,33 @@ zebkit.package("ui.tree", function(pkg, Class) {
      * Tree components are graphical representation of a tree model that allows a user
      * to navigate over the model item, customize the items rendering and
      * organize customizable editing of the items.
-
-            // create tree component instance to visualize the given tree model
-            var tree = new zebkit.ui.tree.Tree({
-                value: "Root",
-                kids : [
-                    "Item 1",
-                    "Item 2",
-                    "Item 3"
-                ]
-            });
-
-            // make all tree items editable with text field component
-            tree.setEditorProvider(new zebkit.ui.tree.DefEditors());
-
+     *
+     *       // create tree component instance to visualize the given tree model
+     *       var tree = new zebkit.ui.tree.Tree({
+     *           value: "Root",
+     *           kids : [
+     *               "Item 1",
+     *               "Item 2",
+     *               "Item 3"
+     *           ]
+     *       });
+     *
+     *       // make all tree items editable with text field component
+     *       tree.setEditorProvider(new zebkit.ui.tree.DefEditors());
+     *
      * One more tree  component implementation - "CompTree" - allows developers
      * to create tree whose nodes are  other UI components
-
-            // create tree component instance to visualize the given tree model
-            var tree = new zebkit.ui.tree.CompTree({
-                value: new zebkit.ui.Label("Root label item"),
-                kids : [
-                    new zebkit.ui.Checkbox("Checkbox Item"),
-                    new zebkit.ui.Button("Button Item"),
-                    new zebkit.ui.TextField("Text field item")
-                ]
-            });
-
+     *
+     *       // create tree component instance to visualize the given tree model
+     *       var tree = new zebkit.ui.tree.CompTree({
+     *           value: new zebkit.ui.Label("Root label item"),
+     *           kids : [
+     *               new zebkit.ui.Checkbox("Checkbox Item"),
+     *               new zebkit.ui.Button("Button Item"),
+     *               new zebkit.ui.TextField("Text field item")
+     *           ]
+     *       });
+     *
      * @class zebkit.ui.tree
      * @access package
      */
@@ -161,67 +161,18 @@ zebkit.package("ui.tree", function(pkg, Class) {
      * Default tree editor view provider
      * @class zebkit.ui.tree.DefViews
      * @constructor
-     * @param {String} [color] the tree item text color
-     * @param {String} [font] the tree item text font
+     * @extends {zebkit.ui.BaseViewProvider}
      */
-    pkg.DefViews = Class([
-        function(color, font) {
-            /**
-             * Default tree item render
-             * @attribute render
-             * @readOnly
-             * @type {zebkit.ui.StringRender}
-             */
-            this.render = new ui.StringRender("");
-
-            zebkit.properties(this, this.clazz);
-
-            if (arguments.length > 0 && color !== null) {
-                this.setColor(color);
-            }
-
-            if (arguments.length > 1 && font !== null) {
-                this.setFont(font);
-            }
-        },
-
-        function $prototype() {
-            /**
-             * Get a view for the given model item of the UI tree component
-             * @param  {zebkit.ui.tree.Tree} tree  a tree component
-             * @param  {zebkit.data.Item} item a tree model element
-             * @return {zebkit.ui.View}  a view to visualize the given tree data model element
-             * @method  getView
-             */
-            this.getView = function (tree, item){
-                if (item.value && typeof item.value.paint !== 'undefined') {
-                    return item.value;
-                }
-                this.render.setValue(item.value === null ? "<null>" : item.value);
-                return this.render;
-            };
-
-            /**
-             * Set the default view provider text render font
-             * @param {zebkit.ui.Font} f a font
-             * @method setFont
-             * @chainable
-             */
-            this.setFont = function(f) {
-                this.render.setFont(f);
-                return this;
-            };
-
-            /**
-             * Set the default view provider text render color
-             * @param {String} c a color
-             * @method setColor
-             * @chainable
-             */
-            this.setColor = function(c) {
-                this.render.setColor(c);
-                return this;
-            };
+    pkg.DefViews = Class(ui.BaseViewProvider, [
+        /**
+         * Get a view for the given model item of the UI tree component
+         * @param  {zebkit.ui.tree.Tree} tree  a tree component
+         * @param  {zebkit.data.Item} item a tree model element
+         * @return {zebkit.ui.View}  a view to visualize the given tree data model element
+         * @method  getView
+         */
+        function getView(tree, item) {
+            return this.$super(tree, item.value);
         }
     ]);
 
@@ -259,6 +210,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
 
      * @param {Boolean} [nodeState] a default tree nodes state (expanded or collapsed)
      * @extends {zebkit.ui.Panel}
+     * @uses  {zebkit.ui.DecorationViews}
      */
 
      /**
@@ -314,7 +266,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
       * @param  {Boolean} isApplied flag that indicates if the edited value has been
       * applied to the given tree item
       */
-    pkg.BaseTree = Class(ui.Panel, [
+    pkg.BaseTree = Class(ui.Panel, ui.DecorationViews, [
         function (d, b){
             if (arguments.length < 2) {
                 b = true;
@@ -404,6 +356,12 @@ zebkit.package("ui.tree", function(pkg, Class) {
                 return this.getIM(i);
             };
 
+            /**
+             * Called every time a pointer pressed in toggle area.
+             * @param  {zebkit.data.Item} root an tree item where toggle has been done
+             * @method togglePressed
+             * @protected
+             */
             this.togglePressed = function(root) {
                 this.toggle(root);
             };
@@ -1126,6 +1084,73 @@ zebkit.package("ui.tree", function(pkg, Class) {
                 return this.model === null ? { width:0, height:0 }
                                            : { width:this.maxw, height:this.maxh };
             };
+
+            /**
+             * Say if items of the tree component should be selectable
+             * @param {Boolean} b true is tree component items can be selected
+             * @method setSelectable
+             */
+            this.setSelectable = function(b){
+                if (this.isSelectable !== b){
+                    if (b === false && this.selected !== null) this.select(null);
+                    this.isSelectable = b;
+                    this.repaint();
+                }
+                return this;
+            };
+
+            /**
+             * Set tree component connector lines color
+             * @param {String} c a color
+             * @method setLineColor
+             * @chainable
+             */
+            this.setLineColor = function (c){
+                this.lnColor = c;
+                this.repaint();
+                return this;
+            };
+
+            /**
+             * Set the given horizontal gaps between tree node graphical elements:
+             * toggle, icon, item view
+             * @param {Integer} gx horizontal gap
+             * @param {Integer} gy vertical gap
+             * @method setGaps
+             * @chainable
+             */
+            this.setGaps = function(gx, gy){
+                if (gx !== this.gapx || gy !== this.gapy){
+                    this.gapx = gx;
+                    this.gapy = gy;
+                    this.vrp();
+                }
+                return this;
+            };
+
+            /**
+             * Set the given tree model to be visualized with the UI component.
+             * @param {zebkit.data.TreeModel|Object} d a tree model
+             * @method setModel
+             * @chainable
+             */
+            this.setModel = function(d){
+                if (this.model !== d) {
+                    if (zebkit.instanceOf(d, zebkit.data.TreeModel) === false) {
+                        d = new zebkit.data.TreeModel(d);
+                    }
+
+                    this.select(null);
+                    if (this.model !== null && this.model._) this.model.off(this);
+                    this.model = d;
+                    if (this.model !== null && this.model._) this.model.on(this);
+                    this.firstVisible = null;
+                    delete this.nodes;
+                    this.nodes = {};
+                    this.vrp();
+                }
+                return this;
+            };
         },
 
         function focused(){
@@ -1135,48 +1160,6 @@ zebkit.package("ui.tree", function(pkg, Class) {
                 this.repaint(m.x + this.scrollManager.getSX(),
                              m.y + this.scrollManager.getSY(), m.width, m.height);
             }
-        },
-        /**
-         * Say if items of the tree component should be selectable
-         * @param {Boolean} b true is tree component items can be selected
-         * @method setSelectable
-         */
-        function setSelectable(b){
-            if (this.isSelectable !== b){
-                if (b === false && this.selected !== null) this.select(null);
-                this.isSelectable = b;
-                this.repaint();
-            }
-            return this;
-        },
-
-        /**
-         * Set tree component connector lines color
-         * @param {String} c a color
-         * @method setLineColor
-         * @chainable
-         */
-        function setLineColor(c){
-            this.lnColor = c;
-            this.repaint();
-            return this;
-        },
-
-        /**
-         * Set the given horizontal gaps between tree node graphical elements:
-         * toggle, icon, item view
-         * @param {Integer} gx horizontal gap
-         * @param {Integer} gy vertical gap
-         * @method setGaps
-         * @chainable
-         */
-        function setGaps(gx, gy){
-            if (gx !== this.gapx || gy !== this.gapy){
-                this.gapx = gx;
-                this.gapy = gy;
-                this.vrp();
-            }
-            return this;
         },
 
         /**
@@ -1220,41 +1203,15 @@ zebkit.package("ui.tree", function(pkg, Class) {
             this.viewSizes.open  = { width: 0, height : 0};
             this.viewSizes.close = { width: 0, height : 0};
             this.viewSizes.leaf  = { width: 0, height : 0};
+
             for(var k in v) {
-                if (v.hasOwnProperty(k)) {
-                    var vv = ui.$view(v[k]);
-
-                    this.views[k] = vv;
-                    if (k !== "aselect" && k !== "iselect"){
-                        this.viewSizes[k] = vv ? vv.getPreferredSize() : { width: 0, height : 0};
-                        this.vrp();
-                    }
+                this.views[k] = ui.$view(v[k]);
+                if (this.viewSizes.hasOwnProperty(k) && this.views[k]) {
+                    this.viewSizes[k] = this.views[k].getPreferredSize();
                 }
             }
-            return this;
-        },
 
-        /**
-         * Set the given tree model to be visualized with the UI component.
-         * @param {zebkit.data.TreeModel|Object} d a tree model
-         * @method setModel
-         * @chainable
-         */
-        function setModel(d){
-            if (this.model !== d) {
-                if (zebkit.instanceOf(d, zebkit.data.TreeModel) === false) {
-                    d = new zebkit.data.TreeModel(d);
-                }
-
-                this.select(null);
-                if (this.model !== null && this.model._) this.model.off(this);
-                this.model = d;
-                if (this.model !== null && this.model._) this.model.on(this);
-                this.firstVisible = null;
-                delete this.nodes;
-                this.nodes = {};
-                this.vrp();
-            }
+            this.vrp();
             return this;
         },
 

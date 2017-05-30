@@ -13,13 +13,11 @@ zebkit.package("ui", function(pkg, Class) {
      *  the title can be placed on the top or bottom part of the border panel.
      *  Also the title can be aligned horizontally.
      *
-     *  ```JavaScript
      *     // create border panel with a title located at the
      *     // top and aligned at the canter
      *     var bp = new zebkit.ui.BorderPan("Title",
      *                                     new zebkit.ui.Panel(),
      *                                     "top", "center");
-     *  ```
      *
      *  @constructor
      *  @class zebkit.ui.BorderPan
@@ -39,13 +37,6 @@ zebkit.package("ui", function(pkg, Class) {
                 this.alignment = a;
             }
 
-            /**
-             * Border panel label component
-             * @attribute label
-             * @type {zebkit.ui.Panel}
-             * @readOnly
-             */
-
             this.$super();
             if (arguments.length > 0) this.add("caption", title);
             if (arguments.length > 1) this.add("center", center);
@@ -64,7 +55,15 @@ zebkit.package("ui", function(pkg, Class) {
              * @type {zebkit.ui.Panel}
              * @readOnly
              */
-            this.label = this.content = null;
+            this.content = null;
+
+            /**
+             * Border panel label component
+             * @attribute label
+             * @type {zebkit.ui.Panel}
+             * @readOnly
+             */
+             this.label = null;
 
             /**
              * Vertical gap. Define top and bottom paddings between
@@ -887,6 +886,8 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Panel class that uses zebkit.layout.StackLayout as a default layout manager.
      * @class  zebkit.ui.StackPan
+     * @param {zebkit.ui.Panel} [varname]* number of components to be added to the stack
+     * panel
      * @constructor
      * @extends {zebkit.ui.Panel}
      */

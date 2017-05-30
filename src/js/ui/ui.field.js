@@ -74,14 +74,16 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.selectionView = this.hint = null;
 
+            // TODO: check the place the property is required
             this.vkMode    = "indirect";
+
             this.startLine = this.startCol = this.endLine = this.endCol = this.curX = 0;
             this.startOff  = this.endOff = -1;
 
             /**
-             * Selection color
+             * Selection color or view
              * @attribute  selection
-             * @type {String}
+             * @type {String|zebkit.ui.View}
              * @readOnly
              */
             this.selection = this.position = null;
@@ -95,8 +97,8 @@ zebkit.package("ui", function(pkg, Class) {
              * @attribute blinkigPeriod
              */
             this.blinkingPeriod = -1;
-            this.blinkMe        = true;
-            this.blinkMeCounter = 0;
+            this.$blinkMe        = true;
+            this.$blinkMeCounter = 0;
 
             /**
              * Cursor type
@@ -256,6 +258,23 @@ zebkit.package("ui", function(pkg, Class) {
                 return null;
             };
 
+            /**
+             * Find the next or previous word in the given text model starting from the given
+             * line and column.
+             * @param  {zebkit.data.TextModel} t a text model
+             * @param  {Integer} line a starting line
+             * @param  {Integer} col a starting column
+             * @param  {Integer} d   a direction. 1 means looking for a next word and -1 means
+             * search for a previous word.
+             * @return {Object} a structure with the next or previous word location:
+             *
+             *        { row: {Integer}, col: {Integer} }
+             *
+             *
+             * The method returns null if the next or previous word cannot be found.
+             * @method  findNextWord
+             * @protected
+             */
             this.findNextWord = function(t, line, col, d){
                 if (line < 0 || line >= t.getLines()) {
                     return null;
@@ -312,6 +331,7 @@ zebkit.package("ui", function(pkg, Class) {
             /**
              * Remove selected text
              * @method removeSelected
+             * @chainable
              */
             this.removeSelected = function(){
                 if (this.hasSelection()){
@@ -319,12 +339,14 @@ zebkit.package("ui", function(pkg, Class) {
                     this.remove(start, (this.startOff > this.endOff ? this.startOff : this.endOff) - start);
                     this.clearSelection();
                 }
+                return this;
             };
 
             /**
              * Start selection.
              * @protected
              * @method  startSelection
+             * @chainable
              */
             this.startSelection = function() {
                 if (this.startOff < 0 && this.position !== null){
@@ -333,6 +355,7 @@ zebkit.package("ui", function(pkg, Class) {
                     this.endCol = this.startCol = pos.currentCol;
                     this.endOff = this.startOff = pos.offset;
                 }
+                return this;
             };
 
             this.keyTyped = function(e) {
@@ -553,7 +576,7 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             /**
-             * Draw the text field cursor
+             * Draw the text field cursor.
              * @protected
              * @param  {CanvasRenderingContext2D} g a 2D context
              * @method drawCursor
@@ -561,7 +584,7 @@ zebkit.package("ui", function(pkg, Class) {
             this.drawCursor = function (g) {
                 if (this.position.offset >= 0 &&
                     this.curView !== null     &&
-                    this.blinkMe              &&
+                    this.$blinkMe              &&
                     this.hasFocus()              )
                 {
                     if (this.textAlign === "left") {
@@ -600,7 +623,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @method select
              * @chainable
              */
-            this.select = function (startOffset,endOffset){
+            this.select = function (startOffset, endOffset){
                 if (endOffset < startOffset ||
                     startOffset < 0 ||
                     endOffset > this.getMaxOffset())
@@ -628,7 +651,7 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             /**
-             * Test if the text field has a selected text
+             * Tests if the text field has a selected text
              * @return {Boolean} true if the text field has a selected text
              * @method hasSelection
              */
@@ -641,8 +664,8 @@ zebkit.package("ui", function(pkg, Class) {
                 var position = this.position;
                 if (position.offset >= 0) {
 
-                    this.blinkMeCounter = 0;
-                    this.blinkMe = true;
+                    this.$blinkMeCounter = 0;
+                    this.$blinkMe = true;
 
                     var lineHeight = this.view.getLineHeight(),
                         top        = this.getTop();
@@ -814,14 +837,14 @@ zebkit.package("ui", function(pkg, Class) {
                 }
 
                 if (this.isEditable === true && this.blinkingPeriod > 0) {
-                    this.blinkMeCounter = 0;
-                    this.blinkMe = true;
+                    this.$blinkMeCounter = 0;
+                    this.$blinkMe = true;
 
                     var $this = this;
                     this.$blinkTask = zebkit.util.tasksSet.run(function() {
-                            $this.blinkMeCounter = ($this.blinkMeCounter + 1) % 3;
-                            if ($this.blinkMeCounter === 0) {
-                                $this.blinkMe = !$this.blinkMe;
+                            $this.$blinkMeCounter = ($this.$blinkMeCounter + 1) % 3;
+                            if ($this.$blinkMeCounter === 0) {
+                                $this.$blinkMe = !$this.$blinkMe;
                                 $this.repaintCursor();
                             }
                         },
@@ -841,7 +864,7 @@ zebkit.package("ui", function(pkg, Class) {
                             this.$blinkTask.shutdown();
                             this.$blinkTask = null;
                         }
-                        this.blinkMe = true;
+                        this.$blinkMe = true;
                     }
                 }
             };
@@ -975,7 +998,7 @@ zebkit.package("ui", function(pkg, Class) {
                         if (this.$blinkTask !== null) {
                             this.$blinkTask.shutdown();
                         }
-                        this.blinkMe = true;
+                        this.$blinkMe = true;
                     }
                     this.vrp();
                 }
@@ -1002,8 +1025,8 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             /**
-             * Set selection view
-             * @param {String} c a selection color
+             * Set selection color or view
+             * @param {String|zebkit.ui.View} c a selection color or view
              * @method setSelectionView
              * @chainable
              */
@@ -1152,19 +1175,21 @@ zebkit.package("ui", function(pkg, Class) {
             }
         },
 
-        /**
-         * Set flag that indicates if the last password character has to be visible.
-         * @param {Boolean} b a boolean flag that says if last password character has
-         * to be visible.
-         * @method setShowLast
-         * @chainable
-         */
-        function setShowLast(b) {
-            if (this.showLast !== b) {
-                this.view.showLast = b;
-                this.repaint();
-            }
-            return this;
+        function $prototype() {
+            /**
+             * Set flag that indicates if the last password character has to be visible.
+             * @param {Boolean} b a boolean flag that says if last password character has
+             * to be visible.
+             * @method setShowLast
+             * @chainable
+             */
+            this.setShowLast = function(b) {
+                if (this.showLast !== b) {
+                    this.view.showLast = b;
+                    this.repaint();
+                }
+                return this;
+            };
         }
     ]);
 });

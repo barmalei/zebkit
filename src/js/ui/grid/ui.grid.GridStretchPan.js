@@ -7,9 +7,9 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
             ...
 
-            var canvas = new zebkit.ui.zCanvas();
-            var grid = new zebkit.ui.grid.Grid(100,10);
-            var pan  = new zebkit.ui.grid.GridStretchPan(grid);
+            var canvas = new zebkit.ui.zCanvas(),
+                grid = new zebkit.ui.grid.Grid(100,10),
+                pan  = new zebkit.ui.grid.GridStretchPan(grid);
 
             canvas.root.setLayout(new zebkit.layout.BorderLayout());
             canvas.root.add("center", pan);
@@ -25,12 +25,6 @@ zebkit.package("ui.grid", function(pkg, Class) {
         function (grid){
             this.$super(this);
 
-            /**
-             * Target grid component
-             * @type {zebkit.ui.Grid}
-             * @readOnly
-             * @attribute grid
-             */
             this.grid = grid;
 
             this.$widths = [];
@@ -42,6 +36,12 @@ zebkit.package("ui.grid", function(pkg, Class) {
         function $prototype() {
             this.$props = this.$strPs = null;
 
+            /**
+             * Target grid component
+             * @type {zebkit.ui.Grid}
+             * @readOnly
+             * @attribute grid
+             */
             this.grid = null;
 
             this.calcPreferredSize = function(target) {

@@ -32,9 +32,7 @@
                 "padding" : [0, 2, 0, 2],
                 "font"    : "%{zebkit.ui.boldFont}"
             },
-
             "border" : null,
-            "background2": null,
             "namesOfWeekDays" : [ "%{WEEKS}" ]
         },
 
@@ -194,7 +192,7 @@
         },
 
         "border": "plain",
-        "background" : "#ECFFE6"
+        "background2" : "#ECFFE6"
     },
 
     "DateTextField" : {

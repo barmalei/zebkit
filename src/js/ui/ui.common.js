@@ -29,10 +29,10 @@ zebkit.package("ui", function(pkg, Class) {
 
     /**
      * Named views holder interface.
-     * @class  zebkit.ui.$ViewsSetterMix
-     * @interface  zebkit.ui.$ViewsSetterMix
+     * @class  zebkit.ui.DecorationViews
+     * @interface  zebkit.ui.DecorationViews
      */
-    pkg.$ViewsSetterMix = zebkit.Interface([
+    pkg.DecorationViews = zebkit.Interface([
         function $prototype() {
             /**
              * Set views set.
@@ -59,6 +59,7 @@ zebkit.package("ui", function(pkg, Class) {
                 if (b === true) {
                     this.vrp();
                 }
+
                 return this;
             };
         }
@@ -164,6 +165,80 @@ zebkit.package("ui", function(pkg, Class) {
 
         return desc;
     };
+
+    /**
+     * Base class to implement model values renders.
+     * @param  {zebkit.ui.Render) [render] a render to visualize values. By default string render is used.
+     * @class zebkit.ui.BaseViewProvider
+     * @constructor
+     */
+    pkg.BaseViewProvider = Class([
+        function(render) {
+            /**
+             * Default render that is used to paint grid content.
+             * @type {zebkit.ui.Render}
+             * @attribute render
+             * @readOnly
+             * @protected
+             */
+            this.render = (arguments.length === 0 || typeof render === 'undefined' ? new pkg.StringRender("")
+                                                                                   : render);
+            zebkit.properties(this, this.clazz);
+        },
+
+        function $prototype() {
+            /**
+             * Set the default view provider font if defined render supports it
+             * @param {zebkit.ui.Font} f a font
+             * @method setFont
+             * @chainable
+             */
+            this.setFont = function(f) {
+                if (typeof this.render.setFont !== 'undefined') {
+                    this.render.setFont(f);
+                }
+                return this;
+            };
+
+            /**
+             * Set the default view provider color if defined render supports it
+             * @param {String} c a color
+             * @method setColor
+             * @chainable
+             */
+            this.setColor = function(c) {
+                if (typeof this.render.setColor !== 'undefined') {
+                    this.render.setColor(c);
+                }
+                return this;
+            };
+
+            /**
+             * Get a view to render the specified value of the target component.
+             * @param  {Object} target a target  component
+             * @param  {Object} [arg]* arguments list
+             * @param  {Object} obj a value to be rendered
+             * @return {zebkit.ui.View}  an instance of view to be used to
+             * render the given value
+             * @method  getView
+             */
+            this.getView = function(target) {
+                var obj = arguments[arguments.length - 1];
+                if (obj !== null && typeof obj !== 'undefined') {
+                    if (typeof obj.toView !== 'undefined') {
+                        return obj.toView();
+                    } else if (typeof obj.paint !== 'undefined') {
+                        return obj;
+                    } else {
+                        this.render.setValue(obj.toString());
+                        return this.render;
+                    }
+                } else {
+                    return null;
+                }
+            };
+        }
+    ]);
 
     /**
      *  UI component to keep and render the given "zebkit.ui.View" class
@@ -445,7 +520,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @method getValue
              */
             this.getValue = function() {
-                return this.view.getValue();
+                return this.view.toString();
             };
 
             /**
@@ -496,7 +571,7 @@ zebkit.package("ui", function(pkg, Class) {
             this.setValue = function(s){
                 if (s === null) s = "";
 
-                var old = this.view.getValue();
+                var old = this.view.toString();
                 if (old !== s) {
                     this.view.setValue(s);
                     this.repaint();

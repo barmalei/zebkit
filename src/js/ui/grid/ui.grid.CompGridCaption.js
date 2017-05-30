@@ -294,15 +294,16 @@ zebkit.package("ui.grid", function(pkg, Class) {
         }
     ]);
 
+    /**
+     * Predefined left vertical component grid caption.
+     * @constructor
+     * @class zebkit.ui.grid.LeftCompGridCaption
+     * @extends {zebkit.ui.grid.CompGridCaption}
+     */
     pkg.LeftCompGridCaption = Class(pkg.CompGridCaption, [
         function $prototype() {
             this.constraints = "left";
         }
     ]);
 
-    pkg.LeftGridCaption = Class(pkg.GridCaption, [
-        function $prototype() {
-            this.constraints = "left";
-        }
-    ]);
 });

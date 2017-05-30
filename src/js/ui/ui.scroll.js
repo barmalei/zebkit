@@ -140,7 +140,6 @@ zebkit.package("ui", function(pkg, Class) {
      * @constructor
      * @extends {zebkit.ui.Panel}
      * @uses {zebkit.util.Position.Metric}
-     * @uses  {zebkit.util.Position.Metric}
      */
     pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
         function(t) {
@@ -233,6 +232,13 @@ zebkit.package("ui", function(pkg, Class) {
             this.unitIncrement = 5;
 
 
+            /**
+             * Scroll orientation.
+             * @attribute orient
+             * @type {String}
+             * @readOnly
+             * @default "vertical"
+             */
             this.orient = "vertical";
 
             /**
@@ -255,7 +261,7 @@ zebkit.package("ui", function(pkg, Class) {
             this.amount = function(){
                 var db = this.decBt;
                 return (this.orient === "vertical") ? this.incBt.y - db.y - db.height
-                                                  : this.incBt.x - db.x - db.width;
+                                                    : this.incBt.x - db.x - db.width;
             };
 
             this.pixel2value = function(p) {
@@ -519,27 +525,6 @@ zebkit.package("ui", function(pkg, Class) {
                 scrolls = "both";
             }
 
-            /**
-             * Vertical scroll bar component
-             * @attribute vBar
-             * @type {zebkit.ui.Scroll}
-             * @readOnly
-             */
-
-            /**
-             * Horizontal scroll bar component
-             * @attribute hBar
-             * @type {zebkit.ui.Scroll}
-             * @readOnly
-             */
-
-            /**
-             * Scrollable target component
-             * @attribute scrollObj
-             * @type {zebkit.ui.Panel}
-             * @readOnly
-             */
-
             this.$isPosChangedLocked = false;
             this.$super();
 
@@ -608,7 +593,29 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $prototype() {
-            this.hBar = this.vBar = this.scrollObj = null;
+            /**
+             * Horizontal scroll bar component
+             * @attribute hBar
+             * @type {zebkit.ui.Scroll}
+             * @readOnly
+             */
+            this.hBar = null;
+
+            /**
+             * Vertical scroll bar component
+             * @attribute vBar
+             * @type {zebkit.ui.Scroll}
+             * @readOnly
+             */
+            this.vBar = null;
+
+            /**
+             * Scrollable target component
+             * @attribute scrollObj
+             * @type {zebkit.ui.Panel}
+             * @readOnly
+             */
+            this.scrollObj = null;
 
             /**
              * Indicate if the scroll bars should be hidden

@@ -68,7 +68,7 @@ zebkit.package("ui", function(pkg, Class) {
             return v;
         }
 
-        if (zebkit.isString(v)) {
+        if (typeof v === "string" || v.constructor === String) {
             if (typeof zebkit.util.rgb[v] !== 'undefined') {
                 return zebkit.util.rgb[v];
             }
@@ -220,7 +220,9 @@ zebkit.package("ui", function(pkg, Class) {
      */
     pkg.Render = Class(pkg.View, [
         function(target) {
-            this.setTarget(target);
+            if (arguments.length > 0) {
+                this.setValue(target);
+            }
         },
 
         function $prototype() {
@@ -234,20 +236,29 @@ zebkit.package("ui", function(pkg, Class) {
             this.target = null;
 
             /**
-             * Set the given target object. The method triggers "targetWasChanged(oldTarget, newTarget)"
+             * Set the given target object. The method triggers "valueWasChanged(oldTarget, newTarget)"
              * execution if the method is declared. Implement the method if you need to track a target
              * object updating.
-             * @method setTarget
+             * @method setValue
              * @param  {Object} o a target object to be visualized
              */
-            this.setTarget = function(o) {
+            this.setValue = function(o) {
                 if (this.target !== o) {
                     var old = this.target;
                     this.target = o;
-                    if (typeof this.targetWasChanged !== 'undefined') {
-                        this.targetWasChanged(old, o);
+                    if (typeof this.valueWasChanged !== 'undefined') {
+                        this.valueWasChanged(old, o);
                     }
                 }
+            };
+
+            /**
+             * Get as rendered object.
+             * @return {Object} a rendered object
+             * @method getValue
+             */
+            this.getValue = function() {
+                return this.target;
             };
         }
     ]);
@@ -435,9 +446,16 @@ zebkit.package("ui", function(pkg, Class) {
         }
     ]);
 
-
+    /**
+     * Abstract shape view.
+     * @param  {String}  [c]  a color of the shape
+     * @param  {Integer} [w]  a line size
+     * @class zebkit.ui.Shape
+     * @constructor
+     * @extends {zebkit.ui.View}
+     */
     pkg.Shape = Class(pkg.View, [
-        function (c, w){
+        function (c, w) {
             if (arguments.length > 0) this.color = c;
             if (arguments.length > 1) this.width = this.gap = w;
         },
@@ -458,6 +476,14 @@ zebkit.package("ui", function(pkg, Class) {
         }
     ]);
 
+    /**
+     * Triangle shape view.
+     * @param  {String}  [c]  a color of the shape
+     * @param  {Integer} [w]  a line size
+     * @class zebkit.ui.TriangleShape
+     * @constructor
+     * @extends {zebkit.ui.Shape}
+     */
     pkg.TriangleShape = Class(pkg.Shape, [
         function $prototype() {
             this.outline = function(g,x,y,w,h,d) {
@@ -527,6 +553,14 @@ zebkit.package("ui", function(pkg, Class) {
             this.radius = 0;
             this.sides  = 15;
 
+            /**
+             * Control border sides visibility.
+             * @param {String} side*  list of visible sides. You can pass number of arguments
+             * to say which sides of the border are visible. The arguments can equal one of the
+             * following value: "top", "bottom", "left", "right"
+             * @method  setSides
+             * @chainable
+             */
             this.setSides = function(top, left, bottom, right) {
                 this.sides = 0;
                 for(var i = 0; i < arguments.length; i++) {
@@ -801,14 +835,6 @@ zebkit.package("ui", function(pkg, Class) {
     pkg.Gradient = Class(pkg.View, [
         function() {
             /**
-             * Gradient orientation: vertical or horizontal
-             * @attribute orient
-             * @readOnly
-             * @default "vertical"
-             * @type {String}
-             */
-
-            /**
              * Gradient start and stop colors
              * @attribute colors
              * @readOnly
@@ -823,6 +849,13 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $prototype() {
+            /**
+             * Gradient orientation: vertical or horizontal
+             * @attribute orient
+             * @readOnly
+             * @default "vertical"
+             * @type {String}
+             */
             this.orient = "vertical";
             this.gradient = null;
             this.gy2 = this.gy1 = this.gx2 = this.gx1 = 0;
@@ -932,7 +965,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @default 0
              */
 
-            this.setTarget(img);
+            this.setValue(img);
             if (arguments.length > 4) {
                 this.x = x;
                 this.y = y;
@@ -995,7 +1028,7 @@ zebkit.package("ui", function(pkg, Class) {
                 g.fill();
             };
 
-            this.targetWasChanged = function(o, n) {
+            this.valueWasChanged = function(o, n) {
                 this.pattern = null;
             };
         }
@@ -1289,7 +1322,9 @@ zebkit.package("ui", function(pkg, Class) {
      */
     pkg.LineView = Class(pkg.View, [
         function(side, color, lineWidth) {
-            if (arguments.length > 0) this.side      = side;
+            if (arguments.length > 0) {
+                this.side = zebkit.util.$validateValue(side, "top", "right", "bottom", "left");
+            }
             if (arguments.length > 1) this.color     = color;
             if (arguments.length > 2) this.lineWidth = lineWidth;
         },
@@ -1334,6 +1369,12 @@ zebkit.package("ui", function(pkg, Class) {
                 } else if (this.side === "bottom") {
                     g.moveTo(x, y + h - d);
                     g.lineTo(x + w - 1, y + h - d);
+                } else if (this.side === "left") {
+                    g.moveTo(x + d, y);
+                    g.lineTo(x + d, y + h - 1);
+                } else if (this.side === "right") {
+                    g.moveTo(x + w - d, y);
+                    g.lineTo(x + w - d, y + h - 1);
                 }
                 g.stroke();
             };
@@ -1557,6 +1598,10 @@ zebkit.package("ui", function(pkg, Class) {
                 return this.setFont(this.font.restyle(style));
             };
 
+            /**
+             * Get line height
+             * @return {[type]} [description]
+             */
             this.getLineHeight = function() {
                 return this.font.height;
             };
@@ -1583,7 +1628,7 @@ zebkit.package("ui", function(pkg, Class) {
                 this.owner = v;
             };
 
-            this.targetWasChanged = function(o, n) {
+            this.valueWasChanged = function(o, n) {
                 if (this.owner !== null && this.owner.isValid) {
                     this.owner.invalidate();
                 }
@@ -1591,6 +1636,11 @@ zebkit.package("ui", function(pkg, Class) {
                 if (typeof this.invalidate !== 'undefined') {
                     this.invalidate();
                 }
+            };
+
+            this.toString = function() {
+                return this.target === null ? null
+                                            : this.target;
             };
         }
     ]);
@@ -1612,7 +1662,7 @@ zebkit.package("ui", function(pkg, Class) {
             // for the sake of speed up construction of the widely used render
             // declare it none standard way.
             this[''] = function(txt, font, color) {
-                this.setTarget(txt);
+                this.setValue(txt);
 
                 /**
                  * Font to be used to render the target string
@@ -1690,24 +1740,6 @@ zebkit.package("ui", function(pkg, Class) {
                 g.fillText(this.target, x, y);
             };
 
-            /**
-             * Return a string that is rendered by this class
-             * @return  {String} a string
-             * @method getValue
-             */
-            this.getValue = function(){
-                return this.target;
-            };
-
-            /**
-             * Set the string to be rendered
-             * @param  {String} s a string
-             * @method setValue
-             */
-            this.setValue = function(s) {
-                this.setTarget(s);
-            };
-
             this.getLine = function(l) {
                 if (l < 0 || l > 1) {
                     throw new RangeError();
@@ -1738,6 +1770,8 @@ zebkit.package("ui", function(pkg, Class) {
      */
     pkg.TextRender = Class(pkg.BaseTextRender, zebkit.util.Position.Metric, [
         function $prototype() {
+            this.textWidth = this.textHeight = this.startInvLine = this.invLines = 0;
+
             // speed up constructor by avoiding super execution since
             // text render is one of the most used class
             this[''] = function(text) {
@@ -1759,13 +1793,7 @@ zebkit.package("ui", function(pkg, Class) {
                  */
                 this.font = this.clazz.font;
 
-                this.textWidth = this.textHeight = this.startInvLine = this.invLines = 0;
-
-                //!!!
-                //   since text render is widely used structure we do slight hack -
-                //   don't call parent constructor
-                //!!!
-                this.setTarget(zebkit.isString(text) ? new zebkit.data.Text(text) : text);
+                this.setValue(text);
             };
 
             /**
@@ -1809,21 +1837,31 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             /**
-             * Return a string that is rendered by this class
-             * @return  {String} a string
-             * @method getValue
-             */
-            this.getValue = function(){
-                return this.target === null ? null : this.target.getValue();
-            };
-
-            /**
              * Set the text model content
-             * @param  {String} s a text as string object
+             * @param  {String|zebkit.data.TextModel} s a text as string object
              * @method setValue
+             * @chainable
              */
-            this.setValue = function (s) {
-                this.target.setValue(s);
+            this.setValue = function(s) {
+                if (typeof s === "string" || s.constructor === String) {
+                    if (this.target !== null) {
+                        this.target.setValue(s);
+                        return;
+                    } else {
+                        s = new zebkit.data.Text(s);
+                    }
+                }
+
+                //TODO: copy paste from Render to speed up
+                if (this.target !== s) {
+                    var old = this.target;
+                    this.target = s;
+                    if (typeof this.valueWasChanged !== 'undefined') {
+                        this.valueWasChanged(old, s);
+                    }
+                }
+
+                return this;
             };
 
             /**
@@ -2051,9 +2089,14 @@ zebkit.package("ui", function(pkg, Class) {
                     d.selectionView.paint(g, x, y, w, h, d);
                 }
             };
+
+            this.toString = function() {
+                return this.target === null ? null
+                                            : this.target.getValue();
+            };
         },
 
-        function targetWasChanged(o,n){
+        function valueWasChanged(o,n){
             if (o !== null) o.off(this);
             if (n !== null) {
                 n.on(this);
@@ -2486,7 +2529,7 @@ zebkit.package("ui", function(pkg, Class) {
             if (arguments.length > 1) {
                 this.lineAlignment = zebkit.util.$validateValue(a, "bottom", "top", "center");
             }
-            this.setTarget(b);
+            this.setValue(b);
         },
 
         function $prototype() {

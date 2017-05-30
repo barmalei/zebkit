@@ -199,7 +199,7 @@ zebkit.package("ui", function(pkg, Class) {
                         var list = this.getCombo().list,
                             selected = list.getSelected();
 
-                        return selected !== null ? list.provider.getView(list, selected, list.selectedIndex)
+                        return selected !== null ? list.provider.getView(list, list.selectedIndex, selected)
                                                  : null;
                     };
 

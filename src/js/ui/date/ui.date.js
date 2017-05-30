@@ -308,9 +308,9 @@ zebkit.package("ui.date", function(pkg, Class) {
                         year = (new Date()).getFullYear();
                     }
                 } else if (arguments.length === 0) {
-                    var d = new Date();
-                    year  = d.getFullYear();
-                    month = d.getMonth();
+                    var cd = new Date();
+                    year  = cd.getFullYear();
+                    month = cd.getMonth();
                 }
 
                 pkg.validateDate(month, year);
@@ -402,7 +402,7 @@ zebkit.package("ui.date", function(pkg, Class) {
             };
 
             this.getView = function(grid, row, col, data) {
-                this.view.setTarget(this.getViewComponent(data));
+                this.view.setValue(this.getViewComponent(data));
                 return this.view;
             };
 

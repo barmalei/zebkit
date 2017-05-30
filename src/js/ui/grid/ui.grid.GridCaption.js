@@ -1,51 +1,17 @@
 zebkit.package("ui.grid", function(pkg, Class) {
     var ui = pkg.cd("..");
 
-    pkg.CaptionViewProvider = Class([
-        function(render) {
-            if (arguments.length === 0 || typeof render === 'undefined') {
-                render = new ui.StringRender("");
-            }
-
-            this.render = render;
-            this.render.setFont(pkg.GridCaption.font);
-            this.render.setColor(pkg.GridCaption.fontColor);
-        },
-
+    /**
+     * Caption cell render. This class can be used to customize grid caption
+     * cells look and feel.
+     * @param  {zebkit.ui.Render} a render to be used to draw grid caption cells.
+     * @constructor
+     * @class zebkit.ui.grid.CaptionViewProvider
+     * @extends {zebkit.ui.grid.DefViews}
+     */
+    pkg.CaptionViewProvider = Class(pkg.DefViews, [
         function $prototype() {
-            this.render = null;
             this.meta = null;
-
-            /**
-             * Set the default view provider text render font
-             * @param {zebkit.ui.Font} f a font
-             * @method setFont
-             */
-            this.setFont = function(f) {
-                this.render.setFont(f);
-                return this;
-            };
-
-            /**
-             * Set the default view provider text render color
-             * @param {String} c a color
-             * @method setColor
-             */
-            this.setColor = function(c) {
-                this.render.setColor(c);
-                return this;
-            };
-
-            this.getView = function(target, rowcol, value){
-                if (value !== null) {
-                    if (typeof value.toView !== 'undefined') return value.toView();
-                    if (typeof value.paint  !== 'undefined') return value;
-                    this.render.setValue(value.toString());
-                    return this.render;
-                } else {
-                    return null;
-                }
-            };
 
             this.$getCellMeta = function(rowcol) {
                 if (this.meta === null) {
@@ -108,7 +74,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
      * as a number of views.
      * @param  {Array} [titles] a caption titles. Title can be a string or
      * a zebkit.ui.View class instance
-     * @param  {zebkit.ui.StringRender|zebkit.ui.TextRender} [render] a text render to be used
+     * @param  {zebkit.ui.BaseTextRender} [render] a text render to be used
      * to paint grid titles
      * @constructor
      * @class zebkit.ui.grid.GridCaption
@@ -118,7 +84,6 @@ zebkit.package("ui.grid", function(pkg, Class) {
         function(titles, render) {
             this.titles = {};
 
-            this.psW = this.psH = 0;
             this.setViewProvider(new pkg.CaptionViewProvider(render));
 
             if (arguments.length === 0) {
@@ -129,12 +94,46 @@ zebkit.package("ui.grid", function(pkg, Class) {
         },
 
         function $prototype() {
+            this.psW = this.psH = 0;
+
+            /**
+             * Grid caption view provider.
+             * @attribute provider
+             * @type {zebkit.ui.grid.CaptionViewProvider}
+             * @readOnly
+             */
             this.provider = null;
 
-            this.defYAlignment = this.defXAlignment = "center";
+            /**
+             * Default vertical cell view alignment.
+             * @attribute defYAlignment
+             * @type {String}
+             * @default "center"
+             */
+            this.defYAlignment = "center";
 
+            /**
+             * Default horizontal cell view alignment.
+             * @attribute defYAlignment
+             * @type {String}
+             * @default "center"
+             */
+            this.defXAlignment = "center";
+
+            /**
+             * Default cell background view.
+             * @attribute defCellBg
+             * @type {zebkit.ui.View}
+             * @default null
+             */
             this.defCellBg = null;
 
+            /**
+             * Set the given caption view provider.
+             * @param {zebkit.ui.grid.CaptionViewProvider} p a caption view provider.
+             * @method setViewProvider
+             * @chainable
+             */
             this.setViewProvider = function(p) {
                 if (p !== this.provider) {
                     this.provider = p;
@@ -143,6 +142,12 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 return this;
             };
 
+            /**
+             * Get rendered caption cell object.
+             * @param  {Ineteger} rowcol a row or column
+             * @return {Object} a rendered caption cell object
+             * @method getTitle
+             */
             this.getTitle = function(rowcol) {
                 return this.titles.hasOwnProperty(rowcol) ? this.titles[rowcol]
                                                           : null;
@@ -193,8 +198,9 @@ zebkit.package("ui.grid", function(pkg, Class) {
             /**
              * Put the given title for the given caption cell.
              * @param  {Integer} rowcol a grid caption cell index
-             * @param  {String|zebkit.ui.View|zebkit.ui.Panel} title a title of the given grid caption cell.
-             * Can be a string or zebkit.ui.View or zebkit.ui.Panel class instance
+             * @param  {String|zebkit.ui.View|zebkit.ui.Panel} title a title of the given
+             * grid caption cell. Can be a string or zebkit.ui.View or zebkit.ui.Panel
+             * class instance
              * @method putTitle
              * @chainable
              */
@@ -211,6 +217,16 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 return this;
             };
 
+            /**
+             * Set the specified alignments of the given caption column or row.
+             * @param {Integer} rowcol a row or column depending on the caption orientation
+             * @param {String} xa a horizontal caption cell alignment. Use "left", "right" or
+             * "center" as the title alignment value.
+             * @param {String} ya a vertical caption cell alignment. Use "top", "bottom" or
+             * "center" as the title alignment value.
+             * @method setTitleAlignments
+             * @chainable
+             */
             this.setTitleAlignments = function(rowcol, xa, ya){
                 if (this.provider.setTitleAlignments(rowcol, xa, ya)) {
                     this.repaint();
@@ -218,6 +234,13 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 return this;
             };
 
+            /**
+             * Set the given caption cell background
+             * @param {Integer} rowcol a caption cell row or column
+             * @param {zebkit.ui.View|String} bg a color or view
+             * @method setCellBackground
+             * @chainable
+             */
             this.setCellBackground = function(rowcol, bg) {
                 if (this.provider.setCellBackground(rowcol, bg)) {
                     this.repaint();
@@ -225,6 +248,14 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 return this;
             };
 
+            /**
+             * Get cell caption preferred size.
+             * @param  {Integer} rowcol row or col of the cell depending the caption
+             * orientation.
+             * @return {Integer} a preferred width or height of the cell
+             * @method getCaptionPS
+             * @protected
+             */
             this.getCaptionPS = function(rowcol) {
                 var v = this.provider.getView(this, rowcol, this.getTitle(rowcol));
                 return (v !== null) ? (this.orient === "horizontal" ? v.getPreferredSize().width
@@ -319,6 +350,18 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
                 this.$super(g);
             }
+        }
+    ]);
+
+    /**
+     * Predefined left vertical grid caption.
+     * @constructor
+     * @class zebkit.ui.grid.LeftGridCaption
+     * @extends {zebkit.ui.grid.GridCaption}
+     */
+    pkg.LeftGridCaption = Class(pkg.GridCaption, [
+        function $prototype() {
+            this.constraints = "left";
         }
     ]);
 });

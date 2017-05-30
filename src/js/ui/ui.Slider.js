@@ -5,8 +5,9 @@ zebkit.package("ui", function(pkg, Class) {
      * @param {String} [o]  a slider orientation ("vertical or "horizontal")
      * @constructor
      * @extends {zebkit.ui.Panel}
+     * @uses   {zebkit.ui.DecorationViews}
      */
-    pkg.Slider = Class(pkg.Panel, pkg.$ViewsSetterMix, [
+    pkg.Slider = Class(pkg.Panel, pkg.DecorationViews, [
         function (o) {
             this._ = new zebkit.util.Listeners();
             this.views = {
@@ -30,32 +31,14 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $clazz() {
-            this.ViewProvider = Class([
-                function(color, font) {
-                    this.render = new pkg.BoldTextRender("");
-
-                    zebkit.properties(this, this.clazz);
-
-                    if (arguments.length > 0) {
-                        this.color = color;
-                    }
-
-                    if (arguments.length > 1) {
-                        this.font = font;
-                    }
-
-                    this.render.setColor(this.color);
-                    this.render.setFont(this.font);
+            this.ViewProvider = Class(pkg.BaseViewProvider, [
+                function() {
+                    this.$super(new pkg.BoldTextRender(""));
                 },
 
-                function $prototype() {
+                function $clazz() {
                     this.color = "white";
                     this.font  = new pkg.Font("Arial", "bold", 12);
-
-                    this.getView = function(d, o) {
-                        this.render.setValue(o !== null && typeof o !== 'undefined' ? o.toString() : "");
-                        return this.render;
-                    };
                 }
             ]);
         },
@@ -207,7 +190,7 @@ zebkit.package("ui", function(pkg, Class) {
                     }
                 }
 
-                if (this.hasFocus() && this.views.marker != null) {
+                if (this.hasFocus() && this.views.marker) {
                     this.views.marker.paint(g, left, top, w + 2, h + 2, this);
                 }
             };
@@ -398,8 +381,11 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             this.pointerPressed = function (e){
-                if (e.isAction()){
-                    var x = e.x, y = e.y, bb = this.getBundleBounds(this.value);
+                if (e.isAction()) {
+                    var x = e.x,
+                        y = e.y,
+                        bb = this.getBundleBounds(this.value);
+
                     if (x < bb.x || y < bb.y || x >= bb.x + bb.width || y >= bb.y + bb.height) {
                         var l = ((this.orient === "horizontal") ? x : y), v = this.loc2value(l);
                         if (this.value != v) {

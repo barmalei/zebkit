@@ -683,7 +683,8 @@ zebkit.package("ui.web", function(pkg, Class) {
 
             /**
              * Force the canvas to occupy the all available view port area
-             * @param {Boolean} b true to force the canvas be stretched over all available view port area
+             * @param {Boolean} b true to force the canvas be stretched over all
+             * available view port area
              * @chainable
              * @method setSizeFull
              */

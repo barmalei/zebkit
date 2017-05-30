@@ -383,7 +383,7 @@
 
     /**
      * Join the given  paths
-     * @param  {String} p* a relative paths
+     * @param  {String} p* relative paths
      * @return {String} an absolute URI
      * @method join
      * @static
@@ -2621,7 +2621,7 @@
             }
 
             /**
-             * Make the class hashable. Hashable class instances are automatically
+             * Makes the class hashable. Hashable class instances are automatically
              * gets unique hash code that is returned with its overridden "toString()"
              * method. The hash code is stored in special "$hash$" field. The feature
              * can be useful when you want to store class instances in "{}" object
@@ -2639,8 +2639,8 @@
             };
 
             /**
-             * Make the class hashless. Prevents generation of hash code for
-             * instances of the classes.
+             * Makes the class hashless. Prevents generation of hash code for
+             * instances of the class.
              * @method hashless
              * @chainable
              * @for zebkit.Class
@@ -2655,7 +2655,7 @@
 
             /**
              * Extend the class with new method and implemented interfaces.
-             * @param {zebkit.Interface} [varname]*  number of interfaces the class has to implement.
+             * @param {zebkit.Interface} [interfaces]*  number of interfaces the class has to implement.
              * @param {Array} methods set of methods the given class has to be extended.
              * @method extend
              * @for  zebkit.Class
@@ -2719,7 +2719,7 @@
 
             /**
              * Tests if the given class inherits the given class or interface.
-             * @param  {clazz}  clazz a class or interface.
+             * @param  {zebkit.Class | zebkit.Interface}  clazz a class or interface.
              * @return {Boolean} true if the class or interface is inherited with
              * the class.
              * @method  isInherit
@@ -2846,7 +2846,7 @@
 
         /**
          * Create an instance of the class
-         * @param  {String} [name]* arguments to be passed to the class constructor
+         * @param  {Object} [arguments]* arguments to be passed to the class constructor
          * @return {Object} an instance of the class.
          * @method newInstance
          * @for  zebkit.Class
@@ -2884,17 +2884,17 @@
         /**
          * Dummy class that implements nothing but can be useful to instantiate
          * anonymous classes with some on "the fly" functionality:
-
-            // instantiate and use zebkit class with method "a()" implemented
-            var ac = new zebkit.Dummy([
-                 function a() {
-                    ...
-                 }
-            ]);
-
-            // use it
-            ac.a();
-
+         *
+         *     // instantiate and use zebkit class with method "a()" implemented
+         *     var ac = new zebkit.Dummy([
+         *          function a() {
+         *             ...
+         *          }
+         *     ]);
+         *
+         *     // use it
+         *     ac.a();
+         *
          * @constructor
          * @class zebkit.Dummy
          */

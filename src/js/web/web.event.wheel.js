@@ -78,6 +78,13 @@ zebkit.package("web", function(pkg, Class) {
         },
 
         function $prototype() {
+            /**
+             * Indicates if the wheel scrolling is done following natural
+             * direction.
+             * @attribute naturalDirection
+             * @type {Boolean}
+             * @default true
+             */
             this.naturalDirection = true;
         }
     ]);

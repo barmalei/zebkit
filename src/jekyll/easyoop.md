@@ -1,6 +1,6 @@
 ---
 layout: page
-tags: menu2
+tags: menu
 title: Easy OOP
 ---
 
@@ -17,13 +17,11 @@ title: Easy OOP
 var MyClass = zebkit.Class([
     // Declare class constructor
     function () {
-        this.a = 10; // Init variable "a" 
+        this.a = 10; // Initialize variable "a" 
     },
 
     // Declare class method "abc"  
-    function abc() {
-       ...
-    }
+    function abc() { ... }
 ]);
 
 // Instantiate the class 
@@ -62,7 +60,6 @@ b.varA;  // 2
 b.varB;  // 5
 b.abc(); // 3 + 2 = 5   
 ```
-
 
 
 **Inheritance** 
@@ -121,6 +118,31 @@ b.abc();
 b.cde();
 ```
 
+**Parametrized interfaces** A declared interface can be parametrized. Parametrization is a declaration of the same interface (with the identical set of methods) but with another default properties set.
+
+```js
+// Declare an interface that renders rectangle 
+var DrawRect = zebkit.Interface([
+    function paint(g) {
+        if (typeof this.color !== 'undefined') {
+            g.color = this.color; 
+        }
+
+        if (typeof this.lineWidth !== 'undefined') {
+            g.lineWidth = this.lineWidth;
+        }
+
+        g.rect(0, 0, 100, 100);
+        g.stroke();
+    }
+]);
+
+// Let's create an interface that draws thick red rectangle 
+var DrawSolidRedRect = DrawRect({
+    color: "red",
+    lineWidth: 4
+});
+```
 
 **Anonymous classes** Anonymous classes is one of the greatest feature zebkit Easy OOP provides. Zebkit allows developers to customize classes during the classes instantiation.
 
@@ -253,7 +275,7 @@ a.cba(); // Call "cba()" method
 
 // Extend instance of class "A" 
 a.extend([
-   function q(){this.abc(); this.cba();}
+   function q() { this.abc(); this.cba(); }
 ]);
 a.q(); // call "q()" instance specific method
 aa.q;  // undefined

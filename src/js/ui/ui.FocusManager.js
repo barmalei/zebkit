@@ -110,6 +110,12 @@ zebkit.package("ui", function(pkg, Class) {
                 }
             };
 
+            /**
+             * Find next candidate to grab focus starting from the given component.
+             * @param  {zebkit.ui.Panel} c a component to start looking for next focusable.
+             * @return {zebkit.ui.Panel} a next component to gain focus.
+             * @method findFocusable
+             */
             this.findFocusable = function(c) {
                 return (this.isFocusable(c) ? c : this.fd(c, 0, 1));
             };

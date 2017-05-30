@@ -317,7 +317,7 @@ zebkit.package("ui", function(pkg, Class) {
                     defaultSize = this.size;
                 }
 
-                if (zebkit.isString(s)) {
+                if (typeof s === "string" || s.constructor === String) {
                     var size = Number(s);
                     if (isNaN(size)) {
                         var m = s.match(/^([0-9]+)(%)$/);
@@ -343,9 +343,23 @@ zebkit.package("ui", function(pkg, Class) {
         function $prototype(clazz) {
             this.s = null;
 
+            /**
+             *  Font family.
+             *  @attribute family
+             *  @type {String}
+             *  @default null
+             */
             this.family = clazz.family;
-            this.style  = clazz.style;
-            this.size   = clazz.size;
+
+
+            /**
+             *  Font style (for instance "bold").
+             *  @attribute style
+             *  @type {String}
+             *  @default null
+             */
+            this.style = clazz.style;
+            this.size  = clazz.size;
 
             /**
              * Returns CSS font representation
@@ -357,6 +371,13 @@ zebkit.package("ui", function(pkg, Class) {
                 return this.s;
             };
 
+            /**
+             * Compute the given string width in pixels basing on the
+             * font metrics.
+             * @param  {String} s a string
+             * @return {Integer} a string width
+             * @method stringWidth
+             */
             this.stringWidth = function(s) {
                 if (s.length === 0) {
                     return 0;
@@ -410,6 +431,11 @@ zebkit.package("ui", function(pkg, Class) {
                 return new this.clazz(this.family, this.style, nsize);
             };
 
+            /**
+             * Restyle font and return new instance of the font class
+             * @param  {String} style a new style
+             * @return {zebkit.ui.Font} a font
+             */
             this.restyle = function(style) {
                 return new this.clazz(this.family, style, this.height + "px");
             };
@@ -1234,7 +1260,8 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             /**
-             * Shortcut method to invalidating the component and initiating the component repainting
+             * Shortcut method to invalidating the component and then initiating the component
+             * repainting.
              * @method vrp
              */
             this.vrp = function(){
@@ -1649,6 +1676,7 @@ zebkit.package("ui", function(pkg, Class) {
              *     the component is stored in the dictionary is considered as the component constraints
              *
              * @method setKids
+             * @chainable
              */
             this.setKids = function(a) {
                 if (arguments.length === 1 && zebkit.instanceOf(a, pkg.Panel)) {
@@ -1681,10 +1709,11 @@ zebkit.package("ui", function(pkg, Class) {
                         }
                     }
                 }
+                return this;
             };
 
             /**
-             * Called whenever the UI component gets or looses focus
+             * The method is called whenever the UI component gets or looses focus
              * @method focused
              * @protected
              */
@@ -1873,7 +1902,7 @@ zebkit.package("ui", function(pkg, Class) {
     ]);
 
     /**
-     * Root layer panel implementation.
+     * Root layer panel implementation basing on zebkit.ui.Panel component.
      * @class zebkit.ui.RootLayer
      * @extends {zebkit.ui.Panel}
      * @uses {zebkit.ui.RootLayerMix}

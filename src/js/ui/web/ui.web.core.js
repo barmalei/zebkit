@@ -595,6 +595,7 @@ zebkit.package("ui.web", function(pkg, Class) {
      *  @constructor
      *  @private
      *  @class zebkit.ui.web.HtmlElementMan
+     *  @extends {zebkit.ui.Manager}
      */
     pkg.HtmlElementMan = Class(ui.Manager, [
         function $prototype() {

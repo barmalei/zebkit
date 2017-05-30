@@ -18,7 +18,7 @@ zebkit.package("ui", function(pkg, Class) {
             });
 
             // define background view that contains views for "state1" and "state2"
-            p.setBorder({
+            p.setBackground({
                 "state1": "yellow",
                 "state1": "green"
             });

@@ -1,8 +1,8 @@
 zebkit.package("ui", function(pkg, Class) {
     /**
-     *  UI manager class. The class is widely used as base for building various UI managers
-     *  like focus, event managers etc. Manager is automatically registered as global events listener
-     *  for events it implements handlers
+     *  UI manager class. The class is widely used as a basement for building various UI managers
+     *  like focus, event managers etc. Manager is automatically registered as global events
+     *  listener for events it implements to handle.
      *  @class zebkit.ui.Manager
      *  @constructor
      */
@@ -15,14 +15,14 @@ zebkit.package("ui", function(pkg, Class) {
     ]);
 
     /**
-     * Component event class. Component event is fired when:
+     * Component event class. Component events are fired when:
      *
-     *   - the component is re-located ("compMoved" event)
-     *   - the component is re-sized ("compResized" event)
-     *   - the component visibility is updated ("compShown" event)
-     *   - the component is enabled ("compEnabled" event)
-     *   - a component has been inserted into the given component ("compAdded" event)
-     *   - a component has been removed from the given component ("compRemoved" event)
+     *   - a component is re-located ("compMoved" event)
+     *   - a component is re-sized ("compResized" event)
+     *   - a component visibility is updated ("compShown" event)
+     *   - a component is enabled ("compEnabled" event)
+     *   - a component has been inserted into another component ("compAdded" event)
+     *   - a component has been removed from another component ("compRemoved" event)
      *
      * Appropriate event type is set in the event id property.
      * @constructor
@@ -203,6 +203,7 @@ zebkit.package("ui", function(pkg, Class) {
      * Mouse and touch screen input event class. The input event is triggered by a mouse or
      * touch screen.
      * @class  zebkit.ui.PointerEvent
+     * @extends zebkit.util.Event
      * @constructor
      */
     pkg.PointerEvent = Class(zebkit.util.Event, [
@@ -481,9 +482,12 @@ zebkit.package("ui", function(pkg, Class) {
                 // assign id that matches method to be called
                 e.id = id;
 
-                // TODO: not stable concept. the idea to suppress event distribution to global
-                // listeners (managers) and child components
-                if (typeof e.source.suppressEvent !== 'undefined' && e.source.suppressEvent(e) === true) {
+                // TODO: not stable concept. the idea to suppress event
+                // distribution to global listeners (managers) and child
+                // components
+                if (typeof e.source.suppressEvent !== 'undefined' &&
+                    e.source.suppressEvent(e) === true)
+                {
                     return true;
                 }
 
@@ -526,14 +530,30 @@ zebkit.package("ui", function(pkg, Class) {
      */
      this.events = new pkg.EventManager();
 
+     /**
+      * Base class to implement clipboard manager.
+      * @class zebkit.ui.Clipboard
+      * @extends zebkit.ui.Manager
+      */
      pkg.Clipboard = Class(pkg.Manager, [
          function $prototype() {
+             /**
+              * Get destination component. Destination component is a component that
+              * is currently should participate in clipboard data exchange.
+              * @return {zebkit.ui.Panle} a destination component.
+              * @method getDestination
+              */
              this.getDestination = function() {
                  return pkg.focusManager.focusOwner;
              };
          }
      ]);
 
+     /**
+      * Base class to implement cursor manager.
+      * @class zebkit.ui.CursorManager
+      * @extends zebkit.ui.Manager
+      */
      pkg.CursorManager = Class(pkg.Manager, [
         function $prototype() {
             /**

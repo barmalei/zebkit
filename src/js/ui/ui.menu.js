@@ -406,7 +406,7 @@ zebkit.package("ui", function(pkg, Class) {
                     if (d.hasOwnProperty(k)) {
                         var sub = d[k];
                         this.add(k);
-                        if (sub != null) {
+                        if (sub !== null) {
                             this.setMenuAt(this.kids.length - 1, zebkit.instanceOf(sub, pkg.Menu) ? sub : new pkg.Menu(sub));
                         }
                     }
@@ -1080,5 +1080,11 @@ zebkit.package("ui", function(pkg, Class) {
         }
     ]);
 
+    /**
+     * Simple popup layer implementation basing on "zebkit.ui.Panel" component.
+     * @class zebkit.ui.PopupLayer
+     * @extends {zebkit.ui.Panel}
+     * @uses {zebkit.ui.PopupLayerMix}
+     */
     pkg.PopupLayer = Class(pkg.Panel, pkg.PopupLayerMix, []);
 });

@@ -46,7 +46,7 @@ zebkit.package("ui.web", function(pkg, Class) {
     ]);
 
     /**
-     *  Ppopup layer implementation.
+     *  Popup layer implementation.
      *  @class zebkit.ui.web.PopupLayer
      *  @constructor
      *  @extends {zebkit.ui.web.HtmlLayer}

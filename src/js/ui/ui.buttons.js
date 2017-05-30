@@ -552,57 +552,57 @@ zebkit.package("ui", function(pkg, Class) {
 
     /**
      * Check-box UI component. The component is a container that consists from two other UI components:
-
-        - Box component to keep checker indicator
-        - Label component to paint label
-
+     *
+     *   - Box component to keep checker indicator
+     *   - Label component to paint label
+     *
      * Developers are free to customize the component as they want. There is no limitation regarding
      * how the box and label components have to be laid out, which UI components have to be used as
      * the box or label components, etc. The check box extends state panel component and re-map states
      * to own views IDs:
-
-       - **"pressed.out"** - checked and pointer cursor is out
-       - **"out"** - un-checked and pointer cursor is out
-       - **"pressed.disabled"** - disabled and checked,
-       - **"disabled"** - disabled and un-checked ,
-       - **"pressed.over"** - checked and pointer cursor is over
-       - **"over"** - un-checked and pointer cursor is out
-
+     *
+     *   - **"pressed.out"** - checked and pointer cursor is out
+     *   - **"out"** - un-checked and pointer cursor is out
+     *   - **"pressed.disabled"** - disabled and checked,
+     *   - **"disabled"** - disabled and un-checked ,
+     *   - **"pressed.over"** - checked and pointer cursor is over
+     *   - **"over"** - un-checked and pointer cursor is out
+     *
      *
      * Customize is quite similar to what explained for zebkit.ui.EvStatePan:
      *
-
-            // create checkbox component
-            var ch = new zebkit.ui.Checkbox("Checkbox");
-
-            // change border when the component checked to green
-            // otherwise set it to red
-            ch.setBorder(new zebkit.ui.ViewSet({
-                "*": new zebkit.ui.Border("red"),
-                "pressed.*": new zebkit.ui.Border("green")
-            }));
-
-            // customize checker box children UI component to show
-            // green for checked and red for un-cheked states
-            ch.kids[0].setView(new zebkit.ui.ViewSet({
-                "*": "red",
-                "pressed.*": "green"
-            }));
-            // sync current state with new look and feel
-            ch.syncState();
-
+     *
+     *       // create checkbox component
+     *       var ch = new zebkit.ui.Checkbox("Checkbox");
+     *
+     *       // change border when the component checked to green
+     *       // otherwise set it to red
+     *       ch.setBorder(new zebkit.ui.ViewSet({
+     *           "*": new zebkit.ui.Border("red"),
+     *           "pressed.*": new zebkit.ui.Border("green")
+     *       }));
+     *
+     *       // customize checker box children UI component to show
+     *       // green for checked and red for un-cheked states
+     *       ch.kids[0].setView(new zebkit.ui.ViewSet({
+     *           "*": "red",
+     *           "pressed.*": "green"
+     *       }));
+     *       // sync current state with new look and feel
+     *       ch.syncState();
+     *
      * Listening checked event should be done by registering a listener in the check box switch manager
      * as follow:
-
-            // create checkbox component
-            var ch = new zebkit.ui.Checkbox("Checkbox");
-
-            // register a checkbox listener
-            ch.manager.on(function(sm) {
-                var s = sm.getValue();
-                ...
-            });
-
+     *
+     *       // create checkbox component
+     *       var ch = new zebkit.ui.Checkbox("Checkbox");
+     *
+     *       // register a checkbox listener
+     *       ch.manager.on(function(sm) {
+     *           var s = sm.getValue();
+     *           ...
+     *       });
+     *
      * @class  zebkit.ui.Checkbox
      * @extends zebkit.ui.CompositeEvStatePan
      * @uses  zebkit.ui.Switchable
@@ -850,11 +850,11 @@ zebkit.package("ui", function(pkg, Class) {
                 b = true;
             }
 
-            if (this.view.decorations != null && this.overDecoration != null && this.isEnabled) {
+            if (this.view.decorations && this.overDecoration && this.isEnabled === true) {
                 if (n === "over") {
                     this.view.setDecoration(this.overDecoration, this.colors[k]);
                     b = true;
-                } else if (this.view.decorations[this.overDecoration] != null) {
+                } else if (this.view.decorations[this.overDecoration]) {
                     this.view.setDecoration(this.overDecoration, null);
                     b = true;
                 }
@@ -879,20 +879,20 @@ zebkit.package("ui", function(pkg, Class) {
 
     /**
      * Fired when a toolbar element has been pressed
-
-            var t = new zebkit.ui.Toolbar();
-
-            // add three pressable icons
-            t.addImage("icon1.jpg");
-            t.addImage("icon2.jpg");
-            t.addLine();
-            t.addImage("ico3.jpg");
-
-            // catch a toolbar icon has been pressed
-            t.on(function (src) {
-                ...
-            });
-
+     *
+     *       var t = new zebkit.ui.Toolbar();
+     *
+     *       // add three pressable icons
+     *       t.addImage("icon1.jpg");
+     *       t.addImage("icon2.jpg");
+     *       t.addLine();
+     *       t.addImage("ico3.jpg");
+     *
+     *       // catch a toolbar icon has been pressed
+     *       t.on(function (src) {
+     *           ...
+     *       });
+     *
      * @event pressed
      * @constructor
      * @param {zebkit.ui.Panel} src a toolbar element that has been pressed

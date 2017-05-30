@@ -771,7 +771,6 @@ zebkit.package("ui", function(pkg, Class) {
                 }
                 return this;
             };
-
         },
 
         function focused(){

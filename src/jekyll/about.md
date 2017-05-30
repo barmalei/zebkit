@@ -304,6 +304,8 @@ zebkit.require(function() {
             combo.on(function(src) {
                 gmap.setMapTypeId(google.maps.MapTypeId[src.getValue()]);    
             });
+
+            c.setSize(400, 401);
         });
     }
 </script>

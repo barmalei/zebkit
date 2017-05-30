@@ -46,6 +46,7 @@ zebkit.package("ui", function(pkg, Class) {
           "right"
 
      * @class zebkit.ui.Tabs
+     * @uses  zebkit.ui.DecorationViews
      * @constructor
      * @extends {zebkit.ui.Panel}
      */
@@ -61,7 +62,7 @@ zebkit.package("ui", function(pkg, Class) {
      * @param {zebkit.ui.Tabs} src a tabs component that triggers the event
      * @param {Integer} selectedIndex a tab page index that has been selected
      */
-    pkg.Tabs = Class(pkg.Panel, pkg.$ViewsSetterMix, [
+    pkg.Tabs = Class(pkg.Panel, pkg.DecorationViews, [
         function(o) {
             /**
              * Selected tab page index
@@ -836,7 +837,14 @@ zebkit.package("ui", function(pkg, Class) {
                 return this;
             };
 
-            this.setPageGaps = function (vg,hg){
+            /**
+             * Set tab page vertical and horizontal gaps
+             * @param {Integer} vg a vertical gaps
+             * @param {Integer} hg a horizontal gaps
+             * @method setPageGaps
+             * @chainable
+             */
+            this.setPageGaps = function (vg, hg){
                 if (this.vgap !== vg || hg !== this.hgap){
                     this.vgap = vg;
                     this.hgap = hg;

@@ -11,15 +11,66 @@ zebkit.package("ui.grid", function(pkg, Class) {
      * The package contains number of classes and interfaces to implement
      * UI Grid component. The grid allows developers to visualize matrix
      * model, customize the model data editing and rendering.
+     *
+     *     // create grid that contains 3 rows and four columns
+     *     var grid = new zebkit.ui.grid.Grid([
+     *         [ "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" ],
+     *         [ "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" ],
+     *         [ "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" ].
+     *     ]);
+     *
+     *     // add grid top caption
+     *     grid.add("top", new zebkit.ui.grid.GridCaption([
+     *         "Title 1",
+     *         "Title 2",
+     *         "Title 3",
+     *         "Title 5",
+     *         "Title 6"
+     *     ]));
+     *
      * @class zebkit.ui.grid
      * @access package
      */
 
+
+    /**
+     * Structure to keep grid cells visibility.
+     * @constructor
+     * @class zebkit.ui.grid.CellsVisibility
+     */
     pkg.CellsVisibility = function() {
         this.hasVisibleCells = function(){
             return this.fr !== null && this.fc !== null &&
                    this.lr !== null && this.lc !== null   ;
         };
+
+        /**
+         * First visible row.
+         * @attribute fr
+         * @type {Integer}
+         * @default null
+         */
+
+        /**
+         * First visible column.
+         * @attribute fc
+         * @type {Integer}
+         * @default null
+         */
+
+        /**
+         * Last visible row.
+         * @attribute lr
+         * @type {Integer}
+         * @default null
+         */
+
+        /**
+         * Last visible column.
+         * @attribute lc
+         * @type {Integer}
+         * @default null
+         */
 
         // first visible row (row and y), first visible
         // col, last visible col and row
@@ -33,40 +84,77 @@ zebkit.package("ui.grid", function(pkg, Class) {
      */
     pkg.Metrics = zebkit.Interface([
         "abstract",
+
+            /**
+             * Get a structure that describes a grid component
+             * columns and rows visibility
+             * @return {zebkit.ui.grid.CellsVisibility} a grid cells visibility
+             * @method getCellsVisibility
+             */
             function getCellsVisibility() {},
+
+            /**
+             * Get the given column width of a grid component
+             * @param {Integer} col a column index
+             * @method getColWidth
+             * @return {Integer} a column width
+             */
             function getColWidth(col) {},
+
+            /**
+             * Get the given row height of a grid component
+             * @param {Integer} row a row index
+             * @method getRowHeight
+             * @return {Integer} a row height
+             */
             function getRowHeight(row) {},
+
+            /**
+             * Get the given column preferred width of a grid component
+             * @param {Integer} col a column index
+             * @method getPSColWidth
+             * @return {Integer} a column preferred width
+             */
+            function getPSColWidth(col) {},
+
+            /**
+             * Get the given row preferred height of a grid component
+             * @param {Integer} row a row index
+             * @method getPSRowHeight
+             * @return {Integer} a row preferred height
+             */
+            function getPSRowHeight(row) {},
+
+            /**
+             * Set the given row height of a grid component
+             * @param {Integer} row a row index
+             * @param {Integer} height a row height
+             * @method setRowHeight
+             */
             function setRowHeight(row, height) {},
-            function setColWidth(col, width) {}
+
+            /**
+             * Set the given column width of a grid component
+             * @param {Integer} col a column index
+             * @param {Integer} width a column width
+             * @method setColWidth
+             */
+            function setColWidth(col, width) {},
+
+            /**
+             * Get number of rows in a grid component
+             * @return {Integer} a number of rows
+             * @method getGridRows
+             */
+            function getGridRows() {},
+
+            /**
+             * Get number of columns in a grid component
+             * @return {Integer} a number of columns
+             * @method getGridCols
+             */
+            function getGridCols() {}
     ]);
-
-    /**
-     * Get the given column width of a grid component
-     * @param {Integer} col a column index
-     * @method getColWidth
-     * @return {Integer} a column width
-     */
-
-    /**
-     * Get the given row height of a grid component
-     * @param {Integer} row a row index
-     * @method getRowHeight
-     * @return {Integer} a row height
-     */
-
-    /**
-     * Get the given row preferred height of a grid component
-     * @param {Integer} row a row index
-     * @method getPSRowHeight
-     * @return {Integer} a row preferred height
-     */
-
-    /**
-     * Get the given column preferred width of a grid component
-     * @param {Integer} col a column index
-     * @method getPSColWidth
-     * @return {Integer} a column preferred width
-     */
 
      /**
       * Get a x origin of a grid component. Origin indicates how
@@ -81,39 +169,6 @@ zebkit.package("ui.grid", function(pkg, Class) {
       * @method getYOrigin
       * @return {Integer} a y origin
       */
-
-      /**
-       * Set the given column width of a grid component
-       * @param {Integer} col a column index
-       * @param {Integer} w a column width
-       * @method setColWidth
-       */
-
-      /**
-       * Set the given row height of a grid component
-       * @param {Integer} row a row index
-       * @param {Integer} h a row height
-       * @method setRowHeight
-       */
-
-      /**
-       * Get number of columns in a grid component
-       * @return {Integer} a number of columns
-       * @method getGridCols
-       */
-
-      /**
-       * Get number of rows in a grid component
-       * @return {Integer} a number of rows
-       * @method getGridRows
-       */
-
-       /**
-        * Get a structure that describes a grid component
-        * columns and rows visibility
-        * @return {zebkit.ui.grid.CellsVisibility} a grid cells visibility
-        * @method getCellsVisibility
-        */
 
       /**
        * Grid line size
@@ -134,45 +189,13 @@ zebkit.package("ui.grid", function(pkg, Class) {
      * background has to be rendered and aligned. Developers can implement an own
      * views providers and than setup it for a grid by calling "setViewProvider(...)"
      * method.
-     * @param {zebkit.ui.TextRender|zebkit.ui.StringText} [render] a string render
+     * @param {zebkit.ui.Render} [render] a string render
      * @class zebkit.ui.grid.DefViews
+     * @extends {zebkit.ui.BaseViewProvider}
      * @constructor
      */
-    pkg.DefViews = Class([
-        function(render) {
-            /**
-             * Default render that is used to paint grid content.
-             * @type {zebkit.ui.StringRender}
-             * @attribute render
-             * @readOnly
-             * @protected
-             */
-            this.render = (arguments.length === 0 || typeof render === 'undefined' ? new ui.StringRender("")
-                                                                                   : render);
-            zebkit.properties(this, this.clazz);
-        },
-
+    pkg.DefViews = Class(ui.BaseViewProvider, [
         function $prototype() {
-            /**
-             * Set the default view provider text render font
-             * @param {zebkit.ui.Font} f a font
-             * @method setFont
-             */
-            this.setFont = function(f) {
-                this.render.setFont(f);
-                return this;
-            };
-
-            /**
-             * Set the default view provider text render color
-             * @param {String} c a color
-             * @method setColor
-             */
-            this.setColor = function(c) {
-                this.render.setColor(c);
-                return this;
-            };
-
             /**
              * Get a renderer to draw the specified grid model value.
              * @param  {zebkit.ui.grid.Grid} target a target Grid component
@@ -183,16 +206,6 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * paint the given cell model value
              * @method  getView
              */
-            this.getView = function(target, row, col, obj){
-                if (obj !== null && typeof obj !== 'undefined') {
-                    if (typeof obj.toView !== 'undefined') return obj.toView();
-                    if (typeof obj.paint  !== 'undefined') return obj;
-                    this.render.setValue(obj.toString());
-                    return this.render;
-                } else {
-                    return null;
-                }
-            };
 
             /**
              * Get an horizontal alignment a content in the given grid cell
@@ -222,6 +235,44 @@ zebkit.package("ui.grid", function(pkg, Class) {
               * @return {String}  a cell color to be applied to the given grid cell
               * @method  getCellColor
               */
+        }
+    ]);
+
+    /**
+     * Stripped rows interface to extend a grid view provider.
+     *
+     *      var grid = new zebkit.ui.grid.Grid([ ... ]);
+     *
+     *      // Make grid rows stripped with blue and green colors
+     *      grid.provider.extend(zebkit.ui.grid.StrippedRows({
+     *          oddView : "blue",
+     *          evenView: "green"
+     *      }));
+     *
+     *
+     * @class zebkit.ui.grid.StrippedRows
+     * @interface zebkit.ui.grid.StrippedRows
+     */
+    pkg.StrippedRows = zebkit.Interface([
+        function $prototype() {
+            /**
+             * Odd rows view or color
+             * @attribute oddView
+             * @type {String|zebkit.ui.View}
+             */
+            this.oddView  = null;
+
+            /**
+             * Even rows view or color
+             * @attribute oddView
+             * @type {String|zebkit.ui.View}
+             */
+            this.evenView = null;
+
+            this.getCellColor = function(grid, row, col) {
+                return row % 2  === 0 ? this.evenView
+                                      : this.oddView;
+            };
         }
     ]);
 
@@ -296,24 +347,6 @@ zebkit.package("ui.grid", function(pkg, Class) {
                     }
                 }
             ]);
-
-            this.Items = Class([
-                function $prototype() {
-                    this.toString = function() {
-                        return this.selectedIndex < 0 ? ""
-                                                      : this.items[this.selectedIndex];
-                    };
-                },
-
-                function(items, selectedIndex) {
-                    if (arguments.length < 2) {
-                        selectedIndex = -1;
-                    }
-
-                    this.items = items;
-                    this.selectedIndex = selectedIndex;
-                }
-            ]);
         },
 
         function $prototype() {
@@ -330,10 +363,6 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @method  fetchEditedValue
              */
             this.fetchEditedValue = function(grid, row, col, data, editor) {
-                if (editor === this.selectorEditor) {
-                    data.selectedIndex = editor.list.selectedIndex;
-                    return data;
-                }
                 return editor.getValue();
             };
 
@@ -354,22 +383,16 @@ zebkit.package("ui.grid", function(pkg, Class) {
                         editor.setValue(v);
                     }
                     return editor;
-                }
-
-                editor = zebkit.isBoolean(v) ? this.boolEditor
-                                            : (zebkit.instanceOf(v, this.clazz.Items) ? this.selectorEditor : this.textEditor);
-
-                if (editor === this.selectorEditor) {
-                    editor.list.setModel(v.items);
-                    editor.list.select(v.selectedIndex);
                 } else {
-                    editor.setValue(v);
-                }
+                    editor = zebkit.isBoolean(v) ? this.boolEditor
+                                                 : this.textEditor;
 
-                editor.setPadding(0);
-                var ah = Math.floor((grid.getRowHeight(row) - editor.getPreferredSize().height)/2);
-                editor.setPadding(ah, grid.cellInsetsLeft, ah, grid.cellInsetsRight);
-                return editor;
+                    editor.setValue(v);
+                    editor.setPadding(0);
+                    var ah = Math.floor((grid.getRowHeight(row) - editor.getPreferredSize().height)/2);
+                    editor.setPadding(ah, grid.cellInsetsLeft, ah, grid.cellInsetsRight);
+                    return editor;
+                }
             };
 
             /**
@@ -381,7 +404,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @return {Boolean} true if the given input event triggers the given cell editing
              * @method shouldStart
              */
-            this.shouldStart = function(grid,row,col,e){
+            this.shouldStart = function(grid, row, col, e){
                 return e.id === "pointerClicked";
             };
 
@@ -435,7 +458,6 @@ zebkit.package("ui.grid", function(pkg, Class) {
      * @param  {Integer} rowcol a row or column that has been resized
      * @param  {Integer} pwh a previous row or column size
      */
-
     pkg.BaseCaption = Class(ui.Panel, [
         function(titles) {
             this._ = new this.clazz.Listeners();
@@ -535,7 +557,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
              */
             this.pointerDragStarted = function(e){
                 if (this.metrics !== null &&
-                    this.isResizable     &&
+                    this.isResizable      &&
                     this.metrics.isUsePsMetric === false)
                 {
                     this.calcRowColAt(e.x, e.y);
@@ -618,7 +640,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 }
             };
 
-            this.calcRowColAt = function(x, y){
+            this.calcRowColAt = function(x, y) {
                 var $this = this;
                 this.selectedColRow = this.getCaptionAt(x, y, function(m, xy, xxyy, wh, i) {
                     xxyy += (wh + m.lineSize);

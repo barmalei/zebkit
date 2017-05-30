@@ -11,7 +11,7 @@ zebkit.package("ui", function(pkg, Class) {
      * pointer cursor moving
      * @extends {zebkit.ui.Panel}
      * @uses {zebkit.util.Position.Metric}
-     * @uses {zebkit.ui.$ViewsSetterMix}
+     * @uses {zebkit.ui.DecorationViews}
      */
 
     /**
@@ -25,7 +25,7 @@ zebkit.package("ui", function(pkg, Class) {
      * @param {zebkit.ui.BaseList} src a list that triggers the event
      * @param {Integer|Object} prev a previous selected index, return null if the selected item has been re-selected
      */
-    pkg.BaseList = Class(pkg.Panel, zebkit.util.Position.Metric, pkg.$ViewsSetterMix, [
+    pkg.BaseList = Class(pkg.Panel, zebkit.util.Position.Metric, pkg.DecorationViews, [
         function (m, b) {
             if (arguments.length === 0) {
                 m = [];
@@ -89,15 +89,26 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $prototype() {
-            this.scrollManager = this.position = this.model = null;
+            this.scrollManager = null;
+
 
             this.canHaveFocus = true;
+
             /**
              * List model the component visualizes
              * @attribute model
              * @type {zebkit.data.ListModel}
              * @readOnly
              */
+            this.model = null;
+
+            /**
+             * Position manager.
+             * @attribute position
+             * @type {zebkit.util.Position}
+             * @readOnly
+             */
+            this.position = null;
 
             /**
              * Select the specified list item.
@@ -149,6 +160,13 @@ zebkit.package("ui", function(pkg, Class) {
                                               : this.model.get(this.selectedIndex);
             };
 
+            /**
+             * Lookup a list item buy the given first character
+             * @param  {String} ch a first character to lookup
+             * @return {Integer} a position of found list item in the list or -1 if no item is found.
+             * @method lookupItem
+             * @protected
+             */
             this.lookupItem = function(ch){
                 var count = this.model === null ? 0 : this.model.count();
                 if (zebkit.util.isLetter(ch) && count > 0){
@@ -711,7 +729,7 @@ zebkit.package("ui", function(pkg, Class) {
             // define new list item views provider that represents every
             // list model item as icon with a caption
             list.setViewProvider(new zebkit.ui.List.ViewProvider([
-                function getView(target, value, i) {
+                function getView(target, i, value) {
                     var caption = value[1];
                     var icon    = value[0];
                     return new zebkit.ui.CompRender(new zebkit.ui.ImageLabel(caption, icon));
@@ -765,59 +783,8 @@ zebkit.package("ui", function(pkg, Class) {
              * be rendered as the view.
              * @class zebkit.ui.List.ViewProvider
              * @constructor
-             * @param {String|zebkit.ui.Font} [f] a font to render list item text
-             * @param {String} [c] a color to render list item text
              */
-            this.ViewProvider = Class([
-                function(f, c) {
-                    /**
-                     * Reference to text render that is used to paint a list items
-                     * @type {zebkit.ui.StringRender}
-                     * @attribute text
-                     * @readOnly
-                     */
-
-                    this.render = new pkg.StringRender("");
-                    zebkit.properties(this, this.clazz);
-                    if (arguments.length > 0) this.render.setFont(f);
-                    if (arguments.length > 1) this.render.setColor(c);
-                },
-
-                function $prototype() {
-                    this.setColor = function(c) {
-                        this.render.setColor(c);
-                        return this;
-                    };
-
-                    this.setFont = function(f) {
-                        this.render.setFont(f);
-                        return this;
-                    };
-
-                    /**
-                     * Get a view for the given model data element of the
-                     * specified list component
-                     * @param  {zebkit.ui.List} target a list component
-                     * @param  {Object} value  a data model value
-                     * @param  {Integer} i  an item index
-                     * @return {zebkit.ui.View}  a view to be used to render
-                     * the given list component item
-                     * @method getView
-                     */
-                    this.getView = function(target, value, i) {
-                        // TODO: this copy paste from grid caption render. Think it is possible to generalize it
-                        // alone with setFont and setColor methods
-                        if (value !== null) {
-                            if (typeof value.toView !== 'undefined') return value.toView();
-                            if (typeof value.paint  !== 'undefined') return value;
-                            this.render.setValue(value.toString());
-                            return this.render;
-                        } else {
-                            return null;
-                        }
-                    };
-                }
-            ]);
+            this.ViewProvider = Class(pkg.BaseViewProvider, []);
 
             /**
              * @for zebkit.ui.List
@@ -873,7 +840,7 @@ zebkit.package("ui", function(pkg, Class) {
                                 }
                             }
 
-                            this.provider.getView(this, this.model.get(i), i)
+                            this.provider.getView(this, i, this.model.get(i))
                                          .paint(g, x + this.gap, y + this.gap,
                                                    this.widths[i] - dg,
                                                    this.heights[i]- dg, this);
@@ -906,7 +873,7 @@ zebkit.package("ui", function(pkg, Class) {
                     if (provider !== null) {
                         var dg = 2*this.gap;
                         for(var i = 0;i < count; i++){
-                            var ps = provider.getView(this, this.model.get(i), i).getPreferredSize();
+                            var ps = provider.getView(this, i, this.model.get(i)).getPreferredSize();
                             this.heights[i] = ps.height + dg;
                             this.widths [i] = ps.width  + dg;
 
@@ -1048,8 +1015,8 @@ zebkit.package("ui", function(pkg, Class) {
             this.setViewProvider(new zebkit.Dummy([
                 function $prototype() {
                     this.render = new pkg.CompRender();
-                    this.getView = function (target,obj,i) {
-                        this.render.setTarget(obj);
+                    this.getView = function (target,i, obj) {
+                        this.render.setValue(obj);
                         return this.render;
                     };
                 }

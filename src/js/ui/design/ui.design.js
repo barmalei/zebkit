@@ -35,15 +35,42 @@ zebkit.package("ui.design", function(pkg, Class) {
 
     /**
      * A designer border view. The border view visually indicates areas
-     * of border with different size possibilities.
+     * of border with different size possibilities. The border logically
+     * split area around a component to number of predefined areas such
+     * as: "center", "bottom", "right", "left", "topRight", "topLeft",
+     * "bottomLeft", "bottomRight", "none". See illustration below:
+     *
+     *
+     *      |topLeft|-----------| top |-------------|topRight|
+     *          |                                        |
+     *          |                                        |
+     *      |  left |            center             |  right |
+     *          |                                        |
+     *          |                                        |
+     *      |bottomLeft|-------|bottom|-------------|bottomRight|
+     *
+     *
      * @constructor
      * @class zebkit.ui.design.ShaperBorder
      * @extends {zebkit.ui.View}
      */
     pkg.ShaperBorder = Class(ui.View, [
         function $prototype() {
+            /**
+             * Border color
+             * @attribute color
+             * @type {String}
+             * @default "blue"
+             */
             this.color = "blue";
-            this.gap   = 7;
+
+            /**
+             * Border gap.
+             * @attribute gap
+             * @type {Number}
+             * @default 7
+             */
+            this.gap = 7;
 
             function contains(x, y, gx, gy, ww, hh) {
                 return gx <= x && (gx + ww) > x && gy <= y && (gy + hh) > y;
@@ -81,7 +108,16 @@ zebkit.package("ui.design", function(pkg, Class) {
                 g.stroke();
             };
 
-            this.detectAt = function(target,x,y) {
+            /**
+             * Detect area type by the given location of the given component
+             * @param  {zebkit.ui.Panel} target a target component
+             * @param  {Integer} x a x coordinate
+             * @param  {Integer} y an y coordinate
+             * @return {String} a detected area type
+             * @protected
+             * @method detectAt
+             */
+            this.detectAt = function(target, x, y) {
                 if (contains(x, y, this.gap, this.gap, target.width - 2 * this.gap, target.height - 2 * this.gap)) {
                     return "center";
                 }
@@ -152,6 +188,16 @@ zebkit.package("ui.design", function(pkg, Class) {
      * has to be controlled
      */
     pkg.ShaperPan = Class(ui.Panel, [
+        function(t) {
+            this.shaperBr = new pkg.ShaperBorder();
+            this.$super(new zebkit.layout.BorderLayout());
+            this.px = this.py = 0;
+            this.setBorder(this.shaperBr);
+            if (arguments.length > 0) {
+                this.add(t);
+            }
+        },
+
         function $clazz() {
             this.colors = [ "lightGray", "blue" ];
         },
@@ -188,7 +234,7 @@ zebkit.package("ui.design", function(pkg, Class) {
              */
             this.minHeight = this.minWidth = 12;
             this.canHaveFocus = this.isResizeEnabled = this.isMoveEnabled = true;
-            this.state = null;
+            this.$state = null;
 
             this.catchInput = true;
 
@@ -235,13 +281,13 @@ zebkit.package("ui.design", function(pkg, Class) {
              * @method pointerDragStarted
              */
             this.pointerDragStarted = function(e) {
-                this.state = null;
+                this.$state = null;
                 if (this.isResizeEnabled || this.isMoveEnabled) {
                     var t = this.shaperBr.detectAt(this, e.x, e.y);
                     if ((this.isMoveEnabled   === true || t !== "center")||
                         (this.isResizeEnabled === true || t === "center")  )
                     {
-                        this.state = { top    : (t === "top"    || t === "topLeft"     || t === "topRight"   ) ? 1 : 0,
+                        this.$state = { top    : (t === "top"    || t === "topLeft"     || t === "topRight"   ) ? 1 : 0,
                                        left   : (t === "left"   || t === "topLeft"     || t === "bottomLeft" ) ? 1 : 0,
                                        right  : (t === "right"  || t === "topRight"    || t === "bottomRight") ? 1 : 0,
                                        bottom : (t === "bottom" || t === "bottomRight" || t === "bottomLeft" ) ? 1 : 0 };
@@ -258,10 +304,10 @@ zebkit.package("ui.design", function(pkg, Class) {
              * @method pointerDragged
              */
             this.pointerDragged = function(e){
-                if (this.state !== null) {
+                if (this.$state !== null) {
                     var dy = (e.absY - this.py),
                         dx = (e.absX - this.px),
-                        s  = this.state,
+                        s  = this.$state,
                         nw = this.width  - dx * s.left + dx * s.right,
                         nh = this.height - dy * s.top  + dy * s.bottom;
 
@@ -278,7 +324,15 @@ zebkit.package("ui.design", function(pkg, Class) {
                 }
             };
 
-            this.setColor = function (b, color) {
+            /**
+             * Set the border color for the given focus state.
+             * @param {Boolean} b a focus state. true means the component holds focus,
+             * false means the component is not a focus owner.
+             * @param {String} color a border color
+             * @method setBorderColor
+             * @chainable
+             */
+            this.setBorderColor = function (b, color) {
                 var rp = false;
                 if (this.colors === null) {
                     this.colors = [ "lightGray", "blue"];
@@ -287,7 +341,7 @@ zebkit.package("ui.design", function(pkg, Class) {
 
                 var oldCol = this.colors[b?1:0];
                 if (oldCol !== color) {
-                    this.colors[b?1:0] = color;
+                    this.colors[b ? 1 : 0] = color;
                     rp = true;
                 }
 
@@ -304,7 +358,16 @@ zebkit.package("ui.design", function(pkg, Class) {
                 return this;
             };
 
-            this.setColors = function(col1, col2) {
+            /**
+             * Set the border colors.
+             * @param {String} col1 a color the border has to have when the
+             * component doesn't hold focus.
+             * @param {String} [col2] a color the border has to have if the
+             * component is focus owner.
+             * @method setBorderColors
+             * @chainable
+             */
+            this.setBorderColors = function(col1, col2) {
                 this.setColor(false, col1);
                 if (arguments.length > 1) {
                     this.setColor(true, col2);
@@ -335,21 +398,11 @@ zebkit.package("ui.design", function(pkg, Class) {
             this.$super();
             this.shaperBr.color = this.colors[this.hasFocus()? 1 : 0];
             this.repaint();
-        },
-
-        function(t) {
-            this.shaperBr = new pkg.ShaperBorder();
-            this.$super(new zebkit.layout.BorderLayout());
-            this.px = this.py = 0;
-            this.setBorder(this.shaperBr);
-            if (arguments.length > 0) {
-                this.add(t);
-            }
         }
     ]);
 
     /**
-     * Special tree model implementation that represent zebkit UI component
+     * Special tree model implementation that represents zebkit UI component
      * hierarchy as a simple tree model.
      * @param  {zebkit.ui.Panel} target a root UI component
      * @constructor
@@ -357,7 +410,17 @@ zebkit.package("ui.design", function(pkg, Class) {
      * @extends {zebkit.data.TreeModel}
      */
     pkg.FormTreeModel = Class(zebkit.data.TreeModel, [
+        function (target){
+            this.$super(this.buildModel(target, null));
+        },
+
         function $prototype() {
+            /**
+             * Build tree model by the given UI component.
+             * @param  {zebkit.ui.Panel} comp a component
+             * @return {zebkit.data.Item} a root tree model item
+             * @method buildModel
+             */
             this.buildModel = function(comp, root){
                 var b    = typeof this.exclude !== 'undefined' && this.exclude(comp),
                     item = b ? root : this.createItem(comp);
@@ -372,6 +435,12 @@ zebkit.package("ui.design", function(pkg, Class) {
                 return b ? null : item;
             };
 
+            /**
+             * Find a tree item that relates to the given component.
+             * @param  {zebkit.ui.Panel} c a component.
+             * @return {zebkit.data.Item} a tree item.
+             * @method itemByComponent
+             */
             this.itemByComponent = function (c, r) {
                 if (arguments.length < 2) r = this.root;
                 if (r.comp === c) return c;
@@ -390,10 +459,6 @@ zebkit.package("ui.design", function(pkg, Class) {
                 item.comp = comp;
                 return item;
             };
-        },
-
-        function (target){
-            this.$super(this.buildModel(target, null));
         }
     ]);
 });

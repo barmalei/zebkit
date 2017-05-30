@@ -65,7 +65,7 @@
 
         "padding"  : 4,
         "font"     : "%{zebkit.ui.boldFont}",
-        "fontColor": "rgb(65, 131, 215)"
+        "color"    : "rgb(65, 131, 215)"
     },
 
     "LeftGridCaption" :{

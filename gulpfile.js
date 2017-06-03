@@ -3,7 +3,7 @@ var gulp = require('gulp');
 
 // Build tree:
 // ----------
-//     [ 'easyoop', 'misc', 'ui', 'ui.grid', 'ui.tree', 'ui.design', 'web', 'ui.web' ]
+//     [ 'easyoop', 'misc', 'ui.event', ui', 'ui.grid', 'ui.tree', 'ui.design', 'web', 'ui.web' ]
 //                                    *
 //                                    |
 //                                [ zebkit ]        [ 'resource', 'ui.vk', 'ui.calendar' ]
@@ -40,12 +40,15 @@ var miscFiles = [
     'src/js/layout.js'
 ];
 
+var uiEventFiles = [
+    "src/js/ui/event/ui.event.core.js",
+    "src/js/ui/event/ui.event.FocusManager.js",
+    "src/js/ui/event/ui.event.ShortcutManager.js"
+];
+
 var uiCoreFiles = [
-    "src/js/ui/ui.core.event.js",
     "src/js/ui/ui.core.js",
-    "src/js/ui/ui.views.js",
-    "src/js/ui/ui.FocusManager.js",
-    "src/js/ui/ui.ShortcutManager.js"
+    "src/js/ui/ui.views.js"
 ];
 
 var uiFiles = [
@@ -103,6 +106,7 @@ var uiWebFiles = [
 
 var zebkitFiles = [ 'build/easyoop.js',
                     'build/misc.js',
+                    'build/ui.event.js',
                     'build/ui.js',
                     'build/ui.tree.js',
                     'build/ui.grid.js',
@@ -180,6 +184,7 @@ gulp.task('resources', function() {
 //
 packageTask("easyoop", [   "src/js/web/web.environment.js", "src/js/easyoop.js" ], false);
 packageTask("misc", miscFiles, false);
+packageTask("ui.event", uiEventFiles);
 packageTask("ui", uiCoreFiles.concat(uiFiles));
 packageTask("ui.grid", uiGridFiles);
 packageTask("ui.tree", uiTreeFiles);
@@ -188,11 +193,11 @@ packageTask("web", webFiles);
 packageTask("ui.web", uiWebFiles);
 
 // extra packages
-packageTask("ui.calendar", [ "src/js/ui/date/ui.date.js" ], false);
+packageTask("ui.date", [ "src/js/ui/date/ui.date.js" ], false);
 packageTask("ui.vk", [ "src/js/ui/vk/ui.vk.js" ], false);
 
 
-gulp.task('genZebkit',  ['easyoop', 'misc',  'ui', 'ui.grid', 'ui.tree', 'ui.design', 'web', 'ui.web'], function() {
+gulp.task('genZebkit',  ['easyoop', 'misc', 'ui.event', 'ui', 'ui.grid', 'ui.tree', 'ui.design', 'web', 'ui.web', 'ui.vk', 'ui.date'], function() {
     return gulp.src(zebkitFiles)
           .pipe(expect(zebkitFiles))
           .pipe(concat('build/zebkit.js'))
@@ -215,6 +220,8 @@ gulp.task('zebkit',  ['genZebkit' ], function() {
                       "build/ui.tree.min.js",
                       "build/ui.grid.js",
                       "build/ui.grid.min.js",
+                      "build/ui.event.js",
+                      "build/ui.event.min.js",
                       "build/ui.web.js",
                       "build/ui.web.min.js",
                       "build/ui.min.js",
@@ -222,7 +229,7 @@ gulp.task('zebkit',  ['genZebkit' ], function() {
           .pipe(rm());
 });
 
-gulp.task('buildJS', [ "zebkit", "resources", "ui.calendar", "ui.vk" ]);
+gulp.task('buildJS', [ "zebkit", "resources", "ui.date", "ui.vk" ]);
 
 gulp.task('runtime', [ "buildJS" ], function () {
     return  gulp.src([
@@ -231,8 +238,8 @@ gulp.task('runtime', [ "buildJS" ], function () {
                 "build/zebkit.min.js",
                 "build/ui.vk.js",
                 "build/ui.vk.min.js",
-                "build/ui.calendar.js",
-                "build/ui.calendar.min.js"
+                "build/ui.date.js",
+                "build/ui.date.min.js"
             ], { base: "build" })
             .pipe(zip('zebkit.runtime.zip'))
             .pipe(gulp.dest("build"));
@@ -261,7 +268,7 @@ gulp.task('website', [ 'buildJS' ], function (gulpCallBack){
 gulp.task('apidoc', [ "zebkit" ], function (gulpCallBack){
     var spawn  = require('child_process').spawn;
     var yuidoc = spawn('yuidoc', ['-t', 'node_modules/yuidoc-zebkit-theme/themes/dark',
-                                  '-H', 'node_modules/yuidoc-zebkit-theme/src/helpers/helpers.js',
+                                  '-c', 'src/yuidoc/yuidoc.json',
                                   "-o", "apidoc",
                                   "-n",
                                   './build' ], { stdio: 'inherit' });
@@ -274,7 +281,7 @@ gulp.task('apidoc', [ "zebkit" ], function (gulpCallBack){
 gulp.task('apidoc-light', [ "zebkit" ], function (gulpCallBack){
     var spawn  = require('child_process').spawn;
     var yuidoc = spawn('yuidoc', ['-t', 'node_modules/yuidoc-zebkit-theme/themes/light',
-                                  '-H', 'node_modules/yuidoc-zebkit-theme/src/helpers/helpers.js',
+                                  '-c', 'src/yuidoc/yuidoc.json',
                                   "-o", "apidoc",
                                   "-n",
                                   './build' ], { stdio: 'inherit' });

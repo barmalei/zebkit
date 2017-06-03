@@ -1,0 +1,11 @@
+{
+    "name": "zebkit",
+    "description": "UI rendered on HTML5 Canvas",
+    "version": "2.0.0",
+    "url": "http://zebkit.com/",
+    "options": {
+        "linkNatives" : true,
+        "helpers"     : [ "node_modules/yuidoc-zebkit-theme/src/helpers/helpers.js" ],
+        "preprocessor": [ "node_modules/yuidoc-zebkit-theme/src/helpers/preprocessor.js"]
+    }
+}

@@ -149,15 +149,15 @@ zebkit.package("ui", function(pkg, Class) {
      * Event state panel class. The class implements UI component whose face, border and
      * background view depends on its input events state. The component is good basis
      * for creation  dynamic view UI components.The state the component can be is:
-
-        - **over** the pointer cursor is inside the component
-        - **out** the pointer cursor is outside the component
-        - **pressed over** the pointer cursor is inside the component and an action pointer
-          button or key is pressed
-        - **pressed out** the pointer cursor is outside the component and an action pointer
-          button or key is pressed
-        - **disabled** the component is disabled
-
+     *
+     *   - **over** the pointer cursor is inside the component
+     *   - **out** the pointer cursor is outside the component
+     *   - **pressed over** the pointer cursor is inside the component and an action pointer
+     *     button or key is pressed
+     *   - **pressed out** the pointer cursor is outside the component and an action pointer
+     *     button or key is pressed
+     *   - **disabled** the component is disabled
+     *
      * The view border, background or face should be set as "zebkit.ui.ViewSet" where an required
      * for the given component state view is identified by an id. By default corresponding to
      * component states views IDs are the following: "over", "pressed.over", "out", "pressed.out",
@@ -299,7 +299,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define key pressed events handler
-             * @param  {zebkit.ui.KeyEvent} e a key event
+             * @param  {zebkit.ui.event.KeyEvent} e a key event
              * @method keyPressed
              */
             this.keyPressed = function(e){
@@ -308,7 +308,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define key released events handler
-             * @param  {zebkit.ui.KeyEvent} e a key event
+             * @param  {zebkit.ui.event.KeyEvent} e a key event
              * @method keyReleased
              */
             this.keyReleased = function(e){
@@ -317,7 +317,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer entered events handler
-             * @param  {zebkit.ui.PointerEvent} e a key event
+             * @param  {zebkit.ui.event.PointerEvent} e a key event
              * @method pointerEntered
              */
             this.pointerEntered = function (e){
@@ -326,7 +326,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer exited events handler
-             * @param  {zebkit.ui.PointerEvent} e a key event
+             * @param  {zebkit.ui.event.PointerEvent} e a key event
              * @method pointerExited
              */
             this.pointerExited = function(e){
@@ -338,7 +338,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer pressed events handler
-             * @param  {zebkit.ui.PointerEvent} e a key event
+             * @param  {zebkit.ui.event.PointerEvent} e a key event
              * @method pointerPressed
              */
             this.pointerPressed = function(e){
@@ -347,7 +347,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer released events handler
-             * @param  {zebkit.ui.PointerEvent} e a key event
+             * @param  {zebkit.ui.event.PointerEvent} e a key event
              * @method pointerReleased
              */
             this.pointerReleased = function(e){
@@ -356,7 +356,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer dragged events handler
-             * @param  {zebkit.ui.PointerEvent} e a key event
+             * @param  {zebkit.ui.event.PointerEvent} e a key event
              * @method pointerDragged
              */
             this.pointerDragged = function(e){

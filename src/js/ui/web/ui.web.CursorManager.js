@@ -24,16 +24,16 @@ zebkit.package("ui.web", function(pkg, Class) {
 
      *  @class zebkit.ui.web.CursorManager
      *  @constructor
-     *  @extends {zebkit.ui.Manager}
+     *  @extends {zebkit.ui.event.Manager}
      */
-    pkg.CursorManager = Class(zebkit.ui.CursorManager, [
+    pkg.CursorManager = Class(zebkit.ui.event.CursorManager, [
         function $prototype() {
             this.$isFunc = false;
             this.source = this.target = null;
 
             /**
              * Define pointer moved events handler.
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerMoved
              */
             this.pointerMoved = function(e) {
@@ -46,7 +46,7 @@ zebkit.package("ui.web", function(pkg, Class) {
 
             /**
              * Define pointer entered events handler.
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerEntered
              */
             this.pointerEntered = function(e) {
@@ -67,7 +67,7 @@ zebkit.package("ui.web", function(pkg, Class) {
 
             /**
              * Define pointer exited events handler.
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerExited
              */
             this.pointerExited  = function(e){
@@ -83,7 +83,7 @@ zebkit.package("ui.web", function(pkg, Class) {
 
             /**
              * Define pointer dragged events handler.
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerDragged
              */
             this.pointerDragged = function(e) {

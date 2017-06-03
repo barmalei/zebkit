@@ -75,11 +75,14 @@ zebkit.package("ui", function(pkg, Class) {
             }
 
             if (root[0] !== '/') {
-                path = zebkit.URI.join(zebkit.ui.$url, root, path);
+            path = zebkit.URI.join(zebkit.ui.$url, root, path);
             } else {
                 path = zebkit.URI.join(root, path);
             }
         }
+
+
+        console.log("LOAD RESOURCES pkg = " + pkg.$name + ", $url = " + pkg.$url +  ", path = " + path);
 
         // it guarantees that loading if JSONs will be done sequentially in
         // the order the JSON appeared
@@ -445,7 +448,7 @@ zebkit.package("ui", function(pkg, Class) {
     var $paintTask = null,
         $paintTasks = [],
         temporary = { x:0, y:0, width:0, height:0 },
-        COMP_EVENT = new pkg.CompEvent();
+        COMP_EVENT = new zebkit.ui.event.CompEvent();
 
     /**
      * Trigger painting for all collected paint tasks
@@ -616,7 +619,7 @@ zebkit.package("ui", function(pkg, Class) {
          p.pointerPressed = function(e) { ... }; // add event handler
 
      * @event pointerPressed
-     * @param {zebkit.ui.PointerEvent} e a pointer event
+     * @param {zebkit.ui.event.PointerEvent} e a pointer event
     */
 
     /**
@@ -627,7 +630,7 @@ zebkit.package("ui", function(pkg, Class) {
          p.pointerReleased = function(e) { ... }; // add event handler
 
      * @event pointerReleased
-     * @param {zebkit.ui.PointerEvent} e a pointer event
+     * @param {zebkit.ui.event.PointerEvent} e a pointer event
      */
 
     /**
@@ -637,7 +640,7 @@ zebkit.package("ui", function(pkg, Class) {
          var p = new zebkit.ui.Panel();
          p.pointerMoved = function(e) { ... }; // add event handler
 
-     * @param {zebkit.ui.PointerEvent} e a pointer event
+     * @param {zebkit.ui.event.PointerEvent} e a pointer event
      * @event  pointerMoved
      */
 
@@ -648,7 +651,7 @@ zebkit.package("ui", function(pkg, Class) {
          var p = new zebkit.ui.Panel();
          p.pointerEntered = function(e) { ... }; // add event handler
 
-     * @param {zebkit.ui.PointerEvent} e a pointer event
+     * @param {zebkit.ui.event.PointerEvent} e a pointer event
      * @event  pointerEntered
      */
 
@@ -659,7 +662,7 @@ zebkit.package("ui", function(pkg, Class) {
          var p = new zebkit.ui.Panel();
          p.pointerExited = function(e) { ... }; // add event handler
 
-     * @param {zebkit.ui.PointerEvent} e a pointer event
+     * @param {zebkit.ui.event.PointerEvent} e a pointer event
      * @event  pointerExited
      */
 
@@ -671,7 +674,7 @@ zebkit.package("ui", function(pkg, Class) {
          var p = new zebkit.ui.Panel();
          p.pointerClicked = function(e) { ... }; // add event handler
 
-     * @param {zebkit.ui.PointerEvent} e a pointer event
+     * @param {zebkit.ui.event.PointerEvent} e a pointer event
      * @event  pointerClicked
      */
 
@@ -683,7 +686,7 @@ zebkit.package("ui", function(pkg, Class) {
          var p = new zebkit.ui.Panel();
          p.pointerDragged = function(e) { ... }; // add event handler
 
-     * @param {zebkit.ui.PointerEvent} e a pointer event
+     * @param {zebkit.ui.event.PointerEvent} e a pointer event
      * @event  pointerDragged
      */
 
@@ -695,7 +698,7 @@ zebkit.package("ui", function(pkg, Class) {
          var p = new zebkit.ui.Panel();
          p.pointerDragStarted = function(e) { ... }; // add event handler
 
-     * @param {zebkit.ui.PointerEvent} e a pointer event
+     * @param {zebkit.ui.event.PointerEvent} e a pointer event
      * @event  pointerDragStarted
     */
 
@@ -707,7 +710,7 @@ zebkit.package("ui", function(pkg, Class) {
          var p = new zebkit.ui.Panel();
          p.pointerDragEnded = function(e) { ... }; // add event handler
 
-     * @param {zebkit.ui.PointerEvent} e a pointer event
+     * @param {zebkit.ui.event.PointerEvent} e a pointer event
      * @event  pointerDragEnded
     */
 
@@ -718,7 +721,7 @@ zebkit.package("ui", function(pkg, Class) {
          var p = new zebkit.ui.Panel();
          p.keyPressed = function(e) { ... }; // add event handler
 
-     * @param {zebkit.ui.KeyEvent} e a key event
+     * @param {zebkit.ui.event.KeyEvent} e a key event
      * @event  keyPressed
      */
 
@@ -729,7 +732,7 @@ zebkit.package("ui", function(pkg, Class) {
          var p = new zebkit.ui.Panel();
          p.keyTyped = function(e) { ... }; // add event handler
 
-     * @param {zebkit.ui.KeyEvent} e a key event
+     * @param {zebkit.ui.event.KeyEvent} e a key event
      * @event  keyTyped
      */
 
@@ -740,7 +743,7 @@ zebkit.package("ui", function(pkg, Class) {
          var p = new zebkit.ui.Panel();
          p.keyReleased = function(e) { ... }; // add event handler
 
-     * @param {zebkit.ui.KeyEvent} e a key event
+     * @param {zebkit.ui.event.KeyEvent} e a key event
      * @event  keyReleased
      */
 
@@ -751,7 +754,7 @@ zebkit.package("ui", function(pkg, Class) {
          var p = new zebkit.ui.Panel();
          p.compSized = function(e) { ... }; // add event handler
 
-     * @param {zebkit.ui.CompEvent} e a component event. Source of the event
+     * @param {zebkit.ui.event.CompEvent} e a component event. Source of the event
      * is a component that has been sized, "prevWidth" and "prevHeight" fields
      * keep a previous size the component had.
      * @event compSized
@@ -768,7 +771,7 @@ zebkit.package("ui", function(pkg, Class) {
      * @param {zebkit.ui.Panel} c a component that has been moved
      * @param {Integer} px a previous x coordinate the moved component had
      * @param {Integer} py a previous y coordinate the moved component had
-     * @param {zebkit.ui.CompEvent} e a component event. Source of the event
+     * @param {zebkit.ui.event.CompEvent} e a component event. Source of the event
      * is a component that has been moved. "prevX" and "prevY" fields hold
      * a previous location the component had.
      * @event compMoved
@@ -782,7 +785,7 @@ zebkit.package("ui", function(pkg, Class) {
          var p = new zebkit.ui.Panel();
          p.compEnabled = function(e) { ... }; // add event handler
 
-     * @param {zebkit.ui.CompEvent} e a component event.
+     * @param {zebkit.ui.event.CompEvent} e a component event.
      * @event compEnabled
      */
 
@@ -794,7 +797,7 @@ zebkit.package("ui", function(pkg, Class) {
          var p = new zebkit.ui.Panel();
          p.compShown = function(e) { ... }; // add event handler
 
-     * @param {zebkit.ui.CompEvent} e a component event.
+     * @param {zebkit.ui.event.CompEvent} e a component event.
      * @event compShown
      */
 
@@ -806,7 +809,7 @@ zebkit.package("ui", function(pkg, Class) {
          var p = new zebkit.ui.Panel();
          p.compAdded = function(e) { ... }; // add event handler
 
-     * @param {zebkit.ui.CompEvent} e a component event. The source of the passed event
+     * @param {zebkit.ui.event.CompEvent} e a component event. The source of the passed event
      * is set to a container component, "kid" field is set to a component that has been
      * added to the container, "constraints" holds a constraints the child component has been
      * added.
@@ -821,7 +824,7 @@ zebkit.package("ui", function(pkg, Class) {
          var p = new zebkit.ui.Panel();
          p.compRemoved = function(e) { ... }; // add event handler
 
-     * @param {zebkit.ui.CompEvent} e a component event. The source of the passed event
+     * @param {zebkit.ui.event.CompEvent} e a component event. The source of the passed event
      * is set to the container component. "kid" field is set to a child component that has
      * been removed from the container and "index" field is set to the index the kid component
      * was added before it had been removed from the container.
@@ -835,7 +838,7 @@ zebkit.package("ui", function(pkg, Class) {
          var p = new zebkit.ui.Panel();
          p.focusGained = function(e) { ... }; // add event handler
 
-     * @param {zebkit.ui.FocusEvent} e an input event
+     * @param {zebkit.ui.event.FocusEvent} e an input event
      * @event  focusGained
      */
 
@@ -846,7 +849,7 @@ zebkit.package("ui", function(pkg, Class) {
          var p = new zebkit.ui.Panel();
          p.focusLost = function(e) { ... }; // add event handler
 
-     * @param {zebkit.ui.FocusEvent} e an input event
+     * @param {zebkit.ui.event.FocusEvent} e an input event
      * @event  focusLost
      */
 
@@ -861,7 +864,8 @@ zebkit.package("ui", function(pkg, Class) {
 
 
      * @param {zebkit.ui.Panel} src a component that triggers the event
-     * @param {zebkit.ui.KeyEvent | zebkit.ui.PointerEvent | zebkit.ui.CompEvent| zebkit.ui.FocusEvent} e an UI event fired by a child component.
+     * @param {zebkit.ui.event.KeyEvent | zebkit.ui.event.PointerEvent | zebkit.ui.event.CompEvent| zebkit.ui.event.FocusEvent} e
+     * an UI event fired by a child component.
      * @event  child<EventName>
      */
 
@@ -1880,6 +1884,7 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Root layer interface.
      * @class zebkit.ui.RootLayerMix
+     * @constructor
      * @interface zebkit.ui.RootLayerMix
      */
     pkg.RootLayerMix = zebkit.Interface([

@@ -180,11 +180,11 @@ zebkit.package("web", function(pkg, Class) {
 
     /**
      * Input key event class.
-     * @class  zebkit.ui.KeyEvent
-     * @extends zebkit.util.Event
+     * @class  zebkit.web.KeyEvent
+     * @extends zebkit.ui.event.KeyEvent
      * @constructor
      */
-    pkg.KeyEvent = Class(zebkit.ui.KeyEvent, [
+    pkg.KeyEvent = Class(zebkit.ui.event.KeyEvent, [
         function $prototype() {
             /**
              * Fulfills the given abstract event with fields from the specified native WEB key event

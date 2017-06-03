@@ -245,7 +245,7 @@ zebkit.package("ui.design", function(pkg, Class) {
 
             /**
              * Define key pressed events handler
-             * @param  {zebkit.ui.KeyEvent} e a key event
+             * @param  {zebkit.ui.event.KeyEvent} e a key event
              * @method keyPressed
              */
             this.keyPressed = function(e) {
@@ -277,7 +277,7 @@ zebkit.package("ui.design", function(pkg, Class) {
 
             /**
              * Define pointer drag started events handler
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerDragStarted
              */
             this.pointerDragStarted = function(e) {
@@ -300,7 +300,7 @@ zebkit.package("ui.design", function(pkg, Class) {
 
             /**
              * Define pointer dragged events handler
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerDragged
              */
             this.pointerDragged = function(e){

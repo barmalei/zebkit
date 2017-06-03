@@ -24,12 +24,12 @@ zebkit.package("web", function(pkg, Class) {
         RMOUSE = "rmouse";
 
     /**
-     * Mouse and touch screen input event class. The input event is triggered by a mouse or
-     * touch screen.
-     * @class  zebkit.ui.PointerEvent
+     * Normalized pointer event that is fired with mouse, touch, pen devices.
+     * @class  zebkit.web.PointerEvent
+     * @extends  zebkit.ui.event.PointerEvent
      * @constructor
      */
-    pkg.PointerEvent = Class(zebkit.ui.PointerEvent, [
+    pkg.PointerEvent = Class(zebkit.ui.event.PointerEvent, [
         function $prototype() {
             this.isAction = function() {
                 return this.identifier !== RMOUSE && this.touchCounter === 1;
@@ -95,6 +95,28 @@ zebkit.package("web", function(pkg, Class) {
         return false;
     }
 
+    /**
+     * Pointer event unifier is special class to normalize input events from different pointer devices (like
+     * mouse, touch screen, pen etc) and various browsers. The class transform all the events to special
+     * neutral pointer event.
+     * @param  {DOMElement} element a DOM element to normalize pointer events
+     * @param  {Object} destination a destination object that implements number of pointer events
+     * handlers:
+     *
+     *      {
+     *          $pointerPressed     : function(e) { ... },
+     *          $pointerReleased    : function(e) { ... },
+     *          $pointerClicked     : function(e) { ... },
+     *          $pointerMoved       : function(e) { ... },
+     *          $pointerDragStarted : function(e) { ... },
+     *          $pointerDragged     : function(e) { ... },
+     *          $pointerDragEnded   : function(e) { ... }
+     *      }
+     *
+     *
+     * @constructor
+     * @class zebkit.web.PointerEventUnifier
+     */
     pkg.PointerEventUnifier = Class([
         function $clazz() {
             // !!!!

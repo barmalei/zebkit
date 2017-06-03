@@ -5,46 +5,46 @@ zebkit.package("ui", function(pkg, Class) {
      *
      * Filling tabs component with pages is the same to how you add an UI component to a panel. For
      * instance in the example below three pages with "Titl1", "Title2", "Title3" are added:
-
-          var tabs = new zebkit.ui.Tabs();
-          tabs.add("Title1", new zebkit.ui.Label("Label as a page"));
-          tabs.add("Title2", new zebkit.ui.Button("Button as a page"));
-          tabs.add("Title3", new zebkit.ui.TextArea("Text area as a page"));
-
+     *
+     *     var tabs = new zebkit.ui.Tabs();
+     *     tabs.add("Title1", new zebkit.ui.Label("Label as a page"));
+     *     tabs.add("Title2", new zebkit.ui.Button("Button as a page"));
+     *     tabs.add("Title3", new zebkit.ui.TextArea("Text area as a page"));
+     *
      *  You can access tabs pages UI component the same way like you access a panel children components
-
-         ...
-         tabs.kids[0] // access the first page
-
+     *
+     *     ...
+     *     tabs.kids[0] // access the first page
+     *
      *  And you can remove it with standard panel inherited API:
-
-         ...
-         tabs.removeAt(0); // remove first tab page
-
-
+     *
+     *     ...
+     *     tabs.removeAt(0); // remove first tab page
+     *
+     *
      *  To customize tab page caption and icon you should access tab object and do it with API it provides:
-
-
-            // update a tab caption
-            tabs.getTab(0).setCaption("Test");
-
-            // update a tab icon
-            tabs.getTab(0).setIcon("my.gif");
-
-            // set a particular font and color for the tab in selected state
-            tabs.getTab(0).setColor(true, "blue");
-            tabs.getTab(0).setFont(true, new zebkit.ui.Font("Arial", "bold", 16));
-
-            // set other caption for the tab in not selected state
-            tabs.getTab(0).setCaption(false, "Test");
-
+     *
+     *
+     *      // update a tab caption
+     *      tabs.getTab(0).setCaption("Test");
+     *
+     *      // update a tab icon
+     *      tabs.getTab(0).setIcon("my.gif");
+     *
+     *      // set a particular font and color for the tab in selected state
+     *      tabs.getTab(0).setColor(true, "blue");
+     *      tabs.getTab(0).setFont(true, new zebkit.ui.Font("Arial", "bold", 16));
+     *
+     *      // set other caption for the tab in not selected state
+     *      tabs.getTab(0).setCaption(false, "Test");
+     *
      * @param {String} [o] the tab panel orientation:
-
-          "top"
-          "bottom"
-          "left"
-          "right"
-
+     *
+     *     "top"
+     *     "bottom"
+     *     "left"
+     *     "right"
+     *
      * @class zebkit.ui.Tabs
      * @uses  zebkit.ui.DecorationViews
      * @constructor
@@ -53,11 +53,11 @@ zebkit.package("ui", function(pkg, Class) {
 
     /**
      * Fired when a new tab page has been selected
-
-          tabs.on(function(src, selectedIndex) {
-             ...
-          });
-
+     *
+     *     tabs.on(function(src, selectedIndex) {
+     *        ...
+     *     });
+     *
      * @event selected
      * @param {zebkit.ui.Tabs} src a tabs component that triggers the event
      * @param {Integer} selectedIndex a tab page index that has been selected
@@ -337,7 +337,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer moved event handler
-             * @param  {zebkit.ui.PointerEvent} e a key event
+             * @param  {zebkit.ui.event.PointerEvent} e a key event
              * @method pointerMoved
              */
             this.pointerMoved = function(e) {
@@ -353,7 +353,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer drag ended event handler
-             * @param  {zebkit.ui.PointerEvent} e a key event
+             * @param  {zebkit.ui.event.PointerEvent} e a key event
              * @method pointerDragEnded
              */
             this.pointerDragEnded = function(e) {
@@ -369,7 +369,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer exited event handler
-             * @param  {zebkit.ui.PointerEvent} e a key event
+             * @param  {zebkit.ui.event.PointerEvent} e a key event
              * @method pointerExited
              */
             this.pointerExited = function(e) {
@@ -753,7 +753,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define key pressed event handler
-             * @param  {zebkit.ui.KeyEvent} e a key event
+             * @param  {zebkit.ui.event.KeyEvent} e a key event
              * @method keyPressed
              */
             this.keyPressed = function(e){
@@ -776,7 +776,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer clicked  event handler
-             * @param  {zebkit.ui.PointerEvent} e a key event
+             * @param  {zebkit.ui.event.PointerEvent} e a key event
              * @method pointerClicked
              */
             this.pointerClicked = function(e){

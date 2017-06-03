@@ -4,7 +4,7 @@ zebkit.package("ui.vk", function(pkg, Class) {
     pkg.$vk = null;
     pkg.makeEditorVisible = true;
 
-    pkg.KeyEvent = Class(ui.KeyEvent, [
+    pkg.KeyEvent = Class(ui.event.KeyEvent, [
         function $prototype() {
             this.withMasks = function(masks) {
                 this.altKey   = false;
@@ -22,7 +22,7 @@ zebkit.package("ui.vk", function(pkg, Class) {
 
     /**
      * Virtual keyboard implementation
-     * @class  ui.vk
+     * @class  zebkit.ui.vk
      * @access package
      */
     pkg.VKLayout = Class(zebkit.layout.Layout, [

@@ -13,7 +13,7 @@ zebkit.package("ui.date", function(pkg, Class) {
      *         root.add(new date.Calendar());
      *     });
      *
-     * @class ui.date
+     * @class zebkit.ui.date
      * @access package
      */
     pkg.compareDates = function(d1, d2) {

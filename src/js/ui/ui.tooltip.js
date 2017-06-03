@@ -174,7 +174,7 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
      * @class zebkit.ui.TooltipManager
-     * @extends zebkit.ui.Manager
+     * @extends zebkit.ui.event.Manager
      * @constructor
      */
 
@@ -191,7 +191,7 @@ zebkit.package("ui", function(pkg, Class) {
       * @param {Integer}  index a menu item index that has been selected
       * @param {zebkit.ui.Panel} item a menu item component that has been selected
       */
-    pkg.TooltipManager = Class(pkg.Manager, [
+    pkg.TooltipManager = Class(zebkit.ui.event.Manager, [
         function $prototype() {
             this.$tooltipX = this.$tooltipY = 0;
             this.$toolTask = this.$targetTooltipLayer = this.$tooltip = this.$target = null;
@@ -223,7 +223,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer clicked event handler
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerClicked
              */
             // this.pointerClicked = function (e){
@@ -251,7 +251,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer entered event handler
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerEntered
              */
             this.pointerEntered = function(e) {
@@ -273,7 +273,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer exited event handler
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerExited
              */
             this.pointerExited = function(e) {
@@ -285,7 +285,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer moved event handler
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerMoved
              */
             this.pointerMoved = function(e) {
@@ -422,7 +422,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer pressed event handler
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerPressed
              */
             this.pointerPressed = function(e) {
@@ -437,7 +437,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer released event handler
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerReleased
              */
             this.pointerReleased = function(e) {

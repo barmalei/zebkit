@@ -4,10 +4,10 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Window component event
      * @constructor
-     * @class zebkit.ui.WinEvent
+     * @class zebkit.ui.event.WinEvent
      * @extends {zebkit.util.Event}
      */
-    pkg.WinEvent = Class(zebkit.util.Event, [
+    pkg.event.WinEvent = Class(zebkit.util.Event, [
         function $prototype() {
             /**
              * Indicates if the window has been shown
@@ -53,7 +53,7 @@ zebkit.package("ui", function(pkg, Class) {
         }
     ]);
 
-    var WIN_EVENT = new pkg.WinEvent();
+    var WIN_EVENT = new pkg.event.WinEvent();
 
     /**
      * Show the given UI component as a modal window
@@ -233,7 +233,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define children components input events handler.
-             * @param  {zebkit.ui.FocusEvent} e a focus event
+             * @param  {zebkit.ui.event.FocusEvent} e a focus event
              * @method childFocusGained
              */
             this.childFocusGained = function (e) {

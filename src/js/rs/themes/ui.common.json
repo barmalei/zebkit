@@ -3,10 +3,10 @@
 
     "doubleClickDelta" : 280,
 
-    "focusManager"   : { "@ ? zebkit.ui.FocusManager"  :[] },
+    "focusManager"   : { "@ ? zebkit.ui.event.FocusManager"  :[] },
 
     "shortcuts" : {
-        "@ ? zebkit.ui.ShortcutManager" :{
+        "@ ? zebkit.ui.event.ShortcutManager" :{
             "common": {
                 "UNDO"          : "Control + KeyZ",
                 "REDO"          : "Control + Shift + KeyZ",

@@ -1,6 +1,6 @@
-zebkit.package("ui", function(pkg, Class) {
+zebkit.package("ui.event", function(pkg, Class) {
     // add shortcut event type
-    pkg.events.regEvents("shortcutFired");
+    zebkit.ui.events.regEvents("shortcutFired");
 
     /**
      * Shortcut event class
@@ -8,7 +8,7 @@ zebkit.package("ui", function(pkg, Class) {
      * @param  {zebkit.ui.Panel} src a source of the event
      * @param  {String} shortcut a shortcut name
      * @param  {String} keys a keys combination ("Control + KeyV")
-     * @class zebkit.ui.ShortcutEvent
+     * @class zebkit.ui.event.ShortcutEvent
      * @extends {zebkit.util.Event}
      */
     pkg.ShortcutEvent = Class(zebkit.util.Event, [
@@ -85,16 +85,39 @@ zebkit.package("ui", function(pkg, Class) {
 
 
      *  @constructor
-     *  @class zebkit.ui.ShortcutManager
-     *  @extends {zebkit.ui.Manager}
+     *  @class zebkit.ui.event.ShortcutManager
+     *  @extends {zebkit.ui.event.Manager}
      */
     pkg.ShortcutManager = Class(pkg.Manager, [
+        function(shortcuts) {
+            this.$super();
+
+            // special structure that is a path from the first key of a sjortcut to the ID
+            // for instance SELECTALL : [ "Control + KeyA", "Control + KeyW"], ... } will
+            // be stored as:
+            //  {
+            //     "Control" : {
+            //         "KeyA" : SELECTALL,
+            //         "KeyW" : SELECTALL
+            //     }
+            //  }
+
+            this.keyShortcuts = {};
+
+            if (arguments.length > 0) {
+                this.setShortcuts(shortcuts.common);
+                if (zebkit.isMacOS === true && typeof shortcuts.osx !== 'undefined') {
+                    this.setShortcuts(shortcuts.osx);
+                }
+            }
+        },
+
         function $prototype() {
             this.keyPath = [];
 
             /**
              * Key pressed event handler.
-             * @param  {zebkit.ui.KeyEvent} e a key event
+             * @param  {zebkit.ui.event.KeyEvent} e a key event
              * @method keyPressed
              */
             this.keyPressed = function(e) {
@@ -104,7 +127,8 @@ zebkit.package("ui", function(pkg, Class) {
                     this.keyPath[this.keyPath.length] = e.code;
                 }
 
-                var fo = pkg.focusManager.focusOwner;
+                // TODO: may be focus manager has to be moved to "ui.event" package
+                var fo = zebkit.ui.focusManager.focusOwner;
                 if (this.keyPath.length > 1) {
                     var sh = this.keyShortcuts;
                     for(var i = 0; i < this.keyPath.length; i++) {
@@ -121,7 +145,7 @@ zebkit.package("ui", function(pkg, Class) {
                         SHORTCUT_EVENT.source   = fo;
                         SHORTCUT_EVENT.shortcut = sh;
                         SHORTCUT_EVENT.keys     = this.keyPath.join('+');
-                        pkg.events.fire("shortcutFired", SHORTCUT_EVENT);
+                        zebkit.ui.events.fire("shortcutFired", SHORTCUT_EVENT);
                     }
                 }
             };
@@ -178,29 +202,6 @@ zebkit.package("ui", function(pkg, Class) {
                     }
                 }
             };
-        },
-
-        function(shortcuts) {
-            this.$super();
-
-            // special structure that is a path from the first key of a sjortcut to the ID
-            // for instance SELECTALL : [ "Control + KeyA", "Control + KeyW"], ... } will
-            // be stored as:
-            //  {
-            //     "Control" : {
-            //         "KeyA" : SELECTALL,
-            //         "KeyW" : SELECTALL
-            //     }
-            //  }
-
-            this.keyShortcuts = {};
-
-            if (arguments.length > 0) {
-                this.setShortcuts(shortcuts.common);
-                if (zebkit.isMacOS === true && typeof shortcuts.osx !== 'undefined') {
-                    this.setShortcuts(shortcuts.osx);
-                }
-            }
         }
     ]);
 });

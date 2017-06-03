@@ -532,7 +532,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
             /**
              * Define pointer dragged events handler.
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerDragged
              */
             this.pointerDragged = function(e){
@@ -552,7 +552,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
             /**
              * Define pointer drag started events handler.
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerDragStarted
              */
             this.pointerDragStarted = function(e){
@@ -571,7 +571,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
             /**
              * Define pointer drag ended events handler.
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerDragEnded
              */
             this.pointerDragEnded = function (e){
@@ -586,7 +586,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
             /**
              * Define pointer moved events handler.
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerMoved
              */
             this.pointerMoved = function(e) {
@@ -597,7 +597,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
             /**
              * Define pointer clicked events handler.
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerClicked
              */
             this.pointerDoubleClicked = function (e){

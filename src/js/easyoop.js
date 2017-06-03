@@ -968,8 +968,9 @@
      *      });
      *
      *  @class zebkit.Package
+     *  @constructor
      */
-    function Package(name, parent) {
+    function Package(name, parent, declared) {
         /**
          * URL the package has been loaded
          * @attribute $url
@@ -1003,7 +1004,9 @@
          * @type {zebkit.Package}
          */
         this.$parent = arguments.length < 2 ? null : parent;
+    }
 
+    Package.prototype.$detectLocation = function() {
         if (typeof __dirname !== 'undefined') {
             this.$url = __dirname;
         } else if (typeof document !== "undefined") {
@@ -1011,14 +1014,14 @@
             var s  = document.getElementsByTagName('script'),
                 ss = s[s.length - 1].getAttribute('src'),
                 i  = ss === null ? -1 : ss.lastIndexOf("/"),
-                a = document.createElement('a');
+                a  = document.createElement('a');
 
             a.href = (i > 0) ? ss.substring(0, i + 1)
                              : document.location.toString();
 
             this.$url = a.href.toString();
         }
-    }
+    };
 
     /**
      * Get full name of the package. Full name includes not the only the given
@@ -1356,6 +1359,8 @@
                 throw new Error("Null package name");
             }
 
+            console.log("Init package : " + name + "," + this.$url);
+
             name = name.trim();
             if (name.match(/^[a-zA-Z_][a-zA-Z0-9_]+(\.[a-zA-Z_][a-zA-Z0-9_]+)*$/) === null) {
                 throw new Error("Invalid package name '" + name + "'");
@@ -1372,6 +1377,11 @@
                 }
                 target = p;
             }
+        }
+
+        // detect url later then sonner since
+        if (target.$url === null) {
+            target.$detectLocation();
         }
 
         if (typeof arguments[arguments.length - 1] === 'function') {

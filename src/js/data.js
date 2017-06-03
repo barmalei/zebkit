@@ -98,7 +98,7 @@ zebkit.package("data", function(pkg, Class) {
 
      *
      * @event textUpdated
-     * @param {zebkit.data.Text} src a text model that triggers the event
+     * @param {zebkit.data.TextModel} src a text model that triggers the event
      * @param {Boolean}  b a flag that is true if a string has been written
      * in the text model, false if the model substring has been removed
      * @param {Integer}  off an offset starting form that the text update

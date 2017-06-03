@@ -11,59 +11,105 @@ zebkit.package("ui", function(pkg, Class) {
          * @type {String}
          */
         DEFAULT     : "default",
+
+        /**
+         * "move"
+         * @const MOVE
+         * @type {String}
+         */
         MOVE        : "move",
+
+        /**
+         * "wait"
+         * @const WAIT
+         * @type {String}
+         */
         WAIT        : "wait",
+
+        /**
+         * "text"
+         * @const TEXT
+         * @type {String}
+         */
         TEXT        : "text",
+
+        /**
+         * "pointer"
+         * @const HAND
+         * @type {String}
+         */
         HAND        : "pointer",
+
+        /**
+         * "ne-resize"
+         * @const NE_RESIZE
+         * @type {String}
+         */
         NE_RESIZE   : "ne-resize",
+
+        /**
+         * "sw-resize"
+         * @const SW_RESIZE
+         * @type {String}
+         */
         SW_RESIZE   : "sw-resize",
+
+        /**
+         * "se-resize"
+         * @const SE_RESIZE
+         * @type {String}
+         */
         SE_RESIZE   : "se-resize",
+
+        /**
+         * "nw-resize"
+         * @const NW_RESIZE
+         * @type {String}
+         */
         NW_RESIZE   : "nw-resize",
+
+        /**
+         * "s-resize"
+         * @const S_RESIZE
+         * @type {String}
+         */
         S_RESIZE    : "s-resize",
+
+        /**
+         * "w-resize"
+         * @const W_RESIZE
+         * @type {String}
+         */
         W_RESIZE    : "w-resize",
+
+        /**
+         * "n-resize"
+         * @const N_RESIZE
+         * @type {String}
+         */
         N_RESIZE    : "n-resize",
+
+        /**
+         * "e-resize"
+         * @const E_RESIZE
+         * @type {String}
+         */
         E_RESIZE    : "e-resize",
+
+        /**
+         * "col-resize"
+         * @const COL_RESIZE
+         * @type {String}
+         */
         COL_RESIZE  : "col-resize",
+
+        /**
+         * "help"
+         * @const HELP
+         * @type {String}
+         */
         HELP        : "help"
     };
-
-    /**
-     * Named views holder interface.
-     * @class  zebkit.ui.DecorationViews
-     * @interface  zebkit.ui.DecorationViews
-     */
-    pkg.DecorationViews = zebkit.Interface([
-        function $prototype() {
-            /**
-             * Set views set.
-             * @param {Object} v named views set.
-             * @method setViews
-             * @chainable
-             */
-            this.setViews = function(v){
-                if (typeof this.views === 'undefined') {
-                    this.views = {};
-                }
-
-                var b = false;
-                for(var k in v) {
-                    if (v.hasOwnProperty(k)) {
-                        var nv = pkg.$view(v[k]);
-                        if (this.views[k] !== nv) {
-                            this.views[k] = nv;
-                            b = true;
-                        }
-                    }
-                }
-
-                if (b === true) {
-                    this.vrp();
-                }
-
-                return this;
-            };
-        }
-    ]);
 
     /**
      * Shortcut to create a UI component by the given description. Depending on the description type
@@ -75,6 +121,7 @@ zebkit.package("ui", function(pkg, Class) {
      *
      * @method $component
      * @protected
+     * @for  zebkit.ui
      * @param  {Object} desc a description
      * @return {zebkit.ui.Panel}  a created UI component
      */
@@ -165,6 +212,44 @@ zebkit.package("ui", function(pkg, Class) {
 
         return desc;
     };
+
+    /**
+     * Named views holder interface.
+     * @class  zebkit.ui.DecorationViews
+     * @interface  zebkit.ui.DecorationViews
+     */
+    pkg.DecorationViews = zebkit.Interface([
+        function $prototype() {
+            /**
+             * Set views set.
+             * @param {Object} v named views set.
+             * @method setViews
+             * @chainable
+             */
+            this.setViews = function(v){
+                if (typeof this.views === 'undefined') {
+                    this.views = {};
+                }
+
+                var b = false;
+                for(var k in v) {
+                    if (v.hasOwnProperty(k)) {
+                        var nv = pkg.$view(v[k]);
+                        if (this.views[k] !== nv) {
+                            this.views[k] = nv;
+                            b = true;
+                        }
+                    }
+                }
+
+                if (b === true) {
+                    this.vrp();
+                }
+
+                return this;
+            };
+        }
+    ]);
 
     /**
      * Base class to implement model values renders.

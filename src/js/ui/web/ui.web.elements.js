@@ -411,6 +411,7 @@ zebkit.package("ui.web", function(pkg, Class) {
      * @param  {String} [href] an href of the link
      * @extends zebkit.ui.web.HtmlElement
      * @class zebkit.ui.web.HtmlLink
+     * @constructor
      * @event fired
      * @param {zebkit.ui.web.Link} src a link that has been pressed
      */

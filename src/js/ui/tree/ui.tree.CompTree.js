@@ -17,11 +17,11 @@ zebkit.package("ui.tree", function(pkg, Class) {
 
      * But to prevent unexpected navigation it is better to use number of predefined
      * with component tree UI components:
-
-       - zebkit.ui.tree.CompTree.Label
-       - zebkit.ui.tree.CompTree.Checkbox
-       - zebkit.ui.tree.CompTree.Combo
-
+     *
+     *   - zebkit.ui.tree.CompTree.Label
+     *   - zebkit.ui.tree.CompTree.Checkbox
+     *   - zebkit.ui.tree.CompTree.Combo
+     *
      * You can describe tree model keeping in mind special notation
 
          var tree = new zebkit.ui.tree.Tree({

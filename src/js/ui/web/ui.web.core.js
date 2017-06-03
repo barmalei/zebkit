@@ -595,9 +595,9 @@ zebkit.package("ui.web", function(pkg, Class) {
      *  @constructor
      *  @private
      *  @class zebkit.ui.web.HtmlElementMan
-     *  @extends {zebkit.ui.Manager}
+     *  @extends {zebkit.ui.event.Manager}
      */
-    pkg.HtmlElementMan = Class(ui.Manager, [
+    pkg.HtmlElementMan = Class(zebkit.ui.event.Manager, [
         function $prototype() {
             /**
              * Evaluates if the given zebkit HTML UI component is invisible state.
@@ -876,8 +876,8 @@ zebkit.package("ui.web", function(pkg, Class) {
     // instantiate manager
     pkg.$htmlElementMan = new pkg.HtmlElementMan();
 
-    if (typeof zebkit.ui.FocusManager !== 'undefined') {
-        zebkit.ui.FocusManager.extend([
+    if (typeof zebkit.ui.event.FocusManager !== 'undefined') {
+        zebkit.ui.event.FocusManager.extend([
             function requestFocus(c) {
                 this.$super(c);
 

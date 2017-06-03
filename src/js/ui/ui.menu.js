@@ -4,10 +4,10 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Menu event class
      * @constructor
-     * @class zebkit.ui.MenuEvent
+     * @class zebkit.ui.event.MenuEvent
      * @extends {zebkit.util.Event}
      */
-    pkg.MenuEvent = Class(zebkit.util.Event, [
+    pkg.event.MenuEvent = Class(zebkit.util.Event, [
         function $prototype() {
             /**
              * Index of selected menu item
@@ -43,7 +43,7 @@ zebkit.package("ui", function(pkg, Class) {
         }
     ]);
 
-    var MENU_EVENT = new pkg.MenuEvent();
+    var MENU_EVENT = new pkg.event.MenuEvent();
 
     /**
      * Show the given popup menu.
@@ -445,7 +445,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define component events handler.
-             * @param  {zebkit.ui.CompEvent} e  a component event
+             * @param  {zebkit.ui.event.CompEvent} e  a component event
              * @method  childCompEnabled
              */
             this.childCompEnabled = this.childCompShown = function(e) {
@@ -493,7 +493,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer exited events handler
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerExited
              */
             this.pointerExited = function(e){
@@ -675,7 +675,7 @@ zebkit.package("ui", function(pkg, Class) {
         /**
          * Override key pressed events handler to handle key events according to
          * context menu component requirements
-         * @param  {zebkit.ui.KeyEvent} e a key event
+         * @param  {zebkit.ui.event.KeyEvent} e a key event
          * @method keyPressed
          */
         function keyPressed(e){
@@ -973,7 +973,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define children components input events handler.
-             * @param  {zebkit.ui.KeyEvent} e an input event
+             * @param  {zebkit.ui.event.KeyEvent} e an input event
              * @method childKeyPressed
              */
             this.childKeyPressed = function(e){
@@ -1084,6 +1084,7 @@ zebkit.package("ui", function(pkg, Class) {
      * Simple popup layer implementation basing on "zebkit.ui.Panel" component.
      * @class zebkit.ui.PopupLayer
      * @extends {zebkit.ui.Panel}
+     * @constructor
      * @uses {zebkit.ui.PopupLayerMix}
      */
     pkg.PopupLayer = Class(pkg.Panel, pkg.PopupLayerMix, []);

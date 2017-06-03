@@ -1,10 +1,16 @@
 (function() {
+
+    /**
+     * WEB environment implementation. Provides elementary API zebkit needs to perform an
+     * environment specific operations.
+     * @class environment
+     * @access package
+     */
     var zebkitEnvironment = function() {
         var pkg    = {},
             hostRe = /([a-zA-Z]+)\:\/\/([^/:]+)/,
             isFF   = typeof navigator !== 'undefined' &&
                      navigator.userAgent.toLowerCase().indexOf('firefox') >= 0;
-
         function $sleep() {
             var r = new XMLHttpRequest(),
                 t = (new Date()).getTime().toString(),

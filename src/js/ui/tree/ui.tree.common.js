@@ -146,7 +146,8 @@ zebkit.package("ui.tree", function(pkg, Class) {
             /**
              * The method is called to ask if the given input event should trigger an tree component item
              * @param  {zebkit.ui.tree.Tree} src a tree UI component
-             * @param  {zebkit.ui.PointerEvent|zebkit.ui.KeyEvent} e   an input event: pointer or key event
+             * @param  {zebkit.ui.event.PointerEvent|zebkit.ui.event.KeyEvent} e   an input event: pointer
+             * or key event
              * @return {Boolean} true if the event should trigger edition of a tree component item
              * @method @shouldStartEdit
              */

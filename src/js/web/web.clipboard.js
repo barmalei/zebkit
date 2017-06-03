@@ -1,6 +1,6 @@
 zebkit.package("web", function(pkg, Class) {
     //  zebkit dependencies:
-    //      -- zebkit.ui.Clipboard
+    //      -- zebkit.ui.event.Clipboard
     //      -- zebkit.web.$fetchKeyCode
     //
     //
@@ -49,9 +49,9 @@ zebkit.package("web", function(pkg, Class) {
      *    - **cut**    "clipCut(focusOwnerComponent, data)"
      * @constructor
      * @class zebkit.web.Clipboard
-     * @extends zebkit.ui.Clipboard
+     * @extends zebkit.ui.event.Clipboard
      */
-    pkg.Clipboard = Class(zebkit.ui.Clipboard, [
+    pkg.Clipboard = Class(zebkit.ui.event.Clipboard, [
         function(triggerKeyCode) {
             if (document.getElementById(this.clazz.id) !== null) {
                 throw new Error("Duplicated clipboard element");

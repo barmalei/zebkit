@@ -446,7 +446,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer pressed events handler
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerPressed
              */
             this.pointerPressed = function (e) {
@@ -571,7 +571,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define key pressed events handler
-             * @param  {zebkit.ui.KeyEvent} e a key event
+             * @param  {zebkit.ui.event.KeyEvent} e a key event
              * @method keyPressed
              */
             this.keyPressed = function (e) {
@@ -589,7 +589,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define key typed  events handler
-             * @param  {zebkit.ui.KeyEvent} e a key event
+             * @param  {zebkit.ui.event.KeyEvent} e a key event
              * @method keyTyped
              */
             this.keyTyped = function(e) {

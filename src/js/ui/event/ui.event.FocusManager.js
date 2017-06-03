@@ -1,7 +1,7 @@
-zebkit.package("ui", function(pkg, Class) {
+zebkit.package("ui.event", function(pkg, Class) {
     /**
      * Focus event class.
-     * @class zebkit.ui.FocusEvent
+     * @class zebkit.ui.event.FocusEvent
      * @constructor
      * @extends zebkit.util.Event
      */
@@ -25,9 +25,9 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Focus manager class defines the strategy of focus traversing among hierarchy of UI components.
      * It keeps current focus owner component and provides API to change current focus component
-     * @class zebkit.ui.FocusManager
+     * @class zebkit.ui.event.FocusManager
      * @constructor
-     * @extends {zebkit.ui.Manager}
+     * @extends {zebkit.ui.event.Manager}
      */
     pkg.FocusManager = Class(pkg.Manager, [
         function $prototype() {
@@ -97,7 +97,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Key pressed event handler.
-             * @param  {zebkit.ui.KeyEvent} e a key event
+             * @param  {zebkit.ui.event.KeyEvent} e a key event
              * @method keyPressed
              */
             this.keyPressed = function(e){
@@ -232,21 +232,21 @@ zebkit.package("ui", function(pkg, Class) {
                         FOCUS_EVENT.source  = oldFocusOwner;
                         FOCUS_EVENT.related = this.focusOwner;
                         oldFocusOwner.focused();
-                        pkg.events.fire("focusLost", FOCUS_EVENT);
+                        zebkit.ui.events.fire("focusLost", FOCUS_EVENT);
                     }
 
                     if (this.focusOwner !== null) {
                         FOCUS_EVENT.source  = this.focusOwner;
                         FOCUS_EVENT.related = oldFocusOwner;
                         this.focusOwner.focused();
-                        pkg.events.fire("focusGained", FOCUS_EVENT);
+                        zebkit.ui.events.fire("focusGained", FOCUS_EVENT);
                     }
                 }
             };
 
             /**
              * Pointer pressed event handler.
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerPressed
              */
             this.pointerPressed = function(e){

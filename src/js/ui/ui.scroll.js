@@ -309,7 +309,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer dragged events handler
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerDragged
              */
             this.pointerDragged = function(e){
@@ -322,7 +322,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer drag started  events handler
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerDragStarted
              */
             this.pointerDragStarted = function (e){
@@ -334,7 +334,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer drag ended events handler
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerDragEnded
              */
             this.pointerDragEnded = function(e) {
@@ -343,7 +343,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer clicked events handler
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerClicked
              */
             this.pointerClicked = function (e){
@@ -950,16 +950,16 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Mobile scroll manager class. Implements inertial scrolling in zebkit mobile application.
      * @class zebkit.ui.MobileScrollMan
-     * @extends zebkit.ui.Manager
+     * @extends zebkit.ui.event.Manager
      * @constructor
      */
-    pkg.MobileScrollMan = Class(pkg.Manager, [
+    pkg.MobileScrollMan = Class(zebkit.ui.event.Manager, [
         function $prototype() {
             this.$timer = this.identifier = this.target = null;
 
             /**
              * Define pointer drag started events handler.
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerDragStarted
              */
             this.pointerDragStarted = function(e) {
@@ -980,7 +980,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer dragged events handler.
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerDragged
              */
             this.pointerDragged = function(e) {
@@ -1013,7 +1013,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer drag ended events handler.
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerDragEnded
              */
             this.pointerDragEnded = function(e) {
@@ -1036,7 +1036,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define pointer pressed events handler.
-             * @param  {zebkit.ui.PointerEvent} e a pointer event
+             * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerPressed
              */
             this.pointerPressed = function(e) {

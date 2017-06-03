@@ -5,7 +5,7 @@ zebkit.package("ui.web", function(pkg, Class) {
     pkg.CanvasEvent = Class(zebkit.util.Event, []);
 
     var ui = pkg.cd(".."),
-        COMP_EVENT = new ui.CompEvent();
+        COMP_EVENT = new ui.event.CompEvent();
 
     // keep pointer owners (the component where cursor/finger placed in)
     pkg.$pointerOwner        = {};
@@ -265,7 +265,7 @@ zebkit.package("ui.web", function(pkg, Class) {
 
             /**
              * Catches key typed events, adjusts and distributes it to UI hierarchy
-             * @param  {zebkit.ui.KeyEvent} e an event
+             * @param  {zebkit.ui.event.KeyEvent} e an event
              * @private
              * @method $keyTyped
              * @return {Boolean}  true if the event has been processed
@@ -281,7 +281,7 @@ zebkit.package("ui.web", function(pkg, Class) {
 
             /**
              * Catches key pressed events, adjusts and distributes it to UI hierarchy
-             * @param  {zebkit.ui.KeyEvent} e an event
+             * @param  {zebkit.ui.event.KeyEvent} e an event
              * @private
              * @method $keyPressed
              * @return {Boolean}  true if the event has been processed
@@ -305,7 +305,7 @@ zebkit.package("ui.web", function(pkg, Class) {
 
             /**
              * Catches key released events, adjusts and distributes it to UI hierarchy
-             * @param  {zebkit.ui.KeyEvent} e an event
+             * @param  {zebkit.ui.event.KeyEvent} e an event
              * @private
              * @method $keyReleased
              * @return {Boolean}  true if the event has been processed
@@ -321,7 +321,7 @@ zebkit.package("ui.web", function(pkg, Class) {
 
             /**
              * Catches pointer entered events, adjusts and distributes it to UI hierarchy
-             * @param  {zebkit.ui.PointerEvent} e an event
+             * @param  {zebkit.ui.event.PointerEvent} e an event
              * @private
              * @method $pointerEntered
              */
@@ -355,7 +355,7 @@ zebkit.package("ui.web", function(pkg, Class) {
 
             /**
              * Catches pointer exited events, adjusts and distributes it to UI hierarchy
-             * @param  {zebkit.ui.PointerEvent} e an event
+             * @param  {zebkit.ui.event.PointerEvent} e an event
              * @private
              * @method $pointerExited
              */
@@ -371,7 +371,7 @@ zebkit.package("ui.web", function(pkg, Class) {
 
             /**
              * Catches pointer moved events, adjusts and distributes it to UI hierarchy.
-             * @param  {zebkit.ui.PointerEvent} e an event
+             * @param  {zebkit.ui.event.PointerEvent} e an event
              * @private
              * @method $pointerMoved
              */
@@ -410,7 +410,7 @@ zebkit.package("ui.web", function(pkg, Class) {
 
             /**
              * Catches pointer drag started events, adjusts and distributes it to UI hierarchy.
-             * @param  {zebkit.ui.PointerEvent} e an event
+             * @param  {zebkit.ui.event.PointerEvent} e an event
              * @private
              * @method $pointerDragStarted
              */
@@ -430,7 +430,7 @@ zebkit.package("ui.web", function(pkg, Class) {
 
             /**
              * Catches pointer dragged events, adjusts and distributes it to UI hierarchy.
-             * @param  {zebkit.ui.PointerEvent} e an event
+             * @param  {zebkit.ui.event.PointerEvent} e an event
              * @private
              * @method $pointerDragged
              */
@@ -446,7 +446,7 @@ zebkit.package("ui.web", function(pkg, Class) {
 
             /**
              * Catches pointer drag ended events, adjusts and distributes it to UI hierarchy.
-             * @param  {zebkit.ui.PointerEvent} e an event
+             * @param  {zebkit.ui.event.PointerEvent} e an event
              * @private
              * @method $pointerDragEnded
              */
@@ -478,7 +478,7 @@ zebkit.package("ui.web", function(pkg, Class) {
 
             /**
              * Catches pointer clicked events, adjusts and distributes it to UI hierarchy.
-             * @param  {zebkit.ui.PointerEvent} e an event
+             * @param  {zebkit.ui.event.PointerEvent} e an event
              * @private
              * @method $pointerClicked
              */
@@ -520,7 +520,7 @@ zebkit.package("ui.web", function(pkg, Class) {
 
             /**
              * Catches pointer released events, adjusts and distributes it to UI hierarchy.
-             * @param  {zebkit.ui.PointerEvent} e an event
+             * @param  {zebkit.ui.event.PointerEvent} e an event
              * @private
              * @method $pointerReleased
              */
@@ -566,7 +566,7 @@ zebkit.package("ui.web", function(pkg, Class) {
 
             /**
              * Catches pointer pressed events, adjusts and distributes it to UI hierarchy.
-             * @param  {zebkit.ui.PointerEvent} e an event
+             * @param  {zebkit.ui.event.PointerEvent} e an event
              * @private
              * @method $pointerPressed
              */

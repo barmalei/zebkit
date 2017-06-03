@@ -489,7 +489,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Define key typed events handler
-             * @param  {zebkit.ui.KeyEvent} e a key event
+             * @param  {zebkit.ui.event.KeyEvent} e a key event
              * @method keyTyped
              */
             this.keyTyped = function (e){

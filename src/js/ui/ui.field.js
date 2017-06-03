@@ -380,7 +380,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Shortcut event handler
-             * @param  {java.ui.ShortcutEvent} e a shortcut event
+             * @param  {java.ui.event.ShortcutEvent} e a shortcut event
              * @method shortcutFired
              */
             this.shortcutFired = function(e) {
@@ -490,7 +490,7 @@ zebkit.package("ui", function(pkg, Class) {
             /**
              * Test if the given key pressed event has to be processed
              * @protected
-             * @param  {zebkit.ui.KeyEvent} e a key event
+             * @param  {zebkit.ui.event.KeyEvent} e a key event
              * @return {Boolean} true if the given key pressed event doesn't
              * have be processed
              * @method isFiltered

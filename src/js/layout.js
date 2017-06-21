@@ -196,7 +196,7 @@ zebkit.package("layout", function(pkg, Class) {
      * ordered by applying a layout manager of its parent component.
      * @class zebkit.layout.Layoutable
      * @constructor
-     * @extends {zebkit.layout.Layout}
+     * @uses {zebkit.layout.Layout}
      * @uses {zebkit.EventProducer}
      * @uses {zebkit.util.PathSearch}
      */
@@ -821,7 +821,10 @@ zebkit.package("layout", function(pkg, Class) {
             this.setAt = function(i, d) {
                 var constr = this.kids[i].constraints,
                     pd     = this.removeAt(i);
-                if (d !== null) this.insert(i, constr, d);
+
+                if (d !== null) {
+                    this.insert(i, constr, d);
+                }
                 return pd;
             };
 
@@ -859,6 +862,7 @@ zebkit.package("layout", function(pkg, Class) {
      *
      *
      *  @class zebkit.layout.StackLayout
+     *  @uses {zebkit.layout.Layout}
      *  @constructor
      */
     pkg.StackLayout = Class(pkg.Layout, [
@@ -914,7 +918,7 @@ zebkit.package("layout", function(pkg, Class) {
      * @param  {Integer} [vgap] vertical gap. The gap is a vertical distance between laid out components
      * @constructor
      * @class zebkit.layout.BorderLayout
-     * @extends {zebkit.layout.Layout}
+     * @uses {zebkit.layout.Layout}
      */
     pkg.BorderLayout = Class(pkg.Layout, [
         function(hgap,vgap){
@@ -1105,7 +1109,7 @@ zebkit.package("layout", function(pkg, Class) {
      * sizes.
      * @class  zebkit.layout.RasterLayout
      * @constructor
-     * @extends {zebkit.layout.Layout}
+     * @uses {zebkit.layout.Layout}
      */
     pkg.RasterLayout = Class(pkg.Layout, [
         function(usePsSize) {
@@ -1225,7 +1229,7 @@ zebkit.package("layout", function(pkg, Class) {
      * @param {Integer} [gap] a space in pixels between laid out components
      * @class  zebkit.layout.FlowLayout
      * @constructor
-     * @extends {zebkit.layout.Layout}
+     * @uses {zebkit.layout.Layout}
      */
     pkg.FlowLayout = Class(pkg.Layout, [
         function (ax, ay, dir, g){
@@ -1401,7 +1405,7 @@ zebkit.package("layout", function(pkg, Class) {
      * @param {Integer} [gap] a space in pixels between laid out components
      * @class  zebkit.layout.ListLayout
      * @constructor
-     * @extends {zebkit.layout.Layout}
+     * @uses {zebkit.layout.Layout}
      */
     pkg.ListLayout = Class(pkg.Layout,[
         function (ax, gap) {
@@ -1491,7 +1495,7 @@ zebkit.package("layout", function(pkg, Class) {
      * vertically or horizontally
      * @class  zebkit.layout.PercentLayout
      * @constructor
-     * @extends {zebkit.layout.Layout}
+     * @uses {zebkit.layout.Layout}
      */
     pkg.PercentLayout = Class(pkg.Layout, [
         function(dir, gap, stretch) {
@@ -1737,7 +1741,7 @@ zebkit.package("layout", function(pkg, Class) {
      * whole horizontal container component space
      * @constructor
      * @class  zebkit.layout.GridLayout
-     * @extends {zebkit.layout.Layout}
+     * @uses {zebkit.layout.Layout}
      */
     pkg.GridLayout = Class(pkg.Layout, [
         function(r, c, stretchRows, stretchCols) {

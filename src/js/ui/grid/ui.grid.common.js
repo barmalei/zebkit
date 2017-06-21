@@ -264,11 +264,19 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
             /**
              * Even rows view or color
-             * @attribute oddView
+             * @attribute evenView
              * @type {String|zebkit.ui.View}
              */
             this.evenView = null;
 
+            /**
+             * Get a cell view.
+             * @param  {zebkit.ui.grid.Grid} grid [description]
+             * @param  {Integer} row  a cell row
+             * @param  {Integer} col  a cell column
+             * @return {String|zebkit.ui.View}  a color or view
+             * @method getCellColor
+             */
             this.getCellColor = function(grid, row, col) {
                 return row % 2  === 0 ? this.evenView
                                       : this.oddView;
@@ -448,11 +456,11 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
     /**
      * Fire when a grid row selection state has been changed
-
-            caption.on("captionResized", function(caption, rowcol, phw) {
-                ...
-            });
-
+     *
+     *     caption.on("captionResized", function(caption, rowcol, phw) {
+     *         ...
+     *     });
+     *
      * @event captionResized
      * @param  {zebkit.ui.grid.BaseCaption} caption a caption
      * @param  {Integer} rowcol a row or column that has been resized

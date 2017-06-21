@@ -491,8 +491,8 @@ zebkit.package("ui.tree", function(pkg, Class) {
              * @method getToogleView
              */
             this.getToggleView = function(i){
-                var v = i.kids.length > 0 ? (this.getIM(i).isOpen ? this.views.on
-                                                                  : this.views.off) : null;
+                var v = i.kids.length > 0 ? (this.getIM(i).isOpen ? this.views.expandedToggle
+                                                                  : this.views.collapsedToggle) : null;
 
                 return (typeof v === 'undefined' ? null : v);
             };
@@ -650,15 +650,15 @@ zebkit.package("ui.tree", function(pkg, Class) {
             };
 
             this.getIconView = function (i){
-                return i.kids.length > 0 ? (this.getIM(i).isOpen ? this.views.open
-                                                                 : this.views.close)
-                                         : this.views.leaf;
+                return i.kids.length > 0 ? (this.getIM(i).isOpen ? this.views.expandedSign
+                                                                 : this.views.collapsedSign)
+                                         : this.views.leafSign;
             };
 
             this.getIconSize = function (i) {
-                return i.kids.length > 0 ? (this.getIM(i).isOpen ? this.viewSizes.open
-                                                                 : this.viewSizes.close)
-                                          : this.viewSizes.leaf;
+                return i.kids.length > 0 ? (this.getIM(i).isOpen ? this.viewSizes.expandedSign
+                                                                 : this.viewSizes.collapsedSign)
+                                          : this.viewSizes.leafSign;
             };
 
             /**
@@ -687,7 +687,8 @@ zebkit.package("ui.tree", function(pkg, Class) {
             };
 
             this.getToggleSize = function(i) {
-                return this.$isOpen(i) ? this.viewSizes.on : this.viewSizes.off;
+                return this.$isOpen(i) ? this.viewSizes.expandedToggle
+                                       : this.viewSizes.collapsedToggle;
             };
 
             this.isOverVisibleArea = function (i) {
@@ -795,7 +796,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
             };
 
             this.paintSelectedItem = function(g, root, node, x, y) {
-                var v = this.hasFocus() ? this.views.aselect : this.views.iselect;
+                var v = this.hasFocus() ? this.views.focusOnSelect : this.views.focusOffSelect;
                 if (v !== null && typeof v !== 'undefined') {
                     v.paint(g, x, y, node.viewWidth, node.viewHeight, this);
                 }
@@ -890,8 +891,8 @@ zebkit.package("ui.tree", function(pkg, Class) {
                 var b = this.$isOpen(root);
                 if (root === this.firstVisible && this.lnColor !== null) {
                     g.setColor(this.lnColor);
-                    var xx = this.getIM(root).x + Math.floor((b ? this.viewSizes.on.width
-                                                                : this.viewSizes.off.width) / 2);
+                    var xx = this.getIM(root).x + Math.floor((b ? this.viewSizes.expandedToggle.width
+                                                                : this.viewSizes.collapsedToggle.width) / 2);
                     g.beginPath();
                     g.moveTo(xx + 0.5, this.getTop());
                     g.lineTo(xx + 0.5, this.$y(root, false));
@@ -903,8 +904,8 @@ zebkit.package("ui.tree", function(pkg, Class) {
                         return true;
                     }
 
-                    var x = this.getIM(firstChild).x + Math.floor((this.$isOpen(firstChild) ? this.viewSizes.on.width
-                                                                                            : this.viewSizes.off.width) / 2),
+                    var x = this.getIM(firstChild).x + Math.floor((this.$isOpen(firstChild) ? this.viewSizes.expandedToggle.width
+                                                                                            : this.viewSizes.collapsedToggle.width) / 2),
                     count = root.kids.length;
                     if (index < count) {
                         var  node = this.getIM(root),
@@ -966,7 +967,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
 
             /**
              * Select the given item.
-             * @param  {zebkit.data.Item} an item to be selected. Use null value to clear any selection
+             * @param  {zebkit.data.Item} item an item to be selected. Use null value to clear any selection
              * @method  select
              */
             this.select = function(item){
@@ -1167,13 +1168,13 @@ zebkit.package("ui.tree", function(pkg, Class) {
          * Set the number of views to customize rendering of different visual elements of the tree
          * UI component. The following decorative elements can be customized:
          *
-         *   - **"close"** - closed tree item icon view
-         *   - **"open"**  - opened tree item icon view
-         *   - **"leaf"**  - leaf tree item icon view
-         *   - **"on"**    - toggle on view
-         *   - **"off"**   - toggle off view
-         *   - **"iselect"**   - a view to express an item selection when tree component doesn't hold focus
-         *   - **"aselect"**   - a view to express an item selection when tree component holds focus
+         *   - **"collapsedSign"** - closed tree item icon view
+         *   - **"expandedSign"**  - opened tree item icon view
+         *   - **"leafSign"**  - leaf tree item icon view
+         *   - **"expandedToggle"**    - toggle on view
+         *   - **"collapsedToggle"**   - toggle off view
+         *   - **"focusOffSelect"**   - a view to express an item selection when tree component doesn't hold focus
+         *   - **"focusOnSelect"**   - a view to express an item selection when tree component holds focus
          *
          * For instance:
 
@@ -1189,8 +1190,8 @@ zebkit.package("ui.tree", function(pkg, Class) {
             // set " [x] " text render for toggle on and
             // " [o] " text render for toggle off tree elements
             tree.setViews({
-                "on": new zebkit.ui.TextRender(" [x] "),
-                "off": new zebkit.ui.TextRender(" [o] ")
+                "expandedToggle" : new zebkit.ui.TextRender(" [x] "),
+                "collapsedToggle": new zebkit.ui.TextRender(" [o] ")
             });
 
          * @param {Object} v dictionary of tree component decorative elements views
@@ -1199,11 +1200,11 @@ zebkit.package("ui.tree", function(pkg, Class) {
          */
         function setViews(v) {
             // setting to 0 prevents exception when on/off view is not defined
-            this.viewSizes.on    = { width: 0, height : 0};
-            this.viewSizes.off   = { width: 0, height : 0};
-            this.viewSizes.open  = { width: 0, height : 0};
-            this.viewSizes.close = { width: 0, height : 0};
-            this.viewSizes.leaf  = { width: 0, height : 0};
+            this.viewSizes.expandedToggle  = { width: 0, height : 0};
+            this.viewSizes.collapsedToggle = { width: 0, height : 0};
+            this.viewSizes.expandedSign    = { width: 0, height : 0};
+            this.viewSizes.collapsedSign   = { width: 0, height : 0};
+            this.viewSizes.leafSign        = { width: 0, height : 0};
 
             for(var k in v) {
                 this.views[k] = ui.$view(v[k]);

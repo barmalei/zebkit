@@ -144,7 +144,7 @@ zebkit.package("ui", function(pkg, Class) {
                                 function setFont(id, f) {
                                     var v = this.views[id];
                                     if (v) {
-                                        v.setFont(s);
+                                        v.setFont(f);
                                         this.recalc();
                                     }
                                     return this;
@@ -344,7 +344,7 @@ zebkit.package("ui", function(pkg, Class) {
                 var i = this.getTabAt(e.x, e.y);
                 if (this.overTab !== i) {
                     this.overTab = i;
-                    if (this.views.over) {
+                    if (this.views.overTab) {
                         this.repaint(this.repaintX, this.repaintY,
                                      this.repaintWidth, this.repaintHeight);
                     }
@@ -360,7 +360,7 @@ zebkit.package("ui", function(pkg, Class) {
                 var i = this.getTabAt(e.x, e.y);
                 if (this.overTab !== i) {
                     this.overTab = i;
-                    if (this.views.over) {
+                    if (this.views.overTab) {
                         this.repaint(this.repaintX, this.repaintY,
                                      this.repaintWidth, this.repaintHeight);
                     }
@@ -375,7 +375,7 @@ zebkit.package("ui", function(pkg, Class) {
             this.pointerExited = function(e) {
                 if (this.overTab >= 0) {
                     this.overTab = -1;
-                    if (this.views.over) {
+                    if (this.views.overTab) {
                         this.repaint(this.repaintX, this.repaintY,
                                      this.repaintWidth, this.repaintHeight);
                     }
@@ -476,7 +476,7 @@ zebkit.package("ui", function(pkg, Class) {
                 var marker = this.views.marker;
                 if (marker) {
                     //TODO: why only "out" is checked ?
-                    var bv   = this.views.out,
+                    var bv   = this.views.outTab,
                         left = bv ? bv.getLeft() : 0,
                         top  = bv ? bv.getTop()  : 0;
                     marker.paint(g, r.x + left, r.y + top,
@@ -494,9 +494,9 @@ zebkit.package("ui", function(pkg, Class) {
             this.paintTab = function (g, pageIndex){
                 var b       = this.getTabBounds(pageIndex),
                     page    = this.kids[pageIndex],
-                    tab     = this.views.out,
-                    tabover = this.views.over,
-                    tabon   = this.views.selected,
+                    tab     = this.views.outTab,
+                    tabover = this.views.overTab,
+                    tabon   = this.views.selectedTab,
                     v       = this.pages[pageIndex * 2],
                     ps      = v.getPreferredSize();
 
@@ -649,7 +649,7 @@ zebkit.package("ui", function(pkg, Class) {
                 if (count > 0) {
                     this.tabAreaHeight = this.tabAreaWidth = 0;
 
-                    var bv   = this.views.out ? this.views.out : null,
+                    var bv   = this.views.outTab ? this.views.outTab : null,
                         b    = (this.orient === "left" || this.orient === "right"),
                         max  = 0,
                         i    = 0,

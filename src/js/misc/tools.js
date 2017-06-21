@@ -6,8 +6,8 @@ zebkit.package(function(pkg, Class) {
                     return print.apply(this, arguments);
                 } else {
                     var args = Array.prototype.slice.call(arguments);
-                    if (typeof alert !== "undefined") {
-                        alert(args.join());
+                    if (typeof window.alert !== "undefined") {
+                        window.alert(args.join());
                     } else {
                         throw new Error("Cannot find output to log : " + args.join());
                     }
@@ -261,7 +261,7 @@ zebkit.package(function(pkg, Class) {
     };
 
     pkg.assertException = function(f, et, lab) {
-        if (!(f instanceof Function)) throw new WrongArgument("Function as input is expected");
+        if (!(f instanceof Function)) throw new Error("Function as input is expected");
 
         if (zebkit.isString(et)) lab = et;
         if (arguments.length < 2 || zebkit.isString(et)) et = Error;
@@ -275,7 +275,7 @@ zebkit.package(function(pkg, Class) {
     };
 
     pkg.assertNoException = function(f, lab) {
-        if (!(f instanceof Function)) throw new WrongArgument("Function as input is expected");
+        if (!(f instanceof Function)) throw new Error("Function as input is expected");
         try { f(); }
         catch(e) {
             throw new AssertionError((lab ? "'" + lab + "'":"") + " in\n" + f + "\n" + "method. '" + e.toString() + "' exception is not expected");

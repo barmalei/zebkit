@@ -356,20 +356,20 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Reference to selection view
-             * @attribute selectionView
+             * @attribute selectView
              * @readOnly
              * @type {zebkit.ui.View}
              */
 
-            this.selectionView = this.button = this.content = this.winpad = null;
+            this.selectView = this.button = this.content = this.winpad = null;
 
 
             this.paint = function(g){
                 if (this.content       !== null &&
-                    this.selectionView !== null &&
+                    this.selectView !== null &&
                     this.hasFocus())
                 {
-                    this.selectionView.paint(g, this.content.x,
+                    this.selectView.paint(g, this.content.x,
                                                 this.content.y,
                                                 this.content.width,
                                                 this.content.height,
@@ -599,12 +599,12 @@ zebkit.package("ui", function(pkg, Class) {
             /**
              * Set the given combo box selection view
              * @param {zebkit.ui.View} c a view
-             * @method setSelectionView
+             * @method setSelectView
              * @chainable
              */
-            this.setSelectionView = function (c){
-                if (c !== this.selectionView) {
-                    this.selectionView = pkg.$view(c);
+            this.setSelectView = function (c){
+                if (c !== this.selectView) {
+                    this.selectView = pkg.$view(c);
                     this.repaint();
                 }
                 return this;

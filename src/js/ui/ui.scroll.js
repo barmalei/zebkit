@@ -659,7 +659,7 @@ zebkit.package("ui", function(pkg, Class) {
 
                     if (this.$interval !== 0) {
                         zebkit.environment.clearInterval(this.$interval);
-                        $this.$interval = 0;
+                        this.$interval = 0;
                     }
 
                     this.vrp();

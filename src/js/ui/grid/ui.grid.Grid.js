@@ -34,13 +34,13 @@ zebkit.package("ui.grid", function(pkg, Class) {
             };
 
             this.posChanged = function(src) {
-                if ($blocked === false) {
-                    $blocked = true;
+                if (this.$blocked === false) {
+                    this.$blocked = true;
                     try {
 
                     }
                     finally {
-                        $blocked = false;
+                        this.$blocked = false;
                     }
                 }
             };
@@ -1373,8 +1373,8 @@ zebkit.package("ui.grid", function(pkg, Class) {
              */
             this.paintCellSelection = function(g, row, col, x, y) {
                 if (this.editingRow < 0) {
-                    var v = ui.focusManager.focusOwner === this ? this.views.onselection
-                                                                : this.views.offselection;
+                    var v = ui.focusManager.focusOwner === this ? this.views.focusOnSelect
+                                                                : this.views.focusOffSelect;
                     if (v !== null && typeof v !== 'undefined')  {
                         v.paint(g, x, y, this.colWidths[col], this.rowHeights[row], this);
                     }
@@ -1999,8 +1999,8 @@ zebkit.package("ui.grid", function(pkg, Class) {
          *
          *
          *      {
-         *         "onselection" : <view to render selected row for the grid that holds focus>,
-         *         "offselection": <view to render selected row for the grid that doesn't hold focus>
+         *         "focusOnSelect" : <view to render selected row for the grid that holds focus>,
+         *         "focusOffSelect": <view to render selected row for the grid that doesn't hold focus>
          *      }
          *
          *

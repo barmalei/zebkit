@@ -1367,11 +1367,11 @@ zebkit.package("util", function(pkg, Class) {
                         case "end": break;
                         case "up":
                             if (this.offset > 0) {
-                                this.setOffset(this.offset - n);
+                                this.setOffset(this.offset - num);
                             } break;
                         case "down":
                             if (this.offset < (this.metrics.getLines() - 1)){
-                                this.setOffset(this.offset + n);
+                                this.setOffset(this.offset + num);
                             } break;
                         default: throw new Error("" + t);
                     }

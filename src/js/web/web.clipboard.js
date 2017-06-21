@@ -148,7 +148,7 @@ zebkit.package("web", function(pkg, Class) {
                         if (dest !== null && typeof dest.clipPaste !== 'undefined') {
                             dest.clipPaste($this.$clipboard.value);
                             if (typeof $this.clipPaste !== 'undefined') {
-                                $this.clipPaste(dest, $clipboard.value);
+                                $this.clipPaste(dest, $this.$clipboard.value);
                             }
                         }
 

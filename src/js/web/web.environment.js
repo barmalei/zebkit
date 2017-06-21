@@ -27,10 +27,10 @@
 
         $Request.prototype.open = function(method, url, async, user, password) {
             var m = url.match(hostRe);
-            if (location.scheme.toLowerCase() === "file:" ||
+            if (window.location.scheme.toLowerCase() === "file:" ||
                   (m           !== null &&
                    typeof m[2] !== 'undefined' &&
-                   m[2].toLowerCase() === location.host.toLowerCase()))
+                   m[2].toLowerCase() === window.location.host.toLowerCase()))
             {
                 this._request = new XMLHttpRequest();
                 this._xdomain = false;

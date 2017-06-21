@@ -253,7 +253,7 @@ zebkit.package("ui", function(pkg, Class) {
 
     /**
      * Base class to implement model values renders.
-     * @param  {zebkit.ui.Render) [render] a render to visualize values. By default string render is used.
+     * @param  {zebkit.ui.Render} [render] a render to visualize values. By default string render is used.
      * @class zebkit.ui.BaseViewProvider
      * @constructor
      */
@@ -392,9 +392,11 @@ zebkit.package("ui", function(pkg, Class) {
 
     /**
      *  Image panel UI component class. The component renders an image.
-     *  @param {String|Image} <img> a path or direct reference to an image object.
+     *  @param {String|Image} [img] a path or direct reference to an image object.
      *  If the passed parameter is string it considered as path to an image.
      *  In this case the image will be loaded using the passed path.
+     *  @param {Integer} [w] a preferred with of the image
+     *  @param {Integer} [h] a preferred height of the image
      *  @class zebkit.ui.ImagePan
      *  @constructor
      *  @extends zebkit.ui.ViewPan
@@ -403,8 +405,8 @@ zebkit.package("ui", function(pkg, Class) {
         function(img, w, h) {
             this.setImage(arguments.length > 0 ? img : null);
             this.$super();
-            if (arguments.length > 2) {
-                this.setPreferredSize(w, h);
+            if (arguments.length > 1) {
+                this.setPreferredSize(w, arguments < 3 ? w : h);
             }
         },
 
@@ -751,14 +753,28 @@ zebkit.package("ui", function(pkg, Class) {
         function $prototype() {
             /**
              * Set the specified caption
-             * @param {String} c an image label caption text
-             * @method setCaption
+             * @param {String|zebkit.ui.Label} c a label text or component
+             * @method setValue
              * @chainable
              */
-            this.setCaption = function(c) {
+            this.setValue = function(c) {
                 var lab = this.byConstraints("label");
-                lab.setValue(c);
-                lab.setVisible(c !== null);
+
+                if (zebkit.instanceOf(c, pkg.Label)) {
+                    var i = -1;
+                    if (lab !== null) {
+                        i = this.indexOf(lab);
+                    }
+
+                    c.constraints = "label";
+                    if (i >= 0) {
+                        this.setAt(i, c);
+                    }
+                } else {
+                    lab.setValue(c);
+                    lab.setVisible(c !== null);
+                }
+
                 return this;
             };
 
@@ -769,7 +785,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @chainable
              */
             this.setImage = function(p) {
-                var lab = this.byConstraints("image");
+                var image = this.byConstraints("image");
                 image.setImage(p);
                 image.setVisible(p !== null);
                 return this;
@@ -804,12 +820,13 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             /**
-             * Get caption component
-             * @return {zebkit.ui.Panel} a caption component
-             * @method getCaption
+             * Get caption value
+             * @return {zebkit.ui.Panel} a caption value
+             * @method getValue
              */
-            this.getCaption = function () {
-                return this.byConstraints("label");
+            this.getValue = function () {
+                var lab = this.byConstraints("label");
+                return lab === null ? null : lab.getValue();
             };
 
             /**

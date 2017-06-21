@@ -1262,7 +1262,7 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             this.count = function() {
-                return $size;
+                return this.$size;
             };
 
             /**
@@ -1715,13 +1715,17 @@ zebkit.package("ui", function(pkg, Class) {
                     var startSel = d.getStartSelection(),
                         endSel   = d.getEndSelection();
 
-                    if (startSel !== null && endSel !== null && startSel.col !== endSel.col && d.selectionView !== null) {
-                        d.selectionView.paint(g, x + this.font.charsWidth(this.target, 0, startSel.col),
-                                                 y,
-                                                 this.font.charsWidth(this.target,
-                                                                      startSel.col,
-                                                                      endSel.col - startSel.col),
-                                                 this.getLineHeight(), d);
+                    if (startSel     !== null       &&
+                        endSel       !== null       &&
+                        startSel.col !== endSel.col &&
+                        d.selectView !== null          )
+                    {
+                        d.selectView.paint(g, x + this.font.charsWidth(this.target, 0, startSel.col),
+                                              y,
+                                              this.font.charsWidth(this.target,
+                                                                   startSel.col,
+                                                                   endSel.col - startSel.col),
+                                              this.getLineHeight(), d);
                     }
                 }
 
@@ -2085,8 +2089,8 @@ zebkit.package("ui", function(pkg, Class) {
              * @method paintSelection
              */
             this.paintSelection = function(g, x, y, w, h, line, d) {
-                if (d.selectionView !== null) {
-                    d.selectionView.paint(g, x, y, w, h, d);
+                if (d.selectView !== null) {
+                    d.selectView.paint(g, x, y, w, h, d);
                 }
             };
 
@@ -2863,12 +2867,15 @@ zebkit.package("ui", function(pkg, Class) {
      * @class  zebkit.ui.ToggleView
      * @extends {zebkit.ui.View}
      * @constructor
-     * @param  {Boolean} plus indicates the sign type plus (true) or minus (false)
-     * @param  {String} color a color
-     * @param  {String} bg a background
+     * @param  {Boolean} [plus] indicates the sign type plus (true) or minus (false)
+     * @param  {String}  [color] a color
+     * @param  {String}  [bg] a background
+     * @param  {Integer} [w] a width
+     * @param  {Integer} [h] a height
+     * @param  {zebkit.ui.View | String}  [br] a border view
      */
     pkg.ToggleView = Class(pkg.View, [
-        function(plus, color, bg, size) {
+        function(plus, color, bg, w, h, br) {
             if (arguments.length > 0) {
                 this.plus = plus;
                 if (arguments.length > 1) {
@@ -2876,7 +2883,13 @@ zebkit.package("ui", function(pkg, Class) {
                     if (arguments.length > 2) {
                         this.bg = bg;
                         if (arguments.length > 3) {
-                            this.width = this.height = size;
+                            this.width = this.height = w;
+                            if (arguments.length > 4) {
+                                this.height = h;
+                                if (arguments.length > 5) {
+                                    this.br = pkg.$view(br);
+                                }
+                            }
                         }
                     }
                 }

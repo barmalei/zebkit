@@ -176,7 +176,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
                         isHor = (this.orient === "horizontal"),
                         size  = isHor ? m.getGridCols() : m.getGridRows();
 
-                    for(var i = 0;i < size; i++) {
+                    for (var i = 0;i < size; i++) {
                         var v = this.provider.getView(this, i, this.getTitle(i));
                         if (v !== null) {
                             var ps = v.getPreferredSize();
@@ -206,7 +206,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
              */
             this.putTitle = function(rowcol, value) {
                 if (value === null) {
-                    if (title !== null) {
+                    if (this.titles.hasOwnProperty(rowcol)) {
                         delete this.titles[rowcol];
                     }
                 } else {

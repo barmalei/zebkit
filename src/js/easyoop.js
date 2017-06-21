@@ -179,7 +179,7 @@
 
                 if (typeof m[3] === 'undefined') {
                     if (this.scheme !== "file") {
-                        throw new Error("Invalid host name : '" + url + "'");
+                        throw new Error("Invalid host name : '" + uri + "'");
                     }
                 } else {
                     this.host = m[3];
@@ -194,7 +194,7 @@
             if (typeof m[6] !== 'undefined') {
                 this.path = m[6];
             } else if (typeof m[1] !== 'undefined') {
-                throw new Error("Invalid URL '" + url + "'");
+                throw new Error("Invalid URL '" + uri + "'");
             }
 
             if (typeof m[7] !== 'undefined' && m[7].length > 1) {
@@ -1358,8 +1358,6 @@
             if (typeof name === 'undefined' || name === null) {
                 throw new Error("Null package name");
             }
-
-            console.log("Init package : " + name + "," + this.$url);
 
             name = name.trim();
             if (name.match(/^[a-zA-Z_][a-zA-Z0-9_]+(\.[a-zA-Z_][a-zA-Z0-9_]+)*$/) === null) {

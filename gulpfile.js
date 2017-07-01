@@ -3,7 +3,7 @@ var gulp = require('gulp');
 
 // Build tree:
 // ----------
-//     [ 'easyoop', 'misc', 'ui.event', ui', 'ui.grid', 'ui.tree', 'ui.design', 'web', 'ui.web' ]
+//     [ 'easyoop', 'misc', 'draw', 'ui.event', 'ui', 'ui.grid', 'ui.tree', 'ui.design', 'web', 'ui.web' ]
 //                                    *
 //                                    |
 //                                [ zebkit ]        [ 'resource', 'ui.vk', 'ui.calendar' ]
@@ -46,9 +46,15 @@ var uiEventFiles = [
     "src/js/ui/event/ui.event.ShortcutManager.js"
 ];
 
+var drawFiles = [
+  "src/js/draw/draw.common.js",
+  "src/js/draw/draw.border.js",
+  "src/js/draw/draw.text.js",
+  "src/js/draw/draw.views.js"
+];
+
 var uiCoreFiles = [
-    "src/js/ui/ui.core.js",
-    "src/js/ui/ui.views.js"
+    "src/js/ui/ui.core.js"
 ];
 
 var uiFiles = [
@@ -106,6 +112,7 @@ var uiWebFiles = [
 
 var zebkitFiles = [ 'build/easyoop.js',
                     'build/misc.js',
+                    'build/draw.js',
                     'build/ui.event.js',
                     'build/ui.js',
                     'build/ui.tree.js',
@@ -182,8 +189,9 @@ gulp.task('resources', function() {
 });
 
 //
-packageTask("easyoop", [   "src/js/web/web.environment.js", "src/js/easyoop.js" ], false);
+packageTask("easyoop", [  "src/js/web/web.environment.js", "src/js/easyoop.js", "src/js/font.js" ], false);
 packageTask("misc", miscFiles, false);
+packageTask("draw", drawFiles);
 packageTask("ui.event", uiEventFiles);
 packageTask("ui", uiCoreFiles.concat(uiFiles));
 packageTask("ui.grid", uiGridFiles);
@@ -197,7 +205,18 @@ packageTask("ui.date", [ "src/js/ui/date/ui.date.js" ], false);
 packageTask("ui.vk", [ "src/js/ui/vk/ui.vk.js" ], false);
 
 
-gulp.task('genZebkit',  ['easyoop', 'misc', 'ui.event', 'ui', 'ui.grid', 'ui.tree', 'ui.design', 'web', 'ui.web', 'ui.vk', 'ui.date'], function() {
+gulp.task('genZebkit',  ['easyoop',
+                         'misc',
+                         'draw',
+                         'ui.event',
+                         'ui',
+                         'ui.grid',
+                         'ui.tree',
+                         'ui.design',
+                         'web',
+                         'ui.web',
+                         'ui.vk',
+                         'ui.date'], function() {
     return gulp.src(zebkitFiles)
           .pipe(expect(zebkitFiles))
           .pipe(concat('build/zebkit.js'))
@@ -212,6 +231,8 @@ gulp.task('zebkit',  ['genZebkit' ], function() {
                       "build/misc.min.js",
                       "build/easyoop.js",
                       "build/easyoop.min.js",
+                      "build/draw.js",
+                      "build/draw.min.js",
                       "build/web.js",
                       "build/web.min.js",
                       "build/ui.design.js",

@@ -24,7 +24,7 @@ zebkit.package("ui.web", function(pkg, Class) {
 
      *  @class zebkit.ui.web.CursorManager
      *  @constructor
-     *  @extends {zebkit.ui.event.Manager}
+     *  @extends zebkit.ui.event.Manager
      */
     pkg.CursorManager = Class(zebkit.ui.event.CursorManager, [
         function $prototype() {

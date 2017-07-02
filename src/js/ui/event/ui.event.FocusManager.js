@@ -27,7 +27,7 @@ zebkit.package("ui.event", function(pkg, Class) {
      * It keeps current focus owner component and provides API to change current focus component
      * @class zebkit.ui.event.FocusManager
      * @constructor
-     * @extends {zebkit.ui.event.Manager}
+     * @extends zebkit.ui.event.Manager
      */
     pkg.FocusManager = Class(pkg.Manager, [
         function $prototype() {
@@ -203,7 +203,9 @@ zebkit.package("ui.event", function(pkg, Class) {
                     }
                     cc = c;
                     c = c.parent;
-                    if (c !== null) index = d + c.indexOf(cc);
+                    if (c !== null) {
+                        index = d + c.indexOf(cc);
+                    }
                 }
 
                 return this.fd(top, d > 0 ? 0 : top.kids.length - 1, d);
@@ -228,7 +230,6 @@ zebkit.package("ui.event", function(pkg, Class) {
                     }
 
                     if (oldFocusOwner !== null) {
-                        var ofc = oldFocusOwner.getCanvas();
                         FOCUS_EVENT.source  = oldFocusOwner;
                         FOCUS_EVENT.related = this.focusOwner;
                         oldFocusOwner.focused();

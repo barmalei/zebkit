@@ -156,136 +156,6 @@ zebkit.package("web", function(pkg, Class) {
     };
 
     /**
-     * Dictionary of useful methods an HTML Canvas 2D context can be extended. The following methods are
-     * included:
-     *
-     *   - **setFont(f)**   set font
-     *   - **setColor(c)**  set background and foreground colors
-     *   - **drawLine(x1, y1, x2, y2, [w])**  draw line of the given width
-     *   - **ovalPath(x,y,w,h)**  build oval path
-     *   - **polylinePath(xPoints, yPoints, nPoints)**  build path by the given points
-     *   - **drawDottedRect(x,y,w,h)**  draw dotted rectangle
-     *   - **drawDashLine(x,y,x2,y2)** draw dashed line
-     *
-     * @attribute $2DContextMethods
-     * @type {Object}
-     * @protected
-     * @readOnly
-     */
-    pkg.$2DContextMethods = {
-        setFont : function(f) {
-            f = (typeof f.s !== 'undefined' ? f.s : f.toString());
-            if (f !== this.font) {
-                this.font = f;
-            }
-        },
-
-        setColor : function (c) {
-            c = (typeof c.s !== 'undefined' ? c.s : c.toString());
-            if (c !== this.fillStyle) this.fillStyle = c;
-            if (c !== this.strokeStyle) this.strokeStyle = c;
-        },
-
-        drawLine : function (x1, y1, x2, y2, w){
-            if (arguments.length < 5) w = 1;
-            var pw = this.lineWidth;
-            this.beginPath();
-            if (this.lineWidth !== w) this.lineWidth = w;
-
-            if (x1 === x2) {
-                x1 += w / 2;
-                x2 = x1;
-            } else if (y1 === y2) {
-                y1 += w / 2;
-                y2 = y1;
-            }
-
-            this.moveTo(x1, y1);
-            this.lineTo(x2, y2);
-            this.stroke();
-            if (pw !== this.lineWidth) this.lineWidth = pw;
-        },
-
-        ovalPath: function (x,y,w,h){
-            this.beginPath();
-            x += this.lineWidth;
-            y += this.lineWidth;
-            w -= 2 * this.lineWidth;
-            h -= 2 * this.lineWidth;
-
-            var kappa = 0.5522848,
-                ox = Math.floor((w / 2) * kappa),
-                oy = Math.floor((h / 2) * kappa),
-                xe = x + w,
-                ye = y + h,
-                xm = x + w / 2,
-                ym = y + h / 2;
-            this.moveTo(x, ym);
-            this.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
-            this.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
-            this.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
-            this.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
-            this.closePath();
-        },
-
-        polylinePath : function(xPoints, yPoints, nPoints){
-            this.beginPath();
-            this.moveTo(xPoints[0], yPoints[0]);
-            for(var i = 1; i < nPoints; i++) this.lineTo(xPoints[i], yPoints[i]);
-        },
-
-        drawDottedRect : function(x,y,w,h) {
-            var ctx = this, m = ["moveTo", "lineTo", "moveTo"];
-            function dv(x, y, s) { for(var i=0; i < s; i++) ctx[m[i%3]](x + 0.5, y + i); }
-            function dh(x, y, s) { for(var i=0; i < s; i++) ctx[m[i%3]](x + i, y + 0.5); }
-            ctx.beginPath();
-            dh(x, y, w);
-            dh(x, y + h - 1, w);
-            ctx.stroke();
-            ctx.beginPath();
-            dv(x, y, h);
-            dv(w + x - 1, y, h);
-            ctx.stroke();
-        },
-
-        drawDashLine : function(x,y,x2,y2) {
-            var pattern = [1,2],
-                compute = null,
-                dx      = (x2 - x), dy = (y2 - y),
-                b       = (Math.abs(dx) > Math.abs(dy)),
-                slope   = b ? dy / dx : dx / dy,
-                sign    = b ? (dx < 0 ?-1:1) : (dy < 0?-1:1),
-                dist    = Math.sqrt(dx * dx + dy * dy);
-
-            if (b) {
-                compute = function(step) {
-                    x += step;
-                    y += slope * step;
-                };
-            }
-            else {
-                compute = function(step) {
-                    x += slope * step;
-                    y += step;
-                };
-            }
-
-            this.beginPath();
-            this.moveTo(x, y);
-            for (var i = 0; dist >= 0.1; i++) {
-                var idx  = i % pattern.length,
-                    dl   = dist < pattern[idx] ? dist : pattern[idx],
-                    step = Math.sqrt(dl * dl / (1 + slope * slope)) * sign;
-
-                compute(step);
-                this[(i % 2 === 0) ? 'lineTo' : 'moveTo'](x + 0.5, y + 0.5);
-                dist -= dl;
-            }
-            this.stroke();
-        }
-    };
-
-    /**
      * Extend standard 2D HTML Canvas context instance with the given set of methods.
      * If new methods clash with already existent 2D context method the old one is overwritten
      * with new one and old method is saved using its name prefixed with "$" character
@@ -380,7 +250,7 @@ zebkit.package("web", function(pkg, Class) {
             }
 
             // populate extra method to 2d context
-            pkg.$extendContext(ctx, pkg.$2DContextMethods);
+            pkg.$extendContext(ctx, zebkit.draw.Context2D);
         }
 
         // take in account that canvas can be visualized on
@@ -392,8 +262,8 @@ zebkit.package("web", function(pkg, Class) {
 
             // calculate canvas with and height taking in account
             // screen ratio
-            cw = ~~(cw * ratio);
-            ch = ~~(ch * ratio);
+            cw = Math.floor(cw * ratio);
+            ch = Math.floor(ch * ratio);
 
             // adjust canvas size if it is necessary
             if (c.width != cw || c.height != ch || updateRatio === true || forceResize === true) {

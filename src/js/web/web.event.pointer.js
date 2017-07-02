@@ -2,7 +2,7 @@ zebkit.package("web", function(pkg, Class) {
     // TODO List:
     //    [+] add pressure level field to pointer events
     //    [-] group field
-    //    [+] floor for pageX/pageY
+    //    [+] round for pageX/pageY
     //    [+] double click
     //    [+] check if button field is required or can be removed from pointer event
     //    [+] support global status keeping and updating (ctrl/alt/shift)
@@ -36,8 +36,8 @@ zebkit.package("web", function(pkg, Class) {
             };
 
             this.$fillWith = function(identifier, e) {
-                this.pageX      = Math.floor(e.pageX);
-                this.pageY      = Math.floor(e.pageY);
+                this.pageX      = Math.round(e.pageX);
+                this.pageY      = Math.round(e.pageY);
                 this.target     = e.target;
                 this.identifier = identifier;
                 this.altKey     = typeof e.altKey   !== 'undefined' ? e.altKey   : false;
@@ -90,7 +90,9 @@ zebkit.package("web", function(pkg, Class) {
 
     function isIn(t, id) {
         for(var i = 0; i < t.length; i++) {
-            if (t[i].identifier === id) return true;
+            if (t[i].identifier === id) {
+                return true;
+            }
         }
         return false;
     }
@@ -288,7 +290,9 @@ zebkit.package("web", function(pkg, Class) {
                     destination.$pointerReleased(stub);
                 } finally {
                     // clear handled pressed and dragged state
-                    if (stub.touchCounter > 0) stub.touchCounter--;
+                    if (stub.touchCounter > 0) {
+                        stub.touchCounter--;
+                    }
                     $lastPointerReleased = $pointerPressedEvents.hasOwnProperty(id) ? $pointerPressedEvents[id] : null;
                     delete $pointerPressedEvents[id];
 
@@ -378,7 +382,9 @@ zebkit.package("web", function(pkg, Class) {
 
             this.$indexOfQ = function(id) {
                 for(var i = 0; i < this.$queue.length; i++) {
-                    if (id === this.$queue[i].identifier) return i;
+                    if (id === this.$queue[i].identifier) {
+                        return i;
+                    }
                 }
                 return -1;
             };
@@ -452,8 +458,8 @@ zebkit.package("web", function(pkg, Class) {
                         stub        : stub
                     };
 
-                    q.pageX = q.pressPageX = Math.floor(e.pageX);
-                    q.pageY = q.pressPageY = Math.floor(e.pageY);
+                    q.pageX = q.pressPageX = Math.round(e.pageX);
+                    q.pageY = q.pressPageY = Math.round(e.pageY);
 
                     // put pointer pressed in queue
                     this.$queue.push(q);
@@ -470,14 +476,16 @@ zebkit.package("web", function(pkg, Class) {
                     }
                 } catch(ee) {
                     // restore touch counter if an error has happened
-                    if (stub.touchCounter > 0) stub.touchCounter--;
+                    if (stub.touchCounter > 0) {
+                        stub.touchCounter--;
+                    }
                     throw ee;
                 }
             };
 
             this.$MMOVE = function(e) {
-                var pageX = Math.floor(e.pageX),
-                    pageY = Math.floor(e.pageY);
+                var pageX = Math.round(e.pageX),
+                    pageY = Math.round(e.pageY);
 
                 // ignore extra mouse moved event that can appear in IE
                 if (this.$mousePageY !== pageY ||
@@ -788,8 +796,8 @@ zebkit.package("web", function(pkg, Class) {
                     // TODO: not clear if second tap will fire mouse move or if the
                     // second tap will have any influence to first tap mouse move
                     // initiation
-                    $this.$mousePageX = Math.floor(e.pageX);
-                    $this.$mousePageY = Math.floor(e.pageY);
+                    $this.$mousePageX = Math.round(e.pageX);
+                    $this.$mousePageY = Math.round(e.pageY);
 
                     // fire touches that has not been fired yet
                     for(var i = 0; i < newTouches.length; i++) {  // go through all touches
@@ -801,7 +809,9 @@ zebkit.package("web", function(pkg, Class) {
                     for (var k in $pointerPressedEvents) {
                         if (isIn(allTouches, k) === false) {
                             var tt = $pointerPressedEvents[k];
-                            if (tt.group != null) tt.group.active = false;
+                            if (tt.group != null) {
+                                tt.group.active = false;
+                            }
                             $this.$UP(tt.identifier, tt, TOUCH_STUB);
                         }
                     }
@@ -836,8 +846,8 @@ zebkit.package("web", function(pkg, Class) {
                         var nmt = mt[i];
                         if ($pointerPressedEvents.hasOwnProperty(nmt.identifier)) {
                             var t = $pointerPressedEvents[nmt.identifier];
-                            if (t.pageX !== Math.floor(nmt.pageX) ||
-                                t.pageY !== Math.floor(nmt.pageY)   )
+                            if (t.pageX !== Math.round(nmt.pageX) ||
+                                t.pageY !== Math.round(nmt.pageY)   )
                             {
                                 // TODO: analyzing time is not enough to generate click event since
                                 // a user can put finger and wait for a long time. the best way is

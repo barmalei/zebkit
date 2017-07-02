@@ -110,8 +110,8 @@ zebkit.package("ui", function(pkg, Class) {
      * @constructor
      * @param  {String} direction an arrow icon direction. Use "left", "right", "top", "bottom" as
      * the parameter value.
-     * @extends {zebkit.ui.EvStatePan}
-     * @uses {zebkit.ui.ButtonRepeatMix}
+     * @extends zebkit.ui.EvStatePan
+     * @uses zebkit.ui.ButtonRepeatMix
      */
 
      /**
@@ -150,7 +150,7 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $clazz() {
-            this.ArrowView = Class(pkg.ArrowView, []);
+            this.ArrowView = Class(zebkit.draw.ArrowView, []);
 
             this.$colors = {
                 "out"          : "red",
@@ -178,7 +178,9 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.setArrowDirection = function(d) {
                 this.iterateArrowViews(function(k, v) {
-                    if (v !== null) v.direction = d;
+                    if (v !== null) {
+                        v.direction = d;
+                    }
                 });
                 this.repaint();
                 return this;
@@ -192,7 +194,9 @@ zebkit.package("ui", function(pkg, Class) {
              * @chainable
              */
             this.setArrowSize = function(w, h) {
-                if (arguments.length < 2) h = w;
+                if (arguments.length < 2) {
+                    h = w;
+                }
                 this.iterateArrowViews(function(k, v) {
                     if (v !== null) {
                         v.width  = w;
@@ -264,7 +268,7 @@ zebkit.package("ui", function(pkg, Class) {
 
      *  @class  zebkit.ui.Button
      *  @constructor
-     *  @param {String|zebkit.ui.Panel|zebkit.ui.View} [t] a button label.
+     *  @param {String|zebkit.ui.Panel|zebkit.draw.View} [t] a button label.
      *  The label can be a simple text or an UI component.
      *  @extends zebkit.ui.CompositeEvStatePan
      *  @uses  zebkit.ui.ButtonRepeatMix
@@ -272,16 +276,16 @@ zebkit.package("ui", function(pkg, Class) {
 
     /**
      * Fired when a button has been pressed
-
-            var b = new zebkit.ui.Button("Test");
-            b.on(function (src) {
-                ...
-            });
-
+     *
+     *     var b = new zebkit.ui.Button("Test");
+     *     b.on(function (src) {
+     *         ...
+     *     });
+     *
      * Button can be adjusted in respect how it generates the pressed event. Event can be
      * triggered by pressed or clicked even. Also event can be generated periodically if
      * the button is kept in pressed state.
-     * @event buttonPressed
+     * @event fired
      * @param {zebkit.ui.Button} src a button that has been pressed
      *
      */
@@ -331,224 +335,116 @@ zebkit.package("ui", function(pkg, Class) {
     ]);
 
     /**
-     * The standard UI checkbox component switch manager implementation. The manager holds
-     * boolean state of a checkbox UI component. There are few ways how a checkbox can
-     * switch its state: standard checkbox or radio group. In general we have a deal with
-     * one switchable UI component that can work in different modes. Thus we can re-use
-     * one UI, but customize it with appropriate switch manager. That is the main idea of
-     * having the class.
-     * @constructor
-     * @class  zebkit.ui.SwitchManager
-     * @uses   {zebkit.EventProducer}
-     */
-
-    /**
-     * Fired when a state has been updated
-
-            var ch = new zebkit.ui.Checkbox("Test");
-            ch.manager.on(function (src, ui) {
-                ...
-            });
-
-     * @event stateUpdated
-     * @param {zebkit.ui.SwitchManager} src a switch manager that controls and tracks the event
-     * @param {zebkit.ui.Checkbox} ui  an UI component that triggers the event
-     */
-    pkg.SwitchManager = Class(zebkit.EventProducer, [
-        function() {
-            this._ = new zebkit.util.Listeners();
-        },
-
-        function $prototype() {
-            this.value = false;
-
-            /**
-             * Get current state of the given UI component
-             * @param  {zebkit.ui.Checkbox} o an ui component
-             * @return {Boolean}  a boolean state
-             * @method getValue
-             */
-            this.getValue = function(o) {
-                return this.value;
-            };
-
-            /**
-             * Set the state for the given UI component
-             * @param  {zebkit.ui.Checkbox} o an ui component
-             * @param  {Boolean} b  a boolean state
-             * @method setValue
-             * @chainable
-             */
-            this.setValue = function(o, b) {
-                if (this.getValue(o) !== b){
-                    this.value = b;
-                    this.updated(o, b);
-                }
-                return this;
-            };
-
-            /**
-             * Toggle the current state
-             * @param  {zebkit.ui.Checkbox} o an ui component
-             * @method toggle
-             * @chainable
-             */
-            this.toggle = function(o) {
-                this.setValue(o, !this.getValue(o));
-                return this;
-            };
-
-            /**
-             * Called every time a state has been updated.
-             * @param  {zebkit.ui.Checkbox} o an ui component for which the state has been updated
-             * @param  {Boolean} b  a new boolean state of the UI component
-             * @method stateUpdated
-             */
-            this.updated = function(o, b){
-                if (o !== null) o.switched(b);
-                this._.fired(this, o);
-            };
-
-            /**
-             * Call when the manager has been installed for the given UI component
-             * @protected
-             * @param  {zebkit.ui.Checkbox} o an UI component the switch manager is designated
-             * @method install
-             */
-            this.install = function(o) {
-                o.switched(this.getValue(o));
-            };
-
-            /**
-             * Call when the manager has been uninstalled for the given UI component
-             * @protected
-             * @param  {zebkit.ui.Checkbox} o an UI component the switch manager is not anymore used
-             * @method uninstall
-             */
-            this.uninstall = function(o) {};
-        }
-    ]);
-
-    /**
-     * Radio group switch manager implementation. This is an extension of "zebkit.ui.SwicthManager" to
-     * support radio group switching behavior. You can use it event with normal checkbox:
-
-           // create group of check boxes that will work as a radio group
-           var gr  = new zebkit.ui.Group();
-           var ch1 = new zebkit.ui.Checkbox("Test 1", gr);
-           var ch2 = new zebkit.ui.Checkbox("Test 2", gr);
-           var ch3 = new zebkit.ui.Checkbox("Test 3", gr);
-
+     * Group class to help managing group of element where only one can be on.
+     *
+     *     // create group of check boxes that will work as a radio group
+     *     var gr  = new zebkit.ui.Group();
+     *     var ch1 = new zebkit.ui.Checkbox("Test 1", gr);
+     *     var ch2 = new zebkit.ui.Checkbox("Test 2", gr);
+     *     var ch3 = new zebkit.ui.Checkbox("Test 3", gr);
+     *
      * @class  zebkit.ui.Group
+     * @param {Boolean} [un] indicates if group can have no one item selected.
      * @constructor
-     * @extends zebkit.ui.SwitchManager
      */
-    pkg.Group = Class(pkg.SwitchManager, [
+    pkg.Group = Class(zebkit.EventProducer, [
         function(un) {
-            this.$super();
             this.selected = null;
+            this._ = new zebkit.util.Listeners();
             if (arguments.length > 0) {
                 this.allowNoneSelected = un;
             }
         },
 
         function $prototype() {
+            /**
+             * indicates if group can have no one item selected.
+             * @attribute allowNoneSelected
+             * @readOnly
+             * @type {Boolean}
+             * @default false
+             */
             this.allowNoneSelected = false;
 
-            this.getValue = function(o) {
-                return o === this.selected;
+            this.$group  = null;
+            this.$locked = false;
+
+            this.$allowValueUpdate = function(src) {
+                if (this.$group === null || this.$group.indexOf(src) < 0) {
+                    throw new Error("Component is not the group member");
+                }
+
+                return (this.selected !== src ||
+                        src.getValue() === false ||
+                        this.allowNoneSelected === true);
             };
 
-            this.setValue = function(o, b){
-                if (this.allowNoneSelected && b === false && this.selected !== null) {
-                    var old = this.selected;
-                    this.selected = null;
-                    this.updated(old, false);
-                } else if (b && this.selected !== o) {
-                    this.clearSelected();
-                    this.selected = o;
-                    this.updated(this.selected, true);
+            this.attach = function(c) {
+                if (this.$group === null) {
+                    this.$group = [];
                 }
-                return this;
+
+                if (this.$group.indexOf(c) >= 0) {
+                    throw new Error("Duplicated group element");
+                }
+
+                if (this.selected !== null && c.getValue() === true) {
+                    c.setValue(false);
+                }
+
+                c.on(this);
+                this.$group.push(c);
             };
 
-            this.clearSelected = function() {
-                if (this.selected !== null) {
-                    var old = this.selected;
-                    this.selected = null;
-                    this.updated(old, false);
+            this.detach = function(c) {
+                if (this.$group === null || this.$group.indexOf(c) < 0) {
+                    throw new Error("Component is not the group member");
                 }
+
+                if (this.selected !== null && c.getValue() === true) {
+                    c.setValue(false);
+                }
+
+                c.off(this);
+                var i = this.$group.indexOf(c);
+                this.$group.splice(i, 1);
+
+                if (this.selected === c) {
+                    if (this.allowNoneSelected !== true && this.$group.length > 0) {
+                        this.$group[i % this.$group.length].setValue(true);
+                    }
+                    this.selected = null;
+                }
+            };
+
+            this.fired = function(c) {
+                if (this.$locked !== true) {
+                    try {
+                        this.$locked = true;
+                        var b   = c.getValue(),
+                            old = this.selected;
+
+                        if (this.allowNoneSelected && b === false && this.selected !== null) {
+                            this.selected = null;
+                            this.updated(old);
+                        } else if (b && this.selected !== c) {
+                            this.selected = c;
+                            if (old !== null) {
+                                old.setValue(false);
+                            }
+                            this.updated(old);
+                        }
+                    } finally {
+                        this.$locked = false;
+                    }
+                }
+            };
+
+            this.updated = function(old) {
+                this._.fired(this, this.selected, old);
             };
         }
     ]);
-
-    /**
-     * Switchable component interface
-     * @class  zebkit.ui.Switchable
-     * @interface zebkit.ui.Switchable
-     */
-    pkg.Switchable = zebkit.Interface([
-        function $prototype() {
-            this.manager = null;
-
-            /**
-             * Set the check box state
-             * @param  {Boolean} b a state
-             * @method setValue
-             * @chainable
-             */
-            this.setValue = function(b) {
-                this.manager.setValue(this, b);
-                return this;
-            };
-
-            /**
-             * Toggle the component current state
-             * @method toggle
-             * @chainable
-             */
-            this.toggle = function() {
-                this.manager.toggle(this);
-                return this;
-            };
-
-            /**
-             * Get the check box state
-             * @return {Boolean} a check box state
-             * @method getValue
-             */
-            this.getValue = function() {
-                return this.manager ? this.manager.getValue(this) : false;
-            };
-
-            /**
-             * Set the specified switch manager
-             * @param {zebkit.ui.SwicthManager} m a switch manager
-             * @method setSwicthManager
-             * @chainable
-             */
-            this.setSwitchManager = function(m){
-                /**
-                 * A switch manager
-                 * @attribute manager
-                 * @readOnly
-                 * @type {zebkit.ui.SwitchManager}
-                 */
-                if (m === null || typeof m === 'undefined') {
-                    throw new Error("Null switch manager");
-                }
-
-                if (this.manager !== m) {
-                    if (this.manager !== null) this.manager.uninstall(this);
-                    this.manager = m;
-                    this.manager.install(this);
-                }
-
-                return this;
-            };
-        }
-    ]);
-
 
     /**
      * Check-box UI component. The component is a container that consists from two other UI components:
@@ -577,14 +473,14 @@ zebkit.package("ui", function(pkg, Class) {
      *
      *       // change border when the component checked to green
      *       // otherwise set it to red
-     *       ch.setBorder(new zebkit.ui.ViewSet({
-     *           "*": new zebkit.ui.Border("red"),
-     *           "pressed.*": new zebkit.ui.Border("green")
+     *       ch.setBorder(new zebkit.draw.ViewSet({
+     *           "*": new zebkit.draw.Border("red"),
+     *           "pressed.*": new zebkit.draw.Border("green")
      *       }));
      *
      *       // customize checker box children UI component to show
      *       // green for checked and red for un-cheked states
-     *       ch.kids[0].setView(new zebkit.ui.ViewSet({
+     *       ch.kids[0].setView(new zebkit.draw.ViewSet({
      *           "*": "red",
      *           "pressed.*": "green"
      *       }));
@@ -594,35 +490,29 @@ zebkit.package("ui", function(pkg, Class) {
      * Listening checked event should be done by registering a listener in the check box switch manager
      * as follow:
      *
-     *       // create checkbox component
+     *       // create check box component
      *       var ch = new zebkit.ui.Checkbox("Checkbox");
      *
-     *       // register a checkbox listener
-     *       ch.manager.on(function(sm) {
-     *           var s = sm.getValue();
+     *       // register a check box listener
+     *       ch.on(function(src) {
+     *           var s = src.getValue();
      *           ...
      *       });
      *
      * @class  zebkit.ui.Checkbox
      * @extends zebkit.ui.CompositeEvStatePan
-     * @uses  zebkit.ui.Switchable
      * @constructor
      * @param {String|zebkit.ui.Panel} [label] a label
-     * @param {zebkit.ui.SwitchManager} [m] a switch manager
      */
-    pkg.Checkbox = Class(pkg.CompositeEvStatePan, pkg.Switchable, [
-        function (c, m) {
-            if (arguments.length < 2) {
-                m = new pkg.SwitchManager();
-            }
-
-            if (arguments.length > 0) {
-                if (c !== null && zebkit.isString(c)) {
-                    c = new this.clazz.Label(c);
-                }
+    pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
+        function (c) {
+            if (arguments.length > 0 && c !== null && zebkit.isString(c)) {
+                c = new this.clazz.Label(c);
             }
 
             this.$super();
+
+            this._ = new zebkit.util.Listeners();
 
             /**
              * Reference to box component
@@ -633,12 +523,10 @@ zebkit.package("ui", function(pkg, Class) {
             this.box = new this.clazz.Box();
             this.add(this.box);
 
-            if (c !== null) {
+            if (arguments.length > 0 && c !== null) {
                 this.add(c);
                 this.setFocusAnchorComponent(c);
             }
-
-            this.setSwitchManager(m);
         },
 
         function $clazz() {
@@ -658,13 +546,53 @@ zebkit.package("ui", function(pkg, Class) {
 
         function $prototype() {
             /**
-             * Callback method that is called whenever a state of switch
-             * manager has been updated.
-             * @param  {Boolean} b a new state
-             * @method switched
+             * Check box state
+             * @attribute value
+             * @type {Boolean}
+             * @readOnly
+             * @protected
              */
-            this.switched = function(b){
-                this.stateUpdated(this.state, this.state);
+            this.value = false;
+
+
+
+            this.$group = null;
+
+            /**
+             * Set the check box state.
+             * @param {Boolean} v a state of the check box
+             * @method setValue
+             * @chainable
+             */
+            this.setValue = function(v) {
+                if (this.value !== v && (this.$group === null || this.$group.$allowValueUpdate(this))) {
+                    this.value = v;
+                    this.stateUpdated(this.state, this.state);
+                    if (typeof this.switched !== 'undefined') {
+                        this.switched(this);
+                    }
+                    this._.fired(this);
+                }
+                return this;
+            };
+
+            /**
+             * Get the check box state
+             * @return {Boolean} a state
+             * @method getValue
+             */
+            this.getValue = function() {
+                return this.value;
+            };
+
+            /**
+             * Toggle check box state.
+             * @method toggle
+             * @chainable
+             */
+            this.toggle = function() {
+                this.setValue(this.value !== true);
+                return this;
             };
 
             /**
@@ -676,42 +604,34 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.toViewId = function(state){
                 if (this.isEnabled === true) {
-                    if (this.getValue()) {
-                        return (this.state === "over") ? "pressed.over" : "pressed.out";
-                    }
-                    return (this.state === "over") ? "over" : "out";
+                    return this.getValue() ? (state === "over" ? "pressed.over" : "pressed.out")
+                                           : (state === "over" ? "over" : "out");
+                } else {
+                    return this.getValue() ? "pressed.disabled" : "disabled";
                 }
-                return this.getValue() ? "pressed.disabled" : "disabled";
             };
-        },
 
-        function keyPressed(e){
-            if (zebkit.instanceOf(this.manager, pkg.Group) && this.getValue()){
-                var d = 0;
-                if (e.code === "ArrowLeft" || e.code === "ArrowUp") {
-                    d = -1;
-                } else if (e.code === "ArrowRight" || e.code === "ArrowDown") {
-                    d = 1;
+            /**
+             * Attach the given check box tho the specified group
+             * @param {zebkit.ui.Group} g a group
+             * @method setGroup
+             * @chainable
+             */
+            this.setGroup = function(g) {
+                if (this.$group !== null) {
+                    this.$group.detach(this);
+                    this.$group = null;
                 }
 
-                if (d !== 0) {
-                    var p = this.parent;
-                    for(var i = p.indexOf(this) + d;i < p.kids.length && i >= 0; i += d){
-                        var l = p.kids[i];
-                        if (l.isVisible === true &&
-                            l.isEnabled === true &&
-                            zebkit.instanceOf(l, pkg.Checkbox) &&
-                            l.manager === this.manager      )
-                        {
-                            l.requestFocus();
-                            l.setValue(true);
-                            break;
-                        }
+                if (this.$group !== g) {
+                    this.$group = g;
+                    if (this.$group !== null) {
+                        this.$group.attach(this);
                     }
-                    return ;
                 }
-            }
-            this.$super(e);
+
+                return this;
+            };
         },
 
         function stateUpdated(o, n) {
@@ -726,25 +646,62 @@ zebkit.package("ui", function(pkg, Class) {
                 this.box = null;
             }
             this.$super(index,c);
+        },
+
+        function keyPressed(e){
+            if (this.$group !== null && this.getValue()){
+                var d = 0;
+                if (e.code === "ArrowLeft" || e.code === "ArrowUp") {
+                    d = -1;
+                } else if (e.code === "ArrowRight" || e.code === "ArrowDown") {
+                    d = 1;
+                }
+
+                if (d !== 0) {
+                    var p = this.parent;
+                    for(var i = p.indexOf(this) + d; i < p.kids.length && i >= 0; i += d) {
+                        var l = p.kids[i];
+                        if (l.isVisible === true &&
+                            l.isEnabled === true &&
+                            l.$group    === this.$group )
+                        {
+                            l.requestFocus();
+                            l.setValue(true);
+                            break;
+                        }
+                    }
+                    return ;
+                }
+            }
+            this.$super(e);
         }
     ]);
 
     /**
      * Radio-box UI component class. This class is extension of "zebkit.ui.Checkbox" class that sets group
-     * as a default switch manager. The other functionality id identical to checkbox component. Generally
+     * as a default switch manager. The other functionality id identical to check box component. Generally
      * speaking this class is a shortcut for radio box creation.
      * @class  zebkit.ui.Radiobox
      * @constructor
      * @param {String|zebkit.ui.Panel} [label] a label
-     * @param {zebkit.ui.Group} [m] a switch manager
-     * @extends {zebkit.ui.Checkbox}
+     * @param {zebkit.ui.Group} [m] a group
+     * @extends zebkit.ui.Checkbox
      */
     pkg.Radiobox = Class(pkg.Checkbox, [
-        function(c, group) {
-            if (arguments.length < 2) {
-                this.$super(c, new pkg.Group());
+        function(lab, group) {
+            if (arguments.length > 0) {
+                if (zebkit.instanceOf(lab, pkg.Group)) {
+                    group = lab;
+                    lab   = null;
+                }
+
+                this.$super(lab);
             } else {
-                this.$super(c, group);
+                this.$super();
+            }
+
+            if (typeof group !== 'undefined') {
+                this.setGroup(group);
             }
         }
     ]);
@@ -759,7 +716,7 @@ zebkit.package("ui", function(pkg, Class) {
     pkg.Link = Class(pkg.Button, [
         function(s) {
             // do it before super
-            this.view = new pkg.DecoratedTextRender(s);
+            this.view = new zebkit.draw.DecoratedTextRender(s);
             this.overDecoration = "underline";
 
             this.$super(null);
@@ -792,7 +749,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Set link font
-             * @param {zebkit.ui.Font} f a font
+             * @param {zebkit.Font} f a font
              * @method setFont
              * @chainable
              */
@@ -874,7 +831,7 @@ zebkit.package("ui", function(pkg, Class) {
      * Toolbar UI component. Handy way to place number of click able elements
      * @class zebkit.ui.Toolbar
      * @constructor
-     * @extends {zebkit.ui.Panel}
+     * @extends zebkit.ui.Panel
      */
 
     /**

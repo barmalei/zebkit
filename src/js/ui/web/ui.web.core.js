@@ -18,7 +18,7 @@ zebkit.package("ui.web", function(pkg, Class) {
      * @param {String|HTMLElement} [element] an HTML element to be represented as a standard zebkit UI
      * component. If the passed parameter is string it denotes a name of an HTML element. In this case
      * a new HTML element will be created.
-     * @extends {zebkit.ui.Panel}
+     * @extends zebkit.ui.Panel
      */
     pkg.HtmlElement = Class(ui.Panel, [
         function(e) {
@@ -184,7 +184,7 @@ zebkit.package("ui.web", function(pkg, Class) {
 
             /**
              * Set the CSS font of the wrapped HTML element
-             * @param {String|zebkit.ui.Font} f a font
+             * @param {String|zebkit.Font} f a font
              * @method setFont
              * @chainable
              */
@@ -342,13 +342,17 @@ zebkit.package("ui.web", function(pkg, Class) {
 
                     for(k in vars) {
                         var v = vars[k];
-                        if (v !== null) e.style[k] = v;
+                        if (v !== null) {
+                            e.style[k] = v;
+                        }
                     }
 
                     if (b) {
                         document.body.removeChild(this.$container);
                         // restore previous parent node
-                        if (domParent !== null) domParent.appendChild(this.$container);
+                        if (domParent !== null) {
+                            domParent.appendChild(this.$container);
+                        }
                     }
                 }
             };
@@ -476,7 +480,7 @@ zebkit.package("ui.web", function(pkg, Class) {
         },
 
         function setBorder(b) {
-            b = ui.$view(b);
+            b = zebkit.draw.$view(b);
 
             if (b === null) {
                this.setStyle("border", "none");
@@ -595,7 +599,7 @@ zebkit.package("ui.web", function(pkg, Class) {
      *  @constructor
      *  @private
      *  @class zebkit.ui.web.HtmlElementMan
-     *  @extends {zebkit.ui.event.Manager}
+     *  @extends zebkit.ui.event.Manager
      */
     pkg.HtmlElementMan = Class(zebkit.ui.event.Manager, [
         function $prototype() {
@@ -766,6 +770,17 @@ zebkit.package("ui.web", function(pkg, Class) {
                 }
             };
 
+            function isLeaf(c) {
+                if (typeof c.$domKids !== 'undefined') {
+                    for(var k in c.$domKids) {
+                        if (c.$domKids.hasOwnProperty(k)) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+
             function detachFromParent(p, c) {
                 // DOM parent means the detached element doesn't
                 // have upper parents since it is relative to the
@@ -786,15 +801,6 @@ zebkit.package("ui.web", function(pkg, Class) {
                         delete p.$domKids;
                     }
                 }
-            }
-
-            function isLeaf(c) {
-                if (typeof c.$domKids !== 'undefined') {
-                    for(var k in c.$domKids) {
-                        if (c.$domKids.hasOwnProperty(k)) return false;
-                    }
-                }
-                return true;
             }
 
             function removeDOMChildren(c) {

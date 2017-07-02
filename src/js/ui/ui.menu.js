@@ -5,7 +5,7 @@ zebkit.package("ui", function(pkg, Class) {
      * Menu event class
      * @constructor
      * @class zebkit.ui.event.MenuEvent
-     * @extends {zebkit.util.Event}
+     * @extends zebkit.util.Event
      */
     pkg.event.MenuEvent = Class(zebkit.util.Event, [
         function $prototype() {
@@ -61,76 +61,74 @@ zebkit.package("ui", function(pkg, Class) {
      * sign elements. The area of the component is split into three parts: left, right and center.
      * Central part keeps content, left side keeps checked sign element and the right side keeps
      * sub-menu sign element.
-     * @param  {String|zebkit.ui.Panel} caption a menu item caption string or component. Caption
+     * @param  {String|zebkit.ui.Panel} content a menu item content string or component. Caption
      * string can encode the item id, item icon and item checked state. For instance:
      *
-     *   - **"Menu Item [@menu_item_id]"** - triggers creation of menu item component
-     *     with "Menu Item" caption and "menu_item_id" id property value
-     *   - **"[x] Menu Item"** - triggers creation of checked menu item component
-     *     with checked on state
-     *   - **"@('mypicture.gif') Menu Item"** - triggers creation of menu item
-     *      component with "Menu Item" caption and loaded mypicture.gif icon
+     *         {
+     *             content:  "Test" | {zebkit.ui.Panel}
+     *             checked:  {Boolean},                   // optional
+     *             group  :  {zebkit.ui.Group},           // optional
+     *             icon   :  "path/to/image" | {Image},   // optional
+     *             handler:  {Function}                   // optional
+     *             id     :  {String}                     // optional
+     *         }
      *
      * @example
      *
      *
      *     // create menu item with icon and "Item 1" title
-     *     var mi = new zebkit.ui.MenuItem("@('mypicture.gif') Item 1");
+     *     var mi = new zebkit.ui.MenuItem({
+     *         content: "Menu item label"
+     *     });
      *
      *
      * @class zebkit.ui.MenuItem
-     * @extends {zebkit.ui.Panel}
+     * @extends zebkit.ui.Panel
      * @constructor
+     *
      */
     pkg.MenuItem = Class(pkg.Panel, [
-        function (c) {
+        function(c) {
             this.$super();
-            this.add(new this.clazz.CheckStatePan());
 
             if (zebkit.isString(c)) {
-                var m = c.match(/(\s*\@\(.*\)\s*)?(\s*\[\s*\]|\s*\[\s*x\s*\]|\s*\(\s*x\s*\)|\s*\(\s*\))?\s*(.*)/);
-                if (m === null) {
-                    throw new Error("Invalid menu item: " + c);
-                }
+                this.add(new this.clazz.Checkbox()).setVisible(false);
+                c = new this.clazz.ImageLabel(c, null);
+            } else if (zebkit.instanceOf(c, pkg.Panel) === false) {
+                var ch = null;
 
-                if (typeof m[2] !== 'undefined') {
-                    var s = m[2].trim();
-                    this.setCheckManager(s[0] === '(' ? new pkg.Group() : new pkg.SwitchManager());
-                    this.manager.setValue(this, m[2].indexOf('x') > 0);
-                }
+                if (c.checked === true || c.checked === false || c.group) {
+                    ch = (typeof c.group !== 'undefined') ? new this.clazz.Radiobox()
+                                                          : new this.clazz.Checkbox();
 
-                var img = null;
-                if (typeof m[1] !== 'undefined') {
-                    img = m[1].substring(m[1].indexOf("@(") + 2, m[1].lastIndexOf(")")).trim();
-                    if (img[0] === "'") {
-                       img = img.substring(1, img.length-1);
-                    } else {
-                        var parts = img.split('.'),
-                            scope = zebkit.$global;
-
-                        img = null;
-                        for (var i = 0; i < parts.length; i++) {
-                            scope = scope[parts[i]];
-                            if (typeof scope === 'undefined' || scope === null) {
-                                break;
-                            }
-                        }
-                        img = scope;
+                    ch.setValue(typeof c.checked === 'undefined' ? false : c.checked);
+                    if (typeof c.group !== 'undefined') {
+                        ch.setGroup(c.group);
                     }
-                }
-
-                c = m[3];
-                m = c.match(/(.*)\s*\[\s*@([a-zA-Z_][a-zA-Z0-9_]+)\s*]\s*/);
-                if (m !== null) {
-                    this.id = m[2].trim();
-                    c       = m[1].trim();
                 } else {
-                    this.id = c.toLowerCase().replace(/[ ]+/, '_');
+                    ch = new this.clazz.Checkbox();
+                    ch.setVisible(false);
                 }
 
-                c = new pkg.ImageLabel(new this.clazz.Label(c), img);
+                this.add(ch);
+
+                if (typeof c.id !== 'undefined') {
+                    this.setId(c.id);
+                }
+
+                if (typeof c.handler !== 'undefined') {
+                    this.$handler = c.handler;
+                }
+
+                if (zebkit.instanceOf(c.content, zebkit.ui.Panel)) {
+                    c = c.content;
+                } else if (typeof c.icon !== 'undefined') {
+                    c = new this.clazz.ImageLabel(c.content, c.icon);
+                } else {
+                    c = new this.clazz.ImageLabel(c.content, null);
+                }
             } else {
-                this.getCheck().setVisible(false);
+                this.add(new this.clazz.Checkbox()).setVisible(false);
             }
 
             this.add(c);
@@ -141,12 +139,16 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $clazz() {
-            this.SubImage      = Class(pkg.StatePan, []);
-            this.Label         = Class(pkg.Label,    []);
-            this.CheckStatePan = Class(pkg.ViewPan,  []);
+            this.SubImage  = Class(pkg.StatePan, []);
+            this.Label     = Class(pkg.Label,    []);
+            this.Checkbox  = Class(pkg.Checkbox, []);
+            this.Radiobox  = Class(pkg.Radiobox, []);
+            this.ImageLabel  = Class(pkg.ImageLabel, []);
         },
 
         function $prototype() {
+            this.$handler = null;
+
             /**
              * Gap between checked, content and sub menu arrow components
              * @attribute gap
@@ -155,14 +157,6 @@ zebkit.package("ui", function(pkg, Class) {
              * @default 8
              */
             this.gap = 8;
-
-            /**
-             * Switch manager that is set to make the item checkable
-             * @type {zebkit.ui.SwitchManager | zebkit.ui.Group}
-             * @attribute manager
-             * @readOnly
-             */
-            this.manager = null;
 
             /**
              * Callback method that is called every time the menu item has
@@ -175,8 +169,12 @@ zebkit.package("ui", function(pkg, Class) {
                     content.setValue(!content.getValue());
                 }
 
-                if (this.manager !== null) {
-                    this.manager.setValue(this, !this.manager.getValue(this));
+                if (this.getCheck().isVisible) {
+                    this.getCheck().toggle();
+                }
+
+                if (this.$handler !== null) {
+                    this.$handler.call(this);
                 }
             };
 
@@ -192,42 +190,41 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             /**
-             * Set the menu item caption.
-             * @param {String} caption a caption
-             * @method setCaption
-             * @chainable
-             */
-            this.setCaption = function(caption) {
-                this.getContent().setCaption(caption);
-                return this;
-            };
-
-            /**
-             * Callback method that is called every time a checked state
-             * of the menu item has been updated
-             * @param {Boolean} b a new checked state
-             * @method switched
-             * @protected
-             */
-            this.switched = function(b) {
-                this.kids[0].view.activate(b ? (this.isEnabled === true ? "on" : "on.disabled") : "off", this);
-            };
-
-            /**
              * Get check state component
              * @return {zebkit.ui.Panel} a check state component
              * @method getCheck
-             * @protected
              */
             this.getCheck = function() {
                 return this.kids[0];
             };
 
             /**
+             * Get checked state of the item
+             * @return {Boolean} a checked state
+             * @method isChecked
+             */
+            this.isChecked = function() {
+                return this.getCheck().isVisible && this.getCheck().getValue();
+            };
+
+            /**
+             * Set group
+             * @param {zebkit.ui.Group} g a group
+             * @param {Boolean} [v] a value
+             * @method setGroup
+             */
+            this.setGroup = function(g, v) {
+                this.getCheck().setGroup(g);
+                this.getCheck().setVisible(true);
+                if (arguments.length > 1) {
+                    this.getCheck().setValue(v);
+                }
+            };
+
+            /**
              * Get content component
              * @return {zebkit.ui.Panel} a content component
              * @method getContent
-             * @protected
              */
             this.getContent = function() {
                 return this.kids.length > 0 ? this.kids[1] : null;
@@ -243,42 +240,60 @@ zebkit.package("ui", function(pkg, Class) {
                 return this.kids.length > 1 ? this.kids[2] : null;
             };
 
-            /**
-             * Hide sub menu arrow component
-             * @method hideSub
-             */
-            this.hideSub = function() {
-                this.getSub().setVisible(false);
-            };
-
             this.activateSub = function(b) {
                 var kid = this.getSub();
-                kid.setState(b ? "arrow" : "*");
+                kid.setState(b ? "pressed" : "*");
                 if (this.parent !== null && this.parent.noSubIfEmpty === true) {
                     kid.setVisible(b);
                 }
             };
 
-            this.calcPreferredSize = function (target){
-                var cc = 0, pw = 0, ph = 0;
-
-                for(var i = 0; i < target.kids.length; i++) {
-                    var k = target.kids[i];
-                    if (k.isVisible === true) {
-                        var ps = k.getPreferredSize();
-                        pw += ps.width + (cc > 0 ? this.gap : 0);
-                        if (ps.height > ph) ph = ps.height;
-                        cc ++;
-                    }
-                }
-
-                return { width:pw, height:ph };
+            this.$getCheckSize = function() {
+                var ch = this.getCheck();
+                return ch === null ? { width: 0, height: 0 } : ch.getPreferredSize() ;
             };
 
-            this.doLayout = function(target){
+            this.$getContentSize = function() {
+                var content = this.getContent();
+                return (content !== null && content.isVisible === true) ? content.getPreferredSize()
+                                                                        : { width : 0, height : 0 };
+            };
+
+            this.$getSubSize = function() {
+                var sub = this.getSub();
+                return (sub !== null && sub.isVisible === true) ? sub.getPreferredSize()
+                                                                : { width : 0, height : 0 };
+            };
+
+            this.calcPreferredSize = function (target){
+                var p1 = this.$getCheckSize(),
+                    p2 = this.$getContentSize(),
+                    p3 = this.$getSubSize(),
+                    h  = Math.max(p1.height, p2.height, p3.height),
+                    w  = p1.width + p2.width + p3.width,
+                    i  = -1;
+
+                if (p1.width > 0) {
+                    i++;
+                }
+
+                if (p2.width > 0) {
+                    i++;
+                }
+
+                if (p3.width > 0) {
+                    i++;
+                }
+
+                return { width: w + (i > 0 ? this.gap * i : 0), height: h };
+            };
+
+            this.doLayout = function(target) {
                 var left    = this.getCheck(),
                     right   = this.getSub(),
                     content = this.getContent(),
+                    p1      = this.$getCheckSize(),
+                    p3      = this.$getSubSize(),
                     t       = target.getTop(),
                     l       = target.getLeft(),
                     eh      = target.height - t - target.getBottom(),
@@ -287,16 +302,18 @@ zebkit.package("ui", function(pkg, Class) {
                 if (left !== null && left.isVisible === true) {
                     left.toPreferredSize();
                     left.setLocation(l, t + Math.floor((eh - left.height)/2));
-                    l += this.gap + left.width;
-                    ew -= (this.gap + left.width);
                 }
+
+                var add = (p1.width > 0 ? this.gap : 0) + p1.width;
+                l  += add;
+                ew -= add;
 
                 if (right !== null && right.isVisible === true) {
                     right.toPreferredSize();
                     right.setLocation(target.width - target.getRight() - right.width,
                                       t + Math.floor((eh - right.height)/2));
-                    ew -= (this.gap + right.width);
                 }
+                ew -= ((p3.width > 0 ? this.gap : 0) + p3.width);
 
                 if (content !== null && content.isVisible === true) {
                     content.toPreferredSize();
@@ -305,46 +322,6 @@ zebkit.package("ui", function(pkg, Class) {
                     }
                     content.setLocation(l, t + Math.floor((eh - content.height)/2));
                 }
-            };
-
-            /**
-             * Set the menu item checked state
-             * @param {Boolean} b a checked state
-             * @method setCheckState
-             * @chainable
-             */
-            this.setCheckState = function(b) {
-                if (this.manager === null) {
-                    this.setCheckManager(new pkg.SwitchManager());
-                }
-                this.manager.setValue(this, b);
-                return this;
-            };
-
-            /**
-             * Get menu item checked state
-             * @return {Boolean} a menu item checked state
-             * @method getCheckState
-             */
-            this.getCheckState = function() {
-                return this.manager.getValue(this);
-            };
-
-            /**
-             * Set the menu item checked state manager.
-             * @param {zebkit.ui.SwitchManager|zebkit.ui.Group} man a switch manager
-             * @method setCheckManager
-             * @chainable
-             */
-            this.setCheckManager = function(man) {
-                if (this.manager !== man) {
-                    if (this.manager !== null) {
-                        this.manager.uninstall(this);
-                    }
-                    this.manager = man;
-                    this.manager.install(this);
-                }
-                return this;
             };
         },
 
@@ -359,37 +336,38 @@ zebkit.package("ui", function(pkg, Class) {
             if (p !== null && p.noSubIfEmpty === true) {
                 this.getSub().setVisible(false);
             }
-        },
-
-        function setEnabled(b) {
-            this.$super(b);
-            // sync menu item enabled state with checkable element state
-            if (this.manager !== null) {
-                this.switched(this.manager.getValue(this));
-            }
-            return this;
         }
     ]).hashable();
 
     /**
      * Menu UI component class. The class implements popup menu UI component.
-
-         var m = new Menu({
-            "Menu Item 1" : [
-                "[x] SubMenu Checked Item 1",
-                "[ ] SubMenu Unchecked Item 2",
-                "-",   // line
-                "[ ] SubMenu Unchecked Item 3"
-            ],
-            "Menu Item 2" : null,
-            "Menu Item 3" : null
-         });
-
+     *
+     *     var m = new Menu([
+     *         {
+     *             content: "Menu Item 1",
+     *             sub    : [
+     *                 {
+     *                     content: "SubMenu Checked Item 1",
+     *                     checked: true
+     *                 },
+     *                 {
+     *                     content: "SubMenu Checked Item 2",
+     *                     checked: false
+     *                 },
+     *                 "-", // line
+     *                 {
+     *                     content: "SubMenu Checked Item 3",
+     *                     checked: false
+     *                 }
+     *         },
+     *         "Menu Item 2",
+     *         "Menu Item 3"
+     *      ]);
      *
      * @class zebkit.ui.Menu
      * @constructor
      * @param {Object} [list] menu items description
-     * @extends {zebkit.ui.CompList}
+     * @extends zebkit.ui.CompList
      */
     pkg.Menu = Class(pkg.CompList, [
         function (d) {
@@ -397,18 +375,14 @@ zebkit.package("ui", function(pkg, Class) {
 
             this.$super([], zebkit.isBoolean(d) ? d : true);
 
-            if (Array.isArray(d)) {
+            if (arguments.length > 0) {
                 for(var i = 0; i < d.length; i++) {
-                    this.add(d[i]);
-                }
-            } else {
-                for(var k in d) {
-                    if (d.hasOwnProperty(k)) {
-                        var sub = d[k];
-                        this.add(k);
-                        if (sub !== null) {
-                            this.setMenuAt(this.kids.length - 1, zebkit.instanceOf(sub, pkg.Menu) ? sub : new pkg.Menu(sub));
-                        }
+                    var item = d[i];
+                    this.add(item);
+                    if (zebkit.isString(item) === false && typeof item.sub !== 'undefined') {
+                        var sub = item.sub;
+                        this.setMenuAt(this.kids.length - 1, zebkit.instanceOf(sub, pkg.Menu) ? sub
+                                                                                              : new pkg.Menu(sub));
                     }
                 }
             }
@@ -453,8 +427,8 @@ zebkit.package("ui", function(pkg, Class) {
                 for(var i = 0;i < this.kids.length; i++){
                     if (this.kids[i] === src) {
                         // clear selection if an item becomes not selectable
-                        if (this.isItemSelectable(i) === false) {
-                            if (i === this.selectedIndex) this.select(-1);
+                        if (this.isItemSelectable(i) === false && (i === this.selectedIndex)) {
+                            this.select(-1);
                         }
                         break;
                     }
@@ -470,10 +444,15 @@ zebkit.package("ui", function(pkg, Class) {
             this.getMenuItem = function(i) {
                 if (zebkit.isString(i) === true) {
                     var item = this.byPath(i);
-                    if (item !== null) return item;
+                    if (item !== null) {
+                        return item;
+                    }
+
                     for (var k in this.menus) {
                         item = this.menus[k].getMenuItem(i);
-                        if (item !== null) return item;
+                        if (item !== null) {
+                            return item;
+                        }
                     }
                 }
                 return this.kids[i];
@@ -486,7 +465,9 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.hasSelectableItems = function(){
                 for(var i = 0; i < this.kids.length; i++) {
-                    if (this.isItemSelectable(i)) return true;
+                    if (this.isItemSelectable(i)) {
+                        return true;
+                    }
                 }
                 return false;
             };
@@ -514,6 +495,43 @@ zebkit.package("ui", function(pkg, Class) {
                 } else {
                     return null;
                 }
+            };
+
+            // TODO: not stable API
+            this.menuById = function(id) {
+                if (this.id === id) {
+                    return this;
+                } else {
+                    for (var i = 0; i < this.kids.length; i++)  {
+                        var m = this.getMenuAt(i);
+                        if (m !== null) {
+                            var res = m.menuById(id);
+                            if (res !== null) {
+                                return res;
+                            }
+                        }
+                    }
+                    return null;
+                }
+            };
+
+            // TODO: not stable API
+            this.menuItemById = function(id) {
+                for (var i = 0; i < this.kids.length; i++)  {
+                    var mi = this.kids[i];
+                    if (mi !== null && mi.id === id) {
+                        return mi;
+                    } else {
+                        var m = this.getMenuAt(i);
+                        if (m !== null) {
+                            var res = m.menuItemById(id);
+                            if (res !== null) {
+                                return res;
+                            }
+                        }
+                    }
+                }
+                return null;
             };
 
             /**
@@ -597,7 +615,9 @@ zebkit.package("ui", function(pkg, Class) {
                     var t = this,
                         p = null;
 
-                    while ((p = t.$parentMenu) !== null) t = p;
+                    while ((p = t.$parentMenu) !== null) {
+                        t = p;
+                    }
                     return t;
                 }
                 return null;
@@ -613,7 +633,9 @@ zebkit.package("ui", function(pkg, Class) {
                     if (nsy + ps.height < eh) {
                         nsy = eh - ps.height;
                     }
-                    if (sy !== nsy) this.scrollManager.scrollYTo(nsy);
+                    if (sy !== nsy) {
+                        this.scrollManager.scrollYTo(nsy);
+                    }
                 }
             };
 
@@ -684,7 +706,9 @@ zebkit.package("ui", function(pkg, Class) {
                     var p = this.$parentMenu;
                     this.$canceled(this);
                     this.$hideMenu();
-                    if (p !== null) p.requestFocus();
+                    if (p !== null) {
+                        p.requestFocus();
+                    }
                 }
             } else {
                 this.$super(e);
@@ -695,8 +719,11 @@ zebkit.package("ui", function(pkg, Class) {
             if (zebkit.isString(c)) {
                 return this.$super(i, ctr, (c.match(/^\-+$/) !== null) ? new this.clazz.Line()
                                                                        : new this.clazz.MenuItem(c));
+            } else if (zebkit.instanceOf(c, pkg.Panel)) {
+                return this.$super(i, ctr, c);
+            } else {
+                return this.$super(i, ctr, new this.clazz.MenuItem(c));
             }
-            return this.$super(i, ctr, c);
         },
 
         function setParent(p) {
@@ -751,7 +778,9 @@ zebkit.package("ui", function(pkg, Class) {
 
                 // request fire selection if the menu is shown and position has moved to new place
                 if (this.parent !== null && off !== this.selectedIndex && this.isItemSelectable(off)) {
-                    if (this.triggerSelectionByPos(off)) rs = off;
+                    if (this.triggerSelectionByPos(off)) {
+                        rs = off;
+                    }
                 }
 
                 if (rs !== null) {
@@ -806,11 +835,6 @@ zebkit.package("ui", function(pkg, Class) {
                         // hide menu since it has been already shown
                         sub.$hideMenu();
                     }
-
-                    // pkg.events.fire("menuItemSelected",
-                    //                  MENU_EVENT.$fillWith(this,
-                    //                                       this.selectedIndex,
-                    //                                       this.kids[prev]));
                 }
             }
             this.$super(prev);
@@ -847,14 +871,20 @@ zebkit.package("ui", function(pkg, Class) {
     pkg.Menubar = Class(pkg.Menu, [
         function $clazz() {
             this.MenuItem = Class(pkg.MenuItem, [
-                function $clazz() {
-                    this.Label = Class(pkg.MenuItem.Label, []);
-                },
-
                 function(c) {
                     this.$super(c);
-                    this.hideSub();
+                    this.getSub().setVisible(false);
                     this.getCheck().setVisible(false);
+                },
+
+                function $prototype() {
+                    this.$getCheckSize = function() {
+                        return pkg.$getPS(this.getCheck());
+                    };
+                },
+
+                function $clazz() {
+                    this.Label = Class(pkg.MenuItem.Label, []);
                 }
             ]);
         },
@@ -889,10 +919,10 @@ zebkit.package("ui", function(pkg, Class) {
                     menu.requestFocus();
                 }
             };
-        },
 
-        function $canceled(m) {
-            this.select(-1);
+            this.$canceled = function(m) {
+                this.select(-1);
+            };
         },
 
         // called when an item is selected by user with pointer click or key
@@ -902,7 +932,6 @@ zebkit.package("ui", function(pkg, Class) {
             if (this.selectedIndex >= 0 && this.selectedIndex === i) {
                 i = -1;
             }
-
             this.$super(i);
         }
     ]);
@@ -922,8 +951,12 @@ zebkit.package("ui", function(pkg, Class) {
                             yy = (m.y + ps.height > target.height) ? target.height - ps.height : m.y;
 
                         m.setSize(ps.width, ps.height);
-                        if (xx < 0) xx = 0;
-                        if (yy < 0) yy = 0;
+                        if (xx < 0) {
+                            xx = 0;
+                        }
+                        if (yy < 0) {
+                            yy = 0;
+                        }
                         m.setLocation(xx, yy);
                     }
                 }
@@ -1083,9 +1116,9 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Simple popup layer implementation basing on "zebkit.ui.Panel" component.
      * @class zebkit.ui.PopupLayer
-     * @extends {zebkit.ui.Panel}
+     * @extends zebkit.ui.Panel
      * @constructor
-     * @uses {zebkit.ui.PopupLayerMix}
+     * @uses zebkit.ui.PopupLayerMix
      */
     pkg.PopupLayer = Class(pkg.Panel, pkg.PopupLayerMix, []);
 });

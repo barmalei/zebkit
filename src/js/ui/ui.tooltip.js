@@ -5,7 +5,7 @@ zebkit.package("ui", function(pkg, Class) {
      * @class  zebkit.ui.Tooltip
      * @param  {zebkit.util.Panel|String} a content component or test label to be shown in tooltip
      * @constructor
-     * @extends {zebkit.ui.Panel}
+     * @extends zebkit.ui.Panel
      */
     pkg.Tooltip = Class(pkg.Panel, [
         function(content) {
@@ -21,10 +21,14 @@ zebkit.package("ui", function(pkg, Class) {
 
             this.ImageLabel = Class(pkg.ImageLabel, []);
 
-            this.TooltipBorder = Class(pkg.View, [
+            this.TooltipBorder = Class(zebkit.draw.View, [
                 function(col, size) {
-                    if (arguments.length > 0) this.color = col;
-                    if (arguments.length > 1) this.size  = size;
+                    if (arguments.length > 0) {
+                        this.color = col;
+                    }
+                    if (arguments.length > 1) {
+                        this.size  = size;
+                    }
                     this.gap = 2 * this.size;
                 },
 
@@ -48,11 +52,11 @@ zebkit.package("ui", function(pkg, Class) {
                         x += this.size;
                         y += this.size;
 
-                        var w2   = (w/2 + 0.5) | 0,
-                            w3_8 = ((3 * w)/8 + 0.5) | 0,
-                            h2_3 = ((2 * h)/3 + 0.5) | 0,
-                            h3   = (h/3 + 0.5) | 0,
-                            w4   = (w/4 + 0.5) | 0;
+                        var w2   = Math.round(w /2),
+                            w3_8 = Math.round((3 * w)/8),
+                            h2_3 = Math.round((2 * h)/3),
+                            h3   = Math.round(h/3),
+                            w4   = Math.round(w/4);
 
                         g.moveTo(x + w2, y);
                         g.quadraticCurveTo(x, y, x, y + h3);
@@ -78,15 +82,15 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function getTop() {
-            return this.$super() + ((this.$contentPs.height/6 + 0.5) | 0);
+            return this.$super() + Math.round(this.$contentPs.height / 6);
         },
 
         function getLeft() {
-            return this.$super() + ((this.$contentPs.height/6 + 0.5) | 0);
+            return this.$super() + Math.round(this.$contentPs.height / 6);
         },
 
         function getRight() {
-            return this.$super() + ((this.$contentPs.height/6 + 0.5) | 0);
+            return this.$super() + Math.round(this.$contentPs.height / 6);
         }
     ]);
 
@@ -258,7 +262,6 @@ zebkit.package("ui", function(pkg, Class) {
                 if (this.$target === null &&
                     ((typeof e.source.tooltip !== 'undefined' && e.source.tooltip !== null) || typeof e.source.getTooltip !== 'undefined'))
                 {
-                    var $this = this;
                     this.$target = e.source;
                     this.$targetTooltipLayer = e.source.getCanvas().getLayer("win");
                     this.$tooltipX = e.x;

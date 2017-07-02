@@ -10,106 +10,176 @@ zebkit.package("ui", function(pkg, Class) {
          * @const DEFAULT
          * @type {String}
          */
-        DEFAULT     : "default",
+        DEFAULT: "default",
 
         /**
          * "move"
          * @const MOVE
          * @type {String}
          */
-        MOVE        : "move",
+        MOVE: "move",
 
         /**
          * "wait"
          * @const WAIT
          * @type {String}
          */
-        WAIT        : "wait",
+        WAIT: "wait",
 
         /**
          * "text"
          * @const TEXT
          * @type {String}
          */
-        TEXT        : "text",
+        TEXT: "text",
 
         /**
          * "pointer"
          * @const HAND
          * @type {String}
          */
-        HAND        : "pointer",
+        HAND: "pointer",
 
         /**
          * "ne-resize"
          * @const NE_RESIZE
          * @type {String}
          */
-        NE_RESIZE   : "ne-resize",
+        NE_RESIZE: "ne-resize",
 
         /**
          * "sw-resize"
          * @const SW_RESIZE
          * @type {String}
          */
-        SW_RESIZE   : "sw-resize",
+        SW_RESIZE: "sw-resize",
 
         /**
          * "se-resize"
          * @const SE_RESIZE
          * @type {String}
          */
-        SE_RESIZE   : "se-resize",
+        SE_RESIZE: "se-resize",
 
         /**
          * "nw-resize"
          * @const NW_RESIZE
          * @type {String}
          */
-        NW_RESIZE   : "nw-resize",
+        NW_RESIZE: "nw-resize",
 
         /**
          * "s-resize"
          * @const S_RESIZE
          * @type {String}
          */
-        S_RESIZE    : "s-resize",
+        S_RESIZE: "s-resize",
 
         /**
          * "w-resize"
          * @const W_RESIZE
          * @type {String}
          */
-        W_RESIZE    : "w-resize",
+        W_RESIZE: "w-resize",
 
         /**
          * "n-resize"
          * @const N_RESIZE
          * @type {String}
          */
-        N_RESIZE    : "n-resize",
+        N_RESIZE: "n-resize",
 
         /**
          * "e-resize"
          * @const E_RESIZE
          * @type {String}
          */
-        E_RESIZE    : "e-resize",
+        E_RESIZE: "e-resize",
 
         /**
          * "col-resize"
          * @const COL_RESIZE
          * @type {String}
          */
-        COL_RESIZE  : "col-resize",
+        COL_RESIZE: "col-resize",
 
         /**
          * "help"
          * @const HELP
          * @type {String}
          */
-        HELP        : "help"
+        HELP: "help"
     };
+
+    /**
+     *  UI component render class. Renders the given target UI component
+     *  on the given surface using the specified 2D context
+     *  @param {zebkit.layout.Layoutable} [target] an UI component to be rendered
+     *  @class zebkit.ui.CompRender
+     *  @constructor
+     *  @extends zebkit.draw.Render
+     */
+    pkg.CompRender = Class(zebkit.draw.Render, [
+        function $prototype() {
+            /**
+             * Get preferred size of the render. The method doesn't calculates
+             * preferred size it simply calls the target component "getPreferredSize"
+             * method.
+             * @method getPreferredSize
+             * @return {Object} a preferred size
+             *
+             *      {width:<Integer>, height: <Integer>}
+             */
+            this.getPreferredSize = function(){
+                return this.target === null || this.target.isVisible === false ? { width:0, height:0 }
+                                                                               : this.target.getPreferredSize();
+            };
+
+            this.paint = function(g,x,y,w,h,d){
+                var c = this.target;
+                if (c !== null && c.isVisible) {
+                    var prevW  = -1,
+                        prevH  = 0,
+                        parent = null;
+
+                    if (w !== c.width || h !== c.height) {
+                        if (c.getCanvas() !== null) {
+                            parent = c.parent;
+                            c.parent = null;
+                        }
+
+                        prevW = c.width;
+                        prevH = c.height;
+                        c.setSize(w, h);
+                    }
+
+                    // validate should be done here since setSize can be called
+                    // above
+                    c.validate();
+                    g.translate(x, y);
+
+                    try {
+                        c.paintComponent(g);
+                    } catch(e) {
+                        if (parent !== null) {
+                            c.parent = parent;
+                        }
+                        g.translate(-x, -y);
+                        throw e;
+                    }
+                    g.translate(-x, -y);
+
+                    if (prevW >= 0){
+                        c.setSize(prevW, prevH);
+                        if (parent !== null) {
+                            c.parent = parent;
+                        }
+                        c.validate();
+                    }
+                }
+            };
+        }
+    ]);
 
     /**
      * Shortcut to create a UI component by the given description. Depending on the description type
@@ -203,7 +273,7 @@ zebkit.package("ui", function(pkg, Class) {
         } else if (desc instanceof Image) {
             return hasInstance && typeof instance.clazz.ImagePan !== 'undefined' ? new instance.clazz.ImagePan(desc)
                                                                                  : new pkg.ImagePan(desc);
-        } else if (zebkit.instanceOf(desc, pkg.View)) {
+        } else if (zebkit.instanceOf(desc, zebkit.draw.View)) {
             var v = hasInstance && typeof instance.clazz.ViewPan !== 'undefined' ? new instance.clazz.ViewPan()
                                                                                  : new pkg.ViewPan();
             v.setView(desc);
@@ -234,7 +304,7 @@ zebkit.package("ui", function(pkg, Class) {
                 var b = false;
                 for(var k in v) {
                     if (v.hasOwnProperty(k)) {
-                        var nv = pkg.$view(v[k]);
+                        var nv = zebkit.draw.$view(v[k]);
                         if (this.views[k] !== nv) {
                             this.views[k] = nv;
                             b = true;
@@ -252,93 +322,19 @@ zebkit.package("ui", function(pkg, Class) {
     ]);
 
     /**
-     * Base class to implement model values renders.
-     * @param  {zebkit.ui.Render} [render] a render to visualize values. By default string render is used.
-     * @class zebkit.ui.BaseViewProvider
-     * @constructor
-     */
-    pkg.BaseViewProvider = Class([
-        function(render) {
-            /**
-             * Default render that is used to paint grid content.
-             * @type {zebkit.ui.Render}
-             * @attribute render
-             * @readOnly
-             * @protected
-             */
-            this.render = (arguments.length === 0 || typeof render === 'undefined' ? new pkg.StringRender("")
-                                                                                   : render);
-            zebkit.properties(this, this.clazz);
-        },
-
-        function $prototype() {
-            /**
-             * Set the default view provider font if defined render supports it
-             * @param {zebkit.ui.Font} f a font
-             * @method setFont
-             * @chainable
-             */
-            this.setFont = function(f) {
-                if (typeof this.render.setFont !== 'undefined') {
-                    this.render.setFont(f);
-                }
-                return this;
-            };
-
-            /**
-             * Set the default view provider color if defined render supports it
-             * @param {String} c a color
-             * @method setColor
-             * @chainable
-             */
-            this.setColor = function(c) {
-                if (typeof this.render.setColor !== 'undefined') {
-                    this.render.setColor(c);
-                }
-                return this;
-            };
-
-            /**
-             * Get a view to render the specified value of the target component.
-             * @param  {Object} target a target  component
-             * @param  {Object} [arg]* arguments list
-             * @param  {Object} obj a value to be rendered
-             * @return {zebkit.ui.View}  an instance of view to be used to
-             * render the given value
-             * @method  getView
-             */
-            this.getView = function(target) {
-                var obj = arguments[arguments.length - 1];
-                if (obj !== null && typeof obj !== 'undefined') {
-                    if (typeof obj.toView !== 'undefined') {
-                        return obj.toView();
-                    } else if (typeof obj.paint !== 'undefined') {
-                        return obj;
-                    } else {
-                        this.render.setValue(obj.toString());
-                        return this.render;
-                    }
-                } else {
-                    return null;
-                }
-            };
-        }
-    ]);
-
-    /**
-     *  UI component to keep and render the given "zebkit.ui.View" class
+     *  UI component to keep and render the given "zebkit.draw.View" class
      *  instance. The target view defines the component preferred size
      *  and the component view.
      *  @class zebkit.ui.ViewPan
      *  @constructor
-     *  @extends {zebkit.ui.Panel}
+     *  @extends zebkit.ui.Panel
      */
     pkg.ViewPan = Class(pkg.Panel, [
         function $prototype() {
             /**
              * Reference to a view that the component visualize
              * @attribute view
-             * @type {zebkit.ui.View}
+             * @type {zebkit.draw.View}
              * @default null
              * @readOnly
              */
@@ -356,14 +352,14 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Set the target view to be wrapped with the UI component
-             * @param  {zebkit.ui.View|Function} v a view or a rendering
+             * @param  {zebkit.draw.View|Function} v a view or a rendering
              * view "paint(g,x,y,w,h,c)" function
              * @method setView
              * @chainable
              */
             this.setView = function(v){
                 var old = this.view;
-                v = pkg.$view(v);
+                v = zebkit.draw.$view(v);
 
                 if (v !== old) {
                     this.view = v;
@@ -416,8 +412,8 @@ zebkit.package("ui", function(pkg, Class) {
             /**
              * Set image to be rendered in the UI component
              * @method setImage
-             * @param {String|Image|zebkit.ui.Picture} img a path or direct reference to an
-             * image or zebkit.ui.Picture render.
+             * @param {String|Image|zebkit.draw.Picture} img a path or direct reference to an
+             * image or zebkit.draw.Picture render.
              * If the passed parameter is string it considered as path to an image.
              * In this case the image will be loaded using the passed path
              * @chainable
@@ -426,16 +422,16 @@ zebkit.package("ui", function(pkg, Class) {
                 var $this = this;
 
                 if (img !== null) {
-                    var isPic     = zebkit.instanceOf(img, pkg.Picture),
+                    var isPic     = zebkit.instanceOf(img, zebkit.draw.Picture),
                         imgToLoad = isPic ? img.target : img ;
 
-                    this.setView(isPic ? img : new pkg.Picture(img));
+                    this.setView(isPic ? img : new zebkit.draw.Picture(img));
 
 
                     this.$runner = zebkit.util.image(imgToLoad);
                     this.$runner.then(function(img) {
                         $this.$runner = null;
-                        $this.setView(isPic ? img : new pkg.Picture(img));
+                        $this.setView(isPic ? img : new zebkit.draw.Picture(img));
                         $this.vrp();
 
                         if (typeof $this.imageLoaded !== 'undefined') {
@@ -476,7 +472,7 @@ zebkit.package("ui", function(pkg, Class) {
      * line will be rendered.
      * @constructor
      * @class zebkit.ui.Line
-     * @extends {zebkit.ui.Panel}
+     * @extends zebkit.ui.Panel
      */
     pkg.Line = Class(pkg.Panel, [
         function() {
@@ -570,9 +566,9 @@ zebkit.package("ui", function(pkg, Class) {
             var l = new zebkit.ui.Label(new zebkit.data.Text("Multiline\ntext"));
 
             // render password text
-            var l = new zebkit.ui.Label(new zebkit.ui.PasswordText("password"));
+            var l = new zebkit.ui.Label(new zebkit.draw.PasswordText("password"));
 
-     * @param  {String|zebkit.data.TextModel|zebkit.ui.TextRender} [r] a text to be shown with the label.
+     * @param  {String|zebkit.data.TextModel|zebkit.draw.TextRender} [r] a text to be shown with the label.
      * You can pass a simple string or an instance of a text model or an instance of text render as the
      * text value.
      * @class zebkit.ui.Label
@@ -582,17 +578,17 @@ zebkit.package("ui", function(pkg, Class) {
     pkg.Label = Class(pkg.ViewPan, [
         function (r) {
             if (arguments.length === 0) {
-                this.setView(new pkg.StringRender(""));
+                this.setView(new zebkit.draw.StringRender(""));
             } else {
                 // test if input string is string
                 if (typeof r === "string" || r.constructor === String) {
-                    this.setView(r.length === 0 || r.indexOf('\n') >= 0 ? new pkg.TextRender(new zebkit.data.Text(r))
-                                                                        : new pkg.StringRender(r));
+                    this.setView(r.length === 0 || r.indexOf('\n') >= 0 ? new zebkit.draw.TextRender(new zebkit.data.Text(r))
+                                                                        : new zebkit.draw.StringRender(r));
                 } else if (typeof r.clazz         !== "undefined" &&
                            typeof r.getTextLength !== 'undefined' &&   // a bit faster tnan instanceOf checking if
                            typeof r.getLines      !== 'undefined'   )  // test if this is an instance of zebkit.data.TextModel
                 {
-                    this.setView(new pkg.TextRender(r));
+                    this.setView(new zebkit.draw.TextRender(r));
                 } else {
                     this.setView(r);
                 }
@@ -617,8 +613,8 @@ zebkit.package("ui", function(pkg, Class) {
              * @chainable
              */
             this.setModel = function(m) {
-                this.setView(zebkit.isString(m) ? new pkg.StringRender(m)
-                                                : new pkg.TextRender(m));
+                this.setView(zebkit.isString(m) ? new zebkit.draw.StringRender(m)
+                                                : new zebkit.draw.TextRender(m));
                 return this;
             };
 
@@ -642,7 +638,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Get the label text font
-             * @return {zebkit.ui.Font} a zebkit label font
+             * @return {zebkit.Font} a zebkit label font
              * @method getFont
              */
             this.getFont = function (){
@@ -656,7 +652,9 @@ zebkit.package("ui", function(pkg, Class) {
              * @chainable
              */
             this.setValue = function(s){
-                if (s === null) s = "";
+                if (s === null) {
+                    s = "";
+                }
 
                 var old = this.view.toString();
                 if (old !== s) {
@@ -684,7 +682,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Set the label text font
-             * @param  {zebkit.ui.Font} f a text font
+             * @param  {zebkit.Font} f a text font
              * @method setFont
              * @chainable
              */
@@ -701,7 +699,7 @@ zebkit.package("ui", function(pkg, Class) {
 
     /**
      * Shortcut class to render bold text in Label
-     * @param {String|zebkit.ui.TextRender|zebkit.data.TextModel} [t] a text string,
+     * @param {String|zebkit.draw.TextRender|zebkit.data.TextModel} [t] a text string,
      * text model or text render instance
      * @constructor
      * @class zebkit.ui.BoldLabel
@@ -713,11 +711,11 @@ zebkit.package("ui", function(pkg, Class) {
      * Image label UI component. This is UI container that consists from an image
      * component and an label component.Image is located at the left size of text.
      * @param {Image|String} img an image or path to the image
-     * @param {String|zebkit.ui.TextRender|zebkit.data.TextModel} txt a text string,
+     * @param {String|zebkit.draw.TextRender|zebkit.data.TextModel} txt a text string,
      * text model or text render instance
      * @constructor
      * @class zebkit.ui.ImageLabel
-     * @extends {zebkit.ui.Panel}
+     * @extends zebkit.ui.Panel
      */
     pkg.ImageLabel = Class(pkg.Panel, [
         function(txt, path) {
@@ -793,7 +791,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Set the caption font
-             * @param {zebkit.ui.Font} a font
+             * @param {zebkit.Font} a font
              * @method setFont
              * @chainable
              */
@@ -891,7 +889,9 @@ zebkit.package("ui", function(pkg, Class) {
              * @chainable
              */
             this.setImgPreferredSize = function (w, h) {
-                if (arguments.length === 1) h = w;
+                if (arguments.length === 1) {
+                    h = w;
+                }
                 this.byConstraints("image").setPreferredSize(w, h);
                 return this;
             };
@@ -902,7 +902,7 @@ zebkit.package("ui", function(pkg, Class) {
      * Progress bar UI component class.
      * @class zebkit.ui.Progress
      * @constructor
-     * @extends {zebkit.ui.Panel}
+     * @extends zebkit.ui.Panel
      */
 
     /**
@@ -1017,7 +1017,7 @@ zebkit.package("ui", function(pkg, Class) {
                 }
             };
 
-            this.calcPreferredSize = function(l){
+            this.calcPreferredSize = function(l) {
                 var bundleSize = (this.orient === "horizontal") ? this.bundleWidth
                                                                 : this.bundleHeight,
                     v1 = (this.maxValue * bundleSize) + (this.maxValue - 1) * this.gap,
@@ -1104,13 +1104,13 @@ zebkit.package("ui", function(pkg, Class) {
 
         /**
          * Set the progress bar bundle element view
-         * @param {zebkit.ui.View} v a progress bar bundle view
+         * @param {zebkit.draw.View} v a progress bar bundle view
          * @method setBundleView
          * @chainable
          */
         function setBundleView(v){
             if (this.bundleView != v){
-                this.bundleView = pkg.$view(v);
+                this.bundleView = zebkit.draw.$view(v);
                 this.vrp();
             }
             return this;

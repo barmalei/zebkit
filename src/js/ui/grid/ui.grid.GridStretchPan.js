@@ -4,22 +4,21 @@ zebkit.package("ui.grid", function(pkg, Class) {
     /**
      * Special UI panel that manages to stretch grid columns to occupy the whole panel space.
      *
-
-            ...
-
-            var canvas = new zebkit.ui.zCanvas(),
-                grid = new zebkit.ui.grid.Grid(100,10),
-                pan  = new zebkit.ui.grid.GridStretchPan(grid);
-
-            canvas.root.setLayout(new zebkit.layout.BorderLayout());
-            canvas.root.add("center", pan);
-
-            ...
-
+     *     ...
+     *
+     *     var canvas = new zebkit.ui.zCanvas(),
+     *         grid = new zebkit.ui.grid.Grid(100,10),
+     *         pan  = new zebkit.ui.grid.GridStretchPan(grid);
+     *
+     *     canvas.root.setLayout(new zebkit.layout.BorderLayout());
+     *     canvas.root.add("center", pan);
+     *
+     *     ...
+     *
      * @constructor
      * @param {zebkit.ui.grid.Grid} grid a grid component that has to be added in the panel
      * @class zebkit.ui.grid.GridStretchPan
-     * @extends {zebkit.ui.Panel}
+     * @extends zebkit.ui.Panel
      */
     pkg.GridStretchPan = Class(ui.Panel, [
         function (grid){
@@ -152,13 +151,17 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
                             for(i = 0; i < cols; i++){
                                 w = grid.getColWidth(i);
-                                if (w === 0) w = grid.getColPSWidth(i);
+                                if (w === 0) {
+                                    w = grid.getColPSWidth(i);
+                                }
                                 this.$propW += w;
                             }
 
                             for(i = 0; i < cols; i++){
                                 w = grid.getColWidth(i);
-                                if (w === 0) w = grid.getColPSWidth(i);
+                                if (w === 0) {
+                                    w = grid.getColPSWidth(i);
+                                }
                                 this.$props[i] = w / this.$propW;
                             }
                         }

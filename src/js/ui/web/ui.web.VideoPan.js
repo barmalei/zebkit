@@ -15,7 +15,7 @@ zebkit.package("ui.web", function(pkg, Class) {
      *
      * @param {String} url an URL to a video
      * @class zebkit.ui.web.VideoPan
-     * @extends {zebkit.ui.Panel}
+     * @extends zebkit.ui.Panel
      * @constructor
      */
     pkg.VideoPan = Class(ui.Panel,  [
@@ -102,7 +102,7 @@ zebkit.package("ui.web", function(pkg, Class) {
 
             this.SignLabel = Class(ui.Panel, [
                 function $clazz() {
-                    this.font = new ui.Font("bold", 18);
+                    this.font = new zebkit.Font("bold", 18);
                 },
 
                 function setColor(c) {
@@ -113,7 +113,7 @@ zebkit.package("ui.web", function(pkg, Class) {
                 function(title) {
                     this.$super(new zebkit.layout.FlowLayout("center", "center"));
                     this.add(new ui.Label(title).setFont(this.clazz.font));
-                    this.setBorder(new ui.Border("gray", 1, 8));
+                    this.setBorder(new zebkit.draw.Border("gray", 1, 8));
                     this.setPadding(6);
                     this.setBackground("white");
                     this.setColor("black");

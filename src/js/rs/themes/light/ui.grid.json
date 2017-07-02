@@ -8,7 +8,7 @@
     "DefEditors" : {
         "TextField": {
             "inheritProperties" : true,
-            "border": {"@zebkit.ui.Border":  "blue" },
+            "border": {"@zebkit.draw.Border":  "blue" },
             "background": null
         },
 
@@ -20,13 +20,13 @@
         "Checkbox": {
             "inheritProperties" : true,
             "layout": { "@zebkit.layout.FlowLayout": [ "center", "center" ]},
-            "border": {"@zebkit.ui.Border":  "blue" }
+            "border": {"@zebkit.draw.Border":  "blue" }
         }
     },
 
     "BaseCaption": {
-        "border"     : { "@zebkit.ui.Border"   : "gray" },
-        "background" : { "@zebkit.ui.Gradient" : [ "white", "lightGray" ] }
+        "border"     : { "@zebkit.draw.Border"   : "gray" },
+        "background" : { "@zebkit.draw.Gradient" : [ "white", "lightGray" ] }
     },
 
     "CompGridCaption" :{
@@ -34,9 +34,9 @@
 
         "StatusPan": {
             "view" : {
-                "*"       : { "@zebkit.ui.ArrowView" : [ "left", "rgb(255, 153, 0)" ], "width" : 9, "height" : 9  },
-                "ascent"  : { "@zebkit.ui.ArrowView" : [ "top", "rgb(255, 153, 0)"  ]   },
-                "descent" : { "@zebkit.ui.ArrowView" : [ "bottom", "rgb(255, 153, 0)" ] }
+                "*"       : { "@zebkit.draw.ArrowView" : [ "left", "rgb(255, 153, 0)" ], "width" : 9, "height" : 9  },
+                "ascent"  : { "@zebkit.draw.ArrowView" : [ "top", "rgb(255, 153, 0)"  ]   },
+                "descent" : { "@zebkit.draw.ArrowView" : [ "bottom", "rgb(255, 153, 0)" ] }
             }
         },
 
@@ -78,8 +78,8 @@
         },
 
         "views" : {
-            "onselection" :"#D0EAFF",
-            "offselection":"#ADC1D6"
+            "focusOnSelect" :"#D0EAFF",
+            "focusOffSelect" :"#ADC1D6"
         },
 
         "lineColor": "rgb(65, 131, 215)"

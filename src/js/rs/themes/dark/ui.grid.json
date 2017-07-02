@@ -19,13 +19,13 @@
         "Checkbox": {
             "inheritProperties" : true,
             "layout": { "@zebkit.layout.FlowLayout": [ "center", "center" ]},
-            "border": {"@zebkit.ui.Border":  "blue" }
+            "border": {"@zebkit.draw.Border":  "blue" }
         }
     },
 
     "BaseCaption": {
-        "border": { "@zebkit.ui.Border":"white" },
-        "background" : { "@zebkit.ui.Gradient": [ "red", "orange" ] },
+        "border": { "@zebkit.draw.Border":"white" },
+        "background" : { "@zebkit.draw.Gradient": [ "red", "orange" ] },
         "lineColor" : "white"
     },
 
@@ -33,9 +33,9 @@
         "inheritProperties" : true,
         "StatusPan": {
             "view" : {
-                "*"       : { "@zebkit.ui.ArrowView" : [ "left", "rgb(255, 153, 0)" ], "width" : 9, "height" : 9  },
-                "ascent"  : { "@zebkit.ui.ArrowView" : [ "top", "rgb(255, 153, 0)"  ]   },
-                "descent" : { "@zebkit.ui.ArrowView" : [ "bottom", "rgb(255, 153, 0)" ] }
+                "*"       : { "@zebkit.draw.ArrowView" : [ "left", "rgb(255, 153, 0)" ], "width" : 9, "height" : 9  },
+                "ascent"  : { "@zebkit.draw.ArrowView" : [ "top", "rgb(255, 153, 0)"  ]   },
+                "descent" : { "@zebkit.draw.ArrowView" : [ "bottom", "rgb(255, 153, 0)" ] }
             }
         },
 
@@ -58,7 +58,7 @@
 
     "LeftCompGridCaption" :{
         "inheritProperties" : true,
-        "background": { "@zebkit.ui.Gradient" : [ "red", "orange", "horizontal"] }
+        "background": { "@zebkit.draw.Gradient" : [ "red", "orange", "horizontal"] }
     },
 
     "GridCaption" :{
@@ -79,12 +79,12 @@
 
         "CornerPan" : {
             "inheritProperties" : true,
-            "background": { "@zebkit.ui.Gradient": [ "red", "orange", "horizontal"] }
+            "background": { "@zebkit.draw.Gradient": [ "red", "orange", "horizontal"] }
         },
 
         "views" : {
-            "onselection"  : "red",
-            "offselection" : "red"
+            "focusOnSelect"  : "red",
+            "focusOffSelect" : "red"
         },
 
         "lineColor": "white"

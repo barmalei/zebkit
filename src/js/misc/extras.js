@@ -3,7 +3,9 @@ zebkit.package("io", function(io, Class) {
 
     zebkit.getMethod = function(clazz, name) {
         // map user defined constructor to internal constructor name
-        if (name === CDNAME) name = zebkit.CNAME;
+        if (name === CDNAME) {
+            name = zebkit.CNAME;
+        }
         var m = clazz.prototype[name];
         return (typeof m === 'function') ?  m : null;
     };
@@ -12,16 +14,16 @@ zebkit.package("io", function(io, Class) {
 
     io.InputStream = Class([
         function (container) {
-            if (isBA && container instanceof ArrayBuffer) this.data = new Uint8Array(container);
-            else {
+            if (isBA && container instanceof ArrayBuffer) {
+                this.data = new Uint8Array(container);
+            } else {
                 if (zebkit.isString(container)) {
                     this.extend([
                         function read() {
                             return this.available() > 0 ? this.data.charCodeAt(this.pos++) & 0xFF : -1;
                         }
                     ]);
-                }
-                else {
+                } else {
                     if (Array.isArray(container) === false) {
                         throw new Error("Wrong type: " + typeof(container));
                     }
@@ -33,12 +35,16 @@ zebkit.package("io", function(io, Class) {
         },
 
         function mark() {
-            if (this.available() <= 0) throw new Error();
+            if (this.available() <= 0) {
+                throw new Error();
+            }
             this.marked = this.pos;
         },
 
         function reset() {
-            if (this.available() <= 0 || this.marked < 0) throw new Error();
+            if (this.available() <= 0 || this.marked < 0) {
+                throw new Error();
+            }
             this.pos    = this.marked;
             this.marked = -1;
         },
@@ -60,7 +66,9 @@ zebkit.package("io", function(io, Class) {
 
             for(var i = 0; i < len; i++) {
                 var b = this.read();
-                if (b < 0) return i === 0 ? -1 : i;
+                if (b < 0) {
+                    return i === 0 ? -1 : i;
+                }
                 buf[off + i] = b;
             }
             return len;
@@ -68,25 +76,36 @@ zebkit.package("io", function(io, Class) {
 
         function readChar() {
             var c = this.read();
-            if (c < 0) return -1;
-            if (c < 128) return String.fromCharCode(c);
+            if (c < 0) {
+                return -1;
+            }
+
+            if (c < 128) {
+                return String.fromCharCode(c);
+            }
 
             var c2 = this.read();
-            if (c2 < 0) throw new Error();
+            if (c2 < 0) {
+                throw new Error();
+            }
 
-            if (c > 191 && c < 224) return String.fromCharCode(((c & 31) << 6) | (c2 & 63));
-            else {
+            if (c > 191 && c < 224) {
+                return String.fromCharCode(((c & 31) << 6) | (c2 & 63));
+            } else {
                 var c3 = this.read();
-                if (c3 < 0) throw new Error();
+                if (c3 < 0) {
+                    throw new Error();
+                }
                 return String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
             }
         },
 
         function readLine() {
-            if (this.available() > 0)
-            {
+            if (this.available() > 0) {
                 var line = [], b;
-                while ((b = this.readChar()) !== -1 && b !== "\n") line.push(b);
+                while ((b = this.readChar()) !== -1 && b !== "\n") {
+                    line.push(b);
+                }
                 var r = line.join('');
                 line.length = 0;
                 return r;
@@ -103,24 +122,31 @@ zebkit.package("io", function(io, Class) {
             var r = zebkit.environment.getHttpRequest(), $this = this;
             r.open("GET", url, f !== null);
             if (f === null || isBA === false) {
-                if (!r.overrideMimeType) throw new Error("Binary mode is not supported");
+                if (!r.overrideMimeType) {
+                    throw new Error("Binary mode is not supported");
+                }
                 r.overrideMimeType("text/plain; charset=x-user-defined");
             }
 
             if (f !== null)  {
-                if (isBA) r.responseType = "arraybuffer";
+                if (isBA) {
+                    r.responseType = "arraybuffer";
+                }
                 r.onreadystatechange = function() {
                     if (r.readyState === 4) {
-                        if (r.status !== 200)  throw new Error(url);
+                        if (r.status !== 200)  {
+                            throw new Error(url);
+                        }
                         zebkit.getMethod($this.clazz.$parent, '', 1).call($this, isBA ? r.response : r.responseText); // $this.$super(res);
                         f($this.data, r);
                     }
                 };
                 r.send(null);
-            }
-            else {
+            } else {
                 r.send(null);
-                if (r.status !== 200) throw new Error(url);
+                if (r.status !== 200) {
+                    throw new Error(url);
+                }
                 this.$super(r.responseText);
             }
         },

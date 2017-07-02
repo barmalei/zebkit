@@ -27,7 +27,7 @@ zebkit.package("ui", function(pkg, Class) {
             ]);
 
      * @class zebkit.ui.Combo
-     * @extends {zebkit.ui.Panel}
+     * @extends zebkit.ui.Panel
      * @constructor
      * @param {Array|zebkit.ui.BaseList} data an combo items array or a list component
      */
@@ -109,7 +109,7 @@ zebkit.package("ui", function(pkg, Class) {
             /**
              * UI panel class that is used to implement combo box content area
              * @class  zebkit.ui.Combo.ContentPan
-             * @extends {zebkit.ui.Panel}
+             * @extends zebkit.ui.Panel
              * @constructor
              */
             this.ContentPan = Class(pkg.Panel, [
@@ -140,7 +140,7 @@ zebkit.package("ui", function(pkg, Class) {
                      * @return {zebkit.ui.Combo} a combo the content panel belongs
                      */
                     this.getCombo = function() {
-                        for (var p = this.parent; p !== null && zebkit.instanceOf(p, pkg.Combo) === false; p = p.parent);
+                        for (var p = this.parent; p !== null && zebkit.instanceOf(p, pkg.Combo) === false; p = p.parent) {}
                         return p;
                     };
                 }
@@ -170,7 +170,9 @@ zebkit.package("ui", function(pkg, Class) {
                     this.childKeyPressed = function(e){
                         if (e.code === "Escape" && this.parent !== null) {
                             this.removeMe();
-                            if (this.owner !== null) this.owner.requestFocus();
+                            if (this.owner !== null) {
+                                this.owner.requestFocus();
+                            }
                         }
                     };
                 },
@@ -231,7 +233,9 @@ zebkit.package("ui", function(pkg, Class) {
                     };
 
                     this.comboValueUpdated = function(combo, value) {
-                        if (this.calcPsByContent === true) this.invalidate();
+                        if (this.calcPsByContent === true) {
+                            this.invalidate();
+                        }
                     };
                 }
             ]);
@@ -358,7 +362,7 @@ zebkit.package("ui", function(pkg, Class) {
              * Reference to selection view
              * @attribute selectView
              * @readOnly
-             * @type {zebkit.ui.View}
+             * @type {zebkit.draw.View}
              */
 
             this.selectView = this.button = this.content = this.winpad = null;
@@ -546,10 +550,13 @@ zebkit.package("ui", function(pkg, Class) {
                 if (this.list !== l) {
                     this.hidePad();
 
-                    if (this.list !== null) this.list.off(this);
+                    if (this.list !== null) {
+                        this.list.off(this);
+                    }
                     this.list = l;
-                    if (typeof this.list._ !== 'undefined') this.list.on(this);
-
+                    if (typeof this.list._ !== 'undefined') {
+                        this.list.on(this);
+                    }
                     var $this = this;
                     this.winpad = new this.clazz.ComboPadPan(this.list, [
                         function setParent(p) {
@@ -580,9 +587,13 @@ zebkit.package("ui", function(pkg, Class) {
                     switch(e.code) {
                         case "Enter"     : this.showPad(); break;
                         case "ArrowLeft" :
-                        case "ArrowUp"   : if (index > 0) this.list.select(index - 1); break;
+                        case "ArrowUp"   : if (index > 0) {
+                            this.list.select(index - 1);
+                        } break;
                         case "ArrowDown" :
-                        case "ArrowRight": if (this.list.model.count() - 1 > index) this.list.select(index + 1); break;
+                        case "ArrowRight": if (this.list.model.count() - 1 > index) {
+                            this.list.select(index + 1);
+                        } break;
                     }
                 }
             };
@@ -598,13 +609,13 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Set the given combo box selection view
-             * @param {zebkit.ui.View} c a view
+             * @param {zebkit.draw.View} c a view
              * @method setSelectView
              * @chainable
              */
             this.setSelectView = function (c){
                 if (c !== this.selectView) {
-                    this.selectView = pkg.$view(c);
+                    this.selectView = zebkit.graphics.$view(c);
                     this.repaint();
                 }
                 return this;
@@ -728,7 +739,9 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function setParent(p) {
-            if (p === null) this.hidePad();
+            if (p === null) {
+                this.hidePad();
+            }
             this.$super(p);
         }
     ]);

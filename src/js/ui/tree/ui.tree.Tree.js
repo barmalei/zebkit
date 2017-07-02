@@ -82,7 +82,9 @@ zebkit.package("ui.tree", function(pkg, Class) {
             };
 
             this.catchScrolled = function (psx, psy){
-                if (this.kids.length > 0) this.stopEditing(false);
+                if (this.kids.length > 0) {
+                    this.stopEditing(false);
+                }
 
                 if (this.firstVisible === null) {
                     this.firstVisible = this.model.root;
@@ -150,7 +152,9 @@ zebkit.package("ui.tree", function(pkg, Class) {
             };
 
             this.pointerReleased = function(e){
-                if (this.se(this.pressedItem, e)) this.pressedItem = null;
+                if (this.se(this.pressedItem, e)) {
+                    this.pressedItem = null;
+                }
             };
 
             this.keyTyped = function(e){
@@ -170,16 +174,30 @@ zebkit.package("ui.tree", function(pkg, Class) {
                 var newSelection = null;
                 switch(e.code) {
                     case "ArrowDown" :
-                    case "ArrowRight": newSelection = this.findNext(this.selected);break;
+                    case "ArrowRight": newSelection = this.findNext(this.selected); break;
                     case "ArrowUp"   :
-                    case "ArrowLeft" : newSelection = this.findPrev(this.selected);break;
-                    case "Home"      : if (e.ctrlKey) this.select(this.model.root);break;
-                    case "End"       : if (e.ctrlKey) this.select(this.findLast(this.model.root));break;
-                    case "PageDown"  : if (this.selected !== null) this.select(this.nextPage(this.selected, 1));break;
-                    case "PageUp"    : if (this.selected !== null) this.select(this.nextPage(this.selected,  -1));break;
+                    case "ArrowLeft" : newSelection = this.findPrev(this.selected); break;
+                    case "Home"      :
+                        if (e.ctrlKey) {
+                            this.select(this.model.root);
+                        } break;
+                    case "End"       :
+                        if (e.ctrlKey) {
+                            this.select(this.findLast(this.model.root));
+                        } break;
+                    case "PageDown"  :
+                        if (this.selected !== null) {
+                            this.select(this.nextPage(this.selected, 1));
+                        } break;
+                    case "PageUp"    :
+                        if (this.selected !== null) {
+                            this.select(this.nextPage(this.selected,  -1));
+                        } break;
                     //!!!!case "Enter": if(this.selected !== null) this.toggle(this.selected);break;
                 }
-                if (newSelection !== null) this.select(newSelection);
+                if (newSelection !== null) {
+                    this.select(newSelection);
+                }
                 this.se(this.selected, e);
             };
 
@@ -307,7 +325,9 @@ zebkit.package("ui.tree", function(pkg, Class) {
 
         function itemPressed(root, e) {
             this.$super(root, e);
-            if (this.se(root, e) === false) this.pressedItem = root;
+            if (this.se(root, e) === false) {
+                this.pressedItem = root;
+            }
         },
 
         function pointerPressed(e){

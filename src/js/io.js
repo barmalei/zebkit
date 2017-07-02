@@ -35,9 +35,13 @@ zebkit.package("io", function(pkg, Class) {
      * @for  zebkit.io
      */
     pkg.UID = function(size) {
-        if (arguments.length === 0) size = 16;
+        if (arguments.length === 0) {
+            size = 16;
+        }
         var id = "";
-        for (var i = 0; i < size; i++) id = id + HEX[~~(Math.random() * 16)];
+        for (var i = 0; i < size; i++) {
+            id = id + HEX[~~(Math.random() * 16)];
+        }
         return id;
     };
 
@@ -93,7 +97,9 @@ zebkit.package("io", function(pkg, Class) {
         var output = [], chr1, chr2, chr3, enc1, enc2, enc3, enc4;
         input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
 
-        while ((input.length % 4) !== 0) input += "=";
+        while ((input.length % 4) !== 0) {
+            input += "=";
+        }
 
         for(var i=0; i < input.length;) {
             enc1 = b64str.indexOf(input.charAt(i++));
@@ -105,8 +111,12 @@ zebkit.package("io", function(pkg, Class) {
             chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
             chr3 = ((enc3 & 3) << 6) | enc4;
             output.push(String.fromCharCode(chr1));
-            if (enc3 !== 64) output.push(String.fromCharCode(chr2));
-            if (enc4 !== 64) output.push(String.fromCharCode(chr3));
+            if (enc3 !== 64) {
+                output.push(String.fromCharCode(chr2));
+            }
+            if (enc4 !== 64) {
+                output.push(String.fromCharCode(chr3));
+            }
         }
         return output.join('');
     };
@@ -123,12 +133,30 @@ zebkit.package("io", function(pkg, Class) {
                       "(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?"].join(''), d = v.match(new RegExp(regexp)),
                       offset = 0, date = new Date(d[1], 0, 1);
 
-        if (d[3])  date.setMonth(d[3] - 1);
-        if (d[5])  date.setDate(d[5]);
-        if (d[7])  date.setHours(d[7]);
-        if (d[8])  date.setMinutes(d[8]);
-        if (d[10]) date.setSeconds(d[10]);
-        if (d[12]) date.setMilliseconds(Number("0." + d[12]) * 1000);
+        if (d[3]) {
+            date.setMonth(d[3] - 1);
+        }
+
+        if (d[5]) {
+            date.setDate(d[5]);
+        }
+
+        if (d[7])  {
+            date.setHours(d[7]);
+        }
+
+        if (d[8])  {
+            date.setMinutes(d[8]);
+        }
+
+        if (d[10]) {
+            date.setSeconds(d[10]);
+        }
+
+        if (d[12]) {
+            date.setMilliseconds(Number("0." + d[12]) * 1000);
+        }
+
         if (d[14]) {
             offset = (Number(d[16]) * 60) + Number(d[17]);
             offset *= ((d[15] === '-') ? 1 : -1);
@@ -158,20 +186,20 @@ zebkit.package("io", function(pkg, Class) {
              * @param {Object} [q] a dictionary of query parameters
              * @return {zebkit.DoIt} an object to get response
              * @example
-
-        // GET request with the number of query parameters
-        var result = zebkit.io.HTTP("google.com").GET({
-            param1: "var1",
-            param3: "var2",
-            param3: "var3"
-        }).then(function(req) {
-            // handle response
-            req.responseText;
-        }).catch(function(e)  {
-            // handle error
-            ...
-        });
-
+             *
+             *     // GET request with the number of query parameters
+             *     var result = zebkit.io.HTTP("google.com").GET({
+             *         param1: "var1",
+             *         param3: "var2",
+             *         param3: "var3"
+             *     }).then(function(req) {
+             *         // handle response
+             *         req.responseText;
+             *     }).catch(function(e)  {
+             *         // handle error
+             *         ...
+             *     });
+             *
              * @method GET
              */
             this.GET = function(q) {
@@ -187,27 +215,27 @@ zebkit.package("io", function(pkg, Class) {
              * either a parameters set or a string.
              * @return {zebkit.DoIt} an object to get response
              * @example
-
-       // asynchronously send POST
-       zebkit.io.HTTP("google.com").POST("Hello").then(function(req) {
-           // handle HTTP GET response ...
-       }).catch(function(e) {
-           // handle error ...
-       });
-
-            * Or you can pass a number of parameters to be sent:
-
-       // send parameters synchronously by HTTP POST request
-       zebkit.io.HTTP("google.com").POST({
-           param1: "val1",
-           param2: "val3",
-           param3: "val3"
-       }).then(function(req) {
-            // handle HTTP GET response ...
-       }).catch(function(e) {
-            // handle error ...
-       });
-
+             *
+             *     // asynchronously send POST
+             *     zebkit.io.HTTP("google.com").POST("Hello").then(function(req) {
+             *         // handle HTTP GET response ...
+             *     }).catch(function(e) {
+             *         // handle error ...
+             *     });
+             *
+             * Or you can pass a number of parameters to be sent:
+             *
+             *     // send parameters synchronously by HTTP POST request
+             *     zebkit.io.HTTP("google.com").POST({
+             *         param1: "val1",
+             *         param2: "val3",
+             *         param3: "val3"
+             *     }).then(function(req) {
+             *          // handle HTTP GET response ...
+             *     }).catch(function(e) {
+             *          // handle error ...
+             *    });
+             *
              * @method POST
              */
             this.POST = function(d) {
@@ -420,7 +448,7 @@ zebkit.package("io", function(pkg, Class) {
               * @protected
               * @param  {String}   url an URL
               * @param  {String}   data  a data to be send
-              * @return {zebkit.util.}  a result
+              * @return {zebkit.DoIt}  a result
               * @method  send
               */
             this.send = function(url, data) {
@@ -491,7 +519,7 @@ zebkit.package("io", function(pkg, Class) {
      * @constructor
      * @param {String} url an URL of remote service
      * @param {Array} methods a list of methods names the remote service provides
-     * @extends {zebkit.io.Service}
+     * @extends zebkit.io.Service
      */
     pkg.JRPC = Class(pkg.Service, [
         function $prototype() {
@@ -536,7 +564,12 @@ zebkit.package("io", function(pkg, Class) {
         return pkg.Service.invoke(pkg.JRPC, url, method);
     };
 
-    pkg.Base64 = function(s) { if (arguments.length > 0) this.encoded = pkg.b64encode(s); };
+    pkg.Base64 = function(s) {
+        if (arguments.length > 0) {
+            this.encoded = pkg.b64encode(s);
+        }
+    };
+
     pkg.Base64.prototype.toString = function() { return this.encoded; };
     pkg.Base64.prototype.decode   = function() { return pkg.b64decode(this.encoded); };
 
@@ -559,7 +592,7 @@ zebkit.package("io", function(pkg, Class) {
 
      * @class zebkit.io.XRPC
      * @constructor
-     * @extends {zebkit.io.Service}
+     * @extends zebkit.io.Service
      * @param {String} url an URL of remote service
      * @param {Array} methods a list of methods names the remote service provides
      */

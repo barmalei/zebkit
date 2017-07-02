@@ -9,7 +9,7 @@ zebkit.package("ui.event", function(pkg, Class) {
      * @param  {String} shortcut a shortcut name
      * @param  {String} keys a keys combination ("Control + KeyV")
      * @class zebkit.ui.event.ShortcutEvent
-     * @extends {zebkit.util.Event}
+     * @extends zebkit.util.Event
      */
     pkg.ShortcutEvent = Class(zebkit.util.Event, [
         function(src, shortcut, keys) {
@@ -86,7 +86,7 @@ zebkit.package("ui.event", function(pkg, Class) {
 
      *  @constructor
      *  @class zebkit.ui.event.ShortcutManager
-     *  @extends {zebkit.ui.event.Manager}
+     *  @extends zebkit.ui.event.Manager
      */
     pkg.ShortcutManager = Class(pkg.Manager, [
         function(shortcuts) {

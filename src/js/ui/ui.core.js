@@ -81,15 +81,23 @@ zebkit.package("ui", function(pkg, Class) {
             }
         }
 
-
-        console.log("LOAD RESOURCES pkg = " + pkg.$name + ", $url = " + pkg.$url +  ", path = " + path);
-
         // it guarantees that loading if JSONs will be done sequentially in
         // the order the JSON appeared
         zebkit.then(function() { // calling the guarantees it will be called when previous actions are completed
             this.till(new zebkit.util.Zson(pkg).then(path)); // now we can trigger other loading action
         });
     };
+
+
+    // extend Zson with special method to fill prederfined views set
+    zebkit.util.Zson.prototype.views = function(v) {
+        for (var k in v) {
+            if (v.hasOwnProperty(k)) {
+                zebkit.draw.$views[k] = v[k];
+            }
+        }
+    };
+
 
     // TODO: prototype of zClass, too simple to say something
     pkg.zCanvas = Class([]);
@@ -178,16 +186,27 @@ zebkit.package("ui", function(pkg, Class) {
             xx     = c.x,
             yy     = c.y;
 
-        if (xx < left) xx = left;
-        if (yy < top)  yy = top;
-        if (xx + c.width > d.width - right) xx = d.width + right - c.width;
-        if (yy + c.height > d.height - bottom) yy = d.height + bottom - c.height;
+        if (xx < left) {
+            xx = left;
+        }
+
+        if (yy < top)  {
+            yy = top;
+        }
+
+        if (xx + c.width > d.width - right) {
+            xx = d.width + right - c.width;
+        }
+
+        if (yy + c.height > d.height - bottom) {
+            yy = d.height + bottom - c.height;
+        }
         c.setLocation(xx, yy);
     };
 
     pkg.calcOrigin = function(x,y,w,h,px,py,t,tt,ll,bb,rr){
         if (arguments.length < 8) {
-            tt = t.getTop();
+        tt = t.getTop();
             ll = t.getLeft();
             bb = t.getBottom();
             rr = t.getRight();
@@ -197,18 +216,24 @@ zebkit.package("ui", function(pkg, Class) {
         if (dw > 0 && dh > 0){
             if (dw - ll - rr > w){
                 var xx = x + px;
-                if (xx < ll) px += (ll - xx);
-                else {
+                if (xx < ll) {
+                    px += (ll - xx);
+                } else {
                     xx += w;
-                    if (xx > dw - rr) px -= (xx - dw + rr);
+                    if (xx > dw - rr) {
+                        px -= (xx - dw + rr);
+                    }
                 }
             }
             if (dh - tt - bb > h){
                 var yy = y + py;
-                if (yy < tt) py += (tt - yy);
-                else {
+                if (yy < tt) {
+                    py += (tt - yy);
+                } else {
                     yy += h;
-                    if (yy > dh - bb) py -= (yy - dh + bb);
+                    if (yy > dh - bb) {
+                        py -= (yy - dh + bb);
+                    }
                 }
             }
             return [px, py];
@@ -216,234 +241,6 @@ zebkit.package("ui", function(pkg, Class) {
         return [0, 0];
     };
 
-    /**
-     * This class represents a font and provides basic font metrics like height, ascent. Using
-     * the class developers can compute string width.
-
-     // plain font
-     var f = new zebkit.ui.Font("Arial", 14);
-
-     // bold font
-     var f = new zebkit.ui.Font("Arial", "bold", 14);
-
-     // defining font with CSS font name
-     var f = new zebkit.ui.Font("100px Futura, Helvetica, sans-serif");
-
-     * @constructor
-     * @param {String} name a name of the font. If size and style parameters has not been passed
-     * the name is considered as CSS font name that includes size and style
-     * @param {String} [style] a style of the font: "bold", "italic", etc
-     * @param {Integer} [size] a size of the font
-     * @class zebkit.ui.Font
-     */
-    pkg.Font = Class([
-        function(family, style, size) {
-            if (arguments.length === 1) {
-                this.size = this.clazz.decodeSize(family);
-                if (this.size === null) {
-                    // trim
-                    family = family.trim();
-
-                    // check if a predefined style has been used
-                    if (family === "bold" || family === "italic") {
-                        this.style = family;
-                    } else {  // otherwise handle it as CSS-like font style
-                        // try to parse font if possible
-                        var re = /([a-zA-Z_\- ]+)?(([0-9]+px|[0-9]+em)\s+([,\"'a-zA-Z_ \-]+))?/,
-                            m  = family.match(re);
-
-                        if (typeof m[4] !== 'undefined') {
-                            this.family = m[4].trim();
-                        }
-
-                        if (typeof m[3] !== 'undefined') {
-                            this.size = m[3].trim();
-                        }
-
-                        if (typeof m[1] !== 'undefined') {
-                            this.style = m[1].trim();
-                        }
-
-                        this.s = family;
-                    }
-                }
-            } else if (arguments.length === 2) {
-                this.family = family;
-                this.size   = this.clazz.decodeSize(style);
-                this.style  = this.size === null ? style : null;
-            } else if (arguments.length === 3) {
-                this.family = family;
-                this.style  = style;
-                this.size   = this.clazz.decodeSize(size);
-            }
-
-            if (this.size === null) {
-                this.size = this.clazz.size + "px";
-            }
-
-            if (this.s === null) {
-                this.s = ((this.style !== null) ? this.style + " ": "") +
-                         this.size + " " +
-                         this.family;
-            }
-
-            var mt = zebkit.environment.fontMetrics(this.s);
-
-            /**
-             * Height of the font
-             * @attribute height
-             * @readOnly
-             * @type {Integer}
-             */
-            this.height = mt.height;
-
-            /**
-             * Ascent of the font
-             * @attribute ascent
-             * @readOnly
-             * @type {Integer}
-             */
-            this.ascent = mt.ascent;
-        },
-
-        function $clazz() {
-
-            // default values
-            this.family = "Arial, Helvetica";
-            this.style  =  null;
-            this.size   =  14;
-
-            this.mergeable = false;
-
-            this.decodeSize = function(s, defaultSize) {
-                if (arguments.length < 2) {
-                    defaultSize = this.size;
-                }
-
-                if (typeof s === "string" || s.constructor === String) {
-                    var size = Number(s);
-                    if (isNaN(size)) {
-                        var m = s.match(/^([0-9]+)(%)$/);
-                        if (m !== null && typeof m[1] !== 'undefined' && m[2] !== 'undefined') {
-                            size = Math.floor((defaultSize * parseInt(m[1], 10)) / 100);
-                            return size + "px";
-                        } else {
-                            return /^([0-9]+)(em|px)$/.test(s) === true ? s : null;
-                        }
-                    } else {
-                        if (s[0] === '+') {
-                            size = defaultSize + size;
-                        } else if (s[0] === '-') {
-                            size = defaultSize - size;
-                        }
-                        return size + "px";
-                    }
-                }
-                return s === null ? null : s + "px";
-            };
-        },
-
-        function $prototype(clazz) {
-            this.s = null;
-
-            /**
-             *  Font family.
-             *  @attribute family
-             *  @type {String}
-             *  @default null
-             */
-            this.family = clazz.family;
-
-
-            /**
-             *  Font style (for instance "bold").
-             *  @attribute style
-             *  @type {String}
-             *  @default null
-             */
-            this.style = clazz.style;
-            this.size  = clazz.size;
-
-            /**
-             * Returns CSS font representation
-             * @return {String} a CSS representation of the given Font
-             * @method toString
-             * @for zebkit.ui.Font
-             */
-            this.toString = function() {
-                return this.s;
-            };
-
-            /**
-             * Compute the given string width in pixels basing on the
-             * font metrics.
-             * @param  {String} s a string
-             * @return {Integer} a string width
-             * @method stringWidth
-             */
-            this.stringWidth = function(s) {
-                if (s.length === 0) {
-                    return 0;
-                } else {
-                    var fm = zebkit.environment.fontMeasure;
-                    if (fm.font !== this.s) {
-                        fm.font = this.s;
-                    }
-
-                    return (fm.measureText(s).width + 0.5) | 0;
-                }
-            };
-
-            /**
-             * Calculate the specified substring width
-             * @param  {String} s a string
-             * @param  {Integer} off fist character index
-             * @param  {Integer} len length of substring
-             * @return {Integer} a substring size in pixels
-             * @method charsWidth
-             * @for zebkit.ui.Font
-             */
-            this.charsWidth = function(s, off, len) {
-                var fm = zebkit.environment.fontMeasure;
-                if (fm.font !== this.s) {
-                    fm.font = this.s;
-                }
-                return (fm.measureText(len === 1 ? s[off]
-                                                 : s.substring(off, off + len)).width + 0.5) | 0;
-            };
-
-            /**
-             * Resize font and return new instance of font class with new size.
-             * @param  {Integer | String} size can be specified in pixels as integer value or as
-             * a percentage from the given font:
-             * @return {zebkit.ui.Font} a font
-             * @for zebkit.ui.Font
-             * @method resize
-             * @example
-             *
-             * ```javascript
-             * var font = new zebkit.ui.Font(10); // font 10 pixels
-             * font = font.resize("200%"); // two times higher font
-             * ```
-             */
-            this.resize = function(size) {
-                var nsize = this.clazz.decodeSize(size, this.height);
-                if (nsize === null) {
-                    throw new Error("Invalid font size : " + size);
-                }
-                return new this.clazz(this.family, this.style, nsize);
-            };
-
-            /**
-             * Restyle font and return new instance of the font class
-             * @param  {String} style a new style
-             * @return {zebkit.ui.Font} a font
-             */
-            this.restyle = function(style) {
-                return new this.clazz(this.family, style, this.height + "px");
-            };
-        }
-    ]);
 
     var $paintTask = null,
         $paintTasks = [],
@@ -952,8 +749,13 @@ zebkit.package("ui", function(pkg, Class) {
                                     y = 0;
                                 }
 
-                                if (w + x > canvas.width ) w = canvas.width - x;
-                                if (h + y > canvas.height) h = canvas.height - y;
+                                if (w + x > canvas.width ) {
+                                    w = canvas.width - x;
+                                }
+
+                                if (h + y > canvas.height) {
+                                    h = canvas.height - y;
+                                }
 
                                 // still have what to repaint than calculate new
                                 // dirty area of target canvas element
@@ -974,8 +776,12 @@ zebkit.package("ui", function(pkg, Class) {
                                             // speed up to comment method call
                                             //MB.unite(da.x, da.y, da.width, da.height, x, y, w, h, da);
                                             var dax = da.x, day = da.y;
-                                            if (da.x > x) da.x = x;
-                                            if (da.y > y) da.y = y;
+                                            if (da.x > x) {
+                                                da.x = x;
+                                            }
+                                            if (da.y > y) {
+                                                da.y = y;
+                                            }
                                             da.width  = Math.max(dax + da.width,  x + w) - da.x;
                                             da.height = Math.max(day + da.height, y + h) - da.y;
                                         }
@@ -1148,7 +954,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @attribute border
              * @default null
              * @readOnly
-             * @type {zebkit.ui.View}
+             * @type {zebkit.draw.View}
              */
 
             /**
@@ -1156,7 +962,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @attribute bg
              * @default null
              * @readOnly
-             * @type {zebkit.ui.View}
+             * @type {zebkit.draw.View}
             */
 
             /**
@@ -1184,13 +990,17 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.getCanvas = function() {
                 var c = this;
-                for(; c !== null && c.$isRootCanvas !== true; c = c.parent);
+                for(; c !== null && c.$isRootCanvas !== true; c = c.parent) {}
                 return c;
             };
 
             this.notifyRender = function(o, n){
-                if (o !== null && typeof o.ownerChanged !== 'undefined') o.ownerChanged(null);
-                if (n !== null && typeof n.ownerChanged !== 'undefined') n.ownerChanged(this);
+                if (o !== null && typeof o.ownerChanged !== 'undefined') {
+                    o.ownerChanged(null);
+                }
+                if (n !== null && typeof n.ownerChanged !== 'undefined') {
+                    n.ownerChanged(this);
+                }
             };
 
             /**
@@ -1257,7 +1067,9 @@ zebkit.package("ui", function(pkg, Class) {
                         var kid = this.kids[i];
                         kid = kid.getComponentAt(x - kid.x,
                                                  y - kid.y);
-                        if (kid !== null) return kid;
+                        if (kid !== null) {
+                            return kid;
+                        }
                     }
                 }
                 return typeof this.contains === 'undefined' || this.contains(x, y) === true ? this : null;
@@ -1384,8 +1196,12 @@ zebkit.package("ui", function(pkg, Class) {
                     // nx--;
                     // ny--;
 
-                    if (nx < 0) nx = 0;
-                    if (ny < 0) ny = 0;
+                    if (nx < 0) {
+                        nx = 0;
+                    }
+                    if (ny < 0) {
+                        ny = 0;
+                    }
 
                     var w1 = p.width - nx,
                         w2 = w + (x > px ? x - px : px - x),
@@ -1466,8 +1282,9 @@ zebkit.package("ui", function(pkg, Class) {
                     pkg.events.fire("compShown", COMP_EVENT);
 
                     if (this.parent !== null) {
-                        if (b) this.repaint();
-                        else {
+                        if (b) {
+                            this.repaint();
+                        } else {
                             this.parent.repaint(this.x, this.y, this.width, this.height);
                         }
                     }
@@ -1591,7 +1408,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Set the border view
-             * @param  {zebkit.ui.View|Function|String} v a border view or border "paint(g,x,y,w,h,c)"
+             * @param  {zebkit.draw.View|Function|String} v a border view or border "paint(g,x,y,w,h,c)"
              * rendering function or one of predefined border name: "plain", "sunken", "raised", "etched"
              * @method setBorder
              * @example
@@ -1599,7 +1416,7 @@ zebkit.package("ui", function(pkg, Class) {
              *      var pan = new zebkit.ui.Panel();
              *
              *      // set round border
-             *      pan.setBorder(zebkit.ui.RoundBorder("red"));
+             *      pan.setBorder(zebkit.draw.RoundBorder("red"));
              *
              *      ...
              *      // set one of predefined border
@@ -1609,7 +1426,7 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.setBorder = function (v) {
                 var old = this.border;
-                v = pkg.$view(v);
+                v = zebkit.draw.$view(v);
                 if (v != old){
                     this.border = v;
                     this.notifyRender(old, v);
@@ -1633,14 +1450,14 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             /**
-             * Set the background. Background can be a color string or a zebkit.ui.View class
+             * Set the background. Background can be a color string or a zebkit.draw.View class
              * instance, or a function(g,x,y,w,h,c) that paints the background:
              *
              *     // set background color
              *     comp.setBackground("red");
              *
              *     // set a picture as a component background
-             *     comp.setBackground(new zebkit.ui.Picture(...));
+             *     comp.setBackground(new zebkit.draw.Picture(...));
              *
              *     // set a custom rendered background
              *     comp.setBackground(function(g,x,y,w,h,target) {
@@ -1652,14 +1469,14 @@ zebkit.package("ui", function(pkg, Class) {
              *     });
              *
              *
-             * @param  {String|zebkit.ui.View|Function} v a background view, color or
+             * @param  {String|zebkit.draw.View|Function} v a background view, color or
              * background "paint(g,x,y,w,h,c)" rendering function.
              * @method setBackground
              * @chainable
              */
             this.setBackground = function (v){
                 var old = this.bg;
-                v = pkg.$view(v);
+                v = zebkit.draw.$view(v);
                 if (v !== old) {
                     this.bg = v;
                     this.notifyRender(old, v);
@@ -1811,8 +1628,8 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             /**
-             * Build zebkit.ui.View that represents the UI component
-             * @return {zebkit.ui.View} a view of the component
+             * Build zebkit.draw.View that represents the UI component
+             * @return {zebkit.draw.View} a view of the component
              * @param {zebkit.ui.Panel} target a target component
              * @method toView
              */
@@ -1909,8 +1726,8 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Root layer panel implementation basing on zebkit.ui.Panel component.
      * @class zebkit.ui.RootLayer
-     * @extends {zebkit.ui.Panel}
-     * @uses {zebkit.ui.RootLayerMix}
+     * @extends zebkit.ui.Panel
+     * @uses zebkit.ui.RootLayerMix
      */
     pkg.RootLayer = Class(pkg.Panel, pkg.RootLayerMix, []);
 });

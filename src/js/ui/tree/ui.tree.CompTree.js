@@ -60,6 +60,14 @@ zebkit.package("ui.tree", function(pkg, Class) {
                 }
             ]);
 
+            this.TextField = Class(ui.TextField, [
+                // let's skip parent invalidation
+                function invalidate() {
+                    this.isValid  = false;
+                    this.cachedWidth = -1;
+                }
+            ]);
+
             this.createModel = function(item, root, tree) {
                 var mi = new zebkit.data.Item();
 
@@ -103,15 +111,19 @@ zebkit.package("ui.tree", function(pkg, Class) {
             };
 
             this.setFont = function(f) {
-                this.font = zebkit.isString(f) ? new zebkit.ui.Font(f) : f;
+                this.font = zebkit.isString(f) ? new zebkit.Font(f) : f;
                 return this;
             };
 
             this.childKeyPressed = function(e) {
-                if (this.isSelectable === true){
-                    var newSelection = (e.code === "ArrowDown") ? this.findNext(this.selected)
-                                                                : (e.code === "ArrowUp") ? this.findPrev(this.selected)
-                                                                                         : null;
+                if (this.isSelectable === true) {
+                    var newSelection = null;
+                    if (e.code === "ArrowDown") {
+                        newSelection = this.findNext(this.selected);
+                    } else if (e.code === "ArrowUp") {
+                        newSelection = this.findPrev(this.selected);
+                    }
+
                     if (newSelection !== null) {
                         this.select(newSelection);
                     }
@@ -125,7 +137,9 @@ zebkit.package("ui.tree", function(pkg, Class) {
                         var item = zebkit.data.TreeModel.findOne(this.model.root,
                                                                 zebkit.layout.getDirectChild(this,
                                                                                             e.source));
-                        if (item !== null) this.select(item);
+                        if (item !== null) {
+                            this.select(item);
+                        }
                     } finally {
                         this.$blockCIE = false;
                     }
@@ -152,7 +166,6 @@ zebkit.package("ui.tree", function(pkg, Class) {
 
                 if (this.firstVisible !== null) {
                     var $this = this,
-                        fvNode = this.getIM(this.firstVisible),
                         started = 0;
 
                     this.model.iterate(this.model.root, function(item) {
@@ -250,7 +263,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
         },
 
         function select(item) {
-            if (this.isSelectable === true) {
+            if (this.isSelectable === true && item !== this.selected) {
                 var old = this.selected;
 
                 if (old !== null && old.value.hasFocus()) {

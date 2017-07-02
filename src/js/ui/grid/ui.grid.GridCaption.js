@@ -4,10 +4,10 @@ zebkit.package("ui.grid", function(pkg, Class) {
     /**
      * Caption cell render. This class can be used to customize grid caption
      * cells look and feel.
-     * @param  {zebkit.ui.Render} a render to be used to draw grid caption cells.
+     * @param  {zebkit.draw.Render} a render to be used to draw grid caption cells.
      * @constructor
      * @class zebkit.ui.grid.CaptionViewProvider
-     * @extends {zebkit.ui.grid.DefViews}
+     * @extends zebkit.ui.grid.DefViews
      */
     pkg.CaptionViewProvider = Class(pkg.DefViews, [
         function $prototype() {
@@ -59,7 +59,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
             this.setCellBackground = function(rowcol, bg) {
                 var m = this.$getCellMeta(rowcol);
                 if (m.bg !== bg) {
-                    m.bg = ui.$view(bg);
+                    m.bg = zebkit.draw.$view(bg);
                     return true;
                 } else {
                     return false;
@@ -73,8 +73,8 @@ zebkit.package("ui.grid", function(pkg, Class) {
      * Rendered means all caption titles, border are painted
      * as a number of views.
      * @param  {Array} [titles] a caption titles. Title can be a string or
-     * a zebkit.ui.View class instance
-     * @param  {zebkit.ui.BaseTextRender} [render] a text render to be used
+     * a zebkit.draw.View class instance
+     * @param  {zebkit.draw.BaseTextRender} [render] a text render to be used
      * to paint grid titles
      * @constructor
      * @class zebkit.ui.grid.GridCaption
@@ -123,7 +123,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
             /**
              * Default cell background view.
              * @attribute defCellBg
-             * @type {zebkit.ui.View}
+             * @type {zebkit.draw.View}
              * @default null
              */
             this.defCellBg = null;
@@ -181,25 +181,34 @@ zebkit.package("ui.grid", function(pkg, Class) {
                         if (v !== null) {
                             var ps = v.getPreferredSize();
                             if (isHor === true) {
-                                if (ps.height > this.psH) this.psH = ps.height;
+                                if (ps.height > this.psH) {
+                                    this.psH = ps.height;
+                                }
                                 this.psW += ps.width;
                             } else {
-                                if (ps.width > this.psW) this.psW = ps.width;
+                                if (ps.width > this.psW) {
+                                    this.psW = ps.width;
+                                }
                                 this.psH += ps.height;
                             }
                         }
                     }
 
-                    if (this.psH === 0) this.psH = pkg.Grid.DEF_ROWHEIGHT;
-                    if (this.psW === 0) this.psW = pkg.Grid.DEF_COLWIDTH;
+                    if (this.psH === 0) {
+                        this.psH = pkg.Grid.DEF_ROWHEIGHT;
+                    }
+
+                    if (this.psW === 0) {
+                        this.psW = pkg.Grid.DEF_COLWIDTH;
+                    }
                 }
             };
 
             /**
              * Put the given title for the given caption cell.
              * @param  {Integer} rowcol a grid caption cell index
-             * @param  {String|zebkit.ui.View|zebkit.ui.Panel} title a title of the given
-             * grid caption cell. Can be a string or zebkit.ui.View or zebkit.ui.Panel
+             * @param  {String|zebkit.draw.View|zebkit.ui.Panel} title a title of the given
+             * grid caption cell. Can be a string or zebkit.draw.View or zebkit.ui.Panel
              * class instance
              * @method putTitle
              * @chainable
@@ -237,7 +246,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
             /**
              * Set the given caption cell background
              * @param {Integer} rowcol a caption cell row or column
-             * @param {zebkit.ui.View|String} bg a color or view
+             * @param {zebkit.draw.View|String} bg a color or view
              * @method setCellBackground
              * @chainable
              */
@@ -330,11 +339,12 @@ zebkit.package("ui.grid", function(pkg, Class) {
                                 vy = ya === "center" ? Math.floor((hh - ps.height)/2)
                                                      : (ya === "bottom" ? hh - ps.height - ((i === size - 1) ? bottom : 0)
                                                                         : (i === 0 ? top: 0));
-
-
                             if (bg !== null) {
-                                if (isHor) bg.paint(g, x, 0, ww + gap , this.height, this);
-                                else       bg.paint(g, 0, y, this.width, hh + gap, this);
+                                if (isHor) {
+                                    bg.paint(g, x, 0, ww + gap , this.height, this);
+                                } else  {
+                                    bg.paint(g, 0, y, this.width, hh + gap, this);
+                                }
                             }
 
                             g.save();
@@ -343,8 +353,11 @@ zebkit.package("ui.grid", function(pkg, Class) {
                             g.restore();
                         }
 
-                        if (isHor) x += ww + gap;
-                        else       y += hh + gap;
+                        if (isHor) {
+                            x += ww + gap;
+                        } else {
+                            y += hh + gap;
+                        }
                     }
                 }
 
@@ -357,7 +370,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
      * Predefined left vertical grid caption.
      * @constructor
      * @class zebkit.ui.grid.LeftGridCaption
-     * @extends {zebkit.ui.grid.GridCaption}
+     * @extends zebkit.ui.grid.GridCaption
      */
     pkg.LeftGridCaption = Class(pkg.GridCaption, [
         function $prototype() {

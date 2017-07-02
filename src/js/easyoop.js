@@ -515,7 +515,7 @@
                     var $this = this;
                     this.then(function() {
                         var jn = $this.join();
-                        body.then(function(res) {
+                        body.then(function() {
                             if (arguments.length > 0) {
                                 // also pass result to body DoIt
                                 this.join.apply(this, arguments);
@@ -586,17 +586,25 @@
                     if (typeof completed === 'function') {
                         if (level === 0) {
                             try {
-                                if (args === null) completed.call(this);
-                                else               completed.apply(this, args);
+                                if (args === null) {
+                                    completed.call(this);
+                                } else {
+                                    completed.apply(this, args);
+                                }
                             } catch(e) {
                                 this.error(e);
                             }
                         } else {
-                            if (args === null) completed.call(this);
-                            else               completed.apply(this, args);
+                            if (args === null) {
+                                completed.call(this);
+                            } else {
+                                completed.apply(this, args);
+                            }
                         }
                     }
-                    if (args !== null) args.length = 0;
+                    if (args !== null) {
+                        args.length = 0;
+                    }
                 };
 
                 if (this.$error === null) {
@@ -691,8 +699,11 @@
                     if ($this.$error === null) {
                         // unblock the doit that waits for the runner we are in and
                         // restore its arguments
-                        if (res.length > 0) jn.apply($this, res);
-                        else                jn.call($this);
+                        if (res.length > 0) {
+                            jn.apply($this, res);
+                        } else {
+                            jn.call($this);
+                        }
 
                         // preserve arguments for the next call
                         if (arguments.length > 0) {
@@ -935,6 +946,10 @@
 
     function $lsall(fn) {
         return $ls.call(this, function(k, v) {
+            if (typeof v === 'undefined') {
+                throw new Error(fn + "," + k);
+            }
+
             if (v !== null && v.clazz === zebkit.Class) {
                 if (typeof v.$name === "undefined") {
                     v.$name = fn + k;
@@ -970,7 +985,7 @@
      *  @class zebkit.Package
      *  @constructor
      */
-    function Package(name, parent, declared) {
+    function Package(name, parent) {
         /**
          * URL the package has been loaded
          * @attribute $url
@@ -1877,8 +1892,11 @@
                         } else {
                             // property setter is detected, call setter to
                             // set the property value
-                            if (Array.isArray(v)) m.apply(target, v);
-                            else                  m.call(target, v);
+                            if (Array.isArray(v)) {
+                                m.apply(target, v);
+                            } else {
+                                m.call(target, v);
+                            }
                         }
                     }
                 }

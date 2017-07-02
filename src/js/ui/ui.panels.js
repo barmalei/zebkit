@@ -13,15 +13,17 @@ zebkit.package("ui", function(pkg, Class) {
      *  the title can be placed on the top or bottom part of the border panel.
      *  Also the title can be aligned horizontally.
      *
-     *     // create border panel with a title located at the
-     *     // top and aligned at the canter
-     *     var bp = new zebkit.ui.BorderPan("Title",
-     *                                     new zebkit.ui.Panel(),
-     *                                     "top", "center");
+     *  @example
+     *
+     *      // create border panel with a title located at the
+     *      // top and aligned at the canter
+     *      var bp = new zebkit.ui.BorderPan("Title",
+     *                                       new zebkit.ui.Panel(),
+     *                                       "top", "center");
      *
      *  @constructor
      *  @class zebkit.ui.BorderPan
-     *  @extends {zebkit.ui.Panel}
+     *  @extends zebkit.ui.Panel
      */
     pkg.BorderPan = Class(pkg.Panel, [
         function(title, center, o, a) {
@@ -38,8 +40,13 @@ zebkit.package("ui", function(pkg, Class) {
             }
 
             this.$super();
-            if (arguments.length > 0) this.add("caption", title);
-            if (arguments.length > 1) this.add("center", center);
+            if (arguments.length > 0) {
+                this.add("caption", title);
+            }
+
+            if (arguments.length > 1) {
+                this.add("center", center);
+            }
         },
 
         function $clazz() {
@@ -224,9 +231,9 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function setBorder(br) {
-            br = pkg.$view(br);
-            if (zebkit.instanceOf(br, pkg.TitledBorder) === false) {
-                br = new pkg.TitledBorder(br, "center");
+            br = zebkit.draw.$view(br);
+            if (zebkit.instanceOf(br, zebkit.draw.TitledBorder) === false) {
+                br = new zebkit.draw.TitledBorder(br, "center");
             }
             return this.$super(br);
         },
@@ -260,7 +267,7 @@ zebkit.package("ui", function(pkg, Class) {
                                           new zebkit.ui.Label("Right panel"));
 
           // customize gripper background color depending on its state
-          sp.gripper.setBackground(new zebkit.ui.ViewSet({
+          sp.gripper.setBackground(new zebkit.draw.ViewSet({
                "over" : "yellow"
                "out" : null,
                "pressed.over" : "red"
@@ -272,7 +279,7 @@ zebkit.package("ui", function(pkg, Class) {
      * @param {String} [o] an orientation of splitter element: "vertical" or "horizontal"
      * @class zebkit.ui.SplitPan
      * @constructor
-     * @extends {zebkit.ui.Panel}
+     * @extends zebkit.ui.Panel
      */
     pkg.SplitPan = Class(pkg.Panel, [
         function(f,s,o) {
@@ -282,8 +289,13 @@ zebkit.package("ui", function(pkg, Class) {
 
             this.$super();
 
-            if (arguments.length > 0) this.add("left", f);
-            if (arguments.length > 1) this.add("right", s);
+            if (arguments.length > 0) {
+                this.add("left", f);
+                if (arguments.length > 1) {
+                    this.add("right", s);
+                }
+            }
+
             this.add("center", new this.clazz.Bar(this));
         },
 
@@ -325,10 +337,14 @@ zebkit.package("ui", function(pkg, Class) {
                         if (e.isAction()) {
                             if (this.target.orient === "vertical"){
                                 x = this.target.normalizeBarLoc(x);
-                                if (x > 0) this.prevLoc = x;
+                                if (x > 0) {
+                                    this.prevLoc = x;
+                                }
                             } else {
                                 y = this.target.normalizeBarLoc(y);
-                                if (y > 0) this.prevLoc = y;
+                                if (y > 0) {
+                                    this.prevLoc = y;
+                                }
                             }
                         }
                     };
@@ -336,7 +352,9 @@ zebkit.package("ui", function(pkg, Class) {
                     this.pointerDragEnded = function(e){
                         var xy = this.target.normalizeBarLoc(this.target.orient === "vertical" ? this.x + e.x
                                                                                                : this.y + e.y);
-                        if (xy > 0) this.target.setGripperLoc(xy);
+                        if (xy > 0) {
+                            this.target.setGripperLoc(xy);
+                        }
                     };
 
                     this.getCursorType = function(t, x, y) {
@@ -411,10 +429,12 @@ zebkit.package("ui", function(pkg, Class) {
             this.leftComp = this.rightComp = this.gripper = null;
 
             this.normalizeBarLoc = function(xy){
-                if (xy < this.minXY) xy = this.minXY;
-                else {
-                    if (xy > this.maxXY) xy = this.maxXY;
+                if (xy < this.minXY) {
+                    xy = this.minXY;
+                } else if (xy > this.maxXY) {
+                    xy = this.maxXY;
                 }
+
                 return (xy > this.maxXY || xy < this.minXY) ?  -1 : xy;
             };
 
@@ -471,11 +491,10 @@ zebkit.package("ui", function(pkg, Class) {
 
                 if (this.orient === "horizontal"){
                     var w = this.width - left - right;
-                    if (this.barLocation < top) this.barLocation = top;
-                    else {
-                        if (this.barLocation > this.height - bottom - bSize.height) {
-                            this.barLocation = this.height - bottom - bSize.height;
-                        }
+                    if (this.barLocation < top) {
+                        this.barLocation = top;
+                    } else if (this.barLocation > this.height - bottom - bSize.height) {
+                        this.barLocation = this.height - bottom - bSize.height;
                     }
 
                     if (this.gripper !== null){
@@ -497,17 +516,16 @@ zebkit.package("ui", function(pkg, Class) {
                     }
                 } else {
                     var h = this.height - top - bottom;
-                    if (this.barLocation < left) this.barLocation = left;
-                    else {
-                        if (this.barLocation > this.width - right - bSize.width) {
-                            this.barLocation = this.width - right - bSize.width;
-                        }
+                    if (this.barLocation < left) {
+                        this.barLocation = left;
+                    } else if (this.barLocation > this.width - right - bSize.width) {
+                        this.barLocation = this.width - right - bSize.width;
                     }
 
                     if (this.gripper !== null){
                         if (this.isMoveable === true){
                             this.gripper.setBounds(this.barLocation, top, bSize.width, h);
-                        } else{
+                        } else {
                             this.gripper.setBounds(this.barLocation, Math.floor((h - bSize.height) / 2),
                                                    bSize.width, bSize.height);
                         }
@@ -588,19 +606,23 @@ zebkit.package("ui", function(pkg, Class) {
             } else if ((ctr === null && this.rightComp === null) || "right" === ctr) {
                 this.rightComp = c;
             } else {
-                if ("center" === ctr) this.gripper = c;
-                else throw new Error("" + ctr);
+                if ("center" === ctr) {
+                    this.gripper = c;
+                } else {
+                    throw new Error("" + ctr);
+                }
             }
         },
 
         function kidRemoved(index,c){
             this.$super(index, c);
-            if (c === this.leftComp) this.leftComp = null;
-            else {
+            if (c === this.leftComp) {
+                this.leftComp = null;
+            } else {
                 if (c === this.rightComp) {
                     this.rightComp = null;
-                } else {
-                    if (c === this.gripper) this.gripper = null;
+                } else if (c === this.gripper) {
+                    this.gripper = null;
                 }
             }
         },
@@ -610,8 +632,7 @@ zebkit.package("ui", function(pkg, Class) {
             if (this.orient === "vertical"){
                 this.minXY = this.getLeft() + this.gap + this.leftMinSize;
                 this.maxXY = this.width - this.gap - this.rightMinSize - ps.width - this.getRight();
-            }
-            else {
+            } else {
                 this.minXY = this.getTop() + this.gap + this.leftMinSize;
                 this.maxXY = this.height - this.gap - this.rightMinSize - ps.height - this.getBottom();
             }
@@ -634,8 +655,7 @@ zebkit.package("ui", function(pkg, Class) {
 
      * @constructor
      * @class zebkit.ui.CollapsiblePan
-     * @uses zebkit.ui.Switchable
-     * @extends {zebkit.ui.Panel}
+     * @extends zebkit.ui.Panel
      * @param {zebkit.ui.Panel|String} l a title label text or
      * @param {zebkit.ui.Panel} c a content of the extender panel
      * component
@@ -653,93 +673,60 @@ zebkit.package("ui", function(pkg, Class) {
       * @param {zebkit.ui.CollapsiblePan} src an extender UI component that generates the event
       * @param {Boolean} isCollapsed a state of the extender UI component
       */
-    pkg.CollapsiblePan = Class(pkg.Panel, pkg.Switchable, [
-        function(lab, content, sm){
+    pkg.CollapsiblePan = Class(pkg.Panel, [
+        function(lab, content){
             this.$super();
 
-            /**
-             * Title panel
-             * @type {zebkit.ui.Panel}
-             * @attribute titlePan
-             * @readOnly
-             */
-            this.titlePan = new this.clazz.TitlePan();
-            this.add("top", this.titlePan);
+            this.headerPan = new this.clazz.Header();
+            this.togglePan = new this.clazz.Toogle();
+            this.togglePan.on(this);
 
-            this.titlePan.add(new this.clazz.TogglePan(this));
-            this.titlePan.add(pkg.$component(arguments.length === 0 || lab === null ? "" : lab, this));
+            this.add("top", this.headerPan);
 
-            /**
-             * Content panel
-             * @type {zebkit.ui.Panel}
-             * @readOnly
-             * @attribute contentPan
-             */
+            this.headerPan.add(this.togglePan);
+            this.headerPan.add(pkg.$component(arguments.length === 0 || lab === null ? "" : lab, this));
+
             if (arguments.length > 1 && content !== null) {
                 this.contentPan = content;
+                content.setVisible(this.getValue());
                 this.add("center", this.contentPan);
             }
-
-            this.setSwitchManager(arguments.length > 2 ? sm : new pkg.SwitchManager());
         },
 
         function $clazz() {
             this.Label = Class(pkg.Label,[]);
 
-            this.ImageLabel = Class(pkg.ImageLabel,[]);
+            this.ImageLabel = Class(pkg.ImageLabel, []);
 
-            this.TitlePan = Class(pkg.StatePan,[]);
+            this.Header = Class(pkg.CompositeEvStatePan, []);
 
-            this.TogglePan = Class(pkg.StatePan, [
-                function(sw) {
-                    if (zebkit.instanceOf(sw, pkg.Switchable) === false) {
-                        throw new Error("Passed component has to implement Switchable interface");
-                    }
-                    this.switchable = sw;
-                    this.$super();
+            this.Toogle = Class(pkg.Checkbox, [
+                function $prototype() {
+                    this.cursorType = pkg.Cursor.HAND;
                 },
 
-                function $prototype() {
-                    this.switchable = null;
-                    this.cursorType = pkg.Cursor.HAND;
-
-                    this.pointerPressed = function(e){
-                        if (e.isAction()) {
-                            this.switchable.toggle();
-                        }
-                    };
+                function $clazz() {
+                    this.layout = new zebkit.layout.FlowLayout();
                 }
             ]);
 
             this.GroupPan = Class(pkg.Panel, [
-                function $clazz() {
-                    this.Group = Class(pkg.Group, [
-                        function(target) {
-                            this.target = target;
-                            this.$super(true);
-                        },
+                function() {
+                    this.group = new pkg.Group(true);
 
-                        function setValue(o, v) {
-                            var selected = this.selected;
-                            this.$super(o, v);
-
-                            if (v === false && selected !== null && this.selected === null) {
-                                var i = this.target.indexOf(selected);
-                                i = (i + 1) % this.target.kids.length;
-                                if (this.target.kids[i] !== selected) {
-                                    this.setValue(this.target.kids[i], true);
-                                }
-                            }
-                            return this;
-                        }
-                    ]);
+                    this.$super();
+                    for(var i = 0; i < arguments.length; i++) {
+                        arguments[i].togglePan.setGroup(this.group);
+                        this.add(arguments[i]);
+                        arguments[i].setBorder(null);
+                    }
                 },
 
                 function $prototype() {
                     this.doLayout = function(t) {
                         var y     = t.getTop(),
                             x     = t.getLeft(),
-                            w     = t.width - x - t.getRight(),
+                            w     = t.width  - x - t.getRight(),
                             eh    = t.height - y - t.getBottom(),
                             kid   = null,
                             i     = 0;
@@ -770,72 +757,103 @@ zebkit.package("ui", function(pkg, Class) {
                     };
 
                     this.calcPreferredSize = function(t) {
-                        var w = 0, h = 0;
+                        var w = 0,
+                            h = 0;
+
                         for(var i = 0; i < t.kids.length; i++) {
                             var kid = t.kids[i];
                             if (kid.isVisible) {
                                 var ps = kid.getPreferredSize();
                                 h += ps.height;
-                                if (ps.width > w) w = ps.width;
+                                if (ps.width > w) {
+                                    w = ps.width;
+                                }
                             }
                         }
-                        return { width: w, height:h };
+                        return { width:w, height:h };
                     };
 
                     this.compAdded = function(e) {
-                        e.kid.setSwitchManager(this.group);
                         if (this.group.selected === null) {
-                            this.group.setValue(e.kid, true);
+                            e.kid.setValue(true);
                         }
                     };
 
                     this.compRemoved = function(e) {
-                        if (this.group.selected === e.kid) {
-                            this.group.setValue(e.kid, false);
+                        if (this.group.selected === e.kid.togglePan) {
+                            e.kid.setValue(false);
                         }
-                        e.kid.setSwitchManager(null);
+                        e.kid.setGroup(null);
                     };
-                },
-
-                function() {
-                    this.group = new this.clazz.Group(this);
-                    this.$super();
-                    for(var i = 0; i < arguments.length; i++) {
-                        arguments[i].setSwitchManager(this.group);
-                        this.add(arguments[i]);
-                    }
                 }
             ]);
         },
 
         function $prototype() {
-            this.contentPan = null;
-            this.titlePan   = null;
+            /**
+             * Title panel
+             * @type {zebkit.ui.Panel}
+             * @attribute headerPan
+             * @readOnly
+             */
+            this.headerPan = null;
 
-            this.switched = function() {
+            /**
+             * Content panel
+             * @type {zebkit.ui.Panel}
+             * @readOnly
+             * @attribute contentPan
+             */
+            this.contentPan = null;
+
+            /**
+             * Toggle UI element
+             * @type {zebkit.ui.Checkbox}
+             * @readOnly
+             * @attribute togglePan
+             */
+            this.togglePan = null;
+
+            this.setValue = function(b) {
+                if (this.togglePan !== null) {
+                    this.togglePan.setValue(b);
+                }
+                return this;
+            };
+
+            this.getValue = function(b) {
+                return (this.togglePan !== null) ? this.togglePan.getValue() : false;
+            };
+
+            this.setGroup = function(g) {
+                if (this.togglePan !== null) {
+                    this.togglePan.setGroup(g);
+                }
+                return this;
+            };
+
+            this.toggle = function() {
+                if (this.togglePan !== null) {
+                    this.togglePan.toggle();
+                }
+                return this;
+            };
+
+            this.fired = function(src) {
                 var value = this.getValue();
                 if (this.contentPan !== null) {
                     this.contentPan.setVisible(value);
                 }
-
-                if (this.titlePan !== null) {
-                    this.titlePan.setState(value ? "on" : "off" );
-                }
             };
 
-            this.compEnabled = function (e) {
-                if (this.titlePan !== null) {
-                    var v = this.getValue();
-                    this.titlePan.setState(this.isEnable ? (v ? "on" : "off")
-                                                         : (v ? "dison" : "disoff") );
-                }
-            };
-
-            this.compRemoved = function (e) {
-                if (this.titlePan === e.kid) {
-                    this.titlePan = null;
+            this.compRemoved = function(e) {
+                if (this.headerPan === e.kid) {
+                    this.headerPan = null;
                 } else if (e.kid === this.contentPan) {
                     this.contentPan = null;
+                } else if (e.kid === this.togglePan) {
+                    this.togglePan.off(this);
+                    this.togglePan = null;
                 }
             };
         }
@@ -846,7 +864,7 @@ zebkit.package("ui", function(pkg, Class) {
      * @class zebkit.ui.StatusBar
      * @constructor
      * @param {Integer} [gap] a gap between status bar children elements
-     * @extends {zebkit.ui.Panel}
+     * @extends zebkit.ui.Panel
      */
     pkg.StatusBarPan = Class(pkg.Panel, [
         function (gap){
@@ -861,7 +879,7 @@ zebkit.package("ui", function(pkg, Class) {
         function $prototype() {
             /**
              * Set the specified border to be applied for status bar children components
-             * @param {zebkit.ui.View} v a border
+             * @param {zebkit.draw.View} v a border
              * @method setBorderView
              * @chainable
              */
@@ -889,7 +907,7 @@ zebkit.package("ui", function(pkg, Class) {
      * @param {zebkit.ui.Panel} [varname]* number of components to be added to the stack
      * panel
      * @constructor
-     * @extends {zebkit.ui.Panel}
+     * @extends zebkit.ui.Panel
      */
     pkg.StackPan = Class(pkg.Panel, [
         function() {

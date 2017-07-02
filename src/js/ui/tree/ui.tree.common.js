@@ -50,9 +50,9 @@ zebkit.package("ui.tree", function(pkg, Class) {
      * the state indicates if the given tree node is collapsed (false) or expanded
      * (true)
      * @private
-     * @class zebkit.ui.tree.$IM
+     * @class zebkit.ui.tree.ItemMetric
      */
-    pkg.$IM = function(b) {
+    pkg.ItemMetric = function(b) {
         /**
          *  The whole width of tree node that includes a rendered item preferred
          *  width, all icons and gaps widths
@@ -162,14 +162,14 @@ zebkit.package("ui.tree", function(pkg, Class) {
      * Default tree editor view provider
      * @class zebkit.ui.tree.DefViews
      * @constructor
-     * @extends {zebkit.ui.BaseViewProvider}
+     * @extends zebkit.draw.BaseViewProvider
      */
-    pkg.DefViews = Class(ui.BaseViewProvider, [
+    pkg.DefViews = Class(zebkit.draw.BaseViewProvider, [
         /**
          * Get a view for the given model item of the UI tree component
          * @param  {zebkit.ui.tree.Tree} tree  a tree component
          * @param  {zebkit.data.Item} item a tree model element
-         * @return {zebkit.ui.View}  a view to visualize the given tree data model element
+         * @return {zebkit.draw.View}  a view to visualize the given tree data model element
          * @method  getView
          */
         function getView(tree, item) {
@@ -210,8 +210,8 @@ zebkit.package("ui.tree", function(pkg, Class) {
             }
 
      * @param {Boolean} [nodeState] a default tree nodes state (expanded or collapsed)
-     * @extends {zebkit.ui.Panel}
-     * @uses  {zebkit.ui.DecorationViews}
+     * @extends zebkit.ui.Panel
+     * @uses  zebkit.ui.DecorationViews
      */
 
      /**
@@ -384,8 +384,8 @@ zebkit.package("ui.tree", function(pkg, Class) {
 
                         if (x >= r.x && x < r.x + r.width && y >= r.y && y < r.y + r.height){
                             this.togglePressed(root);
-                        } else {
-                            if (x > r.x + r.width) this.itemPressed(root, e);
+                        } else if (x > r.x + r.width) {
+                            this.itemPressed(root, e);
                         }
                     }
                 }
@@ -487,7 +487,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
              * Get current toggle element view. The view depends on the state of tree item.
              * @param  {zebkit.data.Item} i a tree model item
              * @protected
-             * @return {zebkit.ui.View}  a toggle element view
+             * @return {zebkit.draw.View}  a toggle element view
              * @method getToogleView
              */
             this.getToggleView = function(i){
@@ -522,7 +522,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
              * tree model item at the given location
              * @param  {CanvasRenderingContext2D} g a graphical context
              * @param  {zebkit.data.Item} root a tree model item to be rendered
-             * @param  {zebkit.ui.tree.$IM} node a tree node metrics
+             * @param  {zebkit.ui.tree.ItemMetric} node a tree node metrics
              * @param  {Ineteger} x a x location where the tree node has to be rendered
              * @param  {Ineteger} y a y location where the tree node has to be rendered
              * @method paintItem
@@ -581,13 +581,13 @@ zebkit.package("ui.tree", function(pkg, Class) {
             /**
              * Get a tree node metrics by the given tree model item.
              * @param  {zebkit.data.Item} item a tree model item
-             * @return {zebkit.ui.tree.$IM} a tree node metrics
+             * @return {zebkit.ui.tree.ItemMetric} a tree node metrics
              * @protected
              * @method getIM
              */
             this.getIM = function (item) {
                 if (this.nodes.hasOwnProperty(item.$hash$) === false){
-                    var node = new pkg.$IM(this.isOpenVal);
+                    var node = new pkg.ItemMetric(this.isOpenVal);
                     this.nodes[item.$hash$] = node;
                     return node;
                 }
@@ -616,14 +616,18 @@ zebkit.package("ui.tree", function(pkg, Class) {
                         dy    = this.scrollManager.getSY(),
                         found = this.getItemAtInBranch(root, x - dx, y - dy);
 
-                    if (found !== null) return found;
+                    if (found !== null) {
+                        return found;
+                    }
 
                     var parent = root.parent;
                     while (parent !== null) {
                         var count = parent.kids.length;
                         for(var i = parent.kids.indexOf(root) + 1;i < count; i ++ ){
                             found = this.getItemAtInBranch(parent.kids[i], x - dx, y - dy);
-                            if (found !== null) return found;
+                            if (found !== null) {
+                                return found;
+                            }
                         }
                         root = parent;
                         parent = root.parent;
@@ -642,7 +646,9 @@ zebkit.package("ui.tree", function(pkg, Class) {
                     if (this.$isOpen(root)) {
                         for(var i = 0;i < root.kids.length; i++) {
                             var res = this.getItemAtInBranch(root.kids[i], x, y);
-                            if (res !== null) return res;
+                            if (res !== null) {
+                                return res;
+                            }
                         }
                     }
                 }
@@ -709,7 +715,9 @@ zebkit.package("ui.tree", function(pkg, Class) {
                     var parent = null;
                     while ((parent = item.parent) !== null){
                         var index = parent.kids.indexOf(item);
-                        if (index + 1 < parent.kids.length) return parent.kids[index + 1];
+                        if (index + 1 < parent.kids.length) {
+                            return parent.kids[index + 1];
+                        }
                         item = parent;
                     }
                 }
@@ -741,7 +749,9 @@ zebkit.package("ui.tree", function(pkg, Class) {
                 while((parent = item.parent) !== null){
                     for(var i = parent.kids.indexOf(item) - 1;i >= 0; i-- ){
                         var child = parent.kids[i];
-                        if (this.isOverVisibleArea(child)) return this.nextVisible(child);
+                        if (this.isOverVisibleArea(child)) {
+                            return this.nextVisible(child);
+                        }
                     }
                     item = parent;
                 }
@@ -777,7 +787,9 @@ zebkit.package("ui.tree", function(pkg, Class) {
                     var count = parent.kids.length;
                     for(var i = parent.kids.indexOf(item) + 1;i < count; i++){
                         res = this.nextVisibleInBranch(parent.kids[i]);
-                        if (res !== null) return res;
+                        if (res !== null) {
+                            return res;
+                        }
                     }
                     item = parent;
                 }
@@ -785,11 +797,16 @@ zebkit.package("ui.tree", function(pkg, Class) {
             };
 
             this.nextVisibleInBranch = function (item){
-                if (this.isVerVisible(item)) return item;
+                if (this.isVerVisible(item)) {
+                    return item;
+                }
+
                 if (this.$isOpen(item)){
                     for(var i = 0;i < item.kids.length; i++){
                         var res = this.nextVisibleInBranch(item.kids[i]);
-                        if (res !== null) return res;
+                        if (res !== null) {
+                            return res;
+                        }
                     }
                 }
                 return null;
@@ -812,7 +829,9 @@ zebkit.package("ui.tree", function(pkg, Class) {
             };
 
             this.paintBranch = function (g, root){
-                if (root === null) return false;
+                if (root === null) {
+                    return false;
+                }
 
                 var node = this.getIM(root),
                     dx   = this.scrollManager.getSX(),
@@ -967,12 +986,14 @@ zebkit.package("ui.tree", function(pkg, Class) {
 
             /**
              * Select the given item.
-             * @param  {zebkit.data.Item} item an item to be selected. Use null value to clear any selection
+             * @param  {zebkit.data.Item} item an item to be selected. Use null value to clear
+             * any selection
              * @method  select
              */
             this.select = function(item){
-                if (this.isSelectable === true){
-                    var old = this.selected, m = null;
+                if (this.isSelectable === true && this.selected !== item){
+                    var old = this.selected,
+                        m    = null;
 
                     this.selected = item;
                     if (this.selected !== null) {
@@ -1019,9 +1040,11 @@ zebkit.package("ui.tree", function(pkg, Class) {
              * @chainable
              */
             this.toggleAll = function (root,b){
-                var model = this.model;
                 if (root.kids.length > 0){
-                    if (this.getItemMetrics(root).isOpen !== b) this.toggle(root);
+                    if (this.getItemMetrics(root).isOpen !== b) {
+                        this.toggle(root);
+                    }
+
                     for(var i = 0; i < root.kids.length; i++ ){
                         this.toggleAll(root.kids[i], b);
                     }
@@ -1048,7 +1071,10 @@ zebkit.package("ui.tree", function(pkg, Class) {
                         do {
                             parent = parent.parent;
                         } while (parent !== item && parent !== null);
-                        if (parent === item) this.select(item);
+
+                        if (parent === item) {
+                            this.select(item);
+                        }
                     }
 
                     this.repaint();
@@ -1056,7 +1082,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
                 return this;
             };
 
-            this.itemInserted = function (model,item){
+            this.itemInserted = function (model, item){
                 this.vrp();
             };
 
@@ -1082,7 +1108,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
                 this.vrp();
             };
 
-            this.calcPreferredSize = function (target){
+            this.calcPreferredSize = function(target) {
                 return this.model === null ? { width:0, height:0 }
                                            : { width:this.maxw, height:this.maxh };
             };
@@ -1094,7 +1120,9 @@ zebkit.package("ui.tree", function(pkg, Class) {
              */
             this.setSelectable = function(b){
                 if (this.isSelectable !== b){
-                    if (b === false && this.selected !== null) this.select(null);
+                    if (b === false && this.selected !== null) {
+                        this.select(null);
+                    }
                     this.isSelectable = b;
                     this.repaint();
                 }
@@ -1143,9 +1171,13 @@ zebkit.package("ui.tree", function(pkg, Class) {
                     }
 
                     this.select(null);
-                    if (this.model !== null && this.model._) this.model.off(this);
+                    if (this.model !== null && this.model._) {
+                        this.model.off(this);
+                    }
                     this.model = d;
-                    if (this.model !== null && this.model._) this.model.on(this);
+                    if (this.model !== null && this.model._) {
+                        this.model.on(this);
+                    }
                     this.firstVisible = null;
                     delete this.nodes;
                     this.nodes = {};
@@ -1190,8 +1222,8 @@ zebkit.package("ui.tree", function(pkg, Class) {
             // set " [x] " text render for toggle on and
             // " [o] " text render for toggle off tree elements
             tree.setViews({
-                "expandedToggle" : new zebkit.ui.TextRender(" [x] "),
-                "collapsedToggle": new zebkit.ui.TextRender(" [o] ")
+                "expandedToggle" : new zebkit.draw.TextRender(" [x] "),
+                "collapsedToggle": new zebkit.draw.TextRender(" [o] ")
             });
 
          * @param {Object} v dictionary of tree component decorative elements views
@@ -1207,7 +1239,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
             this.viewSizes.leafSign        = { width: 0, height : 0};
 
             for(var k in v) {
-                this.views[k] = ui.$view(v[k]);
+                this.views[k] = zebkit.draw.$view(v[k]);
                 if (this.viewSizes.hasOwnProperty(k) && this.views[k]) {
                     this.viewSizes[k] = this.views[k].getPreferredSize();
                 }

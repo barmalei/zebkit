@@ -123,7 +123,9 @@ zebkit.package("ui.vk", function(pkg, Class) {
                 for(var i = 0; i < rows.length; i++) {
                     var r    = rows[i],
                         w    = (r.keys > 0 ? r.keys - 1 : 0) * this.gap + fixKeyWidth * r.fixKeys + r.occupiedHorSpace;
-                    if (w > width) width = w;
+                    if (w > width) {
+                        width = w;
+                    }
                 }
                 return width;
             };
@@ -135,11 +137,18 @@ zebkit.package("ui.vk", function(pkg, Class) {
 
                 for(var row = 0;  ;row++) {
                     var r = this.rowMetric(row, t);
-                    if (r === null) break;
+                    if (r === null) {
+                        break;
+                    }
 
                     rows.push(r);
-                    if (r.fixKeyMaxWidth > fixKeyWidth) fixKeyWidth = r.fixKeyMaxWidth;
-                    if (r.rowHeight      > rowHeight  ) rowHeight   = r.rowHeight;
+                    if (r.fixKeyMaxWidth > fixKeyWidth) {
+                        fixKeyWidth = r.fixKeyMaxWidth;
+                    }
+
+                    if (r.rowHeight > rowHeight) {
+                        rowHeight   = r.rowHeight;
+                    }
                 }
 
                 // check if key proportion is good, otherwise again correct fixed key size
@@ -180,7 +189,9 @@ zebkit.package("ui.vk", function(pkg, Class) {
                         var ps = k.getPreferredSize();
 
                         if (typeof ctr.size === 'undefined' || ctr.size === null) {
-                            if (fixKeyMaxWidth < ps.width) fixKeyMaxWidth = ps.width;
+                            if (fixKeyMaxWidth < ps.width) {
+                                fixKeyMaxWidth = ps.width;
+                            }
                             fixKeys ++;
                         } else {
                             if (ctr.size === "ps") {
@@ -192,7 +203,9 @@ zebkit.package("ui.vk", function(pkg, Class) {
                             occupiedHorSpace += ps.width;
                         }
 
-                        if (rowHeight < ps.height) rowHeight = ps.height;
+                        if (rowHeight < ps.height) {
+                            rowHeight = ps.height;
+                        }
                     }
                 }
 
@@ -215,7 +228,7 @@ zebkit.package("ui.vk", function(pkg, Class) {
         }
     ]);
 
-    pkg.ShiftKeyArrow = zebkit.Class(ui.View, [
+    pkg.ShiftKeyArrow = zebkit.Class(zebkit.draw.View, [
         function(bg, lnCol) {
             if (arguments.length > 1) {
                 this.lineColor = lnCol;
@@ -312,9 +325,9 @@ zebkit.package("ui.vk", function(pkg, Class) {
                 zebkit.instanceOf(v, ui.Panel) === false &&
                 (v instanceof Image) === false)
             {
-                v = ui.$view(v);
+                v = zebkit.draw.$view(v);
 
-                if (zebkit.instanceOf(v, ui.ViewSet)) {
+                if (zebkit.instanceOf(v, zebkit.draw.ViewSet)) {
                     this.statusViews    = v;
                     this.statusViewKeys = [];
                     this.statusKeyIndex = 0;
@@ -334,7 +347,7 @@ zebkit.package("ui.vk", function(pkg, Class) {
         function $clazz() {
             this.padding = 1;
             this.Label = Class(ui.Label, []);
-            this.Label.font = new ui.Font("Arial", "bold", 14);
+            this.Label.font = new zebkit.Font("Arial", "bold", 14);
         },
 
         function $prototype() {
@@ -362,12 +375,16 @@ zebkit.package("ui.vk", function(pkg, Class) {
             };
 
             this.hideHint = function() {
-                if (tooltip !== null) tooltip.removeMe();
+                if (tooltip !== null) {
+                    tooltip.removeMe();
+                }
             };
 
             this.findVK = function(id) {
                 var p = this.parent;
-                while (p !== null && typeof p[id] === 'undefined') p = p.parent;
+                while (p !== null && typeof p[id] === 'undefined') {
+                    p = p.parent;
+                }
                 return p;
             };
 
@@ -529,7 +546,7 @@ zebkit.package("ui.vk", function(pkg, Class) {
         }
     ]);
 
-    pkg.ArrowView = Class(ui.ArrowView, [
+    pkg.ArrowView = Class(zebkit.draw.ArrowView, [
         function $prototype() {
             this.gap = 0;
             this.color = "white";
@@ -577,7 +594,7 @@ zebkit.package("ui.vk", function(pkg, Class) {
             // C /______|  B
             //   \ D
             //
-            view: ui.$view(function(g, x, y, w, h, d) {
+            view: zebkit.draw.$view(function(g, x, y, w, h, d) {
                 var gap = 6;
                 g.setColor("orange");
                 g.beginPath();
@@ -604,7 +621,7 @@ zebkit.package("ui.vk", function(pkg, Class) {
         backspace: {
             code: "Backspace",
             label: "<=",
-            view2: ui.$view(function(g, x, y, w, h, d) {
+            view2: zebkit.draw.$view(function(g, x, y, w, h, d) {
                 g.setColor("black");
                 g.beginPath();
                 g.lineWidth = 2;
@@ -720,13 +737,13 @@ zebkit.package("ui.vk", function(pkg, Class) {
             this.layout = new zebkit.layout.BorderLayout();
 
             this.SmallLabel = Class(ui.Label, []);
-            this.SmallLabel.font = new ui.Font(pkg.VKey.Label.font.name, Math.floor((2*pkg.VKey.Label.font.height)/3));
+            this.SmallLabel.font = new zebkit.Font(pkg.VKey.Label.font.name, Math.floor((2*pkg.VKey.Label.font.height)/3));
 
             this.KeysPopupPan = Class(ui.Panel, [
                 function $clazz() {
                     this.layout     = new zebkit.layout.FlowLayout("left", "center", "horizontal", 6);
               		this.padding    = 6;
-              		this.border     = new ui.Border("plain");
+              		this.border     = new zebkit.draw.Border("plain");
               		this.background = "rgba(200,200,200,0.8)";
                 },
 
@@ -944,7 +961,9 @@ zebkit.package("ui.vk", function(pkg, Class) {
             };
 
             this.vkMaskUpdated = function(vkey, mask, value) {
-                if (typeof mask === 'undefined' || mask === null) throw new Error();
+                if (typeof mask === 'undefined' || mask === null) {
+                    throw new Error();
+                }
 
                 this.eachKey(function(group, key) {
                     if (key !== vkey && key.mask !== null && key.mask === mask) {
@@ -1004,7 +1023,9 @@ zebkit.package("ui.vk", function(pkg, Class) {
             this.getGroupPan = function(name) {
                 for(var i = 0; i < this.kids.length; i++) {
                     var k = this.kids[i];
-                    if (k.name === name) return k;
+                    if (k.name === name) {
+                        return k;
+                    }
                 }
                 return null;
             };
@@ -1065,7 +1086,9 @@ zebkit.package("ui.vk", function(pkg, Class) {
 
     function $isVkElement(c) {
         var p = c;
-        while (p !== null && p.$isVkElement !== true) p = p.parent;
+        while (p !== null && p.$isVkElement !== true) {
+            p = p.parent;
+        }
         return p !== null;
     }
 

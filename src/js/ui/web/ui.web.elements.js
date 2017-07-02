@@ -7,7 +7,7 @@ zebkit.package("ui.web", function(pkg, Class) {
      * @param  {HTMLCanvas} [e] HTML canvas element to be wrapped as a zebkit UI
      * component or nothing to create a new canvas element
      * @class zebkit.ui.web.HtmlCanvas
-     * @extends {zebkit.ui.web.HtmlElement}
+     * @extends zebkit.ui.web.HtmlElement
      */
     pkg.HtmlCanvas = Class(pkg.HtmlElement,  [
         function(e) {
@@ -182,7 +182,9 @@ zebkit.package("ui.web", function(pkg, Class) {
             };
 
             this.scale = function(sx, sy) {
-                if (this.$context !== null) this.$context.scale(sx, sy);
+                if (this.$context !== null) {
+                    this.$context.scale(sx, sy);
+                }
                 this.$scaleX = this.$scaleX * sx;
                 this.$scaleY = this.$scaleY * sy;
                 this.vrp();
@@ -270,7 +272,7 @@ zebkit.package("ui.web", function(pkg, Class) {
      * it will be instantiated automatically. If the component is not passed the new
      * window component (zebkit.ui.Window) will be created.
      * @constructor
-     * @extends {zebkit.ui.web.HtmlCanvas}
+     * @extends zebkit.ui.web.HtmlCanvas
      * @class zebkit.ui.web.HtmlWinCanvas
      */
     pkg.HtmlWinCanvas = Class(pkg.HtmlCanvas, [
@@ -309,7 +311,7 @@ zebkit.package("ui.web", function(pkg, Class) {
      * WEB based HTML components wrapped with as zebkit components.
      * @class zebkit.ui.web.HtmlFocusableElement
      * @constructor
-     * @extends {zebkit.ui.web.HtmlElement}
+     * @extends zebkit.ui.web.HtmlElement
      */
     pkg.HtmlFocusableElement = Class(pkg.HtmlElement, [
         function $prototype() {
@@ -330,7 +332,9 @@ zebkit.package("ui.web", function(pkg, Class) {
      */
     pkg.HtmlTextInput = Class(pkg.HtmlFocusableElement, [
         function(text, e) {
-            if (text === null) text = "";
+            if (text === null) {
+                text = "";
+            }
             this.$super(e);
             this.setAttribute("tabindex", 0);
             this.setValue(text);

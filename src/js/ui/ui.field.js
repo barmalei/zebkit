@@ -2,16 +2,16 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Text field UI component. The component is designed to enter single line, multi lines or password text.
      * The component implement text field functionality from the scratch. It supports the following features
-
-        - Text selection
-        - Redu/Undo actions
-        - Native WEB clipboard
-        - Basic text navigation
-        - Read-only mode
-        - Left or right text alignment
-
+     *
+     *   - Text selection
+     *   - Redu/Undo actions
+     *   - Native WEB clipboard
+     *   - Basic text navigation
+     *   - Read-only mode
+     *   - Left or right text alignment
+     *
      * @constructor
-     * @param {String|zebkit.data.TextModel|zebkit.ui.TextRender} [txt] a text the text field component
+     * @param {String|zebkit.data.TextModel|zebkit.draw.TextRender} [txt] a text the text field component
      * has to be filled. The parameter can be a simple string, text model or text render class instance.
      * @param {Integer} [maxCol] a maximal size of entered text. -1 means the size of the edited text
      * has no length limit.
@@ -20,28 +20,32 @@ zebkit.package("ui", function(pkg, Class) {
      */
     pkg.TextField = Class(pkg.Label, [
         function (render, maxCol){
-            this.history = Array(100);
-            this.historyPos = -1;
-            this.redoCounter = this.undoCounter = this.curY = this.curW = this.curH = 0;
+            this.$history = Array(100);
+
             this.scrollManager = new pkg.ScrollManager(this);
 
+            var renderDefined = false;
             if (arguments.length === 0) {
                 maxCol = -1;
-                render = new pkg.TextRender(new zebkit.data.SingleLineTxt());
-            } else if (arguments.length > 1) {
+                render = new zebkit.draw.TextRender(new zebkit.data.SingleLineTxt());
+                renderDefined = true;
+            } else {
                 if (arguments.length === 1) {
                     if (zebkit.isNumber(render)) {
                         maxCol = render;
-                        render = null;
+                        render = new zebkit.draw.TextRender(new zebkit.data.SingleLineTxt());
+                        renderDefined = true;
                     } else {
                         maxCol = -1;
                     }
                 }
+            }
 
+            if (renderDefined === false) {
                 if (zebkit.isString(render)) {
-                    render = new pkg.TextRender(new zebkit.data.SingleLineTxt(render));
+                    render = new zebkit.draw.TextRender(new zebkit.data.SingleLineTxt(render));
                 } else if (zebkit.instanceOf(render, zebkit.data.TextModel)) {
-                    render = new pkg.TextRender(render);
+                    render = new zebkit.draw.TextRender(render);
                 }
             }
 
@@ -56,37 +60,83 @@ zebkit.package("ui", function(pkg, Class) {
              * Text field hint text render
              * @constructor
              * @class zebkit.ui.TextField.HintRender
-             * @extends {zebkit.ui.StringRender}
+             * @extends zebkit.draw.StringRender
              */
-            this.HintRender = Class(pkg.StringRender, []);
+            this.HintRender = Class(zebkit.draw.StringRender, []);
         },
 
         /**
          * @for zebkit.ui.TextField
          */
         function $prototype() {
-            this.$blinkTask = null;
+            this.$historyPos  = -1;
+            this.$lineHeight  = 0;
+            this.$redoCounter = 0;
+            this.$undoCounter = 0;
+            this.$blinkTask   = null;
+
+            /**
+             * Cursor x loacation
+             * @attribute cursorX
+             * @type {Integer}
+             * @readOnly
+             */
+            this.cursorX = 0;
+
+            /**
+             * Cursor y loacation
+             * @attribute cursorY
+             * @type {Integer}
+             * @readOnly
+             */
+            this.cursorY = 0;
+
+            /**
+             * Cursor width
+             * @attribute cursorWidth
+             * @type {Integer}
+             * @readOnly
+             */
+            this.cursorWidth = 0;
+
+            /**
+             * Cursor height
+             * @attribute cursorHeight
+             * @type {Integer}
+             * @readOnly
+             */
+            this.cursorHeight = 0;
 
             /**
              * Selection view.
-             * @attribute selectionView
-             * @type {zebkit.ui.View}
+             * @attribute selectView
+             * @type {zebkit.draw.View|String}
+             * @readOnly
              */
-            this.selectionView = this.hint = null;
+            this.selectView = null;
+
+            /**
+             * Hint view
+             * @attribute hint
+             * @type {zebkit.draw.View}
+             * @readOnly
+             */
+            this.hint = null;
+
 
             // TODO: check the place the property is required
-            this.vkMode    = "indirect";
+            this.vkMode = "indirect";
 
-            this.startLine = this.startCol = this.endLine = this.endCol = this.curX = 0;
+            this.startLine = this.startCol = this.endLine = this.endCol = 0;
             this.startOff  = this.endOff = -1;
 
             /**
-             * Selection color or view
-             * @attribute  selection
-             * @type {String|zebkit.ui.View}
+             * Cursor position manager
+             * @attribute  position
+             * @type {zebkit.util.Position}
              * @readOnly
              */
-            this.selection = this.position = null;
+            this.position = null;
 
             /**
              * Specify the text field cursor blinking period in milliseconds.
@@ -113,16 +163,17 @@ zebkit.package("ui", function(pkg, Class) {
              * @attribute textAlign
              * @type {String}
              * @default "left"
+             * @readOnly
              */
             this.textAlign = "left";
 
             /**
              * Cursor view
-             * @attribute curView
-             * @type {zebkit.ui.View}
+             * @attribute cursorView
+             * @type {zebkit.draw.View}
              * @readOnly
              */
-            this.curView = null;
+            this.cursorView = null;
 
             /**
              * Indicate if the text field is editable
@@ -193,7 +244,9 @@ zebkit.package("ui", function(pkg, Class) {
                                 // we have to correct insertion offset to start (since the
                                 // selected text is going to be removed)
                                 if (off <= end) {
-                                    if (off < end) end += size;
+                                    if (off < end) {
+                                        end += size;
+                                    }
                                     off = start;
                                 }
                             }
@@ -292,9 +345,13 @@ zebkit.package("ui", function(pkg, Class) {
                 for(; col >= 0 && col < ln.length; col += d){
                     if (b) {
                         if (d > 0) {
-                            if (zebkit.util.isLetter(ln[col])) return { row:line, col:col };
+                            if (zebkit.util.isLetter(ln[col])) {
+                                return { row:line, col:col };
+                            }
                         } else {
-                            if (!zebkit.util.isLetter(ln[col])) return { row : line, col: col + 1 };
+                            if (!zebkit.util.isLetter(ln[col])) {
+                                return { row : line, col: col + 1 };
+                            }
                         }
                     } else  {
                         b = d > 0 ? !zebkit.util.isLetter(ln[col]) : zebkit.util.isLetter(ln[col]);
@@ -510,12 +567,13 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.remove = function (pos,size){
                 if (this.isEditable === true) {
-                    var position = this.position;
                     if (pos >= 0 && (pos + size) <= this.getMaxOffset()) {
                         if (size < 10000) {
-                            this.historyPos = (this.historyPos + 1) % this.history.length;
-                            this.history[this.historyPos] = [-1, pos, this.getValue().substring(pos, pos+size)];
-                            if (this.undoCounter < this.history.length) this.undoCounter++;
+                            this.$historyPos = (this.$historyPos + 1) % this.$history.length;
+                            this.$history[this.$historyPos] = [-1, pos, this.getValue().substring(pos, pos+size)];
+                            if (this.$undoCounter < this.$history.length) {
+                                this.$undoCounter++;
+                            }
                         }
 
                         if (this.view.target.remove(pos, size)) {
@@ -538,10 +596,10 @@ zebkit.package("ui", function(pkg, Class) {
                 if (this.isEditable === true) {
                     // TODO: remove hard coded undo/redo deepness value
                     if (s.length < 10000) {
-                        this.historyPos = (this.historyPos + 1) % this.history.length;
-                        this.history[this.historyPos] = [1, pos, s.length];
-                        if (this.undoCounter < this.history.length) {
-                            this.undoCounter++;
+                        this.$historyPos = (this.$historyPos + 1) % this.$history.length;
+                        this.$history[this.$historyPos] = [1, pos, s.length];
+                        if (this.$undoCounter < this.$history.length) {
+                            this.$undoCounter++;
                         }
                     }
 
@@ -568,10 +626,10 @@ zebkit.package("ui", function(pkg, Class) {
                                 this.getTop();
                 }
 
-                this.curH = r.getLineHeight() - 1;
+                this.$lineHeight = r.getLineHeight() - 1;
             };
 
-            this.catchScrolled = function(psx,psy){
+            this.catchScrolled = function(psx, psy) {
                 this.repaint();
             };
 
@@ -583,16 +641,20 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.drawCursor = function (g) {
                 if (this.position.offset >= 0 &&
-                    this.curView !== null     &&
-                    this.$blinkMe              &&
+                    this.cursorView !== null  &&
+                    this.$blinkMe             &&
                     this.hasFocus()              )
                 {
                     if (this.textAlign === "left") {
-                        this.curView.paint(g, this.curX, this.curY,
-                                              this.curW, this.curH, this);
+                        this.cursorView.paint(g, this.curX, this.curY,
+                                              this.cursorWidth,
+                                              (this.cursorHeight === 0 ? this.$lineHeight : this.cursorHeight),
+                                              this);
                     } else {
-                        this.curView.paint(g, this.curX - this.curW, this.curY,
-                                              this.curW, this.curH, this);
+                        this.cursorView.paint(g, this.curX - this.cursorWidth, this.curY,
+                                              this.cursorWidth,
+                                              (this.cursorHeight === 0 ? this.$lineHeight : this.cursorHeight),
+                                              this);
                     }
                 }
             };
@@ -612,7 +674,9 @@ zebkit.package("ui", function(pkg, Class) {
             this.pointerDragged = function (e){
                 if (e.isAction()){
                     var p = this.getTextRowColAt(e.x, e.y);
-                    if (p !== null) this.position.setRowCol(p.row, p.col);
+                    if (p !== null) {
+                        this.position.setRowCol(p.row, p.col);
+                    }
                 }
             };
 
@@ -659,7 +723,7 @@ zebkit.package("ui", function(pkg, Class) {
                 return this.startOff !== this.endOff;
             };
 
-            this.posChanged = function (target,po,pl,pc){
+            this.posChanged = function (target, po, pl, pc){
                 this.recalc();
                 var position = this.position;
                 if (position.offset >= 0) {
@@ -671,8 +735,8 @@ zebkit.package("ui", function(pkg, Class) {
                         top        = this.getTop();
 
                     this.scrollManager.makeVisible(this.textAlign === "left" ? this.curX
-                                                                             : this.curX - this.curW,
-                                                    this.curY, this.curW, lineHeight);
+                                                                             : this.curX - this.cursorWidth,
+                                                    this.curY, this.cursorWidth, lineHeight);
 
                     if (pl >= 0) {
                         // means selected text exists, than we have to correct selection
@@ -712,8 +776,8 @@ zebkit.package("ui", function(pkg, Class) {
                 if (this.hint !== null && this.getMaxOffset() === 0) {
                     var ps = this.hint.getPreferredSize(),
                         yy = Math.floor((this.height - ps.height)/2),
-                        xx = ("left" === this.textAlign) ? this.getLeft() + this.curW
-                                                         : this.width - ps.width - this.getRight() - this.curW;
+                        xx = ("left" === this.textAlign) ? this.getLeft() + this.cursorWidth
+                                                         : this.width - ps.width - this.getRight() - this.cursorWidth;
 
                     this.hint.paint(g, xx, yy, this.width, this.height, this);
                 }
@@ -723,13 +787,16 @@ zebkit.package("ui", function(pkg, Class) {
              * Set the specified hint text to be drawn with the given font and color.
              * The hint is not-editable text that is shown in empty text field to help
              * a user to understand which input the text field expects.
-             * @param {String|zebkit.ui.View|Function} hint a hint text, view or view render method
+             * @param {String|zebkit.draw.View|Function} hint a hint text, view or view render method
              * @method setHint
              * @chainable
              */
             this.setHint = function(hint) {
-                this.hint = zebkit.isString(hint) ? new this.clazz.HintRender(hint) : pkg.$view(hint);
-                this.repaint();
+                if (this.hint !== hint) {
+                    this.hint = zebkit.isString(hint) ? new this.clazz.HintRender(hint)
+                                                      : zebkit.draw.$view(hint);
+                    this.repaint();
+                }
                 return this;
             };
 
@@ -739,10 +806,10 @@ zebkit.package("ui", function(pkg, Class) {
              * @chainable
              */
             this.undo = function() {
-                if (this.undoCounter > 0) {
-                    var h = this.history[this.historyPos];
+                if (this.$undoCounter > 0) {
+                    var h = this.$history[this.$historyPos];
 
-                    this.historyPos--;
+                    this.$historyPos--;
                     if (h[0] === 1) {
                         this.remove(h[1], h[2]);
                     }
@@ -750,12 +817,12 @@ zebkit.package("ui", function(pkg, Class) {
                         this.write (h[1], h[2]);
                     }
 
-                    this.undoCounter -= 2;
-                    this.redoCounter++;
+                    this.$undoCounter -= 2;
+                    this.$redoCounter++;
 
-                    this.historyPos--;
-                    if (this.historyPos < 0) {
-                        this.historyPos = this.history.length - 1;
+                    this.$historyPos--;
+                    if (this.$historyPos < 0) {
+                        this.$historyPos = this.$history.length - 1;
                     }
 
                     this.repaint();
@@ -769,11 +836,14 @@ zebkit.package("ui", function(pkg, Class) {
              * @chainable
              */
             this.redo = function() {
-                if (this.redoCounter > 0) {
-                    var h = this.history[(this.historyPos + 1) % this.history.length];
-                    if (h[0] === 1) this.remove(h[1], h[2]);
-                    else            this.write (h[1], h[2]);
-                    this.redoCounter--;
+                if (this.$redoCounter > 0) {
+                    var h = this.$history[(this.$historyPos + 1) % this.$history.length];
+                    if (h[0] === 1) {
+                        this.remove(h[1], h[2]);
+                    } else {
+                        this.write (h[1], h[2]);
+                    }
+                    this.$redoCounter--;
                     this.repaint();
                 }
                 return this;
@@ -827,13 +897,12 @@ zebkit.package("ui", function(pkg, Class) {
 
             this.focusGained = function (e){
                 if (this.position.offset < 0) {
-                    this.position.setOffset(this.textAlign === "left" || this.getLines() > 1 ? 0 : this.getMaxOffset());
+                    this.position.setOffset(this.textAlign === "left" || this.getLines() > 1 ? 0
+                                                                                             : this.getMaxOffset());
+                } else if (this.hint !== null) {
+                    this.repaint();
                 } else {
-                    if (this.hint !== null) {
-                        this.repaint();
-                    } else {
-                        this.repaintCursor();
-                    }
+                    this.repaintCursor();
                 }
 
                 if (this.isEditable === true && this.blinkingPeriod > 0) {
@@ -848,8 +917,8 @@ zebkit.package("ui", function(pkg, Class) {
                                 $this.repaintCursor();
                             }
                         },
-                        ~~(this.blinkingPeriod / 3),
-                        ~~(this.blinkingPeriod / 3)
+                        Math.floor(this.blinkingPeriod / 3),
+                        Math.floor(this.blinkingPeriod / 3)
                     );
                 }
             };
@@ -857,7 +926,9 @@ zebkit.package("ui", function(pkg, Class) {
             this.focusLost = function(e) {
                 this.repaintCursor();
                 if (this.isEditable === true) {
-                    if (this.hint !== null) this.repaint();
+                    if (this.hint !== null) {
+                        this.repaint();
+                    }
 
                     if (this.blinkingPeriod > 0) {
                         if (this.$blinkTask !== null) {
@@ -875,10 +946,11 @@ zebkit.package("ui", function(pkg, Class) {
              * @protected
              */
             this.repaintCursor = function() {
-                if (this.curX > 0 && this.curW > 0 && this.curH > 0) {
+                if (this.curX > 0 && this.cursorWidth > 0 && (this.cursorHeight > 0 || this.$lineHeight > 0)) {
                     this.repaint(this.curX + this.scrollManager.getSX(),
                                  this.curY + this.scrollManager.getSY(),
-                                 this.curW, this.curH);
+                                 this.cursorWidth,
+                                 (this.cursorHeight === 0 ? this.$lineHeight : this.cursorHeight));
                 }
             };
 
@@ -891,6 +963,9 @@ zebkit.package("ui", function(pkg, Class) {
                 if (this.startOff >= 0){
                     var b = this.hasSelection();
                     this.endOff = this.startOff = -1;
+                    this.startLine = this.startCol = -1;
+                    this.endLine = this.endCol = -1;
+
                     if (b) {
                         this.repaint();
                     }
@@ -903,7 +978,7 @@ zebkit.package("ui", function(pkg, Class) {
                     indent = this.view.lineIndent,
                     textHeight = this.view.getLineHeight();
 
-                return (((height + indent) / (textHeight + indent) + 0.5) | 0) +
+                return Math.round((height + indent) / (textHeight + indent)) +
                        (((height + indent) % (textHeight + indent) > indent) ? 1 : 0);
             };
 
@@ -925,7 +1000,9 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.cut = function() {
                 var t = this.getSelectedText();
-                if (this.isEditable === true) this.removeSelected();
+                if (this.isEditable === true) {
+                    this.removeSelected();
+                }
                 return t;
             };
 
@@ -953,17 +1030,50 @@ zebkit.package("ui", function(pkg, Class) {
             /**
              * Set the cursor view. The view defines rendering of the text field
              * cursor.
-             * @param {zebkit.ui.View} v a cursor view
+             * @param {zebkit.draw.View} v a cursor view
              * @method setCursorView
              * @chainable
              */
             this.setCursorView = function (v){
-                // TODO: cursor size should be set by property
-                this.curW = 1;
-                this.curView = pkg.$view(v);
-                //this.curW = this.curView !== null ? this.curView.getPreferredSize().width : 1;
-                this.vrp();
+                if (v !== this.cursorView) {
+                    this.cursorWidth = 1;
+                    this.cursorView = zebkit.draw.$view(v);
+                    if (this.cursorView !== null && this.cursorWidth === 0) {
+                        this.cursorWidth = this.cursorView.getPreferredSize().width;
+                    }
+                    this.vrp();
+                }
 
+                return this;
+            };
+
+            /**
+             * Set cursor width.
+             * @param {Integer} w a cursor width
+             * @method setCursorWidth
+             * @chainable
+             */
+            this.setCursorWidth = function(w) {
+                if (w !== this.cursorWidth) {
+                    this.cursorWidth = w;
+                    this.vrp();
+                }
+                return this;
+            };
+
+            /**
+             * Set cursor size.
+             * @param {Integer} w a cursor width
+             * @param {Integer} h a cursor height
+             * @method setCursorSize
+             * @chainable
+             */
+            this.setCursorSize = function(w, h) {
+                if (w !== this.cursorWidth || h !== this.cursorHeight) {
+                    this.cursorWidth  = w;
+                    this.cursorHeight = h;
+                    this.vrp();
+                }
                 return this;
             };
 
@@ -1020,19 +1130,21 @@ zebkit.package("ui", function(pkg, Class) {
                     }
 
                     var p = this.getTextRowColAt(e.x, e.y);
-                    if (p !== null) this.position.setRowCol(p.row, p.col);
+                    if (p !== null) {
+                        this.position.setRowCol(p.row, p.col);
+                    }
                 }
             };
 
             /**
              * Set selection color or view
-             * @param {String|zebkit.ui.View} c a selection color or view
-             * @method setSelectionView
+             * @param {String|zebkit.draw.View} c a selection color or view
+             * @method setSelectView
              * @chainable
              */
-            this.setSelectionView = function(c) {
-                if (c != this.selectionView) {
-                    this.selectionView = pkg.$view(c);
+            this.setSelectView = function(c) {
+                if (c != this.selectView) {
+                    this.selectView = zebkit.draw.$view(c);
 
                     if (this.hasSelection()) {
                         this.repaint();
@@ -1043,7 +1155,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             this.calcPreferredSize = function (t) {
                 var ps = this.view.getPreferredSize();
-                ps.width += this.curW;
+                ps.width += this.cursorWidth;
                 return ps;
             };
 
@@ -1131,7 +1243,9 @@ zebkit.package("ui", function(pkg, Class) {
      */
     pkg.TextArea = Class(pkg.TextField, [
         function(txt) {
-            if (arguments.length === 0) txt = "";
+            if (arguments.length === 0) {
+                txt = "";
+            }
             this.$super(new zebkit.data.Text(txt));
         }
     ]);
@@ -1167,7 +1281,7 @@ zebkit.package("ui", function(pkg, Class) {
                 showLast = false;
             }
 
-            var pt = new pkg.PasswordText(new zebkit.data.SingleLineTxt(txt, size));
+            var pt = new zebkit.draw.PasswordText(new zebkit.data.SingleLineTxt(txt, size));
             pt.showLast = showLast;
             this.$super(pt);
             if (size > 0) {

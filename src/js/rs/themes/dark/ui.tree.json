@@ -1,6 +1,6 @@
 {
     "DefViews": {
-        "color" : "%{zebkit.ui.palette.gray}",
+        "color" : "%{zebkit.palette.gray}",
         "font"  : "12px 'Lucida Grande', 'Lucida Sans', Arial, sans-serif"
     },
 
@@ -10,11 +10,15 @@
         "itemGapX"  : 4,
         "itemGapY"  : 4,
         "views": {
-            "off"     : { "@zebkit.ui.ArrowView":  [  "right", "orange", 10 , 14] },
-            "on"      : { "@zebkit.ui.ArrowView":  [ "bottom", "orange", 14, 10 ] },
+            "leafSign"     : null,
+            "collapsedSign": null,
+            "expandedSign" : null,
 
-            "aselect" : { "@zebkit.ui.Border" : [ "orange", 2, 6 ] },
-            "iselect" : { "@zebkit.ui.Border" : [ "gray", 2, 6 ]   }
+            "collapsedToggle"     : { "@zebkit.draw.ArrowView":  [  "right", "orange", 10 , 14] },
+            "expandedToggle"      : { "@zebkit.draw.ArrowView":  [ "bottom", "orange", 14, 10 ] },
+
+            "focusOnSelect"  : { "@zebkit.draw.Border" : [ "orange", 2, 6 ] },
+            "focusOffSelect" : { "@zebkit.draw.Border" : [ "gray", 2, 6 ]   }
         }
     },
 
@@ -39,7 +43,7 @@
         "Combo" : {
             "inheritProperties" : true,
             "background" : null,
-            "border"     : "%{zebkit.ui.borders.plain}",
+            "border"     : "plain",
             "CompList" : {
                 "Label" : {
                     "font" : "bold",
@@ -47,9 +51,9 @@
                 },
 
                 "views" :  {
-                    "select"    : { "@zebkit.ui.Border" : ["white", 2, 6 ] },
-                    "top.marker": null,
-                    "marker"    : [  [ { "@zebkit.ui.Border" : [ null, 0, 6 ] }, { "@zebkit.ui.Gradient" : ["white", "lightGray" ] } ] ]
+                    "select"    : { "@zebkit.draw.Border" : ["white", 2, 6 ] },
+                    "topMarker" : null,
+                    "marker"    : [  [ { "@zebkit.draw.Border" : [ null, 0, 6 ] }, { "@zebkit.draw.Gradient" : ["white", "lightGray" ] } ] ]
                 }
 
             },

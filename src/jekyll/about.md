@@ -6,7 +6,7 @@ title: Zebkit ?
 
 Zebkit is unique UI platform that renders hierarchy of UI components on HTML5 Canvas. It has minimal dependencies from WEB context and built with zebkit easy JS OOP approach what makes feasible to adapt zebkit UI to other canvas implementations. 
 
-<script type="text/javascript" src="../build/zebkit.min.js">  
+<script type="text/javascript" src="../build/zebkit.js">  
 </script>
 
 {% capture description %}
@@ -117,7 +117,7 @@ zebkit.resources("public/images/zebra-pattern.png", function(img) {
 });
 
 zebkit.require(function() {
-    eval(zebkit.import("ui", "layout"));
+    eval(zebkit.import("ui", "layout", "view"));
 
     var ZebkitTextRender = zebkit.Class(TextRender, [
         function(t, reflection) {
@@ -158,7 +158,7 @@ zebkit.require(function() {
         curW          : 3,
         selectionColor: "gray",
         background    : "black",
-        font          : new Font("Arial", 100)
+        font          : new zebkit.Font("Arial", 100)
     }));
     
     var SimpleChart = zebkit.Class(Panel, [
@@ -272,7 +272,7 @@ zebkit.require(function() {
     var gmap = null;
     function initMap() {
         zebkit.require(function() {
-            eval(zebkit.import("ui"));
+            eval(zebkit.import("ui", "view"));
 
             var c = new zCanvas("sampleGoogleMap", 400, 400);
             var map = new zebkit.ui.web.HtmlElement();
@@ -331,7 +331,7 @@ root.pointerPressed = function(e) {
 
 <script>
 zebkit.require(function() {
-    eval(zebkit.import("ui"));
+    eval(zebkit.import("ui", "view"));
     var zcan = new zCanvas("customShapeSample", 550, 250);
     var root = new Panel(new zebkit.layout.FlowLayout("center", "center", "vertical", 16));
     zcan.root.setLayout(new zebkit.layout.FlowLayout(16));

@@ -122,7 +122,7 @@ zebkit.package("ui.date", function(pkg, Class) {
      *  Shows the given month and year days.
      *  @constructor
      *  @class zebkit.ui.date.DaysGrid
-     *  @extends {zebkit.ui.grid.Grid}
+     *  @extends zebkit.ui.grid.Grid
      */
     pkg.DaysGrid = Class(ui.grid.Grid, [
         function () {
@@ -157,7 +157,9 @@ zebkit.package("ui.date", function(pkg, Class) {
                 },
 
                 tag : function(tag) {
-                    if (tag === null || typeof tag === 'undefined') throw new Error();
+                    if (tag === null || typeof tag === 'undefined') {
+                        throw new Error();
+                    }
 
                     if (this.hasTag(tag) === false) {
                         this.tags.push(tag);
@@ -168,7 +170,9 @@ zebkit.package("ui.date", function(pkg, Class) {
                 },
 
                 untag : function(tag) {
-                    if (tag === null || typeof tag === 'undefined') throw new Error();
+                    if (tag === null || typeof tag === 'undefined') {
+                        throw new Error();
+                    }
 
                     if (this.hasTag(tag) === true) {
                         var i = this.$exists[tag];
@@ -197,7 +201,7 @@ zebkit.package("ui.date", function(pkg, Class) {
             this.ItemPan = Class(ui.Panel, [
                 function () {
                     this.icon  = new ui.ViewPan();
-                    this.label = new ui.Label(new ui.DecoratedTextRender(""));
+                    this.label = new ui.Label(new zebkit.draw.DecoratedTextRender(""));
                     this.$super();
                     this.add(this.icon);
                     this.add(this.label);
@@ -236,7 +240,7 @@ zebkit.package("ui.date", function(pkg, Class) {
 
             this.Listeners = this.$parent.Listeners.ListenersClass("cellSelected", "monthShown");
 
-            var GridCaption = this.GridCaption = Class(ui.grid.GridCaption, [
+            this.GridCaption = Class(ui.grid.GridCaption, [
                 function $clazz() {
                     this.Label = Class(ui.Label, [
                         function setNickname(name) {
@@ -371,7 +375,6 @@ zebkit.package("ui.date", function(pkg, Class) {
              */
             this.getCellColor = function(grid, row, col) {
                 var color = null,
-                    item  = this.model.get(row, col),
                     tags  = this.tags;
 
                 if (tags.length > 0) {
@@ -507,7 +510,9 @@ zebkit.package("ui.date", function(pkg, Class) {
 
             var max = 0, cols = this.getGridCols(), i = 0;
             for(i = 0; i < cols; i++) {
-                if (this.colWidths[i] > max) max = this.colWidths[i];
+                if (this.colWidths[i] > max) {
+                    max = this.colWidths[i];
+                }
             }
 
             for(i = 0; i < cols; i++) {
@@ -693,8 +698,14 @@ zebkit.package("ui.date", function(pkg, Class) {
             this.YearField = Class(ui.TextField, [
                 function keyPressed(e) {
                     switch (e.code) {
-                        case "ArrowUp"  : if (typeof this.fireNextYear !== 'undefined') this.fireNextYear(); break;
-                        case "ArrowDown": if (typeof this.firePrevYear !== 'undefined') this.firePrevYear(); break;
+                        case "ArrowUp"  :
+                            if (typeof this.fireNextYear !== 'undefined') {
+                                this.fireNextYear();
+                            } break;
+                        case "ArrowDown":
+                            if (typeof this.firePrevYear !== 'undefined') {
+                                this.firePrevYear(); break;
+                            }
                         default: return this.$super(e);
                     }
                 }
@@ -794,7 +805,9 @@ zebkit.package("ui.date", function(pkg, Class) {
                 date = new Date(arguments[2], arguments[1], arguments[0]);
             }
 
-            if (date !== null) pkg.validateDate(date);
+            if (date !== null) {
+                pkg.validateDate(date);
+            }
 
             if (pkg.compareDates(this.minDate, date) !== 0) {
                 if (pkg.compareDates(date, this.maxDate) === 1) {
@@ -815,7 +828,9 @@ zebkit.package("ui.date", function(pkg, Class) {
                 date = new Date(arguments[2], arguments[1], arguments[0]);
             }
 
-            if (date !== null) pkg.validateDate(date);
+            if (date !== null) {
+                pkg.validateDate(date);
+            }
 
             if (pkg.compareDates(this.maxDate, date) !== 0) {
                 if (pkg.compareDates(date, this.minDate) === -1) {
@@ -904,7 +919,9 @@ zebkit.package("ui.date", function(pkg, Class) {
         },
 
         function setValue(d) {
-            if (d !== null) pkg.validateDate(d);
+            if (d !== null) {
+                pkg.validateDate(d);
+            }
 
             if (pkg.compareDates(this.date, d) !== 0) {
                 this.date = d;
@@ -937,8 +954,9 @@ zebkit.package("ui.date", function(pkg, Class) {
 
     var PopupCalendarMix = zebkit.Interface([
         function childKeyPressed(e) {
-            if (e.code === "Enter") this.showCalendar(e.source);
-            else if (e.code === "Backspace") {
+            if (e.code === "Enter") {
+                this.showCalendar(e.source);
+            } else if (e.code === "Backspace") {
                 //
             }
         },

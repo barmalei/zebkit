@@ -102,8 +102,12 @@ zebkit.package("ui", function(pkg, Class) {
                 if (psx !== x || psy !== y){
                     this.sx = x;
                     this.sy = y;
-                    if (typeof this.scrollStateUpdated !== 'undefined') this.scrollStateUpdated(x, y, psx, psy);
-                    if (typeof this.target.catchScrolled !== 'undefined') this.target.catchScrolled(psx, psy);
+                    if (typeof this.scrollStateUpdated !== 'undefined') {
+                        this.scrollStateUpdated(x, y, psx, psy);
+                    }
+                    if (typeof this.target.catchScrolled !== 'undefined') {
+                        this.target.catchScrolled(psx, psy);
+                    }
                     this._.scrolled(psx, psy);
                 }
                 return this;
@@ -138,8 +142,8 @@ zebkit.package("ui", function(pkg, Class) {
 
      * @class zebkit.ui.Scroll
      * @constructor
-     * @extends {zebkit.ui.Panel}
-     * @uses {zebkit.util.Position.Metric}
+     * @extends zebkit.ui.Panel
+     * @uses zebkit.util.Position.Metric
      */
     pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
         function(t) {
@@ -288,7 +292,7 @@ zebkit.package("ui", function(pkg, Class) {
                                                  zebkit.layout.isAncestorOf(this.bundle, child));
             };
 
-            this.posChanged = function(target,po,pl,pc){
+            this.posChanged = function(target, po, pl, pc) {
                 if (this.bundle !== null) {
                     if (this.orient === "horizontal") {
                         this.bundle.setLocation(this.value2pixel(), this.getTop());
@@ -350,9 +354,13 @@ zebkit.package("ui", function(pkg, Class) {
                 if (this.isInBundle(e.x, e.y) === false && e.isAction()){
                     var d = this.pageIncrement;
                     if (this.orient === "vertical"){
-                        if (e.y < (this.bundle !== null ? this.bundle.y : Math.floor(this.height / 2))) d =  -d;
+                        if (e.y < (this.bundle !== null ? this.bundle.y : Math.floor(this.height / 2))) {
+                            d =  -d;
+                        }
                     } else {
-                        if (e.x < (this.bundle !== null ? this.bundle.x : Math.floor(this.width / 2))) d =  -d;
+                        if (e.x < (this.bundle !== null ? this.bundle.x : Math.floor(this.width / 2))) {
+                            d =  -d;
+                        }
                     }
                     this.position.setOffset(this.position.offset + d);
                 }
@@ -440,7 +448,9 @@ zebkit.package("ui", function(pkg, Class) {
 
             this.setPosition = function(p){
                 if (p !== this.position){
-                    if (this.position !== null) this.position.off(this);
+                    if (this.position !== null) {
+                        this.position.off(this);
+                    }
                     this.position = p;
 
                     if (this.position !== null){
@@ -517,7 +527,7 @@ zebkit.package("ui", function(pkg, Class) {
      * auto hide mode. Pass true to switch scrollbars in auto hide mode. By default the value is
      * false
      * @class zebkit.ui.ScrollPan
-     * @extends {zebkit.ui.Panel}
+     * @extends zebkit.ui.Panel
      */
     pkg.ScrollPan = Class(pkg.Panel, [
         function (c, scrolls, autoHide) {
@@ -638,8 +648,14 @@ zebkit.package("ui", function(pkg, Class) {
                 if (this.autoHide !== b) {
                     this.autoHide = b;
                     if (this.hBar !== null) {
-                        if (this.hBar.incBt !== null) this.hBar.incBt.setVisible(b === false);
-                        if (this.hBar.decBt !== null) this.hBar.decBt.setVisible(b === false);
+                        if (this.hBar.incBt !== null) {
+                            this.hBar.incBt.setVisible(b === false);
+                        }
+
+                        if (this.hBar.decBt !== null) {
+                            this.hBar.decBt.setVisible(b === false);
+                        }
+
                         if (b === true) {
                             this.hBar.toBack();
                         } else {
@@ -648,8 +664,14 @@ zebkit.package("ui", function(pkg, Class) {
                     }
 
                     if (this.vBar !== null) {
-                        if (this.vBar.incBt !== null) this.vBar.incBt.setVisible(b === false);
-                        if (this.vBar.decBt !== null) this.vBar.decBt.setVisible(b === false);
+                        if (this.vBar.incBt !== null) {
+                            this.vBar.incBt.setVisible(b === false);
+                        }
+
+                        if (this.vBar.decBt !== null) {
+                            this.vBar.decBt.setVisible(b === false);
+                        }
+
                         if (b === true) {
                             this.vBar.toBack();
                         } else {
@@ -700,15 +722,21 @@ zebkit.package("ui", function(pkg, Class) {
 
                 if (dy !== 0 && this.vBar !== null && this.vBar.isVisible === true) {
                     v =  this.vBar.position.offset + dy;
-                    if (v >= 0) this.vBar.position.setOffset(v);
-                    else        this.vBar.position.setOffset(0);
+                    if (v >= 0) {
+                        this.vBar.position.setOffset(v);
+                    } else {
+                        this.vBar.position.setOffset(0);
+                    }
                     b = true;
                 }
 
                 if (dx !== 0 && this.hBar !== null && this.hBar.isVisible === true) {
                     v =  this.hBar.position.offset + dx;
-                    if (v >= 0) this.hBar.position.setOffset(v);
-                    else        this.hBar.position.setOffset(0);
+                    if (v >= 0) {
+                        this.hBar.position.setOffset(v);
+                    } else  {
+                        this.hBar.position.setOffset(0);
+                    }
                     b = true;
                 }
 
@@ -735,7 +763,9 @@ zebkit.package("ui", function(pkg, Class) {
                         this.vBar.position.setOffset( -this.scrollObj.scrollManager.getSY());
                     }
 
-                    if (this.scrollObj.scrollManager == null) this.invalidate();
+                    if (this.scrollObj.scrollManager == null) {
+                        this.invalidate();
+                    }
 
                     this.$isPosChangedLocked = false;
                 } catch(e) { this.$isPosChangedLocked = false; throw e; }
@@ -840,8 +870,14 @@ zebkit.package("ui", function(pkg, Class) {
                             var $this = this;
 
                             // show scroll bar(s)
-                            if (this.vBar !== null) this.vBar.toFront();
-                            if (this.hBar !== null) this.hBar.toFront();
+                            if (this.vBar !== null) {
+                                this.vBar.toFront();
+                            }
+
+                            if (this.hBar !== null) {
+                                this.hBar.toFront();
+                            }
+
                             this.vrp();
 
                             // pointer move should keep scroll bars visible and pointer entered exited
@@ -894,13 +930,22 @@ zebkit.package("ui", function(pkg, Class) {
 
             this.setIncrements = function (hUnit,hPage,vUnit,vPage) {
                 if (this.hBar !== null){
-                    if (hUnit !==  -1) this.hBar.unitIncrement = hUnit;
-                    if (hPage !==  -1) this.hBar.pageIncrement = hPage;
+                    if (hUnit !==  -1) {
+                        this.hBar.unitIncrement = hUnit;
+                    }
+
+                    if (hPage !==  -1) {
+                        this.hBar.pageIncrement = hPage;
+                    }
                 }
 
                 if (this.vBar !== null){
-                    if (vUnit !==  -1) this.vBar.unitIncrement = vUnit;
-                    if (vPage !==  -1) this.vBar.pageIncrement = vPage;
+                    if (vUnit !==  -1) {
+                        this.vBar.unitIncrement = vUnit;
+                    }
+                    if (vPage !==  -1) {
+                        this.vBar.pageIncrement = vPage;
+                    }
                 }
                 return this;
             };
@@ -924,8 +969,12 @@ zebkit.package("ui", function(pkg, Class) {
                 }
 
                 // valid for scroll bar only
-                if (c.incBt !== null) c.incBt.setVisible(!this.autoHide);
-                if (c.decBt !== null) c.decBt.setVisible(!this.autoHide);
+                if (c.incBt !== null) {
+                    c.incBt.setVisible(!this.autoHide);
+                }
+                if (c.decBt !== null) {
+                    c.decBt.setVisible(!this.autoHide);
+                }
                 c.position.on(this);
             }
 

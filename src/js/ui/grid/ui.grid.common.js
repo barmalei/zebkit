@@ -189,12 +189,12 @@ zebkit.package("ui.grid", function(pkg, Class) {
      * background has to be rendered and aligned. Developers can implement an own
      * views providers and than setup it for a grid by calling "setViewProvider(...)"
      * method.
-     * @param {zebkit.ui.Render} [render] a string render
+     * @param {zebkit.draw.Render} [render] a string render
      * @class zebkit.ui.grid.DefViews
-     * @extends {zebkit.ui.BaseViewProvider}
+     * @extends zebkit.draw.BaseViewProvider
      * @constructor
      */
-    pkg.DefViews = Class(ui.BaseViewProvider, [
+    pkg.DefViews = Class(zebkit.draw.BaseViewProvider, [
         function $prototype() {
             /**
              * Get a renderer to draw the specified grid model value.
@@ -202,7 +202,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @param  {Integer} row  a grid cell row
              * @param  {Integer} col  a grid cell column
              * @param  {Object} obj   a model value for the given grid cell
-             * @return {zebkit.ui.View}  an instance of  view to be used to
+             * @return {zebkit.draw.View}  an instance of  view to be used to
              * paint the given cell model value
              * @method  getView
              */
@@ -258,14 +258,14 @@ zebkit.package("ui.grid", function(pkg, Class) {
             /**
              * Odd rows view or color
              * @attribute oddView
-             * @type {String|zebkit.ui.View}
+             * @type {String|zebkit.draw.View}
              */
             this.oddView  = null;
 
             /**
              * Even rows view or color
              * @attribute evenView
-             * @type {String|zebkit.ui.View}
+             * @type {String|zebkit.draw.View}
              */
             this.evenView = null;
 
@@ -274,7 +274,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @param  {zebkit.ui.grid.Grid} grid [description]
              * @param  {Integer} row  a cell row
              * @param  {Integer} col  a cell column
-             * @return {String|zebkit.ui.View}  a color or view
+             * @return {String|zebkit.draw.View}  a color or view
              * @method getCellColor
              */
             this.getCellColor = function(grid, row, col) {
@@ -449,7 +449,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
      * Grid caption base UI component class. This class has to be used
      * as base to implement grid caption components
      * @class  zebkit.ui.grid.BaseCaption
-     * @extends {zebkit.ui.Panel}
+     * @extends zebkit.ui.Panel
      * @constructor
      * @param {Array} [titles] a caption component titles
      */
@@ -529,7 +529,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
              */
             this.isAutoFit = this.isResizable = true;
 
-            this.getCursorType = function (target,x,y){
+            this.getCursorType = function (target, x, y) {
                 return this.metrics !== null    &&
                        this.selectedColRow >= 0 &&
                        this.isResizable         &&
@@ -608,9 +608,9 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerClicked
              */
-            this.pointerDoubleClicked = function (e){
-                if (this.pxy     === null     &&
-                    this.metrics !== null     &&
+            this.pointerDoubleClicked = function(e) {
+                if (this.pxy     === null    &&
+                    this.metrics !== null    &&
                     this.selectedColRow >= 0 &&
                     this.isAutoFit === true     )
                 {
@@ -719,8 +719,11 @@ zebkit.package("ui.grid", function(pkg, Class) {
                         g.setColor(this.lineColor);
                         for(var i = startRC; i <= endRC; i++) {
                             if (i !== 0) {
-                                if (b) g.drawLine(xy, 0, xy, this.height, m.lineSize);
-                                else   g.drawLine(0, xy, this.width, xy, m.lineSize);
+                                if (b) {
+                                    g.drawLine(xy, 0, xy, this.height, m.lineSize);
+                                } else  {
+                                    g.drawLine(0, xy, this.width, xy, m.lineSize);
+                                }
                             }
                             xy += (b ? m.getColWidth(i): m.getRowHeight(i)) + m.lineSize;
                         }

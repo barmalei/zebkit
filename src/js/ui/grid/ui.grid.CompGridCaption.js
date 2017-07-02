@@ -151,7 +151,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
                     return this;
                 },
 
-                function matrixResized(target,prevRows,prevCols){
+                function matrixResized(target, prevRows, prevCols){
                     if (this.isSortable) {
                         this.sortState = 0;
                         this.statusPan.setState("*");
@@ -200,8 +200,8 @@ zebkit.package("ui.grid", function(pkg, Class) {
             /**
              * Put the given title component for the given caption cell.
              * @param  {Integer} rowcol a grid caption cell index
-             * @param  {String|zebkit.ui.Panel|zebkit.ui.View} title a title of the given grid caption cell.
-             * Can be a string or zebkit.ui.View or zebkit.ui.Panel class instance
+             * @param  {String|zebkit.ui.Panel|zebkit.draw.View} title a title of the given grid caption cell.
+             * Can be a string or zebkit.draw.View or zebkit.ui.Panel class instance
              * @method putTitle
              * @chainable
              */
@@ -213,12 +213,10 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
                 if (zebkit.isString(t)) {
                     t = new this.clazz.TitlePan(t);
-                } else {
-                    if (zebkit.instanceOf(t, ui.View)) {
-                        var p = new ui.ViewPan();
-                        p.setView(t);
-                        t = p;
-                    }
+                } else if (zebkit.instanceOf(t, zebkit.draw.View)) {
+                    var p = new ui.ViewPan();
+                    p.setView(t);
+                    t = p;
                 }
 
                 if (rowcol < this.kids.length) {
@@ -298,7 +296,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
      * Predefined left vertical component grid caption.
      * @constructor
      * @class zebkit.ui.grid.LeftCompGridCaption
-     * @extends {zebkit.ui.grid.CompGridCaption}
+     * @extends zebkit.ui.grid.CompGridCaption
      */
     pkg.LeftCompGridCaption = Class(pkg.CompGridCaption, [
         function $prototype() {

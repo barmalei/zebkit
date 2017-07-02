@@ -7,14 +7,14 @@
     "BaseTree" : {
         "lineColor" : null,
         "views": {
-            "close"   : { "@zebkit.ui.Picture": [ "%{zebkit.ui.pictures.zebkit}", 61 ,20 ,16, 14, true ] },
-            "open"    : { "@zebkit.ui.Picture": [ "%{zebkit.ui.pictures.zebkit}", 49 ,34, 16, 14, true ] },
-            "leaf"    : { "@zebkit.ui.Picture": [ "%{zebkit.ui.pictures.zebkit}", 49 ,20 ,16, 14, true ] },
+            "collapsedSign"   : { "@zebkit.draw.Picture": [ "%{zebkit.ui.pictures.zebkit}", 61 ,20 ,16, 14, true ] },
+            "expandedSign"    : { "@zebkit.draw.Picture": [ "%{zebkit.ui.pictures.zebkit}", 49 ,34, 16, 14, true ] },
+            "leafSign"        : { "@zebkit.draw.Picture": [ "%{zebkit.ui.pictures.zebkit}", 49 ,20 ,16, 14, true ] },
 
-            "off"     : { "@zebkit.ui.ArrowView":  [  "right", "#66CCFF", 10, 14] },
-            "on"      : { "@zebkit.ui.ArrowView":  [ "bottom", "#66CCFF", 14, 10] },
+            "collapsedToggle"     : { "@zebkit.draw.ArrowView":  [  "right", "#66CCFF", 10, 14] },
+            "expandedToggle"      : { "@zebkit.draw.ArrowView":  [ "bottom", "#66CCFF", 14, 10] },
 
-            "aselect" : [ [ "rgb(228, 244, 252)", { "@zebkit.ui.Border": "rgb(200,180,200)" } ] ]
+            "focusOnSelect" : [ [ "rgb(228, 244, 252)", { "@zebkit.draw.Border": "rgb(200,180,200)" } ] ]
         }
     },
 

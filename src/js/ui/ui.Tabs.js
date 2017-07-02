@@ -33,7 +33,7 @@ zebkit.package("ui", function(pkg, Class) {
      *
      *      // set a particular font and color for the tab in selected state
      *      tabs.getTab(0).setColor(true, "blue");
-     *      tabs.getTab(0).setFont(true, new zebkit.ui.Font("Arial", "bold", 16));
+     *      tabs.getTab(0).setFont(true, new zebkit.Font("Arial", "bold", 16));
      *
      *      // set other caption for the tab in not selected state
      *      tabs.getTab(0).setCaption(false, "Test");
@@ -48,7 +48,7 @@ zebkit.package("ui", function(pkg, Class) {
      * @class zebkit.ui.Tabs
      * @uses  zebkit.ui.DecorationViews
      * @constructor
-     * @extends {zebkit.ui.Panel}
+     * @extends zebkit.ui.Panel
      */
 
     /**
@@ -80,8 +80,13 @@ zebkit.package("ui", function(pkg, Class) {
             this.pages = [];
             this.views = {};
 
-            if (typeof pkg.Tabs.font      !== 'undefined') this.render.setFont(pkg.Tabs.font);
-            if (typeof pkg.Tabs.fontColor !== 'undefined') this.render.setColor(pkg.Tabs.fontColor);
+            if (typeof pkg.Tabs.font      !== 'undefined') {
+                this.render.setFont(pkg.Tabs.font);
+            }
+
+            if (typeof pkg.Tabs.fontColor !== 'undefined') {
+                this.render.setColor(pkg.Tabs.fontColor);
+            }
 
             this.$super();
 
@@ -99,7 +104,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @param {String|Image} [icon]  an path to an image or image object
              * @param {String} [caption] a tab caption
              * @class zebkit.ui.Tabs.TabView
-             * @extends {zebkit.ui.CompRender}
+             * @extends zebkit.ui.CompRender
              * @constructor
              */
             this.TabView = Class(pkg.CompRender, [
@@ -135,7 +140,7 @@ zebkit.package("ui", function(pkg, Class) {
                     r1.setFont (this.clazz.selectedFont);
 
                     this.getCaptionPan().setView(
-                        new pkg.ViewSet(
+                        new zebkit.draw.ViewSet(
                             {
                                 "selected": r1,
                                 "*"       : r2
@@ -171,9 +176,8 @@ zebkit.package("ui", function(pkg, Class) {
                 },
 
                 function $clazz() {
-                    this.captionRender = pkg.StringRender;
-
-                    this.font = pkg.font;
+                    this.captionRender = zebkit.draw.StringRender;
+                    this.font = new zebkit.Font("Arial", 14);
 
                     this.TabPan = Class(pkg.Panel, [
                         function() {
@@ -200,7 +204,9 @@ zebkit.package("ui", function(pkg, Class) {
                     };
 
                     this.vrp = function() {
-                        if (this.owner !== null) this.owner.vrp();
+                        if (this.owner !== null) {
+                            this.owner.vrp();
+                        }
                     };
 
                     /**
@@ -257,7 +263,7 @@ zebkit.package("ui", function(pkg, Class) {
                      * Set the given tab caption text font for the specified or both
                      * selected not slected states.
                      * @param {Boolean} [b] the tab state. true means selected state.
-                     * @param {zebkit.ui.Font} f the tab text font
+                     * @param {zebkit.Font} f the tab text font
                      * @method setFont
                      * @chainable
                      */
@@ -443,12 +449,7 @@ zebkit.package("ui", function(pkg, Class) {
                                             this.repaintWidth, this.repaintHeight,
                                             ts.x, ts.y, ts.width, ts.height))
                 {
-                    if (this.selectedIndex > 0) {
-                        var r = this.getTabBounds(this.selectedIndex);
-                    }
-
                     var i = 0;
-
                     for(i = 0; i < this.selectedIndex; i++) {
                         this.paintTab(g, i);
                     }
@@ -615,8 +616,11 @@ zebkit.package("ui", function(pkg, Class) {
 
                     for(i = 0;i < count; i ++ ){
                         var br = this.getTabBounds(i);
-                        if (b) br.x += dt;
-                        else   br.y += dt;
+                        if (b) {
+                            br.x += dt;
+                        } else {
+                            br.y += dt;
+                        }
                     }
                 }
 
@@ -664,11 +668,15 @@ zebkit.package("ui", function(pkg, Class) {
                         r = this.getTabBounds(i);
                         if (b) {
                             r.height = ps.height + vadd;
-                            if (ps.width + hadd > max) max = ps.width + hadd;
+                            if (ps.width + hadd > max) {
+                                max = ps.width + hadd;
+                            }
                             this.tabAreaHeight += r.height;
                         } else {
                             r.width = ps.width + hadd;
-                            if (ps.height + vadd > max) max = ps.height + vadd;
+                            if (ps.height + vadd > max) {
+                                max = ps.height + vadd;
+                            }
                             this.tabAreaWidth += r.width;
                         }
                     }
@@ -676,8 +684,11 @@ zebkit.package("ui", function(pkg, Class) {
                     // align tabs widths or heights to have the same size
                     for(i = 0; i < count; i++ ){
                         r = this.getTabBounds(i);
-                        if (b) r.width  = max;
-                        else   r.height = max;
+                        if (b) {
+                            r.width  = max;
+                        } else {
+                            r.height = max;
+                        }
                     }
 
                     if (b) {
@@ -735,7 +746,7 @@ zebkit.package("ui", function(pkg, Class) {
                     if (this.selectedIndex >= 0) {
                         tb = this.getTabBounds(this.selectedIndex);
                         if (x >= tb.x && y >= tb.y && x < tb.x + tb.width && y < tb.y + tb.height) {
-                            return i;
+                            return this.selectedIndex;
                         }
                     }
 
@@ -763,12 +774,16 @@ zebkit.package("ui", function(pkg, Class) {
                         case "ArrowUp":
                         case "ArrowLeft":
                             nxt = this.next(this.selectedIndex - 1,  -1);
-                            if (nxt >= 0) this.select(nxt);
+                            if (nxt >= 0) {
+                                this.select(nxt);
+                            }
                             break;
                         case "ArrowDown":
                         case "ArrowRight":
                             nxt = this.next(this.selectedIndex + 1, 1);
-                            if (nxt >= 0) this.select(nxt);
+                            if (nxt >= 0) {
+                                this.select(nxt);
+                            }
                             break;
                     }
                 }
@@ -782,7 +797,9 @@ zebkit.package("ui", function(pkg, Class) {
             this.pointerClicked = function(e){
                 if (e.isAction()){
                     var index = this.getTabAt(e.x, e.y);
-                    if (index >= 0 && this.isTabEnabled(index)) this.select(index);
+                    if (index >= 0 && this.isTabEnabled(index)) {
+                        this.select(index);
+                    }
                 }
             };
 

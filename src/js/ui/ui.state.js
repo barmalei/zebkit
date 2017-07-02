@@ -3,7 +3,7 @@ zebkit.package("ui", function(pkg, Class) {
      * State panel class. The class is UI component that allows to customize
      * the component  face, background and border depending on the component
      * state. Number and names of states the component can have is defined
-     * by developers. To bind a view to the specified state use zebkit.ui.ViewSet
+     * by developers. To bind a view to the specified state use zebkit.draw.ViewSet
      * class. For instance if a component has to support two states : "state1" and
      * "state2" you can do it as following:
 
@@ -12,8 +12,8 @@ zebkit.package("ui", function(pkg, Class) {
 
             // define border view that contains views for "state1" and "state2"
             p.setBorder({
-                "state1": new zebkit.ui.Border("red", 1),
-                "state1": new zebkit.ui.Border("blue", 2)
+                "state1": new zebkit.draw.Border("red", 1),
+                "state1": new zebkit.draw.Border("blue", 2)
 
             });
 
@@ -33,7 +33,7 @@ zebkit.package("ui", function(pkg, Class) {
      * should react to a state changing.
      * @class  zebkit.ui.StatePan
      * @constructor
-     * @extends {zebkit.ui.ViewPan}
+     * @extends zebkit.ui.ViewPan
      */
     pkg.StatePan = Class(pkg.ViewPan, [
         function $prototype() {
@@ -158,7 +158,7 @@ zebkit.package("ui", function(pkg, Class) {
      *     button or key is pressed
      *   - **disabled** the component is disabled
      *
-     * The view border, background or face should be set as "zebkit.ui.ViewSet" where an required
+     * The view border, background or face should be set as "zebkit.draw.ViewSet" where an required
      * for the given component state view is identified by an id. By default corresponding to
      * component states views IDs are the following: "over", "pressed.over", "out", "pressed.out",
      * "disabled".  Imagine for example we have two colors and we need to change between the colors
@@ -168,7 +168,7 @@ zebkit.package("ui", function(pkg, Class) {
          var statePan = new zebkit.ui.EvStatePan();
 
          // add dynamically updated background
-         statePan.setBackground(new zebkit.ui.ViewSet({
+         statePan.setBackground(new zebkit.draw.ViewSet({
             "over": "red",
             "out": "blue"
          }));
@@ -176,8 +176,8 @@ zebkit.package("ui", function(pkg, Class) {
      * Alone with background border view can be done also dynamic
 
          // add dynamically updated border
-         statePan.setBorder(new zebkit.ui.ViewSet({
-            "over": new zebkit.ui.Border("green", 4, 8),
+         statePan.setBorder(new zebkit.draw.ViewSet({
+            "over": new zebkit.draw.Border("green", 4, 8),
             "out": null
          }));
 
@@ -228,9 +228,10 @@ zebkit.package("ui", function(pkg, Class) {
 
             this._keyReleased = function(e) {
                 if (this.state === PRESSED_OVER || this.state === PRESSED_OUT){
-                    var prev = this.state;
                     this.setState(OVER);
-                    if (this.$isIn === false) this.setState(OUT);
+                    if (this.$isIn === false) {
+                        this.setState(OUT);
+                    }
                 }
             };
 
@@ -381,7 +382,7 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Composite event state panel
      * @constructor
-     * @extends {zebkit.ui.EvStatePan}
+     * @extends zebkit.ui.EvStatePan
      * @class  zebkit.ui.CompositeEvStatePan
      */
     pkg.CompositeEvStatePan = Class(pkg.EvStatePan, [
@@ -443,15 +444,15 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Set the view that has to be rendered as focus marker when the component gains focus.
-             * @param  {String|zebkit.ui.View|Function} c a view.
+             * @param  {String|zebkit.draw.View|Function} c a view.
              * The view can be a color or border string code or view
-             * or an implementation of zebkit.ui.View "paint(g,x,y,w,h,t)" method.
+             * or an implementation of zebkit.draw.View "paint(g,x,y,w,h,t)" method.
              * @method setFocusMarkerView
              * @chainable
              */
             this.setFocusMarkerView = function (c){
                 if (c != this.focusMarkerView){
-                    this.focusMarkerView = pkg.$view(c);
+                    this.focusMarkerView = zebkit.draw.$view(c);
                     this.repaint();
                 }
                 return this;

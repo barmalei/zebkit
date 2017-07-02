@@ -5,7 +5,7 @@ zebkit.package("ui", function(pkg, Class) {
      * Window component event
      * @constructor
      * @class zebkit.ui.event.WinEvent
-     * @extends {zebkit.util.Event}
+     * @extends zebkit.util.Event
      */
     pkg.event.WinEvent = Class(zebkit.util.Event, [
         function $prototype() {
@@ -137,7 +137,7 @@ zebkit.package("ui", function(pkg, Class) {
 
      * @class zebkit.ui.WinLayer
      * @constructor
-     * @extends {zebkit.ui.HtmlCanvas}
+     * @extends zebkit.ui.HtmlCanvas
      */
     pkg.WinLayerMix = zebkit.Interface([
         function $clazz() {
@@ -398,7 +398,7 @@ zebkit.package("ui", function(pkg, Class) {
      * @param {String} [s] a window title
      * @param {zebkit.ui.Panel} [c] a window content
      * @constructor
-     * @extends {zebkit.ui.Panel}
+     * @extends zebkit.ui.Panel
      */
     pkg.Window = Class(pkg.StatePan, [
         function (s, c) {
@@ -622,8 +622,11 @@ zebkit.package("ui", function(pkg, Class) {
                     y > cc.y &&
                     y < cc.y + cc.height)
                 {
-                    if (this.prevW < 0) this.maximize();
-                    else this.restore();
+                    if (this.prevW < 0) {
+                        this.maximize();
+                    } else {
+                        this.restore();
+                    }
                 }
             };
 
@@ -668,7 +671,7 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             this.setIcon = function(i, icon) {
-                if (zebkit.isString(icon) || zebkit.instanceOf(icon, pkg.Picture)) {
+                if (zebkit.isString(icon) || zebkit.instanceOf(icon, zebkit.draw.Picture)) {
                     icon = new pkg.ImagePan(icon);
                 }
                 this.icons.setAt(i, icon);

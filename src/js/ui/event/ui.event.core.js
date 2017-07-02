@@ -405,7 +405,7 @@ zebkit.package("ui.event", function(pkg, Class) {
      *
      * @class zebkit.ui.event.EventManager
      * @constructor
-     * @extends {zebkit.ui.event.Manager}
+     * @extends zebkit.ui.event.Manager
      * @example
      *
      *     // catch all pointer pressed events that are triggered by zebkit UI
@@ -420,7 +420,7 @@ zebkit.package("ui.event", function(pkg, Class) {
             this.$super();
         },
 
-        function $clazz(argument) {
+        function $clazz() {
             var eventNames = [
                 'keyTyped',
                 'keyReleased',

@@ -18,13 +18,19 @@ zebkit.package("data", function(pkg, Class) {
      */
 
     pkg.descent = function descent(a, b) {
-        if (typeof a === 'undefined' || a === null) return 1;
-        return zebkit.isString(a) ? a.localeCompare(b) : a - b;
+        if (typeof a === 'undefined' || a === null) {
+            return 1;
+        } else {
+            return zebkit.isString(a) ? a.localeCompare(b) : a - b;
+        }
     };
 
     pkg.ascent = function ascent(a, b) {
-        if (b === null || typeof b === 'undefined') return 1;
-        return zebkit.isString(b) ? b.localeCompare(a) : b - a;
+        if (b === null || typeof b === 'undefined') {
+            return 1;
+        } else {
+            return zebkit.isString(b) ? b.localeCompare(a) : b - a;
+        }
     };
 
     /**
@@ -38,7 +44,7 @@ zebkit.package("data", function(pkg, Class) {
     /**
      * Abstract text model class
      * @class zebkit.data.TextModel
-     * @uses {zebkit.data.DataModel}
+     * @uses zebkit.data.DataModel
      */
 
     /**
@@ -122,7 +128,7 @@ zebkit.package("data", function(pkg, Class) {
      * @param  {String}  [s] the specified text the model has to be filled
      * @constructor
      * @extends zebkit.data.TextModel
-     * @uses {zebkit.EventProducer}
+     * @uses zebkit.EventProducer
      */
     pkg.Text = Class(pkg.TextModel, zebkit.EventProducer, [
         function(s) {
@@ -203,7 +209,9 @@ zebkit.package("data", function(pkg, Class) {
             };
 
             this.getLine = function(line) {
-                if (line < 0 || line >= this.$lines.length) throw RangeError(line);
+                if (line < 0 || line >= this.$lines.length) {
+                    throw RangeError(line);
+                }
                 return this.$lines[line].$s;
             };
 
@@ -293,7 +301,9 @@ zebkit.package("data", function(pkg, Class) {
                         lineOff = offset - info[1],
                         tmp     = line.substring(0, lineOff) + s + line.substring(lineOff);
 
-                    for(; j < slen && s[j] !== '\n'; j++);
+                    for(; j < slen && s[j] !== '\n'; j++) {
+
+                    }
 
                     if (j >= slen) {
                         this.$lines[info[0]].$s = tmp;
@@ -337,7 +347,7 @@ zebkit.package("data", function(pkg, Class) {
                 return false;
             };
 
-            this.parse = function (startLine, text, lines){
+            this.parse = function (startLine, text, lines) {
                 var size = text.length, prevIndex = 0, prevStartLine = startLine;
                 for(var index = 0; index <= size; prevIndex = index, startLine++){
                     var fi = text.indexOf("\n", index);
@@ -376,7 +386,7 @@ zebkit.package("data", function(pkg, Class) {
      * @constructor
      * @class zebkit.data.SingleLineTxt
      * @extends zebkit.data.TextModel
-     * @uses {zebkit.EventProducer}
+     * @uses zebkit.EventProducer
      */
     pkg.SingleLineTxt = Class(pkg.TextModel, zebkit.EventProducer,[
         function (s, max) {
@@ -538,8 +548,8 @@ zebkit.package("data", function(pkg, Class) {
 
      * @constructor
      * @class zebkit.data.ListModel
-     * @uses {zebkit.data.DataModel}
-     * @uses {zebkit.EventProducer}
+     * @uses zebkit.data.DataModel
+     * @uses zebkit.EventProducer
      */
 
      /**
@@ -622,7 +632,9 @@ zebkit.package("data", function(pkg, Class) {
              */
             this.removeAll = function() {
                 var size = this.$data.length;
-                for(var i = size - 1; i >= 0; i--) this.removeAt(i);
+                for(var i = size - 1; i >= 0; i--) {
+                    this.removeAt(i);
+                }
             };
 
             /**
@@ -642,8 +654,10 @@ zebkit.package("data", function(pkg, Class) {
              * @param {Object} o an element to be removed from the list
              */
             this.remove = function(o) {
-                for(var i = 0;i < this.$data.length; i++ ){
-                    if (this.$data[i] === o) this.removeAt(i);
+                for(var i = 0;i < this.$data.length; i++) {
+                    if (this.$data[i] === o) {
+                        this.removeAt(i);
+                    }
                 }
             };
 
@@ -792,8 +806,8 @@ zebkit.package("data", function(pkg, Class) {
          tree.setValue(tree.root.kids[0], "new value");
 
      * @class zebkit.data.TreeModel
-     * @uses {zebkit.data.DataModel}
-     * @uses {zebkit.EventProducer}
+     * @uses zebkit.data.DataModel
+     * @uses zebkit.EventProducer
      * @constructor
      */
 
@@ -990,9 +1004,12 @@ zebkit.package("data", function(pkg, Class) {
                     }
                 }
 
-                var b = typeof root.kids !== 'undefined' && root.kids !== null,
-                    v = render !== null ? render(root)
-                                        : (root.value === null ? "<null>" : root.value) + " {" + (b?root.kids.length:0) + "}";
+                var b = typeof root.kids !== 'undefined' && root.kids !== null;
+
+                if (render !== null) {
+                    render(root);
+                }
+
                 if (b) {
                     shift = shift + "    ";
                     for (var i = 0; i < root.kids.length; i++) {
@@ -1026,7 +1043,9 @@ zebkit.package("data", function(pkg, Class) {
 
                 for (var i = 0; i < r.kids.length; i++) {
                     res = this.iterate(r.kids[i], f);
-                    if (res === 2) return res;
+                    if (res === 2) {
+                        return res;
+                    }
                 }
             };
 
@@ -1070,7 +1089,10 @@ zebkit.package("data", function(pkg, Class) {
              * the parent item
              */
             this.insert = function(to, item, i) {
-                if (i < 0 || to.kids.length < i) throw new RangeError(i);
+                if (i < 0 || to.kids.length < i) {
+                    throw new RangeError(i);
+                }
+
                 if (zebkit.isString(item)) {
                     item = new pkg.Item(item);
                 }
@@ -1130,8 +1152,8 @@ zebkit.package("data", function(pkg, Class) {
      *  @param  {Integer} [rows] a number of rows
      *  @param  {Integer} [cols] a number of columns
      *  @class zebkit.data.Matrix
-     *  @uses {zebkit.EventProducer}
-     *  @uses {zebkit.data.DataModel}
+     *  @uses zebkit.EventProducer
+     *  @uses zebkit.data.DataModel
      *  @example
      *
      *      // create matrix with 10 rows and 5 columns
@@ -1304,7 +1326,7 @@ zebkit.package("data", function(pkg, Class) {
              * @return {Object}  matrix model cell value
              */
             this.geti = function(i) {
-                return this.get(~~(i / this.cols), i % this.cols);
+                return this.get(Math.floor(i / this.cols), i % this.cols);
             };
 
             /**
@@ -1319,14 +1341,21 @@ zebkit.package("data", function(pkg, Class) {
                 var nr = this.rows,
                     nc = this.cols;
 
-                if (row >= nr) nr += (row - nr + 1);
-                if (col >= nc) nc += (col - nc + 1);
+                if (row >= nr) {
+                    nr += (row - nr + 1);
+                }
+
+                if (col >= nc) {
+                    nc += (col - nc + 1);
+                }
 
                 this.setRowsCols(nr, nc);
                 var old = this.$objs[row] != null ? this.$objs[row][col] : undefined;
                 if (obj !== old) {
                     // allocate array if no data for the given row exists
-                    if (typeof this.$objs[row] === 'undefined') this.$objs[row] = [];
+                    if (typeof this.$objs[row] === 'undefined') {
+                        this.$objs[row] = [];
+                    }
                     this.$objs[row][col] = obj;
                     this._.cellModified(this, row, col, old);
                 }
@@ -1341,8 +1370,8 @@ zebkit.package("data", function(pkg, Class) {
              * @param  {Object} obj a new cell value
              */
             this.puti = function(i, obj){
-                this.put( ~~(i / this.cols),
-                             i % this.cols, obj);
+                this.put( Math.floor(i / this.cols),
+                          i % this.cols, obj);
             };
 
             /**

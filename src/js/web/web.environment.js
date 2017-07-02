@@ -11,6 +11,7 @@
             hostRe = /([a-zA-Z]+)\:\/\/([^/:]+)/,
             isFF   = typeof navigator !== 'undefined' &&
                      navigator.userAgent.toLowerCase().indexOf('firefox') >= 0;
+
         function $sleep() {
             var r = new XMLHttpRequest(),
                 t = (new Date()).getTime().toString(),
@@ -93,7 +94,7 @@
                     originalReq.send(data);
 
                     while (this.status === 0) {
-                        pkg.$sleep();
+                        $sleep();
                     }
 
                     this.readyState = 4;
@@ -349,7 +350,7 @@
                     if ($fmCanvas.font !== font) {
                         $fmCanvas.font = font;
                     }
-                    return ($fmCanvas.measureText(str).width + 0.5) | 0;
+                    return Math.round($fmCanvas.measureText(str).width);
                 }
             };
 

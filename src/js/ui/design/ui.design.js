@@ -52,9 +52,9 @@ zebkit.package("ui.design", function(pkg, Class) {
      *
      * @constructor
      * @class zebkit.ui.design.ShaperBorder
-     * @extends {zebkit.ui.View}
+     * @extends zebkit.draw.View
      */
-    pkg.ShaperBorder = Class(ui.View, [
+    pkg.ShaperBorder = Class(zebkit.draw.View, [
         function $prototype() {
             /**
              * Border color
@@ -183,7 +183,7 @@ zebkit.package("ui.design", function(pkg, Class) {
 
      * @class  zebkit.ui.design.ShaperPan
      * @constructor
-     * @extends {zebkit.ui.Panel}
+     * @extends zebkit.ui.Panel
      * @param {zebkit.ui.Panel} target a target UI component whose size and location
      * has to be controlled
      */
@@ -407,7 +407,7 @@ zebkit.package("ui.design", function(pkg, Class) {
      * @param  {zebkit.ui.Panel} target a root UI component
      * @constructor
      * @class zebkit.ui.design.FormTreeModel
-     * @extends {zebkit.data.TreeModel}
+     * @extends zebkit.data.TreeModel
      */
     pkg.FormTreeModel = Class(zebkit.data.TreeModel, [
         function (target){
@@ -442,20 +442,32 @@ zebkit.package("ui.design", function(pkg, Class) {
              * @method itemByComponent
              */
             this.itemByComponent = function (c, r) {
-                if (arguments.length < 2) r = this.root;
-                if (r.comp === c) return c;
+                if (arguments.length < 2) {
+                    r = this.root;
+                }
+
+                if (r.comp === c) {
+                    return c;
+                }
+
                 for(var i = 0;i < r.kids.length; i++) {
                     var item = this.itemByComponent(c, r.kids[i]);
-                    if (item !== null) return item;
+                    if (item !== null) {
+                        return item;
+                    }
                 }
                 return null;
             };
 
             this.createItem = function(comp){
                 var name = comp.clazz.$name;
-                if (typeof name === 'undefined') name = comp.toString();
+                if (typeof name === 'undefined') {
+                    name = comp.toString();
+                }
+
                 var index = name.lastIndexOf('.'),
                     item = new zebkit.data.Item(index > 0 ? name.substring(index + 1) : name);
+
                 item.comp = comp;
                 return item;
             };

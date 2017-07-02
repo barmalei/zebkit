@@ -5,7 +5,7 @@ zebkit.package("ui.web", function(pkg, Class) {
      * The base class for HTML developing HTML layers.
      * @class zebkit.ui.web.HtmlLayer
      * @constructor
-     * @extends {zebkit.ui.web.HtmlCanvas}
+     * @extends zebkit.ui.web.HtmlCanvas
      */
     pkg.HtmlLayer = Class(pkg.HtmlCanvas, []);
 
@@ -14,8 +14,8 @@ zebkit.package("ui.web", function(pkg, Class) {
      *  where the layer always try grabbing all input event
      *  @class zebkit.ui.web.RootLayer
      *  @constructor
-     *  @extends {zebkit.ui.web.HtmlLayer}
-     *  @uses {zebkit.ui.RootLayerMix}
+     *  @extends zebkit.ui.web.HtmlLayer
+     *  @uses zebkit.ui.RootLayerMix
      */
     pkg.RootLayer = Class(pkg.HtmlLayer, ui.RootLayerMix, [
         function $clazz() {
@@ -27,8 +27,8 @@ zebkit.package("ui.web", function(pkg, Class) {
      *  Window layer implementation.
      *  @class zebkit.ui.web.WinLayer
      *  @constructor
-     *  @extends {zebkit.ui.web.HtmlLayer}
-     *  @uses {zebkit.ui.WinLayerMix}
+     *  @extends zebkit.ui.web.HtmlLayer
+     *  @uses zebkit.ui.WinLayerMix
      */
     pkg.WinLayer = Class(pkg.HtmlLayer, ui.WinLayerMix, [
         function() {
@@ -49,8 +49,8 @@ zebkit.package("ui.web", function(pkg, Class) {
      *  Popup layer implementation.
      *  @class zebkit.ui.web.PopupLayer
      *  @constructor
-     *  @extends {zebkit.ui.web.HtmlLayer}
-     *  @uses {zebkit.ui.PopupLayerMix}
+     *  @extends zebkit.ui.web.HtmlLayer
+     *  @uses zebkit.ui.PopupLayerMix
      */
     pkg.PopupLayer = Class(pkg.HtmlLayer, ui.PopupLayerMix, [
         function $clazz() {

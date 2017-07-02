@@ -47,7 +47,7 @@ zebkit.package("ui.web", function(pkg, Class) {
             root.add(label);
 
      *  @class zebkit.ui.zCanvas
-     *  @extends {zebkit.ui.web.HtmlCanvas}
+     *  @extends zebkit.ui.web.HtmlCanvas
      *  @constructor
      *  @param {String|Canvas} [element] an ID of a HTML canvas element or reference to an HTML Canvas element.
      *  @param {Integer} [width] a width of an HTML canvas element
@@ -124,8 +124,13 @@ zebkit.package("ui.web", function(pkg, Class) {
                 this.element.setAttribute("tabindex", "1");
             }
 
-            if (w < 0) w = this.element.offsetWidth;
-            if (h < 0) h = this.element.offsetHeight;
+            if (w < 0) {
+                w = this.element.offsetWidth;
+            }
+
+            if (h < 0) {
+                h = this.element.offsetHeight;
+            }
 
             // !!!
             // save canvas in list of created Zebkit canvases
@@ -145,7 +150,7 @@ zebkit.package("ui.web", function(pkg, Class) {
                 this.canvasInitialized();
             }
 
-            var $this = this;
+            //var $this = this;
 
             // this method should clean focus if
             // one of of a child DOM element gets focus
@@ -216,6 +221,7 @@ zebkit.package("ui.web", function(pkg, Class) {
             this.$toElementX = function(pageX, pageY) {
                 // offset has to be added here since "calcOffset" can called (for instance page reloading)
                 // to early
+
                 pageX -= (this.offx);
                 pageY -= (this.offy);
 
@@ -632,10 +638,10 @@ zebkit.package("ui.web", function(pkg, Class) {
                     poffy = this.offy,
                     ba    = this.$container.getBoundingClientRect();
 
-                this.offx = Math.round(ba.left) + zebkit.web.$measure(this.$container, "border-left-width") +
-                                                  zebkit.web.$measure(this.$container, "padding-left") + window.pageXOffset;
-                this.offy = Math.round(ba.top) +  zebkit.web.$measure(this.$container, "padding-top" ) +
-                                                  zebkit.web.$measure(this.$container, "border-top-width") + window.pageYOffset;
+                this.offx = Math.round(ba.left + zebkit.web.$measure(this.$container, "border-left-width") +
+                                                 zebkit.web.$measure(this.$container, "padding-left") + window.pageXOffset);
+                this.offy = Math.round(ba.top +  zebkit.web.$measure(this.$container, "padding-top" ) +
+                                                 zebkit.web.$measure(this.$container, "border-top-width") + window.pageYOffset);
 
                 if (this.offx !== poffx || this.offy !== poffy) {
                     // force to fire component re-located event
@@ -749,13 +755,18 @@ zebkit.package("ui.web", function(pkg, Class) {
             }
 
             this.$layers[c.id] = c;
-            if (c.id === "root") this.root = c;
+            if (c.id === "root") {
+                this.root = c;
+            }
+
             this.$super(i, constr, c);
         },
 
         function kidRemoved(i, c){
             delete this.$layers[c.id];
-            if (c.id === "root") this.root = null;
+            if (c.id === "root") {
+                this.root = null;
+            }
             this.$super(i, c);
         }
     ]);
@@ -784,7 +795,6 @@ zebkit.package("ui.web", function(pkg, Class) {
 
     var $wrt = null, $winSizeUpdated = false, $wpw = -1, $wph = -1;
     window.addEventListener("resize", function(e) {
-        var ws = zebkit.web.$viewPortSize();
         if ($wpw !== window.innerWidth || $wph !== window.innerHeight) {
             $wpw = window.innerWidth;
             $wph = window.innerHeight;

@@ -37,7 +37,9 @@ zebkit.package("util", function(pkg, Class) {
     };
 
     pkg.format = function(s, obj, ph) {
-        if (arguments.length < 3) ph = '';
+        if (arguments.length < 3) {
+            ph = '';
+        }
 
         var rg = /\$\{([0-9]+\s*,)?(.?,)?([a-zA-Z_][a-zA-Z0-9_]*)\}/g,
             r  = [],
@@ -74,7 +76,9 @@ zebkit.package("util", function(pkg, Class) {
                 }
             }
 
-            if (v === null || typeof v === 'undefined') v = ph;
+            if (v === null || typeof v === 'undefined') {
+                v = ph;
+            }
 
             r[i++] = v;
         }
@@ -263,7 +267,9 @@ zebkit.package("util", function(pkg, Class) {
                         m[5] = null;
                     } else {
                         var vv = parseInt(m[5], 10);
-                        if (isNaN(vv) === false) m[5] = vv;
+                        if (isNaN(vv) === false) {
+                            m[5] = vv;
+                        }
                     }
                 }
             }
@@ -441,7 +447,9 @@ zebkit.package("util", function(pkg, Class) {
                 this.r = r;
                 this.g = g;
                 this.b = b;
-                if (arguments.length > 3) this.a = a;
+                if (arguments.length > 3) {
+                    this.a = a;
+                }
             }
 
             if (this.s === null) {
@@ -568,7 +576,9 @@ zebkit.package("util", function(pkg, Class) {
 
     var letterRE = /[A-Za-z]/;
     pkg.isLetter = function (ch) {
-        if (ch.length !== 1) throw new Error("Incorrect character");
+        if (ch.length !== 1) {
+            throw new Error("Incorrect character");
+        }
         return letterRE.test(ch);
     };
 
@@ -618,7 +628,9 @@ zebkit.package("util", function(pkg, Class) {
 
         clazz.ListenersClass = function() {
             var args = this.eventNames.slice(); // clone
-            for(var i = 0; i < arguments.length; i++) args.push(arguments[i]);
+            for(var i = 0; i < arguments.length; i++) {
+                args.push(arguments[i]);
+            }
             return $NewListener.apply(this, args);
         };
 
@@ -672,7 +684,9 @@ zebkit.package("util", function(pkg, Class) {
                             this.v.length = 0;
                         } else {
                             while ((i = this.v.indexOf(fn)) >= 0) {
-                                if (i % 2 > 0) i--;
+                                if (i % 2 > 0) {
+                                    i--;
+                                }
                                 this.v.splice(i, 2);
                             }
                         }
@@ -821,7 +835,9 @@ zebkit.package("util", function(pkg, Class) {
                     var k = null;
                     if (arguments.length === 0) {
                         for(k in this.$methods) {
-                            if (this.$methods.hasOwnProperty(k)) this.$methods[k].length = 0;
+                            if (this.$methods.hasOwnProperty(k)) {
+                                this.$methods[k].length = 0;
+                            }
                         }
                         this.$methods = {};
                     } else {
@@ -840,7 +856,9 @@ zebkit.package("util", function(pkg, Class) {
                                 } else {
                                     v = this.$methods[name];
                                     while ((i = v.indexOf(fn)) >= 0) {
-                                        if (i % 2 > 0) i--;
+                                        if (i % 2 > 0) {
+                                            i--;
+                                        }
                                         v.splice(i, 2);
                                     }
 
@@ -853,7 +871,9 @@ zebkit.package("util", function(pkg, Class) {
                             for (k in this.$methods) {
                                 v = this.$methods[k];
                                 while ((i = v.indexOf(fn)) >= 0) {
-                                    if (i % 2 > 0) i--;
+                                    if (i % 2 > 0) {
+                                        i--;
+                                    }
                                     v.splice(i, 2);
                                 }
 
@@ -904,7 +924,7 @@ zebkit.package("util", function(pkg, Class) {
      *      // remove listener
      *      container.remove(listener);
      *
-     * @extends {zebkit.util.Listener}
+     * @extends zebkit.util.Listener
      */
 
 
@@ -1051,12 +1071,14 @@ zebkit.package("util", function(pkg, Class) {
              * @method setOffset
              */
             this.setOffset = function(o){
-                if (o < 0) o = 0;
-                else {
-                    if (o === null) o = -1;
-                    else {
-                        var max = this.metrics.getMaxOffset();
-                        if (o >= max) o = max;
+                if (o < 0) {
+                    o = 0;
+                } else if (o === null) {
+                    o = -1;
+                } else {
+                    var max = this.metrics.getMaxOffset();
+                    if (o >= max) {
+                        o = max;
                     }
                 }
 
@@ -1154,20 +1176,29 @@ zebkit.package("util", function(pkg, Class) {
                         throw new Error("Out of bounds:" + off);
                     }
 
-                    if (max === 0) return [(m.getLines() > 0 ? 0 : -1), 0];
-                    if (off === 0) return [0, 0];
+                    if (max === 0) {
+                        return [(m.getLines() > 0 ? 0 : -1), 0];
+                    }
+
+                    if (off === 0) {
+                        return [0, 0];
+                    }
 
                     var d = 0, sl = 0, so = 0;
                     if (this.isValid === true && this.offset !== -1) {
                         sl = this.currentLine;
                         so = this.offset - this.currentCol;
-                        if (off > this.offset) d = 1;
-                        else {
-                            if (off < this.offset) d = -1;
-                            else return [sl, this.currentCol];
+                        if (off > this.offset) {
+                            d = 1;
+                        } else {
+                            if (off < this.offset) {
+                                d = -1;
+                            } else {
+                                return [sl, this.currentCol];
+                            }
                         }
                     } else {
-                        d = (~~(max / off) === 0) ? -1 : 1;
+                        d = (Math.floor(max / off) === 0) ? -1 : 1;
                         if (d < 0) {
                             sl = m.getLines() - 1;
                             so = max - m.getLineSize(sl);
@@ -1239,7 +1270,9 @@ zebkit.package("util", function(pkg, Class) {
                 if (this.offset < 0){
                     this.setOffset(0);
                 } else {
-                    if (arguments.length === 1) num = 1;
+                    if (arguments.length === 1) {
+                        num = 1;
+                    }
 
                     var prevOffset = this.offset,
                         prevLine   = this.currentLine,
@@ -1323,7 +1356,7 @@ zebkit.package("util", function(pkg, Class) {
      * @param {zebkit.util.Position.Metric} m a position metric
      * @constructor
      * @class zebkit.util.SingleColPosition
-     * @extends {zebkit.util.Position}
+     * @extends zebkit.util.Position
      */
     pkg.SingleColPosition = Class(pkg.Position, [
         function $prototype() {
@@ -1331,15 +1364,17 @@ zebkit.package("util", function(pkg, Class) {
                 this.setOffset(r);
             };
 
-            this.setOffset = function(o){
-                if (o < 0) o = 0;
-                else {
-                    if (o === null) o = -1;
-                    else {
-                        var max = this.metrics.getMaxOffset();
-                        if (o >= max) o = max;
+            this.setOffset = function(o) {
+                if (o < 0) { o = 0;
+                } else if (o === null) {
+                    o = -1;
+                } else {
+                    var max = this.metrics.getMaxOffset();
+                    if (o >= max) {
+                        o = max;
                     }
                 }
+
 
                 if (o !== this.offset) {
                     var prevOffset = this.offset,
@@ -1752,26 +1787,7 @@ zebkit.package("util", function(pkg, Class) {
      *     }
      *
      *    here property "b.c" equals to 100 since it refers to  property "a.b"
-     *
-     *    - **Inheritance** By using special property name "inherit" it is possible to embed set of properties
-     *    from a JSON object:
-     *
-     *     {
-     *        // base component
-     *        "BaseComponent": {
-     *            "background": "red",
-     *            "border": "plain",
-     *            "size": [300, 300]
-     *        },
-     *
-     *        // component that inherits properties from BaseComponent,
-     *        // but override background property with own value
-     *        "ExtenderComp": {
-     *            "inherit": "@{BaseComponent}",
-     *            "background": "green"
-     *        }
-     *     }
-     *
+     *     *
      *    - **Class instantiation**  Property can be easily initialized with an instantiation of required class. JSON
      *    zson considers all properties whose name starts from "@" character as a class name that has to be instantiated:
      *
@@ -1804,7 +1820,7 @@ zebkit.package("util", function(pkg, Class) {
      *     {
      *       "background": "red",
      *       "layout"    : { "@zebkit.layout.BorderLayout": [] },
-     *       "border"    : { "@zebkit.ui.RoundBorder": [ "black", 2 ] }
+     *       "border"    : { "@zebkit.draw.RoundBorder": [ "black", 2 ] }
      *     }
      *
      *     var pan = new zebkit.ui.Panel();
@@ -1823,6 +1839,18 @@ zebkit.package("util", function(pkg, Class) {
      *
      *
      *   Here property "a" equals 1000
+     *
+     *
+     *   - **Load external resources** You can combine Zson from another Zson:
+     *
+     *
+     *     {
+     *         "a": "%{<json> embedded.json}",
+     *         "b": 100
+     *     }
+     *
+     *
+     *   Here property "a" is loaded with properties set with loading external "embedded.json" file
      *
      * @class zebkit.util.Zson
      * @constructor
@@ -2327,7 +2355,6 @@ zebkit.package("util", function(pkg, Class) {
             this.$assignValue = function(o, k, v) {
                 o[k] = v;
                 if (v instanceof zebkit.DoIt) {
-                    var $this = this;
                     this.$runner.then(v.then(function(res) {
                         o[k] = res;
                         return res;

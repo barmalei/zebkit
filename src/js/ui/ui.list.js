@@ -9,9 +9,9 @@ zebkit.package("ui", function(pkg, Class) {
      * of zebkit.data.ListModel or as an array.
      * @param {Boolean} [b] true if the list navigation has to be triggered by
      * pointer cursor moving
-     * @extends {zebkit.ui.Panel}
-     * @uses {zebkit.util.Position.Metric}
-     * @uses {zebkit.ui.DecorationViews}
+     * @extends zebkit.ui.Panel
+     * @uses zebkit.util.Position.Metric
+     * @uses zebkit.ui.DecorationViews
      */
 
     /**
@@ -37,10 +37,9 @@ zebkit.package("ui", function(pkg, Class) {
                 } else {
                     b = false;
                 }
-            } else {
-                if (m === null) m = [];
+            } else if (m === null) {
+                m = [];
             }
-
 
             /**
              * Currently selected list item index
@@ -155,7 +154,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @return {Object} an item
              * @method getSelected
              */
-            this.getSelected = function(){
+            this.getSelected = function() {
                 return this.selectedIndex < 0 ? null
                                               : this.model.get(this.selectedIndex);
             };
@@ -208,10 +207,12 @@ zebkit.package("ui", function(pkg, Class) {
                     if (index !== this.position.offset && (index < 0 || this.isItemSelectable(index) === true)) {
                         this.$triggeredByPointer = true;
 
-                        if (index < 0) this.position.setOffset(null);
-                        else this.position.setOffset(index);
+                        if (index < 0) {
+                            this.position.setOffset(null);
+                        } else {
+                            this.position.setOffset(index);
+                        }
                         this.notifyScrollMan(index);
-
                         this.$triggeredByPointer = false;
                     }
                 }
@@ -260,7 +261,7 @@ zebkit.package("ui", function(pkg, Class) {
                 return this.getLines() - 1;
             };
 
-            this.catchScrolled = function(psx,psy) {
+            this.catchScrolled = function(psx, psy) {
                 this.repaint();
             };
 
@@ -290,8 +291,13 @@ zebkit.package("ui", function(pkg, Class) {
                 if (this.model !== null) {
                     for(var i = 0;i < this.model.count(); i++){
                         var is = this.getItemSize(i);
-                        if (is.height > maxH) maxH = is.height;
-                        if (is.width  > maxW) maxW = is.width;
+                        if (is.height > maxH) {
+                            maxH = is.height;
+                        }
+
+                        if (is.width  > maxW) {
+                            maxW = is.width;
+                        }
                     }
                 }
                 return { width:maxW, height:maxH };
@@ -368,7 +374,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             this.paintOnTop = function(g) {
                 if (this.isComboMode === true || this.hasFocus())  {
-                    this.drawViewAt(g, "top.marker", this.position.offset);
+                    this.drawViewAt(g, "topMarker", this.position.offset);
                 }
             };
 
@@ -439,7 +445,7 @@ zebkit.package("ui", function(pkg, Class) {
                 this.$pointerMoved(e.x, e.y);
             };
 
-            this.pointerExited  = function(e){
+            this.pointerExited = function(e){
                 this.$pointerMoved(-10, -10);
             };
 
@@ -451,7 +457,6 @@ zebkit.package("ui", function(pkg, Class) {
 
             this.keyPressed = function(e){
                 if (this.model !== null && this.model.count() > 0){
-                    var po = this.position.offset;
                     switch(e.code) {
                         case "End":
                             if (e.ctrlKey) {
@@ -461,8 +466,11 @@ zebkit.package("ui", function(pkg, Class) {
                             }
                             break;
                         case "Home":
-                            if (e.ctrlKey) this.position.setOffset(0);
-                            else this.position.seekLineTo("begin");
+                            if (e.ctrlKey) {
+                                this.position.setOffset(0);
+                            } else {
+                                this.position.seekLineTo("begin");
+                            }
                             break;
                         case "ArrowRight": this.position.seek(1); break;
                         case "ArrowDown" : this.position.seekLineTo("down"); break;
@@ -494,7 +502,9 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.keyTyped = function (e){
                 var i = this.lookupItem(e.key);
-                if (i >= 0) this.$select(i);
+                if (i >= 0) {
+                    this.$select(i);
+                }
             };
 
             this.elementInserted = function(target, e,index){
@@ -544,7 +554,7 @@ zebkit.package("ui", function(pkg, Class) {
                 return i < c ? off : -1;
             };
 
-            this.posChanged = function (target,prevOffset,prevLine,prevCol){
+            this.posChanged = function (target, prevOffset, prevLine, prevCol) {
                 var off = this.position.offset;
                 if (off >= 0) {
                     off = this.findSelectable(off, prevOffset < off ? 1 : -1);
@@ -680,7 +690,7 @@ zebkit.package("ui", function(pkg, Class) {
          * supported:
          *
          *   - "select" -  a selection view element
-         *   - "top.marker" - a position marker view element that is rendered  on top of list item
+         *   - "topMarker" - a position marker view element that is rendered  on top of list item
          *   - "marker" - a position marker view element
          *
          * @param {Object} views view elements
@@ -779,12 +789,13 @@ zebkit.package("ui", function(pkg, Class) {
         function $clazz() {
             /**
              * List view provider class. This implementation renders list item using string
-             * render. If a list item is an instance of "zebkit.ui.View" class than it will
+             * render. If a list item is an instance of "zebkit.draw.View" class than it will
              * be rendered as the view.
              * @class zebkit.ui.List.ViewProvider
+             * @extends zebkit.draw.BaseViewProvider
              * @constructor
              */
-            this.ViewProvider = Class(pkg.BaseViewProvider, []);
+            this.ViewProvider = Class(zebkit.draw.BaseViewProvider, []);
 
             /**
              * @for zebkit.ui.List
@@ -846,7 +857,9 @@ zebkit.package("ui", function(pkg, Class) {
                                                    this.heights[i]- dg, this);
 
                             y += this.heights[i];
-                            if (y > yy) break;
+                            if (y > yy) {
+                                break;
+                            }
                         }
 
                         g.translate(-sx,  -sy);
@@ -931,7 +944,9 @@ zebkit.package("ui", function(pkg, Class) {
                                 this.firstVisibleY += (this.heights[this.firstVisible]);
                             }
 
-                            if (this.firstVisible >= count) this.firstVisible =  -1;
+                            if (this.firstVisible >= count) {
+                                this.firstVisible =  -1;
+                            }
                         }
                         this.visValid = true;
                     }
@@ -963,8 +978,11 @@ zebkit.package("ui", function(pkg, Class) {
                         if (y >= yy && y < yy + this.heights[i]) {
                             return i;
                         }
+
                         yy += (this.heights[i]);
-                        if (yy > hh) break;
+                        if (yy > hh) {
+                            break;
+                        }
                     }
                 }
                 return  -1;
@@ -992,14 +1010,14 @@ zebkit.package("ui", function(pkg, Class) {
      * List component consider its children UI components as a list model items. Every added to the component
      * UI children component becomes a list model element. The implementation allows developers to use
      * other UI components as its elements what makes list item view customization very easy and powerful:
-
-            // use image label as the component list items
-            var list = new zebkit.ui.CompList();
-            list.add(new zebkit.ui.ImageLabel("Caption 1", "icon1.gif"));
-            list.add(new zebkit.ui.ImageLabel("Caption 2", "icon2.gif"));
-            list.add(new zebkit.ui.ImageLabel("Caption 3", "icon3.gif"));
-
-
+     *
+     *     // use image label as the component list items
+     *     var list = new zebkit.ui.CompList();
+     *     list.add(new zebkit.ui.ImageLabel("Caption 1", "icon1.gif"));
+     *     list.add(new zebkit.ui.ImageLabel("Caption 2", "icon2.gif"));
+     *     list.add(new zebkit.ui.ImageLabel("Caption 3", "icon3.gif"));
+     *
+     *
      * @class zebkit.ui.CompList
      * @constructor
      * @extends zebkit.ui.BaseList
@@ -1082,7 +1100,9 @@ zebkit.package("ui", function(pkg, Class) {
                 if (this.isComboMode !== true) {
                     var p = child;
                     while (p !== this) {
-                        if (p.stopCatchInput === true) return false;
+                        if (p.stopCatchInput === true) {
+                            return false;
+                        }
                         p = p.parent;
                     }
                 }

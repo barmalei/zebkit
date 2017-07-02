@@ -50,7 +50,7 @@
 
             "label" : {
                 "color" : "#442244",
-                "font"  : { "@zebkit.ui.Font" : [ "Arial", "bold", "14" ] },
+                "font"  : { "@zebkit.Font" : [ "Arial", "bold", "14" ] },
                 "border":  null,
                 "background": null,
                 "padding" : 0
@@ -74,7 +74,7 @@
             "today" : {
                 "icon" :  {
                     "view"          : null,
-                    "border"        : { "@zebkit.ui.RoundBorder" : []},
+                    "border"        : { "@zebkit.draw.RoundBorder" : []},
                     "background"    : "#65B661",
                     "preferredSize" : [ 8, 8 ]
                 }
@@ -99,7 +99,7 @@
         "views": {
             "offmarker"           : "rgba(234, 243, 119, 0.5)",
             "marker"              : "rgba(234, 243, 119, 1.0)",
-            "notSelectableMarker" : { "@zebkit.ui.Border": "lightGray" }
+            "notSelectableMarker" : { "@zebkit.draw.Border": "lightGray" }
         },
 
         "selDayBackground" : "#D5F377"
@@ -131,14 +131,14 @@
 
         "Link" : {
             "id" : "nowLink",
-            "font":  { "@zebkit.ui.Font" : ["Arial", 11]},
+            "font":  { "@zebkit.Font" : ["Arial", 11]},
             "visible" : false
         },
 
         "DotButton" : {
             "id"         : "dotButton",
             "enabled"    : false,
-            "border"     : { "@zebkit.ui.RoundBorder" : [ null, 0] },
+            "border"     : { "@zebkit.draw.RoundBorder" : [ null, 0] },
             "background" : {
                 "out"          : "black",
                 "over"         : "red",
@@ -151,7 +151,7 @@
         "MonthsCombo" : {
             "Label": {
 
-                "font" : { "@zebkit.ui.Font" : [ "Arial", "bold", "14" ] },
+                "font" : { "@zebkit.Font" : [ "Arial", "bold", "14" ] },
                 "padding" : 4,
                 "inheritProperties" : true
             },
@@ -170,20 +170,20 @@
 
             "border" : {
                 "focusoff" :  null,
-                "focuson"  : { "@zebkit.ui.LineView" : [ "bottom", "black", 1 ] }
+                "focuson"  : { "@zebkit.draw.LineView" : [ "bottom", "black", 1 ] }
             }
         },
 
         "YearField" : {
             "id"    : "yearField",
-            "font" : { "@zebkit.ui.Font" : [ "Arial", "bold", "14" ] },
+            "font" : { "@zebkit.Font" : [ "Arial", "bold", "14" ] },
             "editable"   : false,
             "background" : null,
-            "curView" : null,
+            "cursorView" : null,
             "color" : "#276733",
             "border" : {
                 "focusoff" :  null,
-                "focuson"  : { "@zebkit.ui.LineView" : [ "bottom", "black", 1 ] }
+                "focuson"  : { "@zebkit.draw.LineView" : [ "bottom", "black", 1 ] }
             }
         },
 
@@ -220,7 +220,7 @@
             "inheritProperties" : true
         },
 
-        "border" : { "@zebkit.ui.Border": "gray" },
+        "border" : { "@zebkit.draw.Border": "gray" },
         "format" : "${date}/${month2}/${fullYear}"
     },
 
@@ -261,11 +261,11 @@
 
         "tags" : {
             "startDate" : {
-                "border" : { "@zebkit.ui.Border": [] }
+                "border" : { "@zebkit.draw.Border": [] }
             },
 
             "endDate" : {
-                "border" : { "@zebkit.ui.Border": [] }
+                "border" : { "@zebkit.draw.Border": [] }
             }
         },
 

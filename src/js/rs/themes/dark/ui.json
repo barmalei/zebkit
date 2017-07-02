@@ -424,8 +424,9 @@
     },
 
     "Slider": {
-        "ViewProvider" : {
-            "color" : "red"
+        "GaugePan" : {
+            "preferredSize" : [ 2, 2 ],
+            "background"    : "red"
         },
 
         "border": {
@@ -434,12 +435,10 @@
         },
 
         "views" : {
-             "gauge"    : { "@zebkit.draw.Border" : "red" },
              "horHandle": { "@zebkit.draw.RoundBorder": [ "red", 2 ], "fillColor" : "orange"  },
              "verHandle": { "@zebkit.draw.RoundBorder": [ "red", 2 ], "fillColor" : "orange"  }
         },
 
-        "scaleColor": "red",
         "padding"   : 4
     },
 

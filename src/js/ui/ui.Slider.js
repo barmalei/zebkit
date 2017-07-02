@@ -1587,6 +1587,17 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             /**
+             * Set the ruler to be used
+             * @param {zebkit.ui.RulerPan} r a ruler
+             * @method setRuler
+             * @chainable
+             */
+            this.setRuler = function(r) {
+                this.setByConstraints("ruler", r);
+                return this;
+            };
+
+            /**
              * Set the gap between the slider handle and the ruler.
              * @param {Integer} g a gap
              * @method setRulerGap

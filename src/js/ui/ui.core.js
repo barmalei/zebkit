@@ -1014,19 +1014,6 @@ zebkit.package("ui", function(pkg, Class) {
             });
 
 
-             * @param {Function|Object} a listener function or an object that
-             * declares events handler methods
-             * @return {Function|Object} a registered listener
-             * @method bind
-             */
-
-            /**
-             * Shortcut method to remove the register component specific events listener
-             * @param {Function|Object} a listener function to be removed
-             * @method unbind
-             */
-
-
             /**
              * Load content of the panel UI components from the specified JSON file.
              * @param  {String|Object} JSON URL, JSON string or JS object tthat describes UI

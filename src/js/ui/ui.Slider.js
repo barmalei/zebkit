@@ -80,6 +80,7 @@ zebkit.package("ui", function(pkg, Class) {
                 },
 
                 function $prototype() {
+                    this.catchInput = true;
                     this.$selectedLabel = null;
                     this.highlighterView = zebkit.draw.$view("yellow");
 
@@ -136,7 +137,7 @@ zebkit.package("ui", function(pkg, Class) {
             /**
              * Numeric label renderer factory.
              * @param  {Integer} [numPrecision] precision of displayed numbers.
-             * @class zebkit.ui.RulePan.NumLabels
+             * @class zebkit.ui.RulerPan.NumLabels
              * @extends zebkit.draw.BaseViewProvider
              */
             this.NumLabels = Class(zebkit.draw.BaseViewProvider, [
@@ -181,8 +182,8 @@ zebkit.package("ui", function(pkg, Class) {
             /**
              * Percentage label renderer factory.
              * @param  {Integer} [numPrecision] precision of displayed numbers.
-             * @class zebkit.ui.RulePan.PercentageLabels
-             * @extends zebkit.ui.RulePan.NumLabels
+             * @class zebkit.ui.RulerPan.PercentageLabels
+             * @extends zebkit.ui.RulerPan.NumLabels
              */
             this.PercentageLabels = Class(this.NumLabels, [
                 function(numPrecision) {
@@ -754,6 +755,7 @@ zebkit.package("ui", function(pkg, Class) {
                      * @param  {zebkit.ui.RulerPan} ruler a ruler
                      * @param  {Integer} index a point index
                      * @return {Number} a value for the given point with the specified index
+                     * @method pointValue
                      */
                     this.pointValue = function(ruler, index) {
                         return null;
@@ -807,9 +809,9 @@ zebkit.package("ui", function(pkg, Class) {
             /**
              * Set the points values generator
              * @param {zebkit.ui.PointRulerPan.PointsGenerator} g a point generator
-             * @method setPointGenerator
+             * @method setPointsGenerator
              */
-            this.setPointGenerator = function(g) {
+            this.setPointsGenerator = function(g) {
                 if (this.$generator !== g) {
                     this.$generator = g;
                     this.vrp();
@@ -825,7 +827,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @method useDeltaPointsGenerator
              */
             this.useDeltaPointsGenerator = function(delta) {
-                this.setPointGenerator(new this.clazz.DeltaPointsGenerator(delta));
+                this.setPointsGenerator(new this.clazz.DeltaPointsGenerator(delta));
                 return this;
             };
 
@@ -1396,7 +1398,7 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             this.catchInput = function(target) {
-                return target !== this.ruler;
+                return target !== this.ruler || this.ruler.catchInput !== true;
             };
 
             this.doLayout = function(t) {
@@ -1525,10 +1527,11 @@ zebkit.package("ui", function(pkg, Class) {
                         x >= handle.x + handle.width ||
                         y >= handle.y + handle.height   )
                     {
-                        var l = ((this.orient === "horizontal") ? x - this.ruler.x
-                                                                : y - this.ruler.y);
-
-                        this.setValue(this.ruler.toValue(l));
+                        if (this.getComponentAt(x, y) !== this.ruler) {
+                            var l = ((this.orient === "horizontal") ? x - this.ruler.x
+                                                                    : y - this.ruler.y);
+                            this.setValue(this.ruler.toValue(l));
+                        }
                     }
                 }
             };

@@ -20,6 +20,8 @@ Zebkit is perfect choice for development of mobile, single page applications wit
 
 <script>
 
+zebkit.config["ui.theme.name"] = "{{site.themeId}}";    
+
 zebkit.require(function() {
     eval(zebkit.import("ui", "layout"));
 
@@ -69,7 +71,7 @@ zebkit.require(function() {
 </tr>    
 </table>
 
-![ScreenShot]( {{ site.baseurl }}public/images/soverview.png)
+![ScreenShot]( {{ site.baseurl }}public/images/overview-{{site.themeId}}.png)
 
 **Easy OOP JavaScript concept** _Dart_, _CoffeeScript_, _TypeScript_ and other helping intermediate technologies are not necessary. Zebkit easy JavaScript OOP gives power to keep code under control, increases re-usability and simplifies support. Easy OOP produces classes and interfaces, inheritance and mixing, constructor, static context, method overriding, **true access to super context**, **anonymous classes**, packaging, dynamic class extension, etc. 
    
@@ -117,7 +119,7 @@ zebkit.resources("public/images/zebra-pattern.png", function(img) {
 });
 
 zebkit.require(function() {
-    eval(zebkit.import("ui", "layout", "view"));
+    eval(zebkit.import("ui", "layout", "draw"));
 
     var ZebkitTextRender = zebkit.Class(TextRender, [
         function(t, reflection) {
@@ -135,10 +137,19 @@ zebkit.require(function() {
 
         function paintLine(g,x,y,line,d) {
             var gradient=g.createLinearGradient(x,y,x,y+this.font.height);
-            gradient.addColorStop(0.1, '#222');
-            gradient.addColorStop(0.35, '#fff');
-            gradient.addColorStop(0.65, '#fff');
-            gradient.addColorStop(1.0, '#000');
+
+            if ('{{site.themeId}}' === 'dark') {
+                gradient.addColorStop(0.1, '#222');
+                gradient.addColorStop(0.35, '#fff');
+                gradient.addColorStop(0.65, '#fff');
+                gradient.addColorStop(1.0, '#000');
+            } else {
+                gradient.addColorStop(0.1, 'orange');
+                gradient.addColorStop(0.35, 'red');
+                gradient.addColorStop(0.65, 'red');
+                gradient.addColorStop(1.0, 'orange');
+            }
+
             g.fillStyle = gradient;            
             g.fillText(this.getLine(line), x, y);
             g.fillStyle = this.pattern;
@@ -153,11 +164,11 @@ zebkit.require(function() {
 
     var root = new zCanvas("renderingSample", 450, 300).root;
     root.setLayout(new BorderLayout(8));
-    root.add(new TextField(new ZebkitTextRender("Zebkit ...")).properties({
+    root.add("center", new TextField(new ZebkitTextRender("Zebkit ...")).properties({
         cursorView    : "red",
         curW          : 3,
         selectionColor: "gray",
-        background    : "black",
+        background    : '{{site.themeId}}' === 'dark' ? "black" : "white",
         font          : new zebkit.Font("Arial", 100)
     }));
     
@@ -219,7 +230,10 @@ zebkit.require(function() {
         },
 
         function paintLine(g,x,y,line,d){
-            var s = this.getLine(line), v = s.split(/\s/), xx = x;
+            var s  = this.getLine(line), 
+                v  = s.split(/\s/), 
+                xx = x;
+
             for(var i = 0; i < v.length; i++){
                 var str = v[i], color = this.words[str];
                 str += " ";
@@ -231,9 +245,16 @@ zebkit.require(function() {
     ]);
 
     sh = new SynRender("public class Test\nextends Object {\n    static {\n        if (a > 0) {\n            a = 10;\n        }\n    }\n}").setColor("white");
-    sh.words= {"class"   : "#55DD22", "public" : "#FF7744",
-               "extends" : "#FF7744", "static" : "#FF7744",
-               "if"      : "#55DD22", "==":"green"          };
+
+    if ('{{site.themeId}}' === 'light') {
+        sh.words= {"class"   : "#55DD22", "public" : "#FF7744",
+                   "extends" : "#FF7744", "static" : "#FF7744",
+                   "if"      : "#55DD22", "==":"green"          };
+    } else {
+        sh.words= {"class"   : "#55DD22", "public" : "#FF7744",
+                   "extends" : "#FF7744", "static" : "#FF7744",
+                   "if"      : "#55DD22", "==":"green"          };
+    }
 
     var cpan = new Panel().setPreferredSize(230, 120);
     cpan.setLayout(new StackLayout());
@@ -246,7 +267,10 @@ zebkit.require(function() {
 
     var pan = new Panel({
         layout: new FlowLayout(8),
-        kids  : [ new Label(sh), cpan ]
+        kids: [ 
+           new Label(sh).setColor('{{site.themeId}}'=='light'?"gray":"white"), 
+            cpan 
+        ]
     });
     root.add("top", pan);
 });
@@ -272,7 +296,7 @@ zebkit.require(function() {
     var gmap = null;
     function initMap() {
         zebkit.require(function() {
-            eval(zebkit.import("ui", "view"));
+            eval(zebkit.import("ui", "draw"));
 
             var c = new zCanvas("sampleGoogleMap", 400, 400);
             var map = new zebkit.ui.web.HtmlElement();
@@ -331,7 +355,7 @@ root.pointerPressed = function(e) {
 
 <script>
 zebkit.require(function() {
-    eval(zebkit.import("ui", "view"));
+    eval(zebkit.import("ui", "draw"));
     var zcan = new zCanvas("customShapeSample", 550, 250);
     var root = new Panel(new zebkit.layout.FlowLayout("center", "center", "vertical", 16));
     zcan.root.setLayout(new zebkit.layout.FlowLayout(16));
@@ -530,10 +554,10 @@ zebkit.require(function() {
 Find below zebkit application that has been created and loaded with the JSON shown above:
 
 <table cellspacing="0" cellpadding="0" border="0" style="margin:0px;">
-    <tr style="padding:0px;background-color:black;">
+    <tr style="padding:0px;">
         <td align="left" 
             valign="top" 
-            style="border-color:black;padding:0px;background-color:black;">
+            style="border-color:black;padding:0px;">
 
 {% include zsample.html canvas_id='jsonSample' title="Custom shaped UI components" %}
 
@@ -541,7 +565,7 @@ Find below zebkit application that has been created and loaded with the JSON sho
 
 <td align="left" 
     valign="top" 
-    style="padding:0px;background-color:black;border-color:black;">
+    style="padding:0px;border-color:black;">
 
 ```js
 eval(zebkit.import("ui", "layout"));
@@ -718,7 +742,7 @@ zebkit.require(function() {
                        "stretch", "center", 4
                    )),
                padding: 8,
-               background : "#202220",
+              // background : "#202220",
                kids  : [
                    new Label("User name: "),
                    new TextField("", 8),
@@ -733,12 +757,11 @@ zebkit.require(function() {
            new CollapsiblePan("Page 2", 
                new Panel({
                    layout : new FlowLayout("center", "center"),
-                   background : "#202220",
                    kids   : [
                        new Label("No content is available")
                    ]
                })),
-           new CollapsiblePan("Page 3", new Label("...").setBackground("#202220"))
+           new CollapsiblePan("Page 3", new Label("..."))
        ).setPreferredSize(220, 250);
        root.add(p.setLocation(10,500));
 
@@ -779,7 +802,11 @@ zebkit.require(function() {
                 return this.render;
             },
             function getCellColor(target, row, col) {
-                return row % 2 === 0 ?  "orange" : "#ff9149"; 
+                if ('{{site.themeId}}' === 'light') {
+                    return row % 2 === 0 ?  "white" : "#EEEEEE"; 
+                } else {
+                    return row % 2 === 0 ?  "orange" : "#ff9149"; 
+                }
             }
         ]));
 

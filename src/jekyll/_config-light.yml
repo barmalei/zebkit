@@ -13,8 +13,14 @@ url:              https://github.com/barmalei/zebkit
 #baseurl:          /build/website/
 baseurl:          /website/
 
+themeId:      "light"
+
 zebkitBase:       http://localhost:8090/build
 
+includes_dir:  ./_includes
+
+excludes:
+- _includes-dark
 
 author:
   name:           'Andrei Vishneuski'

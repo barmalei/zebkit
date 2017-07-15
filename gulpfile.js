@@ -269,21 +269,43 @@ gulp.task('runtime', [ "buildJS" ], function () {
 // generate WEB site
 gulp.task('website', [ 'buildJS' ], function (gulpCallBack){
     var spawn  = require('child_process').spawn;
-    var jekyll = spawn('jekyll', ['build', '-d', 'website', '-s', 'src/jekyll/' ], { stdio: 'inherit' });
+    var jekyll = spawn('jekyll', ['build',
+                                   '--config', 'src/jekyll/_config-dark.yml',
+                                   '-d', 'website',
+                                   '-s', 'src/jekyll/' ], { stdio: 'inherit' });
 
     jekyll.on('exit', function(code) {
         gulpCallBack(code === 0 ? null : 'ERROR: Jekyll process exited with code: ' + code);
     });
 });
 
-//gulp.task('website', [ "genWebsite" ],  function() {
-//    return  gulp.src([
-//                "build/rs/**/*",
-//                "build/zebkit.js",
-//                "build/zebkit.min.js"
-//            ], { base: "build" }).
-//            pipe(gulp.dest('website/public/js'));
-//});
+// generate WEB-light site
+gulp.task('website-light', [ 'buildJS' ], function (gulpCallBack){
+    var spawn  = require('child_process').spawn;
+    var jekyll = spawn('jekyll', [ 'build',
+                                   '--config', 'src/jekyll/_config-light.yml',
+                                   '-d', 'website',
+                                   '-s', 'src/jekyll/' ], { stdio: 'inherit' });
+
+    jekyll.on('exit', function(code) {
+        gulpCallBack(code === 0 ? null : 'ERROR: Jekyll process exited with code: ' + code);
+    });
+});
+
+
+gulp.task('website-dark', [ 'buildJS' ], function (gulpCallBack){
+    var spawn  = require('child_process').spawn;
+    var jekyll = spawn('jekyll', [ 'build',
+                                   '--config', 'src/jekyll/_config-dark.yml',
+                                   '-d', 'website',
+                                   '-s', 'src/jekyll/' ], { stdio: 'inherit' });
+
+    jekyll.on('exit', function(code) {
+        gulpCallBack(code === 0 ? null : 'ERROR: Jekyll process exited with code: ' + code);
+    });
+});
+
+gulp.task('website', [ "website-dark" ]);
 
 // generate APIDOC
 gulp.task('apidoc', [ "zebkit" ], function (gulpCallBack){

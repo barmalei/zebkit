@@ -98,6 +98,12 @@ If you have installed jekyll you can initiate zebkit WEB site re-generation with
    $ gulp website
 ```
 
+If you prefer light version of the website execute the following command to generate it:
+```bash
+   $ gulp website-light
+```
+
+
 # Run http server and view web site 
 
 ```bash

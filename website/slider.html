@@ -11,7 +11,7 @@
 
   <title>
     
-      404: Page not found &middot; Zebkit - UI platform
+      Slider &middot; Zebkit - UI platform
     
   </title>
 
@@ -103,7 +103,7 @@
                     
                       
                         
-                          <a class="sidebar-nav-item" href="/website/slider.html">
+                          <a class="sidebar-nav-item active" href="/website/slider.html">
                             Slider
                           </a>
                         
@@ -173,8 +173,86 @@
 
     <div class="content container">
       <div class="page">
-  <h1 class="page-title">404: Page not found</h1>
-  <p class="lead">Sorry, we've misplaced that URL or it's pointing to something that doesn't exist. <a href="/website/">Head back home</a> to try finding it again.</p>
+  <h1 class="page-title">Slider</h1>
+  <script type="text/javascript" src="../build/zebkit.js">  
+</script>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="sample" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Get started zebkit application </span>
+        </td>
+    </tr>
+</table>
+
+<script>
+zebkit.require("ui", "layout", "draw", function(ui, layout, draw) {
+    var s1 = new ui.Slider();
+    var s2 = new ui.Slider();
+    var s3 = new ui.Slider("vertical");
+    var s4 = new ui.Slider();
+
+    s2.setRuler(new ui.LinearRulerPan());
+    s3.setRuler(new ui.PointRulerPan("vertical").
+    setPointsGenerator(new ui.PointRulerPan.PointsGenerator([
+        function pointValue(ruler, index) {
+            console.log("index = " + index);
+
+            var min = ruler.getMin();
+            var max = ruler.getMax();
+            if (index === 0) {
+                return min;
+            } else if (index === 2) {
+                return max;
+            } else if (index === 1) {
+                return min + (2 * (max - min)) / 3;
+            } else {
+                return null;
+            }
+        }
+    ])));
+    s3.ruler.showNumbers();
+    s3.ruler.setStrokeSize(8);
+    s3.ruler.setColor("orange");
+    s3.ruler.lineWidth = 3;
+    s3.ruler.setLabelsRender(new ui.RulerPan.NumLabels([
+        function getView(t, value) {
+            var v = this.$supera(arguments);
+            if (v !== null) {
+                if (value < 100  && value > 0) {
+                    v.setValue(Math.round(value) + "*");
+                    v.setColor("red");
+                    return v;
+                }
+            }
+            v.setColor("orange");
+            return v;
+        }
+    ]));
+
+    var root = new ui.zCanvas("sample", 400, 300).root;
+    root.properties({
+        border:  "plain",
+        padding: 8,
+        layout:  new layout.GridLayout(2, 2),
+        kids  : [
+            s1,
+            s2,
+            s3,
+            s4
+        ]
+    });
+});
+</script>
+
 </div>
 
     </div>

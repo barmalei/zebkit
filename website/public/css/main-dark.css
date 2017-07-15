@@ -115,7 +115,7 @@ th {
 
 tbody tr:nth-child(odd) td,
 tbody tr:nth-child(odd) th {
-  background-color: #222;
+  background-color: black;
 }
 
 /* Pagination items can be `span`s or `a`s */
@@ -177,7 +177,7 @@ tbody tr:nth-child(odd) th {
   text-align: center;
   padding: 2rem 1rem;
   color: rgba(255,255,255,.5);
-  background-color: #000;
+  background-color: black;
   overflow: auto;
 }
 @media (min-width: 48em) {

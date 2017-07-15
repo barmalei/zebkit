@@ -555,12 +555,12 @@
     "Tooltip": {
         "Label": {
             "font"   : "bold 11px Arial",
-            "color"  : "gray",
-            "padding": 2
+            "color"  : "#0E4EAD",
+            "padding": 4
         },
 
-        "background" : "yellow",
-        "border" : { "@zebkit.ui.Tooltip.TooltipBorder" : [ "lightGray" ] },
+        "background" : "#66CCFF",
+        "border" : { "@zebkit.ui.Tooltip.TooltipBorder" : [ "#0E4EAD", 1 ] },
         "layout": { "@zebkit.layout.FlowLayout": [ "center", "top" ] }
     },
 

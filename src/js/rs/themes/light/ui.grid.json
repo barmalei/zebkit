@@ -74,7 +74,9 @@
 
     "Grid": {
         "CornerPan" : {
-            "inheritProperties" : true
+            "inheritProperties" : true,
+            "border": { "@zebkit.draw.Border"   : "gray", "sides": ["left", "top"] },
+            "background" : { "@zebkit.draw.Gradient" : [ "white", "lightGray" ] }
         },
 
         "views" : {

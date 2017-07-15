@@ -604,8 +604,8 @@ zebkit.package("ui.web", function(pkg, Class) {
     pkg.HtmlElementMan = Class(zebkit.ui.event.Manager, [
         function $prototype() {
             /**
-             * Evaluates if the given zebkit HTML UI component is invisible state.
-             * @param  {zebkit.ui.HtmlElement}  c  an UI HTML element wrapper
+             * Evaluates if the given zebkit HTML UI component is in invisible state.
+             * @param  {zebkit.ui.HtmlElement}  c an UI HTML element wrapper
              * @private
              * @method $isInInvisibleState
              * @return {Boolean} true if the HTML element wrapped with zebkit UI is in invisible state

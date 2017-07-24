@@ -252,7 +252,7 @@ zebkit.package("ui.date", function(pkg, Class) {
                 function $prototype() {
                     this.setNamesOfWeekDays = function(daysOfWeek) {
                         for(var i = 0; i < daysOfWeek.length; i++) {
-                            this.putTitle(i, new this.clazz.Label().properties(daysOfWeek[i]));
+                            this.setLabel(i, new this.clazz.Label().properties(daysOfWeek[i]));
                         }
                     };
                 }

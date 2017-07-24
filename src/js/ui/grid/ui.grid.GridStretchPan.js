@@ -56,7 +56,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 if (target.kids.length > 0){
                     var grid = this.grid,
                         left = target.getLeft(),
-                        top = target.getTop();
+                        top  = target.getTop();
 
                     if (grid.isVisible === true) {
                         grid.setBounds(left, top,
@@ -96,13 +96,13 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
             this.getMinWidth = function () {
                 return zebkit.instanceOf(this.grid.topCaption, pkg.BaseCaption) ? this.grid.topCaption.minSize
-                                                                               : 10;
+                                                                                : 10;
             };
 
             this.calcColWidths = function(targetAreaW){
                 var grid = this.grid,
                     cols = grid.getGridCols(),
-                    ew   = targetAreaW - (this.$props.length + 1) * grid.lineSize,
+                    ew   = targetAreaW - (cols + 1) * grid.lineSize,
                     sw   = 0;
 
                 if (this.$widths.length !== cols) {
@@ -135,8 +135,10 @@ zebkit.package("ui.grid", function(pkg, Class) {
                     if (this.grid.leftCaption !== null &&
                         this.grid.leftCaption.isVisible === true)
                     {
-                        taWidth -= this.grid.leftCaption.getPreferredSize().width;
+                        taWidth -= (this.grid.leftCaption.getPreferredSize().width + this.grid.lineSize);
                     }
+
+                    taWidth -= (this.grid.getLeft() + this.grid.getRight());
 
                     if (this.$strPs === null || this.$prevWidth !== taWidth) {
                         var cols = grid.getGridCols();
@@ -168,7 +170,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
                         this.$prevWidth  = taWidth;
                         this.calcColWidths(taWidth);
-                        this.$strPs   = {
+                        this.$strPs  = {
                             width : taWidth,
                             height: grid.getPreferredSize().height
                         };

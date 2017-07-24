@@ -638,7 +638,10 @@ zebkit.require(function() {
           "Title 1", 
           "Title 2", 
            new ImageLabel(new CompGridCaption.Link("Title 3"), 
-           new ImagePan("public/images/wbug.png").setPreferredSize(24,24)).setPadding(4,4,4,8)
+           new ImagePan('{{site.themeId}}'=='light' ? "public/images/bug-o.png"
+                                                    : "public/images/wbug.png")
+               .setPreferredSize(24,24))
+               .setPadding(4,4,4,8)
        ]));
        
        grid.add(new LeftCompGridCaption([ "I", "II" ]));

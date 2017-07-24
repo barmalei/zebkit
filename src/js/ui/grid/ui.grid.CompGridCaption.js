@@ -35,14 +35,11 @@ zebkit.package("ui.grid", function(pkg, Class) {
                             xy   = (b ? left + m.getXOrigin()
                                       : top  + m.getYOrigin());
 
+
                         for (var i = 0; i < target.kids.length; i++) {
                             var kid = target.kids[i],
                                 cwh = (b ? m.getColWidth(i)
                                          : m.getRowHeight(i));
-
-                            if (i === 0) {
-                                cwh -= (b ? (left - m.lineSize) : top);
-                            }
 
                             if (kid.isVisible === true) {
                                 if (b) {
@@ -202,10 +199,10 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @param  {Integer} rowcol a grid caption cell index
              * @param  {String|zebkit.ui.Panel|zebkit.draw.View} title a title of the given grid caption cell.
              * Can be a string or zebkit.draw.View or zebkit.ui.Panel class instance
-             * @method putTitle
+             * @method setLabel
              * @chainable
              */
-            this.putTitle = function(rowcol, t) {
+            this.setLabel = function(rowcol, t) {
                 // add empty titles
                 for(var i = this.kids.length - 1;  i >= 0 && i < rowcol; i++) {
                     this.add(new this.clazz.TitlePan(""));

@@ -24,9 +24,7 @@
     },
 
     "BaseCaption": {
-        "border": { "@zebkit.draw.Border":"white" },
-        "background" : { "@zebkit.draw.Gradient": [ "red", "orange" ] },
-        "lineColor" : "white"
+        "background" : { "@zebkit.draw.Gradient": [ "red", "orange" ] }
     },
 
     "CompGridCaption" :{
@@ -87,6 +85,7 @@
             "focusOffSelect" : "red"
         },
 
-        "lineColor": "white"
+        "lineColor": "white",
+        "lineSize" : 1
     }
 }

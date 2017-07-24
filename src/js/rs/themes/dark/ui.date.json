@@ -87,10 +87,8 @@
             }
         },
 
-        "paintNetOnCaption" : true,
         "paintPosMarkerOver": false,
         "usePsMetric"       : true,
-        "drawSideLines"     : false,
         "drawLines"         : [ false, true ],
         "lineColor2"         : "lightGray",
         "navigationMode"    : "cell",

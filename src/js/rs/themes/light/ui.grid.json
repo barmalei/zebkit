@@ -1,7 +1,7 @@
 {
     "DefViews": {
         "cellBackground": null,
-        "font": "13px 'Lucida Grande', 'Lucida Sans', Arial, sans-serif",
+        "font" : "13px 'Lucida Grande', 'Lucida Sans', Arial, sans-serif",
         "color": "rgb(74,74,74)"
     },
 
@@ -20,12 +20,11 @@
         "Checkbox": {
             "inheritProperties" : true,
             "layout": { "@zebkit.layout.FlowLayout": [ "center", "center" ]},
-            "border": {"@zebkit.draw.Border":  "blue" }
+            "border": { "@zebkit.draw.Border":  "blue" }
         }
     },
 
     "BaseCaption": {
-        "border"     : { "@zebkit.draw.Border"   : "gray" },
         "background" : { "@zebkit.draw.Gradient" : [ "white", "lightGray" ] }
     },
 
@@ -75,7 +74,6 @@
     "Grid": {
         "CornerPan" : {
             "inheritProperties" : true,
-            "border": { "@zebkit.draw.Border"   : "gray", "sides": ["left", "top"] },
             "background" : { "@zebkit.draw.Gradient" : [ "white", "lightGray" ] }
         },
 
@@ -84,6 +82,7 @@
             "focusOffSelect" :"#ADC1D6"
         },
 
-        "lineColor": "rgb(65, 131, 215)"
+        "lineColor": "rgb(65, 131, 215)",
+        "lineSize": 1
     }
 }

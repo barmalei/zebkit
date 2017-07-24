@@ -75,6 +75,17 @@ zebkit.package("ui.grid", function(pkg, Class) {
         // first visible row (row and y), first visible
         // col, last visible col and row
         this.fr = this.fc = this.lr = this.lc = null;
+
+        // TODO: replace array with human readable variables
+        // this.firstCol = -1
+        // this.firstRow = -1
+        // this.lastCol = -1
+        // this.lastRow = -1
+
+        // this.firstColX = 0
+        // this.firstRowY = 0
+        // this.lastColX = 0
+        // this.lastRowY = 0
     };
 
     /**
@@ -474,13 +485,14 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
             if (arguments.length > 0) {
                 for(var i = 0; i < titles.length; i++) {
-                    this.putTitle(i, titles[i]);
+                    this.setLabel(i, titles[i]);
                 }
             }
         },
 
         function $clazz() {
-            this.Listeners = new zebkit.util.ListenersClass("captionResized");
+            this.Listeners = new zebkit.util.ListenersClass("captionResized",
+                                                            "captionResizeSelected");
         },
 
         function $prototype() {
@@ -490,7 +502,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
             /**
              * Minimal possible grid cell size
-             * @type {Number}
+             * @type {Integer}
              * @default 10
              * @attribute minSize
              */
@@ -499,18 +511,10 @@ zebkit.package("ui.grid", function(pkg, Class) {
             /**
              * Size of the active area where cells size can be changed by pointer dragging event
              * @attribute activeAreaSize
-             * @type {Number}
+             * @type {Integer}
              * @default 5
              */
             this.activeAreaSize = 5;
-
-            /**
-             * Caption line color
-             * @attribute lineColor
-             * @type {String}
-             * @default "gray"
-             */
-            this.lineColor = "gray";
 
             /**
              * Indicate if the grid cell size has to be adjusted according
@@ -603,6 +607,13 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 }
             };
 
+            this.pointerExited = function(e) {
+                if (this.selectedColRow !== -1) {
+                    this.selectedColRow = -1;
+                    this._.captionResizeSelected(this, this.selectedColRow);
+                }
+            };
+
             /**
              * Define pointer clicked events handler.
              * @param  {zebkit.ui.event.PointerEvent} e a pointer event
@@ -649,13 +660,18 @@ zebkit.package("ui.grid", function(pkg, Class) {
             };
 
             this.calcRowColAt = function(x, y) {
-                var $this = this;
-                this.selectedColRow = this.getCaptionAt(x, y, function(m, xy, xxyy, wh, i) {
-                    xxyy += (wh + m.lineSize);
-                    return (xy < xxyy + $this.activeAreaSize &&
-                            xy > xxyy - $this.activeAreaSize   );
+                var $this = this,
+                    newSelected = this.getCaptionAt(x, y, function(m, xy, xxyy, wh, i) {
+                        xxyy += (wh + Math.floor(m.lineSize / 2));
+                        return (xy < xxyy + $this.activeAreaSize &&
+                                xy > xxyy - $this.activeAreaSize   );
 
-                });
+                    });
+
+                if (newSelected !== this.selectedColRow) {
+                    this.selectedColRow = newSelected;
+                    this._.captionResizeSelected(this, this.selectedColRow);
+                }
             };
 
             /**
@@ -688,15 +704,18 @@ zebkit.package("ui.grid", function(pkg, Class) {
                     {
                         var gap  = m.lineSize,
                             xy   = isHor ? x : y,
-                            xxyy = isHor ? cv.fc[1] - this.x - gap + m.getXOrigin()
-                                         : cv.fr[1] - this.y - gap + m.getYOrigin();
+                            xxyy = isHor ? cv.fc[1] - this.x + m.getXOrigin()
+                                         : cv.fr[1] - this.y + m.getYOrigin();
 
-                        for (var i = (isHor ? cv.fc[0] : cv.fr[0]);i <= (isHor ? cv.lc[0] : cv.lr[0]); i ++ ) {
-                            var wh = isHor ? m.getColWidth(i) : m.getRowHeight(i);
+                        for (var i = (isHor ? cv.fc[0] : cv.fr[0]);i <= (isHor ? cv.lc[0] : cv.lr[0]); i++) {
+                            var wh = isHor ? m.getColWidth(i)
+                                           : m.getRowHeight(i);
+
                             if ((arguments.length > 2 && f(m, xy, xxyy, wh, i)) ||
                                 (arguments.length < 3 && xy > xxyy && xy < xxyy + wh))
                             {
                                 return i;
+
                             }
                             xxyy += wh + gap;
                         }
@@ -705,30 +724,21 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 return -1;
             };
 
-            this.paintOnTop = function(g) {
-                if (this.lineColor !== null && this.metrics !== null) {
-                    var v = this.metrics.getCellsVisibility();
-                    if (v !== null) {
-                        var m       = this.metrics,
-                            b       = this.orient === "horizontal",
-                            startRC = b ? v.fc[0] : v.fr[0],
-                            endRC   = b ? v.lc[0] : v.lr[0],
-                            xy      = b ? v.fc[1] - this.x - m.lineSize + m.getXOrigin()
-                                        : v.fr[1] - this.y - m.lineSize + m.getYOrigin();
-
-                        g.setColor(this.lineColor);
-                        for(var i = startRC; i <= endRC; i++) {
-                            if (i !== 0) {
-                                if (b) {
-                                    g.drawLine(xy, 0, xy, this.height, m.lineSize);
-                                } else  {
-                                    g.drawLine(0, xy, this.width, xy, m.lineSize);
-                                }
-                            }
-                            xy += (b ? m.getColWidth(i): m.getRowHeight(i)) + m.lineSize;
-                        }
-                    }
+            /**
+             * Set the grid caption labels
+             * @param {Object} [labels]* labels
+             * @method setLabels
+             * @chainable
+             */
+            this.setLabels = function() {
+                for (var i = 0; i < arguments.length; i++) {
+                    this.setLabel(i, arguments[i]);
                 }
+                return this;
+            };
+
+            this.setLabel = function(i, lab) {
+                return this;
             };
 
             /**

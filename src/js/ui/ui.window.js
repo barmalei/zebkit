@@ -203,9 +203,9 @@ zebkit.package("ui", function(pkg, Class) {
                     if (this.topModalIndex < 0 && this.activeWin !== null) { // no a modal window has been shown
                         this.activate(null);
                         return false;
+                    } else {
+                        return this.topModalIndex >= 0;
                     }
-
-                    return this.topModalIndex >= 0;
                 }
 
                 return false;
@@ -352,7 +352,7 @@ zebkit.package("ui", function(pkg, Class) {
                 }
             }
 
-            var ci = this.kids.indexOf(lw);
+            var ci = index; //this.kids.indexOf(lw);
             if (ci < this.topModalIndex) { // correct top modal window index
                 this.topModalIndex--;
             } else if (this.topModalIndex === ci) {

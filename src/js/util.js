@@ -1420,7 +1420,7 @@ zebkit.package("util", function(pkg, Class) {
      * method execution. The class manages special tasks queue to run it one by one as soon as a dedicated interval for the
      * given task is elapsed
 
-        var tasks = zebkit.util.TasksSet();
+        var tasks = new zebkit.util.TasksSet();
 
         tasks.run(function(t) {
             // task1 body

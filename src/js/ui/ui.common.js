@@ -232,10 +232,10 @@ zebkit.package("ui", function(pkg, Class) {
 
                     if (txt.length === 0) {
                         return img;
+                    } else {
+                        return hasInstance && typeof instance.clazz.ImageLabel !== 'undefined' ? new instance.clazz.ImageLabel(txt, img)
+                                                                                               : new pkg.ImageLabel(txt, img);
                     }
-
-                    return hasInstance && typeof instance.clazz.ImageLabel !== 'undefined' ? new instance.clazz.ImageLabel(txt, img)
-                                                                                           : new pkg.ImageLabel(txt, img);
                 } else {
                     return hasInstance && typeof instance.clazz.Label !== 'undefined' ? new instance.clazz.Label(desc)
                                                                                       : new pkg.Label(desc);
@@ -1040,96 +1040,110 @@ zebkit.package("ui", function(pkg, Class) {
                 }
                 return ps;
             };
-        },
 
-        /**
-         * Set the progress bar orientation
-         * @param {String} o an orientation: "vertical" or "horizontal"
-         * @method setOrientation
-         * @chainable
-         */
-        function setOrientation(o){
-            if (o !== this.orient) {
-                this.orient = zebkit.util.$validateValue(o, "horizontal", "vertical");
-                this.vrp();
-            }
-            return this;
-        },
+            /**
+             * Set the progress bar orientation
+             * @param {String} o an orientation: "vertical" or "horizontal"
+             * @method setOrientation
+             * @chainable
+             */
+            this.setOrientation = function(o) {
+                if (o !== this.orient) {
+                    this.orient = zebkit.util.$validateValue(o, "horizontal", "vertical");
+                    this.vrp();
+                }
+                return this;
+            };
 
-        /**
-         * Set maximal integer value the progress bar value can rich
-         * @param {Integer} m a maximal value the progress bar value can rich
-         * @method setMaxValue
-         * @chainable
-         */
-        function setMaxValue(m){
-            if (m !== this.maxValue) {
-                this.maxValue = m;
-                this.setValue(this.value);
-                this.vrp();
-            }
-            return this;
-        },
+            /**
+             * Set maximal integer value the progress bar value can rich
+             * @param {Integer} m a maximal value the progress bar value can rich
+             * @method setMaxValue
+             * @chainable
+             */
+            this.setMaxValue = function(m) {
+                if (m !== this.maxValue) {
+                    this.maxValue = m;
+                    this.setValue(this.value);
+                    this.vrp();
+                }
+                return this;
+            };
 
-        /**
-         * Set the current progress bar value
-         * @param {Integer} p a progress bar
-         * @method setValue
-         * @chainable
-         */
-        function setValue(p){
-            p = p % (this.maxValue + 1);
-            if (this.value !== p){
-                var old = this.value;
-                this.value = p;
-                this._.fired(this, old);
-                this.repaint();
-            }
-            return this;
-        },
+            /**
+             * Set the current progress bar value
+             * @param {Integer} p a progress bar
+             * @method setValue
+             * @chainable
+             */
+            this.setValue = function(p) {
+                p = p % (this.maxValue + 1);
+                if (this.value !== p){
+                    var old = this.value;
+                    this.value = p;
+                    this._.fired(this, old);
+                    this.repaint();
+                }
+                return this;
+            };
 
-        /**
-         * Set the given gap between progress bar bundle elements
-         * @param {Integer} g a gap
-         * @method setGap
-         * @chainable
-         */
-        function setGap(g){
-            if (this.gap !== g){
-                this.gap = g;
-                this.vrp();
-            }
-            return this;
-        },
+            /**
+             * Set the given gap between progress bar bundle elements
+             * @param {Integer} g a gap
+             * @method setGap
+             * @chainable
+             */
+            this.setGap = function(g) {
+                if (this.gap !== g){
+                    this.gap = g;
+                    this.vrp();
+                }
+                return this;
+            };
 
-        /**
-         * Set the progress bar bundle element view
-         * @param {zebkit.draw.View} v a progress bar bundle view
-         * @method setBundleView
-         * @chainable
-         */
-        function setBundleView(v){
-            if (this.bundleView != v){
-                this.bundleView = zebkit.draw.$view(v);
-                this.vrp();
-            }
-            return this;
-        },
+            /**
+             * Set the progress bar bundle element view
+             * @param {zebkit.draw.View} v a progress bar bundle view
+             * @method setBundleView
+             * @chainable
+             */
+            this.setBundleView = function(v) {
+                if (this.bundleView != v){
+                    this.bundleView = zebkit.draw.$view(v);
+                    this.vrp();
+                }
+                return this;
+            };
 
-        /**
-         * Set the progress bar bundle element size
-         * @param {Integer} w a bundle element width
-         * @param {Integer} h a bundle element height
-         * @method setBundleSize
-         * @chainable
-         */
-        function setBundleSize(w, h){
-            if (w !== this.bundleWidth && h !== this.bundleHeight){
-                this.bundleWidth  = w;
-                this.bundleHeight = h;
-                this.vrp();
-            }
-            return this;
+            /**
+             * Set the progress bar bundle element size
+             * @param {Integer} w a bundle element width
+             * @param {Integer} h a bundle element height
+             * @method setBundleSize
+             * @chainable
+             */
+            this.setBundleSize = function(w, h) {
+                if (w !== this.bundleWidth && h !== this.bundleHeight){
+                    this.bundleWidth  = w;
+                    this.bundleHeight = h;
+                    this.vrp();
+                }
+                return this;
+            };
+
+            // TODO: debug method
+            this.travel = function() {
+                var v     = 0,
+                    $this = this,
+                    tasks = new zebkit.util.TasksSet();
+
+                tasks.run(function(t) {
+                    $this.setValue(++v);
+                    if (v > 20) {
+                        t.shutdown();
+                    }
+                }, 1000, 500);
+            };
         }
     ]);
 });

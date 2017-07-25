@@ -50,11 +50,22 @@ zebkit.package("ui.design", function(pkg, Class) {
      *      |bottomLeft|-------|bottom|-------------|bottomRight|
      *
      *
+     * @param {String} [color] a bordar color
+     * @param {Integer} [gap] a bordar gap
      * @constructor
      * @class zebkit.ui.design.ShaperBorder
      * @extends zebkit.draw.View
      */
     pkg.ShaperBorder = Class(zebkit.draw.View, [
+        function(color, gap) {
+            if (arguments.length > 0) {
+                this.color = color;
+                if (arguments.length > 1) {
+                    this.gap = gap;
+                }
+            }
+        },
+
         function $prototype() {
             /**
              * Border color
@@ -161,49 +172,72 @@ zebkit.package("ui.design", function(pkg, Class) {
     /**
      * This is UI component class that implements possibility to embeds another
      * UI components to control the component size and location visually.
-
-            // create canvas
-            var canvas = new zebkit.ui.zCanvas(300,300);
-
-            // create two UI components
-            var lab = new zebkit.ui.Label("Label");
-            var but = new zebkit.ui.Button("Button");
-
-            // add created before label component as target of the shaper
-            // component and than add the shaper component into root panel
-            canvas.root.add(new zebkit.ui.design.ShaperPan(lab).properties({
-                bounds: [ 30,30,100,40]
-            }));
-
-            // add created before button component as target of the shaper
-            // component and than add the shaper component into root panel
-            canvas.root.add(new zebkit.ui.design.ShaperPan(but).properties({
-                bounds: [ 130,130,100,50]
-            }));
-
+     *
+     *       // create canvas
+     *       var canvas = new zebkit.ui.zCanvas(300,300);
+     *
+     *       // create two UI components
+     *       var lab = new zebkit.ui.Label("Label");
+     *       var but = new zebkit.ui.Button("Button");
+     *
+     *       // add created before label component as target of the shaper
+     *       // component and than add the shaper component into root panel
+     *       canvas.root.add(new zebkit.ui.design.ShaperPan(lab).properties({
+     *           bounds: [ 30,30,100,40]
+     *       }));
+     *
+     *       // add created before button component as target of the shaper
+     *       // component and than add the shaper component into root panel
+     *       canvas.root.add(new zebkit.ui.design.ShaperPan(but).properties({
+     *           bounds: [ 130,130,100,50]
+     *       }));
+     *
      * @class  zebkit.ui.design.ShaperPan
      * @constructor
      * @extends zebkit.ui.Panel
-     * @param {zebkit.ui.Panel} target a target UI component whose size and location
+     * @param {zebkit.ui.Panel} [target] a target UI component whose size and location
      * has to be controlled
      */
     pkg.ShaperPan = Class(ui.Panel, [
         function(t) {
-            this.shaperBr = new pkg.ShaperBorder();
+            this.border = new this.clazz.ShaperBorderSet({
+                "focuson"  : new pkg.ShaperBorder("blue"),
+                "focusoff" : new pkg.ShaperBorder("lightGray")
+            });
+
             this.$super(new zebkit.layout.BorderLayout());
-            this.px = this.py = 0;
-            this.setBorder(this.shaperBr);
             if (arguments.length > 0) {
                 this.add(t);
             }
         },
 
         function $clazz() {
-            this.colors = [ "lightGray", "blue" ];
+            this.ShaperBorderSet = Class(zebkit.draw.ViewSet, [
+                function() {
+                    this.$supera(arguments);
+                    this.activate("focusoff");
+                },
+
+                function $prototype() {
+                    this.detectAt = function(t, x, y) {
+                        if (this.activeView !== null && typeof this.activeView.detectAt !== 'undefined') {
+                            return this.activeView.detectAt(t, x, y);
+                        } else {
+                            return "none";
+                        }
+                    };
+
+                    this.setBorderColor = function(id, color) {
+                        zebkit.util.$validateValue(id, "focusoff", "focuson");
+                        this.views[id].color = color;
+                        return this;
+                    };
+                }
+            ]);
         },
 
         function $prototype() {
-            this.colors = null;
+            this.px = this.py = 0;
 
            /**
             * Indicates if controlled component can be moved
@@ -211,6 +245,7 @@ zebkit.package("ui.design", function(pkg, Class) {
             * @type {Boolean}
             * @default true
             */
+           this.isMoveEnabled = true;
 
            /**
             * Indicates if controlled component can be sized
@@ -218,6 +253,7 @@ zebkit.package("ui.design", function(pkg, Class) {
             * @type {Boolean}
             * @default true
             */
+            this.isResizeEnabled = true;
 
             /**
              * Minimal possible height or controlled component
@@ -225,6 +261,7 @@ zebkit.package("ui.design", function(pkg, Class) {
              * @type {Integer}
              * @default 12
              */
+             this.minHeight = 12;
 
             /**
              * Minimal possible width or controlled component
@@ -232,15 +269,18 @@ zebkit.package("ui.design", function(pkg, Class) {
              * @type {Integer}
              * @default 12
              */
-            this.minHeight = this.minWidth = 12;
-            this.canHaveFocus = this.isResizeEnabled = this.isMoveEnabled = true;
-            this.$state = null;
+            this.minWidth = 12;
 
-            this.catchInput = true;
+            this.canHaveFocus = true;
+            this.$state       = null;
+            this.catchInput   = true;
 
             this.getCursorType = function (t, x ,y) {
-                return this.kids.length > 0 ? CURSORS[this.shaperBr.detectAt(t, x, y)]
-                                            : null;
+                if (this.kids.length > 0 && this.border !== null && typeof this.border.detectAt !== 'undefined') {
+                    return CURSORS[this.border.detectAt(t, x, y)];
+                } else {
+                    return null;
+                }
             };
 
             /**
@@ -258,7 +298,12 @@ zebkit.package("ui.design", function(pkg, Class) {
                         y  = this.y + dy;
 
                     if (e.shiftKey) {
-                        if (this.isResizeEnabled === true && w > this.shaperBr.gap * 2 && h > this.shaperBr.gap * 2) {
+                        var minW = this.border !== null ? this.border.getLeft() + this.border.getRight()
+                                                        : 10,
+                            minH = this.border !== null ? this.border.getTop() + this.border.getBottom()
+                                                        : 10;
+
+                        if (this.isResizeEnabled === true && w > minW && h > minH) {
                             this.setSize(w, h);
                         }
                     } else {
@@ -283,14 +328,14 @@ zebkit.package("ui.design", function(pkg, Class) {
             this.pointerDragStarted = function(e) {
                 this.$state = null;
                 if (this.isResizeEnabled || this.isMoveEnabled) {
-                    var t = this.shaperBr.detectAt(this, e.x, e.y);
-                    if ((this.isMoveEnabled   === true || t !== "center")||
-                        (this.isResizeEnabled === true || t === "center")  )
+                    var t = this.border.detectAt(this, e.x, e.y);
+                    if ((this.isMoveEnabled   === true || t !== "center") ||
+                        (this.isResizeEnabled === true || t === "center")   )
                     {
                         this.$state = { top    : (t === "top"    || t === "topLeft"     || t === "topRight"   ) ? 1 : 0,
-                                       left   : (t === "left"   || t === "topLeft"     || t === "bottomLeft" ) ? 1 : 0,
-                                       right  : (t === "right"  || t === "topRight"    || t === "bottomRight") ? 1 : 0,
-                                       bottom : (t === "bottom" || t === "bottomRight" || t === "bottomLeft" ) ? 1 : 0 };
+                                        left   : (t === "left"   || t === "topLeft"     || t === "bottomLeft" ) ? 1 : 0,
+                                        right  : (t === "right"  || t === "topRight"    || t === "bottomRight") ? 1 : 0,
+                                        bottom : (t === "bottom" || t === "bottomRight" || t === "bottomLeft" ) ? 1 : 0 };
 
                         this.px = e.absX;
                         this.py = e.absY;
@@ -326,35 +371,15 @@ zebkit.package("ui.design", function(pkg, Class) {
 
             /**
              * Set the border color for the given focus state.
-             * @param {Boolean} b a focus state. true means the component holds focus,
-             * false means the component is not a focus owner.
+             * @param {String} id a focus state. Use "focuson" or "focusoff" as the
+             * parameter value
              * @param {String} color a border color
              * @method setBorderColor
              * @chainable
              */
-            this.setBorderColor = function (b, color) {
-                var rp = false;
-                if (this.colors === null) {
-                    this.colors = [ "lightGray", "blue"];
-                    rp = true;
-                }
-
-                var oldCol = this.colors[b?1:0];
-                if (oldCol !== color) {
-                    this.colors[b ? 1 : 0] = color;
-                    rp = true;
-                }
-
-                var hasFocus = this.hasFocus();
-                if (this.shaperBr.color !== this.colors[hasFocus?1:0]) {
-                    this.shaperBr.color = this.colors[hasFocus?1:0];
-                    rp = true;
-                }
-
-                if (rp) {
-                    this.repaint();
-                }
-
+            this.setBorderColor = function (id, color) {
+                this.border.setBorderColor(id, color);
+                this.repaint();
                 return this;
             };
 
@@ -368,9 +393,9 @@ zebkit.package("ui.design", function(pkg, Class) {
              * @chainable
              */
             this.setBorderColors = function(col1, col2) {
-                this.setColor(false, col1);
+                this.setBorderColor("focusoff", col1);
                 if (arguments.length > 1) {
-                    this.setColor(true, col2);
+                    this.setBorderColor("focuson", col2);
                 }
                 return this;
             };
@@ -392,12 +417,6 @@ zebkit.package("ui.design", function(pkg, Class) {
                            d.width + left + this.getRight(),
                            d.height + top + this.getBottom());
             this.$super(i, "center", d);
-        },
-
-        function focused(){
-            this.$super();
-            this.shaperBr.color = this.colors[this.hasFocus()? 1 : 0];
-            this.repaint();
         }
     ]);
 
@@ -410,7 +429,7 @@ zebkit.package("ui.design", function(pkg, Class) {
      * @extends zebkit.data.TreeModel
      */
     pkg.FormTreeModel = Class(zebkit.data.TreeModel, [
-        function (target){
+        function (target) {
             this.$super(this.buildModel(target, null));
         },
 
@@ -448,15 +467,15 @@ zebkit.package("ui.design", function(pkg, Class) {
 
                 if (r.comp === c) {
                     return c;
-                }
-
-                for(var i = 0;i < r.kids.length; i++) {
-                    var item = this.itemByComponent(c, r.kids[i]);
-                    if (item !== null) {
-                        return item;
+                } else {
+                    for(var i = 0;i < r.kids.length; i++) {
+                        var item = this.itemByComponent(c, r.kids[i]);
+                        if (item !== null) {
+                            return item;
+                        }
                     }
+                    return null;
                 }
-                return null;
             };
 
             this.createItem = function(comp){

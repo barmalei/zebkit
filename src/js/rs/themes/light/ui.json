@@ -554,8 +554,8 @@
 
     "Tooltip": {
         "Label": {
-            "font"   : "bold 11px Arial",
-            "color"  : "#0E4EAD",
+            "font"   : "12px Helvetica",
+            "color"  : "white",
             "padding": 4
         },
 

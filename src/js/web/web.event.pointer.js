@@ -146,12 +146,12 @@ zebkit.package("web", function(pkg, Class) {
                         var mp = $pointerPressedEvents[id];
                         if (mp.$adapter.element !== e.target && mp.$adapter.element.contains(e.target) === false) {
                             try {
+                                mp.$adapter.$UP(id, e, ME_STUB);
+                            } finally {
                                 if ($enteredElement !== null) {
                                     $enteredElement = null;
                                     mp.$adapter.destination.$pointerExited(ME_STUB);
                                 }
-                            } finally {
-                                mp.$adapter.$UP(id, e, ME_STUB);
                             }
                         }
                     }

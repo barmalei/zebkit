@@ -90,7 +90,6 @@
         "paintPosMarkerOver": false,
         "usePsMetric"       : true,
         "drawLines"         : [ false, true ],
-        "lineColor2"         : "lightGray",
         "navigationMode"    : "cell",
         "defCellAlignments" : [ "none", "center" ],
         "views": {
@@ -189,8 +188,7 @@
             "padding" : 2
         },
 
-        "border": "plain",
-        "background2" : "#ECFFE6"
+        "border": "plain"
     },
 
     "DateTextField" : {

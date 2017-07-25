@@ -43,7 +43,6 @@
 
         "Link": {
             "inheritProperties" : true,
-            "font2": "bold",
             "colors": {
                 "pressed.over" : "orange",
                 "out"          : "white",

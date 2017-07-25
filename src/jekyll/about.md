@@ -6,9 +6,6 @@ title: Zebkit ?
 
 Zebkit is unique UI platform that renders hierarchy of UI components on HTML5 Canvas. It has minimal dependencies from WEB context and built with zebkit easy JS OOP approach what makes feasible to adapt zebkit UI to other canvas implementations. 
 
-<script type="text/javascript" src="../build/zebkit.js">  
-</script>
-
 {% capture description %}
 Abstract JavaScript API, powerful OOP concept, rich UI components set is good basement for software engineering with reduced impact of typical WEB development mess.
 {% endcapture %}
@@ -19,8 +16,6 @@ Abstract JavaScript API, powerful OOP concept, rich UI components set is good ba
 Zebkit is perfect choice for development of mobile, single page applications with no limitations regarding desirable UI components set. Everything can be rendered with zebkit and packaged as a re-usable components.  
 
 <script>
-
-zebkit.config["ui.theme.name"] = "{{site.themeId}}";    
 
 zebkit.require(function() {
     eval(zebkit.import("ui", "layout"));
@@ -557,15 +552,15 @@ Find below zebkit application that has been created and loaded with the JSON sho
     <tr style="padding:0px;">
         <td align="left" 
             valign="top" 
-            style="border-color:black;padding:0px;">
+            style="padding:0px;">
 
-{% include zsample.html canvas_id='jsonSample' title="Custom shaped UI components" %}
+{% include zsample.html canvas_id='jsonSample' title="UI loaded and built with Zson" %}
 
 </td>
 
 <td align="left" 
     valign="top" 
-    style="padding:0px;border-color:black;">
+    style="padding:0px;">
 
 ```js
 eval(zebkit.import("ui", "layout"));

@@ -370,8 +370,8 @@ zebkit.package("ui.web", function(pkg, Class) {
                 if (o != null) {
                     pkg.$pointerOwner[e.identifier] = null;
                     return ui.events.fire("pointerExited", e.update(o,
-                                                                          this.$toElementX(e.pageX, e.pageY),
-                                                                          this.$toElementY(e.pageX, e.pageY)));
+                                                                    this.$toElementX(e.pageX, e.pageY),
+                                                                    this.$toElementY(e.pageX, e.pageY)));
                 }
             };
 

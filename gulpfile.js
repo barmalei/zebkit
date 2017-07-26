@@ -284,7 +284,7 @@ gulp.task('website-light', [ 'buildJS' ], function (gulpCallBack){
     var spawn  = require('child_process').spawn;
     var jekyll = spawn('jekyll', [ 'build',
                                    '--config', 'src/jekyll/_config-light.yml',
-                                   '-d', 'website',
+                                   '-d', 'website/light',
                                    '-s', 'src/jekyll/' ], { stdio: 'inherit' });
 
     jekyll.on('exit', function(code) {
@@ -297,7 +297,7 @@ gulp.task('website-dark', [ 'buildJS' ], function (gulpCallBack){
     var spawn  = require('child_process').spawn;
     var jekyll = spawn('jekyll', [ 'build',
                                    '--config', 'src/jekyll/_config-dark.yml',
-                                   '-d', 'website',
+                                   '-d', 'website/dark',
                                    '-s', 'src/jekyll/' ], { stdio: 'inherit' });
 
     jekyll.on('exit', function(code) {
@@ -305,14 +305,15 @@ gulp.task('website-dark', [ 'buildJS' ], function (gulpCallBack){
     });
 });
 
-gulp.task('website', [ "website-dark" ]);
+gulp.task('website', [ "website-dark", "website-light" ]);
+gulp.task('apidoc',  [ "apidoc-dark", "apidoc-light"  ]);
 
 // generate APIDOC
-gulp.task('apidoc', [ "zebkit" ], function (gulpCallBack){
+gulp.task('apidoc-dark', [ "zebkit" ], function (gulpCallBack){
     var spawn  = require('child_process').spawn;
     var yuidoc = spawn('yuidoc', ['-t', 'node_modules/yuidoc-zebkit-theme/themes/dark',
                                   '-c', 'src/yuidoc/yuidoc.json',
-                                  "-o", "apidoc",
+                                  "-o", "apidoc/dark",
                                   "-n",
                                   './build' ], { stdio: 'inherit' });
 
@@ -325,7 +326,7 @@ gulp.task('apidoc-light', [ "zebkit" ], function (gulpCallBack){
     var spawn  = require('child_process').spawn;
     var yuidoc = spawn('yuidoc', ['-t', 'node_modules/yuidoc-zebkit-theme/themes/light',
                                   '-c', 'src/yuidoc/yuidoc.json',
-                                  "-o", "apidoc",
+                                  "-o", "apidoc/light",
                                   "-n",
                                   './build' ], { stdio: 'inherit' });
 

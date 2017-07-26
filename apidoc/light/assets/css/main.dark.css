@@ -1,0 +1,434 @@
+/*
+Font sizes for all selectors other than the body are given in percentages,
+with 100% equal to 13px. To calculate a font size percentage, multiply the
+desired size in pixels by 7.6923076923.
+
+Here's a quick lookup table:
+
+10px - 76.923%
+11px - 84.615%
+12px - 92.308%
+13px - 100%
+14px - 107.692%
+15px - 115.385%
+16px - 123.077%
+17px - 130.769%
+18px - 138.462%
+19px - 146.154%
+20px - 153.846%
+*/
+
+html {
+    background: black;
+    color: #848482;
+    overflow-y: scroll;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "PT Sans", Helvetica, Arial, sans-serif;
+}
+
+/* -- Links ----------------------------------------------------------------- */
+a {
+    color: orange;
+    text-decoration: none;
+}
+
+a:hover { text-decoration: underline; }
+
+/* "Jump to Table of Contents" link is shown to assistive tools, but hidden from
+   sight until it's focused. */
+.jump {
+    position: absolute;
+    padding: 3px 6px;
+    left: -99999px;
+    top: 0;
+}
+
+.jump:focus { left: 40%; }
+
+/* -- Paragraphs ------------------------------------------------------------ */
+p { margin: 1.3em 0; }
+dd p, td p { margin-bottom: 0; }
+dd p:first-child, td p:first-child { margin-top: 0; }
+
+/* -- Headings -------------------------------------------------------------- */
+h1, h2, h3, h4, h5, h6 {
+    color: orange;
+    font-family: 'Trebuchet MS', sans-serif;
+    font-weight: bold;
+    line-height: 1.1;
+}
+
+h1 {
+    font-size: 184.6%;
+    margin: 0.75em 0 0.5em;
+}
+
+h2 {
+    font-size: 153.846%;
+}
+
+h3 { font-size: 138.462%; }
+
+h4 {
+    font-weight: normal;
+    padding: 4px;
+}
+
+h5, h6 { font-size: 107.692%; }
+
+/* -- Code and examples ----------------------------------------------------- */
+code, kbd, pre, samp {
+    font-family: Menlo, Monaco, 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Courier New', Courier, monospace;
+    font-size: 92.308%;
+    line-height: 1.35;
+}
+
+p code, p kbd, p samp, li code {
+    background: none;
+    border: 0px solid #EFEEED;
+    padding: 0 3px;
+}
+
+a code, a kbd, a samp,
+pre code, pre kbd, pre samp,
+table code, table kbd, table samp,
+.intro code, .intro kbd, .intro samp,
+.toc code, .toc kbd, .toc samp {
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+pre.code, pre.terminal, pre.cmd {
+    overflow-x: auto;
+    *overflow-x: scroll;
+    padding: 0.3em 0.6em;
+}
+
+pre.code {
+    background: none;
+    border: 0px solid orange;
+    border-left-width: 1px;
+}
+
+pre.terminal, pre.cmd {
+    background: #F0EFFC;
+    border: 1px solid #D0CBFB;
+    border-left: 5px solid #D0CBFB;
+}
+
+/* Don't reduce the font size of <code>/<kbd>/<samp> elements inside <pre>
+   blocks. */
+pre code, pre kbd, pre samp { font-size: 100%; }
+
+/* Used to denote text that shouldn't be selectable, such as line numbers or
+   shell prompts. Guess which browser this doesn't work in. */
+.noselect {
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+tbody tr:nth-child(odd) {
+   background-color: #222222;
+}
+
+/* -- Lists ----------------------------------------------------------------- */
+dd { margin: 0.2em 0 0.7em 1em; }
+dl { margin: 1em 0; }
+dt { font-weight: bold; }
+
+/* -- Tables ---------------------------------------------------------------- */
+caption, th { text-align: left; }
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+/* -- Layout and Content ---------------------------------------------------- */
+#doc {
+    margin: auto;
+    min-width: 1024px;
+}
+
+#main { width: 900px; }
+#sidebar { width: 270px; margin: 0 15px; }
+
+.content { padding: 0 20px 0 25px; }
+
+/* -- Sidebar --------------------------------------------------------------- */
+.sidebox {
+    background: none;
+
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+    -moz-box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
+    -webkit-box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
+    font-family: 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', 'Helvetica', 'Arial', sans-serif;
+    margin: 0 0 15px 0;
+    padding-bottom: 1px;
+}
+
+strong {
+    color: #FF7744;
+}
+
+.sidebox h2 {
+    -moz-border-radius: 4px 4px 0 0;
+    -webkit-border-radius: 4px 4px 0 0;
+    border-radius: 4px 4px 0 0;
+    color: #FF7744;
+    font-weight: bold;
+    font-size: 16px;
+    margin: 0;
+    padding: 4px 7px 5px;
+}
+
+.sidebox .bd {
+    font-size: 84.615%;
+    padding: 0 5px 0 8px;
+}
+
+.sidebox li { list-style-type: disc; color:#D4D5E3; }
+
+.sidebox ol, .sidebox ul {
+    margin-left: 0;
+    padding-left: 16px;
+}
+
+.sidebox ol ol, .sidebox ol ul,
+.sidebox ul ol, .sidebox ul ul {
+    margin: 0;
+    padding-left: 16px;
+}
+
+/* -- Table of Contents ----------------------------------------------------- */
+
+/* The #toc id refers to the single global table of contents, while the .toc
+   class refers to generic TOC lists that could be used throughout the page. */
+
+.toc code, .toc kbd, .toc samp { font-size: 100%; }
+.toc li { font-weight: bold; }
+.toc li li { font-weight: normal; }
+
+/* -- Intro and Example Boxes ----------------------------------------------- */
+.intro, .example { margin-bottom: 2em; }
+
+.example {
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+    -moz-box-shadow: 0 0 5px #bfbfbf;
+    -webkit-box-shadow: 0 0 5px #bfbfbf;
+    box-shadow: 0 0 5px #bfbfbf;
+    padding: 1em;
+}
+
+.intro {
+    background: none;
+    border: 0px solid #D4D8EB;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+
+    padding: 2px;
+}
+
+/* -- Other Styles ---------------------------------------------------------- */
+
+/* These are probably YUI-specific, and should be moved out of Selleck's default
+   theme. */
+
+.button {
+    border: 1px solid #dadada;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+    color: #444;
+    display: inline-block;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 92.308%;
+    font-weight: bold;
+    padding: 4px 13px 3px;
+    -moz-text-shadow: 1px 1px 0 #fff;
+    -webkit-text-shadow: 1px 1px 0 #fff;
+    text-shadow: 1px 1px 0 #fff;
+    white-space: nowrap;
+
+    background: #EFEFEF; /* old browsers */
+    background: -moz-linear-gradient(top, #f5f5f5 0%, #efefef 50%, #e5e5e5 51%, #dfdfdf 100%); /* firefox */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f5f5f5), color-stop(50%,#efefef), color-stop(51%,#e5e5e5), color-stop(100%,#dfdfdf)); /* webkit */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f5f5f5', endColorstr='#dfdfdf',GradientType=0 ); /* ie */
+}
+
+.button:hover {
+    border-color: #466899;
+    color: #fff;
+    text-decoration: none;
+    -moz-text-shadow: 1px 1px 0 #222;
+    -webkit-text-shadow: 1px 1px 0 #222;
+    text-shadow: 1px 1px 0 #222;
+
+    background: #6396D8; /* old browsers */
+    background: -moz-linear-gradient(top, #6396D8 0%, #5A83BC 50%, #547AB7 51%, #466899 100%); /* firefox */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#6396D8), color-stop(50%,#5A83BC), color-stop(51%,#547AB7), color-stop(100%,#466899)); /* webkit */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#6396D8', endColorstr='#466899',GradientType=0 ); /* ie */
+}
+
+.newwindow { text-align: center; }
+
+.header .version em {
+    display: block;
+    text-align: right;
+}
+
+.yui3-skin-sam #classdocs .yui3-tabview-panel {
+    background-color: transparent;
+}
+
+.yui3-skin-sam #classdocs .yui3-tabview-panel {
+    border: none;
+}
+
+.yui3-skin-sam .yui3-tabview .yui3-tab,
+.yui3-skin-sam .yui3-tabview .yui3-tab-selected,
+.yui3-skin-sam .yui3-tabview .yui3-tab-hover {
+    background: none;
+    color: #333333;
+    text-decoration: none;
+}
+
+.yui3-skin-sam .yui3-tabview .yui3-tab-label,
+.yui3-skin-sam .yui3-tabview .yui3-tab-selected .yui3-tab-label {
+    border: none;
+    background: none;
+    font-size: 100%;
+    color: #FF7744;
+}
+
+.yui3-skin-sam .yui3-tabview .yui3-tab-selected,
+.yui3-skin-sam .yui3-tabview .yui3-tab-hover {
+    background: none;
+    border-top: 2px solid red;
+    font-weight: bold;
+    color: #000;
+}
+
+.yui3-skin-sam .yui3-tabview-list {
+    border-width: 0 0 1px;
+    border-color: #FF7744;
+}
+
+
+a.external {
+    background-image: url(external-small.png);
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    padding-left: 16px;
+}
+
+#classdocs .item {
+    margin: 1em 0;
+    padding: 1.5em;
+}
+
+#classdocs .item .params p,
+    #classdocs .item .returns p,{
+    display: inline;
+}
+
+#classdocs .item em code, #classdocs .item em.comment {
+    color: green;
+}
+
+#classdocs .item em.comment a {
+    color: green;
+    text-decoration: underline;
+}
+
+#classdocs .foundat {
+    font-size: 11px;
+    font-style: normal;
+}
+
+.attrs .emits {
+    margin-left: 2em;
+    padding: .5em;
+    border-left: 1px dashed #ccc;
+    color: red;
+}
+
+abbr {
+    border-bottom: 1px dashed #ccc;
+    font-size: 80%;
+    cursor: help;
+}
+
+.crosslink {
+    color:red;
+}
+
+.property {
+    color: orange;
+}
+
+.prettyprint li.L0,
+.prettyprint li.L1,
+.prettyprint li.L2,
+.prettyprint li.L3,
+.prettyprint li.L5,
+.prettyprint li.L6,
+.prettyprint li.L7,
+.prettyprint li.L8 {
+    list-style: decimal;
+}
+
+ul li p {
+    margin-top: 0;
+}
+
+.type {
+    color: red;
+    display: inline;
+    font-weight: bold;
+}
+
+.method .name {
+    font-size: 110%;
+    color: orange;
+    border-width: 0px ;
+}
+
+.events .name {
+    font-size: 110%;
+    color: orange;
+    border-width: 0px ;
+}
+
+.hd .name {
+    font-size: 110%;
+    color: orange;
+    border-width: 0px ;
+}
+
+
+#hd {
+    background: -moz-linear-gradient(center top , #DCDBD9 0%, #F6F5F3 100%) repeat scroll 0 0 transparent;
+    padding: 0 15px 1px 20px;
+    margin-bottom: 15px;
+}
+
+#hd img {
+    margin-right: 10px;
+    vertical-align: middle;
+}
+

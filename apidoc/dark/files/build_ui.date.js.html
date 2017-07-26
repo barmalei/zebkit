@@ -1,0 +1,2275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>build/ui.date.js - zebkit</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/sunburst.css">
+    <link rel="stylesheet" href="../assets/css/main.dark.css" id="site_styles">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc" style="padding-top:16px;">
+    <div class="yui3-g">
+        <table style="width:auto">
+            <tr style="background:none">
+                <td valign="top" align="left" >
+                    <div id="sidebar" class="yui3-u">
+                        <div id="classes" class="sidebox">
+                            <div class="hd">
+                                <h2 class="no-toc">All packages</h2>
+                            </div>
+                            <div class="bd">
+                                <ul>
+                                        <li>
+                                            <a href="../classes/environment.html">environment</a>
+                                        </li>
+                                        <li>
+                                            <a href="../classes/zebkit.html">zebkit</a>
+                                        </li>
+                                        <li>
+                                            <a href="../classes/zebkit.data.html">zebkit.data</a>
+                                        </li>
+                                        <li>
+                                            <a href="../classes/zebkit.draw.html">zebkit.draw</a>
+                                        </li>
+                                        <li>
+                                            <a href="../classes/zebkit.io.html">zebkit.io</a>
+                                        </li>
+                                        <li>
+                                            <a href="../classes/zebkit.layout.html">zebkit.layout</a>
+                                        </li>
+                                        <li>
+                                            <a href="../classes/zebkit.ui.html">zebkit.ui</a>
+                                        </li>
+                                        <li>
+                                            <a href="../classes/zebkit.ui.date.html">zebkit.ui.date</a>
+                                        </li>
+                                        <li>
+                                            <a href="../classes/zebkit.ui.design.html">zebkit.ui.design</a>
+                                        </li>
+                                        <li>
+                                            <a href="../classes/zebkit.ui.event.html">zebkit.ui.event</a>
+                                        </li>
+                                        <li>
+                                            <a href="../classes/zebkit.ui.grid.html">zebkit.ui.grid</a>
+                                        </li>
+                                        <li>
+                                            <a href="../classes/zebkit.ui.tree.html">zebkit.ui.tree</a>
+                                        </li>
+                                        <li>
+                                            <a href="../classes/zebkit.ui.vk.html">zebkit.ui.vk</a>
+                                        </li>
+                                        <li>
+                                            <a href="../classes/zebkit.ui.web.html">zebkit.ui.web</a>
+                                        </li>
+                                        <li>
+                                            <a href="../classes/zebkit.util.html">zebkit.util</a>
+                                        </li>
+                                        <li>
+                                            <a href="../classes/zebkit.web.html">zebkit.web</a>
+                                        </li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        
+                        <div id="classes" class="sidebox">
+                            <div class="hd">
+                                <h2 class="no-toc">All classes</h2>
+                            </div>
+                            <div class="bd">
+                                <table style="background:none;" border="0">
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.Class.html">zebkit.Class</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.Class.zObject.html">zebkit.Class.zObject</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.data.DataModel.html">zebkit.data.DataModel</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.data.Item.html">zebkit.data.Item</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.data.ListModel.html">zebkit.data.ListModel</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.data.Matrix.html">zebkit.data.Matrix</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.data.SingleLineTxt.html">zebkit.data.SingleLineTxt</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.data.Text.html">zebkit.data.Text</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.data.TextModel.html">zebkit.data.TextModel</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.data.TreeModel.html">zebkit.data.TreeModel</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.DoIt.html">zebkit.DoIt</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.ArrowView.html">zebkit.draw.ArrowView</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.BaseTextRender.html">zebkit.draw.BaseTextRender</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.BaseViewProvider.html">zebkit.draw.BaseViewProvider</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.Border.html">zebkit.draw.Border</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.CompositeView.html">zebkit.draw.CompositeView</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.Dotted.html">zebkit.draw.Dotted</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.Etched.html">zebkit.draw.Etched</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.Gradient.html">zebkit.draw.Gradient</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.Line.html">zebkit.draw.Line</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.PasswordText.html">zebkit.draw.PasswordText</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.Pattern.html">zebkit.draw.Pattern</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.Picture.html">zebkit.draw.Picture</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.Radial.html">zebkit.draw.Radial</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.RadioView.html">zebkit.draw.RadioView</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.Raised.html">zebkit.draw.Raised</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.Render.html">zebkit.draw.Render</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.RoundBorder.html">zebkit.draw.RoundBorder</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.Shape.html">zebkit.draw.Shape</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.StringRender.html">zebkit.draw.StringRender</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.Sunken.html">zebkit.draw.Sunken</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.TextRender.html">zebkit.draw.TextRender</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.TitledBorder.html">zebkit.draw.TitledBorder</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.ToggleView.html">zebkit.draw.ToggleView</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.TriangleShape.html">zebkit.draw.TriangleShape</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.View.html">zebkit.draw.View</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.ViewSet.html">zebkit.draw.ViewSet</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.Dummy.html">zebkit.Dummy</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.EventProducer.html">zebkit.EventProducer</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.Font.html">zebkit.Font</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.Interface.html">zebkit.Interface</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.io.HTTP.html">zebkit.io.HTTP</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.io.JRPC.html">zebkit.io.JRPC</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.io.Service.html">zebkit.io.Service</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.io.XRPC.html">zebkit.io.XRPC</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.layout.BorderLayout.html">zebkit.layout.BorderLayout</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.layout.Constraints.html">zebkit.layout.Constraints</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.layout.FlowLayout.html">zebkit.layout.FlowLayout</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.layout.GridLayout.html">zebkit.layout.GridLayout</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.layout.Layout.html">zebkit.layout.Layout</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.layout.Layoutable.html">zebkit.layout.Layoutable</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.layout.ListLayout.html">zebkit.layout.ListLayout</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.layout.PercentLayout.html">zebkit.layout.PercentLayout</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.layout.RasterLayout.html">zebkit.layout.RasterLayout</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.layout.StackLayout.html">zebkit.layout.StackLayout</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.Package.html">zebkit.Package</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.ArrowButton.html">zebkit.ui.ArrowButton</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.BaseList.html">zebkit.ui.BaseList</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.BoldLabel.html">zebkit.ui.BoldLabel</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.BorderPan.html">zebkit.ui.BorderPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Button.html">zebkit.ui.Button</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.ButtonRepeatMix.html">zebkit.ui.ButtonRepeatMix</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Checkbox.html">zebkit.ui.Checkbox</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Checkbox.Box.html">zebkit.ui.Checkbox.Box</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.CollapsiblePan.html">zebkit.ui.CollapsiblePan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Combo.html">zebkit.ui.Combo</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Combo.ComboPadPan.html">zebkit.ui.Combo.ComboPadPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Combo.ContentPan.html">zebkit.ui.Combo.ContentPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Combo.EditableContentPan.html">zebkit.ui.Combo.EditableContentPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Combo.ReadonlyContentPan.html">zebkit.ui.Combo.ReadonlyContentPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.CompList.html">zebkit.ui.CompList</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.CompositeEvStatePan.html">zebkit.ui.CompositeEvStatePan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.CompRender.html">zebkit.ui.CompRender</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Cursor.html">zebkit.ui.Cursor</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.DaysGrid.html">zebkit.ui.date.DaysGrid</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.DecorationViews.html">zebkit.ui.DecorationViews</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.design.FormTreeModel.html">zebkit.ui.design.FormTreeModel</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.design.ShaperBorder.html">zebkit.ui.design.ShaperBorder</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.design.ShaperPan.html">zebkit.ui.design.ShaperPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.event.Clipboard.html">zebkit.ui.event.Clipboard</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.event.CompEvent.html">zebkit.ui.event.CompEvent</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.event.CursorManager.html">zebkit.ui.event.CursorManager</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.event.EventManager.html">zebkit.ui.event.EventManager</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.event.FocusEvent.html">zebkit.ui.event.FocusEvent</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.event.FocusManager.html">zebkit.ui.event.FocusManager</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.event.KeyEvent.html">zebkit.ui.event.KeyEvent</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.event.Manager.html">zebkit.ui.event.Manager</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.event.MenuEvent.html">zebkit.ui.event.MenuEvent</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.event.PointerEvent.html">zebkit.ui.event.PointerEvent</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.event.ShortcutEvent.html">zebkit.ui.event.ShortcutEvent</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.event.ShortcutManager.html">zebkit.ui.event.ShortcutManager</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.event.WinEvent.html">zebkit.ui.event.WinEvent</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.EvStatePan.html">zebkit.ui.EvStatePan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.BaseCaption.html">zebkit.ui.grid.BaseCaption</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.CaptionViewProvider.html">zebkit.ui.grid.CaptionViewProvider</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.CellsVisibility.html">zebkit.ui.grid.CellsVisibility</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.CompGridCaption.html">zebkit.ui.grid.CompGridCaption</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.CompGridCaption.TitlePan.html">zebkit.ui.grid.CompGridCaption.TitlePan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.DefEditors.html">zebkit.ui.grid.DefEditors</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.DefViews.html">zebkit.ui.grid.DefViews</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.Grid.html">zebkit.ui.grid.Grid</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.GridCaption.html">zebkit.ui.grid.GridCaption</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.GridStretchPan.html">zebkit.ui.grid.GridStretchPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.LeftCompGridCaption.html">zebkit.ui.grid.LeftCompGridCaption</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.LeftGridCaption.html">zebkit.ui.grid.LeftGridCaption</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.Metrics.html">zebkit.ui.grid.Metrics</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.StrippedRows.html">zebkit.ui.grid.StrippedRows</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Group.html">zebkit.ui.Group</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.ImageLabel.html">zebkit.ui.ImageLabel</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.ImagePan.html">zebkit.ui.ImagePan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Label.html">zebkit.ui.Label</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Line.html">zebkit.ui.Line</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.LinearRulerPan.html">zebkit.ui.LinearRulerPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Link.html">zebkit.ui.Link</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.List.html">zebkit.ui.List</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.List.ViewProvider.html">zebkit.ui.List.ViewProvider</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Menu.html">zebkit.ui.Menu</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Menubar.html">zebkit.ui.Menubar</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.MenuItem.html">zebkit.ui.MenuItem</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.MobileScrollMan.html">zebkit.ui.MobileScrollMan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Panel.html">zebkit.ui.Panel</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.PassTextField.html">zebkit.ui.PassTextField</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.PointRulerPan.html">zebkit.ui.PointRulerPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.PointRulerPan.DeltaPointsGenerator.html">zebkit.ui.PointRulerPan.DeltaPointsGenerator</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.PointRulerPan.PointsGenerator.html">zebkit.ui.PointRulerPan.PointsGenerator</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.PopupLayer.html">zebkit.ui.PopupLayer</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.PopupLayerMix.html">zebkit.ui.PopupLayerMix</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Progress.html">zebkit.ui.Progress</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Radiobox.html">zebkit.ui.Radiobox</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.RootLayer.html">zebkit.ui.RootLayer</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.RootLayerMix.html">zebkit.ui.RootLayerMix</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.RulerPan.html">zebkit.ui.RulerPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.RulerPan.NumLabels.html">zebkit.ui.RulerPan.NumLabels</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.RulerPan.PercentageLabels.html">zebkit.ui.RulerPan.PercentageLabels</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Scroll.html">zebkit.ui.Scroll</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.ScrollManager.html">zebkit.ui.ScrollManager</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.ScrollPan.html">zebkit.ui.ScrollPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Slider.html">zebkit.ui.Slider</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.SplitPan.html">zebkit.ui.SplitPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.StackPan.html">zebkit.ui.StackPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.StatePan.html">zebkit.ui.StatePan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.StatusBar.html">zebkit.ui.StatusBar</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Tabs.html">zebkit.ui.Tabs</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Tabs.TabView.html">zebkit.ui.Tabs.TabView</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.TextArea.html">zebkit.ui.TextArea</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.TextField.html">zebkit.ui.TextField</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.TextField.HintRender.html">zebkit.ui.TextField.HintRender</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Toolbar.html">zebkit.ui.Toolbar</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Tooltip.html">zebkit.ui.Tooltip</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.TooltipManager.html">zebkit.ui.TooltipManager</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.tree.BaseTree.html">zebkit.ui.tree.BaseTree</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.tree.CompTree.html">zebkit.ui.tree.CompTree</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.tree.DefEditors.html">zebkit.ui.tree.DefEditors</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.tree.DefViews.html">zebkit.ui.tree.DefViews</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.tree.Tree.html">zebkit.ui.tree.Tree</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.ViewPan.html">zebkit.ui.ViewPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.web.CursorManager.html">zebkit.ui.web.CursorManager</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.web.HtmlCanvas.html">zebkit.ui.web.HtmlCanvas</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.web.HtmlElement.html">zebkit.ui.web.HtmlElement</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.web.HtmlFocusableElement.html">zebkit.ui.web.HtmlFocusableElement</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.web.HtmlLayer.html">zebkit.ui.web.HtmlLayer</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.web.HtmlLink.html">zebkit.ui.web.HtmlLink</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.web.HtmlTextArea.html">zebkit.ui.web.HtmlTextArea</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.web.HtmlTextField.html">zebkit.ui.web.HtmlTextField</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.web.HtmlTextInput.html">zebkit.ui.web.HtmlTextInput</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.web.HtmlWinCanvas.html">zebkit.ui.web.HtmlWinCanvas</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.web.PopupLayer.html">zebkit.ui.web.PopupLayer</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.web.RootLayer.html">zebkit.ui.web.RootLayer</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.web.VideoPan.html">zebkit.ui.web.VideoPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.web.WinLayer.html">zebkit.ui.web.WinLayer</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.Window.html">zebkit.ui.Window</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.WinLayer.html">zebkit.ui.WinLayer</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.zCanvas.html">zebkit.ui.zCanvas</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.URI.html">zebkit.URI</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.util.Event.html">zebkit.util.Event</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.util.Listeners.html">zebkit.util.Listeners</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.util.PathSearch.html">zebkit.util.PathSearch</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.util.Position.html">zebkit.util.Position</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.util.Position.Metric.html">zebkit.util.Position.Metric</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.util.rgb.html">zebkit.util.rgb</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.util.SingleColPosition.html">zebkit.util.SingleColPosition</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.util.TasksSet.html">zebkit.util.TasksSet</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.util.TasksSet.Task.html">zebkit.util.TasksSet.Task</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.util.Zson.html">zebkit.util.Zson</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.web.Clipboard.html">zebkit.web.Clipboard</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.web.KeyEvent.html">zebkit.web.KeyEvent</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.web.KeyEventUninfier.html">zebkit.web.KeyEventUninfier</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.web.MouseWheelSupport.html">zebkit.web.MouseWheelSupport</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.web.PointerEvent.html">zebkit.web.PointerEvent</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.web.PointerEventUnifier.html">zebkit.web.PointerEventUnifier</a>
+                                            </td>
+                                        </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+
+                <td valign="top" align="left">
+                    <div id="main" class="yui3-u">
+                        <div class="content"><h4>build/ui.date.js</h4>
+
+<pre class="code prettyprint linenums">
+zebkit.package(&quot;ui.date&quot;, function(pkg, Class) {
+    var ui = zebkit.ui;
+
+    /**
+     * The package contains number of classes to implement
+     * UI date related component like calendar, date field etc.
+     *
+     *     zebkit.require(&quot;ui&quot;, &quot;ui.date&quot;, &quot;layout&quot;, function(ui, date, layout) {
+     *         var root = (new ui.zCanvas()).root;
+     *         root.setLayout(new layout.FlowLayout(&quot;center&quot;, &quot;center&quot;, &quot;horizontal&quot;, 8));
+     *
+     *         // add calendar component
+     *         root.add(new date.Calendar());
+     *     });
+     *
+     * @class zebkit.ui.date
+     * @access package
+     */
+    pkg.compareDates = function(d1, d2) {
+        if (arguments.length === 2 &amp;&amp; d1 === d2) {
+            return 0;
+        }
+
+        // exclude null dates
+        if (d1 === null || d2 === null) {
+            return null;
+        }
+
+        var day1, month1, year1,
+            day2, month2, year2,
+            i = 1;
+
+        if (d1 instanceof Date) {
+            day1   = d1.getDate();
+            month1 = d1.getMonth();
+            year1  = d1.getFullYear();
+        } else {
+            day1   = arguments[0];
+            month1 = arguments[1];
+            year1  = arguments[2];
+            i = 3;
+        }
+
+        d2 = arguments[i];
+        if (d2 instanceof Date) {
+            day2   = d2.getDate();
+            month2 = d2.getMonth();
+            year2  = d2.getFullYear();
+        } else {
+            day2   = arguments[i];
+            month2 = arguments[i + 1];
+            year2  = arguments[i + 2];
+        }
+
+        if (day1 === day2 &amp;&amp; month1 === month2 &amp;&amp; year1 === year2) {
+            return 0;
+        }
+
+        if (year1 &gt; year2 ||
+            (year1 === year2 &amp;&amp; month1 &gt; month2) ||
+            (year1 === year2 &amp;&amp; month1 === month2 &amp;&amp; day1 &gt; day2))
+        {
+            return 1;
+        }
+
+        return -1;
+    };
+
+
+    Date.prototype.daysInMonth = function() {
+        return new Date(this.getFullYear(), this.getMonth() + 1, 0).getDate();
+    };
+
+    Date.prototype.firstWeekDay = function() {
+        return new Date(this.getFullYear(), this.getMonth(), 1).getDay();
+    };
+
+    Date.prototype.prevMonth = function() {
+        return new Date(this.getFullYear(), this.getMonth() - 1, 1);
+    };
+
+    Date.prototype.nextMonth = function() {
+        return new Date(this.getFullYear(), this.getMonth() + 1, 1);
+    };
+
+    Date.prototype.isValid = function() {
+        // invalid dates have time set
+        // to NaN, NaN never equals each other
+        return this.getTime() === this.getTime();
+    };
+
+    Date.prototype.getMonthName = function() {
+
+        return pkg.MONTHS[this.getMonth()].name;
+    };
+
+    Date.prototype.getMonthNick = function() {
+        return pkg.MONTHS[this.getMonth()].nickname;
+    };
+
+    Date.prototype.getWeekdayName = function() {
+        return pkg.WEEKS[this.getDay()].name;
+    };
+
+    Date.prototype.getWeekdayNick = function() {
+        return pkg.WEEKS[this.getDay()].nickname;
+    };
+
+    Date.prototype.getMonth2 = function() {
+        return this.getMonth() + 1;
+    };
+
+    pkg.validateDate = function(day, month, year) {
+        var d = (arguments.length &lt; 3) ? (arguments.length === 1 ? day : new Date(month, day))
+                                       : new Date(year, month, day);
+        if (d.isValid() === false) {
+            throw new Error(&quot;Invalid date : &quot; + d);
+        }
+    };
+
+    /**
+     *  Shows the given month and year days.
+     *  @constructor
+     *  @class zebkit.ui.date.DaysGrid
+     *  @extends zebkit.ui.grid.Grid
+     */
+    pkg.DaysGrid = Class(ui.grid.Grid, [
+        function () {
+            this.tags    = {};
+            this.view    = new ui.CompRender(null);
+            this.itemPan = new this.clazz.ItemPan();
+
+            this.$super(6, 7);
+
+            //  pre-fill model with data
+            for(var i = 0; i &lt; this.model.rows * this.model.cols; i++) {
+                this.model.puti(i, new this.clazz.Item());
+            }
+
+            this.setViewProvider(this);
+            this.caption = new this.clazz.GridCaption();
+            this.add(&quot;top&quot;, this.caption);
+        },
+
+        function $clazz() {
+            this.Item = function() {
+                this.tags    = [];
+                this.$exists = {};
+                this.day = this.month = this.year = 0;
+            };
+
+            this.Item.prototype = {
+                set : function(day, month, year) {
+                    this.day   = day;
+                    this.month = month;
+                    this.year  = year;
+                },
+
+                tag : function(tag) {
+                    if (tag === null || typeof tag === &#x27;undefined&#x27;) {
+                        throw new Error();
+                    }
+
+                    if (this.hasTag(tag) === false) {
+                        this.tags.push(tag);
+                        this.$exists[tag] = this.tags.length - 1;
+                        return true;
+                    }
+                    return false;
+                },
+
+                untag : function(tag) {
+                    if (tag === null || typeof tag === &#x27;undefined&#x27;) {
+                        throw new Error();
+                    }
+
+                    if (this.hasTag(tag) === true) {
+                        var i = this.$exists[tag];
+                        this.tags.splice(i, 1);
+                        for(; i &lt; this.tags.length; i++) {
+                            this.$exists[tag]--;
+                        }
+                        return true;
+                    }
+                    return false;
+                },
+
+                hasTag : function(tag) {
+                    return this.$exists[tag] &gt;= 0;
+                },
+
+                untagAll : function() {
+                    if (this.tags.length &gt; 0) {
+                        this.tags.length = 0;
+                        this.tags        = [];
+                        this.$exists     = {};
+                    }
+                }
+            };
+
+            this.ItemPan = Class(ui.Panel, [
+                function () {
+                    this.icon  = new ui.ViewPan();
+                    this.label = new ui.Label(new zebkit.draw.DecoratedTextRender(&quot;&quot;));
+                    this.$super();
+                    this.add(this.icon);
+                    this.add(this.label);
+                },
+
+                function $prototype() {
+                    this.setLabel = function(p) {
+                        this.label.properties(p);
+                    };
+
+                    this.setColor = function(c) {
+                        this.label.setColor(c);
+                    };
+
+                    this.setFont = function(f) {
+                        this.label.setFont(f);
+                    };
+
+                    this.setValue = function(v) {
+                        this.label.setValue(&quot;&quot; + v);
+                    };
+
+                    this.setIconView = function(v) {
+                        this.icon.setView(v);
+                    };
+
+                    this.setIcon = function(p) {
+                        this.icon.properties(p);
+                    };
+
+                    this.setTextDecorations = function(d) {
+                        this.label.view.setDecorations(d);
+                    };
+                }
+            ]);
+
+            this.Listeners = this.$parent.Listeners.ListenersClass(&quot;cellSelected&quot;, &quot;monthShown&quot;);
+
+            this.GridCaption = Class(ui.grid.GridCaption, [
+                function $clazz() {
+                    this.Label = Class(ui.Label, [
+                        function setNickname(name) {
+                            return this.setValue(name);
+                        }
+                    ]);
+                },
+
+                function $prototype() {
+                    this.setNamesOfWeekDays = function(daysOfWeek) {
+                        for(var i = 0; i &lt; daysOfWeek.length; i++) {
+                            this.setLabel(i, new this.clazz.Label().properties(daysOfWeek[i]));
+                        }
+                    };
+                }
+            ]);
+        },
+
+        function $prototype() {
+            this.tagger = null;
+
+            this.retagModel = function() {
+                var i = 0;
+
+                for(i = 0; i &lt; this.model.rows * this.model.cols; i++) {
+                    var item = this.model.geti(i);
+                    item.untagAll();
+
+                    if (item.year &lt; this.year || (item.year === this.year &amp;&amp; item.month &lt; this.month)) {
+                        item.tag(&quot;prevMonth&quot;);
+                    } else {
+                        if (item.year &gt; this.year || (item.year === this.year &amp;&amp; item.month &gt; this.month)) {
+                            item.tag(&quot;nextMonth&quot;);
+                        } else {
+                            item.tag(&quot;shownMonth&quot;);
+                        }
+                    }
+
+                    if (this.isItemSelectable(item) === false) {
+                        item.tag(&quot;notSelectable&quot;);
+                    }
+
+                    if (this.tagger !== null) {
+                        this.tagger.tag(item);
+                    }
+                }
+
+                i = this.indexOfItem(new Date());
+                if (i &gt; 0) {
+                    this.model.geti(i).tag(&quot;today&quot;);
+                }
+
+                this.vrp();
+            };
+
+            /**
+             * Set a month and an year with the given arguments.
+             * @param {Date} [date] a date object.
+             * @param {Integer} [month] a month.
+             * @param {Integer} [year] a full year.
+             * @method setValue
+             */
+            this.setValue = function(month, year) {
+                if (arguments.length === 1) {
+                    if (month instanceof Date) {
+                        year  = month.getFullYear();
+                        month = month.getMonth();
+                    } else {
+                        year = (new Date()).getFullYear();
+                    }
+                } else if (arguments.length === 0) {
+                    var cd = new Date();
+                    year  = cd.getFullYear();
+                    month = cd.getMonth();
+                }
+
+                pkg.validateDate(month, year);
+
+                if (this.month !== month || this.year !== year) {
+                    var prevYear  = this.year,
+                        prevMonth = this.month;
+
+                    this.month = month;
+                    this.year  = year;
+
+                    if (prevMonth &gt;= 0) {
+                        this.clearCellsSelection();
+                    }
+
+                    var date         = new Date(this.year, this.month),
+                        firstWeekDay = date.firstWeekDay(),
+                        pdate        = date.prevMonth(),
+                        ndate        = date.nextMonth(),
+                        pdays        = pdate.daysInMonth(),
+                        i            = 0,
+                        d            = 0;
+
+                    // if current month starts from the first cell
+                    // shift one week ahead to shown number of
+                    // previous month days
+                    if (firstWeekDay === 0) {
+                        firstWeekDay += 7;
+                    }
+
+                    for(; i &lt; firstWeekDay; i++) {
+                        this.model.geti(i).set(
+                            pdays - firstWeekDay + i + 1,
+                            pdate.getMonth(),
+                            pdate.getFullYear()
+                        );
+                    }
+
+                    for(d = 1; d &lt;= date.daysInMonth(); i++, d++) {
+                        this.model.geti(i).set(d, month, year);
+                    }
+
+                    for(d = 1; i &lt; this.model.rows * this.model.cols; i++, d++) {
+                        this.model.geti(i).set(d, ndate.getMonth(), ndate.getFullYear());
+                    }
+
+                    this.retagModel();
+                    this._.monthShown(this, prevMonth, prevYear);
+                }
+            };
+
+            /**
+             * Get days grid cell color.
+             * @param  {Integer} row  a row
+             * @param  {Integer} col  a column
+             * @return {String} a cell color
+             * @method  getCellColor
+             */
+            this.getCellColor = function(grid, row, col) {
+                var color = null,
+                    tags  = this.tags;
+
+                if (tags.length &gt; 0) {
+                    for(var i = 0; i &lt; tags.length; i++) {
+                        var k = tags[i];
+                        if (this.tags.hasOwnProperty(k) &amp;&amp; this.tags[k] !== null) {
+                            color = this.tags[k].cellColor;
+                        }
+                    }
+                }
+                return color;
+            };
+
+            this.getViewComponent = function(item) {
+                this.itemPan.properties(this.itemPan.clazz);
+
+                if (item.tags.length &gt; 0) {
+                    for(var i = 0; i &lt; item.tags.length; i++) {
+                        var k = item.tags[i];
+                        if (this.tags.hasOwnProperty(k) &amp;&amp; this.tags[k] !== null) {
+                            this.itemPan.properties(this.tags[k]);
+                        }
+                    }
+                }
+
+                this.itemPan.setValue(item.day);
+                return this.itemPan;
+            };
+
+            this.getView = function(grid, row, col, data) {
+                this.view.setValue(this.getViewComponent(data));
+                return this.view;
+            };
+
+            this.isItemSelectable = function (item) {
+                return true;
+            };
+
+            this.isSelected = function (row, col) {
+                return row &gt;= 0 &amp;&amp; col &gt;= 0 &amp;&amp; this.model.get(row, col).isSelected;
+            };
+
+            this.indexOfItem = function(day, month, year) {
+                if (arguments.length === 1) {
+                    month = day.getMonth();
+                    year  = day.getFullYear();
+                    day   = day.getDate();
+                }
+
+                var m = this.model.rows * this.model.cols;
+                for(var i = 0; i &lt; m; i++) {
+                    var item = this.model.geti(i);
+                    if (item.year === year &amp;&amp; item.day === day &amp;&amp; item.month === month) {
+                        return i;
+                    }
+                }
+                return -1;
+            };
+
+            this.pointerMoved = function(e) {
+                var p = this.cellByLocation(e.x, e.y);
+                if (p !== null) {
+                    this.position.setRowCol(p.row, p.col);
+                }
+                else {
+                    this.position.setOffset(null);
+                }
+            };
+
+            this.clearCellsSelection = function() {
+                for(var i = 0;  i &lt; this.model.rows * this.model.cols; i++) {
+                    var item = this.model.geti(i);
+                    if (item.isSelected === true) {
+                        this.selectCell(i, false);
+                    }
+                }
+            };
+
+            this.pointerExited = function(e) {
+                this.position.setOffset(null);
+            };
+
+            this.setTagger = function(tagger) {
+                if (this.tagger !== tagger) {
+                    this.tagger = tagger;
+                    this.retagModel();
+                }
+            };
+
+            this.setTags = function(tags) {
+                this.tags = zebkit.clone(tags);
+                this.vrp();
+
+            };
+
+            this.addTags = function(tags) {
+                for(var k in tags) {
+                    this.tags[k] = zebkit.clone(tags[k]);
+                }
+                this.vrp();
+            };
+
+            this.setTag = function(tag, p) {
+                this.tags[tag] = zebkit.clone(p);
+                this.vrp();
+            };
+
+            this.selectCell = function(offset, b) {
+                if (arguments.length &gt; 2) {
+                    offset = this.indexOfItem(arguments[0], arguments[1], arguments[2]);
+                    b = arguments[3];
+                }
+
+                if (offset === null || typeof offset === &#x27;undefined&#x27;) {
+                    throw new Error(&quot;&quot; + offset);
+                }
+
+                if (offset instanceof Date) {
+                    offset = this.indexOfItem(offset);
+                }
+
+                var item = this.model.geti(offset);
+                if (item.isSelected !== b &amp;&amp; (b === false || this.isItemSelectable(item))) {
+                    item.isSelected = b;
+                    this.repaint();
+                    this._.cellSelected(this, offset, b);
+                }
+            };
+        },
+
+        function rPsMetric() {
+            this.$super();
+
+            var max = 0, cols = this.getGridCols(), i = 0;
+            for(i = 0; i &lt; cols; i++) {
+                if (this.colWidths[i] &gt; max) {
+                    max = this.colWidths[i];
+                }
+            }
+
+            for(i = 0; i &lt; cols; i++) {
+                this.colWidths[i] = max;
+            }
+        },
+
+        function $getPosMarker() {
+            var item = this.model.geti(this.position.offset);
+            return this.isItemSelectable(item) === false ? this.views.notSelectableMarker
+                                                         : this.$super();
+        },
+
+        function pointerClicked(e) {
+            this.$super(e);
+            var p = this.cellByLocation(e.x, e.y);
+            if (p !== null) {
+                this.selectCell(p.row * this.getGridCols() + p.col, true);
+            }
+        },
+
+        function keyPressed(e) {
+            if (e.code !== &quot;Enter&quot;) {
+                return this.$super(e);
+            }
+
+            if (this.position.offset &gt;= 0) {
+                this.selectCell(this.position.offset, true);
+            }
+        }
+    ]);
+
+    pkg.Calendar = new Class(ui.Panel, [
+        function(date) {
+            if (arguments.length === 0) {
+                date = new Date();
+            }
+
+            var $this = this;
+
+            this.$super(new zebkit.layout.BorderLayout());
+            this.monthDaysGrid = new pkg.DaysGrid([
+                function isItemSelectable(item) {
+                    return (item.tags.length &gt; 0 &amp;&amp; item.hasTag(&quot;shownMonth&quot;) === null) ||
+                           $this.canDateBeSet(new Date(item.year, item.month, item.day));
+                }
+
+            ]);
+            this.monthDaysGrid.on(this);
+
+            this._ = new this.clazz.Listeners();
+
+            this.comboMonth = new this.clazz.MonthsCombo();
+            this.comboMonth.content.setCalcPsByContent(true);
+            this.comboMonth.winpad.adjustToComboSize = false;
+            this.comboMonth.on(function(src) {
+                $this.showMonth(src.list.selectedIndex, $this.monthDaysGrid.year);
+            });
+
+            this.yearText = new this.clazz.YearField(&quot;&quot;, [
+                function fireNextYear() {
+                    $this.showNextYear();
+                },
+
+                function firePrevYear() {
+                    $this.showPrevYear();
+                }
+            ]);
+
+            var topPan = new this.clazz.InfoPan({
+                layout: new zebkit.layout.BorderLayout(),
+                kids  : {
+                    center: new ui.Panel({
+                        layout : new zebkit.layout.FlowLayout(&quot;center&quot;, &quot;center&quot;),
+                        kids   : [
+                            this.comboMonth,
+                            new ui.Panel({
+                                layout : new zebkit.layout.BorderLayout(),
+                                kids   : {
+                                    center : this.yearText,
+                                    right  : new ui.Panel({
+                                        layout: new zebkit.layout.FlowLayout(&quot;center&quot;, &quot;center&quot;, &quot;vertical&quot;, 1),
+                                        kids  : [
+                                            new this.clazz.TopArrowButton(),
+                                            new this.clazz.BottomArrowButton()
+                                        ]
+                                    })
+                                }
+                            })
+                        ]
+                    }),
+
+                    left: new ui.Panel({
+                        layout : new zebkit.layout.FlowLayout(&quot;center&quot;, &quot;center&quot;, &quot;horizontal&quot;, 3),
+                        kids   : [
+                            new this.clazz.LeftArrowButton(),
+                            new this.clazz.DotButton(),
+                            new this.clazz.RightArrowButton()
+                        ]
+                    }),
+
+                    right: new ui.Panel({
+                        layout : new zebkit.layout.FlowLayout(&quot;center&quot;, &quot;bottom&quot;),
+                        kids   : new this.clazz.Link(&quot;today&quot;),
+                        padding: [0,8,4,0]
+                    })
+                }
+            });
+
+            this.add(&quot;top&quot;, topPan);
+            this.add(&quot;center&quot;, this.monthDaysGrid);
+            this.setValue(date);
+
+            this.byPath(&quot;#dotButton&quot;).on(function() {
+                $this.showSelectedMonth();
+            });
+
+            this.byPath(&quot;#leftButton&quot;).on(function() {
+                $this.showPrevMonth();
+            });
+
+            this.byPath(&quot;#rightButton&quot;).on(function() {
+                $this.showNextMonth();
+            });
+
+            this.byPath(&quot;#topButton&quot;).on(function() {
+                $this.showNextYear();
+            });
+
+            this.byPath(&quot;#bottomButton&quot;).on(function() {
+                $this.showPrevYear();
+            });
+
+            this.byPath(&quot;#nowLink&quot;).on(function() {
+                $this.setValue(new Date());
+            });
+        },
+
+        function $clazz() {
+            this.Listeners = zebkit.util.ListenersClass(&quot;dateSet&quot;);
+
+            this.LeftArrowButton   = Class(ui.ArrowButton, []);
+            this.TopArrowButton    = Class(ui.ArrowButton, []);
+            this.BottomArrowButton = Class(ui.ArrowButton, []);
+            this.RightArrowButton  = Class(ui.ArrowButton, []);
+            this.Link              = Class(ui.Link, []);
+
+            this.DotButton = Class(ui.EvStatePan, ui.ButtonRepeatMix, [
+                function() {
+                    this._ = new zebkit.util.Listeners();
+                    this.$super();
+                }
+            ]);
+
+            this.MonthsCombo = Class(ui.Combo, [
+                function $clazz() {
+                    this.Label    = Class(ui.Label, []);
+                    this.CompList = Class(ui.CompList, []);
+                },
+
+                function $prototype() {
+                    this.setMonths = function(months) {
+                        for(var i = 0; i &lt; months.length; i++) {
+                            this.list.model.add(new this.clazz.Label(months[i].name));
+                        }
+                    };
+
+                    this.padShown = function(b) {
+                        if (b === true) {
+                            this.list.position.setOffset(0);
+                        }
+                    };
+                },
+
+                function() {
+                    this.$super(new this.clazz.CompList(true));
+                    this.button.removeMe();
+                }
+            ]);
+
+            this.InfoPan = Class(ui.Panel, []);
+
+            this.YearField = Class(ui.TextField, [
+                function keyPressed(e) {
+                    switch (e.code) {
+                        case &quot;ArrowUp&quot;  :
+                            if (typeof this.fireNextYear !== &#x27;undefined&#x27;) {
+                                this.fireNextYear();
+                            } break;
+                        case &quot;ArrowDown&quot;:
+                            if (typeof this.firePrevYear !== &#x27;undefined&#x27;) {
+                                this.firePrevYear(); break;
+                            }
+                        default: return this.$super(e);
+                    }
+                }
+            ]);
+        },
+
+        function $prototype() {
+            this.comboMonth = this.monthDaysGrid = null;
+            this.selectedDate = this.minDate = this.maxDate = null;
+            this.$freeze = false;
+
+            this.canMonthBeShown = function(month, year) {
+                return true;
+            };
+
+            this.showMonth = function(month, year) {
+                pkg.validateDate(month, year);
+                if (this.canMonthBeShown(month, year)) {
+                    this.monthDaysGrid.setValue(month, year);
+                }
+            };
+
+            this.monthShown = function(src, prevMonth, prevYear) {
+                if (this.selectedDate !== null &amp;&amp;
+                    this.selectedDate.getMonth() === src.month &amp;&amp;
+                    this.selectedDate.getFullYear() === src.year)
+                {
+                    src.selectCell(this.selectedDate, true);
+                }
+
+                this.comboMonth.select(src.month);
+                this.yearText.setValue(&quot;&quot; + src.year);
+                this.repaint();
+            };
+
+            this.showNextYear = function() {
+                this.showMonth(this.monthDaysGrid.month, this.monthDaysGrid.year + 1);
+            };
+
+            this.showPrevYear = function () {
+                this.showMonth(this.monthDaysGrid.month, this.monthDaysGrid.year - 1);
+            };
+
+            this.showNextMonth = function () {
+                if (this.monthDaysGrid.month &lt; 0) {
+                    this.showMonth(0, 1900);
+                } else {
+                    var d = new Date(this.monthDaysGrid.year,
+                                     this.monthDaysGrid.month).nextMonth();
+                    this.showMonth(d.getMonth(), d.getFullYear());
+                }
+            };
+
+            this.showPrevMonth = function () {
+                if (this.showMonth &lt; 0) {
+                    this.showMonth(0, 1900);
+                } else {
+                    var d = new Date(this.monthDaysGrid.year, this.monthDaysGrid.month).prevMonth();
+                    this.showMonth(d.getMonth(), d.getFullYear());
+                }
+            };
+
+            this.showSelectedMonth = function () {
+                if (this.selectedDate !== null) {
+                    this.showMonth(this.selectedDate.getMonth(),
+                                   this.selectedDate.getFullYear());
+                }
+            };
+
+            this.canDateBeSet = function (date) {
+                return  date === null || (
+                            (this.minDate === null || pkg.compareDates(date, this.minDate) &gt;= 0) &amp;&amp;
+                            (this.maxDate === null || pkg.compareDates(date, this.maxDate) &lt;= 0)
+                        );
+            };
+
+            this.cellSelected = function(src, offset, b) {
+                if (this.$freeze !== true &amp;&amp; b === true) {
+                    var item = src.model.geti(offset);
+                    if (item.tags.length &gt; 0) {
+                        if (item.hasTag(&quot;shownMonth&quot;) === true) {
+                            this.setValue(item.day, item.month, item.year);
+                        } else {
+                            if (item.hasTag(&quot;nextMonth&quot;) === true) {
+                                this.showNextMonth();
+                            } else {
+                                this.showPrevMonth();
+                            }
+                        }
+                    }
+                }
+            };
+        },
+
+        function setMinValue(date) {
+            if (arguments.length &gt; 1) {
+                date = new Date(arguments[2], arguments[1], arguments[0]);
+            }
+
+            if (date !== null) {
+                pkg.validateDate(date);
+            }
+
+            if (pkg.compareDates(this.minDate, date) !== 0) {
+                if (pkg.compareDates(date, this.maxDate) === 1) {
+                    throw new RangeError();
+                }
+
+                this.minDate = date;
+                if (pkg.compareDates(this.selectedDate, this.minDate) === -1) {
+                    this.setValue(null);
+                }
+
+                this.monthDaysGrid.retagModel();
+            }
+        },
+
+        function setMaxValue(date) {
+            if (arguments.length &gt; 1) {
+                date = new Date(arguments[2], arguments[1], arguments[0]);
+            }
+
+            if (date !== null) {
+                pkg.validateDate(date);
+            }
+
+            if (pkg.compareDates(this.maxDate, date) !== 0) {
+                if (pkg.compareDates(date, this.minDate) === -1) {
+                    throw new RangeError(&quot;&quot; + date + &quot;,&quot; + this.minDate + &quot;,&quot; + pkg.compareDates(date, this.minDate));
+                }
+
+                this.maxDate = date;
+                if (pkg.compareDates(this.selectedDate, this.maxDate) === 1) {
+                    this.setValue(null);
+                }
+
+                this.monthDaysGrid.retagModel();
+            }
+        },
+
+        function setValue(date) {
+            if (arguments.length &gt; 1) {
+                date = new Date(arguments[2], arguments[1], arguments[0]);
+            }
+
+            if (this.$freeze !== true) {
+                if (date !== null) {
+                    pkg.validateDate(date);
+                }
+
+                if (this.canDateBeSet(date) === true &amp;&amp; pkg.compareDates(this.selectedDate, date) !== 0) {
+                    try {
+                        this.$freeze = true;
+
+                        var prevDate = this.selectedDate;
+                        if (prevDate !== null                                 &amp;&amp;
+                            prevDate.getMonth() === this.monthDaysGrid.month  &amp;&amp;
+                            prevDate.getFullYear() === this.monthDaysGrid.year  )
+                        {
+                            this.monthDaysGrid.selectCell(this.selectedDate, false);
+                        }
+
+                        this.selectedDate = date;
+                        this.byPath(&quot;#dotButton&quot;).setEnabled(this.selectedDate !== null);
+                        this.byPath(&quot;#nowLink&quot;).setEnabled(pkg.compareDates(new Date(), this.selectedDate) !== 0);
+
+                        if (this.selectedDate !== null) {
+                            this.showSelectedMonth();
+                            this.monthDaysGrid.selectCell(this.selectedDate, true);
+                        }
+
+                        this.monthDaysGrid.retagModel();
+                        this._.dateSet(this, prevDate);
+                    } finally {
+                        this.$freeze = false;
+                    }
+                }
+            }
+        }
+    ]);
+
+    pkg.DateTextField = Class(ui.TextField, [
+        function(format) {
+            if (arguments.length === 0) {
+                format = &quot;${2,0,date}/${2,0,month2}/${4,0,fullYear}&quot;;
+            }
+
+            this.$super();
+            this.setFormat(format);
+            this.maxWidth = 0;
+        },
+
+        function $prototype() {
+            this.notDefined = &quot;-&quot;;
+            this.date = null;
+
+            this.$format = function(d) {
+                return zebkit.util.format(this.format, d !== null ? d :{}, this.notDefined);
+            };
+        },
+
+        function setFormat(format) {
+            if (format === null || typeof format === &#x27;undefined&#x27;) {
+                throw new Error(&quot;Format is not defined &quot; + this.clazz.$name);
+            }
+
+            if (this.format !== format) {
+                this.format = format;
+                this.$getSuper(&quot;setValue&quot;).call(this, this.$format(this.date));
+            }
+        },
+
+        function setValue(d) {
+            if (d !== null) {
+                pkg.validateDate(d);
+            }
+
+            if (pkg.compareDates(this.date, d) !== 0) {
+                this.date = d;
+                this.$super(this.$format(this.date));
+            }
+        },
+
+        function calcPreferredSize(target) {
+            var ps = this.$super(target);
+            ps.width = this.maxWidth;
+            return ps;
+        },
+
+        function focused () {
+            if (this.hasFocus()) {
+                this.selectAll();
+            } else {
+                this.clearSelection();
+            }
+            this.$super();
+        },
+
+        function recalc() {
+            this.$super();
+            var s = this.$format(new Date());
+            this.maxWidth = this.getFont().stringWidth(s);
+            this.maxWidth += Math.floor(this.maxWidth / 10);
+        }
+    ]);
+
+    var PopupCalendarMix = zebkit.Interface([
+        function childKeyPressed(e) {
+            if (e.code === &quot;Enter&quot;) {
+                this.showCalendar(e.source);
+            } else if (e.code === &quot;Backspace&quot;) {
+                //
+            }
+        },
+
+        function getCalendar() {
+            if (typeof this.calendar === &#x27;undefined&#x27; || this.calendar === null) {
+                var $this = this;
+
+                this.$freezeCalendar = false;
+
+                this.calendar = new pkg.Calendar([
+                    function winActivated (e){
+                        if (e.isActive === false) {
+                            $this.hideCalendar();
+                        }
+                    },
+
+                    function childKeyPressed(e){
+                        if (e.code === &quot;Escape&quot;) {
+                            $this.hideCalendar();
+                        }
+                    }
+                ]);
+
+                this.calendar.on(&quot;dateSet&quot;, function() {
+                    if ($this.$freezeCalendar === false) {
+                        if (typeof $this.calendarDateSet !== &#x27;undefined&#x27;) {
+                            $this.calendarDateSet.apply($this, arguments);
+                        }
+                        $this.hideCalendar();
+                    }
+                });
+            }
+            return this.calendar;
+        },
+
+        function showCalendar(anchor) {
+            try {
+                this.$freezeCalendar = true;
+
+                var calendar = this.getCalendar();
+                this.hideCalendar();
+                this.anchor = anchor;
+
+                var c = this.getCanvas(),
+                    w = c.getLayer(&quot;win&quot;),
+                    p = zebkit.layout.toParentOrigin(0, 0, anchor, c);
+
+                calendar.toPreferredSize();
+
+                p.y = p.y + anchor.height;
+                if (p.y + calendar.height &gt; w.height - w.getBottom()) {
+                    p.y = p.y - calendar.height - anchor.height - 1;
+                }
+
+                if (p.x + calendar.width &gt; w.width - w.getRight()) {
+                    p.x -= (p.x + calendar.width - w.width + w.getRight());
+                }
+
+                calendar.setLocation(p.x, p.y);
+                ui.showWindow(this, &quot;mdi&quot;, calendar);
+
+                ui.activateWindow(calendar);
+                calendar.monthDaysGrid.requestFocus();
+
+                if (typeof this.calendarShown !== &#x27;undefined&#x27;) {
+                    this.calendarShown(this.calendar);
+                }
+            } finally {
+                this.$freezeCalendar = false;
+            }
+        },
+
+        function  hideCalendar() {
+            var calendar = this.getCalendar();
+            if (calendar.parent !== null) {
+                calendar.removeMe();
+                if (typeof this.calendarHidden !== &#x27;undefined&#x27;) {
+                    this.calendarHidden();
+                }
+                this.anchor.requestFocus();
+                this.anchor = null;
+            }
+        }
+    ]);
+
+    pkg.DateInputField = Class(ui.Panel, PopupCalendarMix, [
+        function (format) {
+            this.$super(new zebkit.layout.FlowLayout());
+
+            var $this = this;
+            this.dateField = arguments.length === 0 ? new this.clazz.DateTextField()
+                                                    : new this.clazz.DateTextField(format);
+            this.add(this.dateField);
+            this.add(new this.clazz.Button(&quot;...&quot;));
+
+            // sync calendar and input field dates
+            this.dateField.setValue(this.getValue());
+
+            this.byPath(&quot;//~zebkit.ui.Button&quot;).on(function(src) {
+                $this.showCalendar($this.dateField);
+            });
+        },
+
+        function $clazz() {
+            this.Button = Class(ui.Button, []);
+
+            this.Calendar = Class(pkg.Calendar, [
+                function $clazz() {
+                    this.MonthsCombo = Class(pkg.Calendar.MonthsCombo, []);
+                }
+            ]);
+
+            this.DateTextField = Class(pkg.DateTextField, []);
+        },
+
+        function calendarDateSet(src) {
+            this.dateField.setValue(src.selectedDate);
+        },
+
+        function setValue(d) {
+            this.getCalendar().setValue(d);
+        },
+
+        function getValue(d) {
+            return this.getCalendar().selectedDate;
+        }
+    ]);
+
+    pkg.DateRangeInput = Class(ui.Panel, PopupCalendarMix, [
+        function() {
+            this.$super();
+
+            var $this = this,
+                la    = new this.clazz.LeftArrowButton(),
+                ra    = new this.clazz.RightArrowButton(),
+                cal   = this.getCalendar();
+
+            this._ = new zebkit.util.Listeners();
+
+            this.minDateField = new this.clazz.MinDateTextField([
+                function keyPressed(e) {
+                    if (e.code === &quot;ArrowRight&quot; &amp;&amp; this.position.offset === this.getMaxOffset()) {
+                        $this.maxDateField.position.setOffset(0);
+                        $this.maxDateField.requestFocus();
+                    }
+                    this.$super(e);
+                }
+            ]);
+
+            this.maxDateField = new this.clazz.MaxDateTextField([
+                function keyPressed(e) {
+                    if (e.code === &quot;ArrowLeft&quot; &amp;&amp; this.position.offset === 0) {
+                        $this.minDateField.requestFocus();
+                    }
+                    this.$super(e);
+                }
+            ]);
+
+            cal.monthDaysGrid.setTagger({
+                tag : function(item) {
+                    if (pkg.compareDates(item.day, item.month, item.year, $this.minDateField.date) === 0) {
+                        item.tag(&quot;startDate&quot;);
+                    }
+                    else {
+                        if (pkg.compareDates(item.day, item.month, item.year, $this.maxDateField.date) === 0) {
+                            item.tag(&quot;endDate&quot;);
+                        }
+                    }
+                }
+            });
+
+            if (typeof this.clazz.tags !== &#x27;undefined&#x27; &amp;&amp;  this.clazz.tags !== null) {
+                cal.monthDaysGrid.addTags(this.clazz.tags);
+            }
+
+            this.add(new this.clazz.DateInputPan(la, this.minDateField));
+            this.add(new this.clazz.Line());
+            this.add(new this.clazz.DateInputPan(this.maxDateField, ra));
+
+            la.on(function () {
+                $this.getCalendar().setMaxValue($this.maxDateField.date);
+                $this.showCalendar($this.minDateField);
+            });
+
+            ra.on(function () {
+                $this.getCalendar().setMinValue($this.minDateField.date);
+                $this.showCalendar($this.maxDateField);
+            });
+        },
+
+        function $clazz() {
+            this.MinDateTextField  = Class(pkg.DateTextField, []);
+            this.MaxDateTextField  = Class(pkg.DateTextField, []);
+            this.LeftArrowButton   = Class(ui.ArrowButton, []);
+            this.RightArrowButton  = Class(ui.ArrowButton, []);
+
+            this.DateInputPan = Class(ui.Panel, [
+                function() {
+                    this.$super();
+                    for(var i = 0; i &lt; arguments.length; i++) {
+                        this.add(arguments[i]);
+                    }
+                }
+            ]);
+
+            this.Line = Class(ui.Line, []);
+        },
+
+        function calendarShown(calendar) {
+            if (this.anchor === this.minDateField) {
+                calendar.setValue(this.minDateField.date);
+                calendar.setMaxValue(this.maxDateField.date);
+                calendar.setMinValue(null);
+            } else {
+                calendar.setValue(this.maxDateField.date);
+                calendar.setMaxValue(null);
+                calendar.setMinValue(this.minDateField.date);
+            }
+        },
+
+        function calendarDateSet(src) {
+            this.setValue(this.anchor === this.minDateField ? src.selectedDate : this.minDateField.date,
+                          this.anchor === this.maxDateField ? src.selectedDate : this.maxDateField.date);
+        },
+
+        function setValue(d1, d2) {
+            if (pkg.compareDates(d1, d2) === 1) {
+                throw new RangeError();
+            }
+
+            if (pkg.compareDates(d1, this.minDateField.date) !== 0 ||
+                pkg.compareDates(d2, this.maxDateField.date) !== 0   )
+            {
+                var prev = this.getValue();
+                this.minDateField.setValue(d1);
+                this.maxDateField.setValue(d2);
+
+                this.getCalendar().monthDaysGrid.retagModel();
+
+                this._.fired(this, prev);
+            }
+        },
+
+        function getValue() {
+            return  {
+                min : this.minDateField.date,
+                max : this.maxDateField.date
+            };
+        }
+    ]);
+
+    ui.$configWith(pkg);
+});
+</pre>
+
+</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/js/tabs.js"></script>
+
+</body>
+</html>

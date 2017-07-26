@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Slider 
-tags: menu
+tags: menu2
 ---
 
 <script type="text/javascript" src="../build/zebkit.js">  

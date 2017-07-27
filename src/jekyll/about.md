@@ -140,8 +140,8 @@ zebkit.require(function() {
                 gradient.addColorStop(1.0, '#000');
             } else {
                 gradient.addColorStop(0.1, 'orange');
-                gradient.addColorStop(0.35, 'red');
-                gradient.addColorStop(0.65, 'red');
+                gradient.addColorStop(0.35, 'white');
+                gradient.addColorStop(0.65, 'white');
                 gradient.addColorStop(1.0, 'orange');
             }
 
@@ -163,7 +163,7 @@ zebkit.require(function() {
         cursorView    : "red",
         curW          : 3,
         selectionColor: "gray",
-        background    : '{{site.themeId}}' === 'dark' ? "black" : "white",
+        background    : "black",
         font          : new zebkit.Font("Arial", 100)
     }));
     

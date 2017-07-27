@@ -516,6 +516,8 @@
         },
 
         "ToolPan": {
+            "padding": 2,
+
             "border": {
                 "over"        : { "@zebkit.draw.Border": [ "#32B6E6", 1, 6] },
                 "*"           : null,

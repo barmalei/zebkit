@@ -585,16 +585,16 @@ zebkit.package("draw", function(pkg, Class) {
     * in a particular time. Active is view that has to be rendered. The view
     * set can be used to store number of decorative elements where only one
     * can be rendered depending from an UI component state.
-    * @param {Object} args object that represents views instances that have
+    * @param {Object} views object that represents views instances that have
     * to be included in the ViewSet
     * @constructor
     * @class zebkit.draw.ViewSet
     * @extends zebkit.draw.CompositeView
     */
     pkg.ViewSet = Class(pkg.CompositeView, [
-        function(args) {
-            if (arguments.length === 0 || args === null) {
-                throw new Error("" + args);
+        function(views) {
+            if (arguments.length === 0 || views === null) {
+                throw new Error("" + views);
             }
 
             /**
@@ -607,14 +607,22 @@ zebkit.package("draw", function(pkg, Class) {
             this.views = {};
             this.$size = 0;
 
-            for(var k in args) {
-                this.views[k] = pkg.$view(args[k]);
+            var activeId = "*";
+            for(var k in views) {
+                var id = k;
+                if (k[0] === '+') {
+                    id = k.substring(1);
+                    activeId = id;
+                }
+
+                this.views[id] = pkg.$view(views[k]);
                 this.$size++;
-                if (this.views[k] !== null) {
-                    this.$recalc(this.views[k]);
+                if (this.views[id] !== null) {
+                    this.$recalc(this.views[id]);
                 }
             }
-            this.activate("*");
+
+            this.activate(activeId);
         },
 
         function $prototype() {
@@ -649,16 +657,12 @@ zebkit.package("draw", function(pkg, Class) {
 
                 if (id === null) {
                     return (this.activeView = null) !== old;
-                }
-
-                if (this.views.hasOwnProperty(id)) {
+                } else  if (this.views.hasOwnProperty(id)) {
                     return (this.activeView = this.views[id]) !== old;
-                }
-
-                if (id.length > 1 && id[0] !== '*' && id[id.length - 1] !== '*') {
+                } else if (id.length > 1 && id[0] !== '*' && id[id.length - 1] !== '*') {
                     var i = id.indexOf('.');
                     if (i > 0) {
-                        var k = id.substring(0, i + 1) + '*';
+                        var k = id.substring(0, i) + '.*';
                         if (this.views.hasOwnProperty(k)) {
                             return (this.activeView = this.views[k]) !== old;
                         } else {
@@ -670,6 +674,7 @@ zebkit.package("draw", function(pkg, Class) {
                     }
                 }
 
+                // "*" is default view
                 return this.views.hasOwnProperty("*") ? (this.activeView = this.views["*"]) !== old
                                                       : false;
             };

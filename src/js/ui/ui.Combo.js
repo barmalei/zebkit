@@ -434,9 +434,11 @@ zebkit.package("ui", function(pkg, Class) {
              * Set combo box value selected value.
              * @param {Object} v a value
              * @method  setValue
+             * @chainable
              */
             this.setValue = function(v) {
-                return this.list.setValue(v);
+                this.list.setValue(v);
+                return this;
             };
 
             /**

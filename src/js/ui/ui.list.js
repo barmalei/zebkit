@@ -797,6 +797,39 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.ViewProvider = Class(zebkit.draw.BaseViewProvider, []);
 
+
+            this.Item = Class([
+                function(value, caption) {
+                    this.value = value;
+                    if (arguments.length > 1) {
+                        this.caption = caption;
+                    } else {
+                        this.caption = value;
+                    }
+                },
+
+                function $prototype() {
+                    this.toString = function() {
+                        return this.caption;
+                    };
+                }
+            ]);
+
+            this.ItemViewProvider = Class(zebkit.draw.BaseViewProvider, [
+                function getView(t, i, v) {
+                    if (v !== null) {
+                        if (typeof v.getCaption === 'function') {
+                            v = v.getCaption();
+                        } else if (typeof v.caption !== 'undefined') {
+                            v = v.caption;
+                        }
+                    }
+
+                    return this.$super(t, i, v);
+                }
+
+            ]);
+
             /**
              * @for zebkit.ui.List
              */

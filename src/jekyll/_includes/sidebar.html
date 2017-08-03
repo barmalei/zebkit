@@ -18,13 +18,41 @@
                 <td colspan="2" style="border-width: 0px;">
                     {% assign pages_list = site.pages %}
                     {% for node in pages_list %}
-                      {% if node.title != null %}
+                        {% if node.title != null %}
                         {% if node.tags == "menu" %}
-                          <a class="sidebar-nav-item{% if page.url == node.url %} active{% endif %}" href="{{ site.baseurl|append:node.url|replace:'//','/'|append:'.html' }}">
-                            {{ node.title }}
-                          </a>
+
+                            {% assign node_active = '' %}
+                            {% if page.url == node.url %}
+                                {% assign node_active = 'active' %}
+                            {% else %}
+                                {% if page.parent  %}
+                                    {% if page.parent == node.id  %}
+                                        {% assign node_active = 'active' %}
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
+
+
+                            <a class="sidebar-nav-item {{ node_active }}"
+                               href="{{ site.baseurl|append:node.url|replace:'//','/'|append:'.html' }}">
+                                {{ node.title }}
+                            </a>
+
+
+                        {% if node.id %}
+                        {% for knode in pages_list %}
+                            {% if knode.parent == node.id %}
+                                <!--
+
+
+                                -->
+                            {% endif %}
+                        {% endfor %}
                         {% endif %}
-                      {% endif %}
+
+
+                        {% endif %}
+                        {% endif %}
                     {% endfor %}
                 </td>
             </tr>

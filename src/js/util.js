@@ -1735,6 +1735,7 @@ zebkit.package("util", function(pkg, Class) {
     pkg.tasksSet = new pkg.TasksSet(7);
 
 
+    // TODO: sound silly, makes sense to rename or remove it
     pkg.Fireable = zebkit.Interface();
 
     /**
@@ -1873,9 +1874,27 @@ zebkit.package("util", function(pkg, Class) {
             this.classAliases = {};
         },
 
+        function $clazz() {
+            this.then = function(json, root, cb) {
+                if (typeof root === 'function') {
+                    cb   = root;
+                    root = null;
+                }
+
+                var zson = arguments.length > 1 && root !== null ? new pkg.Zson(root)
+                                                                 : new pkg.Zson();
+
+                if (typeof cb === 'function') {
+                    zson.then(json, cb);
+                } else {
+                    zson.then(json);
+                }
+                return zson;
+            };
+        },
+
         function $prototype() {
             this.url = null;
-
 
             /**
              * Object that keeps loaded and resolved content of a JSON

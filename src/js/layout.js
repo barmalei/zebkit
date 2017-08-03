@@ -895,7 +895,7 @@ zebkit.package("layout", function(pkg, Class) {
      *
      *      // button component will be sized according to its preferred size
      *      // and aligned to have centered vertical and horizontal alignments
-     *      pan.add(new zebkit.ui.Button("Ok").setConstraints("usePsSize"));
+     *      pan.add("usePsSize", new zebkit.ui.Button("Ok"));
      *
      *
      *  @class zebkit.layout.StackLayout
@@ -1195,19 +1195,15 @@ zebkit.package("layout", function(pkg, Class) {
                     l = c.getLeft();
 
                 for(var i = 0;i < c.kids.length; i++){
-                    var kid = c.kids[i], ww = 0, hh = 0;
+                    var kid = c.kids[i];
 
                     if (kid.isVisible === true){
                         if (this.usePsSize) {
-                            var ps = kid.toPreferredSize();
-                            ww = ps.width;
-                            hh = ps.height;
-                        } else {
-                            ww = kid.width;
-                            hh = kid.height;
+                            kid.toPreferredSize();
                         }
 
-                        var ctr = kid.constraints === null ? null : kid.constraints;
+                        var ctr = kid.constraints === null ? null
+                                                           : kid.constraints;
                         if (ctr !== null) {
                             var x = kid.x,
                                 y = kid.y;
@@ -1215,17 +1211,17 @@ zebkit.package("layout", function(pkg, Class) {
                             if (ctr === "top" || ctr === "topRight" || ctr === "topLeft") {
                                 y = t;
                             } else if (ctr === "bottom" || ctr === "bottomLeft" || ctr === "bottomRight") {
-                                y = c.height - hh - b;
+                                y = c.height - kid.height - b;
                             } else if (ctr === "center" || ctr === "left" || ctr === "right") {
-                                y = Math.floor((c.height - hh) / 2);
+                                y = Math.floor((c.height - kid.height) / 2);
                             }
 
                             if (ctr === "left" || ctr === "topLeft" || ctr === "bottomLeft") {
                                 x = l;
                             } else if (ctr === "right" || ctr === "topRight" || ctr === "bottomRight") {
-                                x = c.width - ww - r;
+                                x = c.width - kid.width - r;
                             } else if (ctr === "center" || ctr === "top" || ctr === "bottom") {
-                                x = Math.floor((c.width  - ww) / 2);
+                                x = Math.floor((c.width  - kid.width) / 2);
                             }
 
                             kid.setLocation(x, y);

@@ -1,6 +1,7 @@
 ---
 layout: page
 tags: menu
+id: about
 title: Zebkit ?
 ---
 
@@ -61,10 +62,6 @@ zebkit.require(function() {
     });
 });
 </script>
-
-</td>
-</tr>    
-</table>
 
 ![ScreenShot]( {{ site.baseurl }}public/images/overview-{{site.themeId}}.png)
 
@@ -549,18 +546,10 @@ zebkit.require(function() {
 Find below zebkit application that has been created and loaded with the JSON shown above:
 
 <table cellspacing="0" cellpadding="0" border="0" style="margin:0px;">
-    <tr style="padding:0px;">
-        <td align="left" 
-            valign="top" 
-            style="padding:0px;">
-
+<tr style="padding:0px;">
+<td align="left" valign="top" style="padding:0px;">
 {% include zsample.html canvas_id='jsonSample' title="UI loaded and built with Zson" %}
-
-</td>
-
-<td align="left" 
-    valign="top" 
-    style="padding:0px;">
+</td><td align="left" valign="top" style="padding:0px;" markdown='1'>
 
 ```js
 eval(zebkit.import("ui", "layout"));

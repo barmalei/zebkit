@@ -2147,7 +2147,10 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 if (this.leftCaption !== null) {
                     this.leftCaption.removeMe();
                 }
-                this.add("left", new pkg.GridCaption(Array.prototype.slice.call(arguments)));
+
+                var a = Array.prototype.slice.call(arguments);
+                this.add("left", this.$hasPanelIn(a) ? new pkg.CompGridCaption(a)
+                                                     : new pkg.GridCaption(a));
                 return this;
             };
 
@@ -2161,8 +2164,21 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 if (this.topCaption !== null) {
                     this.topCaption.removeMe();
                 }
-                this.add("top", new pkg.GridCaption(Array.prototype.slice.call(arguments)));
+
+                var a = Array.prototype.slice.call(arguments);
+                this.add("top", this.$hasPanelIn(a) ? new pkg.CompGridCaption(a)
+                                                    : new pkg.GridCaption(a));
                 return this;
+            };
+
+            this.$hasPanelIn = function(a) {
+                for(var i = 0; i < a.length; i++) {
+                    if (zebkit.instanceOf(a[i], zebkit.ui.Panel)) {
+                        return true;
+                    }
+                }
+
+                return false;
             };
         },
 

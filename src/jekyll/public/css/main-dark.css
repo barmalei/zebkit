@@ -112,9 +112,9 @@ th {
   padding: .25rem .5rem;
 }
 
-tbody tr:nth-child(odd) td,
-tbody tr:nth-child(odd) th {
-  background-color: black;
+th {
+  background-color: #777777;
+  color: white;
 }
 
 /* Pagination items can be `span`s or `a`s */
@@ -384,6 +384,20 @@ table.zsample  td {
     background-color: black;
 }
 
+table.info, table.info td {
+    border-color: gray;
+    border-width: 1px;
+    border-style: solid;
+    border-collapse: collapse;
+}
+
+table.info tr:nth-child(odd) td {
+  background-color: #2f2f2f;
+}
+
+table.info tr:nth-child(even) td {
+  background-color: #3f3f3f;
+}
 
 
 /* Brown */

@@ -95,8 +95,6 @@ zebkit.require(function() {
 {% include zsample.html canvas_id='sample2' title="Get started zebkit application" %}
 
 <script>
-zebkit.config["zebkit.theme"] = "dark";
-
 zebkit.require("ui", "layout", function(ui, layout) {
     var root = new ui.zCanvas("sample2", 400, 300).root;
     root.properties({

@@ -1,6 +1,6 @@
 ---
 layout: page
-tags: menu
+parent: docs
 title: Easy OOP
 ---
 

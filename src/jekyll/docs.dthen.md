@@ -1,6 +1,6 @@
 ---
 layout: page
-tags: menu2
+parent: docs
 title: D-then 
 ---
 

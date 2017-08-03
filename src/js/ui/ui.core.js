@@ -1601,17 +1601,35 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Set the UI component size to its preferred size
-             * @return {Object} a preferred size applied to the component.
-             * The structure of the returned object is the following:
-
-                { width:{Integer}, height:{Integer} }
-
+             * @chainable
              * @method toPreferredSize
              */
-            this.toPreferredSize = function (){
+            this.toPreferredSize = function() {
                 var ps = this.getPreferredSize();
                 this.setSize(ps.width, ps.height);
-                return ps;
+                return this;
+            };
+
+            /**
+             * Set the UI component height to its preferred height
+             * @method toPreferredHeight
+             * @chainable
+             */
+            this.toPreferredHeight = function() {
+                var ps = this.getPreferredSize();
+                this.setSize(this.width, ps.height);
+                return this;
+            };
+
+            /**
+             * Set the UI component width to its preferred width
+             * @method toPreferredWidth
+             * @chainable
+             */
+            this.toPreferredWidth = function() {
+                var ps = this.getPreferredSize();
+                this.setSize(ps.width, this.height);
+                return this;
             };
 
             /**

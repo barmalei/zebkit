@@ -73,29 +73,29 @@ zebkit.package("ui.grid", function(pkg, Class) {
              */
             var clazz = this;
             this.TitlePan = Class(ui.Panel, [
-                function(title) {
+                function(content) {
                     this.$super();
 
                     /**
-                     * Image panel to keep grtid caption title
-                     * @attribute iconPan
+                     * Image panel to keep grid caption icon
+                     * @attribute icon
                      * @type {zebkit.ui.ImagePan}
                      * @readOnly
                      */
-                    this.iconPan = new ui.ImagePan(null);
+                    this.icon = new ui.ImagePan(null);
 
                     /**
-                     * Title link
-                     * @attribute link
-                     * @type {zebkit.ui.Link}
+                     * Title content
+                     * @attribute content
+                     * @type {zebkit.ui.Panel}
                      * @readOnly
                      */
-                    this.link = new clazz.Link(title);
+                    this.content   = zebkit.instanceOf(content, ui.Panel) ? content : new clazz.Link(content);
                     this.statusPan = new clazz.StatusPan();
                     this.statusPan.setVisible(this.isSortable);
 
-                    this.add(this.iconPan);
-                    this.add(this.link);
+                    this.add(this.icon);
+                    this.add(this.content);
                     this.add(this.statusPan);
                 },
 
@@ -144,7 +144,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
                  * @chainable
                  */
                 function setIcon(path) {
-                    this.iconPan.setImage(path);
+                    this.icon.setImage(path);
                     return this;
                 },
 
@@ -173,7 +173,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 },
 
                 function kidAdded(index, constr, kid) {
-                    // TODO: not very prefect check
+                    // TODO: not very perfect check
                     if (zebkit.instanceOf(kid, zebkit.util.Fireable)) {
                         kid.on(this);
                     }
@@ -281,7 +281,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
             this.$super(p);
         },
 
-        function insert(i,constr, c) {
+        function insert(i, constr, c) {
             if (zebkit.isString(c)) {
                 c = new this.clazz.TitlePan(c);
             }
@@ -300,5 +300,4 @@ zebkit.package("ui.grid", function(pkg, Class) {
             this.constraints = "left";
         }
     ]);
-
 });

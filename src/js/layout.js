@@ -786,12 +786,35 @@ zebkit.package("layout", function(pkg, Class) {
 
             /**
              * Remove the component from its parent if it has a parent
+             * @param {Integer} [after] timout in millisecods the component has
+             * to be removed
              * @method removeMe
              */
-            this.removeMe = function() {
+            this.removeMe = function(after) {
                 var i = -1;
                 if (this.parent !== null && (i = this.parent.indexOf(this)) >= 0) {
-                    this.parent.removeAt(i);
+                    if (arguments.length > 0 && after > 0) {
+                        var $this = this;
+                        zebkit.util.tasksSet.runOnce(function() {
+                            $this.removeMe();
+                        }, after);
+                    } else {
+                        this.parent.removeAt(i);
+                    }
+                }
+            };
+
+            /**
+             * Remove component after
+             * @param  {[type]} time [description]
+             * @return {[type]}      [description]
+             * @method
+             */
+            this.removeMeAfter = function(time) {
+                if (this.parent !== null) {
+                    throw new Error("No a parent detected");
+                } else {
+
                 }
             };
 

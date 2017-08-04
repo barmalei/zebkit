@@ -2,387 +2,376 @@
 layout: page
 title: Event handling
 parent: docs
+notitle: true
 ---
 
-#### Component specific events
+### Component specific event handling 
 
-
-Component specific event is an event that is triggered by the component itself. For instance: an item selection, data updating, tree item removed etc. The standard way of catching this type of events is calling _"bind"_ method one of the following manner:
-
-   * **Anonymous event handler** If component generates only one type of event no event name has to be specified:
+Zebkit event listener registration pattern:
 
 ```js
-// create UI button
-var button = new zebra.ui.Button("Test");
-
-// handle an button pressed event
-button.on(function(src) {
-   ...
-})
+comp.on([path,][eventName,], callback);
 ```
+
+   * __path__ is an optional parameter, to lookup component or components the given event handler have to be registered. Path is X-Path like expression. For instance: ```"//*"``` detects all children components, ```"//zebkit.ui.Label"``` will match all children labels components. 
    
-   
-   * **Named event handler** If component generates different event types pass an event type name as a parameter or as the event handler function name:
-    
-```js
-// handle a tree model item removed event
-treeModel.on("itemRemoved", function(src) {
-   ...
-})
-```
+   * __eventName__ is an optional parameter to say which event exactly you need to catch. For instance: ```"matrixModel.on('matrixResized', ...);"```. If the parameter has not been specified all available events will be caught.  
+   * __callback__ is an event or events handler function.
 
-or the same using named event handler function:
+To stop handling event or events use the following pattern:
 
 ```js
-// handle a tree model item removed event
-treeModel.on(function itemRemoved(src) {
-   ...
-})
+comp.off([path,][eventName]);
 ```
-   
 
-  * **Global events handler** If component generates different types of events you can handle all of its with one event handler:
+The parameter meaning is the same to "on(...)" method. If there is no parameters have been specified, all events handlers for the given component will be detached.  
+
+### UI events handling 
+
+UI components generate number of UI specific events like:  
+
+   * __Key events__ like key pressed, released and typed
+   * __Pointer events__ like pointer pressed, released, clicked, moved, dragged and so on. Zebkit pointer events are unified, what means you work with the same event type nevertheless of input device: mouse, touch screen, pen. 
+   * __Focus events__ UI components can catch and lost focus. In this case it fires focus gained and lost events.
+   * __UI Component events__ UI components can update its metrics (size, location) and manage the children components set (add, remove, set).
+
+The event type is handled following __overriding pattern__ instead of registering listeners via "on(...)/off(...)" methods call. It is done to save resources, speeds up events handling and minimize possible memory leaks that are probable when you have to track listeners list. 
+
+Overriding pattern applied to mentioned above UI events says that you have to override desired UI event handler method for the given UI component to start handling it. For instance, if you need to handle pointer released event do it as follow:
+
 ```js
-// handle all tree model events types (item removed, inserted, etc)
-treeModel.on(function(src) {
-   ...
-})
+...
+var comp = new zebkit.ui.Panel();
+...
+comp.pointerReleased = function(e) {
+    // here you will get pointer released event 
+    ...
+};
 ```
 
+or the same with anonymous class paradigm:
 
-Calling **"bind"** method returns an instance of listener that has been registered. Use it to stop listening a particular component event as a parameter of **"unbind()"** method:
-[js]
-   // register listener
-   var l = model.bind("itemSelected", function() { ... });
-   ...
-   // un-register listener
-   model.unbind(l);
-[/js]
-
-To remove all registered listener call "unbind()" method with no parameters:
-[js]
-   // remove all registered listeners
-   model.unbind();
-[/js]
-
-
-
-#### Catching and handling UI components events
-
-
-
-Zebra **UI events** are various common for all UI components events. For instance mouse, key, touch events. The events always has a particular UI destination component. For instance a mouse button is pressed over a dedicated UI component. If a key is typed it is processed in the context of current focus owner UI component and so on. Zebra doesn't support catching or bubbling or combination of WEB events handling approaches.
-
-Zebra introduces a simple approach to catch and handle the UI events handling. If you need to catch a component event just implement an appropriate UI component event handler method. For instance let's handle UI panel mouse pressed and released events:
-[js gutter="false"]
-// create UI panel
-var p = new zebra.ui.Panel();
-// implement mouse pressed event handler
-p.mousePressed = function(e)  { ... };
-// implement mouse released event handler
-p.mouseReleased = function(e)  { ... };
-[/js]
-
-Pay attention an UI component can define own component events handlers. That means your implementation of the component event handler can overwrite the native one. It can cause the component start working improperly. In this case you have to call the native event handler implementation as follow:
-[js gutter="false"]
-// create UI button that declares an own mouse pressed events handler
-var b = new zebra.ui.Button("Test");
-// implement mouse pressed event handler that calls the native
-// implementation to leave the button component in workable state
-b.extend([
-    function mousePressed(e) {
-       // call implemented by button component mouse pressed handler
-       this.$super(e);
-       ...
+```js
+...
+var comp = new zebkit.ui.Panel([
+    function pointerReleased(e) {
+        // here you will get pointer released event 
+        ...
     }
 ]);
-[/js]
+```
 
-or the same, but slightly shorter with anonymous class instantiation:
-[js gutter="false"]
-// create UI button that declares an own mouse pressed events handler
-var b = new zebra.ui.Button("Test", [
-    function mousePressed(e) {
-       // call implemented by button component mouse pressed handler
-       this.$super(e);
-       ...
+Pay attention that zebkit UI components can have own implementations of appropriate UI events handler. In this case don't forget to call super implementation:
+
+```js
+...
+var comp = new zebkit.ui.Button("Button", [
+    function pointerReleased(e) {
+        // here you will get pointer released event 
+        ...
+        // call super implementation of the UI event handler
+        this.$super(e);
     }
 ]);
-[/js]
+```
+
+
+__List of available UI events:__
+
+<table class="info">
+<tr><th>UI events names</th><th>Description</th></tr>
+
+<tr><td markdown="1" valign="top">
+**Pointer events:**<br/>
+pointerMoved, pointerPressed,<br/>
+pointerReleased, pointerClicked,<br/> 
+pointerDragStarted, pointerDragged,<br/>
+pointerDragEnded, pointerEntered,<br/> 
+pointerExited
+</td><td markdown="1">
+Pointer events that are fired with mouse, touch screen, pen devices. Pointer events handlers get "zebkit.ui.PointerEvent" class instance as its argument. The class has the following fields:
+
+   * **source**. Source UI component that has fired the event
+   * **id**. Name of the event ("ponterPressed", "pointerEntered", etc)  
+   * **ponterType**. A type of device that has fired the event: "mouse", "touch", etc.
+   * **identifier**. An identifier of pointer event. For instance every touch event has unique identifier. Events are fired with mouse left and right buttons will have "lmouse" and "rmouse" identifiers correspondingly. 
+   * **touchCounter**. Amount of touches. In case of mouse if you press both left and right button then "touchCounter" field will be set to 2.
+   * **altKey, shiftKey, ctrlKey, metaKey**. Meta key states boolean flags. 
+   * **absX, absY**. Absolute location of pointer event relatively to HTML Canvas where the UI component is hosted.
+   * **x, y**. Location relatively to a source UI component. 
+
+</td></tr>
+
+<tr><td markdown="1" valign="top">
+**Key events:**<br/>
+keyPressed, keyTyped,<br/>
+keyReleased
+</td><td markdown="1">
+Keyboard events. Key event handler methods get "zebkit.ui.KeyEvent" class instance as its argument. The class has the following fields:
+
+   * **source**. Source UI component that has fired the event
+   * **id**. Name of the event ("keyTyped", "keyPressed", etc)  
+   * **key**. A character(s) that has been typed.
+   * **code**. A unique key code like "KeyK", "F1", "Escape", etc
+   * **altKey, shiftKey, ctrlKey, metaKey**. Meta key states boolean flags. 
+   * **device**. Name of devices that fired the given event: "keyboard", "virtualKeyboard".
+   * **repeat**. Number of repeated occurrences. 
+   
+</td></tr>
+
+<tr><td markdown="1" valign="top">
+**Focus events:**<br/>
+focusGained, focusLost
+</td><td markdown="1">
+Focus events. Focus event handler methods get "zebkit.ui.FocusEvent" class instance as its argument. The class has the following fields:
+
+   * **source**. Source UI component that has fired the event
+   * **id**. Name of the event ("focusLost", "focusGained")  
+   * **related**. A character(s) that has been typed.
+
+</td></tr>
+
+<tr><td markdown="1" valign="top">
+**UI component events:**<br/>
+compResized, compMoved,<br/> 
+compEnabled, compShown,<br/>
+compAdded, compRemoved
+</td><td markdown="1">
+UI component events. Component event handler methods get "zebkit.ui.CompEvent" class instance as its argument. The class has the following fields:
+
+   * **source**. Source UI component that has fired the event
+   * **id**. Name of the event ("compResized", "compMoved", etc)  
+   * **kid**. A kid that has been removed or added.
+   * **index**. Am index of a kid that has been removed or added to the source component.
+   * **constraints**. A layout constraints the kid has been added to the source component.
+   * **prevX, prevY**. A previous location the component has had before it has been moved.
+   * **prevWidth, prevHeight**. A previous size the component has had before it has been re-sized.  
+
+</td></tr>
+</table>
+
+## Handling children UI events
+
+It is possible to catch UI events from children components with a direct parent or ancestor component. It can be done the same way you handle UI events - with overriding appropriate event handler method, but in this case you have to add "child" prefix to a name of required handler method. 
+
+For instance, imagine you have a panel that contains number of labels components as its children. You want to handle pointer pressed UI event that has occurred over the labels. You can try to add event "pointerPressed" method handler to every label, but is not handy and generic. Instead add children UI events handler on the level of parent panel component:
+
+{% include zsample.html canvas_id='childrenEvents' title='Children UI events handling' description=description %}                    
+
+<script type="text/javascript">
+zebkit.require("ui", "layout", function(ui, layout) {
+    var root = new ui.zCanvas("childrenEvents", 400, 300).root;
+    root.setLayout(new layout.ListLayout(8));
+    root.setPadding(8);
+    root.setBorder("plain");
+    for (var i = 0; i < 5; i++) {
+        root.add(new ui.Label("Press on " + i + "-th label\n" + 
+                              "to change its background")
+            .setPadding(4))
+            .setBorder("plain");
+    }
+
+    root.childPointerPressed = function(e) {
+        e.source.setBackground(e.source.bg !=null ? null : "#44AAFF"); 
+    };
+});  
+</script>
+
+```js
+zebkit.require("ui", "layout", function(ui, layout) {
+    var root = new ui.zCanvas(400, 300).root;
+    root.setLayout(new layout.ListLayout(8));
+    root.setPadding(8);
+    root.setBorder("plain");
+    for (var i = 0; i < 5; i++) {
+        root.add(new ui.Label("Press on " + i + "-th label\n" + 
+                              "to change its background")
+            .setPadding(4))
+            .setBorder("plain");
+    }
+    // catch children labels pointer pressed event to update 
+    // the labels background
+    root.childPointerPressed = function(e) {
+        e.source.setBackground(e.source.bg != null ?null:"#44AAFF"); 
+    };
+});  
+```
+
+
+## Composite components
+
+Zebkit UI is organized as a hierarchy of UI components where every UI component can be a container for other UI components. UI hierarchy is a good developing approach to implement compound UI components where developers can assemble UI components from another UI components. For example  "zebkit.ui.Button" component can use any other UI component as its content: images, series of images, combinations of labels and images, etc.
+
+The problem of developing compound component is children events handling. In the case of "zebkit.ui.Button" every time a pointer pressed over its content component the event is sent only to the content component, button itself doesn't get it. Possible solution is implementing children component UI events handler(s) as it has been described earlier. More graceful solution is follow **composite UI component** approach.
+
+Composite is an UI component that makes its children components "event transparent". Event transparency means the children components don't get any input (pointer, keyboard, etc) events. It looks like the children components transparent for these events.
+
+To make children of a container events transparent you should set "catchInput" property in the container to true value. It makes all children component of the container event transparent:
+
+{% include zsample.html canvas_id='compositeComp1' title='Children UI events handling' description=description %}                    
+
+<script type="text/javascript">
+zebkit.require("ui", "layout", function(ui, layout) {
+    var root = new ui.zCanvas("compositeComp1", 400, 250).root;
+    root.properties({
+        padding: 8,
+        border: "plain",
+        layout: new layout.ListLayout(16),
+        kids  : [
+          new zebkit.ui.Button("Event transparent button"),
+          new zebkit.ui.Checkbox("Event transparent checkbox"),
+          new zebkit.ui.TextField("Event transparent field")
+        ]
+    });
+    root.catchInput = true;
+});  
+</script>
+
+```js
+zebkit.require("ui", "layout", function(ui, layout) {
+    var root = new ui.zCanvas("compositeComp1", 400, 250).root;
+    root.properties({
+        padding: 8, border: "plain",
+        layout: new layout.ListLayout(16),
+        kids  : [
+          new zebkit.ui.Button("Event transparent button"),
+          new zebkit.ui.Checkbox("Event transparent checkbox"),
+          new zebkit.ui.TextField("Event transparent field")
+        ]
+    });
+    // Make children components of "root" component 
+    root.catchInput = true;
+});  
+```
+
+
+More flexible way to add event transparency is defining "catchInput(kid)" method (instead of treating it as a filed) that gets kid component as an input and should decide whether the given children component has to be make event transparent: 
+
+{% include zsample.html canvas_id='compositeComp2' title='Children UI events handling' description=description %}                    
+
+<script type="text/javascript">
+zebkit.require("ui", "layout", function(ui, layout) {
+    var root = new ui.zCanvas("compositeComp2", 400, 300).root;
+    root.properties({
+        padding: 8,
+        border: "plain",
+        layout: new layout.ListLayout(16),
+        kids  : [
+        new zebkit.ui.Button("Event transparent button"),
+        new zebkit.ui.Checkbox("Normal check box"),
+        new zebkit.ui.TextField("Normal field")
+        ]
+    });
+    root.catchInput = function(kid) {
+        return kid === root.kids[0]; 
+    };
+});  
+</script>
+
+
+```js
+zebkit.require("ui", "layout", function(ui, layout) {
+    var root = new ui.zCanvas("compositeComp2", 400, 300).root;
+    root.properties({
+        padding: 8, border: "plain",
+        layout: new layout.ListLayout(16),
+        kids  : [
+          new zebkit.ui.Button("Event transparent button"),
+          new zebkit.ui.Checkbox("Normal check box"),
+          new zebkit.ui.TextField("Normal field")
+        ]
+    });
+
+    // Make first button of "root" component events transparent. 
+    root.catchInput = function(kid) {
+        return kid === root.kids[0]; 
+    };
+});  
+```
 
 
 
-
-#### UI components events
-
+## Global event handling 
 
 
-Zebra UI component fires the following UI events:
+Zebkit **UI events** handling and distribution is managed with a special singleton class "zebkit.ui.EventManager" class. The manager gets all UI events and than decides how its have to be delivered to destination UI components.
+
+The manager is accessible via "zebkit.ui.events" variable and provides possibility to register global events listeners. Global means the handlers  are getting all UI events have happened with all active UI components. To register and unregister global UI events handler follow the standard pattern:
+
+```js
+// listen all pointer pressed events for all actiev UI components
+zebkit.ui.events.on("pointerPressed", function(e) {
+    ...
+});
+```
+
+For example imagine you need to listen "pointerPressed" event for all UI components to show information window with the components metrics (size and location):    
+
+{% include zsample.html canvas_id='globalEvents' title='Children UI events handling' description=description %}                    
 
 
+<script type="text/javascript">
+zebkit.require("ui", "layout", function(ui, layout) {
+    var root = new ui.zCanvas("globalEvents", 400, 300).root;
+    root.setLayout(new layout.RasterLayout(true));
+    root.setPadding(8);
+    root.setBorder("plain");
 
+    root.add(new ui.Button("Test Button").setLocation(90,90));
+    root.add(new ui.Checkbox("Test\nCheck box").setLocation(240,170));
+    root.add(new ui.TextField("Test text field").setLocation(50,220));
 
-
-
-  * 
-**Key events**:
-[table th="0"]
-_"keyPressed(e)"_;the event fired when a key has been pressed
-_"keyTyped(e)"_;the event fired when a character has been typed
-_"keyReleased(e)"_;the event fired when a key has been released
-[/table]
-
-Key event handler methods gets "zebra.ui.KeyEvent" objects as its argument. The class provides the following important fields and methods:
-[table]
-Field or Method;Description
-_source_; destination UI component
-_ID_; event type ID
-_ch_; typed character
-_code_; pressed key code
-_mask_; "ctrl", "alt", "shift", "cmd" keys mask
-[/table]
-
-
-
-
-
-  * 
-**Mouse and touch screen events**:
-[table th="0"]
-_"mousePressed(e)"_;the event is fired when a mouse button has been pressed
-_"mouseClicked(e)"_;the event is fired when a mouse button has been clicked.
-_"mouseReleased(e)"_;the event is fired when a mouse button has been released
-_"mouseEntered(e)"_;the event is fired when mouse cursor has entered the given UI component
-_"mouseMoved(e)"_;the event is fired when mouse cursor has been moved over the given UI component
-_"mouseExited(e)"_;the event is fired when mouse cursor has exited the given UI component
-_"mouseDragStarted(e)"_;the event fired when mouse cursor has started being moved when a mouse button is kept pressed
-_"mouseDragEnded(e)"_;the event fired when mouse cursor has ended being moved when a mouse button is kept pressed
-_"mouseDragged(e)"_;the event fired when mouse cursor has moved when a mouse button is kept pressed
-[/table]
-
-Mouse event handler methods gets "zebra.ui.MouseEvent" objects as its argument. The class provides the following important fields and methods:
-[table]
-Field or Method;Description
-_source_; destination UI component
-_ID_; event type ID
-_x,y_; mouse cursor location relatively to a destination UI component
-_button_; button mask
-_absX,absY_; mouse cursor location relatively to zebra canvas where the given destination UI component sits on
-[/table]
-
-
-
-
-  * 
-**Component events**:
-[table th="0"]
-_"compSized(c,pw,ph)"_;the event is fired when component "c" has been resized. "pw" and "ph" the previos width and height correspondingly, the component had before resizing
-_"compMoved(c,px,py)"_;the event is fired when component "c" has been moved. "px" and "py" the previos x and y location correspondingly, the component had before
-_"compEnabled(c)"_;the event is fired when component "c" has been enabled or disabled
-_"compShown(c)"_;the event is fired when component "c" visibility state has been updated
-_"compRemoved(p, index, c)"_;the event is fired when component "c" has been removed from parent container "p"
-_"compAdded(p, constraints, c)"_;the event is fired when component "c" has been added to parent container "p"
-[/table]
-
-
-
-
-  * 
-**Window events**:
-[table th="0"]
-_"winActivated(layer,c,state)"_;the event is fired when component "c" has been activated or deactivated as internal window. "state" parameter indicates the component activity status.
-_"winShown(layer,c,visibility)"_;the event is fired when component "c" has been shown or hidden as internal window. "visibility" parameter indicates if the component has been shown or hidden.
-[/table]
-
-
-
-  * 
-**Focus events**:
-[table th="0"]
-_"focusGained(e)"_;the event is fired when a component has gained focus
-_"focusLost(e)"_;the event is fired when a component has lost focus
-[/table]
-
-Focus event handler methods gets "zebra.ui.InputEvent" objects as its argument. The class provides the following important fields and methods:
-[table]
-Field or Method;Description
-_source_; destination UI component
-_ID_; event type ID
-[/table]
-
-
-
-
-  * 
-**Children UI components events**:
-[table th="0"]
-_"childCompEvent(id,src,p1,p2)"_;the event is fired when a component event has occurred
-_"childInputEvent(e)"_;the event is fired when an input (mouse, keyboard, focus) has occurred
-[/table]
-
-
-
-
-
-#### Children UI components events catching 
-
-
-[purehtml id=23]
-Imagine you are developing a new UI component. The new component contains some children UI components. It is important, for instance, to know when mouse cursor is entered and exited the children components since the events have to trigger updating children component background:
-[js gutter="false"]
-// import classes, methods and interfaces into local space
-eval(zebra.Import("ui", "layout"));
-
-// declare UI component class that inherits standard
-// "zebra.ui.Panel"
-var MyComponent = zebra.Class(Panel, [
-     // implement method to handle children UI events
-     function childInputEvent(e) {
-        if (e.ID == MouseEvent.ENTERED) {
-            e.source.setBackground("orange");
+    var info = new ui.Tooltip("");
+    ui.events.on("pointerPressed", function(e) {
+        if (info.parent !== null) {
+            info.removeMe();
         }
-        else
-        if (e.ID == MouseEvent.EXITED) {
-            e.source.setBackground(null);
+        if (root !== e.source) {
+            // show info about an UI component the pointer pressed
+            // event has occurred  
+            info.setValue("x = " + e.source.x+",y = "+e.source.y+
+                          "\nw = "+e.source.width+",h = "+e.source.height);
+            info.toPreferredSize();
+            info.setLocation(e.absX + 5, e.absY - info.height);
+            ui.showWindow(root, info);
+            info.removeMe(1500);
         }
-    }
-]);
-// build UI
-var canvas = new zCanvas(350,150);
-canvas.root.setLayout(new BorderLayout());
-canvas.root.setBorder(new Border("gray"));
-// instantiate few UI components with border element
-var a=new Panel({border:new Border("red"),preferredSize:[100,70]});
-var b=new Panel({border:new Border("blue"),preferredSize:[100,70]});
-var c=new Panel({border:new Border("green"),preferredSize:[100,70]});
-// instantiate just implemented "MyComponent" class
-var myComp = new MyComponent();
-myComp.setLayout(new FlowLayout(CENTER, CENTER, HORIZONTAL, 8));
-
-// add few children UI components
-myComp.add(a);
-myComp.add(b);
-myComp.add(c);
-
-canvas.root.add(CENTER, myComp);
-[/js]
-
-Find live-application below:
+    });
+});  
+</script>
 
 
+```js
+zebkit.require("ui", "layout", function(ui, layout) {
+    var root = new ui.zCanvas("globalEvents", 400, 300).root;
+    root.setLayout(new layout.RasterLayout(true));
+    root.setPadding(8);
+    root.setBorder("plain");
+    // add number of components
+    root.add(new ui.Button("Test Button").setLocation(90,90));
+    root.add(new ui.Checkbox("Test\nCheck box").setLocation(240,170));
+    root.add(new ui.TextField("Test text field").setLocation(50,220));
+
+    var info = new ui.Tooltip("");
+
+    // register global pointer pressed handler
+    ui.events.on("pointerPressed", function(e) {
+        if (info.parent !== null) {
+            info.removeMe();
+        }
+
+        if (root !== e.source) {
+            // show info about an UI component the pointer pressed
+            // event has occurred  
+            info.setValue("x = " + e.source.x+",y = "+e.source.y+
+                  "\nw = "+e.source.width+",h = "+e.source.height);
+            info.toPreferredSize();
+            info.setLocation(e.absX + 5, e.absY - info.height);
+            ui.showWindow(root, info);
+            info.removeMe(1500);
+        }
+    });
+});  
+```
 
 
-
-#### Composite UI component
-
-
-
-Zebra UI is organized as hierarchy of UI components. Every UI component can be a container for other UI components. UI hierarchy is good developing approach to implement compound UI component where developer can assemble the compound UI component from another UI components. Typical example is "zebra.ui.Button" component that allows a developer to use any other UI component as its content. Developers can add images, series of images, combinations of labels and images or any existing Zebra UI component as "zebra.ui.Button" component content.
-
-The main problem of developing compound component is handling of children events. For instance, "zebra.ui.Button" component uses by default "zebra.ui.Label" component as its content. Every time a mouse button is pressed over the label the mouse event is sent to the label. Button component doesn't get the event. Possible solution  is implementing children component events handler. Zebra provides more graceful solution - implementing composite component by inheriting **"zebra.ui.Composite"** interface.
-
-**"zebra.ui.Composite"** interface has very clear meaning: by implementing the interface an UI component can make its children components "event transparent". In other words children components will not get any input (mouse, keyboard, etc) events. It looks like the children components don't exist (transparent) for the events.
-
-[js gutter="false"]
-eval(zebra.Import("ui", "layout", "data"));
-// listen mouse entered and exited event, change background
-// color whenever mouse cursor entered the component
-var p = new Panel([
-    function mouseEntered(e) {this.setBackground("orange");},
-    function mouseExited(e) {this.setBackground(null);}
-]);
-
-// listen mouse entered and exited event, change background
-// color whenever mouse cursor entered the component
-// The anonymous class instance implements composite interface,
-// what causes mouse exited event will not happen if
-// mouse cursor enters its children components
-var composite = new Panel(Composite, [
-    function mouseEntered(e){ this.setBackground("orange");},
-    function mouseExited(e) { this.setBackground(null);}
-]);
-
-// build UI
-var c = new zCanvas(430,150);
-c.root.setBorder(new Border("black"));
-p.setBounds(20,20, 250, 110);
-p.setBorder(new Border("red", 2));
-var l=new Label(
-   new Text("Usual, not event transparent\nchildren component"));
-l.setPadding(12);
-l.setBorder(new Border("red"));
-l.setLocation(20,20);
-l.toPreferredSize();
-p.add(l);
-c.root.add(p);
-
-composite.setBounds(280,20, 190, 110);
-composite.setBorder(new Border("orange", 2));
-var l = new Label(new Text("Event transparent\nchildren component"));
-l.setPadding(12);
-l.setBorder(new Border("red"));
-l.setLocation(20,20);
-l.toPreferredSize();
-composite.add(l);
-c.root.add(composite);
-[/js]
-
-
-Find live-application below:
-
-
-
-Individual children UI component event transparency can be customized by implementing "catchInput(c)" method. The method gets a children UI component as input and has to return "true" if the passed children component is event transparent:
-[js gutter="false"]
-// instantiate "zebra.ui.Panel" class instance that listen
-// mouse entered and exited events. The instance is composite
-// component that makes first added children component event
-// transparent
-var composite = new Panel(Composite, [
-    function mouseEntered(e) { this.setBackground("orange"); },
-    function mouseExited(e)  { this.setBackground(null); },
-    // say the first children component is event transparent
-    function catchInput(c) {
-        return this.indexOf(c) === 0;
-    }
-]);
-// build UI
-var c = new zCanvas(500, 150);
-c.root.setBorder(new Border("black"));
-c.root.setLayout(new BorderLayout());
-composite.setLayout(new FlowLayout(CENTER, CENTER, VERTICAL, 16));
-c.root.add(CENTER, composite);
-
-var p1 = new Label("Event transparent children component");
-p1.setBorder(new Border("red", 2));
-p1.setPadding(12);
-var p2 = new Label("Normal, not event transparent children component");
-p2.setPadding(12);
-p2.setBorder(new Border("gray", 2));
-
-composite.add(p1);
-composite.add(p2);
-[/js]
-
-
-Find live-application below:
-
-
-
-
-
-#### Global UI events listeners
-
-
-
-Zebra **UI events** handling and distribution is centralized in "zebra.ui.EventManager" class. The event manager gets all UI events and than decides how it has to be delivered to a source UI component. The event manager declares number of methods to register different type of event listeners. By registering the listeners you can catch all UI events that are happening in system.
-
-The current installed event manager instance is accessible as **"zebra.ui.events"** variable. The following listener registration and un-registration methods are available:
-[table]
-Listener; Description
-_addMouseListener(l)~~removeMouseListener(l)_;add, remove mouse events listener
-_addKeyListener(l)~~removeKeyListener(l)_;add, remove keyboard events listener
-_addComponentListener(l)~~removeComponentListener(l)_;add, remove component events listener
-_addFocusListener(l)~~removeFocusListener(l)_;add, remove focus events listener
-_addListener(l)~~removeListener(l)_;add, remove generic events listener. This methods analyzes which events handler methods are implemented with the passed object and add or remove the passed object detected listeners
-[/table]

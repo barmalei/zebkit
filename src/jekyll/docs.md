@@ -20,6 +20,9 @@ title: Documentation
 <a href="docs.zson.html">Zson</a>
 <br/>(JSON as a config and descriptive language)<br/>
 
+<a href="docs.dthen.html">D-then</a>
+<br/>(asynchronous calls as a sequence)<br/>
+
 <hr>
 <a href="#">Data models</a>
 <br/>(list, text, matrix, etc)    
@@ -43,10 +46,10 @@ title: Documentation
 <a href="docs.layouts.html">Layout management</a>
 <br/>(rules based layouting)<br/>
 
-<a href="#">Event handling</a>
+<a href="docs.ui.event.html">Event handling</a>
 <br/>(how to catch event)
 
-<a href="#">Resources and configuration</a>
+<a href="docs.ui.config.html">Resources and configuration</a>
 <br/>(define forms with Zson)
 
 <hr>

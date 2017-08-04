@@ -218,7 +218,7 @@ zebkit.package("ui.event", function(pkg, Class) {
         function $prototype() {
             /**
              * Pointer type. Can be "mouse", "touch", "pen"
-             * @attribute  poiterType
+             * @attribute  pointerType
              * @type {String}
              */
             this.pointerType = "mouse";

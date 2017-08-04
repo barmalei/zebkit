@@ -72,6 +72,11 @@ zebkit.package("ui", function(pkg, Class) {
             ]);
         },
 
+        function setValue(v) {
+            this.kids[0].setValue(v);
+            return this;
+        },
+
         function recalc() {
             this.$contentPs = (this.kids.length === 0 ? this.$super()
                                                       : this.kids[0].getPreferredSize());

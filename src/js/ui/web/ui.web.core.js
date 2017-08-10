@@ -53,7 +53,6 @@ zebkit.package("ui.web", function(pkg, Class) {
                 throw new Error("DOM element '" + e + "' already has container");
             }
 
-
             /**
              * Every zebkit HTML element is wrapped with a container (div) HTML element.
              * It is required since not all HTML elements are designed to be a container
@@ -241,7 +240,10 @@ zebkit.package("ui.web", function(pkg, Class) {
                     }
                     name = name.substring(i + 1);
                 }
-                element.style[name] = value;
+
+                if (element.style[name] !== value) {
+                    element.style[name] = value;
+                }
                 return this;
             };
 
@@ -259,8 +261,8 @@ zebkit.package("ui.web", function(pkg, Class) {
 
             /**
              * Set the specified attributes set to the wrapped HTML element
-             * @param {Object} attrs the dictionary of attributes where name of an attribute is a key
-             * of the dictionary and
+             * @param {Object} attrs the dictionary of attributes where name of an
+             * attribute is a key of the dictionary and
              * @method  setAttributes
              * @chainable
              */
@@ -272,12 +274,14 @@ zebkit.package("ui.web", function(pkg, Class) {
             };
 
             /**
-             * Implements "paint" method to be aware when the component is visible.
-             * It is used to adjust wrapped HTML element visibility and size.
+             * Implements "update" method to be aware when the component is visible.
+             * It is used to adjust wrapped HTML element visibility and size. Update
+             * is the first rendering method that is called, so it is right place
+             * to sync HTML element visibility before paint method execution
              * @param  {CanvasRenderingContext2D} g a 2D canvas context
-             * @method paint
+             * @method update
              */
-            this.paint = function(g) {
+            this.update = function(g) {
                 // this method is used as an indication that the component
                 // is visible and no one of his parent is invisible
                 if (this.$container.style.visibility === "hidden") {
@@ -292,7 +296,10 @@ zebkit.package("ui.web", function(pkg, Class) {
             };
 
             this.calcPreferredSize = function(target) {
-                return { width: this.ePsW, height: this.ePsH };
+                return {
+                    width : this.ePsW,
+                    height: this.ePsH
+                };
             };
 
             var $store = [
@@ -313,6 +320,7 @@ zebkit.package("ui.web", function(pkg, Class) {
                         vars      = {},
                         domParent = null,
                         k         = null,
+                        cv        = this.$container.style.visibility,
                         b         = !zebkit.web.$contains(this.$container);
 
                     // element doesn't have preferred size if it is not a member of
@@ -331,7 +339,10 @@ zebkit.package("ui.web", function(pkg, Class) {
                     }
 
                     // force metrics to be calculated automatically
-                    this.$container.style.visibility = "hidden";
+                    if (cv !== "hidden")  {
+                        this.$container.style.visibility = "hidden";
+                    }
+
                     e.style.padding  = "0px";
                     e.style.border   = "none";
                     e.style.position = e.style.height = e.style.width = "auto";
@@ -342,9 +353,13 @@ zebkit.package("ui.web", function(pkg, Class) {
 
                     for(k in vars) {
                         var v = vars[k];
-                        if (v !== null) {
+                        if (v !== null && e.style[k] !== v) {
                             e.style[k] = v;
                         }
+                    }
+
+                    if (this.$container.style.visibility !== cv) {
+                        this.$container.style.visibility = cv;
                     }
 
                     if (b) {
@@ -427,29 +442,36 @@ zebkit.package("ui.web", function(pkg, Class) {
             // HTML layout. In this case offsetWidth/offsetHeihght are always zero what prevents
             // us from proper calculation of CSS width and height. Postpone
             if (zebkit.web.$contains(this.$container)) {
-                var prevVisibility = this.$container.style.visibility;
-                this.$container.style.visibility = "hidden"; // could make sizing smooth
+                var  contStyle      = this.$container.style,
+                     elemStyle      = this.element.style,
+                     prevVisibility = contStyle.visibility;
+
+                if (contStyle.visibility !== "hidden") {
+                    contStyle.visibility = "hidden"; // to make sizing smooth
+                }
 
                 // HTML element size is calculated as sum of CSS "width"/"height", paddings, border
                 // So the passed width and height has to be corrected (before it will be applied to
                 // an HTML element) by reduction of extra HTML gaps. For this we firstly set the
                 // width and size
-                this.element.style.width  = "" + w + "px";
-                this.element.style.height = "" + h + "px";
+                elemStyle.width  = "" + w + "px";
+                elemStyle.height = "" + h + "px";
 
                 var ww = 2 * w - this.element.offsetWidth,
                     hh = 2 * h - this.element.offsetHeight;
 
                 if (ww !== w || hh !== h) {
                     // than we know the component metrics and can compute necessary reductions
-                    this.element.style.width   = "" + ww + "px";
-                    this.element.style.height  = "" + hh + "px";
+                    elemStyle.width   = "" + ww + "px";
+                    elemStyle.height  = "" + hh + "px";
                 }
 
                 this.$sizeAdjusted = true;
 
                 // visibility correction is done by HTML elements manager
-                this.$container.style.visibility = prevVisibility;
+                if (contStyle.visibility !== prevVisibility) {
+                    contStyle.visibility = prevVisibility;
+                }
             } else {
                 this.$sizeAdjusted = false;
             }
@@ -629,41 +651,6 @@ zebkit.package("ui.web", function(pkg, Class) {
                 return p !== null || ui.$cvp(c) === null;
             }
 
-            // attach to appropriate DOM parent if necessary
-            // c parameter has to be DOM element
-            function $resolveDOMParent(c) {
-                // try to find an HTML element in zebkit (pay attention, in zebkit hierarchy !)
-                // hierarchy that has to be a DOM parent for the given component
-                var parentElement = null;
-                for(var p = c.parent; p !== null; p = p.parent) {
-                    if (p.isDOMElement === true) {
-                        parentElement = p.$container;
-                        break;
-                    }
-                }
-
-                // parentElement is null means the component has
-                // not been inserted into DOM hierarchy
-                if (parentElement !== null && c.$container.parentNode === null) {
-                    // parent DOM element of the component is null, but a DOM container
-                    // for the element has been detected. We need to add it to DOM
-                    // than we have to add the DOM to the found DOM parent element
-                    parentElement.appendChild(c.$container);
-
-                    // adjust location of just attached DOM component
-                    $adjustLocation(c);
-                } else {
-                    // test consistency whether the DOM element already has
-                    // parent node that doesn't match the discovered
-                    if (parentElement           !== null &&
-                        c.$container.parentNode !== null &&
-                        c.$container.parentNode !== parentElement)
-                    {
-                        throw new Error("DOM parent inconsistent state ");
-                    }
-                }
-            }
-
             //    +----------------------------------------
             //    |             ^      DOM1
             //    |             .
@@ -702,6 +689,42 @@ zebkit.package("ui.web", function(pkg, Class) {
                     c.$container.style.top  = "" + yy + "px";
                     if (prevVisibility !== null) {
                         c.$container.style.visibility = prevVisibility;
+                    }
+                }
+            }
+
+
+            // attach to appropriate DOM parent if necessary
+            // c parameter has to be DOM element
+            function $resolveDOMParent(c) {
+                // try to find an HTML element in zebkit (pay attention, in zebkit hierarchy !)
+                // hierarchy that has to be a DOM parent for the given component
+                var parentElement = null;
+                for(var p = c.parent; p !== null; p = p.parent) {
+                    if (p.isDOMElement === true) {
+                        parentElement = p.$container;
+                        break;
+                    }
+                }
+
+                // parentElement is null means the component has
+                // not been inserted into DOM hierarchy
+                if (parentElement !== null && c.$container.parentNode === null) {
+                    // parent DOM element of the component is null, but a DOM container
+                    // for the element has been detected. We need to add it to DOM
+                    // than we have to add the DOM to the found DOM parent element
+                    parentElement.appendChild(c.$container);
+
+                    // adjust location of just attached DOM component
+                    $adjustLocation(c);
+                } else {
+                    // test consistency whether the DOM element already has
+                    // parent node that doesn't match the discovered
+                    if (parentElement           !== null &&
+                        c.$container.parentNode !== null &&
+                        c.$container.parentNode !== parentElement)
+                    {
+                        throw new Error("DOM parent inconsistent state ");
                     }
                 }
             }

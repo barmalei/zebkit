@@ -479,8 +479,6 @@ zebkit.package("ui.grid", function(pkg, Class) {
      */
     pkg.BaseCaption = Class(ui.Panel, [
         function(titles) {
-            this._ = new this.clazz.Listeners();
-
             this.$super();
 
             if (arguments.length > 0) {
@@ -610,7 +608,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
             this.pointerExited = function(e) {
                 if (this.selectedColRow !== -1) {
                     this.selectedColRow = -1;
-                    this._.captionResizeSelected(this, this.selectedColRow);
+                    this.fire("captionResizeSelected", [this, this.selectedColRow] );
                 }
             };
 
@@ -650,11 +648,11 @@ zebkit.package("ui.grid", function(pkg, Class) {
                     if (this.orient === "horizontal") {
                         var pw = this.metrics.getColWidth(rowcol);
                         this.metrics.setColWidth(rowcol, ns);
-                        this._.captionResized(this, rowcol, pw);
+                        this.fire("captionResized", [this, rowcol, pw]);
                     } else  {
                         var ph = this.metrics.getRowHeight(rowcol);
                         this.metrics.setRowHeight(rowcol, ns);
-                        this._.captionResized(this, rowcol, ph);
+                        this.fire("captionResized", [this, rowcol, ph]);
                     }
                 }
             };
@@ -670,7 +668,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
                 if (newSelected !== this.selectedColRow) {
                     this.selectedColRow = newSelected;
-                    this._.captionResizeSelected(this, this.selectedColRow);
+                    this.fire("captionResizeSelected", [this, this.selectedColRow]);
                 }
             };
 

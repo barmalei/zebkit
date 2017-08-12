@@ -58,7 +58,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
                     if (b === true) {
                         this.selectedIndex = row;
-                        this.target._.rowSelected();
+                        this.target.fire("rowSelected");
                     }
                 }
             };
@@ -66,7 +66,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
             this.clearSelect = function() {
                 if (this.selectedIndex >= 0) {
                     this.selectedIndex = -1;
-                    this.target._.rowSelected();
+                    this.target.fire("rowSelected");
                 }
             };
 
@@ -150,11 +150,8 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 model = new this.clazz.Matrix(arguments[0], arguments[1]);
             }
 
-            this._ = new this.clazz.Listeners();
             this.views = {};
-
             this.visibility = new pkg.CellsVisibility();
-
             this.$super();
 
             this.add("corner", new this.clazz.CornerPan());
@@ -1256,7 +1253,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 if (this.selectedIndex >= 0) {
                     var prev = this.selectedIndex;
                     this.selectedIndex = -1;
-                    this._.rowSelected(this, -1, 0, false);
+                    this.fire("rowSelected", [this, -1, 0, false]);
                     this.repaintRows(-1, prev);
                 }
                 return this;
@@ -1283,7 +1280,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
                     if (b) {
                         this.selectedIndex = row;
-                        this._.rowSelected(this, row, 1, b);
+                        this.fire("rowSelected", [this, row, 1, b]);
                     }
                 }
 
@@ -1970,12 +1967,12 @@ zebkit.package("ui.grid", function(pkg, Class) {
                         d = new this.clazz.Matrix(d);
                     }
 
-                    if (this.model !== null && typeof this.model._ !== 'undefined') {
+                    if (this.model !== null) {
                         this.model.off(this);
                     }
 
                     this.model = d;
-                    if (this.model !== null && typeof this.model._ !== 'undefined') {
+                    if (this.model !== null) {
                         this.model.on(this);
                     }
 

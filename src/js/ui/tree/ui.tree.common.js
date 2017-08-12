@@ -280,7 +280,6 @@ zebkit.package("ui.tree", function(pkg, Class) {
 
             this._isVal = false;
             this.nodes = {};
-            this._ = new this.clazz.Listeners();
             this.setLineColor("gray");
 
             this.isOpenVal = b;
@@ -1000,7 +999,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
                         this.makeVisible(this.selected);
                     }
 
-                    this._.selected(this, old);
+                    this.fire("selected", [ this, old ]);
 
                     if (old !== null && this.isVerVisible(old)) {
                         m = this.getItemMetrics(old);
@@ -1064,7 +1063,8 @@ zebkit.package("ui.tree", function(pkg, Class) {
                     var node = this.getIM(item);
                     node.isOpen = (node.isOpen ? false : true);
                     this.invalidate();
-                    this._.toggled(this, item);
+
+                    this.fire("toggled", [this, item]);
 
                     if (!node.isOpen && this.selected !== null){
                         var parent = this.selected;

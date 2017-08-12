@@ -79,8 +79,8 @@ zebkit.package("ui", function(pkg, Class) {
                     ]));
                 },
 
-                function textUpdated(src, b, off, size, startLine, lines) {
-                    this.$super(src, b, off, size, startLine, lines);
+                function textUpdated(src, op, off, size, startLine, lines) {
+                    this.$super(src, op, off, size, startLine, lines);
                     if (typeof this.getModel().validate !== 'undefined') {
                         this.target._.fired(this.target);
                     }

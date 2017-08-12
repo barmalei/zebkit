@@ -33,8 +33,6 @@ zebkit.package("ui", function(pkg, Class) {
       */
     pkg.ScrollManager = Class(zebkit.EventProducer, [
         function(c) {
-            this._  = new this.clazz.Listeners();
-
             /**
              * Target UI component for that the scroll manager has been instantiated
              * @attribute target
@@ -108,7 +106,10 @@ zebkit.package("ui", function(pkg, Class) {
                     if (typeof this.target.catchScrolled !== 'undefined') {
                         this.target.catchScrolled(psx, psy);
                     }
-                    this._.scrolled(psx, psy);
+
+                    if (typeof this._ !== 'undefined') {
+                        this._.scrolled(this, psx, psy);
+                    }
                 }
                 return this;
             };
@@ -763,12 +764,15 @@ zebkit.package("ui", function(pkg, Class) {
                         this.vBar.position.setOffset( -this.scrollObj.scrollManager.getSY());
                     }
 
-                    if (this.scrollObj.scrollManager == null) {
+                    if (this.scrollObj.scrollManager === null || typeof this.scrollObj.scrollManager === 'undefined') {
                         this.invalidate();
                     }
 
                     this.$isPosChangedLocked = false;
-                } catch(e) { this.$isPosChangedLocked = false; throw e; }
+                } catch(e) {
+                    this.$isPosChangedLocked = false;
+                    throw e;
+                }
             };
 
             this.calcPreferredSize = function (target){
@@ -953,7 +957,7 @@ zebkit.package("ui", function(pkg, Class) {
 
         function insert(i,ctr,c) {
             if ("center" === ctr) {
-                if (c.scrollManager == null) {
+                if (c.scrollManager === null || typeof c.scrollManager === 'undefined') {
                     c = new this.clazz.ContentPan(c);
                 }
 

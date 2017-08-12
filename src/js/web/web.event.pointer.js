@@ -652,7 +652,7 @@ zebkit.package("web", function(pkg, Class) {
                 // no pressed button exists
                 if ($pointerPressedEvents.hasOwnProperty(id) === false) {
                     // the target element is the not a kid of the element
-                    if ($enteredElement !== null && (e.relatedTarget != null     &&
+                    if ($enteredElement !== null && (e.relatedTarget !== null    &&
                                                      e.relatedTarget !== element &&
                                                      element.contains(e.relatedTarget) === false))
                     {
@@ -670,7 +670,7 @@ zebkit.package("web", function(pkg, Class) {
                     // the canvas, for a time being start listening mouse moved events
                     // of Window to emulate mouse moved events in canvas
                     if ($tmpWinMouseMoveListener === null &&
-                        e.relatedTarget != null &&
+                        e.relatedTarget !== null &&
                         element.contains(e.relatedTarget) === false)
                     {
                         // !!! ignore touchscreen devices

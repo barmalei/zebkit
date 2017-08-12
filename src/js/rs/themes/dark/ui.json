@@ -556,7 +556,7 @@
     "Toolbar": {
         "Combo": {
             "background": "%{palette.white}",
-            "border"    : { "@zebkit.draw.Border": "zebkit.util.rgb(200,180,200)" },
+            "border"    : { "@zebkit.draw.Border": "rgb(200,180,200)" },
             "padding"  : [1, 4, 1, 1]
         },
 

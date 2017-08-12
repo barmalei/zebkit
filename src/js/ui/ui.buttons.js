@@ -130,7 +130,6 @@ zebkit.package("ui", function(pkg, Class) {
       */
     pkg.ArrowButton = Class(pkg.EvStatePan, zebkit.util.Fireable, pkg.ButtonRepeatMix, [
         function(direction) {
-            this._ = new zebkit.util.Listeners();
             this.cursorType = pkg.Cursor.HAND;
 
             if (arguments.length > 0) {
@@ -150,6 +149,8 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $clazz() {
+            this.Listeners = zebkit.util.Listeners;
+
             this.ArrowView = Class(zebkit.draw.ArrowView, []);
 
             this.$colors = {
@@ -291,8 +292,6 @@ zebkit.package("ui", function(pkg, Class) {
      */
     pkg.Button = Class(pkg.CompositeEvStatePan, zebkit.util.Fireable, pkg.ButtonRepeatMix, [
         function(t) {
-            this._ = new zebkit.util.Listeners();
-
             this.$super();
 
             if (arguments.length > 0 && t !== null) {
@@ -303,6 +302,8 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $clazz() {
+            this.Listeners = zebkit.util.Listeners;
+
             this.Label = Class(pkg.Label, []);
 
             this.ViewPan = Class(pkg.ViewPan, [
@@ -350,10 +351,14 @@ zebkit.package("ui", function(pkg, Class) {
     pkg.Group = Class(zebkit.EventProducer, [
         function(un) {
             this.selected = null;
-            this._ = new zebkit.util.Listeners();
+
             if (arguments.length > 0) {
                 this.allowNoneSelected = un;
             }
+        },
+
+        function $clazz() {
+            this.Listeners = zebkit.util.ListenersClass("selected");
         },
 
         function $prototype() {
@@ -441,7 +446,7 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             this.updated = function(old) {
-                this._.fired(this, this.selected, old);
+                this.fire("selected", [this, this.selected, old]);
             };
         }
     ]);
@@ -512,8 +517,6 @@ zebkit.package("ui", function(pkg, Class) {
 
             this.$super();
 
-            this._ = new zebkit.util.Listeners();
-
             /**
              * Reference to box component
              * @attribute box
@@ -530,6 +533,8 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $clazz() {
+            this.Listeners = zebkit.util.Listeners;
+
             /**
              * The box UI component class that is used by default with the check box component.
              * @constructor
@@ -554,8 +559,6 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.value = false;
 
-
-
             this.$group = null;
 
             /**
@@ -571,7 +574,8 @@ zebkit.package("ui", function(pkg, Class) {
                     if (typeof this.switched !== 'undefined') {
                         this.switched(this);
                     }
-                    this._.fired(this);
+
+                    this.fire();
                 }
                 return this;
             };
@@ -855,12 +859,9 @@ zebkit.package("ui", function(pkg, Class) {
      * @param {zebkit.ui.Panel} src a toolbar element that has been pressed
      */
     pkg.Toolbar = Class(pkg.Panel, [
-        function () {
-            this._ = new zebkit.util.Listeners();
-            this.$super();
-        },
-
         function $clazz() {
+            this.Listeners = zebkit.util.Listeners;
+
             this.ToolPan = Class(pkg.EvStatePan, [
                 function(c) {
                     this.$super(new zebkit.layout.BorderLayout());
@@ -874,7 +875,7 @@ zebkit.package("ui", function(pkg, Class) {
                 function stateUpdated(o, n) {
                     this.$super(o, n);
                     if (o === "pressed.over" && n === "over") {
-                        this.parent._.fired(this);
+                        this.parent.fire("fired");
                     }
                 }
             ]);

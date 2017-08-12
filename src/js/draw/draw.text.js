@@ -413,41 +413,35 @@ zebkit.package("draw", function(pkg, Class) {
 
             /**
              * Text model update listener handler
-             * @param  {zebkit.data.TextModel} src text model object
-             * @param  {Boolean} b
-             * @param  {Integer} off an offset starting from that
-             * the text has been updated
-             * @param  {Integer} size a size (in character) of text part that
-             * has been updated
-             * @param  {Integer} ful a first affected by the given update line
-             * @param  {Integer} updatedLines a number of text lines that have
-             * been affected by text updating
+             * @param  {zebkit.data.TextEvent} e text event
              * @method textUpdated
              */
-            this.textUpdated = function(src,b,off,size,ful,updatedLines){
-                if (b === false) {
+            this.textUpdated = function(e) {
+
+                if (e.id === "remove") {
                     if (this.invLines > 0) {
-                        var p1 = ful - this.startInvLine,
-                            p2 = this.startInvLine + this.invLines - ful - updatedLines;
+                        var p1 = e.line - this.startInvLine,
+                            p2 = this.startInvLine + this.invLines - e.line - e.lines;
                         this.invLines = ((p1 > 0) ? p1 : 0) + ((p2 > 0) ? p2 : 0) + 1;
-                        this.startInvLine = this.startInvLine < ful ? this.startInvLine : ful;
+                        this.startInvLine = this.startInvLine < e.line ? this.startInvLine : e.line;
                     } else {
-                        this.startInvLine = ful;
+                        this.startInvLine = e.line;
                         this.invLines = 1;
                     }
 
                     if (this.owner !== null && this.owner.isValid !== true) {
                         this.owner.invalidate();
                     }
-                } else {
+                } else {  // insert
+                    // TODO:  check the code
                     if (this.invLines > 0) {
-                        if (ful <= this.startInvLine) {
-                            this.startInvLine += (updatedLines - 1);
-                        } else if (ful < (this.startInvLine + size)) {
-                            size += (updatedLines - 1);
+                        if (e.line <= this.startInvLine) {
+                            this.startInvLine += (e.lines - 1);
+                        } else if (e.line < (this.startInvLine + this.invLines)) {
+                            this.invLines += (e.lines - 1);
                         }
                     }
-                    this.invalidate(ful, updatedLines);
+                    this.invalidate(e.line, e.lines);
                 }
             };
 

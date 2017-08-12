@@ -330,7 +330,7 @@ zebkit.package("web", function(pkg, Class) {
                 }
 
                 // fix loosing meta right keyup event in some browsers
-                if (wasMetaRightPressed === true && (e.metaKey !== true ||  fc === "MetaRight")) {
+                if (wasMetaRightPressed === true && (e.metaKey !== true || fc === "MetaRight")) {
                     wasMetaRightPressed = false;
                     try {
                         KEY_DOWN_EVENT.code      = "MetaRight";

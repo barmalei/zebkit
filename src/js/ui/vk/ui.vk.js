@@ -883,7 +883,6 @@ zebkit.package("ui.vk", function(pkg, Class) {
     pkg.VK = Class(ui.Panel, [
         function() {
             this.$super();
-            this._     = new this.clazz.Listeners();
             this.masks = {
                 shiftKey : false,
                 metaKey  : false,
@@ -950,7 +949,7 @@ zebkit.package("ui.vk", function(pkg, Class) {
             };
 
             this.vkOptionSelected = function(vkey, index, option) {
-                this._.vkOptionSelected(vkey, index, option);
+                this.fire("vkOptionSelected", [vkey, index, option]);
             };
 
             this.hasMaskSet = function(mask) {
@@ -971,7 +970,7 @@ zebkit.package("ui.vk", function(pkg, Class) {
                     }
                 });
 
-                this._.vkMaskUpdated(vkey, mask, value);
+                this.fire("vkMaskUpdated", [vkey, mask, value]);
             };
 
             this.vkPressed = function (vk, code, key, mask) {

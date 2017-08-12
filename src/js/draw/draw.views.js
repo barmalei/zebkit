@@ -128,11 +128,13 @@ zebkit.package("draw", function(pkg, Class) {
                     this.gradient = g.createRadialGradient(cx1, cy1, this.radius, cx1, cy1, rad2);
                 }
 
-                var b = false;
+                var b = false,
+                    i = 0;
+
                 if (this.$colors.length !== this.colors.length ) {
                     b = true;
                 } else {
-                    for(var i = 0; i < this.$colors.length; i++) {
+                    for (i = 0; i < this.$colors.length; i++) {
                         if (this.$colors[i] !== this.colors[i]) {
                             b = true;
                             break;
@@ -141,7 +143,7 @@ zebkit.package("draw", function(pkg, Class) {
                 }
 
                 if (b) {
-                    for(var i = 0; i < this.colors.length;i++) {
+                    for (i = 0; i < this.colors.length; i++) {
                         this.gradient.addColorStop(i, this.colors[i]);
                     }
                 }

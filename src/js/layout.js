@@ -786,7 +786,7 @@ zebkit.package("layout", function(pkg, Class) {
 
             /**
              * Remove the component from its parent if it has a parent
-             * @param {Integer} [after] timout in millisecods the component has
+             * @param {Integer} [after] timeout in milliseconds the component has
              * to be removed
              * @method removeMe
              */

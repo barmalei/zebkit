@@ -56,6 +56,8 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $clazz() {
+            this.Listeners = zebkit.util.ListenersClass("updated", "selected", "posChanged");
+
             /**
              * Text field hint text render
              * @constructor
@@ -218,48 +220,22 @@ zebkit.package("ui", function(pkg, Class) {
                 return this;
             };
 
-            this.textUpdated = function(src, b, off, size, startLine, lines) {
+            this.textUpdated = function(e) {
                 if (this.position !== null) {
-                    if (b === true) {
-                        // Check if a selection presents
-                        // and clear it.  We do it here because it is important
-                        // to remove any selected text after update since:
-                        //   -- not every update brings to real text update, so we have remove selected text
-                        //      only if real text update has happened
-                        //   -- update can make selection start and end location invalid, so we have to take in
-                        //      account before we remove it
-                        if (this.startOff !== this.endOff) {
-                            var start = this.startOff < this.endOff ? this.startOff : this.endOff,
-                                end   = this.startOff > this.endOff ? this.startOff : this.endOff;
-
-                            // if start of selection is less or equals
-                            // to inserted text offset than we have to correct
-                            // insertion area start and end offsets
-                            if (off <= start) {
-                                start += size;
-                                end += size;
-                            } else {
-                                // if offset of an inserted text if greater than start of
-                                // a selection but less or equals to end of the selection
-                                // we have to correct insertion offset to start (since the
-                                // selected text is going to be removed)
-                                if (off <= end) {
-                                    if (off < end) {
-                                        end += size;
-                                    }
-                                    off = start;
-                                }
-                            }
-
-                            //this.endOff = this.startOff = -1; // clear selection
-                            this.remove(start, end - start);
-                        }
-
+                    if (this.endOff !== this.startOff) {
                         this.endOff = this.startOff = -1; // clear selection
-                        this.position.inserted(off, size);
-                    } else {
-                        this.position.removed(off, size);
+                        this.fire("selected");
                     }
+
+                    if (e.id === "insert") {
+                        this.position.inserted(e.offset, e.size);
+                    } else {
+                        this.position.removed(e.offset, e.size);
+                    }
+                }
+
+                if (e.isLastStep) {
+                    this.fire("updated");
                 }
             };
 
@@ -528,11 +504,9 @@ zebkit.package("ui", function(pkg, Class) {
                             if (this.isEditable === true) {
                                 if (this.hasSelection()) {
                                     this.removeSelected();
-                                } else {
-                                    if (this.isEditable === true && position.offset > 0){
-                                        position.seek(-1);
-                                        this.remove(position.offset, 1);
-                                    }
+                                } else if (this.isEditable === true && position.offset > 0) {
+                                    position.seek(-1);
+                                    this.remove(position.offset, 1);
                                 }
                             } break;
                         default: return ;
@@ -565,7 +539,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @param  {Integer} size a size of removed text
              * @method remove
              */
-            this.remove = function (pos,size){
+            this.remove = function(pos, size){
                 if (this.isEditable === true) {
                     if (pos >= 0 && (pos + size) <= this.getMaxOffset()) {
                         if (size < 10000) {
@@ -603,9 +577,21 @@ zebkit.package("ui", function(pkg, Class) {
                         }
                     }
 
-                    if (this.view.target.write(s, pos)) {
-                        this.repaint();
-                        return true;
+                    // has selection then replace the selection with the given text nevertheless
+                    // the requested pos
+                    if (this.startOff !== this.endOff) {
+                        var start = this.startOff < this.endOff ? this.startOff : this.endOff,
+                            end   = this.startOff > this.endOff ? this.startOff : this.endOff;
+
+                        if (this.view.target.replace(s, start, end - start)) {
+                            this.repaint();
+                            return true;
+                        }
+                    } else {
+                        if (this.view.target.write(s, pos)) {
+                            this.repaint();
+                            return true;
+                        }
                     }
                 }
                 return false;
@@ -706,7 +692,9 @@ zebkit.package("ui", function(pkg, Class) {
                         this.endOff    = endOffset;
                         p = this.position.getPointByOffset(endOffset);
                         this.endLine = p[0];
-                        this.endCol = p[1];
+                        this.endCol  = p[1];
+
+                        this.fire("selected");
                         this.repaint();
                     }
                 }
@@ -725,6 +713,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             this.posChanged = function (target, po, pl, pc){
                 this.recalc();
+
                 var position = this.position;
                 if (position.offset >= 0) {
 
@@ -741,10 +730,12 @@ zebkit.package("ui", function(pkg, Class) {
                     if (pl >= 0) {
                         // means selected text exists, than we have to correct selection
                         // according to the new position
-                        if (this.startOff >= 0){
+                        if (this.startOff >= 0) {
                             this.endLine = position.currentLine;
                             this.endCol  = position.currentCol;
                             this.endOff  = position.offset;
+
+                            this.fire("selected");
                         }
 
                         var minUpdatedLine = pl < position.currentLine ? pl : position.currentLine,
@@ -770,6 +761,8 @@ zebkit.package("ui", function(pkg, Class) {
                         this.repaint();
                     }
                 }
+
+                this.fire("posChanged", this);
             };
 
             this.paintOnTop = function(g) {
@@ -968,6 +961,7 @@ zebkit.package("ui", function(pkg, Class) {
 
                     if (b) {
                         this.repaint();
+                        this.fire("selected");
                     }
                 }
                 return this;

@@ -362,7 +362,7 @@ zebkit.package("ui.date", function(pkg, Class) {
                     }
 
                     this.retagModel();
-                    this._.monthShown(this, prevMonth, prevYear);
+                    this.fire("monthShown", [this, prevMonth, prevYear]);
                 }
             };
 
@@ -500,7 +500,7 @@ zebkit.package("ui.date", function(pkg, Class) {
                 if (item.isSelected !== b && (b === false || this.isItemSelectable(item))) {
                     item.isSelected = b;
                     this.repaint();
-                    this._.cellSelected(this, offset, b);
+                    this.fire("cellSelected", [this, offset, b]);
                 }
             };
         },
@@ -563,11 +563,12 @@ zebkit.package("ui.date", function(pkg, Class) {
             ]);
             this.monthDaysGrid.on(this);
 
-            this._ = new this.clazz.Listeners();
-
             this.comboMonth = new this.clazz.MonthsCombo();
             this.comboMonth.content.setCalcPsByContent(true);
-            this.comboMonth.winpad.adjustToComboSize = false;
+
+            // TODO: find another solution since the property is not suppotred anymore
+            //this.comboMonth.winpad.adjustToComboSize = false;
+
             this.comboMonth.on(function(src) {
                 $this.showMonth(src.list.selectedIndex, $this.monthDaysGrid.year);
             });
@@ -878,7 +879,7 @@ zebkit.package("ui.date", function(pkg, Class) {
                         }
 
                         this.monthDaysGrid.retagModel();
-                        this._.dateSet(this, prevDate);
+                        this.fire("dateSet", [this, prevDate]);
                     } finally {
                         this.$freeze = false;
                     }

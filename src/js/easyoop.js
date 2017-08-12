@@ -118,6 +118,28 @@
     //
     var $uriRE = /^(([a-zA-Z]+)\:\/\/([^\/:]+)?(\:[0-9]+)?(\/)?)?([^?]+)?(\?.+)?/;
 
+    //  Faster match operation analogues:
+    //  Math.floor(f)  =>  ~~(a)
+    //  Math.round(f)  =>  (f + 0.5) | 0
+    function isString(o)  {
+        return typeof o !== "undefined" && o !== null &&
+              (typeof o === "string" || o.constructor === String);
+    }
+
+    function isNumber(o)  {
+        return typeof o !== "undefined" && o !== null &&
+              (typeof o === "number" || o.constructor === Number);
+    }
+
+    function isBoolean(o) {
+        return typeof o !== "undefined" && o !== null &&
+              (typeof o === "boolean" || o.constructor === Boolean);
+    }
+
+    function $toString() {
+        return this.$hash$;
+    }
+
     /**
      * URI class. Pass either a full uri (as a string or zebkit.URI) or number of an URI parts
      * (scheme, host, etc) to constructor it.
@@ -609,7 +631,10 @@
 
                 if (this.$error === null) {
                     if (level === 0 && this.$busy === 0) {
-                        if (this.$results[level] != null && this.$results[level].length > 0) {
+                        if (this.$results[level] !== null &&
+                            typeof this.$results[level] !== 'undefined' &&
+                            this.$results[level].length > 0)
+                        {
                             task.apply(this, this.$results[level]);
                         } else {
                             task.call(this);
@@ -758,7 +783,7 @@
                     index = this.$busy++;
 
                 return function() {
-                    if ($this.$results[level] == null) {
+                    if ($this.$results[level] === null || typeof $this.$results[level] === 'undefined') {
                         $this.$results[level] = [];
                     }
 
@@ -890,24 +915,6 @@
             this.recover();
         }
     };
-
-    //  Faster match operation analogues:
-    //  Math.floor(f)  =>  ~~(a)
-    //  Math.round(f)  =>  (f + 0.5) | 0
-    function isString(o)  {
-        return typeof o !== "undefined" && o !== null &&
-              (typeof o === "string" || o.constructor === String);
-    }
-
-    function isNumber(o)  {
-        return typeof o !== "undefined" && o !== null &&
-              (typeof o === "number" || o.constructor === Number);
-    }
-
-    function isBoolean(o) {
-        return typeof o !== "undefined" && o !== null &&
-              (typeof o === "boolean" || o.constructor === Boolean);
-    }
 
     function lookupObjValue(obj, name) {
         if (arguments.length === 1) {
@@ -1518,10 +1525,6 @@
             return overriddenAbstractMethods;
         }
 
-        function $toString() {
-            return this.$hash$;
-        }
-
         // return function that is meta class
         //  instanceOf      - parent template function (can be null)
         //  templateConstructor - template function,
@@ -1608,10 +1611,11 @@
                           date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
                 }
 
-                console.log(msg + "] : " + e);
+
                 if (e === null || typeof e === 'undefined') {
                     console.log("Unknown error");
                 } else {
+                    console.log(msg + " : " + e);
                     console.log((e.stack ? e.stack : e));
                 }
             }
@@ -2828,7 +2832,7 @@
             }
 
             var ctx = pkg.$global, i = 0, j = 0;
-            for( ;ctx != null; ) {
+            for( ;ctx !== null && typeof ctx !== 'undefined'; ) {
                 i = key.indexOf('.', j);
 
                 if (i < 0) {
@@ -2840,7 +2844,7 @@
                 j = i + 1;
             }
 
-            if (ctx != null) {
+            if (ctx !== null && typeof ctx !== 'undefined') {
                 if ($cachedE.length >= pkg.$cacheSize) {
                     // cache is full, replace first element with the new one
                     var n = $cachedE[0];
@@ -2946,7 +2950,7 @@
          *         // handle "fired" events
          *     });
          *
-         *     a.fire(10);
+         *     a.fireEvent(10);
          *
          * @class zebkit.EventProducer
          * @interface zebkit.EventProducer
@@ -2992,11 +2996,14 @@
                         pt = null,                             // path
                         nm = null;                             // event name
 
-                    if (cb === null || isString(cb)) {
+                    if (cb === null || (typeof cb === "string" || cb.constructor === String)) {
                         throw new Error("Invalid event handler");
                     }
 
                     if (arguments.length === 1) {
+                        if (typeof this._ === 'undefined') {
+                            this._ = new this.clazz.Listeners();
+                        }
                         return this._.add(cb);
                     } else if (arguments.length === 2) {
                         if (arguments[0] === null) {
@@ -3004,17 +3011,28 @@
                         } else if (arguments[0][0] === '.' || arguments[0][0] === '/' || arguments[0][0] === '#') { // detect path
                             pt = arguments[0];
                         } else {
+                            if (typeof this._ === 'undefined') {
+                                this._ = new this.clazz.Listeners();
+                            }
                             return this._.add(arguments[0], cb);
                         }
                     } else if (arguments.length === 3) {
                         pt = arguments[1];
                         nm = arguments[0];
                         if (pt === null) {
+                            if (typeof this._ === 'undefined') {
+                                this._ = new this.clazz.Listeners();
+                            }
                             return this._.add(nm, cb);
                         }
                     }
 
                     this.byPath(pt, function(node) {
+                        // try to initiate
+                        if (typeof node._ === 'undefined' && typeof node.clazz.Listeners !== 'undefined') {
+                            node._ = new node.clazz.Listeners();
+                        }
+
                         if (typeof node._ !== 'undefined') {
                             if (nm !== null) {
                                 if (typeof node._[nm] !== 'undefined') {
@@ -3105,20 +3123,25 @@
                         nm   = arguments[0];  // event name or listener
 
                     if (arguments.length >= 0 && arguments.length < 3) {
-                        if (arguments.length === 0) {
-                            nm = "fired";
+                        if (typeof this._ !== 'undefined') {
+                            if (arguments.length === 0) {
+                                nm = "fired";
+                            }
+
+                            if (this._.hasEvent(nm) === false) {
+                                throw new Error("Listener doesn't '" + nm + "' support the event");
+                            }
+
+                            var fn = this._[nm];
+                            if (arguments.length === 2) {
+                                return Array.isArray(arguments[1]) ? fn.apply(this._, arguments[1])
+                                                                   : fn.call(this._,  arguments[1]);
+                            } else {
+                                return fn.call(this._, this);
+                            }
+                        } else {
+                            return false;
                         }
-
-                        if (this._.hasEvent(nm) === false) {
-                            throw new Error("Listener doesn't '" + nm + "' support the event");
-                        }
-
-                        var fn = this._[nm];
-                        args = (arguments.length === 2 ? arguments[1] : this);
-
-                        return arguments.length === 2 && Array.isArray(args) ? fn.apply(this._, args)
-                                                                             : fn.call(this._, args);
-
                     } else if (arguments.length === 3) {
                         pt   = arguments[1];
                         args = arguments[2];

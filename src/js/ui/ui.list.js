@@ -50,8 +50,6 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.selectedIndex = -1;
 
-            this._ = new this.clazz.Listeners();
-
             /**
              * Indicate the current mode the list items selection has to work
              * @readOnly
@@ -413,7 +411,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @protected
              */
             this.fireSelected = function(prev) {
-                this._.selected(this, prev);
+                this.fire("selected", [this, prev]);
             };
 
             this.pointerClicked = function(e) {
@@ -1220,12 +1218,12 @@ zebkit.package("ui", function(pkg, Class) {
 
         function kidAdded(index,constr,e){
             this.$super(index,constr,e);
-            this.model._.elementInserted(this, e, index);
+            this.model.fire("elementInserted", [this, e, index]);
         },
 
         function kidRemoved(index,e) {
             this.$super(index,e);
-            this.model._.elementRemoved(this, e, index);
+            this.model.fire("elementRemoved", [this, e, index]);
         }
     ]);
 });

@@ -98,29 +98,104 @@ zebkit.package("data", function(pkg, Class) {
      * Fired when the text model has been updated: a string has been
      * inserted or removed
 
-        text.on(function(src, b, off, len, startLine, lines) {
+        text.on(function(e) {
             ...
         });
 
      *
      * @event textUpdated
-     * @param {zebkit.data.TextModel} src a text model that triggers the event
-     * @param {Boolean}  b a flag that is true if a string has been written
-     * in the text model, false if the model substring has been removed
-     * @param {Integer}  off an offset starting form that the text update
-     * took place
-     * @param {Integer}  len a length of text that has been affected by
-     * the text model update
-     * @param {Integer}  startLine a first line that has been affected
-     * by the text model update
-     * @param {Integer}  lines a number of lines that has been affected
-     * by the text model update
+     * @param {zebkit.data.TextEvent} e a text model event
      */
     pkg.TextModel = Class(pkg.DataModel, [
         function $clazz() {
             this.Listeners = zebkit.util.ListenersClass("textUpdated");
+        },
+
+        function $prototype() {
+            this.replace = function(s, off, size) {
+                if (s.length === 0) {
+                    return this.remove(off, size);
+                } else if (size === 0) {
+                    return this.write(s, off);
+                } else {
+                    var b = this.remove(off, size, false);
+                    return this.write(s, off) && b;
+                }
+            };
         }
     ]);
+
+    /**
+     * Text model event class.
+     * @constructor
+     * @class zebkit.data.TextEvent
+     * @extends {zebkit.util.Event}
+     */
+    pkg.TextEvent = Class(zebkit.util.Event, [
+        function $prototype() {
+            /**
+             * Event id.
+             * @attribute id
+             * @type {String}
+             */
+            this.id = null;
+
+            /**
+             * First line number that has participated in the event action.
+             * @attribute line
+             * @type {Integer}
+             */
+            this.line = 0;
+
+            /**
+             * Number of lines that have participated in the event action.
+             * @attribute lines
+             * @type {Integer}
+             */
+            this.lines = 0;
+
+            /**
+             * Offset in a text.
+             * @attribute offset
+             * @type {Integer}
+             */
+            this.offset = 0;
+
+            /**
+             * Number of characters.
+             * @attribute size
+             * @type {Integer}
+             */
+            this.size = 0;
+
+            this.isLastStep = true;
+
+            /**
+             * Fill the event with the give parameters
+             * @param  {zebkit.data.TextModel} src  a source of the event
+             * @param  {String} id an id of the event ("remove", "insert")
+             * @param  {Integer} line a first line
+             * @param  {Integer} lines  a number of lines
+             * @param  {Integer} offset an offset
+             * @param  {Integer} size   a number of characters
+             * @method $fillWith
+             * @chainable
+             * @protected
+             */
+            this.$fillWith = function(src, id, line, lines, offset, size) {
+                this.isLastStep   = true
+                this.source       = src;
+                this.id           = id;
+                this.line         = line;
+                this.lines        = lines;
+                this.offset       = offset;
+                this.size         = size;
+                return this;
+            };
+        }
+    ]);
+
+    var TE_STUB = new pkg.TextEvent();
 
     /**
      * Multi-lines text model implementation
@@ -266,7 +341,7 @@ zebkit.package("data", function(pkg, Class) {
                 }
 
                 this.$lines.splice(start, size);
-                this._.textUpdated(this, false, off, olen, start, size);
+                this._.textUpdated(TE_STUB.$fillWith(this, "remove", start, size, off, olen));
             };
 
             /**
@@ -289,13 +364,13 @@ zebkit.package("data", function(pkg, Class) {
                     offlen += arguments[i].length + 1;
                     this.$lines.splice(startLine + i - 1, 0, new this.clazz.Line(arguments[i]));
                 }
-                this._.textUpdated(this, true, off, offlen, startLine, arguments.length - 1);
+                this._.textUpdated(TE_STUB.$fillWith(this, "insert", startLine, arguments.length - 1, off, offlen));
             };
 
-            this.write = function (s, offset) {
+            this.write = function (s, offset, b) {
                 if (s.length > 0) {
                     var slen    = s.length,
-                        info    = this.calcLineByOffset(0,0,offset),
+                        info    = this.calcLineByOffset(0, 0, offset),
                         line    = this.$lines[info[0]].$s,
                         j       = 0,
                         lineOff = offset - info[1],
@@ -305,30 +380,35 @@ zebkit.package("data", function(pkg, Class) {
 
                     }
 
-                    if (j >= slen) {
+                    if (j >= slen) { // means the update has occurred withing one line
                         this.$lines[info[0]].$s = tmp;
                         j = 1;
                     } else {
-                        this.$lines.splice(info[0], 1);
-                        j = this.parse(info[0], tmp, this.$lines);
+                        this.$lines.splice(info[0], 1); // remove line
+                        j = this.parse(info[0], tmp);   // re-parse the updated part of text
                     }
 
                     if (slen > 0) {
                         this.textLength += slen;
-                        this._.textUpdated(this, true, offset, slen, info[0], j);
+                        TE_STUB.$fillWith(this, "insert", info[0], j, offset, slen);
+                        if (arguments.length > 2) {
+                            TE_STUB.isLastStep = b;
+                        }
+                        this._.textUpdated(TE_STUB);
                         return true;
                     }
                 }
                 return false;
             };
 
-            this.remove = function(offset, size) {
+            this.remove = function(offset, size, b) {
                 if (size > 0) {
                     var i1   = this.calcLineByOffset(0, 0, offset),
                         i2   = this.calcLineByOffset(i1[0], i1[1], offset + size),
                         l1   = this.$lines[i1[0]].$s,
                         l2   = this.$lines[i2[0]].$s,
-                        off1 = offset - i1[1], off2 = offset + size - i2[1],
+                        off1 = offset - i1[1],
+                        off2 = offset + size - i2[1],
                         buf  = l1.substring(0, off1) + l2.substring(off2);
 
                     if (i2[0] === i1[0]) {
@@ -340,21 +420,29 @@ zebkit.package("data", function(pkg, Class) {
 
                     if (size > 0) {
                         this.textLength -= size;
-                        this._.textUpdated(this, false, offset, size, i1[0], i2[0] - i1[0] + 1);
+                        TE_STUB.$fillWith(this, "remove", i1[0], i2[0] - i1[0] + 1, offset, size);
+                        if (arguments.length > 2) {
+                            TE_STUB.isLastStep = b;
+                        }
+                        this._.textUpdated(TE_STUB);
                         return true;
                     }
                 }
                 return false;
             };
 
-            this.parse = function (startLine, text, lines) {
-                var size = text.length, prevIndex = 0, prevStartLine = startLine;
-                for(var index = 0; index <= size; prevIndex = index, startLine++){
+            this.parse = function (startLine, text) {
+                var size          = text.length,
+                    prevIndex     = 0,
+                    prevStartLine = startLine;
+
+                for(var index = 0; index <= size; prevIndex = index, startLine++) {
                     var fi = text.indexOf("\n", index);
                     index = (fi < 0 ? size : fi);
                     this.$lines.splice(startLine, 0, new this.clazz.Line(text.substring(prevIndex, index)));
                     index++;
                 }
+
                 return startLine - prevStartLine;
             };
 
@@ -365,13 +453,15 @@ zebkit.package("data", function(pkg, Class) {
                         var numLines = this.getLines(), txtLen = this.getTextLength();
                         this.$lines.length = 0;
                         this.$lines = [ new this.clazz.Line("") ];
-                        this._.textUpdated(this, false, 0, txtLen, 0, numLines);
+                        TE_STUB.$fillWith(this, "remove", 0, numLines, 0, txtLen);
+                        TE_STUB.isLastStep = false;
+                        this._.textUpdated(TE_STUB);
                     }
 
                     this.$lines = [];
-                    this.parse(0, text, this.$lines);
+                    this.parse(0, text);
                     this.textLength = text.length;
-                    this._.textUpdated(this, true, 0, this.textLength, 0, this.getLines());
+                    this._.textUpdated(TE_STUB.$fillWith(this, "insert", 0, this.getLines(), 0, this.textLength));
                     return true;
                 }
                 return false;
@@ -445,7 +535,7 @@ zebkit.package("data", function(pkg, Class) {
                 return this.$buf;
             };
 
-            this.write = function(s,offset) {
+            this.write = function(s, offset, b) {
                 // cut to the first new line character
                 var j = s.indexOf("\n");
                 if (j >= 0) {
@@ -453,13 +543,46 @@ zebkit.package("data", function(pkg, Class) {
                 }
 
                 var l = (this.maxLen > 0 && (this.$buf.length + s.length) >= this.maxLen) ? this.maxLen - this.$buf.length
-                                                                                         : s.length;
+                                                                                          : s.length;
                 if (l !== 0) {
-                    var nl = this.$buf.substring(0, offset) + s.substring(0, l) + this.$buf.substring(offset);
-                    if (typeof this.validate !== 'function' || this.validate(nl)) {
-                        this.$buf = nl;
-                        if (l > 0) {
-                            this._.textUpdated(this, true, offset, l, 0, 1);
+                    var nl = (offset === this.$buf.length ?  this.$buf + s.substring(0, l)  // append
+                                                          :  this.$buf.substring(0, offset) +
+                                                             s.substring(0, l) +
+                                                             this.$buf.substring(offset));
+
+                    this.$buf = nl;
+                    if (l > 0) {
+                        TE_STUB.$fillWith(this, "insert", 0, 1, offset, l);
+                        if (arguments.length > 2) {
+                            TE_STUB.isLastStep = b;
+                        }
+                        this._.textUpdated(TE_STUB);
+                        return true;
+                    }
+                }
+                return false;
+            };
+
+            this.remove = function(offset, size, b) {
+                if (size > 0 && offset < this.$buf.length) {
+
+                    // normalize size
+                    if (offset + size > this.$buf.length) {
+                        size = this.$buf.length - offset;
+                    }
+
+                    if (size > 0)  {
+                        // build new cut line
+                        var nl = this.$buf.substring(0, offset) +
+                                 this.$buf.substring(offset + size);
+
+                        if (nl.length !== this.$buf.length) {
+                            this.$buf = nl;
+                            TE_STUB.$fillWith(this, "remove", 0, 1, offset, size)
+                            if (arguments.length > 2) {
+                                TE_STUB.isLastStep = b;
+                            }
+                            this._.textUpdated(TE_STUB);
                             return true;
                         }
                     }
@@ -467,34 +590,18 @@ zebkit.package("data", function(pkg, Class) {
                 return false;
             };
 
-            this.remove = function(offset,size){
-                if (size > 0) {
-                    var nl = this.$buf.substring(0, offset) +
-                             this.$buf.substring(offset + size);
-
-                    if (nl.length !== this.$buf.length && (typeof this.validate !== 'function' || this.validate(nl))) {
-                        this.$buf = nl;
-                        this._.textUpdated(this, false, offset, size, 0, 1);
-                        return true;
-                    }
-                }
-                return false;
-            };
-
             this.setValue = function(text){
-                if (typeof this.validate === 'function' && this.validate(text) === false) {
-                    return false;
-                }
-
                 // cut to next line
                 var i = text.indexOf('\n');
                 if (i >= 0) {
                     text = text.substring(0, i);
                 }
 
-                if ((this.$buf === null || this.$buf !== text) && (typeof this.validate !== 'function'  || this.validate(text))) {
+                if (this.$buf === null || this.$buf !== text) {
                     if (this.$buf !== null && this.$buf.length > 0) {
-                        this._.textUpdated(this, false, 0, this.$buf.length, 0, 1);
+                        TE_STUB.$fillWith(this, "remove", 0, 1, 0, this.$buf.length);
+                        TE_STUB.isLastStep = false;
+                        this._.textUpdated(TE_STUB);
                     }
 
                     if (this.maxLen > 0 && text.length > this.maxLen) {
@@ -502,7 +609,7 @@ zebkit.package("data", function(pkg, Class) {
                     }
 
                     this.$buf = text;
-                    this._.textUpdated(this, true, 0, text.length, 0, 1);
+                    this._.textUpdated(TE_STUB.$fillWith(this, "insert", 0, 1, 0, text.length));
                     return true;
                 }
 
@@ -520,15 +627,6 @@ zebkit.package("data", function(pkg, Class) {
                     this.setValue("");
                 }
             };
-
-            /**
-             *  Validate the given text. This method can be implemented to prevent
-             *  inserting text in text model that doesn't satisfy the given condition.
-             *  For instance text can allow only numeric.
-             *  @method validate
-             *  @param {String} text a text
-             *  @return {Boolean} return true if the text is valid otherwise return false
-             */
         }
     ]);
 

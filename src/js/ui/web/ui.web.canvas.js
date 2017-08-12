@@ -339,21 +339,21 @@ zebkit.package("ui.web", function(pkg, Class) {
                 var x = this.$toElementX(e.pageX, e.pageY),
                     y = this.$toElementY(e.pageX, e.pageY),
                     d = this.getComponentAt(x, y),
-                    o = pkg.$pointerOwner[e.identifier];
+                    o = pkg.$pointerOwner.hasOwnProperty(e.identifier) ? pkg.$pointerOwner[e.identifier] : null;
 
                 // also correct current component on that  pointer is located
                 if (d !== o) {
                     // if pointer owner is not null but doesn't match new owner
                     // generate pointer exit and clean pointer owner
-                    if (o != null) {
-                        pkg.$pointerOwner[e.identifier] = null;
+                    if (o !== null) {
+                        delete pkg.$pointerOwner[e.identifier];
                         ui.events.fire("pointerExited", e.update(o, x, y));
                     }
 
                     // if new pointer owner is not null and enabled
                     // generate pointer entered event ans set new pointer owner
                     if (d !== null && d.isEnabled === true){
-                        pkg.$pointerOwner[e.identifier] = d;
+                        delete pkg.$pointerOwner[e.identifier];
                         ui.events.fire("pointerEntered", e.update(d, x, y));
                     }
                 }
@@ -366,9 +366,9 @@ zebkit.package("ui.web", function(pkg, Class) {
              * @method $pointerExited
              */
             this.$pointerExited = function(e) {
-                var o = pkg.$pointerOwner[e.identifier];
-                if (o != null) {
-                    pkg.$pointerOwner[e.identifier] = null;
+                var o = pkg.$pointerOwner.hasOwnProperty(e.identifier) ? pkg.$pointerOwner[e.identifier] : null;
+                if (o !== null) {
+                    delete pkg.$pointerOwner[e.identifier];
                     return ui.events.fire("pointerExited", e.update(o,
                                                                     this.$toElementX(e.pageX, e.pageY),
                                                                     this.$toElementY(e.pageX, e.pageY)));
@@ -386,29 +386,25 @@ zebkit.package("ui.web", function(pkg, Class) {
                 var x = this.$toElementX(e.pageX, e.pageY),
                     y = this.$toElementY(e.pageX, e.pageY),
                     d = this.getComponentAt(x, y),
-                    o = pkg.$pointerOwner[e.identifier],
+                    o = pkg.$pointerOwner.hasOwnProperty(e.identifier) ? pkg.$pointerOwner[e.identifier] : null,
                     b = false;
 
                 // check if pointer already inside a component
-                if (o != null) {
+                if (o !== null) {
                     if (d !== o) {
-                        pkg.$pointerOwner[e.identifier] = null;
+                        delete pkg.$pointerOwner[e.identifier];
                         b = ui.events.fire("pointerExited", e.update(o, x, y));
 
-                        if (d != null && d.isEnabled === true) {
+                        if (d !== null && d.isEnabled === true) {
                             pkg.$pointerOwner[e.identifier] = d;
                             b = ui.events.fire("pointerEntered", e.update(d, x, y)) || b;
                         }
-                    } else {
-                        if (d !== null && d.isEnabled === true) {
-                            b = ui.events.fire("pointerMoved", e.update(d, x, y));
-                        }
+                    } else if (d !== null && d.isEnabled === true) {
+                        b = ui.events.fire("pointerMoved", e.update(d, x, y));
                     }
-                } else {
-                    if (d !== null && d.isEnabled === true) {
-                        pkg.$pointerOwner[e.identifier] = d;
-                        b = ui.events.fire("pointerEntered", e.update(d, x, y));
-                    }
+                } else if (d !== null && d.isEnabled === true) {
+                    pkg.$pointerOwner[e.identifier] = d;
+                    b = ui.events.fire("pointerEntered", e.update(d, x, y));
                 }
 
                 return b;
@@ -441,7 +437,7 @@ zebkit.package("ui.web", function(pkg, Class) {
              * @method $pointerDragged
              */
             this.$pointerDragged = function(e){
-                if (pkg.$pointerOwner[e.identifier] != null) {
+                if (pkg.$pointerOwner.hasOwnProperty(e.identifier)) {
                     return ui.events.fire("pointerDragged", e.update(pkg.$pointerOwner[e.identifier],
                                                                            this.$toElementX(e.pageX, e.pageY),
                                                                            this.$toElementY(e.pageX, e.pageY)));
@@ -457,10 +453,10 @@ zebkit.package("ui.web", function(pkg, Class) {
              * @method $pointerDragEnded
              */
             this.$pointerDragEnded = function(e) {
-                if (pkg.$pointerOwner[e.identifier] != null) {
+                if (pkg.$pointerOwner.hasOwnProperty(e.identifier)) {
                     return ui.events.fire("pointerDragEnded", e.update(pkg.$pointerOwner[e.identifier],
-                                                                             this.$toElementX(e.pageX, e.pageY),
-                                                                             this.$toElementY(e.pageX, e.pageY)));
+                                                                        this.$toElementX(e.pageX, e.pageY),
+                                                                        this.$toElementY(e.pageX, e.pageY)));
                 }
                 return false;
             };
@@ -532,13 +528,12 @@ zebkit.package("ui.web", function(pkg, Class) {
              */
             this.$pointerReleased = function(e) {
                 var x  = this.$toElementX(e.pageX, e.pageY),
-                    y  = this.$toElementY(e.pageX, e.pageY),
-                    pp = pkg.$pointerPressedOwner[e.identifier];
+                    y  = this.$toElementY(e.pageX, e.pageY);
 
                 // release pressed state
-                if (pp != null) {
+                if (pkg.$pointerPressedOwner.hasOwnProperty(e.identifier)) {
                     try {
-                        e = e.update(pp, x, y);
+                        e = e.update(pkg.$pointerPressedOwner[e.identifier], x, y);
                         if (this.$isBlockedByLayer("pointerReleased", "layerPointerReleased", e) !== true) {
                             ui.events.fire("pointerReleased", e);
                         }
@@ -558,7 +553,7 @@ zebkit.package("ui.web", function(pkg, Class) {
 
                     if (nd !== po) {
                         if (po !== null) {
-                            pkg.$pointerOwner[e.identifier] = null;
+                            delete pkg.$pointerOwner[e.identifier];
                             ui.events.fire("pointerExited", e.update(po, x, y));
                         }
 
@@ -578,13 +573,12 @@ zebkit.package("ui.web", function(pkg, Class) {
              */
             this.$pointerPressed = function(e) {
                 var x  = this.$toElementX(e.pageX, e.pageY),
-                    y  = this.$toElementY(e.pageX, e.pageY),
-                    pp = pkg.$pointerPressedOwner[e.identifier];
+                    y  = this.$toElementY(e.pageX, e.pageY);
 
                 // free pointer prev pressed if any
-                if (pp != null) {
+                if (pkg.$pointerPressedOwner.hasOwnProperty(e.identifier)) {
                     try {
-                        ui.events.fire("pointerReleased", e.update(pp, x, y));
+                        ui.events.fire("pointerReleased", e.update(pkg.$pointerPressedOwner[e.identifier], x, y));
                     } finally {
                         delete pkg.$pointerPressedOwner[e.identifier];
                     }
@@ -818,10 +812,10 @@ zebkit.package("ui.web", function(pkg, Class) {
 
     window.onbeforeunload = function(e) {
         var msgs = [];
-        for(var i = pkg.zCanvas.$canvases.length - 1; i >= 0; i--) {
+        for (var i = pkg.zCanvas.$canvases.length - 1; i >= 0; i--) {
             if (typeof pkg.zCanvas.$canvases[i].saveBeforeLeave !== 'undefined') {
                 var m = pkg.zCanvas.$canvases[i].saveBeforeLeave();
-                if (m != null) {
+                if (m !== null && typeof m !== 'undefined') {
                     msgs.push(m);
                 }
             }

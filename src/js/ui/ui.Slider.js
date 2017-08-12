@@ -95,7 +95,7 @@ zebkit.package("ui", function(pkg, Class) {
                         }
 
                         return null;
-                    },
+                    };
 
                     this.pointerMoved = function(e) {
                         if (this.highlighterView !== null) {
@@ -602,7 +602,7 @@ zebkit.package("ui", function(pkg, Class) {
                 }
 
                 if (this.orient === "vertical") {
-                    this.$psH = 50 * this.lineWidth  + this.$minGap + this.$maxGap,
+                    this.$psH = 50 * this.lineWidth  + this.$minGap + this.$maxGap;
                     this.$psW = (this.showStrokes ? this.strokeSize : 0) +
                                 (this.$maxLabSize === 0 ? 0 : this.$maxLabSize + this.gap);
                 } else {
@@ -869,7 +869,7 @@ zebkit.package("ui", function(pkg, Class) {
                 }
 
                 if (this.orient === "vertical") {
-                    this.$psH = 50 + this.$minGap + this.$maxGap,
+                    this.$psH = 50 + this.$minGap + this.$maxGap;
                     this.$psW = (this.showStrokes ? this.strokeSize : 0) +
                                 (this.$maxLabSize === 0 ? 0 : this.$maxLabSize + this.gap);
                 } else {
@@ -1021,7 +1021,11 @@ zebkit.package("ui", function(pkg, Class) {
                     ss         = this.showStrokes ? this.strokeSize : 0,
                     ps         = null,
                     prevLabLoc = null,
-                    prevPs     = null;
+                    prevPs     = null,
+                    rendered   = false,
+                    v          = null,
+                    view       = null,
+                    loc        = 0;
 
                 g.beginPath();
 
@@ -1032,16 +1036,16 @@ zebkit.package("ui", function(pkg, Class) {
 
                     for (i = 0; xx <= maxX; i++, xx += this.strokeStep) {
                         if (i % this.longStrokeRate === 0) {
-                            var rendered = false;
+                            rendered = false;
 
                             if (this.provider !== null && this.showLabels) {
-                                var v    = this.toValue(xx),
-                                    view = this.provider.getView(this, v);
+                                v    = this.toValue(xx);
+                                view = this.provider.getView(this, v);
 
                                 if (view !== null) {
                                     ps = view.getPreferredSize();
 
-                                    var loc = xx - Math.round(ps.width / 2);
+                                    loc = xx - Math.round(ps.width / 2);
                                     if (prevLabLoc === null || loc > prevLabLoc + prevPs.width) {
                                         this.paintLabel(g,
                                                         loc,
@@ -1082,16 +1086,16 @@ zebkit.package("ui", function(pkg, Class) {
 
                     for (i = 0; yy >= minY; i++, yy -= this.strokeStep) {
                         if (i % this.longStrokeRate === 0) {
-                            var rendered = false;
+                            rendered = false;
 
                             if (this.provider !== null && this.showLabels) {
-                                var v    = this.toValue(yy),
-                                    view = this.provider.getView(this, v);
+                                v    = this.toValue(yy);
+                                view = this.provider.getView(this, v);
 
                                 if (view !== null) {
                                     ps = view.getPreferredSize();
 
-                                    var loc = yy - Math.round(ps.height / 2);
+                                    loc = yy - Math.round(ps.height / 2);
                                     if (prevLabLoc === null || (loc + ps.height) < prevLabLoc) {
                                         this.paintLabel(g,
                                                         this.labelsAlignment === "normal" ? x + 2 * ss + this.gap
@@ -1443,18 +1447,20 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             this.calcPreferredSize = function(l) {
-                var ps = this.getHandlePreferredSize();
+                var ps  = this.getHandlePreferredSize();
 
                 if (this.ruler.isVisible === true) {
-                    var rps = this.ruler.getPreferredSize();
+                    var rps = this.ruler.getPreferredSize(),
+                        h2s = 0;
+
                     if (this.orient === "horizontal") {
-                        var h2s = Math.round(ps.width / 2);
+                        h2s = Math.round(ps.width / 2);
                         ps.height += (this.gap + rps.height);
                         ps.width = 10 * ps.width +
                                    Math.max(h2s, this.ruler.isVisible ? this.ruler.$minGap : 0) +
                                    Math.max(h2s, this.ruler.isVisible ? this.ruler.$maxGap : 0);
                     } else {
-                        var h2s = Math.round(ps.height / 2);
+                        h2s = Math.round(ps.height / 2);
                         ps.height = 10 * ps.height +
                                     Math.max(h2s, this.ruler.isVisible ? this.ruler.$minGap : 0) +
                                     Math.max(h2s, this.ruler.isVisible ? this.ruler.$maxGap : 0);

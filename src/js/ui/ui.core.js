@@ -98,6 +98,52 @@ zebkit.package("ui", function(pkg, Class) {
         }
     };
 
+    zebkit.util.Zson.prototype.completed = function() {
+        if (typeof this.$actions !== 'undefined' && this.$actions.length > 0) {
+            try {
+                var root = this.root;
+                for (var i = 0; i < this.$actions.length; i++) {
+                    var a = this.$actions[i];
+
+                    (function(source, eventName, targets) {
+                        var args = [];
+                        if (typeof eventName !== 'undefined' && eventName !== null) {
+                            args.push(eventName);
+                        }
+                        args.push(source);
+                        args.push(function() {
+                            for(var j = 0; j < targets.length; j++) {
+                                var target     = targets[j],
+                                    targetPath = (typeof target.path === 'undefined') ? source : target.path;
+
+                                root.byPath(targetPath, function(c) {
+                                    if (target.update !== 'undefined') {
+                                        c.properties(target.update);
+                                    }
+
+                                    if (target['do'] !== 'undefined') {
+                                        for(var cmd in target['do']) {
+                                            c[cmd].apply(c, target['do'][cmd]);
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                        root.on.apply(root, args);
+                    } (a.source, a.event, typeof a.targets !== 'undefined' ? a.targets : [ a.target ]));
+                }
+            } finally {
+                this.$actions.length = 0;
+            }
+        }
+    };
+
+    zebkit.util.Zson.prototype.actions = function(v) {
+        this.$actions = [];
+        for (var i = 0; i < arguments.length; i++) {
+            this.$actions.push(arguments[i]);
+        }
+    };
 
     // TODO: prototype of zClass, too simple to say something
     pkg.zCanvas = Class([]);

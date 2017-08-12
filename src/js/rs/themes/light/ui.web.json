@@ -21,7 +21,6 @@
 
     "zCanvas": {
         "//"    :  "IT IS IMPORTANT TO HAVE CANVAS CSS PADDING = 0 TO FIX IE9 PROBLEM",
-        "background2": "white",
         "layout"    : { "@zebkit.layout.StackLayout":[] },
 
         "styles": {

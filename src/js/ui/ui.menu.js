@@ -553,12 +553,12 @@ zebkit.package("ui", function(pkg, Class) {
 
                 var p = this.kids[i];
                 if (typeof p.activateSub !== 'undefined') {
-                    var sub = this.menus[p];
+                    var sub = this.menus.hasOwnProperty(p) ? this.menus[p] : null;
                     if (m !== null) {
-                        if (sub == null) {
+                        if (sub === null) {
                             p.activateSub(true);
                         }
-                    } else if (sub != null) {
+                    } else if (sub !== null) {
                         p.activateSub(false);
                     }
                 }
@@ -572,7 +572,12 @@ zebkit.package("ui", function(pkg, Class) {
                     throw new Error("Invalid key");
                 }
 
-                this.menus[p] = m;
+                if (m === null) {
+                    delete this.menus[p];
+                } else {
+                    this.menus[p] = m;
+                }
+
                 return this;
             };
 

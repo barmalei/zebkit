@@ -164,9 +164,9 @@ zebkit.package("draw", function(pkg, Class) {
      * of object types are possible
      *
      *   - **null** null is returned
-     *   - **String** if the string is color or border view id than "zebkit.util.rgb" or border view
+     *   - **String** if the string is color or border view id than "zebkit.draw.rgb" or border view
      *     is returned. Otherwise an instance of zebkit.draw.StringRender is returned.
-     *   -  **String** if the string starts from "#" or "rgb" it is considered as encoded color.  "zebkit.util.rgb"
+     *   -  **String** if the string starts from "#" or "rgb" it is considered as encoded color.  "zebkit.draw.rgb"
      *     instance will be returned as the view
      *   - **Array** an instance of "zebkit.draw.CompositeView" is returned
      *   - **Function** in this case the passed method is considered as ans implementation of "paint(g, x, y, w, h, d)"
@@ -185,7 +185,7 @@ zebkit.package("draw", function(pkg, Class) {
      *
      *      // composite view
      *      var view = zebkit.draw.$view([
-     *          zebkit.utii.rgb.yellow,
+     *          zebkit.draw.rgb.yellow,
      *          "String Render"
      *      ]);
      *
@@ -202,8 +202,8 @@ zebkit.package("draw", function(pkg, Class) {
         if (v === null || typeof v.paint !== 'undefined') {
             return v;
         } else if (typeof v === "string" || v.constructor === String) {
-            if (typeof zebkit.util.rgb[v] !== 'undefined') { // detect color
-                return zebkit.util.rgb[v];
+            if (typeof pkg.rgb[v] !== 'undefined') { // detect color
+                return pkg.rgb[v];
             } else if (typeof pkg.$views[v] !== 'undefined') { // detect predefined view
                 return pkg.$views[v];
             } else {
@@ -214,7 +214,7 @@ zebkit.package("draw", function(pkg, Class) {
                         v[1] === 'g' &&
                         v[2] === 'b'    )  ))
                 {
-                    return new zebkit.util.rgb(v);
+                    return new pkg.rgb(v);
                 } else {
                     return new pkg.StringRender(v);
                 }
@@ -228,45 +228,6 @@ zebkit.package("draw", function(pkg, Class) {
             vv.paint = v;
             return vv;
         }
-    };
-
-    zebkit.util.rgb.prototype.paint = function(g,x,y,w,h,d) {
-        if (this.s !== g.fillStyle) {
-            g.fillStyle = this.s;
-        }
-
-        // fix for IE10/11, calculate intersection of clipped area
-        // and the area that has to be filled. IE11/10 have a bug
-        // that triggers filling more space than it is restricted
-        // with clip
-        if (typeof g.$states !== 'undefined') {
-            var t  = g.$states[g.$curState],
-                rx = x > t.x ? x : t.x,
-                rw = Math.min(x + w, t.x + t.width) - rx;
-
-            if (rw > 0)  {
-                var ry = y > t.y ? y : t.y,
-                rh = Math.min(y + h, t.y + t.height) - ry;
-
-                if (rh > 0) {
-                    g.fillRect(rx, ry, rw, rh);
-                }
-            }
-        } else {
-            g.fillRect(x, y, w, h);
-        }
-    };
-
-    zebkit.util.rgb.prototype.getPreferredSize = function() {
-        return { width:0, height:0 };
-    };
-
-    zebkit.util.rgb.gap = 0;
-    zebkit.util.rgb.prototype.getTop    =
-    zebkit.util.rgb.prototype.getLeft   =
-    zebkit.util.rgb.prototype.getRight  =
-    zebkit.util.rgb.prototype.getBottom = function() {
-        return this.gap;
     };
 
     /**
@@ -392,6 +353,178 @@ zebkit.package("draw", function(pkg, Class) {
         }
     ]);
 
+    /**
+     * RGB color class. This class represents a rgb color as JavaScript structure:
+     *
+     *     // rgb color
+     *     var rgb1 = new zebkit.draw.rgb(100,200,100);
+     *
+     *     // rgb with transparency
+     *     var rgb2 = new zebkit.draw.rgb(100,200,100, 0.6);
+     *
+     *     // encoded as a string rgb color
+     *     var rgb3 = new zebkit.draw.rgb("rgb(100,100,200)");
+     *
+     *     // hex rgb color
+     *     var rgb3 = new zebkit.draw.rgb("#CCDDFF");
+     *
+     * @param  {Integer|String} r  the meaning of the argument depends on number of arguments the
+     * constructor gets:
+     *
+     *   - If constructor gets only this argument the argument is considered as encoded rgb color:
+     *      - **String**  means its hex encoded ("#CCFFDD") or rgb ("rgb(100,10,122)", "rgba(100,33,33,0.6)") encoded color
+     *      - **Integer** means this is number encoded rgb color
+     *   - Otherwise the argument is an integer value that depicts a red intensity of rgb color
+     *
+     * encoded in string rgb color
+     * @param  {Integer} [g]  green color intensity
+     * @param  {Integer} [b] blue color intensity
+     * @param  {Float}   [a] alpha color intensity
+     * @constructor
+     * @class zebkit.draw.rgb
+     * @extends {zebkit.draw.View}
+     */
+    pkg.rgb = Class(pkg.View, [
+        function (r, g, b, a) {
+            /**
+             * Red color intensity
+             * @attribute r
+             * @type {Integer}
+             * @readOnly
+             */
+
+            /**
+             * Green color intensity
+             * @attribute g
+             * @type {Integer}
+             * @readOnly
+             */
+
+            /**
+             * Blue color intensity
+             * @attribute b
+             * @type {Integer}
+             * @readOnly
+             */
+
+            /**
+             * Alpha
+             * @attribute a
+             * @type {Float}
+             * @readOnly
+             */
+            if (arguments.length === 1) {
+                if (zebkit.isString(r)) {
+                    this.s = r;
+                    if (r[0] === '#') {
+                        r = parseInt(r.substring(1), 16);
+                    } else {
+                        if (r[0] === 'r' && r[1] === 'g' && r[2] === 'b') {
+                            var i = r.indexOf('(', 3), p = r.substring(i + 1, r.indexOf(')', i + 1)).split(",");
+                            this.r = parseInt(p[0].trim(), 10);
+                            this.g = parseInt(p[1].trim(), 10);
+                            this.b = parseInt(p[2].trim(), 10);
+                            if (p.length > 3) {
+                                this.a = parseInt(p[3].trim(), 10);
+                                this.isOpaque = (this.a === 1);
+                            }
+                            return;
+                        }
+                    }
+                }
+                this.r =  r >> 16;
+                this.g = (r >> 8) & 0xFF;
+                this.b = (r & 0xFF);
+            } else {
+                this.r = r;
+                this.g = g;
+                this.b = b;
+                if (arguments.length > 3) {
+                    this.a = a;
+                }
+            }
+
+            if (this.s === null) {
+                this.s = (typeof this.a !== "undefined") ? 'rgba(' + this.r + "," + this.g +  "," +
+                                                                     this.b + "," + this.a + ")"
+                                                         : '#' +
+                                                           ((this.r < 16) ? "0" + this.r.toString(16) : this.r.toString(16)) +
+                                                           ((this.g < 16) ? "0" + this.g.toString(16) : this.g.toString(16)) +
+                                                           ((this.b < 16) ? "0" + this.b.toString(16) : this.b.toString(16));
+            }
+        },
+
+        function $prototype() {
+            this.s = null;
+
+            /**
+             * Indicates if the color is opaque
+             * @attribute isOpaque
+             * @readOnly
+             * @type {Boolean}
+             */
+            this.isOpaque = true;
+
+            this.gap = 0;
+
+            this.paint = function(g,x,y,w,h,d) {
+                if (this.s !== g.fillStyle) {
+                    g.fillStyle = this.s;
+                }
+
+                // fix for IE10/11, calculate intersection of clipped area
+                // and the area that has to be filled. IE11/10 have a bug
+                // that triggers filling more space than it is restricted
+                // with clip
+                if (typeof g.$states !== 'undefined') {
+                    var t  = g.$states[g.$curState],
+                        rx = x > t.x ? x : t.x,
+                        rw = Math.min(x + w, t.x + t.width) - rx;
+
+                    if (rw > 0)  {
+                        var ry = y > t.y ? y : t.y,
+                        rh = Math.min(y + h, t.y + t.height) - ry;
+
+                        if (rh > 0) {
+                            g.fillRect(rx, ry, rw, rh);
+                        }
+                    }
+                } else {
+                    g.fillRect(x, y, w, h);
+                }
+            };
+
+            this.toString = function() {
+                return this.s;
+            };
+        },
+
+        function $clazz() {
+            /**
+             * Black color constant
+             * @attribute black
+             * @type {zebkit.draw.rgb}
+             * @static
+             */
+            this.black       = new this(0);
+            this.white       = new this(0xFFFFFF);
+            this.red         = new this(255,0,0);
+            this.blue        = new this(0,0,255);
+            this.green       = new this(0,255,0);
+            this.gray        = new this(128,128,128);
+            this.lightGray   = new this(211,211,211);
+            this.darkGray    = new this(169,169,169);
+            this.orange      = new this(255,165,0);
+            this.yellow      = new this(255,255,0);
+            this.pink        = new this(255,192,203);
+            this.cyan        = new this(0,255,255);
+            this.magenta     = new this(255,0,255);
+            this.darkBlue    = new this(0, 0, 140);
+            this.transparent = new this(0, 0, 0, 0.0);
+
+            this.mergeable = false;
+        }
+    ]);
 
     /**
     * Composite view. The view allows developers to combine number of

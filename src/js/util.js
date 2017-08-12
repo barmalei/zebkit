@@ -363,150 +363,6 @@ zebkit.package("util", function(pkg, Class) {
     ]);
 
     /**
-     * RGB color class. This class represents a rgb color as JavaScript structure:
-
-           // rgb color
-           var rgb1 = new zebkit.util.rgb(100,200,100);
-
-           // rgb with transparency
-           var rgb2 = new zebkit.util.rgb(100,200,100, 0.6);
-
-           // encoded as a string rgb color
-           var rgb3 = new zebkit.util.rgb("rgb(100,100,200)");
-
-           // hex rgb color
-           var rgb3 = new zebkit.util.rgb("#CCDDFF");
-
-     * @param  {Integer|String} r  the meaning of the argument depends on number of arguments the
-     * constructor gets:
-     *
-     *   - If constructor gets only this argument the argument is considered as encoded rgb color:
-     *      - **String**  means its hex encoded ("#CCFFDD") or rgb ("rgb(100,10,122)", "rgba(100,33,33,0.6)") encoded color
-     *      - **Integer** means this is number encoded rgb color
-     *   - Otherwise the argument is an integer value that depicts a red intensity of rgb color
-     *
-     * encoded in string rgb color
-     * @param  {Integer} [g]  green color intensity
-     * @param  {Integer} [b] blue color intensity
-     * @param  {Float}   [a] alpha color intensity
-     * @constructor
-     * @class zebkit.util.rgb
-     */
-    pkg.rgb = Class([
-        function (r, g, b, a) {
-            /**
-             * Red color intensity
-             * @attribute r
-             * @type {Integer}
-             * @readOnly
-             */
-
-            /**
-             * Green color intensity
-             * @attribute g
-             * @type {Integer}
-             * @readOnly
-             */
-
-            /**
-             * Blue color intensity
-             * @attribute b
-             * @type {Integer}
-             * @readOnly
-             */
-
-            /**
-             * Alpha
-             * @attribute a
-             * @type {Float}
-             * @readOnly
-             */
-            if (arguments.length === 1) {
-                if (zebkit.isString(r)) {
-                    this.s = r;
-                    if (r[0] === '#') {
-                        r = parseInt(r.substring(1), 16);
-                    } else {
-                        if (r[0] === 'r' && r[1] === 'g' && r[2] === 'b') {
-                            var i = r.indexOf('(', 3), p = r.substring(i + 1, r.indexOf(')', i + 1)).split(",");
-                            this.r = parseInt(p[0].trim(), 10);
-                            this.g = parseInt(p[1].trim(), 10);
-                            this.b = parseInt(p[2].trim(), 10);
-                            if (p.length > 3) {
-                                this.a = parseInt(p[3].trim(), 10);
-                                this.isOpaque = (this.a === 1);
-                            }
-                            return;
-                        }
-                    }
-                }
-                this.r =  r >> 16;
-                this.g = (r >> 8) & 0xFF;
-                this.b = (r & 0xFF);
-            } else {
-                this.r = r;
-                this.g = g;
-                this.b = b;
-                if (arguments.length > 3) {
-                    this.a = a;
-                }
-            }
-
-            if (this.s === null) {
-                this.s = (typeof this.a !== "undefined") ? 'rgba(' + this.r + "," + this.g +  "," +
-                                                                     this.b + "," + this.a + ")"
-                                                         : '#' +
-                                                           ((this.r < 16) ? "0" + this.r.toString(16) : this.r.toString(16)) +
-                                                           ((this.g < 16) ? "0" + this.g.toString(16) : this.g.toString(16)) +
-                                                           ((this.b < 16) ? "0" + this.b.toString(16) : this.b.toString(16));
-            }
-        },
-
-        function $prototype() {
-            this.s = null;
-
-            /**
-             * Indicates if the color is opaque
-             * @attribute isOpaque
-             * @readOnly
-             * @type {Boolean}
-             */
-            this.isOpaque = true;
-
-            this.toString = function() {
-                return this.s;
-            };
-        },
-
-        function $clazz() {
-            /**
-             * Black color constant
-             * @attribute black
-             * @type {zebkit.util.rgb}
-             * @static
-             */
-
-            this.black       = new this(0);
-            this.white       = new this(0xFFFFFF);
-            this.red         = new this(255,0,0);
-            this.blue        = new this(0,0,255);
-            this.green       = new this(0,255,0);
-            this.gray        = new this(128,128,128);
-            this.lightGray   = new this(211,211,211);
-            this.darkGray    = new this(169,169,169);
-            this.orange      = new this(255,165,0);
-            this.yellow      = new this(255,255,0);
-            this.pink        = new this(255,192,203);
-            this.cyan        = new this(0,255,255);
-            this.magenta     = new this(255,0,255);
-            this.darkBlue    = new this(0, 0, 140);
-            this.transparent = new this(0, 0, 0, 0.0);
-
-            this.mergeable = false;
-        }
-    ]);
-
-    /**
      * Compute intersection of the two given rectangular areas
      * @param  {Integer} x1 a x coordinate of the first rectangular area
      * @param  {Integer} y1 a y coordinate of the first rectangular area
@@ -704,7 +560,7 @@ zebkit.package("util", function(pkg, Class) {
 
             clazz.prototype[$ename] = function() {
                 if (this.v !== null) {
-                    for(var i = 0; i < this.v.length; i +=2 ) {
+                    for (var i = 0; i < this.v.length; i += 2) {
                         if (this.v[i + 1].apply(this.v[i], arguments) === true) {
                             return true;
                         }
@@ -808,13 +664,12 @@ zebkit.package("util", function(pkg, Class) {
 
                     this[name] = (function(name) {
                         return function() {
-                            if (this.$methods !== null) {
-                                if (this.$methods.hasOwnProperty(name)) {
-                                    var c = this.$methods[name];
-                                    for(var i = 0; i < c.length; i += 2) {
-                                        if (c[i + 1].apply(c[i], arguments) === true) {
-                                            return true;
-                                        }
+                            // typeof is faster then hasOwnProperty under nodejs
+                            if (this.$methods !== null && typeof this.$methods[name] !== 'undefined') {
+                                var c = this.$methods[name];
+                                for(var i = 0; i < c.length; i += 2) {
+                                    if (c[i + 1].apply(c[i], arguments) === true) {
+                                        return true;
                                     }
                                 }
                             }
@@ -1041,17 +896,9 @@ zebkit.package("util", function(pkg, Class) {
 
             this.Metric = zebkit.Interface([
                 "abstract",
-                    function getLines()     {
-
-                    },
-
-                    function getLineSize()  {
-
-                    },
-
-                    function getMaxOffset() {
-
-                    }
+                    function getLines()     {},
+                    function getLineSize()  {},
+                    function getMaxOffset() {}
             ]);
         },
 
@@ -1885,11 +1732,10 @@ zebkit.package("util", function(pkg, Class) {
                                                                  : new pkg.Zson();
 
                 if (typeof cb === 'function') {
-                    zson.then(json, cb);
+                    return zson.then(json, cb);
                 } else {
-                    zson.then(json);
+                    return zson.then(json);
                 }
-                return zson;
             };
         },
 
@@ -2355,9 +2201,9 @@ zebkit.package("util", function(pkg, Class) {
                         if (k[0] === "." || k[0] === '#') {
                             delete d[k];
                             if (k[0] === '#') {
-                                this.callMethod(k, v, d);
+                                this.callMethod(k, v);
                             } else {
-                                return this.callMethod(k, v, d);
+                                return this.callMethod(k, v);
                             }
                         } else if (k[0] === '%') {
                             delete d[k];
@@ -2554,6 +2400,14 @@ zebkit.package("util", function(pkg, Class) {
                     }
                     return $this;
                 });
+
+
+                if (typeof $this.completed === 'function') {
+                    this.$runner.then(function() {
+                        $this.completed.call($this);
+                        return $this;
+                    });
+                }
 
                 if (arguments.length > 1) {
                     this.$runner.then(fn);

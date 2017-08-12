@@ -69,7 +69,7 @@ zebkit.package("web", function(pkg, Class) {
                 this.$clipboard.setAttribute("style", "display:none;position:fixed;left:-99em;top:-99em;");
                 this.$clipboard.setAttribute("id", this.clazz.id);
 
-                this.$element   = null;
+                this.$element = null;
 
                 var $this = this;
 
@@ -102,7 +102,7 @@ zebkit.package("web", function(pkg, Class) {
                 };
 
                 this.$clipboard.onfocus = function(e) {
-                    if ($this.$element == null && e.relatedTarget != null) {
+                    if ($this.$element === null && e.relatedTarget !== null) {
                         $this.$element = e.relatedTarget;
                     }
                 };

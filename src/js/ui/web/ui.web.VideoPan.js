@@ -38,24 +38,24 @@ zebkit.package("ui.web", function(pkg, Class) {
 
             // canplaythrough is video event
             this.video.addEventListener("canplaythrough", function() {
-                $this._.playbackStateUpdated($this, "ready");
+                $this.fire("playbackStateUpdated", [$this, "ready"]);
                 $this.repaint();
                 $this.$continuePlayback();
             }, false);
 
             this.video.addEventListener("ended", function() {
-                $this._.playbackStateUpdated($this, "end");
+                $this.fire("playbackStateUpdated", [$this, "end"]);
                 $this.$interruptCancelTask();
             }, false);
 
             this.video.addEventListener("pause", function() {
-                $this._.playbackStateUpdated($this, "pause");
+                $this.fire("playbackStateUpdated", [$this, "pause"]);
                 $this.$interruptCancelTask();
             }, false);
 
             this.video.addEventListener("play", function() {
                 $this.$continuePlayback();
-                $this._.playbackStateUpdated($this, "play");
+                $this.fire("playbackStateUpdated", [$this, "play"]);
             }, false);
 
             // progress event indicates a loading progress
@@ -72,7 +72,7 @@ zebkit.package("ui.web", function(pkg, Class) {
                     // started yet or has been canceled for a some reason
                     if ($this.video.paused === false) {
                         $this.$continuePlayback();
-                        $this._.playbackStateUpdated($this, "continue");
+                        $this.fire("playbackStateUpdated", [$this, "continue"]);
                     }
                 }
             }, false);
@@ -80,7 +80,7 @@ zebkit.package("ui.web", function(pkg, Class) {
             this.source.addEventListener("error", function(e) {
                 $this.$interruptCancelTask();
                 $this.$lastError = e.toString();
-                $this._.playbackStateUpdated($this, "error");
+                $this.fire("playbackStateUpdated", [$this, "error"]);
                 $this.repaint();
                 $this.pause();
             }, false);
@@ -132,8 +132,6 @@ zebkit.package("ui.web", function(pkg, Class) {
             this.$adjustProportions = true;
             this.$lastError = this.$videoBound = this.$cancelTask = null;
             this.$animCurrentTime = -1;
-
-            this._ = new this.clazz.Listeners();
 
             this.views = {
                 pause  : new clazz.SignLabel("Pause, press to continue").toView(),
@@ -366,13 +364,13 @@ zebkit.package("ui.web", function(pkg, Class) {
                                         $this.$lastError = "Playback failed";
                                         $this.pause();
                                         $this.repaint();
-                                        $this._.playbackStateUpdated($this, "error");
+                                        $this.fire("playbackStateUpdated", [$this, "error"]);
                                     }
                                 } finally {
                                     $this.$interruptCancelTask();
                                 }
                             } else {
-                                $this._.playbackStateUpdated($this, "wait");
+                                $this.fire("playbackStateUpdated", [$this, "wait"]);
                             }
                         }, 200);
                     }

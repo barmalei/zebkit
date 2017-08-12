@@ -215,8 +215,8 @@ zebkit.package("ui.web", function(pkg, Class) {
                     var pw  = this.width,
                         ph  = this.height;
 
-                    this.$context = zebkit.web.$canvas(this.element, w, h);
 
+                    this.$context = zebkit.web.$canvas(this.element, w, h);
                     // canvas has one instance of context, the code below
                     // test if the context has been already full filled
                     // with necessary methods and if it is not true
@@ -241,7 +241,7 @@ zebkit.package("ui.web", function(pkg, Class) {
                     this.height = h;
 
                     // sync state of visibility
-                    // TODO: probably it should e in html element manager, manager has
+                    // TODO: probably it should be in html element manager, manager has
                     // to catch resize event and if size is not 0 correct visibility
                     // now manager doesn't set style visibility to "visible" state
                     // if component size is zero

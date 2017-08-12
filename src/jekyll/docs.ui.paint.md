@@ -1,5 +1,5 @@
 ---
-author: admin
+parent: docs
 layout: page
 title: Component rendering
 ---

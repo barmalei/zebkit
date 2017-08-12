@@ -1,11 +1,7 @@
 ---
-author: admin
-comments: true
-date: 2013-06-22 13:50:41+00:00
+parent: docs
 layout: page
-slug: json-like-ui-definition
 title: JSON and UI definition
-wordpress_id: 2050
 ---
 
 [purehtml id=26]

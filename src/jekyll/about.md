@@ -570,16 +570,11 @@ zebkit.util.Zson()
 <br/>
 
 <script>
-zebkit.require(function() {
-    eval(zebkit.import("ui"));
-    var root = new zCanvas("jsonSample", 300, 300).root;
-    root.setLayout(new zebkit.layout.StackLayout());
+zebkit.require("ui", "layout", "util", function(ui, lay, util) {
+    var root = new ui.zCanvas("jsonSample", 300, 300).root;
+   // root.setLayout(new lay.StackLayout());
 
-    var bag = new zebkit.util.Zson();
-
-    bag.then("public/js/simpleapp.json").then(function(bag) {
-        root.add(bag.root);
-    }).catch();    
+    util.Zson.then("public/simpleapp.json", root).catch();    
 });
 </script>
 

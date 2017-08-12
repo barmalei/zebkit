@@ -1,0 +1,50 @@
+{
+    "layout": { "@zebkit.layout.StackLayout" : []},
+    "kids"  : [
+        {
+            "@zebkit.ui.Panel":[],
+            "layout" : { "@zebkit.layout.BorderLayout" :4 },
+            "padding": 4,
+            "border" : "plain",
+            "kids"   : {
+                "top": {
+                    "@zebkit.ui.BoldLabel": "Simple application",
+                    "padding"            : 4,
+                    "background"         : "lightGray"
+                },
+
+                "center": {
+                    "@zebkit.ui.TextArea": ""
+                },
+
+                "bottom": {
+                    "@zebkit.ui.Button": "Clear",
+                    "canHaveFocus" : false
+                }
+           }
+        }
+    ],
+
+    "#actions" : [
+        {
+            "source"  : "//zebkit.ui.Button",
+            "targets"  : [
+                {
+                    "path"   : "//zebkit.ui.TextArea",
+                    "update" : { "value": "" }
+                },
+                {
+                    "update" : { "enabled": false }
+                }
+            ]
+        },
+        {
+            "source"  : "//zebkit.ui.TextArea",
+            "event"   : "updated",
+            "target"  : {
+                "path"   : "//zebkit.ui.Button",
+                "update" : { "enabled":  true }
+            }
+        }
+    ]
+}

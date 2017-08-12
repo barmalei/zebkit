@@ -10,7 +10,7 @@ notitle: true
 Zebkit event listener registration pattern:
 
 ```js
-comp.on([path,][eventName,], callback);
+comp.on([eventName,][path,], callback);
 ```
 
    * __path__ is an optional parameter, to lookup component or components the given event handler have to be registered. Path is X-Path like expression. For instance: ```"//*"``` detects all children components, ```"//zebkit.ui.Label"``` will match all children labels components. 
@@ -21,7 +21,7 @@ comp.on([path,][eventName,], callback);
 To stop handling event or events use the following pattern:
 
 ```js
-comp.off([path,][eventName]);
+comp.off([eventName,][path]);
 ```
 
 The parameter meaning is the same to "on(...)" method. If there is no parameters have been specified, all events handlers for the given component will be detached.  

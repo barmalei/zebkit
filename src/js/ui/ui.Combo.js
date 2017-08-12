@@ -511,7 +511,7 @@ zebkit.package("ui", function(pkg, Class) {
                 var canvas = this.getCanvas();
                 if (canvas !== null) {
                     var ps  = this.winpad.getPreferredSize(),
-                        p   = zebkit.layout.toParentOrigin(0, 0, this.adjustPadTo == null ? this : this.adjustPadTo),
+                        p   = zebkit.layout.toParentOrigin(0, 0, this.adjustPadTo === null ? this : this.adjustPadTo),
                         py  = p.y;
 
                     // if (this.winpad.hbar && ps.width > this.width) {

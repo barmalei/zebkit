@@ -705,8 +705,8 @@ zebkit.package("ui.date", function(pkg, Class) {
                             } break;
                         case "ArrowDown":
                             if (typeof this.firePrevYear !== 'undefined') {
-                                this.firePrevYear(); break;
-                            }
+                                this.firePrevYear();
+                            } break;
                         default: return this.$super(e);
                     }
                 }

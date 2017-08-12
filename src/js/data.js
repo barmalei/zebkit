@@ -183,7 +183,7 @@ zebkit.package("data", function(pkg, Class) {
              * @protected
              */
             this.$fillWith = function(src, id, line, lines, offset, size) {
-                this.isLastStep   = true
+                this.isLastStep   = true;
                 this.source       = src;
                 this.id           = id;
                 this.line         = line;
@@ -578,7 +578,7 @@ zebkit.package("data", function(pkg, Class) {
 
                         if (nl.length !== this.$buf.length) {
                             this.$buf = nl;
-                            TE_STUB.$fillWith(this, "remove", 0, 1, offset, size)
+                            TE_STUB.$fillWith(this, "remove", 0, 1, offset, size);
                             if (arguments.length > 2) {
                                 TE_STUB.isLastStep = b;
                             }
@@ -1414,7 +1414,7 @@ zebkit.package("data", function(pkg, Class) {
                     throw new RangeError(col);
                 }
 
-                return this.$objs[row] == null ? undefined : this.$objs[row][col];
+                return typeof this.$objs[row] === 'undefined' ? undefined : this.$objs[row][col];
             };
 
             /**
@@ -1448,8 +1448,8 @@ zebkit.package("data", function(pkg, Class) {
                 }
 
                 this.setRowsCols(nr, nc);
-                var old = this.$objs[row] != null ? this.$objs[row][col] : undefined;
-                if (obj !== old) {
+                var old = typeof this.$objs[row] !== 'undefined' ? this.$objs[row][col] : undefined;
+                if (old === 'undefined' || obj !== old) {
                     // allocate array if no data for the given row exists
                     if (typeof this.$objs[row] === 'undefined') {
                         this.$objs[row] = [];
@@ -1562,7 +1562,7 @@ zebkit.package("data", function(pkg, Class) {
                 }
 
                 for(var i = 0; i < this.$objs.length; i++) {
-                    if (this.$objs[i] != null && this.$objs[i].length > 0) {
+                    if (typeof this.$objs[i] !== 'undefined' && this.$objs[i].length > 0) {
                         this.$objs[i].splice(begcol, count);
                     }
                 }
@@ -1612,7 +1612,7 @@ zebkit.package("data", function(pkg, Class) {
                 if (this.$objs.length  > 0) {
                     for(var j = 0; j < count; j++) {
                         for(var i = 0; i < this.rows; i++) {
-                            if (this.$objs[i] != null && j <= this.$objs[i].length) {
+                            if (typeof this.$objs[i] !== 'undefined' && j <= this.$objs[i].length) {
                                 this.$objs[i].splice(col, 0, undefined);
                             }
                         }

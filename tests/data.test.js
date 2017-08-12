@@ -639,8 +639,8 @@ zebkit.runTests("Util objects bag",
 
 
         var b_, offset_, slen_, sl_, lines_;
-        t.on(function(text, b, offset, slen, sl, lines) {
-            b_ = b; offset_ = offset; slen_ = slen; sl_ = sl; lines_ = lines;
+        t.on(function(e) {
+            b_ = (e.id === "insert"); offset_ = e.offset; slen_ = e.size; sl_ = e.line; lines_ = e.lines;
         });
 
         t.removeLines(0, 1);
@@ -687,8 +687,8 @@ zebkit.runTests("Util objects bag",
 
         t = new Text("");
         b_ = offset_ = slen_ = sl_ = lines_ = -1;
-        t.on(function(text, b, offset, slen, sl, lines) {
-            b_ = b; offset_ = offset; slen_ = slen; sl_ = sl; lines_ = lines;
+        t.on(function(e) {
+            b_ = e.id === "insert"; offset_ = e.offset; slen_ = e.size; sl_ = e.line; lines_ = e.lines;
         });
 
         assert(t.getLines(), 1);

@@ -9,9 +9,9 @@ zebkit.package("ui.event", function(pkg, Class) {
      * @param  {String} shortcut a shortcut name
      * @param  {String} keys a keys combination ("Control + KeyV")
      * @class zebkit.ui.event.ShortcutEvent
-     * @extends zebkit.util.Event
+     * @extends zebkit.Event
      */
-    pkg.ShortcutEvent = Class(zebkit.util.Event, [
+    pkg.ShortcutEvent = Class(zebkit.Event, [
         function(src, shortcut, keys) {
             this.source = src;
 

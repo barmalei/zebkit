@@ -31,7 +31,7 @@ The latest version of previous generation of zebkit (zebra) can be found as "zeb
   
   ```js
     // configure zebkit to use light theme
-    zebkit.config["ui.theme.name"] = "light";  
+    zebkit.ui.config("theme", "light");  
 
     zebkit.require("ui", "layout", function(ui, layout) {
         // write zebkit application here

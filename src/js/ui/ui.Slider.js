@@ -1156,7 +1156,7 @@ zebkit.package("ui", function(pkg, Class) {
      */
     pkg.Slider = Class(pkg.Panel, pkg.DecorationViews, [
         function(o) {
-            this._ = new zebkit.util.Listeners();
+            this._ = new zebkit.Listeners();
             this.views = {
                 marker: null,
                 gauge : null

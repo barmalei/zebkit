@@ -424,7 +424,7 @@ zebkit.package("ui.web", function(pkg, Class) {
             this.$super("a");
             this.setContent(text);
             this.setAttribute("href", arguments.length < 2 ? "#": href);
-            this._ = new zebkit.util.Listeners();
+            this._ = new zebkit.Listeners();
             var $this = this;
             this.element.onclick = function(e) {
                 $this._.fired($this);

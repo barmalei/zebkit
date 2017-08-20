@@ -283,4 +283,4 @@ zebkit.package("ui.tree", function(pkg, Class) {
            this.$super(item);
         }
     ]);
-});
+}, true);

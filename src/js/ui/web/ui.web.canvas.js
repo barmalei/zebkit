@@ -2,7 +2,7 @@ zebkit.package("ui.web", function(pkg, Class) {
     // TODO: dependencies to remove
     //     -- taskSets (util.js)
 
-    pkg.CanvasEvent = Class(zebkit.util.Event, []);
+    pkg.CanvasEvent = Class(zebkit.Event, []);
 
     var ui = pkg.cd(".."),
         COMP_EVENT = new ui.event.CompEvent();
@@ -860,4 +860,4 @@ zebkit.package("ui.web", function(pkg, Class) {
 
         pkg.$elBoundsUpdated();
     }, false);
-});
+}, true);

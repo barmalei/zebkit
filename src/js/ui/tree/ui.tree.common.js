@@ -291,10 +291,10 @@ zebkit.package("ui.tree", function(pkg, Class) {
         },
 
         function  $clazz() {
-            this.Listeners = zebkit.util.ListenersClass("toggled",
-                                                        "selected",
-                                                        "editingStarted",
-                                                        "editingStopped");
+            this.Listeners = zebkit.ListenersClass("toggled",
+                                                   "selected",
+                                                   "editingStarted",
+                                                   "editingStopped");
         },
 
         function $prototype() {

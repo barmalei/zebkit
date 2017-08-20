@@ -56,7 +56,7 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $clazz() {
-            this.Listeners = zebkit.util.ListenersClass("updated", "selected", "posChanged");
+            this.Listeners = zebkit.ListenersClass("updated", "selected", "posChanged");
 
             /**
              * Text field hint text render

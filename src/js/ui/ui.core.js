@@ -1,4 +1,8 @@
 zebkit.package("ui", function(pkg, Class) {
+
+    this.config("basedir", zebkit.URI.join(this.$url, "rs/themes/%{theme}"), false);
+    this.config("theme", "dark", false);
+
     // Panel WEB specific dependencies:
     //   -  getCanvas() -> zCanvas
     //      -  $da (dirty area)
@@ -59,38 +63,8 @@ zebkit.package("ui", function(pkg, Class) {
      *  @access package
      */
 
-
-    // TODO: not stable API
-    pkg.$configWith = function(pkg, path) {
-        if (arguments.length < 2) {
-            var fn = pkg.fullname();
-            path = fn.substring(fn.indexOf('.') + 1) + ".json";
-        }
-
-        if (path[0] !== '/') {
-            var root = zebkit.config['ui.theme.path'];
-            if (typeof root === "undefined") {
-                root =  typeof zebkit.config['ui.theme.name'] === 'undefined' ? "rs/themes/dark"
-                                                                              : "rs/themes/" + zebkit.config['ui.theme.name'];
-            }
-
-            if (root[0] !== '/') {
-            path = zebkit.URI.join(zebkit.ui.$url, root, path);
-            } else {
-                path = zebkit.URI.join(root, path);
-            }
-        }
-
-        // it guarantees that loading if JSONs will be done sequentially in
-        // the order the JSON appeared
-        zebkit.then(function() { // calling the guarantees it will be called when previous actions are completed
-            this.till(new zebkit.util.Zson(pkg).then(path)); // now we can trigger other loading action
-        });
-    };
-
-
     // extend Zson with special method to fill prederfined views set
-    zebkit.util.Zson.prototype.views = function(v) {
+    zebkit.Zson.prototype.views = function(v) {
         for (var k in v) {
             if (v.hasOwnProperty(k)) {
                 zebkit.draw.$views[k] = v[k];
@@ -98,7 +72,7 @@ zebkit.package("ui", function(pkg, Class) {
         }
     };
 
-    zebkit.util.Zson.prototype.completed = function() {
+    zebkit.Zson.prototype.completed = function() {
         if (typeof this.$actions !== 'undefined' && this.$actions.length > 0) {
             try {
                 var root = this.root;
@@ -138,7 +112,7 @@ zebkit.package("ui", function(pkg, Class) {
         }
     };
 
-    zebkit.util.Zson.prototype.actions = function(v) {
+    zebkit.Zson.prototype.actions = function(v) {
         this.$actions = [];
         for (var i = 0; i < arguments.length; i++) {
             this.$actions.push(arguments[i]);
@@ -1068,7 +1042,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @method load
              */
             this.load = function(jsonPath) {
-                return new zebkit.util.Zson(this).then(jsonPath);
+                return new zebkit.Zson(this).then(jsonPath);
             };
 
             /**
@@ -1739,7 +1713,7 @@ zebkit.package("ui", function(pkg, Class) {
                 this.properties(this.clazz);
 
                 if (arguments.length > 0) {
-                    if (l.constructor === Object) {  // TODO: not 100% method to detetect "{}" type
+                    if (l.constructor === Object) {  // TODO: not 100% method to detetect "{}" dictionary
                         this.properties(l);
                     } else {
                         this.setLayout(l);

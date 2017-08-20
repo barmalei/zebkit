@@ -428,7 +428,7 @@ zebkit.package("ui", function(pkg, Class) {
                     this.setView(isPic ? img : new zebkit.draw.Picture(img));
 
 
-                    this.$runner = zebkit.util.image(imgToLoad);
+                    this.$runner = zebkit.image(imgToLoad);
                     this.$runner.then(function(img) {
                         $this.$runner = null;
                         $this.setView(isPic ? img : new zebkit.draw.Picture(img));
@@ -920,7 +920,7 @@ zebkit.package("ui", function(pkg, Class) {
     pkg.Progress = Class(pkg.Panel, [
         function () {
             this.setBundleView("darkBlue");
-            this._ = new zebkit.util.Listeners();
+            this._ = new zebkit.Listeners();
             this.$super();
         },
 

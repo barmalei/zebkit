@@ -104,7 +104,7 @@ zebkit.package("ui", function(pkg, Class) {
 
 
         function $clazz() {
-            this.Listeners = zebkit.util.ListenersClass("selected");
+            this.Listeners = zebkit.ListenersClass("selected");
 
             /**
              * UI panel class that is used to implement combo box content area
@@ -277,7 +277,7 @@ zebkit.package("ui", function(pkg, Class) {
 
                 function $clazz() {
                     this.TextField = Class(pkg.TextField, []);
-                    this.Listeners = zebkit.util.ListenersClass("contentUpdated");
+                    this.Listeners = zebkit.ListenersClass("contentUpdated");
                 },
 
                 function $prototype() {
@@ -727,7 +727,7 @@ zebkit.package("ui", function(pkg, Class) {
                 this.button = c;
             }
 
-            if (zebkit.instanceOf(c, zebkit.util.Fireable)) {
+            if (zebkit.instanceOf(c, zebkit.Fireable)) {
                 c.on(this);
             }
 
@@ -735,7 +735,7 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function kidRemoved(index,l) {
-            if (zebkit.instanceOf(l, zebkit.util.Fireable)) {
+            if (zebkit.instanceOf(l, zebkit.Fireable)) {
                 l.off(this);
             }
 

@@ -5,9 +5,9 @@ zebkit.package("ui", function(pkg, Class) {
      * Menu event class
      * @constructor
      * @class zebkit.ui.event.MenuEvent
-     * @extends zebkit.util.Event
+     * @extends zebkit.Event
      */
-    pkg.event.MenuEvent = Class(zebkit.util.Event, [
+    pkg.event.MenuEvent = Class(zebkit.Event, [
         function $prototype() {
             /**
              * Index of selected menu item

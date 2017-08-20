@@ -218,4 +218,4 @@ zebkit.package("ui.grid", function(pkg, Class) {
             this.$super();
         }
     ]);
-});
+}, true);

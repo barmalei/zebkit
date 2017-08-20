@@ -34,7 +34,7 @@
 .highlight .ne { color: #c00; } /* Name.Exception */
 .highlight .nf { color: #c0f } /* Name.Function */
 .highlight .nl { color: #99f } /* Name.Label */
-.highlight .nx { color: #ccc } /* Javascript label */
+.highlight .nx { color: #222} /* Javascript label */
 .highlight .nn { color: #0cf; } /* Name.Namespace */
 .highlight .nt { color: #2f6f9f; } /* Name.Tag */
 .highlight .nv { color: #066 } /* Name.Variable */

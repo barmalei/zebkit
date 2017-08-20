@@ -18,7 +18,7 @@
  * @param {Integer} [size] a size of the font
  * @class zebkit.Font
  */
-zebkit.Font = zebkit.Class([
+var Font = Class([
     function(family, style, size) {
         if (arguments.length === 1) {
             this.size = this.clazz.decodeSize(family);
@@ -69,7 +69,7 @@ zebkit.Font = zebkit.Class([
                      this.family;
         }
 
-        var mt = zebkit.environment.fontMetrics(this.s);
+        var mt = $zenv.fontMetrics(this.s);
 
         /**
          * Height of the font
@@ -166,7 +166,7 @@ zebkit.Font = zebkit.Class([
             if (s.length === 0) {
                 return 0;
             } else {
-                var fm = zebkit.environment.fontMeasure;
+                var fm = $zenv.fontMeasure;
                 if (fm.font !== this.s) {
                     fm.font = this.s;
                 }
@@ -185,7 +185,7 @@ zebkit.Font = zebkit.Class([
          * @for zebkit.Font
          */
         this.charsWidth = function(s, off, len) {
-            var fm = zebkit.environment.fontMeasure;
+            var fm = $zenv.fontMeasure;
             if (fm.font !== this.s) {
                 fm.font = this.s;
             }
@@ -226,3 +226,5 @@ zebkit.Font = zebkit.Class([
         };
     }
 ]);
+
+$export( { "Font" : Font } );

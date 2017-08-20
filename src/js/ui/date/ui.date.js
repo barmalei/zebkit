@@ -653,7 +653,7 @@ zebkit.package("ui.date", function(pkg, Class) {
         },
 
         function $clazz() {
-            this.Listeners = zebkit.util.ListenersClass("dateSet");
+            this.Listeners = zebkit.ListenersClass("dateSet");
 
             this.LeftArrowButton   = Class(ui.ArrowButton, []);
             this.TopArrowButton    = Class(ui.ArrowButton, []);
@@ -663,7 +663,7 @@ zebkit.package("ui.date", function(pkg, Class) {
 
             this.DotButton = Class(ui.EvStatePan, ui.ButtonRepeatMix, [
                 function() {
-                    this._ = new zebkit.util.Listeners();
+                    this._ = new zebkit.Listeners();
                     this.$super();
                 }
             ]);
@@ -1096,7 +1096,7 @@ zebkit.package("ui.date", function(pkg, Class) {
                 ra    = new this.clazz.RightArrowButton(),
                 cal   = this.getCalendar();
 
-            this._ = new zebkit.util.Listeners();
+            this._ = new zebkit.Listeners();
 
             this.minDateField = new this.clazz.MinDateTextField([
                 function keyPressed(e) {
@@ -1209,6 +1209,4 @@ zebkit.package("ui.date", function(pkg, Class) {
             };
         }
     ]);
-
-    ui.$configWith(pkg);
-});
+}, true);

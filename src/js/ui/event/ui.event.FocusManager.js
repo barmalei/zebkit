@@ -3,9 +3,9 @@ zebkit.package("ui.event", function(pkg, Class) {
      * Focus event class.
      * @class zebkit.ui.event.FocusEvent
      * @constructor
-     * @extends zebkit.util.Event
+     * @extends zebkit.Event
      */
-    pkg.FocusEvent = Class(zebkit.util.Event, [
+    pkg.FocusEvent = Class(zebkit.Event, [
         function $prototype() {
             /**
              * Related to the event component. For focus gained event it should be a component

@@ -162,7 +162,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
         },
 
         function $clazz() {
-            this.Listeners = zebkit.util.ListenersClass("rowSelected");
+            this.Listeners = zebkit.ListenersClass("rowSelected");
             this.Matrix    = Class(zebkit.data.Matrix, []);
 
             this.DEF_COLWIDTH  = 80;
@@ -1795,7 +1795,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @param {Integer} [col] start column
              * @param {Integer} [len] number of columns whose height has to be set
              * @param {Integer} w  a width
-             * @method setColsHeight
+             * @method setColsWidth
              * @chainable
              */
             this.setColsWidth = function(col, len, w){

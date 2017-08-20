@@ -34,10 +34,10 @@ var jshint    = require('gulp-jshint'),
 var useStrictMode = true;
 
 var miscFiles = [
-    'src/js/util.js',
-    'src/js/io.js',
-    'src/js/data.js',
-    'src/js/layout.js'
+    'src/js/util/util.js',
+    'src/js/io/io.js',
+    'src/js/data/data.js',
+    'src/js/layout/layout.js'
 ];
 
 var uiEventFiles = [
@@ -71,7 +71,7 @@ var uiFiles = [
     "src/js/ui/ui.menu.js",
     "src/js/ui/ui.window.js",
     "src/js/ui/ui.tooltip.js",
-    "src/js/ui/ui.bootstrap.js"
+    "src/js/ui/spin/ui.spin.js"
 ];
 
 var uiDesignFiles = [ "src/js/ui/design/ui.design.js" ];
@@ -79,8 +79,7 @@ var uiDesignFiles = [ "src/js/ui/design/ui.design.js" ];
 var uiTreeFiles = [
     "src/js/ui/tree/ui.tree.common.js",
     "src/js/ui/tree/ui.tree.Tree.js",
-    "src/js/ui/tree/ui.tree.CompTree.js",
-    "src/js/ui/tree/ui.tree.bootstrap.js"
+    "src/js/ui/tree/ui.tree.CompTree.js"
 ];
 
 var uiGridFiles = [
@@ -88,8 +87,7 @@ var uiGridFiles = [
     "src/js/ui/grid/ui.grid.GridCaption.js",
     "src/js/ui/grid/ui.grid.CompGridCaption.js",
     "src/js/ui/grid/ui.grid.Grid.js",
-    "src/js/ui/grid/ui.grid.GridStretchPan.js",
-    "src/js/ui/grid/ui.grid.bootstrap.js"
+    "src/js/ui/grid/ui.grid.GridStretchPan.js"
 ];
 
 var webFiles = [
@@ -107,7 +105,6 @@ var uiWebFiles = [
     "src/js/ui/web/ui.web.layers.js",
     "src/js/ui/web/ui.web.canvas.js",
     "src/js/ui/web/ui.web.VideoPan.js",
-    "src/js/ui/web/ui.web.bootstrap.js"
 ];
 
 var zebkitFiles = [ 'build/easyoop.js',
@@ -134,13 +131,10 @@ var demoFiles = [
 ];
 
 
-function packageTask(name, files, wrap, pkg) {
+function packageTask(name, files, wrap, config) {
     gulp.task(name, function() {
-        var t = gulp.src(files).pipe(expect(files));
-
-        if (typeof pkg === 'undefined') {
+        var t   = gulp.src(files).pipe(expect(files)),
             pkg = name;
-        }
 
         if (wrap !== false) {
             t = t.pipe(insert.transform(function(content, file) {
@@ -154,9 +148,25 @@ function packageTask(name, files, wrap, pkg) {
 
         if (wrap !== false) {
             t = t.pipe(insert.wrap("zebkit.package(\"" + pkg + "\", function(pkg, Class) {" + (useStrictMode ? "\n    'use strict';":"")
-                                    ,"});"))
+                                    ,"}" + (typeof config !== 'undefined' ? "," + config + ");" : ");") ))
                  .pipe(gulp.dest("."));
         }
+
+        return t.pipe(rename(name + '.min.js'))
+                .pipe(uglify({ compress: false, mangle: false }))
+                .pipe(gulp.dest("build"));
+    });
+}
+
+function wrapTask(name, files) {
+    gulp.task(name, function() {
+        var t = gulp.src(files).pipe(expect(files));
+
+        t = t.pipe(concat('build/' + name + '.js')).pipe(gulp.dest("."));
+
+        t = t.pipe(insert.wrap("(function(){\n"  + (useStrictMode ? "\n'use strict';":"") + "\n\n"
+                                ,"})();"))
+             .pipe(gulp.dest("."));
 
         return t.pipe(rename(name + '.min.js'))
                 .pipe(uglify({ compress: false, mangle: false }))
@@ -189,16 +199,27 @@ gulp.task('resources', function() {
 });
 
 //
-packageTask("easyoop", [  "src/js/web/web.environment.js", "src/js/easyoop.js", "src/js/font.js" ], false);
+wrapTask("easyoop", [
+    "src/js/web/web.environment.js",
+    "src/js/dthen.js",
+    "src/js/misc.js",
+    "src/js/oop.js",
+    "src/js/zson.js",
+    "src/js/path.js",
+    "src/js/event.js",
+    "src/js/font.js",
+    "src/js/pkg.js",
+    "src/js/bootstrap.js" ]);
+
 packageTask("misc", miscFiles, false);
 packageTask("draw", drawFiles);
 packageTask("ui.event", uiEventFiles);
-packageTask("ui", uiCoreFiles.concat(uiFiles));
-packageTask("ui.grid", uiGridFiles);
-packageTask("ui.tree", uiTreeFiles);
+packageTask("ui", uiCoreFiles.concat(uiFiles), true, true);
+packageTask("ui.grid", uiGridFiles, true, true);
+packageTask("ui.tree", uiTreeFiles, true, true);
 packageTask("ui.design", uiDesignFiles, false);
 packageTask("web", webFiles);
-packageTask("ui.web", uiWebFiles);
+packageTask("ui.web", uiWebFiles, true, true);
 
 // extra packages
 packageTask("ui.date", [ "src/js/ui/date/ui.date.js" ], false);
@@ -229,8 +250,6 @@ gulp.task('genZebkit',  ['easyoop',
 gulp.task('zebkit',  ['genZebkit' ], function() {
     return gulp.src([ "build/misc.js",
                       "build/misc.min.js",
-                      "build/easyoop.js",
-                      "build/easyoop.min.js",
                       "build/draw.js",
                       "build/draw.min.js",
                       "build/web.js",

@@ -135,6 +135,12 @@ zebkit.require("mypackage", function(mypkg) {
 ```
 
 
+## Package configuration 
+
+Package can be configured with a JSON. 
+
+   -  
+
 ## Standard zebkit packages
 
 Standard packages that are supplied with zebkit (embedded with "zebkit.js") are listed in the table below:

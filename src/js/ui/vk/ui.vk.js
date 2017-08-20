@@ -19,7 +19,6 @@ zebkit.package("ui.vk", function(pkg, Class) {
         }
     ]);
 
-
     /**
      * Virtual keyboard implementation
      * @class  zebkit.ui.vk
@@ -892,7 +891,7 @@ zebkit.package("ui.vk", function(pkg, Class) {
         },
 
         function $clazz() {
-            this.Listeners = zebkit.util.ListenersClass("vkMaskUpdated", "vkOptionSelected");
+            this.Listeners = zebkit.ListenersClass("vkMaskUpdated", "vkOptionSelected");
         },
 
         function $prototype() {
@@ -1115,6 +1114,4 @@ zebkit.package("ui.vk", function(pkg, Class) {
             }
         }
     });
-
-    ui.$configWith(pkg);
-});
+}, true);

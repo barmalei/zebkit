@@ -98,7 +98,7 @@ zebkit.package("ui.web", function(pkg, Class) {
         },
 
         function $clazz() {
-            this.Listeners = zebkit.util.ListenersClass("playbackStateUpdated");
+            this.Listeners = zebkit.ListenersClass("playbackStateUpdated");
 
             this.SignLabel = Class(ui.Panel, [
                 function $clazz() {

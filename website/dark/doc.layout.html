@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  <head>
+    <link href="http://gmpg.org/xfn/11" rel="profile">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    <meta name="viewport"
+       content="user-scalable=no,width=device-width,initial-scale=1,maximum-scale=1">
+    <meta name="msapplication-tap-highlight" content="no">
+
+
+    <title>
+        
+          Layout UI components &middot; Zebkit - UI platform
+        
+    </title>
+
+  <!-- CSS -->
+
+
+    <link rel="stylesheet" href="/website/dark/public/css/poole-dark.css">
+    <link rel="stylesheet" href="/website/dark/public/css/syntax-dark.css">
+    <link rel="stylesheet" href="/website/dark/public/css/main-dark.css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=EB+Garamond">
+    <!-- Icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/website/dark/public/apple-touch-icon-144-precomposed.png">
+    <link rel="shortcut icon" href="/website/dark/public/favicon.ico">
+
+    <!-- RSS -->
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+    <script type="text/javascript" src="/build/zebkit.js">  </script>
+
+    <script type="text/javascript">
+        zebkit.ui.config("theme", "dark");
+    </script>
+</head>
+
+
+
+  <body>
+
+    <div class="sidebar" style="padding: 0px;   border-right: 1px solid orange" >
+    <div class="container sidebar-sticky" style="padding: 0px; margin: 0px;">
+        <table style="height:100%;border-width: 0px; border-color: #151515;">
+            <tr>
+                <td colspan="2" align="center" style="border-width: 0px; margin: 0px; padding: 0px;">
+                    <a href="../index.html">
+                        <img style="margin: 0px; padding: 0px;" src="/website/dark/public/images/zebkit.logo.png" width="80%">
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="border-width: 0px;">
+                    <p style="margin:0px; font-style: italic;"><b style='color:orange; font-size:1.5rem;'>Zebkit</b> is HTML5 Canvas based UI platform developed with unique EasyOOP JavaScript concept and rich extendible components set</p>
+                </td>
+            </tr>
+
+            <tr style="height:100%;" valign="top" align="right">
+                <td colspan="2" style="border-width: 0px;">
+                    
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+
+                            
+                            
+
+
+                            <a class="sidebar-nav-item "
+                               href="/website/dark/about.html">
+                                Zebkit ?
+                            </a>
+
+
+                        
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                        
+
+
+                        
+                        
+                    
+                        
+                        
+
+                            
+                            
+
+
+                            <a class="sidebar-nav-item "
+                               href="/website/dark/api.html">
+                                API Doc
+                            </a>
+
+
+                        
+
+
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+
+                            
+                            
+
+
+                            <a class="sidebar-nav-item "
+                               href="/website/dark/docs.html">
+                                Documentation
+                            </a>
+
+
+                        
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                        
+                            
+                        
+                        
+
+
+                        
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+
+                            
+                            
+
+
+                            <a class="sidebar-nav-item "
+                               href="/website/dark/getstarted.html">
+                                Get started
+                            </a>
+
+
+                        
+
+
+                        
+                        
+                    
+                </td>
+            </tr>
+
+            <tr style="height:90px;">
+                <td colspan="2"  style="border-width: 0px;padding: 0px;"></td>
+            </tr>
+
+            <tr>
+                <td align="right" colspan="2" style="border-width: 0px; border-top: 1px solid orange;">
+                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2017</a></small>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="2" valign="top" align="right" style="border-width: 0px;padding: 0px;">
+                    <table style="width:240px;border-width: 0px; padding: 0px;" cellpadding="0" cellspacing="0">
+                        <tr style="padding: 0px;" border="1">
+                            <td style="width:60px;border-width: 0px;" align="right">
+                                <a href="https://github.com/barmalei/zebkit" title="Download">
+                                    <img alt="Download" title="Download" src="/website/dark/public/images/github3.png" width="40px" height="40px">
+                                </a>
+                            </td>
+                            <td style="width:60px; border-width: 0px;" align="right">
+                                <a href="https://twitter.com/zebkit">
+                                    <img src="/website/dark/public/images/twitter.png" width="40px" height="40px">
+                                </a>
+                            </td>
+                            <td style="width:60px; border-width: 0px;" align="right">
+                                <a href="https://nl.linkedin.com/in/andrei-vishneuski-34b52514">
+                                    <img src="/website/dark/public/images/linkedin.png" width="40px" height="40px">
+                                </a>
+                            </td>
+
+                            <td style="width: 70px; border-width: 0px; " valign="center" align="right">
+                                <a href="../build/zebkit.runtime.zip">
+                                    <img src="/website/dark/public/images/download-dark.png" width="40px" height="40px">
+                                </a>
+                            </td>
+
+                        </tr>
+                    </table>
+                </td>
+
+            </tr>
+
+        </table>
+
+    <nav class="sidebar-nav">
+
+<!--
+      <a class="sidebar-nav-item" href="/website/dark/">Home</a>
+ -->
+
+    </nav>
+
+  </div>
+</div>
+
+    <div class="content container">
+      <div class="page">
+
+    
+        <h1 class="page-title">Layout UI components</h1>
+    
+
+    <h3>Keep UI component in order</h3>
+
+<p>User interface has to be adjustable and adaptive to an environment and a hardware where it can be shown. In that respect existence of mobile phones, various WEB browsers, different operation systems, PCs, laptops, tablets and combinations of all these factors makes life harder. To avoid potential UI layouting problems developers should not locate and size UI components by assigning dedicated (x,y) coordinates and (width,height) values. Otherwise even slight font changing can crash designed UI layout.</p>
+
+<p>Layout managers is well known solution to get adaptive UI. That is exactly the thing that helps developing adjustable UI layout. Layout manager doesn&#39;t trust fixed UI components positions and sizes. It uses rules-based manner to order UI components. Layout manager is defined on the level of an UI component and &quot;knows&quot; two important things:</p>
+
+<ul>
+<li><p>How to order UI children components</p></li>
+<li><p>How to compute the component preferred size basing on its children components hierarchy</p></li>
+</ul>
+
+<p>Technically zbkit layout manager class has to implement the following:</p>
+
+<ul>
+<li><p><strong>&quot;doLayout(target)&quot;</strong> method to define rules children components of the given target component has to be laid outed</p></li>
+<li><p><strong>&quot;calcPreferredSize(target)&quot;</strong> method to calculate size the given target component desires to have</p></li>
+<li><p><strong>&quot;zebkit.layout.Layout&quot;</strong> interface should be implemented by a layout manager class</p></li>
+</ul>
+
+<p>A layout manager can be applied to any Zebra UI component by calling &quot;setLayout(layout)&quot; method. Additionally children UI components can specify extra parameter called constraints that is specific for a particular layout manager. It is can be done either by setting a children component &quot;constraints&quot; field or during insertion of the component to the parent component:</p>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// create panel</span>
+    <span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">();</span>
+    <span class="c1">// set layout manager for the panel</span>
+    <span class="nx">p</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">lay</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">());</span>
+    <span class="c1">// add children components</span>
+    <span class="nx">p</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"center"</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Label</span><span class="p">(</span><span class="s2">"Center"</span><span class="p">));</span> 
+
+    <span class="c1">// another way to specify constraints is filling "constraints"</span>
+    <span class="c1">// field of a children component</span>
+    <span class="kd">var</span> <span class="nx">l</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Label</span><span class="p">(</span><span class="s2">"Top"</span><span class="p">);</span>
+    <span class="nx">l</span><span class="p">.</span><span class="nx">constraints</span> <span class="o">=</span> <span class="s2">"top"</span><span class="p">;</span>
+    <span class="nx">p</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">l</span><span class="p">);</span>
+    <span class="p">...</span>
+<span class="p">});</span>
+</code></pre></div>
+<h3>Implementing simple layout manage</h3>
+
+<p>Nevertheless zebkit provides rich set of different predefined layout managers, it makes sense for better understanding to start from developing an own Zebra layout manager. It should help to discover how simple the idea is. As an example, let&#39;s develop layout manager that orders components along parent component diagonal:</p>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="kr">package</span><span class="p">(</span><span class="s2">"ui.demo"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">pkg</span><span class="p">,</span> <span class="nx">Class</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// declare layout manager class</span>
+    <span class="nx">pkg</span><span class="p">.</span><span class="nx">DiagLayout</span> <span class="o">=</span> <span class="nx">Class</span><span class="p">(</span><span class="nx">zebkit</span><span class="p">.</span><span class="nx">layout</span><span class="p">.</span><span class="nx">Layout</span><span class="p">,[</span>
+        <span class="c1">// define what preferred size the given "target" component </span>
+        <span class="c1">// wants to have. in this case it calculated as sum of </span>
+        <span class="c1">// preferred heights and widths of children components</span>
+        <span class="kd">function</span> <span class="nx">calcPreferredSize</span><span class="p">(</span><span class="nx">target</span><span class="p">)</span> <span class="p">{</span>
+           <span class="kd">var</span> <span class="nx">psW</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">psH</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+           <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">target</span><span class="p">.</span><span class="nx">kids</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+               <span class="kd">var</span> <span class="nx">kid</span> <span class="o">=</span> <span class="nx">target</span><span class="p">.</span><span class="nx">kids</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+               <span class="k">if</span> <span class="p">(</span><span class="nx">kid</span><span class="p">.</span><span class="nx">isVisible</span><span class="p">)</span> <span class="p">{</span>
+                   <span class="kd">var</span> <span class="nx">ps</span> <span class="o">=</span> <span class="nx">kid</span><span class="p">.</span><span class="nx">getPreferredSize</span><span class="p">();</span>
+                   <span class="nx">psW</span> <span class="o">+=</span> <span class="nx">ps</span><span class="p">.</span><span class="nx">width</span><span class="p">;</span>
+                   <span class="nx">psH</span> <span class="o">+=</span> <span class="nx">ps</span><span class="p">.</span><span class="nx">height</span><span class="p">;</span>
+               <span class="p">}</span>
+           <span class="p">}</span>
+           <span class="k">return</span> <span class="p">{</span> <span class="na">width</span><span class="p">:</span><span class="nx">psW</span><span class="p">,</span> <span class="na">height</span><span class="p">:</span><span class="nx">psH</span> <span class="p">};</span>
+        <span class="p">},</span>
+
+        <span class="c1">// define rules how children components of the</span>
+        <span class="c1">// given "target" have to be ordered</span>
+        <span class="kd">function</span> <span class="nx">doLayout</span><span class="p">(</span><span class="nx">target</span><span class="p">)</span> <span class="p">{</span>
+           <span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="nx">target</span><span class="p">.</span><span class="nx">getTop</span><span class="p">(),</span> <span class="nx">y</span> <span class="o">=</span> <span class="nx">target</span><span class="p">.</span><span class="nx">getLeft</span><span class="p">();</span>
+           <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">target</span><span class="p">.</span><span class="nx">kids</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+               <span class="kd">var</span> <span class="nx">kid</span> <span class="o">=</span> <span class="nx">target</span><span class="p">.</span><span class="nx">kids</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+               <span class="k">if</span> <span class="p">(</span><span class="nx">kid</span><span class="p">.</span><span class="nx">isVisible</span><span class="p">)</span> <span class="p">{</span>
+                   <span class="kd">var</span> <span class="nx">ps</span> <span class="o">=</span> <span class="nx">kid</span><span class="p">.</span><span class="nx">getPreferredSize</span><span class="p">();</span>
+                   <span class="nx">kid</span><span class="p">.</span><span class="nx">setBounds</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">ps</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span> <span class="nx">ps</span><span class="p">.</span><span class="nx">height</span><span class="p">);</span>
+                   <span class="nx">x</span> <span class="o">+=</span> <span class="nx">ps</span><span class="p">.</span><span class="nx">width</span><span class="p">;</span>
+                   <span class="nx">y</span> <span class="o">+=</span> <span class="nx">ps</span><span class="p">.</span><span class="nx">height</span><span class="p">;</span>
+               <span class="p">}</span>
+           <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">]);</span>
+<span class="p">});</span>
+</code></pre></div>
+<script type="text/javascript">
+zebkit.package("ui.demo", function(pkg, Class) {
+    pkg.DiagLayout = Class(zebkit.layout.Layout,[
+        function calcPreferredSize(target) {
+           var psW = 0, 
+               psH = 0;
+
+           for(var i=0; i < target.kids.length; i++) {
+               var kid = target.kids[i];
+               if (kid.isVisible) {
+                   var ps = kid.getPreferredSize();
+                   psW += ps.width;
+                   psH += ps.height;
+               }
+           }
+           return { width:psW, height:psH };
+        },
+
+        function doLayout(target) {
+           var x = target.getTop(), 
+               y = target.getLeft();
+           for(var i=0; i < target.kids.length; i++) {
+               var kid = target.kids[i];
+               if (kid.isVisible) {
+                   var ps = kid.getPreferredSize();
+                   kid.setBounds(x, y, ps.width, ps.height);
+                   x += ps.width;
+                   y += ps.height;
+               }
+           }
+        }
+    ]);
+});
+</script>
+
+<p>Use just developed diagonal layout manager as follow:</p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="layoutSampleDiag" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Custom diagonal layout </span>
+        </td>
+    </tr>
+</table>
+                    
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"ui.demo"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">demo</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"layoutSampleDiag"</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span><span class="mi">200</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
+    <span class="c1">// set developed above diagonal layout manager</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">demo</span><span class="p">.</span><span class="nx">DiagLayout</span><span class="p">());</span>
+    <span class="c1">// add children components</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"One"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Two"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Three"</span><span class="p">));</span>
+<span class="p">});</span>
+</code></pre></div>
+<script type="text/javascript">
+    zebkit.require("ui", "ui.demo", function(ui, demo) {
+        var r = new ui.zCanvas("layoutSampleDiag", 200,200).root;
+        // set developed above diagonal layout manager
+        r.setLayout(new demo.DiagLayout());
+
+        // add children components
+        r.add(new ui.Button("One"));
+        r.add(new ui.Button("Two"));
+        r.add(new ui.Button("Three"));
+    });
+</script>
+
+<h3>Predefined layout managers</h3>
+
+<p>Below you can find snapshots for all supplied by zebkit layout managers. Every snapshots are provided together with &quot;live&quot; application that run the snapshot source code directly on this page.</p>
+
+<h4>zebkit.layout.StackLayout</h4>
+
+<p>The layout manager places children UI components over each other and stretches its to fill the whole parent component surface.</p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="layoutSample1" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Paint on top method implementation </span>
+        </td>
+    </tr>
+</table>
+                    
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"layoutSample1"</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">300</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
+    <span class="c1">// set stack layout manager</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">StackLayout</span><span class="p">());</span>
+    <span class="c1">// add button</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Under transparent"</span><span class="p">));</span>
+    <span class="c1">// add partially transparent panel component</span>
+    <span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">();</span>
+    <span class="nx">p</span><span class="p">.</span><span class="nx">setBackground</span><span class="p">(</span><span class="s2">"rgba(240,240,240,0.7)"</span><span class="p">);</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">p</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre></div>
+<script type="text/javascript">  
+zebkit.require("ui", "layout", function(ui, layout) {
+    var r = new ui.zCanvas("layoutSample1", 300, 300).root;
+    r.setBorder("plain");
+    r.setLayout(new layout.StackLayout());
+    r.add(new ui.Button("Under transparent"));
+    var p = new ui.Panel();
+    p.setBackground("rgba(240,240,240,0.7)");
+    r.add(p);
+});
+</script>
+
+<h4>zebkit.layout.BorderLayout</h4>
+
+<p>Border layout manager splits component area into five parts: top, left, right, bottom and center. Children components are placed to one of the part basing on constraints that have been specified for them:</p>
+
+<script type="text/javascript">
+    zebkit.require("ui","layout",function(ui, layout) {
+        var r = new ui.zCanvas("layoutSampleBorder", 600,350).root;
+        r.setLayout(new layout.BorderLayout());
+        r.add("center",new ui.Button("CENTER"));
+        r.add("left", new ui.Button("LEFT"));
+        r.add("right",new ui.Button("RIGHT"));
+        r.add("top",new ui.Button("TOP"));
+        r.add("bottom",new ui.Button("BOTTOM"));
+    });
+</script>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="layoutSampleBorder" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Border layout </span>
+        </td>
+    </tr>
+</table>
+                    
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"layoutSampleBorder"</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span><span class="mi">350</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
+    <span class="c1">// set border layout manager</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">lay</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">());</span>
+
+    <span class="c1">// add children UI components with different constraints</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"center"</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"CENTER"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"left"</span><span class="p">,</span>   <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"LEFT"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"right"</span><span class="p">,</span>  <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"RIGHT"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"top"</span><span class="p">,</span>    <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"TOP"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"bottom"</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"BOTTOM"</span><span class="p">));</span>
+<span class="p">});</span>
+</code></pre></div>
+<h4>zebkit.layout.PercentLayout</h4>
+
+<p>Percent layout manager orders children components basing on percentage sizes of the components. The percentage sizes are defined as the children components constraints.</p>
+
+<p><strong>Horizontally ordered percent layout manager with stretched vertically components</strong></p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="percentLayout1" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Percent layout </span>
+        </td>
+    </tr>
+</table>
+                    
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"percentLayout1"</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">250</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
+
+    <span class="c1">// set percent layout manager that stretches components </span>
+    <span class="c1">// vertically and sizes component horizontally according </span>
+    <span class="c1">// to its percentage constraints</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">lay</span><span class="p">.</span><span class="nx">PercentLayout</span><span class="p">());</span>
+
+    <span class="c1">// add button that takes 20% of horizontal space</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"20%"</span><span class="p">));</span>
+    <span class="c1">// add button that takes 30% of horizontal space</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"30%"</span><span class="p">));</span>
+    <span class="c1">// add button that takes 50% of horizontal space</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"50%"</span><span class="p">));</span>
+<span class="p">});</span>
+</code></pre></div>
+<script type="text/javascript">
+    zebkit.require("ui","layout",function(ui, layout) {
+        var r = new ui.zCanvas("percentLayout1", 400, 250).root;
+        r.setBorder("plain");
+        r.setLayout(new layout.PercentLayout());
+        r.add(20, new ui.Button("20%"));
+        r.add(30, new ui.Button("30%"));
+        r.add(50, new ui.Button("50%"));
+    });
+</script>
+
+<p><strong>Horizontally ordered percent layout manager with preferred components heights</strong></p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="percentLayout2" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Percent layout </span>
+        </td>
+    </tr>
+</table>
+                    
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"percentLayout2"</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">200</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
+
+    <span class="c1">// set percent layout manager that sizes components vertically </span>
+    <span class="c1">// according to its preferred heights and sizes components </span>
+    <span class="c1">// horizontally according to its percentage constraints</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">lay</span><span class="p">.</span><span class="nx">PercentLayout</span><span class="p">(</span><span class="s2">"horizontal"</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">false</span><span class="p">));</span>
+
+    <span class="c1">// add button that takes 20% of horizontal space</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"20%"</span><span class="p">));</span>
+    <span class="c1">// add button that takes 30% of horizontal space</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"30%"</span><span class="p">));</span>
+    <span class="c1">// add button that takes 50% of horizontal space</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"50%"</span><span class="p">));</span>  
+<span class="p">});</span>
+</code></pre></div>
+<script type="text/javascript">
+    zebkit.require("ui","layout",function(ui, layout) {
+        var r = new ui.zCanvas("percentLayout2", 400,200).root;
+        r.setBorder("plain");
+        r.setLayout(new layout.PercentLayout("horizontal", 2, false));
+        r.add(20, new ui.Button("20%"));
+        r.add(30, new ui.Button("30%"));
+        r.add(50, new ui.Button("50%"));  
+    });
+</script>
+
+<p><strong>Vertically ordered percent layout manager with preferred components widths</strong></p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="percentLayout3" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Percent layout </span>
+        </td>
+    </tr>
+</table>
+                    
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"percentLayout3"</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span><span class="mi">200</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
+  <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
+
+  <span class="c1">// set percent layout manager that sizes components horizontally </span>
+  <span class="c1">// according to its preferred widths and sizes components </span>
+  <span class="c1">// vertically according to its percentage constraints</span>
+  <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">lay</span><span class="p">.</span><span class="nx">PercentLayout</span><span class="p">(</span><span class="s2">"vertical"</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">false</span><span class="p">));</span>
+
+  <span class="c1">// add button that takes 20% of vertical space</span>
+  <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"20%"</span><span class="p">));</span>
+  <span class="c1">// add button that takes 30% of vertical space</span>
+  <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"30%"</span><span class="p">));</span>
+  <span class="c1">// add button that takes 50% of vertical space</span>
+  <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"50%"</span><span class="p">));</span>
+<span class="p">});</span>
+</code></pre></div>
+<script type="text/javascript">
+    zebkit.require("ui","layout",function(ui, layout) {
+      var r = new ui.zCanvas("percentLayout3", 400,200).root;
+      r.setBorder("plain");
+      r.setLayout(new layout.PercentLayout("vertical", 2, false));
+      r.add(20, new ui.Button("20%"));
+      r.add(30, new ui.Button("30%"));
+      r.add(50, new ui.Button("50%"));
+    });
+</script>
+
+<p><strong>Vertically ordered percent layout manager with stretched horizontally components</strong></p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="percentLayout4" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Percent layout </span>
+        </td>
+    </tr>
+</table>
+                    
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"percentLayout4"</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span><span class="mi">200</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
+
+    <span class="c1">// set percent layout manager that stretches components</span>
+    <span class="c1">// horizontally and sizes components vertically according</span>
+    <span class="c1">// to its percentage constraints</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">lay</span><span class="p">.</span><span class="nx">PercentLayout</span><span class="p">(</span><span class="s2">"vertical"</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">true</span><span class="p">));</span>
+
+    <span class="c1">// add button that takes 20% of vertical space</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"20%"</span><span class="p">));</span>
+    <span class="c1">// add button that takes 30% of vertical space</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"30%"</span><span class="p">));</span>
+    <span class="c1">// add button that takes 50% of vertical space</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"50%"</span><span class="p">));</span>
+<span class="p">});</span>
+</code></pre></div>
+<script type="text/javascript">
+    zebkit.require("ui","layout",function(ui, layout) {
+      var r = new ui.zCanvas("percentLayout4", 400,200).root;
+      r.setBorder("plain");
+      r.setLayout(new layout.PercentLayout("vertical", 2, true));
+      r.add(20, new ui.Button("20%"));
+      r.add(30, new ui.Button("30%"));
+      r.add(50, new ui.Button("50%"));
+    });
+</script>
+
+<h4>zebkit.layout.FlowLayout</h4>
+
+<p>Flow layout provides many possibilities to align children components.</p>
+
+<p><strong>Vertically ordered UI components are centered horizontally and vertically:</strong></p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="flowLayout1" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Flow layout </span>
+        </td>
+    </tr>
+</table>
+                      
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"flowLayout1"</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">200</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
+
+    <span class="c1">// set flow layout with vertical components ordering and center </span>
+    <span class="c1">// vertical and horizontal alignments</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">lay</span><span class="p">.</span><span class="nx">FlowLayout</span><span class="p">(</span><span class="s2">"center"</span><span class="p">,</span><span class="s2">"center"</span><span class="p">,</span><span class="s2">"vertical"</span><span class="p">,</span><span class="mi">2</span><span class="p">));</span>
+
+    <span class="c1">// add children components</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"VCentered"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"VCentered"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"VCentered"</span><span class="p">));</span>
+<span class="p">});</span>
+</code></pre></div>
+<script type="text/javascript">
+    zebkit.require("ui","layout", function(ui, layout) {
+        var r = new ui.zCanvas("flowLayout1", 400,200).root;
+        r.setBorder("plain");
+        r.setLayout(new layout.FlowLayout("center","center","vertical", 2));
+        r.add(new ui.Button("VCentered"));
+        r.add(new ui.Button("VCentered"));
+        r.add(new ui.Button("VCentered"));
+    });
+</script>
+
+<p><strong>Vertically ordered UI components are aligned top-left:</strong></p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="flowLayout2" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Flow layout </span>
+        </td>
+    </tr>
+</table>
+                    
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"flowLayout2"</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span><span class="mi">200</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
+    <span class="c1">// set flow layout with vertical components</span>
+    <span class="c1">// ordering, top-left alignment and 2 pixels</span>
+    <span class="c1">// gap between inserted components</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">lay</span><span class="p">.</span><span class="nx">FlowLayout</span><span class="p">(</span><span class="s2">"left"</span><span class="p">,</span><span class="s2">"top"</span><span class="p">,</span>
+                                    <span class="s2">"vertical"</span><span class="p">,</span> <span class="mi">2</span><span class="p">));</span>
+    <span class="c1">// add children components</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Left-Top-Ver"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Left-Top-Ver"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Left-Top-Ver"</span><span class="p">));</span>
+<span class="p">});</span>
+</code></pre></div>
+<script type="text/javascript">
+    zebkit.require("ui","layout", function(ui, layout) {
+        var r = new ui.zCanvas("flowLayout2", 400,200).root;
+        r.setBorder("plain");
+        r.setLayout(new layout.FlowLayout("left","top","vertical", 2));
+        r.add(new ui.Button("Left-Top-Ver"));
+        r.add(new ui.Button("Left-Top-Ver"));
+        r.add(new ui.Button("Left-Top-Ver"));
+    });
+</script>
+
+<p><strong>Vertically ordered UI components are aligned top-right:</strong></p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="flowLayout3" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Flow layout </span>
+        </td>
+    </tr>
+</table>
+                    
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"flowLayout3"</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span><span class="mi">200</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
+    <span class="c1">// set flow layout with vertical components</span>
+    <span class="c1">// ordering, top-right alignment and 2 pixels</span>
+    <span class="c1">// gap between inserted components</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">FlowLayout</span><span class="p">(</span><span class="s2">"right"</span><span class="p">,</span><span class="s2">"top"</span><span class="p">,</span>
+                                      <span class="s2">"vertical"</span><span class="p">,</span> <span class="mi">2</span><span class="p">));</span>
+    <span class="c1">// add children components</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Right-Top-Ver"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Right-Top-Ver"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Right-Top-Ver"</span><span class="p">));</span>
+<span class="p">});</span>
+</code></pre></div>
+<script type="text/javascript">
+    zebkit.require("ui","layout", function(ui, layout) {
+        var r = new ui.zCanvas("flowLayout3", 400,200).root;
+        r.setBorder("plain");
+        r.setLayout(new layout.FlowLayout("right","top","vertical", 2));
+        r.add(new ui.Button("Right-Top-Ver"));
+        r.add(new ui.Button("Right-Top-Ver"));
+        r.add(new ui.Button("Right-Top-Ver"));
+    });
+</script>
+
+<p><strong>Vertically ordered UI components are aligned bottom-right:</strong></p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="flowLayout4" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Flow layout </span>
+        </td>
+    </tr>
+</table>
+                    
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"flowLayout4"</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span><span class="mi">200</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
+    <span class="c1">// set flow layout with vertical components</span>
+    <span class="c1">// ordering, bottom-right alignment and 2 pixels</span>
+    <span class="c1">// gap between inserted components</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">FlowLayout</span><span class="p">(</span><span class="s2">"right"</span><span class="p">,</span><span class="s2">"bottom"</span><span class="p">,</span>
+                                      <span class="s2">"vertical"</span><span class="p">,</span> <span class="mi">2</span><span class="p">));</span>
+    <span class="c1">// add children components</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Right-Bottom-Ver"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Right-Bottom-Ver"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Right-Bottom-Ver"</span><span class="p">));</span>
+<span class="p">});</span>
+</code></pre></div>
+<script type="text/javascript">
+    zebkit.require("ui","layout", function(ui, layout) {
+        var r = new ui.zCanvas("flowLayout4", 200,200).root;
+        r.setBorder("plain");
+        r.setLayout(new layout.FlowLayout("right","bottom","vertical", 2));
+        r.add(new ui.Button("Right-Bottom-Ver"));
+        r.add(new ui.Button("Right-Bottom-Ver"));
+        r.add(new ui.Button("Right-Bottom-Ver"));
+    });
+</script>
+
+<p><strong>Horizontally ordered UI components are centered vertically and horizontally:</strong></p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="flowLayout5" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Flow layout </span>
+        </td>
+    </tr>
+</table>
+                    
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"flowLayout5"</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span><span class="mi">120</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
+    <span class="c1">// set flow layout with horizontal components</span>
+    <span class="c1">// ordering, center-center alignment and 2 pixels</span>
+    <span class="c1">// gap between inserted components</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">FlowLayout</span><span class="p">(</span><span class="s2">"center"</span><span class="p">,</span><span class="s2">"center"</span><span class="p">,</span>
+                                      <span class="s2">"horizontal"</span><span class="p">,</span> <span class="mi">2</span><span class="p">));</span>
+    <span class="c1">// add children components</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"HCentered"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"HCentered"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"HCentered"</span><span class="p">));</span>
+<span class="p">});</span>
+</code></pre></div>
+<script type="text/javascript">
+    zebkit.require("ui","layout", function(ui, layout) {
+        var r = new ui.zCanvas("flowLayout5", 600,120).root;
+        r.setBorder("plain");
+        r.setLayout(new layout.FlowLayout("center","center","horizontal", 2));
+        r.add(new ui.Button("HCentered"));
+        r.add(new ui.Button("HCentered"));
+        r.add(new ui.Button("HCentered"));
+    });
+</script>
+
+<p><strong>Horizontally ordered UI components are aligned center-left:</strong></p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="flowLayout6" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Flow layout </span>
+        </td>
+    </tr>
+</table>
+                    
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"flowLayout6"</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span><span class="mi">120</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
+    <span class="c1">// set flow layout with horizontal components</span>
+    <span class="c1">// ordering, center-left alignment and 2 pixels</span>
+    <span class="c1">// gap between inserted components</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">FlowLayout</span><span class="p">(</span><span class="s2">"left"</span><span class="p">,</span><span class="s2">"center"</span><span class="p">,</span>
+                                      <span class="s2">"horizontal"</span><span class="p">,</span><span class="mi">2</span><span class="p">));</span>
+    <span class="c1">// add children components</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Left-Center-Hor"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Left-Center-Hor"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Left-Center-Hor"</span><span class="p">));</span>
+<span class="p">});</span>
+</code></pre></div>
+<script type="text/javascript">
+    zebkit.require("ui","layout", function(ui, layout) {
+        var r = new ui.zCanvas("flowLayout6", 600,120).root;
+        r.setBorder("plain");
+        r.setLayout(new layout.FlowLayout("left","center","horizontal",2));
+        r.add(new ui.Button("Left-Center-Hor"));
+        r.add(new ui.Button("Left-Center-Hor"));
+        r.add(new ui.Button("Left-Center-Hor"));
+    });
+</script>
+
+<p><strong>Horizontally ordered UI components are aligned center-right:</strong></p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="flowLayout7" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Flow layout </span>
+        </td>
+    </tr>
+</table>
+                    
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"flowLayout7"</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span><span class="mi">120</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
+    <span class="c1">// set flow layout with horizontal components</span>
+    <span class="c1">// ordering, center-right alignment and 2 pixels</span>
+    <span class="c1">// gap between inserted components</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">FlowLayout</span><span class="p">(</span><span class="s2">"right"</span><span class="p">,</span><span class="s2">"center"</span><span class="p">,</span>
+                                      <span class="s2">"horizontal"</span><span class="p">,</span> <span class="mi">2</span><span class="p">));</span>
+    <span class="c1">// add children components</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Right-Center-Hor"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Right-Center-Hor"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Right-Center-Hor"</span><span class="p">));</span>
+<span class="p">});</span>
+</code></pre></div>
+<script type="text/javascript">
+    zebkit.require("ui","layout", function(ui, layout) {
+        var r = new ui.zCanvas("flowLayout7", 600,120).root;
+        r.setBorder("plain");
+        r.setLayout(new layout.FlowLayout("right","center","horizontal", 2));
+        r.add(new ui.Button("Right-Center-Hor"));
+        r.add(new ui.Button("Right-Center-Hor"));
+        r.add(new ui.Button("Right-Center-Hor"));
+    });
+</script>
+
+<p><strong>Horizontally ordered UI components are aligned top-right:</strong></p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="flowLayout8" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Flow layout </span>
+        </td>
+    </tr>
+</table>
+                    
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"flowLayout8"</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span><span class="mi">120</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
+    <span class="c1">// set flow layout with horizontal components</span>
+    <span class="c1">// ordering, top-right alignment and 2 pixels</span>
+    <span class="c1">// gap between inserted components</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">FlowLayout</span><span class="p">(</span><span class="s2">"right"</span><span class="p">,</span><span class="s2">"top"</span><span class="p">,</span>
+                                      <span class="s2">"horizontal"</span><span class="p">,</span> <span class="mi">2</span><span class="p">));</span>
+    <span class="c1">// add children components</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Right-Top-Hor"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Right-Top-Hor"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Right-Top-Hor"</span><span class="p">));</span>
+<span class="p">});</span>
+</code></pre></div>
+<script type="text/javascript">
+    zebkit.require("ui","layout", function(ui, layout) {
+        var r = new ui.zCanvas("flowLayout8", 600,120).root;
+        r.setBorder("plain");
+        r.setLayout(new layout.FlowLayout("right","top","horizontal", 2));
+        r.add(new ui.Button("Right-Top-Hor"));
+        r.add(new ui.Button("Right-Top-Hor"));
+        r.add(new ui.Button("Right-Top-Hor"));
+    });
+</script>
+
+<p><strong>Horizontally ordered UI components are aligned top-left:</strong></p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="flowLayout9" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Flow layout </span>
+        </td>
+    </tr>
+</table>
+                    
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"flowLayout9"</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span><span class="mi">120</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
+    <span class="c1">// set flow layout with horizontal components</span>
+    <span class="c1">// ordering, top-left alignment and 2 pixels</span>
+    <span class="c1">// gap between inserted components</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">FlowLayout</span><span class="p">(</span><span class="s2">"left"</span><span class="p">,</span><span class="s2">"top"</span><span class="p">,</span>
+                                      <span class="s2">"horizontal"</span><span class="p">,</span><span class="mi">2</span><span class="p">));</span>
+    <span class="c1">// add children components</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Left-Top-Hor"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Left-Top-Hor"</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Left-Top-Hor"</span><span class="p">));</span>
+<span class="p">});</span>
+</code></pre></div>
+<script type="text/javascript">
+    zebkit.require("ui","layout", function(ui, layout) {
+        var r = new ui.zCanvas("flowLayout9", 600,120).root;
+        r.setBorder("plain");
+        r.setLayout(new layout.FlowLayout("left","top","horizontal",2));
+        r.add(new ui.Button("Left-Top-Hor"));
+        r.add(new ui.Button("Left-Top-Hor"));
+        r.add(new ui.Button("Left-Top-Hor"));
+    });
+</script>
+
+<h4>zebkit.layout.RasterLayout</h4>
+
+<p>Raster layout manager is default Zebra component layout manager. It emulates the standard approach where locations and sizes are precisely specified by calling &quot;setLocation(x,y)&quot;, &quot;setSize(w,h)&quot; or &quot;setBounds(x,y,w,h)&quot; methods. It is strongly recommended to avoid using raster layout manager the way developers define exact values for a component location and size. Rules are better in respect of implementing adaptive UI that doesn&#39;t depend on screen resolutions, font metrics, allocated for an UI application size and so on.</p>
+
+<p><strong>Hardcoded, user defined components locations and sizes:</strong></p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="rasterLayout1" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Raster layout </span>
+        </td>
+    </tr>
+</table>
+                    
+
+<script type="text/javascript">
+    zebkit.require("ui","layout", function(ui, layout) {
+        var r = new ui.zCanvas("rasterLayout1",400,200).root;
+        r.setBorder("plain");
+        r.setLayout(new layout.RasterLayout());
+
+        // create component, setup its metrics precisely
+        // and add its to parent component
+        var b = new ui.Button("(10,10,140,40)");
+        b.setBounds(10,10,140,40);
+        r.add(b);
+
+        var b = new ui.Button("(10,120,80,50)");
+        b.setBounds(10,100,120,50);
+        r.add(b);
+    });
+</script>
+
+<p>Raster layout manager also can be less dependent from an environment an UI application can be run:</p>
+
+<p><strong>Size components to its referred size:</strong></p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="rasterLayout2" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Raster layout </span>
+        </td>
+    </tr>
+</table>
+                    
+
+<script type="text/javascript">
+    zebkit.require("ui","layout", function(ui, layout) {
+        var r = new ui.zCanvas("rasterLayout2",400,200).root;
+        r.setBorder("plain");
+
+        // set raster layout that sizes children components
+        // according to its preferred size
+        r.setLayout(new layout.RasterLayout(true));
+
+        // add children components
+        var b=new ui.Button("(10,10) Preferred Sized");
+        b.setLocation(10,10);
+        r.add(b);
+
+        var b = new ui.Button(
+        new ui.MLabel("(30,100)\nPreferred sized"));
+        b.setLocation(30,100);
+        r.add(b);
+    });
+</script>
+
+<p><strong>Size components to its preferred size and align its:</strong></p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="rasterLayout3" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Raster layout </span>
+        </td>
+    </tr>
+</table>
+                    
+
+<script type="text/javascript">
+    zebkit.require("ui","layout", function(ui, layout) {
+        var r = new ui.zCanvas("rasterLayout3", 400,200).root,
+            MLabel=ui.MLabel; //shortcut to class
+        r.setBorder("plain");
+
+        // set raster layout that sizes children components
+        // according to its preferred size
+        r.setLayout(new layout.RasterLayout(true));
+
+        var b = new ui.Button("(10,10) Preferred Sized");
+        b.setLocation(10,10);
+        r.add(b);
+
+        // add top-left aligned button
+        var b = new ui.Button(
+            new MLabel("(Left,Bottom)\nPreferred sized"));
+        r.add("leftBottom", b);
+
+        // add center aligned button
+        var b = new ui.Button(
+            new MLabel("(Center)\nPreferred sized"));
+        r.add("center", b);
+
+        // add right aligned button
+        var b = new ui.Button(
+            new MLabel("(Center)\nPreferred sized"));
+        r.add("right", b);
+    });
+</script>
+
+<h4>zebkit.layout.ListLayout</h4>
+
+<p>List layout manager orders children component vertically as a list of items.</p>
+
+<p><strong>Children components are stretched horizontally to occupy whole parent container width:</strong></p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="listLayout1" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Raster layout </span>
+        </td>
+    </tr>
+</table>
+                    
+
+<script type="text/javascript">
+    zebkit.require("ui","layout", function(ui, layout) {
+        var r = new ui.zCanvas("listLayout1", 400,200).root;
+        r.setBorder("plain");
+
+        // set list layout manager that orders
+        // components as list item and stretches
+        // children horizontally
+        r.setLayout(new layout.ListLayout());
+
+        // add children components
+        r.add(new ui.Button("Item1"));
+        r.add(new ui.Button("Item2"));
+        r.add(new ui.Button("Item3"));
+    });
+</script>
+
+<p><strong>Children components are centered horizontally:</strong></p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="listLayout2" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">List layout </span>
+        </td>
+    </tr>
+</table>
+                    
+
+<script type="text/javascript">
+    zebkit.require("ui","layout", function(ui, layout) {
+        var r = new ui.zCanvas("listLayout2", 400,200).root;
+        r.setBorder("plain");
+
+        // set list layout manager with centered
+        // horizontally children components and
+        // 2 pixels gap between the components
+        r.setLayout(new layout.ListLayout("center",2));
+
+        // add children components
+        r.add(new ui.Button("Item1"));
+        r.add(new ui.Button("Item2"));
+        r.add(new ui.Button("Item3"));
+    });
+</script>
+
+<p><strong>Children components are aligned left:</strong></p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="listLayout3" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">List layout </span>
+        </td>
+    </tr>
+</table>
+                    
+
+<script type="text/javascript">
+  zebkit.require("ui","layout", function(ui, layout) {
+        var r = new ui.zCanvas("listLayout3", 400,200).root;
+        r.setBorder("plain");
+
+        // set list layout manager with aligned
+        // left children components and
+        // 2 pixels gap between the components
+        r.setLayout(new layout.ListLayout("left", 2));
+
+        // add children components
+        r.add(new ui.Button("Item1"));
+        r.add(new ui.Button("Item2"));
+        r.add(new ui.Button("Item3"));
+    });
+</script>
+
+<h4>zebkit.layout.GridLayout</h4>
+
+<p>Grid layout manager splits a component area to number of virtual cells. Children components are placed into the cells. One cell can be occupied only by one children component. Using &quot;zebkit.layout.Constraints&quot; class developers can control how a children component has to be placed inside the virtual cell. &quot;zebra.layout.Constraints&quot; declares the following fields that declares how a component has to be placed inside a virtual cell:</p>
+
+<table class="info">
+<tr><th>
+Field    
+</th><th>
+Allowed values
+</th><th>
+Description    
+</th></tr>
+
+<tr><td>
+ax
+</td><td>
+"left"<br/>"right"<br/>"center"<br/>"stretch"
+</td><td>
+Horizontal alignment in cell
+</td></tr>
+
+<tr><td>
+ay
+</td><td>
+"top"<br/>"bottom"<br/>"center"<br/>"stretch"
+</td><td>
+Vertical alignment in cell
+</td></tr>
+
+<tr><td>
+top,left,<br/>bottom,right
+</td><td>
+integer value >= 0
+</td><td>
+Cell top, left, bottom and right paddings
+</td></tr>
+
+</table>
+
+<p>The picture below explains how a component can be aligned inside a virtual cell controlled by grid layout manager:</p>
+
+<p><a href="http://www.zebkit.com/wp-content/uploads/2013/06/gridlayout.png"><img src="http://www.zebkit.com/wp-content/uploads/2013/06/gridlayout-1024x512.png" alt="gridlayout"></a></p>
+
+<p><strong>Default grid layout manager constraints</strong></p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="gridLayout1" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">List layout </span>
+        </td>
+    </tr>
+</table>
+                    
+
+<script type="text/javascript">
+  zebkit.require("ui","layout", function(ui, layout) {
+        var r = new ui.zCanvas("gridLayout1", 150,150).root;
+        r.setBorder("plain");
+        r.setLayout(new layout.GridLayout(2,2));
+
+        // add children components
+        r.add(new ui.Button("1x1"));
+        r.add(new ui.Button("1x2"));
+        r.add(new ui.Button("2x1"));
+        r.add(new ui.Button("2x2"));
+    });
+</script>
+
+<p><strong>1. Custom grid layout manager constraints</strong></p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="gridLayout2" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">List layout </span>
+        </td>
+    </tr>
+</table>
+                    
+
+<script type="text/javascript">
+  zebkit.require("ui","layout", function(ui, layout) {
+        var r = new ui.zCanvas("gridLayout2", 400,150).root,
+            ctr = new layout.Constraints();
+        ctr.setPadding(8);
+
+        r.setBorder("plain");
+        r.setLayout(new layout.GridLayout(2,2));
+        r.add(ctr,new ui.Button("1x1 Long component"));
+        r.add(ctr,new ui.Button("1x2"));
+        r.add(ctr,new ui.Button("2x1"));
+        r.add(ctr,new ui.Button("2x2"));
+    });
+</script>
+
+<p><strong>2. Custom grid layout manager constraints</strong></p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="gridLayout3" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">List layout </span>
+        </td>
+    </tr>
+</table>
+                    
+
+<script type="text/javascript">
+    zebkit.require("ui","layout", function(ui, layout) {
+        var r = new ui.zCanvas("gridLayout3", 400,200).root,
+            ctr = new layout.Constraints(),
+            MLabel = ui.MLabel; // class shortcut
+        ctr.setPadding(8);
+
+        r.setBorder("plain");
+        r.setLayout(new layout.GridLayout(2,2));
+
+        var ctr2=new layout.Constraints("center","bottom");
+
+        ctr2.setPadding(8);
+        r.add(ctr2,new ui.Button("1x1 bottom component"));
+
+        r.add(ctr,new ui.Button(new MLabel("1x2\nnew line\nnew line")));
+
+        r.add(new layout.Constraints("center","center"),
+              new ui.Button("Centered"));
+
+        r.add(ctr, new ui.Button(new MLabel("2x2\n2x2\n2x2")));
+    });
+</script>
+
+<h3>Layout package API and constants</h3>
+
+<p>All zebra layout managers are hosted in &quot;zebra.layout&quot; package. The package provides the core &quot;zebra.layout.Layoutable&quot; class. This class describes a rectangular object that is bound with the given size and location. &quot;zebra.layout.Layoutable&quot; component can contain other layoutable components as its children. The children components are laid outed with a layout manager. Pay attention &quot;zebra.layout&quot; package is completely independent from UI part. Developer can easily use it as basis for layout management, for instance, for WEB based elements. Zebra UI engine just extends the basic &quot;zebra.layout.Layoutable&quot; class with visual and event related stuff.</p>
+
+<p>The package provides number of useful API methods that can be handy to manipulate with component hierarchy:</p>
+
+<table class="info">
+<tr><th>
+API method    
+</th><th>
+Description 
+</th></tr>
+
+<tr><td>
+zebra.layout.getDirectChild(p,k)    
+</td><td>
+ get immediate kid for the given parent and children component 
+</td></tr>
+
+
+<tr><td>
+zebra.layout.getDirectAt(x,y,p)
+</td><td>
+get immediate kid located at the given location of the specified parent component
+</td></tr>
+
+; 
+zebra.layout.getTopParent(comp); get top parent by the given component. Top is a component whose parent is "null"
+zebra.layout.toParentOrigin(x,y,c, [p]); translate the given relative location into a parent relative location
+zebra.layout.toChildOrigin(x,y,c,p); convert the given component location into relative location of the specified children component successor
+zebra.layout.isAncestorOf(p,k); test if the given kid component is an ancestor of the specified parent component
+
+
+</table>
+
+<p>Also it declares number of constants that from time to time have to be used as a layout constraints:
+[wpcol<em>2third]
+[table]
+Constraints;Description
+&quot;left&quot;; left constraint or alignment
+&quot;right&quot;; right constraint or alignment
+&quot;top&quot;; top constraint or alignment
+zebra.layout.BOTTOM; bottom constraint or alignment
+&quot;center&quot;; center constraint or alignment
+&quot;horizontal&quot;; horizontal constraint or alignment
+&quot;vertical&quot;; vertical constraint or alignment
+zebra.layout.STRETCH; stretch constraint
+zebra.layout.USE</em>PS<em>SIZE; use preferred size
+zebra.layout.TLEFT; top left constraint or alignment
+zebra.layout.TRIGHT; top right constraint or alignment
+zebra.layout.BLEFT; bottom left constraint or alignment
+zebra.layout.BRIGHT; bottom right constraint or alignment
+[/table][/wpcol_2third][wpcol<em>1third</em>end]
+<a href="http://www.zebkit.com/wp-content/uploads/2013/06/constraints.png"><img src="http://www.zebkit.com/wp-content/uploads/2013/06/constraints-1024x651.png" alt="constraints"></a>
+[/wpcol</em>1third_end]</p>
+
+</div>
+
+    </div>
+
+
+  </body>
+</html>

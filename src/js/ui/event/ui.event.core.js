@@ -35,9 +35,9 @@ zebkit.package("ui.event", function(pkg, Class) {
      * Appropriate event type is set in the event id property.
      * @constructor
      * @class   zebkit.ui.event.CompEvent
-     * @extends zebkit.util.Event
+     * @extends zebkit.Event
      */
-    pkg.CompEvent = Class(zebkit.util.Event, [
+    pkg.CompEvent = Class(zebkit.Event, [
         function $prototype() {
             /**
              * A kid component that has been added or removed (depending on event type).
@@ -103,10 +103,10 @@ zebkit.package("ui.event", function(pkg, Class) {
     /**
      * Input key event class.
      * @class  zebkit.ui.event.KeyEvent
-     * @extends zebkit.util.Event
+     * @extends zebkit.Event
      * @constructor
      */
-    pkg.KeyEvent = Class(zebkit.util.Event, [
+    pkg.KeyEvent = Class(zebkit.Event, [
         function $prototype() {
             /**
              * A code of a pressed key
@@ -211,10 +211,10 @@ zebkit.package("ui.event", function(pkg, Class) {
      * Mouse and touch screen input event class. The input event is triggered by a mouse or
      * touch screen.
      * @class  zebkit.ui.event.PointerEvent
-     * @extends zebkit.util.Event
+     * @extends zebkit.Event
      * @constructor
      */
-    pkg.PointerEvent = Class(zebkit.util.Event, [
+    pkg.PointerEvent = Class(zebkit.Event, [
         function $prototype() {
             /**
              * Pointer type. Can be "mouse", "touch", "pen"
@@ -455,7 +455,7 @@ zebkit.package("ui.event", function(pkg, Class) {
                 this.$CHILD_EVENTS_MAP[eventName] = "child" + eventName[0].toUpperCase() + eventName.substring(1);
             }
 
-            this.Listerners = zebkit.util.ListenersClass.apply(this, eventNames);
+            this.Listerners = zebkit.ListenersClass.apply(this, eventNames);
         },
 
         function $prototype(clazz) {
@@ -474,7 +474,7 @@ zebkit.package("ui.event", function(pkg, Class) {
             /**
              * Fire event with the given id
              * @param  {String} id an event id type
-             * @param  {zebkit.util.Event} e different sort of event
+             * @param  {zebkit.Event} e different sort of event
              * @return {Boolean} boolean flag that indicates if a event handling has been interrupted on one of a stage:
              *
              *    - Suppressed by a target component

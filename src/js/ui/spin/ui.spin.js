@@ -13,7 +13,7 @@ zebkit.package("ui", function(pkg, Class) {
                                   new this.clazz.IncButton(),
                                   new this.clazz.DecButton());
 
-            this._ = new zebkit.util.Listeners();
+            this._ = new zebkit.Listeners();
         },
 
         function $clazz() {
@@ -118,7 +118,7 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $install(child) {
-            if (zebkit.instanceOf(child, zebkit.util.Fireable)) {
+            if (zebkit.instanceOf(child, zebkit.Fireable)) {
                 child.on(this);
             } else if (zebkit.instanceOf(child, pkg.TextField)) {
                 this.editor = child;
@@ -126,7 +126,7 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $uninstall(child) {
-            if (zebkit.instanceOf(child, zebkit.util.Fireable)) {
+            if (zebkit.instanceOf(child, zebkit.Fireable)) {
                 child.off(this);
             } else if (zebkit.instanceOf(child, pkg.TextField)) {
                 this.editor = null;
@@ -194,7 +194,5 @@ zebkit.package("ui", function(pkg, Class) {
             }
         }
     ]);
-
-    //zebkit.ui.$configWith(pkg);
 });
 

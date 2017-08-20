@@ -128,7 +128,7 @@ zebkit.package("ui", function(pkg, Class) {
       * @event fired
       * @param {zebkit.ui.ArrowButton} src a button that has been pressed
       */
-    pkg.ArrowButton = Class(pkg.EvStatePan, zebkit.util.Fireable, pkg.ButtonRepeatMix, [
+    pkg.ArrowButton = Class(pkg.EvStatePan, zebkit.Fireable, pkg.ButtonRepeatMix, [
         function(direction) {
             this.cursorType = pkg.Cursor.HAND;
 
@@ -149,7 +149,7 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $clazz() {
-            this.Listeners = zebkit.util.Listeners;
+            this.Listeners = zebkit.Listeners;
 
             this.ArrowView = Class(zebkit.draw.ArrowView, []);
 
@@ -290,7 +290,7 @@ zebkit.package("ui", function(pkg, Class) {
      * @param {zebkit.ui.Button} src a button that has been pressed
      *
      */
-    pkg.Button = Class(pkg.CompositeEvStatePan, zebkit.util.Fireable, pkg.ButtonRepeatMix, [
+    pkg.Button = Class(pkg.CompositeEvStatePan, zebkit.Fireable, pkg.ButtonRepeatMix, [
         function(t) {
             this.$super();
 
@@ -302,7 +302,7 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $clazz() {
-            this.Listeners = zebkit.util.Listeners;
+            this.Listeners = zebkit.Listeners;
 
             this.Label = Class(pkg.Label, []);
 
@@ -358,7 +358,7 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $clazz() {
-            this.Listeners = zebkit.util.ListenersClass("selected");
+            this.Listeners = zebkit.ListenersClass("selected");
         },
 
         function $prototype() {
@@ -533,7 +533,7 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $clazz() {
-            this.Listeners = zebkit.util.Listeners;
+            this.Listeners = zebkit.Listeners;
 
             /**
              * The box UI component class that is used by default with the check box component.
@@ -860,7 +860,7 @@ zebkit.package("ui", function(pkg, Class) {
      */
     pkg.Toolbar = Class(pkg.Panel, [
         function $clazz() {
-            this.Listeners = zebkit.util.Listeners;
+            this.Listeners = zebkit.Listeners;
 
             this.ToolPan = Class(pkg.EvStatePan, [
                 function(c) {

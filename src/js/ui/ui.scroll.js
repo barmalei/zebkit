@@ -43,7 +43,7 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $clazz() {
-            this.Listeners = zebkit.util.ListenersClass("scrolled");
+            this.Listeners = zebkit.ListenersClass("scrolled");
         },
 
         function $prototype() {

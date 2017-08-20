@@ -5,9 +5,9 @@ zebkit.package("ui", function(pkg, Class) {
      * Window component event
      * @constructor
      * @class zebkit.ui.event.WinEvent
-     * @extends zebkit.util.Event
+     * @extends zebkit.Event
      */
-    pkg.event.WinEvent = Class(zebkit.util.Event, [
+    pkg.event.WinEvent = Class(zebkit.Event, [
         function $prototype() {
             /**
              * Indicates if the window has been shown
@@ -754,7 +754,7 @@ zebkit.package("ui", function(pkg, Class) {
                 // remove previously added buttons
                 for(var i = 0; i < this.buttons.length; i++) {
                     var kid = this.buttons.kids[i];
-                    if (zebkit.instanceOf(kid, zebkit.util.Fireable)) {
+                    if (zebkit.instanceOf(kid, zebkit.Fireable)) {
                         kid.off();
                     }
                 }

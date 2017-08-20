@@ -6,8 +6,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
-    <!-- Enable responsiveness on mobile devices-->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="viewport"
+       content="user-scalable=no,width=device-width,initial-scale=1,maximum-scale=1">
+    <meta name="msapplication-tap-highlight" content="no">
+
 
     <title>
         
@@ -30,10 +32,10 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.min.js">  </script>
+    <script type="text/javascript" src="/build/zebkit.js">  </script>
 
     <script type="text/javascript">
-        zebkit.config["ui.theme.name"] = "dark";
+        zebkit.ui.config("theme", "dark");
     </script>
 </head>
 
@@ -46,7 +48,9 @@
         <table style="height:100%;border-width: 0px; border-color: #151515;">
             <tr>
                 <td colspan="2" align="center" style="border-width: 0px; margin: 0px; padding: 0px;">
-                    <img style="margin: 0px; padding: 0px;" src="/website/dark/public/images/zebkit.logo.png" width="80%">
+                    <a href="../index.html">
+                        <img style="margin: 0px; padding: 0px;" src="/website/dark/public/images/zebkit.logo.png" width="80%">
+                    </a>
                 </td>
             </tr>
             <tr>
@@ -59,61 +63,277 @@
                 <td colspan="2" style="border-width: 0px;">
                     
                     
-                      
                         
-                      
+                        
+                        
                     
-                      
                         
-                          <a class="sidebar-nav-item" href="/website/dark/about.html">
-                            Zebkit ?
-                          </a>
                         
-                      
+
+                            
+                            
+
+
+                            <a class="sidebar-nav-item "
+                               href="/website/dark/about.html">
+                                Zebkit ?
+                            </a>
+
+
+                        
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                        
+
+
+                        
+                        
                     
-                      
                         
-                          <a class="sidebar-nav-item active" href="/website/dark/api.html">
-                            API Doc
-                          </a>
                         
-                      
+
+                            
+                            
+
+
+                            <a class="sidebar-nav-item active"
+                               href="/website/dark/api.html">
+                                API Doc
+                            </a>
+
+
+                        
+
+
+                        
+                        
                     
-                      
                         
-                      
+                        
+                        
                     
-                      
                         
-                          <a class="sidebar-nav-item" href="/website/dark/easyoop.html">
-                            Easy OOP
-                          </a>
                         
-                      
+                        
                     
-                      
                         
-                      
+                        
+                        
                     
-                      
                         
-                          <a class="sidebar-nav-item" href="/website/dark/getstarted.html">
-                            Get started
-                          </a>
                         
-                      
+                        
                     
-                      
                         
-                      
+                        
+                        
                     
-                      
                         
-                      
+                        
+                        
                     
-                      
                         
-                      
+                        
+
+                            
+                            
+
+
+                            <a class="sidebar-nav-item "
+                               href="/website/dark/docs.html">
+                                Documentation
+                            </a>
+
+
+                        
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                        
+                            
+                        
+                        
+
+
+                        
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+
+                            
+                            
+
+
+                            <a class="sidebar-nav-item "
+                               href="/website/dark/getstarted.html">
+                                Get started
+                            </a>
+
+
+                        
+
+
+                        
+                        
                     
                 </td>
             </tr>
@@ -174,16 +394,21 @@
 </div>
 
     <div class="content container">
-      <div style="margin:0px;padding: 0px;">
-  <p><strong>Zebkit API doc is still under construction and not completely relevant to the latest zebkit code base. The documentation is available by the link below:</strong> </p>
+      <div class="page">
 
-<p><a href="/apidoc/dark/index.html">Open current zebkit version of API docs</a></p>
+    
+        <h1 class="page-title">API Doc</h1>
+    
 
-<p>Zebkit API doc has been build basing on special zebkit &quot;yudoc&quot; theme. The theme has been developed to present classes, interfaces, API methods with a candy look and feel and improved navigation:</p>
+    <p><strong>Zebkit API doc is still under construction and not completely relevant to the latest zebkit code base. The documentation is available by the link below:</strong> </p>
 
-<p><img src="/website/dark/public/images/api-dark.png?200x200" alt="ScreenShot"></p>
+<p>Zebkit API doc has been build basing on special zebkit &quot;yuidoc&quot; theme. The theme has been developed to present classes, interfaces, API methods with a candy look and feel and improved navigation:</p>
 
-<p>The &quot;yudoc&quot; theme is reusable for any other JS project that needs it. Find the project on github following the link below:</p>
+<p><a href="/apidoc/dark/index.html"> 
+<img src="/website/dark/public/images/api-dark.png?200x200" alt="ScreenShot">
+</a></p>
+
+<p>The &quot;yuidoc&quot; theme is reusable for any other JS project that needs it. Find the project on github following the link below:</p>
 
 <p><a href="https://github.com/barmalei/yuidoc-zebkit-theme">zebkit yuidoc theme project on github</a></p>
 

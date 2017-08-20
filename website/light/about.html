@@ -6,8 +6,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
-    <!-- Enable responsiveness on mobile devices-->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="viewport"
+       content="user-scalable=no,width=device-width,initial-scale=1,maximum-scale=1">
+    <meta name="msapplication-tap-highlight" content="no">
+
 
     <title>
         
@@ -30,10 +32,10 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.min.js">  </script>
+    <script type="text/javascript" src="/build/zebkit.js">  </script>
 
     <script type="text/javascript">
-        zebkit.config["ui.theme.name"] = "light";
+        zebkit.ui.config("theme", "light");
     </script>
 </head>
 
@@ -46,7 +48,9 @@
         <table style="height:100%;border-width: 0px; border-color: #151515;">
             <tr>
                 <td colspan="2" align="center" style="border-width: 0px; margin: 0px; padding: 0px;">
-                    <img style="margin: 0px; padding: 0px;" src="/website/light/public/images/zebkit.logo.png" width="80%">
+                    <a href="../index.html">
+                        <img style="margin: 0px; padding: 0px;" src="/website/light/public/images/zebkit.logo.png" width="80%">
+                    </a>
                 </td>
             </tr>
             <tr>
@@ -59,61 +63,277 @@
                 <td colspan="2" style="border-width: 0px;">
                     
                     
-                      
                         
-                      
+                        
+                        
                     
-                      
                         
-                          <a class="sidebar-nav-item active" href="/website/light/about.html">
-                            Zebkit ?
-                          </a>
                         
-                      
+
+                            
+                            
+
+
+                            <a class="sidebar-nav-item active"
+                               href="/website/light/about.html">
+                                Zebkit ?
+                            </a>
+
+
+                        
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                        
+
+
+                        
+                        
                     
-                      
                         
-                          <a class="sidebar-nav-item" href="/website/light/api.html">
-                            API Doc
-                          </a>
                         
-                      
+
+                            
+                            
+
+
+                            <a class="sidebar-nav-item "
+                               href="/website/light/api.html">
+                                API Doc
+                            </a>
+
+
+                        
+
+
+                        
+                        
                     
-                      
                         
-                      
+                        
+                        
                     
-                      
                         
-                          <a class="sidebar-nav-item" href="/website/light/easyoop.html">
-                            Easy OOP
-                          </a>
                         
-                      
+                        
                     
-                      
                         
-                      
+                        
+                        
                     
-                      
                         
-                          <a class="sidebar-nav-item" href="/website/light/getstarted.html">
-                            Get started
-                          </a>
                         
-                      
+                        
                     
-                      
                         
-                      
+                        
+                        
                     
-                      
                         
-                      
+                        
+                        
                     
-                      
                         
-                      
+                        
+
+                            
+                            
+
+
+                            <a class="sidebar-nav-item "
+                               href="/website/light/docs.html">
+                                Documentation
+                            </a>
+
+
+                        
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                                <!--
+
+
+                                -->
+                            
+                        
+                            
+                        
+                            
+                        
+                        
+
+
+                        
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+
+                            
+                            
+
+
+                            <a class="sidebar-nav-item "
+                               href="/website/light/getstarted.html">
+                                Get started
+                            </a>
+
+
+                        
+
+
+                        
+                        
                     
                 </td>
             </tr>
@@ -175,8 +395,12 @@
 
     <div class="content container">
       <div class="page">
-  <h1 class="page-title">Zebkit ?</h1>
-  <p>Zebkit is unique UI platform that renders hierarchy of UI components on HTML5 Canvas. It has minimal dependencies from WEB context and built with zebkit easy JS OOP approach what makes feasible to adapt zebkit UI to other canvas implementations. </p>
+
+    
+        <h1 class="page-title">Zebkit ?</h1>
+    
+
+    <p>Zebkit is unique UI platform that renders hierarchy of UI components on HTML5 Canvas. It has minimal dependencies from WEB context and built with zebkit easy JS OOP approach what makes feasible to adapt zebkit UI to other canvas implementations.</p>
 
 <table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
     <tr style="padding: 0px;margin: 0px;">
@@ -196,8 +420,8 @@ Abstract JavaScript API, powerful OOP concept, rich UI components set is good ba
     </tr>
 </table>
 
-<p><br/>
-Zebkit is perfect choice for development of mobile, single page applications with no limitations regarding desirable UI components set. Everything can be rendered with zebkit and packaged as a re-usable components.  </p>
+<p><br />
+Zebkit is perfect choice for development of mobile, single page applications with no limitations regarding desirable UI components set. Everything can be rendered with zebkit and packaged as a re-usable components.</p>
 
 <script>
 
@@ -246,14 +470,11 @@ zebkit.require(function() {
 });
 </script>
 
-<p></td>
-</tr><br>
-</table></p>
+<p><img src="/website/light/public/images/overview-light.png" alt="ScreenShot" /></p>
 
-<p><img src="/website/light/public/images/overview-light.png" alt="ScreenShot"></p>
+<p><strong>Easy OOP JavaScript concept</strong> <em>Dart</em>, <em>CoffeeScript</em>, <em>TypeScript</em> and other helping intermediate technologies are not necessary. Zebkit easy JavaScript OOP gives power to keep code under control, increases re-usability and simplifies support. Easy OOP produces classes and interfaces, inheritance and mixing, constructor, static context, method overriding, <strong>true access to super context</strong>, <strong>anonymous classes</strong>, packaging, dynamic class extension, etc.</p>
 
-<p><strong>Easy OOP JavaScript concept</strong> <em>Dart</em>, <em>CoffeeScript</em>, <em>TypeScript</em> and other helping intermediate technologies are not necessary. Zebkit easy JavaScript OOP gives power to keep code under control, increases re-usability and simplifies support. Easy OOP produces classes and interfaces, inheritance and mixing, constructor, static context, method overriding, <strong>true access to super context</strong>, <strong>anonymous classes</strong>, packaging, dynamic class extension, etc. </p>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>  <span class="c1">// class A declaration </span>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>  <span class="c1">// class A declaration </span>
     <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="p">...</span> <span class="p">},</span> <span class="c1">// constructor</span>
     <span class="kd">function</span> <span class="nx">a</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span> <span class="p">}</span> <span class="c1">// declare class method "a"</span>
 <span class="p">]);</span>
@@ -272,10 +493,12 @@ zebkit.require(function() {
 <span class="nx">a</span><span class="p">.</span><span class="nx">a</span><span class="p">();</span>  <span class="c1">// call "a" method =&gt; 1</span>
 <span class="nx">b</span><span class="p">.</span><span class="nx">a</span><span class="p">();</span>  <span class="c1">// call "a" method =&gt; 2</span>
 <span class="nx">b</span><span class="p">.</span><span class="nx">b</span><span class="p">();</span>  <span class="c1">// call "b" method =&gt; 3</span>
-</code></pre></div>
-<p><br/></p>
+</code></pre>
+</div>
 
-<p><strong>Everything is rendered on canvas</strong> Practically any required UI component can be developed with help of zebkit components model and API. Zebkit abstraction makes UI components development easier, UI components layout managers eliminates dealing with CSS/DOM stuff. </p>
+<p><br /></p>
+
+<p><strong>Everything is rendered on canvas</strong> Practically any required UI component can be developed with help of zebkit components model and API. Zebkit abstraction makes UI components development easier, UI components layout managers eliminates dealing with CSS/DOM stuff.</p>
 
 <table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
     <tr style="padding: 0px;margin: 0px;">
@@ -333,8 +556,8 @@ zebkit.require(function() {
                 gradient.addColorStop(1.0, '#000');
             } else {
                 gradient.addColorStop(0.1, 'orange');
-                gradient.addColorStop(0.35, 'red');
-                gradient.addColorStop(0.65, 'red');
+                gradient.addColorStop(0.35, 'white');
+                gradient.addColorStop(0.65, 'white');
                 gradient.addColorStop(1.0, 'orange');
             }
 
@@ -356,7 +579,7 @@ zebkit.require(function() {
         cursorView    : "red",
         curW          : 3,
         selectionColor: "gray",
-        background    : 'light' === 'dark' ? "black" : "white",
+        background    : "black",
         font          : new zebkit.Font("Arial", 100)
     }));
     
@@ -464,9 +687,9 @@ zebkit.require(function() {
 });
 </script>
 
-<p><br/></p>
+<p><br /></p>
 
-<p><strong>HTML elements in zebkit layout</strong> Zebkit is able to host HTML elements in zebkit layout. You can add HTML5 Canvas elements, Google map, native HTML input fields and treats them as standard zebkit UI components. </p>
+<p><strong>HTML elements in zebkit layout</strong> Zebkit is able to host HTML elements in zebkit layout. You can add HTML5 Canvas elements, Google map, native HTML input fields and treats them as standard zebkit UI components.</p>
 
 <table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
     <tr style="padding: 0px;margin: 0px;">
@@ -533,20 +756,23 @@ zebkit.require(function() {
     }
 </script>
 
-<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDHbhEB-ZtVg7-eXE1yLioDSR2MIafnsIs&callback=initMap"> </script>
+<script async="" defer="" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDHbhEB-ZtVg7-eXE1yLioDSR2MIafnsIs&amp;callback=initMap"> </script>
 
-<p><br/></p>
+<p><br /></p>
 
 <p><strong>Unification of input events</strong> Mouse, touch screen, pen input events in zebkit are handled with one common approach. Keyboard events management produces the same sequence of events and its fields everywhere.</p>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">root</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">300</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">root</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">300</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
 <span class="nx">root</span><span class="p">.</span><span class="nx">pointerPressed</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// catch and handle mouse pressed, touch etc events here</span>
     <span class="p">...</span> 
 <span class="p">}</span>  
-</code></pre></div>
-<p><br/></p>
+</code></pre>
+</div>
 
-<p><strong>Customizable UI components shape</strong> Zebkit UI components are not restricted with rectangular shape. They can have a custom shape. </p>
+<p><br /></p>
+
+<p><strong>Customizable UI components shape</strong> Zebkit UI components are not restricted with rectangular shape. They can have a custom shape.</p>
 
 <table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
     <tr style="padding: 0px;margin: 0px;">
@@ -723,10 +949,11 @@ zebkit.require(function() {
 });
 </script>
 
-<p><br/></p>
+<p><br /></p>
 
-<p><strong>JSON UI descriptive language</strong> Zebkit UI can be defined and loaded with a special human readable JSON. </p>
-<div class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">{</span><span class="w"> </span><span class="nt">"@zebkit.ui.Panel"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+<p><strong>JSON UI descriptive language</strong> Zebkit UI can be defined and loaded with a special human readable JSON.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w"> </span><span class="nt">"@zebkit.ui.Panel"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
     </span><span class="nt">"layout"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"@zebkit.layout.BorderLayout"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="p">},</span><span class="w">
     </span><span class="nt">"padding"</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span><span class="w"> 
     </span><span class="nt">"border"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"plain"</span><span class="p">,</span><span class="w">
@@ -758,15 +985,14 @@ zebkit.require(function() {
         </span><span class="p">}</span><span class="w">
     </span><span class="p">}</span><span class="w">
 </span><span class="p">}}</span><span class="w">
-</span></code></pre></div>
+</span></code></pre>
+</div>
+
 <p>Find below zebkit application that has been created and loaded with the JSON shown above:</p>
 
 <table cellspacing="0" cellpadding="0" border="0" style="margin:0px;">
-    <tr style="padding:0px;">
-        <td align="left" 
-            valign="top" 
-            style="padding:0px;">
-
+<tr style="padding:0px;">
+<td align="left" valign="top" style="padding:0px;">
 
 
 <table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
@@ -785,12 +1011,9 @@ zebkit.require(function() {
     </tr>
 </table>
 
-<p></td></p>
+</td><td align="left" valign="top" style="padding:0px;">
 
-<p><td align="left" 
-    valign="top" 
-    style="padding:0px;"></p>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nb">eval</span><span class="p">(</span><span class="nx">zebkit</span><span class="p">.</span><span class="kr">import</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">));</span>
+      <div class="highlighter-rouge"><pre class="highlight"><code><span class="nb">eval</span><span class="p">(</span><span class="nx">zebkit</span><span class="p">.</span><span class="kr">import</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">));</span>
 
 <span class="kd">var</span> <span class="nx">root</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zCanvas</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span><span class="mi">300</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
 <span class="nx">root</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">StackLayout</span><span class="p">());</span>
@@ -800,27 +1023,24 @@ zebkit.require(function() {
 <span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">root</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">b</span><span class="p">.</span><span class="nx">root</span><span class="p">);</span>
 <span class="p">});</span>
+    
+</code></pre>
+      </div>
 
-</code></pre></div>
-<p></td></tr></table></p>
+    </td></tr></table>
 
-<p><br/></p>
+<p><br /></p>
 
 <script>
-zebkit.require(function() {
-    eval(zebkit.import("ui"));
-    var root = new zCanvas("jsonSample", 300, 300).root;
-    root.setLayout(new zebkit.layout.StackLayout());
+zebkit.require("ui", "layout", "util", function(ui, lay, util) {
+    var root = new ui.zCanvas("jsonSample", 300, 300).root;
+   // root.setLayout(new lay.StackLayout());
 
-    var bag = new zebkit.util.Zson();
-
-    bag.then("public/js/simpleapp.json").then(function(bag) {
-        root.add(bag.root);
-    }).catch();    
+    util.Zson.then("public/simpleapp.json", root).catch();    
 });
 </script>
 
-<p><strong>More than 40 various UI components</strong> Zebkit includes set of highly customizable UI components that are ready to use or extend.    </p>
+<p><strong>More than 40 various UI components</strong> Zebkit includes set of highly customizable UI components that are ready to use or extend.</p>
 
 <table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
     <tr style="padding: 0px;margin: 0px;">
@@ -1020,7 +1240,7 @@ zebkit.require(function() {
    });
 </script>
 
-<p><br/></p>
+<p><br /></p>
 
 <p><strong>Fast and responsive UI components</strong> that can handle and visualize tons of data. For instance find below grid component that keeps <strong>10.000.000 (10 millions)</strong> dynamically generated cells! In this example the grid component size is more than HTML5 Canvas precision can handle. Zebkit has a fix to HTML5 canvas precision problem, but it has to be applied separately.</p>
 
@@ -1068,7 +1288,7 @@ zebkit.require(function() {
     });
 </script>
 
-<p><br/></p>
+<p><br /></p>
 
 <p><strong>Layout management</strong> Zebkit uses rules to order UI components to avoid manipulation with exact UI components positions and sizes. This approach is more general and adaptable to the world of various devices, screens and resolutions.</p>
 
@@ -1088,7 +1308,7 @@ zebkit.require(function() {
     </tr>
 </table>
 
-<script type='text/javascript'>
+<script type="text/javascript">
 zebkit.require(function() {
     eval(zebkit.import("ui", "layout"));
 
@@ -1107,6 +1327,7 @@ zebkit.require(function() {
     }).setPreferredSize(300, -1));
 });
 </script>
+
 
 </div>
 

@@ -109,5 +109,5 @@ var A = zebkit.Class([
 ```js
 var a = new A();
 // configure instance of class "A" with JSON
-zebkit.util.then("config.json", a);  
+zebkit.Zson.then("config.json", a);  
 ```

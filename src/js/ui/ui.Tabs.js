@@ -76,7 +76,7 @@ zebkit.package("ui", function(pkg, Class) {
             this.tabAreaY = this.tabAreaWidth = this.tabAreaHeight = 0;
             this.overTab = this.selectedIndex = -1;
 
-            this._ = new zebkit.util.Listeners();
+            this._ = new zebkit.Listeners();
             this.pages = [];
             this.views = {};
 

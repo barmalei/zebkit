@@ -419,7 +419,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @param  {zebkit.ui.grid.Grid} grid a grid
              * @param  {Integer} row  a grid cell row
              * @param  {Integer} col  a grid cell column
-             * @param  {zebkit.util.Event} e  an event to be evaluated
+             * @param  {zebkit.Event} e  an event to be evaluated
              * @return {Boolean} true if the given input event triggers the given cell editing
              * @method shouldStart
              */
@@ -432,7 +432,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @param  {zebkit.ui.grid.Grid} grid a grid
              * @param  {Integer} row  a grid cell row
              * @param  {Integer} col  a grid cell column
-             * @param  {zebkit.util.Event} e  an event to be evaluated
+             * @param  {zebkit.Event} e  an event to be evaluated
              * @return {Boolean} true if the given input event triggers the given cell editing
              * cancellation
              * @method shouldCancel
@@ -446,7 +446,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @param  {zebkit.ui.grid.Grid} grid [description]
              * @param  {Integer} row  a grid cell row
              * @param  {Integer} col  a grid cell column
-             * @param  {zebkit.util.Event} e  an event to be evaluated
+             * @param  {zebkit.Event} e  an event to be evaluated
              * @return {Boolean} true if the given input event triggers finishing the given cell editing
              * @method shouldFinish
              */
@@ -489,8 +489,8 @@ zebkit.package("ui.grid", function(pkg, Class) {
         },
 
         function $clazz() {
-            this.Listeners = new zebkit.util.ListenersClass("captionResized",
-                                                            "captionResizeSelected");
+            this.Listeners = new zebkit.ListenersClass("captionResized",
+                                                       "captionResizeSelected");
         },
 
         function $prototype() {

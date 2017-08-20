@@ -82,7 +82,7 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $clazz() {
-            this.Listeners = zebkit.util.ListenersClass("selected");
+            this.Listeners = zebkit.ListenersClass("selected");
         },
 
         function $prototype() {

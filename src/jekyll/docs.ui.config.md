@@ -43,10 +43,12 @@ Configuration for a dedicated package are placed in dedicated JSON file. The JSO
 
 
 ```json
+{
 "TextField" : {
     "border"     : { "@zebkit.draw.Border":[ "red", 2 ]},
     "color"      : "white",
     "background" : { "@zebkit.draw.Gradient":[ "red", "orange" ]}
+}
 }
 ```
 
@@ -54,7 +56,7 @@ Configuration for a dedicated package are placed in dedicated JSON file. The JSO
 You can build an own JSON to configure:
 
 ```js
-zebkit.ui.configPackage(zebkit.ui, "my.json");
+zebkit.ui.configWith("/my.json");
 ```
 
 
@@ -66,14 +68,21 @@ By default zebkit expects theme resources are located at the the same level wher
 
 ```js
 // say to use light theme
-zebkit.config["ui.theme.name"] = "light"; // name of theme folder
+zebkit.ui.config("theme", "light"); // name of theme folder
 ```
 
 If a case zebra theme resources are not located together with JS code you can specify path to the resources with setting appropriate configuration variable: 
 
 ```js
 // define path to light theme    
-zebkit.config["ui.theme.path"] = "http://test.com./zebkit/rs/light";
+zebkit.ui.config("basedir", "http://test.com./zebkit/rs/light");
+```
+
+Or you can use placeholder to add theme name to the path:
+
+```js
+// define path to light theme    
+zebkit.ui.config("basedir", "http://test.com./zebkit/rs/%{theme}");
 ```
 
 
@@ -84,45 +93,40 @@ JSON format is handy and clear way to declare various configurations, transfer d
 To load the JSON definition the following code can be used:
 
 ```js
-    zebkit.require("ui", function(ui) {
-        new ui.zCanvas(400, 300).root.load("simple.json");
-    });
+zebkit.require("ui", function(ui) {
+    new ui.zCanvas(400, 300).root.load("simple.json");
+});
 ```
 
 For example, let's load the following Zson:
 
 ```json
 {
-    "layout": { "@zebkit.layout.BorderLayout" :4 },
-    "kids": [
-        {
-            "@zebkit.ui.Panel":[],
-            "layout" : { "@zebkit.layout.BorderLayout" :4 },
-            "padding": 4,
-            "border" : "plain",
-            "kids"   : {
-                "top": {
-                    "@zebkit.ui.BoldLabel": "Simple application",
-                    "padding"            : 4,
-                    "background"         : "lightGray"
-                },
-
-                "center": {
-                    "@zebkit.ui.TextField": ""
-                },
-
-                "bottom": {
-                    "@zebkit.ui.Button": "Clear",
-                    "! fired": {
-                        "path"  : "//textField",
-                        "action": {
-
-                        }    
-                    }
-                }
-           }
+    "layout": { "@zebkit.layout.StackLayout" : []},
+    "kids"  : [{
+        "@zebkit.ui.Panel": [],
+        "layout" : { "@zebkit.layout.BorderLayout" :4 },
+        "padding": 4,
+        "border" : "plain",
+        "kids"   : {
+            "top": {
+                "@zebkit.ui.BoldLabel": "Simple application",
+                "padding"             : 4
+            },
+            "center": { "@zebkit.ui.TextArea": "" },
+            "bottom": {
+                "@zebkit.ui.Button": "Clear",
+                "canHaveFocus"     : false
+            }
        }
-    ]
+    }],
+    "#actions" : [{
+        "source"  : "//zebkit.ui.Button",
+        "target"  : {
+            "path"   : "//zebkit.ui.TextArea",
+            "update" : { "value": "" }
+        }
+    }]
 }
 ```
 
@@ -137,80 +141,55 @@ The result of the loading is shown below:
     });
 </script>
 
+There is "#actions" section in the JSON shown above. The section allows developers to declare simple event handling. In this particular case the section says to clear text area component text by button click. Full supported features of the section are shown below:
 
+<table class="info">
+<tr><th>
+JSON element    
+</th><th>
+Description
+</th></tr>
 
-Than load it four times:
-[wpcol_2third][js gutter="false"]
-   // create canvas and load JSON definition to
-   // its root
-   var r = new zebra.ui.zCanvas(400, 350).root;
-   r.setLayout(new zebra.layout.GridLayout(2,2));
-   r.load("pan.json");
-   r.load("pan.json");
-   r.load("pan.json");
-   r.load("pan.json");
-[/js][/wpcol_2third][wpcol_1third_end][/wpcol_1third_end]
+<tr><td>
+"#actions.source"    
+</td><td>
+Path to identify a source component that fires an event(s)
+</td></tr>
 
-The JSON definition loading works as follow:
+<tr><td>
+"#actions.event"    
+</td><td>
+Optional an event name that has to be handled from the source
+</td></tr>
 
+<tr><td>
+"#actions.targets" or
+<br/>
+"#actions.target"    
+</td><td>
+List of targets ("#actions.targets") components or single target ("#actions.target") component to be updated by the source event(s)
+</td></tr>
 
+<tr><td>
+"#actions.target.path" 
+</td><td>
+Path to detect a target component
+</td></tr>
 
+<tr><td>
+"#actions.target.update" 
+</td><td>
+Properties set the target has to be updated
+</td></tr>
 
-  * 
-Read provided JSON definition by HTTP GET method
+<tr><td>
+"#actions.target.do" 
+</td><td>
+Set of actions over the target component  
+</td></tr>
 
+</table>
 
+## Composing Zson
 
-  * 
-Parse the read definition starting from "kids" field:
-
-
-    * 
-Look for a property "kids" in "r" panel.
-
-
-
-    * 
-Call "kids" property "setKids" setter from "r" panel. This causes creation by JSON description panel and adding it as "r" panel children component.
-
-
-
-
-
-
-
-
-
-Zebra interprets some JSON definition using special semantical rules. For instance the following JSON snippet:
-[js gutter="false"]
-  ...
-  test : {
-     "$zebra.ui.Panel":[]
-     padding: 10
-     ...
-  }
-  ...
-[/js]
-says: instantiate "zebra.ui.Panel" class, set property "padding" of the instance to 10 and assign the panel instance to "test" key.
-
-
-**JSON JavaScript code style UI definition**
-
-At last, let define the same UI following JSON like JavaScript coding:
-[js gutter="false"]
-new zebra.ui.zCanvas(200,200).root.properties({
-   layout  : new zebra.layout.BorderLayout(4,4),
-   padding : 4,
-   border  : "plain",
-   kids: {
-      TOP: new zebra.ui.BoldLabel("Simple application").properties({
-          padding: 4,
-          background: "lightGray"
-      }),
-      CENTER: new zebra.ui.TextArea(),
-      BOTTOM: new zebra.ui.Button("Clear")
-   }
-});
-[/js]
-
-
+Zson can be composed from multiple JSONs. Zson guarantees everything is loaded in a order it is mentioned in Zson.   

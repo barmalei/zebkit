@@ -166,7 +166,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 },
 
                 function kidRemoved(index, kid) {
-                    if (zebkit.instanceOf(kid, zebkit.util.Fireable)) {
+                    if (zebkit.instanceOf(kid, zebkit.Fireable)) {
                         kid.off(this);
                     }
                     this.$super(index, kid);
@@ -174,7 +174,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
                 function kidAdded(index, constr, kid) {
                     // TODO: not very perfect check
-                    if (zebkit.instanceOf(kid, zebkit.util.Fireable)) {
+                    if (zebkit.instanceOf(kid, zebkit.Fireable)) {
                         kid.on(this);
                     }
                     this.$super(index, constr, kid);
@@ -187,7 +187,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
          */
         function $prototype() {
             this.catchInput = function(t) {
-                return zebkit.instanceOf(t, zebkit.util.Fireable) === false;
+                return zebkit.instanceOf(t, zebkit.Fireable) === false;
             };
 
             this.scrolled = function() {

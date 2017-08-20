@@ -97,7 +97,7 @@ hr {
   display: block;
   height: 1px;
   border: 0;
-  border-top: rgba(235, 242, 246, 0.29) 1px solid;
+  border-top: #FF7744 1px solid;
   margin: 1.2em 0;
   padding: 0;
 }
@@ -110,6 +110,11 @@ blockquote {
 td,
 th {
   padding: .25rem .5rem;
+}
+
+th {
+  background-color: #99cccc;
+  color: white;
 }
 
 
@@ -379,6 +384,21 @@ a.sidebar-nav-item:focus {
 table.zsample  td {
     border-width: 0px;
     background-color: white;
+}
+
+table.info, table.info td {
+    border-color: gray;
+    border-width: 1px;
+    border-style: solid;
+    border-collapse: collapse;
+}
+
+table.info tr:nth-child(odd) td {
+  background-color: #CCCCCC;
+}
+
+table.info tr:nth-child(even) td {
+  background-color: #EEEEEE;
 }
 
 

@@ -458,4 +458,4 @@ zebkit.package("ui", function(pkg, Class) {
             };
         }
     ]);
-});
+}, true);

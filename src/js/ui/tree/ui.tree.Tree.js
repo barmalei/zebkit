@@ -116,7 +116,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
             /**
              * Initiate the given item editing if the specified event matches condition
              * @param  {zebkit.data.Item} item an item to be edited
-             * @param  {zebkit.util.Event} e an even that may trigger the item editing
+             * @param  {zebkit.Event} e an even that may trigger the item editing
              * @return {Boolean}  return true if an item editing process has been started,
              * false otherwise
              * @method  se

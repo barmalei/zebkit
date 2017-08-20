@@ -1,9 +1,9 @@
 
 if (typeof(zebkit) === "undefined") {
-    require('../src/js/easyoop.js');
-    require('../src/js/util.js');
+    require('../build/easyoop.js');
+    require('../src/js/util/util.js');
     require('../src/js/misc/tools.js');
-    require('../src/js/layout.js');
+    require('../src/js/layout/layout.js');
 }
 
 eval(zebkit.import("layout"));

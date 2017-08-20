@@ -4,18 +4,15 @@ if (typeof(XMLHttpRequest) === 'undefined') {
 }
 
 if (typeof(zebkit) === "undefined") {
-    require('../src/js/web/web.environment.js');
-    require('../src/js/easyoop.js');
+    require('../build/easyoop.js');
     require('../src/js/misc/tools.js');
-    require('../src/js/io.js');
-    require('../src/js/util.js');
 }
 
 zebkit.package("test", function() {
 
 var assert = zebkit.assert,
     Class = zebkit.Class,
-    Zson = zebkit.util.Zson,
+    Zson = zebkit.Zson,
     assertException = zebkit.assertException,
     assertObjEqual = zebkit.assertObjEqual;
 

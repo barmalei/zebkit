@@ -1,13 +1,13 @@
 
 if (typeof(zebkit) === "undefined") {
-    require("../src/js/easyoop.js");
+    require("../build/easyoop.js");
     require("../src/js/misc/tools.js");
-    require("../src/js/util.js");
-    require("../src/js/layout.js");
+    require("../src/js/util/util.js");
+    require("../src/js/layout/layout.js");
 }
 
 var assert = zebkit.assert, Class = zebkit.Class, assertException = zebkit.assertException,
-    assertNoException = zebkit.assertNoException, Listeners = zebkit.util.Listeners;
+    assertNoException = zebkit.assertNoException, Listeners = zebkit.Listeners;
 
 zebkit.runTests("Util",
     function test_format() {
@@ -38,48 +38,48 @@ zebkit.runTests("Util",
         var treeLikeRoot = { value:"test" };
 
         assertException(function() {
-            zebkit.util.findInTree(treeLikeRoot, "", function() {}, function() {});
+            zebkit.findInTree(treeLikeRoot, "", function() {}, function() {});
         }, Error);
 
         assertException(function() {
-            zebkit.util.findInTree(treeLikeRoot, "/", function() {}, function() {});
+            zebkit.findInTree(treeLikeRoot, "/", function() {}, function() {});
         }, Error);
 
         assertException(function() {
-            zebkit.util.findInTree(treeLikeRoot, "//", function() {}, function() {});
+            zebkit.findInTree(treeLikeRoot, "//", function() {}, function() {});
         }, Error);
 
         assertException(function() {
-            zebkit.util.findInTree(treeLikeRoot, "/*//", function() {}, function() {});
+            zebkit.findInTree(treeLikeRoot, "/*//", function() {}, function() {});
         }, Error);
 
         assertException(function() {
-            zebkit.util.findInTree(treeLikeRoot, "/*/", function() {}, function() {});
+            zebkit.findInTree(treeLikeRoot, "/*/", function() {}, function() {});
         }, Error);
 
         assertException(function() {
-            zebkit.util.findInTree(treeLikeRoot, "/Root/", function() {}, function() {});
+            zebkit.findInTree(treeLikeRoot, "/Root/", function() {}, function() {});
         }, Error);
 
         assertException(function() {
-            zebkit.util.findInTree(treeLikeRoot, "/*/", function() {}, function() {});
+            zebkit.findInTree(treeLikeRoot, "/*/", function() {}, function() {});
         }, Error);
 
         assertException(function() {
-            zebkit.util.findInTree(treeLikeRoot, "//Root//", function() {}, function() {});
+            zebkit.findInTree(treeLikeRoot, "//Root//", function() {}, function() {});
         }, Error);
 
         assertException(function() {
-            zebkit.util.findInTree(treeLikeRoot, "Root//a", function() {}, function() {});
+            zebkit.findInTree(treeLikeRoot, "Root//a", function() {}, function() {});
         }, Error);
 
         assertException(function() {
-            zebkit.util.findInTree(treeLikeRoot, "//Root/a/", function() {}, function() {});
+            zebkit.findInTree(treeLikeRoot, "//Root/a/", function() {}, function() {});
         }, Error);
 
-        zebkit.util.findInTree(treeLikeRoot, "//Root/a/*", function() {}, function() {});
+        zebkit.findInTree(treeLikeRoot, "//Root/a/*", function() {}, function() {});
 
-        zebkit.util.findInTree(treeLikeRoot, "//*[@id='dsds/sds']", function() {}, function() {});
+        zebkit.findInTree(treeLikeRoot, "//*[@id='dsds/sds']", function() {}, function() {});
     },
 
     function test_treelookup() {
@@ -107,136 +107,136 @@ zebkit.runTests("Util",
 
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, ".//*", collect);
+        zebkit.findInTree(treeLikeRoot, ".//*", collect);
         assert(res.length, 7, "-100");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "./Root", collect);
+        zebkit.findInTree(treeLikeRoot, "./Root", collect);
         assert(res.length, 1, "-99");
         assert(res[0].value, "Root", "-98");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "./*/*", collect);
+        zebkit.findInTree(treeLikeRoot, "./*/*", collect);
         assert(res.length, 3, "-999");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "./Root/*", collect);
+        zebkit.findInTree(treeLikeRoot, "./Root/*", collect);
         assert(res.length, 3, "-97");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "./Root/*[@a]", collect);
+        zebkit.findInTree(treeLikeRoot, "./Root/*[@a]", collect);
         assert(res.length, 2, "-96");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "//*[@a]", collect);
+        zebkit.findInTree(treeLikeRoot, "//*[@a]", collect);
         assert(res.length, 4, "-95");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "//*[@b]", collect);
+        zebkit.findInTree(treeLikeRoot, "//*[@b]", collect);
         assert(res.length, 0, "-94");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "/*/*[@a]", collect);
+        zebkit.findInTree(treeLikeRoot, "/*/*[@a]", collect);
         assert(res.length, 2, "-93");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "//*[@c]", collect);
+        zebkit.findInTree(treeLikeRoot, "//*[@c]", collect);
         assert(res.length, 1, "-92");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "//*[ @c]", collect);
+        zebkit.findInTree(treeLikeRoot, "//*[ @c]", collect);
         assert(res.length, 1, "-91");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "//*[  @c ]", collect);
+        zebkit.findInTree(treeLikeRoot, "//*[  @c ]", collect);
         assert(res.length, 1, "-90");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "//*[  @c = 'mm' ]", collect);
+        zebkit.findInTree(treeLikeRoot, "//*[  @c = 'mm' ]", collect);
         assert(res.length, 1, "-89");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "//*", collect);
+        zebkit.findInTree(treeLikeRoot, "//*", collect);
         assert(res.length, 6, "Find all children");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "/*", collect);
+        zebkit.findInTree(treeLikeRoot, "/*", collect);
         assert(res.length, 3, "Find all direct children of the root");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "/*/*", collect);
+        zebkit.findInTree(treeLikeRoot, "/*/*", collect);
         assert(res.length, 3, "Find all children second");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "/*//*", collect);
+        zebkit.findInTree(treeLikeRoot, "/*//*", collect);
         assert(res.length, 3, "5");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "/*/*/*", collect);
+        zebkit.findInTree(treeLikeRoot, "/*/*/*", collect);
         assert(res.length, 0, "6");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, ".", collect);
+        zebkit.findInTree(treeLikeRoot, ".", collect);
         assert(res.length, 1, "8");
         assert(res[0].value, "Root", "9");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "/*/Item 1", collect);
+        zebkit.findInTree(treeLikeRoot, "/*/Item 1", collect);
         assert(res.length, 1, "10");
         assert(res[0].value, "Item 1", "11");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "/Item 1", collect);
+        zebkit.findInTree(treeLikeRoot, "/Item 1", collect);
         assert(res.length, 2, "12");
         assert(res[0].value, "Item 1", "13");
         assert(res[1].value, "Item 1", "14");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "//Item 1", collect);
+        zebkit.findInTree(treeLikeRoot, "//Item 1", collect);
         assert(res.length, 3, "15");
         assert(res[0].value, "Item 1", "16");
         assert(res[1].value, "Item 1", "17");
         assert(res[2].value, "Item 1", "18");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "/Item 1/Item 1", collect);
+        zebkit.findInTree(treeLikeRoot, "/Item 1/Item 1", collect);
         assert(res.length, 0, "19");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "/Item 2/Item 1", collect);
+        zebkit.findInTree(treeLikeRoot, "/Item 2/Item 1", collect);
         assert(res.length, 1, "20");
         assert(res[0].value, "Item 1", "21");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "/Item 1[@a=12]", collect);
+        zebkit.findInTree(treeLikeRoot, "/Item 1[@a=12]", collect);
         assert(res.length, 1, "22");
         assert(res[0].value, "Item 1", "23");
         assert(res[0].a, 12, "24");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "/Item 1[@a=11]", collect);
+        zebkit.findInTree(treeLikeRoot, "/Item 1[@a=11]", collect);
         assert(res.length, 1, "26");
         assert(res[0].value, "Item 1", "27");
         assert(res[0].a, 11, "28");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "//*[@a=11]", collect);
+        zebkit.findInTree(treeLikeRoot, "//*[@a=11]", collect);
         assert(res.length, 2, "29");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "/*[@a=11]", collect);
+        zebkit.findInTree(treeLikeRoot, "/*[@a=11]", collect);
         assert(res.length, 1, "30");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "//Item 1[@a=11]", collect);
+        zebkit.findInTree(treeLikeRoot, "//Item 1[@a=11]", collect);
         assert(res.length, 2, "31");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "//Item 2/*[@a=11]", collect);
+        zebkit.findInTree(treeLikeRoot, "//Item 2/*[@a=11]", collect);
         assert(res.length, 1, "32");
 
         res = [];
-        zebkit.util.findInTree(treeLikeRoot, "//Item 2//*[@a=11]", collect);
+        zebkit.findInTree(treeLikeRoot, "//Item 2//*[@a=11]", collect);
         assert(res.length, 1, "33");
     },
 

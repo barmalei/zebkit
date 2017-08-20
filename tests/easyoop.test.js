@@ -1,16 +1,20 @@
 if (typeof(zebkit) === "undefined") {
     var path = require("path"),
-        base = path.resolve(__dirname, "..", "src", "js");
+        base = path.resolve(__dirname, "..", "src", "js"),
+        buildBase = path.resolve(__dirname, "..", "build");
 
-    require(path.join(base, 'easyoop.js'));
+    require(path.join(buildBase, 'easyoop.js'));
     require(path.join(base, 'misc', 'extras.js'));
-    require(path.join(base, 'util.js'));
     require(path.join(base, 'misc', 'tools.js'));
 }
 
 (function() {
-    var assertException = zebkit.assertException, assert = zebkit.assert, assume = zebkit.assume,
-        Class = zebkit.Class, Interface = zebkit.Interface, assertObjEqual = zebkit.assertObjEqual,
+    var assertException = zebkit.assertException,
+        assert = zebkit.assert,
+        assume = zebkit.assume,
+        Class = zebkit.Class,
+        Interface = zebkit.Interface,
+        assertObjEqual = zebkit.assertObjEqual,
         Path = zebkit.Path;
 
     function test_a_map(Map, b) {
@@ -109,7 +113,6 @@ if (typeof(zebkit) === "undefined") {
         assert(m.size, 1, "test 46");
         if (b == null) assert(m.keys.length, 1, "test 47");
         if (b == null) assert(m.values.length, 1, "test 48");
-
     }
 
     zebkit.runTests("Easy OOP",
@@ -126,7 +129,7 @@ if (typeof(zebkit) === "undefined") {
             }
         },
 
-        function test_cache() {
+        function _test_cache() {
             zebkit.$cacheSize = 3;
 
             zebkit.A = "1";
@@ -2667,18 +2670,33 @@ if (typeof(zebkit) === "undefined") {
                 assert(testf(), 123);
             })();
 
+            zebkit.package("xx", function() {
+                var A = zebkit.Class([
+                    function $prototype() {
+                        this.k = 10;
+                    }
+                ])
 
-            zebkit.package("xx", function(ui) {
-                this.Test = zebkit.Class([]);
-                this.Test.Inner = zebkit.Class([]);
+                this.Test = zebkit.Class([
+                    function $clazz() {
+                        this.test = new A();
+                    }
+                ]);
+                this.Test.Inner = zebkit.Class([
+                    function $clazz() {
+                        this.test = new A();
+                    }
+                ]);
             });
+
 
             var Test  = zebkit.xx.Test;
             var Inner = zebkit.xx.Test.Inner;
             assert(zebkit.xx.Test.$name, "zebkit.xx.Test");
             assert(zebkit.xx.Test.Inner.$name, "zebkit.xx.Test.Inner");
 
-            zebkit.package("xx", function(ui) {
+
+            zebkit.package("xx", function() {
                 this.Test.Test = zebkit.Class([]);
                 this.Test2 = zebkit.Class([]);
             });
@@ -2688,6 +2706,8 @@ if (typeof(zebkit) === "undefined") {
             assert(zebkit.xx.Test.$name, "zebkit.xx.Test");
             assert(zebkit.xx.Test.Test.$name, "zebkit.xx.Test.Test");
             assert(zebkit.xx.Test2.$name, "zebkit.xx.Test2");
+
+
         },
 
         function test_class_names() {
@@ -3206,8 +3226,6 @@ if (typeof(zebkit) === "undefined") {
             I.mergeable = false;
 
 
-
-
             var D = zebkit.Class(C, I, [
                 function a() { this.$super(); }
             ]);
@@ -3238,3 +3256,6 @@ if (typeof(zebkit) === "undefined") {
         }
     );
 })();
+
+
+

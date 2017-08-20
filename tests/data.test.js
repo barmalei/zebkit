@@ -1,8 +1,8 @@
 
 if (typeof(zebkit) === "undefined") {
-    require('../src/js/easyoop.js');
-    require('../src/js/util.js');
-    require('../src/js/data.js');
+    require('../build/easyoop.js');
+    require('../src/js/util/util.js');
+    require('../src/js/data/data.js');
     require('../src/js/misc/tools.js');
 }
 

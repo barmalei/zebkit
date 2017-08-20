@@ -1,14 +1,13 @@
 
 if (typeof(zebkit) === "undefined") {
-    require('../src/js/easyoop.js');
+    require('../build/easyoop.js');
     require('../src/js/misc/tools.js');
-    require('../src/js/util.js');
-    require('../src/js/layout.js');
+    require('../src/js/layout/layout.js');
 }
 
 var assert = zebkit.assert, Class = zebkit.Class, assertException = zebkit.assertException,
-    assertNoException = zebkit.assertNoException, Listeners = zebkit.util.Listeners,
-    ListenersClass = zebkit.util.ListenersClass;
+    assertNoException = zebkit.assertNoException, Listeners = zebkit.Listeners,
+    ListenersClass = zebkit.ListenersClass;
 
 zebkit.runTests("Util Listeners",
     function test_single_listener() {
@@ -921,6 +920,28 @@ zebkit.runTests("Util Listeners",
         r.off("fired");
         r.fire();
         assert(cnt, 5);
+    },
+
+    function test_memory() {
+        var C1 = ListenersClass("event1", "event2", "event3"), c1 = new C1();
+        var C2 = Listeners, c2 = new C2();
+
+        c1.add(function() {});
+        c2.add(function() {});
+        var t1 = new Date().getTime();
+        for(var i=0; i < 10000000; i++) {
+            //c1.event3();
+            c2.fired();
+        }
+
+        console.log(">>> " + (new Date().getTime() - t1));
+
+        var t2 = new Date().getTime();
+       // for(var i=0; i < 10000000; i++) {
+            //c1.event1();
+        //}
+        //console.log(">>> " + (new Date().getTime() - t));
+
     }
 );
 

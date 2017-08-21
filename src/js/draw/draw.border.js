@@ -505,7 +505,7 @@ zebkit.package("draw", function(pkg, Class) {
     pkg.TitledBorder = Class(pkg.Render, [
         function (b, a){
             if (arguments.length > 1) {
-                this.lineAlignment = zebkit.util.$validateValue(a, "bottom", "top", "center");
+                this.lineAlignment = zebkit.util.validateValue(a, "bottom", "top", "center");
             }
 
             this.setValue(pkg.$view(b));

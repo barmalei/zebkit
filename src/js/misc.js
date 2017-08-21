@@ -588,7 +588,7 @@ URI.isAbsolute = function(u) {
 
 /**
  * Test if the given string is URL.
- * @param  {String}  u a string to be checked.
+ * @param  {String|zebkit.URI}  u a string to be checked.
  * @return {Boolean} true if the string is URL
  * @method isURL
  * @static
@@ -599,24 +599,32 @@ URI.isURL = function(u) {
 
 /**
  * Parse the specified query string of the given URI.
- * @param  {String} url an URI
+ * @param  {String|zebkit.URI} url an URI
  * @param  {Boolean} [decode] pass true if query string has to be decoded.
  * @return {Object} a parsed query string as a dictionary of parameters
  * @method parseQS
  * @static
  */
 URI.parseQS = function(qs, decode) {
+    if (qs instanceof URI) {
+        qs = qs.qs;
+        if (qs === null) {
+            return null;
+        }
+    } else if (qs[0] === '?') {
+        qs = qs.substring(1);
+    }
+
     var mqs      = qs.match(/[a-zA-Z0-9_.]+=[^?&=]+/g),
         parsedQS = {};
 
     if (mqs !== null) {
         for(var i = 0; i < mqs.length; i++) {
             var q = mqs[i].split('=');
-            this.parsedQS[q[0].substring(1)] = (decode === true ? $zenv.decodeURIComponent(q[1])
-                                                                : q[1]);
+            parsedQS[q[0]] = (decode === true ? $zenv.decodeURIComponent(q[1])
+                                              : q[1]);
         }
     }
-
     return parsedQS;
 };
 
@@ -681,7 +689,7 @@ URI.join = function() {
 $export(
     URI,        isNumber, isString, $Map,
     dumpError,  image,    getPropertySetter,
-    properties, GET,      isBoolean,  DoIt,
+    properties, GET,      isBoolean, DoIt,
     { "$global"    : $global,
       "$FN"        : $FN,
       "environment": $zenv,
@@ -689,3 +697,4 @@ $export(
       "isFF"       : isFF,
       "isMacOS"    : isMacOS }
 );
+

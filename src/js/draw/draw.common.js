@@ -156,6 +156,14 @@ zebkit.package("draw", function(pkg, Class) {
         }
     };
 
+    /**
+     * Dictionary of predefined views. Every view is accessible by an id associated
+     * with the view.
+     * @attribute $views
+     * @type {Object}
+     * @protected
+     * @for zebkit.draw
+     */
     pkg.$views = {};
 
     /**
@@ -839,8 +847,23 @@ zebkit.package("draw", function(pkg, Class) {
         },
 
         function $prototype() {
+            /**
+             * Shape color.
+             * @attribute color
+             * @type {String}
+             * @default  "gray"
+             */
             this.color = "gray";
-            this.gap   = this.width = 1;
+
+            this.gap = 1;
+
+            /**
+             * Shape line width
+             * @attribute width
+             * @type {Integer}
+             * @default 1
+             */
+            this.width = 1;
 
             this.paint = function(g,x,y,w,h,d) {
                 if (g.lineWidth !== this.width) {

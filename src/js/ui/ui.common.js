@@ -902,29 +902,34 @@ zebkit.package("ui", function(pkg, Class) {
      * Progress bar UI component class.
      * @class zebkit.ui.Progress
      * @constructor
+     * @param {String} [orient] an orientation of the progress bar. Use
+     * "vertical" or "horizontal" as the parameter value
      * @extends zebkit.ui.Panel
      */
 
     /**
      * Fired when a progress bar value has been updated
-
-            progress.on(function(src, oldValue) {
-                ...
-            });
-
+     *
+     *     progress.on(function(src, oldValue) {
+     *         ...
+     *     });
+     *
      *  @event fired
      *  @param {zebkit.ui.Progress} src a progress bar that triggers
      *  the event
      *  @param {Integer} oldValue a progress bar previous value
      */
     pkg.Progress = Class(pkg.Panel, [
-        function () {
-            this.setBundleView("darkBlue");
-            this._ = new zebkit.Listeners();
+        function(orient) {
             this.$super();
+            if (arguments.length > 0) {
+                this.setOrientation(orient);
+            }
         },
 
         function $prototype() {
+            this.Listeners = zebkit.Listeners;
+
             /**
              * Progress bar value
              * @attribute value
@@ -934,24 +939,25 @@ zebkit.package("ui", function(pkg, Class) {
             this.value = 0;
 
             /**
-             * Progress bar bundle width
-             * @attribute bundleWidth
+             * Progress bar element width
+             * @attribute barWidth
              * @type {Integer}
              * @readOnly
              * @default 6
              */
+             this.barWidth = 6;
 
             /**
-             * Progress bar bundle height
-             * @attribute bundleHeight
+             * Progress bar element height
+             * @attribute barHeight
              * @type {Integer}
              * @readOnly
              * @default 6
              */
-            this.bundleWidth = this.bundleHeight = 6;
+            this.barHeight = 6;
 
             /**
-             * Gap between bundle elements
+             * Gap between bar elements
              * @default 2
              * @attribute gap
              * @type {Integer}
@@ -968,8 +974,17 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.maxValue = 20;
 
+            /**
+             * Bar element view
+             * @attribute barView
+             * @readOnly
+             * @type {String|zebkit.draw.View}
+             * @default "blue"
+             */
+            this.barView = "blue";
 
-            this.bundleView = this.titleView = null;
+
+            this.titleView = null;
 
             /**
              * Progress bar orientation
@@ -987,29 +1002,29 @@ zebkit.package("ui", function(pkg, Class) {
                     bottom  = this.getBottom(),
                     rs      = (this.orient === "horizontal") ? this.width - left - right
                                                              : this.height - top - bottom,
-                    bundleSize = (this.orient === "horizontal") ? this.bundleWidth
-                                                                : this.bundleHeight;
+                    barSize = (this.orient === "horizontal") ? this.barWidth
+                                                             : this.barHeight;
 
-                if (rs >= bundleSize){
+                if (rs >= barSize){
                     var vLoc   = Math.floor((rs * this.value) / this.maxValue),
                         x      = left,
                         y      = this.height - bottom,
-                        bundle = this.bundleView,
+                        bar    = this.barView,
                         wh     = this.orient === "horizontal" ? this.height - top - bottom
                                                               : this.width - left - right;
 
                     while (x < (vLoc + left) && this.height - vLoc - bottom < y){
                         if (this.orient === "horizontal"){
-                            bundle.paint(g, x, top, bundleSize, wh, this);
-                            x += (bundleSize + this.gap);
+                            bar.paint(g, x, top, barSize, wh, this);
+                            x += (barSize + this.gap);
                         } else {
-                            bundle.paint(g, left, y - bundleSize, wh, bundleSize, this);
-                            y -= (bundleSize + this.gap);
+                            bar.paint(g, left, y - barSize, wh, barSize, this);
+                            y -= (barSize + this.gap);
                         }
                     }
 
                     if (this.titleView !== null) {
-                        var ps = this.bundleView.getPreferredSize();
+                        var ps = this.barView.getPreferredSize();
                         this.titleView.paint(g, Math.floor((this.width  - ps.width ) / 2),
                                                 Math.floor((this.height - ps.height) / 2),
                                                 ps.width, ps.height, this);
@@ -1018,18 +1033,18 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             this.calcPreferredSize = function(l) {
-                var bundleSize = (this.orient === "horizontal") ? this.bundleWidth
-                                                                : this.bundleHeight,
-                    v1 = (this.maxValue * bundleSize) + (this.maxValue - 1) * this.gap,
-                    ps = this.bundleView.getPreferredSize();
+                var barSize = (this.orient === "horizontal") ? this.barWidth
+                                                             : this.barHeight,
+                    v1 = (this.maxValue * barSize) + (this.maxValue - 1) * this.gap,
+                    ps = this.barView.getPreferredSize();
 
                 ps = (this.orient === "horizontal") ? {
                                                          width :v1,
-                                                         height:(this.bundleHeight >= 0 ? this.bundleHeight
+                                                         height:(this.barHeight >= 0 ? this.barHeight
                                                                                         : ps.height)
                                                       }
                                                     : {
-                                                        width:(this.bundleWidth >= 0 ? this.bundleWidth
+                                                        width:(this.barWidth >= 0 ? this.barWidth
                                                                                      : ps.width),
                                                         height: v1
                                                       };
@@ -1049,7 +1064,7 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.setOrientation = function(o) {
                 if (o !== this.orient) {
-                    this.orient = zebkit.util.$validateValue(o, "horizontal", "vertical");
+                    this.orient = zebkit.util.validateValue(o, "horizontal", "vertical");
                     this.vrp();
                 }
                 return this;
@@ -1081,14 +1096,14 @@ zebkit.package("ui", function(pkg, Class) {
                 if (this.value !== p){
                     var old = this.value;
                     this.value = p;
-                    this._.fired(this, old);
+                    this.fire("fired", [this, old]);
                     this.repaint();
                 }
                 return this;
             };
 
             /**
-             * Set the given gap between progress bar bundle elements
+             * Set the given gap between progress bar element elements
              * @param {Integer} g a gap
              * @method setGap
              * @chainable
@@ -1102,30 +1117,30 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             /**
-             * Set the progress bar bundle element view
-             * @param {zebkit.draw.View} v a progress bar bundle view
-             * @method setBundleView
+             * Set the progress bar element element view
+             * @param {zebkit.draw.View} v a progress bar element view
+             * @method setBarView
              * @chainable
              */
-            this.setBundleView = function(v) {
-                if (this.bundleView != v){
-                    this.bundleView = zebkit.draw.$view(v);
+            this.setBarView = function(v) {
+                if (this.barView != v){
+                    this.barView = zebkit.draw.$view(v);
                     this.vrp();
                 }
                 return this;
             };
 
             /**
-             * Set the progress bar bundle element size
-             * @param {Integer} w a bundle element width
-             * @param {Integer} h a bundle element height
-             * @method setBundleSize
+             * Set the progress bar element size
+             * @param {Integer} w a element width
+             * @param {Integer} h a element height
+             * @method setBarSize
              * @chainable
              */
-            this.setBundleSize = function(w, h) {
-                if (w !== this.bundleWidth && h !== this.bundleHeight){
-                    this.bundleWidth  = w;
-                    this.bundleHeight = h;
+            this.setBarSize = function(w, h) {
+                if (w !== this.barWidth && h !== this.barHeight){
+                    this.barWidth  = w;
+                    this.barHeight = h;
                     this.vrp();
                 }
                 return this;

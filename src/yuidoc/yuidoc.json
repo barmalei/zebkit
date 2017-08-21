@@ -4,6 +4,7 @@
     "version": "2.0.0",
     "url": "http://zebkit.com/",
     "options": {
+        "exclude"     : "easyoop.js,easyoop.min.js",
         "linkNatives" : true,
         "helpers"     : [ "node_modules/yuidoc-zebkit-theme/src/helpers/helpers.js" ],
         "preprocessor": [ "node_modules/yuidoc-zebkit-theme/src/helpers/preprocessor.js"]

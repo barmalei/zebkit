@@ -8,17 +8,17 @@ zebkit.package("util", function(pkg, Class) {
     /**
      * Validate the specified value to be equal one of the given values
      * @param  {value} value a value to be validated
-     * @param  {Object} [value]* a number of valid values to test against
+     * @param  {Object} [allowedValues]* a number of valid values to test against
      * @throws Error if the value doesn't match any valid value
      * @for  zebkit.util
-     * @method  $validateValue
+     * @method  validateValue
      * @example
      *      // test if the alignment is equal one of the possible values
      *      // throws error otherwise
-     *      zebkit.util.$validateValue(alignment, "top", "left", "right", "bottom");
+     *      zebkit.util.validateValue(alignment, "top", "left", "right", "bottom");
      * @protected
      */
-    pkg.$validateValue = function(value) {
+    pkg.validateValue = function(value) {
         if (arguments.length < 2) {
             throw new Error("Invalid arguments list. List of valid values is expected");
         }

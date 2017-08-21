@@ -220,6 +220,7 @@ var Font = Class([
          * Restyle font and return new instance of the font class
          * @param  {String} style a new style
          * @return {zebkit.Font} a font
+         * @method restyle
          */
         this.restyle = function(style) {
             return new this.clazz(this.family, style, this.height + "px");

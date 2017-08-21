@@ -228,7 +228,7 @@ zebkit.package("ui.design", function(pkg, Class) {
                     };
 
                     this.setBorderColor = function(id, color) {
-                        zebkit.util.$validateValue(id, "focusoff", "focuson");
+                        zebkit.util.validateValue(id, "focusoff", "focuson");
                         this.views[id].color = color;
                         return this;
                     };

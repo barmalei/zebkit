@@ -57,32 +57,33 @@ zebkit.package("draw", function(pkg, Class) {
              * @type {String}
              */
             this.orient = "vertical";
-            this.gradient = null;
-            this.gy2 = this.gy1 = this.gx2 = this.gx1 = 0;
+
+            this.$gradient = null;
+            this.$gy2 = this.$gy1 = this.$gx2 = this.$gx1 = 0;
 
             this.paint = function(g,x,y,w,h,dd){
-                var d = (this.orient === "horizontal" ? [0,1]: [1,0]),
+                var d  = (this.orient === "horizontal" ? [0,1]: [1,0]),
                     x1 = x * d[1],
                     y1 = y * d[0],
                     x2 = (x + w - 1) * d[1],
                     y2 = (y + h - 1) * d[0];
 
-                if (this.gradient === null  || this.gx1 !== x1 ||
-                    this.gx2 !== x2         || this.gy1 !== y1 ||
-                    this.gy2 !== y2                              )
+                if (this.$gradient === null  || this.$gx1 !== x1 ||
+                    this.$gx2 !== x2         || this.$gy1 !== y1 ||
+                    this.$gy2 !== y2                              )
                 {
-                    this.gx1 = x1;
-                    this.gx2 = x2;
-                    this.gy1 = y1;
-                    this.gy2 = y2;
+                    this.$gx1 = x1;
+                    this.$gx2 = x2;
+                    this.$gy1 = y1;
+                    this.$gy2 = y2;
 
-                    this.gradient = g.createLinearGradient(x1, y1, x2, y2);
+                    this.$gradient = g.createLinearGradient(x1, y1, x2, y2);
                     for(var i = 0; i < this.colors.length; i++) {
-                        this.gradient.addColorStop(i, this.colors[i].toString());
+                        this.$gradient.addColorStop(i, this.colors[i].toString());
                     }
                 }
 
-                g.fillStyle = this.gradient;
+                g.fillStyle = this.$gradient;
                 g.fillRect(x, y, w, h);
             };
         }
@@ -107,8 +108,7 @@ zebkit.package("draw", function(pkg, Class) {
         },
 
         function $prototype() {
-            this.gradient = null;
-
+            this.$gradient = null;
             this.$cx1 = this.$cy1 = this.$rad1 = this.$rad2 = 0;
             this.$colors = [];
 
@@ -119,19 +119,19 @@ zebkit.package("draw", function(pkg, Class) {
                     cy1  = Math.floor(h / 2),
                     rad2 = w > h ? w : h;
 
-                if (this.gradient === null     ||
+                if (this.$gradient === null     ||
                     this.$cx1  !== cx1         ||
                     this.$cy1  !== cy1         ||
                     this.$rad1 !== this.radius ||
                     this.$rad2 !== this.rad2      )
                 {
-                    this.gradient = g.createRadialGradient(cx1, cy1, this.radius, cx1, cy1, rad2);
+                    this.$gradient = g.createRadialGradient(cx1, cy1, this.radius, cx1, cy1, rad2);
                 }
 
                 var b = false,
                     i = 0;
 
-                if (this.$colors.length !== this.colors.length ) {
+                if (this.$colors.length !== this.colors.length) {
                     b = true;
                 } else {
                     for (i = 0; i < this.$colors.length; i++) {
@@ -144,11 +144,11 @@ zebkit.package("draw", function(pkg, Class) {
 
                 if (b) {
                     for (i = 0; i < this.colors.length; i++) {
-                        this.gradient.addColorStop(i, this.colors[i]);
+                        this.$gradient.addColorStop(i, this.colors[i]);
                     }
                 }
 
-                g.fillStyle = this.gradient;
+                g.fillStyle = this.$gradient;
                 g.fillRect(x, y, w, h);
             };
         }
@@ -254,24 +254,24 @@ zebkit.package("draw", function(pkg, Class) {
              * Buffered pattern
              * @type {Pattern}
              * @protected
-             * @attribute pattern
+             * @attribute $pattern
              * @readOnly
              */
-            this.pattern = null;
+            this.$pattern = null;
 
             this.paint = function(g,x,y,w,h,d) {
-                if (this.pattern === null && this.target !== null) {
-                    this.pattern = g.createPattern(this.target, 'repeat');
+                if (this.$pattern === null && this.target !== null) {
+                    this.$pattern = g.createPattern(this.target, 'repeat');
                 }
                 g.beginPath();
                 g.rect(x, y, w, h);
                 g.closePath();
-                g.fillStyle = this.pattern;
+                g.fillStyle = this.$pattern;
                 g.fill();
             };
 
             this.valueWasChanged = function(o, n) {
-                this.pattern = null;
+                this.$pattern = null;
             };
         }
     ]);
@@ -289,7 +289,7 @@ zebkit.package("draw", function(pkg, Class) {
     pkg.LineView = Class(pkg.View, [
         function(side, color, lineWidth) {
             if (arguments.length > 0) {
-                this.side = zebkit.util.$validateValue(side, "top", "right", "bottom", "left");
+                this.side = zebkit.util.validateValue(side, "top", "right", "bottom", "left");
                 if (arguments.length > 1) {
                     this.color = color;
                     if (arguments.length > 2) {
@@ -377,7 +377,7 @@ zebkit.package("draw", function(pkg, Class) {
     pkg.ArrowView = Class(pkg.View, [
         function (d, col, w, h) {
             if (arguments.length > 0) {
-                this.direction = d;
+                this.direction = zebkit.util.validateValue(d, "left", "right", "bottom", "top");
                 if (arguments.length > 1) {
                     this.color = col;
                     if (arguments.length > 2) {
@@ -407,6 +407,12 @@ zebkit.package("draw", function(pkg, Class) {
              */
             this.fill = true;
 
+            /**
+             * Gap
+             * @attribute gap
+             * @type {Integer}
+             * @default 0
+             */
             this.gap = 0;
 
             /**
@@ -423,6 +429,7 @@ zebkit.package("draw", function(pkg, Class) {
              * @type {Integer}
              * @default 8
              */
+            this.width = 8;
 
              /**
               * Arrow height.
@@ -430,7 +437,7 @@ zebkit.package("draw", function(pkg, Class) {
               * @type {Integer}
               * @default 8
               */
-            this.width = this.height = 8;
+            this.height = 8;
 
             /**
              * Arrow direction.
@@ -472,13 +479,17 @@ zebkit.package("draw", function(pkg, Class) {
                     g.lineTo(x + dt, y + h - 1);
                     g.lineTo(x + w, y + h2);
                     g.lineTo(x - dt, y);
-                } else {
-                    throw new Error("" + this.direction);
                 }
 
                 return true;
             };
 
+            /**
+             * Set gap.
+             * @param {Integer} gap a gap
+             * @chainable
+             * @method setGap
+             */
             this.setGap = function(gap) {
                 this.gap = gap;
                 return this;
@@ -674,7 +685,13 @@ zebkit.package("draw", function(pkg, Class) {
         }
     ]);
 
-
+    /**
+     * The check box ticker view.
+     * @class  zebkit.draw.CheckboxView
+     * @extends zebkit.draw.View
+     * @constructor
+     * @param {String} [color] color of the ticker
+     */
     pkg.CheckboxView = Class(pkg.View, [
         function(color) {
             if (arguments.length > 0) {
@@ -683,6 +700,13 @@ zebkit.package("draw", function(pkg, Class) {
         },
 
         function $prototype() {
+            /**
+             * Ticker color.
+             * @attribute color
+             * @type {String}
+             * @readOnly
+             * @default "rgb(65, 131, 255)"
+             */
             this.color = "rgb(65, 131, 255)";
 
             this.paint = function(g,x,y,w,h,d){
@@ -701,39 +725,59 @@ zebkit.package("draw", function(pkg, Class) {
         }
     ]);
 
-    pkg.BunldeView = Class(pkg.View, [
-        function(dir, color) {
+    /**
+     * Thumb element view.
+     * @class  zebkit.draw.ThumbView
+     * @extends {zebkit.draw.View}
+     * @constructor
+     * @param  {String} [dir]  a direction
+     * @param  {String} [fillColor] a fill color
+     */
+    pkg.ThumbView = Class(pkg.View, [
+        function(dir, fillColor) {
             if (arguments.length > 0) {
-                this.direction = zebkit.util.$validateValue(dir, "vertical", "horizontal");
+                this.direction = zebkit.util.validateValue(dir, "vertical", "horizontal");
                 if (arguments.length > 1) {
-                    this.color = color;
+                    this.fillColor = fillColor;
                 }
             }
         },
 
         function $prototype() {
-            this.color = "#AAAAAA";
-            this.direction = "vertical";
+            /**
+             * Fill color.
+             * @attribute fillColor
+             * @type {String}
+             * @default "#AAAAAA"
+             */
+            this.fillColor = "#AAAAAA";
 
+            /**
+             * Direction.
+             * @attribute direction
+             * @type {String}
+             * @default "vertical"
+             */
+            this.direction = "vertical";
 
             this.paint =  function(g,x,y,w,h,d) {
                 g.beginPath();
 
                 var  r = 0;
                 if (this.direction === "vertical") {
-                    r = w/2;
+                    r = w / 2;
                     g.arc(x + r, y + r, r, Math.PI, 0, false);
                     g.lineTo(x + w, y + h - r);
                     g.arc(x + r, y + h - r, r, 0, Math.PI, false);
                     g.lineTo(x, y + r);
                 } else {
-                    r = h/2;
+                    r = h / 2;
                     g.arc(x + r, y + r, r, 0.5 * Math.PI, 1.5 * Math.PI, false);
                     g.lineTo(x + w - r, y);
                     g.arc(x + w - r, y + h - r, r, 1.5 * Math.PI, 0.5 * Math.PI, false);
                     g.lineTo(x + r, y + h);
                 }
-                g.setColor(this.color);
+                g.setColor(this.fillColor);
                 g.fill();
             };
         }
@@ -744,36 +788,51 @@ zebkit.package("draw", function(pkg, Class) {
      * @class  zebkit.draw.RadioView
      * @extends zebkit.draw.View
      * @constructor
-     * @param {String} [col1] color one to render the outer cycle
-     * @param {String} [col2] color tow to render the inner cycle
+     * @param {String} [outerColor] color one to fill the outer circle
+     * @param {String} [innerColor] color tow to fill the inner circle
      */
     pkg.RadioView = Class(pkg.View, [
-        function(col1, col2) {
+        function(outerColor, innerColor) {
             if (arguments.length > 0) {
-                this.color1 = col1;
+                this.outerColor = outerColor;
                 if (arguments.length > 1) {
-                    this.color2 = col2;
+                    this.innerColor = innerColor;
                 }
             }
         },
 
         function $prototype() {
-            this.color1 = "rgb(15, 81, 205)";
-            this.color2 = "rgb(65, 131, 255)";
+            /**
+             * Outer circle filling color.
+             * @attribute outerColor
+             * @readOnly
+             * @default "rgb(15, 81, 205)"
+             * @type {String}
+             */
+            this.outerColor = "rgb(15, 81, 205)";
+
+            /**
+             * Inner circle filling color.
+             * @attribute innerColor
+             * @readOnly
+             * @default "rgb(65, 131, 255)"
+             * @type {String}
+             */
+            this.innerColor = "rgb(65, 131, 255)";
 
             this.paint = function(g,x,y,w,h,d){
                 g.beginPath();
-                if (g.fillStyle != this.color1) {
-                    g.fillStyle = this.color1;
+                if (g.fillStyle !== this.outerColor) {
+                    g.fillStyle = this.outerColor;
                 }
-                g.arc(Math.floor(x + w/2), Math.floor(y + h/2) , Math.floor(w/3 - 0.5), 0, 2* Math.PI, 1, false);
+                g.arc(Math.floor(x + w/2), Math.floor(y + h/2) , Math.floor(w/3 - 0.5), 0, 2 * Math.PI, 1, false);
                 g.fill();
 
                 g.beginPath();
-                if (g.fillStyle != this.color2) {
-                    g.fillStyle = this.color2;
+                if (g.fillStyle !== this.innerColor) {
+                    g.fillStyle = this.innerColor;
                 }
-                g.arc(Math.floor(x + w/2), Math.floor(y + h/2) , Math.floor(w/4 - 0.5), 0, 2* Math.PI, 1, false);
+                g.arc(Math.floor(x + w/2), Math.floor(y + h/2) , Math.floor(w/4 - 0.5), 0, 2 * Math.PI, 1, false);
                 g.fill();
             };
         }
@@ -875,8 +934,9 @@ zebkit.package("draw", function(pkg, Class) {
         },
 
         function $prototype() {
-            this.gap = this.radius = 6;
-            this.bg  = "#66CCFF";
+            this.gap    = 6;
+            this.radius = 6;
+            this.bg      = "#66CCFF";
 
             this.paint = function(g,x,y,w,h,d) {
                 this.outline(g,x,y,w,h,d);
@@ -884,7 +944,7 @@ zebkit.package("draw", function(pkg, Class) {
                 g.fill();
             };
 
-            this.outline = function (g,x,y,w,h,d) {
+            this.outline = function(g,x,y,w,h,d) {
                 g.beginPath();
                 g.moveTo(x + this.radius, y);
                 g.lineTo(x + w - this.radius*2, y);
@@ -900,7 +960,8 @@ zebkit.package("draw", function(pkg, Class) {
 
     /**
      * Base class to implement model values renders.
-     * @param  {zebkit.draw.Render} [render] a render to visualize values. By default string render is used.
+     * @param  {zebkit.draw.Render} [render] a render to visualize values.
+     * By default string render is used.
      * @class zebkit.draw.BaseViewProvider
      * @constructor
      */

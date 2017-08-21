@@ -879,7 +879,7 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.setAlignment = function(o){
                 if (this.orient !== o) {
-                    this.orient = zebkit.util.$validateValue(o, "top", "bottom", "left", "right");
+                    this.orient = zebkit.util.validateValue(o, "top", "bottom", "left", "right");
                     this.vrp();
                 }
                 return this;

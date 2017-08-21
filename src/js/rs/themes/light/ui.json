@@ -1,6 +1,6 @@
 {
-    "version"   : "4.2017",
-    "themeName" : "light",
+    "version"  : "8.2017",
+    "themeName": "light",
 
     "%{../ui.common.json}": null,
 
@@ -211,13 +211,13 @@
             "canHaveFocus": false
         },
 
-        "VBundle": {
+        "VerticalThumb": {
             "preferredSize" : [ 8, -1],
             "border"        :  { "@zebkit.draw.Border" : [ null, 4, 4 ] },
             "background"    : "#66CCFF"
         },
 
-        "HBundle": {
+        "HorizontalThumb": {
             "preferredSize" : [ -1, 6 ],
             "border"        :  { "@zebkit.draw.Border" : [ null, 4, 4 ] },
             "background"    : "#66CCFF"
@@ -260,9 +260,9 @@
     },
 
     "Progress": {
-        "border"    : { "@zebkit.draw.Border" : [ "rgb(200,200,255)", 1, 3] },
-        "bundleView": "#66CCFF",
-        "padding"   : 2
+        "border"   : { "@zebkit.draw.Border" : [ "rgb(200,200,255)", 1, 3] },
+        "barView"  : "#66CCFF",
+        "padding"  : 2
     },
 
     "Tabs": {

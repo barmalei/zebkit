@@ -330,6 +330,9 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
             /**
              * Initial (not scrolled) y coordinate of first cell
+             * @method $initialCellY
+             * @return {Integer} initial y coordinate
+             * @private
              */
             this.$initialCellY = function() {
                 var ly = 0;
@@ -345,6 +348,9 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
             /**
              * Initial (not scrolled) x coordinate of first cell
+             * @method $initialCellX
+             * @return {Integer} initial x coordinate
+             * @private
              */
             this.$initialCellX = function() {
                 var lx = 0;

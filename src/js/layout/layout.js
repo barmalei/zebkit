@@ -1304,7 +1304,7 @@ zebkit.package("layout", function(pkg, Class) {
                 }
 
                 if (arguments.length > 2)  {
-                    this.direction = zebkit.util.$validateValue(dir, "horizontal", "vertical");
+                    this.direction = zebkit.util.validateValue(dir, "horizontal", "vertical");
                 }
 
                 if (arguments.length > 3) {
@@ -1479,7 +1479,7 @@ zebkit.package("layout", function(pkg, Class) {
             if (arguments.length === 1) {
                 this.gap = ax;
             } else if (arguments.length > 1) {
-                this.ax  = zebkit.util.$validateValue(ax, "stretch", "left", "right", "center");
+                this.ax  = zebkit.util.validateValue(ax, "stretch", "left", "right", "center");
                 this.gap = gap;
             }
         },
@@ -1569,7 +1569,7 @@ zebkit.package("layout", function(pkg, Class) {
     pkg.PercentLayout = Class(pkg.Layout, [
         function(dir, gap, stretch) {
             if (arguments.length > 0) {
-                this.direction = zebkit.util.$validateValue(dir, "horizontal", "vertical");
+                this.direction = zebkit.util.validateValue(dir, "horizontal", "vertical");
                 if (arguments.length > 1) {
                     this.gap = gap;
                 }
@@ -1706,8 +1706,8 @@ zebkit.package("layout", function(pkg, Class) {
                     this.setPadding(p);
                 }
 
-                zebkit.util.$validateValue(this.ax, "stretch", "left", "center", "right");
-                zebkit.util.$validateValue(this.ay, "stretch", "top", "center", "bottom");
+                zebkit.util.validateValue(this.ax, "stretch", "left", "center", "right");
+                zebkit.util.validateValue(this.ay, "stretch", "top", "center", "bottom");
             }
         },
 

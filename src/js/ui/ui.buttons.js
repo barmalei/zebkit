@@ -133,7 +133,7 @@ zebkit.package("ui", function(pkg, Class) {
             this.cursorType = pkg.Cursor.HAND;
 
             if (arguments.length > 0) {
-                this.direction = zebkit.util.$validateValue(direction, "left", "right", "top", "bottom");
+                this.direction = zebkit.util.validateValue(direction, "left", "right", "top", "bottom");
             }
 
             var clz = typeof this.clazz.$colors !== 'undefined' ? this.clazz : pkg.ArrowButton;

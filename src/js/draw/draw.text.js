@@ -97,13 +97,20 @@ zebkit.package("draw", function(pkg, Class) {
                 return this.setFont(this.font.resize(size));
             };
 
+            /**
+             * Re-style font.
+             * @param {String} style a new font style
+             * @method restyleFont
+             * @chainable
+             */
             this.restyleFont = function(style) {
                 return this.setFont(this.font.restyle(style));
             };
 
             /**
              * Get line height
-             * @return {[type]} [description]
+             * @method getLineHeight
+             * @return {Integer} a line height
              */
             this.getLineHeight = function() {
                 return this.font.height;
@@ -131,6 +138,12 @@ zebkit.package("draw", function(pkg, Class) {
                 this.owner = v;
             };
 
+            /**
+             * Overridden method to catch target value changing events.
+             * @param  {Object} o an old target value
+             * @param  {Object} n a new target value
+             * @method valueWasChanged
+             */
             this.valueWasChanged = function(o, n) {
                 if (this.owner !== null && this.owner.isValid) {
                     this.owner.invalidate();
@@ -156,10 +169,19 @@ zebkit.package("draw", function(pkg, Class) {
      * @param {String} [color] a text color
      * @constructor
      * @extends zebkit.draw.BaseTextRender
+     * @use zebkit.util.Position.Metric
      * @class zebkit.draw.StringRender
      */
-    pkg.StringRender = Class(pkg.BaseTextRender, [
+    pkg.StringRender = Class(pkg.BaseTextRender, zebkit.util.Position.Metric, [
         function $prototype() {
+            /**
+             * Calculated string width (in pixels). If string width has not been calculated
+             * the value is set to -1.
+             * @attribute stringWidth
+             * @protected
+             * @default -1
+             * @type {Integer}
+             */
             this.stringWidth = -1;
 
             // for the sake of speed up construction of the widely used render
@@ -184,19 +206,47 @@ zebkit.package("draw", function(pkg, Class) {
                 this.color = arguments.length > 2 ? color : this.clazz.color;
             };
 
-            // implement position metric methods
+            /**
+             * Implementation of position metric interface. Returns maximal
+             * possible offset within the given string.
+             * @method getMaxOffset
+             * @return {Integer} a maximal possible offset.
+             */
             this.getMaxOffset = function() {
                 return this.target.length;
             };
 
-            this.getLineSize = function(l) {
+            /**
+             * Implementation of position metric interface. Returns the given
+             * line size (in characters).
+             * @param {Integer}  line a line number. This render supports only
+             * single line.
+             * @method getLineSize
+             * @return {Integer} a line size
+             */
+            this.getLineSize = function(line) {
+                if (line > 0) {
+                    throw new RangeError("Line number " + line + " is out of the range");
+                }
                 return this.target.length + 1;
             };
 
+            /**
+             * Implementation of position metric interface. Returns number
+             * of lines.
+             * @method getLines
+             * @return {Integer} a number of lines.
+             */
             this.getLines = function() {
                 return 1;
             };
 
+            /**
+             * Calculates string width if it has not been done yet.
+             * @method calcLineWidth
+             * @protected
+             * @return {Integer} a string width
+             */
             this.calcLineWidth = function() {
                 if (this.stringWidth < 0) {
                     this.stringWidth = this.font.stringWidth(this.target);
@@ -204,6 +254,12 @@ zebkit.package("draw", function(pkg, Class) {
                 return this.stringWidth;
             };
 
+            /**
+             * Invalidate the render state. Invalidation flushes string metrics
+             * to be re-calculated again.
+             * @protected
+             * @method invalidate
+             */
             this.invalidate = function() {
                 this.stringWidth = -1;
             };
@@ -247,6 +303,12 @@ zebkit.package("draw", function(pkg, Class) {
                 g.fillText(this.target, x, y);
             };
 
+            /**
+             * Get the given line.
+             * @param  {Integer} l a line number
+             * @return {String} a line
+             * @method getLine
+             */
             this.getLine = function(l) {
                 if (l < 0 || l > 1) {
                     throw new RangeError();
@@ -708,55 +770,131 @@ zebkit.package("draw", function(pkg, Class) {
         }
     ]);
 
+    /**
+     * Decorated text render. This decorator allows developer to draw under, over or strike
+     * lines over the rendered text.
+     * @class  zebkit.draw.DecoratedTextRender
+     * @extends {zebkit.draw.TextRender}
+     * @constructor
+     * @param  {String|zebkit.data.TextModel} text a text as string or text model object
+     */
     pkg.DecoratedTextRender = zebkit.Class(pkg.TextRender, [
         function(text) {
             this.decorations = {
-                underline : null,
-                strike    : null
+                underline : false,
+                strike    : false,
+                overline  : false
             };
             this.$super(text);
         },
 
         function $prototype() {
+            /**
+             * Line width
+             * @attribute lineWidth
+             * @type {Integer}
+             * @default 1
+             */
             this.lineWidth = 1;
 
-            this.setDecoration = function(id, color) {
-                if (id === null || typeof id === 'undefined') {
-                    throw new Error();
+            /**
+             * Line color
+             * @attribute color
+             * @type {String}
+             * @default "black"
+             */
+            this.color = "black";
+
+            /**
+             * Set decoration on or off.
+             * @param {String} id a decoration id. Use "strike", "underline" or "overline"
+             * as the parameter value
+             * @param {Boolean} b a boolean flag that says if the decoration has to be
+             * added or removed.
+             * @method setDecoration
+             * @chainable
+             */
+            this.setDecoration = function(id, b) {
+                if (b) {
+                    this.addDecorations(id);
+                } else {
+                    this.clearDecorations(id);
                 }
-                this.decorations[id] = color;
                 return this;
             };
 
+            /**
+             * Set set of decorations.
+             * @param {Object} d set of decorations. For instance:
+             *
+             *
+             *     {
+             *         underline: true,
+             *         strike: false
+             *     }
+             *
+             *
+             * @method setDecorations
+             * @chainable
+             */
             this.setDecorations = function(d) {
-                this.decorations = zebkit.clone(d);
-                // TODO: the method has to be replaced with addDecoration/clearDecoration
-                if (typeof this.decorations.underline === 'undefined') {
-                    this.decorations.underline = null;
+                for(var k in d) {
+                    if (d.hasOwnProperty()) {
+                        this.setDecoration(k, d[k]);
+                    }
                 }
+                return this;
+            };
 
-                if (typeof this.decorations.strike === 'undefined') {
-                    this.decorations.strike = null;
+            /**
+             * Clear the given decorations.
+             * @param {String} [decorations]* decorations IDs.
+             * @chainable
+             * @method clearDecorations
+             */
+            this.clearDecorations = function() {
+                for (var i = 0; i < arguments.length; i++) {
+                    zebkit.util.validateValue(arguments[i], "underline", "overline", "strike");
+                    this.decorations[arguments[i]] = false;
                 }
+                return this;
+            };
 
+            /**
+             * Add the given decorations.
+             * @param {String} [decorations]* decorations IDs.
+             * @chainable
+             * @method addDecorations
+             */
+            this.addDecorations = function() {
+                for (var i = 0; i < arguments.length; i++) {
+                    zebkit.util.validateValue(arguments[i], "underline", "overline", "strike");
+                    this.decorations[arguments[i]] = true;
+                }
                 return this;
             };
         },
 
         function paintLine(g,x,y,line,d) {
             this.$super(g,x,y,line,d);
+
             var lw = this.calcLineWidth(line),
                 lh = this.getLineHeight(line);
 
-            if (this.decorations.underline !== null) {
+            g.setColor(this.color);
+
+            if (this.decorations.overline) {
                 g.lineWidth = this.lineWidth;
-                g.setColor(this.decorations.underline);
+                g.drawLine(x, y + this.lineWidth, x + lw, y + this.lineWidth);
+            }
+
+            if (this.decorations.underline) {
+                g.lineWidth = this.lineWidth;
                 g.drawLine(x, y + lh - 1, x + lw, y  + lh - 1);
             }
 
-            if (this.decorations.strike !== null) {
+            if (this.decorations.strike) {
                 var yy = y + Math.round(lh / 2) - 1;
-                g.setColor(this.decorations.strike);
                 g.lineWidth = this.lineWidth;
                 g.drawLine(x, yy, x + lw, yy);
             }
@@ -770,8 +908,10 @@ zebkit.package("draw", function(pkg, Class) {
     ]);
 
     /**
-     * Password text render class. This class renders a secret text with hiding it with the given character.
-     * @param {String|zebkit.data.TextModel} [text] a text as string or text model instance
+     * Password text render class. This class renders a secret text with hiding
+     * it with the given character.
+     * @param {String|zebkit.data.TextModel} [text] a text as string or text
+     * model instance
      * @class zebkit.draw.PasswordText
      * @constructor
      * @extends zebkit.draw.TextRender
@@ -796,7 +936,8 @@ zebkit.package("draw", function(pkg, Class) {
             this.echo = "*";
 
             /**
-             * Indicates if the last entered character doesn't have to be replaced with echo character
+             * Indicates if the last entered character doesn't have to be replaced
+             * with echo character
              * @type {Boolean}
              * @attribute showLast
              * @default true
@@ -805,7 +946,8 @@ zebkit.package("draw", function(pkg, Class) {
             this.showLast = true;
 
             /**
-             * Set the specified echo character. The echo character is used to hide secret text.
+             * Set the specified echo character. The echo character is used to
+             * hide secret text.
              * @param {String} ch an echo character
              * @method setEchoChar
              * @chainable

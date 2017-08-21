@@ -101,40 +101,40 @@ zebkit.package("ui", function(pkg, Class) {
      * zebkit allows developers to show any UI component as modal or none modal
      * window. Add an UI component to window layer to show it as modal o none
      * modal window:
-
-            // create canvas
-            var canvas   = new zebkit.ui.zCanvas();
-
-            // get windows layer
-            var winLayer = canvas.getLayer(zebkit.ui.WinLayerMix.id);
-
-            // create standard UI window component
-            var win = new zebkit.ui.Window();
-            win.setBounds(10,10,200,200);
-
-            // show the created window as modal window
-            winLayer.addWin("modal", win);
-
+     *
+     *       // create canvas
+     *       var canvas   = new zebkit.ui.zCanvas();
+     *
+     *       // get windows layer
+     *       var winLayer = canvas.getLayer(zebkit.ui.WinLayerMix.id);
+     *
+     *       // create standard UI window component
+     *       var win = new zebkit.ui.Window();
+     *       win.setBounds(10,10,200,200);
+     *
+     *       // show the created window as modal window
+     *       winLayer.addWin("modal", win);
+     *
      * Also shortcut method can be used
-
-            // create canvas
-            var canvas   = new zebkit.ui.zCanvas();
-
-            // create standard UI window component
-            var win = new zebkit.ui.Window();
-            win.setBounds(10,10,200,200);
-
-            // show the created window as modal window
-            zebkit.ui.showModalWindow(canvas, win);
-
+     *
+     *       // create canvas
+     *       var canvas   = new zebkit.ui.zCanvas();
+     *
+     *       // create standard UI window component
+     *       var win = new zebkit.ui.Window();
+     *       win.setBounds(10,10,200,200);
+     *
+     *       // show the created window as modal window
+     *       zebkit.ui.showModalWindow(canvas, win);
+     *
      * Window layer supports three types of windows:
-
-        - **"modal"** a modal window catches all input till it will be closed
-        - **"mdi"** a MDI window can get focus, but it doesn't block switching
-        focus to other UI elements
-        - **"info"** an INFO window cannot get focus. It is supposed to show
-        some information like tooltip.
-
+     *
+     *   - **"modal"** a modal window catches all input till it will be closed
+     *   - **"mdi"** a MDI window can get focus, but it doesn't block switching
+     *   focus to other UI elements
+     *   - **"info"** an INFO window cannot get focus. It is supposed to show
+     *   some information like tooltip.
+     *
      * @class zebkit.ui.WinLayer
      * @constructor
      * @extends zebkit.ui.HtmlCanvas
@@ -328,7 +328,7 @@ zebkit.package("ui", function(pkg, Class) {
             if (typeof lw.winType === 'undefined') {
                 lw.winType = "mdi";
             } else {
-                zebkit.util.$validateValue(lw.winType, "mdi", "modal", "info");
+                zebkit.util.validateValue(lw.winType, "mdi", "modal", "info");
             }
 
             if (lw.winType === "modal") {

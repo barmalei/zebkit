@@ -50,7 +50,7 @@ var Event = Class([
     // and firing event2 to registered handlers
     listeners.event2(...);
 
- * @for zebkit.util
+ * @for zebkit
  * @method ListenersClass
  * @param {String} [events]* events types the listeners container has to support
  * @return {zebkit.Listener} a listener container class
@@ -572,10 +572,14 @@ var EventProducer = Interface([
             });
         };
 
-        // fire(event, [ a1, a2, ...])
-        // fire(event, e)
-        // fire(event, path, e)
-        // fire(event, path, [a1, a2 ...])
+        /**
+         * Fire event with the given parameters.
+         * @param {String} event an event name
+         * @param {String} [path]  a path if the event has to be send to multiple destination in the tree
+         * @param {Object|Array}  [params] array of parameters or single parameter to be passed to an event
+         * handler or handlers.
+         * @method fire
+         */
         this.fire = function() {
             var pt   = null,  // path
                 args = null,

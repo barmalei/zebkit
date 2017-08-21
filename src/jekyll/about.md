@@ -557,7 +557,7 @@ eval(zebkit.import("ui", "layout"));
 var root = new zCanvas(300,300).root;
 root.setLayout(new StackLayout());
 
-zebkit.util.Zson()
+zebkit.Zson()
 .then("simpleapp.json")
 .then(function(b) {
     root.add(b.root);
@@ -570,11 +570,9 @@ zebkit.util.Zson()
 <br/>
 
 <script>
-zebkit.require("ui", "layout", "util", function(ui, lay, util) {
+zebkit.require("ui", "layout", function(ui) {
     var root = new ui.zCanvas("jsonSample", 300, 300).root;
-   // root.setLayout(new lay.StackLayout());
-
-    util.Zson.then("public/simpleapp.json", root).catch();    
+    zebkit.Zson.then("public/simpleapp.json", root).catch();    
 });
 </script>
 

@@ -50,6 +50,14 @@ function DoIt(body, ignore) {
 }
 
 DoIt.prototype = {
+    /**
+     * Indicates if the error has to be ignored
+     * @attribute $ignoreError
+     * @private
+     * @type {Boolean}
+     */
+    $ignoreError : false,
+
     // TODO: not stable API
     recover : function(body) {
         if (this.$error !== null) {
@@ -481,7 +489,6 @@ DoIt.prototype = {
             if (e === null || typeof e === 'undefined') {
                 console.log("Unknown error");
             } else {
-                console.log(":" + e);
                 console.log((e.stack ? e.stack : e));
             }
         }

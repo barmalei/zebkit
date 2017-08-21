@@ -118,10 +118,10 @@ Package.prototype.config = function(name, value, overwrite) {
 };
 
 /**
- * [$detectLocation description]
+ * Detect the package location and store the location into "$url"
+ * package field
  * @private
- * @method
- * @return {[type]} [description]
+ * @method $detectLocation
  */
 Package.prototype.$detectLocation = function() {
     if (typeof __dirname !== 'undefined') {

@@ -208,7 +208,7 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.setOrientation = function(o) {
                 if (this.orient !== o) {
-                    this.orient = zebkit.util.$validateValue(o, "top", "bottom");
+                    this.orient = zebkit.util.validateValue(o, "top", "bottom");
                     this.vrp();
                 }
                 return this;
@@ -223,7 +223,7 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.setAlignment = function(a) {
                 if (this.alignment !== a) {
-                    this.alignment = zebkit.util.$validateValue(a, "left", "right", "center");
+                    this.alignment = zebkit.util.validateValue(a, "left", "right", "center");
                     this.vrp();
                 }
                 return this;
@@ -446,7 +446,7 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.setOrientation = function(o) {
                 if (o !== this.orient) {
-                    this.orient = zebkit.util.$validateValue(o, "horizontal", "vertical");
+                    this.orient = zebkit.util.validateValue(o, "horizontal", "vertical");
                     this.vrp();
                 }
                 return this;

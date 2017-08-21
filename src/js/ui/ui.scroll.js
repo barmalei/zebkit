@@ -149,7 +149,7 @@ zebkit.package("ui", function(pkg, Class) {
     pkg.Scroll = Class(pkg.Panel, zebkit.util.Position.Metric, [
         function(t) {
             if (arguments.length > 0) {
-                this.orient = zebkit.util.$validateValue(t, "vertical", "horizontal");
+                this.orient = zebkit.util.validateValue(t, "vertical", "horizontal");
             }
 
             /**
@@ -167,18 +167,18 @@ zebkit.package("ui", function(pkg, Class) {
              */
 
             /**
-             * Scroll bar bundle component
-             * @attribute bundle
+             * Scroll bar thumb component
+             * @attribute thumb
              * @type {zebkit.ui.Panel}
              * @readOnly
              */
 
-            this.bundleLoc = 0;
+            this.thumbLoc = 0;
             this.startDragLoc = Number.MAX_VALUE;
             this.$super(this);
 
             var b = (this.orient === "vertical");
-            this.add("center", b ? new pkg.Scroll.VBundle()    : new pkg.Scroll.HBundle());
+            this.add("center", b ? new pkg.Scroll.VerticalThumb() : new pkg.Scroll.HorizontalThumb());
             this.add("top"   , b ? new pkg.Scroll.VDecButton() : new pkg.Scroll.HDecButton());
             this.add("bottom", b ? new pkg.Scroll.VIncButton() : new pkg.Scroll.HIncButton());
 
@@ -200,14 +200,14 @@ zebkit.package("ui", function(pkg, Class) {
             this.HIncButton = Class(this.ArrowButton, []);
             this.HDecButton = Class(this.ArrowButton, []);
 
-            this.VBundle = Class(pkg.Panel, []);
-            this.HBundle = Class(pkg.Panel, []);
+            this.VerticalThumb = Class(pkg.Panel, []);
+            this.HorizontalThumb = Class(pkg.Panel, []);
 
             this.MIN_BUNDLE_SIZE = 16;
         },
 
         function $prototype() {
-            this.incBt = this.decBt = this.bundle = this.position = null;
+            this.incBt = this.decBt = this.thumb = this.position = null;
 
             /**
              * Maximal possible value
@@ -236,7 +236,6 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.unitIncrement = 5;
 
-
             /**
              * Scroll orientation.
              * @attribute orient
@@ -247,15 +246,15 @@ zebkit.package("ui", function(pkg, Class) {
             this.orient = "vertical";
 
             /**
-             * Evaluate if the given point is in scroll bar bundle element
+             * Evaluate if the given point is in scroll bar thumb element
              * @param  {Integer}  x a x location
              * @param  {Integer}  y a y location
              * @return {Boolean}   true if the point is located inside the
-             * scroll bar bundle element
-             * @method isInBundle
+             * scroll bar thumb element
+             * @method isInThumb
              */
-            this.isInBundle = function(x,y){
-                var bn = this.bundle;
+            this.isInThumb = function(x,y){
+                var bn = this.thumb;
                 return (bn !== null &&
                         bn.isVisible === true &&
                         bn.x <= x && bn.y <= y &&
@@ -271,12 +270,12 @@ zebkit.package("ui", function(pkg, Class) {
 
             this.pixel2value = function(p) {
                 var db = this.decBt;
-                return (this.orient === "vertical") ? Math.floor((this.max * (p - db.y - db.height)) / (this.amount() - this.bundle.height))
-                                                    : Math.floor((this.max * (p - db.x - db.width )) / (this.amount() - this.bundle.width));
+                return (this.orient === "vertical") ? Math.floor((this.max * (p - db.y - db.height)) / (this.amount() - this.thumb.height))
+                                                    : Math.floor((this.max * (p - db.x - db.width )) / (this.amount() - this.thumb.width));
             };
 
             this.value2pixel = function(){
-                var db = this.decBt, bn = this.bundle, off = this.position.offset;
+                var db = this.decBt, bn = this.thumb, off = this.position.offset;
                 return (this.orient === "vertical") ? db.y + db.height +  Math.floor(((this.amount() - bn.height) * off) / this.max)
                                                     : db.x + db.width  +  Math.floor(((this.amount() - bn.width) * off) / this.max);
             };
@@ -289,16 +288,16 @@ zebkit.package("ui", function(pkg, Class) {
              * @method catchInput
              */
             this.catchInput = function (child){
-                return child === this.bundle || (this.bundle.kids.length > 0 &&
-                                                 zebkit.layout.isAncestorOf(this.bundle, child));
+                return child === this.thumb || (this.thumb.kids.length > 0 &&
+                                                 zebkit.layout.isAncestorOf(this.thumb, child));
             };
 
             this.posChanged = function(target, po, pl, pc) {
-                if (this.bundle !== null) {
+                if (this.thumb !== null) {
                     if (this.orient === "horizontal") {
-                        this.bundle.setLocation(this.value2pixel(), this.getTop());
+                        this.thumb.setLocation(this.value2pixel(), this.getTop());
                     } else {
-                        this.bundle.setLocation(this.getLeft(), this.value2pixel());
+                        this.thumb.setLocation(this.getLeft(), this.value2pixel());
                     }
                 }
             };
@@ -319,7 +318,7 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.pointerDragged = function(e){
                 if (Number.MAX_VALUE !== this.startDragLoc) {
-                    this.position.setOffset(this.pixel2value(this.bundleLoc -
+                    this.position.setOffset(this.pixel2value(this.thumbLoc -
                                                              this.startDragLoc +
                                                              ((this.orient === "horizontal") ? e.x : e.y)));
                 }
@@ -331,9 +330,9 @@ zebkit.package("ui", function(pkg, Class) {
              * @method pointerDragStarted
              */
             this.pointerDragStarted = function (e){
-                if (this.isDragable === true && this.isInBundle(e.x, e.y)) {
+                if (this.isDragable === true && this.isInThumb(e.x, e.y)) {
                     this.startDragLoc = this.orient === "horizontal" ? e.x : e.y;
-                    this.bundleLoc    = this.orient === "horizontal" ? this.bundle.x : this.bundle.y;
+                    this.thumbLoc    = this.orient === "horizontal" ? this.thumb.x : this.thumb.y;
                 }
             };
 
@@ -352,14 +351,14 @@ zebkit.package("ui", function(pkg, Class) {
              * @method pointerClicked
              */
             this.pointerClicked = function (e){
-                if (this.isInBundle(e.x, e.y) === false && e.isAction()){
+                if (this.isInThumb(e.x, e.y) === false && e.isAction()){
                     var d = this.pageIncrement;
                     if (this.orient === "vertical"){
-                        if (e.y < (this.bundle !== null ? this.bundle.y : Math.floor(this.height / 2))) {
+                        if (e.y < (this.thumb !== null ? this.thumb.y : Math.floor(this.height / 2))) {
                             d =  -d;
                         }
                     } else {
-                        if (e.x < (this.bundle !== null ? this.bundle.x : Math.floor(this.width / 2))) {
+                        if (e.x < (this.thumb !== null ? this.thumb.x : Math.floor(this.width / 2))) {
                             d =  -d;
                         }
                     }
@@ -370,7 +369,7 @@ zebkit.package("ui", function(pkg, Class) {
             this.calcPreferredSize = function (target){
                 var ps1 = pkg.$getPS(this.incBt),
                     ps2 = pkg.$getPS(this.decBt),
-                    ps3 = pkg.$getPS(this.bundle);
+                    ps3 = pkg.$getPS(this.thumb);
 
                 if (this.orient === "horizontal"){
                     ps1.width += (ps2.width + ps3.width);
@@ -405,16 +404,16 @@ zebkit.package("ui", function(pkg, Class) {
                                      b ? ps2.width : ew,
                                      b ? eh : ps2.height);
 
-                if (this.bundle !== null && this.bundle.isVisible === true){
+                if (this.thumb !== null && this.thumb.isVisible === true){
                     var am = this.amount();
                     if (am > minbs) {
                         var bsize = Math.max(Math.min(Math.floor((this.extra * am) / this.max), am - minbs), minbs);
-                        this.bundle.setBounds(b ? this.value2pixel() : left,
+                        this.thumb.setBounds(b ? this.value2pixel() : left,
                                               b ? top   : this.value2pixel(),
                                               b ? bsize : ew,
                                               b ? eh    : bsize);
                     } else {
-                        this.bundle.setSize(0, 0);
+                        this.thumb.setSize(0, 0);
                     }
                 }
             };
@@ -476,7 +475,7 @@ zebkit.package("ui", function(pkg, Class) {
             this.$super(index, ctr, lw);
 
             if ("center" === ctr) {
-                this.bundle = lw;
+                this.thumb = lw;
             } else if ("bottom" === ctr) {
                 this.incBt = lw;
                 this.incBt.on(this);
@@ -490,8 +489,8 @@ zebkit.package("ui", function(pkg, Class) {
 
         function kidRemoved(index,lw) {
             this.$super(index, lw);
-            if (lw === this.bundle) {
-                this.bundle = null;
+            if (lw === this.thumb) {
+                this.thumb = null;
             } else if (lw === this.incBt) {
                 this.incBt.off(this);
                 this.incBt = null;

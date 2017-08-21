@@ -147,6 +147,20 @@
             return this._request.getAllResponseHeaders();
         };
 
+        /**
+         * Build HTTP request that provides number of standard methods, fields and listeners:
+         *
+         *    - "open(method, url [,async])" - opens the given URL
+         *    - "send(data)"   - sends data
+         *    - "status"       - HTTP status code
+         *    - "statusText"   - HTTP status text
+         *    - "responseText" - response text
+         *    - "readyState"   - request ready state
+         *    - "onreadystatechange()" - ready state listener
+         *
+         * @return {Object} an HTTP request object
+         * @method getHttpRequest
+         */
         pkg.getHttpRequest = function() {
             if (typeof XMLHttpRequest !== "undefined") {
                 var r = new XMLHttpRequest();
@@ -157,8 +171,9 @@
                         // !!! FF can throw NS_ERROR_FAILURE exception instead of
                         // !!! returning 404 File Not Found HTTP error code
                         // !!! No request status, statusText are defined in this case
-                        try { return this.__send(data); }
-                        catch(e) {
+                        try {
+                            return this.__send(data);
+                        } catch(e) {
                             if (!e.message || e.message.toUpperCase().indexOf("NS_ERROR_FAILURE") < 0) {
                                 // exception has to be re-instantiate to be Error class instance
                                 throw new Error(e.toString());
@@ -216,23 +231,23 @@
          * @param  {String|HTMLImageElement} img an image URL or image object
          * @param  {Function} ready a call back method to be notified when the image has been completely
          * loaded or failed. The method gets three parameters
-
-            - an URL to the image
-            - boolean loading result. true means success
-            - an image that has been loaded
-
-        * @example
-            // load image
-            zebkit.environment.loadImage("test.png", function(image) {
-                 // handle loaded image
-                 ...
-            }, function (img, exception) {
-                // handle error
-                ...
-            });
+         *
+         *   - an URL to the image
+         *   - boolean loading result. true means success
+         *   - an image that has been loaded
+         *
+         * @example
+         *      // load image
+         *      zebkit.environment.loadImage("test.png", function(image) {
+         *           // handle loaded image
+         *           ...
+         *      }, function (img, exception) {
+         *          // handle error
+         *          ...
+         *      });
+         *
          * @return {HTMLImageElement}  an image
-         * @for  zebkit.web
-         * @method  loadImage
+         * @method loadImage
          */
         pkg.loadImage = function(ph, success, error) {
             var img = null;
@@ -282,14 +297,40 @@
             return img;
         };
 
+        /**
+         * Parse JSON string
+         * @param {String} json a JSON string
+         * @method parseJSON
+         * @return {Object} parsed JSON as an JS Object
+         */
         pkg.parseJSON = JSON.parse;
 
+        /**
+         * Convert the given JS object into an JSON string
+         * @param {Object} jsonObj an JSON JS object to be converted into JSON string
+         * @return {String} a JSON string
+         * @method stringifyJSON
+         *
+         */
         pkg.stringifyJSON = JSON.stringify;
 
+        /**
+         * Call the given callback function repeatedly with the given calling interval.
+         * @param {Function} cb a callback function to be called
+         * @param {Integer}  time an interval in milliseconds the given callback
+         * has to be called
+         * @return {Integer} an run interval id
+         * @method setInterval
+         */
         pkg.setInterval = function (cb, time) {
             return window.setInterval(cb, time);
         };
 
+        /**
+         * Clear the earlier started interval calling
+         * @param  {Integer} id an interval id
+         * @method clearInterval
+         */
         pkg.clearInterval = function (id) {
             return window.clearInterval(id);
         };
@@ -299,6 +340,7 @@
                               window.webkitRequestAnimationFrame ||
                               window.mozRequestAnimationFrame    ||
                               function(callback) { return setTimeout(callback, 35); };
+
 
             pkg.decodeURIComponent = window.decodeURIComponent;
             pkg.encodeURIComponent = window.encodeURIComponent;
@@ -312,7 +354,6 @@
          * Request to run a method as an animation task.
          * @param  {Function} f the task body method
          * @method  animate
-         * @for  zebkit.web
          */
         pkg.animate = function(f){
             return $taskMethod.call(window, f);

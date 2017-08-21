@@ -449,7 +449,7 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.setLabelsAlignment = function(a) {
                 if (this.labelsAlignment !== a) {
-                    zebkit.util.$validateValue(a, "normal", "invert");
+                    zebkit.util.validateValue(a, "normal", "invert");
                     this.labelsAlignment = a;
                     this.repaint();
                 }
@@ -556,7 +556,7 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.setOrientation = function(o) {
                 if (this.orient !== o) {
-                    this.orient = zebkit.util.$validateValue(o, "vertical", "horizontal");
+                    this.orient = zebkit.util.validateValue(o, "vertical", "horizontal");
                     this.vrp();
                 }
                 return this;
@@ -1306,7 +1306,7 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.setOrientation = function(o) {
                 if (this.orient !== o) {
-                    this.orient = zebkit.util.$validateValue(o, "vertical", "horizontal");
+                    this.orient = zebkit.util.validateValue(o, "vertical", "horizontal");
                     this.ruler.setOrientation(o);
                     this.vrp();
                 }

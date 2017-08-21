@@ -1,4 +1,5 @@
 {
+    "@zebkit.ui.Panel": [],
     "layout": { "@zebkit.layout.StackLayout" : []},
     "kids"  : [{
         "@zebkit.ui.Panel":[],
@@ -8,12 +9,12 @@
         "kids"   : {
             "top": {
                 "@zebkit.ui.BoldLabel": "Simple application",
-                "padding"            : 4
+                "padding"             : 4
             },
             "center": { "@zebkit.ui.TextArea": "" },
             "bottom": {
                 "@zebkit.ui.Button": "Clear",
-                "canHaveFocus" : false
+                "canHaveFocus"     : false
             }
        }
     }],

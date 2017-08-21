@@ -163,6 +163,12 @@ var Zson = Class([
     },
 
     function $prototype() {
+        /**
+         * URL the JSON has been loaded from
+         * @attribute  url
+         * @type {zebkit.URI}
+         * @default null
+         */
         this.url = null;
 
         /**
@@ -199,6 +205,13 @@ var Zson = Class([
          * @type {Boolean}
          */
         this.usePropertySetters = true;
+
+        /**
+         * Internal variables set
+         * @attribute $variables
+         * @type {Object}
+         */
+        this.$variables = null;
 
         /**
          * Get a property value by the given key. The property name can point to embedded fields:
@@ -449,11 +462,6 @@ var Zson = Class([
             // let's do optimization to avoid unnecessary overhead
             // equality means nor arguments neither properties has got async call
             if (this.$runner.$busy === busy && this.$runner.$tasks.length === tasks) {
-
-                if (clz == null) {
-                    console.log("!!!!!!!!!!!!!!! " + k);
-                }
-
                 var inst = newInstance(clz, args);
                 this.merge(inst, props, true);
                 return inst;
@@ -524,10 +532,32 @@ var Zson = Class([
                 }
 
                 if (type === "json") {
-                    var bag = new this.clazz();
-                    bag.usePropertySetters = this.usePropertySetters;
+                    var bag = new this.clazz(),
+                        bg  = null,
+                        qs  = new URI(path).qs;
 
-                    var bg = bag.then(path).catch();
+                    bag.usePropertySetters = this.usePropertySetters;
+                    if (qs !== null) {
+                        qs = URI.parseQS(qs);
+                        bag.$variables = {};
+                        for(var k in qs) {
+                            var qsv = qs[k];
+                            if (qsv[0] === "'") {
+                                qsv = qsv.substring(1, qsv.length - 1);
+                            } else if (qsv === "true") {
+                                qsv = true;
+                            } else if (qsv === "false") {
+                                qsv = false;
+                            } else if (qsv === "null") {
+                                qsv = null;
+                            } else {
+                                qsv = parseInt(qsv, 10);
+                            }
+                            bag.$variables[k] = qsv;
+                        }
+                    }
+
+                    bg = bag.then(path).catch();
                     this.$runner.then(bg.then(function(res) {
                         return res.root;
                     }));
@@ -551,12 +581,12 @@ var Zson = Class([
                 // ? means don't throw exception if reference cannot be resolved
                 idx = 2;
                 if (d[2] === '?') {
-                    idx ++;
+                    idx++;
                 }
 
                 var name    = d.substring(idx, d.length - 1).trim(),
                     names   = name.split('.'),
-                    targets = [ this.content, this.root, $global];
+                    targets = [ this.$variables, this.content, this.root, $global];
 
                 for(var i = 0; i < targets.length; i++) {
                     var target = targets[i];

@@ -124,6 +124,11 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                               <a href="../classes/zebkit.data.TextEvent.html">zebkit.data.TextEvent</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
                                                <a href="../classes/zebkit.data.TextModel.html">zebkit.data.TextModel</a>
                                             </td>
                                         </tr>
@@ -159,7 +164,17 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                               <a href="../classes/zebkit.draw.CheckboxView.html">zebkit.draw.CheckboxView</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
                                                <a href="../classes/zebkit.draw.CompositeView.html">zebkit.draw.CompositeView</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.DecoratedTextRender.html">zebkit.draw.DecoratedTextRender</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -219,6 +234,11 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                               <a href="../classes/zebkit.draw.rgb.html">zebkit.draw.rgb</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
                                                <a href="../classes/zebkit.draw.RoundBorder.html">zebkit.draw.RoundBorder</a>
                                             </td>
                                         </tr>
@@ -240,6 +260,11 @@
                                         <tr>
                                             <td>
                                                <a href="../classes/zebkit.draw.TextRender.html">zebkit.draw.TextRender</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.ThumbView.html">zebkit.draw.ThumbView</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -270,6 +295,11 @@
                                         <tr>
                                             <td>
                                                <a href="../classes/zebkit.Dummy.html">zebkit.Dummy</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.Event.html">zebkit.Event</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -359,7 +389,17 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                               <a href="../classes/zebkit.Listeners.html">zebkit.Listeners</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
                                                <a href="../classes/zebkit.Package.html">zebkit.Package</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.PathSearch.html">zebkit.PathSearch</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -954,32 +994,12 @@
                                         </tr>
                                         <tr>
                                             <td>
-                                               <a href="../classes/zebkit.util.Event.html">zebkit.util.Event</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                               <a href="../classes/zebkit.util.Listeners.html">zebkit.util.Listeners</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                               <a href="../classes/zebkit.util.PathSearch.html">zebkit.util.PathSearch</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
                                                <a href="../classes/zebkit.util.Position.html">zebkit.util.Position</a>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>
                                                <a href="../classes/zebkit.util.Position.Metric.html">zebkit.util.Position.Metric</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                               <a href="../classes/zebkit.util.rgb.html">zebkit.util.rgb</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -995,11 +1015,6 @@
                                         <tr>
                                             <td>
                                                <a href="../classes/zebkit.util.TasksSet.Task.html">zebkit.util.TasksSet.Task</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                               <a href="../classes/zebkit.util.Zson.html">zebkit.util.Zson</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -1030,6 +1045,11 @@
                                         <tr>
                                             <td>
                                                <a href="../classes/zebkit.web.PointerEventUnifier.html">zebkit.web.PointerEventUnifier</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.Zson.html">zebkit.Zson</a>
                                             </td>
                                         </tr>
                                 </table>
@@ -1251,27 +1271,27 @@ b.a(10) // return 200</p>
 
     <p>Extend existent class instance with the given methods and interfaces
 For example:</p>
-<pre class="code prettyprint"><code>           var A = zebkit.Class([ // declare class A that defines one "a" method
-               function a() {
-                   console.log("A:a()");
-               }
-           ]);
+<pre class="code prettyprint"><code>   var A = zebkit.Class([ // declare class A that defines one "a" method
+       function a() {
+           console.log("A:a()");
+       }
+   ]);
 
-           var a = new A();
-           a.a();  // show "A:a()" message
+   var a = new A();
+   a.a();  // show "A:a()" message
 
-           A.a.extend([
-               function b() {
-                   console.log("EA:b()");
-               },
+   A.a.extend([
+       function b() {
+           console.log("EA:b()");
+       },
 
-               function a() {   // redefine "a" method
-                   console.log("EA:a()");
-               }
-           ]);
+       function a() {   // redefine "a" method
+           console.log("EA:a()");
+       }
+   ]);
 
-           a.b(); // show "EA:b()" message
-           a.a(); // show "EA:a()" message</code></pre>
+   a.b(); // show "EA:b()" message
+   a.a(); // show "EA:a()" message</code></pre>
 
 
         <br/>

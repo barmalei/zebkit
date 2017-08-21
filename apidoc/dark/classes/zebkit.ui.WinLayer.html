@@ -124,6 +124,11 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                               <a href="../classes/zebkit.data.TextEvent.html">zebkit.data.TextEvent</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
                                                <a href="../classes/zebkit.data.TextModel.html">zebkit.data.TextModel</a>
                                             </td>
                                         </tr>
@@ -159,7 +164,17 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                               <a href="../classes/zebkit.draw.CheckboxView.html">zebkit.draw.CheckboxView</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
                                                <a href="../classes/zebkit.draw.CompositeView.html">zebkit.draw.CompositeView</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.DecoratedTextRender.html">zebkit.draw.DecoratedTextRender</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -219,6 +234,11 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                               <a href="../classes/zebkit.draw.rgb.html">zebkit.draw.rgb</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
                                                <a href="../classes/zebkit.draw.RoundBorder.html">zebkit.draw.RoundBorder</a>
                                             </td>
                                         </tr>
@@ -240,6 +260,11 @@
                                         <tr>
                                             <td>
                                                <a href="../classes/zebkit.draw.TextRender.html">zebkit.draw.TextRender</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.ThumbView.html">zebkit.draw.ThumbView</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -270,6 +295,11 @@
                                         <tr>
                                             <td>
                                                <a href="../classes/zebkit.Dummy.html">zebkit.Dummy</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.Event.html">zebkit.Event</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -359,7 +389,17 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                               <a href="../classes/zebkit.Listeners.html">zebkit.Listeners</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
                                                <a href="../classes/zebkit.Package.html">zebkit.Package</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.PathSearch.html">zebkit.PathSearch</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -954,32 +994,12 @@
                                         </tr>
                                         <tr>
                                             <td>
-                                               <a href="../classes/zebkit.util.Event.html">zebkit.util.Event</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                               <a href="../classes/zebkit.util.Listeners.html">zebkit.util.Listeners</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                               <a href="../classes/zebkit.util.PathSearch.html">zebkit.util.PathSearch</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
                                                <a href="../classes/zebkit.util.Position.html">zebkit.util.Position</a>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>
                                                <a href="../classes/zebkit.util.Position.Metric.html">zebkit.util.Position.Metric</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                               <a href="../classes/zebkit.util.rgb.html">zebkit.util.rgb</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -995,11 +1015,6 @@
                                         <tr>
                                             <td>
                                                <a href="../classes/zebkit.util.TasksSet.Task.html">zebkit.util.TasksSet.Task</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                               <a href="../classes/zebkit.util.Zson.html">zebkit.util.Zson</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -1030,6 +1045,11 @@
                                         <tr>
                                             <td>
                                                <a href="../classes/zebkit.web.PointerEventUnifier.html">zebkit.web.PointerEventUnifier</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.Zson.html">zebkit.Zson</a>
                                             </td>
                                         </tr>
                                 </table>
@@ -1080,36 +1100,38 @@ modal and none modal internal window. There are special ready to use
 zebkit allows developers to show any UI component as modal or none modal
 window. Add an UI component to window layer to show it as modal o none
 modal window:</p>
-<pre class="code prettyprint"><code>       // create canvas
-       var canvas   = new zebkit.ui.zCanvas();
+<pre class="code prettyprint"><code>  // create canvas
+  var canvas   = new zebkit.ui.zCanvas();
 
-       // get windows layer
-       var winLayer = canvas.getLayer(zebkit.ui.WinLayerMix.id);
+  // get windows layer
+  var winLayer = canvas.getLayer(zebkit.ui.WinLayerMix.id);
 
-       // create standard UI window component
-       var win = new zebkit.ui.Window();
-       win.setBounds(10,10,200,200);
+  // create standard UI window component
+  var win = new zebkit.ui.Window();
+  win.setBounds(10,10,200,200);
 
-       // show the created window as modal window
-       winLayer.addWin("modal", win);
+  // show the created window as modal window
+  winLayer.addWin("modal", win);
 </code></pre>
 <p>Also shortcut method can be used</p>
-<pre class="code prettyprint"><code>       // create canvas
-       var canvas   = new zebkit.ui.zCanvas();
+<pre class="code prettyprint"><code>  // create canvas
+  var canvas   = new zebkit.ui.zCanvas();
 
-       // create standard UI window component
-       var win = new zebkit.ui.Window();
-       win.setBounds(10,10,200,200);
+  // create standard UI window component
+  var win = new zebkit.ui.Window();
+  win.setBounds(10,10,200,200);
 
-       // show the created window as modal window
-       zebkit.ui.showModalWindow(canvas, win);
+  // show the created window as modal window
+  zebkit.ui.showModalWindow(canvas, win);
 </code></pre>
 <p>Window layer supports three types of windows:</p>
-<pre class="code prettyprint"><code>   - **"modal"** a modal window catches all input till it will be closed
-   - **"mdi"** a MDI window can get focus, but it doesn't block switching
-   focus to other UI elements
-   - **"info"** an INFO window cannot get focus. It is supposed to show
-   some information like tooltip.</code></pre>
+<ul>
+<li><strong>"modal"</strong> a modal window catches all input till it will be closed</li>
+<li><strong>"mdi"</strong> a MDI window can get focus, but it doesn't block switching
+focus to other UI elements</li>
+<li><strong>"info"</strong> an INFO window cannot get focus. It is supposed to show
+some information like tooltip.</li>
+</ul>
 
 </div>
 

@@ -402,18 +402,31 @@
 
     <h2>UI component self configuration</h2>
 
-<p>Zebkit UI components apply default properties values during its instantiation. The properties values are read from static context of appropriate UI component class or from a parent class. For instance, if we want to change color of all subsequent &quot;zebkit.ui.Label&quot; component instances we can change it on class level:</p>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// specify default label color value in label class static context;  </span>
+<p>Zebkit UI components apply default properties values during its instantiation. The default properties values are read from static context of appropriate UI component class or from a parent class (if it has been configured). For instance, to change color of all subsequent &quot;zebkit.ui.Label&quot; component instances set appropriate property on label component class level:</p>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// specify default label color value in label class static context  </span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">Label</span><span class="p">.</span><span class="nx">color</span> <span class="o">=</span> <span class="s2">"orange"</span><span class="p">;</span>
 <span class="p">...</span>
-<span class="c1">// the label instance will have color set to "orange"</span>
-<span class="kd">var</span> <span class="nx">lab</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">Label</span><span class="p">(</span><span class="s2">"Label"</span><span class="p">);</span>
+<span class="c1">// all label instances will have color set to "orange"</span>
+<span class="kd">var</span> <span class="nx">lab1</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">Label</span><span class="p">(</span><span class="s2">"Label"</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">lab2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">Label</span><span class="p">(</span><span class="s2">"Label"</span><span class="p">);</span>
+<span class="p">...</span>
 </code></pre></div>
-<p>inheritProperties</p>
-
+<p>By default properties values defined on parent class level are not applied to an instance of a class that inherits the parent class. To change the behavior do the following:</p>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// zebkit.ui.TextField class inherits zebkit.ui.Label</span>
+<span class="c1">// class. To take in account label default properties </span>
+<span class="c1">// let's set "inheritProperties" to true </span>
+<span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">TextField</span><span class="p">.</span><span class="nx">inheritProperties</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+<span class="p">...</span>
+<span class="c1">// specify default label color value in label class static context </span>
+<span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">Label</span><span class="p">.</span><span class="nx">color</span> <span class="o">=</span> <span class="s2">"orange"</span><span class="p">;</span>
+<span class="p">...</span>
+<span class="c1">// text field component instances will have color set to "orange"</span>
+<span class="kd">var</span> <span class="nx">tf1</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">TextField</span><span class="p">(</span><span class="s2">"Text field 1"</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">tf2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">TextField</span><span class="p">(</span><span class="s2">"Text field 2"</span><span class="p">);</span>
+</code></pre></div>
 <h2>Configuration resources</h2>
 
-<p>Configuration </p>
+<p>By default UI configuration JSON files are stored on the same level with zebkit JS file in &quot;rs&quot; folder. The structure is shown below:</p>
 <div class="highlight"><pre><code class="language-sh" data-lang="sh"><span class="o">[</span>rs]                      <span class="c"># root resource folder</span>
  +-- <span class="o">[</span>light]              <span class="c"># light theme resources folder</span>
  |     +--  ui.json       <span class="c"># zebkit.ui package configuration  </span>
@@ -428,39 +441,60 @@
  |
  +-- ui.common.json
 </code></pre></div>
-<p>Configuration for a dedicated package are placed in dedicated JSON file. The JSON is loaded during zebkit initialization phase to fulfill the given package with desire values.  </p>
-<div class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">{</span><span class="w">
-</span><span class="nt">"TextField"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-    </span><span class="nt">"border"</span><span class="w">     </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"@zebkit.draw.Border"</span><span class="p">:[</span><span class="w"> </span><span class="s2">"red"</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">]},</span><span class="w">
-    </span><span class="nt">"color"</span><span class="w">      </span><span class="p">:</span><span class="w"> </span><span class="s2">"white"</span><span class="p">,</span><span class="w">
-    </span><span class="nt">"background"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"@zebkit.draw.Gradient"</span><span class="p">:[</span><span class="w"> </span><span class="s2">"red"</span><span class="p">,</span><span class="w"> </span><span class="s2">"orange"</span><span class="w"> </span><span class="p">]}</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre></div>
-<p>You can build an own JSON to configure:</p>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">configWith</span><span class="p">(</span><span class="s2">"/my.json"</span><span class="p">);</span>
+<p>Loading JSON configurations setup static fields for appropriate class that later will be used as default properties values for the class instances. Configuration occurs on the package level. In other words zebkit keeps JSON configuration per package (if necessary). It is possible to load a custom configuration manually with &quot;configWith([path])&quot; method. For instance, imagine we have JSON below to customize text field component properties:       </p>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="p">{</span>
+    <span class="p">...</span>
+    <span class="s2">"TextField"</span> <span class="err">:</span> <span class="p">{</span>
+        <span class="s2">"border"</span>    <span class="err">:</span><span class="p">{</span><span class="s2">"@zebkit.draw.Border"</span><span class="err">:</span><span class="p">[</span><span class="s2">"red"</span><span class="p">,</span> <span class="mi">2</span><span class="p">]},</span>
+        <span class="s2">"color"</span>     <span class="err">:</span><span class="s2">"white"</span><span class="p">,</span>
+        <span class="s2">"background"</span><span class="err">:</span><span class="p">{</span><span class="s2">"@zebkit.draw.Gradient"</span><span class="err">:</span><span class="p">[</span><span class="s2">"red"</span><span class="p">,</span><span class="s2">"orange"</span><span class="p">]}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div>
-<p>inheritProperties</p>
+<p>Then we can configure &quot;zebkit.ui&quot; package with the JSON as follow:</p>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">configWith</span><span class="p">(</span><span class="s2">"/tf.json"</span><span class="p">);</span>
+</code></pre></div>
+<p>Pay attention how zebkit looks for required JSON:
+   - Passed path starts from &quot;/&quot; or is an URL (e.g. &quot;http://text.com/tf.json&quot;) then the path is considered as absolute path and is used as is to read the required resource
+   - Passed path </p>
 
 <h2>Theme configuration</h2>
 
-<p>By default zebkit expects theme resources are located at the the same level where zebkit JS code is located. You can switch to required UI theme with setting special configuration variable:  </p>
+<p>By default zebkit expects theme resources are located in &quot;rs&quot; folder at the the same level where zebkit JS code is stored. To switch UI theme set theme name (has to match a sub-folder hosted in &quot;rs&quot; folder):</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// say to use light theme</span>
-<span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">config</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">,</span> <span class="s2">"light"</span><span class="p">);</span> <span class="c1">// name of theme folder</span>
+ <span class="c1">// name of theme folder</span>
 </code></pre></div>
-<p>If a case zebra theme resources are not located together with JS code you can specify path to the resources with setting appropriate configuration variable: </p>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// define path to light theme    </span>
-<span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">config</span><span class="p">(</span><span class="s2">"basedir"</span><span class="p">,</span> <span class="s2">"http://test.com./zebkit/rs/light"</span><span class="p">);</span>
+<p>In a case if zebkit theme is placed in another place specify base directory where the theme resources are stored: </p>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// define path to custom theme    </span>
+<span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">config</span><span class="p">(</span><span class="s2">"basedir"</span><span class="p">,</span><span class="s2">"http://test.com./myfolder/mytheme"</span><span class="p">);</span>
 </code></pre></div>
-<p>Or you can use placeholder to add theme name to the path:</p>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// define path to light theme    </span>
-<span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">config</span><span class="p">(</span><span class="s2">"basedir"</span><span class="p">,</span> <span class="s2">"http://test.com./zebkit/rs/%{theme}"</span><span class="p">);</span>
+<p>If you has number of themes you can use place holder to simplify switching between these themes:
+<code>js
+// define path to light theme    
+zebkit.ui.config(&quot;basedir&quot;,&quot;http://test.com./myfolder/%{theme}&quot;);
+...
+// specify theme to be used
+zebkit.ui.config(&quot;theme&quot;, &quot;mytheme1&quot;);
+</code></p>
+
+<p><strong>Note:</strong> Note that configuration variables (theme, base directory, etc) have to be adjusted outside &quot;require&quot; or &quot;package&quot; zebkit  sections. In general it should look as follow:
+```js
+<script>
+    // adjust theme variable
+    zebkit.ui.config(&quot;theme&quot;,&quot;light&quot;);</p>
+<div class="highlight"><pre><code class="language-" data-lang="">zebkit.require("ui", function(ui) {
+    // develop UI 
+    ...
+}); 
 </code></pre></div>
+<p></script>
+```</p>
+
 <h2>Zson as form descriptive language</h2>
 
-<p>JSON format is handy and clear way to declare various configurations, transfer data between clients and servers, etc. Zebkit extends JSON format interpretation with number of powerful features what allows developer to use it for UI form definition. </p>
+<p>JSON format is handy and clear way to declare various configurations, transfer data between clients and servers, etc. Zebkit extends JSON format interpretation with number of powerful features what allows developers to use it for UI form definition. </p>
 
-<p>To load the JSON definition the following code can be used:</p>
+<p>To load the JSON UI definition the following code can be used:</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="mi">300</span><span class="p">).</span><span class="nx">root</span><span class="p">.</span><span class="nx">load</span><span class="p">(</span><span class="s2">"simple.json"</span><span class="p">);</span>
 <span class="p">});</span>
@@ -507,7 +541,7 @@
     </tr>
     <tr>
         <td align="center" style="padding:0px; margin:0px;">
-            <span style="color:red;font-size:14px;">Children UI events handling </span>
+            <span style="color:red;font-size:14px;">JSON UI </span>
         </td>
     </tr>
 </table>
@@ -571,7 +605,88 @@ Set of actions over the target component
 
 <h2>Composing Zson</h2>
 
-<p>Zson can be composed from multiple JSONs. Zson guarantees everything is loaded in a order it is mentioned in Zson.   </p>
+<p>Zson can be composed from multiple JSONs. Zson guarantees everything is loaded in a order it is mentioned in Zson, so you can safely add references to variables located in external JSONs if the reference appears later.</p>
+
+<p>To combine multiple JSONs:</p>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="p">{</span>
+    <span class="s2">"%{../external1.json}"</span><span class="err">:</span> <span class="s1">''</span><span class="p">,</span>
+    <span class="s2">"%{../external2.json}"</span><span class="err">:</span> <span class="s1">''</span>
+    <span class="s2">"key"</span> <span class="err">:</span> <span class="p">{</span>
+        <span class="p">...</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Or you can fulfill a value with the given JSON as follow:</p>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="p">{</span>
+    <span class="s2">"key"</span> <span class="err">:</span> <span class="s2">"%{../external.json}"</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>For example let use slightly modified JSON from previous UI example to populate the same UI four times:</p>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="p">{</span>
+    <span class="s2">"@zebkit.ui.Panel"</span><span class="err">:</span> <span class="p">[],</span>
+    <span class="s2">"layout"</span><span class="err">:</span> <span class="p">{</span> <span class="s2">"@zebkit.layout.StackLayout"</span> <span class="err">:</span> <span class="p">[]},</span>
+    <span class="s2">"kids"</span>  <span class="err">:</span> <span class="p">[{</span>
+        <span class="s2">"@zebkit.ui.Panel"</span><span class="p">:[],</span>
+        <span class="s2">"layout"</span> <span class="p">:</span> <span class="p">{</span> <span class="s2">"@zebkit.layout.BorderLayout"</span> <span class="p">:</span><span class="mi">4</span> <span class="p">},</span>
+        <span class="s2">"padding"</span><span class="err">:</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="s2">"border"</span> <span class="err">:</span> <span class="s2">"plain"</span><span class="p">,</span>
+        <span class="s2">"kids"</span>   <span class="err">:</span> <span class="p">{</span>
+            <span class="s2">"top"</span><span class="err">:</span> <span class="p">{</span>
+                <span class="s2">"@zebkit.ui.BoldLabel"</span><span class="err">:</span> <span class="s2">"Simple application"</span><span class="p">,</span>
+                <span class="s2">"padding"</span>             <span class="err">:</span> <span class="mi">4</span>
+            <span class="p">},</span>
+            <span class="s2">"center"</span><span class="err">:</span> <span class="p">{</span> <span class="s2">"@zebkit.ui.TextArea"</span><span class="err">:</span> <span class="s2">""</span> <span class="p">},</span>
+            <span class="s2">"bottom"</span><span class="err">:</span> <span class="p">{</span>
+                <span class="s2">"@zebkit.ui.Button"</span><span class="err">:</span> <span class="s2">"Clear"</span><span class="p">,</span>
+                <span class="s2">"canHaveFocus"</span>     <span class="err">:</span> <span class="kc">false</span>
+            <span class="p">}</span>
+       <span class="p">}</span>
+    <span class="p">}],</span>
+    <span class="s2">"#actions"</span> <span class="err">:</span> <span class="p">[{</span>
+        <span class="s2">"source"</span>  <span class="p">:</span> <span class="s2">"//zebkit.ui.Button"</span><span class="p">,</span>
+        <span class="s2">"target"</span>  <span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"path"</span>   <span class="p">:</span> <span class="s2">"//zebkit.ui.TextArea"</span><span class="p">,</span>
+            <span class="s2">"update"</span> <span class="p">:</span> <span class="p">{</span> <span class="s2">"value"</span><span class="p">:</span> <span class="s2">""</span> <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The JSON to load external JSON four times shown below:  </p>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="p">{</span>
+    <span class="s2">"layout"</span> <span class="err">:</span> <span class="p">{</span> <span class="s2">"@zebkit.layout.GridLayout"</span><span class="err">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">]</span> <span class="p">},</span>
+    <span class="s2">"kids"</span>   <span class="err">:</span> <span class="p">[</span>
+        <span class="s2">"%{./simple.json}"</span><span class="p">,</span>
+        <span class="s2">"%{./simple.json}"</span><span class="p">,</span>
+        <span class="s2">"%{./simple.json}"</span><span class="p">,</span>
+        <span class="s2">"%{./simple.json}"</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The result is the application below:</p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="zsonForm2" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Combining JSONs </span>
+        </td>
+    </tr>
+</table>
+                    
+
+<script type="text/javascript">
+    zebkit.require("ui", function(ui) {
+       var r = new ui.zCanvas("zsonForm2", 500, 500).root;
+       r.load("public/simple2.json").catch();
+    });
+</script>
 
 </div>
 

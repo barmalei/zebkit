@@ -14,11 +14,6 @@
             "bottom": {
                 "@zebkit.ui.Button": "Clear",
                 "canHaveFocus" : false
-            },
-            "left" : {
-                "@zebkit.ui.Panel" : {
-                    "border": "plain"
-                }
             }
        }
     }],

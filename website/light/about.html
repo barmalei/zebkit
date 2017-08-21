@@ -1018,7 +1018,7 @@ zebkit.require(function() {
 <span class="kd">var</span> <span class="nx">root</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zCanvas</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span><span class="mi">300</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
 <span class="nx">root</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">StackLayout</span><span class="p">());</span>
 
-<span class="nx">zebkit</span><span class="p">.</span><span class="nx">util</span><span class="p">.</span><span class="nx">Zson</span><span class="p">()</span>
+<span class="nx">zebkit</span><span class="p">.</span><span class="nx">Zson</span><span class="p">()</span>
 <span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="s2">"simpleapp.json"</span><span class="p">)</span>
 <span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">root</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">b</span><span class="p">.</span><span class="nx">root</span><span class="p">);</span>
@@ -1032,11 +1032,9 @@ zebkit.require(function() {
 <p><br /></p>
 
 <script>
-zebkit.require("ui", "layout", "util", function(ui, lay, util) {
+zebkit.require("ui", "layout", function(ui) {
     var root = new ui.zCanvas("jsonSample", 300, 300).root;
-   // root.setLayout(new lay.StackLayout());
-
-    util.Zson.then("public/simpleapp.json", root).catch();    
+    zebkit.Zson.then("public/simpleapp.json", root).catch();    
 });
 </script>
 

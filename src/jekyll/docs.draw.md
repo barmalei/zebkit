@@ -39,6 +39,7 @@ zebkit.require("draw","ui", function(draw, ui) {
           }
       }
     ]);
+
     var canvas = new ui.zCanvas("drawView1", 301,251);
     canvas.root.setBackground(new ColorBoardView());
 });
@@ -428,9 +429,8 @@ zebkit.require("draw","ui","layout",function(draw, ui, lay) {
 
     c.root.add(new ui.ViewPan()
           .setView(new draw.DecoratedTextRender("Decorated\ntext")
-          .setDecorations({
-              underline : "green"
-          }).setColor("green").setFont("30px")));
+          .setDecorations("underline")
+          .setColor("green").setFont("30px")));
 });
 </script>
 
@@ -440,11 +440,12 @@ Wrapped text render:
 
 <script type="text/javascript">
 zebkit.require("draw","ui","layout",function(draw, ui, lay) {
-    var c = new ui.zCanvas("textView2", 500, 270);
+    var c  = new ui.zCanvas("textView2", 500, 270),
+        tf = new ui.Label(new draw.WrappedTextRender(ui.wrpTxt));
+    
+    tf.setFont("20px");
     c.root.setLayout(new lay.BorderLayout()).setBorder("plain");
-    c.root.add(new ui.ViewPan()
-          .setView(new draw.WrappedTextRender(ui.wrpTxt)
-          .setFont("20px")));
+    c.root.add(tf);          
 });
 </script>
 

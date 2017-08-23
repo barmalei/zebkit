@@ -232,7 +232,7 @@ DoIt.prototype = {
 
     /**
      * Force to fire error.
-     * @param  {Error} e an error to be fired
+     * @param  {Error} [e] an error to be fired
      * @method error
      * @chainable
      */
@@ -252,10 +252,8 @@ DoIt.prototype = {
                 }
 
                 this.$schedule();
-            } else {
-                if (arguments.length < 2 || pr === true) {
-                    this.dumpError(e);
-                }
+            } else if (arguments.length < 2 || pr === true) {
+                this.dumpError(e);
             }
         }
 

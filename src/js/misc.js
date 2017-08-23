@@ -13,7 +13,6 @@ var $exports     = {},
     isMacOS      = $isInBrowser && navigator.platform.toUpperCase().indexOf('MAC') !== -1,
     $FN          = null;
 
-
 /**
  * Reference to global space.
  * @attribute $global
@@ -126,7 +125,7 @@ if (typeof Map === 'undefined' && (typeof $global !== 'undefined' || typeof $glo
     $global.Map = $Map();
 }
 
-function GET(url, data) {
+function GET(url) {
     var req = $zenv.getHttpRequest();
     req.open("GET", url, true);
     return new DoIt(function() {
@@ -172,8 +171,6 @@ function dumpError(e) {
                   date.getFullYear() + " " +
                   date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
         }
-
-
         if (e === null || typeof e === 'undefined') {
             console.log("Unknown error");
         } else {

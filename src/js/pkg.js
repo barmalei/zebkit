@@ -375,13 +375,11 @@ Package.prototype.resources = function() {
                     });
                 } else if (type === "txt") {
                     GET(p).then(function(req) {
-                              jn(req.responseText);
-                          }).error(function(e) {
-                              console.log(e);
-                              jn(null);
-                          });
+                        jn(req.responseText);
+                    }).catch(function(e) {
+                        jn(null);
+                    });
                 } else {
-                    console.log("Invalid path '" + path + "'");
                     jn(null);
                 }
 

@@ -436,7 +436,7 @@ zebkit.package("ui", function(pkg, Class) {
             this.pointerPressed = function(e) {
                 if (this.hideTooltipByPress === true &&
                     e.pointerType === "mouse" &&
-                    this.$target !== null &&
+                    this.$target !== null && this.$target.hideTooltipByPress !== false &&
                     (this.$tooltip === null || this.$tooltip.winType === "info"))
                 {
                     this.stopShowingTooltip();
@@ -449,8 +449,8 @@ zebkit.package("ui", function(pkg, Class) {
              * @method pointerReleased
              */
             this.pointerReleased = function(e) {
-                if ((this.hideTooltipByPress === false || e.pointerType !== "mouse") &&
-                    this.$target !== null &&
+                if ((this.hideTooltipByPress === false || e.pointerType !== "mouse")     &&
+                    (this.$target !== null && this.$target.hideTooltipByPress !== false) &&
                     (this.$tooltip === null || this.$tooltip.winType === "info"))
                 {
                     this.stopShowingTooltip();

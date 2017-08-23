@@ -677,12 +677,83 @@ zebkit.package("draw", function(pkg, Class) {
         }
     ]);
 
+
+    var searchRE = /\s+/;
+
+    function breakLine(font, maxWidth, index, line, result) {
+        if (line === "") {
+            results.push(line);
+        } else {
+            var len = font.stringWidth(line);
+            if (len <= maxWidth) {
+                results.push(line);
+            } else {
+                var re = /\s+/g,
+                    m  = null,
+                    al = 0,
+                    t  = null,
+                    pos = 0,
+                    i  = 0;
+
+                while ((m = re.match(line)) !== null) {
+                    if (m.index > pos) {
+                        tokenStart = pos;
+                        tokenEnd   = m.index;
+                    } else {
+                        tokenStart = m.index;
+                        tokenEnd   = m.index + m[0].length;
+                    }
+
+
+                    al += font.stringWidth();
+                    i++;
+                }
+            }
+
+
+
+
+            var breakIndex = startIndex < line.length ? startIndex
+                                                      : line.length - 1,
+                direction  = 0;
+
+            for(; breakIndex >= 0 && breakIndex < line.length ;) {
+                var substrLen = this.font.charsWidth(line, 0, breakIndex + 1);
+                if (substrLen < w) {
+                    if (direction < 0) {
+                        break;
+                    } else {
+                        direction = 1;
+                    }
+                    breakIndex ++;
+                } else if (substrLen > w) {
+                    breakIndex--;
+                    if (direction > 0) {
+                        break;
+                    } else {
+                        direction = -1;
+                    }
+                } else {
+                    break;
+                }
+            }
+
+            if (breakIndex >= 0) {
+                lines.push(line.substring(0, breakIndex + 1));
+                if (breakIndex < line.length - 1) {
+                    this.breakLine(w, startIndex, line.substring(breakIndex + 1), lines);
+                }
+            }
+        }
+    }
+
+
     pkg.WrappedTextRender = new Class(pkg.TextRender, [
         function $prototype() {
             this.brokenLines = null;
-            this.lastWidth = -1;
+            this.lastWidth   = -1;
 
-            this.breakLine = function (w, startIndex, line, lines) {
+            this.breakLine = function(w, startIndex, line, lines) {
                 if (line === "") {
                     lines.push(line);
                 } else {
@@ -798,51 +869,24 @@ zebkit.package("draw", function(pkg, Class) {
             this.lineWidth = 1;
 
             /**
-             * Line color
-             * @attribute color
+             * Decoration line color
+             * @attribute lineColor
              * @type {String}
              * @default "black"
              */
-            this.color = "black";
-
-            /**
-             * Set decoration on or off.
-             * @param {String} id a decoration id. Use "strike", "underline" or "overline"
-             * as the parameter value
-             * @param {Boolean} b a boolean flag that says if the decoration has to be
-             * added or removed.
-             * @method setDecoration
-             * @chainable
-             */
-            this.setDecoration = function(id, b) {
-                if (b) {
-                    this.addDecorations(id);
-                } else {
-                    this.clearDecorations(id);
-                }
-                return this;
-            };
+            this.lineColor = "black";
 
             /**
              * Set set of decorations.
-             * @param {Object} d set of decorations. For instance:
-             *
-             *
-             *     {
-             *         underline: true,
-             *         strike: false
-             *     }
-             *
-             *
+             * @param {String} [decoration]* set of decorations.
              * @method setDecorations
              * @chainable
              */
             this.setDecorations = function(d) {
-                for(var k in d) {
-                    if (d.hasOwnProperty()) {
-                        this.setDecoration(k, d[k]);
-                    }
+                for(var k in this.decorations) {
+                    this.decorations[k] = false;
                 }
+                this.addDecorations.apply(this, arguments);
                 return this;
             };
 
@@ -881,7 +925,8 @@ zebkit.package("draw", function(pkg, Class) {
             var lw = this.calcLineWidth(line),
                 lh = this.getLineHeight(line);
 
-            g.setColor(this.color);
+
+            g.setColor(this.lineColor);
 
             if (this.decorations.overline) {
                 g.lineWidth = this.lineWidth;
@@ -898,6 +943,9 @@ zebkit.package("draw", function(pkg, Class) {
                 g.lineWidth = this.lineWidth;
                 g.drawLine(x, yy, x + lw, yy);
             }
+
+            // restore text color
+            g.setColor(this.color);
         }
     ]);
 

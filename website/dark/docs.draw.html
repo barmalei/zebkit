@@ -49,7 +49,7 @@
             <tr>
                 <td colspan="2" align="center" style="border-width: 0px; margin: 0px; padding: 0px;">
                     <a href="../index.html">
-                        <img style="margin: 0px; padding: 0px;" src="/website/dark/public/images/zebkit.logo.png" width="80%">
+                        <img style="margin: 0px; padding: 0px;" src="/website/dark/public/images/zebkit.logo.png" width="60%">
                     </a>
                 </td>
             </tr>
@@ -452,6 +452,7 @@ zebkit.require("draw","ui", function(draw, ui) {
           }
       }
     ]);
+
     var canvas = new ui.zCanvas("drawView1", 301,251);
     canvas.root.setBackground(new ColorBoardView());
 });
@@ -968,9 +969,8 @@ zebkit.require("draw","ui","layout",function(draw, ui, lay) {
 
     c.root.add(new ui.ViewPan()
           .setView(new draw.DecoratedTextRender("Decorated\ntext")
-          .setDecorations({
-              underline : "green"
-          }).setColor("green").setFont("30px")));
+          .setDecorations("underline")
+          .setColor("green").setFont("30px")));
 });
 </script>
 
@@ -995,11 +995,13 @@ zebkit.require("draw","ui","layout",function(draw, ui, lay) {
 
 <script type="text/javascript">
 zebkit.require("draw","ui","layout",function(draw, ui, lay) {
-    var c = new ui.zCanvas("textView2", 500, 270);
-    c.root.setLayout(new lay.BorderLayout()).setBorder("plain");
-    c.root.add(new ui.ViewPan()
-          .setView(new draw.WrappedTextRender(ui.wrpTxt)
-          .setFont("20px")));
+    var c  = new ui.zCanvas("textView2", 600, 450),
+        tf = new ui.Label(new draw.WrappedTextRender(ui.wrpTxt));
+    
+    tf.setFont("20px");
+    c.root.setBorder("plain");
+    c.root.add(new zebkit.ui.design.ShaperPan(tf))
+    .setBounds(50, 50, 300,300);          
 });
 </script>
 

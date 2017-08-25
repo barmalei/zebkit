@@ -1,10 +1,4 @@
-Zebkit is JavaScript OOP library for development applications that 
-live in a user browser and fully rely on pure WEB standards
+Zebkit is JavaScript OOP library for development applications that live in a user browser and fully rely on pure WEB standards. Zebkit sits on HTML5 Canvas what makes possible to build and render any UI components you can imagine using handy framework and simple OOP concept.
 
-Zebkit sits on HTML5 Canvas what makes possible to build and render 
-any UI components you can imagine using handy framework and simple 
-OOP concept
 
-The library is designed to keep distance from HTML/DOM specific 
-things. Zebkit development is software engineering what results 
-in re-usable, extendable program code
+The library is designed to keep distance from HTML/DOM specific things. Zebkit development is software engineering what results in re-usable, extendable program code.

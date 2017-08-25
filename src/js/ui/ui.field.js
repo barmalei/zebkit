@@ -290,7 +290,7 @@ zebkit.package("ui", function(pkg, Class) {
             /**
              * Find the next or previous word in the given text model starting from the given
              * line and column.
-             * @param  {zebkit.data.TextModel} t a text model
+             * @param  {zebkit.data.TextModel | zebkit.draw.BaseTextRender} t a text model
              * @param  {Integer} line a starting line
              * @param  {Integer} col a starting column
              * @param  {Integer} d   a direction. 1 means looking for a next word and -1 means
@@ -441,8 +441,8 @@ zebkit.package("ui", function(pkg, Class) {
                         case "PREVWORDSELECT":
                         case "PREVWORD":
                         case "NEXTWORD" : {
-                            var p = this.findNextWord(this.view.target, this.position.currentLine,
-                                                                        this.position.currentCol, d);
+                            var p = this.findNextWord(this.view, this.position.currentLine,
+                                                                 this.position.currentCol, d);
                             if (p !== null) {
                                 this.position.setRowCol(p.row, p.col);
                             }

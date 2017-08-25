@@ -440,12 +440,13 @@ Wrapped text render:
 
 <script type="text/javascript">
 zebkit.require("draw","ui","layout",function(draw, ui, lay) {
-    var c  = new ui.zCanvas("textView2", 500, 270),
+    var c  = new ui.zCanvas("textView2", 600, 450),
         tf = new ui.Label(new draw.WrappedTextRender(ui.wrpTxt));
     
     tf.setFont("20px");
-    c.root.setLayout(new lay.BorderLayout()).setBorder("plain");
-    c.root.add(tf);          
+    c.root.setBorder("plain");
+    c.root.add(new zebkit.ui.design.ShaperPan(tf))
+    .setBounds(50, 50, 300,300);          
 });
 </script>
 

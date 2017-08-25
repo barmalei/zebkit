@@ -1,4 +1,91 @@
 zebkit.package("draw", function(pkg, Class) {
+
+    /**
+     * Break the given line to parts that can be placed in the area with
+     * the specified width.
+     * @param  {zebkit.Font} font a font to compute text metrics
+     * @param  {Integer} maxWidth a maximal area with
+     * @param  {String} line   a line
+     * @param  {Array} result a result array to accumulate wrapped lines
+     * @method  wrapToLines
+     * @for zebkit.draw
+     */
+    pkg.wrapToLines = function(font, maxWidth, line, result) {
+        // The method goes through number of tokens the line is split. Token
+        // is a word or delimiter. Delimiter is specified with the regexp
+        // (in this implementation delimiter is one or more space). Delimiters
+        // are also considered as tokens. On every iteration accumulated tokens
+        // width is compared with maximal possible and if the width is greater
+        // then maximal we sift to previous tokens set and put it as line to
+        // result. Then start iterating again  from the last token we could
+        // not accommodate.
+        if (line === "") {
+            result.push(line);
+        } else {
+            var len = font.stringWidth(line);
+            if (len <= maxWidth) {
+                result.push(line);
+            } else {
+                var m   = "not null",
+                    b   = true,
+                    i   = 0,
+                    al  = 0,
+                    pos = 0,
+                    skip = false,
+                    tokenEnd = 0,
+                    searchRE = /\s+/g,
+                    tokenStart = -1;
+
+                for(; pos !== line.length; ) {
+                    if (skip !== true && m !== null) {
+                        if (b) {
+                            m = searchRE.exec(line);
+                            if (m === null) {
+                                tokenStart = tokenEnd;
+                                tokenEnd   = line.length;
+                            }
+                        }
+
+                        if (m !== null) {
+                            if (m.index > tokenEnd) {
+                                // word token detected
+                                tokenStart = tokenEnd;
+                                tokenEnd   = m.index;
+                                b = false;
+                            } else {
+                                // space token detected
+                                tokenStart = m.index;
+                                tokenEnd   = m.index + m[0].length;
+                                b = true;
+                            }
+                        }
+                    }
+                    skip = false;
+                    al = font.stringWidth(line.substring(pos, tokenEnd));
+                    if (al > maxWidth) {
+                        if (i === 0) {
+                            result.push(line.substring(pos, tokenEnd));
+                            pos = tokenEnd;
+                        } else {
+                            result.push(line.substring(pos, tokenStart));
+                            pos = tokenStart;
+                            skip = true;
+                            i = 0;
+                        }
+                    } else {
+                        if (tokenEnd === line.length) {
+                            result.push(line.substring(pos, tokenEnd));
+                            break;
+                        } else {
+                            i++;
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+
     /**
      * Default normal font
      * @attribute font
@@ -136,6 +223,10 @@ zebkit.package("draw", function(pkg, Class) {
              */
             this.ownerChanged = function(v) {
                 this.owner = v;
+            };
+
+            this.getLine = function(i) {
+                throw new Error("Not implemented");
             };
 
             /**
@@ -677,155 +768,68 @@ zebkit.package("draw", function(pkg, Class) {
         }
     ]);
 
-
-    var searchRE = /\s+/;
-
-    function breakLine(font, maxWidth, index, line, result) {
-        if (line === "") {
-            results.push(line);
-        } else {
-            var len = font.stringWidth(line);
-            if (len <= maxWidth) {
-                results.push(line);
-            } else {
-                var re = /\s+/g,
-                    m  = null,
-                    al = 0,
-                    t  = null,
-                    pos = 0,
-                    i  = 0;
-
-                while ((m = re.match(line)) !== null) {
-                    if (m.index > pos) {
-                        tokenStart = pos;
-                        tokenEnd   = m.index;
-                    } else {
-                        tokenStart = m.index;
-                        tokenEnd   = m.index + m[0].length;
-                    }
-
-
-                    al += font.stringWidth();
-                    i++;
-                }
-            }
-
-
-
-
-            var breakIndex = startIndex < line.length ? startIndex
-                                                      : line.length - 1,
-                direction  = 0;
-
-            for(; breakIndex >= 0 && breakIndex < line.length ;) {
-                var substrLen = this.font.charsWidth(line, 0, breakIndex + 1);
-                if (substrLen < w) {
-                    if (direction < 0) {
-                        break;
-                    } else {
-                        direction = 1;
-                    }
-                    breakIndex ++;
-                } else if (substrLen > w) {
-                    breakIndex--;
-                    if (direction > 0) {
-                        break;
-                    } else {
-                        direction = -1;
-                    }
-                } else {
-                    break;
-                }
-            }
-
-            if (breakIndex >= 0) {
-                lines.push(line.substring(0, breakIndex + 1));
-                if (breakIndex < line.length - 1) {
-                    this.breakLine(w, startIndex, line.substring(breakIndex + 1), lines);
-                }
-            }
-        }
-    }
-
-
+    /**
+     * Wrapped text render.
+     * @constructor
+     * @param  {String|zebkit.data.TextModel} text a text as string or text model object
+     * @class zebkit.draw.WrappedTextRender
+     * @extends {zebkit.draw.TextRender}
+     */
     pkg.WrappedTextRender = new Class(pkg.TextRender, [
         function $prototype() {
-            this.brokenLines = null;
-            this.lastWidth   = -1;
+            this.$brokenLines = [];
+            this.$lastWidth    = -1;
 
-            this.breakLine = function(w, startIndex, line, lines) {
-                if (line === "") {
-                    lines.push(line);
-                } else {
-                    var breakIndex = startIndex < line.length ? startIndex
-                                                              : line.length - 1,
-                        direction  = 0;
-
-                    for(; breakIndex >= 0 && breakIndex < line.length ;) {
-                        var substrLen = this.font.charsWidth(line, 0, breakIndex + 1);
-                        if (substrLen < w) {
-                            if (direction < 0) {
-                                break;
-                            } else {
-                                direction = 1;
-                            }
-                            breakIndex ++;
-                        } else if (substrLen > w) {
-                            breakIndex--;
-                            if (direction > 0) {
-                                break;
-                            } else {
-                                direction = -1;
-                            }
-                        } else {
-                            break;
-                        }
-                    }
-
-                    if (breakIndex >= 0) {
-                        lines.push(line.substring(0, breakIndex + 1));
-                        if (breakIndex < line.length - 1) {
-                            this.breakLine(w, startIndex, line.substring(breakIndex + 1), lines);
-                        }
-                    }
-                }
-            };
-
-            this.breakToLines = function (w) {
-                var m = this.target, startIndex = 0, res = [];
-                for(var i = 0; i < m.getLines(); i++) {
-                    var line = m.getLine(i);
-                    this.breakLine(w, startIndex, line, res);
+            /**
+             * Break text model to number of lines taking in account the maximal width.
+             * @param  {Integer} w a maximal width
+             * @return {Array}  an array of lines
+             * @method $breakToLines
+             * @private
+             */
+            this.$breakToLines = function(w) {
+                var res = [];
+                for (var i = 0; i < this.target.getLines(); i++) {
+                    pkg.wrapToLines(this.font, w, this.target.getLine(i), res);
                 }
                 return res;
             };
 
             this.getLines = function() {
-                return this.brokenLines.length;
+                return this.$brokenLines.length;
             };
 
             this.getLine = function(i) {
-                return this.brokenLines[i];
+                return this.$brokenLines[i];
             };
         },
 
         function invalidate(sl, len){
             this.$super(sl, len);
-            if (this.brokenLines !== null) {
-                this.brokenLines.length = 0;
-            }
-            this.lastWidth = -1;
+            this.$brokenLines.length = 0;
+            this.$lastWidth = -1;
         },
 
+        /**
+         * Get preferred size of the text render
+         * @param  {Integer} [pw] a width the wrapped text has to be computed
+         * @return {Object}  a preferred size
+         *
+         *     { width: {Integer}, height:{Integer} }
+         *
+         * @method getPreferredSize
+         */
         function getPreferredSize(pw, ph) {
             if (arguments.length === 2) {
-                if (this.lastWidth < 0 || this.lastWidth !== pw) {
-                    this.lastWidth = pw;
-                    this.brokenLines = this.breakToLines(pw);
+                if (this.$lastWidth < 0 || this.$lastWidth !== pw) {
+                    this.$lastWidth = pw;
+                    this.$brokenLines = this.$breakToLines(pw);
                 }
+
                 return {
                     width  : pw,
-                    height : this.brokenLines.length * this.getLineHeight() + (this.brokenLines.length - 1) * this.lineIndent
+                    height : this.$brokenLines.length * this.getLineHeight() +
+                            (this.$brokenLines.length - 1) * this.lineIndent
                 };
             } else {
                 return this.$super();
@@ -833,9 +837,9 @@ zebkit.package("draw", function(pkg, Class) {
         },
 
         function paint(g,x,y,w,h,d) {
-            if (this.lastWidth < 0 || this.lastWidth !== w) {
-                this.lastWidth = w;
-                this.brokenLines = this.breakToLines(w);
+            if (this.$lastWidth < 0 || this.$lastWidth !== w) {
+                this.$lastWidth = w;
+                this.$brokenLines = this.$breakToLines(this.$lastWidth);
             }
             this.$super(g,x,y,w,h,d);
         }

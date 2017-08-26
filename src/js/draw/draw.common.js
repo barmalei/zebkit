@@ -339,6 +339,7 @@ zebkit.package("draw", function(pkg, Class) {
              * object updating.
              * @method setValue
              * @param  {Object} o a target object to be visualized
+             * @chainable
              */
             this.setValue = function(o) {
                 if (this.target !== o) {
@@ -348,6 +349,7 @@ zebkit.package("draw", function(pkg, Class) {
                         this.valueWasChanged(old, o);
                     }
                 }
+                return this;
             };
 
             /**

@@ -297,6 +297,38 @@ zebkit.package("draw", function(pkg, Class) {
                 this.color = arguments.length > 2 ? color : this.clazz.color;
             };
 
+            // TODO: the methods below simulate text model methods. it is done for the future
+            // usage of the string render for text field. The render can be convenient for masked
+            // input implementation.
+            this.write = function(s, off) {
+                if (off === 0) {
+                    this.target = s + this.target;
+                } else if (off === s.length) {
+                    this.target = this.target + s;
+                } else {
+                    this.target = this.target.substring(0, off) + s + this.target.substring(off);
+                }
+
+                return true;
+            };
+
+            this.remove = function(off, len) {
+                this.target = this.target.substring(0, off) +
+                              this.target.substring(off + 1);
+                return true;
+            };
+
+            this.replace = function(s, off, size) {
+                if (s.length === 0) {
+                    return this.remove(off, size);
+                } else if (size === 0) {
+                    return this.write(s, off);
+                } else {
+                    var b = this.remove(off, size, false);
+                    return this.write(s, off) && b;
+                }
+            };
+
             /**
              * Implementation of position metric interface. Returns maximal
              * possible offset within the given string.
@@ -454,6 +486,18 @@ zebkit.package("draw", function(pkg, Class) {
                 this.font = this.clazz.font;
 
                 this.setValue(text);
+            };
+
+            this.write = function() {
+                return this.target.write.apply(this.target, arguments);
+            };
+
+            this.remove = function() {
+                return this.target.remove.apply(this.target, arguments);
+            };
+
+            this.replace = function() {
+                return this.target.replace.apply(this.target, arguments);
             };
 
             /**
@@ -769,13 +813,74 @@ zebkit.package("draw", function(pkg, Class) {
     ]);
 
     /**
+     * Render to visualize string whose width is greater than available or specified width.
+     * @class zebkit.draw.CutStringRender
+     * @extends {zebkit.draw.StringRender}
+     * @constructor
+     * @param  {String} [txt] a string to be rendered
+     */
+    pkg.CutStringRender = Class(pkg.StringRender, [
+        function $prototype() {
+            /**
+             * Maximal width of the string in pixels. By default the attribute
+             * is set to -1.
+             * @attribute maxWidth
+             * @type {Integer}
+             * @default -1
+             */
+            this.maxWidth = -1;
+
+            /**
+             * String to be rendered at the end of cut string
+             * @attribute dots
+             * @type {String}
+             * @default "..."
+             */
+            this.dots  = "...";
+        },
+
+        function paint(g,x,y,w,h,d) {
+            var maxw = -1;
+
+            if (this.maxWidth > 0 && this.stringWidth > this.maxWidth) {
+                maxw = this.maxWidth;
+            } else if (this.stringWidth > w) {
+                maxw = w;
+            } else if (typeof g.$states !== 'undefined') {
+                var ts = g.$states[g.$curState];
+                if (ts.x > x || (ts.x + ts.width) < (x + w)) {
+                    maxw = ts.width;
+                }
+            }
+
+            if (maxw <= 0) {
+                this.$super(g,x,y,w,h,d);
+            } else {
+                var dotsLen = this.font.stringWidth(this.dots);
+                try {
+                    g.save();
+                    g.clipRect(x, y, maxw - dotsLen, h);
+                    this.$super(g,x,y,w,h,d);
+                } catch(e) {
+                    g.restore();
+                    throw e;
+                }
+                g.restore();
+                g.setColor(this.color);
+                g.setFont(this.font);
+                g.fillText(this.dots, x + maxw - dotsLen, y);
+            }
+         }
+    ]);
+
+    /**
      * Wrapped text render.
      * @constructor
      * @param  {String|zebkit.data.TextModel} text a text as string or text model object
      * @class zebkit.draw.WrappedTextRender
      * @extends {zebkit.draw.TextRender}
      */
-    pkg.WrappedTextRender = new Class(pkg.TextRender, [
+    pkg.WrappedTextRender = Class(pkg.TextRender, [
         function $prototype() {
             this.$brokenLines = [];
             this.$lastWidth    = -1;

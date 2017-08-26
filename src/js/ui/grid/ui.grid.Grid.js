@@ -405,6 +405,17 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 return this;
             };
 
+            /**
+             * Return a view that is used to render the given grid cell.
+             * @param  {Integer} row a grid cell row
+             * @param  {Integer} col a grid cell column
+             * @return {zebkit.draw.View} a cell view
+             * @method getCellView
+             */
+            this.getCellView = function(row, col) {
+                return this.provider.getView(this, row, col, this.model.get(row, col));
+            };
+
             this.colVisibility = function(col, x, d, b){
                 var cols = this.getGridCols();
                 if (cols === 0) {

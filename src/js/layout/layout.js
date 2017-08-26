@@ -853,6 +853,24 @@ zebkit.package("layout", function(pkg, Class) {
             };
 
             /**
+             * Get accumulated vertical (top and bottom) padding.
+             * @return {Integer} a vertical padding
+             * @method getVerPadding
+             */
+            this.getVerPadding = function() {
+                return this.getTop() + this.getBottom();
+            };
+
+            /**
+             * Get accumulated horizontal (top and bottom) padding.
+             * @return {Integer} a horizontal padding
+             * @method getHorPadding
+             */
+            this.getHorPadding = function() {
+                return this.getLeft() + this.getRight();
+            };
+
+            /**
              * Replace a children component at the specified index
              * with the given new children component
              * @param  {Integer} i an index of a children component to be replaced

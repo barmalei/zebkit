@@ -380,7 +380,7 @@ zebkit.package("ui", function(pkg, Class) {
              *
              *  @method  calcPreferredSize
              */
-            this.calcPreferredSize = function (t) {
+            this.calcPreferredSize = function(t) {
                 return this.view !== null ? this.view.getPreferredSize() : { width:0, height:0 };
             };
         }

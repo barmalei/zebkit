@@ -899,14 +899,16 @@ zebkit.package("draw", function(pkg, Class) {
                 }
                 return res;
             };
+        },
 
-            this.getLines = function() {
-                return this.$brokenLines.length;
-            };
+        function getLines() {
+            return this.$lastWidth < 0 ? this.$super()
+                                       : this.$brokenLines.length;
+        },
 
-            this.getLine = function(i) {
-                return this.$brokenLines[i];
-            };
+        function getLine(i) {
+            return this.$lastWidth < 0 ? this.$super(i)
+                                       : this.$brokenLines[i];
         },
 
         function invalidate(sl, len){
@@ -922,19 +924,21 @@ zebkit.package("draw", function(pkg, Class) {
          *
          *     { width: {Integer}, height:{Integer} }
          *
-         * @method getPreferredSize
+         * @method calcPreferredSize
          */
-        function getPreferredSize(pw, ph) {
-            if (arguments.length === 2) {
+        function calcPreferredSize(pw) {
+            if (arguments.length > 0) {
+                var bl = [];
                 if (this.$lastWidth < 0 || this.$lastWidth !== pw) {
-                    this.$lastWidth = pw;
-                    this.$brokenLines = this.$breakToLines(pw);
+                    bl = this.$breakToLines(pw);
+                } else {
+                    bl = this.$brokenLines;
                 }
 
                 return {
                     width  : pw,
-                    height : this.$brokenLines.length * this.getLineHeight() +
-                            (this.$brokenLines.length - 1) * this.lineIndent
+                    height : bl.length * this.getLineHeight() +
+                            (bl.length - 1) * this.lineIndent
                 };
             } else {
                 return this.$super();

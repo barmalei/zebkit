@@ -233,7 +233,7 @@ zebkit.package("ui.date", function(pkg, Class) {
                     };
 
                     this.setTextDecorations = function(d) {
-                        this.label.view.setDecorations(d);
+                        this.label.view.setDecorations.apply(this.label.view, arguments);
                     };
                 }
             ]);

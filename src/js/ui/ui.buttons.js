@@ -811,12 +811,12 @@ zebkit.package("ui", function(pkg, Class) {
                 b = true;
             }
 
-            if (this.view.decorations && this.overDecoration && this.isEnabled === true) {
+            if (zebkit.instanceOf(this.view, zebkit.draw.DecoratedTextRender) && this.isEnabled === true) {
                 if (n === "over") {
-                    this.view.setDecoration(this.overDecoration, this.colors[k]);
+                    this.view.addDecorations(this.overDecoration);
                     b = true;
-                } else if (this.view.decorations[this.overDecoration]) {
-                    this.view.setDecoration(this.overDecoration, null);
+                } else if (this.view.hasDecoration(this.overDecoration)) {
+                    this.view.clearDecorations(this.overDecoration);
                     b = true;
                 }
             }

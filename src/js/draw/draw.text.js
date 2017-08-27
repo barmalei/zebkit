@@ -314,7 +314,7 @@ zebkit.package("draw", function(pkg, Class) {
 
             this.remove = function(off, len) {
                 this.target = this.target.substring(0, off) +
-                              this.target.substring(off + 1);
+                              this.target.substring(off + len);
                 return true;
             };
 
@@ -498,6 +498,14 @@ zebkit.package("draw", function(pkg, Class) {
 
             this.replace = function() {
                 return this.target.replace.apply(this.target, arguments);
+            };
+
+            this.on = function() {
+                return this.target.on.apply(this.target, arguments);
+            };
+
+            this.off = function() {
+                return this.target.off.apply(this.target, arguments);
             };
 
             /**
@@ -985,9 +993,9 @@ zebkit.package("draw", function(pkg, Class) {
              * Decoration line color
              * @attribute lineColor
              * @type {String}
-             * @default "black"
+             * @default  null
              */
-            this.lineColor = "black";
+            this.lineColor = null;
 
             /**
              * Set set of decorations.
@@ -1030,6 +1038,10 @@ zebkit.package("draw", function(pkg, Class) {
                 }
                 return this;
             };
+
+            this.hasDecoration = function(dec) {
+                return this.decorations[dec] === true;
+            };
         },
 
         function paintLine(g,x,y,line,d) {
@@ -1038,8 +1050,11 @@ zebkit.package("draw", function(pkg, Class) {
             var lw = this.calcLineWidth(line),
                 lh = this.getLineHeight(line);
 
-
-            g.setColor(this.lineColor);
+            if (this.lineColor !== null) {
+                g.setColor(this.lineColor);
+            } else {
+                g.setColor(this.color);
+            }
 
             if (this.decorations.overline) {
                 g.lineWidth = this.lineWidth;
@@ -1058,7 +1073,9 @@ zebkit.package("draw", function(pkg, Class) {
             }
 
             // restore text color
-            g.setColor(this.color);
+            if (this.lineColor !== null) {
+                g.setColor(this.color);
+            }
         }
     ]);
 

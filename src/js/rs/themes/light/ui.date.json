@@ -56,7 +56,7 @@
                 "padding" : 0
             },
 
-            "textDecorations" : {},
+            "textDecorations" : [],
 
             "border": null,
             "background": null
@@ -82,9 +82,7 @@
 
             "notSelectable" : {
                 "color": "gray",
-                "textDecorations" : {
-                    "strike" : "black"
-                }
+                "textDecorations" : ["strike"]
             }
         },
 

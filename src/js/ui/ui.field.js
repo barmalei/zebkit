@@ -550,7 +550,7 @@ zebkit.package("ui", function(pkg, Class) {
                             }
                         }
 
-                        if (this.view.target.remove(pos, size)) {
+                        if (this.view.remove(pos, size)) {
                             this.repaint();
                             return true;
                         }
@@ -583,12 +583,12 @@ zebkit.package("ui", function(pkg, Class) {
                         var start = this.startOff < this.endOff ? this.startOff : this.endOff,
                             end   = this.startOff > this.endOff ? this.startOff : this.endOff;
 
-                        if (this.view.target.replace(s, start, end - start)) {
+                        if (this.view.replace(s, start, end - start)) {
                             this.repaint();
                             return true;
                         }
                     } else {
-                        if (this.view.target.write(s, pos)) {
+                        if (this.view.write(s, pos)) {
                             this.repaint();
                             return true;
                         }
@@ -1185,8 +1185,8 @@ zebkit.package("ui", function(pkg, Class) {
 
         function setView(v){
             if (v != this.view) {
-                if (this.view !== null && this.view.target !== null && typeof this.view.target.on !== 'undefined') {
-                    this.view.target.off(this);
+                if (this.view !== null && typeof this.view.off !== 'undefined') {
+                    this.view.off(this);
                 }
 
                 this.$super(v);
@@ -1196,8 +1196,8 @@ zebkit.package("ui", function(pkg, Class) {
                     this.position.setMetric(this.view);
                 }
 
-                if (this.view !== null && this.view.target !== null && typeof this.view.target.on !== 'undefined') {
-                    this.view.target.on(this);
+                if (this.view !== null && typeof this.view.on !== 'undefined') {
+                    this.view.on(this);
                 }
             }
             return this;

@@ -3153,7 +3153,77 @@ if (typeof(zebkit) === "undefined") {
                 assert(r.path, u.path, "URI assert 5 '" + k + "'");
                 assert(r.parent, u.getParent() === null ? null : u.getParent().toString(), "URI assert 6 '" + k + "'");
             }
+        },
 
+        function test_events() {
+            var A = Class([]), a = new A();
+
+            assert(typeof A.events === 'function', true, "test event 1");
+            assert(A.$parent, null, "test event 2");
+            assert(A.isInherit(zebkit.EventProducer), false, "test event 3");
+            assert(typeof A.Listeners, 'undefined', "test event 3");
+            assert(zebkit.instanceOf(a, zebkit.EventProducer), false, "test event 4");
+            assert(a.fire, undefined, "test event 5");
+            assert(a.on, undefined, "test event 6");
+            assert(a.off, undefined, "test event 7");
+
+            var AA = A.events("fired"), aa = new AA();
+            assert(AA, A, "test event 8");
+            assert(typeof AA.Listeners === 'function', true, "test event 9");
+            assert(AA.$parent, null, "test event 10");
+            assert(AA.isInherit(zebkit.EventProducer), true, "test event 11");
+            assert(zebkit.instanceOf(aa, zebkit.EventProducer), true, "test event 12");
+            assert(A.isInherit(zebkit.EventProducer), true, "test event 13");
+            assert(zebkit.instanceOf(a, zebkit.EventProducer), true, "test event 14");
+            assert(typeof aa.fire === 'function', true, "test event 15");
+            assert(typeof aa.on === 'function', true, "test event 16");
+            assert(typeof aa.off === 'function', true, "test event 17");
+            assert(typeof a.fire === 'function', true, "test event 18");
+            assert(typeof a.on === 'function', true, "test event 19");
+            assert(typeof a.off === 'function', true, "test event 20");
+            assert(typeof aa._  === 'undefined', true, "test event 21");
+
+            var t = -1;
+            aa.on(function(a) { t = a; });
+
+            aa.fire("fired", [ 1 ]);
+            assert(t, 1, "test event 22");
+
+            var AAA = AA.events("test"), aaa = new AAA();
+            assert(AAA, AA, "test event 23");
+
+            var c = 0;
+            aaa.on("test", function(a) {
+                t = a;
+                c++;
+            });
+            aaa.on("fired", function(a) {
+                t = a + 2;
+                c++;
+            });
+
+            aaa.fire("fired", [3]);
+            assert(t, 5, "test event 24");
+            assert(c, 1, "test event 25");
+            aaa.fire("test", [3]);
+            assert(t, 3, "test event 26");
+            assert(c, 2, "test event 27");
+
+            aaa.off("fired");
+            aaa.fire("fired", [8]);
+            assert(t, 3, "test event 28");
+            assert(c, 2, "test event 29");
+            aaa.fire("test", [8]);
+            assert(t, 8, "test event 30");
+            assert(c, 3, "test event 31");
+
+            aaa.off();
+            aaa.fire("fired", [8]);
+            assert(t, 8, "test event 32");
+            assert(c, 3, "test event 33");
+            aaa.fire("test", [8]);
+            assert(t, 8, "test event 34");
+            assert(c, 3, "test event 35");
         },
 
         function _test_perf() {

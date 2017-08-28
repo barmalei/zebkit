@@ -12,8 +12,8 @@ Zebkit UI components apply default properties values during its instantiation. T
 zebkit.ui.Label.color = "orange";
 ...
 // all label instances will have color set to "orange"
-var lab1 = new zebkit.ui.Label("Label");
-var lab2 = new zebkit.ui.Label("Label");
+var lab1 = new zebkit.ui.Label("Label 1");
+var lab2 = new zebkit.ui.Label("Label 2");
 ...
 ```
 
@@ -35,7 +35,7 @@ var tf2 = new zebkit.ui.TextField("Text field 2");
 
 ## Configuration resources 
 
-By default UI configuration JSON files are stored on the same level with zebkit JS file in "rs" folder. The structure is shown below:
+By default UI configuration JSON files are stored on the same level with zebkit UI components JS file(s) in "rs" sub-folder. The structure of zebkit UI configuration resources are shown below:
 
 ```sh
 [rs]                      # root resource folder
@@ -54,9 +54,8 @@ By default UI configuration JSON files are stored on the same level with zebkit 
 ```
 
 
-Loading JSON configurations setup static fields for appropriate class that later will be used as default properties values for the class instances. Configuration occurs on the package level. In other words zebkit keeps JSON configuration per package (if necessary). It is possible to load a custom configuration manually with "configWith([path])" method. For instance, imagine we have JSON below to customize text field component properties:       
-
-```js
+Loading JSON configurations setups static fields for appropriate package entities (classes, interfaces, etc) that will be later used as default properties values for the entities instances. Configuration Zebkit keeps JSON configuration per package (if necessary). It is also possible to load a custom configuration manually with "configWith([path])" method. For instance, imagine we have created JSON shown below to customize text field component properties:       
+```json
 {
     ...
     "TextField" : {
@@ -67,33 +66,34 @@ Loading JSON configurations setup static fields for appropriate class that later
 }
 ```
 
-Then we can configure "zebkit.ui" package with the JSON as follow:
+To apply the JSON do the following:
 
 ```js
 zebkit.ui.configWith("/tf.json");
 ```
 
-Pay attention how zebkit looks for required JSON:
-   - Passed path starts from "/" or is an URL (e.g. "http://text.com/tf.json") then the path is considered as absolute path and is used as is to read the required resource
-   - Passed path 
+Pay attention the way zebkit looks up for a required JSON :
+   - If passed path starts from "/" or the passed path is a complete URL (e.g. "http://text.com/tf.json") then the path is considered as an absolute. The  path is used as is.
+   - No path has been passed. 
+   - Passed path is relative (neither starts from "/" nor URL). 
 
 ## Theme configuration
 
-By default zebkit expects theme resources are located in "rs" folder at the the same level where zebkit JS code is stored. To switch UI theme set theme name (has to match a sub-folder hosted in "rs" folder):
+By default zebkit expects a theme resources are located in appropriate sub-folder in "rs". To switch UI theme set "theme" configuration variable (that has to match a sub-folder hosted in "rs" folder):
 
 ```js
 // say to use light theme
- // name of theme folder
+zebkit.ui.config("theme", "light");
 ```
 
-In a case if zebkit theme is placed in another place specify base directory where the theme resources are stored: 
+In a case if zebkit theme is located in other place specify base directory where the theme resources are stored: 
 
 ```js
 // define path to custom theme    
 zebkit.ui.config("basedir","http://test.com./myfolder/mytheme");
 ```
 
-If you has number of themes you can use place holder to simplify switching between these themes:
+If there are number of themes you need to host in a custom place specify "basedir" as follow:
 ```js
 // define path to light theme    
 zebkit.ui.config("basedir","http://test.com./myfolder/%{theme}");
@@ -102,7 +102,7 @@ zebkit.ui.config("basedir","http://test.com./myfolder/%{theme}");
 zebkit.ui.config("theme", "mytheme1");
 ```
 
-**Note:** Note that configuration variables (theme, base directory, etc) have to be adjusted outside "require" or "package" zebkit  sections. In general it should look as follow:
+**Note:** Note that configuration variables (theme, base directory, etc) have to be adjusted outside of "require" or "package" zebkit sections. The customization should look something like the following:
 ```js
 <script>
     // adjust theme variable
@@ -123,6 +123,7 @@ To load the JSON UI definition the following code can be used:
 
 ```js
 zebkit.require("ui", function(ui) {
+    // load root component with content defined with "simple.json" file
     new ui.zCanvas(400, 300).root.load("simple.json");
 });
 ```
@@ -170,7 +171,7 @@ The result of the loading is shown below:
     });
 </script>
 
-There is "#actions" section in the JSON shown above. The section allows developers to declare simple event handling. In this particular case the section says to clear text area component text by button click. Full supported features of the section are shown below:
+A you can see there is "#actions" section in the JSON shown above. The section allows developers to declare simple events handling. In this particular case the section says to empty text area component value by button click. Full supported features of the section are shown below:
 
 <table class="info">
 <tr><th>
@@ -225,7 +226,7 @@ Zson can be composed from multiple JSONs. Zson guarantees everything is loaded i
 
 To combine multiple JSONs:
 
-```js
+```json
 {
     "%{../external1.json}": '',
     "%{../external2.json}": ''
@@ -237,7 +238,7 @@ To combine multiple JSONs:
 
 Or you can fulfill a value with the given JSON as follow:
 
-```js
+```json
 {
     "key" : "%{../external.json}"
 }
@@ -245,7 +246,7 @@ Or you can fulfill a value with the given JSON as follow:
 
 For example let use slightly modified JSON from previous UI example to populate the same UI four times:
 
-```js
+```json
 {
     "@zebkit.ui.Panel": [],
     "layout": { "@zebkit.layout.StackLayout" : []},
@@ -276,9 +277,9 @@ For example let use slightly modified JSON from previous UI example to populate 
 }
 ```
 
-The JSON to load external JSON four times shown below:  
+Find JSON to load external JSON mentioned above four times below:  
 
-```js
+```json
 {
     "layout" : { "@zebkit.layout.GridLayout": [2, 2, true, true] },
     "kids"   : [

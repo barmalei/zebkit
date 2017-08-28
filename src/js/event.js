@@ -397,7 +397,7 @@ var Listeners = $NewListener();
  *         // handle "fired" events
  *     });
  *
- *     a.fireEvent(10);
+ *     a.fire(10);
  *
  * @class zebkit.EventProducer
  * @interface zebkit.EventProducer
@@ -459,7 +459,7 @@ var EventProducer = Interface([
             } else if (arguments.length === 2) {
                 if (arguments[0] === null) {
                     throw new Error("Invalid event or path");
-                } else if (arguments[0][0] === '.' || arguments[0][0] === '/' || arguments[0][0] === '#') { // detect path
+                } else if (arguments[0][0] === '.' || arguments[0][0] === '/' || arguments[0][0] === '#') { // a path detected
                     pt = arguments[0];
                 } else {
                     if (typeof this._ === 'undefined') {
@@ -626,6 +626,44 @@ var EventProducer = Interface([
         };
     }
 ]);
+
+
+/**
+ * @extends the class with the given events support.
+ * @param {String} [args]* list of events names
+ * @method events
+ * @for  zebkit.Class
+ */
+classTemplateFields.events = function() {
+    var args = Array.prototype.slice.call(arguments);
+    if (arguments.length === 0) {
+        args.push("fired");
+    }
+
+    var c = args.length;
+    if (typeof this.Listeners !== 'undefined') {
+        for (var i = 0; i < this.Listeners.eventNames.length; i++) {
+            var en = this.Listeners.eventNames[i];
+            if (args.indexOf(en) < 0) {
+                args.push(en);
+            }
+        }
+    }
+
+    if (typeof this.Listeners === 'undefined') {
+        this.Listeners = $NewListener.apply($NewListener, args);
+    } else if (c !== args.length) {
+        this.Listeners = $NewListener.apply($NewListener, args);
+    }
+
+    if (this.isInherit(EventProducer) === false) {
+        this.extend(EventProducer);
+    }
+
+    return this;
+};
+
+
 
 // TODO: should be at least re-named to better name
 var Fireable = Interface();

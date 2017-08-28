@@ -29,15 +29,13 @@ zebkit.package("ui", function(pkg, Class) {
                 maxCol = -1;
                 render = new zebkit.draw.TextRender(new zebkit.data.SingleLineTxt());
                 renderDefined = true;
-            } else {
-                if (arguments.length === 1) {
-                    if (zebkit.isNumber(render)) {
-                        maxCol = render;
-                        render = new zebkit.draw.TextRender(new zebkit.data.SingleLineTxt());
-                        renderDefined = true;
-                    } else {
-                        maxCol = -1;
-                    }
+            } else if (arguments.length === 1){
+                if (zebkit.isNumber(render)) {
+                    maxCol = render;
+                    render = new zebkit.draw.TextRender(new zebkit.data.SingleLineTxt());
+                    renderDefined = true;
+                } else {
+                    maxCol = -1;
                 }
             }
 

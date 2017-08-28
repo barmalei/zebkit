@@ -1,15 +1,17 @@
 ---
 layout: page
 parent: docs
+notitle: true
 title: Zson
 ---
-
-### Zson features
 
 JSON is for ages becoming is widely used format to keep configuration, exchange and store data etc. Zebkit uses JSON:
 
    * To configure UI components properties
    * As a descriptive language to define UI forms
+   * As a form to define coupled hierarchy of objects  
+
+### Zson features
 
 Pure JSON is too basic and limited. Zebkit extends JSON interpretation to support number of advanced features. The new JSON interpretation is called Zson. Zson supports the following:
    

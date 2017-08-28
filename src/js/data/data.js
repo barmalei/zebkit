@@ -1418,6 +1418,34 @@ zebkit.package("data", function(pkg, Class) {
             };
 
             /**
+             * Get the given column data as an array object
+             * @param  {Integer} col a column
+             * @return {Array}  a column data
+             * @method getCol
+             */
+            this.getCol = function(col) {
+                var r = [];
+                for (var i = 0; i < this.rows ; i++) {
+                    r[i] = this.get(i, col);
+                }
+                return r;
+            };
+
+            /**
+             * Get the given row data as an array object
+             * @param  {Integer} row a row
+             * @return {Array}  a row data
+             * @method getRow
+             */
+            this.getRow = function(row) {
+                var r = [];
+                for (var i = 0; i < this.cols ; i++) {
+                    r[i] = this.get(row, i);
+                }
+                return r;
+            };
+
+            /**
              * Get a matrix model cell value by the specified index
              * @method geti
              * @param  {Integer} index a cell index
@@ -1434,6 +1462,7 @@ zebkit.package("data", function(pkg, Class) {
              * @param  {Integer} row a cell row
              * @param  {Integer} col a cell column
              * @param  {Object} obj a new cell value
+             * @chainable
              */
             this.put = function(row,col,obj){
                 var nr = this.rows,
@@ -1457,6 +1486,8 @@ zebkit.package("data", function(pkg, Class) {
                     this.$objs[row][col] = obj;
                     this._.cellModified(this, row, col, old);
                 }
+
+                return this;
             };
 
             /**
@@ -1466,10 +1497,12 @@ zebkit.package("data", function(pkg, Class) {
              * @method puti
              * @param  {Integer} i a cell row
              * @param  {Object} obj a new cell value
+             * @chainable
              */
             this.puti = function(i, obj){
                 this.put( Math.floor(i / this.cols),
                           i % this.cols, obj);
+                return this;
             };
 
             /**
@@ -1477,6 +1510,7 @@ zebkit.package("data", function(pkg, Class) {
              * @method setRowsCols
              * @param  {Integer} rows a new number of rows
              * @param  {Integer} cols a new number of columns
+             * @chainable
              */
             this.setRowsCols = function(rows, cols){
                 if (rows !== this.rows || cols !== this.cols){
@@ -1504,24 +1538,29 @@ zebkit.package("data", function(pkg, Class) {
 
                     this._.matrixResized(this, pr, pc);
                 }
+                return this;
             };
 
              /**
              * Set the given number of rows the model has to have.
              * @method setRows
              * @param  {Integer} rows a new number of rows
+             * @chainable
              */
             this.setRows = function(rows) {
                 this.setRowsCols(rows, this.cols);
+                return this;
             };
 
             /**
              * Set the given number of columns the model has to have.
              * @method setCols
              * @param  {Integer} cols a new number of columns
+             * @chainable
              */
             this.setCols = function(cols) {
                 this.setRowsCols(this.rows, cols);
+                return this;
             };
 
             /**
@@ -1530,8 +1569,9 @@ zebkit.package("data", function(pkg, Class) {
              * @method removeRows
              * @param  {Integer} begrow a start row
              * @param  {Integer} count  a number of rows to be removed
+             * @chainable
              */
-            this.removeRows = function(begrow,count) {
+            this.removeRows = function(begrow, count) {
                 if (arguments.length === 1) {
                     count = 1;
                 }
@@ -1543,6 +1583,7 @@ zebkit.package("data", function(pkg, Class) {
                 this.$objs.splice(begrow, count);
                 this.rows -= count;
                 this._.matrixResized(this, this.rows + count, this.cols);
+                return this;
             };
 
             /**
@@ -1551,8 +1592,9 @@ zebkit.package("data", function(pkg, Class) {
              * @method removeCols
              * @param  {Integer}  begcol a start column
              * @param  {Integer} count  a number of columns to be removed
+             * @chainable
              */
-            this.removeCols = function (begcol,count){
+            this.removeCols = function (begcol, count){
                 if (arguments.length === 1) {
                     count = 1;
                 }
@@ -1569,6 +1611,7 @@ zebkit.package("data", function(pkg, Class) {
 
                 this.cols -= count;
                 this._.matrixResized(this, this.rows, this.cols + count);
+                return this;
             };
 
             /**
@@ -1576,6 +1619,7 @@ zebkit.package("data", function(pkg, Class) {
              * @param  {Integer} row   a starting row to insert
              * @param  {Integer} count a number of rows to be added
              * @method insertRows
+             * @chainable
              */
             this.insertRows = function(row, count) {
                 if (arguments.length === 1) {
@@ -1596,6 +1640,7 @@ zebkit.package("data", function(pkg, Class) {
 
                 this.rows += count;
                 this._.matrixResized(this, this.rows - count, this.cols);
+                return this;
             };
 
             /**
@@ -1603,6 +1648,7 @@ zebkit.package("data", function(pkg, Class) {
              * @param  {Integer} col   a starting column to insert
              * @param  {Integer} count a number of columns to be added
              * @method insertCols
+             * @chainable
              */
             this.insertCols = function(col, count) {
                 if (arguments.length === 1) {
@@ -1622,6 +1668,43 @@ zebkit.package("data", function(pkg, Class) {
 
                 this.cols += count;
                 this._.matrixResized(this, this.rows, this.cols - count);
+                return this;
+            };
+
+            /**
+             * Insert the column data at the given column
+             * @param  {Integer} col a column
+             * @param  {Array} [data] a column data
+             * @method insertCol
+             * @chainable
+             */
+            this.insertCol = function(col, data) {
+                this.insertCols(col, 1);
+
+                if (arguments.length > 0) {
+                    for (var i = 0; i < Math.min(data.length, this.rows); i++) {
+                        this.put(i, col, data[i]);
+                    }
+                }
+                return this;
+            };
+
+            /**
+             * Insert the row data at the given row
+             * @param  {Integer} row a row
+             * @param  {Array} [data] a row data
+             * @method insertRow
+             * @chainable
+             */
+            this.insertRow = function(row, data) {
+                this.insertRows(row, 1);
+
+                if (arguments.length > 0) {
+                    for (var i = 0; i < Math.min(data.length, this.cols); i++) {
+                        this.put(row, i, data[i]);
+                    }
+                }
+                return this;
             };
 
             /**

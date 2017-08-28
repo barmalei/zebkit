@@ -167,7 +167,7 @@ zebkit.package("draw", function(pkg, Class) {
     * @extends zebkit.draw.Render
     */
     pkg.Picture = Class(pkg.Render, [
-        function(img,x,y,w,h) {
+        function(img, x, y, w, h) {
             /**
              * A x coordinate of the image part that has to be rendered
              * @attribute x
@@ -220,7 +220,11 @@ zebkit.package("draw", function(pkg, Class) {
             this.x = this.y = this.width = this.height = 0;
 
             this.paint = function(g,x,y,w,h,d) {
-                if (this.target !== null && this.target.complete === true && this.target.naturalWidth > 0 && w > 0 && h > 0){
+                if (this.target !== null &&
+                    this.target.complete === true &&
+                    this.target.naturalWidth > 0 &&
+                    w > 0 && h > 0)
+                {
                     if (this.width > 0) {
                         g.drawImage(this.target, this.x, this.y,
                                     this.width, this.height, x, y, w, h);

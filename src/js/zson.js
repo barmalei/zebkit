@@ -584,7 +584,7 @@ var Zson = Class([
                     idx++;
                 }
 
-                var name    = d.substring(idx, d.length - 1).trim(),
+                var name = d.substring(idx, d.length - 1).trim(),
                     names   = name.split('.'),
                     targets = [ this.$variables, this.content, this.root, $global];
 
@@ -855,6 +855,7 @@ var Zson = Class([
                 } else {
                     $this.root = $this.content;
                 }
+
                 return $this;
             });
 

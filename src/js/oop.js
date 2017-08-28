@@ -632,6 +632,360 @@ function $mixing(clazz, methods) {
     }
 }
 
+
+var classTemplateFields = {
+    /**
+     * Makes the class hashable. Hashable class instances are automatically
+     * gets unique hash code that is returned with its overridden "toString()"
+     * method. The hash code is stored in special "$hash$" field. The feature
+     * can be useful when you want to store class instances in "{}" object
+     * where key is the hash and the value is the instance itself.
+     * @method hashable
+     * @chainable
+     * @for zebkit.Class
+     */
+    hashable : function() {
+        if (this.$uniqueness !== true) {
+            this.$uniqueness = true;
+            this.prototype.toString = $toString;
+        }
+        return this;
+    },
+
+    /**
+     * Makes the class hashless. Prevents generation of hash code for
+     * instances of the class.
+     * @method hashless
+     * @chainable
+     * @for zebkit.Class
+     */
+    hashless : function() {
+        if (this.$uniqueness === true) {
+            this.$uniqueness = false;
+            this.prototype.toString = Object.prototype.toString;
+        }
+        return this;
+    },
+
+    /**
+     * Extend the class with new method and implemented interfaces.
+     * @param {zebkit.Interface} [interfaces]*  number of interfaces the class has to implement.
+     * @param {Array} methods set of methods the given class has to be extended.
+     * @method extend
+     * @for  zebkit.Class
+     */
+    // add extend method later to avoid the method be inherited as a class static field
+    extend : function() {
+        var methods    = arguments[arguments.length - 1],
+            hasMethod  = Array.isArray(methods);
+
+        // inject class
+        if (hasMethod && this.$isExtended !== true) {
+            // create intermediate class
+            var A = this.$parent !== null ? Class(this.$parent, [])
+                                          : Class([]);
+
+            // copy this class prototypes methods to intermediate class A and re-define
+            // boundTo to the intermediate class A if they were bound to source class
+            // methods that have been  moved from source class to class have to be re-bound
+            // to A class
+            for(var name in this.prototype) {
+                if (name !== "clazz" && this.prototype.hasOwnProperty(name) ) {
+                    var f = this.prototype[name];
+                    if (typeof f === 'function') {
+                        A.prototype[name] = typeof f.methodBody !== 'undefined' ? $ProxyMethod(name, f.methodBody, f.boundTo)
+                                                                                : f;
+
+                        if (A.prototype[name].boundTo === this) {
+                            A.prototype[name].boundTo = A;
+                            if (f.boundTo === this) {
+                                f.boundTo = A;
+                            }
+                        }
+                    }
+                }
+            }
+
+            this.$parent = A;
+            this.$isExtended = true;
+        }
+
+        if (hasMethod) {
+            $mixing(this, methods);
+        }
+
+        // add passed interfaces
+        for(var i = 0; i < arguments.length - (hasMethod ? 1 : 0); i++) {
+            var I = arguments[i];
+            if (I === null || typeof I === 'undefined' || I.clazz !== Interface) {
+                throw new Error("Interface is expected");
+            }
+
+            if (typeof this.$parents[I.$hash$] !== 'undefined') {
+                throw new Error("Interface has been already inherited");
+            }
+
+            $cpMethods(I.prototype, this.prototype, this);
+            this.$parents[I.$hash$] = I;
+        }
+    },
+
+    /**
+     * Tests if the given class inherits the given class or interface.
+     * @param  {zebkit.Class | zebkit.Interface}  clazz a class or interface.
+     * @return {Boolean} true if the class or interface is inherited with
+     * the class.
+     * @method  isInherit
+     * @for  zebkit.Class
+     */
+    isInherit : function(clazz) {
+        if (this !== clazz) {
+            // detect class
+            if (clazz.clazz === this.clazz) {
+                for (var p = this.$parent; p !== null; p = p.$parent) {
+                    if (p === clazz) {
+                        return true;
+                    }
+                }
+            } else { // detect interface
+                if (this.$parents[clazz.$hash$] === clazz) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+};
+
+
+var classTemplateProto = {
+    /**
+     * Extend existent class instance with the given methods and interfaces
+     * For example:
+
+        var A = zebkit.Class([ // declare class A that defines one "a" method
+            function a() {
+                console.log("A:a()");
+            }
+        ]);
+
+        var a = new A();
+        a.a();  // show "A:a()" message
+
+        A.a.extend([
+            function b() {
+                console.log("EA:b()");
+            },
+
+            function a() {   // redefine "a" method
+                console.log("EA:a()");
+            }
+        ]);
+
+        a.b(); // show "EA:b()" message
+        a.a(); // show "EA:a()" message
+
+     * @param {zebkit.Interface} [interfaces]* interfaces to be implemented with the
+     * class instance
+     * @param {Array} methods list of methods the class instance has to be extended
+     * with
+     * @method extend
+     * @for zebkit.Class.zObject
+     */
+    extend : function() {
+        var clazz = this.clazz,
+            l = arguments.length,
+            f = arguments[l - 1],
+            hasArray = Array.isArray(f),
+            i = 0;
+
+        // replace the instance class with a new intermediate class
+        // that inherits the replaced class. it is done to support
+        // $super method calls.
+        if (this.$isExtended !== true) {
+            clazz = Class(clazz, []);
+            this.$isExtended = true;         // mark the instance as extended to avoid double extending.
+            clazz.$name = this.clazz.$name;
+            this.clazz = clazz;
+        }
+
+        if (hasArray) {
+            var init = null;
+            for(i = 0; i < f.length; i++) {
+                var n = $FN(f[i]);
+                if (n === CDNAME) {
+                    init = f[i];  // postpone calling initializer before all methods will be defined
+                } else {
+                    if (typeof this[n] !== 'undefined' && typeof this[n] !== 'function') {
+                        throw new Error("Method '" + n + "' clash with a property");
+                    }
+                    this[n] = $ProxyMethod(n, f[i], clazz);
+                }
+            }
+
+            if (init !== null) {
+                init.call(this);
+            }
+            l--;
+        }
+
+        // add new interfaces if they has been passed
+        for (i = 0; i < arguments.length - (hasArray ? 1 : 0); i++) {
+            if (arguments[i].clazz !== Interface) {
+                throw new Error("Invalid argument " + arguments[i] + " Interface is expected.");
+            }
+
+            var I = arguments[i];
+            if (typeof clazz.$parents[I.$hash$] !== 'undefined') {
+                throw new Error("Interface has been already inherited");
+            }
+
+            $cpMethods(I.prototype, this, clazz);
+            clazz.$parents[I.$hash$] = I;
+        }
+        return this;
+    },
+
+    /**
+     * Call super method implementation.
+     * @param {Function} [superMethod]? optional parameter that should be a method of the class instance
+     * that has to be called
+     * @param {Object} [args]* arguments list to pass the executed method
+     * @return {Object} return what super method returns
+     * @method $super
+     * @example
+     *
+     *    var A = zebkit.Class([
+     *        function a(p) { return 10 + p; }
+     *    ]);
+     *
+     *    var B = zebkit.Class(A, [
+     *        function a(p) {
+     *            return this.$super(p) * 10;
+     *        }
+     *    ]);
+     *
+     *    var b = new B();
+     *    b.a(10) // return 200
+     *
+     * @for zebkit.Class.zObject
+     */
+    $super : function() {
+       if ($caller !== null) {
+            for (var $s = $caller.boundTo.$parent; $s !== null; $s = $s.$parent) {
+                var m = $s.prototype[$caller.methodName];
+                if (typeof m !== 'undefined') {
+                    return m.apply(this, arguments);
+                }
+            }
+
+            // handle method not found error
+            var cln = this.clazz && this.clazz.$name ? this.clazz.$name + "." : "";
+            throw new ReferenceError("Method '" +
+                                     cln +
+                                     ($caller.methodName === CNAME ? "constructor"
+                                                                   : $caller.methodName) + "(" + arguments.length + ")" + "' not found");
+        } else {
+            throw new Error("$super is called outside of class context");
+        }
+    },
+
+    // TODO: not stable API
+    $supera : function(args) {
+       if ($caller !== null) {
+            for (var $s = $caller.boundTo.$parent; $s !== null; $s = $s.$parent) {
+                var m = $s.prototype[$caller.methodName];
+                if (typeof m !== 'undefined') {
+                    return m.apply(this, args);
+                }
+            }
+
+            // handle method not found error
+            var cln = this.clazz && this.clazz.$name ? this.clazz.$name + "." : "";
+            throw new ReferenceError("Method '" +
+                                     cln +
+                                     ($caller.methodName === CNAME ? "constructor"
+                                                                   : $caller.methodName) + "(" + arguments.length + ")" + "' not found");
+        } else {
+            throw new Error("$super is called outside of class context");
+        }
+    },
+
+    // TODO: not stable API, $super that doesn't throw exception is there is no super implementation
+    $$super : function() {
+       if ($caller !== null) {
+            for(var $s = $caller.boundTo.$parent; $s !== null; $s = $s.$parent) {
+                var m = $s.prototype[$caller.methodName];
+                if (typeof m !== 'undefined') {
+                    return m.apply(this, arguments);
+                }
+            }
+        } else {
+            throw new Error("$super is called outside of class context");
+        }
+    },
+
+    /**
+     * Get a first super implementation of the given method in a parent classes hierarchy.
+     * @param  {String} name a name of the method
+     * @return {Function} a super method implementation
+     * @method  $getSuper
+     * @for  zebkit.Class.zObject
+     */
+    $getSuper : function(name) {
+       if ($caller !== null) {
+            for(var $s = $caller.boundTo.$parent; $s !== null; $s = $s.$parent) {
+                var m = $s.prototype[name];
+                if (typeof m === 'function') {
+                    return m;
+                }
+            }
+            return null;
+        }
+        throw new Error("$super is called outside of class context");
+    },
+
+    $genHash : function() {
+        if (typeof this.$hash$ === 'undefined') {
+            this.$hash$ = "$ZeInGen" + ($$$++);
+        }
+        return this.$hash$;
+    },
+
+    $clone : function(map) {
+        map = map || new Map();
+
+        var f = function() {};
+        f.prototype = this.constructor.prototype;
+        var nobj = new f();
+        map.set(this, nobj);
+
+        for(var k in this) {
+            if (this.hasOwnProperty(k)) {
+                // obj's layout is obj itself
+                var t = map.get(this[k]);
+                if (t !== undefined) {
+                    nobj[k] = t;
+                } else {
+                    nobj[k] = clone(this[k], map);
+                }
+            }
+        }
+
+        // speed up clearing resources
+        map.clear();
+
+        nobj.constructor = this.constructor;
+
+        if (typeof nobj.$hash$ !== 'undefined') {
+            nobj.$hash$ = "$zObj_" + ($$$++);
+        }
+
+        nobj.clazz = this.clazz;
+        return nobj;
+    }
+}
+
 // create Class template what means we define a function (meta class) that has to be used to define
 // Class. That means we define a function that returns another function that is a Class
 var Class = $make_template(null, function() {
@@ -764,232 +1118,6 @@ var Class = $make_template(null, function() {
     }
 
     /**
-     * Extend existent class instance with the given methods and interfaces
-     * For example:
-
-        var A = zebkit.Class([ // declare class A that defines one "a" method
-            function a() {
-                console.log("A:a()");
-            }
-        ]);
-
-        var a = new A();
-        a.a();  // show "A:a()" message
-
-        A.a.extend([
-            function b() {
-                console.log("EA:b()");
-            },
-
-            function a() {   // redefine "a" method
-                console.log("EA:a()");
-            }
-        ]);
-
-        a.b(); // show "EA:b()" message
-        a.a(); // show "EA:a()" message
-
-     * @param {zebkit.Interface} [interfaces]* interfaces to be implemented with the
-     * class instance
-     * @param {Array} methods list of methods the class instance has to be extended
-     * with
-     * @method extend
-     * @for zebkit.Class.zObject
-     */
-    classTemplate.prototype.extend = function() {
-        var clazz = this.clazz,
-            l = arguments.length,
-            f = arguments[l - 1],
-            hasArray = Array.isArray(f),
-            i = 0;
-
-        // replace the instance class with a new intermediate class
-        // that inherits the replaced class. it is done to support
-        // $super method calls.
-        if (this.$isExtended !== true) {
-            clazz = Class(clazz, []);
-            this.$isExtended = true;         // mark the instance as extended to avoid double extending.
-            clazz.$name = this.clazz.$name;
-            this.clazz = clazz;
-        }
-
-        if (hasArray) {
-            var init = null;
-            for(i = 0; i < f.length; i++) {
-                var n = $FN(f[i]);
-                if (n === CDNAME) {
-                    init = f[i];  // postpone calling initializer before all methods will be defined
-                } else {
-                    if (typeof this[n] !== 'undefined' && typeof this[n] !== 'function') {
-                        throw new Error("Method '" + n + "' clash with a property");
-                    }
-                    this[n] = $ProxyMethod(n, f[i], clazz);
-                }
-            }
-
-            if (init !== null) {
-                init.call(this);
-            }
-            l--;
-        }
-
-        // add new interfaces if they has been passed
-        for (i = 0; i < arguments.length - (hasArray ? 1 : 0); i++) {
-            if (arguments[i].clazz !== Interface) {
-                throw new Error("Invalid argument " + arguments[i] + " Interface is expected.");
-            }
-
-            var I = arguments[i];
-            if (typeof clazz.$parents[I.$hash$] !== 'undefined') {
-                throw new Error("Interface has been already inherited");
-            }
-
-            $cpMethods(I.prototype, this, clazz);
-            clazz.$parents[I.$hash$] = I;
-        }
-        return this;
-    };
-
-    /**
-     * Call super method implementation.
-     * @param {Function} [superMethod]? optional parameter that should be a method of the class instance
-     * that has to be called
-     * @param {Object} [args]* arguments list to pass the executed method
-     * @return {Object} return what super method returns
-     * @method $super
-     * @example
-     *
-     *    var A = zebkit.Class([
-     *        function a(p) { return 10 + p; }
-     *    ]);
-     *
-     *    var B = zebkit.Class(A, [
-     *        function a(p) {
-     *            return this.$super(p) * 10;
-     *        }
-     *    ]);
-     *
-     *    var b = new B();
-     *    b.a(10) // return 200
-     *
-     * @for zebkit.Class.zObject
-     */
-    classTemplate.prototype.$super = function() {
-       if ($caller !== null) {
-            for (var $s = $caller.boundTo.$parent; $s !== null; $s = $s.$parent) {
-                var m = $s.prototype[$caller.methodName];
-                if (typeof m !== 'undefined') {
-                    return m.apply(this, arguments);
-                }
-            }
-
-            // handle method not found error
-            var cln = this.clazz && this.clazz.$name ? this.clazz.$name + "." : "";
-            throw new ReferenceError("Method '" +
-                                     cln +
-                                     ($caller.methodName === CNAME ? "constructor"
-                                                                   : $caller.methodName) + "(" + arguments.length + ")" + "' not found");
-        } else {
-            throw new Error("$super is called outside of class context");
-        }
-    };
-
-    // TODO: not stable API
-    classTemplate.prototype.$supera = function(args) {
-       if ($caller !== null) {
-            for (var $s = $caller.boundTo.$parent; $s !== null; $s = $s.$parent) {
-                var m = $s.prototype[$caller.methodName];
-                if (typeof m !== 'undefined') {
-                    return m.apply(this, args);
-                }
-            }
-
-            // handle method not found error
-            var cln = this.clazz && this.clazz.$name ? this.clazz.$name + "." : "";
-            throw new ReferenceError("Method '" +
-                                     cln +
-                                     ($caller.methodName === CNAME ? "constructor"
-                                                                   : $caller.methodName) + "(" + arguments.length + ")" + "' not found");
-        } else {
-            throw new Error("$super is called outside of class context");
-        }
-    };
-
-    // TODO: not stable API, $super that doesn't throw exception is there is no super implementation
-    classTemplate.prototype.$$super = function() {
-       if ($caller !== null) {
-            for(var $s = $caller.boundTo.$parent; $s !== null; $s = $s.$parent) {
-                var m = $s.prototype[$caller.methodName];
-                if (typeof m !== 'undefined') {
-                    return m.apply(this, arguments);
-                }
-            }
-        } else {
-            throw new Error("$super is called outside of class context");
-        }
-    };
-
-    /**
-     * Get a first super implementation of the given method in a parent classes hierarchy.
-     * @param  {String} name a name of the method
-     * @return {Function} a super method implementation
-     * @method  $getSuper
-     * @for  zebkit.Class.zObject
-     */
-    classTemplate.prototype.$getSuper = function(name) {
-       if ($caller !== null) {
-            for(var $s = $caller.boundTo.$parent; $s !== null; $s = $s.$parent) {
-                var m = $s.prototype[name];
-                if (typeof m === 'function') {
-                    return m;
-                }
-            }
-            return null;
-        }
-        throw new Error("$super is called outside of class context");
-    };
-
-    classTemplate.prototype.$genHash = function() {
-        if (typeof this.$hash$ === 'undefined') {
-            this.$hash$ = "$ZeInGen" + ($$$++);
-        }
-        return this.$hash$;
-    };
-
-    classTemplate.prototype.$clone = function(map) {
-        map = map || new Map();
-
-        var f = function() {};
-        f.prototype = this.constructor.prototype;
-        var nobj = new f();
-        map.set(this, nobj);
-
-        for(var k in this) {
-            if (this.hasOwnProperty(k)) {
-                // obj's layout is obj itself
-                var t = map.get(this[k]);
-                if (t !== undefined) {
-                    nobj[k] = t;
-                } else {
-                    nobj[k] = clone(this[k], map);
-                }
-            }
-        }
-
-        // speed up clearing resources
-        map.clear();
-
-        nobj.constructor = this.constructor;
-
-        if (typeof nobj.$hash$ !== 'undefined') {
-            nobj.$hash$ = "$zObj_" + ($$$++);
-        }
-
-        nobj.clazz = this.clazz;
-        return nobj;
-    };
-
-    /**
      * The instance class.
      * @attribute clazz
      * @type {zebkit.Class}
@@ -1001,6 +1129,11 @@ var Class = $make_template(null, function() {
         classTemplate.prototype.properties = function(p) {
             return properties(this, p);
         };
+    }
+
+    // populate class template prototype methods and fields
+    for(var ptf in classTemplateProto) {
+        classTemplate.prototype[ptf] = classTemplateProto[ptf];
     }
 
     // copy methods from interfaces before mixing class methods
@@ -1027,8 +1160,9 @@ var Class = $make_template(null, function() {
     // populate static fields
     // TODO: exclude the basic static methods and static constant
     // static inheritance
-
     classTemplate.$uniqueness = false;
+
+
     if (parentClass !== null) {
         for (var key in parentClass) {
             if (key[0] !== '$' &&
@@ -1044,128 +1178,10 @@ var Class = $make_template(null, function() {
         }
     }
 
-    /**
-     * Makes the class hashable. Hashable class instances are automatically
-     * gets unique hash code that is returned with its overridden "toString()"
-     * method. The hash code is stored in special "$hash$" field. The feature
-     * can be useful when you want to store class instances in "{}" object
-     * where key is the hash and the value is the instance itself.
-     * @method hashable
-     * @chainable
-     * @for zebkit.Class
-     */
-    classTemplate.hashable = function() {
-        if (this.$uniqueness !== true) {
-            this.$uniqueness = true;
-            this.prototype.toString = $toString;
-        }
-        return this;
-    };
-
-    /**
-     * Makes the class hashless. Prevents generation of hash code for
-     * instances of the class.
-     * @method hashless
-     * @chainable
-     * @for zebkit.Class
-     */
-    classTemplate.hashless = function() {
-        if (this.$uniqueness === true) {
-            this.$uniqueness = false;
-            this.prototype.toString = Object.prototype.toString;
-        }
-        return this;
-    };
-
-    /**
-     * Extend the class with new method and implemented interfaces.
-     * @param {zebkit.Interface} [interfaces]*  number of interfaces the class has to implement.
-     * @param {Array} methods set of methods the given class has to be extended.
-     * @method extend
-     * @for  zebkit.Class
-     */
-
-    // add extend method later to avoid the method be inherited as a class static field
-    classTemplate.extend = function() {
-        var methods    = arguments[arguments.length - 1],
-            hasMethod  = Array.isArray(methods);
-
-        // inject class
-        if (hasMethod && this.$isExtended !== true) {
-            // create intermediate class
-            var A = this.$parent !== null ? Class(this.$parent, [])
-                                          : Class([]);
-
-            // copy this class prototypes methods to intermediate class A and re-define
-            // boundTo to the intermediate class A if they were bound to source class
-            // methods that have been  moved from source class to class have to be re-bound
-            // to A class
-            for(var name in this.prototype) {
-                if (name !== "clazz" && this.prototype.hasOwnProperty(name) ) {
-                    var f = this.prototype[name];
-                    if (typeof f === 'function') {
-                        A.prototype[name] = typeof f.methodBody !== 'undefined' ? $ProxyMethod(name, f.methodBody, f.boundTo)
-                                                                                : f;
-
-                        if (A.prototype[name].boundTo === this) {
-                            A.prototype[name].boundTo = A;
-                            if (f.boundTo === this) {
-                                f.boundTo = A;
-                            }
-                        }
-                    }
-                }
-            }
-
-            this.$parent = A;
-            this.$isExtended = true;
-        }
-
-        if (hasMethod) {
-            $mixing(this, methods);
-        }
-
-        // add passed interfaces
-        for(var i = 0; i < arguments.length - (hasMethod ? 1 : 0); i++) {
-            var I = arguments[i];
-            if (I === null || typeof I === 'undefined' || I.clazz !== Interface) {
-                throw new Error("Interface is expected");
-            }
-
-            if (typeof this.$parents[I.$hash$] !== 'undefined') {
-                throw new Error("Interface has been already inherited");
-            }
-
-            $cpMethods(I.prototype, this.prototype, this);
-            this.$parents[I.$hash$] = I;
-        }
-    };
-
-    /**
-     * Tests if the given class inherits the given class or interface.
-     * @param  {zebkit.Class | zebkit.Interface}  clazz a class or interface.
-     * @return {Boolean} true if the class or interface is inherited with
-     * the class.
-     * @method  isInherit
-     * @for  zebkit.Class
-     */
-    classTemplate.isInherit = function(clazz) {
-        if (this !== clazz) {
-            // detect class
-            if (clazz.clazz === this.clazz) {
-                for (var p = this.$parent; p !== null; p = p.$parent) {
-                    if (p === clazz) {
-                        return true;
-                    }
-                }
-            } else { // detect interface
-                if (this.$parents[clazz.$hash$] === clazz) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    };
+    // populate class level methods and fields into class template
+    for (var tf in classTemplateFields) {
+        classTemplate[tf] = classTemplateFields[tf];
+    }
 
     // assign proper name to class
     classTemplate.clazz.$name = "zebkit.Class";

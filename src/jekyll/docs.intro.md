@@ -4,7 +4,7 @@ parent: docs
 title: Start with zebkit 
 ---
 
-In general zebkit is a JavaScript framework that is supposed to be used for UI development. In the same time the framework provides a lot of artifacts and concepts that are abstracted from UI stuff and can be used independently:   
+Zebkit is a JavaScript framework that is supposed to be used for UI development. In the same time the framework provides a lot of artifacts and concepts that are abstracted from UI stuff and can be used independently:   
 
    * __Easy OOP__. This this the basement for everything in zebkit: packaging, various components buildings, resource management.    
    * __Zson__. JSON as JavaScript objects descriptive language with extended  possibility of inclusions, object instantiations and so on.
@@ -13,7 +13,7 @@ In general zebkit is a JavaScript framework that is supposed to be used for UI d
 
 ## Choose zebkit version
 
-All zebkit artifacts are published on web site. They are applicable either for remote usage or can be downloaded and hosted in a local environment. The artifacts are hosted on web site as follow:
+All zebkit artifacts are published on web site. They are applicable either for remote usage or can be downloaded and hosted in a local environment. The artifacts are hosted on zebkit web site follow the structure shown below:
 
 ```sh
 http://www.zebkit.org/ver        # root zebkit versions URL
@@ -43,7 +43,7 @@ The **latest** (<a href="http://www.zebkit.org/ver/latest">http://www.zebkit.org
 
 __What released zebkit versions are__
 
-There is also zebkit release versions are identified with year and month. The versions are updated only in a case of critical bugs that have not been fixed in subsequent versions. The appropriate artifacts are available by the following pattern: <a href="#">http://zebkit.org/ver/year.month/* </a>
+There are also zebkit release versions are published on web site. They are identified with release year and month. The versions are updated only in a case of critical bugs that have not been fixed in subsequent versions. The appropriate artifacts are available by the following pattern: <a href="#">http://zebkit.org/ver/year.month/* </a>
 
 For instance released at May of 2017 version can be fetched with the following URL: <a href="http://zebkit.org/ver/2017.05/zebkit.js">http://zebkit.org/ver/2017.05/zebkit.js
 </a>
@@ -53,11 +53,11 @@ For instance released at May of 2017 version can be fetched with the following U
 
 Zebkit can be included into your project (page) one of the following manner:
    
-   * Include the version of zebkit hosted on zebkit web site. The latest stable version is available by fixed URL (or add any other desired version): <a href="#">http://zebkit.org/ver/latest/zebkit.[min.]js</a> 
+   * Include the version of zebkit hosted on zebkit web site. The latest stable version is available by fixed URL (or choose other desired version): <a href="#">http://zebkit.org/ver/latest/zebkit.[min.]js</a> 
    
-   * Download required runtime package and unzip it in context of your WEB server. Again the latest zebkit version can be found by the following URL: <a href="http://zebkit.org/ver/latest/zebkit.runtime.zip">http://zebkit.org/ver/latest/zebkit.runtime.zip</a>
+   * Download required runtime package and unzip it in context of your WEB server. The latest zebkit version bundle can be found with the following URL: <a href="http://zebkit.org/ver/latest/zebkit.runtime.zip">http://zebkit.org/ver/latest/zebkit.runtime.zip</a>
 
-   * Checkout version from github and read the instruction how it can be used: <a href="https://github.com/barmalei/zebkit">https://github.com/barmalei/zebkit</a>
+   * Checkout version from github and read the instruction how it can be built and used: <a href="https://github.com/barmalei/zebkit">https://github.com/barmalei/zebkit</a>
 
 Add meta (optionally, for mobile devices only) and script to an HTML page as follow:
 
@@ -85,9 +85,9 @@ content="user-scalable=no,width=device-width,initial-scale=1,maximum-scale=1">
 
 ## Develop with zebkit package(s)
 
-Zebkit stuff is organized as hierarchy of packages. Package is key zebkit structure that unites number of classes, methods, variables and interfaces that are designed for some functional purposes. 
+Zebkit stuff is organized as hierarchy of packages. Package is key zebkit structure that unites number of classes, methods, variables and interfaces that are designed for a functional purposes. 
 
-When zebkit is included into an HTML page you will get global "zebkit" variable. This is the root package you have to start from: 
+Included zebkit into an HTML page adds "zebkit" variable to global space. This variable points to root - "zebkit" - package you have to start from: 
 
 ```js
 // request "zebkit.ui", "zebkit.layout" and "zebkit.ui.grid" package  
@@ -100,11 +100,11 @@ zebkit.require("ui", "layout", "ui.grid", function(ui, layout, grid) {
 Above zebkit "require" call does the following:
 
    * Requests three packages: "zebkit.ui", "zebkit.layout", "zebkit.ui.grid"
-   * Call callback method that guarantees that all the tree packages are ready to be used: the HTML page is completely loaded and requested packages are completely configured.  
+   * Calls passed callback method at the moment all the other packages are ready for usage: an HTML page is completely loaded and requested packages are completely configured.
 
 Inside the require callback method you should start developing a zebkit application.
 
-When you develop your own zebkit code it should be reasonable to stick to zebkit package concept. That means re-usable components, classes and other things should placed in a package or packages. Creation of a zebkit package is simple:  
+Developing a custom zebkit code should be stick to zebkit package concept. It means re-usable components, classes and other things should placed in zebkit package or packages. Creation of a zebkit package is simple:  
 
 ```js
 // create new package 
@@ -137,9 +137,16 @@ zebkit.require("mypackage", function(mypkg) {
 
 ## Package configuration 
 
-Package can be configured with a JSON. 
+Package can be configured with a JSON. The most simple way to initiate the configiration is pass true as last parameter of "zebkit.package(...)" method:
 
-   -  
+```js
+// create new package configured with JSON configuration
+zebkit.require("mypackage", function(mypkg) {
+    ...
+}, true);
+```
+
+It is suppose JSON file has to be stored alone with the package JavaScript code. The name of the configuration file has to be full package name (without "zebkit prefix") + ".json". For example mentioned above the name of configuration files is "mypackage.json" 
 
 ## Standard zebkit packages
 

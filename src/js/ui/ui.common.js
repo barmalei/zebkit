@@ -710,8 +710,8 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Image label UI component. This is UI container that consists from an image
      * component and an label component.Image is located at the left size of text.
-     * @param {Image|String} img an image or path to the image
-     * @param {String|zebkit.draw.TextRender|zebkit.data.TextModel} txt a text string,
+     * @param {Image|String} [img] an image or path to the image
+     * @param {String|zebkit.draw.TextRender|zebkit.data.TextModel} [txt] a text string,
      * text model or text render instance
      * @constructor
      * @class zebkit.ui.ImageLabel
@@ -719,11 +719,17 @@ zebkit.package("ui", function(pkg, Class) {
      */
     pkg.ImageLabel = Class(pkg.Panel, [
         function(txt, path) {
-            var img = zebkit.instanceOf(path, pkg.ImagePan) ? path : new this.clazz.ImagePan(path),
-                lab = zebkit.instanceOf(txt, pkg.Panel)     ? txt  : new this.clazz.Label(txt);
+            var img = null,
+                lab = null;
 
-            img.constraints = "image";
-            lab.constraints = "label";
+            if (arguments.length > 0) {
+                lab = zebkit.instanceOf(txt, pkg.Panel) ? txt : new this.clazz.Label(txt);
+                lab.constraints = "label";
+                if (arguments.length > 1) {
+                    img = zebkit.instanceOf(path, pkg.ImagePan) ? path : new this.clazz.ImagePan(path);
+                    img.constraints = "image";
+                }
+            }
 
             // TODO: this is copy paste of Panel constructor to initialize fields that has to
             // be used for adding child components. these components have to be added before
@@ -735,8 +741,13 @@ zebkit.package("ui", function(pkg, Class) {
             this.layout = new zebkit.layout.FlowLayout("left", "center", "horizontal", 6);
 
             // add before panel constructor thanks to copy pasted code above
-            this.add(img);
-            this.add(lab);
+            if (img !== null) {
+                this.add(img);
+            }
+
+            if (lab !== null) {
+                this.add(lab);
+            }
 
             this.$super();
 

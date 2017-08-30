@@ -168,56 +168,56 @@ zebkit.package("draw", function(pkg, Class) {
     */
     pkg.Picture = Class(pkg.Render, [
         function(img, x, y, w, h) {
+            this.setValue(img);
+            if (arguments.length === 2) {
+                this.height = this.width = x;
+            } else if (arguments.length === 3) {
+                this.width  = x;
+                this.height = y;
+            } else if (arguments.length > 3) {
+                this.x      = x;
+                this.y      = y;
+                this.width  = w;
+                this.height = h;
+            }
+        },
+
+        function $prototype() {
             /**
              * A x coordinate of the image part that has to be rendered
              * @attribute x
              * @readOnly
              * @type {Integer}
-             * @default 0
+             * @default -1
              */
+            this.x = -1;
 
             /**
              * A y coordinate of the image part that has to be rendered
              * @attribute y
              * @readOnly
              * @type {Integer}
-             * @default 0
+             * @default -1
              */
+            this.y = -1;
 
             /**
              * A width  of the image part that has to be rendered
              * @attribute width
              * @readOnly
              * @type {Integer}
-             * @default 0
+             * @default -1
              */
+            this.width = -1;
 
             /**
-             * A height  of the image part that has to be rendered
+             * A height of the image part that has to be rendered
              * @attribute height
              * @readOnly
              * @type {Integer}
-             * @default 0
+             * @default -1
              */
-
-            this.setValue(img);
-            if (arguments.length > 1) {
-                this.x = x;
-                if (arguments.length > 2) {
-                    this.y = y;
-                    if (arguments.length > 3) {
-                        this.height = this.width = w;
-                    }
-
-                    if (arguments.length > 4) {
-                        this.height = h;
-                    }
-                }
-            }
-        },
-
-        function $prototype() {
-            this.x = this.y = this.width = this.height = 0;
+            this.height = -1;
 
             this.paint = function(g,x,y,w,h,d) {
                 if (this.target !== null &&
@@ -225,7 +225,7 @@ zebkit.package("draw", function(pkg, Class) {
                     this.target.naturalWidth > 0 &&
                     w > 0 && h > 0)
                 {
-                    if (this.width > 0) {
+                    if (this.x > 0) {
                         g.drawImage(this.target, this.x, this.y,
                                     this.width, this.height, x, y, w, h);
                     } else {

@@ -468,7 +468,7 @@ zebkit.package("ui.design", function(pkg, Class) {
                 if (r.comp === c) {
                     return c;
                 } else {
-                    for(var i = 0;i < r.kids.length; i++) {
+                    for(var i = 0; i < r.kids.length; i++) {
                         var item = this.itemByComponent(c, r.kids[i]);
                         if (item !== null) {
                             return item;

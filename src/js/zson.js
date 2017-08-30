@@ -496,6 +496,43 @@ var Zson = Class([
             }
         };
 
+        this.$qsToVars = function(uri) {
+            var qs   = null,
+                vars = null;
+
+            if ((uri instanceof URI) === false) {
+                qs = new URI(uri.toString()).qs;
+            } else {
+                qs = uri.qs;
+            }
+
+            if (qs !== null || typeof qs === 'undefined') {
+                qs = URI.parseQS(qs);
+                for(var k in qs) {
+                    var qsv = qs[k];
+                    if (qsv[0] === "'") {
+                        qsv = qsv.substring(1, qsv.length - 1);
+                    } else if (qsv === "true" || qsv === "false") {
+                        qsv = (qsv === "true");
+                    } else if (qsv === "false") {
+                        qsv = false;
+                    } else if (qsv === "null") {
+                        qsv = null;
+                    } else {
+                        qsv = parseInt(qsv, 10);
+                    }
+
+                    if (vars === null) {
+                        vars = {};
+                    }
+
+                    vars[k] = qsv;
+                }
+            }
+
+            return vars;
+        };
+
         this.$buildRef = function(d) {
             var idx = -1;
 
@@ -532,32 +569,11 @@ var Zson = Class([
                 }
 
                 if (type === "json") {
-                    var bag = new this.clazz(),
-                        bg  = null,
-                        qs  = new URI(path).qs;
-
+                    var bag = new this.clazz();
                     bag.usePropertySetters = this.usePropertySetters;
-                    if (qs !== null) {
-                        qs = URI.parseQS(qs);
-                        bag.$variables = {};
-                        for(var k in qs) {
-                            var qsv = qs[k];
-                            if (qsv[0] === "'") {
-                                qsv = qsv.substring(1, qsv.length - 1);
-                            } else if (qsv === "true") {
-                                qsv = true;
-                            } else if (qsv === "false") {
-                                qsv = false;
-                            } else if (qsv === "null") {
-                                qsv = null;
-                            } else {
-                                qsv = parseInt(qsv, 10);
-                            }
-                            bag.$variables[k] = qsv;
-                        }
-                    }
+                    bag.$variables         = this.$qsToVars(path);
 
-                    bg = bag.then(path).catch();
+                    var bg = bag.then(path).catch();
                     this.$runner.then(bg.then(function(res) {
                         return res.root;
                     }));
@@ -715,7 +731,6 @@ var Zson = Class([
                         }
                     }
 
-
                     if (this.$isAtomic(dv) || Array.isArray(dv) ||
                         this.$isAtomic(sv) || Array.isArray(sv) ||
                         typeof sv.clazz !== 'undefined'            )
@@ -823,6 +838,8 @@ var Zson = Class([
                     if ((json[0] !== '[' || json[json.length - 1] !== ']') &&
                         (json[0] !== '{' || json[json.length - 1] !== '}')   )
                     {
+                        $this.$variables = $this.$qsToVars(json);
+
                         $this.url = json + (json.lastIndexOf("?") > 0 ? "&" : "?") + (new Date()).getTime().toString();
 
                         var join = this.join();

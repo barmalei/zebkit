@@ -379,9 +379,9 @@ var ItemRender = zebra.Class(zebra.ui.View, [
 <script type="text/javascript">
     zebkit.require("data", "ui", "draw", function(data, ui, draw) {
         var l = new ui.List([
-            new draw.Picture(zebkit.images.bmw, 0, 0, 24, 24),
-            new draw.Picture(zebkit.images.honda,  0, 0, 24, 24),
-            new draw.Picture(zebkit.images.saab,  0, 0, 24, 24)
+            new draw.Picture(zebkit.images.bmw, 24, 24),
+            new draw.Picture(zebkit.images.honda, 24, 24),
+            new draw.Picture(zebkit.images.saab,  24, 24)
         ]);
 
         new ui.zCanvas("model2").root.properties({
@@ -397,9 +397,9 @@ var ItemRender = zebra.Class(zebra.ui.View, [
 <script type="text/javascript">
     zebkit.require("data", "ui", "draw", function(data, ui, draw) {
         var l = new ui.CompList([
-            new ui.ImageLabel("Item 1", zebkit.images.bmw),
-            new ui.ImageLabel("Item 2", zebkit.images.honda),
-            new ui.ImageLabel("Item 3", zebkit.images.saab)
+            new ui.ImageLabel("Item 1", zebkit.images.bmw, 24),
+            new ui.ImageLabel("Item 2", zebkit.images.honda, 24),
+            new ui.ImageLabel("Item 3", zebkit.images.saab, 24)
         ]);
 
         new ui.zCanvas("model3").root.properties({
@@ -468,7 +468,7 @@ var ItemRender = zebra.Class(zebra.ui.View, [
 <script type="text/javascript">
     zebkit.require("data", "ui", "ui.tree", function(data, ui, tree) {
         var t = new zebkit.ui.tree.Tree({
-            value: new zebkit.draw.Picture(zebkit.images.bmw),
+            value: new ui.ImageLabel("Test", zebkit.images.bmw).property(".//*", "padding", 10),
             kids: [
                 "Item 2",
                 {
@@ -480,6 +480,8 @@ var ItemRender = zebra.Class(zebra.ui.View, [
                 }
             ]
         });
+
+        t.setGaps(0,0);
 
         new ui.zCanvas("model6").root.properties({
            layout : new zebkit.layout.BorderLayout(),

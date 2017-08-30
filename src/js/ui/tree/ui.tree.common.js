@@ -812,7 +812,8 @@ zebkit.package("ui.tree", function(pkg, Class) {
             };
 
             this.paintSelectedItem = function(g, root, node, x, y) {
-                var v = this.hasFocus() ? this.views.focusOnSelect : this.views.focusOffSelect;
+                var v = this.hasFocus() ? this.views.focusOnSelect
+                                        : this.views.focusOffSelect;
                 if (v !== null && typeof v !== 'undefined') {
                     v.paint(g, x, y, node.viewWidth, node.viewHeight, this);
                 }

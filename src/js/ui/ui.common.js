@@ -707,18 +707,21 @@ zebkit.package("ui", function(pkg, Class) {
      */
     pkg.BoldLabel = Class(pkg.Label, []);
 
+
     /**
      * Image label UI component. This is UI container that consists from an image
      * component and an label component.Image is located at the left size of text.
      * @param {Image|String} [img] an image or path to the image
      * @param {String|zebkit.draw.TextRender|zebkit.data.TextModel} [txt] a text string,
      * text model or text render instance
+     * @param {Integer} [w] an image preferred width
+     * @param {Integer} [h] an image preferred height
      * @constructor
      * @class zebkit.ui.ImageLabel
      * @extends zebkit.ui.Panel
      */
     pkg.ImageLabel = Class(pkg.Panel, [
-        function(txt, path) {
+        function(txt, path, w, h) {
             var img = null,
                 lab = null;
 
@@ -728,6 +731,10 @@ zebkit.package("ui", function(pkg, Class) {
                 if (arguments.length > 1) {
                     img = zebkit.instanceOf(path, pkg.ImagePan) ? path : new this.clazz.ImagePan(path);
                     img.constraints = "image";
+
+                    if (arguments.length > 2) {
+                        img.setPreferredSize(w, (arguments.length > 3 ? h : w));
+                    }
                 }
             }
 

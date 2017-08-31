@@ -237,50 +237,17 @@ var Zson = Class([
                 ignore = true;
             }
 
-            var v = this.$get(key.split('.'), this.root);
-            if (ignore === false && typeof v === 'undefined') {
-                throw new Error("Property '" + key + "' not found");
-            }
-
-            return v;
-        };
-
-        /**
-         * Internal implementation of fetching a property value.
-         * @param  {Array} keys array of a key path parts
-         * @param  {Object} root an object to start resolving a property value
-         * @method  $get
-         * @protected
-         * @return {Object} a property value or undefined if the property  cannot be fetched from the
-         * object
-         */
-        this.$get = function(keys, root) {
-            if (keys.length === 0) {
-                throw new Error("No keys were found");
-            }
-
-            var v = root;
-            for(var i = 0; i < keys.length; i++) {
-                v = v[keys[i]];
-                if (typeof v === "undefined") {
-                    return undefined;
+            if (ignore) {
+                try {
+                    return getPropertyValue(this.root, key);
+                } catch(e) {
+                    if ((e instanceof ReferenceError) === false) {
+                        throw e;
+                    }
                 }
+            } else {
+                return getPropertyValue(this.root, key);
             }
-            return v !== null && v.$new ? v.$new() : v;
-        };
-
-        /**
-         * Test if the given value has atomic type (String, Number or Boolean).
-         * @param  {Object}  v a value
-         * @return {Boolean} true if the value has atomic type
-         * @protected
-         * @method  $isAtomic
-         */
-        this.$isAtomic = function(v) {
-            return v === null || typeof v === 'undefined' ||
-                   (typeof v === "string"  || v.constructor === String)  ||
-                   (typeof v === "number"  || v.constructor === Number)  ||
-                   (typeof v === "boolean" || v.constructor === Boolean)  ;
         };
 
         /**
@@ -525,7 +492,6 @@ var Zson = Class([
                     if (vars === null) {
                         vars = {};
                     }
-
                     vars[k] = qsv;
                 }
             }
@@ -731,8 +697,8 @@ var Zson = Class([
                         }
                     }
 
-                    if (this.$isAtomic(dv) || Array.isArray(dv) ||
-                        this.$isAtomic(sv) || Array.isArray(sv) ||
+                    if (isAtomic(dv) || Array.isArray(dv) ||
+                        isAtomic(sv) || Array.isArray(sv) ||
                         typeof sv.clazz !== 'undefined'            )
                     {
                         this.$assignValue(dest, k, sv);

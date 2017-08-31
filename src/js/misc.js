@@ -230,7 +230,6 @@ var $uriRE = /^(([a-zA-Z]+)\:\/\/([^\/:]+)?(\:[0-9]+)?(\/)?)?([^?]+)?(\?.+)?/;
 //  Math.round(f)  =>  (f + 0.5) | 0
 
 
-
 /**
  * Check if the given value is string
  * @param {Object} v a value.
@@ -267,26 +266,62 @@ function isBoolean(o) {
           (typeof o === "boolean" || o.constructor === Boolean);
 }
 
-// get a value by the specified path from the given object or global space object
-function lookupObjValue(obj, name) {
-    if (arguments.length === 1) {
-        name = obj;
-        obj  = $global;
+/**
+ * Test if the given value has atomic type (String, Number or Boolean).
+ * @param  {Object}  v a value
+ * @return {Boolean} true if the value has atomic type
+ * @method  isAtomic
+ * @for zebkit
+ */
+function isAtomic(v) {
+    return v === null || typeof v === 'undefined' ||
+           (typeof v === "string"  || v.constructor === String)  ||
+           (typeof v === "number"  || v.constructor === Number)  ||
+           (typeof v === "boolean" || v.constructor === Boolean)  ;
+}
+
+/**
+ * Get property value for the given object and the specified property path
+ * @param  {Object} obj  a target object.
+ * as the target object
+ * @param  {String} path property path.
+ * @param  {Boolean} [useGetter] says too try getter method when it exists.
+ * By default the parameter is false
+ * @return {Object} a property value
+ * @method  getPropertyValue
+ * @for  zebkit
+ */
+function getPropertyValue(obj, path, useGetter) {
+    if (arguments.length < 3) {
+        useGetter = false;
     }
 
-    if (typeof name === 'undefined' || name.trim().length === 0) {
-        throw new Error("Invalid field name: '" + name + "'");
+    if (typeof path === 'undefined' || path.trim().length === 0) {
+        throw new Error("Invalid field path: '" + path + "'");
     }
 
-    var names = name.trim().split('.');
-    for(var i = 0; i < names.length; i++) {
-        obj = obj[names[i]];
-
-        if (typeof obj === 'undefined' || ((i + 1) === names.length && obj === null)) {
-            throw new Error("'" + name + "' value cannot be detected");
+    var paths = path.trim().split('.');
+    for(var i = 0; i < paths.length; i++) {
+        var p = paths[i], m = null;
+        if (typeof obj !== 'undefined' && obj !== null &&
+            ((useGetter === true && (m = getPropertyGetter(obj, p))) || obj.hasOwnProperty(p)))
+        {
+            if (useGetter === true && m !== null) {
+                obj = m.call(obj);
+            } else {
+                obj = obj[p];
+            }
+        } else {
+            throw new ReferenceError("Property path '" + p + "' cannot be resolved");
         }
     }
-    return obj;
+
+    // detect object value factory
+    if (obj !== null && typeof obj !== 'undefined' && typeof obj.$new === 'function') {
+        return obj.$new();
+    } else {
+        return obj;
+    }
 }
 
 /**
@@ -308,10 +343,30 @@ function getPropertySetter(obj, name) {
             pi[name] = (typeof m  === "function") ? m : null;
         }
         return pi[name];
+    } else {
+        m = obj[ "set" + name[0].toUpperCase() + name.substring(1) ];
+        return (typeof m  === "function") ? m : null;
     }
+}
 
-    m = obj[ "set" + name[0].toUpperCase() + name.substring(1) ];
-    return (typeof m  === "function") ? m : null;
+/**
+ * Get a property getter method if it is declared with the class of the specified object for the
+ * given property. Getter is a method whose name matches the following patterns: "get<PropertyName>"
+ * or "is<PropertyName>" where the first letter of the property name is in upper case. For instance
+ * getter method for property "color" has to have name "getColor".
+ * @param  {Object} obj an object instance
+ * @param  {String} name a property name
+ * @return {Function}  a method that can be used as a getter for the given property
+ * @method  getPropertyGetter
+ * @for zebkit
+ */
+function getPropertyGetter(obj, name) {
+    var suffix = name[0].toUpperCase() + name.substring(1),
+        m      = obj[ "get" + suffix];
+    if (typeof m !== 'function') {
+        m = obj[ "is" + suffix];
+    }
+    return (typeof m === 'function') ? m : null;
 }
 
 /**
@@ -684,8 +739,9 @@ URI.join = function() {
 };
 
 $export(
-    URI,        isNumber, isString, $Map,
+    URI,        isNumber, isString, $Map, isAtomic,
     dumpError,  image,    getPropertySetter,
+    getPropertyValue,     getPropertyGetter,
     properties, GET,      isBoolean, DoIt,
     { "$global"    : $global,
       "$FN"        : $FN,

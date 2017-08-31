@@ -8,8 +8,11 @@ Zebkit is a JavaScript framework that is supposed to be used for UI development.
 
    * __Easy OOP__. This this the basement for everything in zebkit: packaging, various components buildings, resource management.    
    * __Zson__. JSON as JavaScript objects descriptive language with extended  possibility of inclusions, object instantiations and so on.
-   * __Data model__. Number of classes and interfaces to represent difefrent data models like list, tree, matrix and so on
-   * etc  
+   * __Data model package__. Number of classes and interfaces to represent different data models like list, tree, matrix and so on
+   * __Dthen__. More powerful promise-like approach to make your asynchronous code plain and readable.
+   * __Views and renders package__. Number of simple graphical elements to be rendered on a canvas surface.
+   * __IO package__. Simple package to communicate to restful, XRPC, JRPC services.
+   * and so on   
 
 ## Choose zebkit version
 
@@ -37,6 +40,7 @@ http://www.zebkit.org/ver        # root zebkit versions URL
 __What the latest zebkit version is__
 
 The **latest** (<a href="http://www.zebkit.org/ver/latest">http://www.zebkit.org/ver/latest</a>) is the version that is considered as the most stable and bug free snapshot of github version. For developers using the latest means:
+
    * They stick to the most actual and quite stable version with the hottest fixes and the most recent new features.
    * They should never care about bloody version name or code to address the version they need. They always get the latest one. 
    * They are in a risk with the latest version updates. That means a recent update of the latest version can add a bug or (in rare cases) even backward compatible issues. 
@@ -82,29 +86,32 @@ content="user-scalable=no,width=device-width,initial-scale=1,maximum-scale=1">
 </html>
 ```
 
+That is all, your page is ready to start developing with zebkit.
 
-## Develop with zebkit package(s)
+## Developing with zebkit 
 
-Zebkit stuff is organized as hierarchy of packages. Package is key zebkit structure that unites number of classes, methods, variables and interfaces that are designed for a functional purposes. 
+Zebkit stuff is organized as hierarchy of __packages__. Package is key zebkit structure that unites number of classes, methods, variables and interfaces that are designed for dedicated functional purposes. 
 
-Included zebkit into an HTML page adds "zebkit" variable to global space. This variable points to root - "zebkit" - package you have to start from: 
+Including zebkit into an HTML page adds "zebkit" variable to the global space. This variable points to root - "zebkit" - package to start with: 
 
 ```js
-// request "zebkit.ui", "zebkit.layout" and "zebkit.ui.grid" package  
-zebkit.require("ui", "layout", "ui.grid", function(ui, layout, grid) {
+// request "zebkit.ui","zebkit.layout" and "zebkit.ui.grid" packages  
+zebkit.require("ui","layout","ui.grid", function(ui, layout, grid) {
     var button = new ui.Button("My Button");
     ...
 });
 ```
 
-Above zebkit "require" call does the following:
+__"zebkit.require(...)"__ method call illustrated in snippet above does the following:
 
-   * Requests three packages: "zebkit.ui", "zebkit.layout", "zebkit.ui.grid"
-   * Calls passed callback method at the moment all the other packages are ready for usage: an HTML page is completely loaded and requested packages are completely configured.
+   * Requests three packages references: "zebkit.ui", "zebkit.layout", "zebkit.ui.grid"
+   * Calls passed callback method at the moment all other packages are ready for usage: an HTML page is completely loaded and requested packages are completely configured.
 
-Inside the require callback method you should start developing a zebkit application.
+Callback method is the safe place to start developing zebkit application.
 
-Developing a custom zebkit code should be stick to zebkit package concept. It means re-usable components, classes and other things should placed in zebkit package or packages. Creation of a zebkit package is simple:  
+## Package re-usable code 
+
+Developing a custom zebkit code should be done within zebkit package concept. Re-usable components, classes and other entities should be placed in zebkit package or packages. Creation of a new zebkit package is simple:  
 
 ```js
 // create new package 
@@ -137,7 +144,7 @@ zebkit.require("mypackage", function(mypkg) {
 
 ## Package configuration 
 
-Package can be configured with a JSON. The most simple way to initiate the configiration is pass true as last parameter of "zebkit.package(...)" method:
+Package entities can be configured with a JSON. The most simple way to initiate the configuration is to pass true as last parameter of __"zebkit.package(...)"__ method:
 
 ```js
 // create new package configured with JSON configuration
@@ -146,7 +153,7 @@ zebkit.require("mypackage", function(mypkg) {
 }, true);
 ```
 
-It is suppose JSON file has to be stored alone with the package JavaScript code. The name of the configuration file has to be full package name (without "zebkit prefix") + ".json". For example mentioned above the name of configuration files is "mypackage.json" 
+It is suppose JSON file has to be stored alone with the package JavaScript code and the name of the configuration file has to be full package name (without "zebkit prefix") plus ".json" extension. In example mentioned above the name of configuration file is "mypackage.json" 
 
 ## Standard zebkit packages
 

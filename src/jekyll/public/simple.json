@@ -1,5 +1,5 @@
 {
-    "layout": { "@zebkit.layout.StackLayout" : []},
+    "layout": { "@zebkit.layout.StackLayout" : [] },
     "kids"  : [{
         "@zebkit.ui.Panel":[],
         "layout" : { "@zebkit.layout.BorderLayout" :4 },
@@ -19,10 +19,27 @@
     }],
 
     "#actions" : [{
-        "source"  : "//zebkit.ui.Button",
-        "target"  : {
+        "source"   : "//zebkit.ui.Button",
+        "condition": {
+            "canHaveFocus" : true
+        },
+
+        "fire" : {
+            "event" : "CleanMyPc",
+            "target": "*",
+            "args"  : [
+
+            ]
+        },
+
+        "target"   : {
             "path"   : "//zebkit.ui.TextArea",
-            "update" : { "value": "" }
+            "update" : { "value": "" },
+            "condition" : [
+                {  "propertyName" : "propertyValue", "$op": "eq" },
+                "OR",
+                {  "name" : "<name>", "op": "eq", "value"  },
+            ]
         }
     }]
 }

@@ -35,8 +35,8 @@ myClassInstance.a; // 10
 
 **Access to parent context** 
 
-   * Use _$super(...)_ method to call a parent method implementation
-   * _$super(...)_ works correct for deep hierarchy tracking properly an order of methods execution 
+   * Use __$super(...)__ method to call a parent method implementation
+   * __$super(...)__ works correct for deep hierarchy tracking properly an order of methods execution 
 
 ```js
 var A = zebkit.Class([
@@ -65,10 +65,10 @@ b.abc(); // 3 + 2 = 5
 **Inheritance** 
 
    * Zebkit easy OOP supports single parent inheritance 
-   * Pass a parent class to be inherited as the first parameter of _"zebkit.Class()"_ method
+   * Pass a parent class to be inherited as the first parameter of __"zebkit.Class(...)"__ method
    * Class methods can be overridden, but not overloaded
    * Constructor is inherited
-   * Use _"zebkit.instanceOf()_ operator instead of standard JS _"instanceof"_  
+   * Use __"zebkit.instanceOf()__ operator instead of standard JS __"instanceof"__  
 
 ```js
 // Define class A with class method  "abc()"
@@ -91,12 +91,12 @@ zebkit.instanceOf(a, B) // false
 
 **Mixing (Interface)** Mixing is way to share common functionality between classes without necessity to support improper multi inheritance OOP concept.
 
-   * Mix methods set has to be declared with _"zebkit.Interface(...)"_
-   * _"zebkit.Interface()"_ can declare set of methods and initializer 
+   * Mix methods set has to be declared with __"zebkit.Interface(...)"__
+   * __"zebkit.Interface()"__ can declare set of methods
    * Interface cannot inherit other interfaces and classes
 
 ```js
-// Declare Mix1 and Mix2 interfaces  
+// Declare Mix1 and Mix2 interfaces  x§
 var Mix1 = zebkit.Interface([
     function abc() { ... }
 ]); 
@@ -203,10 +203,10 @@ B.staticMethod == A.staticMethod;// true
 ```
 
 
-**Packaging** It is recommended to use package system zebkit provides. The packages are organized as hierarchy (the same way Java does it). Packages are accessible from predefined _"zebkit"_ global package with using dot notation. The main rules you should follow:
+**Packaging** It is recommended to use package system zebkit provides. The packages are organized as hierarchy (the same way Java does it). Packages are accessible from predefined __"zebkit"__ global package with using dot notation. The main rules you should follow:
 
-   * Declare a package variables and classes safely with _"zebkit.package(...)"_ method
-   * Safely access to packages stuff with _"zebkit.require(...)"_ method
+   * Declare a package variables and classes safely with __"zebkit.package(...)"__ method
+   * Safely access to packages stuff with __"zebkit.require(...)"__ method
    * Use dot notation to access package stuff 
 
 ```js
@@ -227,7 +227,7 @@ zebkit.require("test", function(test) {
 ```
 
 
-**Import package stuff in your scope** Not always handy to access classes and variables by pointing full path to its (_"zebkit.ui.grid.Grid"_). Zebkit helps importing fields from the given package(s) into a local scope by using _zebkit.import()__ method that should be used in combination with JS "eval()" standard method. Pay attention that using JS "eval()" method is bad practice. It is recommended to use _"zebkit.require(...)"_ method where it is possible.
+**Import package stuff in your scope** Not always handy to access classes and variables by pointing full path to its (__"zebkit.ui.grid.Grid"__). Zebkit helps importing fields from the given package(s) into a local scope by using __zebkit.import()__ method that should be used in combination with JS "eval()" standard method. Pay attention that using JS "eval()" method is bad practice. It is recommended to use __"zebkit.require(...)"__ method.
 
 ```js
 // Define variables in "test" package 
@@ -255,9 +255,9 @@ zebkit.require(function() {
 
 **Dynamic class extensions** Zebkit classes can be extended dynamically either on the class level (extend class definition with new methods and variables) or on the class instance level.
 
-   * Use _"extend(...)"_ method to extend a class or a class instance
+   * Use __"extend(...)"__ method to extend a class or a class instance with new methods and fields
    * Extending of a class causes his new instances will get the extensions
-   * Extending an instance has effect only for the given class instance 
+   * Extending an instance of a class has effect only for the given class instance
 
 ```js
 var A = zebkit.Class([

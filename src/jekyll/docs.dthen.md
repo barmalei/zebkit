@@ -5,11 +5,11 @@ title: D-then
 ---
 
 
-Writing and subsequent reading JS code can make developers crazy because of callbacks JS software is normally overloaded. Especially "curved" code is encouraged by asynchronous calls. JS Promises are good to make JS code better looking and understandable. But in a context of zebkit project standard promises concept was not enough. 
+Writing and subsequent reading JS code can make developers crazy because of callbacks JS software is normally overloaded. JS Promises are good solution to make JS code better looking and understandable. But in a context of zebkit project standard promises concept was not enough. 
 
-As an better alternative top JS Promise, zebkit has introduced 'DoIt' approach that have the following key advantages:   
+As an better alternative to JS Promise, zebkit has introduced __'Dthen'__ approach that offers the following key advantages:   
 
-**Simply run a sequence of methods.** No reject or resolve callbacks have to be called:
+**Simply run a sequence of methods.** No "reject" or "resolve" callbacks are expected to be called:
 
 ```js
 new zebkit.DoIt().then(function() {
@@ -27,7 +27,7 @@ new zebkit.DoIt().then(function() {
 ```
 
 
-**Run methods in an order you add it.** Synchronous, asynchronous methods can be combined in the executed sequence where every next step run only when previous one is completed:  
+**Run methods in an order you add it.** Synchronous or asynchronous methods can be combined in the executed sequence where every next step is run only when previous one has been completed:  
 
 ```js
 var rn = new zebkit.DoIt().then(function() {
@@ -50,7 +50,7 @@ var rn = new zebkit.DoIt().then(function() {
 ```
 
 
-**Embedded sequences are possible.** Embedded execution method sequences can be useful to make your code more readable. Embedded sequence don't pass its result with outer sequence: 
+**Embedded sequences are possible.** Embedded execution methods sequences can be useful to make your code more readable. Embedded sequences don't share its result with outer sequence: 
 
 ```js
 new zebkit.DoIt().then(function() {
@@ -67,7 +67,7 @@ new zebkit.DoIt().then(function() {
 ```
 
 
-**Multiple sequences execution can be combined.** A sequence can be run as a part of other sequence or can its run can be synchronized with another one:
+**Synchronizing multiple sequences.** A sequence can be run as a part of other sequence:
 
 ```js
 var doit1 = new zebkit.DoIt().then(function() {
@@ -111,7 +111,7 @@ new zebkit.DoIt().then(function() {
 });
 ```
 
-**Asynchronous are easy to control.** Calling 'join' method multiple times are used to join results of multiple asynchronous code execution:
+**Asynchronous are easy to control.**:
 
 ```js
 new zebkit.DoIt().then(function() {

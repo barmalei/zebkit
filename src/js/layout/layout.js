@@ -326,6 +326,18 @@ zebkit.package("layout", function(pkg, Class) {
             };
 
             /**
+             * Set the component properties. This is wrapper for "properties" method to supply
+             * properties setter method.
+             * @param  {String} [path]  a path to find children components
+             * @param  {Object} props a dictionary of properties to be applied
+             * @method setProperties
+             */
+            this.setProperties = function() {
+                this.properties.apply(this, arguments);
+                return this;
+            };
+
+            /**
              * Apply the given set of properties to the given component or a number of children
              * its components.
              * @example
@@ -345,7 +357,6 @@ zebkit.package("layout", function(pkg, Class) {
              *
              * @param  {String} [path]  a path to find children components
              * @param  {Object} props a dictionary of properties to be applied
-             * @return {zebkit.ui.Layoutable} a component itself
              * @chainable
              * @method properties
              */

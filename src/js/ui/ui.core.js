@@ -1,7 +1,7 @@
 zebkit.package("ui", function(pkg, Class) {
 
-    this.config("basedir", zebkit.URI.join(this.$url, "rs/themes/%{theme}"), false);
-    this.config("theme", "dark", false);
+    this.config( { "basedir" : zebkit.URI.join(this.$url, "rs/themes/%{theme}"),
+                   "theme"   : "dark" }, false);
 
     // Panel WEB specific dependencies:
     //   -  getCanvas() -> zCanvas
@@ -72,6 +72,30 @@ zebkit.package("ui", function(pkg, Class) {
         }
     };
 
+
+    function testCondition(target, cond) {
+        for(var k in cond) {
+            var cv = cond[k],
+                tv = zebkit.getPropertyValue(target, k, true);
+
+            if (zebkit.isAtomic(cv)) {
+                if (cv !== tv) {
+                    return false;
+                }
+            } else {
+                for(var op in cv) {
+
+                }
+            }
+
+            if (cond[k] !== v) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     zebkit.Zson.prototype.completed = function() {
         if (typeof this.$actions !== 'undefined' && this.$actions.length > 0) {
             try {
@@ -79,32 +103,40 @@ zebkit.package("ui", function(pkg, Class) {
                 for (var i = 0; i < this.$actions.length; i++) {
                     var a = this.$actions[i];
 
-                    (function(source, eventName, targets) {
-                        var args = [];
+                    (function(source, eventName, cond, targets) {
+                        var args    = [],
+                            srcComp = root.byPath(source);
+
                         if (typeof eventName !== 'undefined' && eventName !== null) {
                             args.push(eventName);
                         }
                         args.push(source);
                         args.push(function() {
-                            for(var j = 0; j < targets.length; j++) {
-                                var target     = targets[j],
-                                    targetPath = (typeof target.path === 'undefined') ? source : target.path;
+                            if (cond === null || typeof cond === 'undefined' || testCondition(srcComp, cond)) {
+                                // targets
+                                for(var j = 0; j < targets.length; j++) {
+                                    var target     = targets[j],
+                                        targetPath = (typeof target.path === 'undefined') ? source : target.path;
 
-                                root.byPath(targetPath, function(c) {
-                                    if (target.update !== 'undefined') {
-                                        c.properties(target.update);
-                                    }
+                                    // find target
+                                    root.byPath(targetPath, function(c) {
+                                        if (typeof target.condition === 'undefined' || testCondition(c, target.condition)) {
+                                            if (target.update !== 'undefined') {
+                                                c.properties(target.update);
+                                            }
 
-                                    if (target['do'] !== 'undefined') {
-                                        for(var cmd in target['do']) {
-                                            c[cmd].apply(c, target['do'][cmd]);
+                                            if (target['do'] !== 'undefined') {
+                                                for(var cmd in target['do']) {
+                                                    c[cmd].apply(c, target['do'][cmd]);
+                                                }
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                                }
                             }
                         });
                         root.on.apply(root, args);
-                    } (a.source, a.event, typeof a.targets !== 'undefined' ? a.targets : [ a.target ]));
+                    } (a.source, a.event, a.condition, typeof a.targets !== 'undefined' ? a.targets : [ a.target ]));
                 }
             } finally {
                 this.$actions.length = 0;

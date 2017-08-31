@@ -4,11 +4,11 @@ parent: docs
 ---
 
 
-The key root zebkit UI component is "__zebkit.ui.Panel__". Every zebkit UI component is an instance of "zebkit.ui.Panel" class. This class unifies all existent zebkit components with common API, event handling, metrics and behavior. Even if you instantiate a zebkit HTML component it will be represented as an instance of "zebkit.ui.Panel" class.           
+The major root zebkit UI component is "__zebkit.ui.Panel__". Every zebkit UI component is an instance of "zebkit.ui.Panel" class. This class unifies all existent zebkit components with common API, event handling, metrics and behavior. Even if you instantiate a zebkit HTML component it will be represented as an instance of "zebkit.ui.Panel" class.           
 
-"zebkit.ui.Panel" is container, what means it can embeds other UI components as its children component. The children components are ordered with a alyout manager of the container has set.    
+__"zebkit.ui.Panel"__ is container, what means it can embed other UI components as its children components that are ordered with a layout manager the container defines.    
 
-Zebkit UI application is hierarchy of ordered with layout managers UI components that are rendered on HTML5 Canvas. To start building an application layout you have to instantiate zebkit canvas component ("zebkit.ui.zCanvas"). The instance is either bound to existent HTML5 Canvas element or dynamically  creates HTML5 Canvas element in DOM tree:
+Typical zebkit UI application is hierarchy of ordered with layout managers UI components that are rendered on HTML5 Canvas. To start building an application layout you have to instantiate zebkit canvas component ("zebkit.ui.zCanvas"). The instance is either bound to existent HTML5 Canvas element or dynamically  creates HTML5 Canvas element in DOM tree:
 
 
 ```js
@@ -31,7 +31,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
 ```
 
 
-Below is shown simple zebkit application that shows hierarchy of UI components:
+Below find a simple zebkit application that has the following hierarchy of UI components:
 
 <table>
 <tr><td markdown="1">
@@ -92,6 +92,9 @@ zebkit.require("ui", "layout", function(ui, layout) {
           .add("center", p); 
 });
 </script>
+
+## Traveling UI components hierarchy 
+
 
 
 ## UI Component metrics
@@ -218,15 +221,11 @@ remove all children components
 
 Every UI component defines a layout manager to layout its children components. Layout manager is special class that:
 
-	
-  * inherits **"zebkit.layout.Layout"** interface
-
+   * inherits **"zebkit.layout.Layout"** interface
         
-  * Declare **"calcPreferredSize(comp)"** method to calculate component "pure" preferred size (the size that does not take in account border and padding gaps)
-
+   * Declare **"calcPreferredSize(comp)"** method to calculate component "pure" preferred size (the size that does not take in account border and padding gaps)
         
-  * Declare **"doLayout(comp)"** method that knows how to place children components basing on some rules
-
+   * Declare **"doLayout(comp)"** method that knows how to place children components basing on some rules
 
 Layout manager is mandatory. If an UI component has not defined a layout manager a default one is taken. The default layout manager doesn't have any special rules to order children components. Actually it does nothing, what means component bounds ("x", "y", "width", "height") have effect.
 

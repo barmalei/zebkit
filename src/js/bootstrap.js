@@ -104,7 +104,7 @@ var zebkit = new Package("zebkit");
  * @for  zebkit
  * @attribute environment
  * @readOnly
- * @type {Object}
+ * @type {Environment}
  */
 
 // declaring zebkit as a global variable has to be done before calling "package" method

@@ -19,37 +19,36 @@ var Event = Class([
 /**
  * This method allows to declare a listeners container class for the given
  * dedicated event types.
-
-    // create listener container to keep three different events
-    // handlers
-    var MyListenerContainerClass = zebkit.ListenersClass("event1",
-                                                         "event2",
-                                                         "event3");
-
-    // instantiate listener class container
-    var listeners = new MyListenerContainerClass();
-
-    // add "event1" listener
-    listeners.add(function event1() {
-        ...
-    });
-
-    // add "event2" listener
-    listeners.add(function event2() {
-       ...
-    });
-
-    // add listener for both event1 and event2 events
-    listeners.add(function() {
-       ...
-    });
-
-    // and firing event1 to registered handlers
-    listeners.event1(...);
-
-    // and firing event2 to registered handlers
-    listeners.event2(...);
-
+ *
+ *     // create listener container to keep three different events
+ *     // handlers
+ *     var MyListenerContainerClass = zebkit.ListenersClass("event1",
+ *                                                          "event2",
+ *                                                          "event3");
+ *     // instantiate listener class container
+ *     var listeners = new MyListenerContainerClass();
+ *
+ *     // add "event1" listener
+ *     listeners.add(function event1() {
+ *         ...
+ *     });
+ *
+ *     // add "event2" listener
+ *     listeners.add(function event2() {
+ *        ...
+ *     });
+ *
+ *     // add listener for both event1 and event2 events
+ *     listeners.add(function() {
+ *        ...
+ *     });
+ *
+ *     // and firing event1 to registered handlers
+ *     listeners.event1(...);
+ *
+ *     // and firing event2 to registered handlers
+ *     listeners.event2(...);
+ *
  * @for zebkit
  * @method ListenersClass
  * @param {String} [events]* events types the listeners container has to support

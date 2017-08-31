@@ -22,7 +22,7 @@ function $lsall(fn) {
             // class is detected, set the class name and ref to the class package
             if (typeof v.$name === "undefined") {
                 v.$name = fn + k;
-                v.$pkg  = lookupObjValue($global, fn.substring(0, fn.length - 1));
+                v.$pkg  = getPropertyValue($global, fn.substring(0, fn.length - 1));
             }
             return $lsall.call(v, v.$name + ".");
         }
@@ -102,18 +102,25 @@ function Package(name, parent) {
 Package.prototype.config = function(name, value, overwrite) {
     if (arguments.length === 0) {
         return this.$config;
-    } else if (arguments.length === 1) {
+    } else if (arguments.length === 1 && isString(argumenst[0])) {
         return this.$config[name];
-    } else if (arguments.length > 1) {
-        var old = this.$config[name];
-        if (value === undefined) {
-            delete this.$config[name];
-        } else if (arguments.length < 3 || overwrite === true) {
-            this.$config[name] = value;
-        } else if (this.$config.hasOwnProperty(name) === false) {
-            this.$config[name] = value;
+    } else  {
+        if (isString(arguments[0])) {
+            var old = this.$config[name];
+            if (value === undefined) {
+                delete this.$config[name];
+            } else if (arguments.length < 3 || overwrite === true) {
+                this.$config[name] = value;
+            } else if (this.$config.hasOwnProperty(name) === false) {
+                this.$config[name] = value;
+            }
+            return old;
+        } else {
+            overwrite = arguments.length > 1 ? value : false;
+            for (var k in arguments[0]) {
+                this.config(k, arguments[0][k], overwrite);
+            }
         }
-        return old;
     }
 };
 
@@ -215,7 +222,6 @@ Package.prototype.packages = function(callback, recursively) {
             }
         }
     }
-
     return false;
 };
 
@@ -258,7 +264,7 @@ Package.prototype.import = function() {
     var code = [];
     if (arguments.length > 0) {
         for(var i = 0; i < arguments.length; i++) {
-            var v = lookupObjValue(this, arguments[i]);
+            var v = getPropertyValue(this, arguments[i]);
             if ((v instanceof Package) === false) {
                 throw new Error("Package '" + arguments[i] + " ' cannot be found");
             }
@@ -304,7 +310,7 @@ Package.prototype.require = function() {
     }
 
     for(var i = 0; isString(arguments[i]) && i < arguments.length; i++) {
-        var pkg = lookupObjValue(this, arguments[i]);
+        var pkg = getPropertyValue(this, arguments[i]);
         if ((pkg instanceof Package) === false) {
             throw new Error("Package '" + arguments[i] + "' cannot be found");
         }

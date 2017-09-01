@@ -225,7 +225,7 @@ zebkit.package("draw", function(pkg, Class) {
                     this.target.naturalWidth > 0 &&
                     w > 0 && h > 0)
                 {
-                    if (this.x > 0) {
+                    if (this.x >= 0) {
                         g.drawImage(this.target, this.x, this.y,
                                     this.width, this.height, x, y, w, h);
                     } else {

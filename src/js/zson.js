@@ -86,7 +86,7 @@
  *
  *     var pan = new zebkit.ui.Panel();
  *     new zebkit.Zson(pan).then("pan.json", function(zson) {
- *         // loaded and fullil panel
+ *         // loaded and fulfill panel
  *         ...
  *     });
  *
@@ -205,6 +205,14 @@ var Zson = Class([
          * @type {Boolean}
          */
         this.usePropertySetters = true;
+
+        /**
+         * Cache busting
+         * @attribute cacheBusting
+         * @type {Boolean}
+         * @default false
+         */
+        this.cacheBusting = false;
 
         /**
          * Internal variables set
@@ -481,12 +489,13 @@ var Zson = Class([
                         qsv = qsv.substring(1, qsv.length - 1);
                     } else if (qsv === "true" || qsv === "false") {
                         qsv = (qsv === "true");
-                    } else if (qsv === "false") {
-                        qsv = false;
                     } else if (qsv === "null") {
                         qsv = null;
+                    } if (qsv === "undefined") {
+                        qsv = undefined;
                     } else {
-                        qsv = parseInt(qsv, 10);
+                        qsv = (qsv.indexOf('.') >= 0) ? parseFloat(qsv)
+                                                      : parseInt(qsv, 10);
                     }
 
                     if (vars === null) {
@@ -806,7 +815,11 @@ var Zson = Class([
                     {
                         $this.$variables = $this.$qsToVars(json);
 
-                        $this.url = json + (json.lastIndexOf("?") > 0 ? "&" : "?") + (new Date()).getTime().toString();
+                        $this.url = json;
+
+                        if ($this.cacheBusting === false) {
+                            $this.url = $this.url + (json.lastIndexOf("?") > 0 ? "&" : "?") + (new Date()).getTime().toString();
+                        }
 
                         var join = this.join();
                         GET($this.url).then(function(r) {

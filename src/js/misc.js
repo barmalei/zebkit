@@ -212,23 +212,9 @@ function image(ph, fireErr) {
     return d;
 }
 
-
-// ( (http) :// (host)? (:port)? (/)? )? (path)? (?query_string)?
-//
-//  [1] scheme://host/
-//  [2] scheme
-//  [3] host
-//  [4]  port
-//  [5] /
-//  [6] path
-//  [7] ?query_string
-//
-var $uriRE = /^(([a-zA-Z]+)\:\/\/([^\/:]+)?(\:[0-9]+)?(\/)?)?([^?]+)?(\?.+)?/;
-
 //  Faster match operation analogues:
 //  Math.floor(f)  =>  ~~(a)
 //  Math.round(f)  =>  (f + 0.5) | 0
-
 
 /**
  * Check if the given value is string
@@ -413,6 +399,18 @@ function properties(target, p) {
     return target;
 }
 
+// ( (http) :// (host)? (:port)? (/)? )? (path)? (?query_string)?
+//
+//  [1] scheme://host/
+//  [2] scheme
+//  [3] host
+//  [4]  port
+//  [5] /
+//  [6] path
+//  [7] ?query_string
+//
+var $uriRE = /^(([a-zA-Z]+)\:\/\/([^\/:]+)?(\:[0-9]+)?(\/)?)?([^?]+)?(\?.+)?/;
+
 /**
  * URI class. Pass either a full uri (as a string or zebkit.URI) or number of an URI parts
  * (scheme, host, etc) to constructor it.
@@ -489,7 +487,7 @@ function URI(uri) {
         if (typeof m[6] !== 'undefined') {
             this.path = m[6];
         } else if (typeof m[1] !== 'undefined') {
-            throw new Error("Invalid URL '" + uri + "'");
+            this.path = "/";
         }
 
         if (typeof m[7] !== 'undefined' && m[7].length > 1) {

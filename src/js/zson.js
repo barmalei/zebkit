@@ -547,6 +547,7 @@ var Zson = Class([
                     var bag = new this.clazz();
                     bag.usePropertySetters = this.usePropertySetters;
                     bag.$variables         = this.$qsToVars(path);
+                    bag.cacheBusting       = this.cacheBusting;
 
                     var bg = bag.then(path).catch();
                     this.$runner.then(bg.then(function(res) {

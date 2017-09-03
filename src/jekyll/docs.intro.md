@@ -7,16 +7,16 @@ title: Start with zebkit
 Zebkit is a JavaScript framework that is supposed to be used for UI development. In the same time the framework provides a lot of artifacts and concepts that are abstracted from UI stuff and can be used independently:   
 
    * __Easy OOP__. This this the basement for everything in zebkit: packaging, various components buildings, resource management.    
-   * __Zson__. JSON as JavaScript objects descriptive language with extended  possibility of inclusions, object instantiations and so on.
+   * __Zson__. Zson extends interpretation of standard JSON with introducing advanced possibilities such as of extra JSON inclusions, object instantiations, references support and so on.
    * __Data model package__. Number of classes and interfaces to represent different data models like list, tree, matrix and so on
-   * __Dthen__. More powerful promise-like approach to make your asynchronous code plain and readable.
-   * __Views and renders package__. Number of simple graphical elements to be rendered on a canvas surface.
+   * __Dthen__. Promise-like approach to make typical JS callback and asynchronous code style looking more plain, readable and controllable.
+   * __Views and renders package__. Number of various graphical elements ready to be rendered on a canvas surface.
    * __IO package__. Simple package to communicate to restful, XRPC, JRPC services.
    * and so on   
 
 ## Choose zebkit version
 
-All zebkit artifacts are published on web site. They are applicable either for remote usage or can be downloaded and hosted in a local environment. The artifacts are hosted on zebkit web site follow the structure shown below:
+All zebkit artifacts are published on web site. They are applicable either for remote usage or can be downloaded and hosted in a local environment. The artifacts are hosted on zebkit web site as follow:
 
 ```sh
 http://www.zebkit.org/ver        # root zebkit versions URL
@@ -41,7 +41,7 @@ __What the latest zebkit version is__
 
 The **latest** (<a href="http://www.zebkit.org/ver/latest">http://www.zebkit.org/ver/latest</a>) is the version that is considered as the most stable and bug free snapshot of github version. For developers using the latest means:
 
-   * They stick to the most actual and quite stable version with the hottest fixes and the most recent new features.
+   * They stick to the most actual and quite stable version with the hottest fixes and the most recent new features and improvements.
    * They should never care about bloody version name or code to address the version they need. They always get the latest one. 
    * They are in a risk with the latest version updates. That means a recent update of the latest version can add a bug or (in rare cases) even backward compatible issues. 
 
@@ -157,7 +157,7 @@ It is suppose JSON file has to be stored alone with the package JavaScript code 
 
 ## Standard zebkit packages
 
-Standard packages that are supplied with zebkit (embedded with "zebkit.js") are listed in the table below:
+Standard packages that are supplied with zebkit (included into "zebkit.[min.]js") are listed in the table below:
 
 <table class="info">
 <tr><th>Package name</th><th>Description</th></tr>
@@ -165,7 +165,7 @@ Standard packages that are supplied with zebkit (embedded with "zebkit.js") are 
 <tr>
 <td>zebkit</td>
 <td>
-The root zebkit package that provides core easy OOP classes and interfaces.  
+This is the root zebkit package that provides core easy OOP classes and interfaces.  
 </td>
 </tr>
 
@@ -186,35 +186,35 @@ The package provides number of classes and interfaces to represent simple data m
 <tr>
 <td>zebkit.layout</td>
 <td>
-The package provides number of layout manager that can be easily adapted to layout rectangular UI elements. Zebra UI is widely used to layout Rich UI components.
+The package provides number of layout manager that can be easily adapted to layout rectangular UI elements. Zebra UI widely uses the package to layout Rich UI components.
 </td>
 </tr>
 
 <tr>
 <td>zebkit.io</td>
 <td>
-The package contains number of classes, methods that are helpful to communicate to a remote HTTP, XML-RPC or JSON-RPC service.
+The package contains number of classes, methods that are helpful to communicate to a remote HTTP, XML-RPC or JSON-RPC services.
 </td>
 </tr>
 
 <tr>
 <td>zebkit.draw</td>
 <td>
-The package provides number of renders and views that are able to draw different kind of objects: texts, shapes, images, etc.
+The package provides number of elementary renders and views that are able to draw different kind of objects: texts, shapes, images, etc.
 </td>
 </tr>
 
 <tr>
 <td>zebkit.ui<br/>zebkit.ui.grid<br/>zebkit.ui.tree<br/>zebkit.ui.design</td>
 <td>
-The packages provide huge amount of different abstract UI components that are supposed to be used to build Rich UI WEB application that are rendered on HTML Canvas element. Abstract means they are free from WEB specific what make possible porting it to other platforms and environments.
+The packages provide huge amount of different UI components that are supposed to be used to build Rich UI WEB application rendered on HTML5 Canvas element. The UI components are implemented the way they are free from WEB specific. It makes possible porting the components to other platforms and environments without the components code update.
 </td>
 </tr>
 
 <tr>
 <td>zebkit.ui.event</td>
 <td>
-The package provide UI events related stuff.
+The package provides UI events related stuff.
 </td>
 </tr>
 
@@ -237,7 +237,7 @@ The package provides implementations of required abstractions for WEB environmen
 
 ## Extra zebkit packages
 
-There are number extension packages listed below. These packages are supplied in separate JavaScript files:   
+There are number add-on packages listed below. These packages are supplied in separate JavaScript files:   
 
 <table class="info">
 <tr><th>Package name</th><th>Description</th></tr>

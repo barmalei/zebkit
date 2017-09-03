@@ -20,26 +20,9 @@
 
     "#actions" : [{
         "source"   : "//zebkit.ui.Button",
-        "condition": {
-            "canHaveFocus" : true
-        },
-
-        "fire" : {
-            "event" : "CleanMyPc",
-            "target": "*",
-            "args"  : [
-
-            ]
-        },
-
         "target"   : {
             "path"   : "//zebkit.ui.TextArea",
-            "update" : { "value": "" },
-            "condition" : [
-                {  "propertyName" : "propertyValue", "$op": "eq" },
-                "OR",
-                {  "name" : "<name>", "op": "eq", "value"  },
-            ]
+            "update" : { "value": "" }
         }
     }]
 }

@@ -816,20 +816,6 @@ zebkit.package("layout", function(pkg, Class) {
             };
 
             /**
-             * Remove component after
-             * @param  {[type]} time [description]
-             * @return {[type]}      [description]
-             * @method
-             */
-            this.removeMeAfter = function(time) {
-                if (this.parent !== null) {
-                    throw new Error("No a parent detected");
-                } else {
-
-                }
-            };
-
-            /**
              * The method can be implemented to be informed every time a children component
              * has been removed
              * @param {Integer} i a children component index at which it has been removed

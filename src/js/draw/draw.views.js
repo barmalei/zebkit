@@ -962,6 +962,21 @@ zebkit.package("draw", function(pkg, Class) {
         }
     ]);
 
+    // TODO: not sure it makes sense to put here
+    // a bit dirty implementation
+    pkg.CloudView = Class(pkg.Shape, [
+        function outline(g,x,y,w,h,d) {
+            g.beginPath();
+            g.moveTo(x + w * 0.2, y  +  h * 0.25);
+            g.bezierCurveTo(x, y + h*0.25, x, y + h*0.75, x + w * 0.2, y + h*0.75);
+            g.bezierCurveTo(x + 0.1 * w, y + h - 1 , x + 0.8*w, y + h - 1, x + w * 0.7, y + h*0.75);
+            g.bezierCurveTo(x + w - 1, y + h * 0.75 , x + w - 1, y, x + w * 0.65, y + h*0.25) ;
+            g.bezierCurveTo(x + w - 1, y, x + w * 0.1, y, x + w * 0.2, y + h * 0.25) ;
+            g.closePath();
+            return true;
+        }
+    ]);
+
     /**
      * Base class to implement model values renders.
      * @param  {zebkit.draw.Render} [render] a render to visualize values.

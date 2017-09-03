@@ -13,7 +13,7 @@ Zebkit event listener registration pattern:
 comp.on([eventName,][path,], callback);
 ```
 
-   * __path__ is an optional parameter, to lookup component or components the given event handler have to be registered. Path is X-Path like expression. For instance: ```"//*"``` detects all children components, ```"//zebkit.ui.Label"``` will match all children labels components. 
+   * __path__ is an optional parameter, to lookup component or components the given event handler have to be registered. Path is X-Path like expression. For instance: ```"//*"``` detects all child components, ```"//zebkit.ui.Label"``` will match all child labels components. 
    
    * __eventName__ is an optional parameter to say which event exactly you need to catch. For instance: ```"matrixModel.on('matrixResized', ...);"```. If the parameter has not been specified all available events will be caught.  
    * __callback__ is an event or events handler function.
@@ -33,9 +33,9 @@ UI components generate number of UI specific events like:
    * __Key events__ like key pressed, released and typed
    * __Pointer events__ like pointer pressed, released, clicked, moved, dragged and so on. Zebkit pointer events are unified, what means you work with the same event type nevertheless of input device: mouse, touch screen, pen. 
    * __Focus events__ UI components can catch and lost focus. In this case it fires focus gained and lost events.
-   * __UI Component events__ UI components can update its metrics (size, location) and manage the children components set (add, remove, set).
+   * __UI Component events__ UI components can update its metrics (size, location) and manage the child components set (add, remove, set).
 
-The event type is handled following __overriding pattern__ instead of registering listeners via "on(...)/off(...)" methods call. It is done to save resources, speeds up events handling and minimize possible memory leaks that are probable when you have to track listeners list. 
+The event type is handled following __overriding pattern__ instead of registering listeners via __"on(...)/off(...)"__ methods call. It is done to save resources, speeds up events handling and minimize possible memory leaks that are probable when you have to track listeners list. 
 
 Overriding pattern applied to mentioned above UI events says that you have to override desired UI event handler method for the given UI component to start handling it. For instance, if you need to handle pointer released event do it as follow:
 
@@ -150,13 +150,13 @@ UI component events. Component event handler methods get "zebkit.ui.CompEvent" c
 </td></tr>
 </table>
 
-## Handling children UI events
+## Handling child UI events
 
-It is possible to catch UI events from children components with a direct parent or ancestor component. It can be done the same way you handle UI events - with overriding appropriate event handler method, but in this case you have to add "child" prefix to a name of required handler method. 
+It is possible to catch UI events from child components with a direct parent or ancestor component. It can be done the same way you handle UI events - with overriding appropriate event handler method, but in this case you have to add "child" prefix to a name of required handler method. 
 
-For instance, imagine you have a panel that contains number of labels components as its children. You want to handle pointer pressed UI event that has occurred over the labels. You can try to add event "pointerPressed" method handler to every label, but is not handy and generic. Instead add children UI events handler on the level of parent panel component:
+For instance, imagine you have a panel that contains number of labels components as its children. You want to handle pointer pressed UI event that has occurred over the labels. You can try to add event "pointerPressed" method handler to every label, but is not handy and generic. Instead add child UI events handler on the level of parent panel component:
 
-{% include zsample.html canvas_id='childrenEvents' title='Children UI events handling' description=description %}                    
+{% include zsample.html canvas_id='childrenEvents' title='Child UI events handling' description=description %}                    
 
 <script type="text/javascript">
 zebkit.require("ui", "layout", function(ui, layout) {
@@ -189,7 +189,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
             .setPadding(4))
             .setBorder("plain");
     }
-    // catch children labels pointer pressed event to update 
+    // catch child labels pointer pressed event to update 
     // the labels background
     root.childPointerPressed = function(e) {
         e.source.setBackground(e.source.bg != null ?null:"#44AAFF"); 
@@ -202,13 +202,13 @@ zebkit.require("ui", "layout", function(ui, layout) {
 
 Zebkit UI is organized as a hierarchy of UI components where every UI component can be a container for other UI components. UI hierarchy is a good developing approach to implement compound UI components where developers can assemble UI components from another UI components. For example  "zebkit.ui.Button" component can use any other UI component as its content: images, series of images, combinations of labels and images, etc.
 
-The problem of developing compound component is children events handling. In the case of "zebkit.ui.Button" every time a pointer pressed over its content component the event is sent only to the content component, button itself doesn't get it. Possible solution is implementing children component UI events handler(s) as it has been described earlier. More graceful solution is follow **composite UI component** approach.
+The problem of developing compound component is child events handling. In the case of "zebkit.ui.Button" every time a pointer pressed over its content component the event is sent only to the content component, button itself doesn't get it. Possible solution is implementing child component UI events handler(s) as it has been described earlier. More graceful solution is follow **composite UI component** approach.
 
-Composite is an UI component that makes its children components "event transparent". Event transparency means the children components don't get any input (pointer, keyboard, etc) events. It looks like the children components transparent for these events.
+Composite is an UI component that makes its child components "event transparent". Event transparency means the child components don't get any input (pointer, keyboard, etc) events. It looks like the child components transparent for these events.
 
-To make children of a container events transparent you should set "catchInput" property in the container to true value. It makes all children component of the container event transparent:
+To make children of a container events transparent you should set "catchInput" property in the container to true value. It makes all child component of the container event transparent:
 
-{% include zsample.html canvas_id='compositeComp1' title='Children UI events handling' description=description %}                    
+{% include zsample.html canvas_id='compositeComp1' title='Child UI events handling' description=description %}                    
 
 <script type="text/javascript">
 zebkit.require("ui", "layout", function(ui, layout) {
@@ -239,13 +239,13 @@ zebkit.require("ui", "layout", function(ui, layout) {
           new zebkit.ui.TextField("Event transparent field")
         ]
     });
-    // Make children components of "root" component 
+    // Make child components of "root" component 
     root.catchInput = true;
 });  
 ```
 
 
-More flexible way to add event transparency is defining "catchInput(kid)" method (instead of treating it as a filed) that gets kid component as an input and should decide whether the given children component has to be make event transparent: 
+More flexible way to add event transparency is defining "catchInput(kid)" method (instead of treating it as a filed) that gets kid component as an input and should decide whether the given child component has to be make event transparent: 
 
 {% include zsample.html canvas_id='compositeComp2' title='Children UI events handling' description=description %}                    
 

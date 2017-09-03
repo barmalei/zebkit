@@ -53,8 +53,8 @@ By default UI configuration JSON files are stored on the same level with zebkit 
  +-- ui.common.json
 ```
 
+Loading JSON configurations setups static fields for appropriate package entities (classes, interfaces, etc) that will be later used as default properties values for the entities instances. Configuration Zebkit keeps JSON configuration per package (if necessary). It is also possible to load a custom configuration manually with __"configWith([path])"__ method. For instance, imagine we have created JSON shown below to customize text field component properties:
 
-Loading JSON configurations setups static fields for appropriate package entities (classes, interfaces, etc) that will be later used as default properties values for the entities instances. Configuration Zebkit keeps JSON configuration per package (if necessary). It is also possible to load a custom configuration manually with "configWith([path])" method. For instance, imagine we have created JSON shown below to customize text field component properties:       
 ```json
 {
     ...
@@ -73,9 +73,10 @@ zebkit.ui.configWith("/tf.json");
 ```
 
 Pay attention the way zebkit looks up for a required JSON :
-   - If passed path starts from "/" or the passed path is a complete URL (e.g. "http://text.com/tf.json") then the path is considered as an absolute. The  path is used as is.
-   - No path has been passed. 
-   - Passed path is relative (neither starts from "/" nor URL). 
+
+   - If passed path starts from __"/"__ or the passed path is a complete URL (e.g. "http://text.com/tf.json") then the path is considered as an absolute and applied as is.
+   - No path has been passed. In this case configuration file name is the package name (without "zebkit." prefix) plus ".json" as extension.   
+   - Passed path is relative (neither starts from __"/"__ nor URL). In this case the path is considered relative to an URL the given package has been loaded, or relative to __"basedir"__ if it has been defined on the level of the package or one of his parent package.
 
 ## Theme configuration
 
@@ -94,6 +95,7 @@ zebkit.ui.config("basedir","http://test.com./myfolder/mytheme");
 ```
 
 If there are number of themes you need to host in a custom place specify "basedir" as follow:
+
 ```js
 // define path to light theme    
 zebkit.ui.config("basedir","http://test.com./myfolder/%{theme}");
@@ -103,7 +105,8 @@ zebkit.ui.config("theme", "mytheme1");
 ```
 
 **Note:** Note that configuration variables (theme, base directory, etc) have to be adjusted outside of "require" or "package" zebkit sections. The customization should look something like the following:
-```js
+
+```html
 <script>
     // adjust theme variable
     zebkit.ui.config("theme","light");
@@ -123,7 +126,7 @@ To load the JSON UI definition the following code can be used:
 
 ```js
 zebkit.require("ui", function(ui) {
-    // load root component with content defined with "simple.json" file
+    // load root component content with "simple.json" file
     new ui.zCanvas(400, 300).root.load("simple.json");
 });
 ```
@@ -228,8 +231,8 @@ To combine multiple JSONs:
 
 ```json
 {
-    "%{../external1.json}": '',
-    "%{../external2.json}": ''
+    "%{../external1.json}": "",
+    "%{../external2.json}": ""
     "key" : {
         ...
     }

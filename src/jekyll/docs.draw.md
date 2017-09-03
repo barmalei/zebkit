@@ -16,11 +16,11 @@ zebkit.resources("public/images/pattern.png",
 );
 </script> 
 
-Zebkit supplies "zebkit.draw" package that collects classes and interfaces  responsible for rendering different objects: borders, graphical elements, texts and so on. As soon a developer needs to render a re-usable decorative element it makes sense to implement it basin on the package abstraction.
+Zebkit supplies __"zebkit.draw"__ package that collects classes and interfaces are responsible for rendering different objects: borders, graphical elements, texts and so on. As soon a developer needs to render a re-usable decorative element it makes sense to implement it basing on the package abstraction.
 
 In general there are two base classes for implementing rendered objects:
 	
-   * **zebkit.draw.View** Paints a visual element on the provided surface. Developing a new decorative element requires the view class inherits "zebkit.draw.View" class and implements "paint(g,x,y,w,h,c)" method. The method is responsible for painting the visual element on a rectangular surface "(x,y,w,h)" with the given "2D" context "g". For instance let's implement view that shows color board:
+   * **zebkit.draw.View** Paints a visual element on the provided surface. Developing a new decorative element requires the view class inherits "zebkit.draw.View" class and implements __"paint(g,x,y,w,h,c)"__ method. The method is responsible for painting the visual element on a rectangular surface "(x,y,w,h)" with the given "2D" context "g". For instance let's implement view that shows color board:
   
 {% include zsample.html canvas_id='drawView1' title='Random color board view' description=description %}                    
 
@@ -71,7 +71,7 @@ zebkit.require("draw","ui", function(draw, ui) {
 ```
 
 	
-   * **zebkit.draw.Render** Render class is successor of "zebkit.draw.View" class that is designed to render or visualize the given target object (for instance text, image etc). From the implementation point of view it is close to "zebkit.draw.View" classes: you also should implement "paint(g,x,y,w,h,c)" method, but the method has to render a "target" object on teh given rectangular surface. For instance, let's implement render that draw the given function (target object): 
+   * **zebkit.draw.Render** Render class is successor of "zebkit.draw.View" class that is designed to render or visualize the given target object (for instance text, image etc). From the implementation point of view it is close to "zebkit.draw.View" classes: you also should implement __"paint(g,x,y,w,h,c)"__ method, but the method has to render a "target" object on the given rectangular surface. For instance, let's implement render that draw the given function (target object): 
 
 {% include zsample.html canvas_id='drawView2' title='Draw target fiction for the given interval' description=description %}                    
 

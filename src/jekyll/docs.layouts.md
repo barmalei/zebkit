@@ -1,37 +1,38 @@
 ---
 layout: page
 parent: docs
-title: UI layouts
+title: Layout manager
 ---
 
 User interface has to be adjustable and adaptive to an environment and a hardware where it can be shown. To avoid potential UI layouting problems developers should not positioning and sizing UI components by assigning dedicated (x,y) coordinates and (width,height). 
 
 Layout managers is well known solution to get adaptive UI that helps developing adjustable UI layout. Layout manager doesn't trust fixed UI components positions and sizes. It uses rules-based manner to order UI components. Layout manager "knows" two important things:
 
-  * How to order UI children components
-  
-  * How to compute the component preferred size basing on its children components hierarchy
+  * How to order UI child components
+  * How to compute the component preferred size taking in account its child components hierarchy
 
-In zebkit layout manager usage looks something like below:
+Usage layout manager in zebkit looks something like the following:
 
 ```js
-...
-var pan = new zebkit.ui.Panel();
-// set layout manager
-pan.setLayout(new zebkit.layout.BorderLayout()) 
-...
-// border layout manager understand number of children components 
-// alignments (top, center, left, etc). let's add a component at 
-// the top of panel
-pan.add("top", new zebkit.ui.Button("Ok"));
-...
+zebkit.require("ui", "layout", function(ui, layout) {
+    ...
+    var pan = new ui.Panel();
+    // Set layout manager
+    pan.setLayout(new layout.BorderLayout()) 
+    ...
+    // Border layout manager understand orders child components 
+    // with number of predefined alignments (top, center, left, 
+    // etc). Let's add a component at the top of panel
+    pan.add("top", new ui.Button("Ok"));
+    ...
+});
 ```
 
-Zebkit is supplied with number ready-to-use layout managers. In most cases they are enough for building UI application.    
+Zebkit is supplied with a number ready-to-use layout managers. In most cases they are enough for building UI application.    
 
 ### Raster Layout
 
-The layout manager orders children components basing on its exact locations and sizes that are set via "setLocation(x, y)", "setSize(w,h)" or "setBounds(x, y, w, h)" methods. But also the manager can use preferred sizes and custom vertical and horizontal alignments to place the children components.    
+The layout manager orders child components basing on its exact locations and sizes that are set via __"setLocation(x, y)"__, __"setSize(w,h)"__ or __"setBounds(x, y, w, h)"__ methods. But also the manager can use preferred sizes and custom vertical and horizontal alignments to place the child components.    
 
 {% include zsample.html canvas_id='rasterLayout1' title='Raster layout' %}
 
@@ -51,7 +52,7 @@ zebkit.require("ui","layout",function(ui, lay) {
 
 ### Stack Layout
 
-This the most simple layout manager that place children components on top of each other stretching (or using preferred size) its to fill all available parent component space.
+This the most simple layout manager that place child components on top of each other stretching (or using preferred size) its to fill all available parent component space.
 
 {% include zsample.html canvas_id='stackLayout1' title='Raster layout' %}
 
@@ -62,11 +63,11 @@ zebkit.require("ui","layout",function(ui, lay) {
     // setup stack layout
     r.setLayout(new lay.StackLayout());
 
-    // add children component stretched vertically and 
+    // add child component stretched vertically and 
     // horizontally over the whole parent component area
     r.add(new ui.Button("Stretched\n\n\n\n button"));
 
-    // add children component sized according its 
+    // add child component sized according its 
     // preferred size
     r.add("usePsSize", new ui.Button("Ok"));
 });
@@ -97,7 +98,7 @@ zebkit.require("ui","layout",function(ui, lay) {
 
 ### List layout
 
-List layout manager treats children components as sequence of list items ordered vertically. The items can be either aligned horizontally or stretched to occupy the whole available horizontal space.     
+List layout manager treats child components as sequence of list items ordered vertically. The items can be either aligned horizontally or stretched to occupy the whole available horizontal space.     
 
 {% include zsample.html canvas_id='layoutSample2' title='List layout' %}
 
@@ -105,10 +106,10 @@ List layout manager treats children components as sequence of list items ordered
 zebkit.require("ui","layout", function(ui, layout) {
     var r = new ui.zCanvas().root;
     // set list layout manager that orders components as list 
-    // item and stretches children horizontally
+    // item and stretches child horizontally
     r.setLayout(new layout.ListLayout());
 
-    // add children components
+    // add child components
     r.add(new ui.Button("Stretched Item 1"));
     r.add(new ui.Button("Stretched Item 1"));
     r.add(new ui.Button("Stretched Item 1"));
@@ -118,7 +119,7 @@ zebkit.require("ui","layout", function(ui, layout) {
 
 ### Percentage layout
 
-This layout manager orders children components vertically or horizontally according to requested in percents height or width. 
+This layout manager orders child components vertically or horizontally according to requested in percents height or width. 
 
 {% include zsample.html canvas_id='layoutSample3' title='Percentage layout' %}
 
@@ -142,7 +143,7 @@ zebkit.require("ui","layout",function(ui, lay) {
 
 ### Flow layout
 
-Flow layout manager orders children components vertically or horizontally according to its preferred size. Additionally the ordered components can be aligned vertically  ("top", "bottom", "center") and horizontally ("left", "right", "center").  
+Flow layout manager orders child components vertically or horizontally according to its preferred size. Additionally the ordered components can be aligned vertically  ("top", "bottom", "center") and horizontally ("left", "right", "center").  
 
 {% include zsample.html canvas_id='layoutSample4' title='Flow layout' %}
 
@@ -154,7 +155,7 @@ zebkit.require("ui","layout", function(ui, lay) {
     // vertical and horizontal alignments
     r.setLayout(new lay.FlowLayout("center","center","vertical",2));
 
-    // add children components
+    // add child components
     r.add(new ui.Button("VCentered"));
     r.add(new ui.Button("VCentered"));
     r.add(new ui.Button("VCentered"));
@@ -163,7 +164,7 @@ zebkit.require("ui","layout", function(ui, lay) {
 
 ### Grid layout
 
-Grid layout splits container area to number of logical cells where children components have to be placed. Every children component can have specified constraints that says how the component has to be aligned inside the virtual cell (vertical alignment, horizontal alignment, stretching).  
+Grid layout splits container area to number of logical cells where child components have to be placed. Every child component can have specified constraints that says how the component has to be aligned inside the virtual cell (vertical alignment, horizontal alignment, stretching).  
 
 {% include zsample.html canvas_id='layoutSample5' title='Grid layout' %}
 
@@ -174,7 +175,7 @@ zebkit.require("ui","layout", function(ui, layout) {
     // into four virtual cells (2 rows, and 2 columns)  
     r.setLayout(new layout.GridLayout(2,2));
 
-    // add children components
+    // add child components
     r.add(new ui.Button("1x1"));
     r.add(new ui.Button("1x2"));
     r.add(new ui.Button("2x1"));
@@ -185,10 +186,10 @@ zebkit.require("ui","layout", function(ui, layout) {
 
 ### Custom layout manager
 
-If existent layout managers are not enough it is not a big deal to implement a custom one. To do it inherit "zebkit.layout.Layout" interface and implement the following two methods:
+If existent layout managers are not enough it is not a big deal to implement a custom one. To do it inherit __"zebkit.layout.Layout"__ interface and implement the following two methods:
 
-   * **"calcPreferredSize(target)"** The method has to calculate a target component preferred size basing on its content (usually preferred size of its children component). 
-   * **"doLayout(target)"** The method orders the target container children components basing on specific rules the manager implements.
+   * **"calcPreferredSize(target)"** The method has to calculate a target component preferred size basing on its content (usually preferred size of its child component). 
+   * **"doLayout(target)"** The method orders the target container child components basing on specific rules the manager implements.
 
 Let's develop layout manager that orders components along parent component diagonal:
 
@@ -197,7 +198,7 @@ zebkit.package("ui.demo", function(pkg, Class) {
    // declare layout manager class
    pkg.DiagLayout = Class(zebkit.layout.Layout,[
        // preferred size target component wants to have is calculated 
-       // as sum of preferred sizes of children components
+       // as sum of preferred sizes of child components
        function calcPreferredSize(target) {
           var psW = 0, psH = 0;
           for(var i=0; i < target.kids.length; i++) {
@@ -210,7 +211,7 @@ zebkit.package("ui.demo", function(pkg, Class) {
           }
           return { width:psW, height:psH };
        },
-       // define rules how children components of the
+       // define rules how child components of the
        // given "target" have to be ordered
        function doLayout(target) {
           var x = target.getTop(), y = target.getLeft();

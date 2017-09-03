@@ -56,8 +56,8 @@ zebkit.data.TreeModel
 
 JavaScript types can be used to construct an appropriate data model. Usually it is done by a data model class constructor.
 
-##  ListModel (zebkit.data.ListModel)
 
+##  ListModel (zebkit.data.ListModel)
 
 ```js
 // create list model
@@ -108,7 +108,7 @@ JavaScript tree model:
    "kids" : [
       "Item 1",
       {
-         "value": "Item 2"
+         "value": "Item 2",
          "kids" : [ "Item 2.1", "Item 2.2" ]
       }
    ]

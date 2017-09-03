@@ -196,6 +196,13 @@ Optional an event name that has to be handled from the source
 </td></tr>
 
 <tr><td>
+"#actions.condition"    
+</td><td>
+Optional a condition the source event is handled. Condition is dictionary of source properties and its values. If all properties values of the specified condition match the correspondent properties of source component the event 
+will be handled.   
+</td></tr>
+
+<tr><td>
 "#actions.targets" or
 <br/>
 "#actions.target"    
@@ -207,6 +214,12 @@ List of targets ("#actions.targets") components or single target ("#actions.targ
 "#actions.target.path" 
 </td><td>
 Path to detect a target component
+</td></tr>
+
+<tr><td>
+"#actions.target.condition"    
+</td><td>
+Optional a condition the target "update" and "do" sections will be applied. Condition is dictionary of target properties and its values. If all properties values of the specified condition match the correspondent properties of target component "update" and "do" sections are applied to the target.
 </td></tr>
 
 <tr><td>
@@ -232,7 +245,7 @@ To combine multiple JSONs:
 ```json
 {
     "%{../external1.json}": "",
-    "%{../external2.json}": ""
+    "%{../external2.json}": "",
     "key" : {
         ...
     }

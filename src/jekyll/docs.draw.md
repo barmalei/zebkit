@@ -462,6 +462,8 @@ zebkit.require("draw","ui","layout",function(draw, ui, lay) {
     var c = new ui.zCanvas("arrowView1", 300, 300);
     c.root.setLayout(new lay.BorderLayout(16));
 
+    draw.ArrowView.prototype.color = "orange";
+
     c.root.add("left",new ui.ViewPan().setView(new draw.ArrowView("left")))
     .setPreferredSize(40, -1);
     c.root.add("top",new ui.ViewPan().setView(new draw.ArrowView("top")))
@@ -487,8 +489,8 @@ zebkit.require("draw","ui","layout",function(draw, ui, lay) {
 
     var pan = new ui.ViewPan().setBackground(new draw.ViewSet({
         "Pattern"  : new draw.Pattern(ui.imgPattern),
-        "Gradient" : new draw.Gradient("red", "green"),
-        "+Color"   : "#44AAff"
+        "+Gradient" : new draw.Gradient("red", "green"),
+        "Color"   : "#44AAff"
     })).setBorder("plain");
 
     c.root.add(pan);
@@ -610,9 +612,9 @@ View gaps are important what the given view or render is going to be used as a b
 
 ```js
     var MyView = zebkit.Class(zebkit.draw.View, [
-         function paint(g,x,y,w,h,c) {
+        function paint(g,x,y,w,h,c) {
             ... // paint something
-         },
+        },
         // get top gap
         function getTop() {
            return 10;

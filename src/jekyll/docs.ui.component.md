@@ -112,6 +112,7 @@ Find below a simple zebkit application that builds the following UI components h
 
 <table>
 <tr><td markdown="1">
+
 ```bash
 # HTML5 Canvas surface
 zebkit.ui.zCanvas 
@@ -132,8 +133,9 @@ zebkit.ui.zCanvas
             +-zebkit.ui.TextField
              ("Text Field")
 ```      
+
 </td><td>
-      {% include zsample2.html canvas_id='layoutSample' title='Components hierarchy' description=description %}                
+{% include zsample2.html canvas_id='layoutSample' title='Components hierarchy' description=description %}                
 </td></tr>
 </table>
 

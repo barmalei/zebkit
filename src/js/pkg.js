@@ -102,7 +102,7 @@ function Package(name, parent) {
 Package.prototype.config = function(name, value, overwrite) {
     if (arguments.length === 0) {
         return this.$config;
-    } else if (arguments.length === 1 && isString(argumenst[0])) {
+    } else if (arguments.length === 1 && isString(arguments[0])) {
         return this.$config[name];
     } else  {
         if (isString(arguments[0])) {

@@ -117,6 +117,7 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
 
 $global.zebkit = zebkit;
 
+// collect exported entities in zebkit package space
 zebkit.package(function(pkg) {
     for(var exp in $exports) {
         pkg[exp] = $exports[exp];
@@ -124,6 +125,25 @@ zebkit.package(function(pkg) {
 });
 
 if ($isInBrowser) {
+
+    // collect query string parameters
+    try {
+        var uri = new URI(document.URL);
+        if (uri.qs !== null) {
+            var params = URI.parseQS(uri.qs);
+            for (var k in params) {
+                zebkit.config(k, URI.decodeQSValue(params[k]));
+            }
+
+            var cacheBusting = zebkit.config("zson.cacheBusting");
+            if (typeof cacheBusting !== 'undefined' && cacheBusting !== null) {
+                Zson.prototype.cacheBusting = cacheBusting;
+            }
+        }
+    } catch(e) {
+        dumpError(e);
+    }
+
     zebkit.then(function() {
         var jn        = this.join(),
             $interval = $zenv.setInterval(function () {
@@ -131,6 +151,6 @@ if ($isInBrowser) {
                 $zenv.clearInterval($interval);
                 jn(zebkit);
             }
-        }, 100);
+        }, 50);
     });
 }

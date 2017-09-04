@@ -670,13 +670,54 @@ URI.parseQS = function(qs, decode) {
 
     if (mqs !== null) {
         for(var i = 0; i < mqs.length; i++) {
-            var q = mqs[i].split('=');
-            parsedQS[q[0]] = (decode === true ? $zenv.decodeURIComponent(q[1])
-                                              : q[1]);
+            var q = mqs[i].split('='),
+                k = q[0].trim(),
+                v = decode === true ? $zenv.decodeURIComponent(q[1])
+                                    : q[1];
+
+            if (parsedQS.hasOwnProperty(k)) {
+                var p = parsedQS[k];
+                if (Array.isArray(p) === false) {
+                    parsedQS[k] = [ p ];
+                }
+                parsedQS[k].push(v);
+            } else {
+                parsedQS[k] = v;
+            }
         }
     }
     return parsedQS;
 };
+
+
+URI.decodeQSValue = function(value) {
+    if (Array.isArray(value)) {
+        var r = [];
+        for(var i = 0; i < value.length; i++) {
+            r[i] = URI.decodeQSValue(value[i]);
+        }
+        return r;
+    } else {
+        value = value.trim();
+        if (value[0] === "'") {
+            value = value.substring(1, value.length - 1);
+        } else if (value === "true" || value === "false") {
+            value = (value === "true");
+        } else if (value === "null") {
+            value = null;
+        } else if (value === "undefined") {
+            value = undefined;
+        } else {
+            var num = (value.indexOf('.') >= 0) ? parseFloat(value)
+                                                : parseInt(value, 10);
+            if (isNaN(num) === false) {
+                value = num;
+            }
+        }
+        return value;
+    }
+};
+
 
 /**
  * Convert the given dictionary of parameters to a query string.

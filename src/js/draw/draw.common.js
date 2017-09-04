@@ -396,76 +396,87 @@ zebkit.package("draw", function(pkg, Class) {
      */
     pkg.rgb = Class(pkg.View, [
         function (r, g, b, a) {
-            /**
-             * Red color intensity
-             * @attribute r
-             * @type {Integer}
-             * @readOnly
-             */
+            this.isOpaque = true;
 
-            /**
-             * Green color intensity
-             * @attribute g
-             * @type {Integer}
-             * @readOnly
-             */
-
-            /**
-             * Blue color intensity
-             * @attribute b
-             * @type {Integer}
-             * @readOnly
-             */
-
-            /**
-             * Alpha
-             * @attribute a
-             * @type {Float}
-             * @readOnly
-             */
             if (arguments.length === 1) {
                 if (zebkit.isString(r)) {
-                    this.s = r;
-                    if (r[0] === '#') {
-                        r = parseInt(r.substring(1), 16);
-                    } else {
-                        if (r[0] === 'r' && r[1] === 'g' && r[2] === 'b') {
-                            var i = r.indexOf('(', 3), p = r.substring(i + 1, r.indexOf(')', i + 1)).split(",");
-                            this.r = parseInt(p[0].trim(), 10);
-                            this.g = parseInt(p[1].trim(), 10);
-                            this.b = parseInt(p[2].trim(), 10);
-                            if (p.length > 3) {
-                                this.a = parseInt(p[3].trim(), 10);
-                                this.isOpaque = (this.a === 1);
+                    this.s = r = r.trim();
+
+                    if (r[0] === '#') {  // hex color has been detected
+                        if (r.length >= 7) {  // long hex color #RRGGBB[AA]
+                            var rr = parseInt(r.substring(1, 7), 16);
+                            this.r =  rr >> 16;
+                            this.g = (rr >> 8) & 0xFF;
+                            this.b = (rr & 0xFF);
+
+                            if (r.length > 7) {  // check if alpha is represnted with the color
+                                this.a = parseInt(r.substring(7, r.length), 16);
+                                this.isOpaque = (this.a === 0xFF);
                             }
-                            return;
+                        } else {   // short hex color #RGB[A]
+                            this.r = parseInt(r.substring(1, 2), 16);
+                            this.g = parseInt(r.substring(2, 3), 16);
+                            this.b = parseInt(r.substring(3, 4), 16);
+                            if (r.length > 4) { // check if alpha is represnted with the color
+                                this.a = parseInt(r.substring(4, 5), 16);
+                                this.isOpaque = (this.a === 0xF);
+                            }
                         }
+                    } else if (r[0] === 'r' && r[1] === 'g' && r[2] === 'b') { // rgb encoded color has been detected
+                        var i = r.indexOf('(', 3),
+                            s = r.substring(i + 1, r.indexOf(')', i + 1)),
+                            p = s.split(",");
+
+                        this.r = parseInt(p[0].trim(), 10);
+                        this.g = parseInt(p[1].trim(), 10);
+                        this.b = parseInt(p[2].trim(), 10);
+                        if (p.length > 3) {
+                            var aa = p[3].trim();
+                            if (aa[aa.length - 1] === '%') {
+                                this.isOpaque = (aa == "100%");
+                                this.a = parseFloat((parseInt(aa, 10) / 100).toFixed(2));
+                            } else {
+                                this.a = parseFloat(aa, 10);
+                                this.isOpaque = (this.a == 1.0);
+                            }
+                        }
+                    } else if (r.length > 2 && typeof this.clazz[r] !== 'undefined') {
+                        var col = this.clazz.colors[r];
+                        this.r = col.r;
+                        this.g = col.g;
+                        this.b = col.b;
+                        this.a = col.a;
+                        this.s = col.s;
+                        this.isOpaque = col.isOpaque;
                     }
+                } else { // consider an number has been passed
+                    this.r =  r >> 16;
+                    this.g = (r >> 8) & 0xFF;
+                    this.b = (r & 0xFF);
                 }
-                this.r =  r >> 16;
-                this.g = (r >> 8) & 0xFF;
-                this.b = (r & 0xFF);
-            } else {
+            } else if (arguments.length > 1) {
                 this.r = r;
                 this.g = g;
                 this.b = b;
                 if (arguments.length > 3) {
                     this.a = a;
+                    this.isOpaque = (a == 1.0);
                 }
             }
 
             if (this.s === null) {
-                this.s = (typeof this.a !== "undefined") ? 'rgba(' + this.r + "," + this.g +  "," +
-                                                                     this.b + "," + this.a + ")"
-                                                         : '#' +
-                                                           ((this.r < 16) ? "0" + this.r.toString(16) : this.r.toString(16)) +
-                                                           ((this.g < 16) ? "0" + this.g.toString(16) : this.g.toString(16)) +
-                                                           ((this.b < 16) ? "0" + this.b.toString(16) : this.b.toString(16));
+                this.s = (this.isOpaque === false)  ? 'rgba(' + this.r + "," + this.g +  "," +
+                                                                this.b + "," + this.a + ")"
+                                                    : '#' +
+                                                       ((this.r < 16) ? "0" + this.r.toString(16) : this.r.toString(16)) +
+                                                       ((this.g < 16) ? "0" + this.g.toString(16) : this.g.toString(16)) +
+                                                       ((this.b < 16) ? "0" + this.b.toString(16) : this.b.toString(16));
             }
         },
 
         function $prototype() {
             this.s = null;
+            this.gap = 0;
 
             /**
              * Indicates if the color is opaque
@@ -475,7 +486,37 @@ zebkit.package("draw", function(pkg, Class) {
              */
             this.isOpaque = true;
 
-            this.gap = 0;
+            /**
+             * Red color intensity
+             * @attribute r
+             * @type {Integer}
+             * @readOnly
+             */
+            this.r = 0;
+
+            /**
+             * Green color intensity
+             * @attribute g
+             * @type {Integer}
+             * @readOnly
+             */
+            this.g = 0;
+
+            /**
+             * Blue color intensity
+             * @attribute b
+             * @type {Integer}
+             * @readOnly
+             */
+            this.b = 0;
+
+            /**
+             * Alpha
+             * @attribute a
+             * @type {Float}
+             * @readOnly
+             */
+            this.a = 1.0;
 
             this.paint = function(g,x,y,w,h,d) {
                 if (this.s !== g.fillStyle) {
@@ -516,20 +557,103 @@ zebkit.package("draw", function(pkg, Class) {
              * @type {zebkit.draw.rgb}
              * @static
              */
+
+            // CSS1
             this.black       = new this(0);
+            this.silver      = new this(0xC0, 0xC0, 0xC0);
+            this.grey        = this.gray = new this(0x80, 0x80, 0x80);
             this.white       = new this(0xFFFFFF);
+            this.maroon      = new this(0x800000);
             this.red         = new this(255,0,0);
-            this.blue        = new this(0,0,255);
-            this.green       = new this(0,255,0);
-            this.gray        = new this(128,128,128);
-            this.lightGray   = new this(211,211,211);
-            this.darkGray    = new this(169,169,169);
-            this.orange      = new this(255,165,0);
+            this.purple      = new this(0x800080);
+            this.fuchsia     = new this(0xff00ff);
+            this.green       = new this(0x008000);
+            this.lime        = new this(0x00ff00);
+            this.olive       = new this(0x808000);
             this.yellow      = new this(255,255,0);
-            this.pink        = new this(255,192,203);
-            this.cyan        = new this(0,255,255);
-            this.magenta     = new this(255,0,255);
-            this.darkBlue    = new this(0, 0, 140);
+            this.navy        = new this(0x000080);
+            this.blue        = new this(0,0,255);
+            this.teal        = new this(0x008080);
+            this.aqua        = new this(0x00ffff);
+
+            // CSS2
+            this.orange         = new this(255,165,0);
+            this.aliceblue      = new this(0xf0f8ff);
+            this.antiqueWhite   = this.antiquewhite = new this(0xfaebd7);
+            this.aquamarine     = new this(0x7fffd4);
+            this.azure          = new this(0xf0ffff);
+            this.beige          = new this(0xf5f5dc);
+            this.bisque         = new this(0xffe4c4);
+            this.blanchedalmond = new this(0xffebcd);
+            this.blueViolet     = this.blueviolet = new this(0x8a2be2);
+            this.brown          = new this(0xa52a2a);
+            this.burlywood      = new this(0xdeb887);
+            this.cadetblue      = new this(0x5f9ea0);
+            this.chartreuse     = new this(0x7fff00);
+            this.chocolate      = new this(0xd2691e);
+            this.coral          = new this(0xff7f50);
+            this.cornflowerblue = new this(0x6495ed);
+            this.cornsilk       = new this(0xfff8dc);
+            this.crimson        = new this(0xdc143c);
+            this.cyan           = new this(0,255,255);
+            this.darkBlue       = this.darkblue        = new this(0x00008b);
+            this.darkCyan       = this.darkcyan        = new this(0x008b8b);
+            this.darkGoldenrod  = this.darkgoldenrod   = new this(0xb8860b);
+            this.darkGrey       = this.darkgrey        = this.darkGray  = this.darkgray = new this(0xa9a9a9);
+            this.darkGreen      = this.darkgreen       = new this(0x006400);
+            this.darkKhaki      = this.darkkhaki       = new this(0xbdb76b);
+            this.darkMagenta    = this.darkmagenta     = new this(0x8b008b);
+            this.darkOliveGreen = this.darkolivegreen  = new this(0x556b2f);
+            this.darkOrange     = this.darkorange      = new this(0xff8c00);
+            this.darkOrchid     = this.darkorchid      = new this(0x9932cc);
+            this.darkRed        = this.darkred         = new this(0x8b0000);
+            this.darkSalmon     = this.darksalmon      = new this(0xe9967a);
+            this.darkSeaGreen   = this.darkseagreen    = new this(0x8fbc8f);
+            this.darkSlateBlue  = this.darkslateblue   = new this(0x483d8b);
+            this.darkSlateGrey  = this.darkSlateGray   = this.darkslategray  = this.darkslategrey = new this(0x2f4f4f);
+            this.darkTurquoise  = this.darkturquoise   = new this(0x00ced1);
+            this.darkViolet     = this.darkviolet      = new this(0x9400d3);
+            this.deepPink       = this.darkviolet      = new this(0xff1493);
+            this.dimGrey        = this.dimGray  = this.dimgray = this.dimgrey = new this(0x696969);
+            this.dodgerBlue     = this.dodgerblue  = new this(0x1e90ff);
+            this.firebrick      = new this(0xb22222);
+            this.floralwhite    = new this(0xfffaf0);
+            this.forestgreen    = new this(0x228b22);
+            this.gainsboro      = new this(0xdcdcdc);
+            this.ghostwhite     = new this(0xf8f8ff);
+            this.gold           = new this(0xffd700);
+            this.goldenrod      = new this(0xdaa520);
+            this.greenyellow    = new this(0xadff2f);
+            this.honeydew       = new this(0xf0fff0);
+            this.hotpink        = new this(0xff69b4);
+            this.indianred      = new this(0xcd5c5c);
+            this.indigo         = new this(0x4b0082);
+            this.ivory          = new this(0xfffff0);
+            this.khaki          = new this(0xf0e68c);
+            this.lavender       = new this(0xe6e6fa);
+            this.lavenderblush  = new this(0xfff0f5);
+            this.lawngreen      = new this(0x7cfc00);
+            this.lemonchiffon   = new this(0xfffacd);
+            this.lightBlue      = this.lightblue  = new this(0xadd8e6);
+            this.lightCoral     = this.lightcoral = new this(0xf08080);
+            this.lightCyan      = this.lightcyan  = new this(0xe0ffff);
+            this.lightGoldenRodYellow  = this.lightgoldenrodyellow  = new this(0xfafad2);
+
+            // CSS3
+            this.lightGrey       = this.lightGray      = this.lightgray = this.lightgrey = new this(0xd3d3d3);
+            this.lightGreen      = this.lightgreen     = new this(0x90ee90);
+            this.lightPink       = this.lightpink      = new this(0xffb6c1);
+            this.lightSalmon     = this.lightsalmon    = new this(0xffa07a);
+            this.lightSeaGreen   = this.lightseagreen  = new this(0x20b2aa);
+            this.lightSkyBlue    = this.lightskyblue   = new this(0x87cefa);
+            this.lightSkyBlue    = this.lightskyblue   = new this(0x87cefa);
+            this.lightSlateGrey  = this.lightSlateGray = this.lightslategrey = this.lightslategray  = new this(0x778899);
+            this.lightSteelBlue  = this.lightsteelblue = new this(0xb0c4de);
+            this.lightYellow     = this.lightyellow    = new this(0xffffe0);
+            this.linen           = new this(0xfaf0e6);
+            this.magenta         = new this(0xff00ff);
+            this.pink            = new this(0xffc0cb);
+
             this.transparent = new this(0, 0, 0, 0.0);
 
             this.mergeable = false;

@@ -1,7 +1,19 @@
 zebkit.package("ui", function(pkg, Class) {
 
-    this.config( { "basedir" : zebkit.URI.join(this.$url, "rs/themes/%{theme}"),
-                   "theme"   : "dark" }, false);
+    var   basedir      = zebkit.config("ui.basedir"),
+          theme        = zebkit.config("ui.theme");
+
+
+    if (theme === "auto") {
+      //  getComputedStyle
+    }
+
+    this.config( { "basedir" : basedir ? basedir
+                                       : zebkit.URI.join(this.$url, "rs/themes/%{theme}"),
+                   "theme"   : theme   ? theme
+                                       : "dark" },
+                   false);
+
 
     // Panel WEB specific dependencies:
     //   -  getCanvas() -> zCanvas

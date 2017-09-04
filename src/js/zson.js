@@ -330,7 +330,7 @@ var Zson = Class([
         this.$resolveRef = function(target, names) {
             var fn = function(ref, rn) {
                 rn.then(function(target) {
-                    if (target != null && target.hasOwnProperty(ref) === true) {
+                    if (target !== null && typeof target !== 'undefined' && target.hasOwnProperty(ref) === true) {
                         var v = target[ref];
                         if (v instanceof DoIt) {
                             var jn = this.join();
@@ -484,24 +484,10 @@ var Zson = Class([
             if (qs !== null || typeof qs === 'undefined') {
                 qs = URI.parseQS(qs);
                 for(var k in qs) {
-                    var qsv = qs[k];
-                    if (qsv[0] === "'") {
-                        qsv = qsv.substring(1, qsv.length - 1);
-                    } else if (qsv === "true" || qsv === "false") {
-                        qsv = (qsv === "true");
-                    } else if (qsv === "null") {
-                        qsv = null;
-                    } if (qsv === "undefined") {
-                        qsv = undefined;
-                    } else {
-                        qsv = (qsv.indexOf('.') >= 0) ? parseFloat(qsv)
-                                                      : parseInt(qsv, 10);
-                    }
-
                     if (vars === null) {
                         vars = {};
                     }
-                    vars[k] = qsv;
+                    vars[k] = URI.decodeQSValue(qs[k]);
                 }
             }
 
@@ -713,7 +699,7 @@ var Zson = Class([
                     {
                         this.$assignValue(dest, k, sv);
                     } else if (recursively === true) {
-                        if (dv != null && typeof dv.clazz !== 'undefined' && dv.clazz.mergeable === false) {
+                        if (dv !== null && typeof dv !== 'undefined' && typeof dv.clazz !== 'undefined' && dv.clazz.mergeable === false) {
                             this.$assignValue(dest, k, sv);
                         } else {
                             this.merge(dv, sv);

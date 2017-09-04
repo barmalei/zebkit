@@ -984,7 +984,7 @@ var classTemplateProto = {
         nobj.clazz = this.clazz;
         return nobj;
     }
-}
+};
 
 // create Class template what means we define a function (meta class) that has to be used to define
 // Class. That means we define a function that returns another function that is a Class
@@ -1138,8 +1138,8 @@ var Class = $make_template(null, function() {
 
     // copy methods from interfaces before mixing class methods
     if (toInherit.length > 0) {
-        for(var i = toInherit[0].clazz === Interface ? 0 : 1; i < toInherit.length; i++) {
-            var  ic = toInherit[i];
+        for(var idx = toInherit[0].clazz === Interface ? 0 : 1; idx < toInherit.length; idx++) {
+            var ic = toInherit[idx];
             $cpMethods(ic.prototype, classTemplate.prototype, classTemplate);
 
             // copy static fields from interface to the class
@@ -1189,9 +1189,9 @@ var Class = $make_template(null, function() {
     // copy methods from interfaces
     if (toInherit.length > 0) {
         // notify inherited class and interfaces that they have been inherited with the given class
-        for(var i = 0; i < toInherit.length; i++) {
-            if (typeof toInherit[i].inheritedWidth === 'function') {
-                toInherit[i].inheritedWidth(classTemplate);
+        for(var j = 0; j < toInherit.length; j++) {
+            if (typeof toInherit[j].inheritedWidth === 'function') {
+                toInherit[j].inheritedWidth(classTemplate);
             }
         }
     }

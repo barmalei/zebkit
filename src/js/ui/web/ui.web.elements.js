@@ -245,10 +245,8 @@ zebkit.package("ui.web", function(pkg, Class) {
                     // to catch resize event and if size is not 0 correct visibility
                     // now manager doesn't set style visibility to "visible" state
                     // if component size is zero
-                    if (this.$container.style.visibility === "hidden") {
-                        if (this.isVisible) {
-                            this.$container.style.visibility = "visible";
-                        }
+                    if (this.$container.style.visibility === "hidden" && this.isVisible) {
+                        this.$container.style.visibility = "visible";
                     }
 
                     this.invalidate();

@@ -274,6 +274,8 @@ zebkit.package("web", function(pkg, Class) {
      */
     pkg.KeyEventUnifier = Class([
         function(element, destination) {
+            var $this = this;
+
             //   Alt + x  was pressed  (for IE11 consider sequence of execution of "alt" and "x" keys)
             //   Chrome/Safari/FF  keydown -> keydown -> keypressed
             // ----------------------------------------------------------------------------------------------------------------------
@@ -365,7 +367,8 @@ zebkit.package("web", function(pkg, Class) {
                 // elements don't prevent the event for the children DOM element
                 var key = CODES[KEY_DOWN_EVENT.code];
                 if (key != null && key.pr === true && e.target === element) {
-                    e.preventDefault();
+                    // TODO: may be put the "if" logic into prevent default
+                    $this.preventDefault(e, key);
                 }
                 e.stopPropagation();
 
@@ -491,6 +494,12 @@ zebkit.package("web", function(pkg, Class) {
                         destination.$keyTyped(KEY_PRESS_EVENT);
                     }
                 }
+            };
+        },
+
+        function $prototype() {
+            this.preventDefault = function(e, key) {
+                e.preventDefault();
             };
         }
     ]);

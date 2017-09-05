@@ -336,10 +336,28 @@ zebkit.package("ui.web", function(pkg, Class) {
             this.$super(e);
             this.setAttribute("tabindex", 0);
             this.setValue(text);
+
+            this.$keyUnifier = new zebkit.web.KeyEventUnifier(this.element, this);
+            this.$keyUnifier.preventDefault = function(e, key) {}
         },
 
         function $prototype() {
             this.cursorType = ui.Cursor.TEXT;
+
+            this.$keyTyped = function(e) {
+                e.source = this;
+                ui.events.fire("keyTyped", e);
+            };
+
+            this.$keyPressed = function(e) {
+                e.source = this;
+                return ui.events.fire("keyPressed", e);
+            };
+
+            this.$keyReleased = function(e) {
+                e.source = this;
+                return ui.events.fire("keyReleased", e);
+            };
 
             /**
              * Get a text of the text input element

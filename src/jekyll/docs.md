@@ -23,13 +23,11 @@ title: Documentation
 <a href="docs.dthen.html">D-then</a>
 <br/>(asynchronous calls as a sequence)<br/>
 
-<hr>
 <a href="docs.data.html">Data models</a>
 <br/>(list, text, matrix, etc)    
 
-<hr>
-<a href="#">IO</a>
-<br/>(list, text, matrix, etc)    
+<a href="docs.io.html">IO</a>
+<br/>(GET, POST, JRPC, XRPC)    
 
 </td>
 
@@ -58,7 +56,7 @@ title: Documentation
 
 <hr>
 
-<a href="#">HTML Element</a>
+<a href="docs.ui.web.html">HTML Element</a>
 </td></tr>
 
 <tr><td width="50%" valign="top" colspan="2" markdown="1">

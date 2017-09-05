@@ -49,6 +49,7 @@
 
     "HtmlTextInput": {
         "inheritProperties" : true,
+        "color"   : "white",
         "style"   : [ "outline", "none"],
         "padding" : [4,4,4,4]
     },

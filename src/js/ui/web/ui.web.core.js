@@ -204,6 +204,10 @@ zebkit.package("ui.web", function(pkg, Class) {
                 return this;
             };
 
+            this.getColor = function() {
+                return window.getComputedStyle(this.element, "color");
+            };
+
             /**
              * Apply the given set of CSS styles to the wrapped HTML element
              * @param {Object} styles a dictionary of CSS styles

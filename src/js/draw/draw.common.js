@@ -613,7 +613,7 @@ zebkit.package("draw", function(pkg, Class) {
             this.darkSlateGrey  = this.darkSlateGray   = this.darkslategray  = this.darkslategrey = new this(0x2f4f4f);
             this.darkTurquoise  = this.darkturquoise   = new this(0x00ced1);
             this.darkViolet     = this.darkviolet      = new this(0x9400d3);
-            this.deepPink       = this.darkviolet      = new this(0xff1493);
+            this.deepPink       = this.deeppink        = new this(0xff1493);
             this.dimGrey        = this.dimGray  = this.dimgray = this.dimgrey = new this(0x696969);
             this.dodgerBlue     = this.dodgerblue  = new this(0x1e90ff);
             this.firebrick      = new this(0xb22222);
@@ -645,7 +645,6 @@ zebkit.package("draw", function(pkg, Class) {
             this.lightPink       = this.lightpink      = new this(0xffb6c1);
             this.lightSalmon     = this.lightsalmon    = new this(0xffa07a);
             this.lightSeaGreen   = this.lightseagreen  = new this(0x20b2aa);
-            this.lightSkyBlue    = this.lightskyblue   = new this(0x87cefa);
             this.lightSkyBlue    = this.lightskyblue   = new this(0x87cefa);
             this.lightSlateGrey  = this.lightSlateGray = this.lightslategrey = this.lightslategray  = new this(0x778899);
             this.lightSteelBlue  = this.lightsteelblue = new this(0xb0c4de);

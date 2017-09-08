@@ -90,17 +90,7 @@ zebkit.package("ui", function(pkg, Class) {
             var cv = cond[k],
                 tv = zebkit.getPropertyValue(target, k, true);
 
-            if (zebkit.isAtomic(cv)) {
-                if (cv !== tv) {
-                    return false;
-                }
-            } else {
-                for(var op in cv) {
-
-                }
-            }
-
-            if (cond[k] !== v) {
+            if (cv !== tv) {
                 return false;
             }
         }
@@ -1065,6 +1055,24 @@ zebkit.package("ui", function(pkg, Class) {
                 if (n !== null && typeof n.ownerChanged !== 'undefined') {
                     n.ownerChanged(this);
                 }
+            };
+
+            this.setBorderLayout = function() {
+                this.setLayout(arguments.length > 0 ? new zebkit.layout.BorderLayout(arguments[0])
+                                                    : new zebkit.layout.BorderLayout());
+                return this;
+            };
+
+            this.setFlowLayout = function() {
+                this.setLayout(arguments.length > 0 ? new zebkit.layout.FlowLayout(arguments[0])
+                                                    : new zebkit.layout.FlowLayout());
+                return this;
+            };
+
+            this.setStackLayout = function() {
+                this.setLayout(arguments.length > 0 ? new zebkit.layout.StackLayout(arguments[0])
+                                                    : new zebkit.layout.StackLayout());
+                return this;
             };
 
             /**

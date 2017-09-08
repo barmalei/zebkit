@@ -1,5 +1,5 @@
 {
-    "version"   : "04.2017",
+    "version"   : "09.2017",
 
     "doubleClickDelta" : 280,
 
@@ -9,25 +9,51 @@
         "@ ? zebkit.ui.event.ShortcutManager" :{
             "common": {
                 "UNDO"          : "Control + KeyZ",
-                "REDO"          : "Control + Shift + KeyZ",
+                "REDO"          : [
+                                    "Control + Shift   + KeyZ",
+                                    "Shift   + Control + KeyZ"
+                                  ],
                 "SELECTALL"     : "Control + KeyA",
                 "NEXTWORD"      : "Control + ArrowRight",
                 "PREVWORD"      : "Control + ArrowLeft",
-                "NEXTWORDSELECT": "Control + Shift + ArrowRight",
-                "PREVWORDSELECT": "Control + Shift + ArrowLeft",
+                "NEXTWORDSELECT": [
+                                    "Control + Shift   + ArrowRight",
+                                    "Shift   + Control + ArrowRight"
+                                  ],
+                "PREVWORDSELECT": [
+                                    "Control + Shift   + ArrowLeft",
+                                    "Shift   + Control + ArrowLeft"
+                                  ],
                 "PREVPAGE"      : "Control + ArrowUp",
                 "NEXTPAGE"      : "Control + ArrowDown",
-                "PREVPAGESELECT": "Control + ArrowUp + Shift",
-                "NEXTPAGESELECT": "Control + ArrowDown + Shift"
+                "PREVPAGESELECT": [
+                                    "Control + ArrowUp + Shift",
+                                    "ArrowUp + Control + Shift"
+                                  ],
+                "NEXTPAGESELECT": [
+                                    "ArrowDown + Control   + Shift",
+                                    "Control   + ArrowDown + Shift"
+                                  ]
             },
             "osx" : {
                 "UNDO"          : "MetaLeft + KeyZ",
-                "REDO"          : "MetaLeft + Shift + KeyZ",
+                "REDO"          : [
+                                    "MetaLeft + Shift + KeyZ",
+                                    "Shift + MetaLeft + KeyZ"
+                                  ],
                 "SELECTALL"     : "MetaLeft + KeyA",
+
                 "NEXTWORD"      : "MetaLeft + ArrowRight",
+
                 "PREVWORD"      : "MetaLeft + ArrowLeft",
-                "NEXTWORDSELECT": "MetaLeft + Shift + ArrowRight",
-                "PREVWORDSELECT": "MetaLeft + Shift + ArrowLeft"
+                "NEXTWORDSELECT": [
+                                    "MetaLeft + Shift    + ArrowRight",
+                                    "Shift    + MetaLeft + ArrowRight"
+                                  ],
+                "PREVWORDSELECT": [
+                                    "MetaLeft + Shift    + ArrowLeft",
+                                    "Shift    + MetaLeft + ArrowLeft"
+                                  ]
             }
          }
     },

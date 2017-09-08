@@ -966,7 +966,7 @@ zebkit.package("draw", function(pkg, Class) {
             if (arguments.length > 0) {
                 this.color = c;
                 if (arguments.length > 1) {
-                    this.width = this.gap = w;
+                    this.lineWidth = this.gap = w;
                 }
             }
         },
@@ -984,15 +984,22 @@ zebkit.package("draw", function(pkg, Class) {
 
             /**
              * Shape line width
-             * @attribute width
+             * @attribute lineWidth
              * @type {Integer}
              * @default 1
              */
-            this.width = 1;
+            this.lineWidth = 1;
+
+            this.setLineWidth = function(w) {
+                if (w !== this.lineWidth) {
+                    this.lineWidth = this.gap = w;
+                }
+                return this;
+            };
 
             this.paint = function(g,x,y,w,h,d) {
-                if (g.lineWidth !== this.width) {
-                    g.lineWidth = this.width;
+                if (g.lineWidth !== this.lineWidth) {
+                    g.lineWidth = this.lineWidth;
                 }
 
                 this.outline(g,x,y,w,h,d);

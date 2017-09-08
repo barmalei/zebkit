@@ -390,6 +390,13 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             this.keyTyped = function(e) {
+                // Test if selection has been initiated (but nothing has been selected yet)
+                // Typing a character changes position so if selection is active then
+                // typed character will be unexpectedly selected.
+                if (e.shiftKey && this.startOff >= 0 && this.endOff === this.startOff) {
+                    this.clearSelection();
+                }
+
                 if (this.isEditable === true &&
                     e.ctrlKey === false &&
                     e.metaKey === false &&
@@ -451,8 +458,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             this.keyPressed = function(e) {
                 if (this.isFiltered(e) === false)  {
-                    var position    = this.position;
-
+                    var position = this.position;
                     if (e.shiftKey) {
                         this.startSelection();
                     }
@@ -493,10 +499,8 @@ zebkit.package("ui", function(pkg, Class) {
                         case "Delete":
                             if (this.hasSelection() && this.isEditable === true) {
                                 this.removeSelected();
-                            } else {
-                                if (this.isEditable === true) {
-                                    this.remove(position.offset, 1);
-                                }
+                            } else if (this.isEditable === true) {
+                                this.remove(position.offset, 1);
                             } break;
                         case "Backspace":
                             if (this.isEditable === true) {

@@ -11,8 +11,8 @@ zebkit.package("draw", function(pkg, Class) {
         function $prototype() {
             this.outline = function(g,x,y,w,h,d) {
                 g.beginPath();
-                w -= 2 * this.width;
-                h -= 2 * this.width;
+                w -= 2 * this.lineWidth;
+                h -= 2 * this.lineWidth;
                 g.moveTo(x + w - 1, y);
                 g.lineTo(x + w - 1, y + h - 1);
                 g.lineTo(x, y + h - 1);
@@ -973,6 +973,115 @@ zebkit.package("draw", function(pkg, Class) {
             g.bezierCurveTo(x + w - 1, y + h * 0.75 , x + w - 1, y, x + w * 0.65, y + h*0.25) ;
             g.bezierCurveTo(x + w - 1, y, x + w * 0.1, y, x + w * 0.2, y + h * 0.25) ;
             g.closePath();
+            return true;
+        }
+    ]);
+
+    pkg.FunctionRender = Class(pkg.Render, [
+        function(fn, x1, x2) {
+            this.$super(fn);
+            this.setRange(x1, x2);
+            if (arguments.length > 3) {
+                this.granularity = arguments[3];
+            }
+        },
+
+        function $prototype(g,x,y,w,h,c) {
+            this.granularity = 200;
+            this.color       = "orange";
+            this.lineWidth   = 2;
+
+            this.$fy = null;
+
+            this.valueWasChanged = function(o, n) {
+                if (n !== null && typeof n !== 'function') {
+                    throw new Error("Function is expected");
+                }
+                this.$fy = null;
+            };
+
+            this.setGranularity = function(g) {
+                if (g !== this.granularity) {
+                    this.granularity = g;
+                    this.$fy = null;
+                }
+            };
+
+            this.setRange = function(x1, x2) {
+                if (x1 > x2) {
+                    throw new RangeError("Incorrect range interval");
+                }
+
+                if (this.x1 !== x1 || this.x2 !== x2) {
+                    this.x1 = x1;
+                    this.x2 = x2;
+                    this.$fy = null;
+                }
+            };
+
+            this.recalc = function() {
+                if (this.$fy === null) {
+                    this.$fy   = [];
+                    this.$maxy = -100000000;
+                    this.$miny =  100000000;
+                    this.$dx   = (this.x2 - this.x1) / this.granularity;
+
+                    for(var x = this.x1, i = 0; x <= this.x2; i++) {
+                        this.$fy[i] = this.target(x);
+                        if (this.$fy[i] > this.$maxy) {
+                            this.$maxy = this.$fy[i];
+                        }
+
+                        if (this.$fy[i] < this.$miny) {
+                            this.$miny = this.$fy[i];
+                        }
+
+                        x += this.$dx;
+                    }
+                }
+            };
+
+            this.paint = function(g,x,y,w,h,c) {
+                if (this.target !== null) {
+                    this.recalc();
+
+                    var cx = (w - this.lineWidth * 2) / (this.x2 - this.x1),
+                        cy = (h - this.lineWidth * 2) / (this.$maxy - this.$miny),
+                        sx = this.x1 + this.$dx;
+
+                    g.beginPath();
+                    g.setColor(this.color);
+                    g.lineWidth = this.lineWidth;
+                    g.moveTo(this.lineWidth,
+                             this.lineWidth + (this.$fy[0] - this.$miny) * cy);
+
+                    //sx = (sx - this.x1)
+
+                    for(var i = 1; i < this.$fy.length; i++) {
+                        g.lineTo(this.lineWidth + (sx - this.x1) * cx,
+                                 this.lineWidth + (this.$fy[i] - this.$miny)* cy);
+                        sx += this.$dx;
+                    }
+                    g.stroke();
+                }
+            };
+        }
+    ]);
+
+
+    pkg.Pentahedron =  Class(pkg.Shape, [
+        function outline(g,x,y,w,h,d) {
+            g.beginPath();
+            x += this.lineWidth;
+            y += this.lineWidth;
+            w -= 2*this.lineWidth;
+            h -= 2*this.lineWidth;
+            g.moveTo(x + w/2, y);
+            g.lineTo(x + w - 1, y + h/3);
+            g.lineTo(x + w - 1 - w/3, y + h - 1);
+            g.lineTo(x + w/3, y + h - 1);
+            g.lineTo(x, y + h/3);
+            g.lineTo(x + w/2, y);
             return true;
         }
     ]);

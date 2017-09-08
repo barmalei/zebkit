@@ -447,6 +447,32 @@ zebkit.package("ui.web", function(pkg, Class) {
             };
         }
     ]);
+
+    /**
+     * This special wrapper component that has to be used to put HtmlElement into
+     * "zebkit.ui.ScrollPan"
+     * @example
+     *
+     *      var htmlElement = new zebkit.ui.web.HtmlElement();
+     *      ...
+     *      var scrollPan = new zebkit.ui.ScrollPan(new zebkit.ui.web.HtmlScrollContent(htmlElement));
+     *
+     *
+     * @param  {zebkit.ui.web.HtmlElement} t target html component that is going to
+     * scrolled.
+     * @class zebkit.ui.web.HtmlScrollContent
+     * @extends {zebkit.ui.web.HtmlElement}
+     * @constructor
+     */
+    pkg.HtmlScrollContent = Class(pkg.HtmlElement, [
+        function(t) {
+            this.$super();
+            this.scrollManager = new ui.ScrollPan.ContentPanScrollManager(t);
+            this.setLayout(new ui.ScrollPan.ContentPanLayout());
+            this.add("center",t);
+            this.setBackground("blue");
+        }
+    ]);
 });
 
 

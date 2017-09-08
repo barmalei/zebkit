@@ -416,6 +416,7 @@ zebkit.package("ui.web", function(pkg, Class) {
                 pnode.removeChild(this.$container);
                 pnode.appendChild(this.$container);
             }
+            return this;
         },
 
         function toBack() {
@@ -425,6 +426,7 @@ zebkit.package("ui.web", function(pkg, Class) {
                 pnode.removeChild(this.$container);
                 pnode.insertBefore(this.$container, pnode.firstChild);
             }
+            return this;
         },
 
         function setEnabled(b) {

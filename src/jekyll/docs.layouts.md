@@ -4,12 +4,12 @@ parent: docs
 title: Layout manager
 ---
 
-User interface has to be adjustable and adaptive to an environment and a hardware where it can be shown. To avoid potential UI layouting problems developers should not positioning and sizing UI components by assigning dedicated (x,y) coordinates and (width,height). 
+User interface has to be adaptive to an environment and a hardware where it can be shown. To avoid potential UI layouting problems developers should not positioning and sizing UI components by assigning dedicated (x,y) coordinates and (width,height) size. 
 
 Layout managers is well known solution to get adaptive UI that helps developing adjustable UI layout. Layout manager doesn't trust fixed UI components positions and sizes. It uses rules-based manner to order UI components. Layout manager "knows" two important things:
 
-  * How to order UI child components
-  * How to compute the component preferred size taking in account its child components hierarchy
+  * How to order UI child components of the given container component
+  * How to compute the container component preferred size taking in account its child components hierarchy
 
 Usage layout manager in zebkit looks something like the following:
 
@@ -17,10 +17,10 @@ Usage layout manager in zebkit looks something like the following:
 zebkit.require("ui", "layout", function(ui, layout) {
     ...
     var pan = new ui.Panel();
-    // Set layout manager
+    // Set layout manager for the container
     pan.setLayout(new layout.BorderLayout()) 
     ...
-    // Border layout manager understand orders child components 
+    // Border layout manager orders child components 
     // with number of predefined alignments (top, center, left, 
     // etc). Let's add a component at the top of panel
     pan.add("top", new ui.Button("Ok"));
@@ -54,7 +54,7 @@ zebkit.require("ui","layout",function(ui, lay) {
 
 This the most simple layout manager that place child components on top of each other stretching (or using preferred size) its to fill all available parent component space.
 
-{% include zsample.html canvas_id='stackLayout1' title='Raster layout' %}
+{% include zsample.html canvas_id='stackLayout1' title='Stack layout' %}
 
 
 ```js
@@ -76,7 +76,7 @@ zebkit.require("ui","layout",function(ui, lay) {
 
 ### Border Layout
 
-The layout manager splits container area into five logical areas: "left", "right", "top", "bottom", "center". Children component cab be added to occupy one of the listed above logical area:   
+The layout manager splits container area into five logical areas: "left", "right", "top", "bottom", "center". Child components can be added to occupy one of the listed above logical area:   
 
 {% include zsample.html canvas_id='layoutSample1' title='Border layout' %}
 
@@ -106,7 +106,7 @@ List layout manager treats child components as sequence of list items ordered ve
 zebkit.require("ui","layout", function(ui, layout) {
     var r = new ui.zCanvas().root;
     // set list layout manager that orders components as list 
-    // item and stretches child horizontally
+    // items and stretches child components horizontally
     r.setLayout(new layout.ListLayout());
 
     // add child components
@@ -119,7 +119,7 @@ zebkit.require("ui","layout", function(ui, layout) {
 
 ### Percentage layout
 
-This layout manager orders child components vertically or horizontally according to requested in percents height or width. 
+This layout manager orders child components vertically or horizontally according to specified as constraints height or width. Height and width are specified in percents. 
 
 {% include zsample.html canvas_id='layoutSample3' title='Percentage layout' %}
 
@@ -143,7 +143,7 @@ zebkit.require("ui","layout",function(ui, lay) {
 
 ### Flow layout
 
-Flow layout manager orders child components vertically or horizontally according to its preferred size. Additionally the ordered components can be aligned vertically  ("top", "bottom", "center") and horizontally ("left", "right", "center").  
+Flow layout manager orders child components vertically or horizontally according to its preferred size. Depending of a selected child components ordering (vertical or horizontal) they can be aligned "top", "bottom", "center" or "left", "right", "center".  
 
 {% include zsample.html canvas_id='layoutSample4' title='Flow layout' %}
 

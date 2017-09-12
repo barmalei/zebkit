@@ -3,6 +3,30 @@ zebkit.package("ui.event", function(pkg, Class) {
     zebkit.ui.events.regEvents("shortcutFired");
 
     /**
+     * Build all possible combination of the characters set:
+     *   "abc" ->   abc, acb, bac, bca, cab, cba
+     * @param  {String}   sequence character set
+     * @param  {Function} cb  called for every new unique characters
+     * sequence
+     */
+    function variants(sequence, cb) {
+        if (sequence.length === 2) {
+            cb(sequence);
+            cb(sequence[1] + sequence[0]);
+        } else if (sequence.length > 2) {
+            for(var i = 0; i < sequence.length; i++) {
+                (function(sequence, ch) {
+                    variants(sequence, function(v) {
+                        cb(ch + v);
+                    });
+                })(sequence.substring(0, i) + sequence.substring(i+1), sequence[i]);
+            }
+        } else {
+            cb(sequence);
+        }
+    }
+
+    /**
      * Shortcut event class
      * @constructor
      * @param  {zebkit.ui.Panel} src a source of the event
@@ -38,25 +62,25 @@ zebkit.package("ui.event", function(pkg, Class) {
     /**
      *  Shortcut manager supports short cut (keys) definition and listening. The shortcuts have to be defined in
      *  zebkit JSON configuration files. There are two sections:
-
-        - **osx** to keep shortcuts for Mac OS X platform
-        - **common** to keep shortcuts for all other platforms
-
+     *
+     *   - **osx** to keep shortcuts for Mac OS X platform
+     *   - **common** to keep shortcuts for all other platforms
+     *
      *  The JSON configuration entity has simple structure:
-
-
-          {
-            "common": {
-                "UNDO": "Control + KeyZ",
-                "REDO": "Control + Shift + KeyZ",
-                 ...
-            },
-            "osx" : {
-                "UNDO":  "MetaLeft + KeyZ",
-                 ...
-            }
-          }
-
+     *
+     *
+     *     {
+     *       "common": {
+     *           "UNDO": "Control + KeyZ",
+     *           "REDO": "Control + Shift + KeyZ",
+     *            ...
+     *       },
+     *       "osx" : {
+     *           "UNDO":  "MetaLeft + KeyZ",
+     *            ...
+     *       }
+     *     }
+     *
      *  The configuration contains list of shortcuts. Every shortcut is bound to a key combination that triggers it.
      *  Shortcut has a name and an optional list of arguments that have to be passed to a shortcut listener method.
      *  The optional arguments can be used to differentiate two shortcuts that are bound to the same command.
@@ -64,26 +88,26 @@ zebkit.package("ui.event", function(pkg, Class) {
      *  On the component level shortcut can be listened by implementing "shortcutFired(e)" listener handler.
      *  Pay attention to catch shortcut your component has to be focusable - be able to hold focus.
      *  For instance, to catch "UNDO" shortcut do the following:
-
-            var pan = new zebkit.ui.Panel([
-                function shortcutFired(e) {
-                    // handle shortcut here
-                    if (e.shortcut === "UNDO") {
-
-                    }
-                },
-
-                // visualize the component gets focus
-                function focused() {
-                    this.$super();
-                    this.setBackground(this.hasFocus()?"red":null);
-                }
-            ]);
-
-            // let our panel to hold focus by setting appropriate property
-            pan.canHaveFocus = true;
-
-
+     *
+     *      var pan = new zebkit.ui.Panel([
+     *          function shortcutFired(e) {
+     *              // handle shortcut here
+     *              if (e.shortcut === "UNDO") {
+     *
+     *              }
+     *          },
+     *
+     *          // visualize the component gets focus
+     *          function focused() {
+     *              this.$super();
+     *              this.setBackground(this.hasFocus()?"red":null);
+     *          }
+     *      ]);
+     *
+     *      // let our panel to hold focus by setting appropriate property
+     *      pan.canHaveFocus = true;
+     *
+     *
      *  @constructor
      *  @class zebkit.ui.event.ShortcutManager
      *  @extends zebkit.ui.event.Manager
@@ -113,7 +137,7 @@ zebkit.package("ui.event", function(pkg, Class) {
         },
 
         function $prototype() {
-            this.keyPath = [];
+            this.$keyPath = [];
 
             /**
              * Key pressed event handler.
@@ -121,18 +145,18 @@ zebkit.package("ui.event", function(pkg, Class) {
              * @method keyPressed
              */
             this.keyPressed = function(e) {
-                if (e.code === null || this.keyPath.length > 5) {
-                    this.keyPath = [];
+                if (e.code === null || this.$keyPath.length > 5) {
+                    this.$keyPath = [];
                 } else if (e.repeat === 1) {
-                    this.keyPath[this.keyPath.length] = e.code;
+                    this.$keyPath[this.$keyPath.length] = e.code;
                 }
 
                 // TODO: may be focus manager has to be moved to "ui.event" package
                 var fo = zebkit.ui.focusManager.focusOwner;
-                if (this.keyPath.length > 1) {
+                if (this.$keyPath.length > 1) {
                     var sh = this.keyShortcuts;
-                    for(var i = 0; i < this.keyPath.length; i++) {
-                        var code = this.keyPath[i];
+                    for(var i = 0; i < this.$keyPath.length; i++) {
+                        var code = this.$keyPath[i];
                         if (sh.hasOwnProperty(code)) {
                             sh = sh[code];
                         } else {
@@ -144,7 +168,7 @@ zebkit.package("ui.event", function(pkg, Class) {
                     if (sh !== null) {
                         SHORTCUT_EVENT.source   = fo;
                         SHORTCUT_EVENT.shortcut = sh;
-                        SHORTCUT_EVENT.keys     = this.keyPath.join('+');
+                        SHORTCUT_EVENT.keys     = this.$keyPath.join('+');
                         zebkit.ui.events.fire("shortcutFired", SHORTCUT_EVENT);
                     }
                 }
@@ -152,11 +176,11 @@ zebkit.package("ui.event", function(pkg, Class) {
 
             this.keyReleased = function(e) {
                 if (e.key === "Meta") {
-                    this.keyPath = [];
+                    this.$keyPath = [];
                 } else {
-                    for(var i = 0; i < this.keyPath.length; i++) {
-                        if (this.keyPath[i] === e.code) {
-                            this.keyPath.splice(i, 1);
+                    for(var i = 0; i < this.$keyPath.length; i++) {
+                        if (this.$keyPath[i] === e.code) {
+                            this.$keyPath.splice(i, 1);
                             break;
                         }
                     }
@@ -177,20 +201,32 @@ zebkit.package("ui.event", function(pkg, Class) {
              */
             this.setShortcuts = function(shortcuts) {
                 for (var id in shortcuts) {
-                    var shortcut = shortcuts[id];
+                    var shortcut = shortcuts[id],
+                        j        = 0;
                     id = id.trim();
 
                     if (Array.isArray(shortcut) === false) {
                         shortcut = [ shortcut ];
                     }
 
-                    for(var j = 0; j < shortcut.length; j++) {
+                    var re = /\(([^()]+)\)/;
+                    for(j = 0; j < shortcut.length; j++) {
+                        var m = re.exec(shortcut[j]);
+                        if (m !== null) {
+                            var variants = m[1].replace(/\s+/g, '').split('+'),
+                                prefix   = shortcut[j].substring(0, m.lastIndex),
+                                suffix   = shortcut[j].substring(m[1].length + 1);
+                        }
+                    }
+
+                    for(j = 0; j < shortcut.length; j++) {
                         var keys  = shortcut[j].replace(/\s+/g, '').split('+'),
                             st    = this.keyShortcuts,
                             len   = keys.length;
 
                         for(var i = 0; i < len; i++) {
                             var key = keys[i];
+
                             if (i === (len - 1)) {
                                 st[key] = id;
                             } else if (st.hasOwnProperty(key) === false || zebkit.isString(st[key])) {

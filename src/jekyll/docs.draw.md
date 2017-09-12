@@ -122,24 +122,27 @@ zebkit.require("draw","ui", function(draw, ui) {
 
         function paint(g,x,y,w,h,c) {
           var fy=[],dx=(this.x2-this.x1)/200,my=-1000000,mny=1000000;
+          // calculate function values for the given range and 
+          // the function minimal and maximal values 
           for(var x = this.x1,i = 0; x < this.x2; x+= dx,i++) {
               fy[i] = this.target(x); // call target function 
               if (fy[i] > my) my = fy[i];
               if (fy[i] < mny) mny = fy[i];
           }
-          var cx =(w-8)/(this.x2-this.x1),cy=(h-8)/(maxy - miny),
-              t  = function (xy, ct) { return ct * xy; };
+          var cx = (w - 8) / (this.x2 - this.x1), 
+              cy = (h - 8) / (maxy - miny);
           g.beginPath();
           g.setColor("red");
           g.lineWidth = 4;
-          g.moveTo(4, 4 + t(fy[0] - miny, cy));
-          for(var x=this.x1+dx,i=1;i<fy.length;x+=dx,i++) {
-              g.lineTo(4+t(x-this.x1, cx),4+t(fy[i]-miny, cy));
+          g.moveTo(4, 4 + (fy[0] - miny) * cy);
+          for(var vx = dx, i = 1; i < fy.length; vx += dx, i++) {
+              g.lineTo(4 + vx * cx),
+                       4 + (fy[i] - miny) * cy));
           }
           g.stroke();
         }
     ]);
-    var canvas = new ui.zCanvas("drawView2", 400, 200);
+    var canvas = new ui.zCanvas(400, 200);
     // implemented render as, the canvas root background
     canvas.root.setBackground(new FunctionRender(function(x) {
         return Math.cos(x) * Math.sin(x) - 2 * Math.sin(x*x);
@@ -150,7 +153,7 @@ zebkit.require("draw","ui", function(draw, ui) {
 
 ## Standard views and renders
 
-Zebkit provide rich set of various predefined views and renders. 
+Zebkit provides rich set of various predefined views and renders. 
 
 ### Border view (zebkit.draw.Border)
 

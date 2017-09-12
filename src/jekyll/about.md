@@ -167,52 +167,11 @@ zebkit.require("ui", "layout", "draw", function(ui, layout, draw) {
     }));
     
     var SimpleChart = zebkit.Class(ui.Panel, [
-        function(fn, x1, x2, dx, col) {
-            this.fn = fn;
-            this.x1 = x1;
-            this.x2 = x2;
-            this.dx = dx;
-            this.color = col;
-            this.lineWidth = 4;
+        function(fn, x1, x2, col) {
             this.$super();
-        },
-
-        function validate() {
-            var b = this.isLayoutValid;
-            this.$super();
-            if (b === false)  {
-                var maxy = -1000000, miny = 1000000, fy = [];
-                for(var x=this.x1, i = 0; x < this.x2; x += this.dx, i++) {
-                    fy[i] = this.fn(x);
-                    if (fy[i] > maxy) maxy = fy[i];
-                    if (fy[i] < miny) miny = fy[i];
-                }
-
-                var left = this.getLeft() + this.lineWidth,
-                    top  = this.getTop() + this.lineWidth,
-                    ww = this.width-left-this.getRight()-this.lineWidth*2,
-                    hh = this.height-top-this.getBottom()-this.lineWidth*2,
-                    cx = ww/(this.x2 - this.x1), cy = hh/ (maxy - miny),
-                    t  = function (xy, ct) { return ct * xy; };
-
-                this.gx = [ left ];
-                this.gy = [ top + t(fy[0] - miny, cy) ];
-                for(var x=this.x1+this.dx,i=1;i<fy.length;x+=this.dx,i++) {
-                    this.gx[i] = left + t(x - this.x1, cx);
-                    this.gy[i] = top  + t(fy[i] - miny, cy);
-                }
-            }
-        },
-
-        function paint(g) {
-            g.beginPath();
-            g.setColor(this.color);
-            g.lineWidth = this.lineWidth;
-            g.moveTo(this.gx[0], this.gy[0]);
-            for(var i = 1; i < this.gx.length; i++) {
-                g.lineTo(this.gx[i], this.gy[i]);
-            }
-            g.stroke();
+            var r = new draw.FunctionRender(fn,x1,x2,150,col)
+            r.lineWidth = 4;
+            this.setBackground(r);        
         }
     ]);
 
@@ -254,10 +213,10 @@ zebkit.require("ui", "layout", "draw", function(ui, layout, draw) {
     cpan.setLayout(new layout.StackLayout());
     cpan.add(new SimpleChart(function(x) {
         return Math.cos(x) * Math.sin(x) - 2 * Math.sin(x*x);
-    }, -2, 5, 0.01, "#FF7744"));
+    }, -2, 5, "#FF7744"));
     cpan.add(new SimpleChart(function(x) {
         return Math.cos(x) * Math.sin(x) + 2 * Math.sin(x*x);
-    }, -2, 1, 0.01, "#55DD22"))
+    }, -2, 1, "#55DD22"))
 
     var pan = new ui.Panel({
         layout: new layout.FlowLayout(8),
@@ -416,7 +375,9 @@ zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
     var TriangleButton = zebkit.Class(ui.Button, [
         function(target, color) {
             this.$super(target);
-            this.setBorder(new TriangleBorder(arguments.length > 1 ? color : "red", 4));
+            this.setBorder(new TriangleBorder(arguments.length > 1 ? color
+                                                                   : "red",
+                           4));
         },
 
         function contains(x, y) {

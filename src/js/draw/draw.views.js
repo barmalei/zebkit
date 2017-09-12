@@ -977,21 +977,77 @@ zebkit.package("draw", function(pkg, Class) {
         }
     ]);
 
+    /**
+     * Function render. The render draws a chart for the specified function
+     * within the given interval.
+     * @constructor
+     * @class zebkit.draw.FunctionRender
+     * @extends {zebkit.draw.Render}
+     * @param  {Function} fn  a function to be rendered
+     * @param  {Number}   x1  a minimal value of rendered function interval
+     * @param  {Number}   x2  a maximal value of rendered function interval
+     * @param  {Integer} [granularity]  a granularity
+     * @param  {String}  [color]  a chart color
+     * @example
+     *
+     *      zebkit.require("ui", "draw", function(ui, draw) {
+     *          var root = new ui.zCanvas(400, 300).root;
+     *          // paint sin(x) function as a background of root component
+     *          root.setBackground(new draw.FunctionRender(function(x) {
+     *              return Math.sin(x);
+     *          }, -3, 3));
+     *      });
+     *
+     */
     pkg.FunctionRender = Class(pkg.Render, [
-        function(fn, x1, x2) {
+        function(fn, x1, x2, granularity) {
             this.$super(fn);
             this.setRange(x1, x2);
             if (arguments.length > 3) {
                 this.granularity = arguments[3];
+                if (arguments.length > 4) {
+                    this.color = arguments[4];
+                }
             }
         },
 
         function $prototype(g,x,y,w,h,c) {
+            /**
+             * Granularity defines how many points the given interval have to be split.
+             * @type {Integer}
+             * @attribute granularity
+             * @readOnly
+             * @default 200
+             */
             this.granularity = 200;
-            this.color       = "orange";
-            this.lineWidth   = 2;
+
+            /**
+             * Function chart color.
+             * @type {String}
+             * @attribute color
+             * @default "orange"
+             */
+            this.color = "orange";
+
+            /**
+             * Chart line width.
+             * @type {Integer}
+             * @attribute lineWidth
+             * @default 1
+             */
+            this.lineWidth   = 1;
+
+            /**
+             * Indicates if the function chart has to be stretched vertically
+             * to occupy the whole vertical space
+             * @type {Boolean}
+             * @attribute stretch
+             * @default true
+             */
+            this.stretch = true;
 
             this.$fy = null;
+
 
             this.valueWasChanged = function(o, n) {
                 if (n !== null && typeof n !== 'function') {
@@ -1000,6 +1056,12 @@ zebkit.package("draw", function(pkg, Class) {
                 this.$fy = null;
             };
 
+            /**
+             * Set the given granularity. Granularity defines how smooth
+             * the rendered chart should be.
+             * @param {Integer} g a granularity
+             * @method setGranularity
+             */
             this.setGranularity = function(g) {
                 if (g !== this.granularity) {
                     this.granularity = g;
@@ -1007,6 +1069,13 @@ zebkit.package("draw", function(pkg, Class) {
                 }
             };
 
+            /**
+             * Set the specified interval - minimal and maximal function
+             * argument values.
+             * @param {Number} x1 a minimal value
+             * @param {Number} x2 a maximal value
+             * @method setRange
+             */
             this.setRange = function(x1, x2) {
                 if (x1 > x2) {
                     throw new RangeError("Incorrect range interval");
@@ -1019,7 +1088,7 @@ zebkit.package("draw", function(pkg, Class) {
                 }
             };
 
-            this.recalc = function() {
+            this.$recalc = function() {
                 if (this.$fy === null) {
                     this.$fy   = [];
                     this.$maxy = -100000000;
@@ -1043,24 +1112,31 @@ zebkit.package("draw", function(pkg, Class) {
 
             this.paint = function(g,x,y,w,h,c) {
                 if (this.target !== null) {
-                    this.recalc();
+                    this.$recalc();
 
-                    var cx = (w - this.lineWidth * 2) / (this.x2 - this.x1),
-                        cy = (h - this.lineWidth * 2) / (this.$maxy - this.$miny),
-                        sx = this.x1 + this.$dx;
+                    var cx = (w - this.lineWidth * 2) / (this.x2 - this.x1),  // value to pixel scale
+                        cy = cx,
+                        vx = this.$dx,
+                        sy = this.lineWidth,
+                        dy = h - this.lineWidth * 2;
+
+                    if (this.stretch) {
+                        cy = (h - this.lineWidth * 2) / (this.$maxy - this.$miny);
+                    } else {
+                        dy = (this.$maxy - this.$miny) * cx;
+                        sy = (h - dy) / 2;
+                    }
 
                     g.beginPath();
                     g.setColor(this.color);
                     g.lineWidth = this.lineWidth;
+
                     g.moveTo(this.lineWidth,
-                             this.lineWidth + (this.$fy[0] - this.$miny) * cy);
-
-                    //sx = (sx - this.x1)
-
+                             sy + dy - (this.$fy[0] - this.$miny) * cy);
                     for(var i = 1; i < this.$fy.length; i++) {
-                        g.lineTo(this.lineWidth + (sx - this.x1) * cx,
-                                 this.lineWidth + (this.$fy[i] - this.$miny)* cy);
-                        sx += this.$dx;
+                        g.lineTo(this.lineWidth + vx * cx,
+                                 sy + dy - (this.$fy[i] - this.$miny) * cy);
+                        vx += this.$dx;
                     }
                     g.stroke();
                 }
@@ -1068,8 +1144,15 @@ zebkit.package("draw", function(pkg, Class) {
         }
     ]);
 
-
-    pkg.Pentahedron =  Class(pkg.Shape, [
+    /**
+     * Pentahedron shape view.
+     * @param  {String}  [c]  a color of the shape
+     * @param  {Integer} [w]  a line size
+     * @class zebkit.draw.PentahedronShape
+     * @constructor
+     * @extends zebkit.draw.Shape
+     */
+    pkg.PentahedronShape =  Class(pkg.Shape, [
         function outline(g,x,y,w,h,d) {
             g.beginPath();
             x += this.lineWidth;

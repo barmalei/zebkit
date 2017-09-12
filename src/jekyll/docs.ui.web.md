@@ -1,7 +1,7 @@
 ---
 layout: page
 parent: docs
-title: HTML Elements in zebkit layout
+title: Zebkit HTML Elements
 ---
 
 Zebkit introduces unique feature - __"seamless integration of HTML elements into zebkit layout"__.  HTML elements can be placed in any zebkit UI component as if the HTML elements are also rendered on HTML5 Canvas. Placing HTML elements into zebkit layout gives the following:
@@ -16,10 +16,10 @@ As any other zebkit UI component HTML elements have to be represented as an inst
 
 __HTML elements in zebkit layout__ 
 
-Below is shown an example of zebkit application that does following:
+Find below an example of zebkit application that does the following:
 
    * add HTML _DIV_ (light green) element at the central part of zebkit root panel (ordered with zebkit border layout manager)
-   * add zebkit button at the "bottom" in the root panel layout
+   * add zebkit button at the "bottom" in the root panel
    * add zebkit check box component at the "top" part of inserted earlier HTML _DIV_ element. Border layout is set for DIV element.  
 
 {% include zsample.html canvas_id='webSample0' title='HTML elements in zebkit  layout' description=description %}                    
@@ -79,7 +79,7 @@ zebkit.require("ui", "ui.web", function(ui, web) {
 ```
 
 
-More impressive example is __scrolling HTML element with zebkit UI scroll panel component__. In this case the HTML element is scrolled with virtual, rendered on HTML canvas scrolls !  
+More impressive example is __scrolling of HTML element with zebkit UI scroll panel component__. In this case the HTML element is scrolled with virtual, rendered on HTML canvas scrollbars !  
 
 {% include zsample.html canvas_id='webSample1' title='Scroll HTML element with zebkit scroll panel' description=description %}                    
 
@@ -186,11 +186,6 @@ The application catches "keyReleased" event to refresh the chart with entered by
     zebkit.require("ui", "ui.web", "draw", function(ui, web, draw) {
         var root = new ui.zCanvas("webSample3", 600, 300).root;
         root.setBorderLayout().setBorder("plain").setPadding(32);
-      
-        var fn  = new ui.TextField();
-        fn.setValue("Math.cos(x)");
-        root.add("bottom", fn);
-
 
         var ta = new web.HtmlTextField("Correct function interval: 0-12")
                     .setStyle("background-color", "transparent")
@@ -204,14 +199,8 @@ The application catches "keyReleased" event to refresh the chart with entered by
             if (m !== null) {
                 var min=parseFloat(m[1]), max=parseFloat(m[4]);
                 if (max > min && !isNaN(min) && !isNaN(max)) {  
-                    var func = eval(
-                        "(function(x) { return "+fn.getValue()+";});"
-                    ); 
-
                     this.setBackground(new draw.FunctionRender(function(x) {
-                         //return Math.sin(x);
-                          return func(x);
-                     // return Math.sin(x)*Math.cos(2*x)-Math.cos(x*x); 
+                        return Math.sin(x)*Math.cos(2*x)-Math.cos(x*x); 
                     }, min, max));
                 }
             } 
@@ -234,14 +223,14 @@ zebkit.require("ui", "ui.web", "draw", function(ui, web, draw) {
       
     ta.keyReleased = function(e) {
         this.setBackground(null); // clear layout 
-        // Reg exp to detect rendered function interval enterRd by 
+        // Reg exp to detect rendered function interval entered by 
         // a user
         var re=/((\-)?[0-9]+(.[0-9]+)?)[,\-]((\-)?[0-9]+(.[0-9]+)?)/,
             m = this.getValue().match(re);
         if (m !== null) {
             var min=parseFloat(m[1]), max=parseFloat(m[4]);
             if (max > min && !isNaN(min) && !isNaN(max)) {  
-                this.setBackground(new draw.FunctionRender(function(x) {
+                this.setBackground(new draw.FunctionRender(function(x){
                   return Math.sin(x)*Math.cos(2*x)-Math.cos(x*x); 
                 }, min, max));
             }

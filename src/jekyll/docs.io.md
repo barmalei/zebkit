@@ -4,7 +4,7 @@ parent: docs
 title: IO
 ---
 
-Zebkit __“io”__ package collects different communication classes and methods to perform HTTP requests and perform JRPC and XRPC services calls. Requests according to WEB recommendations works in asynchronous mode and return promise-like structure to track response and handle error.   
+Zebkit __“io”__ package collects different communication classes and methods to perform HTTP requests and do JRPC and XRPC services calls. Requests according to WEB recommendations works in asynchronous mode and return promise-like structure to track response and handle error.   
 
 ```js
 // get data synchronously

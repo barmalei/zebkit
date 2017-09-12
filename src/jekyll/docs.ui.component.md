@@ -1,6 +1,8 @@
 ---
 layout: page
 parent: docs
+notitle: true
+title: UI Component
 ---
 
 ## zebkit.ui.Panel

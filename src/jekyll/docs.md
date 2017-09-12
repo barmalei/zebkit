@@ -35,10 +35,10 @@ title: Documentation
 ### UI 
 <hr>
 
-<a href="docs.ui.component.html">Component</a>
+<a href="docs.ui.component.html">UI Component</a>
 <br/>(key properties, metrics, etc)
 
-<a href="docs.ui.paint.html">Rendering</a>
+<a href="docs.ui.paint.html">Component rendering</a>
 <br/>(everything can be rendered)
 
 <a href="docs.layouts.html">Layout management</a>
@@ -52,14 +52,18 @@ title: Documentation
 
 <hr>
 <a href="docs.draw.html">Draw</a>
-<br/>(Draw primitive, visualize objects)    
+<br/>(Draw primitive, visualize objects)
+</td></tr>
 
+<tr><td colspan="2" width="100%">
 <hr>
-
 <a href="docs.ui.web.html">HTML Element</a>
+<br/>(embedding HTML elements into zebkit layout)
 </td></tr>
 
 <tr><td width="50%" valign="top" colspan="2" markdown="1">
+
+<!--
 ### Core UI Components
 <hr>
 <a href="doc.ui.component.html">Label, Button, etc</a>
@@ -68,7 +72,7 @@ title: Documentation
 <a href="doc.ui.component.html">Fields</a>
 <a href="doc.ui.component.html">Tree</a>
 <a href="doc.ui.component.html">Grid</a>
-    
+--> 
 </td></tr></table>
 
 

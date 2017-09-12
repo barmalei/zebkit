@@ -1,6 +1,8 @@
 ---
 layout: page
 parent: docs
+notitle: true
+title: Resources and configuration
 ---
 
 ## UI component self configuration 

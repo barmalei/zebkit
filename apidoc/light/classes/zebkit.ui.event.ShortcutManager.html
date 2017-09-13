@@ -181,6 +181,11 @@
                                                <a href="../classes/zebkit.draw.CompositeView.html">zebkit.draw.CompositeView</a>
                                             </td>
                                         </tr>
+                                        <tr class="classNameCell" className="zebkit.draw.CutStringRender" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.draw.CutStringRender.html">zebkit.draw.CutStringRender</a>
+                                            </td>
+                                        </tr>
                                         <tr class="classNameCell" className="zebkit.draw.DecoratedTextRender" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.draw.DecoratedTextRender.html">zebkit.draw.DecoratedTextRender</a>
@@ -194,6 +199,11 @@
                                         <tr class="classNameCell" className="zebkit.draw.Etched" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.draw.Etched.html">zebkit.draw.Etched</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.draw.FunctionRender" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.draw.FunctionRender.html">zebkit.draw.FunctionRender</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.draw.Gradient" name="allClassesItem">
@@ -214,6 +224,11 @@
                                         <tr class="classNameCell" className="zebkit.draw.Pattern" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.draw.Pattern.html">zebkit.draw.Pattern</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.draw.PentahedronShape" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.draw.PentahedronShape.html">zebkit.draw.PentahedronShape</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.draw.Picture" name="allClassesItem">
@@ -299,6 +314,11 @@
                                         <tr class="classNameCell" className="zebkit.draw.ViewSet" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.draw.ViewSet.html">zebkit.draw.ViewSet</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.draw.WrappedTextRender" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.draw.WrappedTextRender.html">zebkit.draw.WrappedTextRender</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.Dummy" name="allClassesItem">
@@ -941,6 +961,11 @@
                                                <a href="../classes/zebkit.ui.web.HtmlLink.html">zebkit.ui.web.HtmlLink</a>
                                             </td>
                                         </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.web.HtmlScrollContent" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.web.HtmlScrollContent.html">zebkit.ui.web.HtmlScrollContent</a>
+                                            </td>
+                                        </tr>
                                         <tr class="classNameCell" className="zebkit.ui.web.HtmlTextArea" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.web.HtmlTextArea.html">zebkit.ui.web.HtmlTextArea</a>
@@ -1121,45 +1146,45 @@
 <div class="intro">
     <p>Shortcut manager supports short cut (keys) definition and listening. The shortcuts have to be defined in
 zebkit JSON configuration files. There are two sections:</p>
-<pre class="code prettyprint"><code>  - **osx** to keep shortcuts for Mac OS X platform
-  - **common** to keep shortcuts for all other platforms
-</code></pre>
+<ul>
+<li><strong>osx</strong> to keep shortcuts for Mac OS X platform</li>
+<li><strong>common</strong> to keep shortcuts for all other platforms</li>
+</ul>
 <p>The JSON configuration entity has simple structure:</p>
-<pre class="code prettyprint"><code>    {
-      "common": {
-          "UNDO": "Control + KeyZ",
-          "REDO": "Control + Shift + KeyZ",
-           ...
-      },
-      "osx" : {
-          "UNDO":  "MetaLeft + KeyZ",
-           ...
-      }
-    }
-</code></pre>
+<p>{
+"common": {
+"UNDO": "Control + KeyZ",
+"REDO": "Control + Shift + KeyZ",
+...
+},
+"osx" : {
+"UNDO":  "MetaLeft + KeyZ",
+...
+}
+}</p>
 <p>The configuration contains list of shortcuts. Every shortcut is bound to a key combination that triggers it.
 Shortcut has a name and an optional list of arguments that have to be passed to a shortcut listener method.
 The optional arguments can be used to differentiate two shortcuts that are bound to the same command.</p>
 <p>On the component level shortcut can be listened by implementing "shortcutFired(e)" listener handler.
 Pay attention to catch shortcut your component has to be focusable - be able to hold focus.
 For instance, to catch "UNDO" shortcut do the following:</p>
-<pre class="code prettyprint"><code>      var pan = new zebkit.ui.Panel([
-          function shortcutFired(e) {
-              // handle shortcut here
-              if (e.shortcut === "UNDO") {
+<pre class="code prettyprint"><code>var pan = new zebkit.ui.Panel([
+    function shortcutFired(e) {
+        // handle shortcut here
+        if (e.shortcut === "UNDO") {
 
-              }
-          },
+        }
+    },
 
-          // visualize the component gets focus
-          function focused() {
-              this.$super();
-              this.setBackground(this.hasFocus()?"red":null);
-          }
-      ]);
+    // visualize the component gets focus
+    function focused() {
+        this.$super();
+        this.setBackground(this.hasFocus()?"red":null);
+    }
+]);
 
-      // let our panel to hold focus by setting appropriate property
-      pan.canHaveFocus = true;</code></pre>
+// let our panel to hold focus by setting appropriate property
+pan.canHaveFocus = true;</code></pre>
 
 </div>
 

@@ -174,6 +174,11 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                               <a href="../classes/zebkit.draw.CutStringRender.html">zebkit.draw.CutStringRender</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
                                                <a href="../classes/zebkit.draw.DecoratedTextRender.html">zebkit.draw.DecoratedTextRender</a>
                                             </td>
                                         </tr>
@@ -185,6 +190,11 @@
                                         <tr>
                                             <td>
                                                <a href="../classes/zebkit.draw.Etched.html">zebkit.draw.Etched</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.FunctionRender.html">zebkit.draw.FunctionRender</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -205,6 +215,11 @@
                                         <tr>
                                             <td>
                                                <a href="../classes/zebkit.draw.Pattern.html">zebkit.draw.Pattern</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.PentahedronShape.html">zebkit.draw.PentahedronShape</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -290,6 +305,11 @@
                                         <tr>
                                             <td>
                                                <a href="../classes/zebkit.draw.ViewSet.html">zebkit.draw.ViewSet</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.WrappedTextRender.html">zebkit.draw.WrappedTextRender</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -934,6 +954,11 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                               <a href="../classes/zebkit.ui.web.HtmlScrollContent.html">zebkit.ui.web.HtmlScrollContent</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
                                                <a href="../classes/zebkit.ui.web.HtmlTextArea.html">zebkit.ui.web.HtmlTextArea</a>
                                             </td>
                                         </tr>
@@ -1088,8 +1113,9 @@
 
 <br/>
 <div class="intro">
-    <p>Sequential tasks runner (D-then). Allows developers to execute number of steps (async and sync) in the
-exact order they have been called by runner. The ideas of the runner implementation is making the
+    <p>Promise-like sequential tasks runner (D-then). Allows developers to execute
+number of steps (async and sync) in the exact order they have been called with
+the class instance. The idea of the runner implementation is making the
 code more readable and plain nevertheless it includes asynchronous parts:</p>
 
 </div>
@@ -1219,7 +1245,7 @@ code more readable and plain nevertheless it includes asynchronous parts:</p>
 
                                     <td>
                                         <b>
-                                            <a class="name" href="#methods_error">error (e)</a>
+                                            <a class="name" href="#methods_error">error ([e])</a>
                                         </b>
                                     </td>
 
@@ -1378,8 +1404,8 @@ code more readable and plain nevertheless it includes asynchronous parts:</p>
                         </strong>
                     <p>a callback to handle the error. The method
 gets an error that has happened as its argument. If there is no argument
-the error will be printed in output. If body is null then no error output
-is expected.</p>
+the error will be printed in output. If passed argument is null then
+no error output is expected.</p>
 
                 </li>
         </ul>
@@ -1402,7 +1428,7 @@ is expected.</p>
 
                 <span class="type">chainable</span>
 
-    <strong class="name"><code>error</code> (<code>e</code>)</strong>
+    <strong class="name"><code>error</code> (<code>[e]</code>)</strong>
 
     <br/>
 
@@ -1413,7 +1439,7 @@ is expected.</p>
         <strong>Parameters:</strong>
         <ul class="params">
                 <li>
-                        <span class="name"><code>e</code></span>
+                        <span class="name"><code>[e]</code></span>
                         <strong class="type">
                             &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error" class="crosslink external" target="_blank">Error</a>&gt;
                         </strong>
@@ -1538,7 +1564,7 @@ continue tasks that has not been run yet because of the error.</p>
                         </strong>
                     <p>a method to be executed. The method can get results
 of previous step execution as its arguments. The method is called in context
-of instance of a DoIt instance.</p>
+of a DoIt instance.</p>
 
                 </li>
         </ul>
@@ -1566,7 +1592,7 @@ of instance of a DoIt instance.</p>
     <br/>
 
     <p>Throw an exception if an error has happened before the method call,
-otherwise fo nothing.</p>
+otherwise do nothing.</p>
 
 
 
@@ -1592,7 +1618,7 @@ otherwise fo nothing.</p>
 
     <br/>
 
-    <p>Wait before the given doit is ready to be called.</p>
+    <p>Wait for the given doit redness.</p>
 
 
         <br/>

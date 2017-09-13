@@ -181,6 +181,11 @@
                                                <a href="../classes/zebkit.draw.CompositeView.html">zebkit.draw.CompositeView</a>
                                             </td>
                                         </tr>
+                                        <tr class="classNameCell" className="zebkit.draw.CutStringRender" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.draw.CutStringRender.html">zebkit.draw.CutStringRender</a>
+                                            </td>
+                                        </tr>
                                         <tr class="classNameCell" className="zebkit.draw.DecoratedTextRender" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.draw.DecoratedTextRender.html">zebkit.draw.DecoratedTextRender</a>
@@ -194,6 +199,11 @@
                                         <tr class="classNameCell" className="zebkit.draw.Etched" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.draw.Etched.html">zebkit.draw.Etched</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.draw.FunctionRender" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.draw.FunctionRender.html">zebkit.draw.FunctionRender</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.draw.Gradient" name="allClassesItem">
@@ -214,6 +224,11 @@
                                         <tr class="classNameCell" className="zebkit.draw.Pattern" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.draw.Pattern.html">zebkit.draw.Pattern</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.draw.PentahedronShape" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.draw.PentahedronShape.html">zebkit.draw.PentahedronShape</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.draw.Picture" name="allClassesItem">
@@ -299,6 +314,11 @@
                                         <tr class="classNameCell" className="zebkit.draw.ViewSet" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.draw.ViewSet.html">zebkit.draw.ViewSet</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.draw.WrappedTextRender" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.draw.WrappedTextRender.html">zebkit.draw.WrappedTextRender</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.Dummy" name="allClassesItem">
@@ -939,6 +959,11 @@
                                         <tr class="classNameCell" className="zebkit.ui.web.HtmlLink" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.web.HtmlLink.html">zebkit.ui.web.HtmlLink</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.web.HtmlScrollContent" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.web.HtmlScrollContent.html">zebkit.ui.web.HtmlScrollContent</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.web.HtmlTextArea" name="allClassesItem">
@@ -1916,9 +1941,12 @@ sub-package itself as its arguments</p>
 
     <br/>
 
-    <p>Method to request sub-package or sub-packages be ready and visible in
-passed callback. The method guarantees the callbacks be called the time
-all zebkit data is loaded and ready.</p>
+    <p>This method has to be used to start building a zebkit application. It
+expects a callback function where an application code has to be placed and
+number of required for the application packages names.  The call back gets
+the packages instances as its arguments. The method guarantees the callback
+is called at the time zebkit and requested packages are loaded, initialized
+and ready to be used.</p>
 
 
         <br/>
@@ -1932,7 +1960,7 @@ all zebkit data is loaded and ready.</p>
                         <span class="name">
                             <abbr title="Denotes that this argument can contain (n) number">(*..n)</abbr>
                         </span>
-                    <p>name or names of sub-packages to make visible
+                    <p>name or names of packages to make visible
 in callback method</p>
 
                 </li>

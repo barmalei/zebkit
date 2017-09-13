@@ -174,6 +174,11 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                               <a href="../classes/zebkit.draw.CutStringRender.html">zebkit.draw.CutStringRender</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
                                                <a href="../classes/zebkit.draw.DecoratedTextRender.html">zebkit.draw.DecoratedTextRender</a>
                                             </td>
                                         </tr>
@@ -185,6 +190,11 @@
                                         <tr>
                                             <td>
                                                <a href="../classes/zebkit.draw.Etched.html">zebkit.draw.Etched</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.FunctionRender.html">zebkit.draw.FunctionRender</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -205,6 +215,11 @@
                                         <tr>
                                             <td>
                                                <a href="../classes/zebkit.draw.Pattern.html">zebkit.draw.Pattern</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.PentahedronShape.html">zebkit.draw.PentahedronShape</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -290,6 +305,11 @@
                                         <tr>
                                             <td>
                                                <a href="../classes/zebkit.draw.ViewSet.html">zebkit.draw.ViewSet</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.WrappedTextRender.html">zebkit.draw.WrappedTextRender</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -934,6 +954,11 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                               <a href="../classes/zebkit.ui.web.HtmlScrollContent.html">zebkit.ui.web.HtmlScrollContent</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
                                                <a href="../classes/zebkit.ui.web.HtmlTextArea.html">zebkit.ui.web.HtmlTextArea</a>
                                             </td>
                                         </tr>
@@ -1298,12 +1323,11 @@
         /**
          * Loads an image by the given URL.
          * @param  {String|HTMLImageElement} img an image URL or image object
-         * @param  {Function} ready a call back method to be notified when the image has been completely
-         * loaded or failed. The method gets three parameters
-         *
-         *   - an URL to the image
-         *   - boolean loading result. true means success
-         *   - an image that has been loaded
+         * @param  {Function} success a call back method to be notified when the image has
+         * been successfully loaded. The method gets an image as its parameter.
+         * @param {Function} [error] a call back method to be notified if the image loading
+         * has failed. The method gets an image instance as its parameter and an exception
+         * that describes an error has happened.
          *
          * @example
          *      // load image
@@ -1507,8 +1531,9 @@
     }
 })();
 /**
- * Sequential tasks runner (D-then). Allows developers to execute number of steps (async and sync) in the
- * exact order they have been called by runner. The ideas of the runner implementation is making the
+ * Promise-like sequential tasks runner (D-then). Allows developers to execute
+ * number of steps (async and sync) in the exact order they have been called with
+ * the class instance. The idea of the runner implementation is making the
  * code more readable and plain nevertheless it includes asynchronous parts:
  * @example
 
@@ -1579,6 +1604,7 @@ DoIt.prototype = {
                 body.call(this, err);
             }
         }
+        return this;
     },
 
     /**
@@ -1600,7 +1626,7 @@ DoIt.prototype = {
      * @method  then
      * @param  {Function} body a method to be executed. The method can get results
      * of previous step execution as its arguments. The method is called in context
-     * of instance of a DoIt instance.
+     * of a DoIt instance.
      * @chainable
      */
     then : function(body, completed) {
@@ -1740,7 +1766,7 @@ DoIt.prototype = {
 
     /**
      * Force to fire error.
-     * @param  {Error} e an error to be fired
+     * @param  {Error} [e] an error to be fired
      * @method error
      * @chainable
      */
@@ -1760,10 +1786,8 @@ DoIt.prototype = {
                 }
 
                 this.$schedule();
-            } else {
-                if (arguments.length &lt; 2 || pr === true) {
-                    this.dumpError(e);
-                }
+            } else if (arguments.length &lt; 2 || pr === true) {
+                this.dumpError(e);
             }
         }
 
@@ -1771,7 +1795,7 @@ DoIt.prototype = {
     },
 
     /**
-     * Wait before the given doit is ready to be called.
+     * Wait for the given doit redness.
      * @param  {zebkit.DoIt} r a runner
      * @example
      *
@@ -1909,8 +1933,8 @@ DoIt.prototype = {
      * Method to catch error that has occurred during the doit sequence execution.
      * @param  {Function} [body] a callback to handle the error. The method
      * gets an error that has happened as its argument. If there is no argument
-     * the error will be printed in output. If body is null then no error output
-     * is expected.
+     * the error will be printed in output. If passed argument is null then
+     * no error output is expected.
      * @chainable
      * @method catch
      */
@@ -1972,7 +1996,7 @@ DoIt.prototype = {
 
     /**
      * Throw an exception if an error has happened before the method call,
-     * otherwise fo nothing.
+     * otherwise do nothing.
      * @method  throw
      * @chainable
      */
@@ -1997,7 +2021,6 @@ DoIt.prototype = {
             if (e === null || typeof e === &#x27;undefined&#x27;) {
                 console.log(&quot;Unknown error&quot;);
             } else {
-                console.log(&quot;&quot; + e);
                 console.log((e.stack ? e.stack : e));
             }
         }
@@ -2017,7 +2040,6 @@ var $exports     = {},
     isFF         = $isInBrowser &amp;&amp; window.mozInnerScreenX !== null,
     isMacOS      = $isInBrowser &amp;&amp; navigator.platform.toUpperCase().indexOf(&#x27;MAC&#x27;) !== -1,
     $FN          = null;
-
 
 /**
  * Reference to global space.
@@ -2131,7 +2153,7 @@ if (typeof Map === &#x27;undefined&#x27; &amp;&amp; (typeof $global !== &#x27;un
     $global.Map = $Map();
 }
 
-function GET(url, data) {
+function GET(url) {
     var req = $zenv.getHttpRequest();
     req.open(&quot;GET&quot;, url, true);
     return new DoIt(function() {
@@ -2177,8 +2199,6 @@ function dumpError(e) {
                   date.getFullYear() + &quot; &quot; +
                   date.getHours() + &quot;:&quot; + date.getMinutes() + &quot;:&quot; + date.getSeconds();
         }
-
-
         if (e === null || typeof e === &#x27;undefined&#x27;) {
             console.log(&quot;Unknown error&quot;);
         } else {
@@ -2220,24 +2240,9 @@ function image(ph, fireErr) {
     return d;
 }
 
-
-// ( (http) :// (host)? (:port)? (/)? )? (path)? (?query_string)?
-//
-//  [1] scheme://host/
-//  [2] scheme
-//  [3] host
-//  [4]  port
-//  [5] /
-//  [6] path
-//  [7] ?query_string
-//
-var $uriRE = /^(([a-zA-Z]+)\:\/\/([^\/:]+)?(\:[0-9]+)?(\/)?)?([^?]+)?(\?.+)?/;
-
 //  Faster match operation analogues:
 //  Math.floor(f)  =&gt;  ~~(a)
 //  Math.round(f)  =&gt;  (f + 0.5) | 0
-
-
 
 /**
  * Check if the given value is string
@@ -2275,26 +2280,62 @@ function isBoolean(o) {
           (typeof o === &quot;boolean&quot; || o.constructor === Boolean);
 }
 
-// get a value by the specified path from the given object or global space object
-function lookupObjValue(obj, name) {
-    if (arguments.length === 1) {
-        name = obj;
-        obj  = $global;
+/**
+ * Test if the given value has atomic type (String, Number or Boolean).
+ * @param  {Object}  v a value
+ * @return {Boolean} true if the value has atomic type
+ * @method  isAtomic
+ * @for zebkit
+ */
+function isAtomic(v) {
+    return v === null || typeof v === &#x27;undefined&#x27; ||
+           (typeof v === &quot;string&quot;  || v.constructor === String)  ||
+           (typeof v === &quot;number&quot;  || v.constructor === Number)  ||
+           (typeof v === &quot;boolean&quot; || v.constructor === Boolean)  ;
+}
+
+/**
+ * Get property value for the given object and the specified property path
+ * @param  {Object} obj  a target object.
+ * as the target object
+ * @param  {String} path property path.
+ * @param  {Boolean} [useGetter] says too try getter method when it exists.
+ * By default the parameter is false
+ * @return {Object} a property value
+ * @method  getPropertyValue
+ * @for  zebkit
+ */
+function getPropertyValue(obj, path, useGetter) {
+    if (arguments.length &lt; 3) {
+        useGetter = false;
     }
 
-    if (typeof name === &#x27;undefined&#x27; || name.trim().length === 0) {
-        throw new Error(&quot;Invalid field name: &#x27;&quot; + name + &quot;&#x27;&quot;);
+    if (typeof path === &#x27;undefined&#x27; || path.trim().length === 0) {
+        throw new Error(&quot;Invalid field path: &#x27;&quot; + path + &quot;&#x27;&quot;);
     }
 
-    var names = name.trim().split(&#x27;.&#x27;);
-    for(var i = 0; i &lt; names.length; i++) {
-        obj = obj[names[i]];
-
-        if (typeof obj === &#x27;undefined&#x27; || ((i + 1) === names.length &amp;&amp; obj === null)) {
-            throw new Error(&quot;&#x27;&quot; + name + &quot;&#x27; value cannot be detected&quot;);
+    var paths = path.trim().split(&#x27;.&#x27;);
+    for(var i = 0; i &lt; paths.length; i++) {
+        var p = paths[i], m = null;
+        if (typeof obj !== &#x27;undefined&#x27; &amp;&amp; obj !== null &amp;&amp;
+            ((useGetter === true &amp;&amp; (m = getPropertyGetter(obj, p))) || obj.hasOwnProperty(p)))
+        {
+            if (useGetter === true &amp;&amp; m !== null) {
+                obj = m.call(obj);
+            } else {
+                obj = obj[p];
+            }
+        } else {
+            throw new ReferenceError(&quot;Property path &#x27;&quot; + p + &quot;&#x27; cannot be resolved&quot;);
         }
     }
-    return obj;
+
+    // detect object value factory
+    if (obj !== null &amp;&amp; typeof obj !== &#x27;undefined&#x27; &amp;&amp; typeof obj.$new === &#x27;function&#x27;) {
+        return obj.$new();
+    } else {
+        return obj;
+    }
 }
 
 /**
@@ -2316,10 +2357,30 @@ function getPropertySetter(obj, name) {
             pi[name] = (typeof m  === &quot;function&quot;) ? m : null;
         }
         return pi[name];
+    } else {
+        m = obj[ &quot;set&quot; + name[0].toUpperCase() + name.substring(1) ];
+        return (typeof m  === &quot;function&quot;) ? m : null;
     }
+}
 
-    m = obj[ &quot;set&quot; + name[0].toUpperCase() + name.substring(1) ];
-    return (typeof m  === &quot;function&quot;) ? m : null;
+/**
+ * Get a property getter method if it is declared with the class of the specified object for the
+ * given property. Getter is a method whose name matches the following patterns: &quot;get&lt;PropertyName&gt;&quot;
+ * or &quot;is&lt;PropertyName&gt;&quot; where the first letter of the property name is in upper case. For instance
+ * getter method for property &quot;color&quot; has to have name &quot;getColor&quot;.
+ * @param  {Object} obj an object instance
+ * @param  {String} name a property name
+ * @return {Function}  a method that can be used as a getter for the given property
+ * @method  getPropertyGetter
+ * @for zebkit
+ */
+function getPropertyGetter(obj, name) {
+    var suffix = name[0].toUpperCase() + name.substring(1),
+        m      = obj[ &quot;get&quot; + suffix];
+    if (typeof m !== &#x27;function&#x27;) {
+        m = obj[ &quot;is&quot; + suffix];
+    }
+    return (typeof m === &#x27;function&#x27;) ? m : null;
 }
 
 /**
@@ -2366,9 +2427,21 @@ function properties(target, p) {
     return target;
 }
 
+// ( (http) :// (host)? (:port)? (/)? )? (path)? (?query_string)?
+//
+//  [1] scheme://host/
+//  [2] scheme
+//  [3] host
+//  [4]  port
+//  [5] /
+//  [6] path
+//  [7] ?query_string
+//
+var $uriRE = /^(([a-zA-Z]+)\:\/\/([^\/:]+)?(\:[0-9]+)?(\/)?)?([^?]+)?(\?.+)?/;
+
 /**
  * URI class. Pass either a full uri (as a string or zebkit.URI) or number of an URI parts
- * (scheme, host, etc) to constructor it.
+ * (scheme, host, etc) to construct it.
  * @param {String} [uri] an URI.
  * @param {String} [scheme] a scheme.
  * @param {String} [host] a host.
@@ -2442,7 +2515,7 @@ function URI(uri) {
         if (typeof m[6] !== &#x27;undefined&#x27;) {
             this.path = m[6];
         } else if (typeof m[1] !== &#x27;undefined&#x27;) {
-            throw new Error(&quot;Invalid URL &#x27;&quot; + uri + &quot;&#x27;&quot;);
+            this.path = &quot;/&quot;;
         }
 
         if (typeof m[7] !== &#x27;undefined&#x27; &amp;&amp; m[7].length &gt; 1) {
@@ -2625,13 +2698,54 @@ URI.parseQS = function(qs, decode) {
 
     if (mqs !== null) {
         for(var i = 0; i &lt; mqs.length; i++) {
-            var q = mqs[i].split(&#x27;=&#x27;);
-            parsedQS[q[0]] = (decode === true ? $zenv.decodeURIComponent(q[1])
-                                              : q[1]);
+            var q = mqs[i].split(&#x27;=&#x27;),
+                k = q[0].trim(),
+                v = decode === true ? $zenv.decodeURIComponent(q[1])
+                                    : q[1];
+
+            if (parsedQS.hasOwnProperty(k)) {
+                var p = parsedQS[k];
+                if (Array.isArray(p) === false) {
+                    parsedQS[k] = [ p ];
+                }
+                parsedQS[k].push(v);
+            } else {
+                parsedQS[k] = v;
+            }
         }
     }
     return parsedQS;
 };
+
+
+URI.decodeQSValue = function(value) {
+    if (Array.isArray(value)) {
+        var r = [];
+        for(var i = 0; i &lt; value.length; i++) {
+            r[i] = URI.decodeQSValue(value[i]);
+        }
+        return r;
+    } else {
+        value = value.trim();
+        if (value[0] === &quot;&#x27;&quot;) {
+            value = value.substring(1, value.length - 1);
+        } else if (value === &quot;true&quot; || value === &quot;false&quot;) {
+            value = (value === &quot;true&quot;);
+        } else if (value === &quot;null&quot;) {
+            value = null;
+        } else if (value === &quot;undefined&quot;) {
+            value = undefined;
+        } else {
+            var num = (value.indexOf(&#x27;.&#x27;) &gt;= 0) ? parseFloat(value)
+                                                : parseInt(value, 10);
+            if (isNaN(num) === false) {
+                value = num;
+            }
+        }
+        return value;
+    }
+};
+
 
 /**
  * Convert the given dictionary of parameters to a query string.
@@ -2692,8 +2806,9 @@ URI.join = function() {
 };
 
 $export(
-    URI,        isNumber, isString, $Map,
+    URI,        isNumber, isString, $Map, isAtomic,
     dumpError,  image,    getPropertySetter,
+    getPropertyValue,     getPropertyGetter,
     properties, GET,      isBoolean, DoIt,
     { &quot;$global&quot;    : $global,
       &quot;$FN&quot;        : $FN,
@@ -3338,6 +3453,360 @@ function $mixing(clazz, methods) {
     }
 }
 
+
+var classTemplateFields = {
+    /**
+     * Makes the class hashable. Hashable class instances are automatically
+     * gets unique hash code that is returned with its overridden &quot;toString()&quot;
+     * method. The hash code is stored in special &quot;$hash$&quot; field. The feature
+     * can be useful when you want to store class instances in &quot;{}&quot; object
+     * where key is the hash and the value is the instance itself.
+     * @method hashable
+     * @chainable
+     * @for zebkit.Class
+     */
+    hashable : function() {
+        if (this.$uniqueness !== true) {
+            this.$uniqueness = true;
+            this.prototype.toString = $toString;
+        }
+        return this;
+    },
+
+    /**
+     * Makes the class hashless. Prevents generation of hash code for
+     * instances of the class.
+     * @method hashless
+     * @chainable
+     * @for zebkit.Class
+     */
+    hashless : function() {
+        if (this.$uniqueness === true) {
+            this.$uniqueness = false;
+            this.prototype.toString = Object.prototype.toString;
+        }
+        return this;
+    },
+
+    /**
+     * Extend the class with new method and implemented interfaces.
+     * @param {zebkit.Interface} [interfaces]*  number of interfaces the class has to implement.
+     * @param {Array} methods set of methods the given class has to be extended.
+     * @method extend
+     * @for  zebkit.Class
+     */
+    // add extend method later to avoid the method be inherited as a class static field
+    extend : function() {
+        var methods    = arguments[arguments.length - 1],
+            hasMethod  = Array.isArray(methods);
+
+        // inject class
+        if (hasMethod &amp;&amp; this.$isExtended !== true) {
+            // create intermediate class
+            var A = this.$parent !== null ? Class(this.$parent, [])
+                                          : Class([]);
+
+            // copy this class prototypes methods to intermediate class A and re-define
+            // boundTo to the intermediate class A if they were bound to source class
+            // methods that have been  moved from source class to class have to be re-bound
+            // to A class
+            for(var name in this.prototype) {
+                if (name !== &quot;clazz&quot; &amp;&amp; this.prototype.hasOwnProperty(name) ) {
+                    var f = this.prototype[name];
+                    if (typeof f === &#x27;function&#x27;) {
+                        A.prototype[name] = typeof f.methodBody !== &#x27;undefined&#x27; ? $ProxyMethod(name, f.methodBody, f.boundTo)
+                                                                                : f;
+
+                        if (A.prototype[name].boundTo === this) {
+                            A.prototype[name].boundTo = A;
+                            if (f.boundTo === this) {
+                                f.boundTo = A;
+                            }
+                        }
+                    }
+                }
+            }
+
+            this.$parent = A;
+            this.$isExtended = true;
+        }
+
+        if (hasMethod) {
+            $mixing(this, methods);
+        }
+
+        // add passed interfaces
+        for(var i = 0; i &lt; arguments.length - (hasMethod ? 1 : 0); i++) {
+            var I = arguments[i];
+            if (I === null || typeof I === &#x27;undefined&#x27; || I.clazz !== Interface) {
+                throw new Error(&quot;Interface is expected&quot;);
+            }
+
+            if (typeof this.$parents[I.$hash$] !== &#x27;undefined&#x27;) {
+                throw new Error(&quot;Interface has been already inherited&quot;);
+            }
+
+            $cpMethods(I.prototype, this.prototype, this);
+            this.$parents[I.$hash$] = I;
+        }
+    },
+
+    /**
+     * Tests if the class inherits the given class or interface.
+     * @param  {zebkit.Class | zebkit.Interface}  clazz a class or interface.
+     * @return {Boolean} true if the class or interface is inherited with
+     * the class.
+     * @method  isInherit
+     * @for  zebkit.Class
+     */
+    isInherit : function(clazz) {
+        if (this !== clazz) {
+            // detect class
+            if (clazz.clazz === this.clazz) {
+                for (var p = this.$parent; p !== null; p = p.$parent) {
+                    if (p === clazz) {
+                        return true;
+                    }
+                }
+            } else { // detect interface
+                if (this.$parents[clazz.$hash$] === clazz) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+};
+
+
+var classTemplateProto = {
+    /**
+     * Extend existent class instance with the given methods and interfaces
+     * For example:
+
+        var A = zebkit.Class([ // declare class A that defines one &quot;a&quot; method
+            function a() {
+                console.log(&quot;A:a()&quot;);
+            }
+        ]);
+
+        var a = new A();
+        a.a();  // show &quot;A:a()&quot; message
+
+        A.a.extend([
+            function b() {
+                console.log(&quot;EA:b()&quot;);
+            },
+
+            function a() {   // redefine &quot;a&quot; method
+                console.log(&quot;EA:a()&quot;);
+            }
+        ]);
+
+        a.b(); // show &quot;EA:b()&quot; message
+        a.a(); // show &quot;EA:a()&quot; message
+
+     * @param {zebkit.Interface} [interfaces]* interfaces to be implemented with the
+     * class instance
+     * @param {Array} methods list of methods the class instance has to be extended
+     * with
+     * @method extend
+     * @for zebkit.Class.zObject
+     */
+    extend : function() {
+        var clazz = this.clazz,
+            l = arguments.length,
+            f = arguments[l - 1],
+            hasArray = Array.isArray(f),
+            i = 0;
+
+        // replace the instance class with a new intermediate class
+        // that inherits the replaced class. it is done to support
+        // $super method calls.
+        if (this.$isExtended !== true) {
+            clazz = Class(clazz, []);
+            this.$isExtended = true;         // mark the instance as extended to avoid double extending.
+            clazz.$name = this.clazz.$name;
+            this.clazz = clazz;
+        }
+
+        if (hasArray) {
+            var init = null;
+            for(i = 0; i &lt; f.length; i++) {
+                var n = $FN(f[i]);
+                if (n === CDNAME) {
+                    init = f[i];  // postpone calling initializer before all methods will be defined
+                } else {
+                    if (typeof this[n] !== &#x27;undefined&#x27; &amp;&amp; typeof this[n] !== &#x27;function&#x27;) {
+                        throw new Error(&quot;Method &#x27;&quot; + n + &quot;&#x27; clash with a property&quot;);
+                    }
+                    this[n] = $ProxyMethod(n, f[i], clazz);
+                }
+            }
+
+            if (init !== null) {
+                init.call(this);
+            }
+            l--;
+        }
+
+        // add new interfaces if they has been passed
+        for (i = 0; i &lt; arguments.length - (hasArray ? 1 : 0); i++) {
+            if (arguments[i].clazz !== Interface) {
+                throw new Error(&quot;Invalid argument &quot; + arguments[i] + &quot; Interface is expected.&quot;);
+            }
+
+            var I = arguments[i];
+            if (typeof clazz.$parents[I.$hash$] !== &#x27;undefined&#x27;) {
+                throw new Error(&quot;Interface has been already inherited&quot;);
+            }
+
+            $cpMethods(I.prototype, this, clazz);
+            clazz.$parents[I.$hash$] = I;
+        }
+        return this;
+    },
+
+    /**
+     * Call super method implementation.
+     * @param {Function} [superMethod]? optional parameter that should be a method of the class instance
+     * that has to be called
+     * @param {Object} [args]* arguments list to pass the executed method
+     * @return {Object} return what super method returns
+     * @method $super
+     * @example
+     *
+     *    var A = zebkit.Class([
+     *        function a(p) { return 10 + p; }
+     *    ]);
+     *
+     *    var B = zebkit.Class(A, [
+     *        function a(p) {
+     *            return this.$super(p) * 10;
+     *        }
+     *    ]);
+     *
+     *    var b = new B();
+     *    b.a(10) // return 200
+     *
+     * @for zebkit.Class.zObject
+     */
+    $super : function() {
+       if ($caller !== null) {
+            for (var $s = $caller.boundTo.$parent; $s !== null; $s = $s.$parent) {
+                var m = $s.prototype[$caller.methodName];
+                if (typeof m !== &#x27;undefined&#x27;) {
+                    return m.apply(this, arguments);
+                }
+            }
+
+            // handle method not found error
+            var cln = this.clazz &amp;&amp; this.clazz.$name ? this.clazz.$name + &quot;.&quot; : &quot;&quot;;
+            throw new ReferenceError(&quot;Method &#x27;&quot; +
+                                     cln +
+                                     ($caller.methodName === CNAME ? &quot;constructor&quot;
+                                                                   : $caller.methodName) + &quot;(&quot; + arguments.length + &quot;)&quot; + &quot;&#x27; not found&quot;);
+        } else {
+            throw new Error(&quot;$super is called outside of class context&quot;);
+        }
+    },
+
+    // TODO: not stable API
+    $supera : function(args) {
+       if ($caller !== null) {
+            for (var $s = $caller.boundTo.$parent; $s !== null; $s = $s.$parent) {
+                var m = $s.prototype[$caller.methodName];
+                if (typeof m !== &#x27;undefined&#x27;) {
+                    return m.apply(this, args);
+                }
+            }
+
+            // handle method not found error
+            var cln = this.clazz &amp;&amp; this.clazz.$name ? this.clazz.$name + &quot;.&quot; : &quot;&quot;;
+            throw new ReferenceError(&quot;Method &#x27;&quot; +
+                                     cln +
+                                     ($caller.methodName === CNAME ? &quot;constructor&quot;
+                                                                   : $caller.methodName) + &quot;(&quot; + arguments.length + &quot;)&quot; + &quot;&#x27; not found&quot;);
+        } else {
+            throw new Error(&quot;$super is called outside of class context&quot;);
+        }
+    },
+
+    // TODO: not stable API, $super that doesn&#x27;t throw exception is there is no super implementation
+    $$super : function() {
+       if ($caller !== null) {
+            for(var $s = $caller.boundTo.$parent; $s !== null; $s = $s.$parent) {
+                var m = $s.prototype[$caller.methodName];
+                if (typeof m !== &#x27;undefined&#x27;) {
+                    return m.apply(this, arguments);
+                }
+            }
+        } else {
+            throw new Error(&quot;$super is called outside of class context&quot;);
+        }
+    },
+
+    /**
+     * Get a first super implementation of the given method in a parent classes hierarchy.
+     * @param  {String} name a name of the method
+     * @return {Function} a super method implementation
+     * @method  $getSuper
+     * @for  zebkit.Class.zObject
+     */
+    $getSuper : function(name) {
+       if ($caller !== null) {
+            for(var $s = $caller.boundTo.$parent; $s !== null; $s = $s.$parent) {
+                var m = $s.prototype[name];
+                if (typeof m === &#x27;function&#x27;) {
+                    return m;
+                }
+            }
+            return null;
+        }
+        throw new Error(&quot;$super is called outside of class context&quot;);
+    },
+
+    $genHash : function() {
+        if (typeof this.$hash$ === &#x27;undefined&#x27;) {
+            this.$hash$ = &quot;$ZeInGen&quot; + ($$$++);
+        }
+        return this.$hash$;
+    },
+
+    $clone : function(map) {
+        map = map || new Map();
+
+        var f = function() {};
+        f.prototype = this.constructor.prototype;
+        var nobj = new f();
+        map.set(this, nobj);
+
+        for(var k in this) {
+            if (this.hasOwnProperty(k)) {
+                // obj&#x27;s layout is obj itself
+                var t = map.get(this[k]);
+                if (t !== undefined) {
+                    nobj[k] = t;
+                } else {
+                    nobj[k] = clone(this[k], map);
+                }
+            }
+        }
+
+        // speed up clearing resources
+        map.clear();
+
+        nobj.constructor = this.constructor;
+
+        if (typeof nobj.$hash$ !== &#x27;undefined&#x27;) {
+            nobj.$hash$ = &quot;$zObj_&quot; + ($$$++);
+        }
+
+        nobj.clazz = this.clazz;
+        return nobj;
+    }
+};
+
 // create Class template what means we define a function (meta class) that has to be used to define
 // Class. That means we define a function that returns another function that is a Class
 var Class = $make_template(null, function() {
@@ -3470,232 +3939,6 @@ var Class = $make_template(null, function() {
     }
 
     /**
-     * Extend existent class instance with the given methods and interfaces
-     * For example:
-
-        var A = zebkit.Class([ // declare class A that defines one &quot;a&quot; method
-            function a() {
-                console.log(&quot;A:a()&quot;);
-            }
-        ]);
-
-        var a = new A();
-        a.a();  // show &quot;A:a()&quot; message
-
-        A.a.extend([
-            function b() {
-                console.log(&quot;EA:b()&quot;);
-            },
-
-            function a() {   // redefine &quot;a&quot; method
-                console.log(&quot;EA:a()&quot;);
-            }
-        ]);
-
-        a.b(); // show &quot;EA:b()&quot; message
-        a.a(); // show &quot;EA:a()&quot; message
-
-     * @param {zebkit.Interface} [interfaces]* interfaces to be implemented with the
-     * class instance
-     * @param {Array} methods list of methods the class instance has to be extended
-     * with
-     * @method extend
-     * @for zebkit.Class.zObject
-     */
-    classTemplate.prototype.extend = function() {
-        var clazz = this.clazz,
-            l = arguments.length,
-            f = arguments[l - 1],
-            hasArray = Array.isArray(f),
-            i = 0;
-
-        // replace the instance class with a new intermediate class
-        // that inherits the replaced class. it is done to support
-        // $super method calls.
-        if (this.$isExtended !== true) {
-            clazz = Class(clazz, []);
-            this.$isExtended = true;         // mark the instance as extended to avoid double extending.
-            clazz.$name = this.clazz.$name;
-            this.clazz = clazz;
-        }
-
-        if (hasArray) {
-            var init = null;
-            for(i = 0; i &lt; f.length; i++) {
-                var n = $FN(f[i]);
-                if (n === CDNAME) {
-                    init = f[i];  // postpone calling initializer before all methods will be defined
-                } else {
-                    if (typeof this[n] !== &#x27;undefined&#x27; &amp;&amp; typeof this[n] !== &#x27;function&#x27;) {
-                        throw new Error(&quot;Method &#x27;&quot; + n + &quot;&#x27; clash with a property&quot;);
-                    }
-                    this[n] = $ProxyMethod(n, f[i], clazz);
-                }
-            }
-
-            if (init !== null) {
-                init.call(this);
-            }
-            l--;
-        }
-
-        // add new interfaces if they has been passed
-        for (i = 0; i &lt; arguments.length - (hasArray ? 1 : 0); i++) {
-            if (arguments[i].clazz !== Interface) {
-                throw new Error(&quot;Invalid argument &quot; + arguments[i] + &quot; Interface is expected.&quot;);
-            }
-
-            var I = arguments[i];
-            if (typeof clazz.$parents[I.$hash$] !== &#x27;undefined&#x27;) {
-                throw new Error(&quot;Interface has been already inherited&quot;);
-            }
-
-            $cpMethods(I.prototype, this, clazz);
-            clazz.$parents[I.$hash$] = I;
-        }
-        return this;
-    };
-
-    /**
-     * Call super method implementation.
-     * @param {Function} [superMethod]? optional parameter that should be a method of the class instance
-     * that has to be called
-     * @param {Object} [args]* arguments list to pass the executed method
-     * @return {Object} return what super method returns
-     * @method $super
-     * @example
-     *
-     *    var A = zebkit.Class([
-     *        function a(p) { return 10 + p; }
-     *    ]);
-     *
-     *    var B = zebkit.Class(A, [
-     *        function a(p) {
-     *            return this.$super(p) * 10;
-     *        }
-     *    ]);
-     *
-     *    var b = new B();
-     *    b.a(10) // return 200
-     *
-     * @for zebkit.Class.zObject
-     */
-    classTemplate.prototype.$super = function() {
-       if ($caller !== null) {
-            for (var $s = $caller.boundTo.$parent; $s !== null; $s = $s.$parent) {
-                var m = $s.prototype[$caller.methodName];
-                if (typeof m !== &#x27;undefined&#x27;) {
-                    return m.apply(this, arguments);
-                }
-            }
-
-            // handle method not found error
-            var cln = this.clazz &amp;&amp; this.clazz.$name ? this.clazz.$name + &quot;.&quot; : &quot;&quot;;
-            throw new ReferenceError(&quot;Method &#x27;&quot; +
-                                     cln +
-                                     ($caller.methodName === CNAME ? &quot;constructor&quot;
-                                                                   : $caller.methodName) + &quot;(&quot; + arguments.length + &quot;)&quot; + &quot;&#x27; not found&quot;);
-        } else {
-            throw new Error(&quot;$super is called outside of class context&quot;);
-        }
-    };
-
-    // TODO: not stable API
-    classTemplate.prototype.$supera = function(args) {
-       if ($caller !== null) {
-            for (var $s = $caller.boundTo.$parent; $s !== null; $s = $s.$parent) {
-                var m = $s.prototype[$caller.methodName];
-                if (typeof m !== &#x27;undefined&#x27;) {
-                    return m.apply(this, args);
-                }
-            }
-
-            // handle method not found error
-            var cln = this.clazz &amp;&amp; this.clazz.$name ? this.clazz.$name + &quot;.&quot; : &quot;&quot;;
-            throw new ReferenceError(&quot;Method &#x27;&quot; +
-                                     cln +
-                                     ($caller.methodName === CNAME ? &quot;constructor&quot;
-                                                                   : $caller.methodName) + &quot;(&quot; + arguments.length + &quot;)&quot; + &quot;&#x27; not found&quot;);
-        } else {
-            throw new Error(&quot;$super is called outside of class context&quot;);
-        }
-    };
-
-    // TODO: not stable API, $super that doesn&#x27;t throw exception is there is no super implementation
-    classTemplate.prototype.$$super = function() {
-       if ($caller !== null) {
-            for(var $s = $caller.boundTo.$parent; $s !== null; $s = $s.$parent) {
-                var m = $s.prototype[$caller.methodName];
-                if (typeof m !== &#x27;undefined&#x27;) {
-                    return m.apply(this, arguments);
-                }
-            }
-        } else {
-            throw new Error(&quot;$super is called outside of class context&quot;);
-        }
-    };
-
-    /**
-     * Get a first super implementation of the given method in a parent classes hierarchy.
-     * @param  {String} name a name of the method
-     * @return {Function} a super method implementation
-     * @method  $getSuper
-     * @for  zebkit.Class.zObject
-     */
-    classTemplate.prototype.$getSuper = function(name) {
-       if ($caller !== null) {
-            for(var $s = $caller.boundTo.$parent; $s !== null; $s = $s.$parent) {
-                var m = $s.prototype[name];
-                if (typeof m === &#x27;function&#x27;) {
-                    return m;
-                }
-            }
-            return null;
-        }
-        throw new Error(&quot;$super is called outside of class context&quot;);
-    };
-
-    classTemplate.prototype.$genHash = function() {
-        if (typeof this.$hash$ === &#x27;undefined&#x27;) {
-            this.$hash$ = &quot;$ZeInGen&quot; + ($$$++);
-        }
-        return this.$hash$;
-    };
-
-    classTemplate.prototype.$clone = function(map) {
-        map = map || new Map();
-
-        var f = function() {};
-        f.prototype = this.constructor.prototype;
-        var nobj = new f();
-        map.set(this, nobj);
-
-        for(var k in this) {
-            if (this.hasOwnProperty(k)) {
-                // obj&#x27;s layout is obj itself
-                var t = map.get(this[k]);
-                if (t !== undefined) {
-                    nobj[k] = t;
-                } else {
-                    nobj[k] = clone(this[k], map);
-                }
-            }
-        }
-
-        // speed up clearing resources
-        map.clear();
-
-        nobj.constructor = this.constructor;
-
-        if (typeof nobj.$hash$ !== &#x27;undefined&#x27;) {
-            nobj.$hash$ = &quot;$zObj_&quot; + ($$$++);
-        }
-
-        nobj.clazz = this.clazz;
-        return nobj;
-    };
-
-    /**
      * The instance class.
      * @attribute clazz
      * @type {zebkit.Class}
@@ -3709,10 +3952,15 @@ var Class = $make_template(null, function() {
         };
     }
 
+    // populate class template prototype methods and fields
+    for(var ptf in classTemplateProto) {
+        classTemplate.prototype[ptf] = classTemplateProto[ptf];
+    }
+
     // copy methods from interfaces before mixing class methods
     if (toInherit.length &gt; 0) {
-        for(var i = toInherit[0].clazz === Interface ? 0 : 1; i &lt; toInherit.length; i++) {
-            var  ic = toInherit[i];
+        for(var idx = toInherit[0].clazz === Interface ? 0 : 1; idx &lt; toInherit.length; idx++) {
+            var ic = toInherit[idx];
             $cpMethods(ic.prototype, classTemplate.prototype, classTemplate);
 
             // copy static fields from interface to the class
@@ -3733,8 +3981,9 @@ var Class = $make_template(null, function() {
     // populate static fields
     // TODO: exclude the basic static methods and static constant
     // static inheritance
-
     classTemplate.$uniqueness = false;
+
+
     if (parentClass !== null) {
         for (var key in parentClass) {
             if (key[0] !== &#x27;$&#x27; &amp;&amp;
@@ -3750,128 +3999,10 @@ var Class = $make_template(null, function() {
         }
     }
 
-    /**
-     * Makes the class hashable. Hashable class instances are automatically
-     * gets unique hash code that is returned with its overridden &quot;toString()&quot;
-     * method. The hash code is stored in special &quot;$hash$&quot; field. The feature
-     * can be useful when you want to store class instances in &quot;{}&quot; object
-     * where key is the hash and the value is the instance itself.
-     * @method hashable
-     * @chainable
-     * @for zebkit.Class
-     */
-    classTemplate.hashable = function() {
-        if (this.$uniqueness !== true) {
-            this.$uniqueness = true;
-            this.prototype.toString = $toString;
-        }
-        return this;
-    };
-
-    /**
-     * Makes the class hashless. Prevents generation of hash code for
-     * instances of the class.
-     * @method hashless
-     * @chainable
-     * @for zebkit.Class
-     */
-    classTemplate.hashless = function() {
-        if (this.$uniqueness === true) {
-            this.$uniqueness = false;
-            this.prototype.toString = Object.prototype.toString;
-        }
-        return this;
-    };
-
-    /**
-     * Extend the class with new method and implemented interfaces.
-     * @param {zebkit.Interface} [interfaces]*  number of interfaces the class has to implement.
-     * @param {Array} methods set of methods the given class has to be extended.
-     * @method extend
-     * @for  zebkit.Class
-     */
-
-    // add extend method later to avoid the method be inherited as a class static field
-    classTemplate.extend = function() {
-        var methods    = arguments[arguments.length - 1],
-            hasMethod  = Array.isArray(methods);
-
-        // inject class
-        if (hasMethod &amp;&amp; this.$isExtended !== true) {
-            // create intermediate class
-            var A = this.$parent !== null ? Class(this.$parent, [])
-                                          : Class([]);
-
-            // copy this class prototypes methods to intermediate class A and re-define
-            // boundTo to the intermediate class A if they were bound to source class
-            // methods that have been  moved from source class to class have to be re-bound
-            // to A class
-            for(var name in this.prototype) {
-                if (name !== &quot;clazz&quot; &amp;&amp; this.prototype.hasOwnProperty(name) ) {
-                    var f = this.prototype[name];
-                    if (typeof f === &#x27;function&#x27;) {
-                        A.prototype[name] = typeof f.methodBody !== &#x27;undefined&#x27; ? $ProxyMethod(name, f.methodBody, f.boundTo)
-                                                                                : f;
-
-                        if (A.prototype[name].boundTo === this) {
-                            A.prototype[name].boundTo = A;
-                            if (f.boundTo === this) {
-                                f.boundTo = A;
-                            }
-                        }
-                    }
-                }
-            }
-
-            this.$parent = A;
-            this.$isExtended = true;
-        }
-
-        if (hasMethod) {
-            $mixing(this, methods);
-        }
-
-        // add passed interfaces
-        for(var i = 0; i &lt; arguments.length - (hasMethod ? 1 : 0); i++) {
-            var I = arguments[i];
-            if (I === null || typeof I === &#x27;undefined&#x27; || I.clazz !== Interface) {
-                throw new Error(&quot;Interface is expected&quot;);
-            }
-
-            if (typeof this.$parents[I.$hash$] !== &#x27;undefined&#x27;) {
-                throw new Error(&quot;Interface has been already inherited&quot;);
-            }
-
-            $cpMethods(I.prototype, this.prototype, this);
-            this.$parents[I.$hash$] = I;
-        }
-    };
-
-    /**
-     * Tests if the given class inherits the given class or interface.
-     * @param  {zebkit.Class | zebkit.Interface}  clazz a class or interface.
-     * @return {Boolean} true if the class or interface is inherited with
-     * the class.
-     * @method  isInherit
-     * @for  zebkit.Class
-     */
-    classTemplate.isInherit = function(clazz) {
-        if (this !== clazz) {
-            // detect class
-            if (clazz.clazz === this.clazz) {
-                for (var p = this.$parent; p !== null; p = p.$parent) {
-                    if (p === clazz) {
-                        return true;
-                    }
-                }
-            } else { // detect interface
-                if (this.$parents[clazz.$hash$] === clazz) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    };
+    // populate class level methods and fields into class template
+    for (var tf in classTemplateFields) {
+        classTemplate[tf] = classTemplateFields[tf];
+    }
 
     // assign proper name to class
     classTemplate.clazz.$name = &quot;zebkit.Class&quot;;
@@ -3879,9 +4010,9 @@ var Class = $make_template(null, function() {
     // copy methods from interfaces
     if (toInherit.length &gt; 0) {
         // notify inherited class and interfaces that they have been inherited with the given class
-        for(var i = 0; i &lt; toInherit.length; i++) {
-            if (typeof toInherit[i].inheritedWidth === &#x27;function&#x27;) {
-                toInherit[i].inheritedWidth(classTemplate);
+        for(var j = 0; j &lt; toInherit.length; j++) {
+            if (typeof toInherit[j].inheritedWidth === &#x27;function&#x27;) {
+                toInherit[j].inheritedWidth(classTemplate);
             }
         }
     }
@@ -4050,7 +4181,7 @@ $export(clone, instanceOf, newInstance,
  *
  *     var pan = new zebkit.ui.Panel();
  *     new zebkit.Zson(pan).then(&quot;pan.json&quot;, function(zson) {
- *         // loaded and fullil panel
+ *         // loaded and fulfill panel
  *         ...
  *     });
  *
@@ -4171,6 +4302,14 @@ var Zson = Class([
         this.usePropertySetters = true;
 
         /**
+         * Cache busting
+         * @attribute cacheBusting
+         * @type {Boolean}
+         * @default false
+         */
+        this.cacheBusting = false;
+
+        /**
          * Internal variables set
          * @attribute $variables
          * @type {Object}
@@ -4201,50 +4340,17 @@ var Zson = Class([
                 ignore = true;
             }
 
-            var v = this.$get(key.split(&#x27;.&#x27;), this.root);
-            if (ignore === false &amp;&amp; typeof v === &#x27;undefined&#x27;) {
-                throw new Error(&quot;Property &#x27;&quot; + key + &quot;&#x27; not found&quot;);
-            }
-
-            return v;
-        };
-
-        /**
-         * Internal implementation of fetching a property value.
-         * @param  {Array} keys array of a key path parts
-         * @param  {Object} root an object to start resolving a property value
-         * @method  $get
-         * @protected
-         * @return {Object} a property value or undefined if the property  cannot be fetched from the
-         * object
-         */
-        this.$get = function(keys, root) {
-            if (keys.length === 0) {
-                throw new Error(&quot;No keys were found&quot;);
-            }
-
-            var v = root;
-            for(var i = 0; i &lt; keys.length; i++) {
-                v = v[keys[i]];
-                if (typeof v === &quot;undefined&quot;) {
-                    return undefined;
+            if (ignore) {
+                try {
+                    return getPropertyValue(this.root, key);
+                } catch(e) {
+                    if ((e instanceof ReferenceError) === false) {
+                        throw e;
+                    }
                 }
+            } else {
+                return getPropertyValue(this.root, key);
             }
-            return v !== null &amp;&amp; v.$new ? v.$new() : v;
-        };
-
-        /**
-         * Test if the given value has atomic type (String, Number or Boolean).
-         * @param  {Object}  v a value
-         * @return {Boolean} true if the value has atomic type
-         * @protected
-         * @method  $isAtomic
-         */
-        this.$isAtomic = function(v) {
-            return v === null || typeof v === &#x27;undefined&#x27; ||
-                   (typeof v === &quot;string&quot;  || v.constructor === String)  ||
-                   (typeof v === &quot;number&quot;  || v.constructor === Number)  ||
-                   (typeof v === &quot;boolean&quot; || v.constructor === Boolean)  ;
         };
 
         /**
@@ -4319,7 +4425,7 @@ var Zson = Class([
         this.$resolveRef = function(target, names) {
             var fn = function(ref, rn) {
                 rn.then(function(target) {
-                    if (target != null &amp;&amp; target.hasOwnProperty(ref) === true) {
+                    if (target !== null &amp;&amp; typeof target !== &#x27;undefined&#x27; &amp;&amp; target.hasOwnProperty(ref) === true) {
                         var v = target[ref];
                         if (v instanceof DoIt) {
                             var jn = this.join();
@@ -4460,6 +4566,29 @@ var Zson = Class([
             }
         };
 
+        this.$qsToVars = function(uri) {
+            var qs   = null,
+                vars = null;
+
+            if ((uri instanceof URI) === false) {
+                qs = new URI(uri.toString()).qs;
+            } else {
+                qs = uri.qs;
+            }
+
+            if (qs !== null || typeof qs === &#x27;undefined&#x27;) {
+                qs = URI.parseQS(qs);
+                for(var k in qs) {
+                    if (vars === null) {
+                        vars = {};
+                    }
+                    vars[k] = URI.decodeQSValue(qs[k]);
+                }
+            }
+
+            return vars;
+        };
+
         this.$buildRef = function(d) {
             var idx = -1;
 
@@ -4496,32 +4625,12 @@ var Zson = Class([
                 }
 
                 if (type === &quot;json&quot;) {
-                    var bag = new this.clazz(),
-                        bg  = null,
-                        qs  = new URI(path).qs;
-
+                    var bag = new this.clazz();
                     bag.usePropertySetters = this.usePropertySetters;
-                    if (qs !== null) {
-                        qs = URI.parseQS(qs);
-                        bag.$variables = {};
-                        for(var k in qs) {
-                            var qsv = qs[k];
-                            if (qsv[0] === &quot;&#x27;&quot;) {
-                                qsv = qsv.substring(1, qsv.length - 1);
-                            } else if (qsv === &quot;true&quot;) {
-                                qsv = true;
-                            } else if (qsv === &quot;false&quot;) {
-                                qsv = false;
-                            } else if (qsv === &quot;null&quot;) {
-                                qsv = null;
-                            } else {
-                                qsv = parseInt(qsv, 10);
-                            }
-                            bag.$variables[k] = qsv;
-                        }
-                    }
+                    bag.$variables         = this.$qsToVars(path);
+                    bag.cacheBusting       = this.cacheBusting;
 
-                    bg = bag.then(path).catch();
+                    var bg = bag.then(path).catch();
                     this.$runner.then(bg.then(function(res) {
                         return res.root;
                     }));
@@ -4548,7 +4657,7 @@ var Zson = Class([
                     idx++;
                 }
 
-                var name    = d.substring(idx, d.length - 1).trim(),
+                var name = d.substring(idx, d.length - 1).trim(),
                     names   = name.split(&#x27;.&#x27;),
                     targets = [ this.$variables, this.content, this.root, $global];
 
@@ -4679,14 +4788,13 @@ var Zson = Class([
                         }
                     }
 
-
-                    if (this.$isAtomic(dv) || Array.isArray(dv) ||
-                        this.$isAtomic(sv) || Array.isArray(sv) ||
+                    if (isAtomic(dv) || Array.isArray(dv) ||
+                        isAtomic(sv) || Array.isArray(sv) ||
                         typeof sv.clazz !== &#x27;undefined&#x27;            )
                     {
                         this.$assignValue(dest, k, sv);
                     } else if (recursively === true) {
-                        if (dv != null &amp;&amp; typeof dv.clazz !== &#x27;undefined&#x27; &amp;&amp; dv.clazz.mergeable === false) {
+                        if (dv !== null &amp;&amp; typeof dv !== &#x27;undefined&#x27; &amp;&amp; typeof dv.clazz !== &#x27;undefined&#x27; &amp;&amp; dv.clazz.mergeable === false) {
                             this.$assignValue(dest, k, sv);
                         } else {
                             this.merge(dv, sv);
@@ -4787,7 +4895,13 @@ var Zson = Class([
                     if ((json[0] !== &#x27;[&#x27; || json[json.length - 1] !== &#x27;]&#x27;) &amp;&amp;
                         (json[0] !== &#x27;{&#x27; || json[json.length - 1] !== &#x27;}&#x27;)   )
                     {
-                        $this.url = json + (json.lastIndexOf(&quot;?&quot;) &gt; 0 ? &quot;&amp;&quot; : &quot;?&quot;) + (new Date()).getTime().toString();
+                        $this.$variables = $this.$qsToVars(json);
+
+                        $this.url = json;
+
+                        if ($this.cacheBusting === false) {
+                            $this.url = $this.url + (json.lastIndexOf(&quot;?&quot;) &gt; 0 ? &quot;&amp;&quot; : &quot;?&quot;) + (new Date()).getTime().toString();
+                        }
 
                         var join = this.join();
                         GET($this.url).then(function(r) {
@@ -4819,6 +4933,7 @@ var Zson = Class([
                 } else {
                     $this.root = $this.content;
                 }
+
                 return $this;
             });
 
@@ -5078,37 +5193,36 @@ var Event = Class([
 /**
  * This method allows to declare a listeners container class for the given
  * dedicated event types.
-
-    // create listener container to keep three different events
-    // handlers
-    var MyListenerContainerClass = zebkit.ListenersClass(&quot;event1&quot;,
-                                                         &quot;event2&quot;,
-                                                         &quot;event3&quot;);
-
-    // instantiate listener class container
-    var listeners = new MyListenerContainerClass();
-
-    // add &quot;event1&quot; listener
-    listeners.add(function event1() {
-        ...
-    });
-
-    // add &quot;event2&quot; listener
-    listeners.add(function event2() {
-       ...
-    });
-
-    // add listener for both event1 and event2 events
-    listeners.add(function() {
-       ...
-    });
-
-    // and firing event1 to registered handlers
-    listeners.event1(...);
-
-    // and firing event2 to registered handlers
-    listeners.event2(...);
-
+ *
+ *     // create listener container to keep three different events
+ *     // handlers
+ *     var MyListenerContainerClass = zebkit.ListenersClass(&quot;event1&quot;,
+ *                                                          &quot;event2&quot;,
+ *                                                          &quot;event3&quot;);
+ *     // instantiate listener class container
+ *     var listeners = new MyListenerContainerClass();
+ *
+ *     // add &quot;event1&quot; listener
+ *     listeners.add(function event1() {
+ *         ...
+ *     });
+ *
+ *     // add &quot;event2&quot; listener
+ *     listeners.add(function event2() {
+ *        ...
+ *     });
+ *
+ *     // add listener for both event1 and event2 events
+ *     listeners.add(function() {
+ *        ...
+ *     });
+ *
+ *     // and firing event1 to registered handlers
+ *     listeners.event1(...);
+ *
+ *     // and firing event2 to registered handlers
+ *     listeners.event2(...);
+ *
  * @for zebkit
  * @method ListenersClass
  * @param {String} [events]* events types the listeners container has to support
@@ -5456,7 +5570,7 @@ var Listeners = $NewListener();
  *         // handle &quot;fired&quot; events
  *     });
  *
- *     a.fireEvent(10);
+ *     a.fire(10);
  *
  * @class zebkit.EventProducer
  * @interface zebkit.EventProducer
@@ -5518,7 +5632,7 @@ var EventProducer = Interface([
             } else if (arguments.length === 2) {
                 if (arguments[0] === null) {
                     throw new Error(&quot;Invalid event or path&quot;);
-                } else if (arguments[0][0] === &#x27;.&#x27; || arguments[0][0] === &#x27;/&#x27; || arguments[0][0] === &#x27;#&#x27;) { // detect path
+                } else if (arguments[0][0] === &#x27;.&#x27; || arguments[0][0] === &#x27;/&#x27; || arguments[0][0] === &#x27;#&#x27;) { // a path detected
                     pt = arguments[0];
                 } else {
                     if (typeof this._ === &#x27;undefined&#x27;) {
@@ -5685,6 +5799,44 @@ var EventProducer = Interface([
         };
     }
 ]);
+
+
+/**
+ * Extends zebkit.Class with the given events support.
+ * @param {String} [args]* list of events names
+ * @method events
+ * @for  zebkit.Class
+ */
+classTemplateFields.events = function() {
+    var args = Array.prototype.slice.call(arguments);
+    if (arguments.length === 0) {
+        args.push(&quot;fired&quot;);
+    }
+
+    var c = args.length;
+    if (typeof this.Listeners !== &#x27;undefined&#x27;) {
+        for (var i = 0; i &lt; this.Listeners.eventNames.length; i++) {
+            var en = this.Listeners.eventNames[i];
+            if (args.indexOf(en) &lt; 0) {
+                args.push(en);
+            }
+        }
+    }
+
+    if (typeof this.Listeners === &#x27;undefined&#x27;) {
+        this.Listeners = $NewListener.apply($NewListener, args);
+    } else if (c !== args.length) {
+        this.Listeners = $NewListener.apply($NewListener, args);
+    }
+
+    if (this.isInherit(EventProducer) === false) {
+        this.extend(EventProducer);
+    }
+
+    return this;
+};
+
+
 
 // TODO: should be at least re-named to better name
 var Fireable = Interface();
@@ -5951,7 +6103,7 @@ function $lsall(fn) {
             // class is detected, set the class name and ref to the class package
             if (typeof v.$name === &quot;undefined&quot;) {
                 v.$name = fn + k;
-                v.$pkg  = lookupObjValue($global, fn.substring(0, fn.length - 1));
+                v.$pkg  = getPropertyValue($global, fn.substring(0, fn.length - 1));
             }
             return $lsall.call(v, v.$name + &quot;.&quot;);
         }
@@ -6031,18 +6183,25 @@ function Package(name, parent) {
 Package.prototype.config = function(name, value, overwrite) {
     if (arguments.length === 0) {
         return this.$config;
-    } else if (arguments.length === 1) {
+    } else if (arguments.length === 1 &amp;&amp; isString(arguments[0])) {
         return this.$config[name];
-    } else if (arguments.length &gt; 1) {
-        var old = this.$config[name];
-        if (value === undefined) {
-            delete this.$config[name];
-        } else if (arguments.length &lt; 3 || overwrite === true) {
-            this.$config[name] = value;
-        } else if (this.$config.hasOwnProperty(name) === false) {
-            this.$config[name] = value;
+    } else  {
+        if (isString(arguments[0])) {
+            var old = this.$config[name];
+            if (value === undefined) {
+                delete this.$config[name];
+            } else if (arguments.length &lt; 3 || overwrite === true) {
+                this.$config[name] = value;
+            } else if (this.$config.hasOwnProperty(name) === false) {
+                this.$config[name] = value;
+            }
+            return old;
+        } else {
+            overwrite = arguments.length &gt; 1 ? value : false;
+            for (var k in arguments[0]) {
+                this.config(k, arguments[0][k], overwrite);
+            }
         }
-        return old;
     }
 };
 
@@ -6144,7 +6303,6 @@ Package.prototype.packages = function(callback, recursively) {
             }
         }
     }
-
     return false;
 };
 
@@ -6182,12 +6340,13 @@ Package.prototype.ls = function(cb, all) {
  * @param {String} [pkgname]* names of packages to be imported
  * @return {String} an import string to be evaluated in a local JS space
  * @method  import
+ * @deprecated Usage of the method has to be avoided. Use zebkit.require(...) instead.
  */
 Package.prototype.import = function() {
     var code = [];
     if (arguments.length &gt; 0) {
         for(var i = 0; i &lt; arguments.length; i++) {
-            var v = lookupObjValue(this, arguments[i]);
+            var v = getPropertyValue(this, arguments[i]);
             if ((v instanceof Package) === false) {
                 throw new Error(&quot;Package &#x27;&quot; + arguments[i] + &quot; &#x27; cannot be found&quot;);
             }
@@ -6206,10 +6365,13 @@ Package.prototype.import = function() {
 };
 
 /**
- * Method to request sub-package or sub-packages be ready and visible in
- * passed callback. The method guarantees the callbacks be called the time
- * all zebkit data is loaded and ready.
- * @param {String} [packages]* name or names of sub-packages to make visible
+ * This method has to be used to start building a zebkit application. It
+ * expects a callback function where an application code has to be placed and
+ * number of required for the application packages names.  The call back gets
+ * the packages instances as its arguments. The method guarantees the callback
+ * is called at the time zebkit and requested packages are loaded, initialized
+ * and ready to be used.
+ * @param {String} [packages]* name or names of packages to make visible
  * in callback method
  * @param {Function} [callback] a method to be called. The method is called
  * in context of the given package and gets requested packages passed as the
@@ -6233,7 +6395,7 @@ Package.prototype.require = function() {
     }
 
     for(var i = 0; isString(arguments[i]) &amp;&amp; i &lt; arguments.length; i++) {
-        var pkg = lookupObjValue(this, arguments[i]);
+        var pkg = getPropertyValue(this, arguments[i]);
         if ((pkg instanceof Package) === false) {
             throw new Error(&quot;Package &#x27;&quot; + arguments[i] + &quot;&#x27; cannot be found&quot;);
         }
@@ -6304,13 +6466,11 @@ Package.prototype.resources = function() {
                     });
                 } else if (type === &quot;txt&quot;) {
                     GET(p).then(function(req) {
-                              jn(req.responseText);
-                          }).error(function(e) {
-                              console.log(e);
-                              jn(null);
-                          });
+                        jn(req.responseText);
+                    }).catch(function(e) {
+                        jn(null);
+                    });
                 } else {
-                    console.log(&quot;Invalid path &#x27;&quot; + path + &quot;&#x27;&quot;);
                     jn(null);
                 }
 
@@ -6602,7 +6762,7 @@ var zebkit = new Package(&quot;zebkit&quot;);
  * @for  zebkit
  * @attribute environment
  * @readOnly
- * @type {Object}
+ * @type {Environment}
  */
 
 // declaring zebkit as a global variable has to be done before calling &quot;package&quot; method
@@ -6615,6 +6775,7 @@ if (typeof module !== &#x27;undefined&#x27; &amp;&amp; typeof module.exports !==
 
 $global.zebkit = zebkit;
 
+// collect exported entities in zebkit package space
 zebkit.package(function(pkg) {
     for(var exp in $exports) {
         pkg[exp] = $exports[exp];
@@ -6622,6 +6783,25 @@ zebkit.package(function(pkg) {
 });
 
 if ($isInBrowser) {
+
+    // collect query string parameters
+    try {
+        var uri = new URI(document.URL);
+        if (uri.qs !== null) {
+            var params = URI.parseQS(uri.qs);
+            for (var k in params) {
+                zebkit.config(k, URI.decodeQSValue(params[k]));
+            }
+
+            var cacheBusting = zebkit.config(&quot;zson.cacheBusting&quot;);
+            if (typeof cacheBusting !== &#x27;undefined&#x27; &amp;&amp; cacheBusting !== null) {
+                Zson.prototype.cacheBusting = cacheBusting;
+            }
+        }
+    } catch(e) {
+        dumpError(e);
+    }
+
     zebkit.then(function() {
         var jn        = this.join(),
             $interval = $zenv.setInterval(function () {
@@ -6629,7 +6809,7 @@ if ($isInBrowser) {
                 $zenv.clearInterval($interval);
                 jn(zebkit);
             }
-        }, 100);
+        }, 50);
     });
 }
 })();
@@ -9733,6 +9913,34 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
             };
 
             /**
+             * Get the given column data as an array object
+             * @param  {Integer} col a column
+             * @return {Array}  a column data
+             * @method getCol
+             */
+            this.getCol = function(col) {
+                var r = [];
+                for (var i = 0; i &lt; this.rows ; i++) {
+                    r[i] = this.get(i, col);
+                }
+                return r;
+            };
+
+            /**
+             * Get the given row data as an array object
+             * @param  {Integer} row a row
+             * @return {Array}  a row data
+             * @method getRow
+             */
+            this.getRow = function(row) {
+                var r = [];
+                for (var i = 0; i &lt; this.cols ; i++) {
+                    r[i] = this.get(row, i);
+                }
+                return r;
+            };
+
+            /**
              * Get a matrix model cell value by the specified index
              * @method geti
              * @param  {Integer} index a cell index
@@ -9749,6 +9957,7 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
              * @param  {Integer} row a cell row
              * @param  {Integer} col a cell column
              * @param  {Object} obj a new cell value
+             * @chainable
              */
             this.put = function(row,col,obj){
                 var nr = this.rows,
@@ -9772,6 +9981,8 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
                     this.$objs[row][col] = obj;
                     this._.cellModified(this, row, col, old);
                 }
+
+                return this;
             };
 
             /**
@@ -9781,10 +9992,12 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
              * @method puti
              * @param  {Integer} i a cell row
              * @param  {Object} obj a new cell value
+             * @chainable
              */
             this.puti = function(i, obj){
                 this.put( Math.floor(i / this.cols),
                           i % this.cols, obj);
+                return this;
             };
 
             /**
@@ -9792,6 +10005,7 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
              * @method setRowsCols
              * @param  {Integer} rows a new number of rows
              * @param  {Integer} cols a new number of columns
+             * @chainable
              */
             this.setRowsCols = function(rows, cols){
                 if (rows !== this.rows || cols !== this.cols){
@@ -9819,24 +10033,29 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
 
                     this._.matrixResized(this, pr, pc);
                 }
+                return this;
             };
 
              /**
              * Set the given number of rows the model has to have.
              * @method setRows
              * @param  {Integer} rows a new number of rows
+             * @chainable
              */
             this.setRows = function(rows) {
                 this.setRowsCols(rows, this.cols);
+                return this;
             };
 
             /**
              * Set the given number of columns the model has to have.
              * @method setCols
              * @param  {Integer} cols a new number of columns
+             * @chainable
              */
             this.setCols = function(cols) {
                 this.setRowsCols(this.rows, cols);
+                return this;
             };
 
             /**
@@ -9845,8 +10064,9 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
              * @method removeRows
              * @param  {Integer} begrow a start row
              * @param  {Integer} count  a number of rows to be removed
+             * @chainable
              */
-            this.removeRows = function(begrow,count) {
+            this.removeRows = function(begrow, count) {
                 if (arguments.length === 1) {
                     count = 1;
                 }
@@ -9858,6 +10078,7 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
                 this.$objs.splice(begrow, count);
                 this.rows -= count;
                 this._.matrixResized(this, this.rows + count, this.cols);
+                return this;
             };
 
             /**
@@ -9866,8 +10087,9 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
              * @method removeCols
              * @param  {Integer}  begcol a start column
              * @param  {Integer} count  a number of columns to be removed
+             * @chainable
              */
-            this.removeCols = function (begcol,count){
+            this.removeCols = function (begcol, count){
                 if (arguments.length === 1) {
                     count = 1;
                 }
@@ -9884,6 +10106,7 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
 
                 this.cols -= count;
                 this._.matrixResized(this, this.rows, this.cols + count);
+                return this;
             };
 
             /**
@@ -9891,6 +10114,7 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
              * @param  {Integer} row   a starting row to insert
              * @param  {Integer} count a number of rows to be added
              * @method insertRows
+             * @chainable
              */
             this.insertRows = function(row, count) {
                 if (arguments.length === 1) {
@@ -9911,6 +10135,7 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
 
                 this.rows += count;
                 this._.matrixResized(this, this.rows - count, this.cols);
+                return this;
             };
 
             /**
@@ -9918,6 +10143,7 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
              * @param  {Integer} col   a starting column to insert
              * @param  {Integer} count a number of columns to be added
              * @method insertCols
+             * @chainable
              */
             this.insertCols = function(col, count) {
                 if (arguments.length === 1) {
@@ -9937,6 +10163,43 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
 
                 this.cols += count;
                 this._.matrixResized(this, this.rows, this.cols - count);
+                return this;
+            };
+
+            /**
+             * Insert the column data at the given column
+             * @param  {Integer} col a column
+             * @param  {Array} [data] a column data
+             * @method insertCol
+             * @chainable
+             */
+            this.insertCol = function(col, data) {
+                this.insertCols(col, 1);
+
+                if (arguments.length &gt; 0) {
+                    for (var i = 0; i &lt; Math.min(data.length, this.rows); i++) {
+                        this.put(i, col, data[i]);
+                    }
+                }
+                return this;
+            };
+
+            /**
+             * Insert the row data at the given row
+             * @param  {Integer} row a row
+             * @param  {Array} [data] a row data
+             * @method insertRow
+             * @chainable
+             */
+            this.insertRow = function(row, data) {
+                this.insertRows(row, 1);
+
+                if (arguments.length &gt; 0) {
+                    for (var i = 0; i &lt; Math.min(data.length, this.cols); i++) {
+                        this.put(row, i, data[i]);
+                    }
+                }
+                return this;
             };
 
             /**
@@ -10291,6 +10554,18 @@ zebkit.package(&quot;layout&quot;, function(pkg, Class) {
             };
 
             /**
+             * Set the component properties. This is wrapper for &quot;properties&quot; method to supply
+             * properties setter method.
+             * @param  {String} [path]  a path to find children components
+             * @param  {Object} props a dictionary of properties to be applied
+             * @method setProperties
+             */
+            this.setProperties = function() {
+                this.properties.apply(this, arguments);
+                return this;
+            };
+
+            /**
              * Apply the given set of properties to the given component or a number of children
              * its components.
              * @example
@@ -10310,7 +10585,6 @@ zebkit.package(&quot;layout&quot;, function(pkg, Class) {
              *
              * @param  {String} [path]  a path to find children components
              * @param  {Object} props a dictionary of properties to be applied
-             * @return {zebkit.ui.Layoutable} a component itself
              * @chainable
              * @method properties
              */
@@ -10770,20 +11044,6 @@ zebkit.package(&quot;layout&quot;, function(pkg, Class) {
             };
 
             /**
-             * Remove component after
-             * @param  {[type]} time [description]
-             * @return {[type]}      [description]
-             * @method
-             */
-            this.removeMeAfter = function(time) {
-                if (this.parent !== null) {
-                    throw new Error(&quot;No a parent detected&quot;);
-                } else {
-
-                }
-            };
-
-            /**
              * The method can be implemented to be informed every time a children component
              * has been removed
              * @param {Integer} i a children component index at which it has been removed
@@ -10815,6 +11075,24 @@ zebkit.package(&quot;layout&quot;, function(pkg, Class) {
                     this.invalidate();
                 }
                 return this;
+            };
+
+            /**
+             * Get accumulated vertical (top and bottom) padding.
+             * @return {Integer} a vertical padding
+             * @method getVerPadding
+             */
+            this.getVerPadding = function() {
+                return this.getTop() + this.getBottom();
+            };
+
+            /**
+             * Get accumulated horizontal (top and bottom) padding.
+             * @return {Integer} a horizontal padding
+             * @method getHorPadding
+             */
+            this.getHorPadding = function() {
+                return this.getLeft() + this.getRight();
             };
 
             /**
@@ -12387,6 +12665,7 @@ zebkit.package(&quot;draw&quot;, function(pkg, Class) {
              * object updating.
              * @method setValue
              * @param  {Object} o a target object to be visualized
+             * @chainable
              */
             this.setValue = function(o) {
                 if (this.target !== o) {
@@ -12396,6 +12675,7 @@ zebkit.package(&quot;draw&quot;, function(pkg, Class) {
                         this.valueWasChanged(old, o);
                     }
                 }
+                return this;
             };
 
             /**
@@ -12442,76 +12722,87 @@ zebkit.package(&quot;draw&quot;, function(pkg, Class) {
      */
     pkg.rgb = Class(pkg.View, [
         function (r, g, b, a) {
-            /**
-             * Red color intensity
-             * @attribute r
-             * @type {Integer}
-             * @readOnly
-             */
+            this.isOpaque = true;
 
-            /**
-             * Green color intensity
-             * @attribute g
-             * @type {Integer}
-             * @readOnly
-             */
-
-            /**
-             * Blue color intensity
-             * @attribute b
-             * @type {Integer}
-             * @readOnly
-             */
-
-            /**
-             * Alpha
-             * @attribute a
-             * @type {Float}
-             * @readOnly
-             */
             if (arguments.length === 1) {
                 if (zebkit.isString(r)) {
-                    this.s = r;
-                    if (r[0] === &#x27;#&#x27;) {
-                        r = parseInt(r.substring(1), 16);
-                    } else {
-                        if (r[0] === &#x27;r&#x27; &amp;&amp; r[1] === &#x27;g&#x27; &amp;&amp; r[2] === &#x27;b&#x27;) {
-                            var i = r.indexOf(&#x27;(&#x27;, 3), p = r.substring(i + 1, r.indexOf(&#x27;)&#x27;, i + 1)).split(&quot;,&quot;);
-                            this.r = parseInt(p[0].trim(), 10);
-                            this.g = parseInt(p[1].trim(), 10);
-                            this.b = parseInt(p[2].trim(), 10);
-                            if (p.length &gt; 3) {
-                                this.a = parseInt(p[3].trim(), 10);
-                                this.isOpaque = (this.a === 1);
+                    this.s = r = r.trim();
+
+                    if (r[0] === &#x27;#&#x27;) {  // hex color has been detected
+                        if (r.length &gt;= 7) {  // long hex color #RRGGBB[AA]
+                            var rr = parseInt(r.substring(1, 7), 16);
+                            this.r =  rr &gt;&gt; 16;
+                            this.g = (rr &gt;&gt; 8) &amp; 0xFF;
+                            this.b = (rr &amp; 0xFF);
+
+                            if (r.length &gt; 7) {  // check if alpha is represnted with the color
+                                this.a = parseInt(r.substring(7, r.length), 16);
+                                this.isOpaque = (this.a === 0xFF);
                             }
-                            return;
+                        } else {   // short hex color #RGB[A]
+                            this.r = parseInt(r.substring(1, 2), 16);
+                            this.g = parseInt(r.substring(2, 3), 16);
+                            this.b = parseInt(r.substring(3, 4), 16);
+                            if (r.length &gt; 4) { // check if alpha is represnted with the color
+                                this.a = parseInt(r.substring(4, 5), 16);
+                                this.isOpaque = (this.a === 0xF);
+                            }
                         }
+                    } else if (r[0] === &#x27;r&#x27; &amp;&amp; r[1] === &#x27;g&#x27; &amp;&amp; r[2] === &#x27;b&#x27;) { // rgb encoded color has been detected
+                        var i = r.indexOf(&#x27;(&#x27;, 3),
+                            s = r.substring(i + 1, r.indexOf(&#x27;)&#x27;, i + 1)),
+                            p = s.split(&quot;,&quot;);
+
+                        this.r = parseInt(p[0].trim(), 10);
+                        this.g = parseInt(p[1].trim(), 10);
+                        this.b = parseInt(p[2].trim(), 10);
+                        if (p.length &gt; 3) {
+                            var aa = p[3].trim();
+                            if (aa[aa.length - 1] === &#x27;%&#x27;) {
+                                this.isOpaque = (aa == &quot;100%&quot;);
+                                this.a = parseFloat((parseInt(aa, 10) / 100).toFixed(2));
+                            } else {
+                                this.a = parseFloat(aa, 10);
+                                this.isOpaque = (this.a == 1.0);
+                            }
+                        }
+                    } else if (r.length &gt; 2 &amp;&amp; typeof this.clazz[r] !== &#x27;undefined&#x27;) {
+                        var col = this.clazz.colors[r];
+                        this.r = col.r;
+                        this.g = col.g;
+                        this.b = col.b;
+                        this.a = col.a;
+                        this.s = col.s;
+                        this.isOpaque = col.isOpaque;
                     }
+                } else { // consider an number has been passed
+                    this.r =  r &gt;&gt; 16;
+                    this.g = (r &gt;&gt; 8) &amp; 0xFF;
+                    this.b = (r &amp; 0xFF);
                 }
-                this.r =  r &gt;&gt; 16;
-                this.g = (r &gt;&gt; 8) &amp; 0xFF;
-                this.b = (r &amp; 0xFF);
-            } else {
+            } else if (arguments.length &gt; 1) {
                 this.r = r;
                 this.g = g;
                 this.b = b;
                 if (arguments.length &gt; 3) {
                     this.a = a;
+                    this.isOpaque = (a == 1.0);
                 }
             }
 
             if (this.s === null) {
-                this.s = (typeof this.a !== &quot;undefined&quot;) ? &#x27;rgba(&#x27; + this.r + &quot;,&quot; + this.g +  &quot;,&quot; +
-                                                                     this.b + &quot;,&quot; + this.a + &quot;)&quot;
-                                                         : &#x27;#&#x27; +
-                                                           ((this.r &lt; 16) ? &quot;0&quot; + this.r.toString(16) : this.r.toString(16)) +
-                                                           ((this.g &lt; 16) ? &quot;0&quot; + this.g.toString(16) : this.g.toString(16)) +
-                                                           ((this.b &lt; 16) ? &quot;0&quot; + this.b.toString(16) : this.b.toString(16));
+                this.s = (this.isOpaque === false)  ? &#x27;rgba(&#x27; + this.r + &quot;,&quot; + this.g +  &quot;,&quot; +
+                                                                this.b + &quot;,&quot; + this.a + &quot;)&quot;
+                                                    : &#x27;#&#x27; +
+                                                       ((this.r &lt; 16) ? &quot;0&quot; + this.r.toString(16) : this.r.toString(16)) +
+                                                       ((this.g &lt; 16) ? &quot;0&quot; + this.g.toString(16) : this.g.toString(16)) +
+                                                       ((this.b &lt; 16) ? &quot;0&quot; + this.b.toString(16) : this.b.toString(16));
             }
         },
 
         function $prototype() {
             this.s = null;
+            this.gap = 0;
 
             /**
              * Indicates if the color is opaque
@@ -12521,7 +12812,37 @@ zebkit.package(&quot;draw&quot;, function(pkg, Class) {
              */
             this.isOpaque = true;
 
-            this.gap = 0;
+            /**
+             * Red color intensity
+             * @attribute r
+             * @type {Integer}
+             * @readOnly
+             */
+            this.r = 0;
+
+            /**
+             * Green color intensity
+             * @attribute g
+             * @type {Integer}
+             * @readOnly
+             */
+            this.g = 0;
+
+            /**
+             * Blue color intensity
+             * @attribute b
+             * @type {Integer}
+             * @readOnly
+             */
+            this.b = 0;
+
+            /**
+             * Alpha
+             * @attribute a
+             * @type {Float}
+             * @readOnly
+             */
+            this.a = 1.0;
 
             this.paint = function(g,x,y,w,h,d) {
                 if (this.s !== g.fillStyle) {
@@ -12562,20 +12883,102 @@ zebkit.package(&quot;draw&quot;, function(pkg, Class) {
              * @type {zebkit.draw.rgb}
              * @static
              */
+
+            // CSS1
             this.black       = new this(0);
+            this.silver      = new this(0xC0, 0xC0, 0xC0);
+            this.grey        = this.gray = new this(0x80, 0x80, 0x80);
             this.white       = new this(0xFFFFFF);
+            this.maroon      = new this(0x800000);
             this.red         = new this(255,0,0);
-            this.blue        = new this(0,0,255);
-            this.green       = new this(0,255,0);
-            this.gray        = new this(128,128,128);
-            this.lightGray   = new this(211,211,211);
-            this.darkGray    = new this(169,169,169);
-            this.orange      = new this(255,165,0);
+            this.purple      = new this(0x800080);
+            this.fuchsia     = new this(0xff00ff);
+            this.green       = new this(0x008000);
+            this.lime        = new this(0x00ff00);
+            this.olive       = new this(0x808000);
             this.yellow      = new this(255,255,0);
-            this.pink        = new this(255,192,203);
-            this.cyan        = new this(0,255,255);
-            this.magenta     = new this(255,0,255);
-            this.darkBlue    = new this(0, 0, 140);
+            this.navy        = new this(0x000080);
+            this.blue        = new this(0,0,255);
+            this.teal        = new this(0x008080);
+            this.aqua        = new this(0x00ffff);
+
+            // CSS2
+            this.orange         = new this(255,165,0);
+            this.aliceblue      = new this(0xf0f8ff);
+            this.antiqueWhite   = this.antiquewhite = new this(0xfaebd7);
+            this.aquamarine     = new this(0x7fffd4);
+            this.azure          = new this(0xf0ffff);
+            this.beige          = new this(0xf5f5dc);
+            this.bisque         = new this(0xffe4c4);
+            this.blanchedalmond = new this(0xffebcd);
+            this.blueViolet     = this.blueviolet = new this(0x8a2be2);
+            this.brown          = new this(0xa52a2a);
+            this.burlywood      = new this(0xdeb887);
+            this.cadetblue      = new this(0x5f9ea0);
+            this.chartreuse     = new this(0x7fff00);
+            this.chocolate      = new this(0xd2691e);
+            this.coral          = new this(0xff7f50);
+            this.cornflowerblue = new this(0x6495ed);
+            this.cornsilk       = new this(0xfff8dc);
+            this.crimson        = new this(0xdc143c);
+            this.cyan           = new this(0,255,255);
+            this.darkBlue       = this.darkblue        = new this(0x00008b);
+            this.darkCyan       = this.darkcyan        = new this(0x008b8b);
+            this.darkGoldenrod  = this.darkgoldenrod   = new this(0xb8860b);
+            this.darkGrey       = this.darkgrey        = this.darkGray  = this.darkgray = new this(0xa9a9a9);
+            this.darkGreen      = this.darkgreen       = new this(0x006400);
+            this.darkKhaki      = this.darkkhaki       = new this(0xbdb76b);
+            this.darkMagenta    = this.darkmagenta     = new this(0x8b008b);
+            this.darkOliveGreen = this.darkolivegreen  = new this(0x556b2f);
+            this.darkOrange     = this.darkorange      = new this(0xff8c00);
+            this.darkOrchid     = this.darkorchid      = new this(0x9932cc);
+            this.darkRed        = this.darkred         = new this(0x8b0000);
+            this.darkSalmon     = this.darksalmon      = new this(0xe9967a);
+            this.darkSeaGreen   = this.darkseagreen    = new this(0x8fbc8f);
+            this.darkSlateBlue  = this.darkslateblue   = new this(0x483d8b);
+            this.darkSlateGrey  = this.darkSlateGray   = this.darkslategray  = this.darkslategrey = new this(0x2f4f4f);
+            this.darkTurquoise  = this.darkturquoise   = new this(0x00ced1);
+            this.darkViolet     = this.darkviolet      = new this(0x9400d3);
+            this.deepPink       = this.deeppink        = new this(0xff1493);
+            this.dimGrey        = this.dimGray  = this.dimgray = this.dimgrey = new this(0x696969);
+            this.dodgerBlue     = this.dodgerblue  = new this(0x1e90ff);
+            this.firebrick      = new this(0xb22222);
+            this.floralwhite    = new this(0xfffaf0);
+            this.forestgreen    = new this(0x228b22);
+            this.gainsboro      = new this(0xdcdcdc);
+            this.ghostwhite     = new this(0xf8f8ff);
+            this.gold           = new this(0xffd700);
+            this.goldenrod      = new this(0xdaa520);
+            this.greenyellow    = new this(0xadff2f);
+            this.honeydew       = new this(0xf0fff0);
+            this.hotpink        = new this(0xff69b4);
+            this.indianred      = new this(0xcd5c5c);
+            this.indigo         = new this(0x4b0082);
+            this.ivory          = new this(0xfffff0);
+            this.khaki          = new this(0xf0e68c);
+            this.lavender       = new this(0xe6e6fa);
+            this.lavenderblush  = new this(0xfff0f5);
+            this.lawngreen      = new this(0x7cfc00);
+            this.lemonchiffon   = new this(0xfffacd);
+            this.lightBlue      = this.lightblue  = new this(0xadd8e6);
+            this.lightCoral     = this.lightcoral = new this(0xf08080);
+            this.lightCyan      = this.lightcyan  = new this(0xe0ffff);
+            this.lightGoldenRodYellow  = this.lightgoldenrodyellow  = new this(0xfafad2);
+
+            // CSS3
+            this.lightGrey       = this.lightGray      = this.lightgray = this.lightgrey = new this(0xd3d3d3);
+            this.lightGreen      = this.lightgreen     = new this(0x90ee90);
+            this.lightPink       = this.lightpink      = new this(0xffb6c1);
+            this.lightSalmon     = this.lightsalmon    = new this(0xffa07a);
+            this.lightSeaGreen   = this.lightseagreen  = new this(0x20b2aa);
+            this.lightSkyBlue    = this.lightskyblue   = new this(0x87cefa);
+            this.lightSlateGrey  = this.lightSlateGray = this.lightslategrey = this.lightslategray  = new this(0x778899);
+            this.lightSteelBlue  = this.lightsteelblue = new this(0xb0c4de);
+            this.lightYellow     = this.lightyellow    = new this(0xffffe0);
+            this.linen           = new this(0xfaf0e6);
+            this.magenta         = new this(0xff00ff);
+            this.pink            = new this(0xffc0cb);
+
             this.transparent = new this(0, 0, 0, 0.0);
 
             this.mergeable = false;
@@ -12889,7 +13292,7 @@ zebkit.package(&quot;draw&quot;, function(pkg, Class) {
             if (arguments.length &gt; 0) {
                 this.color = c;
                 if (arguments.length &gt; 1) {
-                    this.width = this.gap = w;
+                    this.lineWidth = this.gap = w;
                 }
             }
         },
@@ -12907,15 +13310,22 @@ zebkit.package(&quot;draw&quot;, function(pkg, Class) {
 
             /**
              * Shape line width
-             * @attribute width
+             * @attribute lineWidth
              * @type {Integer}
              * @default 1
              */
-            this.width = 1;
+            this.lineWidth = 1;
+
+            this.setLineWidth = function(w) {
+                if (w !== this.lineWidth) {
+                    this.lineWidth = this.gap = w;
+                }
+                return this;
+            };
 
             this.paint = function(g,x,y,w,h,d) {
-                if (g.lineWidth !== this.width) {
-                    g.lineWidth = this.width;
+                if (g.lineWidth !== this.lineWidth) {
+                    g.lineWidth = this.lineWidth;
                 }
 
                 this.outline(g,x,y,w,h,d);
@@ -13665,6 +14075,93 @@ zebkit.package(&quot;draw&quot;, function(pkg, Class) {
     ]);
 
 
+
+    /**
+     * Break the given line to parts that can be placed in the area with
+     * the specified width.
+     * @param  {zebkit.Font} font a font to compute text metrics
+     * @param  {Integer} maxWidth a maximal area with
+     * @param  {String} line   a line
+     * @param  {Array} result a result array to accumulate wrapped lines
+     * @method  wrapToLines
+     * @for zebkit.draw
+     */
+    pkg.wrapToLines = function(font, maxWidth, line, result) {
+        // The method goes through number of tokens the line is split. Token
+        // is a word or delimiter. Delimiter is specified with the regexp
+        // (in this implementation delimiter is one or more space). Delimiters
+        // are also considered as tokens. On every iteration accumulated tokens
+        // width is compared with maximal possible and if the width is greater
+        // then maximal we sift to previous tokens set and put it as line to
+        // result. Then start iterating again  from the last token we could
+        // not accommodate.
+        if (line === &quot;&quot;) {
+            result.push(line);
+        } else {
+            var len = font.stringWidth(line);
+            if (len &lt;= maxWidth) {
+                result.push(line);
+            } else {
+                var m   = &quot;not null&quot;,
+                    b   = true,
+                    i   = 0,
+                    al  = 0,
+                    pos = 0,
+                    skip = false,
+                    tokenEnd = 0,
+                    searchRE = /\s+/g,
+                    tokenStart = -1;
+
+                for(; pos !== line.length; ) {
+                    if (skip !== true &amp;&amp; m !== null) {
+                        if (b) {
+                            m = searchRE.exec(line);
+                            if (m === null) {
+                                tokenStart = tokenEnd;
+                                tokenEnd   = line.length;
+                            }
+                        }
+
+                        if (m !== null) {
+                            if (m.index &gt; tokenEnd) {
+                                // word token detected
+                                tokenStart = tokenEnd;
+                                tokenEnd   = m.index;
+                                b = false;
+                            } else {
+                                // space token detected
+                                tokenStart = m.index;
+                                tokenEnd   = m.index + m[0].length;
+                                b = true;
+                            }
+                        }
+                    }
+                    skip = false;
+                    al = font.stringWidth(line.substring(pos, tokenEnd));
+                    if (al &gt; maxWidth) {
+                        if (i === 0) {
+                            result.push(line.substring(pos, tokenEnd));
+                            pos = tokenEnd;
+                        } else {
+                            result.push(line.substring(pos, tokenStart));
+                            pos = tokenStart;
+                            skip = true;
+                            i = 0;
+                        }
+                    } else {
+                        if (tokenEnd === line.length) {
+                            result.push(line.substring(pos, tokenEnd));
+                            break;
+                        } else {
+                            i++;
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+
     /**
      * Default normal font
      * @attribute font
@@ -13804,6 +14301,10 @@ zebkit.package(&quot;draw&quot;, function(pkg, Class) {
                 this.owner = v;
             };
 
+            this.getLine = function(i) {
+                throw new Error(&quot;Not implemented&quot;);
+            };
+
             /**
              * Overridden method to catch target value changing events.
              * @param  {Object} o an old target value
@@ -13870,6 +14371,38 @@ zebkit.package(&quot;draw&quot;, function(pkg, Class) {
                  * @type {String}
                  */
                 this.color = arguments.length &gt; 2 ? color : this.clazz.color;
+            };
+
+            // TODO: the methods below simulate text model methods. it is done for the future
+            // usage of the string render for text field. The render can be convenient for masked
+            // input implementation.
+            this.write = function(s, off) {
+                if (off === 0) {
+                    this.target = s + this.target;
+                } else if (off === s.length) {
+                    this.target = this.target + s;
+                } else {
+                    this.target = this.target.substring(0, off) + s + this.target.substring(off);
+                }
+
+                return true;
+            };
+
+            this.remove = function(off, len) {
+                this.target = this.target.substring(0, off) +
+                              this.target.substring(off + len);
+                return true;
+            };
+
+            this.replace = function(s, off, size) {
+                if (s.length === 0) {
+                    return this.remove(off, size);
+                } else if (size === 0) {
+                    return this.write(s, off);
+                } else {
+                    var b = this.remove(off, size, false);
+                    return this.write(s, off) &amp;&amp; b;
+                }
             };
 
             /**
@@ -14029,6 +14562,26 @@ zebkit.package(&quot;draw&quot;, function(pkg, Class) {
                 this.font = this.clazz.font;
 
                 this.setValue(text);
+            };
+
+            this.write = function() {
+                return this.target.write.apply(this.target, arguments);
+            };
+
+            this.remove = function() {
+                return this.target.remove.apply(this.target, arguments);
+            };
+
+            this.replace = function() {
+                return this.target.replace.apply(this.target, arguments);
+            };
+
+            this.on = function() {
+                return this.target.on.apply(this.target, arguments);
+            };
+
+            this.off = function() {
+                return this.target.off.apply(this.target, arguments);
             };
 
             /**
@@ -14343,84 +14896,133 @@ zebkit.package(&quot;draw&quot;, function(pkg, Class) {
         }
     ]);
 
-    pkg.WrappedTextRender = new Class(pkg.TextRender, [
+    /**
+     * Render to visualize string whose width is greater than available or specified width.
+     * @class zebkit.draw.CutStringRender
+     * @extends {zebkit.draw.StringRender}
+     * @constructor
+     * @param  {String} [txt] a string to be rendered
+     */
+    pkg.CutStringRender = Class(pkg.StringRender, [
         function $prototype() {
-            this.brokenLines = null;
-            this.lastWidth = -1;
+            /**
+             * Maximal width of the string in pixels. By default the attribute
+             * is set to -1.
+             * @attribute maxWidth
+             * @type {Integer}
+             * @default -1
+             */
+            this.maxWidth = -1;
 
-            this.breakLine = function (w, startIndex, line, lines) {
-                if (line === &quot;&quot;) {
-                    lines.push(line);
-                } else {
-                    var breakIndex = startIndex &lt; line.length ? startIndex
-                                                              : line.length - 1,
-                        direction  = 0;
+            /**
+             * String to be rendered at the end of cut string
+             * @attribute dots
+             * @type {String}
+             * @default &quot;...&quot;
+             */
+            this.dots  = &quot;...&quot;;
+        },
 
-                    for(; breakIndex &gt;= 0 &amp;&amp; breakIndex &lt; line.length ;) {
-                        var substrLen = this.font.charsWidth(line, 0, breakIndex + 1);
-                        if (substrLen &lt; w) {
-                            if (direction &lt; 0) {
-                                break;
-                            } else {
-                                direction = 1;
-                            }
-                            breakIndex ++;
-                        } else if (substrLen &gt; w) {
-                            breakIndex--;
-                            if (direction &gt; 0) {
-                                break;
-                            } else {
-                                direction = -1;
-                            }
-                        } else {
-                            break;
-                        }
-                    }
+        function paint(g,x,y,w,h,d) {
+            var maxw = -1;
 
-                    if (breakIndex &gt;= 0) {
-                        lines.push(line.substring(0, breakIndex + 1));
-                        if (breakIndex &lt; line.length - 1) {
-                            this.breakLine(w, startIndex, line.substring(breakIndex + 1), lines);
-                        }
-                    }
+            if (this.maxWidth &gt; 0 &amp;&amp; this.stringWidth &gt; this.maxWidth) {
+                maxw = this.maxWidth;
+            } else if (this.stringWidth &gt; w) {
+                maxw = w;
+            } else if (typeof g.$states !== &#x27;undefined&#x27;) {
+                var ts = g.$states[g.$curState];
+                if (ts.x &gt; x || (ts.x + ts.width) &lt; (x + w)) {
+                    maxw = ts.width;
                 }
-            };
+            }
 
-            this.breakToLines = function (w) {
-                var m = this.target, startIndex = 0, res = [];
-                for(var i = 0; i &lt; m.getLines(); i++) {
-                    var line = m.getLine(i);
-                    this.breakLine(w, startIndex, line, res);
+            if (maxw &lt;= 0) {
+                this.$super(g,x,y,w,h,d);
+            } else {
+                var dotsLen = this.font.stringWidth(this.dots);
+                try {
+                    g.save();
+                    g.clipRect(x, y, maxw - dotsLen, h);
+                    this.$super(g,x,y,w,h,d);
+                } catch(e) {
+                    g.restore();
+                    throw e;
+                }
+                g.restore();
+                g.setColor(this.color);
+                g.setFont(this.font);
+                g.fillText(this.dots, x + maxw - dotsLen, y);
+            }
+         }
+    ]);
+
+    /**
+     * Wrapped text render.
+     * @constructor
+     * @param  {String|zebkit.data.TextModel} text a text as string or text model object
+     * @class zebkit.draw.WrappedTextRender
+     * @extends {zebkit.draw.TextRender}
+     */
+    pkg.WrappedTextRender = Class(pkg.TextRender, [
+        function $prototype() {
+            this.$brokenLines = [];
+            this.$lastWidth    = -1;
+
+            /**
+             * Break text model to number of lines taking in account the maximal width.
+             * @param  {Integer} w a maximal width
+             * @return {Array}  an array of lines
+             * @method $breakToLines
+             * @private
+             */
+            this.$breakToLines = function(w) {
+                var res = [];
+                for (var i = 0; i &lt; this.target.getLines(); i++) {
+                    pkg.wrapToLines(this.font, w, this.target.getLine(i), res);
                 }
                 return res;
             };
+        },
 
-            this.getLines = function() {
-                return this.brokenLines.length;
-            };
+        function getLines() {
+            return this.$lastWidth &lt; 0 ? this.$super()
+                                       : this.$brokenLines.length;
+        },
 
-            this.getLine = function(i) {
-                return this.brokenLines[i];
-            };
+        function getLine(i) {
+            return this.$lastWidth &lt; 0 ? this.$super(i)
+                                       : this.$brokenLines[i];
         },
 
         function invalidate(sl, len){
             this.$super(sl, len);
-            if (this.brokenLines !== null) {
-                this.brokenLines.length = 0;
-            }
-            this.lastWidth = -1;
+            this.$brokenLines.length = 0;
+            this.$lastWidth = -1;
         },
 
-        function getPreferredSize(pw, ph) {
-            if (arguments.length === 2) {
-                if (this.lastWidth &lt; 0 || this.lastWidth !== pw) {
-                    this.lastWidth = pw;
-                    this.brokenLines = this.breakToLines(pw);
+        /**
+         * Get preferred size of the text render
+         * @param  {Integer} [pw] a width the wrapped text has to be computed
+         * @return {Object}  a preferred size
+         *
+         *     { width: {Integer}, height:{Integer} }
+         *
+         * @method calcPreferredSize
+         */
+        function calcPreferredSize(pw) {
+            if (arguments.length &gt; 0) {
+                var bl = [];
+                if (this.$lastWidth &lt; 0 || this.$lastWidth !== pw) {
+                    bl = this.$breakToLines(pw);
+                } else {
+                    bl = this.$brokenLines;
                 }
+
                 return {
                     width  : pw,
-                    height : this.brokenLines.length * this.getLineHeight() + (this.brokenLines.length - 1) * this.lineIndent
+                    height : bl.length * this.getLineHeight() +
+                            (bl.length - 1) * this.lineIndent
                 };
             } else {
                 return this.$super();
@@ -14428,9 +15030,9 @@ zebkit.package(&quot;draw&quot;, function(pkg, Class) {
         },
 
         function paint(g,x,y,w,h,d) {
-            if (this.lastWidth &lt; 0 || this.lastWidth !== w) {
-                this.lastWidth = w;
-                this.brokenLines = this.breakToLines(w);
+            if (this.$lastWidth &lt; 0 || this.$lastWidth !== w) {
+                this.$lastWidth = w;
+                this.$brokenLines = this.$breakToLines(this.$lastWidth);
             }
             this.$super(g,x,y,w,h,d);
         }
@@ -14464,51 +15066,24 @@ zebkit.package(&quot;draw&quot;, function(pkg, Class) {
             this.lineWidth = 1;
 
             /**
-             * Line color
-             * @attribute color
+             * Decoration line color
+             * @attribute lineColor
              * @type {String}
-             * @default &quot;black&quot;
+             * @default  null
              */
-            this.color = &quot;black&quot;;
-
-            /**
-             * Set decoration on or off.
-             * @param {String} id a decoration id. Use &quot;strike&quot;, &quot;underline&quot; or &quot;overline&quot;
-             * as the parameter value
-             * @param {Boolean} b a boolean flag that says if the decoration has to be
-             * added or removed.
-             * @method setDecoration
-             * @chainable
-             */
-            this.setDecoration = function(id, b) {
-                if (b) {
-                    this.addDecorations(id);
-                } else {
-                    this.clearDecorations(id);
-                }
-                return this;
-            };
+            this.lineColor = null;
 
             /**
              * Set set of decorations.
-             * @param {Object} d set of decorations. For instance:
-             *
-             *
-             *     {
-             *         underline: true,
-             *         strike: false
-             *     }
-             *
-             *
+             * @param {String} [decoration]* set of decorations.
              * @method setDecorations
              * @chainable
              */
             this.setDecorations = function(d) {
-                for(var k in d) {
-                    if (d.hasOwnProperty()) {
-                        this.setDecoration(k, d[k]);
-                    }
+                for(var k in this.decorations) {
+                    this.decorations[k] = false;
                 }
+                this.addDecorations.apply(this, arguments);
                 return this;
             };
 
@@ -14539,6 +15114,10 @@ zebkit.package(&quot;draw&quot;, function(pkg, Class) {
                 }
                 return this;
             };
+
+            this.hasDecoration = function(dec) {
+                return this.decorations[dec] === true;
+            };
         },
 
         function paintLine(g,x,y,line,d) {
@@ -14547,7 +15126,11 @@ zebkit.package(&quot;draw&quot;, function(pkg, Class) {
             var lw = this.calcLineWidth(line),
                 lh = this.getLineHeight(line);
 
-            g.setColor(this.color);
+            if (this.lineColor !== null) {
+                g.setColor(this.lineColor);
+            } else {
+                g.setColor(this.color);
+            }
 
             if (this.decorations.overline) {
                 g.lineWidth = this.lineWidth;
@@ -14563,6 +15146,11 @@ zebkit.package(&quot;draw&quot;, function(pkg, Class) {
                 var yy = y + Math.round(lh / 2) - 1;
                 g.lineWidth = this.lineWidth;
                 g.drawLine(x, yy, x + lw, yy);
+            }
+
+            // restore text color
+            if (this.lineColor !== null) {
+                g.setColor(this.color);
             }
         }
     ]);
@@ -14657,8 +15245,8 @@ zebkit.package(&quot;draw&quot;, function(pkg, Class) {
         function $prototype() {
             this.outline = function(g,x,y,w,h,d) {
                 g.beginPath();
-                w -= 2 * this.width;
-                h -= 2 * this.width;
+                w -= 2 * this.lineWidth;
+                h -= 2 * this.lineWidth;
                 g.moveTo(x + w - 1, y);
                 g.lineTo(x + w - 1, y + h - 1);
                 g.lineTo(x, y + h - 1);
@@ -14813,61 +15401,65 @@ zebkit.package(&quot;draw&quot;, function(pkg, Class) {
     * @extends zebkit.draw.Render
     */
     pkg.Picture = Class(pkg.Render, [
-        function(img,x,y,w,h) {
+        function(img, x, y, w, h) {
+            this.setValue(img);
+            if (arguments.length === 2) {
+                this.height = this.width = x;
+            } else if (arguments.length === 3) {
+                this.width  = x;
+                this.height = y;
+            } else if (arguments.length &gt; 3) {
+                this.x      = x;
+                this.y      = y;
+                this.width  = w;
+                this.height = h;
+            }
+        },
+
+        function $prototype() {
             /**
              * A x coordinate of the image part that has to be rendered
              * @attribute x
              * @readOnly
              * @type {Integer}
-             * @default 0
+             * @default -1
              */
+            this.x = -1;
 
             /**
              * A y coordinate of the image part that has to be rendered
              * @attribute y
              * @readOnly
              * @type {Integer}
-             * @default 0
+             * @default -1
              */
+            this.y = -1;
 
             /**
              * A width  of the image part that has to be rendered
              * @attribute width
              * @readOnly
              * @type {Integer}
-             * @default 0
+             * @default -1
              */
+            this.width = -1;
 
             /**
-             * A height  of the image part that has to be rendered
+             * A height of the image part that has to be rendered
              * @attribute height
              * @readOnly
              * @type {Integer}
-             * @default 0
+             * @default -1
              */
-
-            this.setValue(img);
-            if (arguments.length &gt; 1) {
-                this.x = x;
-                if (arguments.length &gt; 2) {
-                    this.y = y;
-                    if (arguments.length &gt; 3) {
-                        this.height = this.width = w;
-                    }
-
-                    if (arguments.length &gt; 4) {
-                        this.height = h;
-                    }
-                }
-            }
-        },
-
-        function $prototype() {
-            this.x = this.y = this.width = this.height = 0;
+            this.height = -1;
 
             this.paint = function(g,x,y,w,h,d) {
-                if (this.target !== null &amp;&amp; this.target.complete === true &amp;&amp; this.target.naturalWidth &gt; 0 &amp;&amp; w &gt; 0 &amp;&amp; h &gt; 0){
-                    if (this.width &gt; 0) {
+                if (this.target !== null &amp;&amp;
+                    this.target.complete === true &amp;&amp;
+                    this.target.naturalWidth &gt; 0 &amp;&amp;
+                    w &gt; 0 &amp;&amp; h &gt; 0)
+                {
+                    if (this.x &gt;= 0) {
                         g.drawImage(this.target, this.x, this.y,
                                     this.width, this.height, x, y, w, h);
                     } else {
@@ -15601,6 +16193,213 @@ zebkit.package(&quot;draw&quot;, function(pkg, Class) {
                 g.quadraticCurveTo(x, y, x + this.radius, y);
                 return true;
             };
+        }
+    ]);
+
+    // TODO: not sure it makes sense to put here
+    // a bit dirty implementation
+    pkg.CloudView = Class(pkg.Shape, [
+        function outline(g,x,y,w,h,d) {
+            g.beginPath();
+            g.moveTo(x + w * 0.2, y  +  h * 0.25);
+            g.bezierCurveTo(x, y + h*0.25, x, y + h*0.75, x + w * 0.2, y + h*0.75);
+            g.bezierCurveTo(x + 0.1 * w, y + h - 1 , x + 0.8*w, y + h - 1, x + w * 0.7, y + h*0.75);
+            g.bezierCurveTo(x + w - 1, y + h * 0.75 , x + w - 1, y, x + w * 0.65, y + h*0.25) ;
+            g.bezierCurveTo(x + w - 1, y, x + w * 0.1, y, x + w * 0.2, y + h * 0.25) ;
+            g.closePath();
+            return true;
+        }
+    ]);
+
+    /**
+     * Function render. The render draws a chart for the specified function
+     * within the given interval.
+     * @constructor
+     * @class zebkit.draw.FunctionRender
+     * @extends {zebkit.draw.Render}
+     * @param  {Function} fn  a function to be rendered
+     * @param  {Number}   x1  a minimal value of rendered function interval
+     * @param  {Number}   x2  a maximal value of rendered function interval
+     * @param  {Integer} [granularity]  a granularity
+     * @param  {String}  [color]  a chart color
+     * @example
+     *
+     *      zebkit.require(&quot;ui&quot;, &quot;draw&quot;, function(ui, draw) {
+     *          var root = new ui.zCanvas(400, 300).root;
+     *          // paint sin(x) function as a background of root component
+     *          root.setBackground(new draw.FunctionRender(function(x) {
+     *              return Math.sin(x);
+     *          }, -3, 3));
+     *      });
+     *
+     */
+    pkg.FunctionRender = Class(pkg.Render, [
+        function(fn, x1, x2, granularity) {
+            this.$super(fn);
+            this.setRange(x1, x2);
+            if (arguments.length &gt; 3) {
+                this.granularity = arguments[3];
+                if (arguments.length &gt; 4) {
+                    this.color = arguments[4];
+                }
+            }
+        },
+
+        function $prototype(g,x,y,w,h,c) {
+            /**
+             * Granularity defines how many points the given interval have to be split.
+             * @type {Integer}
+             * @attribute granularity
+             * @readOnly
+             * @default 200
+             */
+            this.granularity = 200;
+
+            /**
+             * Function chart color.
+             * @type {String}
+             * @attribute color
+             * @default &quot;orange&quot;
+             */
+            this.color = &quot;orange&quot;;
+
+            /**
+             * Chart line width.
+             * @type {Integer}
+             * @attribute lineWidth
+             * @default 1
+             */
+            this.lineWidth   = 1;
+
+            /**
+             * Indicates if the function chart has to be stretched vertically
+             * to occupy the whole vertical space
+             * @type {Boolean}
+             * @attribute stretch
+             * @default true
+             */
+            this.stretch = true;
+
+            this.$fy = null;
+
+
+            this.valueWasChanged = function(o, n) {
+                if (n !== null &amp;&amp; typeof n !== &#x27;function&#x27;) {
+                    throw new Error(&quot;Function is expected&quot;);
+                }
+                this.$fy = null;
+            };
+
+            /**
+             * Set the given granularity. Granularity defines how smooth
+             * the rendered chart should be.
+             * @param {Integer} g a granularity
+             * @method setGranularity
+             */
+            this.setGranularity = function(g) {
+                if (g !== this.granularity) {
+                    this.granularity = g;
+                    this.$fy = null;
+                }
+            };
+
+            /**
+             * Set the specified interval - minimal and maximal function
+             * argument values.
+             * @param {Number} x1 a minimal value
+             * @param {Number} x2 a maximal value
+             * @method setRange
+             */
+            this.setRange = function(x1, x2) {
+                if (x1 &gt; x2) {
+                    throw new RangeError(&quot;Incorrect range interval&quot;);
+                }
+
+                if (this.x1 !== x1 || this.x2 !== x2) {
+                    this.x1 = x1;
+                    this.x2 = x2;
+                    this.$fy = null;
+                }
+            };
+
+            this.$recalc = function() {
+                if (this.$fy === null) {
+                    this.$fy   = [];
+                    this.$maxy = -100000000;
+                    this.$miny =  100000000;
+                    this.$dx   = (this.x2 - this.x1) / this.granularity;
+
+                    for(var x = this.x1, i = 0; x &lt;= this.x2; i++) {
+                        this.$fy[i] = this.target(x);
+                        if (this.$fy[i] &gt; this.$maxy) {
+                            this.$maxy = this.$fy[i];
+                        }
+
+                        if (this.$fy[i] &lt; this.$miny) {
+                            this.$miny = this.$fy[i];
+                        }
+
+                        x += this.$dx;
+                    }
+                }
+            };
+
+            this.paint = function(g,x,y,w,h,c) {
+                if (this.target !== null) {
+                    this.$recalc();
+
+                    var cx = (w - this.lineWidth * 2) / (this.x2 - this.x1),  // value to pixel scale
+                        cy = cx,
+                        vx = this.$dx,
+                        sy = this.lineWidth,
+                        dy = h - this.lineWidth * 2;
+
+                    if (this.stretch) {
+                        cy = (h - this.lineWidth * 2) / (this.$maxy - this.$miny);
+                    } else {
+                        dy = (this.$maxy - this.$miny) * cx;
+                        sy = (h - dy) / 2;
+                    }
+
+                    g.beginPath();
+                    g.setColor(this.color);
+                    g.lineWidth = this.lineWidth;
+
+                    g.moveTo(this.lineWidth,
+                             sy + dy - (this.$fy[0] - this.$miny) * cy);
+                    for(var i = 1; i &lt; this.$fy.length; i++) {
+                        g.lineTo(this.lineWidth + vx * cx,
+                                 sy + dy - (this.$fy[i] - this.$miny) * cy);
+                        vx += this.$dx;
+                    }
+                    g.stroke();
+                }
+            };
+        }
+    ]);
+
+    /**
+     * Pentahedron shape view.
+     * @param  {String}  [c]  a color of the shape
+     * @param  {Integer} [w]  a line size
+     * @class zebkit.draw.PentahedronShape
+     * @constructor
+     * @extends zebkit.draw.Shape
+     */
+    pkg.PentahedronShape =  Class(pkg.Shape, [
+        function outline(g,x,y,w,h,d) {
+            g.beginPath();
+            x += this.lineWidth;
+            y += this.lineWidth;
+            w -= 2*this.lineWidth;
+            h -= 2*this.lineWidth;
+            g.moveTo(x + w/2, y);
+            g.lineTo(x + w - 1, y + h/3);
+            g.lineTo(x + w - 1 - w/3, y + h - 1);
+            g.lineTo(x + w/3, y + h - 1);
+            g.lineTo(x, y + h/3);
+            g.lineTo(x + w/2, y);
+            return true;
         }
     ]);
 
@@ -16528,6 +17327,30 @@ zebkit.package(&quot;ui.event&quot;, function(pkg, Class) {
     zebkit.ui.events.regEvents(&quot;shortcutFired&quot;);
 
     /**
+     * Build all possible combination of the characters set:
+     *   &quot;abc&quot; -&gt;   abc, acb, bac, bca, cab, cba
+     * @param  {String}   sequence character set
+     * @param  {Function} cb  called for every new unique characters
+     * sequence
+     */
+    function variants(sequence, cb) {
+        if (sequence.length === 2) {
+            cb(sequence);
+            cb(sequence[1] + sequence[0]);
+        } else if (sequence.length &gt; 2) {
+            for(var i = 0; i &lt; sequence.length; i++) {
+                (function(sequence, ch) {
+                    variants(sequence, function(v) {
+                        cb(ch + v);
+                    });
+                })(sequence.substring(0, i) + sequence.substring(i+1), sequence[i]);
+            }
+        } else {
+            cb(sequence);
+        }
+    }
+
+    /**
      * Shortcut event class
      * @constructor
      * @param  {zebkit.ui.Panel} src a source of the event
@@ -16563,25 +17386,25 @@ zebkit.package(&quot;ui.event&quot;, function(pkg, Class) {
     /**
      *  Shortcut manager supports short cut (keys) definition and listening. The shortcuts have to be defined in
      *  zebkit JSON configuration files. There are two sections:
-
-        - **osx** to keep shortcuts for Mac OS X platform
-        - **common** to keep shortcuts for all other platforms
-
+     *
+     *   - **osx** to keep shortcuts for Mac OS X platform
+     *   - **common** to keep shortcuts for all other platforms
+     *
      *  The JSON configuration entity has simple structure:
-
-
-          {
-            &quot;common&quot;: {
-                &quot;UNDO&quot;: &quot;Control + KeyZ&quot;,
-                &quot;REDO&quot;: &quot;Control + Shift + KeyZ&quot;,
-                 ...
-            },
-            &quot;osx&quot; : {
-                &quot;UNDO&quot;:  &quot;MetaLeft + KeyZ&quot;,
-                 ...
-            }
-          }
-
+     *
+     *
+     *     {
+     *       &quot;common&quot;: {
+     *           &quot;UNDO&quot;: &quot;Control + KeyZ&quot;,
+     *           &quot;REDO&quot;: &quot;Control + Shift + KeyZ&quot;,
+     *            ...
+     *       },
+     *       &quot;osx&quot; : {
+     *           &quot;UNDO&quot;:  &quot;MetaLeft + KeyZ&quot;,
+     *            ...
+     *       }
+     *     }
+     *
      *  The configuration contains list of shortcuts. Every shortcut is bound to a key combination that triggers it.
      *  Shortcut has a name and an optional list of arguments that have to be passed to a shortcut listener method.
      *  The optional arguments can be used to differentiate two shortcuts that are bound to the same command.
@@ -16589,26 +17412,26 @@ zebkit.package(&quot;ui.event&quot;, function(pkg, Class) {
      *  On the component level shortcut can be listened by implementing &quot;shortcutFired(e)&quot; listener handler.
      *  Pay attention to catch shortcut your component has to be focusable - be able to hold focus.
      *  For instance, to catch &quot;UNDO&quot; shortcut do the following:
-
-            var pan = new zebkit.ui.Panel([
-                function shortcutFired(e) {
-                    // handle shortcut here
-                    if (e.shortcut === &quot;UNDO&quot;) {
-
-                    }
-                },
-
-                // visualize the component gets focus
-                function focused() {
-                    this.$super();
-                    this.setBackground(this.hasFocus()?&quot;red&quot;:null);
-                }
-            ]);
-
-            // let our panel to hold focus by setting appropriate property
-            pan.canHaveFocus = true;
-
-
+     *
+     *      var pan = new zebkit.ui.Panel([
+     *          function shortcutFired(e) {
+     *              // handle shortcut here
+     *              if (e.shortcut === &quot;UNDO&quot;) {
+     *
+     *              }
+     *          },
+     *
+     *          // visualize the component gets focus
+     *          function focused() {
+     *              this.$super();
+     *              this.setBackground(this.hasFocus()?&quot;red&quot;:null);
+     *          }
+     *      ]);
+     *
+     *      // let our panel to hold focus by setting appropriate property
+     *      pan.canHaveFocus = true;
+     *
+     *
      *  @constructor
      *  @class zebkit.ui.event.ShortcutManager
      *  @extends zebkit.ui.event.Manager
@@ -16638,7 +17461,7 @@ zebkit.package(&quot;ui.event&quot;, function(pkg, Class) {
         },
 
         function $prototype() {
-            this.keyPath = [];
+            this.$keyPath = [];
 
             /**
              * Key pressed event handler.
@@ -16646,18 +17469,18 @@ zebkit.package(&quot;ui.event&quot;, function(pkg, Class) {
              * @method keyPressed
              */
             this.keyPressed = function(e) {
-                if (e.code === null || this.keyPath.length &gt; 5) {
-                    this.keyPath = [];
+                if (e.code === null || this.$keyPath.length &gt; 5) {
+                    this.$keyPath = [];
                 } else if (e.repeat === 1) {
-                    this.keyPath[this.keyPath.length] = e.code;
+                    this.$keyPath[this.$keyPath.length] = e.code;
                 }
 
                 // TODO: may be focus manager has to be moved to &quot;ui.event&quot; package
                 var fo = zebkit.ui.focusManager.focusOwner;
-                if (this.keyPath.length &gt; 1) {
+                if (this.$keyPath.length &gt; 1) {
                     var sh = this.keyShortcuts;
-                    for(var i = 0; i &lt; this.keyPath.length; i++) {
-                        var code = this.keyPath[i];
+                    for(var i = 0; i &lt; this.$keyPath.length; i++) {
+                        var code = this.$keyPath[i];
                         if (sh.hasOwnProperty(code)) {
                             sh = sh[code];
                         } else {
@@ -16669,7 +17492,7 @@ zebkit.package(&quot;ui.event&quot;, function(pkg, Class) {
                     if (sh !== null) {
                         SHORTCUT_EVENT.source   = fo;
                         SHORTCUT_EVENT.shortcut = sh;
-                        SHORTCUT_EVENT.keys     = this.keyPath.join(&#x27;+&#x27;);
+                        SHORTCUT_EVENT.keys     = this.$keyPath.join(&#x27;+&#x27;);
                         zebkit.ui.events.fire(&quot;shortcutFired&quot;, SHORTCUT_EVENT);
                     }
                 }
@@ -16677,11 +17500,11 @@ zebkit.package(&quot;ui.event&quot;, function(pkg, Class) {
 
             this.keyReleased = function(e) {
                 if (e.key === &quot;Meta&quot;) {
-                    this.keyPath = [];
+                    this.$keyPath = [];
                 } else {
-                    for(var i = 0; i &lt; this.keyPath.length; i++) {
-                        if (this.keyPath[i] === e.code) {
-                            this.keyPath.splice(i, 1);
+                    for(var i = 0; i &lt; this.$keyPath.length; i++) {
+                        if (this.$keyPath[i] === e.code) {
+                            this.$keyPath.splice(i, 1);
                             break;
                         }
                     }
@@ -16702,20 +17525,32 @@ zebkit.package(&quot;ui.event&quot;, function(pkg, Class) {
              */
             this.setShortcuts = function(shortcuts) {
                 for (var id in shortcuts) {
-                    var shortcut = shortcuts[id];
+                    var shortcut = shortcuts[id],
+                        j        = 0;
                     id = id.trim();
 
                     if (Array.isArray(shortcut) === false) {
                         shortcut = [ shortcut ];
                     }
 
-                    for(var j = 0; j &lt; shortcut.length; j++) {
+                    var re = /\(([^()]+)\)/;
+                    for(j = 0; j &lt; shortcut.length; j++) {
+                        var m = re.exec(shortcut[j]);
+                        if (m !== null) {
+                            var variants = m[1].replace(/\s+/g, &#x27;&#x27;).split(&#x27;+&#x27;),
+                                prefix   = shortcut[j].substring(0, m.lastIndex),
+                                suffix   = shortcut[j].substring(m[1].length + 1);
+                        }
+                    }
+
+                    for(j = 0; j &lt; shortcut.length; j++) {
                         var keys  = shortcut[j].replace(/\s+/g, &#x27;&#x27;).split(&#x27;+&#x27;),
                             st    = this.keyShortcuts,
                             len   = keys.length;
 
                         for(var i = 0; i &lt; len; i++) {
                             var key = keys[i];
+
                             if (i === (len - 1)) {
                                 st[key] = id;
                             } else if (st.hasOwnProperty(key) === false || zebkit.isString(st[key])) {
@@ -16733,8 +17568,20 @@ zebkit.package(&quot;ui.event&quot;, function(pkg, Class) {
 zebkit.package(&quot;ui&quot;, function(pkg, Class) {
     &#x27;use strict&#x27;;
 
-    this.config(&quot;basedir&quot;, zebkit.URI.join(this.$url, &quot;rs/themes/%{theme}&quot;), false);
-    this.config(&quot;theme&quot;, &quot;dark&quot;, false);
+    var   basedir      = zebkit.config(&quot;ui.basedir&quot;),
+          theme        = zebkit.config(&quot;ui.theme&quot;);
+
+
+    if (theme === &quot;auto&quot;) {
+      //  getComputedStyle
+    }
+
+    this.config( { &quot;basedir&quot; : basedir ? basedir
+                                       : zebkit.URI.join(this.$url, &quot;rs/themes/%{theme}&quot;),
+                   &quot;theme&quot;   : theme   ? theme
+                                       : &quot;dark&quot; },
+                   false);
+
 
     // Panel WEB specific dependencies:
     //   -  getCanvas() -&gt; zCanvas
@@ -16805,6 +17652,20 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
         }
     };
 
+
+    function testCondition(target, cond) {
+        for(var k in cond) {
+            var cv = cond[k],
+                tv = zebkit.getPropertyValue(target, k, true);
+
+            if (cv !== tv) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     zebkit.Zson.prototype.completed = function() {
         if (typeof this.$actions !== &#x27;undefined&#x27; &amp;&amp; this.$actions.length &gt; 0) {
             try {
@@ -16812,32 +17673,40 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
                 for (var i = 0; i &lt; this.$actions.length; i++) {
                     var a = this.$actions[i];
 
-                    (function(source, eventName, targets) {
-                        var args = [];
+                    (function(source, eventName, cond, targets) {
+                        var args    = [],
+                            srcComp = root.byPath(source);
+
                         if (typeof eventName !== &#x27;undefined&#x27; &amp;&amp; eventName !== null) {
                             args.push(eventName);
                         }
                         args.push(source);
                         args.push(function() {
-                            for(var j = 0; j &lt; targets.length; j++) {
-                                var target     = targets[j],
-                                    targetPath = (typeof target.path === &#x27;undefined&#x27;) ? source : target.path;
+                            if (cond === null || typeof cond === &#x27;undefined&#x27; || testCondition(srcComp, cond)) {
+                                // targets
+                                for(var j = 0; j &lt; targets.length; j++) {
+                                    var target     = targets[j],
+                                        targetPath = (typeof target.path === &#x27;undefined&#x27;) ? source : target.path;
 
-                                root.byPath(targetPath, function(c) {
-                                    if (target.update !== &#x27;undefined&#x27;) {
-                                        c.properties(target.update);
-                                    }
+                                    // find target
+                                    root.byPath(targetPath, function(c) {
+                                        if (typeof target.condition === &#x27;undefined&#x27; || testCondition(c, target.condition)) {
+                                            if (target.update !== &#x27;undefined&#x27;) {
+                                                c.properties(target.update);
+                                            }
 
-                                    if (target[&#x27;do&#x27;] !== &#x27;undefined&#x27;) {
-                                        for(var cmd in target[&#x27;do&#x27;]) {
-                                            c[cmd].apply(c, target[&#x27;do&#x27;][cmd]);
+                                            if (target[&#x27;do&#x27;] !== &#x27;undefined&#x27;) {
+                                                for(var cmd in target[&#x27;do&#x27;]) {
+                                                    c[cmd].apply(c, target[&#x27;do&#x27;][cmd]);
+                                                }
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                                }
                             }
                         });
                         root.on.apply(root, args);
-                    } (a.source, a.event, typeof a.targets !== &#x27;undefined&#x27; ? a.targets : [ a.target ]));
+                    } (a.source, a.event, a.condition, typeof a.targets !== &#x27;undefined&#x27; ? a.targets : [ a.target ]));
                 }
             } finally {
                 this.$actions.length = 0;
@@ -17754,6 +18623,24 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
                 if (n !== null &amp;&amp; typeof n.ownerChanged !== &#x27;undefined&#x27;) {
                     n.ownerChanged(this);
                 }
+            };
+
+            this.setBorderLayout = function() {
+                this.setLayout(arguments.length &gt; 0 ? new zebkit.layout.BorderLayout(arguments[0])
+                                                    : new zebkit.layout.BorderLayout());
+                return this;
+            };
+
+            this.setFlowLayout = function() {
+                this.setLayout(arguments.length &gt; 0 ? new zebkit.layout.FlowLayout(arguments[0])
+                                                    : new zebkit.layout.FlowLayout());
+                return this;
+            };
+
+            this.setStackLayout = function() {
+                this.setLayout(arguments.length &gt; 0 ? new zebkit.layout.StackLayout(arguments[0])
+                                                    : new zebkit.layout.StackLayout());
+                return this;
             };
 
             /**
@@ -18871,7 +19758,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
              *
              *  @method  calcPreferredSize
              */
-            this.calcPreferredSize = function (t) {
+            this.calcPreferredSize = function(t) {
                 return this.view !== null ? this.view.getPreferredSize() : { width:0, height:0 };
             };
         }
@@ -19198,23 +20085,36 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
      */
     pkg.BoldLabel = Class(pkg.Label, []);
 
+
     /**
      * Image label UI component. This is UI container that consists from an image
      * component and an label component.Image is located at the left size of text.
-     * @param {Image|String} img an image or path to the image
-     * @param {String|zebkit.draw.TextRender|zebkit.data.TextModel} txt a text string,
+     * @param {Image|String} [img] an image or path to the image
+     * @param {String|zebkit.draw.TextRender|zebkit.data.TextModel} [txt] a text string,
      * text model or text render instance
+     * @param {Integer} [w] an image preferred width
+     * @param {Integer} [h] an image preferred height
      * @constructor
      * @class zebkit.ui.ImageLabel
      * @extends zebkit.ui.Panel
      */
     pkg.ImageLabel = Class(pkg.Panel, [
-        function(txt, path) {
-            var img = zebkit.instanceOf(path, pkg.ImagePan) ? path : new this.clazz.ImagePan(path),
-                lab = zebkit.instanceOf(txt, pkg.Panel)     ? txt  : new this.clazz.Label(txt);
+        function(txt, path, w, h) {
+            var img = null,
+                lab = null;
 
-            img.constraints = &quot;image&quot;;
-            lab.constraints = &quot;label&quot;;
+            if (arguments.length &gt; 0) {
+                lab = zebkit.instanceOf(txt, pkg.Panel) ? txt : new this.clazz.Label(txt);
+                lab.constraints = &quot;label&quot;;
+                if (arguments.length &gt; 1) {
+                    img = zebkit.instanceOf(path, pkg.ImagePan) ? path : new this.clazz.ImagePan(path);
+                    img.constraints = &quot;image&quot;;
+
+                    if (arguments.length &gt; 2) {
+                        img.setPreferredSize(w, (arguments.length &gt; 3 ? h : w));
+                    }
+                }
+            }
 
             // TODO: this is copy paste of Panel constructor to initialize fields that has to
             // be used for adding child components. these components have to be added before
@@ -19226,8 +20126,13 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
             this.layout = new zebkit.layout.FlowLayout(&quot;left&quot;, &quot;center&quot;, &quot;horizontal&quot;, 6);
 
             // add before panel constructor thanks to copy pasted code above
-            this.add(img);
-            this.add(lab);
+            if (img !== null) {
+                this.add(img);
+            }
+
+            if (lab !== null) {
+                this.add(lab);
+            }
 
             this.$super();
 
@@ -20974,12 +21879,12 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
                 b = true;
             }
 
-            if (this.view.decorations &amp;&amp; this.overDecoration &amp;&amp; this.isEnabled === true) {
+            if (zebkit.instanceOf(this.view, zebkit.draw.DecoratedTextRender) &amp;&amp; this.isEnabled === true) {
                 if (n === &quot;over&quot;) {
-                    this.view.setDecoration(this.overDecoration, this.colors[k]);
+                    this.view.addDecorations(this.overDecoration);
                     b = true;
-                } else if (this.view.decorations[this.overDecoration]) {
-                    this.view.setDecoration(this.overDecoration, null);
+                } else if (this.view.hasDecoration(this.overDecoration)) {
+                    this.view.clearDecorations(this.overDecoration);
                     b = true;
                 }
             }
@@ -25825,15 +26730,13 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
                 maxCol = -1;
                 render = new zebkit.draw.TextRender(new zebkit.data.SingleLineTxt());
                 renderDefined = true;
-            } else {
-                if (arguments.length === 1) {
-                    if (zebkit.isNumber(render)) {
-                        maxCol = render;
-                        render = new zebkit.draw.TextRender(new zebkit.data.SingleLineTxt());
-                        renderDefined = true;
-                    } else {
-                        maxCol = -1;
-                    }
+            } else if (arguments.length === 1){
+                if (zebkit.isNumber(render)) {
+                    maxCol = render;
+                    render = new zebkit.draw.TextRender(new zebkit.data.SingleLineTxt());
+                    renderDefined = true;
+                } else {
+                    maxCol = -1;
                 }
             }
 
@@ -26086,7 +26989,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
             /**
              * Find the next or previous word in the given text model starting from the given
              * line and column.
-             * @param  {zebkit.data.TextModel} t a text model
+             * @param  {zebkit.data.TextModel | zebkit.draw.BaseTextRender} t a text model
              * @param  {Integer} line a starting line
              * @param  {Integer} col a starting column
              * @param  {Integer} d   a direction. 1 means looking for a next word and -1 means
@@ -26188,6 +27091,13 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
             };
 
             this.keyTyped = function(e) {
+                // Test if selection has been initiated (but nothing has been selected yet)
+                // Typing a character changes position so if selection is active then
+                // typed character will be unexpectedly selected.
+                if (e.shiftKey &amp;&amp; this.startOff &gt;= 0 &amp;&amp; this.endOff === this.startOff) {
+                    this.clearSelection();
+                }
+
                 if (this.isEditable === true &amp;&amp;
                     e.ctrlKey === false &amp;&amp;
                     e.metaKey === false &amp;&amp;
@@ -26237,8 +27147,8 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
                         case &quot;PREVWORDSELECT&quot;:
                         case &quot;PREVWORD&quot;:
                         case &quot;NEXTWORD&quot; : {
-                            var p = this.findNextWord(this.view.target, this.position.currentLine,
-                                                                        this.position.currentCol, d);
+                            var p = this.findNextWord(this.view, this.position.currentLine,
+                                                                 this.position.currentCol, d);
                             if (p !== null) {
                                 this.position.setRowCol(p.row, p.col);
                             }
@@ -26249,8 +27159,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
 
             this.keyPressed = function(e) {
                 if (this.isFiltered(e) === false)  {
-                    var position    = this.position;
-
+                    var position = this.position;
                     if (e.shiftKey) {
                         this.startSelection();
                     }
@@ -26291,10 +27200,8 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
                         case &quot;Delete&quot;:
                             if (this.hasSelection() &amp;&amp; this.isEditable === true) {
                                 this.removeSelected();
-                            } else {
-                                if (this.isEditable === true) {
-                                    this.remove(position.offset, 1);
-                                }
+                            } else if (this.isEditable === true) {
+                                this.remove(position.offset, 1);
                             } break;
                         case &quot;Backspace&quot;:
                             if (this.isEditable === true) {
@@ -26346,7 +27253,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
                             }
                         }
 
-                        if (this.view.target.remove(pos, size)) {
+                        if (this.view.remove(pos, size)) {
                             this.repaint();
                             return true;
                         }
@@ -26379,12 +27286,12 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
                         var start = this.startOff &lt; this.endOff ? this.startOff : this.endOff,
                             end   = this.startOff &gt; this.endOff ? this.startOff : this.endOff;
 
-                        if (this.view.target.replace(s, start, end - start)) {
+                        if (this.view.replace(s, start, end - start)) {
                             this.repaint();
                             return true;
                         }
                     } else {
-                        if (this.view.target.write(s, pos)) {
+                        if (this.view.write(s, pos)) {
                             this.repaint();
                             return true;
                         }
@@ -26981,8 +27888,8 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
 
         function setView(v){
             if (v != this.view) {
-                if (this.view !== null &amp;&amp; this.view.target !== null &amp;&amp; typeof this.view.target.on !== &#x27;undefined&#x27;) {
-                    this.view.target.off(this);
+                if (this.view !== null &amp;&amp; typeof this.view.off !== &#x27;undefined&#x27;) {
+                    this.view.off(this);
                 }
 
                 this.$super(v);
@@ -26992,8 +27899,8 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
                     this.position.setMetric(this.view);
                 }
 
-                if (this.view !== null &amp;&amp; this.view.target !== null &amp;&amp; typeof this.view.target.on !== &#x27;undefined&#x27;) {
-                    this.view.target.on(this);
+                if (this.view !== null &amp;&amp; typeof this.view.on !== &#x27;undefined&#x27;) {
+                    this.view.on(this);
                 }
             }
             return this;
@@ -31445,7 +32352,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
             this.pointerPressed = function(e) {
                 if (this.hideTooltipByPress === true &amp;&amp;
                     e.pointerType === &quot;mouse&quot; &amp;&amp;
-                    this.$target !== null &amp;&amp;
+                    this.$target !== null &amp;&amp; this.$target.hideTooltipByPress !== false &amp;&amp;
                     (this.$tooltip === null || this.$tooltip.winType === &quot;info&quot;))
                 {
                     this.stopShowingTooltip();
@@ -31458,8 +32365,8 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
              * @method pointerReleased
              */
             this.pointerReleased = function(e) {
-                if ((this.hideTooltipByPress === false || e.pointerType !== &quot;mouse&quot;) &amp;&amp;
-                    this.$target !== null &amp;&amp;
+                if ((this.hideTooltipByPress === false || e.pointerType !== &quot;mouse&quot;)     &amp;&amp;
+                    (this.$target !== null &amp;&amp; this.$target.hideTooltipByPress !== false) &amp;&amp;
                     (this.$tooltip === null || this.$tooltip.winType === &quot;info&quot;))
                 {
                     this.stopShowingTooltip();
@@ -32480,7 +33387,8 @@ zebkit.package(&quot;ui.tree&quot;, function(pkg, Class) {
             };
 
             this.paintSelectedItem = function(g, root, node, x, y) {
-                var v = this.hasFocus() ? this.views.focusOnSelect : this.views.focusOffSelect;
+                var v = this.hasFocus() ? this.views.focusOnSelect
+                                        : this.views.focusOffSelect;
                 if (v !== null &amp;&amp; typeof v !== &#x27;undefined&#x27;) {
                     v.paint(g, x, y, node.viewWidth, node.viewHeight, this);
                 }
@@ -35440,6 +36348,17 @@ zebkit.package(&quot;ui.grid&quot;, function(pkg, Class) {
                 return this;
             };
 
+            /**
+             * Return a view that is used to render the given grid cell.
+             * @param  {Integer} row a grid cell row
+             * @param  {Integer} col a grid cell column
+             * @return {zebkit.draw.View} a cell view
+             * @method getCellView
+             */
+            this.getCellView = function(row, col) {
+                return this.provider.getView(this, row, col, this.model.get(row, col));
+            };
+
             this.colVisibility = function(col, x, d, b){
                 var cols = this.getGridCols();
                 if (cols === 0) {
@@ -37966,7 +38885,7 @@ zebkit.package(&quot;ui.design&quot;, function(pkg, Class) {
                 if (r.comp === c) {
                     return c;
                 } else {
-                    for(var i = 0;i &lt; r.kids.length; i++) {
+                    for(var i = 0; i &lt; r.kids.length; i++) {
                         var item = this.itemByComponent(c, r.kids[i]);
                         if (item !== null) {
                             return item;
@@ -39794,6 +40713,8 @@ zebkit.package(&quot;web&quot;, function(pkg, Class) {
      */
     pkg.KeyEventUnifier = Class([
         function(element, destination) {
+            var $this = this;
+
             //   Alt + x  was pressed  (for IE11 consider sequence of execution of &quot;alt&quot; and &quot;x&quot; keys)
             //   Chrome/Safari/FF  keydown -&gt; keydown -&gt; keypressed
             // ----------------------------------------------------------------------------------------------------------------------
@@ -39885,7 +40806,8 @@ zebkit.package(&quot;web&quot;, function(pkg, Class) {
                 // elements don&#x27;t prevent the event for the children DOM element
                 var key = CODES[KEY_DOWN_EVENT.code];
                 if (key != null &amp;&amp; key.pr === true &amp;&amp; e.target === element) {
-                    e.preventDefault();
+                    // TODO: may be put the &quot;if&quot; logic into prevent default
+                    $this.preventDefault(e, key);
                 }
                 e.stopPropagation();
 
@@ -40011,6 +40933,12 @@ zebkit.package(&quot;web&quot;, function(pkg, Class) {
                         destination.$keyTyped(KEY_PRESS_EVENT);
                     }
                 }
+            };
+        },
+
+        function $prototype() {
+            this.preventDefault = function(e, key) {
+                e.preventDefault();
             };
         }
     ]);
@@ -40323,6 +41251,10 @@ zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
                 return this;
             };
 
+            this.getColor = function() {
+                return window.getComputedStyle(this.element, &quot;color&quot;);
+            };
+
             /**
              * Apply the given set of CSS styles to the wrapped HTML element
              * @param {Object} styles a dictionary of CSS styles
@@ -40531,6 +41463,7 @@ zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
                 pnode.removeChild(this.$container);
                 pnode.appendChild(this.$container);
             }
+            return this;
         },
 
         function toBack() {
@@ -40540,6 +41473,7 @@ zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
                 pnode.removeChild(this.$container);
                 pnode.insertBefore(this.$container, pnode.firstChild);
             }
+            return this;
         },
 
         function setEnabled(b) {
@@ -41319,10 +42253,8 @@ zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
                     // to catch resize event and if size is not 0 correct visibility
                     // now manager doesn&#x27;t set style visibility to &quot;visible&quot; state
                     // if component size is zero
-                    if (this.$container.style.visibility === &quot;hidden&quot;) {
-                        if (this.isVisible) {
-                            this.$container.style.visibility = &quot;visible&quot;;
-                        }
+                    if (this.$container.style.visibility === &quot;hidden&quot; &amp;&amp; this.isVisible) {
+                        this.$container.style.visibility = &quot;visible&quot;;
                     }
 
                     this.invalidate();
@@ -41412,10 +42344,28 @@ zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
             this.$super(e);
             this.setAttribute(&quot;tabindex&quot;, 0);
             this.setValue(text);
+
+            this.$keyUnifier = new zebkit.web.KeyEventUnifier(this.element, this);
+            this.$keyUnifier.preventDefault = function(e, key) {}
         },
 
         function $prototype() {
             this.cursorType = ui.Cursor.TEXT;
+
+            this.$keyTyped = function(e) {
+                e.source = this;
+                ui.events.fire(&quot;keyTyped&quot;, e);
+            };
+
+            this.$keyPressed = function(e) {
+                e.source = this;
+                return ui.events.fire(&quot;keyPressed&quot;, e);
+            };
+
+            this.$keyReleased = function(e) {
+                e.source = this;
+                return ui.events.fire(&quot;keyReleased&quot;, e);
+            };
 
             /**
              * Get a text of the text input element
@@ -41503,6 +42453,32 @@ zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
             this.element.onclick = function(e) {
                 $this._.fired($this);
             };
+        }
+    ]);
+
+    /**
+     * This special wrapper component that has to be used to put HtmlElement into
+     * &quot;zebkit.ui.ScrollPan&quot;
+     * @example
+     *
+     *      var htmlElement = new zebkit.ui.web.HtmlElement();
+     *      ...
+     *      var scrollPan = new zebkit.ui.ScrollPan(new zebkit.ui.web.HtmlScrollContent(htmlElement));
+     *
+     *
+     * @param  {zebkit.ui.web.HtmlElement} t target html component that is going to
+     * scrolled.
+     * @class zebkit.ui.web.HtmlScrollContent
+     * @extends {zebkit.ui.web.HtmlElement}
+     * @constructor
+     */
+    pkg.HtmlScrollContent = Class(pkg.HtmlElement, [
+        function(t) {
+            this.$super();
+            this.scrollManager = new ui.ScrollPan.ContentPanScrollManager(t);
+            this.setLayout(new ui.ScrollPan.ContentPanLayout());
+            this.add(&quot;center&quot;,t);
+            this.setBackground(&quot;blue&quot;);
         }
     ]);
 

@@ -174,6 +174,11 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                               <a href="../classes/zebkit.draw.CutStringRender.html">zebkit.draw.CutStringRender</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
                                                <a href="../classes/zebkit.draw.DecoratedTextRender.html">zebkit.draw.DecoratedTextRender</a>
                                             </td>
                                         </tr>
@@ -185,6 +190,11 @@
                                         <tr>
                                             <td>
                                                <a href="../classes/zebkit.draw.Etched.html">zebkit.draw.Etched</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.FunctionRender.html">zebkit.draw.FunctionRender</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -205,6 +215,11 @@
                                         <tr>
                                             <td>
                                                <a href="../classes/zebkit.draw.Pattern.html">zebkit.draw.Pattern</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.PentahedronShape.html">zebkit.draw.PentahedronShape</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -290,6 +305,11 @@
                                         <tr>
                                             <td>
                                                <a href="../classes/zebkit.draw.ViewSet.html">zebkit.draw.ViewSet</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.draw.WrappedTextRender.html">zebkit.draw.WrappedTextRender</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -930,6 +950,11 @@
                                         <tr>
                                             <td>
                                                <a href="../classes/zebkit.ui.web.HtmlLink.html">zebkit.ui.web.HtmlLink</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.web.HtmlScrollContent.html">zebkit.ui.web.HtmlScrollContent</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -1689,7 +1714,7 @@ line and column.</p>
                 <li>
                         <span class="name"><code>t</code></span>
                         <strong class="type">
-                            &lt;<a href="../classes/zebkit.data.TextModel.html" class="crosslink">zebkit.data.TextModel</a>&gt;
+                            &lt;<a href="../classes/zebkit.data.TextModel.html" class="crosslink">zebkit.data.TextModel</a> | <a href="../classes/zebkit.draw.BaseTextRender.html" class="crosslink">zebkit.draw.BaseTextRender</a>&gt;
                         </strong>
                     <p>a text model</p>
 
@@ -2146,6 +2171,52 @@ there is no any selected text</p>
                             </td>
                         </tr>
                         <tr>
+                            <td><a name="methods_getHorPadding"></a>
+
+<div class="method item">
+    <span class="foundat">
+                <span>
+                    @Implemented in
+                </span>
+                <a href="zebkit.layout.Layoutable.html#methods_getHorPadding">
+                    zebkit.layout.Layoutable
+                </a>
+                <br/>
+    </span>
+
+
+            <strong> public </strong>
+
+
+                <span class="type">
+                    &lt;Integer&gt;
+                </span>
+
+    <strong class="name"><code>getHorPadding</code> (<code> </code>)</strong>
+
+    <br/>
+
+    <p>Get accumulated horizontal (top and bottom) padding.</p>
+
+
+
+            <br/>
+            <div class="returns">
+                <strong>
+                    Returns:
+                </strong>
+                <span class="type">
+                        &lt;Integer&gt;
+                </span>
+                <p>a horizontal padding</p>
+
+            </div>
+
+
+</div>
+                            </td>
+                        </tr>
+                        <tr>
                             <td><a name="methods_getLeft"></a>
 
 <div class="method item">
@@ -2577,6 +2648,52 @@ there is no any selected text</p>
                         &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>&gt;
                 </span>
                 <p>a zebkit label text</p>
+
+            </div>
+
+
+</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><a name="methods_getVerPadding"></a>
+
+<div class="method item">
+    <span class="foundat">
+                <span>
+                    @Implemented in
+                </span>
+                <a href="zebkit.layout.Layoutable.html#methods_getVerPadding">
+                    zebkit.layout.Layoutable
+                </a>
+                <br/>
+    </span>
+
+
+            <strong> public </strong>
+
+
+                <span class="type">
+                    &lt;Integer&gt;
+                </span>
+
+    <strong class="name"><code>getVerPadding</code> (<code> </code>)</strong>
+
+    <br/>
+
+    <p>Get accumulated vertical (top and bottom) padding.</p>
+
+
+
+            <br/>
+            <div class="returns">
+                <strong>
+                    Returns:
+                </strong>
+                <span class="type">
+                        &lt;Integer&gt;
+                </span>
+                <p>a vertical padding</p>
 
             </div>
 
@@ -3379,9 +3496,7 @@ given 2D HTML Canvas context</p>
             <strong> public </strong>
 
 
-                <span class="type">
-                    &lt;zebkit.ui.Layoutable&gt;
-                </span>
+                <span class="type">chainable</span>
 
     <strong class="name"><code>properties</code> (<code>[path], props</code>)</strong>
 
@@ -3412,17 +3527,6 @@ its components.</p>
                 </li>
         </ul>
 
-            <br/>
-            <div class="returns">
-                <strong>
-                    Returns:
-                </strong>
-                <span class="type">
-                        &lt;zebkit.ui.Layoutable&gt;
-                </span>
-                <p>a component itself</p>
-
-            </div>
 
 
         <br/>
@@ -4038,64 +4142,6 @@ milliseconds</p>
                 </li>
         </ul>
 
-
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="methods_"></a>
-
-<div class="method item">
-    <span class="foundat">
-                <span>
-                    @Implemented in
-                </span>
-                <a href="zebkit.layout.Layoutable.html#methods_">
-                    zebkit.layout.Layoutable
-                </a>
-                <br/>
-    </span>
-
-
-            <strong> public </strong>
-
-
-                <span class="type">
-                    &lt;type&gt;
-                </span>
-
-    <strong class="name"><code>&#x60; (</code>time`)</strong>
-
-    <br/>
-
-    <p>Remove component after</p>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul class="params">
-                <li>
-                        <span class="name"><code>time</code></span>
-                        <strong class="type">
-                            &lt;type&gt;
-                        </strong>
-                    <p>[description]</p>
-
-                </li>
-        </ul>
-
-            <br/>
-            <div class="returns">
-                <strong>
-                    Returns:
-                </strong>
-                <span class="type">
-                        &lt;type&gt;
-                </span>
-                <p>[description]</p>
-
-            </div>
 
 
 </div>
@@ -5547,6 +5593,62 @@ argument value to not set preferred width</p>
                         </strong>
                     <p>a preferred height. Pass "-1" as the
 argument value to not set preferred height</p>
+
+                </li>
+        </ul>
+
+
+
+</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><a name="methods_setProperties"></a>
+
+<div class="method item">
+    <span class="foundat">
+                <span>
+                    @Implemented in
+                </span>
+                <a href="zebkit.layout.Layoutable.html#methods_setProperties">
+                    zebkit.layout.Layoutable
+                </a>
+                <br/>
+    </span>
+
+
+            <strong> public </strong>
+
+
+                <span class="type">
+                    void
+                </span>
+
+    <strong class="name"><code>setProperties</code> (<code>[path], props</code>)</strong>
+
+    <br/>
+
+    <p>Set the component properties. This is wrapper for "properties" method to supply
+properties setter method.</p>
+
+
+        <br/>
+        <strong>Parameters:</strong>
+        <ul class="params">
+                <li>
+                        <span class="name"><code>[path]</code></span>
+                        <strong class="type">
+                            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>&gt;
+                        </strong>
+                    <p>a path to find children components</p>
+
+                </li>
+                <li>
+                        <span class="name"><code>props</code></span>
+                        <strong class="type">
+                            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="crosslink external" target="_blank">Object</a>&gt;
+                        </strong>
+                    <p>a dictionary of properties to be applied</p>
 
                 </li>
         </ul>

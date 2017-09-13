@@ -181,6 +181,11 @@
                                                <a href="../classes/zebkit.draw.CompositeView.html">zebkit.draw.CompositeView</a>
                                             </td>
                                         </tr>
+                                        <tr class="classNameCell" className="zebkit.draw.CutStringRender" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.draw.CutStringRender.html">zebkit.draw.CutStringRender</a>
+                                            </td>
+                                        </tr>
                                         <tr class="classNameCell" className="zebkit.draw.DecoratedTextRender" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.draw.DecoratedTextRender.html">zebkit.draw.DecoratedTextRender</a>
@@ -194,6 +199,11 @@
                                         <tr class="classNameCell" className="zebkit.draw.Etched" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.draw.Etched.html">zebkit.draw.Etched</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.draw.FunctionRender" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.draw.FunctionRender.html">zebkit.draw.FunctionRender</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.draw.Gradient" name="allClassesItem">
@@ -214,6 +224,11 @@
                                         <tr class="classNameCell" className="zebkit.draw.Pattern" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.draw.Pattern.html">zebkit.draw.Pattern</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.draw.PentahedronShape" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.draw.PentahedronShape.html">zebkit.draw.PentahedronShape</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.draw.Picture" name="allClassesItem">
@@ -299,6 +314,11 @@
                                         <tr class="classNameCell" className="zebkit.draw.ViewSet" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.draw.ViewSet.html">zebkit.draw.ViewSet</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.draw.WrappedTextRender" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.draw.WrappedTextRender.html">zebkit.draw.WrappedTextRender</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.Dummy" name="allClassesItem">
@@ -941,6 +961,11 @@
                                                <a href="../classes/zebkit.ui.web.HtmlLink.html">zebkit.ui.web.HtmlLink</a>
                                             </td>
                                         </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.web.HtmlScrollContent" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.web.HtmlScrollContent.html">zebkit.ui.web.HtmlScrollContent</a>
+                                            </td>
+                                        </tr>
                                         <tr class="classNameCell" className="zebkit.ui.web.HtmlTextArea" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.web.HtmlTextArea.html">zebkit.ui.web.HtmlTextArea</a>
@@ -1216,7 +1241,7 @@ environment specific operations.</p>
 
                                         <td>
                                             <b>
-                                                <a class="name" href="#methods_loadImage">loadImage (img, ready)</a>
+                                                <a class="name" href="#methods_loadImage">loadImage (img, success, [error])</a>
                                             </b>
                                         </td>
                                     </tr>
@@ -1423,7 +1448,7 @@ environment specific operations.</p>
                     &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement" class="crosslink external" target="_blank">HTMLImageElement</a>&gt;
                 </span>
 
-    <strong class="name"><code>loadImage</code> (<code>img, ready</code>)</strong>
+    <strong class="name"><code>loadImage</code> (<code>img, success, [error]</code>)</strong>
 
     <br/>
 
@@ -1442,17 +1467,22 @@ environment specific operations.</p>
 
                 </li>
                 <li>
-                        <span class="name"><code>ready</code></span>
+                        <span class="name"><code>success</code></span>
                         <strong class="type">
                             &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" class="crosslink external" target="_blank">Function</a>&gt;
                         </strong>
-                    <p>a call back method to be notified when the image has been completely
-loaded or failed. The method gets three parameters</p>
-<ul>
-<li>an URL to the image</li>
-<li>boolean loading result. true means success</li>
-<li>an image that has been loaded</li>
-</ul>
+                    <p>a call back method to be notified when the image has
+been successfully loaded. The method gets an image as its parameter.</p>
+
+                </li>
+                <li>
+                        <span class="name"><code>[error]</code></span>
+                        <strong class="type">
+                            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" class="crosslink external" target="_blank">Function</a>&gt;
+                        </strong>
+                    <p>a call back method to be notified if the image loading
+has failed. The method gets an image instance as its parameter and an exception
+that describes an error has happened.</p>
 
                 </li>
         </ul>
